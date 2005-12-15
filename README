@@ -1,0 +1,21 @@
+to be written
+
+Package Versioning Schmeme:
+---------------------------
+
+Version numbers are divided into three parts, the major release
+number, the minor release number and the patchlevel.  The version
+number is appended to the name of the tarballs:
+
+  <project>-<major>.<minor>.<patchlevel>.tar.gz
+
+For example
+
+  projectname-0.9.3.tar.gz
+
+A change in the major release number indicates major changes in
+the interfaces.  Between minor releases, every effort should be
+made to keep the interfaces compatible.  The patchlevels indicate
+the day to day work between the releases.  Odd minor release
+numbers like 2.1.0 indicate unstable development releases while
+even numbers like 2.4.0 indicate stable releases.

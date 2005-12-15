@@ -1,0 +1,22 @@
+OpenDarkEngine is a project that intends to eventually become a
+platform independent replacement for the Dark Engine used in the
+games Thief - The Dark Project (including the Thief Gold release)
+and Thief II - The Metal Age.  This would allow to play the games
+on Unix or Windows given that one has access to the game data
+files.
+
+Currently openDarkEngine is in its very early testing stage.  Use
+at your own risk.
+
+-------------------------------------------------------------------
+
+You can download the latest tarball from:
+
+  http://www.sourceforge.net/projects/opde
+
+-------------------------------------------------------------------
+
+New features:
+-------------
+
+* Initial version
