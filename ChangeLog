@@ -1,6 +1,9 @@
 2005-12-17  Dominik Vogt  <dominik.vogt@gmx.de>
 
+	* configure.ac:
 	* src/Makefile.am:
+	added tests for X11 devel headers
+
 	* src/wrloader.cc:
 	* src/main.cc:
 	* src/latlas.cc:
@@ -10,3 +13,4 @@
 	* configure.ac:
 	added a test for existence of config.h file and used it in all .cc
 	files
+
