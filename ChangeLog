@@ -1,0 +1,12 @@
+2005-12-17  Dominik Vogt  <dominik.vogt@gmx.de>
+
+	* src/Makefile.am:
+	* src/wrloader.cc:
+	* src/main.cc:
+	* src/latlas.cc:
+	* src/misfile.cc:
+	* src/txtloader.cc:
+	* src/utils.cc:
+	* configure.ac:
+	added a test for existence of config.h file and used it in all .cc
+	files
