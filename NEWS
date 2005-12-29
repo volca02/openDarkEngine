@@ -2,4 +2,12 @@
 
 Changes in alpha release 0.0.2 (15-Dec-2005)
 
-* Initioal version
+* Initial version
+
+Changes in alpha release 0.0.3 (29-Dec-2005)
+
+* Added OSM file manipulation base - DLL loader for linux, and some COM interfaces and implementation (IMalloc, IUnknown), plus some basic interfaces used by DLL loading
+* Added console (without input now)
+* Added ability to load D2 missions (tested on SS2, shall load Thief2 missions too - untested)
+* Converted to DarkLib from class misfile (this will be used for loader in whole)
+* Fixes
