@@ -1,8 +1,46 @@
 OpenDarkEngine (OPDE) readme
 ----------------------------
 
-    OPDE was created as an effort to build a multiplatform engine supporting the LookingGlass'es (TM) data files from the original DarkEngine games.
+    OPDE was created as an effort to build a 
+multiplatform engine supporting the LookingGlass'es (TM) 
+data files from the original DarkEngine games.
 So far, a basic display of levels work.
+
+Requirements
+------------
+OPDE needs OGRE3D library in version 1.2.0 or 
+newer and Devil image library (an ogre requirement).
+Unfortunetly, the DevIL library needs a small patch 
+to resolve the issue number 1211071 - too strict check 
+of pcx headers. It is allready fixed in the CVS version,
+so hopefully next release will be ok.
+
+
+The structure of the sources
+----------------------------
+As of now, the sources are split into these directories:
+DarkSceneManager - a scene manager rendering the level geometry, utilising the BSP-Portal structure of the WR/WRRGB chunk of the GAM files.
+darklib - Telliamed's library utilised for manipulation of the GAM/MIS/SAV files
+dllloader - win32 dll files loader - a layer of compatibility between windows and linux versions. Used for OSM files loading.
+
+
+File formats
+------------
+The original game files have differing formats and meanings, those are:
+.mis files - mission files - they contain a series of chunks, defining level geometry, object positions and definitions, rooms database and other things.
+.gam files - game definition files - tipically one file per game, containing game definitions.
+ the definitions found in here are something as superclasses to those found in mis files
+.sav files - should be the same format as mis files, describing actual situation of the mission
+
+.osm files 
+script files - win32 dll files containing an entry-point function ScriptModuleInit, which gets handles to the engines Interfaces
+and then uses them to manipulate the in - game situation.
+The game engine in reverse calls scripts found in these files, whenever something happens in the game or if object has a script reference to call.
+
+.crf files - zip files containing resources
+
+
+...and others...
 
 
 
