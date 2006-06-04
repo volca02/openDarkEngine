@@ -1,4 +1,10 @@
-To be written.
+OpenDarkEngine (OPDE) readme
+----------------------------
+
+    OPDE was created as an effort to build a multiplatform engine supporting the LookingGlass'es (TM) data files from the original DarkEngine games.
+So far, a basic display of levels work.
+
+
 
 Package Versioning Schmeme:
 ---------------------------

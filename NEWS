@@ -11,3 +11,7 @@ Changes in alpha release 0.0.3 (29-Dec-2005)
 * Added ability to load D2 missions (tested on SS2, shall load Thief2 missions too - untested)
 * Converted to DarkLib from class misfile (this will be used for loader in whole)
 * Fixes
+
+Changes in alpha release 0.1.0 (04-Jun-2006)
+* Rewritten the whole thing to use Ogre3D
+* CVS reinitialized
