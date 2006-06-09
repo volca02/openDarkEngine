@@ -8,6 +8,7 @@
 
 using namespace std;
 using std::string;
+
 //////////////////// logging
 #define LOG_DEBUG 3
 #define LOG_INFO 2
@@ -37,16 +38,16 @@ void log(long level, char *fmt, ...) {
 
 ////////////////////// global data - yuck
 
-UVMap *uvs;
+UVMap *uvs = NULL;
 long num_uvs; // TODO: == hdr.num_verts?
 
-VHotObj *vhots;
-Vertex *vertices;
-MeshMaterial *materials;
-MeshMaterialExtra *materialsExtra;
+VHotObj *vhots = NULL;
+Vertex *vertices = NULL;
+MeshMaterial *materials = NULL;
+MeshMaterialExtra *materialsExtra = NULL;
 
 void readModelHeaderTables(ifstream &in, BinHeader &hdr, BinHeader2 &hdr2, BinHeadType &thdr) {
-	log_info("LGMD mesh processing");
+	log_info("LGMD mesh processing - e.g. an object");
 	long size = 0;
 	
 	log_debug("Header version : %d", thdr.version);
@@ -80,47 +81,84 @@ void readModelHeaderTables(ifstream &in, BinHeader &hdr, BinHeader2 &hdr2, BinHe
 	}
 	
 	log_info("Reading Tables:");
+
+	log_info(" * Materials (%d)", hdr.num_mats);
+	log_debug("  - offset %06lX",hdr.offset_mats);
+
+	// Materials
+	materials = new MeshMaterial[hdr.num_mats];
+
+	// this is not good! we read right through other tables...
+	in.seekg(hdr.offset_mats, ios::beg);
+	long was = (int) in.tellg();
+	log_debug("  - position before : %05lX", was);
+	in.read((char *) materials, hdr.num_mats * sizeof(MeshMaterial));
+	long is = (int) in.tellg();
+	log_debug("  - position after  : %05lX", is);
+	log_debug("  - materials size read : %ld", is - was);
+	
+	for (int x = 0; x < hdr.num_mats; x++)
+		log_debug("       - material name : %s", materials[x].name);
+	if ( hdr.mat_flags & MD_MAT_TRANS || hdr.mat_flags & MD_MAT_ILLUM ) {
+		log_info(" * Extra materials (%d)", hdr.num_mats);
+		log_debug("  - extra position before : %05lX", (int) in.tellg());
+		// Extra Materials
+		materialsExtra = new MeshMaterialExtra[hdr.num_mats];
+		in.read((char *) materialsExtra, hdr.num_mats * sizeof(MeshMaterialExtra));
+		log_debug("  - extra position after  : %05lX", (int) in.tellg());
+	}
+	
 	
 	log_info(" * UVMAP (%d / %d)", hdr.num_verts, num_uvs);
+	log_debug("  - offset %06lX",hdr.offset_uv);
 	// prepare and read uvmaps
 	uvs = new UVMap[num_uvs];
 	
 	in.seekg(hdr.offset_uv, ios::beg);
-	// in.read((char *) uvs, num_uvs * sizeof(UVMap));
-	// I have to rely on shadowspawn here: read uvs in the number of verts (maybe these equal anyways)
-	in.read((char *) uvs, hdr.num_verts * sizeof(UVMap));
+	// I have to rely on shadowspawn here: read uvs in the number of verts - those are differing, but I guess that this is solvable later on
+	// After looking into the binary, the num_uvs calculated seem to be reasonable
+	// in.read((char *) uvs, hdr.num_verts * sizeof(UVMap));
+	 in.read((char *) uvs, num_uvs * sizeof(UVMap));
 	
-	// TODO: shadowspawn reverses the U part of pre-6 version mesh UV table here
+	// TODO: shadowspawn reverses the U part of pre-6 version mesh UV table here. See if we need that too
 	
 	log_info(" * VHOT (%d)", hdr.num_vhots);
+	log_debug("  - offset %06lX",hdr.offset_vhots);
 	// prepare and read the vhots
 	vhots = new VHotObj[hdr.num_vhots];
 	in.seekg(hdr.offset_vhots, ios::beg);
 	in.read((char *) vhots, hdr.num_vhots * sizeof(VHotObj));
 	
 	log_info(" * Vertices (%d)", hdr.num_verts);
+	log_debug("  - offset %06lX",hdr.offset_verts);
 	
 	// prepare and read the vertices
 	vertices = new Vertex[hdr.num_verts];
 	in.seekg(hdr.offset_verts, ios::beg);
 	in.read((char *) vertices, hdr.num_verts * sizeof(Vertex));
 	
-	log_info(" * Materials (%d)", hdr.num_mats);
-	// Materials
-	
-	materials = new MeshMaterial[hdr.num_mats];
-	materialsExtra = NULL;
-	in.seekg(hdr.offset_mats, ios::beg);
-	in.read((char *) materials, hdr.num_mats * sizeof(MeshMaterial));
-	
-	if ( hdr.mat_flags & MD_MAT_TRANS || hdr.mat_flags & MD_MAT_ILLUM ) {
-		log_info(" * Extra materials (%d)", hdr.num_mats);
-		// Extra Materials
-		materialsExtra = new MeshMaterialExtra[hdr.num_mats];
-		in.read((char *) materialsExtra, hdr.num_mats * sizeof(MeshMaterialExtra));
-	}
-	
 	log_info("Object tree processing:");
+	
+	
+	// cleanout
+	log_info("Releasing used pointers");
+	if (vhots != NULL)
+		delete[] vhots;
+	
+	if (vertices != NULL)
+		delete[] vertices;
+	
+	if (uvs != NULL)
+		delete[] uvs;
+	
+	if (materials != NULL)
+		delete[] materials;
+	
+	if (materialsExtra != NULL)
+		delete[] materialsExtra;
+	
+	// the end
+	log_info("all done");
 }
 
 int main(int argc, char* argv[]) {
