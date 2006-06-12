@@ -139,6 +139,34 @@ void SaveMaterialFile(char* basename, char *path, BinHeader &hdr) {
 	out.close();
 }
 
+
+void addTriangle(unsigned char material, short ida, short idb, short idc, SubObjectHeader &hdr) {
+	Vertex a, b, c;
+	
+	a = transformVertex(vertices[ida], hdr.trans);
+	b = transformVertex(vertices[idb], hdr.trans);
+	c = transformVertex(vertices[idc], hdr.trans);
+}
+
+// the V6 direct triangle index list...
+// This is not a guranteed thing, it seems that a study of V6 format is needed
+void LoadDirectTriList(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &hdr2, int objidx, SubObjectHeader &shdr) {
+	in.seekg(hdr2.offset_parts, ios::beg);
+	
+	PolyPartsShorts *parts;
+	parts = new PolyPartsShorts[num_uvs];
+	in.read((char *)parts, num_uvs * sizeof(PolyPartsShorts));
+	
+	// iterate through the triangles and add them all to the output buffers.
+	// I don't quite understand where to get the material number for this version of Mesh
+	// maybe there is a list of materials per triangle after the parts offset, we'll see
+	int n;
+	
+	for (n = 0; n < num_uvs; n++) { 
+		addTriangle(0, parts[n].a, parts[n].b, parts[n].c, shdr);
+	}
+}
+
 /* Processes object list, and should prepare the global vertex buffer, index buffer, skeleton tree, vertex - joint mapping
 */
 void ProcessObjects(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &hdr2) {
@@ -155,11 +183,13 @@ void ProcessObjects(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 
 		log_debug("       - sub-object name : %s", objects[x].name);
 		log_debug("       	- movement type : %d", (int) objects[x].movement);
 		
-		/*log_debug("Transform : ");
-		if (loglevel >= LOG_DEBUG)
-			cout << objects[x].trans << "\n";*/
-		
 		// the sub-object readout. We directly process the geometry too, and build the constructs needed to export the file
+		
+		// The v. 6 file has a direct list of triangle vertex and uv indices, the others have a BSP structured data
+		// we call the add Triangle function on the resulting triangle anyway...
+		if (thdr.version == 6) {
+			LoadDirectTriList(in, thdr, hdr, hdr2, x, objects[x]);
+		} // but the
 	}
 	
 	// now the important stuff...
