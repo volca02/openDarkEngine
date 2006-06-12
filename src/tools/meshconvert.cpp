@@ -2,47 +2,16 @@
 #include <stdio.h>
 #include <string>
 #include <iostream>
+#include <sstream>
 #include <fstream>
 #include <cstdarg>
+
 #include "meshconvert.h"
+#include "logging.h"
 
 using namespace std;
 using std::string;
 
-//////////////////// logging mumbo - jumbo
-char* LOG_LEVEL_STRINGS[4] = {"FATAL","ERROR","INFO ","DEBUG"};
-
-#define LOG_DEBUG 3
-#define LOG_INFO 2
-#define LOG_ERROR 1
-#define LOG_FATAL 0
-
-long loglevel = LOG_DEBUG;
-
-void log(long level, char *fmt, ...) {
-	if (level > loglevel)
-		return;
-	
-	// to filter out those which do not fin in the table of strings describing level
-	if (level > 3)
-		level = 3;
-	if (level < 0)
-		level = 0;
-	
-	va_list argptr;
-	char result[255];
-	
-	va_start(argptr, fmt);
-	vsnprintf(result, 255, fmt, argptr);
-	va_end(argptr);
-	
-	printf("Log (%s) : %s\n", LOG_LEVEL_STRINGS[level], result);
-}
-
-#define log_fatal(...) log(LOG_ERROR, __VA_ARGS__)
-#define log_error(...) log(LOG_ERROR, __VA_ARGS__)
-#define log_info(...) log(LOG_INFO, __VA_ARGS__)
-#define log_debug(...) log(LOG_DEBUG, __VA_ARGS__)
 
 ////////////////////// global data - yuck
 
@@ -55,11 +24,121 @@ MeshMaterial *materials = NULL;
 MeshMaterialExtra *materialsExtra = NULL;
 SubObjectHeader *objects = NULL;
 
+char *fileBaseName = NULL;
 // HERE come the resulting structures we are desperately trying to fill:
 // vector<Vertex> out_vertices;
 
 
 /////////////////////////////////////////// HELPER FUNCTIONS
+/**
+Recalc the vertex coordinates using the given transformation;
+*/
+Vertex transformVertex(Vertex &in, SubObjTransform &trans) {
+	Vertex out;
+	
+	out.x = in.x * trans.f[0] + in.y * trans.f[3] + in.z * trans.f[6] + trans.AxlePoint.x;
+	out.y = in.x * trans.f[1] + in.y * trans.f[4] + in.z * trans.f[7] + trans.AxlePoint.y;
+	out.z = in.x * trans.f[2] + in.y * trans.f[5] + in.z * trans.f[8] + trans.AxlePoint.z;
+	
+	return out;
+}
+
+// write out the material file
+/*
+The structure we use is:
+material basename/matNN
+{
+	technique
+	{
+		pass
+		{
+			ambient x y z
+			diffuse x y z
+
+			texture_unit
+			{
+				texture filename
+			}
+		}
+	}
+}
+*/
+void SaveMaterialFile(char* basename, char *path, BinHeader &hdr) {
+	char filepath[1024];
+	
+	snprintf(filepath, 1024, "%s%s.material", path, basename);
+	log_info("Saving material file to %s", filepath);
+	
+	ofstream out(filepath, ios::binary);
+	
+	int n;
+	
+	for (n = 0; n < hdr.num_mats; n++) {
+		out << "material " << basename << "/" << "mat" << n << endl;
+		out << "{" << endl; // material start
+		out << "	technique" << endl; 
+		out << "	{" << endl; // technique start
+
+		out << "		pass" << endl; 
+		out << "		{" << endl; // pass start
+
+		float transp = -1;
+		float illum = 0;
+		
+		// if the Transparency / illumination is present, output those too
+		if (hdr.mat_flags & MD_MAT_TRANS) {
+			transp = materialsExtra[n].trans;
+		}
+			
+		if (hdr.mat_flags & MD_MAT_ILLUM) {
+			illum = materialsExtra[n].illum;
+		}
+		// put the material specifications out
+		if (materials[n].type == MD_MAT_COLOR) {
+			// the material descriptions for textureless material
+			// we give this a ambient, difuse specular parameters
+			log_debug("		Material %d is MAT_COLOR", n);
+			ostringstream colorstr;
+			
+			colorstr << ((float)materials[n].colour[2])/255 << " ";
+			colorstr << ((float)materials[n].colour[1])/255 << " ";
+			colorstr << ((float)materials[n].colour[0])/255;
+			
+			if (transp > 0)
+				colorstr << " " << transp;
+			
+			// TODO: think off a better values maybe?
+			out << "\t\t\tambient " << "0 0 0" << endl;
+			out << "\t\t\tdiffuse " << colorstr.str() << endl;
+			out << "\t\t\tspecular " << illum << " " << illum << " " << illum << endl; 
+			// enda line
+			out << endl;
+			
+		} else if (materials[n].type == MD_MAT_TMAP) {
+			log_debug("		Material %d is MAT_TMAP", n);
+			// the material descriptions for textured material 
+			/* 
+			TODO: if the mesh comes weird, use some of these settings
+			out << "\t\t\tambient" << "0 0 0" << endl;
+			out << "\t\t\tdiffuse" << "1 1 1" << endl;*/
+			
+			out << "\t\t\ttexture_unit" << endl << "\t\t\t{" << endl;
+			out << "\t\t\t\ttexture " << materials[n].name << endl;
+			out << "\t\t\t}" << endl;
+			
+		} else
+			log_error("Unknown material (%d) type : %d", n, materials[n].type);
+		
+		
+		
+		out << "		}" << endl; // pass end
+		out << "	}" << endl; // technique end
+		out << "}" << endl << endl; // material end
+	}
+	
+	out.close();
+}
+
 /* Processes object list, and should prepare the global vertex buffer, index buffer, skeleton tree, vertex - joint mapping
 */
 void ProcessObjects(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &hdr2) {
@@ -71,17 +150,29 @@ void ProcessObjects(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 
 	// TODO: I do not have other choice, than to make the skeleton so the VHOTS in the sub-objects are made as bones from the joint point to the vhot.
 	// This is because the ogre does not have anything like the VHOT vertices... (This should not be a serious problem, I hope - they only should have compatible numbering	)
 	
-	// logging the object names:
+	XMLOgreMesh m();
+	
 	for (int x = 0; x < hdr.num_objs; x++) {
+		// logging the object names:
 		log_debug("       - sub-object name : %s", objects[x].name);
 		log_debug("       	- movement type : %d", (int) objects[x].movement);
-		log_debug("       	- movement type : %d", (int) objects[x].movement);
+		
+		/*log_debug("Transform : ");
+		if (loglevel >= LOG_DEBUG)
+			cout << objects[x].trans << "\n";*/
+		
+		// the sub-object readout. We directly process the geometry too, and build the constructs needed to export the file
 	}
 	
 	// now the important stuff...
 
-	// the object tree goes in such way, that it should be possible to do only one transform per sub-object we process...
-	// it seems we have to do transforms. otherwise we would end up having a broken geometry relations
+	// the first object is allways root, and has a bogus transformation...
+	// the others have a good transformation info, and the connection of skeleton bones seems to be dependent on the sub-object names
+	
+	/*m.setVertexListPtr(vertices);
+	m.setMaterialListPtr(materials);
+	m.setExtraMaterialListPtr(materialsExtra);
+	m.setObjectList(objects);*/
 }
 
 
@@ -195,7 +286,9 @@ void readObjectModel(ifstream &in, BinHeadType &thdr) {
 	
 	log_info("Object tree processing:");
 	
+	SaveMaterialFile(fileBaseName, "materials/", hdr);
 	ProcessObjects(in, thdr, hdr, hdr2);
+	
 	
 	// cleanout
 	log_info("Releasing used pointers");
@@ -214,30 +307,52 @@ void readObjectModel(ifstream &in, BinHeadType &thdr) {
 	if (materialsExtra != NULL)
 		delete[] materialsExtra;
 	
+	if (objects != NULL)
+		delete[] materialsExtra;
 	// the end
 	log_info("all done");
 }
 
 int main(int argc, char* argv[]) {
-	cout << "MeshConvert (.bin to .xml converter for all kinds of LG meshes)\n";
+	cout << "MeshConvert (.bin to .xml converter for all kinds of LG meshes)" << endl;
 
 
 	// open the input bin mesh file
 	BinHeadType header;
 	
-	ifstream input("door17sw.bin", ios::binary); 
+	if (argc < 2) {
+		cout << "Specify a .BIN file as a parameter, please" << endl;
+		return 1;
+	}
+	
+	ifstream input(argv[1], ios::binary); 
 	
 	input.read((char *) &header, sizeof(header));
 	
 	
+	/// I Know, I Know. This code below is a pure CRAP. For testing purposes only.
+	char helper[255];
+	strcpy ( (char *) helper, argv[1] );
+	
+	char *tp = strrchr ( (char *) helper, '.' );
+	if ( tp )
+		*tp = 0x0;
+	
+	fileBaseName = strrchr ( (char *) helper, '/' );
+	
+	if ( !fileBaseName )
+			fileBaseName = helper;
+		else
+			fileBaseName++; // spit out the slash
+	// --- END OF REALLY CRAP CODE (that does not mean that there is no crap code outside this section though ;) ) ---
+		
 	if (strncmp(header.ID,"LGMD",4) == 0) {
 		readObjectModel(input, header);
-		
 	} else 
 	if (strncmp(header.ID,"LGMM",4) == 0) {
-		cout << "AI mesh type - Unimplemented for now\n";
-	}
-		else printf("Unknown type");
+		cout << "AI mesh type - Unimplemented for now" << endl;
+	}	else 
+		cout << "Unknown type" << endl;
 	
 
 	input.close();		
