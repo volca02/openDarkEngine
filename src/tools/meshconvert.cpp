@@ -148,9 +148,7 @@ void ProcessObjects(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 
 	in.read((char *) objects, sizeof(SubObjectHeader) * hdr.num_objs);
 	
 	// TODO: I do not have other choice, than to make the skeleton so the VHOTS in the sub-objects are made as bones from the joint point to the vhot.
-	// This is because the ogre does not have anything like the VHOT vertices... (This should not be a serious problem, I hope - they only should have compatible numbering	)
-	
-	XMLOgreMesh m();
+	// This is because the ogre does not have anything like the VHOT vertices... (This should not be a serious problem, I hope - they only should have compatible naming - VHOT1 for example)
 	
 	for (int x = 0; x < hdr.num_objs; x++) {
 		// logging the object names:
@@ -169,10 +167,6 @@ void ProcessObjects(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 
 	// the first object is allways root, and has a bogus transformation...
 	// the others have a good transformation info, and the connection of skeleton bones seems to be dependent on the sub-object names
 	
-	/*m.setVertexListPtr(vertices);
-	m.setMaterialListPtr(materials);
-	m.setExtraMaterialListPtr(materialsExtra);
-	m.setObjectList(objects);*/
 }
 
 
@@ -308,7 +302,8 @@ void readObjectModel(ifstream &in, BinHeadType &thdr) {
 		delete[] materialsExtra;
 	
 	if (objects != NULL)
-		delete[] materialsExtra;
+		delete[] objects;
+	
 	// the end
 	log_info("all done");
 }
@@ -326,6 +321,7 @@ int main(int argc, char* argv[]) {
 	}
 	
 	ifstream input(argv[1], ios::binary); 
+	cout << "Opened " << argv[1] << endl;
 	
 	input.read((char *) &header, sizeof(header));
 	
@@ -352,7 +348,7 @@ int main(int argc, char* argv[]) {
 	if (strncmp(header.ID,"LGMM",4) == 0) {
 		cout << "AI mesh type - Unimplemented for now" << endl;
 	}	else 
-		cout << "Unknown type" << endl;
+		cout << "Unknown type of file : " << argv[1] << endl;
 	
 
 	input.close();		
