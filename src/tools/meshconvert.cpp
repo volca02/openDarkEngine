@@ -167,6 +167,74 @@ void LoadDirectTriList(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeade
 	}
 }
 
+void parseSubNode(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &hdr2, int objidx, SubObjectHeader &shdr, long offset) {
+	char splittype;
+	short polys[1024];
+	
+	log_debug("Sub-node %d on offset %04lX", offset, hdr.offset_nodes + offset);
+	in.seekg(hdr.offset_nodes + offset, ios::beg);
+	in.read(&splittype, 1);
+	
+	NodeRaw     nr;
+	NodeCall    nc;
+	NodeSplit   ns;
+	
+	switch (splittype) {
+		case MD_NODE_HDR: 
+				log_debug("Header node"); 
+				parseSubNode (in, thdr, hdr, hdr2, objidx, shdr, offset + sizeof(NodeHeader)); 
+			break;		
+		case MD_NODE_SPLIT:
+				log_debug("Split node");
+				in.read((char *) &ns, sizeof(NodeSplit));
+				// the polygons are read sequentially, and processed
+				
+				in.read((char *) polys, sizeof(short) * (ns.pgon_before_count + ns.pgon_after_count));
+				for (int n = 0; n < ns.pgon_before_count; n++) {
+					// TODO: triangulate the polygon, and call addTriangle for every of those resulting ones
+				}
+				
+				if ( ( ns.behind_node >= shdr.node_start ) ) { // todo:  && ( ns.behind_node < NodeMax )
+					parseSubNode (in, thdr, hdr, hdr2, objidx, shdr, ns.behind_node);
+				}
+				if ( ( ns.front_node >= shdr.node_start ) ) { // todo: && ( ns.front_node < NodeMax )
+					parseSubNode (in, thdr, hdr, hdr2, objidx, shdr, ns.front_node);
+				}
+				
+			break;
+		
+		case MD_NODE_CALL: 
+				log_debug("Call node");
+				in.read((char *) &nc, sizeof(NodeCall));
+				// the polygons are read sequentially, and processed
+
+				in.read((char *) polys, sizeof(short) * (nc.pgon_before_count + nc.pgon_after_count));
+				for (int n = 0; n < ns.pgon_before_count; n++) {
+					// TODO: triangulate the polygon, and call addTriangle for every of those resulting ones
+				}
+			break;
+				
+		case MD_NODE_RAW: 
+				log_debug("Raw node");
+				in.read((char *) &nr, sizeof(NodeRaw));
+				// the polygons are read sequentially, and processed
+
+				in.read((char *) polys, sizeof(short) * (nr.pgon_count));
+				for (int n = 0; n < ns.pgon_before_count; n++) {
+					// TODO: triangulate the polygon, and call addTriangle for every of those resulting ones
+				}
+		
+			break;
+		
+		default: log_error("Unknown node type %d at offset %04lX", splittype,  hdr.offset_nodes + offset);
+	}
+}
+
+void LoadTreeNodeGeometry(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &hdr2, int objidx, SubObjectHeader &shdr) {
+
+	parseSubNode(in, thdr, hdr, hdr2, objidx, shdr, shdr.node_start);
+}
+
 /* Processes object list, and should prepare the global vertex buffer, index buffer, skeleton tree, vertex - joint mapping
 */
 void ProcessObjects(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &hdr2) {
@@ -189,7 +257,9 @@ void ProcessObjects(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 
 		// we call the add Triangle function on the resulting triangle anyway...
 		if (thdr.version == 6) {
 			LoadDirectTriList(in, thdr, hdr, hdr2, x, objects[x]);
-		} // but the
+		} // but the pre - 6 versions do have a tree specifying the geometry
+			else
+			LoadTreeNodeGeometry(in, thdr, hdr, hdr2, x, objects[x]);
 	}
 	
 	// now the important stuff...
