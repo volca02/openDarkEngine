@@ -167,6 +167,18 @@ void LoadDirectTriList(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeade
 	}
 }
 
+void loadPolygon(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &hdr2, int objidx, SubObjectHeader &shdr, long offset) {
+    int oldpos = in.tellg();
+    
+    /*ObjPolygon polyHdr;
+    
+    in.read((char *) polyHdr, sizeof(ObjPolygon));
+    */
+    
+    // return to the old position
+    in.seekg(oldpos, ios::beg);
+}
+
 void parseSubNode(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &hdr2, int objidx, SubObjectHeader &shdr, long offset) {
 	char splittype;
 	short polys[1024];
@@ -189,8 +201,9 @@ void parseSubNode(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &h
 				in.read((char *) &ns, sizeof(NodeSplit));
 				// the polygons are read sequentially, and processed
 				
-				in.read((char *) polys, sizeof(short) * (ns.pgon_before_count + ns.pgon_after_count));
-				for (int n = 0; n < ns.pgon_before_count; n++) {
+				int polycount = ns.pgon_before_count + ns.pgon_after_count;
+				in.read((char *) polys, sizeof(short) * polycount);
+				for (int n = 0; n < polycount; n++) {
 					// TODO: triangulate the polygon, and call addTriangle for every of those resulting ones
 				}
 				
@@ -208,8 +221,9 @@ void parseSubNode(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &h
 				in.read((char *) &nc, sizeof(NodeCall));
 				// the polygons are read sequentially, and processed
 
-				in.read((char *) polys, sizeof(short) * (nc.pgon_before_count + nc.pgon_after_count));
-				for (int n = 0; n < ns.pgon_before_count; n++) {
+				int polycount = nc.pgon_before_count + nc.pgon_after_count;
+				in.read((char *) polys, sizeof(short) * polycount);
+				for (int n = 0; n < polycount; n++) {
 					// TODO: triangulate the polygon, and call addTriangle for every of those resulting ones
 				}
 			break;
@@ -220,7 +234,7 @@ void parseSubNode(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &h
 				// the polygons are read sequentially, and processed
 
 				in.read((char *) polys, sizeof(short) * (nr.pgon_count));
-				for (int n = 0; n < ns.pgon_before_count; n++) {
+				for (int n = 0; n < nr.pgon_count; n++) {
 					// TODO: triangulate the polygon, and call addTriangle for every of those resulting ones
 				}
 		
