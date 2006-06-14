@@ -5,6 +5,7 @@
 #include <sstream>
 #include <fstream>
 #include <cstdarg>
+#include <vector>
 
 #include "meshconvert.h"
 #include "logging.h"
@@ -28,20 +29,9 @@ char *fileBaseName = NULL;
 // HERE come the resulting structures we are desperately trying to fill:
 // vector<Vertex> out_vertices;
 
+vector< SingleMaterialMesh* > outputters;
 
 /////////////////////////////////////////// HELPER FUNCTIONS
-/**
-Recalc the vertex coordinates using the given transformation;
-*/
-Vertex transformVertex(Vertex &in, SubObjTransform &trans) {
-	Vertex out;
-	
-	out.x = in.x * trans.f[0] + in.y * trans.f[3] + in.z * trans.f[6] + trans.AxlePoint.x;
-	out.y = in.x * trans.f[1] + in.y * trans.f[4] + in.z * trans.f[7] + trans.AxlePoint.y;
-	out.z = in.x * trans.f[2] + in.y * trans.f[5] + in.z * trans.f[8] + trans.AxlePoint.z;
-	
-	return out;
-}
 
 // write out the material file
 /*
@@ -139,13 +129,23 @@ void SaveMaterialFile(char* basename, char *path, BinHeader &hdr) {
 	out.close();
 }
 
-
-void addTriangle(unsigned char material, short ida, short idb, short idc, SubObjectHeader &hdr) {
-	Vertex a, b, c;
+//////////
+void addTriangle(BinHeader &hdr, SubObjectHeader &shdr, int objidx, unsigned char material, 
+			short ida, short idb, short idc, 
+			short uva = -1, short uvb = -1, short uvc = -1) {
 	
-	a = transformVertex(vertices[ida], hdr.trans);
-	b = transformVertex(vertices[idb], hdr.trans);
-	c = transformVertex(vertices[idc], hdr.trans);
+	log_debug("Adding triangle : material %d, vertex indices %d, %d, %d (UV: %d, %d, %d)", material, ida, idb, idc, uva, uvb, uvc);
+	
+	if (material >= hdr.num_mats) {
+		log_error("Material %d is out of range");
+	}
+	
+	if (uva == -1) { // this vertex does not have a UV map
+		outputters[material]->addTriangle(objidx, ida, idb, idc);
+	} else
+		outputters[material]->addTriangle(objidx, ida, idb, idc, uva, uvb, uvc);
+	
+	
 }
 
 // the V6 direct triangle index list...
@@ -162,26 +162,67 @@ void LoadDirectTriList(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeade
 	// maybe there is a list of materials per triangle after the parts offset, we'll see
 	int n;
 	
-	for (n = 0; n < num_uvs; n++) { 
-		addTriangle(0, parts[n].a, parts[n].b, parts[n].c, shdr);
-	}
+	for (n = 0; n < num_uvs; n++)  
+		addTriangle(hdr, shdr, objidx, 0, parts[n].a, parts[n].b, parts[n].c, parts[n].a, parts[n].b, parts[n].c);
 }
 
 void loadPolygon(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &hdr2, int objidx, SubObjectHeader &shdr, long offset) {
-    int oldpos = in.tellg();
+	log_debug("loading polygon : ");
+	int oldpos = in.tellg();
     
-    /*ObjPolygon polyHdr;
+	ObjPolygon polyHdr;
     
-    in.read((char *) polyHdr, sizeof(ObjPolygon));
-    */
+	in.seekg(hdr.offset_pgons + offset, ios::beg);
+	in.read((char *) &polyHdr, sizeof(ObjPolygon));
     
-    // return to the old position
-    in.seekg(oldpos, ios::beg);
+
+	short *vertex_indices;
+	short *normal_indices; // ??
+	short *uv_indices = NULL;
+	
+	vertex_indices = new short[polyHdr.num_verts];
+	normal_indices = new short[polyHdr.num_verts];
+	in.read((char *) vertex_indices, sizeof(short) * polyHdr.num_verts);
+	in.read((char *) normal_indices, sizeof(short) * polyHdr.num_verts);
+	
+	if ( polyHdr.type == MD_PGON_TMAP ) {
+		uv_indices = new short[polyHdr.num_verts];
+		in.read((char *) uv_indices, sizeof(short) * polyHdr.num_verts);
+	}
+	
+	char Material;
+	
+	if ( thdr.version == 4 ) 
+		in.read(&Material, 1);
+	else
+		Material = polyHdr.data - 1;
+	
+	// now let's triangularize
+	// we allways have N-2 triangles per polygon (3 -> 1, 4 -> 2... etc)
+	for (int i = 0; i < polyHdr.num_verts - 1; i++) {
+		addTriangle(hdr, shdr, objidx, Material, 
+			vertex_indices[0],
+			vertex_indices[i],
+			vertex_indices[i+1],
+			uv_indices[0],
+			uv_indices[i],
+			uv_indices[i+1]);
+	}
+	
+	// release the structures
+	delete[] vertex_indices;
+	delete[] normal_indices;
+	if (uv_indices != NULL)
+		delete[] uv_indices;
+	
+	// return to the old position
+	in.seekg(oldpos, ios::beg);
 }
 
 void parseSubNode(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &hdr2, int objidx, SubObjectHeader &shdr, long offset) {
 	char splittype;
 	short polys[1024];
+	int polycount;
 	
 	log_debug("Sub-node %d on offset %04lX", offset, hdr.offset_nodes + offset);
 	in.seekg(hdr.offset_nodes + offset, ios::beg);
@@ -201,11 +242,12 @@ void parseSubNode(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &h
 				in.read((char *) &ns, sizeof(NodeSplit));
 				// the polygons are read sequentially, and processed
 				
-				int polycount = ns.pgon_before_count + ns.pgon_after_count;
+				polycount = ns.pgon_before_count + ns.pgon_after_count;
 				in.read((char *) polys, sizeof(short) * polycount);
-				for (int n = 0; n < polycount; n++) {
-					// TODO: triangulate the polygon, and call addTriangle for every of those resulting ones
-				}
+				log_debug("Polygon count: %d", polycount);
+		
+				for (int n = 0; n < polycount; n++) 
+					loadPolygon(in, thdr, hdr, hdr2, objidx, shdr, polys[n]);
 				
 				if ( ( ns.behind_node >= shdr.node_start ) ) { // todo:  && ( ns.behind_node < NodeMax )
 					parseSubNode (in, thdr, hdr, hdr2, objidx, shdr, ns.behind_node);
@@ -221,11 +263,13 @@ void parseSubNode(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &h
 				in.read((char *) &nc, sizeof(NodeCall));
 				// the polygons are read sequentially, and processed
 
-				int polycount = nc.pgon_before_count + nc.pgon_after_count;
+				polycount = nc.pgon_before_count + nc.pgon_after_count;
+				log_debug("Polygon count: %d", polycount);
+		
 				in.read((char *) polys, sizeof(short) * polycount);
-				for (int n = 0; n < polycount; n++) {
-					// TODO: triangulate the polygon, and call addTriangle for every of those resulting ones
-				}
+				for (int n = 0; n < polycount; n++) 
+					loadPolygon(in, thdr, hdr, hdr2, objidx, shdr, polys[n]);
+				
 			break;
 				
 		case MD_NODE_RAW: 
@@ -234,9 +278,10 @@ void parseSubNode(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &h
 				// the polygons are read sequentially, and processed
 
 				in.read((char *) polys, sizeof(short) * (nr.pgon_count));
-				for (int n = 0; n < nr.pgon_count; n++) {
-					// TODO: triangulate the polygon, and call addTriangle for every of those resulting ones
-				}
+				log_debug("Polygon count: %d", nr.pgon_count);
+		
+				for (int n = 0; n < nr.pgon_count; n++) 
+					loadPolygon(in, thdr, hdr, hdr2, objidx, shdr, polys[n]);
 		
 			break;
 		
@@ -346,10 +391,13 @@ void readObjectModel(ifstream &in, BinHeadType &thdr) {
 	
 	in.read((char *) materials, hdr.num_mats * sizeof(MeshMaterial));
 	
-	// logging the material names:
-	for (int x = 0; x < hdr.num_mats; x++)
+	for (int x = 0; x < hdr.num_mats; x++) {
+		// logging the material names:
 		log_debug("       - material name : %s", materials[x].name);
-	
+		
+		// intialise the outputter
+		outputters.push_back(new SingleMaterialMesh(fileBaseName, x, materials[x].type == MD_MAT_TMAP));
+	}
 	// if we need extended attributes
 	if ( hdr.mat_flags & MD_MAT_TRANS || hdr.mat_flags & MD_MAT_ILLUM ) {
 		log_info(" * Extra materials (%d)", hdr.num_mats);
@@ -392,11 +440,35 @@ void readObjectModel(ifstream &in, BinHeadType &thdr) {
 	in.seekg(hdr.offset_verts, ios::beg);
 	in.read((char *) vertices, hdr.num_verts * sizeof(Vertex));
 	
+	log_debug("Setting important data structures in outputters...");
+	
 	log_info("Object tree processing:");
 	
 	SaveMaterialFile(fileBaseName, "materials/", hdr);
 	ProcessObjects(in, thdr, hdr, hdr2);
 	
+	for (int x = 0; x < hdr.num_mats; x++) {
+		outputters[x]->setObjects(objects, hdr.num_objs);
+		outputters[x]->setVertices(vertices, hdr.num_verts);
+		outputters[x]->setUVMaps(uvs, num_uvs);
+	}
+	
+	// final output
+	char filepath[1024];
+	
+	snprintf(filepath, 1024, "%s.xml", fileBaseName); // TODO: Path!
+	
+	ofstream ofs(filepath);
+	
+	ofs << "<mesh>" << endl << "\t<submeshes>" << endl;
+	
+	for (int x = 0; x < hdr.num_mats; x++)
+		outputters[x]->output(ofs, "\t\t");
+
+
+	ofs << "\t</submeshes>" << endl << "</mesh>" << endl;
+	
+	ofs.close();
 	
 	// cleanout
 	log_info("Releasing used pointers");
@@ -417,6 +489,13 @@ void readObjectModel(ifstream &in, BinHeadType &thdr) {
 	
 	if (objects != NULL)
 		delete[] objects;
+	
+	for (int x = 0; x < hdr.num_objs; x++)
+		if (outputters[x] != NULL) {
+			SingleMaterialMesh *m = outputters[x];
+			delete m;
+		}
+
 	
 	// the end
 	log_info("all done");
