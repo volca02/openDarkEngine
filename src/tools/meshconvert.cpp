@@ -341,7 +341,7 @@ void readObjectModel(ifstream &in, BinHeadType &thdr) {
 	log_debug("Header version : %d", thdr.version);
 	
 	// determine the header size depending on the version of the mesh
-	switch (thdr.version) {
+	switch ((int) thdr.version) {
 		case 3: size = SIZE_BIN_HDR_V3; break;
 		case 4: size = SIZE_BIN_HDR_V4; break;
 		case 6: size = SIZE_BIN_HDR_V6; break;
@@ -504,7 +504,13 @@ void readObjectModel(ifstream &in, BinHeadType &thdr) {
 int main(int argc, char* argv[]) {
 	cout << "MeshConvert (.bin to .xml converter for all kinds of LG meshes)" << endl;
 
-
+	log_debug("S char  : %d",sizeof(char));
+	log_debug("S int   : %d",sizeof(int));
+	log_debug("S short : %d",sizeof(short));	
+	log_debug("S long  : %d",sizeof(long));
+	log_debug("S float : %d",sizeof(float));
+	log_debug("S BH    : %d",sizeof(BinHeader));
+	
 	// open the input bin mesh file
 	BinHeadType header;
 	
