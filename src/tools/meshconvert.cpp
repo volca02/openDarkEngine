@@ -64,7 +64,7 @@ void SaveMaterialFile(char* basename, char *path, BinHeader &hdr) {
 	int n;
 	
 	for (n = 0; n < hdr.num_mats; n++) {
-		out << "material " << basename << "/" << "mat" << n << endl;
+		out << "material " << basename << "/" << "Mat" << n << endl;
 		out << "{" << endl; // material start
 		out << "	technique" << endl; 
 		out << "	{" << endl; // technique start
@@ -141,9 +141,9 @@ void addTriangle(BinHeader &hdr, SubObjectHeader &shdr, int objidx, unsigned cha
 	}
 	
 	if (uva == -1) { // this vertex does not have a UV map
-		outputters[material]->addTriangle(objidx, ida, idb, idc);
+		outputters[material]->addTriangle(objidx, ida, idc, idb);
 	} else
-		outputters[material]->addTriangle(objidx, ida, idb, idc, uva, uvb, uvc);
+		outputters[material]->addTriangle(objidx, ida, idc, idb, uva, uvc, uvb);
 	
 	
 }
