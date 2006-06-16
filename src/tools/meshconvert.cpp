@@ -13,6 +13,16 @@
 using namespace std;
 using std::string;
 
+// directory separator
+#ifdef WIN32
+
+#define PLATFORM_SLASH '\\'
+
+#else
+
+#define PLATFORM_SLASH '/'
+
+#endif
 
 ////////////////////// global data - yuck
 
@@ -25,9 +35,16 @@ MeshMaterial *materials = NULL;
 MeshMaterialExtra *materialsExtra = NULL;
 SubObjectHeader *objects = NULL;
 
+char *meshOutPath = NULL;
+char *materialOutPath = NULL;
+char *fileName = NULL;
 char *fileBaseName = NULL;
+
 // HERE come the resulting structures we are desperately trying to fill:
 // vector<Vertex> out_vertices;
+
+short maxslotnum = 0;
+short *slot2matnum = NULL; // convert slot number to the material index...
 
 vector< SingleMaterialMesh* > outputters;
 
@@ -130,22 +147,42 @@ void SaveMaterialFile(char* basename, char *path, BinHeader &hdr) {
 }
 
 //////////
+int SlotToMatIndex(short slot) {
+	if (slot < 0)
+		return -1;
+	
+	if (slot > maxslotnum)
+		return -1;
+	
+	return slot2matnum[slot];
+}
+
 void addTriangle(BinHeader &hdr, SubObjectHeader &shdr, int objidx, unsigned char material, 
 			short ida, short idb, short idc, 
-			short uva = -1, short uvb = -1, short uvc = -1) {
+			short uva, short uvb, short uvc) {
 	
-	log_debug("Adding triangle : material %d, vertex indices %d, %d, %d (UV: %d, %d, %d)", material, ida, idb, idc, uva, uvb, uvc);
+	log_verbose("Adding triangle : material %d, vertex indices %d, %d, %d (UV: %d, %d, %d)", material, ida, idb, idc, uva, uvb, uvc);
+	
 	
 	if (material >= hdr.num_mats) {
 		log_error("Material %d is out of range");
+		return;
 	}
 	
-	if (uva == -1) { // this vertex does not have a UV map
-		outputters[material]->addTriangle(objidx, ida, idc, idb);
-	} else
-		outputters[material]->addTriangle(objidx, ida, idc, idb, uva, uvc, uvb);
+	outputters[material]->addTriangle(objidx, ida, idb, idc, uva, uvb, uvc);
+}
+
+void addTriangle(BinHeader &hdr, SubObjectHeader &shdr, int objidx, unsigned char material, 
+			short ida, short idb, short idc) {
 	
+	log_verbose("Adding no-tex triangle : material %d, vertex indices %d, %d, %d", material, ida, idb, idc);
 	
+	if (material >= hdr.num_mats) {
+		log_error("Material %d is out of range");
+		return;
+	}
+	
+	outputters[material]->addTriangle(objidx, ida, idb, idc);
 }
 
 // the V6 direct triangle index list...
@@ -164,10 +201,12 @@ void LoadDirectTriList(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeade
 	
 	for (n = 0; n < num_uvs; n++)  
 		addTriangle(hdr, shdr, objidx, 0, parts[n].a, parts[n].b, parts[n].c, parts[n].a, parts[n].b, parts[n].c);
+	
+	delete[] parts;
 }
 
 void loadPolygon(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &hdr2, int objidx, SubObjectHeader &shdr, long offset) {
-	log_debug("loading polygon : ");
+	log_verbose("loading polygon on offset %04X : ", hdr.offset_pgons + offset);
 	int oldpos = in.tellg();
     
 	ObjPolygon polyHdr;
@@ -186,6 +225,7 @@ void loadPolygon(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &hd
 	in.read((char *) normal_indices, sizeof(short) * polyHdr.num_verts);
 	
 	if ( polyHdr.type == MD_PGON_TMAP ) {
+		log_verbose("Textured, reading indices");
 		uv_indices = new short[polyHdr.num_verts];
 		in.read((char *) uv_indices, sizeof(short) * polyHdr.num_verts);
 	}
@@ -194,19 +234,46 @@ void loadPolygon(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &hd
 	
 	if ( thdr.version == 4 ) 
 		in.read(&Material, 1);
-	else
-		Material = polyHdr.data - 1;
+	else { 
+		int mat = SlotToMatIndex(polyHdr.data); // Material here uses a slot... we'll se if the v4 does that too (so no -1)
+		log_verbose("Material, type, textured : %d %02X %d", mat, polyHdr.type, (polyHdr.type == MD_PGON_TMAP));
+
+		if ((mat < 0) || (mat >= hdr.num_mats)) {
+			log_error("Invalid material number %d, not adding the polygon (slot %d)", mat, polyHdr.data);
+			return;
+		}
+		
+		Material = mat;
+	}
 	
 	// now let's triangularize
 	// we allways have N-2 triangles per polygon (3 -> 1, 4 -> 2... etc)
 	for (int i = 0; i < polyHdr.num_verts - 1; i++) {
-		addTriangle(hdr, shdr, objidx, Material, 
-			vertex_indices[0],
-			vertex_indices[i],
-			vertex_indices[i+1],
-			uv_indices[0],
-			uv_indices[i],
-			uv_indices[i+1]);
+		// depending on texturization
+		if ( polyHdr.type == MD_PGON_TMAP )
+			addTriangle(hdr, shdr, objidx, Material, 
+				vertex_indices[0],
+				vertex_indices[i+1],
+				vertex_indices[i],
+				uv_indices[0],
+				uv_indices[i+1],
+				uv_indices[i]);
+		else {
+			if (materials[Material].type == MD_MAT_TMAP) {
+				log_error("Material needs UV and none found, using vertex index for uv");
+				addTriangle(hdr, shdr, objidx, Material, 
+					vertex_indices[0],
+					vertex_indices[i+1],
+					vertex_indices[i], 
+					vertex_indices[0],
+					vertex_indices[i+1],
+					vertex_indices[i]);
+			} else
+				addTriangle(hdr, shdr, objidx, Material, 
+					vertex_indices[0],
+					vertex_indices[i+1],
+					vertex_indices[i]);
+		}
 	}
 	
 	// release the structures
@@ -234,7 +301,9 @@ void parseSubNode(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &h
 	
 	switch (splittype) {
 		case MD_NODE_HDR: 
-				log_debug("Header node"); 
+				NodeHeader ndhdr;
+				// in.read((char *) &ndhdr, sizeof(NodeHeader));
+				log_debug("-- Header node --"); 
 				parseSubNode (in, thdr, hdr, hdr2, objidx, shdr, offset + sizeof(NodeHeader)); 
 			break;		
 		case MD_NODE_SPLIT:
@@ -244,19 +313,29 @@ void parseSubNode(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &h
 				
 				polycount = ns.pgon_before_count + ns.pgon_after_count;
 				in.read((char *) polys, sizeof(short) * polycount);
-				log_debug("Polygon count: %d", polycount);
-		
-				for (int n = 0; n < polycount; n++) 
-					loadPolygon(in, thdr, hdr, hdr2, objidx, shdr, polys[n]);
 				
+				log_debug("Childs : %d - %d", ns.behind_node, ns.front_node);
+		
+				log_verbose("Polygon count: %d", polycount);
+		
+				if (ns.behind_node < offset)
+					log_error("Split to a lower node number - behind node!");
+				else
 				if ( ( ns.behind_node >= shdr.node_start ) ) { // todo:  && ( ns.behind_node < NodeMax )
 					parseSubNode (in, thdr, hdr, hdr2, objidx, shdr, ns.behind_node);
 				}
+				
+				if (ns.behind_node < offset)
+					log_error("Split to a lower node number - front node!");
+				else
 				if ( ( ns.front_node >= shdr.node_start ) ) { // todo: && ( ns.front_node < NodeMax )
 					parseSubNode (in, thdr, hdr, hdr2, objidx, shdr, ns.front_node);
 				}
 				
-			break;
+				for (int n = 0; n < polycount; n++) 
+					loadPolygon(in, thdr, hdr, hdr2, objidx, shdr, polys[n]);
+				
+				break;
 		
 		case MD_NODE_CALL: 
 				log_debug("Call node");
@@ -264,7 +343,7 @@ void parseSubNode(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &h
 				// the polygons are read sequentially, and processed
 
 				polycount = nc.pgon_before_count + nc.pgon_after_count;
-				log_debug("Polygon count: %d", polycount);
+				log_verbose("Polygon count: %d", polycount);
 		
 				in.read((char *) polys, sizeof(short) * polycount);
 				for (int n = 0; n < polycount; n++) 
@@ -278,7 +357,7 @@ void parseSubNode(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &h
 				// the polygons are read sequentially, and processed
 
 				in.read((char *) polys, sizeof(short) * (nr.pgon_count));
-				log_debug("Polygon count: %d", nr.pgon_count);
+				log_verbose("Polygon count: %d", nr.pgon_count);
 		
 				for (int n = 0; n < nr.pgon_count; n++) 
 					loadPolygon(in, thdr, hdr, hdr2, objidx, shdr, polys[n]);
@@ -338,7 +417,7 @@ void readObjectModel(ifstream &in, BinHeadType &thdr) {
 	log_info("LGMD mesh processing - e.g. an object");
 	long size = 0;
 	
-	log_debug("Header version : %d", thdr.version);
+	log_info("Header version : %d", thdr.version);
 	
 	// determine the header size depending on the version of the mesh
 	switch ((int) thdr.version) {
@@ -393,11 +472,35 @@ void readObjectModel(ifstream &in, BinHeadType &thdr) {
 	
 	for (int x = 0; x < hdr.num_mats; x++) {
 		// logging the material names:
-		log_debug("       - material name : %s", materials[x].name);
+		log_debug("       - material name : %s (type: %04X, slot: %d)", materials[x].name, materials[x].type, materials[x].slot_num);
 		
+		// computing the maximal slot number
+		if (materials[x].slot_num > maxslotnum)
+			maxslotnum = materials[x].slot_num;
+		
+		// slot2matnum[materials[x].slot_num] = x;
 		// intialise the outputter
-		outputters.push_back(new SingleMaterialMesh(fileBaseName, x, materials[x].type == MD_MAT_TMAP));
+		
+		SingleMaterialMesh *ins = new SingleMaterialMesh(fileBaseName, x, (materials[x].type == MD_MAT_TMAP));
+		
+		if (ins == NULL)
+			log_error("Material %d failed to construct", x);
+		
+		outputters.push_back(ins);
 	}
+	
+	// slot to index material conversion table preparation
+	if (thdr.version == 3) {
+		slot2matnum = new short[maxslotnum + 1];
+		for (int x = 0; x < maxslotnum; x++)
+			slot2matnum[x] = -1;
+	
+		for (int x = 0; x < hdr.num_mats; x++) {
+			log_debug("Adding slot %d (-> %d) to slot2matnum", materials[x].slot_num, x);
+			slot2matnum[materials[x].slot_num] = x;
+		}
+	}
+	
 	// if we need extended attributes
 	if ( hdr.mat_flags & MD_MAT_TRANS || hdr.mat_flags & MD_MAT_ILLUM ) {
 		log_info(" * Extra materials (%d)", hdr.num_mats);
@@ -426,11 +529,16 @@ void readObjectModel(ifstream &in, BinHeadType &thdr) {
 	// VHOT:
 	log_info(" * VHOT (%d)", hdr.num_vhots);
 	log_debug("  - offset %06lX",hdr.offset_vhots);
-	// prepare and read the vhots
-	vhots = new VHotObj[hdr.num_vhots];
-	in.seekg(hdr.offset_vhots, ios::beg);
-	in.read((char *) vhots, hdr.num_vhots * sizeof(VHotObj));
 	
+	if (hdr.num_vhots > 0) {
+		// prepare and read the vhots
+		vhots = new VHotObj[hdr.num_vhots];
+		in.seekg(hdr.offset_vhots, ios::beg);
+		in.read((char *) vhots, hdr.num_vhots * sizeof(VHotObj));
+	} else {
+		vhots = NULL;
+		log_info("No vhots in this model");
+	}
 	// Vertex table....
 	log_info(" * Vertices (%d)", hdr.num_verts);
 	log_debug("  - offset %06lX",hdr.offset_verts);
@@ -454,9 +562,9 @@ void readObjectModel(ifstream &in, BinHeadType &thdr) {
 	}
 	
 	// final output
-	char filepath[1024];
+	char filepath[2048];
 	
-	snprintf(filepath, 1024, "%s.xml", fileBaseName); // TODO: Path!
+	snprintf(filepath, 1024, "%s%s.xml", meshOutPath, fileBaseName); // TODO: Path!
 	
 	ofstream ofs(filepath);
 	
@@ -472,75 +580,188 @@ void readObjectModel(ifstream &in, BinHeadType &thdr) {
 	
 	// cleanout
 	log_info("Releasing used pointers");
+	log_debug(" * outputters");
+	for (int x = 0; x < hdr.num_objs; x++)
+		if (outputters[x] != NULL) {
+			log_debug("   - %d", x);
+			SingleMaterialMesh *m = outputters[x];
+	//		delete m;
+		}
+		
+	log_debug(" * vhot");
 	if (vhots != NULL)
 		delete[] vhots;
 	
+	log_debug(" * vert");
 	if (vertices != NULL)
 		delete[] vertices;
 	
+	log_debug(" * vert");
 	if (uvs != NULL)
 		delete[] uvs;
 	
+	log_debug(" * materials");
 	if (materials != NULL)
 		delete[] materials;
 	
+	log_debug(" * extras");
 	if (materialsExtra != NULL)
 		delete[] materialsExtra;
 	
+	log_debug(" * objects");
 	if (objects != NULL)
 		delete[] objects;
 	
-	for (int x = 0; x < hdr.num_objs; x++)
-		if (outputters[x] != NULL) {
-			SingleMaterialMesh *m = outputters[x];
-			delete m;
-		}
-
+	log_debug(" * slot2matnum");
+	
+	if (slot2matnum != NULL)
+		delete[] slot2matnum;
 	
 	// the end
 	log_info("all done");
 }
 
+void tidy() {
+	if (meshOutPath != NULL)
+		delete[] meshOutPath;
+	
+	if (materialOutPath != NULL)
+		delete[] materialOutPath;
+	
+	if (fileBaseName != NULL)
+		delete[] fileBaseName;
+}
+
+// prepare some global variables depending on the commandline shape
+// we understand these:
+// -x output dir - XML (including the trailing slash)
+// -m output dir - mesh
+void displayHelpAndExit() {
+	cout << "meshconverter [-x XML-out-path] [-m Material-out-path] [-l loglevel] filename" << endl;
+	cout << "Loglevel : 0 - fatal, 1 - error, 2 - info, 3 - debug" << endl;
+	cout << "Platform slash : '" << PLATFORM_SLASH << "'" << endl;
+	tidy();
+	exit(1);
+}
+
+void putTrailingSlash(char **string) {
+	if (strlen(*string) > 0) {
+		char endc = (*string)[strlen(*string)-1];
+		
+		if (endc != PLATFORM_SLASH) {// no trailing slash!
+			
+			char *newstring = new char[strlen(*string) + 2];
+			
+			sprintf(newstring, "%s%c", *string, PLATFORM_SLASH); // string allocation - aaw the plain C
+			
+			delete[] *string;
+			*string = newstring;
+		}
+	}
+}
+
+void parseCmdLine(int argc, char* argv[]) {
+	int pos = 0;
+	
+	fileName = NULL;
+	
+	meshOutPath = new char[2];
+	materialOutPath = new char[2];
+	strcpy(meshOutPath, "");
+	strcpy(materialOutPath, "");
+	
+	while (++pos < argc) {
+		if (argv[pos][0] == '-') { // an option switch
+			if (strlen(argv[pos]) == 2) {
+				switch (argv[pos][1]) {
+					case 'x' : 
+						delete[] meshOutPath;
+						meshOutPath = new char[strlen(argv[++pos]) + 1];
+						strcpy(meshOutPath, argv[pos]); 
+						break;
+					case 'm' : 
+						delete[] materialOutPath;
+						materialOutPath = new char[strlen(argv[++pos]) + 1];
+						strcpy(materialOutPath, argv[pos]); 
+						break;
+					case 'l' : 
+						++pos;
+					
+						if (strlen(argv[pos]) > 1)
+							log_error("Non-fatal: unknown loglevel %s",argv[pos]);
+						else {
+							int level = argv[pos][0] - '0';
+							if ( level > LOG_VERBOSE )
+								level = LOG_DEBUG;
+							if ( level < 0 )
+								level = 0;
+							
+							log_info("Setting loglevel to %d", level);
+							loglevel = level;
+						}
+						break;
+					default: 
+						log_error("Option %s not understood", argv[pos]);
+						displayHelpAndExit();
+				}
+			} else {
+				log_error("Option %s not understood", argv[pos]);
+				displayHelpAndExit();
+			}
+		} else {
+			log_debug("Argument %s (%c) is a filename", argv[pos], argv[pos][0]);
+			fileName = argv[pos];
+		}
+		
+		
+		// if the params were not included
+		if (pos >= argc) {
+			log_error("Some option has unsatisfied parameters (option without value)");
+			displayHelpAndExit();
+		}
+	}
+	
+	if (fileName==NULL) 
+		displayHelpAndExit();
+	
+	// fix the output path strings
+	putTrailingSlash(&meshOutPath);
+	putTrailingSlash(&materialOutPath);
+	
+	
+	// cut - out the base name of the input file, and save it into the filebasename
+	char helper[255];
+	strncpy ( (char *) helper, fileName, 254);
+	
+	char *tp = strrchr ( (char *) helper, '.' );
+	
+	if ( tp )
+		*tp = 0x0;
+	
+	char *bname = strrchr ( (char *) helper, PLATFORM_SLASH );
+	
+	if ( bname )
+			bname++;  // spit out the slash
+		else
+			bname = helper;
+		
+	fileBaseName = new char[strlen(bname) + 1];
+	strcpy(fileBaseName, bname);
+}
+
 int main(int argc, char* argv[]) {
 	cout << "MeshConvert (.bin to .xml converter for all kinds of LG meshes)" << endl;
-
-	log_debug("S char  : %d",sizeof(char));
-	log_debug("S int   : %d",sizeof(int));
-	log_debug("S short : %d",sizeof(short));	
-	log_debug("S long  : %d",sizeof(long));
-	log_debug("S float : %d",sizeof(float));
-	log_debug("S BH    : %d",sizeof(BinHeader));
+	
+	parseCmdLine(argc, argv);
 	
 	// open the input bin mesh file
 	BinHeadType header;
 	
-	if (argc < 2) {
-		cout << "Specify a .BIN file as a parameter, please" << endl;
-		return 1;
-	}
-	
-	ifstream input(argv[1], ios::binary); 
-	cout << "Opened " << argv[1] << endl;
+	ifstream input(fileName, ios::binary); 
+	cout << "Opened " << fileName << endl;
 	
 	input.read((char *) &header, sizeof(header));
 	
-	
-	/// I Know, I Know. This code below is a pure CRAP. For testing purposes only.
-	char helper[255];
-	strcpy ( (char *) helper, argv[1] );
-	
-	char *tp = strrchr ( (char *) helper, '.' );
-	if ( tp )
-		*tp = 0x0;
-	
-	fileBaseName = strrchr ( (char *) helper, '/' );
-	
-	if ( !fileBaseName )
-			fileBaseName = helper;
-		else
-			fileBaseName++; // spit out the slash
-	// --- END OF REALLY CRAP CODE (that does not mean that there is no crap code outside this section though ;) ) ---
-		
 	if (strncmp(header.ID,"LGMD",4) == 0) {
 		readObjectModel(input, header);
 	} else 
@@ -551,5 +772,7 @@ int main(int argc, char* argv[]) {
 	
 
 	input.close();		
+	
+	tidy();
 	return 0;
 }
