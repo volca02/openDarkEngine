@@ -9,6 +9,7 @@
 
 #include "meshconvert.h"
 #include "logging.h"
+#include "compat.h"
 
 using namespace std;
 using std::string;
@@ -478,9 +479,7 @@ void readObjectModel(ifstream &in, BinHeadType &thdr) {
 		if (materials[x].slot_num > maxslotnum)
 			maxslotnum = materials[x].slot_num;
 		
-		// slot2matnum[materials[x].slot_num] = x;
 		// intialise the outputter
-		
 		SingleMaterialMesh *ins = new SingleMaterialMesh(fileBaseName, x, (materials[x].type == MD_MAT_TMAP));
 		
 		if (ins == NULL)
@@ -490,7 +489,7 @@ void readObjectModel(ifstream &in, BinHeadType &thdr) {
 	}
 	
 	// slot to index material conversion table preparation
-	if (thdr.version == 3) {
+	if (thdr.version == 3) { // it seems only v3 meshes use slots for materials
 		slot2matnum = new short[maxslotnum + 1];
 		for (int x = 0; x < maxslotnum; x++)
 			slot2matnum[x] = -1;
