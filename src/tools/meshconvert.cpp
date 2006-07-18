@@ -42,8 +42,6 @@ char *fileName = NULL;
 char *fileBaseName = NULL;
 
 // HERE come the resulting structures we are desperately trying to fill:
-// vector<Vertex> out_vertices;
-
 short maxslotnum = 0;
 short *slot2matnum = NULL; // convert slot number to the material index...
 
@@ -303,7 +301,7 @@ void parseSubNode(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &h
 	switch (splittype) {
 		case MD_NODE_HDR: 
 				NodeHeader ndhdr;
-				// in.read((char *) &ndhdr, sizeof(NodeHeader));
+				in.read((char *) &ndhdr, sizeof(NodeHeader));
 				log_debug("-- Header node --"); 
 				parseSubNode (in, thdr, hdr, hdr2, objidx, shdr, offset + sizeof(NodeHeader)); 
 			break;		
@@ -584,7 +582,7 @@ void readObjectModel(ifstream &in, BinHeadType &thdr) {
 		if (outputters[x] != NULL) {
 			log_debug("   - %d", x);
 			SingleMaterialMesh *m = outputters[x];
-	//		delete m;
+	//		delete m; // TODO: Why oh why is this causing segfaults?
 		}
 		
 	log_debug(" * vhot");
@@ -637,7 +635,7 @@ void tidy() {
 // -m output dir - mesh
 void displayHelpAndExit() {
 	cout << "meshconverter [-x XML-out-path] [-m Material-out-path] [-l loglevel] filename" << endl;
-	cout << "Loglevel : 0 - fatal, 1 - error, 2 - info, 3 - debug" << endl;
+	cout << "Loglevel : 0 - fatal, 1 - error, 2 - info, 3 - debug 4-all" << endl;
 	cout << "Platform slash : '" << PLATFORM_SLASH << "'" << endl;
 	tidy();
 	exit(1);

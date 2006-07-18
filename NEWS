@@ -15,3 +15,8 @@ Changes in alpha release 0.0.3 (29-Dec-2005)
 Changes in alpha release 0.1.0 (04-Jun-2006)
 * Rewritten the whole thing to use Ogre3D
 * CVS reinitialized
+
+Changes in alpha release 0.1.1 (18-Jul-2006)
+* added meshconvert application used to prepare the binary meshes to XML format used by Ogre3D importer
+* added a trivial support for Widgets, and a not-yet-working console
+* Fixes
