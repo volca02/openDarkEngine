@@ -20,3 +20,8 @@ Changes in alpha release 0.1.1 (18-Jul-2006)
 * added meshconvert application used to prepare the binary meshes to XML format used by Ogre3D importer
 * added a trivial support for Widgets, and a not-yet-working console
 * Fixes
+
+Changes in alpha release 0.1.2 (29-Jul-2006)
+* Rewritten the core renderer visibility testing routine - now more effective stack based approach 
+* fixed a bug with water portals
+* Applied a telliameds patch
