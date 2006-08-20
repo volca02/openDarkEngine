@@ -29,3 +29,7 @@ Changes in alpha release 0.1.2 (29-Jul-2006)
 Changes in alpha release 0.1.3 (11-Aug-2006)
 * Darklib was replaced with DarkDatabase class
 * Fixed to work on AMD64 platform
+
+Changes in alpha release 0.1.4 (20-Aug-2006)
+* Added the ability to do lightmap switching
+* Added a console command "light ID Intensity". Note that the ID differes from the object ID.
