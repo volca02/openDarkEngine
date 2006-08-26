@@ -20,9 +20,10 @@ The structure of the sources
 ----------------------------
 As of now, the sources are split into these directories:
 DarkSceneManager - a scene manager rendering the level geometry, utilising the BSP-Portal structure of the WR/WRRGB chunk of the GAM files.
-darklib - Telliamed's library utilised for manipulation of the GAM/MIS/SAV files
+darkdb - The library of objects used for reading (and writing when implemented) of Tag Files
 widgets - Directory, where the widgets reside - for example the display part of the console
-meshconvert - Mesh converter from the .bin format to .xml and .material, used by ogre (for in-game objects conversion)
+tools - Mesh converter from the .bin format to .xml and .material, used by ogre (for in-game objects conversion)
+console - The in-game console backend sources
 
 
 Building
