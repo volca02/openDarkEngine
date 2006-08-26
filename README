@@ -38,7 +38,7 @@ The windows build was not yet tested.
 
 Running
 -------
-You will need to initialize resources.cfg, opde.cfg for the main executable to work.
+You will need to initialize resources.cfg, opde.cfg and plugins.cfg for the main executable to work.
 see the opde wiki for more info:
     http://opde.sourceforge.net/wiki/index.php/Main_Page
 
