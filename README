@@ -43,6 +43,15 @@ You will need to initialize resources.cfg, opde.cfg and plugins.cfg for the main
 see the opde wiki for more info:
     http://opde.sourceforge.net/wiki/index.php/Main_Page
 
+License
+-------
+All files, if not otherwise specified, are released under the GNU GPL license.
+
+The DarkSceneManager is released under the LGPL license, to comply with the original version of the sources - The BSPSceneManager.
+Additional sources, written and added to the DarkSceneManager (found in the src/DarkSceneManager) are licensed under LGPL too.
+
+See COPYING for the informations regarding the GNU GPL license.
+
 
 Package Versioning Schmeme:
 ---------------------------
