@@ -24,7 +24,7 @@ Changes in alpha release 0.1.1 (18-Jul-2006)
 Changes in alpha release 0.1.2 (29-Jul-2006)
 * Rewritten the core renderer visibility testing routine - now more effective stack based approach 
 * fixed a bug with water portals
-* Applied a telliameds patch
+* Applied a telliamed's patch
 
 Changes in alpha release 0.1.3 (11-Aug-2006)
 * Darklib was replaced with DarkDatabase class
@@ -33,3 +33,10 @@ Changes in alpha release 0.1.3 (11-Aug-2006)
 Changes in alpha release 0.1.4 (20-Aug-2006)
 * Added the ability to do lightmap switching
 * Added a console command "light ID Intensity". Note that the ID differes from the object ID.
+
+Changes in alpha release 0.1.5 (02-Sep-2006)
+* The water portals are really fixed now. The rendering of water works, but needs to be finished.
+* Updated the documentation of the sources. It should be pretty complete now.
+* The material scripts can be used (and are searched) prior to the simple texture-only default materials. Not too complete for now.
+* Water material script added. If not found, water should be invisible.
+* Added -Werror compiler flag.

@@ -602,8 +602,8 @@ void readObjectModel(ifstream &in, BinHeadType &thdr) {
 	for (int x = 0; x < hdr.num_objs; x++)
 		if (outputters[x] != NULL) {
 			log_debug("   - %d", x);
-			SingleMaterialMesh *m = outputters[x];
-	//		delete m; // TODO: Why oh why is this causing segfaults?
+			//SingleMaterialMesh *m = outputters[x];
+			//delete m; // TODO: Why oh why is this causing segfaults?
 		}
 		
 	log_debug(" * vhot");
