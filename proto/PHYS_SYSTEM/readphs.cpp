@@ -239,6 +239,48 @@ void readBoundingDefinition(FILE *f, uint32 btype, uint32 version) {
 	
 }
 
+void printRotationAxes(uint32 ax) {
+	printf("\tRotational Axes : ");
+	
+	if (ax & 4)
+		printf("Z ");
+	
+	if (ax & 2)
+		printf("Y ");
+	
+	if (ax & 1)
+		printf("X");
+	
+	printf("\n");
+}
+
+// Prints out the Rest axes. I didn't test this one but it seems to be reasonable that the bit order is the same as for Rot. Axes (Dunno about the +- things)
+void printRestAxes(uint32 rest) {
+	printf("\tRest Axes  : ");
+	
+	if (rest & 32)
+		printf("+Z ");
+	
+	if (rest & 16)
+		printf("+Y ");
+	
+	if (rest & 8)
+		printf("+X ");
+	
+	if (rest & 4)
+		printf("-Z ");
+	
+	if (rest & 2)
+		printf("-Y ");
+	
+	if (rest & 1)
+		printf("-X");
+	
+	printf("\n");
+}
+
+
+
 
 /// Read one object from the Phys syst
 bool readObjectPhys(FILE *f, int pos, int version) {
@@ -311,15 +353,17 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	printf("\tUnknown    : "); readStruct("LLLL", f);printf("\n");
 
 	/* 
-	Rotation axises flags: X - 1, Y - 2, Z - 4 ? (Sphere - all = 7, box = 4)
+	Rotation axises flags: X - 1, Y - 2, Z - 4 ? (Sphere - all = 7, box = 4 - X only?)
 	Rests: 63 for cube.
 	*/
 	uint32 rot_flags, rest_flags; 
 	fread(&rot_flags,1,4,f);
 	fread(&rest_flags,1,4,f);
-	printf("\tRot. flags : %X\n", rot_flags);
-	printf("\tRest flags : %X\n", rest_flags);
 	
+	printRotationAxes(rot_flags);
+	printRestAxes(rest_flags);
+	
+
 	printf("\tUnknown    : "); readStruct("LLL", f);printf("\n");
 	
 	// THIEF 2 has one more long here
@@ -363,15 +407,20 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	
 	// The following block is not understood yet. seems to be parametrized by the subobj count too.
 	/* 132 bytes for cube (4), 252 bytes for sphere (7)*/
-	printf("\tUnknown  : "); readStruct("FL", f);printf("\n");
+	printf("\t???      : "); readStruct("FFLLLLLL", f);printf("\n");
 	
-	printf("\tUnknown  : "); readStruct("LLLLLL", f);printf("\n");
+	fpos(f);
+	// Translation speed here
+	printf("\tVelocity : "); readVector3(f);
 	
-	// Probably translation speed vector. Nonzero for flying object
-	printf("\tTranslation speed? : "); readVector3(f);
+	printf("\tUnknown  : "); readStruct("LLLLLLL", f);printf("\n");
 	
-	printf("\tUnknown  : "); readStruct("LLLLLLLLLL", f);printf("\n");
-	printf("\tUnknown  : "); readStruct("LLF",f);printf("\n");
+	// Rotational speed ?
+	printf("\tRot vel. : "); readVector3(f);
+
+	fpos(f);
+	printf("\t???      : "); readStruct("LLF",f);printf("\n");
+	fpos(f);
 	
 	// These fit well
 	float mass, density, elasticity;
@@ -385,15 +434,15 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	
 	
 	// At the end. There will be rotations (and speeds?) for all axises, if there is any(?) - investigate by switching all off
-	printf("\tUnknown  : "); readStruct("XLLX", f);printf("\n");
-	printf("\tUnknown  : "); readStruct("FL", f);printf("\n");
+	printf("\t???      : "); readStruct("XLLX", f);printf("\n");
+	printf("\t???      : "); readStruct("FL", f);printf("\n");
 	
 	// This seems to be bounded with the rot_flags or rest_flags, the bvolume comparision is just a hack to let me read past this data
 	// I switch one rot axis off, and the data size here does not change. So can be based on rest axises, or some nonzeroness of those
 	if (bvolume == 0) {
 		printf("\tUnknown  : "); readStruct("LLFFFFFFFF", f);printf("\n");
 		printf("\tUnknown  : "); readStruct("LLFFFFFFFF", f);printf("\n");
-		printf("\tUnknown  : "); readStruct("LLFFFFFFFF", f);printf("\n");
+		printf("\tUnknown  : "); readStruct("LFFFFFFFFF", f);printf("\n");
 	}
 		
 	fpos(f);
