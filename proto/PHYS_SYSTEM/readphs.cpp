@@ -9,6 +9,9 @@
 #define sint32 uint32_t
 #define uint32 int32_t
 
+#define PI 3.14159265358979323846
+
+#pragma pack(push,1)
 typedef struct { // SIZE: 8
 	uint32	phys_version;
 	uint32	obj_count;
@@ -29,18 +32,101 @@ typedef struct { // SIZE: 16
 	float	norm;
 } t_coord_norm;
 
+// Definition of the facing angle...
+typedef struct { // SIZE: 8
+	unsigned short x;
+	unsigned short y;
+	unsigned short z;
+} t_facing; // This will be SCord after all, as telliamed writes....
+
 // Once I'll understand what the sub-objects are, I'll work this out :
-typedef struct {
-	t_coord pos1;
-	sint32  unk1;
+/*
+Remarks:
+The facing1 and facing4 seem to be the same value (maybe those differ in the time of collision)
+*/
+typedef struct { // SIZE: 18 longs (72 bytes)
+	t_coord pos1;     //  
+
+	sint32  unk1;     //   TODO: Often -1
+	t_facing facing1; //   Sorta Angle of this sub-object element.
+	t_facing facing2; //   Sorta Angle of this sub-object element.
+	t_facing facing3; //   Angle again - different.
+	
+	short sa;
+	short sb;
+	// , sb, sc, sd;
+	// float   a1, b1;   //   Unknown (Angle releted?)
+	
+	// sint32  unk2;     
+	// sint32  unk3;     
+	
+	t_facing facing4; //   Angle again - different.
+	
+	
+	
+	// float   a2, b2;   //   Unknown (Angle releted?)
+
+	t_coord pos2;     //   Seems to be copy of pos1, but not 100% of the time
+
+	uint32 a3, b3, c3, d3;     // Unknown.
+	
 } t_subObject;
+
+
+#pragma pack(pop)
+
+
+/* PHYS. OBJECT FLAGS */
+#define PHYS_OBJ_ROPE      0x0001000
+#define PHYS_OBJ_MTERRAIN  0x0100000
 
 const char hchr[]="0123456789ABCDEF";
 ////////////////// HELPERS //////////////////
+void printPhysObjFlags(uint32 flags) {
+	printf("\tFlags         : ");
+	
+	if (flags & PHYS_OBJ_ROPE)
+		printf("ROPE ");
+	
+	if (flags & PHYS_OBJ_MTERRAIN)
+		printf("MOVING-TERRAIN ");
+	
+	printf("\n");
+}
+
 void p_coord(t_coord &c) {
 	printf("		[ %+10.2f %+10.2f %+10.2f ]\n",c.x,c.y,c.z);
 }
 
+
+void printFacing(t_facing &facing) {
+	//printf("X: %8.6g Y: %8.6g Z: %8.6g\n", facing.x * PI / 1024, facing.y * PI / 1024, facing.z * PI / 1024); // I dunno exactly. Well
+	printf("X: %6hu Y: %6hu Z: %6hu\n", facing.x, facing.y, facing.z); // I dunno exactly. Well
+}
+
+
+void readSubObject(FILE* f) {
+	t_subObject s;
+	
+	fread(&s, 1, sizeof(t_subObject), f);
+	
+	printf("\t\tPOS1     : "); p_coord(s.pos1);
+	
+	printf("\t\tUNK1     : %X\n", s.unk1);
+	printf("\t\tFAC 1    : "); printFacing(s.facing1);
+	printf("\t\tFAC 2    : "); printFacing(s.facing2);
+	printf("\t\tFAC 3    : "); printFacing(s.facing3);
+	
+	printf("\t\tsa       : %hu\n", s.sa);
+	printf("\t\tsb       : %hu\n", s.sb);
+	
+	printf("\t\tFAC 4    : "); printFacing(s.facing4);
+	
+	printf("\t\tPOS2     : "); p_coord(s.pos2);
+	
+	printf("\t\tUNK      : %X %X %X %X\n", s.a3, s.b3, s.c3, s.d3);
+	
+}
 
 void hexdump(unsigned char *ptr,int size, FILE *target=stdout) {
 	int i;
@@ -279,9 +365,6 @@ void printRestAxes(uint32 rest) {
 	printf("\n");
 }
 
-
-
-
 /// Read one object from the Phys syst
 bool readObjectPhys(FILE *f, int pos, int version) {
 	printf("  Object %d : \n", pos);
@@ -293,18 +376,25 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 		return false;
 	
 	// 
-	uint32 object_id, num_subobjs, count2;
+	uint32 object_id, num_subobjs, phys_flags;
 	fread(&object_id,1,4,f);
 	fread(&num_subobjs,1,4,f);
-	fread(&count2,1,4,f);
+	fread(&phys_flags,1,4,f);
 	printf("\tObjectID      : %d\n",object_id);
 	printf("\tSub-Objects   : %d\n",num_subobjs);
-	printf("\tFlags         : %08X\n",count2);
+	printf("\tFlags         : %08X\n",phys_flags);
+	
+	printPhysObjFlags(phys_flags);
 	// Will have to investigate what the flags mean. It seems there are flags for doors and translational objects, rotational objects, etc
 	
 	float gravity;
 	fread(&gravity,1,4,f);
 	printf("\tGravity       : %f\n", gravity);
+	
+	if (num_subobjs > 200) {
+		fprintf(stderr, "Sub-object count too big to be true - %d - exiting\n", num_subobjs);
+		return false;
+	}
 	
 	uint32* subobj_counts = new uint32[num_subobjs];
 	fread(subobj_counts,4,num_subobjs,f);
@@ -333,6 +423,8 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 
 	fpos(f);
 	
+	
+	// This looks rope releted
 	printf("\t Float List for sub-objects (%d) : \n", num_subobjs);
 	for (int n = 0; n < num_subobjs; n++) {
 		printf("\t\t %d : ", n);
@@ -386,7 +478,9 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	The last element is set to the center of the Collision Volume.
 	*/
 	for (int n = 0; n < num_subobjs + 1; n++) {
-		printf("\t SUBOBJ[%4d] : ",n); readStruct("FFFLFFFFXFFFFFLFXF", f);printf("\n");
+		// printf("\t SUBOBJ[%4d] : ",n); readStruct("FFFLFFFFXFFFFFLFXX", f);printf("\n");
+		// printf("\t SUBOBJ[%4d] : ",n); readStruct("FFFXXXFFXXXFFFXXXX", f);printf("\n");
+		printf("\t SUBOBJ[%4d] :\n",n); readSubObject(f);
 	}
 	
 	
@@ -407,7 +501,16 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	
 	// The following block is not understood yet. seems to be parametrized by the subobj count too.
 	/* 132 bytes for cube (4), 252 bytes for sphere (7)*/
-	printf("\t???      : "); readStruct("FFLLLLLL", f);printf("\n");
+	// printf("\t???      : "); readStruct("X", f); printf("\n");
+	
+	// Count of the velocity descriptions...
+	uint32 vel_counts;
+	fread(&vel_counts,1,4,f);
+	printf("\tVel. counts : %d\n", vel_counts); 
+	fpos(f);
+	
+	printf("\tFacing releted   : "); readStruct("X", f); printf("\n");
+	printf("\t???      : "); readStruct("LLLLLL", f);printf("\n");
 	
 	fpos(f);
 	// Translation speed here
@@ -433,18 +536,22 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	printf("\tElast.   : %8.4g\n", elasticity);
 	
 	
-	// At the end. There will be rotations (and speeds?) for all axises, if there is any(?) - investigate by switching all off
-	printf("\t???      : "); readStruct("XLLX", f);printf("\n");
-	printf("\t???      : "); readStruct("FL", f);printf("\n");
+	
+	printf("\t???      : "); readStruct("XLLXFL", f);printf("\n");
 	
 	// This seems to be bounded with the rot_flags or rest_flags, the bvolume comparision is just a hack to let me read past this data
 	// I switch one rot axis off, and the data size here does not change. So can be based on rest axises, or some nonzeroness of those
-	if (bvolume == 0) {
+	if (vel_counts > 1) {
 		printf("\tUnknown  : "); readStruct("LLFFFFFFFF", f);printf("\n");
 		printf("\tUnknown  : "); readStruct("LLFFFFFFFF", f);printf("\n");
 		printf("\tUnknown  : "); readStruct("LFFFFFFFFF", f);printf("\n");
 	}
-		
+	
+	if (vel_counts > 2) {
+		printf("Too big vel_count!\n");
+		return false;
+	}
+	
 	fpos(f);
 	
 	// Flags for the Controls Follow (BOX offset: 0x374, Sphere offset: 0x20c)
