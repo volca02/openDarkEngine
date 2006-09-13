@@ -472,10 +472,7 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	
 	
 	/*
-	Following are structures of 18 floats/longs per line, the count seems to differ per bounding volume type (But I didn't manage to find what the counts are yet)
-	BOX has 7... SPHERE has 2 (Seems to be always SubObject Count + 1)
-	The first 3 floats seem to mean the position of a certain collision element. For box, those are the centers of the sides.
-	The last element is set to the center of the Collision Volume.
+	The last sub-object is set to the center of the Collision Volume.
 	*/
 	for (int n = 0; n < num_subobjs + 1; n++) {
 		// printf("\t SUBOBJ[%4d] : ",n); readStruct("FFFLFFFFXFFFFFLFXX", f);printf("\n");
@@ -494,29 +491,22 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	}
 	fpos(f);
 	
-	
-	// I think that this is the place where the position and speed (rot+trans) are defined
-	// The size of all this is somewhat releted to some previous values. For example ca and cb could hold the length of the following block
-	// But how? 
-	
-	// The following block is not understood yet. seems to be parametrized by the subobj count too.
-	/* 132 bytes for cube (4), 252 bytes for sphere (7)*/
-	// printf("\t???      : "); readStruct("X", f); printf("\n");
-	
-	// Count of the velocity descriptions...
+	// Count of the velocity descriptions... I have to look for the right place to cut the following structures. Velocity for example is defined twice...
 	uint32 vel_counts;
 	fread(&vel_counts,1,4,f);
 	printf("\tVel. counts : %d\n", vel_counts); 
 	fpos(f);
 	
 	printf("\tFacing releted   : "); readStruct("X", f); printf("\n");
-	printf("\t???      : "); readStruct("LLLLLL", f);printf("\n");
+	printf("\t???      : "); readStruct("LLXXXX", f);printf("\n");
 	
 	fpos(f);
 	// Translation speed here
 	printf("\tVelocity : "); readVector3(f);
 	
-	printf("\tUnknown  : "); readStruct("LLLLLLL", f);printf("\n");
+	// Axial vel?
+	printf("\tAxial v.?: "); readVector3(f);
+	printf("\tUnknown  : "); readStruct("XXXX", f);printf("\n");
 	
 	// Rotational speed ?
 	printf("\tRot vel. : "); readVector3(f);
@@ -537,10 +527,9 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	
 	
 	
-	printf("\t???      : "); readStruct("XLLXFL", f);printf("\n");
+	printf("\t???      : "); readStruct("XLXXXX", f);printf("\n");
 	
-	// This seems to be bounded with the rot_flags or rest_flags, the bvolume comparision is just a hack to let me read past this data
-	// I switch one rot axis off, and the data size here does not change. So can be based on rest axises, or some nonzeroness of those
+	// This seems to be bounded with the vel_counts (I did not find a value of >2 or <1)
 	if (vel_counts > 1) {
 		printf("\tUnknown  : "); readStruct("LLFFFFFFFF", f);printf("\n");
 		printf("\tUnknown  : "); readStruct("LLFFFFFFFF", f);printf("\n");
@@ -564,7 +553,9 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	*/
 	printf("\tControl Flags : %08X\n", control_flags);
 	
-	printf("\tUnknown  : "); readStruct("FFFF", f); printf("\n");
+	// Position?
+	printf("\tUnknown       : "); readVector3N(f);
+	
 	// Now the control vectors (t_coord_norm * 4?)
 	printf("\tAxis Velocity : "); readVector3N(f);
 	printf("\tVelocity      : "); readVector3N(f);
