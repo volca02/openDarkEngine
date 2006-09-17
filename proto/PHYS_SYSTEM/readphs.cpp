@@ -105,6 +105,14 @@ void printFacing(t_facing &facing) {
 }
 
 
+void readFacing(FILE *f) {
+	t_facing fc;
+	
+	fread(&fc, 1, sizeof(t_facing), f);
+	
+	printFacing(fc);
+}
+
 void readSubObject(FILE* f) {
 	t_subObject s;
 	
@@ -497,17 +505,25 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	printf("\tVel. counts : %d\n", vel_counts); 
 	fpos(f);
 	
+	if (vel_counts > 2) {
+		printf("Too big vel_count!\n");
+		return false;
+	}
+	
 	printf("\tFacing releted   : "); readStruct("X", f); printf("\n");
 	printf("\t???      : "); readStruct("LLXXXX", f);printf("\n");
 	
 	fpos(f);
+	
+	// Those are the global? Speed values
 	// Translation speed here
 	printf("\tVelocity : "); readVector3(f);
 	
 	// Axial vel?
 	printf("\tAxial v.?: "); readVector3(f);
 	printf("\tUnknown  : "); readStruct("XXXX", f);printf("\n");
-	
+	//printf("\tUnknown  : "); readFacing(f);
+	//printf("\tUnknown  : "); readFacing(f);
 	// Rotational speed ?
 	printf("\tRot vel. : "); readVector3(f);
 
@@ -527,19 +543,34 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	
 	
 	
-	printf("\t???      : "); readStruct("XLXXXX", f);printf("\n");
+	printf("\t???      : "); readStruct("XLX", f);printf("\n");
+	
+	uint32 count_x;
+	fread(&count_x,1,4,f);
+	printf("\tCnt x    : %d\n", count_x);
+	
+	printf("\t???      : "); readStruct("X", f);printf("\n");
+	
+	
+	uint32 count_y;
+	fread(&count_y,1,4,f);
+	printf("\tCnt y    : %d\n", count_y);
 	
 	// This seems to be bounded with the vel_counts (I did not find a value of >2 or <1)
-	if (vel_counts > 1) {
-		printf("\tUnknown  : "); readStruct("LLFFFFFFFF", f);printf("\n");
-		printf("\tUnknown  : "); readStruct("LLFFFFFFFF", f);printf("\n");
-		printf("\tUnknown  : "); readStruct("LFFFFFFFFF", f);printf("\n");
+	if (count_y >= 0) {
+		// Read the count
+		uint32 count_z;
+		fread(&count_z,1,4,f);
+		printf("\tCnt z    : %d\n", count_z);
+		
+		for (int a = 0; a < count_z; a++) {
+			printf("\tUnknown  : "); readStruct("FFFFFFFFF", f);printf("\n");
+		}
+		
+		readStruct("FFF", f);
 	}
 	
-	if (vel_counts > 2) {
-		printf("Too big vel_count!\n");
-		return false;
-	}
+	
 	
 	fpos(f);
 	
@@ -548,6 +579,7 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	fread(&control_flags,1,4,f);
 	
 	/// Control flags
+	// Should be 0x2e0 for 2Subobj sphere (is 0x26c - 116 bytes less than should (29 Long/float values) )
 	/*
 	8 - rotation
 	*/

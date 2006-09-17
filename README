@@ -24,7 +24,7 @@ darkdb - The library of objects used for reading (and writing when implemented) 
 widgets - Directory, where the widgets reside - for example the display part of the console
 tools - Mesh converter from the .bin format to .xml and .material, used by ogre (for in-game objects conversion)
 console - The in-game console backend sources
-
+services - The core in-game objects 
 
 Building
 --------
@@ -53,22 +53,12 @@ Additional sources, written and added to the DarkSceneManager (found in the src/
 See COPYING for the informations regarding the GNU GPL license.
 
 
-Package Versioning Schmeme:
----------------------------
-
-Version numbers are divided into three parts, the major release
-number, the minor release number and the patchlevel.  The version
-number is appended to the name of the tarballs:
-
-  <project>-<major>.<minor>.<patchlevel>.tar.gz
-
-For example
-
-  projectname-0.9.3.tar.gz
-
-A change in the major release number indicates major changes in
-the interfaces.  Between minor releases, every effort should be
-made to keep the interfaces compatible.  The patchlevels indicate
-the day to day work between the releases.  Odd minor release
-numbers like 2.1.0 indicate unstable development releases while
-even numbers like 2.4.0 indicate stable releases.
+Thanks
+------
+Thanks go to:
+TomNHarris (telliamed) - for the lots of work he done understanding the Dark Engine and data formats. Also for the irreplaceable help he is giving to us.
+ShadowSpawn - For the BIN mesh format and Movement database format descriptions.
+ataricom - For helping out with the Wiki
+Ogre3D developers - for helping out with various questions and definitely for the Ogre3D library
+TTLG comunity
+..and others
