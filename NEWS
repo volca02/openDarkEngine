@@ -40,3 +40,10 @@ Changes in alpha release 0.1.5 (02-Sep-2006)
 * The material scripts can be used (and are searched) prior to the simple texture-only default materials. Not too complete for now.
 * Water material script added. If not found, water should be invisible.
 * Added -Werror compiler flag.
+
+Changes in alpha release 0.1.6 (17-Sep-2006)
+* SceneManager is nearly cleaned up (needs finishing though)
+* Level geometry is loaded outside the SceneManager class, in a new (and first) Service called worldrep
+* Water rendering finally works, the material should be tweaked to look better
+* SkyHack seems to work well now
+* The levels are currently non-lit (No lightmaps), as the lightmapping needs final fix.
