@@ -212,9 +212,14 @@ namespace Opde {
 				std::cerr << " * Src. material empty, not cloning " << txtName.str() << std::endl;
 			}
 			
+			// Volca: I disable the lightmaps for now, as they cause two problems.
+			// 1. They are badly shifted/scaled 
+			// 2. They are causing the water texture to disappear
+			// To enable those, just uncomment the following line
+			/*
 			StringUtil::StrStreamType lightmapName;
 			lightmapName << "@lightmap" << atlasnum;
-			/*
+			
 			Pass *shadPass = shadMat->getTechnique(0)->getPass(0);
 			
 			if (shadPass->getNumTextureUnitStates() <= 1) {
@@ -235,7 +240,8 @@ namespace Opde {
 				TextureUnitState* tex = shadPass->getTextureUnitState(1);
 				tex->setTextureName(lightmapName.str());
 				tex->setTextureCoordSet(1);
-			} */
+			} 
+			//*/
 		}
 		
 		// Get the texture dimensions
@@ -320,7 +326,7 @@ namespace Opde {
 		// The lightmap is scaled: scale/4.0 is the stretch for the pixel size. 
 		// This means that scale 4 will result in 1x1 (world coords) pixel size, scale 8.00 will result in 2x2 pixel size (world coords).
 		// Lightmaps are (+1,+1) sized than expected to be by the polygon bounding rectangle dimensions (3->4,13->14). 
-		// This is because of the rounding to the pixel sizes of the resulting buffers. 
+		// This is because of the rounding to the pixel sizes of the resulting buffers (IMHO).
 		
 		// lmaps ARE center vertex based
 		wr_coord_t& o_center = face_infos[faceNum].center;
@@ -330,21 +336,23 @@ namespace Opde {
 		
 		Vector3 orig = tmp; // for debugging, remove...
 		
+		// The scale defines the pixel size. Nothing else does
+		float scale = face_infos[faceNum].scale;
+		
 		// lightmaps x,y sizes
 		unsigned int sz_x = lm_infos[faceNum].lx;
 		unsigned int sz_y = lm_infos[faceNum].ly;
 		
+		// Shifts. These are *64 (e.g. fixed point, 5 bits represent 0-1 range) to get 0-1 shift (in pixels)
+		// Weird thing about these is that they are nonsymetrical, and signed. The Center vertex
 		sh_u = lm_infos[faceNum].u; 
 		sh_v = lm_infos[faceNum].v;
 		
-		// rel. pos (to the center)
+		// rel. pos (to the center). The supplied center is not always The center you would expect (average X/Y/Z value of all polygon vertices)
+		// but it is the base for lightmap texturing is seems.
 		tmp -= center;
 		
 		// tmp -= o_first;
-		
-		//sh_u /= (256 / scale); // or the other way?
-		//sh_v /= (256 / scale);
-		
 		
 		sh_u /= 64;
 		sh_v /= 64;
@@ -357,10 +365,11 @@ namespace Opde {
 		// The ratio should be the somewhat same for both X and Y (squared pixels). Thus the repetition of the Y twice?
 		// We do 2 things here - convert to UV space and normalize. Let's separate these into two steps
 		
-		lx = (nax_u.dotProduct(tmp)) / (sz_x/4.0);  // step one. - world to UV space conversion, and scaling.
-		ly = (nax_v.dotProduct(tmp)) / (sz_y/4.0);
+		lx = (nax_u.dotProduct(tmp)) / ( sz_x * scale / 4.0) + 0.5;  // step one. - world to UV space conversion, and scaling.
+		ly = (nax_v.dotProduct(tmp)) / ( sz_y * scale / 4.0) + 0.5;
 		
-		manual->textureCoord(lx, ly);
+		// remap to the atlas coords and insert it to the vertex as a second texture coord...
+		manual->textureCoord(lightMaps[faceNum]->toAtlasCoords(Vector2(lx,ly)));
 		
 		//memcpy(dest->normal, &cell->planes[ cell->face_maps[faceNum].plane ].normal,  sizeof(float) * 3);
 		manual->normal(planes[faceNum].normal.x, planes[faceNum].normal.y, planes[faceNum].normal.z);

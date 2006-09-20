@@ -52,15 +52,9 @@ typedef struct { // SIZE: 18 longs (72 bytes)
 	t_facing facing2; //   Sorta Angle of this sub-object element.
 	t_facing facing3; //   Angle again - different.
 	
-	short sa;
-	short sb;
-	// , sb, sc, sd;
-	// float   a1, b1;   //   Unknown (Angle releted?)
+	uint32 a2; // Address 
 	
-	// sint32  unk2;     
-	// sint32  unk3;     
-	
-	t_facing facing4; //   Angle again - different.
+	t_facing facing4; //   Angle again - normaly = facing1
 	
 	
 	
@@ -125,14 +119,13 @@ void readSubObject(FILE* f) {
 	printf("\t\tFAC 2    : "); printFacing(s.facing2);
 	printf("\t\tFAC 3    : "); printFacing(s.facing3);
 	
-	printf("\t\tsa       : %hu\n", s.sa);
-	printf("\t\tsb       : %hu\n", s.sb);
+	printf("\t\tsa       : %X\n", s.a2);
 	
 	printf("\t\tFAC 4    : "); printFacing(s.facing4);
 	
 	printf("\t\tPOS2     : "); p_coord(s.pos2);
 	
-	printf("\t\tUNK      : %X %X %X %X\n", s.a3, s.b3, s.c3, s.d3);
+	printf("\t\tPOINTERS      : %X %X %X %X\n", s.a3, s.b3, s.c3, s.d3);
 	
 }
 
@@ -289,10 +282,14 @@ void readStruct(char *format, FILE *f) {
 				printf("%8uu ",z);
 				break;
 			case 'X':
-			case 'x':
 				uint32 d;
 				fread(&d,1,4,f);
 				printf("%8XX ",d);
+				break;
+			case 'x':
+				uint16 e;
+				fread(&e,1,2,f);
+				printf("%8hXx ",e);
 				break;
 			default:
 				printf("?(%c)", format[x]);
@@ -510,9 +507,8 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 		return false;
 	}
 	
-	printf("\tFacing releted   : "); readStruct("X", f); printf("\n");
-	printf("\t???      : "); readStruct("LLXXXX", f);printf("\n");
-	
+	printf("\tPointers        : "); readStruct("XXXXXXX", f); printf("\n");
+
 	fpos(f);
 	
 	// Those are the global? Speed values
@@ -557,17 +553,33 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	printf("\tCnt y    : %d\n", count_y);
 	
 	// This seems to be bounded with the vel_counts (I did not find a value of >2 or <1)
+	fpos(f);
+	
 	if (count_y >= 0) {
 		// Read the count
 		uint32 count_z;
 		fread(&count_z,1,4,f);
 		printf("\tCnt z    : %d\n", count_z);
 		
-		for (int a = 0; a < count_z; a++) {
-			printf("\tUnknown  : "); readStruct("FFFFFFFFF", f);printf("\n");
+		printf("\tUnknown  : "); readStruct("X", f);printf("\n");
+		
+		uint32 count_a;
+		fread(&count_a,1,4,f);
+		printf("\tCnt a    : %d\n", count_a);
+		
+		printf("\tUnknown  : "); readStruct("XX", f);printf("\n");
+		printf("\tVelocity : "); readVector3(f); 
+		
+		for (int a = 0; a < count_x; a++) {
+			
+			fpos(f);
+			printf("\t\tUnknown  : "); readStruct("XXXXXXXX", f); printf("\n");
+			printf("\t\tUnknown  : "); readStruct("XXXXXFFF", f); printf("\n");
+			printf("\t\tUnknown  : "); readStruct("XXXXXXXX", f); printf("\n");
+			printf("\t\tUnknown  : "); readStruct("XXXXX", f); printf("\n");
 		}
 		
-		readStruct("FFF", f);
+		// I overlap by 7 here
 	}
 	
 	

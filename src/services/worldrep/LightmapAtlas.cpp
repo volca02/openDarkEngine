@@ -110,20 +110,18 @@ namespace Opde {
 		// get the origin for our lmap
 		FreeSpaceInfo origin = getOrigin(w,h);
 		
-		// calculate some important UV conversion data
-		// +0.5? to display only the inner transition of lmap texture, the outer goes to black color
-		destinfo.u = ((float)origin.x + 0.5 ) / ATLAS_lmsize;
-		destinfo.v = ((float)origin.y + 0.5 ) / ATLAS_lmsize;
-		
-		// size conversion to atlas coords
-		destinfo.su = ((float)w - 1)/ATLAS_lmsize;
-		destinfo.sv = ((float)h - 1)/ATLAS_lmsize;
-	
-		destinfo.atlasnum = idx;
-		
 		lmpixel *converted_data = LightMap::convert(buf, w, h, ver);
 		
 		LightMap* light_map = new LightMap(origin, this, w, h, converted_data);
+	
+		// calculate some important UV conversion data
+		// +0.5? to display only the inner transition of lmap texture, the outer goes to black color
+		light_map->uv.x = ((float)origin.x + 0.5 ) / ATLAS_lmsize;
+		light_map->uv.y = ((float)origin.y + 0.5 ) / ATLAS_lmsize;
+		
+		// size conversion to atlas coords
+		light_map->suv.x = ((float)w - 1)/ATLAS_lmsize;
+		light_map->suv.y = ((float)h - 1)/ATLAS_lmsize;
 	
 		// finally increment the count of stored lightmaps
 		count++;
