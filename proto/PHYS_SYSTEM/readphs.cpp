@@ -24,7 +24,7 @@ typedef struct { // SIZE: 12
 	float	z;
 } t_coord;
 
-// Vector with length/norm (Velocities use this)
+// Vector with length/norm (Controls-Velocities use this)
 typedef struct { // SIZE: 16
 	float	x;
 	float   y;
@@ -60,9 +60,9 @@ typedef struct { // SIZE: 18 longs (72 bytes)
 	
 	// float   a2, b2;   //   Unknown (Angle releted?)
 
-	t_coord pos2;     //   Seems to be copy of pos1, but not 100% of the time
+	t_coord pos2;     //   Seems to be copy of pos1, but matbe not 100% of the time
 
-	uint32 a3, b3, c3, d3;     // Unknown.
+	uint32 a3, b3, c3, d3;     // Unknown. - Pointers
 	
 } t_subObject;
 
@@ -189,21 +189,28 @@ void p_HDR(phys_hdr &hdr) {
 }
 
 // Bounding volume type printout. There is a difference for 0,2,4 - sphere hat for example
-bool p_BVolType(uint32 bv) {
+bool p_BVolType(sint32 bv) {
 	bool err = false;
-	
+	// Telliamed -> 0:Sphere, 1:BSP, 2:Point, 3:OBB, 4:SphereHat, -128:Invalid.
 	printf("\tBounding [%1d]   : ", bv);
 	switch (bv) {
 		case 0:
-		case 2:
-		case 4:
 			printf("Sphere");
+			break;
+		case 2:
+			printf("Point (Sphere)");
+			break;
+		case 4:
+			printf("Sphere Hat");
 			break;
 		case 1:
 			printf("BSP Tree - Object defined boundry");
 			break;
 		case 3:
 			printf("BOX");
+			break;
+		case -128:
+			printf("Invalid");
 			break;
 		default:
 			printf("Unknown boundry!");
@@ -299,24 +306,26 @@ void readStruct(char *format, FILE *f) {
 
 
 // This should read the bounding volume definitions
-void readBoundingDefinition(FILE *f, uint32 btype, uint32 version) {
+void readBoundingDefinition(FILE *f, uint32 btype, uint32 version, uint32 submodel_count) {
 	printf("\tBounding Volume definition   :\n");
 	switch (btype) {
 		case 0:
 		case 2:
 		case 4:
-			float radius;
-			printf("\tBOUNDING UNKNOWN  : "); readStruct("FFFFFFFFFFFFFFFFF", f); printf("\n");
-			fread(&radius,4,1,f);
-			printf("\tSphere  - Radius %8.2g\n", radius);
-			// printf("\tBOUNDING UNKNOWN  : "); readStruct("FFF", f); printf("\n");
+			// The radiuses are repeated for all the sub-objects
+			for (int n = 0; n < submodel_count; n++) {
+				float radius;
+				fread(&radius,4,1,f);
+				printf("\tSphere %d - Radius %8.2g\n", n, radius);
+			}
 			break;
 		case 1:
 			printf("BSP Tree - Object defined boundry (no data)\n");
 			break;
 		case 3:
 			printf("\tBOX : ");
-			readVector3(f);
+			printf("\tBOUNDING UNKNOWN  : "); readStruct("FFF", f);printf("\n"); // Translation of the obb?	
+			printf("\tBox dimensions: "); readVector3(f);
 			printf("\tBOUNDING UNKNOWN  : "); readStruct("FF", f);printf("\n"); // Translation of the obb?
 			// THIEF 2 has more data here
 			if (version >= 32) {
@@ -375,7 +384,7 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	printf("  Object %d : \n", pos);
 	
 	// First uint32 is bounding type
-	uint32 bvolume;
+	sint32 bvolume;
 	fread(&bvolume,1,4,f);
 	if (p_BVolType(bvolume))
 		return false;
@@ -517,7 +526,7 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	
 	// Axial vel?
 	printf("\tAxial v.?: "); readVector3(f);
-	printf("\tUnknown  : "); readStruct("XXXX", f);printf("\n");
+	printf("\tPointers?: "); readStruct("XXXX", f);printf("\n");
 	//printf("\tUnknown  : "); readFacing(f);
 	//printf("\tUnknown  : "); readFacing(f);
 	// Rotational speed ?
@@ -539,80 +548,101 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	
 	
 	
-	printf("\t???      : "); readStruct("XLX", f);printf("\n");
+	printf("\tPtrs?    : "); readStruct("XXX", f);printf("\n");
 	
-	uint32 count_x;
-	fread(&count_x,1,4,f);
-	printf("\tCnt x    : %d\n", count_x);
+	uint32 count_submodels; // THE NUMBER of sub-models again. Realy.
+	fread(&count_submodels,1,4,f);
+	printf("\tSubmodel cnt  : %d\n", count_submodels);
 	
-	printf("\t???      : "); readStruct("X", f);printf("\n");
-	
-	
-	uint32 count_y;
-	fread(&count_y,1,4,f);
-	printf("\tCnt y    : %d\n", count_y);
-	
-	// This seems to be bounded with the vel_counts (I did not find a value of >2 or <1)
 	fpos(f);
 	
-	if (count_y >= 0) {
-		// Read the count
-		uint32 count_z;
-		fread(&count_z,1,4,f);
-		printf("\tCnt z    : %d\n", count_z);
-		
-		printf("\tUnknown  : "); readStruct("X", f);printf("\n");
-		
-		uint32 count_a;
-		fread(&count_a,1,4,f);
-		printf("\tCnt a    : %d\n", count_a);
-		
-		printf("\tUnknown  : "); readStruct("XX", f);printf("\n");
-		printf("\tVelocity : "); readVector3(f); 
-		
-		for (int a = 0; a < count_x; a++) {
-			
+	/*
+	Following structures seem like per sub-model velocities. This makes sense, As this is probably used for objects with movable parts.
+	The sub-object - sub-model mapping is probably made by order of appearence
+	*/
+	
+	// Dunno if this condition is right. count_submodels > 1 didn't work well
+	if (vel_counts >= 2) {
+		// should be while sub model number >0 maybe
+		for (int a = 0; a < count_submodels; a++) {
 			fpos(f);
-			printf("\t\tUnknown  : "); readStruct("XXXXXXXX", f); printf("\n");
-			printf("\t\tUnknown  : "); readStruct("XXXXXFFF", f); printf("\n");
-			printf("\t\tUnknown  : "); readStruct("XXXXXXXX", f); printf("\n");
-			printf("\t\tUnknown  : "); readStruct("XXXXX", f); printf("\n");
+			
+			// Something like a signature (54 18 BE 01)
+			printf("\tPointer   : "); readStruct("X", f);printf("\n");
+			
+			// Subobject index
+			uint32 subobj_idx;
+			fread(&subobj_idx,1,4,f);
+			printf("\tSubobject index : %d\n", subobj_idx);
+			
+			// Now follow 108 bytes (27 longs)
+			// The first is very often set to 03
+			// also, there is a velocity vector inside... printf("\tVelocity : "); readVector3(f); 
+			
+			printf("\tUnknown  : "); readStruct("XX", f);printf("\n");
+			
+			// not a matrix, but 25 bytes length it has. there are 3 floats on [3][4],[4][0],[4][1]  (were one usualy)
+			readMatrixLong(f,5,5,"\tUnknown");
 		}
 		
-		// I overlap by 7 here
+		// If we're here, a number indicating some count is present
+		printf("\tCount What? : "); readStruct("L", f);printf("\n");
 	}
 	
-	
-	
 	fpos(f);
 	
-	// Flags for the Controls Follow (BOX offset: 0x374, Sphere offset: 0x20c)
-	uint32 control_flags;
-	fread(&control_flags,1,4,f);
-	
-	/// Control flags
-	// Should be 0x2e0 for 2Subobj sphere (is 0x26c - 116 bytes less than should (29 Long/float values) )
+	// Flags for the Controls Follow (BOX offset: 0x374, Sphere offset: 0x20c, Two-sphered object: 0x2e0, SphereHat 0x2e0, 3 sphered rope 0x3b4, 4sph. rope 0x488)
+	// Control flags have: -1 for global ones, and, if there is more than 1 sub-model, they repeat for all of them
 	/*
-	8 - rotation
+	4 sub-model offsets (the index number offset):
+	-1 : 
 	*/
-	printf("\tControl Flags : %08X\n", control_flags);
+	int control_counts = 1;
 	
-	// Position?
-	printf("\tUnknown       : "); readVector3N(f);
+	if (vel_counts >= 2)
+		control_counts = count_submodels + 1;
 	
-	// Now the control vectors (t_coord_norm * 4?)
-	printf("\tAxis Velocity : "); readVector3N(f);
-	printf("\tVelocity      : "); readVector3N(f);
-	printf("\tRot. Velocity : "); readVector3N(f);
-	fpos(f);
-	
-	// I think this could be a rotation vector... It was nonzero for moving object
-	printf("\tUnk. Vector 1  : "); readVector3(f);
+	for (int a = 0; a < control_counts; a++) {
+		fpos(f);
+		// Maybe not, but seems like a signature/pointer
+		printf("\tPointer    : "); readStruct("X", f);printf("\n");
+		
+		// Subobject index
+		sint32 minusone;
+		fread(&minusone,1,4,f);
+		printf("\tSubmodel index (-1 = global controls) : %d\n", minusone);
+		
+		/// Control flags. min
+		// Should be 0x2e0 for 2Subobj sphere (is 0x26c - 116 bytes less than should (29 Long/float values) )
+		/*
+		8 - rotation
+		*/
+		uint32 control_flags;
+		fread(&control_flags,1,4,f);
+		printf("\tControl Flags : %08X\n", control_flags);
+		
+		// Position?
+		printf("\tUnknown       : "); readVector3N(f);
+		
+		// Now the control vectors (t_coord_norm * 4?)
+		printf("\tAxis Velocity : "); readVector3N(f);
+		printf("\tVelocity      : "); readVector3N(f);
+		printf("\tRot. Velocity : "); readVector3N(f);
+
+		// I think this could be a rotation vector... It was nonzero for moving object
+		// printf("\tUnk. Vector 1  : "); readVector3(f);
+		if ( a == 0 && (control_counts > 1)) {
+			printf("\tSob-model control count : "); readStruct("L", f);printf("\n");
+		}
+	}
 	
 	// We should be on the right offset for the bounding volume definition readout
-	fpos(f);
+	
+	// Hey! There are probably other data here if the sub_model count is > 1
+	
+	
+	readBoundingDefinition(f, bvolume, version, num_subobjs);
 
-	readBoundingDefinition(f, bvolume, version);
 
 	// Actually the BOX type phys has 8 bytes more per chunk with one box inside
 
