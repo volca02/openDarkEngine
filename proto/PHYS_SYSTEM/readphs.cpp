@@ -14,9 +14,7 @@
 #pragma pack(push,1)
 typedef struct { // SIZE: 8
 	uint32	phys_version;
-	uint32	obj_count;
 } phys_hdr;
-
 
 typedef struct { // SIZE: 12
 	float	x;
@@ -67,6 +65,11 @@ typedef struct { // SIZE: 18 longs (72 bytes)
 } t_subObject;
 
 
+typedef struct {
+	uint32	contact_type; // 1-5?
+	uint32	object_num;
+	uint32	unknown;
+} t_PhysContactHeader;
 #pragma pack(pop)
 
 
@@ -185,7 +188,6 @@ void hexread(FILE *f,unsigned int size,char *prefix,int llen=16) {
 void p_HDR(phys_hdr &hdr) {
 	printf("Phys Header \n");
 	printf("\tVersion      : %d\n", hdr.phys_version);
-	printf("\tObject Count : %d\n", hdr.obj_count);
 }
 
 // Bounding volume type printout. There is a difference for 0,2,4 - sphere hat for example
@@ -581,8 +583,18 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 			
 			printf("\tUnknown  : "); readStruct("XX", f);printf("\n");
 			
+			// 3,3,3,4,3,3,4,2
+			printf("\tVel1 ?   : "); readVector3(f); // Probably not floats but hexadecimal (pointers?)
+			printf("\tVel2     : "); readVector3(f);
+			printf("\tVel3     : "); readVector3(f);
+			printf("\tVel4 ?   : "); readVector3N(f); // Probably not floats but hexadecimal (pointers?)
+			printf("\tVel5     : "); readVector3(f);
+			printf("\tVel6     : "); readVector3(f);
+			printf("\tVel7     : "); readVector3(f);
+			printf("\tVel8 ?   : "); readVector3(f); // Probably not floats but hexadecimal (pointers?)
+			
 			// not a matrix, but 25 bytes length it has. there are 3 floats on [3][4],[4][0],[4][1]  (were one usualy)
-			readMatrixLong(f,5,5,"\tUnknown");
+			//readMatrixLong(f,5,5,"\tUnknown");
 		}
 		
 		// If we're here, a number indicating some count is present
@@ -671,6 +683,67 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	return true;
 }
 
+void printPhysContactHeader(t_PhysContactHeader& hdr) {
+	printf("\tPhys Contact Header:\n");
+	printf("\t\tContact type  : %d\n", hdr.contact_type);
+	printf("\t\tObject Number : %d\n", hdr.object_num);
+	printf("\t\tUnknown       : %d\n", hdr.unknown);
+}
+
+void readContacts(FILE *f) {
+	// Well, this should be parametrised somewhere. Not a while feof no no no.
+	while (!feof(f)) {
+		fpos(f);
+		t_PhysContactHeader pchdr;
+		fread(&pchdr,1,sizeof(t_PhysContactHeader),f);
+	
+		printPhysContactHeader(pchdr);
+		
+		fpos(f);
+		
+		switch (pchdr.contact_type) {
+			case 1:
+				printf("\tUnk     : "); readStruct("X", f); printf("\n"); 
+	
+				// A vector3
+				printf("\tUnk vec : "); readVector3(f);
+			
+				// Some number
+				printf("\tUnk     : "); readStruct("X", f); printf("\n"); 
+		
+				// Contact list. Normal, and distance. (I suppose these are from the object COG or center)
+				uint32 count;
+				fread(&count, sizeof(uint32), 1, f);
+	
+				printf("\tCount   : %d\n", count);
+						
+				readMatrixFloat(f,4,count,"\tContact");
+			
+				fread(&count, sizeof(uint32), 1, f);
+	
+				// Objects involved in the contact?
+				printf("\tObject links Count : %d\n", count);
+			
+				readMatrixLong(f,1,count,"\tUnk");
+				
+				
+				fread(&count, sizeof(uint32), 1, f);
+	
+				printf("\tCount   : %d\n", count);
+			
+				readMatrixLong(f,1,count,"\tUnk");
+				
+				// sorta pointer here
+				
+				break;
+			default:
+				printf("Unknown contact type - %d. ending readout...\n", pchdr.contact_type);
+				return;
+		}
+	}
+	
+}
+
 //////////////////// MAIN ////////////////////
 int main(int argc, char *argv[]) {
 	FILE	*f;
@@ -697,18 +770,44 @@ int main(int argc, char *argv[]) {
 	fread(&hdr,sizeof(hdr),1,f);
 	p_HDR(hdr);
 	
-	// Do only one for now, we do not know how to get the lenght right
-	//for (int n = 0; n < 1; n++) {
+	fprintf(stderr, " * Phys. system version : '%d'\n", hdr.phys_version);
 	
-	for (int n = 0; n < hdr.obj_count; n++) {
-		if (!readObjectPhys(f, n, hdr.phys_version))  {
-			fprintf(stderr,"Error encountered, ending readout\n");
-			break;
+	for (int group=0; group < 3; group++) {
+		uint32 obj_count;
+		fread(&obj_count,sizeof(obj_count),1,f);
+		printf("Group %d object count : %d\n", group, obj_count);
+		
+		for (int n = 0; n < obj_count; n++) {
+			if (!readObjectPhys(f, n, hdr.phys_version))  {
+				fprintf(stderr,"Error encountered, ending readout\n");
+				break;
+			}
 		}
 	}
 	
-	// This is the place where I will have to start reading contacts. Those should be after the phys object list i think.
+	// Contacts: "5 3 0" for empty?
+	fpos(f);
+	
+	// something here I think. Can be the 4. list of objects, or something else.... dunno.
+	uint32 len;
+	fread(&len,sizeof(len),1,f);
+	printf("Extra data count : %d\n", len);
+	fpos(f);
+	
+	readContacts(f);
+	
+	fpos(f);
+	
+	if (feof(f))
+		printf("EOF\n");
 	
 	fclose(f);
 	
 }
+
+/*
+There are 3 or 4 sections of physical object definitions (not sure yet). 
+The first contains the active objects
+The second contains sleeping objects
+I dunno about the last 1-2 (Was/Were empty in the savegames of T2)
+*/
