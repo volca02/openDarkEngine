@@ -172,7 +172,7 @@ namespace Opde {
 	//------------------------------------------------------------------------------------
 	const wr_plane_t WRCell::getPlane(int index) {
 		if (index > header.num_planes)
-			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Plane index is out of bounds", "WorldRepService::getPlane");
+			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Plane index is out of bounds", "WRCell::getPlane");
 		
 		return planes[index];
 	}
@@ -244,7 +244,7 @@ namespace Opde {
 			//*/
 		}
 		
-		// Get the texture dimensions
+		// Get the texture dimensions. TODO: Num - 0 Technique is not guaranteed to be the used one. 
 		
 		dimensions = std::make_pair((Ogre::uint)64, (Ogre::uint)64); // failback to 64x64
 		
@@ -343,7 +343,7 @@ namespace Opde {
 		unsigned int sz_x = lm_infos[faceNum].lx;
 		unsigned int sz_y = lm_infos[faceNum].ly;
 		
-		// Shifts. These are *64 (e.g. fixed point, 5 bits represent 0-1 range) to get 0-1 shift (in pixels)
+		// Shifts. These are *128 (e.g. fixed point, 6 bits represent 0-1 range) to get 0-1 shift (in pixels)
 		// Weird thing about these is that they are nonsymetrical, and signed. The Center vertex
 		sh_u = lm_infos[faceNum].u; 
 		sh_v = lm_infos[faceNum].v;
@@ -354,18 +354,16 @@ namespace Opde {
 		
 		// tmp -= o_first;
 		
-		sh_u /= 64;
-		sh_v /= 64;
-		
+		// scale to the pixel size of 1
+		sh_u /= 128;
+		sh_v /= 128;
 		
 		// shifting by UV shifts...
-		// tmp += ( (nax_u * sh_u) + (nax_v * sh_v) );
+		// tmp -= ( (nax_u * sh_u) + (nax_v * sh_v) );
 		
 		// To the UV space
-		// The ratio should be the somewhat same for both X and Y (squared pixels). Thus the repetition of the Y twice?
-		// We do 2 things here - convert to UV space and normalize. Let's separate these into two steps
-		
-		lx = (nax_u.dotProduct(tmp)) / ( sz_x * scale / 4.0) + 0.5;  // step one. - world to UV space conversion, and scaling.
+		// We do 2 things here - convert to UV space and normalize. As we work with -0.5 to 0.5, and lmaps are 0 - 1, we add 0.5 to result
+		lx = (nax_u.dotProduct(tmp)) / ( sz_x * scale / 4.0) + 0.5;  
 		ly = (nax_v.dotProduct(tmp)) / ( sz_y * scale / 4.0) + 0.5;
 		
 		// remap to the atlas coords and insert it to the vertex as a second texture coord...
