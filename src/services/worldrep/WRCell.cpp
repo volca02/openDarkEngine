@@ -216,7 +216,7 @@ namespace Opde {
 			// 1. They are badly shifted/scaled 
 			// 2. They are causing the water texture to disappear
 			// To enable those, just uncomment the following line
-			/*
+			
 			StringUtil::StrStreamType lightmapName;
 			lightmapName << "@lightmap" << atlasnum;
 			
@@ -257,7 +257,7 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------------------------------------
-	void WRCell::insertTexturedVertex(ManualObject *manual, int faceNum, wr_coord_t coord, std::pair< Ogre::uint, Ogre::uint > dimensions) {
+	void WRCell::insertTexturedVertex(ManualObject *manual, int faceNum, wr_coord_t coord, Vector2 displacement, std::pair< Ogre::uint, Ogre::uint > dimensions) {
 		// New vertex...
 		manual->position(coord.x, coord.y, coord.z);
 		
@@ -271,7 +271,7 @@ namespace Opde {
 		// normalised versions of the above
 		Vector3 nax_u, nax_v;
 		
-		// readout from the cell info
+		// Texturing axises
 		wr_coord_t _axu = face_infos[faceNum].ax_u;
 		wr_coord_t _axv = face_infos[faceNum].ax_v;
 		
@@ -279,7 +279,7 @@ namespace Opde {
 		ax_u = Vector3(_axu.x, _axu.y, _axu.z);
 		ax_v = Vector3(_axv.x, _axv.y, _axv.z);
 		
-		// Normalise those texturing axises
+		// Normalise the texturing axises
 		nax_u = ax_u.normalisedCopy(); // Normalized version of the axis U
 		nax_v = ax_v.normalisedCopy(); // -"- V
 		
@@ -290,8 +290,7 @@ namespace Opde {
 		// UV shifts
 		float sh_u, sh_v;
 
-		// HA: The UV shifts can't simply be center vertex based! It all seems to be 0 vertex based. 
-		// Not always right it is, I'm afraid...
+		// The UV shifts can't simply be center vertex based! It all seems to be 0 vertex based. 
 		
 		sh_u = face_infos[faceNum].u / 4096.0;  
 		sh_v = face_infos[faceNum].v / 4096.0; 
@@ -328,7 +327,11 @@ namespace Opde {
 		// Lightmaps are (+1,+1) sized than expected to be by the polygon bounding rectangle dimensions (3->4,13->14). 
 		// This is because of the rounding to the pixel sizes of the resulting buffers (IMHO).
 		
-		// lmaps ARE center vertex based
+		/*
+		Lmaps seem to be center vertex based (UV has negative values sometimes).
+		*/
+		
+		/* // If mapped from the o_first vertex
 		wr_coord_t& o_center = face_infos[faceNum].center;
 		Vector3 center = Vector3(o_center.x, o_center.y, o_center.z);
 		
@@ -344,33 +347,113 @@ namespace Opde {
 		unsigned int sz_y = lm_infos[faceNum].ly;
 		
 		// Shifts. These are *128 (e.g. fixed point, 6 bits represent 0-1 range) to get 0-1 shift (in pixels)
-		// Weird thing about these is that they are nonsymetrical, and signed. The Center vertex
-		sh_u = lm_infos[faceNum].u; 
-		sh_v = lm_infos[faceNum].v;
+		// Weird thing about these is that they are nonsymetrical, and signed (max value 63, min about -15 or such).
+		sh_u = lm_infos[faceNum].u / 128 + 0.5; 
+		sh_v = lm_infos[faceNum].v / 128 + 0.5;
 		
-		// rel. pos (to the center). The supplied center is not always The center you would expect (average X/Y/Z value of all polygon vertices)
-		// but it is the base for lightmap texturing is seems.
-		tmp -= center;
-		
-		// tmp -= o_first;
-		
-		// scale to the pixel size of 1
-		sh_u /= 128;
-		sh_v /= 128;
+		// rel. pos 
+		// tmp -= poly_center;
+		// tmp -= center;
+		tmp -= o_first;
 		
 		// shifting by UV shifts...
-		// tmp -= ( (nax_u * sh_u) + (nax_v * sh_v) );
+		tmp -= ( (nax_u * sh_u) + (nax_v * sh_v) );
 		
 		// To the UV space
-		// We do 2 things here - convert to UV space and normalize. As we work with -0.5 to 0.5, and lmaps are 0 - 1, we add 0.5 to result
-		lx = (nax_u.dotProduct(tmp)) / ( sz_x * scale / 4.0) + 0.5;  
-		ly = (nax_v.dotProduct(tmp)) / ( sz_y * scale / 4.0) + 0.5;
+		lx = (nax_u.dotProduct(tmp)) / ( sz_x * scale / 4.0);  
+		ly = (nax_v.dotProduct(tmp)) / ( sz_y * scale / 4.0);
 		
+		// remap to the atlas coords and insert it to the vertex as a second texture coord...
+		manual->textureCoord(lightMaps[faceNum]->toAtlasCoords(Vector2(lx,ly) + displacement));
+		
+		//memcpy(dest->normal, &cell->planes[ cell->face_maps[faceNum].plane ].normal,  sizeof(float) * 3);
+		manual->normal(planes[faceNum].normal.x, planes[faceNum].normal.y, planes[faceNum].normal.z);
+		*/
+		
+		
+		wr_coord_t& o_center = face_infos[faceNum].center;
+		Vector3 center = Vector3(o_center.x, o_center.y, o_center.z);
+		
+		tmp = Vector3(coord.x, coord.y, coord.z);
+		
+		Vector3 orig = tmp; // for debugging, remove...
+		
+		// The scale defines the pixel size. Nothing else does
+		float scale = face_infos[faceNum].scale;
+		
+		// lightmaps x,y sizes
+		unsigned int sz_x = lm_infos[faceNum].lx;
+		unsigned int sz_y = lm_infos[faceNum].ly;
+		
+		// Shifts. These are *128 (e.g. fixed point, 6 bits represent 0-1 range) to get 0-1 shift (in pixels)
+		// Weird thing about these is that they are nonsymetrical, and signed (max value 63, min about -15 or such).
+		sh_u = lm_infos[faceNum].u / 128; 
+		sh_v = lm_infos[faceNum].v / 128;
+		
+		// rel. pos 
+		// tmp -= poly_center;
+		// tmp -= center;
+		// tmp -= o_first;
+		
+		// shifting by UV shifts...
+		tmp -= ( (nax_u * (sh_u)) + (nax_v * (sh_v)) );
+		
+		// To the UV space
+		lx = ((nax_u.dotProduct(tmp)) - displacement.x) / ( sz_x * scale / 4.0) + 0.5;  
+		ly = ((nax_v.dotProduct(tmp)) - displacement.y) / ( sz_y * scale / 4.0) + 0.5;
+		
+		/*lx = ((nax_u.dotProduct(tmp)) - displacement.x) / ( sz_x * scale / 4.0);  
+		ly = ((nax_v.dotProduct(tmp)) - displacement.y) / ( sz_y * scale / 4.0);
+		*/
 		// remap to the atlas coords and insert it to the vertex as a second texture coord...
 		manual->textureCoord(lightMaps[faceNum]->toAtlasCoords(Vector2(lx,ly)));
 		
 		//memcpy(dest->normal, &cell->planes[ cell->face_maps[faceNum].plane ].normal,  sizeof(float) * 3);
-		manual->normal(planes[faceNum].normal.x, planes[faceNum].normal.y, planes[faceNum].normal.z);
+		Vector3 normal(planes[faceNum].normal.x, planes[faceNum].normal.y, planes[faceNum].normal.z);
+		normal.normalise();
+		
+		manual->normal(normal);
+	}
+	
+	
+	Vector2 WRCell::calcLightmapDisplacement(int polyNum) {
+		// ------------- Calculate the UV center displacement (as the poly center is off)
+		// readout from the cell info
+		wr_coord_t _axu = face_infos[polyNum].ax_u;
+		wr_coord_t _axv = face_infos[polyNum].ax_v;
+	
+		// convert the vectors to the Ogre types
+		Vector3 ax_u = Vector3(_axu.x, _axu.y, _axu.z);
+		Vector3 ax_v = Vector3(_axv.x, _axv.y, _axv.z);
+	
+		// Normalise those texturing axises
+		Vector3 nax_u = ax_u.normalisedCopy(); // Normalized version of the axis U
+		Vector3 nax_v = ax_v.normalisedCopy();
+		
+		Vector2 min_uv(1E16,1E16);
+		Vector2 max_uv(-1E16,-1E16);
+		
+		// Precalculate the lightmap displacement. (To get the resulting lmap uv to 0-1 range)
+		for (int vert = 0; vert < face_maps[polyNum].count; vert++) {
+			// find the min and max coords in texture space
+			wr_coord_t coord = vertices[ poly_indices[polyNum][vert] ];
+			
+			Vector3 vcoord(coord.x, coord.y, coord.z); 
+			
+			// To uv space
+			Vector2 uvs(nax_u.dotProduct(vcoord), nax_v.dotProduct(vcoord));
+			
+			min_uv.x = std::min(min_uv.x, uvs.x);
+			min_uv.y = std::min(min_uv.y, uvs.y);
+			max_uv.x = std::max(max_uv.x, uvs.x);
+			max_uv.y = std::max(max_uv.y, uvs.y);
+		}
+		
+		// Now, compute displacement.
+		max_uv -= min_uv;
+		
+		return min_uv + max_uv/2; 
+		// return min_uv; 
 	}
 	
 	//------------------------------------------------------------------------------------
@@ -379,7 +462,7 @@ namespace Opde {
 		
 		
 		StringUtil::StrStreamType modelName;
-		modelName << "cell_" << cellNum << "_geometry";	
+		modelName << "cell_" << cellNum;	
 					
 		
 		ManualObject* manual = sceneMgr->createManualObject(modelName.str());
@@ -392,35 +475,26 @@ namespace Opde {
 			manual->begin(getMaterialName(face_infos[polyNum].txt, lightMaps[polyNum]->getAtlasIndex(), dimensions));
 			
 			// temporary array of indices (for polygon triangulation)
-			int *V = new int[face_maps[polyNum].count];
+			Vector2 displacement = calcLightmapDisplacement(polyNum);
 			
-			for (int vert = 0; vert < face_maps[polyNum].count; vert++) {
-				// for each vertex of the poly
-				wr_coord_t coord = vertices[ poly_indices[polyNum][vert] ];
-				
-				insertTexturedVertex(manual, polyNum, coord, dimensions);
-				
-				V[vert] = vert;
-			} // for each vertex
+			insertTexturedVertex(manual, polyNum, face_infos[polyNum].center, displacement, dimensions);
+
+			// for each vertex, insert into the model
+			for (int vert = 0; vert < face_maps[polyNum].count; vert++) 
+				insertTexturedVertex(manual, polyNum, vertices[ poly_indices[polyNum][vert] ], displacement, dimensions);
+
 			
-			// now feed the indices array
-			for (int t = 0; t < face_maps[polyNum].count - 2; t++) {
-				// we take 3 consecutive points
-				int u,v,w;
-				u = V[t];
-				v = V[t+1];
-				w = V[t+2];
-
-				// chop out the vertex index, it is allready mapped.
-				V[t+1] = u;
-
+			// now feed the indexes 
+			for (int t = 1; t < face_maps[polyNum].count + 1; t++) {
 				// push back the indexes
-				manual->index(u);
-				manual->index(v);
-				manual->index(w);
+				manual->index(0);
+				manual->index(t);
+				
+				if (t < face_maps[polyNum].count) 
+						manual->index(t+1);
+					else
+						manual->index(1);
 			}
-			
-			delete[] V;
 					
 			manual->end();
 		}

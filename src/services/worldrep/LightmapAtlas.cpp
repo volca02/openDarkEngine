@@ -366,7 +366,7 @@ namespace Opde {
 	
 	void LightMap::AddSwitchableLightmap(int id, lmpixel *data) {
 		switchable_lmap.insert(std::make_pair(id, data));
-		intensities.insert(std::make_pair(id, float(0)));
+		intensities.insert(std::make_pair(id, float(1)));
 		
 		// register us
 		owner->registerAnimLight(id, this);

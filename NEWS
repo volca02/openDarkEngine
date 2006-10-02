@@ -47,3 +47,11 @@ Changes in alpha release 0.1.6 (17-Sep-2006)
 * Water rendering finally works, the material should be tweaked to look better
 * SkyHack seems to work well now
 * The levels are currently non-lit (No lightmaps), as the lightmapping needs final fix.
+
+Changes in alpha release 0.1.7 (2-Oct-2006)
+* Water portals rendering works even with the lightmaps. The materials are bad though - not looking as they should.
+* Added/restructuralised the materials
+* Added OpdeService, OpdeServiceFactory and some more. These will hopefully be a base classes for the services.
+* Lightmaps are partially fixed. Swiched on by default now.
+* Pre-add of the StructInfo sources (Thanks telliamed!). These should form the binary service later on (for universal binary file access using binary templates)
+* Some sky box work
