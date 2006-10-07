@@ -22,6 +22,8 @@
 #ifndef __OPDESINGLETON_H
 #define __OPDESINGLETON_H
 
+#include <cassert>
+
 namespace Opde {
 	
 	// Just a copy of Ogre's singleton impl, before writing something on our own. Thanks OGRE people!
