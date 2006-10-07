@@ -55,3 +55,9 @@ Changes in alpha release 0.1.7 (2-Oct-2006)
 * Lightmaps are partially fixed. Swiched on by default now.
 * Pre-add of the StructInfo sources (Thanks telliamed!). These should form the binary service later on (for universal binary file access using binary templates)
 * Some sky box work
+
+Changes in alpha release 0.1.8 (7-Oct-2006)
+* Header files put to the place where cpp files are, in hoping that this wil simplify orientation and building
+* Converted from automake/autoconf to cmake
+* Fixes to make compatible with VC++ and Mingw (Still some problems can/will emerge though)
+* Restructuralisation of the directory tree. I hope this will be more meaningful

@@ -1,0 +1,133 @@
+/******************************************************************************
+ *
+ *    This file is part of openDarkEngine project
+ *    Copyright (C) 2005-2006 openDarkEngine team
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU Lesser General Public License as published by the Free Software
+ * Foundation; either version 2 of the License, or (at your option) any later
+ * version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+ * Place - Suite 330, Boston, MA 02111-1307, USA, or go to
+ * http://www.gnu.org/copyleft/lesser.txt.
+ *****************************************************************************/
+ 
+#include "OgrePlane.h"
+#include "OgrePortalFrustum.h"
+
+namespace Ogre {
+
+	
+// construct a new Frustum out of a camera and a Portal (which has been clipped as needed previously)
+	PortalFrustum::PortalFrustum(Camera *cam, Portal *poly) {
+		// we definetally should throw an exception if the poly is null...
+		
+		// we create a new frustum planes using a 3*Vector3 constructor
+		unsigned int idx;
+		const PortalPoints& pnts = poly->getPoints();
+		
+		if (pnts.size() < 3) 
+			// we have a degenerated poly!!!
+			return;
+		
+		Vector3 cam_pos = cam->getDerivedPosition();
+		
+		planes.clear();
+		
+		// should we check whether the normal is faced to the center of the poly?
+		unsigned int previous = pnts.size()-1;
+		for (idx = 0; idx < pnts.size(); idx++) { 
+			Plane plane;
+			
+			plane.redefine(pnts.at(previous), pnts.at(idx), cam_pos); // Dunno why, the constructor was failing to intialize the values directly...
+			
+			planes.push_back(plane);
+			previous = idx;
+		}
+	}
+
+	/** new frustum, based solely on camera... Uses camera's LEFT, RIGHT, TOP and BOTTOM planes as the frustum planes
+	*/
+	PortalFrustum::PortalFrustum(Camera *cam) {
+		// read out the LEFT, RIGHT, TOP and BOTTOM planes from the camera, and push them into our planes var...
+		planes.clear();
+
+		planes.push_back(cam->getFrustumPlane(FRUSTUM_PLANE_BOTTOM));
+		planes.push_back(cam->getFrustumPlane(FRUSTUM_PLANE_LEFT));
+		planes.push_back(cam->getFrustumPlane(FRUSTUM_PLANE_TOP));
+		planes.push_back(cam->getFrustumPlane(FRUSTUM_PLANE_RIGHT));
+	}
+	
+	void PortalFrustum::addPlane(Plane a) {
+		planes.push_back(a);
+	}
+	
+	FrustumPlanes& PortalFrustum::getPlanes() {
+		return planes;
+	}
+	
+	/**
+	* Classifies the Portal using it's bounding sphere.
+	* Returns:	 1 - totally inside in the frustum
+	*	  	 0 - Portal is should be clipped to detect if changed
+	*	    	-1 - Portal is totally outside the frustum
+	*/
+	int PortalFrustum::getPortalClassification(Portal *src) {
+		// test the absolute distance of the Portal center to each plane.
+		// if it is equal or smaller than radius, we intersect 
+		// otherwise if the distance is below zero, we are away, then end up immedietally telling so
+		Vector3 center = src->mCenter;
+		float radius = src->mRadius;
+		
+		for (unsigned int idx = 0; idx < planes.size(); idx++) {
+			float dist = planes.at(idx).getDistance(center);
+			
+			if (fabs(dist) < radius) // intersection
+				return 0;
+			
+			if (dist < -radius) // totally outside, so we can safely say we do not see the poly by our frustum
+				return -1;
+		}
+		
+		return 1;
+	}
+	
+	/** 
+	* Clips the ginven Portal by frustum planes.
+	* returns a Portal pointer (not necesi necessarily an new one), or NULL if clipped away
+	*/
+	Portal *PortalFrustum::clipPoly(Portal *src, bool &didClip) {
+		// todo: test if the bounding box (sphere) is completely: inside/outside, or intersecting.
+		// todo: only clip the poly if intersecting.
+		
+		int cl = getPortalClassification(src);
+		
+		if (cl ==  1) // all inside
+			return src;
+		
+		if (cl == -1) // all outside
+			return NULL;
+		
+		
+		Portal *new_poly = new Portal(src);
+		
+		// The poly intersects with its bounding volume, so clip it using all planes we have
+		unsigned int idx;
+		
+		for (idx = 0; idx < planes.size(); idx++) {
+			if (new_poly->clipByPlane(&planes.at(idx), didClip) <= 2) {
+				// was totally clipped away
+				delete new_poly;
+				return NULL;
+			}
+		}
+		
+		return new_poly;
+	}
+}

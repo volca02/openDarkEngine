@@ -1,6 +1,8 @@
 OpenDarkEngine (OPDE) readme
 ----------------------------
 
+This is a readme file for the OPDE project version 0.1.8
+
     OPDE was created as an effort to build a 
 multiplatform engine supporting the LookingGlass'es (TM) 
 data files from the original DarkEngine games.
@@ -8,33 +10,39 @@ So far, a basic display of levels work.
 
 Requirements
 ------------
-OPDE needs OGRE3D library in version 1.2.0 or 
-newer and Devil image library (an ogre requirement).
-Unfortunetly, the DevIL library needs a small patch 
-to resolve the issue number 1211071 - too strict check 
-of pcx headers. It is allready fixed in the CVS version,
-so hopefully next release will be ok.
+OPDE needs:
+* OGRE3D library in version 1.2.0 or newer and Devil image library (an ogre requirement).
+* CEGUI (The part of Ogre SDK under windows, do not install separately)
+* CMake
 
-
-The structure of the sources
-----------------------------
-As of now, the sources are split into these directories:
-DarkSceneManager - a scene manager rendering the level geometry, utilising the BSP-Portal structure of the WR/WRRGB chunk of the GAM files.
-darkdb - The library of objects used for reading (and writing when implemented) of Tag Files
-widgets - Directory, where the widgets reside - for example the display part of the console
-tools - Mesh converter from the .bin format to .xml and .material, used by ogre (for in-game objects conversion)
-console - The in-game console backend sources
-services - The core in-game objects 
 
 Building
 --------
 On *nix systems, building with (replace the OPDE_DIR with the directory in which the source resides) should be sufficient:
 cd OPDE_DIR
-./bootstrap
-./configure
+cmake .
 make
 
-The windows build was not yet tested.
+On windows, please ensure that these environmental variables are set:
+* OGRE_HOME
+* CEGUI_HOME
+* CEGUI_EXTRA_INCLUDE_DIR
+
+If not, set them to point to the right directories
+SET CEGUI_HOME=/OgreSDK
+SET CEGUI_EXTRA_INCLUDE_DIR=/OgreSDK/samples/include
+
+Ensure, that MinGW/Visual C++ make systems are in path
+
+Then progress with (from commandline, being in the root directory of OPDE project):
+
+cmake .
+
+or, if wanting to select the generator (for example MinGW makefiles)
+
+cmake . -G "MinGW Makefiles"
+
+The result should be compilable by your system (VC / mingw32-make for mingw)
 
 
 Running
@@ -61,4 +69,4 @@ ShadowSpawn - For the BIN mesh format and Movement database format descriptions.
 ataricom - For helping out with the Wiki
 Ogre3D developers - for helping out with various questions and definitely for the Ogre3D library
 TTLG comunity
-..and others
+...and others

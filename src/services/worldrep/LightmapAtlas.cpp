@@ -321,7 +321,7 @@ namespace Opde {
 		
 			// Just to be sure we get the intensity 
 			if (intens_it == intensities.end())  {
-				intensities.insert(std::make_pair(light_id, 0));
+				intensities.insert(std::make_pair(light_id, 0.0f));
 			} else {
 				intensity = intens_it->second;
 			}
