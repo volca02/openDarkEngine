@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include <inttypes.h>
+#include "integers.h"
 
 #define uint8 uint8_t
 #define sint8 int8_t
