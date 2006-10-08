@@ -11,7 +11,7 @@ So far, a basic display of levels work.
 Requirements
 ------------
 OPDE needs:
-* OGRE3D library in version 1.2.0 or newer and Devil image library (an ogre requirement).
+* OGRE3D library in version 1.2.0 or newer and Devil image library (an ogre requirement, should be a part of SDK under windows).
 * CEGUI (The part of Ogre SDK under windows, do not install separately)
 * CMake
 
@@ -23,16 +23,13 @@ cd OPDE_DIR
 cmake .
 make
 
-On windows, please ensure that these environmental variables are set:
-* OGRE_HOME
-* CEGUI_HOME
-* CEGUI_EXTRA_INCLUDE_DIR
+On windows, please ensure that the OGRE_HOME environmental variables is set (should be if the installation was done using the ogre sdk).
 
-If not, set them to point to the right directories
+If the cmake will have problem locating the CEGUI libs/headers, you can try setting these environmental variables:
 SET CEGUI_HOME=/OgreSDK
 SET CEGUI_EXTRA_INCLUDE_DIR=/OgreSDK/samples/include
 
-Ensure, that MinGW/Visual C++ make systems are in path
+Ensure, that MinGW/Visual C++ make systems are usable. (Cmake should test this first time it is run)
 
 Then progress with (from commandline, being in the root directory of OPDE project):
 
@@ -43,6 +40,8 @@ or, if wanting to select the generator (for example MinGW makefiles)
 cmake . -G "MinGW Makefiles"
 
 The result should be compilable by your system (VC / mingw32-make for mingw)
+
+If you have a problem making for Mingw, please ensure that "sh" executable is NOT in path. If it is, and can't be relocated, select MSYS Makefiles rather than MinGW ones.
 
 
 Running
