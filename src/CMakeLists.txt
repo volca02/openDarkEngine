@@ -1,6 +1,6 @@
 add_subdirectory(base)
-add_subdirectory(main)
 add_subdirectory(services)
 add_subdirectory(scenemanager)
 add_subdirectory(tools)
 add_subdirectory(widgets)
+add_subdirectory(main)
