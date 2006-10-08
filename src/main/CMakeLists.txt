@@ -33,7 +33,7 @@ link_directories(
     ${OPDE_SOURCE_DIR}/src/services/worldrep
 )
 
-add_executable (opde Opde.cpp OpdeMission.cpp)
+add_executable (opde WIN32 Opde.cpp OpdeMission.cpp)
 
 target_link_libraries( opde
     ${OGRE_LIBRARIES}
