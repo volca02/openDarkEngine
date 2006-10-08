@@ -32,7 +32,11 @@ ENDIF(UNIX)
 
 
 IF(WIN32)
+    # For the OgreSDK should be the prefared place to get the CEGUI files
+
     SET(CEGUI_INC_SEARCH_PATH
+	$ENV{OGRE_HOME}/include
+	$ENV{OGRE_HOME}/include/CEGUI
 	$ENV{CEGUI_HOME}/include
 	$ENV{CEGUI_HOME}/include/CEGUI
 	$ENV{CEGUI_EXTRA_INCLUDE_DIR}
@@ -40,12 +44,19 @@ IF(WIN32)
      )
      
      SET(CEGUI_LIB_SEARCH_PATH
+	$ENV{OGRE_HOME}/lib
+	$ENV{OGRE_HOME}/bin
+	$ENV{OGRE_HOME}/bin/debug
+	$ENV{OGRE_HOME}/bin/release
 	$ENV{CEGUI_HOME}/lib
 	$ENV{CEGUI_HOME}/bin
 	$ENV{CEGUI_HOME}/bin/debug
 	$ENV{CEGUI_HOME}/bin/release
+	/OgreSDK/lib
+	/OgreSDK/bin
+	/OgreSDK/bin/debug
+	/OgreSDK/bin/release
      )
-
 ENDIF(WIN32)
 
 # Include paths search
