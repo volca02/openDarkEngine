@@ -52,7 +52,7 @@ namespace Opde {
 		serviceFactories.insert(make_pair(factory->ServiceName, factory));
 	}
 	
-	OpdeServiceFactory* OpdeServiceManager::findFactory(const string& name) {
+	OpdeServiceFactory* OpdeServiceManager::findFactory(const std::string& name) {
 		
 		ServiceFactoryMap::const_iterator factory_it = serviceFactories.find(name);
 		
@@ -63,7 +63,7 @@ namespace Opde {
 		}
 	}
 	
-	OpdeService* OpdeServiceManager::findService(const string& name) {
+	OpdeService* OpdeServiceManager::findService(const std::string& name) {
 		
 		ServiceInstanceMap::iterator service_it = serviceInstances.find(name);
 		
@@ -74,7 +74,7 @@ namespace Opde {
 		}
 	}
 	
-	OpdeService* OpdeServiceManager::createInstance(const string& name) {
+	OpdeService* OpdeServiceManager::createInstance(const std::string& name) {
 		OpdeServiceFactory* factory = findFactory(name);
 		
 		if (factory != NULL) { // Found a factory for the Service name
@@ -84,7 +84,7 @@ namespace Opde {
 		}
 	}
 	
-	OpdeService* OpdeServiceManager::getService(const string& name) {
+	OpdeService* OpdeServiceManager::getService(const std::string& name) {
 		OpdeService *service = findService(name);
 		
 		if (service != NULL) 

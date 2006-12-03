@@ -27,7 +27,7 @@ using namespace std;
 namespace Opde {
 	
 	
-		Exception::Exception(const string& desc, const string& src, char* file, long line) {
+		BasicException::BasicException(const std::string& desc, const std::string& src, char* file, long line) {
 			description = desc;
 			source = src;
 			
@@ -37,14 +37,15 @@ namespace Opde {
 			} else {
 				fileName = string("-Unsupplied-");
 			}
-
+			
+			
+			details = string("Opde Exception (" + fileName + ") - " + source + " : " + description);
 		}
 		
-		string Exception::getDetails() {
-			// todo: Use string streams... ["+string(lineNum)+"]
-			return string("Opde Exception (" + fileName + ") - " + source + " : " + description);
+		const std::string& BasicException::getDetails() {
+			return details;
 		}
 		
-		Exception::~Exception() throw() {
+		BasicException::~BasicException() throw() {
 		}
 }

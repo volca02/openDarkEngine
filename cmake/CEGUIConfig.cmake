@@ -2,13 +2,13 @@
 # Try to find Cegui library on both Windows and Linux systems
 # 
 # The following values will get defined:
-#	CEGUI_FOUND - True if cegui lib was found
+#	CEGUI_FOUND_OK - True if cegui lib was found
 #	CEGUI_INCLUDE_DIR - Include libraries for cegui usage
 #	CEGUI_LIBRARIES - Library paths for cegui
 #
 # Please set your environmental variables to include CEGUI_HOME, which should point to the CEGUI SDK
 #
-SET(CEGUI_FOUND "No")
+SET(CEGUI_FOUND_OK "No")
 
 IF (UNIX)
     SET(CEGUI_INC_SEARCH_PATH
@@ -88,5 +88,5 @@ ENDIF(CEGUI_EXTRA_INCLUDE_DIR)
 SET(CEGUI_LIBRARIES ${CEGUI_CEGUI_LIB} ${CEGUI_OGRE_LIB})
 
 IF(CEGUI_INCLUDE_DIR AND CEGUI_CEGUI_LIB AND CEGUI_OGRE_LIB)
-    SET(CEGUI_FOUND "Yes")
+    SET(CEGUI_FOUND_OK "Yes")
 ENDIF(CEGUI_INCLUDE_DIR AND CEGUI_CEGUI_LIB AND CEGUI_OGRE_LIB)

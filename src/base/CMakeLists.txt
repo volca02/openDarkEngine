@@ -1,3 +1,4 @@
+add_subdirectory(logger)
 add_subdirectory(console)
 add_subdirectory(servicemanager)
 add_subdirectory(gui)

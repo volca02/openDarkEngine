@@ -144,8 +144,6 @@ namespace Opde {
 	}
 	
 	void LightAtlas::updateLightMapBuffer(FreeSpaceInfo& fsi, lmpixel* rgb) {
-		// atlas->lock(HardwareBuffer::HBL_DISCARD);
-		
 		const PixelBox &pb = atlas->getCurrentLock();
 		
 		for (int y = 0; y < fsi.h; y++) {
@@ -154,13 +152,9 @@ namespace Opde {
 			for (int x = 0; x < fsi.w; x++)
 				data[x + fsi.x] = rgb[x + y * fsi.w].ARGB(); // Write a A8R8G8B8 conversion of the lmpixel
 		}
-					
-		// atlas->unlock();
 	}
 	
-	void LightAtlas::updateLightMapBuffer(FreeSpaceInfo& fsi, Vector3* rgb) {
-		// atlas->lock(HardwareBuffer::HBL_DISCARD);
-		
+	void LightAtlas::updateLightMapBuffer(FreeSpaceInfo& fsi, Ogre::Vector3* rgb) {
 		const PixelBox &pb = atlas->getCurrentLock();
 		
 		for (int y = 0; y < fsi.h; y++) {
@@ -185,8 +179,6 @@ namespace Opde {
 				data[x + fsi.x] = ARGB;
 			}
 		}
-					
-		//atlas->unlock();
 	}
 	
 	void LightAtlas::registerAnimLight(int id, LightMap* target) {
@@ -224,7 +216,7 @@ namespace Opde {
 	
 	// ---------------- LightAtlasList Methods ----------------------
 	LightAtlasList::LightAtlasList() {
-		Opde::ConsoleBackend::getInstance()->registerCommandListener(std::string("light"), dynamic_cast<ConsoleCommandListener*>(this));
+		Opde::ConsoleBackend::getSingleton().registerCommandListener(std::string("light"), dynamic_cast<ConsoleCommandListener*>(this));
 	}
 	
 	LightAtlasList::~LightAtlasList() {
@@ -283,7 +275,8 @@ namespace Opde {
 				std::string s_light = parameters.substr(0,space_pos);
 				std::string s_intensity = parameters.substr(space_pos+1, parameters.length() - (space_pos + 1));
 				
-				Opde::ConsoleBackend::getInstance()->putMessage(std::string("Doing light change"));
+				// TODO: Use logger for this.
+				Opde::ConsoleBackend::getSingleton().putMessage(std::string("Doing light change"));
 				
 				int light = StringConverter::parseInt(s_light);
 				float intensity = StringConverter::parseReal(s_intensity);

@@ -27,23 +27,29 @@
 
 namespace Opde {
 	
-	#define OPDE_EXCEPT(desc, src) throw( Opde::Exception(desc, src, __FILE__, __LINE__) )
+	/** A usage - simplifying macro */
+	#define OPDE_EXCEPT(desc, src) throw( Opde::BasicException(desc, src, __FILE__, __LINE__) )
 	
-	/** Standard OPDE exception */
-	class Exception : public std::exception {
-		private:
+	/** @brief A standard OPDE exception
+	*
+	* This exception is ment as a useful yet powerful tool. Based largely on the Ogre's exception idea.
+	* For simple usage, use the OPDE_EXCEPT macro */
+	class BasicException : public std::exception {
+		protected:
 			std::string description;
 			std::string source;
 			std::string fileName;
+		
+			std::string details; // Cached version of the exception data
 			long lineNum;
 		public:
 			/** Constructor. */
-			Exception(const std::string& desc, const std::string& src, char* file = NULL, long line = -1);
+			BasicException(const std::string& desc, const std::string& src, char* file = NULL, long line = -1);
 		
-			~Exception() throw();
+			~BasicException() throw();
 		
 			/** Gets the details about the exception that happened */
-			std::string getDetails();
+			const std::string& getDetails();
 		
 		
 	};

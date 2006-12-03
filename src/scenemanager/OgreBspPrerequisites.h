@@ -33,8 +33,10 @@ namespace Ogre {
 
     // Predeclare classes
 
-    class BspNode;
-    class DarkSceneManager;
+	class BspNode;
+	class PortalFrustum;
+	class Portal;
+	class DarkSceneManager;
 
 }
 

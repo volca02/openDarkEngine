@@ -66,7 +66,7 @@ namespace Ogre {
 			node = node->getNextNode(point);
 			
 			// if node is null we have a problem! We're out off world this time.
-			if (node == NULL) 
+			if (node == NULL)
 				return NULL;
 		}
 
@@ -90,7 +90,7 @@ namespace Ogre {
 				(*nodeit)->_removeMovable(mov);
 			}
 			// Clear the existing list of nodes because we'll reevaluate it
-		i->second.clear();
+			i->second.clear();
 		}
 
 		tagNodesWithMovable(mRootNode, mov, pos);
@@ -100,8 +100,6 @@ namespace Ogre {
 	void BspTree::tagNodesWithMovable(BspNode* node, const MovableObject* mov,
 		const Vector3& pos)
 	{
-		/*
-		// TODO: To let our Visitors work, this must be modified to make distinction between visitor and parent node
 		if (node->isLeaf())
 		{
 			// Add to movable->node map
@@ -111,7 +109,7 @@ namespace Ogre {
 			MovableToNodeMap::value_type(mov, std::list<BspNode*>()));
 
 			p.first->second.push_back(node);
-
+			
 			// Add movable to node
 			node->_addMovable(mov);
 
@@ -119,26 +117,30 @@ namespace Ogre {
 		else
 		{
 			// Find distance to dividing plane
-			Real dist = node->getDistance(pos);
+			Real dist = node->getDistance(pos); // The problem is that pos = (0,0,0)
+
 			if (Math::Abs(dist) < mov->getBoundingRadius())
 			{
 				// Bounding sphere crosses the plane, do both
-				tagNodesWithMovable(node->getBack(), mov, pos);
-				tagNodesWithMovable(node->getFront(), mov, pos);
+				if (node->getBack() != NULL)
+					tagNodesWithMovable(node->getBack(), mov, pos);
+
+				if (node->getFront() != NULL)
+					tagNodesWithMovable(node->getFront(), mov, pos);
 			}
 			else if (dist < 0)
 			{    //-----------------------------------------------------------------------
-	
 				// Do back
-				tagNodesWithMovable(node->getBack(), mov, pos);
+				if (node->getBack() != NULL)
+					tagNodesWithMovable(node->getBack(), mov, pos);
 			}
 			else
 			{
 				// Do front
-				tagNodesWithMovable(node->getFront(), mov, pos);
+				if (node->getFront() != NULL)
+					tagNodesWithMovable(node->getFront(), mov, pos);
 			}
 		}
-		*/
 	}
 	
 	//-----------------------------------------------------------------------

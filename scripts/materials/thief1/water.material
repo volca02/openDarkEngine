@@ -10,7 +10,7 @@ material water/basic
 			// cull_hardware none
 			lighting off
 			
-			// scene_blend alpha_blend
+			// Blend based on color value
 			scene_blend colour_blend
 			
 			depth_write off
@@ -19,13 +19,8 @@ material water/basic
 			{
 				tex_address_mode wrap
 				tex_coord_set 0
-				alpha_op_ex blend_manual src_manual src_texture 0.98 0.98
-			}
-
-			texture_unit 1
-			{
-				colour_op_ex add src_current src_texture
-				tex_coord_set 1
+				
+				colour_op_ex modulate_x2 src_manual src_texture 0.8 0.8 0.8
 			}
 		}
 	}
@@ -41,7 +36,7 @@ material water/bl_in : water/basic
 		{
 			texture_unit
 			{
-				anim_texture waterhw/BLIN_1.PCX waterhw/BLIN_2.PCX waterhw/BLIN_3.PCX waterhw/BLIN_4.PCX waterhw/BLIN_5.PCX waterhw/BLIN_6.PCX waterhw/BLIN_7.PCX waterhw/BLIN_8.PCX waterhw/BLIN_9.PCX waterhw/BLIN_10.PCX waterhw/BLIN_11.PCX waterhw/BLIN_12.PCX waterhw/BLIN_13.PCX 2
+				anim_texture waterhw/BLIN.PCX waterhw/BLIN_1.PCX waterhw/BLIN_2.PCX waterhw/BLIN_3.PCX waterhw/BLIN_4.PCX waterhw/BLIN_5.PCX waterhw/BLIN_6.PCX waterhw/BLIN_7.PCX waterhw/BLIN_8.PCX waterhw/BLIN_9.PCX waterhw/BLIN_10.PCX waterhw/BLIN_11.PCX waterhw/BLIN_12.PCX waterhw/BLIN_13.PCX 1.5
 			}
 		}
 	}
@@ -55,7 +50,7 @@ material water/bl_out : water/basic
 		{
 			texture_unit 
 			{
-				anim_texture waterhw/BLOUT_1.PCX waterhw/BLOUT_2.PCX waterhw/BLOUT_3.PCX waterhw/BLOUT_4.PCX waterhw/BLOUT_5.PCX waterhw/BLOUT_6.PCX waterhw/BLOUT_7.PCX waterhw/BLOUT_8.PCX waterhw/BLOUT_9.PCX waterhw/BLOUT_10.PCX waterhw/BLOUT_11.PCX waterhw/BLOUT_12.PCX waterhw/BLOUT_13.PCX 2
+				anim_texture waterhw/BLOUT.PCX waterhw/BLOUT_1.PCX waterhw/BLOUT_2.PCX waterhw/BLOUT_3.PCX waterhw/BLOUT_4.PCX waterhw/BLOUT_5.PCX waterhw/BLOUT_6.PCX waterhw/BLOUT_7.PCX waterhw/BLOUT_8.PCX waterhw/BLOUT_9.PCX waterhw/BLOUT_10.PCX waterhw/BLOUT_11.PCX waterhw/BLOUT_12.PCX waterhw/BLOUT_13.PCX 1.5
 			}
 		}
 	}
@@ -70,7 +65,7 @@ material water/gr_in : water/basic
 		{
 			texture_unit 0
 			{
-				anim_texture waterhw/GRIN_1.PCX waterhw/GRIN_2.PCX waterhw/GRIN_3.PCX waterhw/GRIN_4.PCX waterhw/GRIN_5.PCX waterhw/GRIN_6.PCX waterhw/GRIN_7.PCX waterhw/GRIN_8.PCX waterhw/GRIN_9.PCX waterhw/GRIN_10.PCX waterhw/GRIN_11.PCX waterhw/GRIN_12.PCX waterhw/GRIN_13.PCX 2
+				anim_texture waterhw/GRIN.PCX waterhw/GRIN_1.PCX waterhw/GRIN_2.PCX waterhw/GRIN_3.PCX waterhw/GRIN_4.PCX waterhw/GRIN_5.PCX waterhw/GRIN_6.PCX waterhw/GRIN_7.PCX waterhw/GRIN_8.PCX waterhw/GRIN_9.PCX waterhw/GRIN_10.PCX waterhw/GRIN_11.PCX waterhw/GRIN_12.PCX waterhw/GRIN_13.PCX 1.5
 			}
 		}
 	}
@@ -85,7 +80,7 @@ material water/gr_out : water/basic
 		{
 			texture_unit 0
 			{
-				anim_texture waterhw/GROUT_1.PCX waterhw/GROUT_2.PCX waterhw/GROUT_3.PCX waterhw/GROUT_4.PCX waterhw/GROUT_5.PCX waterhw/GROUT_6.PCX waterhw/GROUT_7.PCX waterhw/GROUT_8.PCX waterhw/GROUT_9.PCX waterhw/GROUT_10.PCX waterhw/GROUT_11.PCX waterhw/GROUT_12.PCX waterhw/GROUT_13.PCX 2
+				anim_texture waterhw/GROUT.PCX waterhw/GROUT_1.PCX waterhw/GROUT_2.PCX waterhw/GROUT_3.PCX waterhw/GROUT_4.PCX waterhw/GROUT_5.PCX waterhw/GROUT_6.PCX waterhw/GROUT_7.PCX waterhw/GROUT_8.PCX waterhw/GROUT_9.PCX waterhw/GROUT_10.PCX waterhw/GROUT_11.PCX waterhw/GROUT_12.PCX waterhw/GROUT_13.PCX 1.5
 			}
 		}
 	}

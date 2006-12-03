@@ -122,12 +122,10 @@ namespace Ogre {
         Plane::Side sd = getSide(point);
         if (sd == Plane::NEGATIVE_SIDE)
         {
-            //LogManager::getSingleton().logMessage("back");
             return getBack();
         }
         else
         {
-            //LogManager::getSingleton().logMessage("front");
             return getFront();
         }
 
@@ -138,13 +136,11 @@ namespace Ogre {
     void BspNode::_addMovable(const MovableObject* mov)
     {
         mMovables.insert(mov);
-	    // TODO: Visitors/Parent node attachment
     }
     //-----------------------------------------------------------------------
     void BspNode::_removeMovable(const MovableObject* mov)
     {
         mMovables.erase(mov);
-	    // TODO: Visitors/Parent node dettachment
     }
     //-----------------------------------------------------------------------
     Real BspNode::getDistance(const Vector3& pos) const
@@ -219,4 +215,34 @@ namespace Ogre {
     void BspNode::setOwner(SceneManager *owner) {
 	    mOwner = owner;
     }
+    
+	//-------------------------------------------------------------------------
+	void BspNode::attachOutgoingPortal(Portal *portal) {
+		mDstPortals.insert(portal);
+	}
+			
+	//-------------------------------------------------------------------------
+	void BspNode::attachIncommingPortal(Portal *portal) {
+		mSrcPortals.insert(portal);
+	}
+    
+    	//-------------------------------------------------------------------------
+	void BspNode::setCellNum(unsigned int cellNum) {
+		mCellNum = cellNum;
+	}
+			
+	//-------------------------------------------------------------------------
+	unsigned int BspNode::getCellNum() {
+		return mCellNum;
+	}
+	
+	//-------------------------------------------------------------------------
+	void BspNode::setFaceGroupStart(int fgs) {
+		mFaceGroupStart = fgs;
+	}
+		
+	//-------------------------------------------------------------------------
+	void BspNode::setFaceGroupCount(int fgc) {
+		mNumFaceGroups = fgc;
+	}
 }

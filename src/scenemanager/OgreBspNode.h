@@ -23,8 +23,6 @@ http://www.gnu.org/copyleft/lesser.txt.
 -----------------------------------------------------------------------------
 
 Rewritten to be used in openDarkEngine project by Filip Volejnik <f.volejnik@centrum.cz>
-
-- The class now does not contain any mention on the world geometry, as it is up to the user to attach the geometry to the sceneNodes (Leafs here)
 */
 
 #ifndef _BspNode_H__
@@ -34,10 +32,11 @@ Rewritten to be used in openDarkEngine project by Filip Volejnik <f.volejnik@cen
 #include "OgrePlane.h"
 #include "OgreAxisAlignedBox.h"
 #include "OgreSceneQuery.h"
+#include "OgrePortal.h"
 #include <vector>
 
 namespace Ogre {
-
+	
     /** Encapsulates a node in a BSP tree.
         A BSP tree represents space partitioned by planes . The space which is
         partitioned is either the world (in the case of the root node) or the space derived
@@ -50,8 +49,13 @@ namespace Ogre {
         of the walking algorithm. If a node is a leaf, the isLeaf() method returns true and both getFront() and
         getBack() return null pointers. If the node is a partitioning plane isLeaf() returns false and getFront()
         and getBack() will return the corresponding BspNode objects.
+	
+	This version of BspNode, updated to be used by DarkSceneManager, implements Portals as members. It should be considered as a 'Cell' if it is a leaf.
     */
     class BspNode {
+    		// So I'll save some time not calling methods to retrieve/set protected data...
+		friend class DarkSceneManager;
+
 	public:
 		BspNode(SceneManager* owner, bool isLeaf);
 
@@ -118,7 +122,8 @@ namespace Ogre {
 		/// Gets the signed distance to the dividing plane
 		Real getDistance(const Vector3& pos) const;
 	
-		typedef std::set<const MovableObject*> IntersectingObjectSet;
+		/** A set of MovableObjects intersecting this Node(e.g. visible in the cell) */
+		typedef std::set< const MovableObject* > IntersectingObjectSet;
 	
 		/** Returns a reference to the scene node representing this leaf. Throws exception on the non-leaf nodes. */
 		SceneNode* getSceneNode();
@@ -138,6 +143,26 @@ namespace Ogre {
 		/** Sets the owning SceneManager instance */
 		void setOwner(SceneManager *owner);
 	
+	
+		/** Attaches a Portal as an outgoing portal of this BSPNode
+		*/
+		void attachOutgoingPortal(Portal *portal);
+		
+		/** Attaches a Portal as an incomming portal of this BSPNode
+		*/
+		void attachIncommingPortal(Portal *portal);
+		
+		/** Sets the Cell number. For debugging */
+		void setCellNum(unsigned int cellNum);
+		
+		/** gets the Cell number. For debugging */
+		unsigned int getCellNum();
+
+		/** sets the Face group start index */
+		void setFaceGroupStart(int fgs);
+		
+		/** sets the Face group count */
+		void setFaceGroupCount(int fgc);
 	protected:
 		SceneManager* mOwner; // Back-reference to SceneManager which owns this Node
 		bool mIsLeaf;
@@ -151,8 +176,10 @@ namespace Ogre {
 		    of memory the BspLevel is responsible for assigning enough memory for all nodes in one go.
 		*/
 		Plane mSplitPlane;
+	
 		/** Pointer to the node in front of this non-leaf node. */
 		BspNode* mFront;
+	
 		/** Pointer to the node behind this non-leaf node. */
 		BspNode* mBack;
 	
@@ -161,12 +188,44 @@ namespace Ogre {
 		/** The axis-aligned box which bounds node if it is a leaf. */
 		AxisAlignedBox mBounds;
 		
-		// TODO: Remove?
+		/** The set of movables that could be visible in this BSP node, and thus have to be rendered when this node is visible */
 		IntersectingObjectSet mMovables;
-    public:
-        const IntersectingObjectSet& getObjects(void) const { return mMovables; }
+		
+		
+		// ----------- Portal based rendering stuff - leaf only
+		
+		/** A vector of portals leading into this cell */
+		PortalList mSrcPortals;
+		/** A vector of portals leading out of this cell */
+		PortalList mDstPortals;
+	
+		
+		/* the last frame number this SceneNode was rendered. */
+		unsigned int mFrameNum;
+	
+		/** Indicates the state of the cell. if the mFrameNum is not actual, the value of this boolean is not valid */
+		bool mInitialized;
+		
+		/** Indicates the actual order position of this cell in the ActiveCells list. Invalid if the mFrameNum is not actual */
+		size_t mListPosition;
+	
+		/** Cell ID. For Debugging purposes. */
+		unsigned int mCellNum;
+		
+		/** Number of face groups in this node if it is a leaf. */
+		int mNumFaceGroups;
+		
+		/** Index to the part of the main leaf facegroup index buffer(held in BspLevel) for this leaf.
+		    This leaf uses mNumFaceGroups from this pointer onwards. From here you use the index
+		    in this buffer to look up the actual face.
+		    Note that again for simplicity and bulk memory allocation the face
+		    group list itself is allocated by the BspLevel for all nodes, and each leaf node is given a section of it to
+		    work on. This saves lots of small memory allocations / deallocations which limits memory fragmentation.
+		*/
+		int mFaceGroupStart;
 
-
+	public:
+		const IntersectingObjectSet& getObjects(void) const { return mMovables; }
     };
 
 

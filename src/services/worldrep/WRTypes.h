@@ -70,7 +70,7 @@ namespace Opde {
 	
 	
 	typedef struct { // SIZE: 8
-		uint8_t	flags;
+		uint8_t	flags; // Nonzero for watered polygons
 		uint8_t	count; // Polygon vertices count
 		uint8_t	plane; //  plane number
 		uint8_t	unk;   // seems zero

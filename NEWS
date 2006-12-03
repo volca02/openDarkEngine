@@ -61,3 +61,11 @@ Changes in alpha release 0.1.8 (7-Oct-2006)
 * Converted from automake/autoconf to cmake
 * Fixes to make compatible with VC++ and Mingw (Still some problems can/will emerge though)
 * Restructuralisation of the directory tree. I hope this will be more meaningful
+
+Changes in alpha release 0.1.9 (03-Dec-2006)
+* Updated cmake scripts for both ogre and cegui, now the cmake will end up with an error when it does not find one of those
+* Rewritten the renderer to use hardware buffers for static geometry and entities for water (major speed improvement)
+* Attaching meshes to the scene now works (this means the object could be displayed if loading would be coded)
+* added a logger
+* minor fixes and changes
+- skyhack does not work correctly for now, the skybox needs to be rendered before the geometry in order to work. Will be fixed

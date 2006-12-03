@@ -58,6 +58,34 @@ namespace Ogre {
 		
 			BspTree *mBspTree;
 		
+			// Set of already included face groups
+			typedef std::set<int> FaceGroupSet;
+			FaceGroupSet mFaceGroupSet;
+			
+			// Material -> face group hashmap
+			typedef std::map<Material*, std::vector<StaticFaceGroup*>, materialLess > MaterialFaceGroupMap;
+			MaterialFaceGroupMap mMatFaceGroupMap;
+		
+			/** Bsp Leaf nodes. For deallocation purposes */
+			Ogre::BspNode* mLeafNodes;
+		
+			/** Bsp non-leaf nodes. For deallocation purposes */
+			Ogre::BspNode* mNonLeafNodes;
+		
+			/// Global static level geometry vertex data 
+			Ogre::VertexData* mVertexData;
+		
+			/// Global static level geometry index data 
+			Ogre::HardwareIndexBufferSharedPtr mIndexes;
+			/// Size of the index buffer (entries)
+ 			unsigned int mNumIndexes;
+
+			/// Face groups
+			Ogre::StaticFaceGroup* mFaceGroups;
+			/// Face group count
+			unsigned int mNumFaceGroups;
+			
+			
 			/** Walks the BSP tree looking for the node which the camera
 			    is in, and tags any geometry which is in a visible leaf for
 			    later processing using Portal Visibility.
@@ -66,16 +94,21 @@ namespace Ogre {
 			*/
 			BspNode* walkTree(Camera* camera, RenderQueue *queue, bool onlyShadowCasters);
 			
+			/** 
+			* Queues all movables attached to the given BspNode for rendering. Skips those already queued.
+			* Also prepares static geometry faces for later rendering if onlyShadowCasters is false
+			*/
+			void queueBspNode(BspNode* node, Camera* camera, bool onlyShadowCasters);
 			
 			/**
 			* Prepares the cell (visited first time the frame) to be processed by the traversal routine
 			*/
-			void prepareCell(DarkSceneNode *cell, Camera *camera, PortalFrustum *frust);
+			void prepareCell(BspNode *cell, Camera *camera, Matrix4& toScreen, PortalFrustum *frust);
 			
 			/**
 			* Traverses the scene using portals. Fills the mCellList vector with visible SceneNodes.
 			*/
-			void traversePortals(DarkSceneNode *cell, Camera* camera, RenderQueue *queue, Rectangle &viewrect, bool onlyShadowCasters);
+			void traversePortals(BspNode *cell, Camera* camera, RenderQueue *queue, PortalRect &viewrect, bool onlyShadowCasters);
 			
 			/** Tags geometry in the leaf specified for later rendering. */
 			void processVisibleLeaf(BspNode* leaf, Camera* cam, bool onlyShadowCasters);
@@ -83,21 +116,26 @@ namespace Ogre {
 			/** Caches a face group for imminent rendering. */
 			unsigned int cacheGeometry(unsigned int* pIndexes, const StaticFaceGroup* faceGroup);
 		
+			/** Renders the static geometry - e.g. visible parts of the level data */ 
+			void renderStaticGeometry(void);
+		
 			/** Frees up allocated memory for geometry caches. */
 			void freeMemory(void);
 		
 			/** Adds a bounding box to draw if turned on. */
 			void addBoundingBox(const AxisAlignedBox& aab, bool visible);
 		
-			// TODO: ???
+			// 
 			typedef std::set<const MovableObject*> MovablesForRendering;
+			
+			/** MovableObjects listed that will get inserted into the renderQueue */
 			MovablesForRendering mMovablesForRendering;
 		
 			// debugging var. first time frame rendered
 			bool	firstTime;
 			
 			// the list of cells to be processed / allready processed
-			std::vector<DarkSceneNode *> mActiveCells;
+			std::vector<BspNode *> mActiveCells;
 			size_t mActualPosition; // actual position in the Active Cell list TODO: Make a local variable?
 			
 		public:
@@ -110,6 +148,10 @@ namespace Ogre {
 			/**  Not implemented. Returns 0. */
 			size_t estimateWorldGeometry(const String& filename);
 			
+			/** Set the vertex/index buffers and face list of the Static geometry. The Leaf BSPNodes have to have corresponding data set */ 
+			void setStaticGeometry(Ogre::VertexData* vertexData, Ogre::HardwareIndexBufferSharedPtr indexes, 
+					Ogre::StaticFaceGroup* faceGroups, unsigned int numIndexes, unsigned int numFaceGroups);
+		
 			/** Tells the manager whether to draw the axis-aligned boxes that surround
 			    nodes in the Bsp tree. For debugging purposes.
 			*/
@@ -120,6 +162,9 @@ namespace Ogre {
 		
 			/** Overriden from SceneManager. */
 			void _findVisibleObjects(Camera* cam, bool onlyShadowCasters);
+		
+			/** Overriden from SceneManager. */
+			void _renderVisibleObjects(void);
 		
 			/** Creates a specialized BspSceneNode */
 			SceneNode * createSceneNode ( void );

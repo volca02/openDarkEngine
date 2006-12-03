@@ -19,34 +19,20 @@
  *
  *****************************************************************************/
  
-#ifndef __OPDESERVICEFACTORY_H
-#define __OPDESERVICEFACTORY_H
+#ifndef __STDLOG_H
+#define __STDLOG_H
 
-#include <string>
-
-
+#include "logger.h"
+  
 namespace Opde {
 
-	// Volca: I like the Ogre's approach on factories. This is quite simmilar
-	
-	// forward declaration
-	class OpdeServiceManager;
-	class OpdeService;
-		
-	/** Code base for the service factories. Implement the methods with the Service Factory you're implementing. */
-	class OpdeServiceFactory {
+	/** Log listener, writing the logging messsages to std::cerr */
+	class StdLog : public LogListener {
 		public:
-			OpdeServiceFactory() {	};
-			virtual ~OpdeServiceFactory() {	};
-		
-			/** Creates and returns a new instance of the service. 
-			* @todo Do I NEED named services? I think not. */
-			virtual OpdeService* createInstance(OpdeServiceManager* manager) = 0;
-			
-			/** The service name. Please fill this to let the factory work. */
-			std::string ServiceName;
+			StdLog();
+			virtual ~StdLog();
+			virtual void logMessage(LogLevel level, char *message);
 	};
 }
-
 
 #endif

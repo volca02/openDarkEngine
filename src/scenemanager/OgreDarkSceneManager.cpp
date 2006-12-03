@@ -43,13 +43,12 @@ Rewritten to use in the openDarkEngine project by Filip Volejnik <f.volejnik@cen
 #include "OgreLogManager.h"
 #include "OgreTechnique.h"
 #include "OgrePass.h"
-
+#include <OgreHardwareBufferManager.h>
 #include <vector>
 #include <fstream>
 
-// Traversal logging to stdout. Change to a ConsoleCommandListener command : traversal_log filename.txt
 // #define debug
-//#define cellist
+// #define cellist
 
 namespace Ogre {
 
@@ -96,6 +95,33 @@ namespace Ogre {
 	}
     
 	//-----------------------------------------------------------------------
+	void DarkSceneManager::setStaticGeometry(Ogre::VertexData* vertexData, Ogre::HardwareIndexBufferSharedPtr indexes, 
+		Ogre::StaticFaceGroup* faceGroups, unsigned int numIndexes, unsigned int numFaceGroups) {
+		
+		mVertexData = vertexData;
+		mIndexes = indexes;
+		mNumIndexes = numIndexes;
+		mFaceGroups = faceGroups;
+		mNumFaceGroups = numFaceGroups;
+
+		// TODO: If already allocated, deallocate
+		mRenderOp.vertexData = mVertexData;
+		// index data is per-frame
+		mRenderOp.indexData = new IndexData();
+		mRenderOp.indexData->indexStart = 0;
+		mRenderOp.indexData->indexCount = 0;
+		// Create enough index space to render whole level
+		mRenderOp.indexData->indexBuffer = HardwareBufferManager::getSingleton()
+		.createIndexBuffer(
+			HardwareIndexBuffer::IT_32BIT, // always 32-bit
+			mNumIndexes, 
+			HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY_DISCARDABLE, false);
+	
+		mRenderOp.operationType = RenderOperation::OT_TRIANGLE_LIST;
+		mRenderOp.useIndexes = true;
+	}
+	
+	//-----------------------------------------------------------------------
 	void DarkSceneManager::_findVisibleObjects(Camera* cam, bool onlyShadowCasters) {
 		// Erase the render queue
 		RenderQueue* renderQueue = getRenderQueue();
@@ -108,19 +134,79 @@ namespace Ogre {
 		// Walk the tree, tag static geometry, return camera's node (for info only)
 		walkTree(cam, renderQueue, onlyShadowCasters);
 	}
+	
+	//-----------------------------------------------------------------------
+	void DarkSceneManager::renderStaticGeometry(void) {
+		// Check we should be rendering
+		if (!isRenderQueueToBeProcessed(mWorldGeometryRenderQueue))
+			return;
+
+		// Cache vertex/face data first
+		std::vector<StaticFaceGroup*>::const_iterator faceGrpi;
+		static RenderOperation patchOp;
+        
+		// no world transform required
+		mDestRenderSystem->_setWorldMatrix(Matrix4::IDENTITY);
+		// Set view / proj
+		mDestRenderSystem->_setViewMatrix(mCameraInProgress->getViewMatrix(true));
+		mDestRenderSystem->_setProjectionMatrix(mCameraInProgress->getProjectionMatrixRS());
+
+		// For each material in turn, cache rendering data & render
+		MaterialFaceGroupMap::const_iterator mati;
+
+		for (mati = mMatFaceGroupMap.begin(); mati != mMatFaceGroupMap.end(); ++mati) {
+			// Get Material
+			Material* thisMaterial = mati->first;
+
+			// Empty existing cache
+			mRenderOp.indexData->indexCount = 0;
+			// lock index buffer ready to receive data
+			unsigned int* pIdx = static_cast<unsigned int*>(
+				mRenderOp.indexData->indexBuffer->lock(HardwareBuffer::HBL_DISCARD));
+
+			for (faceGrpi = mati->second.begin(); faceGrpi != mati->second.end(); ++faceGrpi) {
+				// Cache each
+				unsigned int numelems = cacheGeometry(pIdx, *faceGrpi);
+				mRenderOp.indexData->indexCount += numelems;
+				pIdx += numelems;
+			}
+			
+			// Unlock the buffer
+			mRenderOp.indexData->indexBuffer->unlock();
+
+			// Skip if no faces to process (we're not doing flare types yet)
+			if (mRenderOp.indexData->indexCount == 0)
+				continue;
+
+			Technique::PassIterator pit = thisMaterial->getTechnique(0)->getPassIterator();
+		
+			while (pit.hasMoreElements()) {
+				_setPass(pit.getNext());
+
+				// Hacky. To let the polygon mode be wireframe
+				mDestRenderSystem->_setPolygonMode(mCameraInProgress->getPolygonMode());
+				mDestRenderSystem->_render(mRenderOp);
+			}
+		} // for each material
+	}
     
 	//-----------------------------------------------------------------------
-	/**
-	* Prepares a cell for the traversal to happen.
-	*/
-	void DarkSceneManager::prepareCell(DarkSceneNode *cell, Camera *camera, PortalFrustum *frust) { 
+	void DarkSceneManager::_renderVisibleObjects(void) {
+		// Render static level geometry first
+		renderStaticGeometry();
+
+		// Call superclass to render the rest
+		SceneManager::_renderVisibleObjects();		
+	}
+	
+	//-----------------------------------------------------------------------
+	void DarkSceneManager::prepareCell(BspNode *cell, Camera *camera, Matrix4& toScreen, PortalFrustum *frust) { 
 		PortalListConstIterator outPortal_it = cell->mDstPortals.begin();
 		
 		for (;outPortal_it != cell->mDstPortals.end(); outPortal_it++) {
 			Portal *out_portal = (*outPortal_it);
 
-			out_portal->calculateDistance(camera);
-			out_portal->refreshScreenRect(camera, frust);
+			out_portal->refreshScreenRect(camera, toScreen, frust);
 			
 			out_portal->mMentions = 0; 
 		}
@@ -130,34 +216,41 @@ namespace Ogre {
 	}
 	
 	//-----------------------------------------------------------------------
-	/**
-	* The core rendering method. Processes the scene for visibility
-	* @todo This method needs some refactoring to make it readable
-	*/
-	void DarkSceneManager::traversePortals(DarkSceneNode *cell, Camera* camera, RenderQueue *queue, Rectangle &viewrect, bool onlyShadowCasters) {
+	void DarkSceneManager::traversePortals(BspNode *cell, Camera* camera, RenderQueue *queue, PortalRect &viewrect, bool onlyShadowCasters) {
 		#ifdef debug
 		std::cerr << "traversal Starting" << std::endl;		
 		#endif
+		
+		// Prepare the to screen transform matrix. 
+		const Matrix4& viewM = camera->getViewMatrix();
+		const Matrix4& projM = camera->getProjectionMatrix();
+		
+		Matrix4 toScreen = projM * viewM;
 		
 		PortalFrustum *cameraFrustum = new PortalFrustum(camera);
 		
 		mActiveCells.clear();
 		
-		// prepare the cell
-		prepareCell(cell, camera, cameraFrustum);
+		// prepare the mother cell (in which the camera is)
+		prepareCell(cell, camera, toScreen, cameraFrustum);
 		mActiveCells.push_back(cell);
 		mActualPosition = 0;
 		cell->mListPosition = 0;
 		cell->mFrameNum = mActualFrame; 
 		
 		PortalListConstIterator outPortal_it = cell->mDstPortals.begin();
+		#ifdef debug
+		std::cerr << " * MOTHER CELL ID : " << cell->mCellNum << std::endl;
+		#endif
 		
 		for (;outPortal_it != cell->mDstPortals.end(); outPortal_it++) {
 			Portal *outportal = (*outPortal_it);
-			
+			#ifdef debug	
+			std::cerr << "  * MOTHER CELL: Testing portal " << outportal->mPortalID << " to cell " << outportal->mTarget->mCellNum << std::endl;
+			#endif
 			outportal->mMentions = 0; 
 			
-			if  (outportal->mDotProduct > 0) {
+			if  (outportal->mPortalCull) {
 				#ifdef debug
 				std::cerr << "  * MOTHER CELL: backface cull for outcell " << outportal->mTarget->mCellNum << std::endl;
 				#endif				
@@ -165,12 +258,12 @@ namespace Ogre {
 				continue;
 			}
 
-			Rectangle tgt;
+			PortalRect tgt;
 				
 			if (outportal->intersectByRect(viewrect, tgt)) {
 				outportal->unionActualWithRect(tgt); // so we have non-zero actual rect for that portal
 				
-				// mark the visible portal
+				// mark the visible portal, so it will be evaluated as a view source
 				outportal->mMentions = 1; 
 			} 
 			#ifdef debug
@@ -181,21 +274,21 @@ namespace Ogre {
 		}
 		
 		
-		
+		// While a cell is needed to be evaluated
 		while (mActualPosition < mActiveCells.size()) {
 			// get one cell
 			#ifdef debug
 			std::cerr << " * Actual position " << mActualPosition << std::endl;
 			#endif
 			
-			DarkSceneNode *actual = mActiveCells.at(mActualPosition);
+			BspNode *actual = mActiveCells.at(mActualPosition);
 
 			#ifdef debug
 			std::cerr << "    - with cell number " << actual->mCellNum << std::endl;
 			#endif
 			
 			if (!actual->mInitialized)
-				prepareCell(actual, camera, cameraFrustum);
+				prepareCell(actual, camera, toScreen, cameraFrustum);
 			
 			int chcount = 0; // change count
 			
@@ -209,7 +302,7 @@ namespace Ogre {
 				std::cerr << "  * test output portal " << target_portal->mPortalID << " to cell " << target_portal->mTarget->mCellNum << std::endl;
 				#endif				
 				
-				if  (target_portal->mDotProduct > 0) { // backface cull
+				if  (target_portal->mPortalCull) { // backface cull
 					#ifdef debug
 					std::cerr << "    * backface cull for " << target_portal->mPortalID << " to cell " << target_portal->mTarget->mCellNum << std::endl;
 
@@ -233,12 +326,22 @@ namespace Ogre {
 					// If the source cell was not yet initialized, we'll skip the processing against this portal
 					// it should be ok, since we will not lower the mention number, and if the source cell will be traversed
 					// we'll get here again with the right mentions situation
-					DarkSceneNode *source_cell = source->mSource;
+					BspNode *source_cell = source->mSource;
 					
-					if ((!source_cell->mInitialized) || (source_cell->mFrameNum != mActualFrame)) 
+					if ((source_cell->mFrameNum != mActualFrame) || (!source_cell->mInitialized)) 
 						continue;
 
 					// Ok. The source cell was initialized
+					
+					// test for backface cull
+					if  (source->mPortalCull) { // backface cull
+						#ifdef debug
+						std::cerr << "    * backface cull for source portal " << source->mPortalID << std::endl;
+						#endif				
+
+						continue;
+					}
+					
 					
 					if (source->mMentions > 0) { // reevaluation is needed
 						#ifdef debug
@@ -247,11 +350,11 @@ namespace Ogre {
 						
 						// clip the src_portals view to the target portal
 						
-						Rectangle tgt; // the rectangle which represents the actual computed src to target portal intersection
+						PortalRect tgt; // the rectangle which represents the actual computed src to target portal intersection
 						
 						if (target_portal->intersectByRect(source->mActualRect, tgt)) {
 							#ifdef debug
-							std::cerr << "   - nonzarro portal " << source->mPortalID << " intersection" << std::endl;
+							std::cerr << "   - non-zero portal " << source->mPortalID << " intersection" << std::endl;
 							#endif
 
 							
@@ -276,7 +379,7 @@ namespace Ogre {
 					std::cerr << "    * a change in portal view occured " << target_portal->mPortalID << std::endl;
 					#endif
 					
-					DarkSceneNode *target_cell = target_portal->mTarget;
+					BspNode *target_cell = target_portal->mTarget;
 					
 					// if the cell was not yet added
 					if (target_cell->mFrameNum != mActualFrame) {
@@ -296,13 +399,15 @@ namespace Ogre {
 						std::cerr << "   - requeue? " << target_cell->mListPosition <<  " < " << mActualPosition << std::endl;
 						#endif	
 						
-						if (target_cell->mListPosition < mActualPosition && target_cell->mListPosition != 0) { // We do not want to requeue the mother cell (Hey, this is a cycle isn't it?)
+						// If the cell was already processed, move it to the to
+						// We do not want to requeue the mother cell (Hey, this would be a cycle!)
+						if (target_cell->mListPosition < mActualPosition && target_cell->mListPosition != 0) { 
 							#ifdef debug
 							std::cerr << "   - requeueing cell " << target_cell->mCellNum << std::endl;
 							#endif
 							
 							// change the ListPosition for all succesive cells
-							std::vector< DarkSceneNode *>::iterator cell_it = mActiveCells.begin() + target_cell->mListPosition + 1;
+							std::vector< BspNode *>::iterator cell_it = mActiveCells.begin() + target_cell->mListPosition + 1;
 							
 							for (;cell_it != mActiveCells.end(); cell_it++)
 								(*cell_it)->mListPosition--;
@@ -312,9 +417,6 @@ namespace Ogre {
 							
 							mActiveCells.push_back(target_cell);
 							target_cell->mListPosition = mActiveCells.size() - 1; // we put it to the end	
-							
-							// testing if the requeue works....
-							assert(mActiveCells.at(mActiveCells.size() -1 )->mCellNum == target_cell->mCellNum);
 							
 							mActualPosition--;
 						}
@@ -347,25 +449,6 @@ namespace Ogre {
 		
 		// Get rid of our frustum
 		delete cameraFrustum;
-		
-		// TODO: No need to order back-to-front now, the rendering in underlying sceneManager will handle this
-		std::vector<DarkSceneNode *>::reverse_iterator it = mActiveCells.rbegin();
-		
-		#ifdef cellist
-		std::cerr << cell->mCellNum << ":";
-		#endif
-		
-		for (;it != mActiveCells.rend(); it++) {
-			#ifdef cellist
-			std::cerr << (*it)->mCellNum << " ";
-			#endif
-			
-			// Add the visible scene node to the render queue. This adds all the movables in the sceneNode to the Queue.
-			(*it) -> _addToRenderQueue(camera, queue, onlyShadowCasters );
-		}
-		#ifdef cellist
-		std::cerr << std::endl;
-		#endif
 	}
 	
 	
@@ -378,20 +461,47 @@ namespace Ogre {
 		
 		mActualFrame++; 
 		
+		// Clear the rendering helping buffers
+		mMatFaceGroupMap.clear();
+		mFaceGroupSet.clear();
+		
 		mCellVisited = 0;
 		mCellDrawn = 0;
 		
 		if (cameraNode != NULL) {
-			DarkSceneNode *rootSceneNode = static_cast<DarkSceneNode *>(cameraNode->getSceneNode());
+			// I'm walking on BspNodes now. It seems to be cleaner approach
+			//DarkSceneNode *rootSceneNode = static_cast<DarkSceneNode *>(cameraNode->getSceneNode());
 			
 			// TODO: Check if DirectX renderer has the same screen rect size
-			Rectangle screen;
-			screen.top = 1;
-			screen.right = 1;
-			screen.bottom = -1;
-			screen.left = -1;
+			PortalRect screen; 
+			screen.right = 1024;
+			screen.top = 768;
+			screen.bottom = 0;
+			screen.left = 0;
 			
-			traversePortals(rootSceneNode, camera, queue, screen, onlyShadowCasters);
+			traversePortals(cameraNode, camera, queue, screen, onlyShadowCasters);
+			
+			// TODO: No need to order back-to-front now, the rendering in underlying sceneManager will handle this
+			// Maybe this is a key for the skyhack to work. Leave it as it is
+			std::vector<BspNode *>::reverse_iterator it = mActiveCells.rbegin();
+			
+			#ifdef cellist
+			std::cerr << "CELLIST: ";
+			#endif
+
+			for (;it != mActiveCells.rend(); it++) {
+				#ifdef cellist
+				std::cerr << (*it)->mCellNum << " ";
+				#endif
+				
+				// TODO: HMM. Queue the movables.
+				// Try to insert the movableObjects checking if it already is in the movablesForRendering or not
+				queueBspNode((*it), camera, onlyShadowCasters);
+				
+			}
+			#ifdef cellist
+			std::cerr << std::endl;
+			#endif
 		}
 		
 		firstTime = false;
@@ -400,6 +510,109 @@ namespace Ogre {
 	}
     
     
+	//-----------------------------------------------------------------------
+	void DarkSceneManager::queueBspNode(BspNode* node, Camera* camera, bool onlyShadowCasters) {
+		MaterialPtr pMat;
+		
+		// Skip world geometry if we're only supposed to process shadow casters
+		// World is pre-lit
+		if (!onlyShadowCasters) {
+			// Parse the leaf node's faces, add face groups to material map
+			int numGroups = node->mNumFaceGroups;
+			int idx = node->mFaceGroupStart;
+
+			for (;numGroups--;idx++) {
+				// Check not already included
+				if (mFaceGroupSet.find(idx) != mFaceGroupSet.end())
+				    	continue;
+
+				StaticFaceGroup* faceGroup = mFaceGroups + idx;
+				
+				// Get Material pointer by handle
+				pMat = MaterialManager::getSingleton().getByHandle(faceGroup->materialHandle);
+				assert (!pMat.isNull());
+				
+				// Check normal (manual culling). Something rotten here, not doing for now...
+				/*ManualCullingMode cullMode = pMat->getTechnique(0)->getPass(0)->getManualCullingMode();
+				
+				if (cullMode != MANUAL_CULL_NONE) {
+				    Real dist = faceGroup->plane.getDistance(camera->getDerivedPosition());
+				    if ( (dist < 0 && cullMode == MANUAL_CULL_BACK) ||
+					(dist > 0 && cullMode == MANUAL_CULL_FRONT) )
+					continue; // skip
+				} */
+				
+
+				mFaceGroupSet.insert(idx);
+				// Try to insert, will find existing if already there
+				std::pair<MaterialFaceGroupMap::iterator, bool> matgrpi;
+				matgrpi = mMatFaceGroupMap.insert(
+				    MaterialFaceGroupMap::value_type(pMat.getPointer(), std::vector<StaticFaceGroup*>())
+				    );
+				
+				// Whatever happened, matgrpi.first is map iterator
+				// Need to get second part of that to get vector
+				matgrpi.first->second.push_back(faceGroup);
+			}
+		}
+		
+		const BspNode::IntersectingObjectSet& objects = node->getObjects();
+		BspNode::IntersectingObjectSet::const_iterator oi, oiend;
+		
+		oiend = objects.end();
+		for (oi = objects.begin(); oi != oiend; ++oi)
+		{
+		    if (mMovablesForRendering.find(*oi) == mMovablesForRendering.end())
+		    {
+			// It hasn't been rendered yet
+			MovableObject *mov = const_cast<MovableObject*>(*oi); // hacky
+			if (mov->isVisible() && 
+			    (!onlyShadowCasters || mov->getCastShadows()) && 
+						camera->isVisible(mov->getWorldBoundingBox()))
+			{
+				mov->_notifyCurrentCamera(camera);
+				mov->_updateRenderQueue( getRenderQueue() );
+			    
+				mMovablesForRendering.insert(*oi);
+			}
+
+		    }
+		}
+	}
+	
+	//-----------------------------------------------------------------------
+	unsigned int DarkSceneManager::cacheGeometry(unsigned int* pIndexes, 
+		const StaticFaceGroup* faceGroup) {
+
+		size_t idxStart, numIdx, vertexStart;
+
+		if (faceGroup->fType == FGT_FACE_LIST) {
+			idxStart = faceGroup->elementStart;
+			numIdx = faceGroup->numElements;
+			vertexStart = faceGroup->vertexStart;
+		} else	{
+			// Unsupported face type
+			return 0;
+		}
+
+
+		// Copy index data
+		unsigned int* pSrc = static_cast<unsigned int*>(
+		    mIndexes->lock(
+			idxStart * sizeof(unsigned int),
+			numIdx * sizeof(unsigned int), 
+			HardwareBuffer::HBL_READ_ONLY));
+		
+		// I do not offset indexes here as I can do it before the rendering gets place
+		for (size_t elem = 0; elem < numIdx; ++elem) {
+			*pIndexes++ = *pSrc++;
+		}
+		mIndexes->unlock();
+
+		// return number of elements
+		return static_cast<unsigned int>(numIdx);
+	}
+	
 	//-----------------------------------------------------------------------
 	void DarkSceneManager::showNodeBoxes(bool show) {
 		mShowNodeAABs = show;

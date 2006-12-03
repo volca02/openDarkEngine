@@ -1,4 +1,5 @@
 // ---------------- Standard Thief 2 waters/lavas ----------------------
+// TODO: Do something with the basic material definitions duplicity
 material water/basic
 {
 	technique 0
@@ -8,7 +9,7 @@ material water/basic
 			// cull_hardware none
 			lighting off
 			
-			// scene_blend alpha_blend
+			// Blend based on color value
 			scene_blend colour_blend
 			
 			depth_write off
@@ -17,15 +18,8 @@ material water/basic
 			{
 				tex_address_mode wrap
 				tex_coord_set 0
-				alpha_op_ex blend_manual src_manual src_texture 0.98 0.98
-			}
-
-			texture_unit 1
-			{
-				colour_op_ex add src_current src_texture
-				// colour_op_ex add src_manual src_current 0.5 0.5 0.5
-				// colour_op_ex modulate_x4 src_current src_texture
-				tex_coord_set 1
+				
+				colour_op_ex modulate_x2 src_manual src_texture 0.8 0.8 0.8
 			}
 		}
 	}
@@ -46,7 +40,7 @@ material water/vm_in : water/basic
 	}
 }
 
-material water/bl_out : water/basic
+material water/vm_out : water/basic
 {
 	technique 
 	{

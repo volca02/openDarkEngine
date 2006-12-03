@@ -82,7 +82,7 @@ namespace Ogre {
 		// test the absolute distance of the Portal center to each plane.
 		// if it is equal or smaller than radius, we intersect 
 		// otherwise if the distance is below zero, we are away, then end up immedietally telling so
-		Vector3 center = src->mCenter;
+		const Vector3 center = src->mCenter;
 		float radius = src->mRadius;
 		
 		for (unsigned int idx = 0; idx < planes.size(); idx++) {
@@ -121,7 +121,7 @@ namespace Ogre {
 		unsigned int idx;
 		
 		for (idx = 0; idx < planes.size(); idx++) {
-			if (new_poly->clipByPlane(&planes.at(idx), didClip) <= 2) {
+			if (new_poly->clipByPlane(planes.at(idx), didClip) <= 2) {
 				// was totally clipped away
 				delete new_poly;
 				return NULL;

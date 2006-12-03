@@ -23,22 +23,33 @@
 
 #include "OgreVector3.h"
 #include "OgrePlane.h"
-#include "OgreRectangle.h"
 #include "OgrePortalFrustum.h"
 #include <iostream>
-
-// TODO: The public variables are pure crap. Define them as protected and do a friend class out of the DarkSceneManager
 
 namespace Ogre {
 
 	class PortalFrustum;
-	class DarkSceneNode;
+	class BspNode;
 		
+	/** @brief An int-type based portal rectangle struct 
+	*
+	* This structure is used by Portal class when calculating the on-screen bounding rectangle.
+	* It is ment as a Ogre::Rect replacement, because that one uses Real as a base type, which is slower to use
+	*/
+	struct PortalRect {
+			int left, right, bottom, top;
+	};
+	
+
+	std::ostream& operator<< (std::ostream& o, PortalRect& r);
+	
 	/** A vector of Vertices used for Portal shape definition */
 	typedef std::vector< Vector3 > PortalPoints;
 	
-	/** A Portal class, used for SceneNode to SceneNode visibility testing
+	/** @brief A Portal class used for SceneNode to SceneNode visibility testing
+	*
 	* Implements One direction portal, defined by the edge points. 
+	* visibility determination is done using a to-screen projected portal vertices bounding rectangles PortalRects
 	* @note Please note that the direction of the plane's normal has to comply with the 
 	* portals vertex order derived normal. Also note that no check that the points actualy lie on the plane is done. */
 	class Portal {
@@ -51,19 +62,14 @@ namespace Ogre {
 			/** The plane on which the portal lies */
 			Plane		plane;
 			/** Screen - space bounding rectangle of the portal */
-			Rectangle	screenRect;  
-		
-			/**
-			* Fills x and y variables with Vector3 to screen coordinates projection
-			*/
-			void getScreenCoordinates(Camera *cam, const Vector3& position, Real& x, Real& y);
+			PortalRect	screenRect;  
 		
 		protected:
 			/** target Scene Node (Cell) for this Portal */
-			DarkSceneNode *mTarget;
+			BspNode *mTarget;
 
 			/** source Cell for this Portal */
-			DarkSceneNode *mSource;
+			BspNode *mSource;
 			
 			/** Helping value, used to determine the validity of the Portal's screen rectangle */
 			unsigned int 	mFrameNum;
@@ -71,11 +77,11 @@ namespace Ogre {
 			/** for debugging - portal id (e.g. order number) */
 			int	mPortalID;
 			
-			/** dot product of the portal normal with the camera view vector (for back face culling) */ 
-			float mDotProduct;
+			/** Portal back-face cull - true if should be culled */ 
+			bool mPortalCull;
 			
 			/** Actual view rectangle */
-			Rectangle	mActualRect;  
+			PortalRect	mActualRect;  
 			
 			/** Number of mentions (e.g. nonzero if this portal was reevaluated) */
 			int	mMentions;
@@ -87,8 +93,10 @@ namespace Ogre {
 			float mRadius;
 		public:
 			/** Default constructor. Defines an empty geometry, and source and destination SceneNodes that are parameters
-			* @param source Source sceneNode*/
-			Portal(DarkSceneNode* source, DarkSceneNode* target, Plane plane);
+			* @param source Source SceneNode
+			* @param target Target SceneNode
+			* @param plane Portal plane (Normal direction does matter) */
+			Portal(BspNode* source, BspNode* target, Plane plane);
 		
 			~Portal();
 			
@@ -104,17 +112,17 @@ namespace Ogre {
 			int getPointCount();
 			
 			/** Returns the target DarkSceneNode for this portal */
-			DarkSceneNode* getTarget();
+			BspNode* getTarget();
 			
 			/** Returns the source DarkSceneNode for this portal */
-			DarkSceneNode* getSource();
+			BspNode* getSource();
 		
-			Plane getPlane();
+			const Plane& getPlane();
 			
 			void setPlane(Plane plane);
 			
 			/** get the number of Portal's vertices outside a given plane
-			* \return the count of points which lie outside (negative distance from the plane)
+			* @return the count of points which lie outside (negative distance from the plane)
 			*/
 			unsigned int getOutCount(Plane &plane);
 			
@@ -122,40 +130,33 @@ namespace Ogre {
 			bool isSeen(Camera *cam);
 			
 			void refreshBoundingVolume();
-			// copy the vertices of a given Portal into us
+			
+			// Portal copy operator
 			// Portal& operator= (Portal *src);
 			
 			/** Clips the poly using a plane (and replaces instances vertices after success)
-			* \return number of vertices in the new poly
+			* @return number of vertices in the new poly
 			*/
-			int clipByPlane(Plane *plane, bool &didClip);
+			int clipByPlane(const Plane &plane, bool &didClip);
 			
 			/**
 			* Refreshes screen projection bounding Rectangle
+			* @param cam Camera which is used by the projection
+			* @param toScreen A precomputed Projection*View matrix matrix4 which is used to project the vertices to screen
+			* @param frust PortalFrustum used to cut away non visible parts of the portal
 			*/
-			void refreshScreenRect(Camera *cam, PortalFrustum *frust);
+			void refreshScreenRect(Camera *cam, Matrix4& toScreen, PortalFrustum *frust);
 			
 			/**
 			* Intersects the Portals bounding rectangle by the given rectangle, and writes the result to the target parameter
 			*/
-			bool intersectByRect(Rectangle &boundry, Rectangle &target);
+			bool intersectByRect(PortalRect &boundry, PortalRect &target);
 			
 			/**
 			* Union the actual view rectangle with addition rectangle. Returns true on a view change.
 			*/
-			bool unionActualWithRect(Rectangle &addition);
-			
-			/**
-			* updates target parameter with the intersection of the rectangle boundry and the Portals screenRect (refreshes screenRect if appropriate - e.g. new frame)
-			* returns: true if the rectangle is valid
-			*/
-			bool getScreenBoundingRectangleIntersection(Camera *cam, unsigned int frameNum, Rectangle &boundry, Rectangle &target);
-			
-			/**
-			* Recalculate portals distance from camera into the mDistance attribute
-			*/
-			void calculateDistance(Camera *cam);
-			
+			bool unionActualWithRect(PortalRect &addition);
+
 			/**
 			* Debugging portal id setter
 			*/
@@ -163,10 +164,16 @@ namespace Ogre {
 			
 			/** Attaches the portal to the source and destination DarkSceneNodes */
 			void attach();
+			
+			/** Optimizes the portal. Removes unneeded, unnecessary vertices which slow down the visibility evaluation.
+			* @return int Number of vertices removed */
+			int optimize();
 	};
 
 	/** A bunch of the portal pointers. Is used in the DarkSceneNode class. */
 	typedef std::set< Portal *> PortalList;
+	
+	/** An iterator over a PortalList */
 	typedef std::set< Portal *>::const_iterator PortalListConstIterator;
 }
 

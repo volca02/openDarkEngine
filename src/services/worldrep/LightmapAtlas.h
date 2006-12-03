@@ -307,8 +307,9 @@ class LightAtlas {
 };
 
 
-/** Class holding a number of the ligh map atlases. 
-* Use this class to work with the light map storing and switching. */
+/** @brief A holder of a number of the light map atlases. 
+*
+* Use this class to work with the light map storage and light switching. */
 class LightAtlasList : public ConsoleCommandListener {
 	private:
 		/** A list of the light map atlases */

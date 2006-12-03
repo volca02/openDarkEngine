@@ -29,49 +29,63 @@
 #include "OgreTextureManager.h"
 #include "OgrePrerequisites.h"
 
+#include "logger.h"
+
 using namespace Ogre;
 
 namespace Opde {
 
 	//------------------------------------------------------------------------------------
-	WRCell::WRCell() {
+	WRCell::WRCell() : cellNum(-1), atlased(false), loaded(false) {
+		bspNode = NULL;
 	}
 	
 	//------------------------------------------------------------------------------------
 	WRCell::~WRCell() {
-		delete[] vertices;
-		delete[] face_maps;
-		delete[] face_infos;
-		
-		for (int i = 0; i < header.num_polygons; i++)
-			delete[] poly_indices[i];
-		
-		delete[] poly_indices;
-		
-		delete[] planes;
-		
-		delete[] anim_map;
-		
-		delete[] lm_infos;
-		
-		for (int i = 0; i < header.num_textured; i++) {
+		if (loaded) {
 			
-			for (int l = 0; l < lmcounts[i]; l++)
-				delete[] lmaps[i][l];
+			delete[] vertices;
+			delete[] face_maps;
+			delete[] face_infos;
 			
-			delete[] lmaps[i];
+			for (int i = 0; i < header.num_polygons; i++)
+				delete[] poly_indices[i];
+			
+			delete[] poly_indices;
+			
+			delete[] planes;
+			
+			delete[] anim_map;
+			
+			delete[] lm_infos;
+			
+			for (int i = 0; i < header.num_textured; i++) {
+				
+				for (int l = 0; l < lmcounts[i]; l++)
+					delete[] lmaps[i][l];
+				
+				delete[] lmaps[i];
+			}
+			
+			delete[] lmaps;
+			delete[] lmcounts;
+			
+			delete[] obj_indices;
+			
+			delete[] lightMaps;
 		}
-		
-		delete[] lmaps;
-		delete[] lmcounts;
-		
-		delete[] obj_indices;
-		
-		delete[] lightMaps;
 	}
 	
 	//------------------------------------------------------------------------------------
-	void WRCell::loadFromChunk(DarkDatabaseChunk *chunk, int lightSize) {
+	void WRCell::loadFromChunk(unsigned int _cell_num, DarkDatabaseChunk *chunk, int lightSize) {
+		assert(!loaded);
+		
+		// Copy the Cell id
+		cellNum = _cell_num;
+		
+		// check the lightmap pixel size
+		assert((lightSize>=1) && (lightSize<=2));
+		
 		// The number in the comment is used by me to check if I deallocate what I allocated...
 		mLightSize = lightSize;
 		
@@ -155,6 +169,8 @@ namespace Opde {
 		// 12. Light object indexes
 		obj_indices = new uint16_t[obj_count];
 		chunk->read(&(obj_indices[0]), sizeof(uint16_t) * obj_count);
+		
+		loaded = true;
 	}
 	
 	//------------------------------------------------------------------------------------
@@ -171,6 +187,8 @@ namespace Opde {
 	
 	//------------------------------------------------------------------------------------
 	const wr_plane_t WRCell::getPlane(int index) {
+		assert(loaded);
+		
 		if (index > header.num_planes)
 			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Plane index is out of bounds", "WRCell::getPlane");
 		
@@ -178,29 +196,43 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------------------------------------
-	String WRCell::getMaterialName(unsigned int texture, unsigned int atlasnum, std::pair< Ogre::uint, Ogre::uint > &dimensions) {
+	const MaterialPtr WRCell::getMaterial(unsigned int texture, unsigned int atlasnum, std::pair< Ogre::uint, Ogre::uint > &dimensions, unsigned int flags) {
+		assert(loaded);
+		assert(atlased); // not exactly needed, but will not harm
+		
 		StringUtil::StrStreamType tmp;
+		
+		// Lightmaps should only be used for non-flow textures. I dunno if non-flow water uses lmaps or not, but flow textures do not use it for sure
+		// So if the polygon flags are nonzero, do not add lightmap (the flags seem to be releted to the transparency [having 14 value])
+		// This means no cloning at all
+		
+		// Texture and prototype name
+		StringUtil::StrStreamType txtName;
+		txtName << "@template" << texture;
 		
 		bool isSky = (texture == SKY_TEXTURE);
 		
 		if  (isSky) { 
 			tmp << "SkyShader";
 		} else {
-			tmp << "Shader" << texture << "#" << atlasnum;
+			if (flags != 0) {
+				tmp << txtName.str(); // directly name after the original. This will cause the material to be found
+			} else {
+				tmp << "Shader" << texture << "#" << atlasnum;
+			}
 		}
 		std::string shaderName = tmp.str();
 		
 		MaterialPtr shadMat = MaterialManager::getSingleton().getByName(shaderName);
+		
 		
 		// If the material was not yet constructed, we'll do so now...
 		if (shadMat.isNull()) {
 			if (isSky)  // Should not be here if the polygon is sky textured
 				OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Sky material 'SkyShader' was not found (should be already created)", "WRCell::getMaterialHandle");
 			
-			// Texture and prototype name
-			StringUtil::StrStreamType txtName;
-			txtName << "@template" << texture;
-			
+			if (flags != 0)  // Should not be here if flags!=0 - we use the original material
+				LOG_ERROR("Material for water texture %d was not found and should. This could cause some problems", texture);
 			
 			MaterialPtr origMat = MaterialManager::getSingleton().getByName(txtName.str());
 			
@@ -209,39 +241,37 @@ namespace Opde {
 			} else {
 				// OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Material "+txtName.str()+" was not found (should be already created)", "BspLevel::loadDarkLevel");
 				shadMat = MaterialManager::getSingleton().create(shaderName, ResourceGroupManager::getSingleton().getWorldResourceGroupName());
-				std::cerr << " * Src. material empty, not cloning " << txtName.str() << std::endl;
+				LOG_INFO(" * Src. material empty, not cloning %s", txtName.str().c_str());
 			}
 			
-			// Volca: I disable the lightmaps for now, as they cause two problems.
-			// 1. They are badly shifted/scaled 
-			// 2. They are causing the water texture to disappear
-			// To enable those, just uncomment the following line
-			
-			StringUtil::StrStreamType lightmapName;
-			lightmapName << "@lightmap" << atlasnum;
-			
-			Pass *shadPass = shadMat->getTechnique(0)->getPass(0);
-			
-			if (shadPass->getNumTextureUnitStates() <= 1) {
-				// Lightmap texture is added here
-				TextureUnitState* tex = shadPass->createTextureUnitState(lightmapName.str());
+			if (flags == 0) {
+				StringUtil::StrStreamType lightmapName;
+				lightmapName << "@lightmap" << atlasnum;
 				
-				// Blend
-				tex->setColourOperation(LBO_MODULATE);
-				// Use 2nd texture co-ordinate set
-				tex->setTextureCoordSet(1);
+				Pass *shadPass = shadMat->getTechnique(0)->getPass(0);
 				
-				// Clamp
-				tex->setTextureAddressingMode(TextureUnitState::TAM_CLAMP);
-				
-				// Switch filtering off to see lmap pixels: TFO_NONE
-				tex->setTextureFiltering(TFO_ANISOTROPIC);
-			} else { // There is a definition of the lightmapping pass already, we only update that definition
-				TextureUnitState* tex = shadPass->getTextureUnitState(1);
-				tex->setTextureName(lightmapName.str());
-				tex->setTextureCoordSet(1);
-			} 
-			//*/
+				if (shadPass->getNumTextureUnitStates() <= 1) {
+					// Lightmap texture is added here
+					TextureUnitState* tex = shadPass->createTextureUnitState(lightmapName.str());
+					
+					// Blend
+					tex->setColourOperation(LBO_MODULATE);
+					// Use 2nd texture co-ordinate set
+					tex->setTextureCoordSet(1);
+					
+					// Clamp
+					tex->setTextureAddressingMode(TextureUnitState::TAM_CLAMP);
+					
+					// Switch filtering off to see lmap pixels: TFO_NONE
+					tex->setTextureFiltering(TFO_ANISOTROPIC);
+				} else { // There is a definition of the lightmapping pass already, we only update that definition
+					TextureUnitState* tex = shadPass->getTextureUnitState(1);
+					tex->setTextureName(lightmapName.str());
+					tex->setTextureCoordSet(1);
+				}
+			} else {
+				LOG_DEBUG("Material %s is water-typed, not adding lightmap. This should not happen since we use the original material", txtName.str().c_str());
+			}
 		}
 		
 		// Get the texture dimensions. TODO: Num - 0 Technique is not guaranteed to be the used one. 
@@ -253,13 +283,46 @@ namespace Opde {
 					if (shadMat->getTechnique(0)->getPass(0)->getNumTextureUnitStates() > 0)
 						dimensions = shadMat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureDimensions();
 		
-		return tmp.str();
+		return shadMat;
 	}
 	
 	//------------------------------------------------------------------------------------
-	void WRCell::insertTexturedVertex(ManualObject *manual, int faceNum, wr_coord_t coord, Vector2 displacement, std::pair< Ogre::uint, Ogre::uint > dimensions) {
-		// New vertex...
-		manual->position(coord.x, coord.y, coord.z);
+	const Ogre::String WRCell::getMaterialName(unsigned int texture, unsigned int atlasnum, std::pair< Ogre::uint, Ogre::uint > &dimensions, unsigned int flags) {
+		MaterialPtr mat = getMaterial(texture, atlasnum, dimensions, flags);
+		
+		return mat->getName();
+	}
+	
+	//------------------------------------------------------------------------------------
+	void WRCell::insertTexturedVertex(Ogre::ManualObject *manual, int faceNum, wr_coord_t coord, Ogre::Vector2 displacement, std::pair< Ogre::uint, Ogre::uint > dimensions) {
+		BspVertex vert;
+		
+		constructBspVertex(faceNum, coord, displacement, dimensions, &vert);
+		
+		manual->position(vert.position[0], vert.position[1], vert.position[2]);
+		
+		manual->textureCoord(vert.texcoords[0], vert.texcoords[1]);
+		
+		manual->textureCoord(vert.lightmap[0], vert.lightmap[1]);
+		
+		Vector3 normal(vert.normal[0], vert.normal[1], vert.normal[2]);
+	}
+	
+	//------------------------------------------------------------------------------------
+	void WRCell::constructBspVertex(int faceNum, wr_coord_t pos, Ogre::Vector2 displacement, std::pair< Ogre::uint, Ogre::uint > dimensions, BspVertex *vtx) {
+		// Position copy
+		vtx->position[0] = pos.x;
+		vtx->position[1] = pos.y;
+		vtx->position[2] = pos.z;
+		
+		// Normal copy
+		Vector3 normal(planes[faceNum].normal.x, planes[faceNum].normal.y, planes[faceNum].normal.z);
+		normal.normalise();
+		
+		vtx->normal[0] = normal.x;
+		vtx->normal[1] = normal.y;
+		vtx->normal[2] = normal.z;
+
 		
 		// texturing coordinates
 		float tx, ty;
@@ -296,7 +359,7 @@ namespace Opde {
 		sh_v = face_infos[faceNum].v / 4096.0; 
 		
 		// the original vertex:
-		Vector3 tmp = Vector3(coord.x, coord.y, coord.z);
+		Vector3 tmp = Vector3(pos.x, pos.y, pos.z);
 		
 		// The first vertex in the poly.
 		wr_coord_t& first = vertices[ poly_indices[faceNum][0] ]; //cell->face_maps[faceNum].flags
@@ -318,63 +381,15 @@ namespace Opde {
 		tx = (nax_u.dotProduct(tmp)) / (l_ax_u * rs_x); // we divide by scale to normalize 
 		ty = (nax_v.dotProduct(tmp)) / (l_ax_v * rs_y); 
 		
-		manual->textureCoord(tx, ty);
+		// - write the result into the BspVertex
+		vtx->texcoords[0] = tx;
+		vtx->texcoords[1] = ty;
 		
 		// ----------------- LIGHTMAP COORDS --------------------
-		// Get the facts here:
-		// The lightmap is scaled: scale/4.0 is the stretch for the pixel size. 
-		// This means that scale 4 will result in 1x1 (world coords) pixel size, scale 8.00 will result in 2x2 pixel size (world coords).
-		// Lightmaps are (+1,+1) sized than expected to be by the polygon bounding rectangle dimensions (3->4,13->14). 
-		// This is because of the rounding to the pixel sizes of the resulting buffers (IMHO).
-		
-		/*
-		Lmaps seem to be center vertex based (UV has negative values sometimes).
-		*/
-		
-		/* // If mapped from the o_first vertex
 		wr_coord_t& o_center = face_infos[faceNum].center;
 		Vector3 center = Vector3(o_center.x, o_center.y, o_center.z);
 		
-		tmp = Vector3(coord.x, coord.y, coord.z);
-		
-		Vector3 orig = tmp; // for debugging, remove...
-		
-		// The scale defines the pixel size. Nothing else does
-		float scale = face_infos[faceNum].scale;
-		
-		// lightmaps x,y sizes
-		unsigned int sz_x = lm_infos[faceNum].lx;
-		unsigned int sz_y = lm_infos[faceNum].ly;
-		
-		// Shifts. These are *128 (e.g. fixed point, 6 bits represent 0-1 range) to get 0-1 shift (in pixels)
-		// Weird thing about these is that they are nonsymetrical, and signed (max value 63, min about -15 or such).
-		sh_u = lm_infos[faceNum].u / 128 + 0.5; 
-		sh_v = lm_infos[faceNum].v / 128 + 0.5;
-		
-		// rel. pos 
-		// tmp -= poly_center;
-		// tmp -= center;
-		tmp -= o_first;
-		
-		// shifting by UV shifts...
-		tmp -= ( (nax_u * sh_u) + (nax_v * sh_v) );
-		
-		// To the UV space
-		lx = (nax_u.dotProduct(tmp)) / ( sz_x * scale / 4.0);  
-		ly = (nax_v.dotProduct(tmp)) / ( sz_y * scale / 4.0);
-		
-		// remap to the atlas coords and insert it to the vertex as a second texture coord...
-		manual->textureCoord(lightMaps[faceNum]->toAtlasCoords(Vector2(lx,ly) + displacement));
-		
-		//memcpy(dest->normal, &cell->planes[ cell->face_maps[faceNum].plane ].normal,  sizeof(float) * 3);
-		manual->normal(planes[faceNum].normal.x, planes[faceNum].normal.y, planes[faceNum].normal.z);
-		*/
-		
-		
-		wr_coord_t& o_center = face_infos[faceNum].center;
-		Vector3 center = Vector3(o_center.x, o_center.y, o_center.z);
-		
-		tmp = Vector3(coord.x, coord.y, coord.z);
+		tmp = Vector3(pos.x, pos.y, pos.z);
 		
 		Vector3 orig = tmp; // for debugging, remove...
 		
@@ -405,17 +420,16 @@ namespace Opde {
 		/*lx = ((nax_u.dotProduct(tmp)) - displacement.x) / ( sz_x * scale / 4.0);  
 		ly = ((nax_v.dotProduct(tmp)) - displacement.y) / ( sz_y * scale / 4.0);
 		*/
+		
 		// remap to the atlas coords and insert it to the vertex as a second texture coord...
-		manual->textureCoord(lightMaps[faceNum]->toAtlasCoords(Vector2(lx,ly)));
+		Vector2 lmUV = lightMaps[faceNum]->toAtlasCoords(Vector2(lx,ly));
 		
-		//memcpy(dest->normal, &cell->planes[ cell->face_maps[faceNum].plane ].normal,  sizeof(float) * 3);
-		Vector3 normal(planes[faceNum].normal.x, planes[faceNum].normal.y, planes[faceNum].normal.z);
-		normal.normalise();
+		vtx->lightmap[0] = lmUV.x;
+		vtx->lightmap[1] = lmUV.y;
 		
-		manual->normal(normal);
 	}
 	
-	
+	//------------------------------------------------------------------------------------
 	Vector2 WRCell::calcLightmapDisplacement(int polyNum) {
 		// ------------- Calculate the UV center displacement (as the poly center is off)
 		// readout from the cell info
@@ -457,34 +471,54 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------------------------------------
-	void WRCell::constructStaticGeometry(int cellNum, SceneNode *node, SceneManager *sceneMgr, LightAtlasList* atlasList) {
-		// Prepare the materials first.
+	void WRCell::constructPortalMeshes(Ogre::SceneManager *sceneMgr) {
+		// some checks on the status. These are hard mistakes
+		assert(loaded);
+		assert(atlased);
+		
+		int portalStart = header.num_polygons - header.num_portals;
 		
 		
-		StringUtil::StrStreamType modelName;
-		modelName << "cell_" << cellNum;	
-					
+		for (int polyNum = portalStart; polyNum < header.num_textured; polyNum++) {
+			// Prepare the object's name
+			StringUtil::StrStreamType modelName;
+			modelName << "cell_" << cellNum << "_portal_" << polyNum;	
+			
+			// Each portal's mech gets it's own manual object. This way we minimize the mesh attachments to hopefully minimal set	
+			ManualObject* manual = sceneMgr->createManualObject(modelName.str());
 		
-		ManualObject* manual = sceneMgr->createManualObject(modelName.str());
-		
-		for (int polyNum = 0; polyNum < header.num_textured; polyNum++) {
+
 			// Iterate through the faces, and add all the triangles we can construct using the polygons defined
 			std::pair< Ogre::uint, Ogre::uint > dimensions;
 			
 			// begin inserting one polygon
-			manual->begin(getMaterialName(face_infos[polyNum].txt, lightMaps[polyNum]->getAtlasIndex(), dimensions));
+			manual->begin(getMaterialName(face_infos[polyNum].txt, lightMaps[polyNum]->getAtlasIndex(), dimensions, face_maps[polyNum].flags));
 			
 			// temporary array of indices (for polygon triangulation)
 			Vector2 displacement = calcLightmapDisplacement(polyNum);
 			
-			insertTexturedVertex(manual, polyNum, face_infos[polyNum].center, displacement, dimensions);
+			
+			// Hmm. I use a SceneNode centered at the polygon's center. Otherwise I get huge radius (from 0,0,0 of the sceneNode).
+			wr_coord_t polyCenter = face_infos[polyNum].center;
+			Vector3 nodeCenter = Vector3(polyCenter.x, polyCenter.y, polyCenter.z);
+			
+			wr_coord_t zero;
+			zero.x = 0; zero.y = 0; zero.z = 0;
+			insertTexturedVertex(manual, polyNum, zero , displacement, dimensions);
 
 			// for each vertex, insert into the model
-			for (int vert = 0; vert < face_maps[polyNum].count; vert++) 
-				insertTexturedVertex(manual, polyNum, vertices[ poly_indices[polyNum][vert] ], displacement, dimensions);
-
+			for (int vert = 0; vert < face_maps[polyNum].count; vert++)  {
+				wr_coord_t vrelative = vertices[ poly_indices[polyNum][vert] ];
+				
+				// Subtract the center
+				vrelative.x = vrelative.x - polyCenter.x;
+				vrelative.y = vrelative.y - polyCenter.y;
+				vrelative.z = vrelative.z - polyCenter.z;
+				
+				insertTexturedVertex(manual, polyNum, vrelative, displacement, dimensions);
+			}
 			
-			// now feed the indexes 
+			// now feed the indexes
 			for (int t = 1; t < face_maps[polyNum].count + 1; t++) {
 				// push back the indexes
 				manual->index(0);
@@ -494,28 +528,50 @@ namespace Opde {
 						manual->index(t+1);
 					else
 						manual->index(1);
+				
 			}
 					
 			manual->end();
+
+			// LOG_DEBUG("Attaching cell %d geometry to it's scene node", cellNum);
+			
+			// Attach the resulting object to the node with the center in the center vertex of the mesh...
+			SceneNode* meshNode = sceneMgr->createSceneNode(modelName.str());
+			meshNode->setPosition(nodeCenter);
+			
+			(static_cast<DarkSceneNode*>(meshNode))->attachObject(manual);
+			
+			// Attach the new scene node to the root node of the scene (this ensures no further transforms, other than we want, 
+			// take place, and that the geom will be visible only when needed)
+			sceneMgr->getRootSceneNode()->addChild(meshNode);
+					
+			if(meshNode) {
+				meshNode->needUpdate(true);
+			}
+			// LOG_DEBUG("Attaching cell %d geometry : done", cellNum);
 		}
-		
-		node->attachObject(manual);
+
 	}
 	
 	//------------------------------------------------------------------------------------
-	void WRCell::attachPortals(std::vector< DarkSceneNode *> nodeList, DarkSceneNode *thisNode) {
+	int WRCell::attachPortals(WRCell * cellList) {
+		assert(bspNode);
+		
 		// The textured portals are both texturing source and portals. This solves the problems of that approach.
 		int PortalOffset = header.num_polygons - header.num_portals;
 		
+		// Number of removed vertices (This number indicates the count of vertices removed due to the 
+		// fact that the vector to the next vertex is the same (to some degree) as from the last one to here)
+		int optimized = 0;
+		
 		for (int portalNum = PortalOffset; portalNum < header.num_polygons; portalNum++) {
-			// There is probably a complication in the normal of the plane. I'll let the polygon class handle that in some method
 			Ogre::Plane portalPlane;
 			wr_plane_t wrPlane = planes[face_maps[portalNum].plane];
 			
 			portalPlane.normal = Vector3(wrPlane.normal.x, wrPlane.normal.y, wrPlane.normal.z);
 			portalPlane.d = wrPlane.d;
 			
-			Portal *portal = new Portal(thisNode, nodeList[face_maps[portalNum].tgt_cell], portalPlane);
+			Portal *portal = new Portal(bspNode, cellList[face_maps[portalNum].tgt_cell].getBspNode(), portalPlane);
 			
 			for (int vert = 0; vert < face_maps[portalNum].count; vert++) {
 				// for each vertex of that poly
@@ -530,13 +586,21 @@ namespace Opde {
 			// refresh the polygon bounding sphere... for clipping optimisation
 			portal->refreshBoundingVolume();
 			
-			// Attach the portal to the scene Nodes
+			// Optimize the portal
+			optimized += portal->optimize();
+			
+			// Attach the portal to the BspNodes
 			portal->attach();
 		}
+		
+		return optimized;
 	}
 	
 	//------------------------------------------------------------------------------------
 	void WRCell::atlasLightMaps(LightAtlasList* atlasList) {
+		assert(loaded);
+		assert(!atlased);
+		
 		int ver = mLightSize - 1;
 		// Array of lmap references
 		lightMaps = new LightMap*[header.num_textured];
@@ -571,6 +635,126 @@ namespace Opde {
 			}
 			
 		} // for each face
+		
+		atlased = true;
+	}
+	
+	//------------------------------------------------------------------------------------
+	int WRCell::getVertexCount() {
+		// The total vertex count is gonna be the count of polygon vertices (It would not give a big optimization to do otherwise - material-normal-vertex combinations)
+		int total = 0;
+		
+		// Only the non-transparent geometry, please - no textured portals
+		int faceCount = header.num_polygons - header.num_portals;
+		
+		for (int polyNum = 0; polyNum < faceCount; polyNum++) {
+			total += face_maps[polyNum].count;
+		}
+		
+		return total;
+	}
+	
+	
+	//------------------------------------------------------------------------------------
+	int WRCell::getIndexCount() {
+		// The total count of indices, following the same scenario as for vertices, will be counted as 3*tri_count
+		// For I do triangle fans using first vertex as a base vertex, the tri_count = vertex_count - 2 , index count is triple
+		// Note that this method of triangulation is only possible for convex polygons, which we do always have
+		int total = 0;
+
+		// Only the non-transparent geometry, please - no textured portals
+		int faceCount = header.num_polygons - header.num_portals;
+
+		for (int polyNum = 0; polyNum < faceCount; polyNum++) {
+			int pvc = face_maps[polyNum].count; 
+			assert(pvc > 2);
+			total += 3 * (pvc - 2);
+		}
+		
+		return total;
+	}
+	
+	//------------------------------------------------------------------------------------
+	int WRCell::getFaceCount() {
+		// this one is simple in the above mentioned scenario
+		
+		return header.num_polygons - header.num_portals;
+	}
+	
+	//------------------------------------------------------------------------------------
+	int WRCell::buildStaticGeometry(BspVertex* vertexPtr, unsigned int* indexPtr, StaticFaceGroup* facePtr, 
+					int startVertex, int startIndex, int startFace) {
+		assert(loaded);
+		assert(atlased);
+		assert(bspNode);
+		
+		int actIdx = 0;
+		int actVertex = 0;
+
+		// Now, I'm gonna build the geometry of all textured faces found in this cell (except portals. those go separate, because of the Z sort of transparency)
+		
+		// Only the non-transparent geometry, please - no textured portals
+		int faceCount = header.num_polygons - header.num_portals;
+		
+		// for each of the polygons
+		for (int polyNum = 0; polyNum < faceCount; polyNum++) {
+			std::pair< Ogre::uint, Ogre::uint > dimensions;
+			
+			MaterialPtr shadMat = getMaterial(face_infos[polyNum].txt, lightMaps[polyNum]->getAtlasIndex(), dimensions, face_maps[polyNum].flags);
+			
+			// HACKY... I dunno the real calculation behind lightmaps yet
+			Vector2 displacement = calcLightmapDisplacement(polyNum);
+			
+			// Copy the vertex data
+			for (int t = 0; t < face_maps[polyNum].count; t++) {
+				constructBspVertex(polyNum, vertices[ poly_indices[polyNum][t] ], displacement, dimensions, vertexPtr++);
+			}
+			// HMM. The triangle count = polygon_points - 2
+			for (int t = 1; t < face_maps[polyNum].count - 1; t++) {
+				// put in the indexes
+				*(indexPtr++) = 0     + startVertex + actVertex;
+				*(indexPtr++) = t     + startVertex + actVertex;
+				*(indexPtr++) = t + 1 + startVertex + actVertex;
+			}
+			
+			int matHandle = shadMat->getHandle();
+			
+			facePtr[polyNum].fType = FGT_FACE_LIST;
+			facePtr[polyNum].isSky = false;
+			facePtr[polyNum].vertexStart = startVertex + actVertex;
+			facePtr[polyNum].numVertices = face_maps[polyNum].count;
+			facePtr[polyNum].elementStart = startIndex + actIdx;  // absolute index index :)
+			facePtr[polyNum].numElements = 3 * (face_maps[polyNum].count - 2); // The count of the triads * 3 of this poly
+			facePtr[polyNum].materialHandle = shadMat->getHandle();
+			facePtr[polyNum].plane.normal = Vector3(planes[polyNum].normal.x, planes[polyNum].normal.y, planes[polyNum].normal.z);
+			facePtr[polyNum].plane.d = planes[polyNum].d;
+
+			actVertex += facePtr[polyNum].numVertices;
+			actIdx    += facePtr[polyNum].numElements;
+		}
+		
+		// update the BspNode with FaceGroupStart and FaceGroupCount
+		bspNode->setFaceGroupStart(startFace);
+		bspNode->setFaceGroupCount(faceCount);
+		
+		return faceCount;
+	}
+	//------------------------------------------------------------------------------------
+	void WRCell::setBspNode(Ogre::BspNode* tgtNode) {
+		bspNode = tgtNode;
+		bspNode->setIsLeaf(true);
+	}
+	
+	//------------------------------------------------------------------------------------
+	Ogre::BspNode* WRCell::getBspNode() {
+		return bspNode;
+	}
+
+	//------------------------------------------------------------------------------------
+	Ogre::Vector3 WRCell::getCenter() {
+		Vector3 center(header.center.x, header.center.y, header.center.z);
+
+		return center;
 	}
 
 }

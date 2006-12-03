@@ -1,13 +1,34 @@
+/******************************************************************************
+ *
+ *    This file is part of openDarkEngine project
+ *    Copyright (C) 2005-2006 openDarkEngine team
+ *
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *****************************************************************************/
+ 
 #include "ConsoleBackend.h"	
 
 namespace Opde {
 	using namespace Ogre;
 	using namespace std;
 
+	const char* logLevels[5] = {"FATAL","ERROR","INFO","DEBUG","VERBOSE"};
 
-	// Static member definition:
-	ConsoleBackend* ConsoleBackend::pinstance;
-
+	template<> ConsoleBackend* Singleton<ConsoleBackend>::ms_Singleton = 0;
+	
 	ConsoleBackend::ConsoleBackend() {
 		commandMap.clear();
 		completionMap.clear();
@@ -28,19 +49,8 @@ namespace Opde {
 
 		// LogManager::getSingleton().addListener(this); 
 	}
-
-	void ConsoleBackend::setup() {
-		pinstance = NULL;
-	}
-
-	ConsoleBackend* ConsoleBackend::getInstance() {
-		if (pinstance == NULL) 
-			pinstance = new ConsoleBackend();
-
-		return pinstance;
-	}
 		
-	void ConsoleBackend::addText(string text) {
+	void ConsoleBackend::addText(std::string text) {
 		messages.push_back(text);		
 		changed = true;
 		
@@ -48,7 +58,7 @@ namespace Opde {
 		position += 1;
 	}
 
-	bool ConsoleBackend::registerCommandListener(string Command, ConsoleCommandListener *listener) {
+	bool ConsoleBackend::registerCommandListener(std::string Command, ConsoleCommandListener *listener) {
 		map<string, ConsoleCommandListener *>::iterator commandIt = commandMap.find(Command);
 
 		if (commandIt != commandMap.end()) { // already registered
@@ -62,7 +72,7 @@ namespace Opde {
 		return false;
 	}
 		
-	void ConsoleBackend::executeCommand(string Command) {
+	void ConsoleBackend::executeCommand(std::string Command) {
 		addText(">" + Command);
 
 		// Split the command on the first space... make it a Command PARAMETERS
@@ -102,7 +112,7 @@ namespace Opde {
 		addText("Error: Command " + command_part + " not understood!");
 	}
 
-	std::string ConsoleBackend::tabComplete(string Text) {
+	std::string ConsoleBackend::tabComplete(std::string Text) {
 		//TODO: Code
 		return Text;
 	}
@@ -111,9 +121,14 @@ namespace Opde {
 		addText(text);
 	}
 
-	void ConsoleBackend::write(const String &name, const String &message, LogMessageLevel lml, bool maskDebug) {
+	void ConsoleBackend::write(const Ogre::String &name, const Ogre::String &message, Ogre::LogMessageLevel lml, bool maskDebug) {
 		if (lml = LML_CRITICAL)
 			addText("OgreLog: (" + name + " : " + message);
+	}
+	
+	void ConsoleBackend::logMessage(LogLevel level, char *message) {
+		std::string smessage(message);
+		addText("LOG[" + string(logLevels[level]) + "] : " + smessage);
 	}
 
 	bool ConsoleBackend::getChanged() {
@@ -135,5 +150,13 @@ namespace Opde {
 			return true;
 		} else
 			return false;
+	}
+	
+	ConsoleBackend& ConsoleBackend::getSingleton(void) {
+		assert( ms_Singleton );  return ( *ms_Singleton );  
+	}
+	
+	ConsoleBackend* ConsoleBackend::getSingletonPtr(void) {
+		return ms_Singleton;
 	}
 }

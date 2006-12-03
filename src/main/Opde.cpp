@@ -25,6 +25,8 @@
 #include "OpdeLoadingBar.h"
 #include "OpdeMission.h"
 #include "OgreDarkSceneManager.h"
+#include "logger.h"
+#include "stdlog.h"
 
 // For now... Will be in this namespace too...
 using namespace Opde;
@@ -35,9 +37,22 @@ class OpdeApplication : public ExampleApplication {
 		OpdeGUI	*gui;
 		OpdeMission *mission;
 		DarkSceneManagerFactory* darkFactory;
+		StdLog* stdlog;
+		ConsoleBackend* backend;
+	
 	public:
 		OpdeApplication() {
-
+			Logger *logger = new Logger();
+			
+			stdlog = new StdLog();
+		
+			logger->registerLogListener(stdlog);
+			
+			backend = new Opde::ConsoleBackend();
+			
+			backend->putMessage("==Console Starting==");
+			
+			// logger->registerLogListener(backend);
 		}
 
 		~OpdeApplication() {
@@ -51,6 +66,11 @@ class OpdeApplication : public ExampleApplication {
 				mission = NULL;
 			}
 			
+			if (stdlog) {
+				delete stdlog;
+				stdlog = NULL;
+			}
+			
 			Root::getSingleton().removeSceneManagerFactory(darkFactory);
 			delete darkFactory;
 		}
@@ -61,9 +81,6 @@ class OpdeApplication : public ExampleApplication {
 		ExampleLoadingBar mLoadingBar;
 
 		void loadResources(void) {
-			// TODO: Hacky. But this all will go away anyway
-			mission = new OpdeMission(mRoot);
-			
 			mLoadingBar.start(mWindow, 1, 1, 0.75);
 
 			// Turn off rendering of everything except overlays
@@ -76,13 +93,21 @@ class OpdeApplication : public ExampleApplication {
 				ResourceGroupManager::getSingleton().getWorldResourceGroupName(), 
 				mMission, mSceneMgr);
 			*/
+			
+			std::cerr << "PROBLEM STARTS: " << std::endl;
 			// Initialise the rest of the resource groups, parse scripts etc
 			ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
-			
+			std::cerr << "PROBLEM ENDS... " << std::endl;	
+
+			// TODO: Hacky. But this all will go away anyway
+			mission = new OpdeMission(mRoot);
+
+			/*
 			ResourceGroupManager::getSingleton().loadResourceGroup(
 				ResourceGroupManager::getSingleton().getWorldResourceGroupName(),
 				false, true);
-			
+			*/
+
 			mission->loadMission(mMission);
 			
 			// Back to full rendering

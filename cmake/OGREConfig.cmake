@@ -2,11 +2,11 @@
 # Try to find Ogre library on both Windows and Linux systems
 # 
 # The following values will get defined:
-#	OGRE_FOUND - True if ogre lib was found
+#	OGRE_FOUND_OK - True if ogre lib was found
 #	OGRE_INCLUDE_DIR - Include libraries for Ogre usage
 #	OGRE_LIBRARIES - Library paths for ogre
 
-SET(OGRE_FOUND "No")
+SET(OGRE_FOUND_OK "No")
 
 IF (UNIX)
     SET(OGRE_INC_SEARCH_PATH
@@ -57,5 +57,5 @@ FIND_LIBRARY(OGRE_LIBRARIES NAMES OgreMain OgreMain_d PATHS
 
 
 IF(OGRE_INCLUDE_DIR AND OGRE_LIBRARIES)
-    SET(OGRE_FOUND "Yes")
+    SET(OGRE_FOUND_OK "Yes")
 ENDIF(OGRE_INCLUDE_DIR AND OGRE_LIBRARIES)

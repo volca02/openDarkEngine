@@ -31,17 +31,9 @@ Rewritten to be used in the openDarkEngine project by Filip Volejnik <f.volejnik
 //TODO: Destructor should release all DstPortals.
 namespace Ogre {
 	DarkSceneNode::DarkSceneNode(SceneManager* creator) : SceneNode(creator) {
-		mSrcPortals.clear();
-		mDstPortals.clear();
-		mFrameNum = 0;
-		mInitialized = false;
 	}
 	
 	DarkSceneNode::DarkSceneNode(SceneManager* creator, const String& name) : SceneNode(creator, name) {
-		mSrcPortals.clear();
-		mDstPortals.clear();
-		mFrameNum = 0;
-		mInitialized = false;
 	}
 
 	void DarkSceneNode::_update(bool updateChildren, bool parentHasChanged)  {
@@ -115,62 +107,13 @@ namespace Ogre {
 				else
 				{
 					// move deals with re-adding
-	                static_cast<DarkSceneManager*>(mCreator)->_notifyObjectMoved(
-    	                i->second, this->_getDerivedPosition());
+					static_cast<DarkSceneManager*>(mCreator)->_notifyObjectMoved(
+						i->second, this->_getDerivedPosition());
 				}
 			}
 		}
 	}
-	//-------------------------------------------------------------------------
-	// TODO: Add the ability to render visitors too. This only renders the movables attached to this node as the main node
-	void DarkSceneNode::_addToRenderQueue( Camera* cam, RenderQueue *queue, bool onlyShadowCasters ) {
-		ObjectMap::iterator mit = mObjectsByName.begin();
 
-		while ( mit != mObjectsByName.end() )  {
-			MovableObject * mo = mit->second;
-
-			mo->_notifyCurrentCamera(cam);
-			if ( mo->isVisible() &&
-				(!onlyShadowCasters || mo->getCastShadows())) {
-				mo -> _updateRenderQueue( queue );
-			}
-
-			++mit;
-		}
-
-		mit = mVisitorsByName.begin();
-		while ( mit != mObjectsByName.end() )  {
-			MovableObject * mo = mit->second;
-
-			mo->_notifyCurrentCamera(cam);
-			if ( mo->isVisible() &&
-				(!onlyShadowCasters || mo->getCastShadows())) {
-				mo -> _updateRenderQueue( queue );
-			}
-
-			++mit;
-		}
-	}
-	
-	//-------------------------------------------------------------------------
-	void DarkSceneNode::attachOutgoingPortal(Portal *portal) {
-		mDstPortals.insert(portal);
-	}
-			
-	//-------------------------------------------------------------------------
-	void DarkSceneNode::attachIncommingPortal(Portal *portal) {
-		mSrcPortals.insert(portal);
-	}
-	
-	//-------------------------------------------------------------------------
-	void DarkSceneNode::setCellNum(unsigned int cellNum) {
-		mCellNum = cellNum;
-	}
-			
-	//-------------------------------------------------------------------------
-	unsigned int DarkSceneNode::getCellNum() {
-		return mCellNum;
-	}
 }
 
 
