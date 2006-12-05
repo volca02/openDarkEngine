@@ -47,7 +47,8 @@ namespace Ogre {
 
 	//-----------------------------------------------------------------------
 	BspTree::~BspTree() {
-		delete[] mRootNode;
+		delete[] mLeafNodes;
+		delete[] mNonLeafNodes;
 	}
 
 	//-----------------------------------------------------------------------
@@ -163,9 +164,16 @@ namespace Ogre {
 	}
 	
 	//----------------------------------------------------------------------
-	void BspTree::setBspTree(BspNode* rootNode) {
-		// TODO: This should only be allowed in the certain parts of the level initialization. Oh well. Maybe SceneManager's params would be the right place
+	void BspTree::setBspTree(BspNode* rootNode, BspNode *leafNodes, BspNode* nonLeafNodes, 
+					size_t leafNodeCount, size_t nonLeafNodeCount) {
+		// TODO: This should only be allowed in the certain parts of the level initialization. Oh well.
 		mRootNode = rootNode;
+		
+		mLeafNodes = leafNodes;
+		mNumLeafNodes = leafNodeCount;
+		
+		mNonLeafNodes = nonLeafNodes;
+		mNumNonLeafNodes = nonLeafNodeCount;
 	}
 }
 

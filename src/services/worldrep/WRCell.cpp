@@ -28,7 +28,7 @@
 #include "OgreMaterialManager.h"
 #include "OgreTextureManager.h"
 #include "OgrePrerequisites.h"
-
+#include "OpdeException.h"
 #include "logger.h"
 
 using namespace Ogre;
@@ -190,7 +190,7 @@ namespace Opde {
 		assert(loaded);
 		
 		if (index > header.num_planes)
-			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Plane index is out of bounds", "WRCell::getPlane");
+			OPDE_EXCEPT("Plane index is out of bounds", "WRCell::getPlane");
 		
 		return planes[index];
 	}
@@ -471,6 +471,19 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------------------------------------
+	Ogre::Plane WRCell::getOgrePlane(unsigned int n) {
+		Ogre::Plane plane;
+		
+		if (header.num_planes <= n)
+			OPDE_EXCEPT("Plane index out of bounds.","WRCell::getPlane");
+		
+		plane.normal = Vector3(planes[n].normal.x, planes[n].normal.y, planes[n].normal.z);
+		plane.d = planes[n].d;
+		
+		return plane;
+	}
+	
+	//------------------------------------------------------------------------------------
 	void WRCell::constructPortalMeshes(Ogre::SceneManager *sceneMgr) {
 		// some checks on the status. These are hard mistakes
 		assert(loaded);
@@ -691,6 +704,9 @@ namespace Opde {
 		int actIdx = 0;
 		int actVertex = 0;
 
+		
+		BspNode::CellPlaneList planelist;
+		
 		// Now, I'm gonna build the geometry of all textured faces found in this cell (except portals. those go separate, because of the Z sort of transparency)
 		
 		// Only the non-transparent geometry, please - no textured portals
@@ -731,7 +747,17 @@ namespace Opde {
 
 			actVertex += facePtr[polyNum].numVertices;
 			actIdx    += facePtr[polyNum].numElements;
+			
 		}
+		
+		// Iterate through the cell's planes, and construct a plane list for this cell, then supply it to the BspNode
+		for (int x = 0; x < header.num_planes; x++) {
+			Ogre::Plane cplane = getOgrePlane(x);
+			
+			planelist.push_back(cplane);
+		}
+		
+		bspNode->setPlaneList(planelist);
 		
 		// update the BspNode with FaceGroupStart and FaceGroupCount
 		bspNode->setFaceGroupStart(startFace);

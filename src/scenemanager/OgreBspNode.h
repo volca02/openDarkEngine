@@ -55,7 +55,7 @@ namespace Ogre {
     class BspNode {
     		// So I'll save some time not calling methods to retrieve/set protected data...
 		friend class DarkSceneManager;
-
+		friend class BspRaySceneQuery;
 	public:
 		BspNode(SceneManager* owner, bool isLeaf);
 
@@ -163,6 +163,13 @@ namespace Ogre {
 		
 		/** sets the Face group count */
 		void setFaceGroupCount(int fgc);
+
+		/** Plane list. For Scene queries */
+		typedef std::list<Plane> CellPlaneList;
+
+		/** sets the plane list for scene queries */
+		void setPlaneList(CellPlaneList& planes);
+
 	protected:
 		SceneManager* mOwner; // Back-reference to SceneManager which owns this Node
 		bool mIsLeaf;
@@ -223,9 +230,18 @@ namespace Ogre {
 		    work on. This saves lots of small memory allocations / deallocations which limits memory fragmentation.
 		*/
 		int mFaceGroupStart;
-
+		
+		/** cell's plane list for Leaf nodes */
+		CellPlaneList mPlaneList;
+		
+		// For acceleration, we prepare a world fragment too (WFT_PLANE_BOUNDED_REGION)
+		/** World fragment if someone wants the plane list as a result from the query. - a pre-prepared fragment containing the cell's planes */
+		SceneQuery::WorldFragment mPlaneFragment;
+		
 	public:
 		const IntersectingObjectSet& getObjects(void) const { return mMovables; }
+		const CellPlaneList& getPlaneList() const { return mPlaneList; }
+
     };
 
 

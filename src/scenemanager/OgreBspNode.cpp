@@ -245,4 +245,13 @@ namespace Ogre {
 	void BspNode::setFaceGroupCount(int fgc) {
 		mNumFaceGroups = fgc;
 	}
+	
+	//-------------------------------------------------------------------------
+	void BspNode::setPlaneList(BspNode::CellPlaneList& planes) {
+		mPlaneList = planes;
+		
+		// update the fragment as well
+		mPlaneFragment.fragmentType = SceneQuery::WFT_PLANE_BOUNDED_REGION;
+		mPlaneFragment.planes = &mPlaneList;
+	}
 }

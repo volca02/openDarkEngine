@@ -42,7 +42,7 @@ namespace Ogre {
 		/** Constructor. */
 		BspTree();
 	
-		/** Destructor. Does unallocate the BSP tree */
+		/** Destructor. Does unallocate the BSP tree (e.g. leaf and non-leaf node list) */
 		~BspTree();
 	
 		/** Returns a pointer to the root node (BspNode) of the BSP tree. */
@@ -62,11 +62,21 @@ namespace Ogre {
 		/** Internal method, makes sure an object is removed from the leaves when detached from a node. */
 		void _notifyObjectDetached(const MovableObject* mov);
 		
+		BspNode* getLeafNodeStart() const { return mLeafNodes; };
+		unsigned int getNumLeafNodes() const { return mNumLeafNodes; };
 	protected:
 		/** Pointer list for the nodes...
 		*/
 		BspNode* mRootNode;
-		size_t	mNumNodes;
+			
+		/** Bsp Leaf nodes */
+		Ogre::BspNode* mLeafNodes;
+		unsigned int mNumLeafNodes;
+		
+		/** Bsp non-leaf nodes */
+		Ogre::BspNode* mNonLeafNodes;
+		unsigned int mNumNonLeafNodes;
+
 		
 		typedef std::map<const MovableObject*, std::list<BspNode*> > MovableToNodeMap;
 		/// Map for locating the nodes a movable is currently a member of
@@ -75,7 +85,10 @@ namespace Ogre {
 		void tagNodesWithMovable(BspNode* node, const MovableObject* mov, const Vector3& pos);
 	
 		/** Sets the BspTree root node to the tree root specified by root rootNode */
-		void setBspTree(BspNode* rootNode);
+		void setBspTree(BspNode* rootNode, BspNode *leafNodes, BspNode* nonLeafNodes, 
+					size_t leafNodeCount, size_t nonLeafNodeCount);
+	
+		
 	};
 }
 

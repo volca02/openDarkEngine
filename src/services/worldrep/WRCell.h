@@ -120,6 +120,9 @@ namespace Opde {
 			/** Calculates the Lightmap center in texture space, using Bounding coordinates as the base. */
 			Ogre::Vector2 calcLightmapDisplacement(int polyNum);
 			
+			/** returns the cell's plane of index n */
+			Ogre::Plane getOgrePlane(unsigned int n);
+			
 			/** The bsp node constructed by this class. Filled with static geometry and otherwise initialized */			
 			Ogre::BspNode* bspNode;
 		public:

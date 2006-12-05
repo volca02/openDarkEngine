@@ -66,11 +66,13 @@ namespace Ogre {
 			typedef std::map<Material*, std::vector<StaticFaceGroup*>, materialLess > MaterialFaceGroupMap;
 			MaterialFaceGroupMap mMatFaceGroupMap;
 		
-			/** Bsp Leaf nodes. For deallocation purposes */
+			/** Bsp Leaf nodes */
 			Ogre::BspNode* mLeafNodes;
-		
-			/** Bsp non-leaf nodes. For deallocation purposes */
+			unsigned int mNumLeafNodes;
+			
+			/** Bsp non-leaf nodes */
 			Ogre::BspNode* mNonLeafNodes;
+			unsigned int mNumNonLeafNodes;
 		
 			/// Global static level geometry vertex data 
 			Ogre::VertexData* mVertexData;
@@ -182,7 +184,13 @@ namespace Ogre {
 			
 			/** Sets the BSP tree to the new value, specified by the root BspNode. 
 			* @note The rootNode is unallocated using delete[] when freeing the level geometry. */
-			void setBspTree(BspNode *rootNode);
+			void setBspTree(BspNode *rootNode, BspNode *leafNodes, BspNode* nonLeafNodes, size_t leafNodeCount, size_t nonLeafNodeCount);
+			
+			/** return the root node of the bsp tree */
+			const BspNode* getRootBspNode();
+			
+			/** returns the pointer to the BspTree class which holds the Bsp tree */
+			BspTree* getBspTree() const { return mBspTree; };
 			
 			/** @copydoc SceneManager::clearScene */
 			void clearScene(void);

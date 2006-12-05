@@ -677,12 +677,24 @@ namespace Ogre {
 	}
 	
 	//-----------------------------------------------------------------------
-	void DarkSceneManager::setBspTree(BspNode *rootNode) {
+	void DarkSceneManager::setBspTree(BspNode *rootNode, BspNode *leafNodes, BspNode* nonLeafNodes, 
+		size_t leafNodeCount, size_t nonLeafNodeCount) {
 		if (mBspTree == NULL) 
 				mBspTree = new BspTree();
 		
 		
-		mBspTree->setBspTree(rootNode);
+		mBspTree->setBspTree(rootNode, leafNodes, nonLeafNodes, leafNodeCount, nonLeafNodeCount);
+		
+		mLeafNodes = leafNodes;
+		mNumLeafNodes = leafNodeCount;
+		
+		mNonLeafNodes = nonLeafNodes;
+		mNumNonLeafNodes = nonLeafNodeCount;
+	}
+	
+	//-----------------------------------------------------------------------
+	const BspNode* DarkSceneManager::getRootBspNode() {
+		return mBspTree->getRootNode();
 	}
 	
 	//-----------------------------------------------------------------------
@@ -728,21 +740,14 @@ namespace Ogre {
 		overlap 2 leaves?
 		*/
 		
-		/* TODO: Seriously this needs to be fixed WELL.
-		const BspLevelPtr& lvl = ((DarkSceneManager*)mParentSceneMgr)->getLevel();
+		BspTree* tree = ((DarkSceneManager*)mParentSceneMgr)->getBspTree();
 		
-		if (lvl.isNull()) return;
+		if (tree == NULL) return;
 
-		BspNode* node = lvl->getNodeStart();
-		int numNodes = lvl->getNumNodes();
+		BspNode* node = tree->getLeafNodeStart();
+		int numNodes = tree->getNumLeafNodes();
 		
 		while (numNodes--) {
-			// skip non-leaf node
-			if (!node->isLeaf()) { // TODO: this would be better done as iteration through cells
-				++node;
-				continue;
-			}
-			
 			const BspNode::IntersectingObjectSet& objects = node->getObjects();
 			int numObjects = (int)objects.size();
 	
@@ -779,7 +784,7 @@ namespace Ogre {
 			
 			++node;
 		}
-		*/
+		
 	}
     
 	//-----------------------------------------------------------------------
@@ -792,16 +797,14 @@ namespace Ogre {
 	
 	//-----------------------------------------------------------------------
 	void BspRaySceneQuery::execute(RaySceneQueryListener* listener) {
-		/* TODO: !!!!
 		clearTemporaries();
-		BspLevelPtr lvl = static_cast<DarkSceneManager*>(mParentSceneMgr)->getLevel();
+		const BspNode* rootNode = static_cast<DarkSceneManager*>(mParentSceneMgr)->getRootBspNode();
 		
-		if (!lvl.isNull()) {
+		if (rootNode != NULL) {
 			processNode(
-				lvl->getRootNode(), 
+				rootNode, 
 				mRay, listener);
 		}
-		*/
 	}
 	
 	//-----------------------------------------------------------------------
@@ -842,29 +845,60 @@ namespace Ogre {
 		
 			if (node->getSide(tracingRay.getOrigin()) == Plane::NEGATIVE_SIDE) {
 				// Intersects from -ve side, so do back then front
-				res = processNode(
-					node->getBack(), tracingRay, listener, result.second, traceDistance);
+				BspNode *backNode = node->getBack();
+				BspNode *frontNode = node->getFront();
 				
-				if (!res) return res;
-                
-				res = processNode(
-					node->getFront(), splitRay, listener, 
-					maxDistance - result.second, 
-					traceDistance + result.second);
+				// A good place for assertion? If both front and back are null, houston has a problem (and us too)
+				assert((backNode==NULL)&&(frontNode==NULL));
+				
+				if (backNode) { // If the back side is inside the world. if not, shall we ignore?
+					// trace the abscissa from the start point to the split plane.
+					res = processNode(
+						backNode, tracingRay, listener, result.second, traceDistance);
+					
+					if (!res) return res;
+				}
+				
+				// trace the rest of the ray.
+				if (frontNode) {
+					res = processNode(
+						frontNode, splitRay, listener, 
+						maxDistance - result.second, 
+						traceDistance + result.second);
+				}
+				
 			} else {
-				// Intersects from +ve side, so do front then back
-				res = processNode(node->getFront(), tracingRay, listener, 
-					result.second, traceDistance);
+				BspNode *backNode = node->getBack();
+				BspNode *frontNode = node->getFront();
 				
-				if (!res) return res;
+				// A good place for assertion? If both front and back are null, houston has a problem (and us too)
+				assert((backNode==NULL)&&(frontNode==NULL));
 				
-				res = processNode(node->getBack(), splitRay, listener,
-					maxDistance - result.second, 
-					traceDistance + result.second);
+				if (frontNode) { // If the back side is inside the world. if not, shall we ignore?
+					// trace the abscissa from the start point to the split plane.
+					res = processNode(frontNode, tracingRay, listener, 
+						result.second, traceDistance);
+				
+					
+					if (!res) return res;
+				}
+				
+				// trace the rest of the ray.
+				if (backNode) {
+					res = processNode(
+						backNode, splitRay, listener, 
+						maxDistance - result.second, 
+						traceDistance + result.second);
+				}
 			}
 		} else {
 			// Does not cross the splitting plane, just cascade down one side
-			res = processNode(node->getNextNode(tracingRay.getOrigin()),
+			BspNode *nextNode = node->getNextNode(tracingRay.getOrigin());
+			
+			// in the void space out of the tree, we have a problem too!
+			assert(!nextNode);
+			
+			res = processNode(nextNode,
 				tracingRay, listener, maxDistance, traceDistance);
 		}
 
@@ -875,8 +909,6 @@ namespace Ogre {
 	bool BspRaySceneQuery::processLeaf(const BspNode* leaf, const Ray& tracingRay, 
 		RaySceneQueryListener* listener, Real maxDistance, Real traceDistance) {
 		
-		/* TODO: !!!!
-			
 		const BspNode::IntersectingObjectSet& objects = leaf->getObjects();
 
 		BspNode::IntersectingObjectSet::const_iterator i, iend;
@@ -911,21 +943,19 @@ namespace Ogre {
 		}
 
 
-		// Check ray against brushes
+		// Check ray against the cell planes
 		if (mQueryMask & SceneManager::WORLD_GEOMETRY_TYPE_MASK) {
-			const BspNode::NodeBrushList& brushList = leaf->getSolidBrushes();
-			BspNode::NodeBrushList::const_iterator bi, biend;
-			biend = brushList.end();
+			// Get the plane list out of the leaf cell
+			const BspNode::CellPlaneList& planes = leaf->getPlaneList();
+			
 			bool intersectedBrush = false;
 			
-			for (bi = brushList.begin(); bi != biend; ++bi) {
-				BspNode::Brush* brush = *bi;
-                
-			std::pair<bool, Real> result = Math::intersects(tracingRay, brush->planes, true);
+			std::pair<bool, Real> result = Math::intersects(tracingRay, planes, true);
 			// if the result came back positive and intersection point is inside
 			// the node, check if this brush is closer
 			if(result.first && result.second <= maxDistance) {
 				intersectedBrush = true;
+				
 				if(mWorldFragmentType == SceneQuery::WFT_SINGLE_INTERSECTION) {
 					// We're interested in a single intersection
 					// Have to create these 
@@ -938,21 +968,21 @@ namespace Ogre {
 							return false;
 				} else 
 					if (mWorldFragmentType ==  SceneQuery::WFT_PLANE_BOUNDED_REGION) {
-					// We want the whole bounded volume
-					assert((*bi)->fragment.fragmentType == SceneQuery::WFT_PLANE_BOUNDED_REGION);
-					if (!listener->queryResult(const_cast<WorldFragment*>(&(brush->fragment)), 
+						// We want the whole bounded volume
+						assert(leaf->mPlaneFragment.fragmentType == SceneQuery::WFT_PLANE_BOUNDED_REGION);
+						if (!listener->queryResult(const_cast<WorldFragment*>(&(leaf->mPlaneFragment)), 
 						result.second + traceDistance))
 							return false; 
 
 					}
 				}
-			}
+			
 		
 			if (intersectedBrush) {
 				return false; // stop here
 			}
 		}
-		*/
+		
 		return true;
 	}
 	
