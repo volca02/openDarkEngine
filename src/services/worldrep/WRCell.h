@@ -71,8 +71,8 @@ namespace Opde {
 			// uint32_t		num_indices;
 			uint8_t		**poly_indices;
 			
-			/** Plane descriptors */
-			wr_plane_t	*planes;
+			/** Planes forming the cell */
+			Ogre::Plane *planes;
 			
 			/** animated lights map (e.g. bit to object number mapping) - count is to be found in the header */
 			int16_t		*anim_map; // index by bit num, and ya get the object number the animated lightmap belongs to
@@ -100,6 +100,11 @@ namespace Opde {
 			/** Indicates the fact that the cell data have already been loaded */
 			bool loaded;
 			
+			/** Indicates the fact that the cell portals have been already attached */
+			bool portalsDone;
+			
+			Ogre::BspNode::PlanePortalMap mPortalMap;
+			
 			int countBits(uint32_t src);
 			
 			/** Returns a prepared material pointer for combination texture/atlasnum
@@ -120,9 +125,6 @@ namespace Opde {
 			/** Calculates the Lightmap center in texture space, using Bounding coordinates as the base. */
 			Ogre::Vector2 calcLightmapDisplacement(int polyNum);
 			
-			/** returns the cell's plane of index n */
-			Ogre::Plane getOgrePlane(unsigned int n);
-			
 			/** The bsp node constructed by this class. Filled with static geometry and otherwise initialized */			
 			Ogre::BspNode* bspNode;
 		public:
@@ -138,7 +140,7 @@ namespace Opde {
 			void loadFromChunk(unsigned int _cell_num, DarkDatabaseChunk *chunk, int lightSize);
 		
 			/** Returns a cell's plane with the specified index */
-			const wr_plane_t getPlane(int index);
+			const Ogre::Plane& getPlane(int index);
 		
 			/** Construct and inserts the static geometry of the portal meshes into the Scene 
 			* Inserts a new SceneNode -> MovableObject pairs for each of the portals geometry having a graphical representation (e.g. water planes)

@@ -40,31 +40,40 @@ namespace Opde {
 	class ConsoleBackend : public Singleton<ConsoleBackend>, public Ogre::LogListener, public Opde::LogListener {
 		private:
 			/** Map of the string to the Listeners which handle them */
-			std::map<std::string, ConsoleCommandListener *> commandMap;
+			std::map<std::string, ConsoleCommandListener *> mCommandMap;
+			
+			/** Map of the string to the Listeners which handle them */
+			std::map<std::string, std::string> mHintMap;
 		
 			/** Command accelerator - tab completion map*/
-			std::map<std::string, std::set<std::string> > completionMap;
+			std::map<std::string, std::set<std::string> > mCompletionMap;
 		
 			/** Console texts list */
-			std::list< std::string > messages;
+			std::list< std::string > mMessages;
 		
 			/** Current view position. Use method scroll to move the actual view */
-			unsigned int position;
+			unsigned int mPosition;
 
 			/** Internal method for adding text rows */
 			void addText(std::string text);
 				
 			/** Indicates true if the console text / scroll changed till last time and should be redrawn */
-			bool changed;
+			bool mChanged;
 
 		public:
 			/** constructor */ 
 			ConsoleBackend();
 		
 			/** Will register the command Command with the ConsoleCommandListener listener
-			 * \return true if sucessful */
-			bool registerCommandListener(std::string Command, ConsoleCommandListener *listener);
+			* @note When the command is already registered, the listener will be reregistered, allowing this to be called in the constructors */
+			void registerCommandListener(std::string Command, ConsoleCommandListener *listener);
 		
+			/** Register a help (or a short description) for a command
+			* @param command Command name
+			* @param hint Hint text
+			*/
+			void setCommandHint(std::string command, std::string hint);
+			
 			/** execute the command, given on the commandline. Will tokenize by " " to find the first word, try to find that word as a command, and if sucessfull, will execute the commandListener's method commandExecuted */
 			void executeCommand(std::string Command);
 		

@@ -25,6 +25,7 @@ http://www.gnu.org/copyleft/lesser.txt.
 Rewritten to use in the openDarkEngine project by Filip Volejnik <f.volejnik@centrum.cz>
 */
 
+#include "config.h"
 #include "OgreDarkSceneManager.h"
 #include "OgreBspNode.h"
 #include "OgreException.h"
@@ -47,8 +48,19 @@ Rewritten to use in the openDarkEngine project by Filip Volejnik <f.volejnik@cen
 #include <vector>
 #include <fstream>
 
-// #define debug
-// #define cellist
+// The ray query traversal log
+// #define raydetails
+// only the leaf node's details
+// #define raydetailsl
+// The details of intersection test
+// #define raydetailsli
+
+// A conditional logging of cell-portal traversal
+#ifdef OPDE_DEBUG
+	#define LOG_TRAVERSAL(...) if (mTraversalLog) fprintf(stderr, __VA_ARGS__);
+#else
+	#define LOG_TRAVERSAL(...) ;
+#endif
 
 namespace Ogre {
 
@@ -64,16 +76,25 @@ namespace Ogre {
 
 		mActualFrame = 1;
 	    
-		firstTime = true;
-		
 		mBspTree = NULL;
+		
+		mShowPortals = false;
+		
+		mTraversalLog = false;
 	}
 
 	//-----------------------------------------------------------------------
 	DarkSceneManager::~DarkSceneManager() {
-		// TODO: freeMemory();
+		freeMemory();
 	}
     
+	//-----------------------------------------------------------------------
+	void DarkSceneManager::freeMemory(void) {
+		// no need to delete index buffer, will be handled by shared pointer
+		delete mRenderOp.indexData;
+		mRenderOp.indexData = 0;
+	}
+	
 	//-----------------------------------------------------------------------
 	const String& DarkSceneManager::getTypeName(void) const
 	{
@@ -90,7 +111,7 @@ namespace Ogre {
 	void DarkSceneManager::setWorldGeometry(const String& filename) {
 		// As we're not doing any internal loading, we throw unsupported exception
 		OGRE_EXCEPT(Exception::ERR_INVALIDPARAMS,
-			"World geometry is not supported by the DarkSceneManager. Use the supplied methods to inject it for now.",
+			"World geometry is not supported by the DarkSceneManager. Use the supplied methods to inject it.",
 			"SceneManager::setWorldGeometry");
 	}
     
@@ -191,10 +212,44 @@ namespace Ogre {
 	}
     
 	//-----------------------------------------------------------------------
+	void DarkSceneManager::renderPortals(void) {
+		if (!isRenderQueueToBeProcessed(mWorldGeometryRenderQueue))
+			return;
+		
+		// no world transform required
+		mDestRenderSystem->_setWorldMatrix(Matrix4::IDENTITY);
+		// Set view / proj
+		mDestRenderSystem->_setViewMatrix(mCameraInProgress->getViewMatrix(true));
+		mDestRenderSystem->_setProjectionMatrix(mCameraInProgress->getProjectionMatrixRS());
+		
+		// Iterate through the portal renderables and render
+		PortalListConstIterator pit = mVisiblePortals.begin();
+		
+		mDestRenderSystem->_setPolygonMode(mCameraInProgress->getPolygonMode());
+		
+		for (;pit!= mVisiblePortals.end(); pit++) {
+			// add the portal to the renderqueue as a renderable
+			getRenderQueue()->addRenderable((*pit));
+		}
+		
+		
+	}
+	
+	//-----------------------------------------------------------------------
 	void DarkSceneManager::_renderVisibleObjects(void) {
+		// render the sky if appropriate. Do this here so the skyhack will work
+		/* To do this, i have to skip the queueing because the static geometry is rendered directly, skipping the queue. I could in theory fire the rendering
+		for this single group
+		*/
+		// TODO: Once the sky system is solved, do a direct rendering (using renderOps) of the sky mesh
+		
+				
 		// Render static level geometry first
 		renderStaticGeometry();
 
+		if (mShowPortals)
+			renderPortals();
+		
 		// Call superclass to render the rest
 		SceneManager::_renderVisibleObjects();		
 	}
@@ -202,8 +257,9 @@ namespace Ogre {
 	//-----------------------------------------------------------------------
 	void DarkSceneManager::prepareCell(BspNode *cell, Camera *camera, Matrix4& toScreen, PortalFrustum *frust) { 
 		PortalListConstIterator outPortal_it = cell->mDstPortals.begin();
+		PortalListConstIterator end = cell->mDstPortals.end();
 		
-		for (;outPortal_it != cell->mDstPortals.end(); outPortal_it++) {
+		for (;outPortal_it != end; outPortal_it++) {
 			Portal *out_portal = (*outPortal_it);
 
 			out_portal->refreshScreenRect(camera, toScreen, frust);
@@ -217,10 +273,7 @@ namespace Ogre {
 	
 	//-----------------------------------------------------------------------
 	void DarkSceneManager::traversePortals(BspNode *cell, Camera* camera, RenderQueue *queue, PortalRect &viewrect, bool onlyShadowCasters) {
-		#ifdef debug
-		std::cerr << "traversal Starting" << std::endl;		
-		#endif
-		
+		LOG_TRAVERSAL("CELL_TRAVERSAL: traversal Starting");
 		// Prepare the to screen transform matrix. 
 		const Matrix4& viewM = camera->getViewMatrix();
 		const Matrix4& projM = camera->getProjectionMatrix();
@@ -239,21 +292,20 @@ namespace Ogre {
 		cell->mFrameNum = mActualFrame; 
 		
 		PortalListConstIterator outPortal_it = cell->mDstPortals.begin();
-		#ifdef debug
-		std::cerr << " * MOTHER CELL ID : " << cell->mCellNum << std::endl;
-		#endif
+		
+		LOG_TRAVERSAL("CELL_TRAVERSAL: * MOTHER CELL ID : %d", cell->mCellNum);
+
 		
 		for (;outPortal_it != cell->mDstPortals.end(); outPortal_it++) {
 			Portal *outportal = (*outPortal_it);
-			#ifdef debug	
-			std::cerr << "  * MOTHER CELL: Testing portal " << outportal->mPortalID << " to cell " << outportal->mTarget->mCellNum << std::endl;
-			#endif
+			
+			LOG_TRAVERSAL("CELL_TRAVERSAL: * MOTHER CELL: Testing portal %d to cell %d", 
+				      outportal->mPortalID, outportal->mTarget->mCellNum);
+			
 			outportal->mMentions = 0; 
 			
 			if  (outportal->mPortalCull) {
-				#ifdef debug
-				std::cerr << "  * MOTHER CELL: backface cull for outcell " << outportal->mTarget->mCellNum << std::endl;
-				#endif				
+				LOG_TRAVERSAL("CELL_TRAVERSAL: * MOTHER CELL: backface cull for outcell %d", outportal->mTarget->mCellNum);
 				
 				continue;
 			}
@@ -265,27 +317,20 @@ namespace Ogre {
 				
 				// mark the visible portal, so it will be evaluated as a view source
 				outportal->mMentions = 1; 
-			} 
-			#ifdef debug
-			else {
-				std::cerr << "  * MOTHER CELL: offscreen for " << outportal->mTarget << std::endl;
+			} else {
+				LOG_TRAVERSAL("CELL_TRAVERSAL:   * MOTHER CELL: offscreen for %d", outportal->mTarget);
 			}
-			#endif
 		}
 		
 		
 		// While a cell is needed to be evaluated
 		while (mActualPosition < mActiveCells.size()) {
 			// get one cell
-			#ifdef debug
-			std::cerr << " * Actual position " << mActualPosition << std::endl;
-			#endif
+			LOG_TRAVERSAL("CELL_TRAVERSAL: * Actual position ", mActualPosition);
 			
 			BspNode *actual = mActiveCells.at(mActualPosition);
 
-			#ifdef debug
-			std::cerr << "    - with cell number " << actual->mCellNum << std::endl;
-			#endif
+			LOG_TRAVERSAL("CELL_TRAVERSAL:  - with cell number ", actual->mCellNum);
 			
 			if (!actual->mInitialized)
 				prepareCell(actual, camera, toScreen, cameraFrustum);
@@ -298,15 +343,12 @@ namespace Ogre {
 			for (;tgtPortal_it != actual->mDstPortals.end(); tgtPortal_it++) {
 				Portal *target_portal = *tgtPortal_it;	
 
-				#ifdef debug
-				std::cerr << "  * test output portal " << target_portal->mPortalID << " to cell " << target_portal->mTarget->mCellNum << std::endl;
-				#endif				
+				LOG_TRAVERSAL("CELL_TRAVERSAL: * test output portal %d to cell %d", 
+					      target_portal->mPortalID, target_portal->mTarget->mCellNum);
 				
 				if  (target_portal->mPortalCull) { // backface cull
-					#ifdef debug
-					std::cerr << "    * backface cull for " << target_portal->mPortalID << " to cell " << target_portal->mTarget->mCellNum << std::endl;
-
-					#endif				
+					LOG_TRAVERSAL("CELL_TRAVERSAL:    * backface cull for %d to cell %d", 
+							target_portal->mPortalID, target_portal->mTarget->mCellNum);
 
 					continue;
 				}
@@ -319,9 +361,7 @@ namespace Ogre {
 				for (;src_portal_it != actual->mSrcPortals.end(); src_portal_it++) {
 					Portal *source = *src_portal_it;
 
-					#ifdef debug
-					std::cerr << "    * against src. " << source->mPortalID << std::endl;
-					#endif
+					LOG_TRAVERSAL("CELL_TRAVERSAL:     * against src. ", source->mPortalID);
 					
 					// If the source cell was not yet initialized, we'll skip the processing against this portal
 					// it should be ok, since we will not lower the mention number, and if the source cell will be traversed
@@ -335,33 +375,24 @@ namespace Ogre {
 					
 					// test for backface cull
 					if  (source->mPortalCull) { // backface cull
-						#ifdef debug
-						std::cerr << "    * backface cull for source portal " << source->mPortalID << std::endl;
-						#endif				
+						LOG_TRAVERSAL("CELL_TRAVERSAL:     * backface cull for source portal ", source->mPortalID);
 
 						continue;
 					}
 					
-					
+
 					if (source->mMentions > 0) { // reevaluation is needed
-						#ifdef debug
-						std::cerr << "     * Mention on portal, reconsidering" << std::endl; 
-						#endif
+						LOG_TRAVERSAL("CELL_TRAVERSAL:      * Mention on portal, reconsidering"); 
 						
 						// clip the src_portals view to the target portal
-						
 						PortalRect tgt; // the rectangle which represents the actual computed src to target portal intersection
 						
 						if (target_portal->intersectByRect(source->mActualRect, tgt)) {
-							#ifdef debug
-							std::cerr << "   - non-zero portal " << source->mPortalID << " intersection" << std::endl;
-							#endif
-
+							LOG_TRAVERSAL("CELL_TRAVERSAL:    - non-zero portal %d intersection", source->mPortalID);
 							
 							if (target_portal->unionActualWithRect(tgt)) {
-								#ifdef debug
-								std::cerr << "   - outgoing portal " << source->mPortalID << " changed." << std::endl;
-								#endif
+								LOG_TRAVERSAL("CELL_TRAVERSAL: - outgoing portal %d changed.", source->mPortalID);
+								
 								changed = true; 
 								chcount++;
 							}
@@ -375,17 +406,16 @@ namespace Ogre {
 					target_portal->mMentions++;
 				
 				if (target_portal->mMentions > 0) { // the view to the target has changed
-					#ifdef debug
-					std::cerr << "    * a change in portal view occured " << target_portal->mPortalID << std::endl;
-					#endif
+					LOG_TRAVERSAL("CELL_TRAVERSAL:     * a change in portal view occured - %d", target_portal->mPortalID);
 					
 					BspNode *target_cell = target_portal->mTarget;
 					
+					// will only add the ones that are not inside already
+					mVisiblePortals.insert(target_portal);
+					
 					// if the cell was not yet added
 					if (target_cell->mFrameNum != mActualFrame) {
-						#ifdef debug					
-						std::cerr << "   - adding cell " << target_cell->mCellNum << std::endl;
-						#endif						
+						LOG_TRAVERSAL("CELL_TRAVERSAL:    - adding cell %d", target_cell->mCellNum);
 						
 						target_cell->mInitialized = false; // invalidate the prepareness state
 						
@@ -395,16 +425,13 @@ namespace Ogre {
 						target_cell->mFrameNum = mActualFrame;
 					} else {
 						// we'll have to move the cell to the end if it has a position less than the actual cell
-						#ifdef debug						
-						std::cerr << "   - requeue? " << target_cell->mListPosition <<  " < " << mActualPosition << std::endl;
-						#endif	
+						LOG_TRAVERSAL("CELL_TRAVERSAL:    - requeue? %d < %d",
+								target_cell->mListPosition, mActualPosition);
 						
 						// If the cell was already processed, move it to the to
 						// We do not want to requeue the mother cell (Hey, this would be a cycle!)
 						if (target_cell->mListPosition < mActualPosition && target_cell->mListPosition != 0) { 
-							#ifdef debug
-							std::cerr << "   - requeueing cell " << target_cell->mCellNum << std::endl;
-							#endif
+							LOG_TRAVERSAL("CELL_TRAVERSAL:    - requeueing cell %d", target_cell->mCellNum);
 							
 							// change the ListPosition for all succesive cells
 							std::vector< BspNode *>::iterator cell_it = mActiveCells.begin() + target_cell->mListPosition + 1;
@@ -424,10 +451,8 @@ namespace Ogre {
 				} // if changed
 			} // for portals
 			
-			#ifdef debug
 			if (chcount == 0)
-				std::cerr << "  ! No change occured!" << std::endl;
-			#endif
+				LOG_TRAVERSAL("CELL_TRAVERSAL:   ! No change occured!");
 			
 			// now unmention all the incoming portals
 			// I have to do it here because directly unmentioning would destroy the portal vis testing...
@@ -443,9 +468,7 @@ namespace Ogre {
 			mActualPosition++;
 		} // while mActualPosition
 
-		#ifdef debug		
-		std::cerr << "Finished the traversal..." << std::endl;
-		#endif
+		LOG_TRAVERSAL("CELL_TRAVERSAL: Finished the traversal...");
 		
 		// Get rid of our frustum
 		delete cameraFrustum;
@@ -464,6 +487,9 @@ namespace Ogre {
 		// Clear the rendering helping buffers
 		mMatFaceGroupMap.clear();
 		mFaceGroupSet.clear();
+		
+		// visible portal list clear
+		mVisiblePortals.clear();
 		
 		mCellVisited = 0;
 		mCellDrawn = 0;
@@ -485,26 +511,11 @@ namespace Ogre {
 			// Maybe this is a key for the skyhack to work. Leave it as it is
 			std::vector<BspNode *>::reverse_iterator it = mActiveCells.rbegin();
 			
-			#ifdef cellist
-			std::cerr << "CELLIST: ";
-			#endif
-
-			for (;it != mActiveCells.rend(); it++) {
-				#ifdef cellist
-				std::cerr << (*it)->mCellNum << " ";
-				#endif
-				
-				// TODO: HMM. Queue the movables.
-				// Try to insert the movableObjects checking if it already is in the movablesForRendering or not
+			for (;it != mActiveCells.rend(); it++)
 				queueBspNode((*it), camera, onlyShadowCasters);
-				
-			}
-			#ifdef cellist
-			std::cerr << std::endl;
-			#endif
 		}
 		
-		firstTime = false;
+		mTraversalLog = false;
 		
 		return cameraNode;
 	}
@@ -532,15 +543,15 @@ namespace Ogre {
 				pMat = MaterialManager::getSingleton().getByHandle(faceGroup->materialHandle);
 				assert (!pMat.isNull());
 				
-				// Check normal (manual culling). Something rotten here, not doing for now...
-				/*ManualCullingMode cullMode = pMat->getTechnique(0)->getPass(0)->getManualCullingMode();
+				// Check normal (manual culling).
+				ManualCullingMode cullMode = pMat->getTechnique(0)->getPass(0)->getManualCullingMode();
 				
 				if (cullMode != MANUAL_CULL_NONE) {
 				    Real dist = faceGroup->plane.getDistance(camera->getDerivedPosition());
 				    if ( (dist < 0 && cullMode == MANUAL_CULL_BACK) ||
 					(dist > 0 && cullMode == MANUAL_CULL_FRONT) )
 					continue; // skip
-				} */
+				}
 				
 
 				mFaceGroupSet.insert(idx);
@@ -604,9 +615,11 @@ namespace Ogre {
 			HardwareBuffer::HBL_READ_ONLY));
 		
 		// I do not offset indexes here as I can do it before the rendering gets place
-		for (size_t elem = 0; elem < numIdx; ++elem) {
+		/*for (size_t elem = 0; elem < numIdx; ++elem) {
 			*pIndexes++ = *pSrc++;
-		}
+		}*/
+		memcpy(pIndexes, pSrc, numIdx * sizeof(unsigned int));
+		
 		mIndexes->unlock();
 
 		// return number of elements
@@ -673,7 +686,8 @@ namespace Ogre {
 			delete mBspTree;
 			mBspTree = NULL;
 		}
-		// TODO: freeMemory();
+		
+		freeMemory();
 	}
 	
 	//-----------------------------------------------------------------------
@@ -727,6 +741,27 @@ namespace Ogre {
 	}
 	
 	//-----------------------------------------------------------------------
+	bool DarkSceneManager::setOption( const String & key, const void * val ) {
+    		if ( key == "ShowPortals" ) {
+        		mShowPortals = * static_cast < const bool * > ( val );
+        		return true;
+	    	}
+
+		return SceneManager::setOption( key, val );
+	}
+	
+	//-----------------------------------------------------------------------
+	bool DarkSceneManager::getOption( const String & key, void *val ) {
+		if ( key == "ShowPortals" ) {
+			bool * bptr = ((bool *)(val));
+        		*bptr = mShowPortals;
+        		return true;
+	    	}
+
+		return SceneManager::setOption( key, val );
+	}
+	
+	//-----------------------------------------------------------------------
 	//-----------------------------------------------------------------------
 	BspIntersectionSceneQuery::BspIntersectionSceneQuery(SceneManager* creator) : DefaultIntersectionSceneQuery(creator) {
 		// Add bounds fragment type
@@ -744,11 +779,11 @@ namespace Ogre {
 		
 		if (tree == NULL) return;
 
-		BspNode* node = tree->getLeafNodeStart();
+		BspNode* leaf = tree->getLeafNodeStart();
 		int numNodes = tree->getNumLeafNodes();
 		
 		while (numNodes--) {
-			const BspNode::IntersectingObjectSet& objects = node->getObjects();
+			const BspNode::IntersectingObjectSet& objects = leaf->getObjects();
 			int numObjects = (int)objects.size();
 	
 			BspNode::IntersectingObjectSet::const_iterator a, b, theEnd;
@@ -780,9 +815,61 @@ namespace Ogre {
 						}
 					}
 				}
-			}
 			
-			++node;
+			
+				// Check object against cell's geometry
+				if (mQueryTypeMask & SceneManager::WORLD_GEOMETRY_TYPE_MASK) {
+					// Get the plane list out of the leaf cell
+					const BspNode::CellPlaneList& planes = leaf->getPlaneList();
+					
+					BspNode::CellPlaneList::const_iterator pi, piend;
+					piend = planes.end();
+					Real radius = aObj->getBoundingRadius();
+					const Vector3& pos = aObj->getParentNode()->_getDerivedPosition();
+
+					bool planeIntersect = false; // Assume no intersection for now
+					int pidx = 0;
+					
+					for (pi = planes.begin(); pi != piend; ++pi, ++pidx) {
+						Real dist = pi->getDistance(pos);
+						
+						if (dist < radius) { // a real intersection occured. this means we can stop testing now...
+							// But first, test if the sphere is not totally covered by a portal
+							BspNode::PlanePortalMap::const_iterator ports = leaf->mPortalMap.find(pidx);
+			
+							if (ports != leaf->mPortalMap.end()) {
+								PortalListConstIterator ptend = ports->second.end();
+								PortalListConstIterator it = ports->second.begin();
+								
+								bool portalCovered = false;
+								for (; it != ptend; it++) {
+									if ((*it)->enclosesSphere(pos, radius, dist)) {
+										portalCovered = true;
+										break;
+									}
+								}
+								
+								if (portalCovered)
+									continue;
+							}
+							
+							planeIntersect = true;
+							break;
+						}
+					}
+					
+					if (planeIntersect) {
+						// report the cell as it's WorldFragment
+						assert(leaf->mCellFragment.fragmentType == SceneQuery::WFT_CUSTOM_GEOMETRY);
+						if (!listener->queryResult(const_cast<MovableObject*>(aObj), 
+							const_cast<WorldFragment*>(&(leaf->mCellFragment))))
+								return; 
+					}
+					
+				}
+			} // for each object in the leaf
+			
+			++leaf;
 		}
 		
 	}
@@ -798,12 +885,18 @@ namespace Ogre {
 	//-----------------------------------------------------------------------
 	void BspRaySceneQuery::execute(RaySceneQueryListener* listener) {
 		clearTemporaries();
-		const BspNode* rootNode = static_cast<DarkSceneManager*>(mParentSceneMgr)->getRootBspNode();
 		
-		if (rootNode != NULL) {
-			processNode(
-				rootNode, 
-				mRay, listener);
+		const BspTree* bspTree = static_cast<DarkSceneManager*>(mParentSceneMgr)->getBspTree();
+		
+		// Find the leaf node the ray origin is in
+		const BspNode* baseNode = bspTree->findLeaf(mRay.getOrigin());
+		
+		if (baseNode != NULL) {
+			#ifdef raydetails
+			std::cerr << "! STARTING RAY SCENE QUERY !" << std::endl;
+			#endif
+			
+			traverseLeafNodes(baseNode, mRay, listener);
 		}
 	}
 	
@@ -824,168 +917,236 @@ namespace Ogre {
 	}
 	
 	//-----------------------------------------------------------------------
-	bool BspRaySceneQuery::processNode(const BspNode* node, const Ray& tracingRay, 
-			RaySceneQueryListener* listener, Real maxDistance, Real traceDistance) {
+	void BspRaySceneQuery::traverseLeafNodes(const BspNode* leaf, Ray tracingRay, 
+			RaySceneQueryListener* listener) {
 		
-		if (node->isLeaf()) {
-			return processLeaf(node, tracingRay, listener, maxDistance, traceDistance);
-		}
-
-		bool res = true;
+		Real traceDistance = 0;
+		bool nextCell = true;
+		Ray actualRay = tracingRay;	
 		
-		std::pair<bool, Real> result = tracingRay.intersects(node->getSplitPlane());
-		
-		if (result.first && result.second < maxDistance) {
-			// Crosses the split plane, need to perform 2 queries
-			// Calculate split point ray
-			Vector3 splitPoint = tracingRay.getOrigin() 
-				+ tracingRay.getDirection() * result.second;
+		while (nextCell) {
+			nextCell = false;
 			
-			Ray splitRay(splitPoint, tracingRay.getDirection());
-		
-			if (node->getSide(tracingRay.getOrigin()) == Plane::NEGATIVE_SIDE) {
-				// Intersects from -ve side, so do back then front
-				BspNode *backNode = node->getBack();
-				BspNode *frontNode = node->getFront();
-				
-				// A good place for assertion? If both front and back are null, houston has a problem (and us too)
-				assert((backNode==NULL)&&(frontNode==NULL));
-				
-				if (backNode) { // If the back side is inside the world. if not, shall we ignore?
-					// trace the abscissa from the start point to the split plane.
-					res = processNode(
-						backNode, tracingRay, listener, result.second, traceDistance);
-					
-					if (!res) return res;
-				}
-				
-				// trace the rest of the ray.
-				if (frontNode) {
-					res = processNode(
-						frontNode, splitRay, listener, 
-						maxDistance - result.second, 
-						traceDistance + result.second);
-				}
-				
-			} else {
-				BspNode *backNode = node->getBack();
-				BspNode *frontNode = node->getFront();
-				
-				// A good place for assertion? If both front and back are null, houston has a problem (and us too)
-				assert((backNode==NULL)&&(frontNode==NULL));
-				
-				if (frontNode) { // If the back side is inside the world. if not, shall we ignore?
-					// trace the abscissa from the start point to the split plane.
-					res = processNode(frontNode, tracingRay, listener, 
-						result.second, traceDistance);
-				
-					
-					if (!res) return res;
-				}
-				
-				// trace the rest of the ray.
-				if (backNode) {
-					res = processNode(
-						backNode, splitRay, listener, 
-						maxDistance - result.second, 
-						traceDistance + result.second);
-				}
-			}
-		} else {
-			// Does not cross the splitting plane, just cascade down one side
-			BspNode *nextNode = node->getNextNode(tracingRay.getOrigin());
-			
-			// in the void space out of the tree, we have a problem too!
-			assert(!nextNode);
-			
-			res = processNode(nextNode,
-				tracingRay, listener, maxDistance, traceDistance);
-		}
-
-		return res;
-	}
+			if (!leaf->isLeaf()) 
+				OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Node given is not a leaf node. Cannot progress", "BspRaySceneQuery::traverseLeafNode");
 	
-	//-----------------------------------------------------------------------
-	bool BspRaySceneQuery::processLeaf(const BspNode* leaf, const Ray& tracingRay, 
-		RaySceneQueryListener* listener, Real maxDistance, Real traceDistance) {
-		
-		const BspNode::IntersectingObjectSet& objects = leaf->getObjects();
-
-		BspNode::IntersectingObjectSet::const_iterator i, iend;
-		
-		iend = objects.end();
-		
-		//Check ray against objects
-        
-		for(i = objects.begin(); i != iend; ++i) {
-			// cast away constness, constness of node is nothing to do with objects
-			MovableObject* obj = const_cast<MovableObject*>(*i);
-			// Skip this object if not enabled
-			if((obj->getQueryFlags() & mQueryMask) == 0)
-				continue;
-
-			// check we haven't reported this one already
-			// (objects can be intersecting more than one node)
-			if (mObjsThisQuery.find(obj) != mObjsThisQuery.end())
-				continue;
-
-			//Test object as bounding box
-			std::pair<bool, Real> result = 
-					tracingRay.intersects(obj->getWorldBoundingBox());
+			#ifdef raydetailsl
+			std::cerr << " * RSQ PL: To process the leaf " << leaf->getCellNum() << " with : " << actualRay.getOrigin() << " dir " << actualRay.getDirection()
+				<< std::endl;
+			#endif
+				
+			const BspNode::IntersectingObjectSet& objects = leaf->getObjects();
+	
+			BspNode::IntersectingObjectSet::const_iterator i, iend;
 			
-			// if the result came back positive and intersection point is inside
-			// the node, fire the event handler
+			iend = objects.end();
 			
-			if(result.first && result.second <= maxDistance) {
-				if (!listener->queryResult(obj, result.second + traceDistance))
-					return false;
-			}
-		}
-
-
-		// Check ray against the cell planes
-		if (mQueryMask & SceneManager::WORLD_GEOMETRY_TYPE_MASK) {
 			// Get the plane list out of the leaf cell
 			const BspNode::CellPlaneList& planes = leaf->getPlaneList();
 			
 			bool intersectedBrush = false;
 			
-			std::pair<bool, Real> result = Math::intersects(tracingRay, planes, true);
-			// if the result came back positive and intersection point is inside
-			// the node, check if this brush is closer
-			if(result.first && result.second <= maxDistance) {
-				intersectedBrush = true;
+			int pidx = -1;
+			
+			Plane cl_plane;
+			
+			std::pair<bool, Real> result = rayIntersects(actualRay, planes, false, pidx, cl_plane);
+			
+			#ifdef raydetailsl
+			if (result.first) {
+				std::cerr << "\tRSQ PL: Intersection! D = "  << result.second << " plane index " << pidx << std::endl;
+			} else {
+				std::cerr << "\tRSQ PL: No intersection. with bulshit dist : "<< result.second << std::endl;
+			}
+			#endif
+			
+			// Because I'm inside, I definetaly should hit a plane... If I'm not inside, the BSP should have informed me
+			if (!result.first) {
+				std::cerr << "No plane hit while traversing through cell no. " << leaf->getCellNum() <<
+					" ray " << actualRay.getOrigin() << " -> " << actualRay.getDirection() << std::endl;
+				return;
+			}
+				//OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Ray didn't hit a plane!", "BspRaySceneQuery::traverseLeafNode");
+			
+			// I'll only report a success on the object hit when it is nearer the wall (is this right thing to do?)
+			Real collDistance = result.second;
+			
+			//Check ray against objects
+		
+			for(i = objects.begin(); i != iend; ++i) {
+				// cast away constness, constness of node is nothing to do with objects
+				MovableObject* obj = const_cast<MovableObject*>(*i);
+				// Skip this object if not enabled
+				if((obj->getQueryFlags() & mQueryMask) == 0)
+					continue;
+	
+				// check we haven't reported this one already
+				// (objects can be intersecting more than one node)
+				if (mObjsThisQuery.find(obj) != mObjsThisQuery.end())
+					continue;
+	
+				//Test object as bounding box
+				std::pair<bool, Real> result = 
+						actualRay.intersects(obj->getWorldBoundingBox());
+				
+				// if the result came back positive and intersection point is inside
+				// the node, fire the event handler
+				
+				if(result.first && result.second <= collDistance) {
+					if (!listener->queryResult(obj, collDistance + traceDistance))
+						return; // We hit an object, we can stop
+				}
+			}
+			
+			// Now, we'll test for portal intersection
+			BspNode::PlanePortalMap::const_iterator ports = leaf->mPortalMap.find(pidx);
+			
+					
+			if (ports != leaf->mPortalMap.end()) {
+				#ifdef raydetailsl
+				std::cerr << "\tRSQ PL: Will test PORTALS " << std::endl;
+				#endif
+				
+				PortalListConstIterator ptend = ports->second.end();
+				PortalListConstIterator it = ports->second.begin();
+				
+				bool portalHit = false;
+				for (; it != ptend; it++) {
+					if ((*it)->isHitBy(actualRay)) {
+						#ifdef raydetailsl
+						std::cerr << "\tRSQ PL: Portal hit..." << std::endl;
+						#endif
+						
+						// Move our origin into the target cell
+						// We'll move the origin of the Ray into the collision point, plus some extra to fix some irregularities of the FPU math
+						
+						Vector3 portalPoint = actualRay.getOrigin() 
+							+ actualRay.getDirection() * (collDistance + PLANE_DISTANCE_CORRECTION);
+				
+						Ray newRay(portalPoint, actualRay.getDirection());
+						
+						// now traverse to the next cell 
+						leaf = (*it)->getTarget();
+						actualRay = newRay;
+						traceDistance += collDistance + PLANE_DISTANCE_CORRECTION;
+						nextCell = true;
+						
+						portalHit = true;
+						
+						break;
+					}	
+				}
+				
+				if (portalHit)
+					continue;
+			}
+			#ifdef raydetailsl
+			else {
+				std::cerr << "\tRSQ PL: No portals for the colliding plane..." << std::endl;
+			}
+			#endif
+			
+			// In this point, I know I hit a wall (portals were already tested)
+			if(result.first) {
+				#ifdef raydetailsl
+				std::cerr << "\tRSQ PL: Found intersection " << actualRay.getPoint(result.second) << " dist " << collDistance + traceDistance << "(is " << collDistance << " " << traceDistance << ")" << std::endl;
+				#endif
+				
+				Vector3 onPlane = actualRay.getPoint(result.second);
 				
 				if(mWorldFragmentType == SceneQuery::WFT_SINGLE_INTERSECTION) {
 					// We're interested in a single intersection
 					// Have to create these 
 					SceneQuery::WorldFragment* wf = new SceneQuery::WorldFragment();
 					wf->fragmentType = SceneQuery::WFT_SINGLE_INTERSECTION;
-					wf->singleIntersection = tracingRay.getPoint(result.second);
+					wf->singleIntersection = onPlane;
+					
 					// save this so we can clean up later
 					mSingleIntersections.push_back(wf);
-					if (!listener->queryResult(wf, result.second + traceDistance))
-							return false;
-				} else 
-					if (mWorldFragmentType ==  SceneQuery::WFT_PLANE_BOUNDED_REGION) {
-						// We want the whole bounded volume
-						assert(leaf->mPlaneFragment.fragmentType == SceneQuery::WFT_PLANE_BOUNDED_REGION);
-						if (!listener->queryResult(const_cast<WorldFragment*>(&(leaf->mPlaneFragment)), 
-						result.second + traceDistance))
-							return false; 
-
-					}
+					if (!listener->queryResult(wf, collDistance + traceDistance))
+							return;
+					
+				} else if (mWorldFragmentType ==  SceneQuery::WFT_CUSTOM_GEOMETRY) {
+					// We want the whole bounded volume
+					assert(leaf->mCellFragment.fragmentType == SceneQuery::WFT_CUSTOM_GEOMETRY);
+					if (!listener->queryResult(const_cast<WorldFragment*>(&(leaf->mCellFragment)), 
+						collDistance + traceDistance))
+						return; 
 				}
-			
-		
-			if (intersectedBrush) {
-				return false; // stop here
 			}
-		}
-		
-		return true;
+		} // While 
 	}
 	
+	//-----------------------------------------------------------------------
+	std::pair<bool, Real> BspRaySceneQuery::rayIntersects(const Ray& ray, 
+		const std::list<Plane>& planes, bool normalIsOutside, int& planeindex, Plane& cPlane) {
+		
+		// I have to implement my own intersects routine, because I actually want to be inside the volume
+		// If any of the planes return outside, I'm not inside the volume, and therefore no intersection could occur
+		/* The second reason for custom implementation is the fact that the character of the data I use force me to
+		evaluate whether the intersection happened inside the portal or not. It would not be a great thing to iterate through all
+		the portals of the cell if I only need to evaluate those which lie on the plane that I got the minimal distance from 
+		*/	
+			
+		std::list<Plane>::const_iterator planeit, planeitend;
+		planeitend = planes.end();
+		bool anyOutside = false;
+		std::pair<bool, Real> ret;
+		ret.first = false;
+		ret.second = Math::POS_INFINITY;
+		
+		// TODO: DELETE THIS
+		Real f = Math::POS_INFINITY;
+		
+		#ifdef raydetailsli
+		std::cerr << "   RSQ RI: Will search for an intersection " << std::endl;
+		#endif
+		
+		Plane::Side inside  = normalIsOutside ?  Plane::NEGATIVE_SIDE : Plane::POSITIVE_SIDE;
+		Plane::Side outside = normalIsOutside ?  Plane::POSITIVE_SIDE : Plane::NEGATIVE_SIDE;
+		
+		int index = 0;
+		
+		for (planeit = planes.begin(); planeit != planeitend; ++planeit, ++index) {
+			const Plane& plane = *planeit;
+			
+			// is origin inside?
+			if (plane.getSide(ray.getOrigin()) != outside) { 
+				// Test single plane
+				std::pair<bool, Real> planeRes = ray.intersects(plane);
+				
+				// only consider this one if no backface cull happens
+				Real toRay = plane.normal.dotProduct(ray.getDirection() );
+				
+				if ((toRay < 0) && planeRes.first) {
+					// Ok, we intersected
+					ret.first = true;
+					
+					// Use the least distant result since we have a convex volume
+					if (planeRes.second < ret.second) {
+						ret.second = planeRes.second;
+						planeindex = index;
+						cPlane = plane;
+					}
+				}
+			} else {
+				anyOutside = true;
+				break;
+			}
+		}
+
+		if (anyOutside) {
+			#ifdef raydetailsli
+			std::cerr << "   RSQ RI: Outside the volume from plane index " << index << ". Will not report min. d. " <<  ret.second << " plane dist " << f << std::endl;
+			#endif
+			// Intersecting at 0 distance since inside the volume!
+			ret.first = false;
+			ret.second = Math::POS_INFINITY;
+		}
+
+		return ret;
+	}
+
 	//-----------------------------------------------------------------------
         //-----------------------------------------------------------------------
 	const String DarkSceneManagerFactory::FACTORY_TYPE_NAME = "DarkSceneManager";

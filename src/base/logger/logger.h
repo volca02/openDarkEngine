@@ -22,6 +22,7 @@
 #ifndef __LOGGER_H
 #define __LOGGER_H
 
+#include "config.h"
 #include "OpdeSingleton.h"
 #include <set>
 
@@ -83,8 +84,15 @@ namespace Opde {
 	#define LOG_FATAL(...) Logger::getSingleton().log(LOG_ERROR, __VA_ARGS__)
 	#define LOG_ERROR(...) Logger::getSingleton().log(LOG_ERROR, __VA_ARGS__)
 	#define LOG_INFO(...) Logger::getSingleton().log(LOG_INFO, __VA_ARGS__)
-	#define LOG_DEBUG(...) Logger::getSingleton().log(LOG_DEBUG, __VA_ARGS__)
-	#define LOG_VERBOSE(...) Logger::getSingleton().log(LOG_VERBOSE, __VA_ARGS__)
+	
+	// the debug+verbose loggers are conditionaly built in when the DEBUG flag is defined
+	#ifdef OPDE_DEBUG
+		#define LOG_DEBUG(...) Logger::getSingleton().log(LOG_DEBUG, __VA_ARGS__)
+		#define LOG_VERBOSE(...) Logger::getSingleton().log(LOG_VERBOSE, __VA_ARGS__)
+	#else
+		#define LOG_DEBUG(...)
+		#define LOG_VERBOSE(...)
+	#endif
 	
 	// Shortcut to the Logger instance
 	#define LOG Logger::getSingleton()

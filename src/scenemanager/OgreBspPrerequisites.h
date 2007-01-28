@@ -27,14 +27,14 @@ Rewritten to be used by the openDarkEngine project by Filip Volejnik <f.volejnik
 #ifndef __BspPrerequisites_H__
 #define __BspPrerequisites_H__
 
-#include "OgrePrerequisites.h"
+#include <OgrePrerequisites.h>
 
 namespace Ogre {
 
-    // Predeclare classes
-
+    	// Predeclare classes
 	class BspNode;
 	class PortalFrustum;
+	class Polygon;
 	class Portal;
 	class DarkSceneManager;
 

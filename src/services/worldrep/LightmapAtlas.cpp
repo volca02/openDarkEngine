@@ -21,8 +21,9 @@
 #include "LightmapAtlas.h"
 #include "OgreStringConverter.h"
 #include "ConsoleBackend.h"
-
+#include "WRCommon.h"
 // #define framelm
+#include "OpdeException.h"
 
 using namespace Ogre;
 
@@ -36,21 +37,20 @@ namespace Opde {
 	/*
 		A single texture, containing many lightmaps. used in the texturelist construction
 	*/
-	LightAtlas::LightAtlas(int category, int idx) {
+	LightAtlas::LightAtlas(int idx) {
 		name << "@lightmap" << idx; // so we can find the atlas by number in the returned AtlasInfo
-		this->category = category;  // category can be used for texture number f.e. - e.g. to stop mixing the texture<>lmap in a big scale (we drop down the number of resulting combinations)
 		
 		this->idx = idx;
 		
 		count = 0;
 	
 		// initialise the free space - initially whole lmap
-		freeSpace.push_back(new FreeSpaceInfo(0,0,ATLAS_lmsize,ATLAS_lmsize));
+		freeSpace = new FreeSpaceInfo(0,0,ATLAS_WIDTH,ATLAS_HEIGHT);
 		
-		
+		// I Place the lightmaps into a separate resource group for easy unloading
 		ptex = TextureManager::getSingleton().createManual(
-			name.str(),ResourceGroupManager::getSingleton().getWorldResourceGroupName(), 
-			TEX_TYPE_2D, ATLAS_lmsize, ATLAS_lmsize, 0, PF_A8R8G8B8, 
+			name.str(), TEMPTEXTURE_RESOURCE_GROUP, 
+			TEX_TYPE_2D, ATLAS_WIDTH, ATLAS_HEIGHT, 0, PF_A8R8G8B8, 
 			TU_DYNAMIC_WRITE_ONLY);
 		
 		atlas = ptex->getBuffer(0, 0);
@@ -59,10 +59,10 @@ namespace Opde {
 		atlas->lock(HardwareBuffer::HBL_DISCARD);
 		const PixelBox &pb = atlas->getCurrentLock();
 		
-		for (int y = 0; y < ATLAS_lmsize; y++) {
+		for (int y = 0; y < ATLAS_HEIGHT; y++) {
 			uint32 *data = static_cast<uint32*>(pb.data) + y*pb.rowPitch;
 			
-			for (int x = 0; x < ATLAS_lmsize; x++) 
+			for (int x = 0; x < ATLAS_WIDTH; x++) 
 				data[x] = 0;
 			
 		}
@@ -70,64 +70,38 @@ namespace Opde {
 		atlas->unlock();
 	}
 	
-	bool LightAtlas::canInsert(int w, int h) {
-		// no free space
-		if (freeSpace.size() == 0) return false;
-		
-		int last = freeSpace.size();
-		// so, we should also do the actual work here, no need to search twice
-		
-		// iterate through free spaces
-		for (int i = 0; i < last; i++) {
-			if (freeSpace.at(i)->Fits(w,h))
-				return true;
-		}
 	
-		return false;
+	LightAtlas::~LightAtlas() {
+		// TODO: for_each(lightmaps.begin(), lightmaps.end(), delete lmap);
+		if (freeSpace != NULL)
+			delete freeSpace;
 	}
 	
-	// get origin for the new lightmap inserted
-	FreeSpaceInfo LightAtlas::getOrigin(int w, int h) {
-		int last = freeSpace.size();
-		// so, we should also do the actual work here, no need to search twice
+	bool LightAtlas::addLightMap(LightMap *lmap) {
+		std::pair<int, int> dim = lmap->getDimensions();
 		
-		// iterate through free spaces
-		for (int i = 0; i < last; i++) {
-			FreeSpaceInfo dest;
-			
-			if (freeSpace.at(i)->Crop(w, h, freeSpace, i, &dest)) 
-				return dest;
-		}
-		
-		// TODO: Assertation?!
-		return FreeSpaceInfo(0,0,-1,-1); // this is an error!
-	}
-	
-	
-	LightMap* LightAtlas::addLightmap(int ver, char *buf, int w, int h, AtlasInfo &destinfo) {
-		if (!canInsert(w,h)) return NULL;
-	
 		// get the origin for our lmap
-		FreeSpaceInfo origin = getOrigin(w,h);
+		FreeSpaceInfo* area = freeSpace->allocate(dim.first, dim.second);
 		
-		lmpixel *converted_data = LightMap::convert(buf, w, h, ver);
+		if (area == NULL) // didn't fit
+			return false;
 		
-		LightMap* light_map = new LightMap(origin, this, w, h, converted_data);
-	
 		// calculate some important UV conversion data
 		// +0.5? to display only the inner transition of lmap texture, the outer goes to black color
-		light_map->uv.x = ((float)origin.x + 0.5 ) / ATLAS_lmsize;
-		light_map->uv.y = ((float)origin.y + 0.5 ) / ATLAS_lmsize;
+		lmap->uv.x = ((float)area->x + 0.5 ) / ATLAS_WIDTH;
+		lmap->uv.y = ((float)area->y + 0.5 ) / ATLAS_HEIGHT;
 		
 		// size conversion to atlas coords
-		light_map->suv.x = ((float)w - 1)/ATLAS_lmsize;
-		light_map->suv.y = ((float)h - 1)/ATLAS_lmsize;
+		lmap->suv.x = ((float)dim.first - 1)/ATLAS_WIDTH;
+		lmap->suv.y = ((float)dim.second - 1)/ATLAS_HEIGHT;
 	
 		// finally increment the count of stored lightmaps
 		count++;
-		lightmaps.push_back(light_map); 
+		lightmaps.push_back(lmap); 
 		
-		return light_map;
+		lmap->setPlacement(this, area);
+				
+		return true;
 	}
 	
 	bool LightAtlas::render() {
@@ -214,44 +188,71 @@ namespace Opde {
 		return idx;
 	}
 	
+	
+	int LightAtlas::getUnusedArea() {
+		return freeSpace->getLeafArea();
+	}
+	
 	// ---------------- LightAtlasList Methods ----------------------
 	LightAtlasList::LightAtlasList() {
 		Opde::ConsoleBackend::getSingleton().registerCommandListener(std::string("light"), dynamic_cast<ConsoleCommandListener*>(this));
+		Opde::ConsoleBackend::getSingleton().setCommandHint(std::string("light"), "Switch a light intensity: light LIGHT_NUMBER INTENSITY(0-1)");
+		Opde::ConsoleBackend::getSingleton().registerCommandListener(std::string("lmeff"), dynamic_cast<ConsoleCommandListener*>(this));
+		Opde::ConsoleBackend::getSingleton().setCommandHint(std::string("lmeff"), "lightmap atlas efficiency calculator");
+		// TODO: short description of command could be useful (registerCommandListener(command, desc, classptr))
+		
+		mSplitCount = 0;
 	}
 	
 	LightAtlasList::~LightAtlasList() {
-		int last = list.size();
+		std::vector< LightAtlas* >::iterator it = list.begin();
 			
-		// iterate through existing Atlases, and see if any of them accepts our lightmap
-		for (int i = 0; i < last; i++) 
-			delete list.at(i);
+		for (; it != list.end(); it++) 
+			delete *it;
 		
 		list.clear();
 	}
 	
-	
-	LightMap* LightAtlasList::addLightmap(int ver, int texture, char *buf, int w, int h, AtlasInfo &destinfo) {
+	bool LightAtlasList::placeLightMap(LightMap* lmap) {
 		if (list.size() == 0) 
-			list.push_back(new LightAtlas(texture, 0));
+			list.push_back(new LightAtlas(0));
 		
 		int last = list.size();
 		
-		LightMap *result;
-		
 		// iterate through existing Atlases, and see if any of them accepts our lightmap
 		for (int i = 0; i < last; i++) {
-			if (list.at(i)->getCategory() == texture) // so we don't mix up the different categories (e.g. texture numbers)
-				if (result = list.at(i)->addLightmap(ver, buf, w, h, destinfo)) 
-					return result;
+				if (list.at(i)->addLightMap(lmap)) 
+					return false;
 		}
 		
 		// add new atlas to list if none of them accepted the lmap
-		list.push_back(new LightAtlas(texture, last));
+		LightAtlas* la = new LightAtlas(last);
+		list.push_back(la);
 		
-		return list.at(last)->addLightmap(ver, buf, w, h, destinfo);
+		la->addLightMap(lmap);
+		return true;
 		
-		// now we have a lightAtlas which we can insert into. 
-		// TODO: add a useful info in destinfo too please (for light switching)
+	}
+	
+	LightMap* LightAtlasList::addLightmap(int ver, int texture, char *buf, int w, int h, AtlasInfo &destinfo) {
+		// convert the pixel representation
+		lmpixel *cdata = LightMap::convert(buf, w, h, ver);
+		
+		// construct the lmap
+		LightMap* lmap = new LightMap(w, h, cdata);
+		
+		// Try to insert, will find existing if already there
+		std::pair<TextureLightMapQueue::iterator, bool> lmm;
+		
+		// Insert the lightmap to the queue
+		lmm = mLightMapQueue.insert(
+		    TextureLightMapQueue::value_type(texture, std::vector<LightMap*>())
+		  );
+				
+
+		lmm.first->second.push_back(lmap);
+		
+		return lmap;
 	}
 	
 	int LightAtlasList::getCount() {
@@ -259,9 +260,38 @@ namespace Opde {
 	}
 
 	bool LightAtlasList::render() {
-		for (std::vector<LightAtlas *>::size_type i=0; i < list.size(); i++)
-			if (!list.at(i)->render()) return false;
-				
+		/*
+		TODO: The performance of the renderer highly depends on the atlasing used.
+		* The reason is that each material is processed separately. As each atlas produces one texture, the same-material based lightmaps should be in the same atlases.
+		* There should be as little atlasses as possible for the same reason.
+		- If atlasing takes the lightmaps as they go, a low number of atlases is produced, but the lightmap categories are highly mixed
+		- If the lightmaps are put into atlases per thei're texture number, the result is good, but the redundacy is killing memory a bit (90% unused pixel space common)
+		The solution is to atlas the lightmaps after all those are inserted (there is no guarantee that those will come in material index order), And doing so in a material order
+		*/
+		
+		// Step 1. Atlas the queue
+		TextureLightMapQueue::iterator ti = mLightMapQueue.begin();
+		
+		// for all materials
+		for (; ti != mLightMapQueue.end(); ti++) {
+			// sort the lmap vector by the area of the lmaps, and insert those all
+			std::sort(ti->second.begin(), ti->second.end(), lightMapLess());
+			
+			bool first = true;
+			
+			// find a nice warm place for all those little lightmaps
+			for (std::vector< LightMap *>::iterator it = ti->second.begin(); it < ti->second.end(); it++, first = false) {
+				if (placeLightMap(*it) && !first)
+					mSplitCount++;
+			}
+		}
+		
+		// Step2. Render
+		for (std::vector<LightAtlas *>::iterator it = list.begin(); it != list.end(); it++)
+			if (!(*it)->render()) 
+				OPDE_EXCEPT("Could not render the lightmaps!","LightAtlasList::render()");
+		
+		
 		return true;
 	}
 	
@@ -284,13 +314,47 @@ namespace Opde {
 				// apply
 				setLightIntensity(light, intensity);
 			}
-		}
+		} else if (command == "lmeff") {
+			// calculate the lightmap coverage efficiency - per atlas and global one (average)
+			// LOG_ERROR("Lmeff not implemented yet");
+			int total_pixels = 0;
+			int unused_pixels = 0;
+			
+			int last = list.size();
+		
+			// iterate through existing Atlases, and see if any of them accepts our lightmap
+			for (int i = 0; i < last; i++) {
+				unused_pixels += list.at(i)->getUnusedArea();
+				total_pixels += ATLAS_WIDTH * ATLAS_HEIGHT;
+			}
+			
+			float percentage = 0;
+			
+			if (total_pixels > 0)
+				percentage = 100.0f * unused_pixels / total_pixels;
+			
+			LOG_INFO("Total unused light map atlasses pixels: %d of %d (%f\%). %d atlases total used. Total splits: %d", unused_pixels, total_pixels, percentage, last, mSplitCount);
+			
+		} else LOG_ERROR("Command %s not understood by LightAtlasList", command.c_str());
 	}
 	
-// ------------------------------- Lightmap class
+	bool LightAtlasList::lightMapLess::operator() (const LightMap* a, const LightMap* b) const {
+		std::pair<int, int> s1, s2;
+		
+		s1 = a->getDimensions();
+		s2 = b->getDimensions();
+		
+		int area1 = s1.first * s1.second;
+		int area2 = s2.first * s2.second;
+		
+		return (area1 < area2);
+	}
+	
+	// ------------------------------- Lightmap class
 	void LightMap::refresh() {
 		// First we calculate the new version of the lmap. Then we post it to the atlas
 		// Float version of lmap
+		// TODO: Int will be sufficient and quicker
 		Vector3* f_lmap = new Vector3[sx * sy];
 					
 		// copy the static lmap...
@@ -326,7 +390,7 @@ namespace Opde {
 			}
 		}
 		
-		owner->updateLightMapBuffer(position, f_lmap);
+		owner->updateLightMapBuffer(*position, f_lmap);
 		
 		// Get rid of the helping array
 		delete[] f_lmap;
@@ -360,9 +424,6 @@ namespace Opde {
 	void LightMap::AddSwitchableLightmap(int id, lmpixel *data) {
 		switchable_lmap.insert(std::make_pair(id, data));
 		intensities.insert(std::make_pair(id, float(1)));
-		
-		// register us
-		owner->registerAnimLight(id, this);
 	}
 	
 	void LightMap::setLightIntensity(int id, float intensity) {
@@ -380,6 +441,23 @@ namespace Opde {
 	
 	int LightMap::getAtlasIndex() {
 		return owner->getIndex();
+	}
+	
+	
+	void LightMap::setPlacement(LightAtlas* _owner, FreeSpaceInfo* tgt) {
+		owner = _owner;
+		position = tgt;
+		
+		// register as a light releted lightmap
+		std::map<int, float>::iterator it = intensities.begin();
+	
+		for (; it != intensities.end(); it++) {
+			owner->registerAnimLight(it->first, this);
+		}
+	}
+	
+	std::pair<int, int> LightMap::getDimensions() const {
+		return std::pair<int,int>(sx, sy);
 	}
 } // namespace ogre
 

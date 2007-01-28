@@ -41,7 +41,7 @@ Rewritten from the BSPLevel class to use in the openDarkEngine project by Filip 
 namespace Ogre {
 
 	//-----------------------------------------------------------------------
-	BspTree::BspTree() : mRootNode(0) {
+	BspTree::BspTree() : mRootNode(NULL) {
 		// Nothing. Set-Null somethings!
 	}
 
@@ -118,7 +118,7 @@ namespace Ogre {
 		else
 		{
 			// Find distance to dividing plane
-			Real dist = node->getDistance(pos); // The problem is that pos = (0,0,0)
+			Real dist = node->getDistance(pos); 
 
 			if (Math::Abs(dist) < mov->getBoundingRadius())
 			{

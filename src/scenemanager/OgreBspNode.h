@@ -56,6 +56,8 @@ namespace Ogre {
     		// So I'll save some time not calling methods to retrieve/set protected data...
 		friend class DarkSceneManager;
 		friend class BspRaySceneQuery;
+		friend class BspIntersectionSceneQuery;
+			
 	public:
 		BspNode(SceneManager* owner, bool isLeaf);
 
@@ -135,7 +137,7 @@ namespace Ogre {
 		/** Sets the Node to be leaf or not */
 		void setIsLeaf(bool isLeaf);
 		/** Sets the splitting plane of this node */
-		void setSplitPlane(Plane splitPlane);
+		void setSplitPlane(const Plane& splitPlane);
 		/** Sets the Front child of this node */
 		void setFrontChild(BspNode* frontChild);
 		/** Sets the back child of this node */
@@ -156,7 +158,7 @@ namespace Ogre {
 		void setCellNum(unsigned int cellNum);
 		
 		/** gets the Cell number. For debugging */
-		unsigned int getCellNum();
+		unsigned int getCellNum() const;
 
 		/** sets the Face group start index */
 		void setFaceGroupStart(int fgs);
@@ -167,8 +169,13 @@ namespace Ogre {
 		/** Plane list. For Scene queries */
 		typedef std::list<Plane> CellPlaneList;
 
+		/** Plane portal map (index of the CellPlaneList) to the portal set */
+		typedef std::map<int, PortalList > PlanePortalMap;
+		
+		
 		/** sets the plane list for scene queries */
-		void setPlaneList(CellPlaneList& planes);
+		void setPlaneList(CellPlaneList& planes, PlanePortalMap& portalmap);
+		
 
 	protected:
 		SceneManager* mOwner; // Back-reference to SceneManager which owns this Node
@@ -234,9 +241,12 @@ namespace Ogre {
 		/** cell's plane list for Leaf nodes */
 		CellPlaneList mPlaneList;
 		
+		/** The Plane index to Portal set map */
+		PlanePortalMap mPortalMap;
+		
 		// For acceleration, we prepare a world fragment too (WFT_PLANE_BOUNDED_REGION)
-		/** World fragment if someone wants the plane list as a result from the query. - a pre-prepared fragment containing the cell's planes */
-		SceneQuery::WorldFragment mPlaneFragment;
+		/** World fragment if someone wants the cell as a result from the query. - a pre-prepared fragment containing the cell */
+		SceneQuery::WorldFragment mCellFragment;
 		
 	public:
 		const IntersectingObjectSet& getObjects(void) const { return mMovables; }

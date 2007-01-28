@@ -1,0 +1,22 @@
+This is a TODO plan for openDarkEngine
+
+Each minor version has it's own plan piece, which can change as requirements will
+
+0.2.0 - 0.3.0:
+	* implement a file handling base classes 
+	* implement a dynamic data containers
+	* implement a templating service for binary data templates/instances handling (e.g. a library of binary templates)
+	* implement a database service for per-object data storage using the dynamic data containers
+	* implement a base of the object service
+	* implement a LGMD .bin loader (online, resource manager?) that constructs a SceneNode tree and some specs of limits + rotating/sliding info
+	* test all the previous by loading the game objects in-game
+	* if considered a good idea, implement a base scripting bindings
+	* Write a custom gui service, based on ogre's overlays. Cegui is not too suitable for our purposes 
+	    - this one should implement a mouse/keyboard event filter, and support some base components - buttons, text lists
+	    - should be extendable by some virtual methods (render, event recieval, focussing) - should be enough to support ss2 gui too
+	* get rid of the temporary source code. That includes OpdeMission ad the ExampleApplication
+
+0.3.0 - 0.4.0: (Just a sketch for now, will likely change)
+	* AI object loading implementation (LGMM), including the movement database. Some tricks could be needed for the translation part of the movement
+	* Physics service implementation
+	* Particle service implementation

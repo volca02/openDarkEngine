@@ -21,16 +21,24 @@
 #ifndef _OgrePortal_H__
 #define _OgrePortal_H__
 
-#include "OgreVector3.h"
-#include "OgrePlane.h"
+#include <OgreCamera.h>
+#include <OgreSimpleRenderable.h>
+#include <OgreVector3.h>
+#include <OgrePlane.h>
+
 #include "OgrePortalFrustum.h"
+#include "OgrePolygon.h"
+#include "OgreBspPrerequisites.h"
+
 #include <iostream>
 
-namespace Ogre {
+#define MAX(a,b) ((a>b)?a:b)
+#define MIN(a,b) ((a<b)?a:b)
 
-	class PortalFrustum;
-	class BspNode;
-		
+// Helping 'infinity' macro for PortalRect coords
+#define INF 100000
+
+namespace Ogre {
 	/** @brief An int-type based portal rectangle struct 
 	*
 	* This structure is used by Portal class when calculating the on-screen bounding rectangle.
@@ -44,7 +52,7 @@ namespace Ogre {
 	std::ostream& operator<< (std::ostream& o, PortalRect& r);
 	
 	/** A vector of Vertices used for Portal shape definition */
-	typedef std::vector< Vector3 > PortalPoints;
+	typedef Ogre::PolygonPoints PortalPoints;
 	
 	/** @brief A Portal class used for SceneNode to SceneNode visibility testing
 	*
@@ -52,19 +60,28 @@ namespace Ogre {
 	* visibility determination is done using a to-screen projected portal vertices bounding rectangles PortalRects
 	* @note Please note that the direction of the plane's normal has to comply with the 
 	* portals vertex order derived normal. Also note that no check that the points actualy lie on the plane is done. */
-	class Portal {
+	class Portal : public Polygon, public SimpleRenderable {
 		friend class DarkSceneManager;
 		friend class PortalFrustum;
 			
-		private:
-			/** A vector containing the Vector3 values - Portal/portal edge vertices */
-			PortalPoints 	*points;
-			/** The plane on which the portal lies */
-			Plane		plane;
+		protected:
+			/// Static screen width size half
+			static int mScreenWidth2;
+			/// Static screen height size half
+			static int mScreenHeight2;
+			
+        		/* The SimpleRenderable methods override. */
+			void getWorldTransforms( Matrix4* xform ) const;
+        		const Quaternion& getWorldOrientation(void) const;
+        		const Vector3& getWorldPosition(void) const;
+	
+			void Portal::refreshPortalRenderable();
 			/** Screen - space bounding rectangle of the portal */
 			PortalRect	screenRect;  
 		
-		protected:
+			/** On-demand (lazy) generated movable object for debug rendering */
+			ManualObject* mMovableObject;
+			
 			/** target Scene Node (Cell) for this Portal */
 			BspNode *mTarget;
 
@@ -89,7 +106,7 @@ namespace Ogre {
 			/** Portal's center vertex */
 			Vector3 mCenter;
 			
-			/** deprecated: Portals bounding sphere radius. Should use the built-in bounding volumes */
+			/** Portals bounding sphere radius. */
 			float mRadius;
 		public:
 			/** Default constructor. Defines an empty geometry, and source and destination SceneNodes that are parameters
@@ -100,16 +117,8 @@ namespace Ogre {
 		
 			~Portal();
 			
-			/** Constructs the class as a copy of already existing portal */
+			/** Copy ctor */
 			Portal(Portal *src);
-			
-			void addVertex(float x, float y, float z);
-			
-			void addVertex(Vector3 a);
-			
-			const PortalPoints& getPoints();
-		
-			int getPointCount();
 			
 			/** Returns the target DarkSceneNode for this portal */
 			BspNode* getTarget();
@@ -117,45 +126,122 @@ namespace Ogre {
 			/** Returns the source DarkSceneNode for this portal */
 			BspNode* getSource();
 		
-			const Plane& getPlane();
-			
-			void setPlane(Plane plane);
-			
-			/** get the number of Portal's vertices outside a given plane
-			* @return the count of points which lie outside (negative distance from the plane)
-			*/
-			unsigned int getOutCount(Plane &plane);
-			
-			// is the Portal seen by camera frustum at all?
-			bool isSeen(Camera *cam);
-			
+			/** Refresh the center and radius bounding sphere parameters */
 			void refreshBoundingVolume();
-			
-			// Portal copy operator
-			// Portal& operator= (Portal *src);
-			
-			/** Clips the poly using a plane (and replaces instances vertices after success)
-			* @return number of vertices in the new poly
-			*/
-			int clipByPlane(const Plane &plane, bool &didClip);
-			
 			/**
 			* Refreshes screen projection bounding Rectangle
 			* @param cam Camera which is used by the projection
 			* @param toScreen A precomputed Projection*View matrix matrix4 which is used to project the vertices to screen
 			* @param frust PortalFrustum used to cut away non visible parts of the portal
 			*/
-			void refreshScreenRect(Camera *cam, Matrix4& toScreen, PortalFrustum *frust);
+			void refreshScreenRect(Camera *cam, Matrix4& toScreen, PortalFrustum *frust) {
+				// inverse coords to let the min/max initialize
+				screenRect.top = -INF;
+				screenRect.right = -INF;
+				screenRect.left = INF;
+				screenRect.bottom = INF;
+				
+				// Erase the actual rect
+				mActualRect = screenRect;
+				
+				// Backface cull. The portal won't be culled if a vector camera-vertex dotproduct normal will be greater than 0
+				Vector3 camToV0 = mPoints->at(0) - cam->getDerivedPosition(); 
+						
+				float dotp = camToV0.dotProduct(mPlane.normal);
+				
+				mPortalCull = (dotp > 0);
+				
+				// skip these expensive operations if we encounter a backface cull
+				if (mPortalCull) 
+					return;
+		
+				// We also can cull away the portal if it is behind the camera's near plane. Can we? This needs distance calculation with the surrounding sphere
+				
+				// We have to cut the Portal using camera's frustum first, as this should solve the to screen projection problems...
+				// the reason is that the coords that are at the back side or near the view point do not get projected right (that is right for our purpose)
+				// it should be sufficient to clip by near plane only though
+				
+				bool didc;
+				Portal *onScreen = frust->clipPoly(this, didc);
+				
+				// If we have a non-zero cut result
+				if (onScreen) {
+					const PortalPoints& scr_points = onScreen->getPoints();
+					
+					unsigned int idx;
+					
+					// project all the vertices to screen space
+					for (idx = 0; idx < scr_points.size(); idx++) {
+						int x, y;
+						
+						// This is one time-consuming line... I wonder how big eater this line is.
+						Vector3 hcsPosition = toScreen * scr_points.at(idx);
+						
+						// TODO: Parametrise the Screen width/height
+						// NOTE: The X coord is flipped. This is because of the transform matrix, but it is not a problem for us
+						x = ((int)(hcsPosition.x * mScreenWidth2) + mScreenWidth2); 
+						y = ((int)(hcsPosition.y * mScreenHeight2) + mScreenHeight2); 
+						
+						screenRect.top    = MAX(screenRect.top, y);
+						screenRect.bottom = MIN(screenRect.bottom, y);
+						screenRect.right  = MAX(screenRect.right, x);
+						screenRect.left   = MIN(screenRect.left, x);
+					}
+			
+					// release only if clip produced a new poly
+					if (onScreen != this)
+						delete onScreen;
+				}
+			}
+				
+			
 			
 			/**
 			* Intersects the Portals bounding rectangle by the given rectangle, and writes the result to the target parameter
 			*/
-			bool intersectByRect(PortalRect &boundry, PortalRect &target);
+			bool intersectByRect(PortalRect &boundry, PortalRect &target)  {
+				target.top = MIN(screenRect.top, boundry.top);
+				target.bottom = MAX(screenRect.bottom, boundry.bottom);
+				target.left = MAX(screenRect.left, boundry.left);
+				target.right = MIN(screenRect.right, boundry.right);
+				
+				if (target.top < target.bottom)
+					return false;
+			
+				if (target.right < target.left)
+					return false;
+				
+				return true;
+			}
 			
 			/**
 			* Union the actual view rectangle with addition rectangle. Returns true on a view change.
 			*/
-			bool unionActualWithRect(PortalRect &addition);
+			bool unionActualWithRect(PortalRect &addition) {
+				bool changed = false;
+				
+				if (addition.left < mActualRect.left) {
+					mActualRect.left = addition.left;
+					changed = true;
+				}
+				
+				if (addition.right > mActualRect.right) {
+					mActualRect.right = addition.right;
+					changed = true;
+				}
+				
+				if (addition.bottom < mActualRect.bottom) {
+					mActualRect.bottom = addition.bottom;
+					changed = true;
+				}
+				
+				if (addition.top > mActualRect.top) {
+					mActualRect.top = addition.top;
+					changed = true;
+				}
+				
+				return changed;
+			}
 
 			/**
 			* Debugging portal id setter
@@ -165,9 +251,10 @@ namespace Ogre {
 			/** Attaches the portal to the source and destination DarkSceneNodes */
 			void attach();
 			
-			/** Optimizes the portal. Removes unneeded, unnecessary vertices which slow down the visibility evaluation.
-			* @return int Number of vertices removed */
-			int optimize();
+			/** Mandatory override from SimpleRenderable */
+			Real getSquaredViewDepth(const Camera* cam) const;
+			/** Mandatory override from SimpleRenderable */
+			virtual Real getBoundingRadius(void) const;
 	};
 
 	/** A bunch of the portal pointers. Is used in the DarkSceneNode class. */

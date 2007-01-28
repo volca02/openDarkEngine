@@ -4,5 +4,6 @@
 	
 #cmakedefine HAVE_INTTYPES_H 1
 
+#cmakedefine OPDE_DEBUG
 
 #endif

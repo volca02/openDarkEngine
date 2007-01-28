@@ -1,7 +1,7 @@
 OpenDarkEngine (OPDE) readme
 ----------------------------
 
-This is a readme file for the OPDE project version 0.1.8
+This is a readme file for the OPDE project version 0.2.0
 
     OPDE was created as an effort to build a 
 multiplatform engine supporting the LookingGlass'es (TM) 
@@ -58,6 +58,19 @@ The DarkSceneManager is released under the LGPL license, to comply with the orig
 Additional sources, written and added to the DarkSceneManager (found in the src/DarkSceneManager) are licensed under LGPL too.
 
 See COPYING for the informations regarding the GNU GPL license.
+
+Source code structure
+---------------------
+The main code resides in the 'src' subdirectory. The 'proto' directory contains some prototype code in the testing phase.
+
+In the src directory, you can find:
+
+    compat - Compiler compatibility headers
+    base - base classes for the engine - logging, console backend, etc.
+    scenemanager - the DarkSceneManager code, used to render BSP/Portal type of scenes
+    services - The engine services, which will make up the engine itself
+    tools - various tools - only meshconvert utility for now (LGMD -> .mesh xml converter)
+    widgets - a widget implementations (GUI) - only console for now
 
 
 Thanks

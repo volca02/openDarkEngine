@@ -20,6 +20,7 @@
  
 #include "OgrePlane.h"
 #include "OgrePortalFrustum.h"
+#include "OgrePortal.h"
 
 namespace Ogre {
 

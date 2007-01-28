@@ -21,10 +21,10 @@
 #ifndef _OgrePortalFrustum_H__
 #define _OgrePortalFrustum_H__
 
-#include "OgrePortal.h"
-#include "OgrePlane.h"
-#include "OgreVector3.h"
-#include "OgreCamera.h"
+#include "OgreBspPrerequisites.h"
+#include <OgrePlane.h>
+#include <OgreVector3.h>
+#include <OgreCamera.h>
 
 namespace Ogre {
 

@@ -34,16 +34,20 @@ Rewritten to be used by the openDarkEngine project by Filip Volejnik <f.volejnik
 #include "OgreRenderOperation.h"
 #include <set>
 #include <vector>
-#include "OgrePortalFrustum.h"
+#include "OgreBspPrerequisites.h"
 #include "OgreDarkSceneNode.h"
 #include "OgreBspTree.h"
 
 namespace Ogre {
 
-	/**
+	#define PLANE_DISTANCE_CORRECTION 0.00001
+	
+	/** BSP/Portal based scene manager
 	*/
 	class DarkSceneManager : public SceneManager {
 		protected:
+			bool mTraversalLog;
+			
 			// some statistics
 			unsigned int	mCellDrawn;
 			unsigned int	mCellVisited;
@@ -58,6 +62,8 @@ namespace Ogre {
 		
 			BspTree *mBspTree;
 		
+			PortalList mVisiblePortals;
+			
 			// Set of already included face groups
 			typedef std::set<int> FaceGroupSet;
 			FaceGroupSet mFaceGroupSet;
@@ -121,6 +127,10 @@ namespace Ogre {
 			/** Renders the static geometry - e.g. visible parts of the level data */ 
 			void renderStaticGeometry(void);
 		
+			/** Renders the visible portals as wireframe - debug method 
+			* @note Must be enabled using the setOption - ShowPortals */
+			void DarkSceneManager::renderPortals(void);
+			
 			/** Frees up allocated memory for geometry caches. */
 			void freeMemory(void);
 		
@@ -133,12 +143,13 @@ namespace Ogre {
 			/** MovableObjects listed that will get inserted into the renderQueue */
 			MovablesForRendering mMovablesForRendering;
 		
-			// debugging var. first time frame rendered
-			bool	firstTime;
+			/// Display the visible portals as wireframe (set through setOption - ShowPortals)
+			bool mShowPortals;
 			
-			// the list of cells to be processed / allready processed
+			/// the list of cells to be processed / allready processed
 			std::vector<BspNode *> mActiveCells;
-			size_t mActualPosition; // actual position in the Active Cell list TODO: Make a local variable?
+			/// actual position in the Active Cell list TODO: Make a local variable?
+			size_t mActualPosition; 
 			
 		public:
 			DarkSceneManager(const String& instanceName);
@@ -254,7 +265,19 @@ namespace Ogre {
 			*/
 			virtual IntersectionSceneQuery* 
 			    createIntersectionQuery(unsigned long mask = 0xFFFFFFFF);
+			
+			/**
+				Set a scene manager option.
+				@remarks
+					Options:
+						"ShowPortals" : bool * - display visible portals as wireframe
+			*/
+			bool DarkSceneManager::setOption( const String & key, const void * val );
 
+			/**
+				Get a scene manager option
+			*/
+			bool DarkSceneManager::getOption( const String & key, void *val );
     };
 
     /** BSP specialisation of IntersectionSceneQuery */
@@ -268,7 +291,7 @@ namespace Ogre {
 
     };
 
-    /** BSP specialisation of RaySceneQuery */
+    /** BSP/Portal specialisation of RaySceneQuery */
     class BspRaySceneQuery : public DefaultRaySceneQuery
     {
     public:
@@ -284,17 +307,15 @@ namespace Ogre {
         std::vector<SceneQuery::WorldFragment*> mSingleIntersections;
 
         void clearTemporaries(void);
-        /** Internal processing of a single node.
-        @returns true if we should continue tracing, false otherwise
+	
+        /** Internal processing of a leaf node traversal
         */
-        bool processNode(const BspNode* node, const Ray& tracingRay, RaySceneQueryListener* listener,
-            Real maxDistance = Math::POS_INFINITY, Real traceDistance = 0.0f);
-        /** Internal processing of a single leaf.
-        @returns true if we should continue tracing, false otherwise
-        */
-        bool processLeaf(const BspNode* node, const Ray& tracingRay, RaySceneQueryListener* listener,
-            Real maxDistance = Math::POS_INFINITY, Real traceDistance = 0.0f);
+        void traverseLeafNodes(const BspNode* leaf, Ray tracingRay, RaySceneQueryListener* listener);
 
+	/** Helper method getting the nearest intersection for convex volume of planes, when inside of it.
+	* if intersection occured, the planeindex is filled up with the index of the plane which resulted in the returned minimal distance */
+	std::pair<bool, Real> rayIntersects(const Ray& ray, 
+					    const std::list<Plane>& planes, bool normalIsOutside, int& planeindex, Plane& cPlane);
     };
     
 	/// Factory for DarkSceneManager

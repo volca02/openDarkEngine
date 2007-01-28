@@ -30,13 +30,14 @@
 #include "OgrePrerequisites.h"
 #include "OpdeException.h"
 #include "logger.h"
+#include "WRCommon.h"
 
 using namespace Ogre;
 
 namespace Opde {
 
 	//------------------------------------------------------------------------------------
-	WRCell::WRCell() : cellNum(-1), atlased(false), loaded(false) {
+	WRCell::WRCell() : cellNum(-1), atlased(false), loaded(false), portalsDone(false) {
 		bspNode = NULL;
 	}
 	
@@ -121,8 +122,21 @@ namespace Opde {
 		}
 		
 		//6. load the planes
-		planes = new wr_plane_t[header.num_planes];
-		chunk->read(planes, sizeof(wr_plane_t) * header.num_planes);
+		wr_plane_t* wr_planes = new wr_plane_t[header.num_planes];
+		chunk->read(wr_planes, sizeof(wr_plane_t) * header.num_planes);
+		
+		planes = new Ogre::Plane[header.num_planes];
+		// convert the planes to the ogre format
+		for (int x = 0; x < header.num_planes; x++) {
+			wr_plane_t origpl = wr_planes[x];
+			Ogre::Plane tplane;
+			
+			tplane.normal = Vector3(origpl.normal.x, origpl.normal.y, origpl.normal.z);
+			tplane.d = origpl.d;
+			
+			planes[x] = tplane;
+		}
+		delete[] wr_planes;
 		
 		//7. anim lights map
 		// load the light id's array
@@ -186,7 +200,7 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------------------------------------
-	const wr_plane_t WRCell::getPlane(int index) {
+	const Ogre::Plane& WRCell::getPlane(int index) {
 		assert(loaded);
 		
 		if (index > header.num_planes)
@@ -471,19 +485,6 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------------------------------------
-	Ogre::Plane WRCell::getOgrePlane(unsigned int n) {
-		Ogre::Plane plane;
-		
-		if (header.num_planes <= n)
-			OPDE_EXCEPT("Plane index out of bounds.","WRCell::getPlane");
-		
-		plane.normal = Vector3(planes[n].normal.x, planes[n].normal.y, planes[n].normal.z);
-		plane.d = planes[n].d;
-		
-		return plane;
-	}
-	
-	//------------------------------------------------------------------------------------
 	void WRCell::constructPortalMeshes(Ogre::SceneManager *sceneMgr) {
 		// some checks on the status. These are hard mistakes
 		assert(loaded);
@@ -546,8 +547,7 @@ namespace Opde {
 					
 			manual->end();
 
-			// LOG_DEBUG("Attaching cell %d geometry to it's scene node", cellNum);
-			
+			LOG_DEBUG("Attaching cell water portal %d geometry...", cellNum);
 			// Attach the resulting object to the node with the center in the center vertex of the mesh...
 			SceneNode* meshNode = sceneMgr->createSceneNode(modelName.str());
 			meshNode->setPosition(nodeCenter);
@@ -557,18 +557,80 @@ namespace Opde {
 			// Attach the new scene node to the root node of the scene (this ensures no further transforms, other than we want, 
 			// take place, and that the geom will be visible only when needed)
 			sceneMgr->getRootSceneNode()->addChild(meshNode);
-					
+			
 			if(meshNode) {
 				meshNode->needUpdate(true);
 			}
-			// LOG_DEBUG("Attaching cell %d geometry : done", cellNum);
-		}
 
+			LOG_DEBUG("   - Attaching cell water portal %d geometry : done", cellNum);
+		}
+		
+		// NOTE: The following code adds a white wireframe object for every portal in the scene. Ment as a debug tool it is
+		// TODO: Remove once the scene queries run ok
+		
+		// Create a white wireframe material first
+		/*
+		for (int polyNum = portalStart; polyNum < header.num_polygons; polyNum++) {
+			// Prepare the object's name
+			StringUtil::StrStreamType modelName;
+			modelName << "cell_" << cellNum << "_portal_" << polyNum << "_edge";	
+			
+			// Each portal's mech gets it's own manual object. This way we minimize the mesh attachments to hopefully minimal set	
+			ManualObject* manual = sceneMgr->createManualObject(modelName.str());
+			
+    			manual->begin("BaseWhiteNoLighting", RenderOperation::OT_LINE_STRIP);
+			
+			wr_coord_t polyCenter = vertices[ poly_indices[polyNum][0] ];
+			Vector3 nodeCenter = Vector3(polyCenter.x, polyCenter.y, polyCenter.z);
+			
+			// for each vertex, insert into the model
+			for (int vert = 0; vert < face_maps[polyNum].count; vert++)  {
+				wr_coord_t vrelative = vertices[ poly_indices[polyNum][vert] ];
+				
+				// Subtract the center
+				vrelative.x = vrelative.x - polyCenter.x;
+				vrelative.y = vrelative.y - polyCenter.y;
+				vrelative.z = vrelative.z - polyCenter.z;
+				
+				manual->position(vrelative.x, vrelative.y, vrelative.z);
+			}
+			
+			// now feed the indexes
+			for (int t = 0; t <= face_maps[polyNum].count; t++) {
+				// push back the index
+				manual->index(t % face_maps[polyNum].count);
+			}
+			
+
+			manual->end();
+
+			// LOG_DEBUG("Attaching cell %d geometry to it's scene node", cellNum);
+			
+			// Attach the resulting object to the node with the center in the center vertex of the mesh...
+			SceneNode* meshNode = sceneMgr->createSceneNode(modelName.str());
+			
+			
+			(static_cast<DarkSceneNode*>(meshNode))->attachObject(manual);
+			
+			meshNode->setPosition(nodeCenter);
+			
+			if(meshNode) {
+				meshNode->needUpdate(true);
+			}
+
+			// Attach the new scene node to the root node of the scene (this ensures no further transforms, other than we want, 
+			// take place, and that the geom will be visible only when needed)
+			sceneMgr->getRootSceneNode()->addChild(meshNode);
+			
+
+		}
+		*/
 	}
 	
 	//------------------------------------------------------------------------------------
-	int WRCell::attachPortals(WRCell * cellList) {
+	int WRCell::attachPortals(WRCell* cellList) {
 		assert(bspNode);
+		assert(!portalsDone);
 		
 		// The textured portals are both texturing source and portals. This solves the problems of that approach.
 		int PortalOffset = header.num_polygons - header.num_portals;
@@ -579,10 +641,8 @@ namespace Opde {
 		
 		for (int portalNum = PortalOffset; portalNum < header.num_polygons; portalNum++) {
 			Ogre::Plane portalPlane;
-			wr_plane_t wrPlane = planes[face_maps[portalNum].plane];
 			
-			portalPlane.normal = Vector3(wrPlane.normal.x, wrPlane.normal.y, wrPlane.normal.z);
-			portalPlane.d = wrPlane.d;
+			portalPlane = getPlane(face_maps[portalNum].plane);
 			
 			Portal *portal = new Portal(bspNode, cellList[face_maps[portalNum].tgt_cell].getBspNode(), portalPlane);
 			
@@ -590,7 +650,7 @@ namespace Opde {
 				// for each vertex of that poly
 				wr_coord_t coord = vertices[ poly_indices[portalNum][vert] ];
 				
-				portal->addVertex(coord.x, coord.y, coord.z);
+				portal->addPoint(coord.x, coord.y, coord.z);
 			} // for each vertex
 			
 			// Debbuging portal order ID
@@ -604,8 +664,14 @@ namespace Opde {
 			
 			// Attach the portal to the BspNodes
 			portal->attach();
+			
+			// insert to the plane->(portal set) map
+			std::pair<Ogre::BspNode::PlanePortalMap::iterator, bool > ptset =
+				mPortalMap.insert(Ogre::BspNode::PlanePortalMap::value_type(face_maps[portalNum].plane, Ogre::PortalList()));
+			ptset.first->second.insert(portal);
 		}
 		
+		portalsDone = true;
 		return optimized;
 	}
 	
@@ -700,6 +766,7 @@ namespace Opde {
 		assert(loaded);
 		assert(atlased);
 		assert(bspNode);
+		assert(portalsDone);
 		
 		int actIdx = 0;
 		int actVertex = 0;
@@ -742,22 +809,32 @@ namespace Opde {
 			facePtr[polyNum].elementStart = startIndex + actIdx;  // absolute index index :)
 			facePtr[polyNum].numElements = 3 * (face_maps[polyNum].count - 2); // The count of the triads * 3 of this poly
 			facePtr[polyNum].materialHandle = shadMat->getHandle();
-			facePtr[polyNum].plane.normal = Vector3(planes[polyNum].normal.x, planes[polyNum].normal.y, planes[polyNum].normal.z);
-			facePtr[polyNum].plane.d = planes[polyNum].d;
+			facePtr[polyNum].plane = getPlane(face_maps[polyNum].plane);
 
 			actVertex += facePtr[polyNum].numVertices;
 			actIdx    += facePtr[polyNum].numElements;
-			
 		}
 		
-		// Iterate through the cell's planes, and construct a plane list for this cell, then supply it to the BspNode
-		for (int x = 0; x < header.num_planes; x++) {
-			Ogre::Plane cplane = getOgrePlane(x);
+		
+		// Because of the ray scene query, I have to add ALL planes of the cell
+		Ogre::BspNode::PlanePortalMap remmapedPortalMap;
+		
+		//for (int i = 0; planeit != planeend; planeit++, i++) {
+		for (int i = 0; i < header.num_planes; i++) {
+			Ogre::Plane cplane = getPlane(i);
+			
+			int portals = 0;
+			
+			// debug cout of portals mapped on a cell's plane
+			Ogre::BspNode::PlanePortalMap::const_iterator ptsetit = mPortalMap.find(i);
+			if  (ptsetit != mPortalMap.end()) {
+				portals = ptsetit->second.size();
+			}
 			
 			planelist.push_back(cplane);
 		}
 		
-		bspNode->setPlaneList(planelist);
+		bspNode->setPlaneList(planelist, mPortalMap);
 		
 		// update the BspNode with FaceGroupStart and FaceGroupCount
 		bspNode->setFaceGroupStart(startFace);

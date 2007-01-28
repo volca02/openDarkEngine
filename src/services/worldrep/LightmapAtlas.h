@@ -30,16 +30,17 @@
 #include "OgreHardwarePixelBuffer.h"
 #include "ConsoleCommandListener.h"
 
-// maximal W and H of lightmap in pixels
-#define ATLAS_maxlm 32
-// number of lightmaps in a row (and number of rows)
-#define ATLAS_numlm 8
-// number of lightmaps in atlas
-#define ATLAS_lmcount (ATLAS_numlm*ATLAS_numlm)
+// TODO: This is dated... We should just return Width and Height for lightmaps (separate), to let the tuning be simpler
+// - this means some changes to the lmap allocation have to be made too
+
 // size of lightmap atlas (both W and H)
-#define ATLAS_lmsize (ATLAS_maxlm*ATLAS_numlm)
+#define ATLAS_WIDTH 512
+#define ATLAS_HEIGHT 512
+#define ATLAS_LMSIZE (ATLAS_WIDTH*ATLAS_LMSIZE)
 
 namespace Opde {
+	
+
 	
 typedef struct {
 	int atlasnum;
@@ -48,74 +49,161 @@ typedef struct {
 } AtlasInfo;
 
 
-/** Free space information storage - rectangular area in the lightmap (either used or free to use) */
-class FreeSpaceInfo {
-	public:
-		int	x;
-		int	y;
-		int	w;
-		int	h;
-
+/** Free space information storage - rectangular area in the lightmap (either used or free to use)
+* Organized in a binary tree. 
+* thanks to this article for a tip: http://www.blackpawn.com/texts/lightmaps/default.html
+*/
+class FreeSpaceInfo { 
+	protected:
+		int 	mMaxArea;
+		bool 	mIsLeaf;
+		
+		FreeSpaceInfo* mChild[2];
+		
 		FreeSpaceInfo() {
 			this->x = 0;
 			this->y = 0;
 			this->w = -1;
 			this->h = -1;
+			
+			mMaxArea = 0;
+			mIsLeaf = true;
+			
+			mChild[0] = NULL;
+			mChild[1] = NULL;
 		}
-	
+		
+	public:
+		int	x;
+		int	y;
+		int	w;
+		int	h;
+		
+		
+
 		FreeSpaceInfo(int x, int y, int w, int h) {
 			this->x = x;
 			this->y = y;
 			this->w = w;
 			this->h = h;
+			
+			mIsLeaf = true;
+			mMaxArea = w * h;
+			
+			mChild[0] = NULL;
+			mChild[1] = NULL;
 		}
 		
-		bool Fits(int sw, int sh) {
+		~FreeSpaceInfo() {
+			if (mChild[0] != NULL)
+				delete mChild[0];
+			
+			if (mChild[1] != NULL)
+				delete mChild[1];
+		}
+		
+		bool Fits(int sw, int sh) const {
 			if ((sw<=w) && (sh<=h))
 				return true;
 			
 			return false;
 		}
 		
-		// test if we can, and if so, Crop Out the sw*sh rect, and insert the rest of the rects (the one that were created during croping) to the list
-		// otherwise return false (if size is too big for us)
+		int getArea() const {
+			return w*h;
+		}
 		
-		/** Crops this free space with a rectangular area measured sw*sh. 
-		* Used for lightmap space allocation inside the Light Map atlas.
-		* If the rectangular area requested fits into the area the instance represents, the instance is removed from the list. 
-		* If there is some space left on the bottom or right of the cropping area, a new FreeSpaceInfo is inserted to describe those.
-		* \param sw Width of the cropping area
-		* \param sh Height of the cropping area
-		* \param list a std::vector storing this instance
-		* \param order the index of this instance inside the list (to let this instance remove itself from the list)
-		* \param dest a pointer to the target FreeSpaceInfo instance we fill with the cropped area if sucesful
-		* \return true if sucessful, false otherwise 
-		* @see Opde::LightAtlas */
-		bool Crop(int sw, int sh, std::vector< FreeSpaceInfo * > &list, int order, FreeSpaceInfo *dest) {
-			// first test if we can insert
-			if (!Fits(sw,sh))
-				return false;
-			
-			// now insert
-			// we can have up to 2 rectangles as a result of cropping operation
-			
-			list.erase(list.begin()+order);
-			
-			// bottom will be created?
-			if (sh<h) 
-				list.push_back(new FreeSpaceInfo(x,y+sh,w,h-sh));
+		/** returns the maximal allocatable area of this node/leaf */
+		int getMaxArea() const {
+			return mMaxArea;
+		}
+		
+		/** allocate a space in the free area. 
+		* @return A free space rectangle of the requested space, or null if the space could not be allocated */
+		FreeSpaceInfo* allocate(int sw, int sh) {
+			if (!mIsLeaf) { // split node.
+				int reqa = sw * sh;
+				
+				for (int i = 0; i < 2; i++) {
+					FreeSpaceInfo* result = NULL;
+					
+					if (mChild[i] == NULL)
+						continue;
+					
+					if (mChild[i]->getMaxArea() >= reqa)
+						result = mChild[i]->allocate(sw, sh);
+				
+					if (result != NULL) { // allocation was ok
+						// refresh the maximal area
+						refreshMaxArea();
 						
-			// right will be created?
-			if (sw<w) 
-				list.push_back(new FreeSpaceInfo(x+sw,y,w-sw,sh));
-						
-			// ok, we have the original cropped.
-			// the removal of us must be done from caller
+						return result;
+					}
+				} 
+				
+				return NULL; // no luck, sorry!
+			} else {
+				// we're the leaf node. Try to insert if possible
+				if (!Fits(sw,sh))
+					return NULL;
 			
-			// create new FreeSpaceInfo describing the target.
-			*dest = FreeSpaceInfo(x,y,sw,sh);
+				// bottom will be created?
+				if (sh<h) 
+					mChild[0] = new FreeSpaceInfo(x,y+sh,w,h-sh);
+							
+				// right will be created?
+				if (sw<w) 
+					mChild[1] = new FreeSpaceInfo(x+sw,y,w-sw,sh);
+				
+				
+				// modify this node to be non-leaf, as it was allocated
+				mIsLeaf = false;
+				
+				w = sw;
+				h = sh;
+				
+				// refresh the mMaxArea
+				refreshMaxArea();
+				
+				return this;
+			}
+		}
+		
+		/** refreshes the maximal allocatable area for this node/leaf. 
+		Non-leaf nodes get the maximum as the maximum area of the children */
+		void refreshMaxArea() {
+			if (mIsLeaf) {
+				mMaxArea = w * h;
+				return;
+			}
 			
-			return true;
+			mMaxArea = -1;
+			
+			for (int j = 0; j < 2; j++) {
+				if (mChild[j] == NULL)
+					continue;
+				
+				if (mChild[j]->getMaxArea() > mMaxArea)
+					mMaxArea = mChild[j]->getMaxArea();
+			}
+		}
+		
+		/** returns the maximal area of this node */
+		int getLeafArea() {
+			if (mIsLeaf) {
+				return getArea();
+			}
+			
+			int area = 0;
+			
+			for (int j = 0; j < 2; j++) {
+				if (mChild[j] == NULL)
+					continue;
+				
+				area += mChild[j]->getLeafArea();
+			}
+			
+			return area;
 		}
 };
 
@@ -151,7 +239,7 @@ class LightMap {
 		friend class LightAtlas;
 			
 		/** Information about the lightmap position in the atlas */
-		FreeSpaceInfo position;
+		FreeSpaceInfo* position;
 	
 		/** static lightmap */
 		lmpixel* static_lmap;
@@ -177,23 +265,28 @@ class LightMap {
 	public:
 		/** Constructor - takes the targetting freespaceinfo, size of the lightmap and initializes our buffer with the static lightmap.
 		* This class will manage the unallocation of the lighymap as needed, just pass the pointer, it will deallocate the lmap in the destructor */
-		LightMap(FreeSpaceInfo& tgt, LightAtlas *owner, unsigned int sx, unsigned int sy, lmpixel *static_lightmap) {
-			position = tgt;
-			
+		LightMap(unsigned int sx, unsigned int sy, lmpixel *static_lightmap) {
 			static_lmap = static_lightmap;
 			
 			this->sx = sx;
 			this->sy = sy;
-			this->owner = owner;
+			
+			position = NULL;
 		}
 		
 		~LightMap() {
 			if (static_lmap != NULL)
 				delete[] static_lmap;
 			
-			// TODO: delete the animated lmaps too
+			for (std::map<int, lmpixel*>::iterator it = switchable_lmap.begin(); it != switchable_lmap.end(); it++)
+				delete it->second;
+			
+			switchable_lmap.clear();
 		}
 	
+		/** Set the targetting placement of the lightmap in the atlas _owner */
+		void setPlacement(LightAtlas* _owner, FreeSpaceInfo* tgt);
+		
 		/** Gets an owner atlas of this lightmap
 		* \return LightAtlas containing this light map */
 		const LightAtlas* getOwner() {
@@ -222,6 +315,8 @@ class LightMap {
 		/** Refreshes the texture's pixel buffer with our new settings*/
 		void refresh();
 		
+		std::pair<int, int> getDimensions() const;
+		
 		/** Returns the atlas index */
 		int getAtlasIndex();
 };
@@ -233,9 +328,6 @@ class LightAtlas {
 	private:
 		/** The count of the stored light maps */
 		int count;
-	
-		/** The category of this atlas - used for texture number - every texture owns it's own atlas or atlases */
-		int category;
 	
 		/** Global index of this atlas in the atlas list */
 		int idx;
@@ -250,7 +342,7 @@ class LightAtlas {
 		Ogre::StringUtil::StrStreamType name;
 	
 		/** A vector containing Free Space rectangles left in the Atlas */
-		std::vector < FreeSpaceInfo * > freeSpace;
+		FreeSpaceInfo* freeSpace;
 	
 		/** Already inserted lightmaps - mainly for dealocation */
 		std::vector < LightMap * > lightmaps;
@@ -262,14 +354,13 @@ class LightAtlas {
 		lmpixel *copybuffer; // I keep the data of the lightmap here before I place them to Texture buffer.
 
 		/** return an origin - XY coords for the next free space (for a lightmap sized w*h) */
-		FreeSpaceInfo getOrigin(int w, int h);
-
-	public:
-		LightAtlas(int category, int idx);
+		std::pair<FreeSpaceInfo, bool> getOrigin(int w, int h);
 	
-		/** \return true if a light map of this size can be inserted into this light map atlas. */
-		bool canInsert(int w, int h);
-
+	public:
+		LightAtlas(int idx);
+		
+		~LightAtlas();
+		
 		/** Adds a light map to this atlas. 
 		* \param ver the version (and thus a size) of the WR chunk. 
 		* \param buf a buffer containing the light map pixel data
@@ -278,14 +369,8 @@ class LightAtlas {
 		* \param destinfo destination structure to hold light map targetting and stuff.
 		*/
 		//  TODO: Deprecate destinfo
-		LightMap* addLightmap(int ver, char *buf, int w, int h, AtlasInfo &destinfo); // TODO: make a size out of the ver
+		bool addLightMap(LightMap *lmap);
 
-		/** A function returning the category of this Atlas. Used for texture number distinction. 
-		* \return int Category of the Atlas (Currently used for texture number) */
-		int getCategory() {
-			return category;
-		}
-		
 		/** renders the prepared light map buffers into a texture - copies the pixel data to the 'atlas' */
 		bool render();
 		
@@ -304,6 +389,9 @@ class LightAtlas {
 		
 		/** Returns the Light Map Atlas order number */
 		int getIndex();
+		
+		/** Returns the pixel count of unmapped area of this atlas */
+		int getUnusedArea();
 };
 
 
@@ -311,27 +399,41 @@ class LightAtlas {
 *
 * Use this class to work with the light map storage and light switching. */
 class LightAtlasList : public ConsoleCommandListener {
+	public:
+		struct lightMapLess {
+             		bool operator()(const LightMap* a, const LightMap* b) const;
+         	};
+		
 	private:
 		/** A list of the light map atlases */
 		std::vector<LightAtlas *> list;
 	
-		/** ? */
-		int index;
-
+		/** Pre-render lightmap list*/
+		typedef std::map<int, std::vector<LightMap*> > TextureLightMapQueue;
+		TextureLightMapQueue mLightMapQueue;
+		
+		int mSplitCount; /// The split count of the same-texture lightmaps (e.g. the spread number. Higher number -> worse performance)
+		
+	protected:
+		bool placeLightMap(LightMap* lmap);
+		
 	public:
 		LightAtlasList();
 	
 		/** A destructor, unallocates all the previously allocated lightmaps */
 		virtual ~LightAtlasList();
 		
-		/** Adds a light map holding place and a static lightmap */
+		/** Adds a light map holding place and a static lightmap. 
+		* @note The U/V mapping of the lightmap is not valid until the atlas list is rendered */
 		LightMap* addLightmap(int ver, int texture, char *buf, int w, int h, AtlasInfo &destinfo);
 
 		/** get's the current count of the atlases stored. 
 		* \return int Count of the atlases */
 		int getCount();
 
-		/** Prepares the Light Atlases to be used as textures. Calls the LightAtlas.render method
+		/** Prepares the Light Atlases to be used as textures. 
+		* atlases all the lightmaps, in Texture, size orders (texture being major ordering rule) 
+		* Then calls the LightAtlas.render method
 		* @see Ogre::LightAtlas.render() */
 		bool render();
 	

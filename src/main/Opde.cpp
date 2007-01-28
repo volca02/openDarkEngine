@@ -52,7 +52,7 @@ class OpdeApplication : public ExampleApplication {
 			
 			backend->putMessage("==Console Starting==");
 			
-			// logger->registerLogListener(backend);
+			logger->registerLogListener(backend);
 		}
 
 		~OpdeApplication() {
@@ -94,10 +94,8 @@ class OpdeApplication : public ExampleApplication {
 				mMission, mSceneMgr);
 			*/
 			
-			std::cerr << "PROBLEM STARTS: " << std::endl;
 			// Initialise the rest of the resource groups, parse scripts etc
 			ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
-			std::cerr << "PROBLEM ENDS... " << std::endl;	
 
 			// TODO: Hacky. But this all will go away anyway
 			mission = new OpdeMission(mRoot);
@@ -166,7 +164,7 @@ class OpdeApplication : public ExampleApplication {
 		}
 		
 		void createFrameListener(void) {
-			mFrameListener = new ExampleFrameListener(mWindow, mCamera);
+			mFrameListener = new ExampleFrameListener(mWindow, mCamera, mSceneMgr);
 			mFrameListener->showDebugOverlay(true);
 			mRoot->addFrameListener(mFrameListener);
 			

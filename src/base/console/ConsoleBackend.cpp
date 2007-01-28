@@ -30,11 +30,11 @@ namespace Opde {
 	template<> ConsoleBackend* Singleton<ConsoleBackend>::ms_Singleton = 0;
 	
 	ConsoleBackend::ConsoleBackend() {
-		commandMap.clear();
-		completionMap.clear();
-		messages.clear();
-		position = 0;
-		changed = true;
+		mCommandMap.clear();
+		mCompletionMap.clear();
+		mMessages.clear();
+		mPosition = 0;
+		mChanged = true;
 
 		// Register as an ogre logger
 
@@ -51,61 +51,68 @@ namespace Opde {
 	}
 		
 	void ConsoleBackend::addText(std::string text) {
-		messages.push_back(text);		
-		changed = true;
+		mMessages.push_back(text);		
+		mChanged = true;
 		
 		// TODO: No position change if view is not at the end of the message list.
-		position += 1;
+		mPosition += 1;
 	}
 
-	bool ConsoleBackend::registerCommandListener(std::string Command, ConsoleCommandListener *listener) {
-		map<string, ConsoleCommandListener *>::iterator commandIt = commandMap.find(Command);
+	void ConsoleBackend::registerCommandListener(std::string command, ConsoleCommandListener *listener) {
+		map<string, ConsoleCommandListener *>::iterator commandIt = mCommandMap.find(command);
 
-		if (commandIt != commandMap.end()) { // already registered
-			addText("Error: Command " + Command + " is already registered");
-			return false;
+		if (commandIt != mCommandMap.end()) { // already registered
+			LOG_DEBUG("ConsoleBackend::registerCommandListener: Command %s is already registered, reregistering the listener pointer",  command.c_str());
+			commandIt->second = listener;
 		} else {
-			commandMap.insert(make_pair(Command, listener));
-			return true;
+			mCommandMap.insert(make_pair(command, listener));
 		}
-
-		return false;
+	}
+	
+	void ConsoleBackend::setCommandHint(std::string command, std::string hint) {
+		mHintMap.insert(make_pair(command, hint));
 	}
 		
-	void ConsoleBackend::executeCommand(std::string Command) {
-		addText(">" + Command);
+	void ConsoleBackend::executeCommand(std::string command) {
+		addText(">" + command);
 
 		// Split the command on the first space... make it a Command PARAMETERS
-		size_t space_pos = Command.find(' ');
+		size_t space_pos = command.find(' ');
 		
 		// If there are no parameters at all... as a default
-		string command_part = Command;
+		string command_part = command;
 		string command_parameters = "";
 
 		if (space_pos != string::npos) { 
 			// First substring to command, second to params
-			command_part = Command.substr(0,space_pos);
-			command_parameters = Command.substr(space_pos+1, Command.length() - (space_pos + 1));
+			command_part = command.substr(0,space_pos);
+			command_parameters = command.substr(space_pos+1, command.length() - (space_pos + 1));
 		}
 
 		// Try if it is a in-built command
-		if (command_part == "commands") {
-			map<string, ConsoleCommandListener *>::iterator commands = commandMap.begin();
+		if (command_part == "commands" || command_part == "?") {
+			map<string, ConsoleCommandListener *>::iterator commands = mCommandMap.begin();
 
-			for (;commands != commandMap.end(); commands++) {
-				addText("  " + (commands->first));
+			for (;commands != mCommandMap.end(); commands++) {
+				
+				// Try to look for a hint text
+				map<string, string>::const_iterator hintIt = mHintMap.find(commands->first);
+					
+				if (hintIt != mHintMap.end()) // if a hint text was found, use it
+					addText("  " + (commands->first) + " - " + hintIt->second);
+				else {
+					addText("  " + (commands->first));
+				}
 			}
 			return;
 		}
 			
 		// Find the command listener, as we are not the handler
-		map<string, ConsoleCommandListener *>::iterator commands = commandMap.begin();
+		map<string, ConsoleCommandListener *>::iterator commandIt = mCommandMap.find(command_part);
 
-		for (;commands != commandMap.end(); commands++) {
-				if ((commands->first) == command_part) {
-					(commands->second)->commandExecuted(command_part, command_parameters);
-					return;
-				}
+		if (commandIt != mCommandMap.end()) {
+			(commandIt->second)->commandExecuted(command_part, command_parameters);
+			return;
 		}
 
 		// command not found...
@@ -132,8 +139,8 @@ namespace Opde {
 	}
 
 	bool ConsoleBackend::getChanged() {
-		if (changed) {
-			changed = false;
+		if (mChanged) {
+			mChanged = false;
 
 			return true;
 		}
@@ -142,11 +149,11 @@ namespace Opde {
 	}
 
 	bool ConsoleBackend::pullMessage(std::string& target) {
-		if (messages.size() > 0) {
-			list< string >::const_iterator first = messages.begin();
+		if (mMessages.size() > 0) {
+			list< string >::const_iterator first = mMessages.begin();
 
 			target = (*first);
-			messages.pop_front();
+			mMessages.pop_front();
 			return true;
 		} else
 			return false;

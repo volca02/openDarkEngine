@@ -37,6 +37,11 @@ namespace Ogre {
         mOwner = owner;
         mIsLeaf = isLeaf;
 	mSceneNode = NULL;
+	
+			
+	// update the fragment as wellBspNode
+	mCellFragment.fragmentType = SceneQuery::WFT_CUSTOM_GEOMETRY;
+	mCellFragment.geometry = this;
     }
 
     //-----------------------------------------------------------------------
@@ -44,6 +49,12 @@ namespace Ogre {
 	mOwner = NULL;
         mIsLeaf = false;
 	mSceneNode = NULL;
+	
+			
+	// update the fragment as wellBspNode
+	mCellFragment.fragmentType = SceneQuery::WFT_CUSTOM_GEOMETRY;
+	mCellFragment.geometry = this;
+
     }
     //-----------------------------------------------------------------------
     BspNode::~BspNode()
@@ -196,9 +207,8 @@ namespace Ogre {
     }
     
     //-----------------------------------------------------------------------
-    void BspNode::setSplitPlane(Plane splitPlane) {
+    void BspNode::setSplitPlane(const Plane& splitPlane) {
 	    mSplitPlane = splitPlane;
-	    
     }
     
     //-----------------------------------------------------------------------
@@ -232,7 +242,7 @@ namespace Ogre {
 	}
 			
 	//-------------------------------------------------------------------------
-	unsigned int BspNode::getCellNum() {
+	unsigned int BspNode::getCellNum() const {
 		return mCellNum;
 	}
 	
@@ -247,11 +257,8 @@ namespace Ogre {
 	}
 	
 	//-------------------------------------------------------------------------
-	void BspNode::setPlaneList(BspNode::CellPlaneList& planes) {
+	void BspNode::setPlaneList(BspNode::CellPlaneList& planes, BspNode::PlanePortalMap& portalmap) {
 		mPlaneList = planes;
-		
-		// update the fragment as well
-		mPlaneFragment.fragmentType = SceneQuery::WFT_PLANE_BOUNDED_REGION;
-		mPlaneFragment.planes = &mPlaneList;
+		mPortalMap = portalmap;
 	}
 }
