@@ -25,7 +25,7 @@
 namespace Ogre {
 
 	
-// construct a new Frustum out of a camera and a Portal (which has been clipped as needed previously)
+	// construct a new Frustum out of a camera and a Portal (which has been clipped as needed previously)
 	PortalFrustum::PortalFrustum(Camera *cam, Portal *poly) {
 		// we definetally should throw an exception if the poly is null...
 		
@@ -53,8 +53,7 @@ namespace Ogre {
 		}
 	}
 
-	/** new frustum, based solely on camera... Uses camera's LEFT, RIGHT, TOP and BOTTOM planes as the frustum planes
-	*/
+	/*---------------------------------------------------------*/
 	PortalFrustum::PortalFrustum(Camera *cam) {
 		// read out the LEFT, RIGHT, TOP and BOTTOM planes from the camera, and push them into our planes var...
 		planes.clear();
@@ -65,20 +64,17 @@ namespace Ogre {
 		planes.push_back(cam->getFrustumPlane(FRUSTUM_PLANE_RIGHT));
 	}
 	
+	/*---------------------------------------------------------*/
 	void PortalFrustum::addPlane(Plane a) {
 		planes.push_back(a);
 	}
 	
+	/*---------------------------------------------------------*/
 	FrustumPlanes& PortalFrustum::getPlanes() {
 		return planes;
 	}
 	
-	/**
-	* Classifies the Portal using it's bounding sphere.
-	* Returns:	 1 - totally inside in the frustum
-	*	  	 0 - Portal is should be clipped to detect if changed
-	*	    	-1 - Portal is totally outside the frustum
-	*/
+	/*---------------------------------------------------------*/
 	int PortalFrustum::getPortalClassification(Portal *src) {
 		// test the absolute distance of the Portal center to each plane.
 		// if it is equal or smaller than radius, we intersect 
@@ -99,11 +95,8 @@ namespace Ogre {
 		return 1;
 	}
 	
-	/** 
-	* Clips the ginven Portal by frustum planes.
-	* returns a Portal pointer (not necesi necessarily an new one), or NULL if clipped away
-	*/
-	Portal *PortalFrustum::clipPoly(Portal *src, bool &didClip) {
+	/*---------------------------------------------------------*/
+	Portal *PortalFrustum::clipPortal(Portal *src, bool &didClip) {
 		// todo: test if the bounding box (sphere) is completely: inside/outside, or intersecting.
 		// todo: only clip the poly if intersecting.
 		

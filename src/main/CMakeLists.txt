@@ -1,7 +1,3 @@
-# include_directories (${HELLO_SOURCE_DIR}/Hello)
-# link_directories (${HELLO_BINARY_DIR}/Hello)
-# target_link_libraries (helloDemo Hello)
-
 include_directories(
     ${OGRE_INCLUDE_DIR}
     ${CEGUI_INCLUDE_DIR}

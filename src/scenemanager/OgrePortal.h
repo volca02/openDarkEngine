@@ -162,7 +162,7 @@ namespace Ogre {
 				// it should be sufficient to clip by near plane only though
 				
 				bool didc;
-				Portal *onScreen = frust->clipPoly(this, didc);
+				Portal *onScreen = frust->clipPortal(this, didc);
 				
 				// If we have a non-zero cut result
 				if (onScreen) {

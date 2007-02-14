@@ -32,7 +32,7 @@ namespace Ogre {
 	
 	typedef std::vector< Plane > FrustumPlanes;
 	
-	/** A Multiple-planed frustum. Defined by either a camera, or a camera and a ploygon defining the boundaries of the frustum. */
+	/** A Multiple-planed frustum. Defined by either a camera, or a camera and a polygon defining the boundaries of the frustum. */
 	class PortalFrustum {
 		private:
 			FrustumPlanes planes;
@@ -57,9 +57,11 @@ namespace Ogre {
 			*/
 			int getPortalClassification(Portal *src);
 		
-			// returns a brand new Portal based on the source one, only clipped by us
-			// TODO: clipPortal
-			Portal *clipPoly(Portal *src, bool &didClip);
+			/** 
+			* Clips the ginven Portal by frustum planes.
+			* returns a Portal pointer (not necesi necessarily an new one), or NULL if clipped away
+			*/
+			Portal *clipPortal(Portal *src, bool &didClip);
 	};
 
 }

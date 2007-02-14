@@ -21,6 +21,7 @@
 #include "OpdeException.h"
 
 #include <string>
+#include <sstream>
 
 using namespace std;
 
@@ -34,12 +35,18 @@ namespace Opde {
 			if (file != NULL) {
 				fileName = string(file);
 				lineNum = line;
+				
+				stringstream out;
+				out << lineNum;
+				
+				details = string("Opde Exception (" + fileName + " line " + out.str() + ") - " + source + " : " + description);
 			} else {
 				fileName = string("-Unsupplied-");
+				
+				details = string("Opde Exception  - " + source + " : " + description);
 			}
 			
 			
-			details = string("Opde Exception (" + fileName + ") - " + source + " : " + description);
 		}
 		
 		const std::string& BasicException::getDetails() {
