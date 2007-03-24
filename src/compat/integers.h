@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *****************************************************************************/
- 
+
 #ifndef __INTEGERS_H
 #define __INTEGERS_H
 
@@ -35,9 +35,8 @@
 	#define int16_t  __int16
 	#define int8_t   __int8
 #else
-
-#include <inttypes.h>
-
+	#include <inttypes.h>
 #endif
 
 #endif
+
