@@ -53,26 +53,26 @@ class OpdeApplication : public ExampleApplication {
 			backend->putMessage("==Console Starting==");
 			
 			logger->registerLogListener(backend);
+
+			gui = NULL;
+			mission = NULL;
+			darkFactory = NULL;
 		}
 
 		~OpdeApplication() {
-			if (gui) {
-				delete gui;
-				gui = NULL;
-			}
+			delete gui;
+			gui = NULL;
+					
+			delete mission;
+			mission = NULL;
 			
-			if (mission) {
-				delete mission;
-				mission = NULL;
-			}
+			delete stdlog;
+			stdlog = NULL;
 			
-			if (stdlog) {
-				delete stdlog;
-				stdlog = NULL;
+			if (darkFactory) {
+				Root::getSingleton().removeSceneManagerFactory(darkFactory);
+				delete darkFactory;
 			}
-			
-			Root::getSingleton().removeSceneManagerFactory(darkFactory);
-			delete darkFactory;
 		}
 		
 	protected:
