@@ -25,7 +25,8 @@ IF (UNIX)
 	/usr/local/lib32
 	/usr/local/lib64
      )
- 
+
+	SET(OGRE_LIBNAMES OgreMain)
 ENDIF(UNIX)
 
 IF(WIN32)
@@ -44,13 +45,20 @@ IF(WIN32)
 	$ENV{OGRE_HOME}/bin/release
      )
 
+	IF(CMAKE_BUILD_TYPE STREQUAL Debug)
+		# Suffix the library with _d
+		SET(OGRE_LIBNAMES OgreMain_d)
+	ELSE(CMAKE_BUILD_TYPE STREQUAL Debug)
+		SET(OGRE_LIBNAMES OgreMain)
+	ENDIF(CMAKE_BUILD_TYPE STREQUAL Debug) 
+
 ENDIF(WIN32)
 
 # Include paths search
 FIND_PATH(OGRE_INCLUDE_DIR Ogre.h ${OGRE_INC_SEARCH_PATH})
 
 # Ogre library
-FIND_LIBRARY(OGRE_LIBRARIES NAMES OgreMain OgreMain_d PATHS 
+FIND_LIBRARY(OGRE_LIBRARIES NAMES ${OGRE_LIBNAMES} PATHS 
 	${OGRE_LIB_SEARCH_PATH}
 )
 
