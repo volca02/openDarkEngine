@@ -38,4 +38,9 @@
 #define min(a,b) (a>b?b:a)
 #endif
 
+
+#ifndef uint
+	typedef unsigned int uint;
+#endif
+
 #endif
