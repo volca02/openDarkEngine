@@ -35,10 +35,12 @@ ENDIF(UNIX)
 
 IF(WIN32)
     # For the OgreSDK should be the prefared place to get the CEGUI files
+    # The samples line is there to help building with the standard setup (Missing OgreCEGUIRenderer.h)
 
     SET(CEGUI_INC_SEARCH_PATH
 	$ENV{OGRE_HOME}/include
 	$ENV{OGRE_HOME}/include/CEGUI
+	$ENV{OGRE_HOME}/samples/include
 	$ENV{CEGUI_HOME}/include
 	$ENV{CEGUI_HOME}/include/CEGUI
 	$ENV{CEGUI_EXTRA_INCLUDE_DIR}
@@ -73,8 +75,16 @@ ENDIF(WIN32)
 # Include paths search
 FIND_PATH(CEGUI_INCLUDE_DIR CEGUI.h ${CEGUI_INC_SEARCH_PATH})
 
+IF(NOT CEGUI_INCLUDE_DIR)
+	MESSAGE("WARNING: CEGUI.h not found under ${CEGUI_INC_SEARCH_PATH}")
+ENDIF(NOT CEGUI_INCLUDE_DIR)
+
 # Include paths search, renderer
 FIND_PATH(CEGUI_EXTRA_INCLUDE_DIR OgreCEGUIRenderer.h ${CEGUI_INC_SEARCH_PATH})
+
+IF(NOT CEGUI_EXTRA_INCLUDE_DIR)
+	MESSAGE("WARNING: OgreCEGUIRenderer.h not found under ${CEGUI_INC_SEARCH_PATH}")
+ENDIF(NOT CEGUI_EXTRA_INCLUDE_DIR)
 
 # Cegui library
 FIND_LIBRARY(CEGUI_CEGUI_LIB NAME ${CEGUIBASE_LIBNAMES} PATHS ${CEGUI_LIB_SEARCH_PATH})

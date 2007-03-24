@@ -1,7 +1,8 @@
 project (OPDE)
 
 # Build type selection. This should be targettable 
-SET(CMAKE_BUILD_TYPE Debug)
+# SET(CMAKE_BUILD_TYPE Debug)
+SET(CMAKE_BUILD_TYPE Release)
 
 # Option to build in the debugging code
 OPTION(GLOBAL_DEBUG 
@@ -17,8 +18,8 @@ IF(CMAKE_COMPILER_IS_MINGW)
 	SET(CMAKE_SHARED_LINKER_FLAGS"-Wl,--enable-auto-image-base -Wl,--add-stdcall-alias -Wl,--enable-runtime-pseudo-reloc -Wl,--enable-auto-import")
 ENDIF(CMAKE_COMPILER_IS_MINGW)
 
-# Warning level high
-SET(CMAKE_CXX_WARNING_LEVEL 4)
+# Warning level high (Lowered by one to supress the payload of ogre releted warnings)
+SET(CMAKE_CXX_WARNING_LEVEL 3)
 
 # GCC specific. Release/Debug flags (I add some debug/profiler switches there)
 IF(CMAKE_COMPILER_IS_GNUCXX)
