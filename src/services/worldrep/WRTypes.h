@@ -120,14 +120,18 @@ namespace Opde {
 	* A bsp Tree node - e.g. a leaf or a split plane
 	*/
 	typedef struct { // 20b - BSP node
-		uint32_t nodenum:24; // Yup, 24 bits. Trust me on this [TNH]
-		uint8_t flags:8; // 0x100 == 1 -> leaf node
+		// As TNH says: 24 bits node number, 8 bits flags. 
+		// I put those into one field, as Msvc and GCC differ in bitfield packing
+		uint32_t ndn_fl; 
+		// uint8_t flags; // 0x100 == 1 -> leaf node
 		int32_t cell; // if Nonleaf, the splitting cells number
 		int32_t plane; // if Nonleaf, the splitting cells plane number - e.g. read nodes[cell].plane[plane] to get the plane you want
 		uint32_t front; // Or Cell index if leaf node (or END if 0xFFFFFF)
 		uint32_t back;  // Not used in leaf node
 	} wr_BSP_node_t;
 	
+	#define _BSP_NODENUM(a) (a->ndn_fl & 0x00FFFFFF)
+	#define _BSP_FLAGS(a) (a->ndn_fl  >> 24)
 #pragma pack(pop)
 } // end of Opde namespace
 

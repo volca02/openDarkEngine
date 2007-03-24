@@ -201,6 +201,7 @@ namespace Opde {
 	
 	//------------------------------------------------------------------------------------
 	const Ogre::Plane& WRCell::getPlane(int index) {
+
 		assert(loaded);
 		
 		if (index > header.num_planes)
