@@ -46,6 +46,10 @@ The result should be compilable by your system (VC / mingw32-make for mingw)
 
 If you have a problem making for Mingw, please ensure that "sh" executable is NOT in path. If it is, and can't be relocated, select MSYS Makefiles rather than MinGW ones.
 
+Currently, Debug mode in VC is too slow for normal operation. For testing purposes, please use Release mode. 
+Windows users: If you run cmake for Debug mode - default, edit the cmakelists.txt, change CMAKE_BUILD_TYPE to Release in the set command, 
+remove the CMakeCache.txt and rerun cmake. This will ensure correct lib files are linked (_d prefixed or not).
+
 
 Running
 -------
