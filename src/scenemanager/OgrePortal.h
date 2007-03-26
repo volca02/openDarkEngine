@@ -75,7 +75,7 @@ namespace Ogre {
         		const Quaternion& getWorldOrientation(void) const;
         		const Vector3& getWorldPosition(void) const;
 	
-			void Portal::refreshPortalRenderable();
+			void refreshPortalRenderable();
 			/** Screen - space bounding rectangle of the portal */
 			PortalRect	screenRect;  
 		

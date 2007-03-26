@@ -129,7 +129,7 @@ namespace Ogre {
 		
 			/** Renders the visible portals as wireframe - debug method 
 			* @note Must be enabled using the setOption - ShowPortals */
-			void DarkSceneManager::renderPortals(void);
+			void renderPortals(void);
 			
 			/** Frees up allocated memory for geometry caches. */
 			void freeMemory(void);
@@ -272,12 +272,12 @@ namespace Ogre {
 					Options:
 						"ShowPortals" : bool * - display visible portals as wireframe
 			*/
-			bool DarkSceneManager::setOption( const String & key, const void * val );
+			bool setOption( const String & key, const void * val );
 
 			/**
 				Get a scene manager option
 			*/
-			bool DarkSceneManager::getOption( const String & key, void *val );
+			bool getOption( const String & key, void *val );
     };
 
     /** BSP specialisation of IntersectionSceneQuery */
