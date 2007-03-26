@@ -1,6 +1,6 @@
 include_directories ( 
     ${OGRE_INCLUDE_DIR} 
-    ${OPDE_SOURCE_DIR}
+    ${OPDE_BINARY_DIR}
     ${OPDE_SOURCE_DIR}/src/compat/
     ${OPDE_SOURCE_DIR}/src/base/servicemanager/
     ${OPDE_SOURCE_DIR}/src/base/console

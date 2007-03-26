@@ -1,7 +1,7 @@
 include_directories(
     ${OGRE_INCLUDE_DIR}
     ${CEGUI_INCLUDE_DIR}
-    ${OPDE_SOURCE_DIR}
+    ${OPDE_BINARY_DIR}
     ${OPDE_SOURCE_DIR}/src/compat
     ${OPDE_SOURCE_DIR}/src/base/logger
     ${OPDE_SOURCE_DIR}/src/base/gui
