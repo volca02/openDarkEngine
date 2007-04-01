@@ -5,73 +5,28 @@ This is a readme file for the OPDE project version 0.2.0
 
     OPDE was created as an effort to build a 
 multiplatform engine supporting the LookingGlass'es (TM) 
-data files from the original DarkEngine games.
+data files from the original DarkEngine(TM) games.
 So far, a basic display of levels work.
-
-Requirements
-------------
-OPDE needs:
-* OGRE3D library in version 1.2.0 or newer (but not >=1.3.0) and Devil image library (an ogre requirement, should be a part of SDK under windows).
-* CEGUI (The part of Ogre SDK under windows, do not install separately) - 0.4 series
-* CMake
-
-
-Building
---------
-On *nix systems, building with (replace the OPDE_DIR with the directory in which the source resides) should be sufficient:
-cd OPDE_DIR
-cmake .
-make
-
-On windows, please ensure that the OGRE_HOME environmental variables is set (should be if the installation was done using the ogre sdk).
-
-If the cmake will have problem locating the CEGUI libs/headers, you can try setting these environmental variables:
-SET CEGUI_HOME=/OgreSDK
-SET CEGUI_EXTRA_INCLUDE_DIR=/OgreSDK/samples/include
-
-Ensure, that MinGW/Visual C++ make systems are usable. (Cmake should test this first time it is run)
-
-Then progress with (from commandline, being in the root directory of OPDE project):
-
-cmake .
-
-or, if wanting to select the generator (for example MinGW makefiles)
-
-cmake . -G "MinGW Makefiles"
-
-
-Please read the output of cmake carefuly. If the makefiles/VC solution is not present, it will give you hints about what was wrong.
-
-The result should be compilable by your system (VC / mingw32-make for mingw)
-
-If you have a problem making for Mingw, please ensure that "sh" executable is NOT in path. If it is, and can't be relocated, select MSYS Makefiles rather than MinGW ones.
-
-Currently, Debug mode in VC is too slow for normal operation. For testing purposes, please use Release mode. 
-Windows users: If you run cmake for Debug mode - default, edit the cmakelists.txt, change CMAKE_BUILD_TYPE to Release in the set command, 
-remove the CMakeCache.txt and rerun cmake. This will ensure correct lib files are linked (_d prefixed or not).
-
-
-Running
--------
-You will need to initialize resources.cfg, opde.cfg and plugins.cfg for the main executable to work.
-see the opde wiki for more info:
-    http://opde.sourceforge.net/wiki/index.php/Main_Page
 
 License
 -------
-All files, if not otherwise specified, are released under the GNU GPL license.
+All files, if not otherwise specified, are released under the GNU/GPL license.
 
-The DarkSceneManager is released under the LGPL license, to comply with the original version of the sources - The BSPSceneManager.
+The DarkSceneManager is released under the GNU/LGPL license, to comply with the original version of the sources - The BSPSceneManager.
 Additional sources, written and added to the DarkSceneManager (found in the src/DarkSceneManager) are licensed under LGPL too.
 
 See COPYING for the informations regarding the GNU GPL license.
+
+Building
+--------
+Please see doc/DEVELOPERS file for detailed instructions about how to build the sources.
 
 Source code structure
 ---------------------
 The main code resides in the 'src' subdirectory. The 'proto' directory contains some prototype code in the testing phase.
 
-In the src directory, you can find:
 
+In the src directory, you can find:
     compat - Compiler compatibility headers
     base - base classes for the engine - logging, console backend, etc.
     scenemanager - the DarkSceneManager code, used to render BSP/Portal type of scenes

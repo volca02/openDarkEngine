@@ -1,375 +1,59 @@
                         Notes for Developers:            -*-text-*-
                         ---------------------
 
-Last updated on 9-Jan-2005
+Last updated on 01-Apr-2007
 
-You will need to install several GNU tools to be able to use the
-CVS sources.  If you do not have these tools available, build from
-the tar file distributions instead.
+Requirements
+------------
+OPDE needs:
+* OGRE3D library, 1.2 series and Devil image library (an ogre requirement, should be a part of SDK under windows).
+* CEGUI (The part of Ogre SDK under windows, do not install separately) - 0.4 series
+* CMake
 
-To build from the CVS sources, you will need:
 
-  * GNU gcc
-  * GNU make
-  * autoconf (version >= 2.53)
-  * automake (version >= 1.6)
-  * libtool (version >= 1.4)
+Building
+--------
+On *nix systems, building with (replace the OPDE_DIR with the directory in which the source resides) should be sufficient:
 
-After the *initial* checkout of the sources, you will need to
-execute the following commands from the top of the source tree.
+Note: For out of source builds (prefered method), create a separate directory that will hold the built files, 
+and run cmake with the path to the source directory (the one containing this readme) as a parameter (replace the BUILD_DIR and OPDE_DIR 
+with your paths):
 
-    aclocal
-    libtoolize --force
-    autoheader
-    automake --add-missing
-    autoreconf
+cd BUILD_DIR
+cmake OPDE_DIR
+make
 
-Because of what seems to be a bug in automake, sometimes the file
-depcomp is not automatically installed.  This leads to a compile
-error later.  In this case, just run
+On windows, please ensure that the OGRE_HOME environmental variables is set (should be if the installation was done using the ogre sdk).
 
-    automake --add-missing
-    autoreconf
+If the cmake will have problem locating the CEGUI libs/headers, you can try setting these environmental variables:
+SET CEGUI_HOME=/OgreSDK
+SET CEGUI_EXTRA_INCLUDE_DIR=/OgreSDK/samples/include
 
-again and you should be fine.
+Ensure, that MinGW/Visual C++ make systems are usable. (Cmake should test this first time it is run)
 
-There will be some warnings, which are ignorable as long as you
-get a working configure script: the configure script will fix all
-those problems.
+Then progress with (from commandline, being in the root directory of OPDE project):
 
-Now, configure and build as per INSTALL.project> and INSTALL.  If
-configure fails, please look through `config.log' for clues.
+cmake .
 
+or, if wanting to select the generator (for example MinGW makefiles)
 
-Development Rules of the Road:
-------------------------------
+cmake . -G "MinGW Makefiles"
 
- 1) _Every_ change must be properly ChangeLogged.  If you use
-    Emacs, you can do this oh-so-trivially with the "C-x 4 a"
-    command; it will add a header (if it's a new day), the name of
-    the file, and even the name of the function you're currently
-    in.
+Note: You can also use the out of source build approach as *nix building guide notes. This makes your source directory clean.
 
-    If you start adding them as you change functions, it'll soon
-    become second-nature and we'll get proper ChangeLogs.
+Please read the output of cmake carefuly. If the makefiles/VC solution is not present, it will give you hints about what was wrong.
 
-    If you don't use Emacs, please mimic the format of all the
-    other log entries when adding your own.
+The result should be compilable by your system (VC / mingw32-make for mingw)
 
- 2) If you make a user-visible change please add a blurb about it
-    to the NEWS file.  A couple sentences is fine; don't repeat
-    the documentation but give folks enough of an idea so they can
-    decide if they want to learn more.  Bug fixes (unless they're
-    _really_ user visible) shouldn't be noted in the NEWS file.
+If you have a problem making for Mingw, please ensure that "sh" executable is NOT in path. If it is, and can't be relocated, select MSYS Makefiles rather than MinGW ones.
 
- 3) If you add a new user-visible feature, don't forget to update
-    the appropriate man pages at the same time!
+Currently, Debug mode in VC is too slow for normal operation. For testing purposes, please use Release mode. 
+Windows users: If you run cmake for Debug mode - default, edit the cmakelists.txt, change CMAKE_BUILD_TYPE to Release in the set command, 
+remove the CMakeCache.txt and rerun cmake. This will ensure correct lib files are linked (_d prefixed or not).
 
-        ** Of course, compile and test before committing! **
 
-
-Dealing with CVS:
------------------
-
-Consult the CVS documentation for details.  One thing worth
-mentioning here is that _no_ files that are generated in the build
-process belong into CVS.
-
-
-Changing a Makefile:
---------------------
-
-First of all, NEVER edit anything named Makefile or Makefile.in.
-These are both derived from the corresponding Makefile.am.  The
-most common reason for editing is to change the list of sources.
-
-Steps: 1. edit foo/blah/Makefile.am
-       2. re-run "make" from the top of the build directory
-
-Step 2 will take care of rebuilding the Makefile.in and Makefile
-from your changed Makefile.am.
-
-Makefile.am has a simple format, basically:
-
-        bin_PROGRAMS = myprog
-
-        myprog_SOURCES = blah.c blah.h foo.c foo.h ...
-
-Notice that you have to add all files, C-code *and* headers, to
-the _SOURCES line.  This is vital, because this is the list of
-files that are packed into the distribution.  If you leave one
-out, nobody will be able to build the distributed tar file!
-
-
-Changing configure.ac:
-----------------------
-
-The most common reason to do this is to change the version string.
-If you're editing it for any other reason, I will assume you know
-what you're doing.
-
-Steps: 1. edit configure.ac, and find the line containing
-          AM_INIT_AUTOMAKE(<project>, x.y.z) at the top of the file
-       2. change x.y.z to the new version string
-       3. re-run "make" from the top of the build directory
-
-Step 3 will take care of rebuilding the configure script, and
-usually all the other Makefiles.
-
-
-Version numbers:
-----------------
-
-Version numbers are divided into three parts, the major release
-number, the minor release number and the patchlevel.  The version
-number is appended to the name of the tarballs:
-
-  <project>-<major>.<minor>.<patchlevel>.tar.gz
-
-For example
-
-  projectname-0.9.3.tar.gz
-
-A change in the major release number indicates major changes in
-the interfaces.  Between minor releases, every effort should be
-made to keep the interfaces compatible.  The patchlevels indicate
-the day to day work between the releases.  Odd minor release
-numbers like 2.1.0 indicate unstable development releases while
-even numbers like 2.4.0 indicate stable releases.
-
-Building an official distribution:
-----------------------------------
-
-By this, I mean the file <project>-x.y.z.tar.gz.  It is important
-to do all steps in the given order!
-
-Preparations:
-
-  - Make sure you have all optional libraries installed.
-  - When building a release, update the CVS sources first.  For a
-    stable release it is best to throw away the whole source tree
-    and check it out from scratch to ensure all source files have
-    been added to CVS.
-  - For a stable release, change the dates in
-    doc/<project>.lsm.in, <project>.1 (if these files are used in
-    your project) and fill in the release date in NEWS.  Put the
-    proper entries in the ChangeLog.
-  - Set the correct version numbers in configure.ac in the
-    AC_INIT macro.  ChangeLog this change.
-  - For a stable release, update doc/ANNOUNCE file.  For the
-    first version of a major release (e.g. 2.6.0) all user visible
-    changes have to be mentioned.  For the following maintenance
-    releases *all* code changes have to be listed.  This is
-    usually done by copying all entries from the NEWS file.  Don't
-    forget to proof read the file as it may be sent to the project
-    announcement mailing list.  Put the proper entries in the
-    ChangeLog.
-  - Commit all these changes.
-
-Configuration tests:
-
-  Note that you need to have actually built everything before
-  packing the distribution.  Among other things, this generates
-  the proper dependency information for insertion into
-  Makefile.in's generated by "make distcheck".
-
-  - Run
-      aclocal &&
-      libtoolize --force &&
-      autoheader && automake --add-missing && autoreconf
-  - If you are building a stable release, remove the config.cache
-    file if there is one (autoconf 2.52 does no longer generate
-    this file by default).  Of course doing this for a development
-    release won't hurt either.
-  - Run
-      ./configure
-  - Make sure configure detects all optional libraries except the
-    ones that are recommended not to be used.  Repeat the previous
-    step until configure finds everything.  Building a release
-    without all optional libraries should be a rare exception.
-
-Compile tests:
-
-  - Run
-      make clean
-    even if you checked out from scratch.  It is a useful
-    additional check.
-  - Double check that you get no warnings during the build:
-      make CXXFLAGS="-g -O2 -Wall -Werror"
-    On some systems, the system include files generate warnings.
-    On such a system you have to omit the -Werror option and check
-    the output of the compilation run for warnings manually.  It
-    is important to use the -O2 option (or -O1) because some
-    versions of gcc seem to have a bug: when -Wall is used, but
-    not -O2, some warnings are not generated as they should.
-  - Fix all warnings and problems, commit the changes and repeat
-    the previous step until no more warnings occur.
-
-Build and test the release tarballs:
-
-  The next step will create the tar file, then unpack it and
-  attempt to build the project from it and install to a scratch
-  directory.  This makes sure that you really *did* include all
-  the files necessary to build the package into the tar file.  It
-  may be hard to appreciate how useful this is, until it has
-  reminded you that you forgot file "foo.h" in some _SOURCES line.
-  But trust me, it will save your bacon in this way some day!
-
-  - Run
-      make distcheck
-  - Ensure that you see the message
-      "<project>-x.y.z.tar.gz is ready for distribution"
-
-Tag the release:
-
-* IMPORTANT NOTE: Before you proceed, please ask yourself if the
-  code is ready to be released:
-
-  * Have you committed patches only hours or even minutes ago?
-  * Have there been any big changes in the last few days?
-  * Are there any important parts that are not well tested?
-  * Are you tired from work or have you been hacking for many
-    hours in a row?
-
-  Should your answer to any of these questions be 'yes', please do
-  take a break now and reconsider, especially if this is going to
-  be a stable release.
-
-  The steps above are not critical and can not screw up anything
-  bad.  This is not true for what follows.  If you do something
-  wrong now, you will have a hard time cleaning up the mess.
-  Should something go wrong and you are not sure about the correct
-  fixes, please ask others for help.
-
-  It's important that the files included in the release tarballs
-  and the tagged files are identical.
-
-  - Tag the CVS tree (replace x, y and z):
-      $ cvs tag version-x_y_z
-
-Upload the release:
-
-  Hopefully you didn't change any files after the last commit.
-  Otherwise commit your changes and return to the previous
-  sections, i.e. rebuild tarballs using "make distcheck" and
-  retag the tree.
-
-  - Sign the tarball with gpg using the project release key:
-      make sign
-  - Create the MD5 checksum file:
-      make md5
-  - Upload the release tarball, the signature and the MD5 checksum
-    file to the ftp server.
-
-Update the version number:
-
-  - Set the version numbers in configure.ac to the values used in
-    the development cycle (e.g. x.y.z_devel).  Update the
-    AM_INIT_AUTOMAKE macro.
-  - Create a new section for future changes in the NEWS file.
-  - Add a ChangeLog entry indicating that a new version started.
-  - Commit these three changes.
-  - For a stable release, copy the NEWS from the stable branch to
-    the development branch (the contents, don't just overwrite the
-    file).
-
-Announce the release:
-
-  - Once the tarballs are in place, mail the ANNOUNCE file to the
-    usual places.
-
-
-Maintaining the NEWS:
----------------------
-
-The following explanation was taken from the "GNU Coding
-Standards" documentation by Richard Stallman, Octorber 19, 2001.
-
---
-In addition to its manual, the package should have a file named
-"NEWS" which contains a list of user-visible changes worth
-mentioning.  In each new release, add items to the front of the
-file and identify the version they pertain to.  Don't discard old
-items; leave them in the file after the newer items.  This way, a
-user upgrading from any previous version can see what is new.
-
-If the `NEWS' file gets very long, move some of the older items
-into a file named `ONEWS' and put a note at the end referring the
-user to that file.
---
-
-
-Maintaining the ChangeLog:
---------------------------
-
-The following explanation was taken from the "GNU Coding
-Standards" documentation by Richard Stallman, Octorber 19, 2001.
-
-Additionally it is a good idea to log every file and every
-function changed.  Wildcards like foo/bar.* or foo.[ch] should be
-avoided as such constructs make it very difficult to search for
-specific changes.
-
---
-Keep a change log to describe all the changes made to program
-source files.  The purpose of this is so that people investigating
-bugs in the future will know about the changes that might have
-introduced the bug.  Often a new bug can be found by looking at
-what was recently changed.  More importantly, change logs can help
-you eliminate conceptual inconsistencies between different parts
-of a program, by giving you a history of how the conflicting
-concepts arose and who they came from.
-
-Change Log Concepts
-
-You can think of the change log as a conceptual "undo list" which
-explains how earlier versions were different from the current
-version.  People can see the current version; they don't need the
-change log to tell them what is in it.  What they want from a
-change log is a clear explanation of how the earlier version
-differed.
-
-The change log file is normally called "ChangeLog" and covers an
-entire directory.  Each directory can have its own change log, or
-a directory can use the change log of its parent directory-it's up
-to you.
-
-Another alternative is to record change log information with a
-version control system such as RCS or CVS.  This can be converted
-automatically to a "ChangeLog" file using rcs2log; in Emacs, the
-command C-x v a (vc-update-change-log) does the job.
-
-There's no need to describe the full purpose of the changes or how
-they work together.  If you think that a change calls for
-explanation, you're probably right.  Please do explain it-- but
-please put the explanation in comments in the code, where people
-will see it whenever they see the code.  For example, "New
-function" is enough for the change log when you add a function,
-because there should be a comment before the function definition
-to explain what it does.
-
-However, sometimes it is useful to write one line to describe the
-overall purpose of a batch of changes.
-
-The easiest way to add an entry to "ChangeLog" is with the Emacs
-command M-x add- change-log-entry.  An entry should have an
-asterisk, the name of the changed file, and then in parentheses
-the name of the changed functions, variables or whatever, followed
-by a colon.  Then describe the changes you made to that function
-or variable.
---
-
-Example ChangeLog entry:
-
---
-1998-08-17 Richard Stallman !rms@gnu.org?
-
-        * register.el (insert-register): Return nil.
-        (jump-to-register): Likewise.
-
-        * sort.el (sort-subr): Return nil.
-        * tex-mode.el (tex-bibtex-file, tex-file, tex-region):
-        Restart the tex shell if process is gone or stopped.
-        (tex-shell-running): New function.
-
---
+Running
+-------
+You will need to initialize resources.cfg, opde.cfg and plugins.cfg for the main executable to work.
+see the opde wiki for more info:
+    http://opde.sourceforge.net/wiki/index.php/Main_Page
