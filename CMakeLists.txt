@@ -1,13 +1,27 @@
 project (OPDE)
 
 # Build type selection. This should be targettable 
-# SET(CMAKE_BUILD_TYPE Debug)
+#SET(CMAKE_BUILD_TYPE Debug)
 SET(CMAKE_BUILD_TYPE Release)
 
 # Option to build in the debugging code
 OPTION(GLOBAL_DEBUG 
-    "Build the debugging code too."
+    "Build the debugging code too"
     OFF)
+
+# Option to build in the debugging code
+OPTION(PROFILING 
+    "Build the sources with profiling support (Only Debug build type)"
+    OFF)
+
+# Compiler profiling flags
+IF (PROFILING)
+    IF(CMAKE_COMPILER_IS_GNUCXX)
+	SET(PROFILER "-pg") # GCC only profiler option
+    ENDIF(CMAKE_COMPILER_IS_GNUCXX)	
+ELSE (PROFILING)
+    SET(PROFILER "")
+ENDIF (PROFILING)
 
 #Target the binary files into a separate directories
 # SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR/Build})
@@ -18,13 +32,13 @@ IF(CMAKE_COMPILER_IS_MINGW)
 	SET(CMAKE_SHARED_LINKER_FLAGS"-Wl,--enable-auto-image-base -Wl,--add-stdcall-alias -Wl,--enable-runtime-pseudo-reloc -Wl,--enable-auto-import")
 ENDIF(CMAKE_COMPILER_IS_MINGW)
 
-# Warning level high (Lowered by one to supress the payload of ogre releted warnings)
+# Warning level high (Lowered by one to supress the payload of ogre releted warnings in VC)
 SET(CMAKE_CXX_WARNING_LEVEL 3)
 
 # GCC specific. Release/Debug flags (I add some debug/profiler switches there)
 IF(CMAKE_COMPILER_IS_GNUCXX)
-	SET(CMAKE_C_FLAGS_DEBUG "-g -O3 -pg")
-	SET(CMAKE_CXX_FLAGS_DEBUG "-g -O3 -pg")
+	SET(CMAKE_C_FLAGS_DEBUG "-g -O3 ${PROFILER}")
+	SET(CMAKE_CXX_FLAGS_DEBUG "-g -O3 ${PROFILER}")
 	SET(CMAKE_CXX_FLAGS_DISTRIBUTION "-O3")
 	SET(CMAKE_C_FLAGS_DISTRIBUTION "-O3")
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
@@ -86,5 +100,20 @@ ELSE(CEGUI_FOUND_OK)
 ENDIF(CEGUI_FOUND_OK)
 
 
+# Add the subdirectories which contain aditional CMakeLists.txt files
 add_subdirectory (src)
 add_subdirectory (proto)
+
+MESSAGE(STATUS "Your configuration seems to be OK!")
+
+MESSAGE("")
+
+# Print out some configuration status messages
+MESSAGE("Your build parameters:")
+MESSAGE(" * Global debugging : ${GLOBAL_DEBUG}")
+MESSAGE(" * Build type       : ${CMAKE_BUILD_TYPE}")
+MESSAGE(" * Profilling       : ${PROFILING}")
+MESSAGE(" * C compiler       : ${CMAKE_C_COMPILER}")
+MESSAGE(" * C++ compiler     : ${CMAKE_CXX_COMPILER}")
+MESSAGE(" * Source directory : ${CMAKE_CURRENT_SOURCE_DIR}")
+MESSAGE(" * Binary directory : ${CMAKE_CURRENT_BINARY_DIR}")
