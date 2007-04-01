@@ -1,3 +1,21 @@
+#    This file is part of openDarkEngine project
+#    Copyright (C) 2005-2007 openDarkEngine team
+#
+#    This program is free software; you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation; either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program; if not, write to the Free Software
+#    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+
 project (OPDE)
 
 # Build type selection. This should be targettable 
@@ -6,7 +24,12 @@ SET(CMAKE_BUILD_TYPE Release)
 
 # Option to build in the debugging code
 OPTION(GLOBAL_DEBUG 
-    "Build the debugging code too"
+    "Build the debugging code"
+    OFF)
+
+# Option to build the documentation
+OPTION(GENERATE_DOC
+    "Build the doxy documentation"
     OFF)
 
 # Option to build in the debugging code
@@ -60,8 +83,8 @@ ELSE(GLOBAL_DEBUG)
 ENDIF(GLOBAL_DEBUG)
 
 # Some configuration checks to allow platform independence
-include(ConfigureChecks.cmake)
-configure_file(config.h.cmake ${CMAKE_BINARY_DIR}/config.h )
+INCLUDE(ConfigureChecks.cmake)
+CONFIGURE_FILE(config.h.cmake ${CMAKE_BINARY_DIR}/config.h )
 
 # Solve the dependencies
 # SET(EXPAT_DIR ${CMAKE_MODULE_PATH})
@@ -104,6 +127,16 @@ ENDIF(CEGUI_FOUND_OK)
 add_subdirectory (src)
 add_subdirectory (proto)
 
+# Generate the doxyfile if selected as an option
+IF (GENERATE_DOC)
+    # Generate the doxyfile from the template file
+    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
+                      ${CMAKE_BINARY_DIR}/Doxyfile)
+    
+    MESSAGE(STATUS "Doxyfile was generated in ${CMAKE_BINARY_DIR}.")
+    # You can run doxygen on that file to generate documentation...
+ENDIF (GENERATE_DOC)
+
 MESSAGE(STATUS "Your configuration seems to be OK!")
 
 MESSAGE("")
@@ -113,7 +146,9 @@ MESSAGE("Your build parameters:")
 MESSAGE(" * Global debugging : ${GLOBAL_DEBUG}")
 MESSAGE(" * Build type       : ${CMAKE_BUILD_TYPE}")
 MESSAGE(" * Profilling       : ${PROFILING}")
+MESSAGE(" * Doxy generation  : ${GENERATE_DOC}")
 MESSAGE(" * C compiler       : ${CMAKE_C_COMPILER}")
 MESSAGE(" * C++ compiler     : ${CMAKE_CXX_COMPILER}")
 MESSAGE(" * Source directory : ${CMAKE_CURRENT_SOURCE_DIR}")
 MESSAGE(" * Binary directory : ${CMAKE_CURRENT_BINARY_DIR}")
+
