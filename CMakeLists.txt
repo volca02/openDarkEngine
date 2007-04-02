@@ -18,9 +18,9 @@
 
 project (OPDE)
 
-# Build type selection. This should be targettable 
-#SET(CMAKE_BUILD_TYPE Debug)
-SET(CMAKE_BUILD_TYPE Release)
+# Build type selection. Use ccmake for selection of this (or the commandline switches)
+# SET(CMAKE_BUILD_TYPE Debug)
+# SET(CMAKE_BUILD_TYPE Release)
 
 # Option to build in the debugging code
 OPTION(GLOBAL_DEBUG 
