@@ -23,6 +23,9 @@ cd BUILD_DIR
 cmake OPDE_DIR
 make
 
+Note: You can also use ccmake instead of cmake, which is a GUI frontend to cmake that will let you change the variables. That means Doxygen
+building, build type, debug code building. This works on both windows and *nix platforms.
+
 On windows, please ensure that the OGRE_HOME environmental variables is set (should be if the installation was done using the ogre sdk).
 
 If the cmake will have problem locating the CEGUI libs/headers, you can try setting these environmental variables:
