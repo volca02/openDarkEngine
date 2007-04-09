@@ -116,7 +116,7 @@ namespace Ogre {
 		int positive = 0;
 		int negative = 0;
 		
-		int pointcount = mPoints->size();
+		unsigned int pointcount = mPoints->size();
 		
 		//first we mark the vertices
 		Plane::Side *sides = new Plane::Side[pointcount];
@@ -257,7 +257,7 @@ namespace Ogre {
 		Vector3 ip     = ray.getPoint(intersection.second);
 		Vector3 origin = ray.getOrigin();
 				
-		for (int idx = 0; idx < mPoints->size(); idx++) {
+		for (unsigned int idx = 0; idx < mPoints->size(); idx++) {
 			int iv2 = (idx + 1) % mPoints->size();
 			
 			Vector3 v1 = mPoints->at(idx);
