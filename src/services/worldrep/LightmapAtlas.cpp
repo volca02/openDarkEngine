@@ -333,7 +333,7 @@ namespace Opde {
 			if (total_pixels > 0)
 				percentage = 100.0f * unused_pixels / total_pixels;
 			
-			LOG_INFO("Total unused light map atlasses pixels: %d of %d (%f\%). %d atlases total used. Total splits: %d", unused_pixels, total_pixels, percentage, last, mSplitCount);
+			LOG_INFO("Total unused light map atlasses pixels: %d of %d (%f%%). %d atlases total used. Total splits: %d", unused_pixels, total_pixels, percentage, last, mSplitCount);
 			
 		} else LOG_ERROR("Command %s not understood by LightAtlasList", command.c_str());
 	}

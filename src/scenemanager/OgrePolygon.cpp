@@ -214,7 +214,7 @@ namespace Ogre {
 		// Why the hell didn't the LG guys remove those? (Probably not worth the trouble)
 		
 		int removed = 0;
-		int idx;
+		unsigned int idx;
 		
 		for (idx = 0; idx < mPoints->size(); idx++) {
 			int prev = idx - 1;
@@ -284,7 +284,7 @@ namespace Ogre {
 		// intersection circle radius
 		Real irad = radius*radius - distance*distance;
 				
-		for (int idx = 0; idx < mPoints->size(); idx++) {
+		for (unsigned int idx = 0; idx < mPoints->size(); idx++) {
 			int iv2 = (idx + 1) % mPoints->size();
 			
 			Vector3 v1 = mPoints->at(idx);
