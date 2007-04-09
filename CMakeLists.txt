@@ -19,8 +19,11 @@
 project (OPDE)
 
 # Build type selection. Use ccmake for selection of this (or the commandline switches)
-# SET(CMAKE_BUILD_TYPE Debug)
-# SET(CMAKE_BUILD_TYPE Release)
+# Default build type
+IF (NOT CMAKE_BUILD_TYPE)
+    # Release for now, as VC builds are incredibly slow on Debug
+    SET(CMAKE_BUILD_TYPE Release)
+ENDIF (NOT CMAKE_BUILD_TYPE)
 
 # Option to build in the debugging code
 OPTION(GLOBAL_DEBUG 
