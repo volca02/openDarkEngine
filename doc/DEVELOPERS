@@ -42,7 +42,8 @@ or, if wanting to select the generator (for example MinGW makefiles)
 
 cmake . -G "MinGW Makefiles"
 
-Note: You can also use the out of source build approach as *nix building guide notes. This makes your source directory clean.
+Note: You can also use the out of source build approach as *nix building guide notes. This makes your source directory clean. 
+	The windows version of ccmake is CMakeSetup.
 
 Please read the output of cmake carefuly. If the makefiles/VC solution is not present, it will give you hints about what was wrong.
 
