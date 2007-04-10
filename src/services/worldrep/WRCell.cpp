@@ -762,7 +762,7 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------------------------------------
-	int WRCell::buildStaticGeometry(BspVertex* vertexPtr, unsigned int* indexPtr, StaticFaceGroup* facePtr, 
+	int WRCell::buildStaticGeometry(BspVertex* vertexPtr, unsigned int* indexPtr, Ogre::StaticFaceGroup* facePtr, 
 					int startVertex, int startIndex, int startFace) {
 		assert(loaded);
 		assert(atlased);

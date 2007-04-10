@@ -42,7 +42,13 @@ namespace Ogre {
 
 	#define PLANE_DISTANCE_CORRECTION 0.00001
 	
-	/** BSP/Portal based scene manager
+	/** BSP/Portal based scene manager.
+	*
+	* This sceneManager uses BSP tree and Portals. Each cell (leaf node of the BSP tree) is a convex cell, that is constructed with a 
+	* set of textured polygons and portal polygons, which enclose the whole cell. The cells are convex pieces of geometry. For the portal
+	* polygons, the visibility is evaluated, and if the portal is visible, the cell that is connected by the portal is rendered as well.
+	*
+	* @note This scene manager does not support portal movement, as the Intersection querries and visibility evaluators would have to be modified (and yet the modifying code would have to leave the cell convex and without holes) 
 	*/
 	class DarkSceneManager : public SceneManager {
 		protected:
@@ -98,6 +104,8 @@ namespace Ogre {
 			    is in, and tags any geometry which is in a visible leaf for
 			    later processing using Portal Visibility.
 			    @param camera Pointer to the viewpoint.
+			    @param queue The render queue to use
+			    @param onlyShadowCasters if true, only shadow casters are queued
 			    @returns The BSP node the camera was found in, for info.
 			*/
 			BspNode* walkTree(Camera* camera, RenderQueue *queue, bool onlyShadowCasters);
@@ -152,7 +160,10 @@ namespace Ogre {
 			size_t mActualPosition; 
 			
 		public:
+			/** Constructor */
 			DarkSceneManager(const String& instanceName);
+			
+			/** Destructor */
 			~DarkSceneManager();
 		
 			/** Not implemented. Please use the supplied methods for now */
@@ -161,7 +172,10 @@ namespace Ogre {
 			/**  Not implemented. Returns 0. */
 			size_t estimateWorldGeometry(const String& filename);
 			
-			/** Set the vertex/index buffers and face list of the Static geometry. The Leaf BSPNodes have to have corresponding data set */ 
+			/** The static world geometry setter method. Caller supplies a vertex buffer and index buffer, a set of faces. 
+			* The acompaniing method setBspTree sets the BSP tree that contains face lists for each cell.
+			* @see setBspTree
+			*/ 
 			void setStaticGeometry(Ogre::VertexData* vertexData, Ogre::HardwareIndexBufferSharedPtr indexes, 
 					Ogre::StaticFaceGroup* faceGroups, unsigned int numIndexes, unsigned int numFaceGroups);
 		
@@ -194,7 +208,9 @@ namespace Ogre {
 			const String& getTypeName(void) const;
 			
 			/** Sets the BSP tree to the new value, specified by the root BspNode. 
-			* @note The rootNode is unallocated using delete[] when freeing the level geometry. */
+			* @note The rootNode is unallocated using delete[] when freeing the level geometry. 
+			* @note The previous BSP tree is not freed
+			* @see BspTree::setBspTree */
 			void setBspTree(BspNode *rootNode, BspNode *leafNodes, BspNode* nonLeafNodes, size_t leafNodeCount, size_t nonLeafNodeCount);
 			
 			/** return the root node of the bsp tree */
@@ -203,7 +219,7 @@ namespace Ogre {
 			/** returns the pointer to the BspTree class which holds the Bsp tree */
 			BspTree* getBspTree() const { return mBspTree; };
 			
-			/** @copydoc SceneManager::clearScene */
+			/** Clears the scene */
 			void clearScene(void);
 			
 			/** Creates an AxisAlignedBoxSceneQuery for this scene manager. 

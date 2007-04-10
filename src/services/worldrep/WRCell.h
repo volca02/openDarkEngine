@@ -184,7 +184,7 @@ namespace Opde {
 						int startVertex, int startIndex, int startFace);
 			
 			/** Attaches all the found portals to the source and destination DarkSceneNodes
-			* @param nodeList The cell list which the method uses to set source and destination BspNodes 
+			* @param cellList The cell list which the method uses to set source and destination BspNodes 
 			* @return int Number of vertices removed by optimization
 			*/
 			int attachPortals(WRCell* cellList);

@@ -362,11 +362,7 @@ class LightAtlas {
 		~LightAtlas();
 		
 		/** Adds a light map to this atlas. 
-		* \param ver the version (and thus a size) of the WR chunk. 
-		* \param buf a buffer containing the light map pixel data
-		* \param w the width of the light map pixel data
-		* \param h the height of the light map pixel data
-		* \param destinfo destination structure to hold light map targetting and stuff.
+		* @param lmap Lightmap to be added 
 		*/
 		//  TODO: Deprecate destinfo
 		bool addLightMap(LightMap *lmap);
