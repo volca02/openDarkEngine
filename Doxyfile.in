@@ -3,8 +3,8 @@
 #---------------------------------------------------------------------------
 # Project related configuration options
 #---------------------------------------------------------------------------
-PROJECT_NAME           = OPDE
-PROJECT_NUMBER         = 0.2.0
+PROJECT_NAME           = ${PROJECT_NAME}
+PROJECT_NUMBER         = ${OPDE_VER_MAJOR}.${OPDE_VER_MINOR}.${OPDE_VER_PATCH}
 OUTPUT_DIRECTORY       = ${CMAKE_BINARY_DIR}/doc
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
@@ -23,7 +23,7 @@ ABBREVIATE_BRIEF       = "The $name class" \
                          an \
                          the
 ALWAYS_DETAILED_SEC    = NO
-INLINE_INHERITED_MEMB  = NO
+INLINE_INHERITED_MEMB  = YES
 FULL_PATH_NAMES        = YES
 STRIP_FROM_PATH        = ./
 STRIP_FROM_INC_PATH    = 
@@ -46,7 +46,7 @@ EXTRACT_PRIVATE        = NO
 EXTRACT_STATIC         = NO
 EXTRACT_LOCAL_CLASSES  = YES
 EXTRACT_LOCAL_METHODS  = NO
-HIDE_UNDOC_MEMBERS     = YES
+HIDE_UNDOC_MEMBERS     = NO
 HIDE_UNDOC_CLASSES     = YES
 HIDE_FRIEND_COMPOUNDS  = NO
 HIDE_IN_BODY_DOCS      = NO

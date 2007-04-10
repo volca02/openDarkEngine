@@ -6,4 +6,8 @@
 
 #cmakedefine OPDE_DEBUG
 
+#define OPDE_VER_MAJOR ${OPDE_VER_MAJOR}
+#define OPDE_VER_MINOR ${OPDE_VER_MINOR}
+#define OPDE_VER_PATCH ${OPDE_VER_PATCH}
+
 #endif
