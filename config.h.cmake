@@ -10,4 +10,6 @@
 #define OPDE_VER_MINOR ${OPDE_VER_MINOR}
 #define OPDE_VER_PATCH ${OPDE_VER_PATCH}
 
+#define __BIG_ENDIAN ${BIG_ENDIAN}
+
 #endif
