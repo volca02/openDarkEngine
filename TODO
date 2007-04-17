@@ -6,8 +6,7 @@ Each minor version has it's own plan piece, which can change as requirements wil
 	* implement a file handling base classes 
 	* implement a dynamic data containers
 	* implement a templating service for binary data templates/instances handling (e.g. a library of binary templates)
-	* implement a database service for per-object data storage using the dynamic data containers
-	* implement a base of the object service
+	* implement a base of the object service (Property, Link and Object)
 	* implement a LGMD .bin loader (online, resource manager?) that constructs a SceneNode tree and some specs of limits + rotating/sliding info
 	* test all the previous by loading the game objects in-game
 	* if considered a good idea, implement a base scripting bindings
@@ -20,3 +19,92 @@ Each minor version has it's own plan piece, which can change as requirements wil
 	* AI object loading implementation (LGMM), including the movement database. Some tricks could be needed for the translation part of the movement
 	* Physics service implementation
 	* Particle service implementation
+
+
+
+Detailed plan
+-------------
+The overall idea is to reproduce the DarkEngine system :)
+
+The base is Services, each handling a different kind of engine function. On opde executable start, a configuration file is loaded, which should contain the specification of a bootstraping script to use (The main control script), resource configuration to use, files to use, etc. The result is that the core services are properly set-up, and bootstraping script is executed. This script then creates/duplicates the original game look and feel - gui's are set-up and displayed, movies are played.
+
+Upon the game itself is started, another set of services is instantinated. The main script only handles game logic outside the gameplay - e.g. menu system, mission to mission sequence / zone loading in ss2. Also map/objectives are handled here (Simulation is paused while executing the bootstraping script).
+
+The core game system should probably be two threads. One, stepped on 1 ms, simulation thread, handles script messages and timed messages - e.g. the game logic, another thread handles the renderer loop. This way, multi core systems get some bonus and, after all, this how the original system probably worked.
+
+0.2.0:
+
+The plan is to implement object system services. 
+
+After that, a service that handles mesh object loading and display, which will be hooked as a notification client to the property notification system.
+
+Configuration service
+---------------------
+A central register for configuration storage. Should have categories, each containing a set of key/value pairs
+Abilities:
+* Load a configuration from a given file/files.
+* Uses Ogre::ConfigFile
+
+Binary service
+--------------
+Should handle loading of structure definitions from a xml file, and organising them in groups. The service should have methods to get a certain structure definition. Should be based on the DTypeDef class. Based on telliamed's XML files, which will be modified to fit the binary service.
+
+Property service
+----------------
+Should handle loading properties from the Mission definition, GAM system and savegames. The loader has to be prepared to understand the properties from
+either Thief 1/Thief Gold/Thief 2 and System Shock 2. It should use Binary service as a source of data format descriptions. There should be a file containing the definitions of properties, their names, stored names, inheritance types. Configuration service should contain the path to the description file.
+
+The property service should have these abilities:
+* Notification of property - ADDITION, REMOVAL, CHANGE (call a list of methods registered to listen to the event). Per property type. This notification is fired even if the property addition/chage comes indirectly thanks to inheritance.
+* Cacheing of property inheritance - Listening to the link service notifications about Metaproperty links, it should remap the visibility and value source of given property (Priority based, as in MetaProperty link's data - priority)
+* Inheritance definitions for each property type - as far as I know, there are these inheritance mechanims:
+	- Normal inheritance - Property get's inherited every time
+	- Archetype-only inheritance - Inheritance works only on archetypes. The property does not inherit into an object instance. Dromed copies this property if instantinating an archetype. In-game, it should be ignored on metaproperty change.
+* loading / writing of archetype, non-archetype and both to a given FileGroup
+
+Link service
+------------
+Responsible for link management. Uses binary service for link/link data loading. Link data are stored in binary for all the time. Links are remapped to more optimal structures.
+
+Abilities:
+* Link organisation in per-type storages.
+* Link indexing - link name to link type ID, link type ID to link names
+* Link manipulation - addition, removal, change of link and link data
+* Link change notification - Addition, Removal, change of link or link data. Per link type
+* Link queries - Different kinds of link queries - for example - get all mp links to pointing to the object ID X
+* Link data manipulation - queries on link data values, data value changes
+* Later on, link broadcasts (message distribution) - probably 0.3.0 task
+* Link loaders/writers, and a central load/save. Both archetype-only, archetype-less and all links should be implemented. Storing to FileGroup.
+
+Object service
+--------------
+Service responsible for object management.
+
+Abilities:
+* Object instantination, removal, slay. Upon instantination
+     some object have to be given new instances of the archetype's linked objects (ParticleAttachment, weapon for creatures). 
+     This should be probably done via Notifications to services responsible for that.
+* Notification of object changes
+
+
+Inheritance service(?)
+-------------------
+High level service working with inheritance and archetype tree
+
+Abilities:
+* Metaproperty addition and removal
+* Inheritance queries
+* Archetype addition, removal, move in the tree
+* Notification of inheritance changes
+
+Renderer service(?)
+* hooked on renderer properties, handle object display and mesh loading - the question here is if LGMD should be loaded as a SceneNode tree or a skeleton
+based single mesh. Each has some positives and negatives.
+
+
+0.3.0 and further
+
+Scripting handlers - ScriptLanguage class, which handles script loading, execution, in-script class instance wrappers, service bindings
+Implementation of ScriptLanguage for the chosen language. Then implementation of the bootstrapper code.
+Message system.
+Implementation of other services - physics, tweq, ai, etc.
