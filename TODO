@@ -108,3 +108,12 @@ Scripting handlers - ScriptLanguage class, which handles script loading, executi
 Implementation of ScriptLanguage for the chosen language. Then implementation of the bootstrapper code.
 Message system.
 Implementation of other services - physics, tweq, ai, etc.
+
+Some unsorted todos:
+--------------------
+Sky - has to be rendered prior to static world geometry. Should be possible through renderSingleObject. This is waiting for T2-type sky to be written.
+Collision system will have to be implemented ourselves
+Tweq system - this will cause some problems - some tweqs only get updated if visible.
+AI vision - do the vision cones work on WorldRep geometry or on room database? My bet is rooms.
+Dynamic lights - as switchable lightmaps cover the lightning of unmovable lights, some approach has to be thinked up on dynamic lights, those are the only lightning world geometry too - shaders?
+
