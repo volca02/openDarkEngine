@@ -9,6 +9,6 @@
 #define OPDE_VER_MINOR ${OPDE_VER_MINOR}
 #define OPDE_VER_PATCH ${OPDE_VER_PATCH}
 
-#define __OPDE_BIG_ENDIAN ${BIG_ENDIAN}
+#cmakedefine __OPDE_BIG_ENDIAN ${BIG_ENDIAN}
 
 #endif
