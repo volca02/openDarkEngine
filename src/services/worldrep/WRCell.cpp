@@ -78,7 +78,7 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------------------------------------
-	void WRCell::loadFromChunk(unsigned int _cell_num, DarkDatabaseChunk *chunk, int lightSize) {
+	void WRCell::loadFromChunk(unsigned int _cell_num, File *chunk, int lightSize) {
 		assert(!loaded);
 		
 		// Copy the Cell id
@@ -278,7 +278,7 @@ namespace Opde {
 					tex->setTextureAddressingMode(TextureUnitState::TAM_CLAMP);
 					
 					// Switch filtering off to see lmap pixels: TFO_NONE
-					tex->setTextureFiltering(TFO_ANISOTROPIC);
+					tex->setTextureFiltering(TFO_BILINEAR);
 				} else { // There is a definition of the lightmapping pass already, we only update that definition
 					TextureUnitState* tex = shadPass->getTextureUnitState(1);
 					tex->setTextureName(lightmapName.str());
@@ -330,8 +330,10 @@ namespace Opde {
 		vtx->position[1] = pos.y;
 		vtx->position[2] = pos.z;
 		
+		uint pln = face_maps[faceNum].plane;
+		
 		// Normal copy
-		Vector3 normal(planes[faceNum].normal.x, planes[faceNum].normal.y, planes[faceNum].normal.z);
+		Vector3 normal(planes[pln].normal.x, planes[pln].normal.y, planes[pln].normal.z);
 		normal.normalise();
 		
 		vtx->normal[0] = normal.x;
@@ -499,7 +501,7 @@ namespace Opde {
 			StringUtil::StrStreamType modelName;
 			modelName << "cell_" << cellNum << "_portal_" << polyNum;	
 			
-			// Each portal's mech gets it's own manual object. This way we minimize the mesh attachments to hopefully minimal set	
+			// Each portal's mesh gets it's own manual object. This way we minimize the mesh attachments to hopefully minimal set	
 			ManualObject* manual = sceneMgr->createManualObject(modelName.str());
 		
 

@@ -22,7 +22,7 @@
 #define __wrcell_h
 
 #include "WRTypes.h"
-#include "DarkDatabase.h"
+#include "FileGroup.h"
 #include "LightmapAtlas.h"
 #include "OgrePortal.h"
 #include "OgreSceneNode.h"
@@ -137,7 +137,7 @@ namespace Opde {
 			* @param chunk The database chunk to load data from
 			* @param lightSize The lightmap pixel size (either 1 or 2) 
 			* @note lightSize has to be 1 for grayscale lightmaps, 2 for xBGR lightmaps. Otherwise, an assertation takes place */
-			void loadFromChunk(unsigned int _cell_num, DarkDatabaseChunk *chunk, int lightSize);
+			void loadFromChunk(unsigned int _cell_num, File *chunk, int lightSize);
 		
 			/** Returns a cell's plane with the specified index */
 			const Ogre::Plane& getPlane(int index);

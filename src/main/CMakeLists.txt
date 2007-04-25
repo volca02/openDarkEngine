@@ -4,6 +4,7 @@ include_directories(
     ${OPDE_BINARY_DIR}
     ${OPDE_SOURCE_DIR}/src/compat
     ${OPDE_SOURCE_DIR}/src/base/logger
+    ${OPDE_SOURCE_DIR}/src/base/file
     ${OPDE_SOURCE_DIR}/src/base/gui
     ${OPDE_SOURCE_DIR}/src/base/console
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
@@ -38,6 +39,7 @@ target_link_libraries( opde
     ${OGRE_LIBRARIES}
     ${CEGUI_LIBRARIES}
 #    ${EXPAT_LIBRARIES}
+    OpdeFile
     OpdeLogger
     OpdeConsole
     OpdeGUI
@@ -48,5 +50,6 @@ target_link_libraries( opde
     OpdeDatabaseService
 #    OpdeBinaryService
     OpdeBase
+
 )
 
