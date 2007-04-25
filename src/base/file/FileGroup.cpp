@@ -66,8 +66,6 @@ namespace Opde {
 			it->second.file->release();
 		}
 		
-		mSrcFile->release();
-		
 		mFiles.clear();
 	}
 	
@@ -139,7 +137,7 @@ namespace Opde {
 	
 	//------------------------------------	
 	void DarkFileGroup::writeInventory(File* dest, DarkDBInvItem* inventory, uint count) {
-		assert(mSrcFile != NULL);
+		assert(dest != NULL);
 		
 		for (uint i = 0; i < count; i++) {
 			dest->write(&inventory[i].name, sizeof(inventory[i].name));
@@ -161,12 +159,12 @@ namespace Opde {
 	
 	//------------------------------------	
 	void DarkFileGroup::writeChunkHeader(File* dest, const DarkDBChunkHeader& hdr) {
-		assert(mSrcFile != NULL);
+		assert(dest != NULL);
 		
-		mSrcFile->write(&hdr.name, sizeof(hdr.name));
-		mSrcFile->writeElem(&hdr.version_high, sizeof(hdr.version_high), 1);
-		mSrcFile->writeElem(&hdr.version_low, sizeof(hdr.version_low), 1);
-		mSrcFile->writeElem(&hdr.zero, sizeof(hdr.zero), 1);
+		dest->write(&hdr.name, sizeof(hdr.name));
+		dest->writeElem(&hdr.version_high, sizeof(hdr.version_high), 1);
+		dest->writeElem(&hdr.version_low, sizeof(hdr.version_low), 1);
+		dest->writeElem(&hdr.zero, sizeof(hdr.zero), 1);
 	}
 	
 	//------------------------------------	
@@ -264,8 +262,6 @@ namespace Opde {
 		memset(&mHeader.zeros, 0, sizeof(mHeader.zeros));
 		
 		mHeader.dead_beef = 0x0EFBEADDE;
-		
-		dest->write(&mHeader, sizeof(mHeader));
 		
 		// --- Let's write the header
 		
