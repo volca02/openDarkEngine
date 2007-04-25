@@ -51,7 +51,7 @@ namespace Opde {
 	}
 		
 	void ConsoleBackend::addText(std::string text) {
-		mMessages.push_back(text);		
+		mMessages.push_back(text);	
 		mChanged = true;
 		
 		// TODO: No position change if view is not at the end of the message list.
