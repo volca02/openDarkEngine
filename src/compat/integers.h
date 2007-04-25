@@ -38,9 +38,11 @@
 	#include <inttypes.h>
 #endif
 
+namespace Opde {
 #ifndef uint
  typedef unsigned int uint;
 #endif
+}
 
 #endif
 
