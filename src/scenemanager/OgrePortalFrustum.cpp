@@ -42,14 +42,19 @@ namespace Ogre {
 		planes.clear();
 		
 		// should we check whether the normal is faced to the center of the poly?
-		unsigned int previous = pnts.size()-1;
-		for (idx = 0; idx < pnts.size(); idx++) { 
+		PortalPoints::const_iterator previous = pnts.end()--;
+		
+		PortalPoints::const_iterator it = pnts.begin();
+		PortalPoints::const_iterator pend = pnts.end();
+		
+		// project all the vertices to screen space
+		for (; it != pend; it++) {
 			Plane plane;
 			
-			plane.redefine(pnts.at(previous), pnts.at(idx), cam_pos); // Dunno why, the constructor was failing to intialize the values directly...
+			plane.redefine(*previous, *it, cam_pos); // Dunno why, the constructor was failing to intialize the values directly...
 			
 			planes.push_back(plane);
-			previous = idx;
+			previous = it;
 		}
 	}
 
@@ -82,8 +87,11 @@ namespace Ogre {
 		const Vector3 center = src->mCenter;
 		float radius = src->mRadius;
 		
-		for (unsigned int idx = 0; idx < planes.size(); idx++) {
-			float dist = planes.at(idx).getDistance(center);
+		FrustumPlanes::const_iterator it = planes.begin();
+		FrustumPlanes::const_iterator pend = planes.end();
+		
+		for (; it != pend; it++) {
+			float dist = it->getDistance(center);
 			
 			if (fabs(dist) < radius) // intersection
 				return 0;
@@ -112,10 +120,11 @@ namespace Ogre {
 		Portal *new_poly = new Portal(src);
 		
 		// The poly intersects with its bounding volume, so clip it using all planes we have
-		unsigned int idx;
+		FrustumPlanes::const_iterator it = planes.begin();
+		FrustumPlanes::const_iterator pend = planes.end();
 		
-		for (idx = 0; idx < planes.size(); idx++) {
-			if (new_poly->clipByPlane(planes.at(idx), didClip) <= 2) {
+		for (; it != pend; it++) {
+			if (new_poly->clipByPlane(*it, didClip) <= 2) {
 				// was totally clipped away
 				delete new_poly;
 				return NULL;

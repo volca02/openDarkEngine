@@ -152,30 +152,31 @@ namespace Ogre {
 				mPortalCull = (dotp > 0);
 				
 				// skip these expensive operations if we encounter a backface cull
-				if (mPortalCull) 
+				if (mPortalCull)
 					return;
 		
 				// We also can cull away the portal if it is behind the camera's near plane. Can we? This needs distance calculation with the surrounding sphere
 				
 				// We have to cut the Portal using camera's frustum first, as this should solve the to screen projection problems...
 				// the reason is that the coords that are at the back side or near the view point do not get projected right (that is right for our purpose)
-				// it should be sufficient to clip by near plane only though
+				// it should be sufficient to clip by camera's plane (not near plane, too far away, just the plane that comes throught the camera's origin and has normal == view vector of camera)
 				
 				bool didc;
+				
 				Portal *onScreen = frust->clipPortal(this, didc);
 				
 				// If we have a non-zero cut result
 				if (onScreen) {
 					const PortalPoints& scr_points = onScreen->getPoints();
 					
-					unsigned int idx;
-					
+					PortalPoints::const_iterator it = scr_points.begin();
+					PortalPoints::const_iterator pend = scr_points.end();
 					// project all the vertices to screen space
-					for (idx = 0; idx < scr_points.size(); idx++) {
+					for (; it != pend; it++) {
 						int x, y;
 						
 						// This is one time-consuming line... I wonder how big eater this line is.
-						Vector3 hcsPosition = toScreen * scr_points.at(idx);
+						Vector3 hcsPosition = toScreen * (*it);
 						
 						// TODO: Parametrise the Screen width/height
 						// NOTE: The X coord is flipped. This is because of the transform matrix, but it is not a problem for us
