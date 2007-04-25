@@ -26,7 +26,7 @@
 #include "OpdeException.h"
 #include "OgreDataStream.h"
 #include "RefCounted.h"
-
+#include "integers.h"
 #include <fstream>
 
 // Maximal memory file buffer size. Reading/Writing structures bigger than this will split those to fit into the buffers

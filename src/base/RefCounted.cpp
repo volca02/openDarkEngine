@@ -21,8 +21,6 @@
  
 #include "RefCounted.h"
 
-using namespace std;
-
 namespace Opde {
 	
 	/*------------------------------------------------------*/

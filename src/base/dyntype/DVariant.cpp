@@ -559,7 +559,8 @@ namespace Opde {
 	bool DVariant::StringToBool(const std::string& str) {
 		string s(str);
 		
-		transform(s.begin(), s.end(), s.begin(), (int(*)(int)) std::tolower);
+		// HMM: VC does not like this.
+		// transform(s.begin(), s.end(), s.begin(), (int(*)(int)) std::tolower);
 		
 		if ((s=="true") || (s=="1") || (s=="yes")) {
 			return true;
