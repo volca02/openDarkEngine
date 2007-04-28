@@ -47,8 +47,7 @@ target_link_libraries( opde
     OpdeServiceManager
     OpdeWorldRepService
     DarkSceneManager
-    OpdeDatabaseService
-#    OpdeBinaryService
+    OpdeBinaryService
     OpdeBase
 
 )
