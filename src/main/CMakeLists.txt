@@ -10,6 +10,7 @@ include_directories(
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
     ${OPDE_SOURCE_DIR}/src/scenemanager
     ${OPDE_SOURCE_DIR}/src/base/Dark
+    ${OPDE_SOURCE_DIR}/src/base/dyntype
     ${OPDE_SOURCE_DIR}/src/base
     ${OPDE_SOURCE_DIR}/src/main
     ${OPDE_SOURCE_DIR}/src/widgets
@@ -33,7 +34,11 @@ link_directories(
     ${OPDE_SOURCE_DIR}/src/services/worldrep
 )
 
-add_executable (opde WIN32 Opde.cpp OpdeMission.cpp)
+add_executable (opde WIN32 
+    Opde.cpp 
+    OpdeMission.cpp 
+#    OpdeDTypeScriptCompiler.cpp
+)
 
 target_link_libraries( opde
     ${OGRE_LIBRARIES}
