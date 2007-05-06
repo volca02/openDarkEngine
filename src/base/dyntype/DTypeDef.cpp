@@ -280,9 +280,10 @@ namespace Opde {
 		if (templ.type() == DVariant::DV_VECTOR && size != 12)
 			OPDE_EXCEPT("Only 12-byte float vectors are supported", "DTypeDef::DTypeDef");
 		
-		// Enumeration which is not uint
-		if (_enum !=NULL && templ.type() == DVariant::DV_UINT)
-			OPDE_EXCEPT("Only uint enumerations are supported", "DTypeDef::DTypeDef");
+		// Bitfield controled field which is not uint
+		
+		if (_enum != NULL && _enum->isBitfield() && templ.type() != DVariant::DV_UINT)
+			OPDE_EXCEPT("Only uint can be used for bitfield controled fields", "DTypeDef::DTypeDef");
 		
 		// Size <=0 and not string
 		if (templ.type() != DVariant::DV_STRING && size < 0)
@@ -290,21 +291,58 @@ namespace Opde {
 		
 		mTypeName = name;
 		mDefVal = templ;
+		mDefaultUsed = true;
 		
 		mPriv = new DTPrivateSimple(templ.type(), size, _enum);
 	}
 	
 	//------------------------------------
+	// Field constructor, no default value
+	DTypeDef::DTypeDef(const std::string& name, const DVariant::Type type, int size, DEnum* _enum) : mTypeName(name), mDefVal(), RefCounted() {
+		// Check for constraints
+		
+		// zero size is meaningles
+		if (size == 0)
+			OPDE_EXCEPT("Zero sized field cannot be constructed", "DTypeDef::DTypeDef");
+		
+		// Float with non-4 byte length
+		if (type == DVariant::DV_FLOAT && size != 4)
+			OPDE_EXCEPT("Only 4-byte floats are supported", "DTypeDef::DTypeDef");
+		
+		// Vector with size != 12
+		if (type == DVariant::DV_VECTOR && size != 12)
+			OPDE_EXCEPT("Only 12-byte float vectors are supported", "DTypeDef::DTypeDef");
+		
+		// Bitfield controled field which is not uint
+		
+		if (_enum != NULL && _enum->isBitfield() && type != DVariant::DV_UINT)
+			OPDE_EXCEPT("Only uint can be used for bitfield controled fields", "DTypeDef::DTypeDef");
+		
+		
+		// Size <=0 and not string
+		if (type != DVariant::DV_STRING && size < 0)
+			OPDE_EXCEPT("Dynamic size is only supported for strings", "DTypeDef::DTypeDef");
+		
+		mTypeName = name;
+		
+		mDefVal = DVariant();
+		mDefaultUsed = false;
+		
+		mPriv = new DTPrivateSimple(type, size, _enum);
+	}
+	
+	//------------------------------------
 	// Array constructor
-	DTypeDef::DTypeDef(const std::string& name, DTypeDef* member, int size) : mTypeName(name), mDefVal(0), RefCounted() {
+	DTypeDef::DTypeDef(DTypeDef* member, int size) : mTypeName(member->name()), mDefVal(0), RefCounted() {
 		// Check the member for being a dynamic length string (prohibited)
 		if (member->size() <= 0)
 			OPDE_EXCEPT("Dynamic sized type is not supported as a field", "DTypeDef::DTypeDef");
 		
-		mTypeName = name;
+		if (size <= 0)
+			OPDE_EXCEPT("Array of size less than 1 element", "DTypeDef::DTypeDef");
 		
 		size_t ms = member->size(); // member size
-		string basen = name + '['; // base name
+		string basen = mTypeName + '['; // base name
 		
 		// Now build the field cache.
 		// Not as simple, as we have to insert all fields of the member inside
@@ -330,7 +368,6 @@ namespace Opde {
 					mFields.push_back(field);
 				}
 			} else { 
-				// in reality, this creates a sortof alias. that is - the name of the original field is masked by array name
 				FieldDef field;
 				field.offset = i * ms;
 				

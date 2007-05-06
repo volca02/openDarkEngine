@@ -111,8 +111,13 @@ namespace Opde {
 			/// Constucts a possibly enumerated (if _enum is not NULL) type with default value and type taken from templ
 			DTypeDef(const std::string& name, const DVariant& templ, int size, DEnum* _enum = NULL);
 			
-			/// Construct an array type, with the type defined by member, and default value of the fields defined by member, sized size
-			DTypeDef(const std::string& name, DTypeDef* member, int size);
+			/// Constucts a possibly enumerated (if _enum is not NULL) type with type taken from templ
+			DTypeDef(const std::string& name, DVariant::Type type, int size, DEnum* _enum = NULL);
+			
+			/** Construct an array type, with the type defined by member, and default value of the fields defined by member, sized size
+			* @note The base name is taken from the member
+			*/
+			DTypeDef(DTypeDef* member, int size);
 			
 			/// Construct a Structure with members defined by the list. If unioned is true, all the fields share the same start offset (0)
 			DTypeDef(const std::string& name, DTypeDefVector members, bool unioned = false);
@@ -247,6 +252,9 @@ namespace Opde {
 			
 			/// Default value. Only valid if the dtypedef is simple. This fills the fields of a newly created type
 			DVariant mDefVal;
+			
+			/// Default value is used at all
+			bool mDefaultUsed;
 			
 			Fields mFields;
 			FieldMap mFieldMap;
