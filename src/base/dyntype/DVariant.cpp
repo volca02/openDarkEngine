@@ -28,6 +28,13 @@ namespace Opde {
 	/*------------------------------------------------------*/
 	/*-------------------- DVariant ------------------------*/
 	/*------------------------------------------------------*/
+	
+	DVariant::DVariant() {
+		mPrivate.isShared = false;
+		mPrivate.type = DV_INVALID;
+	}
+	
+	//------------------------------------
 	DVariant::DVariant(Type t, void *val) {
 		mPrivate.isShared = false;
 		
@@ -545,12 +552,21 @@ namespace Opde {
 	int DVariant::StringToInt(const std::string& str) {
 		std::stringstream ssStream;
 		int iReturn;
-
-		ssStream << str;
-    		ssStream >> iReturn;
 		
-		if (!ssStream)
-			throw runtime_error(string("DVariant::StringToInt - Parse error for ") + str);
+		if (str.substr(0,2)=="0x") { // hexadecimal
+			ssStream >> hex;
+			ssStream << str.substr(2);
+    			ssStream >> iReturn;
+		
+			if (!ssStream)
+				throw runtime_error(string("DVariant::StringToInt - Parse error for ") + str);
+		} else {
+			ssStream << str;
+    			ssStream >> iReturn;
+		
+			if (!ssStream)
+				throw runtime_error(string("DVariant::StringToInt - Parse error for ") + str);
+		}
 		
 		return iReturn;
 	}

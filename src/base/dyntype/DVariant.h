@@ -50,6 +50,9 @@ namespace Opde {
 				DV_VECTOR	= 6
 			} Type;
 			
+			/** Construct an invalid, empty DVariant instance. */
+			DVariant();
+			
 			/** Construct a DVariant instance. Set a value from the pointer target val, if val is not NULL */
 			DVariant(Type t, void *val = 0);
 			
