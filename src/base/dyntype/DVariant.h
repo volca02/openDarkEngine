@@ -210,9 +210,15 @@ namespace Opde {
 			* @throw runtime_error if unsupported format is encountered */
 			static Vector3 StringToVector(const std::string& str);
 			
-			/** Helper conversion routine : Int from String 
-			* @param str the string to be parsed */
+			/** Helper conversion routine : int from String 
+			* @param str the string to be parsed
+			* @note Understands the 0xNUMBER hexadecimal format */
 			static int StringToInt(const std::string& str);
+			
+			/** Helper conversion routine : uint from String 
+			* @param str the string to be parsed 
+			* @note Understands the 0xNUMBER hexadecimal format */
+			static uint StringToUInt(const std::string& str);
 			
 			/** Helper conversion routine : Bool from String 
 			* Converts 1,yes,true to true, 0,no,false to false (ignoring case) 

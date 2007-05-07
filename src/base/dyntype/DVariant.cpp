@@ -91,7 +91,7 @@ namespace Opde {
 				break;
 				
 			case DV_UINT :
-				mPrivate.data.duint = StringToInt(txtval);
+				mPrivate.data.duint = StringToUInt(txtval);
 				break;
 
 			case DV_STRING :
@@ -552,6 +552,29 @@ namespace Opde {
 	int DVariant::StringToInt(const std::string& str) {
 		std::stringstream ssStream;
 		int iReturn;
+		
+		if (str.substr(0,2)=="0x") { // hexadecimal
+			ssStream >> hex;
+			ssStream << str.substr(2);
+    			ssStream >> iReturn;
+		
+			if (!ssStream)
+				throw runtime_error(string("DVariant::StringToInt - Parse error for ") + str);
+		} else {
+			ssStream << str;
+    			ssStream >> iReturn;
+		
+			if (!ssStream)
+				throw runtime_error(string("DVariant::StringToInt - Parse error for ") + str);
+		}
+		
+		return iReturn;
+	}
+	
+	//------------------------------------
+	uint DVariant::StringToUInt(const std::string& str) {
+		std::stringstream ssStream;
+		uint iReturn;
 		
 		if (str.substr(0,2)=="0x") { // hexadecimal
 			ssStream >> hex;
