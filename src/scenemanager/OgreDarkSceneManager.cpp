@@ -62,6 +62,7 @@ Rewritten to use in the openDarkEngine project by Filip Volejnik <f.volejnik@cen
 	#define LOG_TRAVERSAL(...) ;
 #endif
 
+
 namespace Ogre {
 
 	//-----------------------------------------------------------------------
@@ -81,6 +82,10 @@ namespace Ogre {
 		mShowPortals = false;
 		
 		mTraversalLog = false;
+		
+		mBackfaced = 0;
+		mCellsRendered = 0;
+		mEvalPortals = 0;
 	}
 
 	//-----------------------------------------------------------------------
@@ -143,7 +148,7 @@ namespace Ogre {
 	}
 	
 	//-----------------------------------------------------------------------
-	void DarkSceneManager::_findVisibleObjects(Camera* cam, bool onlyShadowCasters) {
+	void DarkSceneManager::_findVisibleObjects(Camera *cam, VisibleObjectsBoundsInfo *visibleBounds, bool onlyShadowCasters) {
 		// Erase the render queue
 		RenderQueue* renderQueue = getRenderQueue();
 		
@@ -242,7 +247,6 @@ namespace Ogre {
 		for this single group
 		*/
 		// TODO: Once the sky system is solved, do a direct rendering (using renderOps) of the sky mesh
-		
 				
 		// Render static level geometry first
 		renderStaticGeometry();
@@ -262,13 +266,18 @@ namespace Ogre {
 		for (;outPortal_it != end; outPortal_it++) {
 			Portal *out_portal = (*outPortal_it);
 
+			mEvalPortals++;
+			
 			out_portal->refreshScreenRect(camera, toScreen, frust);
 			
-			out_portal->mMentions = 0; 
+			if  (out_portal->mPortalCull) {
+				mBackfaced++;
+			}
 		}
 		
 		cell->mInitialized = true;
 		cell->mFrameNum = mActualFrame;
+		mCellsRendered++;
 	}
 	
 	//-----------------------------------------------------------------------
@@ -277,6 +286,12 @@ namespace Ogre {
 		// Prepare the to screen transform matrix. 
 		const Matrix4& viewM = camera->getViewMatrix();
 		const Matrix4& projM = camera->getProjectionMatrix();
+		
+		// clear statistics
+		mBackfaced = 0;
+		mCellsRendered = 0;
+		mEvalPortals = 0;
+		
 		
 		Matrix4 toScreen = projM * viewM;
 		
@@ -291,37 +306,17 @@ namespace Ogre {
 		cell->mListPosition = 0;
 		cell->mFrameNum = mActualFrame; 
 		
+		// Whole screen rect for the input view
+		// TODO: Init these with the current view size
+		cell->mViewRect.left = 0;
+		cell->mViewRect.bottom = 0;
+		cell->mViewRect.right = 1024;
+		cell->mViewRect.top = 768;
+		
 		PortalListConstIterator outPortal_it = cell->mDstPortals.begin();
 		
 		LOG_TRAVERSAL("CELL_TRAVERSAL: * MOTHER CELL ID : %d", cell->mCellNum);
 
-		
-		for (;outPortal_it != cell->mDstPortals.end(); outPortal_it++) {
-			Portal *outportal = (*outPortal_it);
-			
-			LOG_TRAVERSAL("CELL_TRAVERSAL: * MOTHER CELL: Testing portal %d to cell %d", 
-				      outportal->mPortalID, outportal->mTarget->mCellNum);
-			
-			outportal->mMentions = 0; 
-			
-			if  (outportal->mPortalCull) {
-				LOG_TRAVERSAL("CELL_TRAVERSAL: * MOTHER CELL: backface cull for outcell %d", outportal->mTarget->mCellNum);
-				
-				continue;
-			}
-
-			PortalRect tgt;
-				
-			if (outportal->intersectByRect(viewrect, tgt)) {
-				outportal->unionActualWithRect(tgt); // so we have non-zero actual rect for that portal
-				
-				// mark the visible portal, so it will be evaluated as a view source
-				outportal->mMentions = 1; 
-			} else {
-				LOG_TRAVERSAL("CELL_TRAVERSAL:   * MOTHER CELL: offscreen for %d", outportal->mTarget);
-			}
-		}
-		
 		
 		// While a cell is needed to be evaluated
 		while (mActualPosition < mActiveCells.size()) {
@@ -340,6 +335,7 @@ namespace Ogre {
 			// now that we have the cell prepared, process the outgoing portals with input views
 			PortalListConstIterator tgtPortal_it = actual->mDstPortals.begin();
 		
+			// for all target portals.
 			for (;tgtPortal_it != actual->mDstPortals.end(); tgtPortal_it++) {
 				Portal *target_portal = *tgtPortal_it;	
 
@@ -353,62 +349,34 @@ namespace Ogre {
 					continue;
 				}
 
-				// now process it with all the input portals mentioned
-				PortalListConstIterator src_portal_it = actual->mSrcPortals.begin();
-				
 				bool changed = false;
 				
-				for (;src_portal_it != actual->mSrcPortals.end(); src_portal_it++) {
-					Portal *source = *src_portal_it;
-
-					LOG_TRAVERSAL("CELL_TRAVERSAL:     * against src. ", source->mPortalID);
-					
-					// If the source cell was not yet initialized, we'll skip the processing against this portal
-					// it should be ok, since we will not lower the mention number, and if the source cell will be traversed
-					// we'll get here again with the right mentions situation
-					BspNode *source_cell = source->mSource;
-					
-					if ((source_cell->mFrameNum != mActualFrame) || (!source_cell->mInitialized)) 
-						continue;
-
-					// Ok. The source cell was initialized
-					
-					// test for backface cull
-					if  (source->mPortalCull) { // backface cull
-						LOG_TRAVERSAL("CELL_TRAVERSAL:     * backface cull for source portal ", source->mPortalID);
-
-						continue;
-					}
-					
-
-					if (source->mMentions > 0) { // reevaluation is needed
-						LOG_TRAVERSAL("CELL_TRAVERSAL:      * Mention on portal, reconsidering"); 
-						
-						// clip the src_portals view to the target portal
-						PortalRect tgt; // the rectangle which represents the actual computed src to target portal intersection
-						
-						if (target_portal->intersectByRect(source->mActualRect, tgt)) {
-							LOG_TRAVERSAL("CELL_TRAVERSAL:    - non-zero portal %d intersection", source->mPortalID);
+				PortalRect tgt;
+				
+				BspNode *target_cell = target_portal->mTarget;
+				
+				
+				if (target_portal->intersectByRect(actual->mViewRect, tgt)) {
+					LOG_TRAVERSAL("CELL_TRAVERSAL:    - non-zero portal view intersection");
 							
-							if (target_portal->unionActualWithRect(tgt)) {
-								LOG_TRAVERSAL("CELL_TRAVERSAL: - outgoing portal %d changed.", source->mPortalID);
-								
-								changed = true; 
-								chcount++;
-							}
+					if (target_portal->unionActualWithRect(tgt)) { // if the view change modifies the portals vision-through
+						LOG_TRAVERSAL("CELL_TRAVERSAL: - outgoing portal view changed.");
+							
+						// cell's cull box should be empty...
+						if (target_cell->mFrameNum != mActualFrame) {
+							target_cell->mViewRect = tgt;
+							changed = true;
+						} else {
+							changed = target_portal->mTarget->updateViewRect(tgt);
 						}
-					} // if portal is mentioned
-				} // for all mentioned input portals
+						chcount++;
+					}
+				}
 				
 				// end of portal reevaluation
 				
-				if (changed && target_portal->mMentions < 1) 
-					target_portal->mMentions++;
-				
-				if (target_portal->mMentions > 0) { // the view to the target has changed
+				if (changed) { // the view to the target cell has changed
 					LOG_TRAVERSAL("CELL_TRAVERSAL:     * a change in portal view occured - %d", target_portal->mPortalID);
-					
-					BspNode *target_cell = target_portal->mTarget;
 					
 					// will only add the ones that are not inside already
 					mVisiblePortals.insert(target_portal);
@@ -457,13 +425,6 @@ namespace Ogre {
 			// now unmention all the incoming portals
 			// I have to do it here because directly unmentioning would destroy the portal vis testing...
 			PortalListConstIterator src_portal_it = actual->mSrcPortals.begin();
-
-			
-			for (;src_portal_it != actual->mSrcPortals.end(); src_portal_it++) {
-				if ((*src_portal_it)->mMentions > 0)
-					(*src_portal_it)->mMentions--;
-			}
-
 			
 			mActualPosition++;
 		} // while mActualPosition
@@ -490,9 +451,6 @@ namespace Ogre {
 		
 		// visible portal list clear
 		mVisiblePortals.clear();
-		
-		mCellVisited = 0;
-		mCellDrawn = 0;
 		
 		if (cameraNode != NULL) {
 			// I'm walking on BspNodes now. It seems to be cleaner approach
@@ -755,6 +713,18 @@ namespace Ogre {
 		if ( key == "ShowPortals" ) {
 			bool * bptr = ((bool *)(val));
         		*bptr = mShowPortals;
+        		return true;
+	    	} else if ( key == "BackfaceCulls" ) {
+			unsigned int * uptr = ((unsigned int *)(val));
+        		*uptr = mBackfaced;
+        		return true;
+	    	} else if ( key == "CellsRendered" ) {
+			unsigned int * uptr = ((unsigned int *)(val));
+        		*uptr = mCellsRendered;
+        		return true;
+	    	} else if ( key == "EvaluatedPortals" ) {
+			unsigned int * uptr = ((unsigned int *)(val));
+        		*uptr = mEvalPortals;
         		return true;
 	    	}
 

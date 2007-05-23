@@ -32,7 +32,7 @@ namespace Ogre {
 	
 	/** @brief A Polygon class used as a base for the Portal class as well as other things
 	*/
-	class Polygon {
+	class ConvexPolygon {
 		friend class DarkSceneManager;
 			
 		protected:
@@ -46,12 +46,12 @@ namespace Ogre {
 		public:
 			/** Default constructor. Defines an empty geometry which will lie on the specified plane
 			* @param plane Polygon's plane (Normal direction does matter) */
-			Polygon(Plane plane);
+			ConvexPolygon(Plane plane);
 		
-			~Polygon();
+			~ConvexPolygon();
 			
 			/** copy ctor */
-			Polygon(Polygon *src);
+			ConvexPolygon(ConvexPolygon *src);
 			
 			void addPoint(float x, float y, float z);
 			
@@ -82,7 +82,7 @@ namespace Ogre {
 			/** Returns true if the ray hits the polygon */
 			bool isHitBy(const Ray& ray) const;
 			
-			/** Returns true if the sphere is totaly enclosed by the portal on the intersection with the portal's plane 
+			/** Returns true if the sphere is totaly enclosed by the polygon on the intersection with the portal's plane 
 			* @param pos Sphere center
 			* @param radius Sphere radius
 			* @param distance Sphere center to polygon's plane distance

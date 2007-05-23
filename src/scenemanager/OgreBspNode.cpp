@@ -32,8 +32,7 @@ Rewritten to use in the openDarkEngine project by Filip Volejnik <f.volejnik@cen
 namespace Ogre {
 
     //-----------------------------------------------------------------------
-    BspNode::BspNode(SceneManager* owner, bool isLeaf)
-    {
+    BspNode::BspNode(SceneManager* owner, bool isLeaf) : mViewRect(PortalRect::EMPTY) {
         mOwner = owner;
         mIsLeaf = isLeaf;
 	mSceneNode = NULL;
@@ -45,7 +44,7 @@ namespace Ogre {
     }
 
     //-----------------------------------------------------------------------
-    BspNode::BspNode() {
+    BspNode::BspNode()  : mViewRect(PortalRect::EMPTY) {
 	mOwner = NULL;
         mIsLeaf = false;
 	mSceneNode = NULL;

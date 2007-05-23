@@ -34,6 +34,8 @@
 namespace Ogre {
 	#define POSITION_BINDING 0
 	
+	const PortalRect PortalRect::EMPTY = PortalRect(INF, -INF, INF, -INF);
+	
 	// ---------------------------------------------------------------------------------
 	std::ostream& operator<< (std::ostream& o, PortalRect& r) {
 		o << "RECT [top:" << r.top << ", left:" << r.left << ", bottom: " << r.bottom << ", right:" << r.right << "]";
@@ -48,7 +50,7 @@ namespace Ogre {
 	int Portal::mScreenWidth2 = 512;
 	int Portal::mScreenHeight2 = 384;
 	
-	Portal::Portal(BspNode* source, BspNode* target, Plane plane) : Polygon(plane) {
+	Portal::Portal(BspNode* source, BspNode* target, Plane plane) : ConvexPolygon(plane) {
 		mFrameNum = 0xFFFFF;
 		mMentions = 0;
 		
@@ -70,7 +72,7 @@ namespace Ogre {
 	}
 			
 	// ---------------------------------------------------------------------------------
-	Portal::Portal(Portal *src) : Polygon(src) {
+	Portal::Portal(Portal *src) : ConvexPolygon(src) {
 		this->mTarget = src->getTarget();
 		this->mSource = src->getSource();
 	}

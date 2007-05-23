@@ -55,9 +55,10 @@ namespace Ogre {
 			bool mTraversalLog;
 			
 			// some statistics
-			unsigned int	mCellDrawn;
-			unsigned int	mCellVisited;
 			unsigned int 	mActualFrame;
+			unsigned int	mBackfaced;
+			unsigned int	mCellsRendered;
+			unsigned int	mEvalPortals;
 		    
 			// State variables for rendering WIP
 			RenderOperation mRenderOp;
@@ -188,7 +189,7 @@ namespace Ogre {
 			ViewPoint getSuggestedViewpoint(bool random = false);
 		
 			/** Overriden from SceneManager. */
-			void _findVisibleObjects(Camera* cam, bool onlyShadowCasters);
+			void _findVisibleObjects(Camera *cam, VisibleObjectsBoundsInfo *visibleBounds, bool onlyShadowCasters);
 		
 			/** Overriden from SceneManager. */
 			void _renderVisibleObjects(void);
@@ -292,6 +293,12 @@ namespace Ogre {
 
 			/**
 				Get a scene manager option
+				@remarks
+					Options:
+						ShowPortals - bool - True if portals are rendered as wireframe
+						BackfaceCulls - unsigned int - number of portals that were backfaced
+						CellsRendered - count of rendered cells
+						EvaluatedPortals - Count of portals evaluated for visibility
 			*/
 			bool getOption( const String & key, void *val );
     };

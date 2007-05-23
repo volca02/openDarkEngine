@@ -226,6 +226,9 @@ namespace Ogre {
 		/** Cell ID. For Debugging purposes. */
 		unsigned int mCellNum;
 		
+		/** Current view rectangle to this cell */
+		PortalRect mViewRect;
+		
 		/** Number of face groups in this node if it is a leaf. */
 		int mNumFaceGroups;
 		
@@ -248,6 +251,32 @@ namespace Ogre {
 		/** World fragment if someone wants the cell as a result from the query. - a pre-prepared fragment containing the cell */
 		SceneQuery::WorldFragment mCellFragment;
 		
+		/** Enlarge the view rect to the cell to accompany the given view rect */
+		inline bool updateViewRect(const PortalRect& tgt) {
+			bool changed = false;
+				
+			if (tgt.left < mViewRect.left) {
+				mViewRect.left = tgt.left;
+				changed = true;
+			}
+			
+			if (tgt.right > mViewRect.right) {
+				mViewRect.right = tgt.right;
+				changed = true;
+			}
+			
+			if (tgt.bottom < mViewRect.bottom) {
+				mViewRect.bottom = tgt.bottom;
+				changed = true;
+			}
+			
+			if (tgt.top > mViewRect.top) {
+				mViewRect.top = tgt.top;
+				changed = true;
+			}
+			
+			return changed;
+		}
 	public:
 		const IntersectingObjectSet& getObjects(void) const { return mMovables; }
 		const CellPlaneList& getPlaneList() const { return mPlaneList; }

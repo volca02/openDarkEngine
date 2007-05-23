@@ -38,7 +38,7 @@ namespace Ogre {
 	// ---------------------------------------------------------------------------------
 	// ----------------- Polygon Class implementation -----------------------------------
 	// ---------------------------------------------------------------------------------
-	Polygon::Polygon(Plane plane) {
+	ConvexPolygon::ConvexPolygon(Plane plane) {
 		mPoints = new PolygonPoints();
 		mPoints->clear();
 		
@@ -46,12 +46,12 @@ namespace Ogre {
 	}	
 		
 	// ---------------------------------------------------------------------------------
-	Polygon::~Polygon() {
+	ConvexPolygon::~ConvexPolygon() {
 		delete mPoints;
 	}
 			
 	// ---------------------------------------------------------------------------------
-	Polygon::Polygon(Polygon *src) {
+	ConvexPolygon::ConvexPolygon(ConvexPolygon *src) {
 		const PolygonPoints& pnts = src->getPoints();
 				
 		mPoints = new PolygonPoints();
@@ -66,37 +66,37 @@ namespace Ogre {
 	}
 			
 	// ---------------------------------------------------------------------------------
-	void Polygon::addPoint(float x, float y, float z) {
+	void ConvexPolygon::addPoint(float x, float y, float z) {
 		mPoints->push_back(Vector3(x,y,z));
 	}
 	
 	// ---------------------------------------------------------------------------------		
-	void Polygon::addPoint(Vector3 a) {
+	void ConvexPolygon::addPoint(Vector3 a) {
 		mPoints->push_back(a);
 	}
 			
 	// ---------------------------------------------------------------------------------
-	const PolygonPoints& Polygon::getPoints() {
+	const PolygonPoints& ConvexPolygon::getPoints() {
 		return *mPoints;
 	}
 			
 	// ---------------------------------------------------------------------------------
-	int Polygon::getPointCount() {
+	int ConvexPolygon::getPointCount() {
 		return mPoints->size();
 	}
 	
 	// ---------------------------------------------------------------------------------
-	const Plane& Polygon::getPlane() {
+	const Plane& ConvexPolygon::getPlane() {
 		return mPlane;
 	}
 	
 	// ---------------------------------------------------------------------------------
-	void Polygon::setPlane(Plane plane) {
+	void ConvexPolygon::setPlane(Plane plane) {
 		this->mPlane = plane;
 	}
 	
 	// ---------------------------------------------------------------------------------
-	unsigned int Polygon::getOutCount(Plane &plane) {
+	unsigned int ConvexPolygon::getOutCount(Plane &plane) {
 		unsigned int idx;
 		
 		int negative = 0;
@@ -112,7 +112,7 @@ namespace Ogre {
 	}
 	
 	// ---------------------------------------------------------------------------------
-	int Polygon::clipByPlane(const Plane &plane, bool &didClip) {
+	int ConvexPolygon::clipByPlane(const Plane &plane, bool &didClip) {
 		int positive = 0;
 		int negative = 0;
 		
@@ -203,7 +203,7 @@ namespace Ogre {
 	}
 
 	// ---------------------------------------------------------------------------------
-	int Polygon::optimize() {
+	int ConvexPolygon::optimize() {
 		// Remove vertices not forming an edge break (lying on an edge of previous and next vertex)
 		// Is this worth the trouble? It removes ~5-400 vertices in average situation per mission (Often more than 300, sure this depends on EQUALITY_ANGLE value)
 		
@@ -245,7 +245,7 @@ namespace Ogre {
 	}
 	
 	// ---------------------------------------------------------------------------------
-	bool Polygon::isHitBy(const Ray& ray) const {
+	bool ConvexPolygon::isHitBy(const Ray& ray) const {
 		// Create a RayStart->Edge defined plane. 
 		// If the intersection of the ray to the polygon's plane is inside for all the planes, it is inside the poly
 		std::pair<bool, Real> intersection = ray.intersects(mPlane);
@@ -274,7 +274,7 @@ namespace Ogre {
 	}
 	
 	// ---------------------------------------------------------------------------------
-	bool Polygon::enclosesSphere(const Vector3& pos, const Real& radius, const Real& distance) const {
+	bool ConvexPolygon::enclosesSphere(const Vector3& pos, const Real& radius, const Real& distance) const {
 		// calculate the intersection point
 		Vector3 ip = pos - distance * mPlane.normal;
 		

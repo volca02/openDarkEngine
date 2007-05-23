@@ -46,6 +46,21 @@ namespace Ogre {
 	*/
 	struct PortalRect {
 			int left, right, bottom, top;
+			static const PortalRect EMPTY;
+			
+			PortalRect(int l, int r, int b, int t) {
+				left = l;
+				right = r;
+				bottom = b;
+				top = t;
+			}
+			
+			PortalRect() {
+				left = INF;
+				right = -INF;
+				bottom = INF;
+				top = -INF;
+			}
 	};
 	
 
@@ -60,7 +75,7 @@ namespace Ogre {
 	* visibility determination is done using a to-screen projected portal vertices bounding rectangles PortalRects
 	* @note Please note that the direction of the plane's normal has to comply with the 
 	* portals vertex order derived normal. Also note that no check that the points actualy lie on the plane is done. */
-	class Portal : public Polygon, public SimpleRenderable {
+	class Portal : public ConvexPolygon, public SimpleRenderable {
 		friend class DarkSceneManager;
 		friend class PortalFrustum;
 			
@@ -136,10 +151,7 @@ namespace Ogre {
 			*/
 			void refreshScreenRect(Camera *cam, Matrix4& toScreen, PortalFrustum *frust) {
 				// inverse coords to let the min/max initialize
-				screenRect.top = -INF;
-				screenRect.right = -INF;
-				screenRect.left = INF;
-				screenRect.bottom = INF;
+				screenRect = PortalRect::EMPTY;
 				
 				// Erase the actual rect
 				mActualRect = screenRect;
