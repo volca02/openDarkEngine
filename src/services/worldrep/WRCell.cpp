@@ -485,6 +485,54 @@ namespace Opde {
 		
 		return min_uv + max_uv/2; 
 		// return min_uv; 
+		/*
+		
+		// Calculate the centroid of the polygon
+		// The zero index vertex UV space coord:
+		wr_coord_t coord = vertices[ poly_indices[polyNum][0] ];
+			
+		Vector3 vcoord(coord.x, coord.y, coord.z); 
+			
+		// To uv space
+		Vector2 zuv(nax_u.dotProduct(vcoord), nax_v.dotProduct(vcoord));
+		
+		Vector2 center(0,0);
+		Real parea = 0;
+		
+		// Precalculate the lightmap displacement. (To get the resulting lmap uv to 0-1 range)
+		for (int vert = 1; vert < face_maps[polyNum].count - 1; vert++) {
+			// find the min and max coords in texture space
+			wr_coord_t coord = vertices[ poly_indices[polyNum][vert] ];
+			
+			Vector3 vcoord(coord.x, coord.y, coord.z); 
+			
+			// To uv space
+			Vector2 uvs(nax_u.dotProduct(vcoord), nax_v.dotProduct(vcoord));
+			
+			// The next vertex
+			coord = vertices[ poly_indices[polyNum][vert+1] ];
+			
+			
+			vcoord = Vector3(coord.x, coord.y, coord.z); 
+			
+			// To uv space
+			Vector2 uvsn(nax_u.dotProduct(vcoord), nax_v.dotProduct(vcoord));
+			
+			// Calculate the centroid of the triangle
+			Vector2 centroid = (uvs + uvsn + zuv) / 3;
+			
+			Vector2 disp1 = uvs-zuv;
+			Vector2 disp2 = uvsn-zuv;
+			Real area = disp1.x * disp2.y - disp1.y * disp2.x;
+			
+			center += centroid * area;
+			parea += area;
+		}
+		
+		center /= parea;
+		
+		return center;
+		*/
 	}
 	
 	//------------------------------------------------------------------------------------
