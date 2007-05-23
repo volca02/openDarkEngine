@@ -1,0 +1,189 @@
+// ---------------- Standard Thief 1 waters/lavas ----------------------
+// add is not good operation. Will have to solve the water
+
+material water/basic
+{
+	technique 0
+	{
+		pass 0
+		{
+			// cull_hardware none
+			lighting off
+			
+			// Blend based on color value
+			scene_blend colour_blend
+			
+			depth_write off
+			
+			texture_unit 0
+			{
+				tex_address_mode wrap
+				tex_coord_set 0
+				
+				colour_op_ex modulate_x2 src_manual src_texture 0.8 0.8 0.8
+			}
+		}
+	}
+}
+
+
+// Blue hardware water. Animated
+material water/bl_in : water/basic
+{
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				anim_texture waterhw/BLIN.PCX waterhw/BLIN_1.PCX waterhw/BLIN_2.PCX waterhw/BLIN_3.PCX waterhw/BLIN_4.PCX waterhw/BLIN_5.PCX waterhw/BLIN_6.PCX waterhw/BLIN_7.PCX waterhw/BLIN_8.PCX waterhw/BLIN_9.PCX waterhw/BLIN_10.PCX waterhw/BLIN_11.PCX waterhw/BLIN_12.PCX waterhw/BLIN_13.PCX 1.5
+			}
+		}
+	}
+}
+
+material water/bl_out : water/basic
+{
+	technique 
+	{
+		pass 
+		{
+			texture_unit 
+			{
+				anim_texture waterhw/BLOUT.PCX waterhw/BLOUT_1.PCX waterhw/BLOUT_2.PCX waterhw/BLOUT_3.PCX waterhw/BLOUT_4.PCX waterhw/BLOUT_5.PCX waterhw/BLOUT_6.PCX waterhw/BLOUT_7.PCX waterhw/BLOUT_8.PCX waterhw/BLOUT_9.PCX waterhw/BLOUT_10.PCX waterhw/BLOUT_11.PCX waterhw/BLOUT_12.PCX waterhw/BLOUT_13.PCX 1.5
+			}
+		}
+	}
+}
+
+// Green animated hardware water
+material water/gr_in : water/basic
+{
+	technique 0
+	{
+		pass 0
+		{
+			texture_unit 0
+			{
+				anim_texture waterhw/GRIN.PCX waterhw/GRIN_1.PCX waterhw/GRIN_2.PCX waterhw/GRIN_3.PCX waterhw/GRIN_4.PCX waterhw/GRIN_5.PCX waterhw/GRIN_6.PCX waterhw/GRIN_7.PCX waterhw/GRIN_8.PCX waterhw/GRIN_9.PCX waterhw/GRIN_10.PCX waterhw/GRIN_11.PCX waterhw/GRIN_12.PCX waterhw/GRIN_13.PCX 1.5
+			}
+		}
+	}
+}
+
+
+material water/gr_out : water/basic
+{
+	technique 0
+	{
+		pass 0
+		{
+			texture_unit 0
+			{
+				anim_texture waterhw/GROUT.PCX waterhw/GROUT_1.PCX waterhw/GROUT_2.PCX waterhw/GROUT_3.PCX waterhw/GROUT_4.PCX waterhw/GROUT_5.PCX waterhw/GROUT_6.PCX waterhw/GROUT_7.PCX waterhw/GROUT_8.PCX waterhw/GROUT_9.PCX waterhw/GROUT_10.PCX waterhw/GROUT_11.PCX waterhw/GROUT_12.PCX waterhw/GROUT_13.PCX 1.5
+			}
+		}
+	}
+}
+
+// ----------------- LAVA:
+// Basic lava material def
+// Nothing interesting now, I'm afraid
+
+material water/lava
+{
+	technique 
+	{
+		pass 
+		{
+			lighting off
+		}
+	}
+}
+
+// Lava2
+material water/l2_in : water/lava
+{
+	technique 
+	{
+		pass 
+		{
+			texture_unit 
+			{
+				texture	waterhw/L2IN.PCX
+			}
+		}
+	}
+}
+
+material water/l2_out : water/lava
+{
+	technique 
+	{
+		pass 
+		{
+			texture_unit 
+			{
+				texture	waterhw/L2OUT.PCX
+			}
+		}
+	}
+}
+
+// Lava3
+material water/l3_in : water/lava
+{
+	technique 
+	{
+		pass 
+		{
+			texture_unit 
+			{
+				texture	waterhw/L3IN.PCX
+			}
+		}
+	}
+}
+
+material water/l3_out : water/lava
+{
+	technique 
+	{
+		pass 
+		{
+			texture_unit 
+			{
+				texture	waterhw/L3OUT.PCX
+			}
+		}
+	}
+}
+
+// Lava4
+material water/l4_in : water/lava
+{
+	technique 
+	{
+		pass 
+		{
+			texture_unit 
+			{
+				texture	waterhw/L4IN.PCX
+			}
+		}
+	}
+}
+
+material water/l4_out : water/lava
+{
+	technique 
+	{
+		pass 
+		{
+			texture_unit 
+			{
+				texture	waterhw/L4OUT.PCX
+			}
+		}
+	}
+}

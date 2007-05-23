@@ -1,0 +1,41 @@
+// ---------------- Standard Thief 1 skyboxes ----------------------
+
+//----- daylight skybox 
+material Skybox/daysky
+{
+	technique 
+	{
+		pass 
+		{
+			// cull_hardware none
+			lighting off
+			
+			depth_write off
+			
+			texture_unit 
+			{
+			    cubic_texture skyhw/nskyn.pcx skyhw/nskys.pcx skyhw/nskyw.pcx skyhw/nskye.pcx skyhw/nskyt.pcx skyhw/nskyt.pcx separateUV
+			}
+		}
+	}
+}
+
+//----- night skybox
+material Skybox/nightsky
+{
+	technique 
+	{
+		pass 
+		{
+			// cull_hardware none
+			lighting off
+			
+			depth_write off
+			
+			texture_unit 
+			{
+			    cubic_texture skyhw/dskyn.pcx skyhw/dskys.pcx skyhw/dskyw.pcx skyhw/dskye.pcx skyhw/dskyt.pcx skyhw/dskyt.pcx separateUV
+			}
+		}
+	}
+}

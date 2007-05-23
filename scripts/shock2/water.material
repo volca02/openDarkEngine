@@ -1,0 +1,215 @@
+// ---------------- Standard Thief 2 waters/lavas ----------------------
+// TODO: Do something with the basic material definitions duplicity
+material water/basic
+{
+	technique 0
+	{
+		pass 0
+		{
+			// cull_hardware none
+			lighting off
+			
+			// Blend based on color value
+			scene_blend colour_blend
+			
+			depth_write off
+			
+			texture_unit 0
+			{
+				tex_address_mode wrap
+				tex_coord_set 0
+				
+				colour_op_ex modulate_x2 src_manual src_texture 0.8 0.8 0.8
+			}
+		}
+	}
+}
+
+// Blue hardware water. Animated
+material water/vm_in : water/basic
+{
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+				anim_texture vwater/vmin.PCX vwater/vmin_1.PCX vwater/vmin_2.PCX vwater/vmin_3.PCX vwater/vmin_4.PCX vwater/vmin_5.PCX vwater/vmin_6.PCX vwater/vmin_7.PCX vwater/vmin_8.PCX vwater/vmin_9.PCX vwater/vmin_10.PCX vwater/vmin_11.PCX vwater/vmin_12.PCX vwater/vmin_13.PCX 2
+			}
+		}
+	}
+}
+
+material water/vm_out : water/basic
+{
+	technique 
+	{
+		pass 
+		{
+			texture_unit 
+			{
+				anim_texture vwater/vmout.PCX vwater/vmout_1.PCX vwater/vmout_2.PCX vwater/vmout_3.PCX vwater/vmout_4.PCX vwater/vmout_5.PCX vwater/vmout_6.PCX vwater/vmout_7.PCX vwater/vmout_8.PCX vwater/vmout_9.PCX vwater/vmout_10.PCX vwater/vmout_11.PCX vwater/vmout_12.PCX vwater/vmout_13.PCX 2
+			}
+		}
+	}
+}
+
+material water/bl_in : water/basic
+{
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+			    texture water/blin.pcx
+			}
+		}
+	}
+}
+
+material water/bl_out : water/basic
+{
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+			    texture water/blout.pcx
+			}
+		}
+	}
+}
+
+material water/gr_in : water/basic
+{
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+			    texture water/grin.pcx
+			}
+		}
+	}
+}
+
+material water/gr_out : water/basic
+{
+	technique
+	{
+		pass
+		{
+			texture_unit
+			{
+			    texture water/grout.pcx
+			}
+		}
+	}
+}
+
+
+
+// ----------------- LAVA:
+// Basic lava material def
+// Nothing interesting now, I'm afraid
+
+material water/lava
+{
+	technique 
+	{
+		pass 
+		{
+			lighting off
+		}
+	}
+}
+
+// Lava2
+material water/l2_in : water/lava
+{
+	technique 
+	{
+		pass 
+		{
+			texture_unit 
+			{
+				texture	waterhw/L2IN.PCX
+			}
+		}
+	}
+}
+
+material water/l2_out : water/lava
+{
+	technique 
+	{
+		pass 
+		{
+			texture_unit 
+			{
+				texture	waterhw/L2OUT.PCX
+			}
+		}
+	}
+}
+
+// Lava3
+material water/l3_in : water/lava
+{
+	technique 
+	{
+		pass 
+		{
+			texture_unit 
+			{
+				texture	waterhw/L3IN.PCX
+			}
+		}
+	}
+}
+
+material water/l3_out : water/lava
+{
+	technique 
+	{
+		pass 
+		{
+			texture_unit 
+			{
+				texture	waterhw/L3OUT.PCX
+			}
+		}
+	}
+}
+
+// Lava4
+material water/l4_in : water/lava
+{
+	technique 
+	{
+		pass 
+		{
+			texture_unit 
+			{
+				texture	waterhw/L4IN.PCX
+			}
+		}
+	}
+}
+
+material water/l4_out : water/lava
+{
+	technique 
+	{
+		pass 
+		{
+			texture_unit 
+			{
+				texture	waterhw/L4OUT.PCX
+			}
+		}
+	}
+}

@@ -1,0 +1,4079 @@
+// ******************************************************************************
+// *
+// *    This file is part of openDarkEngine project
+// *    Copyright (C) 2005-2006 openDarkEngine team
+// *
+// *    This program is free software; you can redistribute it and/or modify
+// *    it under the terms of the GNU General Public License as published by
+// *    the Free Software Foundation; either version 2 of the License, or
+// *    (at your option) any later version.
+// *
+// *    This program is distributed in the hope that it will be useful,
+// *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+// *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// *    GNU General Public License for more details.
+// *
+// *    You should have received a copy of the GNU General Public License
+// *    along with this program; if not, write to the Free Software
+// *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// *
+// *****************************************************************************
+
+// Thief 2 (R) DType type definitions
+// Converted from the Telliamed's xml file Thief2-structs.xml, released under GNU GPL
+// Original file is copirighted : Copyright (C) 2006 Tom N Harris <telliamed@whoopdedo.org>
+
+
+bitfield aiawarenessflags {
+	key "Seen" 0x01
+	key "Heard" 0x02
+	key "Can Raycast" 0x04
+	key "Line of Sight" 0x08
+	key "Blind" 0x10
+	key "Deaf" 0x20
+	key "Highest" 0x40
+	key "First Hand" 0x80
+}
+
+enum aifleecondition : uint {
+	key "Never" 0
+	key "Alert 1" 1
+	key "Alert 2" 2
+	key "Alert 3" 3
+	key "Damage" 4
+	key "Threat" 5
+	key "Frustrated" 6
+}
+
+enum aimode : uint {
+	key "Asleep" 0
+	key "Super efficient" 1
+	key "Efficient" 2
+	key "Normal" 3
+	key "Combat" 4
+	key "Dead" 5
+}
+
+enum ainonhostile : uint {
+	key "Never" 0
+	key "To Player" 1
+	key "To Player Until Damaged" 2
+	key "To Player Until Threatened" 3
+	key "Until Damaged" 4
+	key "Until Threatened" 5
+	key "Always" 6
+}
+
+bitfield aiobjectavoidflags {
+	key "Block Pathfind" 1
+	key "Repel" 2
+}
+
+enum aipriority : uint {
+	key "None" 0
+	key "VeryLow" 1
+	key "Low" 2
+	key "Normal" 3
+	key "High" 4
+	key "VeryHigh" 5
+	key "Absolute" 6
+}
+
+enum airating : uint {
+	key "Null" 0
+	key "Well Below Average" 1
+	key "Below Average" 2
+	key "Average" 3
+	key "Above Average" 4
+	key "Well Above Average" 5
+}
+
+enum aircapplicable : uint {
+	key "None" 0
+	key "Minimum" 1
+	key "VeryLow" 2
+	key "Low" 3
+	key "Normal" 4
+	key "High" 5
+	key "VeryHigh" 6
+}
+
+enum aircconstraint : uint {
+	key "None" 0
+	key "Nearby AI" 1
+	key "Misses" 2
+}
+
+enum aircfrequency : uint {
+	key "Never" 0
+	key "Very Rarely" 1
+	key "Rarely" 2
+	key "Sometimes" 3
+	key "Often" 4
+	key "Very Often" 5
+}
+
+enum aircmethod : uint {
+	key "Straight Line" 0
+	key "Arcing" 1
+	key "Reflecting" 2
+	key "Overhead" 3
+}
+
+enum aircpriority : uint {
+	key "Very Low" 0
+	key "Low" 1
+	key "Moderate" 2
+	key "High" 3
+	key "Very High" 4
+}
+
+enum aisoundtype : uint {
+	key "None" 0
+	key "Inform" 1
+	key "Minor anomaly" 2
+	key "Major anomaly" 3
+	key "Non-combat high" 4
+	key "Combat high" 5
+}
+
+enum aispeed : uint {
+	key "Stopped" 0
+	key "Very Slow" 1
+	key "Slow" 2
+	key "Normal" 3
+	key "Fast" 4
+	key "Very Fast" 5
+}
+
+enum aiteam : uint {
+	key "Good" 0
+	key "Neutral" 1
+	key "Bad" 2
+}
+
+enum aithreat : uint {
+	key "Raised Weapon" 0
+	key "Threat" 1
+}
+
+bitfield aivisionflags {
+	key "Active" 0x01
+	key "No Alert 0" 0x02
+	key "No Alert 1" 0x04
+	key "No Alert 2" 0x08
+	key "No Alert 3" 0x10
+	key "Peripheral" 0x20
+	key "Omni" 0x40
+	key "Night Vision" 0x80
+	key "Behind" 0x100
+}
+
+enum aiwatchkillcondition : uint {
+	key "Never" 0
+	key "After Trigger" 1
+	key "After Completion" 2
+}
+
+enum aiwatchvisibility : uint {
+	key "None" 0
+	key "Line of Sight" 1
+	key "Raycast" 2
+}
+
+enum alertlevel : uint {
+	key "None" 0
+	key "Low" 1
+	key "Moderate" 2
+	key "High" 3
+}
+
+bitfield ambienthackedflags {
+	key "Environmental" 0x01
+	key "No Sharp Curve" 0x02
+	key "Turned Off" 0x04
+	key "Once Only" 0x08
+	key "Music" 0x10
+	key "Synch" 0x20
+	key "No Fade" 0x40
+	key "Destroy Object" 0x80
+	key "Auto Off" 0x100
+}
+
+enum animlightmode : uint {
+	key "Alternate" 0
+	key "Alternate Smoothly" 1
+	key "Random" 2
+	key "Min Brightness" 3
+	key "Max Brightness" 4
+	key "Zero Brightness" 5
+	key "Brighten Smoothly" 6
+	key "Dim Smoothly" 7
+	key "Semi-Random" 8
+	key "Flicker" 9
+}
+
+bitfield animtextureflags {
+	key "Wrap" 1
+	key "Randing" 2
+	key "Reverse" 4
+	key "Portal" 8
+}
+
+bitfield bitmapanimationflags {
+	key "Kill On Completion" 1
+}
+
+enum broadcastschema2 : uint {
+	key "None" 0
+	key "Sleeping" 1
+	key "Alert 0" 2
+	key "Alert 1" 3
+	key "Alert 2" 4
+	key "Alert 3" 5
+	key "Alert to 1" 6
+	key "Alert to 2" 7
+	key "Alert to 3" 8
+	key "Spot Player" 9
+	key "Alert Down" 10
+	key "Lost Contact" 11
+	key "Charge" 12
+	key "Shoot" 13
+	key "Flee" 14
+	key "Friend" 15
+	key "Alarm" 16
+	key "Get Bowman" 17
+	key "Attack" 18
+	key "Attack Hit" 19
+	key "Block" 20
+	key "Block Attempt" 21
+	key "Blocked" 22
+	key "Hit-No Damage" 23
+	key "Hit-High Damage" 24
+	key "Hit-Low Damage" 25
+	key "Ambush" 26
+	key "Die Loud" 27
+	key "Die Soft" 28
+	key "Body" 29
+	key "Mising" 30
+	key "Security" 31
+	key "Anomaly Small" 32
+	key "Anomaly Large" 33
+	key "Robot" 34
+	key "Intruder" 35
+	key "Body Seen" 36
+	key "Missing Seen" 37
+	key "Anomaly Seen" 38
+	key "Robot Seen" 39
+	key "Frustrated" 40
+}
+
+enum broadcasttype : uint {
+	key "Normal" 0
+	key "None" 1
+	key "Custom" 2
+}
+
+enum containtype : int {
+	key "Default" 0
+	key "Belt" -1
+	key "Hand" -2
+	key "Alternate" -3
+}
+
+enum convactor : int {
+	key "Unused" -1
+}
+
+enum creaturetype : uint {
+	key "Humanoid" 0
+	key "PlayerArm" 1
+	key "PlayerBowArm" 2
+	key "Burrick" 3
+	key "Spider" 4
+	key "BugBeast" 5
+	key "Crayman" 6
+	key "Constantine" 7
+	key "Apparition" 8
+	key "Sweel" 9
+	key "Rope" 10
+	key "Zombie" 11
+	key "Small Spider" 12
+	key "Frog" 13
+	key "Cutty" 14
+	key "Avatar" 15
+	key "Robot" 16
+	key "Small Robot" 17
+	key "Spider Bot" 18
+}
+
+enum cretposetype : uint {
+	key "Tags" 0
+	key "Motion" 1
+}
+
+bitfield darkstatflags {
+	key "Innocent" 0x01
+	key "Enemy" 0x02
+	key "Hidden" 0x04
+	key "FoundBody" 0x08
+	key "Robot" 0x10
+}
+
+bitfield difficultylevels {
+	key "0 (Normal)" 0x01
+	key "1 (Hard)" 0x02
+	key "2 (Expert)" 0x04
+}
+
+enum doorstate : uint {
+	key "Closed" 0
+	key "Open" 1
+	key "Closing" 2
+	key "Opening" 3
+	key "Halted" 4
+}
+
+enum eaxtype : uint {
+	key "Generic" 0
+	key "PaddedCell" 1
+	key "Room" 2
+	key "Bathroom" 3
+	key "LivingRoom" 4
+	key "StoneRoom" 5
+	key "Auditorium" 6
+	key "ConcertHall" 7
+	key "Cave" 8
+	key "Arena" 9
+	key "Hangar" 10
+	key "CarpetedHallway" 11
+	key "Hallway" 12
+	key "StoneCorridor" 13
+	key "Alley" 14
+	key "Forest" 15
+	key "City" 16
+	key "Mountains" 17
+	key "Quarry" 18
+	key "Plain" 19
+	key "ParkingLot" 20
+	key "SewerPipe" 21
+	key "UnderWater" 22
+	key "Drugged" 23
+	key "Dizzy" 24
+	key "Psychotic" 25
+}
+
+enum facevisage : uint {
+	key "Neutral" 0
+	key "Smile" 1
+	key "Wince" 2
+	key "Surprise" 3
+	key "Stunned" 4
+}
+
+bitfield frobaction {
+	key "Move" 0x01
+	key "Script" 0x02
+	key "Delete" 0x04
+	key "Ignore" 0x08
+	key "FocusScript" 0x10
+	key "Tool Cursor" 0x20
+	key "Use Ammo" 0x40
+	key "Default" 0x80
+	key "Deselect" 0x100
+}
+
+bitfield frobproxyflags {
+	key "Do Inv" 0x01
+	key "No World" 0x02
+	key "Do ToolSrc" 0x04
+	key "No ToolDst" 0x08
+	key "Allow Direct" 0x10
+}
+
+bitfield gunflashflags {
+	key "Attach Projectile" 1
+	key "Random Bank" 2
+}
+
+enum inventoryrendertype : uint {
+	key "Default" 0
+	key "Alt Model" 1
+	key "Alt Bitmap" 2
+}
+
+enum inventorytype : uint {
+	key "Junk" 0
+	key "Item" 1
+	key "Weapon" 2
+}
+
+enum investigatekind : uint {
+	key "Normal" 0
+	key "Don't Investigate" 1
+}
+
+enum meshjoint : uint {
+	key "None" 0
+	key "Head" 1
+	key "Neck" 2
+	key "Abdomen" 3
+	key "Butt" 4
+	key "LeftShoulder" 5
+	key "RightShoulder" 6
+	key "LeftElbow" 7
+	key "RightElbow" 8
+	key "LeftWrist" 9
+	key "RightWrist" 10
+	key "LeftFingers" 11
+	key "RightFingers" 12
+	key "LeftHip" 13
+	key "RightHip" 14
+	key "LeftKnee" 15
+	key "RightKnee" 16
+	key "LeftAnkle" 17
+	key "RightAnkle" 18
+	key "LeftToe" 19
+	key "RightToe" 20
+	key "Tail" 21
+}
+
+enum motorcontrollertype : uint {
+	key "GroundLocomotion" 0
+	key "Combat" 1
+	key "GroundAction" 2
+	key "PlayerArm" 3
+	key "PlayerBow" 4
+	key "Single" 5
+}
+
+enum networkcategorytype : uint {
+	key "Local Only" 0
+	key "Hosted" 1
+	key "Obsolete" 2
+}
+
+enum networkhandler : uint {
+	key "Host" 0
+	key "Local Only" 1
+	key "All Machines" 2
+}
+
+enum objectrendertype : uint {
+	key "Normal" 0
+	key "Not Rendered" 1
+	key "No Lightmap" 2
+	key "Editor Only" 3
+}
+
+enum particleattachtype : uint {
+	key "Object" 0
+	key "VHot" 1
+	key "Joint" 2
+	key "Submodel" 3
+}
+
+enum particlegrouptype : uint {
+	key "Single-Colored Pixels" 0
+	key "Multi-Colored Pixels" 1
+	key "Single-Colored Squares" 2
+	key "Multi-Colored Squares" 3
+	key "Single-Colored Disk" 4
+	key "Scaled Bitmap" 5
+}
+
+enum particlegroupanimation : uint {
+	key "Launch Once" 0
+	key "Launch Continually" 1
+	key "Rotating Hollow Sphere" 2
+	key "Rotating Sphere" 3
+	key "Rotating Hollow Cube" 4
+	key "Rotating Cube" 5
+	key "Rotating Disk" 6
+	key "Rotating Circle" 7
+	key "Rotating Pyramid" 8
+}
+
+enum particlegroupmotion : uint {
+	key "Immobile" 0
+	key "Follow Velocity" 1
+	key "Follow Velocity%26Gravity" 2
+	key "Trailing Object" 3
+	key "Attached to Object" 4
+	key "Fire and Forget" 5
+}
+
+enum particlelaunchtype : uint {
+	key "Cube" 0
+	key "Sphere" 1
+	key "Cylinder" 2
+}
+
+bitfield physcollisionresult {
+	key "Bounce" 0x01
+	key "Destroy" 0x02
+	key "Slay" 0x04
+	key "No Collision Sound" 0x08
+	key "No Result" 0x10
+	key "Full Collision Sound" 0x20
+}
+
+enum physaxistype : int {
+	key "X-Axis" 0
+	key "Y-Axis" 1
+	key "Z-Axis" 2
+}
+
+bitfield physaxisflags {
+	key "X-Axis" 1
+	key "Y-Axis" 2
+	key "Z-Axis" 4
+}
+
+bitfield physorientationflags {
+	key "+X-Axis" 1
+	key "+Y-Axis" 2
+	key "+Z-Axis" 4
+	key "-X-Axis" 8
+	key "-Y-Axis" 16
+	key "-Z-Axis" 32
+}
+
+bitfield physcontrolflags {
+	key "Axis Velocity" 1
+	key "Velocity" 2
+	key "Rotational Velocity" 4
+	key "Location" 8
+	key "Rotation" 16
+}
+
+enum physmodeltype : uint {
+	key "BoundingBox" 0
+	key "Sphere" 1
+	key "SphereHat" 2
+	key "None" 3
+}
+
+bitfield pickcfgflags {
+	key "Reset On Fail" 1
+	key "Randomize Time" 2
+}
+
+enum pscriptaction : uint {
+	key "Nothing" 0
+	key "ScrMessage" 1
+	key "PlaySchema%2FMotion" 2
+	key "Alert" 3
+	key "BeHostile" 4
+	key "Investigate" 5
+	key "GotoObject" 6
+	key "FrobObject" 7
+	key "Wait" 8
+	key "MPrint" 9
+	key "Add%2FRemoveMetaprop" 10
+	key "AddLink" 11
+	key "RemoveLink" 12
+	key "Face" 13
+	key "Signal" 14
+	key "DestScrMessage" 15
+}
+
+enum schemaaudioclass : uint {
+	key "None" 0
+	key "Noise" 1
+	key "Speech" 2
+	key "Ambient" 3
+	key "Music" 4
+	key "MetaUI" 5
+	key "Player Feet" 6
+	key "Other Feet" 7
+	key "Collisions" 8
+	key "Weapons" 9
+	key "Monsters" 10
+}
+
+bitfield schemaloopflags {
+	key "Poly" 0x001
+	key "Auto-Halt" 0x002
+}
+
+bitfield schemaplayflags {
+	key "Retrigger" 0x001
+	key "Pan Position" 0x002
+	key "Pan Range" 0x004
+	key "No Repeat" 0x008
+	key "No Cache" 0x010
+	key "Stream" 0x020
+	key "Play Once" 0x040
+	key "No Combat" 0x080
+	key "Net Ambient" 0x100
+	key "Local Spatial" 0x200
+}
+
+enum slayresulttype : uint {
+	key "Normal" 0
+	key "Nothing" 1
+	key "Terminate" 2
+	key "Destroy" 3
+}
+
+enum swordactiontype : uint {
+	key "Swing" 0
+	key "Block" 1
+	key "Block Directed" 2
+}
+
+bitfield terrainattachtype {
+	key "Rope" 1
+	key "Vine" 2
+}
+
+bitfield trapcontrolflags {
+	key "Once" 1
+	key "Invert" 2
+	key "NoOn" 4
+	key "NoOff" 8
+}
+
+bitfield tweqanimflags {
+	key "NoLimit" 0x01
+	key "Sim" 0x02
+	key "Wrap" 0x04
+	key "OneBounce" 0x08
+	key "SimSmallRadius" 0x10
+	key "SimLargeRadius" 0x20
+	key "Offscreen" 0x40
+}
+
+bitfield tweqcurveflags {
+	key "JitterLow" 0x01
+	key "JitterHigh" 0x02
+	key "JitterMul" 0x04
+}
+
+enum tweqhaltcfg : uint {
+	key "DestroyObj" 0
+	key "RemoveProp" 1
+	key "StopTweq" 2
+	key "Continue" 3
+	key "SlayObj" 4
+}
+
+bitfield tweqmiscflags {
+	key "Anchor" 0x001
+	key "Scripts" 0x002
+	key "Random" 0x004
+	key "Gravity" 0x008
+	key "ZeroVelocity" 0x010
+	key "TellAI" 0x020
+	key "PushOut" 0x040
+	key "NegativeLogic" 0x080
+	key "RelativeVelocity" 0x100
+	key "NoPhysics" 0x200
+	key "AnchorVHot" 0x400
+	key "HostOnly" 0x800
+}
+
+bitfield tweqstateflags {
+	key "On" 0x01
+	key "Reverse" 0x02
+	key "ReSynch" 0x04
+	key "GoEdge" 0x08
+	key "LapOne" 0x10
+}
+
+bitfield tweqnullflags {
+	key "Null" 0x01
+}
+
+bitfield voiceoverflags {
+	key "World Hilight" 0x01
+	key "Pick Up" 0x02
+}
+
+bitfield weaponmode {
+	key "Block" 0x01
+	key "Melee" 0x02
+	key "Ranged" 0x04
+	key "Idle" 0x08
+}
+
+
+struct vector {
+	float x
+	float y
+	float z
+}
+
+struct vector2D {
+	float x
+	float y
+}
+
+struct int-vector {
+	int32 x
+	int32 y
+	int32 z
+}
+
+
+struct short-vector {
+	int16 x
+	int16 y
+	int16 z
+}
+
+
+struct color {
+	float r
+	float g
+	float b
+}
+
+
+struct pseudoscript {
+	uint32 use pscriptaction action
+	char [64] args
+}
+
+
+struct aiaptitude {
+	uint32 use airating rating = "3"
+}
+
+
+struct cfgtweqsimple {
+	uint8 unknown
+	uint8 use tweqcurveflags curve
+	uint8 use tweqanimflags anim
+	uint8 use tweqhaltcfg halt
+	uint16 use tweqmiscflags misc
+	uint16 rate
+}
+
+
+struct sttweqsimple {
+	uint16 use tweqstateflags anim
+	uint16 use tweqnullflags misc
+	uint16 time
+	uint16 frame
+}
+
+namespace properties {
+	
+	// Label: Acoustics
+	struct Acoustics {
+		uint32 use eaxtype eax
+		int32 dampening
+		int32 height
+	}
+
+	
+	// Label: AdvPickSoundCfg
+	struct AdvPickSo {
+		
+		struct stage {
+			char [24] pick1
+			char [24] pick2
+			char [24] pick3
+		}
+
+	}
+
+	
+	// Label: AdvPickStateCfg
+	struct AdvPickSt {
+		bool32 enable
+		uint32 source1
+		uint32 source2
+		uint32 source3
+		int32 time
+	}
+
+	
+	// Label: AdvPickTransCfg
+	struct AdvPickTr {
+		
+		struct stage {
+			int32 pick1
+			int32 pick2
+			int32 pick3
+		}
+
+	}
+
+	
+	// Label: AI
+	struct AI {
+		char [32] behaviorset
+	}
+
+	
+	// Label: AIAlertCap
+	struct AI_AlertC {
+		uint32 use alertlevel maxlevel = "3"
+		uint32 use alertlevel minlevel
+		uint32 use alertlevel minrelax
+	}
+
+	
+	// Label: AIAlertness
+	struct AI_Alertn {
+		uint32 use alertlevel level
+		uint32 use alertlevel peak
+	}
+
+	
+	// Label: AIAlertResponse
+	struct AI_AlrtRs {
+		uint32 use alertlevel level
+		uint32 use aipriority priority
+		int32 unknown
+		alias pseudoscript step
+		alias pseudoscript extra
+	}
+
+	
+	// Label: AIAlertSenseMultiplier
+	struct AI_AlSnMu {
+		
+		struct level {
+			float hangle
+			float vangle
+			float range
+			float knowledge
+		}
+
+		float combat
+	}
+
+	
+	// Label: AIAwarenessCapacitor
+	struct AI_AwareC {
+		float discharge
+		int32 unknown
+	}
+
+	
+	// Label: AIAwarenessDelay
+	struct AI_AwrDel {
+		int32 time_to_two
+		int32 time_to_three
+		int32 retrigger_two
+		int32 retrigger_three
+		int32 ignore_range
+	}
+
+	
+	// Label: AIBroadcastSettings
+	struct AI_BcstSe {
+		bool32 disable
+		
+		struct state {
+			uint32 use broadcastschema2 schema
+			uint32 use broadcasttype type
+			char [16] custom
+			char [64] tags
+		}
+
+	}
+
+	
+	// Label: AIBlocksVision
+	struct AI_BlkVis {
+		bool32 blockvision
+	}
+
+	
+	// Label: AIBodyResponse
+	struct AI_BodyRs {
+		uint32 use aipriority priority
+		int32 unknown
+		alias pseudoscript step
+		alias pseudoscript extra
+	}
+
+	
+	// Label: AICamera
+	struct AI_Camera {
+		float minangle
+		float maxangle
+		float scanspeed
+	}
+
+	
+	// Label: AICombatResponse
+	struct AI_CbtRsp {
+		uint32 use aipriority priority
+		int32 unknown
+		alias pseudoscript step
+		alias pseudoscript extra
+	}
+
+	
+	// Label: AICombatTiming
+	struct AI_CbtTim {
+		int32 createtime
+		int32 droptime
+		int32 mindelay
+		int32 maxdelay
+	}
+
+	// Helper: AI Conversation step
+	struct AI_Conver_step {
+		int32 use convactor actor = "-1"
+		bool32 noblock
+		alias pseudoscript action
+	}
+	
+	// Label: AIConversation
+	struct AI_Conver {
+		int32 unknown1
+		uint32 use alertlevel abort_level
+		uint32 use aipriority abort_priority
+		int32 unknown2
+		
+		alias AI_Conver_step step
+		alias AI_Conver_step extra
+	}
+
+	
+	// Label: AICoverPoint
+	struct AICoverPt {
+		int32 value
+		float decayspeed
+		bool32 canduck
+	}
+
+	
+	// Label: AIDevice
+	struct AI_Device {
+		int32 joint
+		float inactive
+		float active
+		float speed
+		int32 rotation_joint
+		float facing
+		bool32 rotate_on
+	}
+
+	
+	// Helper: Efficiency record
+	struct AIEfficiency_record {
+		float entry
+		float entry_height
+		float exit
+		float exit_height
+	}
+	
+	// Label: AIEfficiency
+	struct AI_Effici {
+		bool32 enabled
+
+		alias AIEfficiency_record normal
+		alias AIEfficiency_record super
+	}
+
+	
+	// Label: AIFidget
+	struct AI_Fidget {
+		bool32 fidget
+	}
+
+	
+	// Label: AIFiresThrough
+	struct AIFiresTh {
+		bool32 firethrough
+	}
+
+	
+	// Label: AIFleeAware
+	struct AI_FleeAw {
+		bool32 fleeaware
+	}
+
+	
+	// Label: AIFleeCondition
+	struct AI_FleeCo {
+		uint32 use aifleecondition condition
+		int32 hp_percent
+		int32 friends
+	}
+
+	
+	// Label: AIFleePoint
+	struct AI_FleePo {
+		int32 value
+	}
+
+	
+	// Label: AIFreeSenseKnowledge
+	struct AI_FreeKn {
+		int32 value
+	}
+
+	
+	// Label: AIFrozen
+	struct AI_Frozen {
+		int32 start
+		int32 duration
+	}
+
+	
+	// Label: AIFrustrated
+	struct AI_Frustr {
+		int32 source
+		int32 dest
+		int32 unknown
+	}
+
+	
+	// Label: AIGunDescription
+	struct AIGunDesc {
+		float maxrange
+		vector fireoffset
+		int32 startlag
+		int32 burstlag
+		int32 endlag
+		int16 aimerror
+	}
+
+	
+	// Label: AIIdleDirections
+	struct AI_IdleDi {
+		int32 mintime
+		int32 maxtime
+		
+		struct direction {
+			int32 facing
+			int32 weight
+		}
+
+	}
+
+	
+	// Label: AIIdleOrigin
+	struct AI_IdleOr {
+		vector position
+		float facing
+	}
+
+	
+	// Label: AIIdleReturnToOrigin
+	struct AI_IdlRet {
+		bool32 returnorigin
+	}
+
+	
+	// Label: AIIgnoreCameras
+	struct AI_IgCam {
+		bool32 ignorecamera
+	}
+
+	
+	// Label: AIInformDelay
+	struct AI_InfDly {
+		int32 delay
+	}
+
+	
+	// Label: AIInformDistance
+	struct AI_InfDst {
+		int32 distance
+	}
+
+	
+	// Label: AIInformExpiration
+	struct AI_InfExp {
+		int32 time
+	}
+
+	
+	// Label: AIInformFromLastSeen
+	struct AI_InfFrm {
+		bool32 inform
+	}
+
+	
+	// Label: AIInformMaxPasses
+	struct AI_InfMxP {
+		int32 passes
+	}
+
+	
+	// Label: AIInformNow
+	struct AI_InfNow {
+		bool32 inform
+	}
+
+	
+	// Label: AIInformOthers
+	struct AI_InfOtr {
+		bool32 inform
+	}
+
+	
+	// Label: AIInformResponse
+	struct AI_InfRsp {
+		bool32 disable
+		bool32 nodefault
+		int32 unknown
+		alias pseudoscript step
+		alias pseudoscript extra
+	}
+
+	
+	// Label: AIInvestigationKind
+	struct AI_InvKnd {
+		uint32 use investigatekind type
+	}
+
+	
+	// Label: AIIsBig
+	struct AI_IsBig {
+		bool32 isbig
+	}
+
+	
+	// Label: AIIsProxy
+	struct AI_IsProx {
+		bool32 isproxy
+	}
+
+	
+	// Label: AIIsSmall
+	struct AI_IsSmal {
+		bool32 issmall
+	}
+
+	
+	// Label: AILaunchVisible
+	struct AI_Launch {
+		bool32 isvisible
+	}
+
+	
+	// Label: AIMode
+	struct AI_Mode {
+		uint32 use aimode mode
+	}
+
+	varstr AI_MotTag
+	
+	// Label: AIMoveSpeed
+	struct AI_MoveSp {
+		float speed
+	}
+
+	
+	// Label: AIMoveZOffset
+	struct AI_MoveZO {
+		float height
+	}
+
+	
+	// Label: AINonCombatDamageResponse
+	struct AI_NCDmgR {
+		int32 woundthreshold
+		int32 severethreshold
+		int32 responsechance
+	}
+
+	
+	// Label: AINonCombatRespondToDamage
+	struct AI_NCDmRs {
+		bool32 respond
+	}
+
+	
+	// Label: AIPathExactOBB
+	struct AI_NGOBB {
+		bool32 pathexact
+	}
+
+	
+	// Label: AINoGhost
+	struct AI_NoGhos {
+		bool32 noghost
+	}
+
+	
+	// Label: AINoHandoff
+	struct AI_NoHand {
+		bool32 nohandoff
+	}
+
+	
+	// Label: AINonHostile
+	struct AI_NonHst {
+		uint32 use ainonhostile condition
+	}
+
+	
+	// Label: AINoticeDamage
+	struct AI_Notice {
+		bool32 value
+	}
+
+	
+	// Label: AINoticeBodies
+	struct AI_NtcBod {
+		bool32 value
+	}
+
+	
+	// Label: AIObjectAvoid
+	struct AI_ObjAvo {
+		int32 zero
+		uint32 use aiobjectavoidflags flags
+	}
+
+	
+	// Label: AIObjectPathable
+	struct AI_ObjPat {
+		bool32 value
+	}
+
+	
+	// Label: AIOnlyNoticePlayer
+	struct AI_OnlyPl {
+		bool32 value
+	}
+
+	
+	// Label: AIPatrol
+	struct AI_Patrol {
+		bool32 value
+	}
+
+	
+	// Label: AIPatrolRandom
+	struct AI_PtrlRn {
+		bool32 value
+	}
+
+	
+	// Label: AIRangedCombatParams
+	struct AIRCProp {
+		int32 mindistance
+		int32 idealdistance
+		float firingdelay
+		uint32 use aircpriority coverdesire = "2"
+		float decayspeed
+		uint32 use aircfrequency firewhilemoving = "3"
+		bool32 containprojectile
+	}
+
+	
+	// Label: AIRangedCombatRanges
+	struct AIRCRange {
+		float mindistance
+		float shortdistance
+		float longdistance
+		float maxdistance
+	}
+
+	
+	// Label: AIRangedCombatWoundSound
+	struct AIRCWndSn {
+		int32 woundthreshold
+		int32 severethreshold
+		int32 responsechance
+	}
+
+	
+	// Label: AIRangedCombatWoundMotion
+	struct AIRCWound {
+		int32 woundthreshold
+		int32 severethreshold
+		int32 responsechance
+	}
+
+	
+	// Label: AIRangedApplicabilities
+	struct AI_RngApp {
+		uint32 use aircapplicable idle = "4"
+		uint32 use aircapplicable zero1 = "0"
+		uint32 use aircapplicable close = "4"
+		uint32 use aircapplicable backup = "4"
+		uint32 use aircapplicable wound = "4"
+		uint32 use aircapplicable vantage = "4"
+		uint32 use aircapplicable left = "4"
+		uint32 use aircapplicable right = "4"
+		uint32 use aircapplicable zero2 = "0"
+	}
+
+	
+	// Label: AIRangedFleeParams
+	struct AI_RngFle {
+		uint32 use aircapplicable veryshortpriority
+		uint32 use aircapplicable shortpriority = "4"
+		float anglerange
+		int32 numpoints
+		float distance
+		float clearance
+	}
+
+	
+	// Label: AIRangedShootParams
+	struct AI_RngSho {
+		uint32 use aircapplicable veryshortpriority = "4"
+		uint32 use aircapplicable shortpriority = "4"
+		uint32 use aircapplicable idealpriority = "4"
+		uint32 use aircapplicable longpriority = "4"
+		uint32 use aircapplicable verylongpriority = "4"
+		bool32 confirmrange
+		bool32 confirmlof
+		int32 rotationspeed
+		vector launchoffset
+	}
+
+	
+	// Label: AISaveConversation
+	struct AI_SaveCo {
+		bool32 value
+	}
+
+	
+	// Label: AISeesProjectiles
+	struct AI_SeesPr {
+		bool32 value
+	}
+
+	
+	// Label: AISignalResponse
+	struct AI_SigRsp {
+		char [32] signal
+		uint32 use aipriority priority
+		int32 unknown
+		alias pseudoscript step
+		alias pseudoscript extra
+	}
+
+	varstr AI_SndTag
+	
+	// Label: AISoundType
+	struct AI_SndTyp {
+		uint32 use aisoundtype type
+		char [32] signal
+		int32 zero
+	}
+
+	varstr AI_StandT
+	
+	// Label: AISurprise
+	struct AISuprise {
+		float zero
+		float one
+		float radius
+	}
+
+	
+	// Label: AISuspiciousResponse
+	struct AI_SuspRs {
+		uint32 use aipriority priority
+		int32 unknown
+		alias pseudoscript step
+		alias pseudoscript extra
+	}
+
+	
+	// Label: AITeam
+	struct AI_Team {
+		uint32 use aiteam team
+	}
+
+	
+	// Label: AIThreatResponse
+	struct AI_ThrtRs {
+		uint32 use aithreat threat
+		uint32 use aipriority priority
+		int32 unknown
+		alias pseudoscript step
+		alias pseudoscript extra
+	}
+
+	
+	// Label: AITrackMedium
+	struct AI_TrackM {
+		bool32 value
+	}
+
+	
+	// Label: AITurnRate
+	struct AI_TurnRa {
+		float speed
+	}
+
+	
+	// Label: AITurret
+	struct AI_Turret {
+		float fireepsilon
+		int32 firepause
+		float pitchepsilon
+		float range
+	}
+
+	
+	// Label: AIUsesDoors
+	struct AI_UsesDo {
+		bool32 value
+	}
+
+	
+	// Label: AIPathWater
+	struct AI_UseWat {
+		bool32 value
+	}
+
+	
+	// Label: AIVantagePoint
+	struct AIVantage {
+		int32 value
+		float decayspeed
+	}
+
+	
+	// Label: AIVisibilityControl
+	struct AI_VisCtr {
+		int32 lowlight
+		int32 midlight
+		int32 highlight
+		float slow
+		float fast
+		int32 slowmod
+		int32 normalmod
+		int32 fastmod
+		float walldist
+		int32 crouchmod
+		int32 wallmod
+		float cornerleanmod
+	}
+
+	
+	// Label: AIVisionDescription
+	struct AI_VisDes {
+		int32 unknown
+		
+		struct viscone {
+			uint32 use aivisionflags flags
+			int32 angle
+			int32 zangle
+			int32 range
+			int32 acuity
+		}
+
+		float zoffset
+	}
+
+	
+	// Label: AIVisibility
+	struct AI_Visibi {
+		int32 level
+		int32 light
+		int32 movement
+		int32 exposure
+		int32 lastupdate
+	}
+
+	
+	// Label: AIVisionJoint
+	struct AI_VisJoi {
+		uint32 use meshjoint joint
+	}
+
+	
+	// Label: AIVisibilityModifier
+	struct AI_VisMod {
+		float vistype
+	}
+
+	
+	// Label: AIVisionType
+	struct AI_VisType {
+		uint32 type
+	}
+
+	
+	// Label: AIWatchPoint
+	struct AI_WtchPn {
+		int32 unknown1
+		uint32 trigger
+		uint32 use alertlevel awareness
+		uint32 use aiwatchvisibility visibility
+		int32 unknown2
+		uint32 use aiwatchkillcondition killcondition
+		bool32 killlikelinks
+		bool32 onceonly
+		int32 reusetime
+		int32 resettime
+		uint32 use alertlevel minalertness
+		uint32 use alertlevel maxalertness
+		uint32 use aipriority priority
+		int32 radius
+		int32 height
+		alias pseudoscript step
+		alias pseudoscript extra
+	}
+
+	
+	// Label: AirSupply
+	struct AirSupply {
+		int32 value
+	}
+
+	
+	// Label: AltLinkLocation
+	struct AltLink {
+		uint32 use meshjoint joint
+		alias int-vector rotation
+		vector offset
+	}
+
+	
+	// Label: AmbientRoom
+	struct Ambient {
+		char [64] name
+		int32 volume
+	}
+
+	
+	// Label: AmbientSound
+	struct AmbientHa {
+		int32 radius
+		int32 volume
+		uint32 use ambienthackedflags flags
+		char [16] schema
+		char [16] aux
+	}
+
+	
+	// Label: AIAngleLimits
+	struct AngleLimi {
+		float start
+		float end
+	}
+
+	
+	// Label: AnimLight
+	struct AnimLight {
+		int32 unk1
+		vector offset
+		int32 unk2 = "1"
+		int16 cellindex
+		int16 hitcells
+		int16 lightnum = "-1"
+		uint16 use animlightmode mode = "4"
+		int32 brightentime
+		int32 dimtime
+		float minbrightness
+		float maxbrightness
+		int32 unk4
+		bool32 rising
+		int32 countdown
+		bool32 inactive
+		float radius
+		int32 unk5
+		bool32 quadlit
+		float innerradius
+	}
+
+	
+	// Label: AnimTexture
+	struct AnimTex {
+		int32 speed
+		uint32 use animtextureflags flags
+	}
+
+	
+	// Label: ARSourceScale
+	struct arSrcScal {
+		float scale
+	}
+
+	
+	// Label: Automap
+	struct Automap {
+		int32 page
+		int32 location
+	}
+
+	
+	// Label: AutoMultibrush
+	struct AutoVBR {
+		char [16] vbrname
+	}
+
+	
+	// Label: AvatarZOffset
+	struct AvatarZOf {
+		float height
+	}
+
+	
+	// Label: BaseGunDescription
+	struct BaseGunDe {
+		
+		struct setting {
+			int32 burst
+			int32 clip
+			int32 spray
+			float stimmult
+			int32 bursttime
+			int32 shottime
+			int32 ammousage
+			float speedmult
+			int32 reloadtime
+			int32 zero
+		}
+
+		int32 numsettings
+		float zoomfactor
+	}
+
+	
+	// Label: BaseWeaponDamage
+	struct BaseWpnDm {
+		int32 damage
+	}
+
+	
+	// Label: BashFactor
+	struct BashFacto {
+		float value
+	}
+
+	
+	// Label: BashParams
+	struct BashParam {
+		float threshold
+		float coefficient
+	}
+
+	
+	// Label: BeltLinkLocation
+	struct BeltLink {
+		uint32 use meshjoint joint
+		alias int-vector rotation
+		vector offset
+	}
+
+	
+	// Label: BitmapAnimation
+	struct BitmapAni {
+		uint32 use bitmapanimationflags flags
+	}
+
+	
+	// Label: BitmapWorldSpace
+	struct BitmapWor {
+		alias vector2D size
+		alias vector2D feetpertile
+	}
+
+	
+	// Label: Blood
+	struct Blood {
+		bool32 isblood
+	}
+
+	
+	// Label: BloodCause
+	struct BloodCaus {
+		bool32 causeblood
+	}
+
+	
+	// Label: BloodMaxDamage
+	struct BloodMaxD {
+		int32 damage
+	}
+
+	varstr BloodType
+	varstr Book
+	varstr BookArt
+	
+	// Label: Borrowed
+	struct Borrowed {
+		bool32 borrowed
+	}
+
+	
+	// Label: Borrowing
+	struct Borrowing {
+		bool32 borrowing
+	}
+
+	
+	// Label: BreathConfig
+	struct BreathCon {
+		int32 maxair
+		int32 drownfreq
+		int32 drowndamage
+		float recoverrate
+	}
+
+	
+	// Label: BumpMap
+	struct BumpMap {
+		bool32 isbumpmap
+	}
+
+	
+	// Label: CanAttach
+	struct CanAttach {
+		uint32 use terrainattachtype type
+	}
+
+	
+	// Label: TweqEmitterConfig
+	struct CfgTweqEm {
+		uint8 unknown
+		uint8 use tweqcurveflags curve
+		uint8 use tweqanimflags anim
+		uint8 use tweqhaltcfg halt
+		uint16 use tweqmiscflags misc
+		uint16 rate
+		int32 maxframes
+		char [16] objectname
+		vector velocity
+		vector anglerandom
+	}
+
+	
+	// Label: TweqJointsConfig
+	struct CfgTweqJo {
+		uint8 unknown
+		uint8 use tweqcurveflags curve
+		uint8 use tweqanimflags anim
+		uint8 use tweqhaltcfg halt
+		uint16 use tweqmiscflags misc
+		uint16 zero
+		
+		struct joint {
+			uint8 unk1
+			uint8 use tweqcurveflags curve
+			uint8 use tweqanimflags anim
+			uint8 zero
+			float rate
+			float low
+			float high
+		}
+
+		int8 primary
+		uint8 unused
+	}
+
+	
+	// Label: TweqLockConfig
+	struct CfgTweqLo {
+		uint8 unknown
+		uint8 use tweqcurveflags curve
+		uint8 use tweqanimflags anim
+		uint8 use tweqhaltcfg halt
+		uint16 use tweqmiscflags misc
+		uint16 zero
+		int32 zero2
+		float rate
+		float low
+		float high
+		int8 joint
+		uint8 zero3
+	}
+
+	
+	// Label: TweqModelsConfig
+	struct CfgTweqMo {
+		uint8 unknown
+		uint8 use tweqcurveflags curve
+		uint8 use tweqanimflags anim
+		uint8 use tweqhaltcfg halt
+		uint16 use tweqmiscflags misc
+		uint16 rate
+		char [16] modelname
+	}
+
+	// Helper: Tweq Axis
+	struct TweqConfig_Axis {
+		float rate
+		float low
+		float high
+	}
+	
+	// Label: TweqRotateConfig
+	struct CfgTweqRo {
+		uint8 unknown
+		uint8 use tweqcurveflags curve
+		uint8 use tweqanimflags anim
+		uint8 use tweqhaltcfg halt
+		uint16 use tweqmiscflags misc
+		uint16 zero
+		
+		alias TweqConfig_Axis x
+		alias TweqConfig_Axis y
+		alias TweqConfig_Axis z
+		
+		int32 use physaxistype primary
+	}
+
+	
+	// Label: TweqScaleConfig
+	struct CfgTweqSc {
+		uint8 unknown
+		uint8 use tweqcurveflags curve
+		uint8 use tweqanimflags anim
+		uint8 use tweqhaltcfg halt
+		uint16 use tweqmiscflags misc
+		uint16 zero
+		
+		alias TweqConfig_Axis x
+		alias TweqConfig_Axis y
+		alias TweqConfig_Axis z
+		
+		int32 use physaxistype primary
+	}
+
+	
+	// Label: ClassTags
+	struct ClassTag {
+		uint32 value
+		char [252] tags
+	}
+
+	
+	// Label: Climbability
+	struct Climbabil {
+		float factor
+	}
+
+	
+	// Label: CollisionType
+	struct Collision {
+		uint32 use physcollisionresult flags
+	}
+
+	
+	// Label: CombineType
+	struct CombineTy {
+		char [16] label
+	}
+
+	
+	// Label: ContainInherit
+	struct ContainIn {
+		bool32 value
+	}
+
+	
+	// Label: ConveyorVelocity
+	struct ConveyorV {
+		float x
+		float y
+		float z
+	}
+
+	
+	// Label: Corona
+	struct Corona {
+		int32 unknown1
+		vector position
+		float alpha
+		float maxsize
+		float maxdist
+		float minsize
+		char [16] bitmap
+		int32 unknown5
+	}
+
+	
+	// Label: CreatureType
+	struct Creature {
+		uint32 use creaturetype type
+	}
+
+	
+	// Label: CreaturePose
+	struct CretPose {
+		uint32 use cretposetype type
+		char [80] name
+		float fraction
+		float scale
+		bool32 isballistic
+	}
+
+	
+	// Label: CollisionSoundArrow
+	struct CSArrow {
+		char [16] label
+	}
+
+	
+	// Label: CollisionSoundProjectile
+	struct CSProject {
+		char [16] label
+	}
+
+	
+	// Label: CollisionSoundProperty
+	struct CSPropert {
+		char [16] label
+	}
+
+	
+	// Label: Culpable
+	struct Culpable {
+		bool32 isculpable
+	}
+
+	
+	// Label: CurrentWeaponDamage
+	struct CurWpnDmg {
+		int32 damage
+	}
+
+	
+	// Label: AIFrogExplodeRange
+	struct DAI_FrogE {
+		float distance
+	}
+
+	
+	// Label: DarkStats
+	struct DarkStat {
+		uint32 use darkstatflags flags
+	}
+
+	
+	// Label: DeathStage
+	struct DeathStag {
+		int32 value
+	}
+
+	varstr DesignNot
+	
+	// Label: DiffPermit
+	struct DiffPermi {
+		uint32 use difficultylevels levels
+	}
+
+	
+	// Label: DistinctAvatar
+	struct DistinctA {
+		bool32 value
+	}
+
+	
+	// Label: DonorType
+	struct DonorType {
+		int32 value
+	}
+
+	
+	// Label: Elasticity
+	struct Elasticit {
+		float elasticity
+	}
+
+	
+	// Label: ExtraLight
+	struct ExtraLigh {
+		float factor
+		bool32 isadditive
+	}
+
+	
+	// Label: FaceTextures
+	struct Face {
+		char [16] original
+		char [16] neutral
+		char [16] smile
+		char [16] wince
+		char [16] surprise
+		char [16] stunned
+		char [16] extra
+	}
+
+	
+	// Label: FaceMotions
+	struct FacePos {
+		bool32 value
+	}
+
+	
+	// Label: FaceState
+	struct FaceStat {
+		bool32 istalking
+		int32 unknown
+		uint32 use facevisage currentvisage
+		int32 priority
+		int32 endtime
+	}
+
+	
+	// Label: Firer
+	struct Firer {
+		int32 objectid
+	}
+
+	
+	// Label: Fixture
+	struct Fixture {
+		bool32 value
+	}
+
+	
+	// Label: FlowColorIndex
+	struct FlowColor {
+		int32 index
+	}
+
+	
+	// Label: FlowGroup
+	struct FlowGroup {
+		int32 group
+	}
+
+	
+	// Label: FrameAnimationConfig
+	struct FrameAniC {
+		float fps
+		bool8 oneshot
+		bool8 bounce
+		bool8 limit
+		bool8 killfinish
+	}
+
+	
+	// Label: FrameAnimationState
+	struct FrameAniS {
+		int32 unknown1
+		int32 unknown2
+		int32 current
+		int32 unknown3
+	}
+
+	
+	// Label: Friction
+	struct Friction {
+		float friction
+	}
+
+	
+	// Label: FrobHandler
+	struct FrobHandl {
+		uint32 use networkhandler type
+	}
+
+	
+	// Label: FrobInfo
+	struct FrobInfo {
+		uint32 use frobaction world
+		uint32 use frobaction inventory
+		uint32 use frobaction tool
+		uint32 zero
+	}
+
+	
+	// Label: FromBriefcase
+	struct FromBrief {
+		bool32 value
+	}
+
+	
+	// Label: Fungus
+	struct Fungus {
+		bool32 isfungus
+	}
+
+	varstr GameDesc
+	varstr GameName
+	
+	// Label: GunState
+	struct GunState {
+		int32 ammo
+		float condition
+		int32 setting
+		int32 mods
+		float silencing
+	}
+
+	
+	// Label: HandoffNumber
+	struct HandoffNu {
+		int32 value
+	}
+
+	
+	// Label: HasBrush
+	struct HasBrush {
+		bool32 hasbrush
+	}
+
+	
+	// Label: HasRefs
+	struct HasRefs {
+		bool32 hasrefs
+	}
+
+	
+	// Label: Heartbeat
+	struct Heartbeat {
+		int32 time
+	}
+
+	
+	// Label: HeatDisks
+	struct HeatDisks {
+		vector start
+		vector end
+		float startradius
+		float endradius
+		float bottomjitter
+		float topjitter
+		float height
+		int32 blobs
+		int32 maxdisks
+	}
+
+	
+	// Label: HitPoints
+	struct HitPoints {
+		int32 hp
+	}
+
+	
+	// Label: HtHAudioResponse
+	struct HTHAudioR {
+		float low
+		float high
+		float speed
+	}
+
+	
+	// Label: HtHCombatDistances
+	struct HTHCombat {
+		float low
+		float mid
+		float high
+	}
+
+	
+	// Label: HtHGruntAlways
+	struct HTHGruntA {
+		bool32 gruntalways
+	}
+
+	
+	// Label: HtHModeOverride
+	struct HTHModeOv {
+		int32 value
+	}
+
+	
+	// Label: HtHMotionResponse
+	struct HTHMotion {
+		float low
+		float high
+		float speed
+	}
+
+	
+	// Label: Immobile
+	struct Immobile {
+		bool32 isimmobile
+	}
+
+	
+	// Label: InventoryBeingTaken
+	struct InvBeingT {
+		bool32 istaken
+	}
+
+	varstr InvCycleO
+	
+	// Label: InventoryLimbModel
+	struct InvLimbMo {
+		char [16] name
+	}
+
+	
+	// Label: InventoryRenderType
+	struct InvRendTy {
+		uint32 use inventoryrendertype type
+		char [16] name
+	}
+
+	
+	// Label: InventoryType
+	struct InvType {
+		uint32 use inventorytype type
+	}
+
+	
+	// Label: Invisible
+	struct INVISIBLE {
+		int32 visibility
+	}
+
+	
+	// Label: ItemStore
+	struct ItemStore {
+		bool32 isstore
+	}
+
+	
+	// Label: JointPositions
+	struct JointPos {
+		float position
+	}
+
+	
+	// Label: KeyDest
+	struct KeyDst {
+		bool8 master
+		uint32 regions
+		uint8 lockid
+	}
+
+	
+	// Label: LauncherMass
+	struct LauncherM {
+		float mass
+	}
+
+	
+	// Label: Light
+	struct Light {
+		float brightness
+		vector offset
+		float radius
+		bool32 quadlight
+		float inner
+	}
+
+	
+	// Label: LightColor
+	struct LightColo {
+		float hue
+		float saturation
+	}
+
+	
+	// Label: LocalCopy
+	struct LocalCopy {
+		bool32 islocal
+	}
+
+	
+	// Label: LockCount (?)
+	struct LockCnt {
+		int32 value
+	}
+
+	
+	// Label: Locked
+	struct Locked {
+		bool32 islocked
+	}
+
+	
+	// Label: Loot
+	struct Loot {
+		int32 gold
+		int32 gems
+		int32 art
+		uint32 special
+	}
+
+	
+	// Label: LoudRoom
+	struct LoudRoom {
+		float value
+	}
+
+	
+	// Label: MaxHitPoints
+	struct MAX_HP {
+		int32 hp
+	}
+
+	
+	// Label: MaxSpeechPause
+	struct MaxSpchPa {
+		int32 time
+	}
+
+	
+	// Label: MeshAttach
+	struct MeshAttac {
+		uint32 custom
+		uint32 accessory
+		
+		struct attachment {
+			int32 object
+			uint32 use meshjoint joint
+			alias short-vector angle
+			uint16 zero
+			vector offset
+		}
+
+	}
+
+	
+	// Label: MeshTextures
+	struct MeshTex {
+		
+		struct texture {
+			char [16] original
+			char [16] replacement
+		}
+
+		char [12] zero
+	}
+
+	
+	// Label: MinSpeechPause
+	struct MinSpchPa {
+		int32 time
+	}
+
+	varstr ModeChang
+	
+	// Label: ModelName
+	struct ModelName {
+		char [16] label
+	}
+
+	varstr ModeUnchn
+	
+	// Label: MotionActorTags
+	struct MotActorT {
+		char [800] tags
+	}
+
+	
+	// Label: MotionGaitDescription
+	struct MotGaitDe {
+		int32 offsetleft
+		int32 offsetright
+		float ascend
+		float descend
+		float timewarp
+		float stretch
+		int32 anglevelocity
+		int32 turntolerance
+		float maxvelocity
+		float minvelocity
+		int32 numturns
+		
+		struct turn {
+			int32 angle
+			int32 offset
+		}
+
+		float noise
+	}
+
+	
+	// Label: MotorController
+	struct MotorCont {
+		uint32 use motorcontrollertype type
+	}
+
+	
+	// Label: MotionPhysLimits
+	struct MotPhysLi {
+		int32 unknown1
+		int32 unknown2
+	}
+
+	
+	// Label: MotionPlayerLimbOffset
+	struct MotPlyrLi {
+		vector position
+		vector angle
+	}
+
+	
+	// Label: MovingTerrain
+	struct MovingTer {
+		bool32 active
+		int32 unknown
+	}
+
+	
+	// Label: NetworkCategory
+	struct NetworkCa {
+		uint32 use networkcategorytype type
+	}
+
+	
+	// Label: NoBorrow
+	struct NoBorrow {
+		bool32 disallow
+	}
+
+	
+	// Label: NoDrop
+	struct NoDrop {
+		bool32 disallow
+	}
+
+	
+	// Label: FlashInvulnerable
+	struct NoFlash {
+		bool32 noflash
+	}
+
+	
+	// Label: NonPhysicalCreature
+	struct NonPhysCr {
+		bool32 nophys
+	}
+
+	
+	// Label: ObjectShadow
+	struct ObjShad {
+		bool32 hasshadow
+	}
+
+	varstr OTxtRepr0
+	varstr OTxtRepr1
+	varstr OTxtRepr2
+	varstr OTxtRepr3
+	
+	// Label: Particle
+	struct Particle {
+		int32 value
+	}
+
+	
+	// Label: ParticleGroup
+	struct ParticleG {
+		int32 unknown1
+		uint32 use particlegrouptype type = "4"
+		uint32 use particlegroupmotion motion = "4"
+		uint32 use particlegroupanimation animation = "1"
+		int32 unknown2
+		int32 numparticles
+		int32 unknown3
+		vector velocity
+		vector gravity
+		uint8 colors
+		uint8 alpha
+		bool8 simalways
+		bool8 simgroup
+		uint8 zero1
+		bool8 sortparticles
+		uint16 zero2
+		bool8 ignorerefs
+		uint8 zero3
+		vector spinspeed
+		int32 pulsecycle
+		float pulsesize
+		float radius
+		bool8 startlaunched
+		bool8 spinandpulse
+		bool8 subpixelalpha
+		bool8 subpixelskip
+		uint8 zero4
+		bool8 active
+		int32 animtimeoffset
+		float particlesize
+		int32 unknown4
+		float scalespeed
+		int32 unknown5
+		int32 launchtime
+		char [16] bitmap
+		int32 unknown6
+		int32 fadetime
+		int32 unknown7
+		bool32 matchunrefs
+	}
+
+	varstr ParticleT
+	
+	// Label: ParticleGroupLaunchInfo
+	struct PGLaunchI {
+		uint32 use particlelaunchtype type
+		vector boxmin
+		vector boxmax
+		vector velocitymin
+		vector velocitymax
+		float radiusmin
+		float radiusmax
+		float timemin
+		float timemax
+		bool32 worldvelocity
+		bool32 worldlocation
+		int32 unknown
+	}
+
+	
+	// Label: PhysAICollidesWith
+	struct PhysAICol {
+		bool32 collideswith
+	}
+
+	
+	// Label: PhysicsModelAttributes
+	struct PhysAttr {
+		float gravity
+		float mass
+		float density
+		float elasticity
+		float friction
+		vector cog
+		uint32 use physaxisflags rotationaxes
+		uint32 use physorientationflags restaxes
+		uint32 use physorientationflags climbable
+		bool32 edgetrigger
+		float poresize
+	}
+
+	
+	// Label: PhysicsModelCanMantle
+	struct PhysCanMa {
+		bool32 mantleable
+	}
+
+	
+	// Label: PhysicsModelControls
+	struct PhysContr {
+		uint32 use physcontrolflags flags
+		vector translation
+		vector velocity
+		vector rotation
+	}
+
+	
+	// Label: PhysicsModelDimensions
+	struct PhysDims {
+		float radius
+		vector offset
+		vector size
+		bool32 pointterrain
+		bool32 pointspecial
+	}
+
+	
+	// Label: PhysProjectileExplosion
+	struct PhysExplo {
+		int32 magnitude
+		float radius
+	}
+
+	
+	// Label: PhysProjectileFacesVelocity
+	struct PhysFaceV {
+		bool32 facevelocity
+	}
+
+	
+	// Label: PhysProjectileInitialVelocity
+	struct PhysInitV {
+		float x
+		float y
+		float z
+	}
+
+	
+	// Label: PhysicsPressurePlate
+	struct PhysPPlat {
+		float weight
+		float travel
+		float speed
+		float pause
+		bool32 blockvision
+		int32 zero
+	}
+
+	
+	// Label: PhysRope
+	struct PhysRope {
+		float length
+		bool32 deployed
+		float desiredlength
+	}
+
+	
+	// Label: PhysicsModelState
+	struct PhysState {
+		vector location
+		vector facing
+		vector velocity
+		vector rotvelocity
+	}
+
+	
+	// Label: PhysicsModelType
+	struct PhysType {
+		uint32 use physmodeltype type = "0"
+		int32 submodels = "6"
+		bool32 removeonsleep
+		bool32 special
+	}
+
+	
+	// Label: PickBias
+	struct PickBias {
+		float value
+	}
+
+	
+	// Label: PickDestConfig
+	struct PickCfg {
+		
+		struct stage {
+			uint32 lockbits
+			int16 pins
+			int16 percent
+			uint32 use pickcfgflags flags
+		}
+
+	}
+
+	
+	// Label: PickDistance
+	struct PickDist {
+		float distance
+	}
+
+	
+	// Label: PickSourceConfig
+	struct PickSrc {
+		uint32 bits
+	}
+
+	
+	// Label: PickState
+	struct PickState {
+		uint8 tumbler
+		uint8 pin
+		bool8 done
+		uint8 randtime
+		uint32 totaltime
+		uint32 stagetime
+		uint32 picker
+	}
+
+	
+	// Label: Position
+	struct Position {
+		vector position
+		int16 cell = "-1"
+		int16 zero = "-1"
+		alias short-vector facing
+	}
+
+	
+	// Label: Preload
+	struct Preload {
+		bool32 value
+	}
+
+	varstr PrjSound
+	
+	// Label: ProjectileDescription
+	struct Projectil {
+		int32 spray
+		int16 spread
+	}
+
+	
+	// Label: Puppet
+	struct Puppet {
+		int32 unknown1
+		int32 object
+		int32 zero
+		int32 unknown2
+	}
+
+	
+	// Label: AIRangedCombatAudioResponse
+	struct RangedAud {
+		float low
+		float high
+		float rate
+	}
+
+	
+	// Label: RenderAlpha
+	struct RenderAlp {
+		float alpha
+	}
+
+	
+	// Label: RenderFlash
+	struct RenderFla {
+		
+		// Label: Color
+		struct color {
+			uint8 red
+			uint8 green
+			uint8 blue
+		}
+
+		bool8 active
+		int32 worldduration
+		int32 screenduration
+		int32 effectduration
+		float overalltime
+		float range
+		uint32 startframe
+	}
+
+	
+	// Label: RenderType
+	struct RenderTyp {
+		uint32 use objectrendertype mode
+	}
+
+	
+	// Label: AIRangedCombatGruntAlways
+	struct RngdGrunt {
+		bool32 gruntalways
+	}
+
+	
+	// Label: RoomGravity
+	struct RoomGrav {
+		int32 gravity
+	}
+
+	
+	// Label: RotatingDoor
+	struct RotDoor {
+		int32 zero
+		float closedangle
+		float openangle
+		float speed
+		int32 use physaxistype axis
+		uint32 use doorstate state
+		bool32 hardlimits
+		float blocksound
+		bool32 blockvision
+		float pushmass
+		vector closedposition
+		vector openposition
+		vector startposition
+		alias short-vector startfacing
+		float unknown
+		int32 room
+		bool32 clockwise
+		alias short-vector haltclose
+		alias short-vector haltopen
+	}
+
+	
+	// Label: SalePrice
+	struct SalePrice {
+		int32 price
+	}
+
+	
+	// Label: ModelScale
+	struct Scale {
+		float x
+		float y
+		float z
+	}
+
+	
+	// Label: SchemaActionSound
+	struct SchAction {
+		char [16] label
+	}
+
+	
+	// Label: SchemaAttenuationFactor
+	struct SchAttFac {
+		float attenuation
+	}
+
+	
+	// Label: SchemaLastSample
+	struct SchLastSa {
+		int32 value
+	}
+
+	
+	// Label: SchemaLoopParams
+	struct SchLoopPa {
+		uint8 use schemaloopflags flags
+		uint8 maxsamples
+		int16 loopcount
+		int16 mininterval
+		int16 maxinterval
+	}
+
+	
+	// Label: SchemaMessage
+	struct SchMsg {
+		char [16] label
+	}
+
+	
+	// Label: SchemaPlayParams
+	struct SchPlayPa {
+		uint16 use schemaplayflags flags = "0x7F00"
+		uint16 use schemaaudioclass class
+		int32 volume = "-1"
+		int32 pan
+		uint32 delay
+		int32 fade
+	}
+
+	
+	// Label: SchemaPriority
+	struct SchPriori {
+		int32 priority
+	}
+
+	
+	// Label: Scripts
+	struct Scripts {
+		char [32] scripts
+		bool32 dontinherit
+	}
+
+	
+	// Label: ScriptTiming
+	struct ScriptTim {
+		int32 timing
+	}
+
+	
+	// Label: SelfIllumination
+	struct SelfIllum {
+		float brightness
+	}
+
+	
+	// Label: DynamicLight
+	struct SelfLit {
+		int32 brightness
+	}
+
+	
+	// Label: Shadow
+	struct Shadow {
+		int32 intensity
+	}
+
+	
+	// Label: SlayResult
+	struct SlayResul {
+		uint32 use slayresulttype mode
+	}
+
+	
+	// Label: SFXSpark
+	struct Spark {
+		uint32 flags
+		uint16 color
+		uint16 anglejitter
+		uint16 angle
+		uint16 zero
+		float size
+		float sizejitter
+		float light
+		float lightjitter
+	}
+
+	
+	// Label: SpeechLastPlayed
+	struct SpchNextP {
+		int32 value
+	}
+
+	
+	// Label: SpeechVoice
+	struct SpchVoice {
+		char [16] label
+	}
+
+	
+	// Label: CurrentSpeech
+	struct Speech {
+		uint32 flags
+		int32 time
+		int32 schema
+		int32 concept
+		int32 unknown
+		uint32 handle
+	}
+
+	
+	// Label: SpotlightAmbient
+	struct SpotAmb {
+		float inner
+		float outer
+		float ambient
+	}
+
+	
+	// Label: Spotlight
+	struct Spotlight {
+		float inner
+		float outer
+		float distance
+	}
+
+	
+	// Label: StackCount
+	struct StackCoun {
+		int32 count
+	}
+
+	
+	// Label: StimIsKnockout
+	struct StimKO {
+		bool32 isknockout
+	}
+
+	
+	// Label: TweqJointsState
+	struct StTweqJoi {
+		uint16 use tweqstateflags anim
+		uint16 use tweqnullflags misc
+		uint32 use tweqstateflags joint
+	}
+
+	
+	// Label: TweqLockState
+	struct StTweqLoc {
+		uint16 use tweqstateflags anim
+		uint16 use tweqnullflags misc
+		float angle
+		uint32 stage
+	}
+
+	
+	// Label: TweqRotateState
+	struct StTweqRot {
+		uint16 use tweqstateflags anim
+		uint16 use tweqnullflags misc
+		uint32 use tweqstateflags x
+		uint32 use tweqstateflags y
+		uint32 use tweqstateflags z
+	}
+
+	
+	// Label: TweqScaleState
+	struct StTweqSca {
+		uint16 use tweqstateflags anim
+		uint16 use tweqnullflags misc
+		uint32 use tweqstateflags x
+		uint32 use tweqstateflags y
+		uint32 use tweqstateflags z
+	}
+
+	
+	// Label: SuspiciousObject
+	struct SuspObj {
+		bool8 issuspicious
+		char [32] type
+		float minlight
+	}
+
+	
+	// Label: SwingExposure
+	struct SwingExpo {
+		int32 value
+	}
+
+	
+	// Label: SwordActionType
+	struct SwordActi {
+		uint32 use swordactiontype mode
+	}
+
+	varstr SymName
+	varstr TerrRepOn
+	varstr TerrRepOf
+	varstr TerrRepDe
+	
+	// Label: TextureIndex
+	struct TextureID {
+		int32 index
+	}
+
+	
+	// Label: RetextureRadius
+	struct TextureRa {
+		float distance
+	}
+
+	
+	// Label: CreatureTimeWarp
+	struct TimeWarp {
+		float factor
+	}
+
+	
+	// Label: InventoryToolReach
+	struct ToolReach {
+		float distance
+	}
+
+	
+	// Label: TranslatingDoor
+	struct TransDoor {
+		int32 zero
+		float closed
+		float open
+		float speed
+		int32 use physaxistype axis
+		uint32 use doorstate state
+		bool32 hardlimits
+		float blocksound
+		bool32 blockvision
+		float pushmass
+		vector closedposition
+		vector openposition
+		vector startposition
+		alias short-vector startfacing
+		float unknown
+		int32 room
+	}
+
+	
+	// Label: Transient
+	struct Transient {
+		bool32 value
+	}
+
+	
+	// Label: TrapControlFlags
+	struct TrapFlags {
+		uint32 use trapcontrolflags flags
+	}
+
+	varstr TrapQVar
+	
+	// Label: VoiceIndex
+	struct VoiceIdx {
+		int32 voice
+	}
+
+	
+	// Label: WaterColor
+	struct WaterColo {
+		uint8 red
+		uint8 green
+		uint8 blue
+		uint8 zero
+		float alpha
+	}
+
+	
+	// Label: WeaponDamage
+	struct WeaponDam {
+		int32 damage
+	}
+
+	
+	// Label: WeaponType
+	struct WeaponTyp {
+		int32 type
+	}
+
+	
+	// Label: LocalWeather
+	struct Weather {
+		int32 unknown1
+		bool32 fog
+		bool32 precipitation
+		int32 unknown2
+	}
+
+	
+	// Label: WeaponExposure
+	struct WpnExposu {
+		int32 value
+	}
+
+	
+	// Label: WeaponCollidesWithTerrain
+	struct WpnTerrCo {
+		bool32 value
+	}
+
+	
+	// Label: RendererZBias
+	struct Z-Bias {
+		int32 bias
+	}
+
+}
+
+namespace links {
+	
+	// Label: AIAttack
+	struct AIAttack {
+		uint32 use aipriority priority = "3"
+	}
+
+	
+	// Label: AIAwareness
+	struct AIAwareness {
+		int32 unknown1
+		uint32 use aiawarenessflags flags
+		uint32 use alertlevel level
+		uint32 use alertlevel peaklevel
+		int32 levelenter
+		int32 lastcontact
+		vector lastposition
+		int32 unknown2
+		int32 visioncone
+		int32 lastupdate
+		int32 lastseen
+		int32 unknown3
+		int32 lastfirsthand
+		int32 freshness
+		int32 unknown4
+	}
+
+	
+	// Label: AICamera
+	struct AICamera {
+		char [32] message
+		char [32] data
+	}
+
+	
+	// Label: AIConversationActor
+	struct AIConversationActor {
+		int32 actor
+	}
+
+	
+	// Label: AIDefendObject
+	struct AIDefendObj {
+		int32 unknown1
+		uint32 use aispeed returnspeed = "3"
+		int32 unknown2
+		
+		struct range {
+			int32 radius
+			int32 height
+			uint32 use alertlevel minalertness
+			uint32 use alertlevel maxalertness
+			int32 unknown3
+		}
+
+	}
+
+	
+	// Label: AIDoor
+	struct AIDoor {
+		int32 unknown
+	}
+
+	
+	// Label: AIFleeDest
+	struct AIFleeDest {
+		int32 unknown
+		bool32 reached
+		int32 expiration
+	}
+
+	// Helper: AIFollowObject_Axis
+	struct AIFollowObject_Axis {
+		float angle
+		int32 distance
+	}
+	
+	// Label: AIFollowObject
+	struct AIFollowObj {
+		int32 unknown1
+		
+		alias AIFollowObject_Axis x
+		alias AIFollowObject_Axis y
+		alias AIFollowObject_Axis z
+		
+		int32 unknown2
+	}
+
+	
+	// Label: AINoFlee
+	struct AINoFlee {
+		int32 expiration
+	}
+
+	
+	// Label: AIProjectile
+	struct AIProjectile {
+		uint32 use aircconstraint constraint
+		int32 data
+		uint32 use aircmethod method = "1"
+		uint32 use aircpriority priority = "2"
+		float delay
+		bool32 leading
+		int32 ammo
+		int32 burst
+		uint32 use aircpriority accuracy = "2"
+		uint32 use meshjoint joint
+		int32 unknown
+	}
+
+	
+	// Label: AISuspicious
+	struct AISuspiciousLink {
+		int32 timeseen
+	}
+
+	
+	// Label: ARSourceLink
+	struct arSrc {
+		int32 sourcelink
+		int32 starttime
+		int32 count
+	}
+
+	
+	// Label: Contains
+	struct Contains {
+		int32 use containtype location
+	}
+
+	
+	// Label: Corpse
+	struct Corpse {
+		bool32 propagatestim
+	}
+
+	
+	// Label: CreatureAttachment
+	struct CreatureAttachment {
+		uint32 use meshjoint joint
+		bool32 isweapon
+		float unknown1
+		int32 unknown2
+		float unknown3
+		int32 unknown4
+		float unknown5
+		int32 unknown6
+		int32 unknown7
+	}
+
+	
+	// Label: CurrentWeapon
+	struct CurWeapon {
+		int32 unknown
+	}
+
+	
+	// Label: Flinderize
+	struct Flinderize {
+		int32 count
+		float impulse
+		bool32 scatter
+		vector offset
+	}
+
+	
+	// Label: FlowContact
+	struct FlowContact {
+		int32 unknown
+	}
+
+	
+	// Label: FrobProxy
+	struct FrobProxy {
+		uint32 use frobproxyflags flags
+	}
+
+	
+	// Label: GunFlash
+	struct GunFlash {
+		int32 vhot
+		uint32 use gunflashflags flags
+	}
+
+	
+	// Label: HostObject
+	struct HostObj {
+		int32 unknown
+	}
+
+	
+	// Label: Lock
+	struct Lock {
+		int32 unknown
+	}
+
+	
+	// Label: Metaproperty
+	struct MetaProp {
+		int32 priority = "1024"
+	}
+
+	
+	// Label: NowPicking
+	struct NowPicking {
+		int32 unknown
+	}
+
+	
+	// Label: ParticleAttachment
+	struct ParticleAttachement {
+		uint32 use particleattachtype type
+		int32 vhot
+		uint32 joint
+		int32 submodel
+	}
+
+	
+	// Label: PhysAttachment
+	struct PhysAttach {
+		vector offset
+	}
+
+	
+	// Label: PlayerFactory
+	struct PlayerFactory {
+		int32 unknown
+	}
+
+	
+	// Label: Projectile
+	struct Projectile {
+		int32 order
+		int32 setting
+	}
+
+	
+	// Label: ReactParam
+	struct ReactParam {
+		int32 receptron
+	}
+
+	
+	// Label: ScriptParams
+	struct ScriptParams {
+		char [16] label
+	}
+
+	
+	// Label: StimSensor
+	struct StimSensor {
+		int32 sensorcount
+	}
+
+	
+	// Label: TerrainPath
+	struct TPath {
+		float speed
+		int32 pausetime
+		bool32 pathlimit
+		int32 zero
+	}
+
+	
+	// Label: VoiceOver
+	struct VoiceOver {
+		uint32 use voiceoverflags flags
+	}
+
+	
+	// Label: WeaponOffset
+	struct WeaponOffset {
+		uint32 use weaponmode modes
+		vector transform
+		uint32 use meshjoint joint
+	}
+
+	
+	// Label: WeaponHaloBlock
+	struct WHBlock {
+		int32 unknown
+	}
+
+}
+
+namespace stimsource {
+	enum arsourcetype : int {
+		key "None" 0
+		key "Contact" 1
+		key "Radius" 2
+		key "Flow" 3
+		key "Script" 4
+	}
+
+	enum arsourcename : string {
+		key "None" None
+		key "Contact" Contact
+		key "Radius" Radius
+		key "Flow" Flow
+		key "Script" Script
+	}
+
+	bitfield arsourcefieldflags {
+		key "Shape" 1
+		key "Lifecycle" 2
+	}
+
+	bitfield arlifecycleflags {
+		key "No Max" 1
+		key "Destroy On Completion" 2
+	}
+
+	bitfield arcontactflags {
+		key "Collision" 0x001
+		key "WorldFrob" 0x002
+		key "InvFrob" 0x004
+		key "InvFrob" 0x008
+		key "ToolFrob Inv%2FWorld" 0x010
+		key "ToolFrob Inv%2FInv" 0x020
+		key "ToolFrob World%2FWorld" 0x040
+		key "ToolFrob World%2FInv" 0x080
+		key "Weapon Low" 0x800
+		key "Weapon Med" 0x100
+		key "Weapon High" 0x200
+		key "Weapon Block" 0x400
+	}
+
+	bitfield arradiusflags {
+		key "Line of Sight" 1
+	}
+
+	enum arradiustype : uint {
+		key "None" 0
+		key "Linear" 1
+		key "Inverse Square" 2
+	}
+
+	
+	// Label: ARSourceDescription
+	struct arSrcDesc {
+		int32 use arsourcetype sourcetype
+		float intensity
+		uint32 use arsourcefieldflags validfields
+		
+		union shape {
+			// Label: Shape (Contact)
+			struct shapecontact {
+				uint32 use arcontactflags types
+				float velocitycoeff
+				float frobtimecoeff
+				int32 zero
+			}
+
+			
+			// Label: Shape (Radius)
+			struct shaperadius {
+				float distance
+				uint32 use arradiusflags flags
+				uint32 use arradiustype dispersion
+				int32 zero
+			}
+		}
+		
+		// Label: Lifecycle
+		struct lifecycle {
+			uint32 use arlifecycleflags flags
+			int32 period
+			int32 maxfirings
+			float slope
+			int32 zero
+		}
+
+		char [32] use arsourcename typename
+	}
+
+}
+
+namespace reactions {
+	bitfield receptronflags {
+		key "No Min" 1
+		key "No Max" 2
+	}
+
+	enum receptroneffects : string {
+		key "None" None
+		key "Abort" Abort
+		key "Amplify" Amplify
+		key "Weak Point" WeakPoint
+		key "Stimulate" stimulate
+		key "Script Message" stim_script_msg
+		key "Tweq Control" tweq_control
+		key "Set Quest Var" SetQvar
+		key "Impact Result" impact_result
+		key "Permeate" permeate
+		key "Add Property" add_prop
+		key "Remove Property" rem_prop
+		key "Clone Properties" clone_props
+		key "Add Metaproperty" add_metaprop
+		key "Remove Metaproperty" rem_metaprop
+		key "Change Model" set_model
+		key "Create Object" create_obj
+		key "Move Object" move_obj
+		key "Frob Object" frob_obj
+		key "Destroy Object" destroy_obj
+		key "Slay Object" slay
+		key "Damage" damage
+		key "Spoof Damage" spoofdamage
+		key "Knockout" Knockout
+		key "Freeze" Freeze
+		key "Weapon Hit" weapon_hit
+		key "Weapon Block" weapon_block
+		key "Awareness Filter" AwareFilter
+		key "Env Sound" EnvSound
+	}
+
+	enum reactionimpactresult : uint {
+		key "Bounce" 2
+		key "Stick" 3
+		key "Slay" 4
+	}
+
+	bitfield reactionawarenessflags {
+		key "Can't See" 1
+		key "Can't Hear" 2
+		key "Stunned" 4
+		key "Not an AI" 8
+	}
+
+	// Label: Receptron
+	struct Receptron {
+		int32 ordinal
+		float minintensity
+		float maxintensity
+		uint32 use receptronflags flags
+		char [32] use receptroneffects effect
+		int32 target
+		int32 agent
+		
+		union reaction {
+			// Label: Amplify Stimulus
+			struct amplify {
+				float multiply
+				float add
+			}
+		
+		
+			// Label: Weak Point
+			struct weakpoint {
+				float multiply
+				float add
+				vector offset
+				float radius
+			}
+		
+			// Label: Stimulate Other
+			struct stimulate {
+				char [16] name
+				float add
+				float multiply
+			}
+		
+			
+			// Label: Script Message
+			struct stim_script_msg {
+				int32 refcount
+				uint32 flags
+			}
+		
+			
+			// Label: Tweq Control
+			struct tweq_control {
+				uint32 type
+				uint32 action
+				uint32 use tweqanimflags anim
+				int32 zero
+			}
+		
+			// Label: Set Quest Variable
+			struct setqvar {
+				char [28] name
+				uint16 operation
+				int16 value
+			}
+			
+			// Label: Impact Result
+			struct impact_result {
+				uint32 use reactionimpactresult type
+			}
+		
+			
+			// Label: Permeate Into Container
+			struct permeate {
+				float coefficient
+				float magnitude
+			}
+		
+			
+			// Label: Add Property
+			struct add_prop {
+				char [16] name
+			}
+		
+			
+			// Label: Remove Property
+			struct rem_prop {
+				char [16] name
+			}
+		
+			
+			// Label: Create Object
+			struct create_obj {
+				vector position
+				float heading
+				float pitch
+				float bank
+			}
+		
+			
+			// Label: Move Object
+			struct move_obj {
+				vector position
+				float heading
+				float pitch
+				float bank
+			}
+		
+			
+			// Label: Damage
+			struct damage {
+				int32 add
+				int32 type
+				float multiply
+				bool32 stimtype
+			}
+		
+			// Label: Spoof Damage
+			struct spoofdamage {
+				int32 add
+				int32 type
+				float multiply
+				bool32 stimtype
+			}	
+	
+			// Label: Change Model
+			struct set_model {
+				char [16] name
+			}
+		
+			// Label: Awareness Filter
+			struct awarefilter {
+				uint32 use reactionawarenessflags abortflags
+			}
+		
+			// Label: Freeze
+			struct freeze {
+				int32 duration
+			}
+		
+			// Label: Environmental Sound
+			struct envsound {
+				char [32] tags
+			}
+
+		
+			// Label: Null Reaction
+			struct none {
+			}
+		}
+	}
+}
+
+namespace chunks {
+	// Helper: AI Acuity
+	struct AI_Acuity {
+		float lighting
+		float movement
+		float exposure
+	}
+	
+	// Label: AIAcuitySet
+	struct AIACS {
+		alias AI_Acuity normal
+		alias AI_Acuity peripheral
+		alias AI_Acuity omni
+		alias AI_Acuity lightonly
+		alias AI_Acuity moveonly
+		alias AI_Acuity lowlight
+	}
+	
+	// Label: AICreatureSizes
+	struct AICRTSZ {
+		
+		struct type {
+			float width
+			float height
+		}
+
+	}
+
+	
+	// Label: AIGamesysPathOption
+	struct AIGPTHVAR {
+		float largedoorsize
+	}
+
+	
+	// Label: AIHearingStats
+	struct AIHearStat {
+		
+		// Label: Multiply (first)
+		struct multiply {
+			float null
+			float verylow
+			float low
+			float normal
+			float high
+			float veryhigh
+		}
+
+		
+		// Label: Add (second)
+		struct add {
+			int32 null
+			int32 verylow
+			int32 low
+			int32 normal
+			int32 high
+			int32 veryhigh
+		}
+
+	}
+
+	
+	// Label: AISoundTweaks
+	struct AISNDTWK {
+		int32 untyped
+		int32 inform
+		int32 minor
+		int32 major
+		int32 noncombat
+		int32 combat
+	}
+
+	
+	// Label: BashVelocityVars
+	struct BASH {
+		float threshold
+		float coefficient
+	}
+
+	
+	// Label: DarkCombatVars
+	struct DARKCOMBAT {
+		int32 backstab
+		float mindistance
+	}
+
+	
+	// Label: GamesysEAXDefaults
+	struct GameSysEAX {
+		uint32 use eaxtype eax
+		int32 dampening
+		int32 heightoverride
+	}
+
+	
+	// Label: MapFile
+	struct MAP_FILE {
+		char [256] name
+	}
+
+	
+	// Label: AIPathOption
+	struct AIPATHVAR {
+		bool32 pathwater
+	}
+
+	
+	// Label: Ambient
+	struct AMBIENT {
+		int32 unknown
+	}
+
+	
+	// Label: BrushHeader
+	struct BRHEAD {
+		char [16] creator
+		char [16] lastsave
+		uint32 unknown1
+		int32 gridsize
+		bool32 showgrid
+		uint32 shading
+		uint32 unknown2
+		bool32 usegrid
+		uint32 time
+	}
+
+	
+	// Label: DarkMissionDescription
+	struct DARKMISS {
+		int32 number
+		char [9] path
+	}
+
+	
+	// Label: AutomapParams
+	struct MAPISRC {
+		int32 sourcemission
+		float compassoffset
+	}
+
+	bitfield missloopflags {
+		key "Skip" 0x01
+		key "NoBriefing" 0x02
+		key "NoLoadout" 0x04
+		key "Cutscene" 0x08
+		key "End" 0x10
+	}
+
+	enum missloopmode : uint {
+		key "Null" 0
+		key "AppStart" 1
+		key "MainMenu" 2
+		key "NewGame" 3
+		key "MetaGame" 4
+		key "MissFlag" 5
+		key "Briefing" 6
+		key "Loading" 7
+		key "StartMission" 8
+		key "Loadout" 9
+		key "StartSim" 10
+		key "EndSim" 11
+		key "EndMission" 12
+		key "Debrief" 13
+		key "MissionComplete" 19
+		key "Cutscene" 14
+		key "EndGame" 15
+		key "Default" 16
+		key "Restart" 17
+		key "Restore" 18
+	}
+
+	
+	// Label: MissionLoop
+	struct MISSLOOP {
+		int32 current_mission
+		uint32 use missloopflags flags
+		uint32 use missloopmode current_mode
+		uint32 use missloopmode next_mode
+		int32 next_mission
+	}
+
+	
+	// Label: WaterColors
+	struct WATERBANKS {
+		
+		struct color {
+			int8 red
+			int8 green
+			int8 blue
+			int8 zero
+			float alpha
+		}
+
+	}
+
+	
+	// Label: FlowTextureColors
+	struct FLOW_TEX {
+		
+		struct flow {
+			int16 in_texture
+			int16 out_texture
+			char [28] name
+		}
+
+	}
+
+	
+	// Label: CellMotion
+	struct CELL_MOTION {
+		
+		struct anchor {
+			vector position
+			alias short-vector rotation
+			uint32 flags
+			int16 use physaxistype axis
+			int8 zero
+		}
+
+		
+		struct delta {
+			vector position
+			alias short-vector rotation
+		}
+
+	}
+
+	
+	// Label: Fog
+	struct FOG {
+		int32 red
+		int32 green
+		int32 blue
+		float distance
+	}
+
+	
+	// Label: PlayerCamera
+	struct PLAYERCAM {
+		uint32 attachment
+		float fov
+		vector position
+		alias short-vector rotation
+		int16 unknown
+		int32 attached_id
+	}
+
+	
+	// Label: RenderParams
+	struct RENDPARAMS {
+		char [16] paletteres
+		alias color ambient
+		bool32 usesunlight
+		bool32 quadsunlight
+		vector sundirection
+		float sunhue
+		float sunsaturation
+		float sunbrightness
+		float unknown
+	}
+
+	
+	// Label: BackgroundMusic
+	struct SONGPARAMS {
+		char [32] name
+	}
+
+	
+	// Label: SkyRenderMode
+	struct SKYMODE {
+		uint32 type
+	}
+
+	
+	// Label: NewSky:Stars
+	struct STAROBJVAR {
+		bool32 enable
+		bool32 fog
+		float density
+		float offset
+		float intensity
+	}
+
+	
+	// Label: NewSky:Sky
+	struct SKYOBJVAR {
+		bool32 enable
+		bool32 fog
+		float atmosphere
+		float earth
+		int32 latitudecount
+		int32 longitudecount
+		float dip
+		alias color polecolor
+		alias color fortyfivecolor
+		alias color seventycolor
+		alias color horizoncolor
+		alias color dipcolor
+		alias color glowcolor
+		float glowlatitude
+		float glowlongitude
+		float glowangle
+		float glowscale
+		float glowmethod
+		float cliplatitude
+	}
+
+	
+	// Label: NewSky:CelestialObject
+	struct CELOBJVAR {
+		bool32 enable
+		bool32 fog
+		bool32 isalpha
+		char [256] texture
+		float alpha
+		float distance
+		float size
+		float latitude
+		float longitude
+		float rotation
+		alias color color
+	}
+
+	
+	// Label: NewSky:CloudDeck
+	struct CLOUDOBJVAR {
+		bool32 enable
+		bool32 fog
+		bool32 isalpha
+		char [256] texture
+		float alpha
+		float Height
+		float tilesize
+		int32 tilesperside
+		int32 subtiles
+		vector wind
+		alias color color
+		alias color eastcolor
+		uint32 eastmethod
+		float eastscale
+		alias color westcolor
+		uint32 westmethod
+		float westscale
+		float rotation
+		int32 subtilealpha
+		alias color glowcolor
+		uint32 glowmethod
+		float glowscale
+		float glowlatitude
+		float glowlongitude
+		float glowangle
+		int32 glowtiles
+	}
+
+	
+	// Label: NewSky:DistantObject
+	struct DISTOBJVAR {
+		bool32 enable
+		bool32 fog
+		char [256] bitmap1
+		char [256] bitmap2
+		alias color color
+		float distance
+		float top
+		float bottom
+		int32 panels
+		int32 panelspertexture
+		float alpha
+	}
+
+	
+	// Label: Weather
+	struct WEATHERVAR {
+		uint32 type
+		float frequency
+		float velocity
+		float distance
+		float radius
+		float alpha
+		float brightness
+		float jitter
+		float length
+		float splashfrequency
+		float splashradius
+		float splashheight
+		float splashtime
+		char [32] texture
+		vector wind
+	}
+
+	
+	// Label: SaveDescription
+	struct SAVEDESC {
+		char [1024] description
+		int32 extra
+	}
+
+}
