@@ -70,7 +70,7 @@ Changes in alpha release 0.1.9 (03-Dec-2006)
 * minor fixes and changes
 - skyhack does not work correctly for now, the skybox needs to be rendered before the geometry in order to work. Will be fixed
 
-Changes in alpha release 0.2.0 (28-Jan-2006)
+Changes in alpha release 0.2.0 (28-Jan-2007)
 * Lightmap atlas can now be rectangular (not square only)
 * Console now understands 'load_mission MISSION_FILE' command
 * Console now understands 'show_portals X' command (X==1 shows visible portal geometry)
@@ -78,3 +78,27 @@ Changes in alpha release 0.2.0 (28-Jan-2006)
 * fixed the loading of the world geometry (mission geometry can now be loaded online several times)
 * added an cmake option to compile the OPDE_DEBUG code in (including LOG_DEBUG statements)
 * Light map atlassing rewritten a bit. Now atlassing is done after all lightmaps are inserted, using a binary tree approach.
+
+Changes in alpha release 0.2.1 (23-May-2007)
+* removed OpdeGUI and OpdeMission temporary classes
+* Fixed water material loading (still needs a texture manager service though)
+* Removed the old DarkDB loading code.
+* Started implementing endianness independence.
+* Added File/FileGroup abstract classes, and thei're implementations for std, Ogre::DataStream, Memory
+* Modified the WorldRep service to work agains the new FileGroup class
+* Added the RefCounted class, used to implement reference counted classes.
+* Added a chunk extraction and listing tool.
+* Some small fixes in CMake scripts.
+* Implemented a binary service, which is a catalogue of dynamically defined structured types
+* Implemented a compiler for dtype scripts
+* Implemented a ScriptLoader for the dtype scripts
+* Added dtype scripts for all 3 games
+* Restructured the scripts directory
+* Removed the junk code from main
+* Implemented the DTypeDef and DVariant classes
+* Made a small improvement in the DarkSceneManager (performance - wise)
+* Implemented game's state manager.
+* Moved the code to Ogre3D 1.4
+* Added dependency to OIS
+* Various small fixes
+* Removed dependency on CeGUI

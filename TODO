@@ -2,18 +2,18 @@ This is a TODO plan for openDarkEngine
 
 Each minor version has it's own plan piece, which can change as requirements will
 
+(* marks todo, + marks a thing already implemented)
+
 0.2.0 - 0.3.0:
-	* implement a file handling base classes 
-	* implement a dynamic data containers
-	* implement a templating service for binary data templates/instances handling (e.g. a library of binary templates)
+	+ implement a file handling base classes 
+	+ implement a dynamic data containers - (sortof - DTypeDef)
+	- implement a templating service for binary data templates/instances handling (e.g. a library of binary templates)
 	* implement a base of the object service (Property, Link and Object)
 	* implement a LGMD .bin loader (online, resource manager?) that constructs a SceneNode tree and some specs of limits + rotating/sliding info
 	* test all the previous by loading the game objects in-game
 	* if considered a good idea, implement a base scripting bindings
-	* Write a custom gui service, based on ogre's overlays. Cegui is not too suitable for our purposes 
-	    - this one should implement a mouse/keyboard event filter, and support some base components - buttons, text lists
-	    - should be extendable by some virtual methods (render, event recieval, focussing) - should be enough to support ss2 gui too
-	* get rid of the temporary source code. That includes OpdeMission ad the ExampleApplication
+	* Write a custom gui service, based on ogre's overlays. Or find one that fits (BetaGUI?)
+	+ get rid of the temporary source code. That includes OpdeMission ad the ExampleApplication
 
 0.3.0 - 0.4.0: (Just a sketch for now, will likely change)
 	* AI object loading implementation (LGMM), including the movement database. Some tricks could be needed for the translation part of the movement
@@ -56,11 +56,12 @@ either Thief 1/Thief Gold/Thief 2 and System Shock 2. It should use Binary servi
 
 The property service should have these abilities:
 * Notification of property - ADDITION, REMOVAL, CHANGE (call a list of methods registered to listen to the event). Per property type. This notification is fired even if the property addition/chage comes indirectly thanks to inheritance.
-* Cacheing of property inheritance - Listening to the link service notifications about Metaproperty links, it should remap the visibility and value source of given property (Priority based, as in MetaProperty link's data - priority)
+* Cacheing of property inheritance - Listening to the inheritance service notifications, it should remap the visibility and value source of given property (Priority based, as in MetaProperty link's data - priority)
 * Inheritance definitions for each property type - as far as I know, there are these inheritance mechanims:
 	- Normal inheritance - Property get's inherited every time
-	- Archetype-only inheritance - Inheritance works only on archetypes. The property does not inherit into an object instance. Dromed copies this property if instantinating an archetype. In-game, it should be ignored on metaproperty change.
+	- Archetype-only inheritance - Inheritance works only on archetypes. The property does not inherit into an object instance (ID>0). Dromed copies this property if instantinating an archetype. In-game, it should be ignored on metaproperty change.
 * loading / writing of archetype, non-archetype and both to a given FileGroup
+* Iterator on object self-properties (those not inherited). For editor use
 
 Link service
 ------------
@@ -84,10 +85,14 @@ Abilities:
 * Object instantination, removal, slay. Upon instantination
      some object have to be given new instances of the archetype's linked objects (ParticleAttachment, weapon for creatures). 
      This should be probably done via Notifications to services responsible for that.
-* Notification of object changes
+* Notification of object changes - Creation, Death, Pre-Death
+* Object cloning - fabricate by example (copy object and links to it)
+* OBJVEC (name?) handling - bitmap of available object ID's. Rescale upon filling to avoid DE's types of problems. Protected methods getFreeArchetypeID, getFreeObjectID.
+
+- Copying of the links is somewhat special. Each link type knows if it has to be copied or not. Copying of properties is simmilar. Prop. service will have inheritance type on each property.
 
 
-Inheritance service(?)
+Inheritance Service (name this Trait Service?)
 -------------------
 High level service working with inheritance and archetype tree
 
@@ -96,6 +101,9 @@ Abilities:
 * Inheritance queries
 * Archetype addition, removal, move in the tree
 * Notification of inheritance changes
+* Holds Normal/Metaproperty priorities for all objects. Adding metaprop will always give a new biggest number of priority for the new link. This means it would be wise to use InheritanceService, not link service directly for MP management.
+
+- Property Service is hooked on the events of this service. Upon inheritance change, property service refreshes the current value for all affected properties of all affected objects. Usually, in-game, this will be limited to metaproperty addition/removal.
 
 Renderer service(?)
 * hooked on renderer properties, handle object display and mesh loading - the question here is if LGMD should be loaded as a SceneNode tree or a skeleton
@@ -117,3 +125,41 @@ Tweq system - this will cause some problems - some tweqs only get updated if vis
 AI vision - do the vision cones work on WorldRep geometry or on room database? My bet is rooms.
 Dynamic lights - as switchable lightmaps cover the lightning of unmovable lights, some approach has to be thinked up on dynamic lights, those are the only lightning world geometry too - shaders?
 
+
+
+Some remarks:
+-------------
+
+GameService
+-----------
+The bootstrap script should control GameService. GameService would be a service doing the global engine functions. 
+* Load/Save of savegames
+* Mission loading
+* Mission order (which mission is next)
+* Game State Machine control (Which State would be next Movie1, Movie2, Main Menu...)
+* Per frame updates? The order is cruical - physics, collisions, tweq, particle, AI.... This has to be determined, and fixed. Maybe some FrameUpdated class with order - int.
+* Persistency of some values
+* The state machine should be able to cooperate with script object(s)
+* State registrations - register named GameState instances to be referenced by state changing calls
+
+
+ScriptService
+-------------
+* Event dispatcher for in-game scripts
+* Instance manager for script classes wrapped in C++ classes
+* Instantinator/Registrator for such classes
+* Uses ScriptLanguage instance to accomplish it's tasks.
+
+The ScriptLanguage class, or simmilar named, would handle:
+* script loading and execution
+* static methods doing inter-language registration of types and classes (Services, etc.)
+* Wrap the script's instances to a C++ instances for some classes - Script as a main example, also GameState and GUIManagedGameState (event callbacks)
+
+GUIManagedState:
+* Handles mouse cursor. Exposes method setupGUI instead of start(). setupGUI will be filled with gui building code and event bindings.
+
+ScriptManagedState:
+* A wrapper around script's instance. Gives the ability to manage the game state in some scripting language.
+
+ScriptGUIManagedState:
+* As ScriptManagedState, but including the GUIManagedState functions. Callbacks directly to the scripting level.
