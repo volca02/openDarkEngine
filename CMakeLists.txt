@@ -20,7 +20,7 @@ project (OPDE)
 
 SET(OPDE_VER_MAJOR "0")
 SET(OPDE_VER_MINOR "2")
-SET(OPDE_VER_PATCH "0")
+SET(OPDE_VER_PATCH "1")
 
 # Build type selection. Use ccmake for selection of this (or the commandline switches)
 # Default build type
@@ -94,24 +94,23 @@ INCLUDE(ConfigureChecks.cmake)
 CONFIGURE_FILE(config.h.cmake ${CMAKE_BINARY_DIR}/config.h )
 
 # Solve the dependencies
-# SET(EXPAT_DIR ${CMAKE_MODULE_PATH})
+SET(OIS_DIR ${CMAKE_MODULE_PATH})
 SET(OGRE_DIR ${CMAKE_MODULE_PATH})
 SET(CEGUI_DIR ${CMAKE_MODULE_PATH})
 
-# FIND_PACKAGE(EXPAT)
+FIND_PACKAGE(OIS)
 FIND_PACKAGE(OGRE)
 FIND_PACKAGE(CEGUI)
 
 # Only visual check enabling verbose output, and package found info
 
-# Expat not yet added. Needs a cross-platform compilation checks
-# IF(EXPAT_FOUND_OK)
-#     MESSAGE("EXPAT Found OK")
-#     MESSAGE(" - EXPAT includes ${EXPAT_INCLUDE_DIR}")
-#     MESSAGE(" - EXPAT libs ${EXPAT_LIBRARIES}")
-# ELSE(EXPAT_FOUND_OK)
-#     MESSAGE(FATAL_ERROR "EXPAT not found")
-# ENDIF(EXPAT_FOUND_OK)
+IF(OIS_FOUND_OK)
+     MESSAGE(STATUS "OIS Found OK")
+     MESSAGE(STATUS " - OIS includes ${OIS_INCLUDE_DIR}")
+     MESSAGE(STATUS " - OIS libs ${OIS_LIBRARIES}")
+ELSE(OIS_FOUND_OK)
+     MESSAGE(STATUS FATAL_ERROR "OIS not found")
+ENDIF(OIS_FOUND_OK)
 
 IF(OGRE_FOUND_OK)
     MESSAGE(STATUS "OGRE Found OK")
@@ -121,13 +120,13 @@ ELSE(OGRE_FOUND_OK)
     MESSAGE(FATAL_ERROR "OGRE not found")
 ENDIF(OGRE_FOUND_OK)
 
-IF(CEGUI_FOUND_OK)
-    MESSAGE(STATUS "CEGUI Found OK")
-    MESSAGE(STATUS " - CEGUI includes ${CEGUI_INCLUDE_DIR}")
-    MESSAGE(STATUS " - CEGUI libs ${CEGUI_LIBRARIES}")
-ELSE(CEGUI_FOUND_OK)
-    MESSAGE(FATAL_ERROR "CEGUI not found")
-ENDIF(CEGUI_FOUND_OK)
+#IF(CEGUI_FOUND_OK)
+#    MESSAGE(STATUS "CEGUI Found OK")
+#    MESSAGE(STATUS " - CEGUI includes ${CEGUI_INCLUDE_DIR}")
+#    MESSAGE(STATUS " - CEGUI libs ${CEGUI_LIBRARIES}")
+#ELSE(CEGUI_FOUND_OK)
+#    MESSAGE(FATAL_ERROR "CEGUI not found")
+#ENDIF(CEGUI_FOUND_OK)
 
 
 # Add the subdirectories which contain aditional CMakeLists.txt files
