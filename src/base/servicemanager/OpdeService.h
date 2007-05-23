@@ -26,15 +26,15 @@
 namespace Opde {
 	 
 	// Forward declaration
-	class OpdeServiceManager;
+	class ServiceManager;
 	
 	/** Interface used for all services. Those must implement the here mentioned methods. */
-	class OpdeService {
+	class Service {
 			protected:
-				OpdeServiceManager* serviceManager;
+				ServiceManager* serviceManager;
 		
 			public:
-				OpdeService(OpdeServiceManager* manager);
+				Service(ServiceManager* manager);
 	};
 		
 }

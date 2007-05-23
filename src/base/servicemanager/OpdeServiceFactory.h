@@ -30,18 +30,18 @@ namespace Opde {
 	// Volca: I like the Ogre's approach on factories. This is quite simmilar
 	
 	// forward declaration
-	class OpdeServiceManager;
-	class OpdeService;
+	class ServiceManager;
+	class Service;
 		
 	/** Code base for the service factories. Implement the methods with the Service Factory you're implementing. */
-	class OpdeServiceFactory {
+	class ServiceFactory {
 		public:
-			OpdeServiceFactory() {	};
-			virtual ~OpdeServiceFactory() {	};
+			ServiceFactory() {	};
+			virtual ~ServiceFactory() {	};
 		
 			/** Creates and returns a new instance of the service. 
 			* @todo Do I NEED named services? I think not. */
-			virtual OpdeService* createInstance(OpdeServiceManager* manager) = 0;
+			virtual Service* createInstance(ServiceManager* manager) = 0;
 			
 			/** The service name. Please fill this to let the factory work. */
 			std::string ServiceName;

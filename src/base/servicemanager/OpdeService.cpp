@@ -22,7 +22,7 @@
 
 namespace Opde {
 
-	OpdeService::OpdeService(OpdeServiceManager* manager) : serviceManager(manager) {
+	Service::Service(ServiceManager* manager) : serviceManager(manager) {
 	}
 	
 }

@@ -29,36 +29,36 @@
 
 namespace Opde {
 	 
-	/** Central manager for the Services. Each service must have the OpdeServiceFactory implemented, and must implement OpdeService class. 
-	* @see OpdeServiceFactory
-	* @see OpdeService 
+	/** Central manager for the Services. Each service must have the ServiceFactory implemented, and must implement Service class. 
+	* @see ServiceFactory
+	* @see Service 
 	*/
-	class OpdeServiceManager : public Singleton<OpdeServiceManager> {
+	class ServiceManager : public Singleton<ServiceManager> {
 		private:
-			typedef std::map< std::string, OpdeServiceFactory* > ServiceFactoryMap;
-			typedef std::map< std::string, OpdeService* > ServiceInstanceMap;
+			typedef std::map< std::string, ServiceFactory* > ServiceFactoryMap;
+			typedef std::map< std::string, Service* > ServiceInstanceMap;
 		
 			ServiceFactoryMap serviceFactories;
 			ServiceInstanceMap serviceInstances;
 		
-			OpdeServiceFactory* findFactory(const std::string& name);
-			OpdeService* findService(const std::string& name);
-			OpdeService* createInstance(const std::string& name);
+			ServiceFactory* findFactory(const std::string& name);
+			Service* findService(const std::string& name);
+			Service* createInstance(const std::string& name);
 		public:
-			OpdeServiceManager();
+			ServiceManager();
 
 			// Singleton releted
-			static OpdeServiceManager& getSingleton(void);
-			static OpdeServiceManager* getSingletonPtr(void);
+			static ServiceManager& getSingleton(void);
+			static ServiceManager* getSingletonPtr(void);
 		
 			/** Registration for the services */
-			void addServiceFactory(OpdeServiceFactory* factory);
+			void addServiceFactory(ServiceFactory* factory);
 		
 			/** Returns the service, named name, pointer.
-			* @param name The service type name (The name returned by the OpdeServiceFactory)
-			* @see OpdeServiceFactory
+			* @param name The service type name (The name returned by the ServiceFactory)
+			* @see ServiceFactory
 			*/
-			OpdeService* getService(const std::string& name);
+			Service* getService(const std::string& name);
 	};
 }
 

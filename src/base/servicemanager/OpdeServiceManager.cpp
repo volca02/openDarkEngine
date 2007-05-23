@@ -29,30 +29,30 @@ using namespace std;
 
 namespace Opde {
 	
-	template<> OpdeServiceManager* Singleton<OpdeServiceManager>::ms_Singleton = 0;
+	template<> ServiceManager* Singleton<ServiceManager>::ms_Singleton = 0;
 		
-	OpdeServiceManager::OpdeServiceManager() {
+	ServiceManager::ServiceManager() {
 		
 	}
 	
-	OpdeServiceManager& OpdeServiceManager::getSingleton(void) {
+	ServiceManager& ServiceManager::getSingleton(void) {
 		assert( ms_Singleton );  return ( *ms_Singleton );  
 	}
 	
-	OpdeServiceManager* OpdeServiceManager::getSingletonPtr(void) {
+	ServiceManager* ServiceManager::getSingletonPtr(void) {
 		return ms_Singleton;
 	}
 	
 	
 	//------------------ Main implementation ------------------
-	void OpdeServiceManager::addServiceFactory(OpdeServiceFactory* factory) {
+	void ServiceManager::addServiceFactory(ServiceFactory* factory) {
 		
 		// std::cout << "Registering Factory named '" << factory->ServiceName << "'" << std::endl;
 		
 		serviceFactories.insert(make_pair(factory->ServiceName, factory));
 	}
 	
-	OpdeServiceFactory* OpdeServiceManager::findFactory(const std::string& name) {
+	ServiceFactory* ServiceManager::findFactory(const std::string& name) {
 		
 		ServiceFactoryMap::const_iterator factory_it = serviceFactories.find(name);
 		
@@ -63,7 +63,7 @@ namespace Opde {
 		}
 	}
 	
-	OpdeService* OpdeServiceManager::findService(const std::string& name) {
+	Service* ServiceManager::findService(const std::string& name) {
 		
 		ServiceInstanceMap::iterator service_it = serviceInstances.find(name);
 		
@@ -74,8 +74,8 @@ namespace Opde {
 		}
 	}
 	
-	OpdeService* OpdeServiceManager::createInstance(const std::string& name) {
-		OpdeServiceFactory* factory = findFactory(name);
+	Service* ServiceManager::createInstance(const std::string& name) {
+		ServiceFactory* factory = findFactory(name);
 		
 		if (factory != NULL) { // Found a factory for the Service name
 			return factory->createInstance(this);
@@ -84,8 +84,8 @@ namespace Opde {
 		}
 	}
 	
-	OpdeService* OpdeServiceManager::getService(const std::string& name) {
-		OpdeService *service = findService(name);
+	Service* ServiceManager::getService(const std::string& name) {
+		Service *service = findService(name);
 		
 		if (service != NULL) 
 			return service;
