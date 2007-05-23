@@ -1,6 +1,7 @@
 include_directories(
     ${OGRE_INCLUDE_DIR}
     ${CEGUI_INCLUDE_DIR}
+    ${OIS_INCLUDE_DIR}
     ${OPDE_BINARY_DIR}
     ${OPDE_SOURCE_DIR}/src/compat
     ${OPDE_SOURCE_DIR}/src/base/logger
@@ -36,24 +37,25 @@ link_directories(
 
 add_executable (opde WIN32 
     Opde.cpp 
-    OpdeMission.cpp 
-#    OpdeDTypeScriptCompiler.cpp
+    GameStateManager.cpp
+    GameState.cpp
+    GamePlayState.cpp
+    GameLoadState.cpp
+    DTypeScriptCompiler.cpp
+    DTypeScriptLoader.cpp
 )
 
 target_link_libraries( opde
     ${OGRE_LIBRARIES}
     ${CEGUI_LIBRARIES}
-#    ${EXPAT_LIBRARIES}
+    ${OIS_LIBRARIES}
     OpdeFile
     OpdeLogger
     OpdeConsole
-    OpdeGUI
-    OpdeWidgetConsole
     OpdeServiceManager
     OpdeWorldRepService
     DarkSceneManager
     OpdeBinaryService
     OpdeBase
-
 )
 
