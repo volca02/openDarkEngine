@@ -35,7 +35,7 @@
 
 namespace Opde {
 
-	/** Backend class, used for commands processing.
+	/** Backend class, used for commands processing, and console text memmory
 	* A singleton class, used to insert texts to console and to call Command Listeners */
 	class ConsoleBackend : public Singleton<ConsoleBackend>, public Ogre::LogListener, public Opde::LogListener {
 		private:
@@ -49,10 +49,11 @@ namespace Opde {
 			std::map<std::string, std::set<std::string> > mCompletionMap;
 		
 			/** Console texts list */
-			std::list< std::string > mMessages;
+			std::deque< Ogre::String > mMessages;
 		
-			/** Current view position. Use method scroll to move the actual view */
-			unsigned int mPosition;
+			/** Current view position. Use method scroll to move the actual view.
+			* @note the update of this value is smart. If the mPosition was previously at bottom, will stay there */
+			int mPosition;
 
 			/** Internal method for adding text rows */
 			void addText(std::string text);
@@ -60,9 +61,10 @@ namespace Opde {
 			/** Indicates true if the console text / scroll changed till last time and should be redrawn */
 			bool mChanged;
 
+			unsigned int mTextHistory;
 		public:
 			/** constructor */ 
-			ConsoleBackend();
+			ConsoleBackend(unsigned int text_history = 1000);
 		
 			/** Will register the command Command with the ConsoleCommandListener listener
 			* @note When the command is already registered, the listener will be reregistered, allowing this to be called in the constructors */
@@ -84,16 +86,22 @@ namespace Opde {
 			void putMessage(std::string text);
 		
 			/** Ogre's log listener implementation. Used as a to console logger for the ogre Logging system. This means that one can se the ogre logger to write messages to console too */
-			virtual void write(const Ogre::String &name, const Ogre::String &message, Ogre::LogMessageLevel lml=Ogre::LML_NORMAL, bool maskDebug=false);
+			virtual void messageLogged( const Ogre::String& message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String &logName );
 			
 			/** Opde logging method implementation */
 			virtual void logMessage(LogLevel level, char *message);
 			
 			/** Returns true, if the console text was changed from last time, and resets the indicator - asking twice will return true,false */
 			bool getChanged();
+			
+			/** Scroll the view window a defined number of lines */
+			void scroll(int lines);
 
-			/** Pulls a new message out of the queue of new messages, and deletes it */
-			bool pullMessage(std::string& target);
+			/** Pulls a set of messages out of the memory of messages.
+			@param linenum The start line to load. -1 means we will pull up to #lines from end of the vector
+			@param lines the maximal count of lines to load 
+			*/
+			void pullMessages(std::vector<Ogre::String>& target, unsigned int lines);
 			
 			// Singleton stuff
 			static ConsoleBackend& getSingleton(void);

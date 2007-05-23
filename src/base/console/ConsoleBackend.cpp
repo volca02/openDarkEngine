@@ -29,7 +29,7 @@ namespace Opde {
 
 	template<> ConsoleBackend* Singleton<ConsoleBackend>::ms_Singleton = 0;
 	
-	ConsoleBackend::ConsoleBackend() {
+	ConsoleBackend::ConsoleBackend(unsigned int text_history) : mTextHistory(text_history), mCommandMap(), mCompletionMap(), mPosition(0) {
 		mCommandMap.clear();
 		mCompletionMap.clear();
 		mMessages.clear();
@@ -37,25 +37,29 @@ namespace Opde {
 		mChanged = true;
 
 		// Register as an ogre logger
-
-		// TODO: This makes the console horribly slow for the first time it shows up. 
-		// 3 Ways to solve: 
-		//	* Pull texts as soon as possible (without console visible) and construct console gui as a first element in the application.
-		//	* Log only our texts - do not be a ogre logging listener at all (But I want it to be - standardization)
-		//  * Limit the widget pull only to max ~10 lines per frame
-
-		// Or a combination of those...
-		// Notice that limiting to LML_CRITICAL did not solve the issue
-
-		// LogManager::getSingleton().addListener(this); 
+		//LogManager::getSingleton().getDefaultLog()->addListener(this); 
 	}
 		
 	void ConsoleBackend::addText(std::string text) {
-		mMessages.push_back(text);	
-		mChanged = true;
+		// split the text on newlines, to aid line counting
+		std::vector< String > lines = StringUtil::split(text, "\r\n");
 		
-		// TODO: No position change if view is not at the end of the message list.
-		mPosition += 1;
+		std::vector< String >::iterator it = lines.begin();
+		
+		
+		
+		for (;it != lines.end(); it++) {
+			if (mPosition >= mMessages.size())
+				mPosition++;
+			
+			mMessages.push_back(*it);
+		}
+		
+		// if the size is greater the mTextHistory, remove till sufficient
+		while (mMessages.size() > mTextHistory) 
+			mMessages.pop_front();
+		
+		mChanged = true;
 	}
 
 	void ConsoleBackend::registerCommandListener(std::string command, ConsoleCommandListener *listener) {
@@ -128,9 +132,9 @@ namespace Opde {
 		addText(text);
 	}
 
-	void ConsoleBackend::write(const Ogre::String &name, const Ogre::String &message, Ogre::LogMessageLevel lml, bool maskDebug) {
+	void ConsoleBackend::messageLogged( const String& message, LogMessageLevel lml, bool maskDebug, const String &logName ) {
 		if (lml = LML_CRITICAL)
-			addText("OgreLog: (" + name + " : " + message);
+			addText("OgreLog: (" + logName + ") : " + message);
 	}
 	
 	void ConsoleBackend::logMessage(LogLevel level, char *message) {
@@ -148,15 +152,29 @@ namespace Opde {
 		return false;
 	}
 
-	bool ConsoleBackend::pullMessage(std::string& target) {
-		if (mMessages.size() > 0) {
-			list< string >::const_iterator first = mMessages.begin();
-
-			target = (*first);
-			mMessages.pop_front();
-			return true;
-		} else
-			return false;
+	void ConsoleBackend::pullMessages(std::vector<Ogre::String>& target, unsigned int lines) {
+		// add the lines from the mMessages backwards
+		
+		std::deque < Ogre::String >::iterator it;
+		
+		if (mMessages.size() <= lines) { // no mPosition involvable
+			it = mMessages.begin();
+			lines = mMessages.size();
+		} else {
+			if (mPosition >= lines) { // enough lines in the past to do current position
+				it = mMessages.begin() + (mPosition - lines);
+			} else { // Not enough lines in the past. Do from start
+				it = mMessages.begin();
+				lines = mMessages.size() > lines ? lines : mMessages.size();
+				
+				
+				
+			}
+		}
+		
+		for (;lines > 0; lines--, ++it) {
+			target.push_back(*it);
+		}
 	}
 	
 	ConsoleBackend& ConsoleBackend::getSingleton(void) {
@@ -165,5 +183,19 @@ namespace Opde {
 	
 	ConsoleBackend* ConsoleBackend::getSingletonPtr(void) {
 		return ms_Singleton;
+	}
+	
+	void ConsoleBackend::scroll(int lines) {
+		int prev_pos = mPosition;
+		
+		mPosition += lines;
+		
+		if (mPosition > static_cast<int>(mMessages.size()))
+			mPosition = mMessages.size();
+		
+		if (mPosition < 0)
+			mPosition = 0;
+		
+		mChanged = (prev_pos != mPosition);
 	}
 }
