@@ -29,7 +29,7 @@ IF (UNIX)
 	# Include paths search
 	FIND_PATH(OIS_INCLUDE_DIR OIS.h ${OIS_INC_SEARCH_PATH})
 
-	# Ogre library
+	# OIS library
 	FIND_LIBRARY(OIS_LIBRARIES NAMES ${OIS_LIBNAMES} PATHS 
 		${OIS_LIB_SEARCH_PATH}
 	)
@@ -45,14 +45,14 @@ ENDIF(UNIX)
 IF(WIN32)
     # Include path when using the ogre SDK. Other drives/dirs?
     SET(OIS_INC_SEARCH_PATH
-	/OgreSDK/include
+	/OIS/include
 	$ENV{OIS_HOME}/include
      )
      
      SET(OIS_LIB_SEARCH_PATH
-     	c:/OIS/lib
-	c:/OIS/bin/debug
-	c:/OIS/bin/release
+     	/OIS/lib
+	/OIS/bin/debug
+	/OIS/bin/release
 	$ENV{OIS_HOME}/lib
 	$ENV{OIS_HOME}/bin/debug
 	$ENV{OIS_HOME}/bin/release
@@ -63,7 +63,7 @@ IF(WIN32)
 	# Include paths search
 	FIND_PATH(OIS_INCLUDE_DIR OIS.h ${OIS_INC_SEARCH_PATH})
 
-	# Ogre library
+	# OIS library
 	FIND_LIBRARY(OIS_LIBRARIES NAMES ${OIS_LIBNAMES} PATHS 
 		${OIS_LIB_SEARCH_PATH}
 	)
