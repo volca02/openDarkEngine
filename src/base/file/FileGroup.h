@@ -32,7 +32,7 @@ namespace Opde {
 	/** File group stored inside a single file. This is an abstract class for file group manipulation. For implementation see DarkFileGroup.
 	* The loaded file group does not modify the source file in any way. That means all operations are safe and do not destroy/modify original
 	file. */
-	class FileGroup {
+	class FileGroup : public RefCounted {
 		public:
 			/** File source FileGroup constructor. Loads the chunk list from a given file. */
 			FileGroup(File* source);
@@ -67,6 +67,23 @@ namespace Opde {
 			@note the above limitation should not cause any complications, as all the standard writing is done into an empty file group */
 			virtual void write(File* dest) = 0;
 		
+			/** Set the parent file */
+			void setParent(FileGroup* parent);
+			
+			/** Get the parent file */
+			inline FileGroup* getParent() { return mParent; };
+			
+			/** A custom defined type for this file group. Defaults to 0 */
+			inline void setType(int type) { mType = type; };
+			
+			/** Returns the custom defined type for this file group. Defaults to 0 */
+			inline int getType() { return mType; };
+			
+			/** Search for the database with the given type id through the parents and self 
+			* @return Pointer to specified group (release after usage), or NULL if not found */
+			FileGroup* getGroupTyped(int type);
+			
+			/** Chunk duo - it's header and the file that contains the data */
 			typedef struct Chunk {
 				DarkDBChunkHeader header;
 				File *file;
@@ -85,10 +102,26 @@ namespace Opde {
 		protected:
 			/** Source file, if not created empty */
 			File* mSrcFile;
+			
+			/** Custom defined parent FileGroup */
+			FileGroup* mParent;
+			
+			/** Custom defined file type for this FileGroup */
+			int mType;
 	};
 	
 	//------------------------ DarkDatabase FileGroup
 	
+	typedef enum { 
+		/// Unknown dark file group type
+		DFG_UNKNOWN = 0,
+		/// Dark's game system
+		DFG_GAMESYS = 1,
+		/// Dark's mission file
+		DFG_MISSION = 2,
+		/// Dark's savegame
+		DFG_SAVEGAME = 3
+	} DarkFileGroupType;
 	
 	/** File group implemented on LG's MIS/COW/GAM/SAV type files. 
 	* This class exposes the chunks of that format as separate files, which can be replaced, deleted or added. The new database 

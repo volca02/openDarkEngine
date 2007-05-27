@@ -27,7 +27,7 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- FileGroup ---------------------*/
 	/*----------------------------------------------------*/
-	FileGroup::FileGroup(File* source) : mSrcFile(source) {
+	FileGroup::FileGroup(File* source) : mSrcFile(source), mParent(NULL) {
 		mSrcFile->addRef();
 	}
 	
@@ -36,11 +36,35 @@ namespace Opde {
 	
 	//------------------------------------	
 	FileGroup::~FileGroup() {
-		if (mSrcFile != NULL)
-			mSrcFile->release();
+		if (mParent != NULL)
+			mParent->release();
+		
+		if (mParent != NULL)
+			mParent->release();
 	}
 
+	//------------------------------------ 
+	void FileGroup::setParent(FileGroup* parent) {
+		parent->addRef(); 
+		
+		if (mParent)
+			mParent->release(); 
+		
+		mParent = parent; 
+	}
 	
+	//------------------------------------
+	FileGroup* FileGroup::getGroupTyped(int type) {
+		if (mType == type) {
+			this->addRef();
+			return this;
+		} else {
+			if (mParent != NULL)
+				return mParent->getGroupTyped(type);
+			else
+				return NULL;
+		}
+	}
 	/*--------------------------------------------------------*/
 	/*-------------------- DarkFileGroup ---------------------*/
 	/*--------------------------------------------------------*/

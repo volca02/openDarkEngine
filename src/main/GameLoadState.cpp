@@ -67,8 +67,6 @@ namespace Opde {
 	}
 	
 	void GameLoadState::exit() {
-		// mOverlayMgr->destroyAll();
-				
 		GamePlayState* st = new GamePlayState();
 		
 		mLoadingOverlay->hide();

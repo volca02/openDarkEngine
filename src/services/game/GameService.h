@@ -41,15 +41,19 @@ namespace Opde {
 			void unload();
 		protected:
 			
+			/// Retrieve a readonly database file by it's name
+			DarkFileGroup* getDBFileNamed(const std::string& filename);
+			
 			/// Assign the parent file for the given db. Calls itself recursively as needed to build the whole chain
 			void assignDBParents(DarkFileGroup* db);
 			
-			ServiceManager* mServiceMgr;
+			/// Load and assign a mission database to the db (has to be a SaveGame), then loads the gamesys for the loaded miss file
+			void _loadMissionDB(DarkFileGroup* db);
+			
+			/// Load and assign a gamesys database to the db (has to be a mission or savegame)
+			void _loadGameSysDB(DarkFileGroup* db);
+			
 			DarkFileGroup* mCurDB;
-
-		private:
-			GameService();
-
 	};
 	
 	

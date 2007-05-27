@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2007 openDarkEngine team
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free Software
@@ -18,27 +18,36 @@
  * http://www.gnu.org/copyleft/lesser.txt.
  *****************************************************************************/
  
-#ifndef __OPDESERVICE_H
-#define __OPDESERVICE_H
- 
-#include "OpdeNonCopyable.h" 
-#include "OpdeServiceManager.h" 
+#include "LinkService.h"
+
+using namespace std;
 
 namespace Opde {
-	 
-	// Forward declaration
-	class ServiceManager;
 	
-	/** Interface used for all services. Those must implement the here mentioned methods. */
-	class Service : public NonCopyable {
-			protected:
-				ServiceManager* mServiceManager;
+	/*----------------------------------------------------*/
+	/*-------------------- LinkService -------------------*/
+	/*----------------------------------------------------*/
+	LinkService::LinkService(ServiceManager *manager) : Service(manager) {
+	}
+	
+	//------------------------------------------------------
+	LinkService::~LinkService() {
 		
-			public:
-				Service(ServiceManager* manager);
+	}
+	
+	//-------------------------- Factory implementation
+	std::string LinkServiceFactory::mName = "LinkService";
+	
+	LinkServiceFactory::LinkServiceFactory() : ServiceFactory() { 
+		ServiceManager::getSingleton().addServiceFactory(this);
 	};
-		
+	
+	const std::string& LinkServiceFactory::getName() {
+		return mName;
+	}
+	
+	Service* LinkServiceFactory::createInstance(ServiceManager* manager) {
+		return new LinkService(manager);
+	}
+	
 }
- 
- 
-#endif

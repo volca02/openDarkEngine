@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2007 openDarkEngine team
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free Software
@@ -18,26 +18,41 @@
  * http://www.gnu.org/copyleft/lesser.txt.
  *****************************************************************************/
  
-#ifndef __OPDESERVICE_H
-#define __OPDESERVICE_H
- 
-#include "OpdeNonCopyable.h" 
-#include "OpdeServiceManager.h" 
+#ifndef __LINKSERVICE_H
+#define __LINKSERVICE_H
+
+#include "OpdeServiceManager.h"
+#include "OpdeService.h"
+#include "FileGroup.h"
 
 namespace Opde {
-	 
-	// Forward declaration
-	class ServiceManager;
 	
-	/** Interface used for all services. Those must implement the here mentioned methods. */
-	class Service : public NonCopyable {
-			protected:
-				ServiceManager* mServiceManager;
-		
-			public:
-				Service(ServiceManager* manager);
+	/** @brief Link service - service managing in-game object links
+	*/
+	class LinkService : public Service {
+		public:
+			LinkService(ServiceManager *manager);
+			virtual ~LinkService();
+			
+		protected:
+			
 	};
+	
+	
+	/// Factory for the GameService objects
+	class LinkServiceFactory : public ServiceFactory {
+		public:
+			LinkServiceFactory();
+			~LinkServiceFactory() {};
+			
+			/** Creates a GameService instance */
+			Service* createInstance(ServiceManager* manager);
+			
+			virtual const std::string& getName();
 		
+		private:
+			static std::string mName;
+	};
 }
  
  
