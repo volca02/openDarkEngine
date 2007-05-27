@@ -18,8 +18,8 @@
  * http://www.gnu.org/copyleft/lesser.txt.
  *****************************************************************************/
  
-#ifndef __BINARY_H
-#define __BINARY_H
+#ifndef __BINARYSERVICE_H
+#define __BINARYSERVICE_H
 
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
@@ -110,6 +110,11 @@ namespace Opde {
 			
 			/** Creates a BinaryService instance */
 			Service* createInstance(ServiceManager* manager);
+			
+			virtual const std::string& getName();
+			
+		private:
+			static std::string mName;
 	};
 }
  

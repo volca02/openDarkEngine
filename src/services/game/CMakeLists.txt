@@ -1,0 +1,25 @@
+include_directories ( 
+    ${OGRE_INCLUDE_DIR} 
+    ${OPDE_BINARY_DIR}
+    ${OPDE_SOURCE_DIR}/src/base
+    ${OPDE_SOURCE_DIR}/src/base/Dark
+    ${OPDE_SOURCE_DIR}/src/scenemanager
+    ${OPDE_SOURCE_DIR}/src/compat
+    ${OPDE_SOURCE_DIR}/src/base/servicemanager
+    ${OPDE_SOURCE_DIR}/src/base/console
+    ${OPDE_SOURCE_DIR}/src/base/file
+    ${OPDE_SOURCE_DIR}/src/services/worldrep
+)
+
+link_directories ( 
+    ${OGRE_LIB_DIR}
+    ${OPDE_SOURCE_DIR}/src/base
+    ${OPDE_SOURCE_DIR}/src/base/servicemanager
+)
+
+add_library (OpdeGameService GameService.cpp)
+
+target_link_libraries(OpdeGameService
+    OpdeBase
+    OpdeServiceManager
+)

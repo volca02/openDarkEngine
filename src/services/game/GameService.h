@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2007 openDarkEngine team
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free Software
@@ -18,55 +18,56 @@
  * http://www.gnu.org/copyleft/lesser.txt.
  *****************************************************************************/
  
- 
-#ifndef __GAMELOADSTATE_H
-#define __GAMELOADSTATE_H
+#ifndef __GAMESERVICE_H
+#define __GAMESERVICE_H
 
-#include "GameState.h"
-#include "OpdeSingleton.h"
-#include "FileGroup.h"
-#include "WorldRepService.h"
 #include "OpdeServiceManager.h"
-
-#include <OgreRoot.h>
-#include <OgreSceneManager.h>
-#include <OgreOverlayManager.h>
-
+#include "OpdeService.h"
+#include "FileGroup.h"
 
 namespace Opde {
 	
-	class GameLoadState : public Singleton<GameLoadState>, public GameState {
+	/** @brief Game service - service defining game states, and mission loading/saving
+	*/
+	class GameService : public Service {
 		public:
-			GameLoadState();
+			GameService(ServiceManager *manager);
+			virtual ~GameService();
 			
-			virtual void start();
-			virtual void exit(); 
-			virtual void suspend();
-			virtual void resume(); 
+			/// Loads a game database. Can be either savegame, or mission
+			void load(const std::string& filename);
 			
-			virtual void update(unsigned long timePassed);
-			
-			
-			virtual bool keyPressed( const OIS::KeyEvent &e );
-			virtual bool keyReleased( const OIS::KeyEvent &e );
-			virtual bool mouseMoved( const OIS::MouseEvent &e );
-			virtual bool mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id );
-			virtual bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id );
-		
+			/// Unload the game data. Release all the data that are connected to a game's mission in progress
+			void unload();
 		protected:
-			Ogre::Root *mRoot;
-			Ogre::SceneManager *mSceneMgr;
-			Ogre::OverlayManager *mOverlayMgr;
-			Ogre::Camera *mCamera;
-			Ogre::Viewport *mViewport;
+			
+			/// Assign the parent file for the given db. Calls itself recursively as needed to build the whole chain
+			void assignDBParents(DarkFileGroup* db);
 			
 			ServiceManager* mServiceMgr;
-			
-			bool mFirstTime;
-			bool mLoaded;
-			
-			Ogre::Overlay* mLoadingOverlay;
-	};	
-}
+			DarkFileGroup* mCurDB;
 
+		private:
+			GameService();
+
+	};
+	
+	
+	/// Factory for the GameService objects
+	class GameServiceFactory : public ServiceFactory {
+		public:
+			GameServiceFactory();
+			~GameServiceFactory() {};
+			
+			/** Creates a GameService instance */
+			Service* createInstance(ServiceManager* manager);
+			
+			virtual const std::string& getName();
+		
+		private:
+			static std::string mName;
+	};
+}
+ 
+ 
 #endif

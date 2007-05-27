@@ -22,7 +22,11 @@
 #include "OpdeException.h"
 #include "logger.h"
 #include "stdlog.h"
+
+// All the services
 #include "WorldRepService.h"
+#include "BinaryService.h"
+#include "GameService.h"
 
 #include <OgreRoot.h>
 #include <OgreWindowEventUtilities.h>
@@ -190,14 +194,9 @@ namespace Opde {
 	
 	void GameStateManager::registerServiceFactories() {
 		// register the worldrep factory
-		WorldRepServiceFactory *wrfac = new WorldRepServiceFactory();
-		
-		mServiceMgr->addServiceFactory(wrfac);
-		
-		BinaryServiceFactory *bsfac = new BinaryServiceFactory();
-		
-		mServiceMgr->addServiceFactory(bsfac);
-		
+		new WorldRepServiceFactory();
+		new BinaryServiceFactory();
+		new GameServiceFactory();
 	}
 			
 	/// Method which will define the source of resources (other than current folder)

@@ -22,6 +22,8 @@
 #include "GameLoadState.h"
 #include "GamePlayState.h"
 
+#include "GameService.h"
+
 #include "logger.h"
 
 #include <OgreOverlay.h>
@@ -34,7 +36,7 @@ namespace Opde {
 	
 	template<> GameLoadState* Singleton<GameLoadState>::ms_Singleton = 0;
 	
-	GameLoadState::GameLoadState() : mSceneMgr(NULL), mCurDB(NULL), mOverlayMgr(NULL), mLoaded(false) {
+	GameLoadState::GameLoadState() : mSceneMgr(NULL), mOverlayMgr(NULL), mLoaded(false) {
 	}
 	
 	void GameLoadState::start() {
@@ -69,8 +71,6 @@ namespace Opde {
 				
 		GamePlayState* st = new GamePlayState();
 		
-		delete mCurDB;
-		
 		mLoadingOverlay->hide();
 		
 		mSceneMgr->destroyAllCameras();
@@ -91,21 +91,12 @@ namespace Opde {
 	
 	void GameLoadState::update(unsigned long timePassed) {
 		if (!mFirstTime && !mLoaded) {
-			WorldRepService* svc = static_cast<WorldRepService*>(mServiceMgr->getService("WorldRepService"));
-			
-			if (mCurDB != NULL)  {
-				svc->unload();
-				
-				delete mCurDB;
-			}
 			
 			mRoot->renderOneFrame();
 			
-			mCurDB = new DarkFileGroup(new StdFile("miss1.mis", File::FILE_R));
+			GameService* gsvc = static_cast<GameService*>(mServiceMgr->getService("GameService"));
 			
-			mRoot->renderOneFrame();
-			
-			svc->loadFromDarkDatabase(mCurDB);
+			gsvc->load("miss1.mis");
 		
 			mLoaded = true;
 			OverlayElement* guiLdr = OverlayManager::getSingleton().getOverlayElement("Opde/LoadPanel/Description");

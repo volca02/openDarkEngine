@@ -21,6 +21,7 @@
 #ifndef __OPDESERVICE_H
 #define __OPDESERVICE_H
  
+#include "OpdeNonCopyable.h" 
 #include "OpdeServiceManager.h" 
 
 namespace Opde {
@@ -29,7 +30,7 @@ namespace Opde {
 	class ServiceManager;
 	
 	/** Interface used for all services. Those must implement the here mentioned methods. */
-	class Service {
+	class Service : public NonCopyable {
 			protected:
 				ServiceManager* serviceManager;
 		

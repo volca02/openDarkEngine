@@ -749,14 +749,18 @@ namespace Opde {
 	}
 	
 	//-------------------------- Factory implementation
-	WorldRepServiceFactory::WorldRepServiceFactory() { 
-		ServiceName = "WorldRepService";
-		
+	std::string WorldRepServiceFactory::mName = "WorldRepService";
+	
+	WorldRepServiceFactory::WorldRepServiceFactory() : ServiceFactory() {
 		ServiceManager::getSingleton().addServiceFactory(this);
 	};
 	
 	Service* WorldRepServiceFactory::createInstance(ServiceManager* manager) {
 		return new WorldRepService(manager);
+	}
+	
+	const std::string& WorldRepServiceFactory::getName() {
+		return mName;
 	}
 	
 }

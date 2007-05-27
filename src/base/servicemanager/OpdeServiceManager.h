@@ -33,7 +33,7 @@ namespace Opde {
 	* @see ServiceFactory
 	* @see Service 
 	*/
-	class ServiceManager : public Singleton<ServiceManager> {
+	class ServiceManager : public Singleton<ServiceManager>, public NonCopyable {
 		private:
 			typedef std::map< std::string, ServiceFactory* > ServiceFactoryMap;
 			typedef std::map< std::string, Service* > ServiceInstanceMap;
@@ -46,6 +46,9 @@ namespace Opde {
 			Service* createInstance(const std::string& name);
 		public:
 			ServiceManager();
+			
+			/// Destructor. Deletes all registered factories
+			~ServiceManager();
 
 			// Singleton releted
 			static ServiceManager& getSingleton(void);

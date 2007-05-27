@@ -16,7 +16,7 @@ include_directories(
     ${OPDE_SOURCE_DIR}/src/main
     ${OPDE_SOURCE_DIR}/src/widgets
     ${OPDE_SOURCE_DIR}/src/services/binary
-    ${OPDE_SOURCE_DIR}/src/services/database
+    ${OPDE_SOURCE_DIR}/src/services/game
     ${OPDE_SOURCE_DIR}/src/services/worldrep
 )
 
@@ -52,10 +52,11 @@ target_link_libraries( opde
     OpdeFile
     OpdeLogger
     OpdeConsole
+    DarkSceneManager
     OpdeServiceManager
     OpdeWorldRepService
-    DarkSceneManager
     OpdeBinaryService
+    OpdeGameService
     OpdeBase
 )
 

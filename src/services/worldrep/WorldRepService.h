@@ -18,8 +18,8 @@
  * http://www.gnu.org/copyleft/lesser.txt.
  *****************************************************************************/
  
-#ifndef __WORLDREP_H
-#define __WORLDREP_H
+#ifndef __WORLDREPSERVICE_H
+#define __WORLDREPSERVICE_H
 
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
@@ -148,6 +148,11 @@ namespace Opde {
 			
 			/** Creates a WorldRepService instance */
 			Service* createInstance(ServiceManager* manager);
+			
+			const std::string& getName();
+			
+		private:
+			static std::string mName;
 	};
 }
  

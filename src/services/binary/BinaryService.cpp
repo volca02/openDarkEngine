@@ -168,11 +168,15 @@ namespace Opde {
 	}
 	
 	//-------------------------- Factory implementation
-	BinaryServiceFactory::BinaryServiceFactory() { 
-		ServiceName = "BinaryService";
-		
+	std::string BinaryServiceFactory::mName = "BinaryService";
+	
+	BinaryServiceFactory::BinaryServiceFactory() : ServiceFactory() {
 		ServiceManager::getSingleton().addServiceFactory(this);
 	};
+
+	const std::string& BinaryServiceFactory::getName() {
+		return mName;
+	}
 	
 	Service* BinaryServiceFactory::createInstance(ServiceManager* manager) {
 		return new BinaryService(manager);

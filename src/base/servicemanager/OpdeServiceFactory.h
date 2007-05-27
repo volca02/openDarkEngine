@@ -23,7 +23,7 @@
 #define __OPDESERVICEFACTORY_H
 
 #include <string>
-
+#include "OpdeServiceManager.h"
 
 namespace Opde {
 
@@ -36,15 +36,16 @@ namespace Opde {
 	/** Code base for the service factories. Implement the methods with the Service Factory you're implementing. */
 	class ServiceFactory {
 		public:
-			ServiceFactory() {	};
+			ServiceFactory() {  };
 			virtual ~ServiceFactory() {	};
 		
 			/** Creates and returns a new instance of the service. 
 			* @todo Do I NEED named services? I think not. */
 			virtual Service* createInstance(ServiceManager* manager) = 0;
 			
-			/** The service name. Please fill this to let the factory work. */
-			std::string ServiceName;
+			/** Get the name of the created objects. What object this factory creates? */
+			virtual const std::string& getName() = 0;
+			
 	};
 }
 

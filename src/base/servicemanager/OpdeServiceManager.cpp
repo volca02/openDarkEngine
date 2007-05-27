@@ -35,6 +35,17 @@ namespace Opde {
 		
 	}
 	
+	ServiceManager::~ServiceManager() {
+		// delete all factories registered
+		ServiceFactoryMap::iterator factory_it = serviceFactories.begin();
+		
+		for (; factory_it != serviceFactories.end(); factory_it++) {
+			delete factory_it->second;
+		}
+		
+		serviceFactories.clear();
+	}
+	
 	ServiceManager& ServiceManager::getSingleton(void) {
 		assert( ms_Singleton );  return ( *ms_Singleton );  
 	}
@@ -46,10 +57,7 @@ namespace Opde {
 	
 	//------------------ Main implementation ------------------
 	void ServiceManager::addServiceFactory(ServiceFactory* factory) {
-		
-		// std::cout << "Registering Factory named '" << factory->ServiceName << "'" << std::endl;
-		
-		serviceFactories.insert(make_pair(factory->ServiceName, factory));
+		serviceFactories.insert(make_pair(factory->getName(), factory));
 	}
 	
 	ServiceFactory* ServiceManager::findFactory(const std::string& name) {
