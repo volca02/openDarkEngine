@@ -25,7 +25,7 @@
 #include "GameState.h"
 #include "OpdeSingleton.h"
 #include "FileGroup.h"
-#include "worldrep.h"
+#include "WorldRepService.h"
 #include "OpdeServiceManager.h"
 
 #include <OgreRoot.h>

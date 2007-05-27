@@ -26,7 +26,7 @@
 #include <stack>
 #include "DTypeDef.h"
 #include "DVariant.h"
-#include "binary.h"
+#include "BinaryService.h"
 
 namespace Opde {
 

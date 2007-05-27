@@ -15,7 +15,7 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 
-add_library (OpdeBinaryService binary.cpp)
+add_library (OpdeBinaryService BinaryService.cpp)
 
 target_link_libraries(OpdeBinaryService
     OpdeBase

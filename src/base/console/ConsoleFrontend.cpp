@@ -52,7 +52,10 @@ namespace Opde {
 		mIsActive = active;
 	}
 	
-	void ConsoleFrontend::injectKeyPress(const OIS::KeyEvent &e) {
+	bool ConsoleFrontend::injectKeyPress(const OIS::KeyEvent &e) {
+		if (!mIsActive) 
+			return false;
+		
 		if (e.key == KC_RETURN) {
 			ConsoleBackend::getSingleton().executeCommand(mCommand);
 			mCommand = "";
@@ -67,6 +70,8 @@ namespace Opde {
 			mCommand += (char)e.text;
 		
 		mCommandLine->setCaption(">" + mCommand);
+		
+		return true;
 		
 	}
 	

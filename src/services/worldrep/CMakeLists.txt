@@ -17,7 +17,7 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 
-add_library (OpdeWorldRepService worldrep.cpp WRCell.cpp LightmapAtlas.cpp)
+add_library (OpdeWorldRepService WorldRepService.cpp WRCell.cpp LightmapAtlas.cpp)
 
 target_link_libraries(OpdeWorldRepService
     OpdeServiceManager

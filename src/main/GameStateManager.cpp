@@ -22,7 +22,7 @@
 #include "OpdeException.h"
 #include "logger.h"
 #include "stdlog.h"
-#include "worldrep.h"
+#include "WorldRepService.h"
 
 #include <OgreRoot.h>
 #include <OgreWindowEventUtilities.h>

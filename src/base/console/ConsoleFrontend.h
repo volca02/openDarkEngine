@@ -39,8 +39,10 @@ namespace Opde {
                         ConsoleFrontend();
 			~ConsoleFrontend();
 			
-			/// Injects an ois keyboard event into the console
-			void injectKeyPress(const OIS::KeyEvent &e);
+			/** Injects an ois keyboard event into the console
+			* @return true if the keyboard event was consumed, false otherwise (Console not visible)
+			*/
+			bool injectKeyPress(const OIS::KeyEvent &e);
 			
 			void setActive(bool active);
 			

@@ -239,31 +239,30 @@ namespace Opde {
 			return true;
     		}
 		
-		if (mConsole->isActive()) {
-			mConsole->injectKeyPress(e);
-			return true;
-		}
-		
-		if(e.key == KC_W) { 
-			mForward = true;
-			return true;
-		} else if(e.key == KC_S) { 
-			mBackward = true;
-			return true;
-		} else if(e.key == KC_A) { 
-			mLeft = true;
-			return true;
-		} else if(e.key == KC_D) { 
-			mRight = true;
-			return true;
-		} else if (e.key == KC_SYSRQ) {
-			mScreenShot = true;
-			return true;
-		} else if (e.key == KC_O) {
-			mSceneDisplay = true;
-			return true;
-		} else if (e.key == KC_P) {
-			mPortalDisplay = true;
+		if (!mConsole->injectKeyPress(e)) {
+			if(e.key == KC_W) { 
+				mForward = true;
+				return true;
+			} else if(e.key == KC_S) { 
+				mBackward = true;
+				return true;
+			} else if(e.key == KC_A) { 
+				mLeft = true;
+				return true;
+			} else if(e.key == KC_D) { 
+				mRight = true;
+				return true;
+			} else if (e.key == KC_SYSRQ) {
+				mScreenShot = true;
+				return true;
+			} else if (e.key == KC_O) {
+				mSceneDisplay = true;
+				return true;
+			} else if (e.key == KC_P) {
+				mPortalDisplay = true;
+				return true;
+			}
+		} else {
 			return true;
 		}
 	}
