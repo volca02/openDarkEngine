@@ -148,6 +148,10 @@ namespace Opde {
 		addLexemeTokenAction("string", ID_STRING);
 		
 		// primitive type names
+		addLexemeTokenAction("bool32", ID_BOOL32, &DTypeScriptCompiler::parseField);
+		addLexemeTokenAction("bool16", ID_BOOL16, &DTypeScriptCompiler::parseField);
+		addLexemeTokenAction("bool8", ID_BOOL8, &DTypeScriptCompiler::parseField);
+		
 		addLexemeTokenAction("int32", ID_INT32, &DTypeScriptCompiler::parseField);
 		addLexemeTokenAction("int16", ID_INT16, &DTypeScriptCompiler::parseField);
 		addLexemeTokenAction("int8", ID_INT8, &DTypeScriptCompiler::parseField);
@@ -200,11 +204,11 @@ namespace Opde {
 
 	//-----------------------------------------------------------------------
 	void DTypeScriptCompiler::logParseError(const String& error) {
-		LOG_ERROR("Error in script at line %d  of %s (last context: %s) : %s", mCurrentLine, mSourceName.c_str(), mCurrentState.name.c_str(), error.c_str());
+		// LOG_ERROR("Error in script at line %d  of %s (last context: %s) : %s", mCurrentLine, mSourceName.c_str(), mCurrentState.name.c_str(), error.c_str());
 		
-		/*OGRE_EXCEPT(Ogre::Exception::ERR_INTERNAL_ERROR,
+		OGRE_EXCEPT(Ogre::Exception::ERR_INTERNAL_ERROR,
                     "Error in script at line " + StringConverter::toString(mCurrentLine) +
-			" of " + mSourceName + ": " + error, "DTypeScriptCompiler::logParseError");*/
+			" of " + mSourceName + ": " + error, "DTypeScriptCompiler::logParseError");
 	}
     
 	//-----------------------------------------------------------------------
@@ -325,7 +329,7 @@ namespace Opde {
 		else if (name == "uint" || name == "uint32" || name == "uint16" || name == "uint8") {
 			return DVariant::DV_UINT;
 		} 
-		else if (name == "bool") {
+		else if (name == "bool" || name == "bool32" || name == "bool16" || name == "bool8") {
 			return DVariant::DV_BOOL;
 		} 
 		else if (name == "float") {
