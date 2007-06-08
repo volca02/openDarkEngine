@@ -1,0 +1,18 @@
+material Opde/Console 
+{
+  technique
+  {
+    pass
+    {
+      scene_blend alpha_blend
+      depth_write off
+      
+      texture_unit
+      {
+        colour_op_ex source1 src_manual src_current 0.3 0.3 0.3
+        alpha_op_ex source1 src_manual src_current 0.5
+      }
+    }
+  }
+}
+
