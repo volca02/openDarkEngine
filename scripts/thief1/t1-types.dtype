@@ -2480,7 +2480,15 @@ namespace properties {
 }
 
 namespace links {
-	
+	// Link Format (link itself)
+	struct LINK {
+	    uint32 id
+            int32 src
+	    int32 dest
+    	    uint16 flavor
+	}
+
+
 	// Label: AIAttack
 	struct AIAttack {
 		uint32 use aipriority priority = "3"
@@ -2585,7 +2593,7 @@ namespace links {
 		int32 burst
 		uint32 use aircpriority accuracy = "2"
 		uint32 use meshjoint joint
-		int32 unknown
+		int32 unknown[3]
 	}
 
 	
@@ -2633,7 +2641,7 @@ namespace links {
 	
 	// Label: FlowContact
 	struct FlowContact {
-		int32 unknown
+		int32 unknown[4]
 	}
 
 	
@@ -2708,9 +2716,10 @@ namespace links {
 		int32 unknown
 	}
 
-}
 
-namespace stimsource {
+	// } // Removed, so that I can load links in one go without special logic around receptrons and AR
+	// namespace stimsource {
+
 	enum arsourcetype : int {
 		key "None" 0
 		key "Contact" 1
@@ -2775,7 +2784,7 @@ namespace stimsource {
 			uint32 use arcontactflags types
 			float velocitycoeff
 			float frobtimecoeff
-			int32 zero
+			int32 zero[5]
 		    }
 		
 		    // Label: Shape (Radius)
@@ -2783,7 +2792,7 @@ namespace stimsource {
 			float distance
 			uint32 use arradiusflags flags
 			uint32 use arradiustype dispersion
-			int32 zero
+			int32 zero[5]
 		    }
 		}
 		
@@ -2793,15 +2802,15 @@ namespace stimsource {
 			int32 period
 			int32 maxfirings
 			float slope
-			int32 zero
+			int32 zero[4]
 		}
 
 		char [32] use arsourcename typename
 	}
 
-}
-
-namespace reactions {
+	// } // Removed, so that I can load links in one go without special logic around receptrons and AR
+	// namespace reactions {
+	
 	bitfield receptronflags {
 		key "No Min" 1
 		key "No Max" 2
