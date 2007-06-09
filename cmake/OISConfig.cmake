@@ -2,44 +2,25 @@
 # Try to find OIS library on both Windows and Linux systems
 # 
 # The following values will get defined:
-#	OIS_FOUND_OK - True if ogre lib was found
+#	OIS_FOUND - True if ogre lib was found
 #	OIS_INCLUDE_DIR - Include libraries for Ogre usage
 #	OIS_LIBRARIES - Library paths for ogre
 
-SET(OIS_FOUND_OK "No")
+SET(OIS_FOUND "No")
+MARK_AS_ADVANCED(OIS_FOUND)
 
 IF (UNIX)
-    SET(OIS_INC_SEARCH_PATH
-	/usr/include/OIS
-	/usr/local/include/OIS
-     )
-     
-     SET(OIS_LIB_SEARCH_PATH
-        /lib
-        /usr/lib
-	/usr/lib32
-	/usr/lib64
-	/usr/local/lib
-	/usr/local/lib32
-	/usr/local/lib64
-     )
+    INCLUDE(UsePkgConfig)
 
-	SET(OIS_LIBNAMES OIS)
+    PKGCONFIG(OIS OIS_INCLUDE_DIR OIS_LIBRARIES OIS_LIB_FLAGS OIS_CXX_FLAGS)
 
-	# Include paths search
-	FIND_PATH(OIS_INCLUDE_DIR OIS.h ${OIS_INC_SEARCH_PATH})
+    # Move the -I include directories to the INCLUDE list
+    STRING(REGEX MATCHALL "-I[^ ]+" OIS_INCLUDE_DIR ${OIS_CXX_FLAGS})
+    STRING(REGEX REPLACE "-I" "" OIS_INCLUDE_DIR ${OIS_INCLUDE_DIR})
 
-	# OIS library
-	FIND_LIBRARY(OIS_LIBRARIES NAMES ${OIS_LIBNAMES} PATHS 
-		${OIS_LIB_SEARCH_PATH}
-	)
-
-
-	MARK_AS_ADVANCED(OIS_FOUND_OK)
-
-	IF(OIS_INCLUDE_DIR AND OIS_LIBRARIES)
-	    SET(OIS_FOUND_OK "Yes")
-	ENDIF(OIS_INCLUDE_DIR AND OIS_LIBRARIES)
+    # Process the linked libraries list from LIB_FLAGS to LIBRARIES
+    STRING(REGEX MATCHALL "-l[^ ]+" OIS_LIBRARIES ${OIS_LIB_FLAGS})
+    STRING(REGEX REPLACE "-l" "" OIS_LIBRARIES ${OIS_LIBRARIES})
 ENDIF(UNIX)
 
 IF(WIN32)
@@ -68,10 +49,8 @@ IF(WIN32)
 		${OIS_LIB_SEARCH_PATH}
 	)
 
-	MARK_AS_ADVANCED(OIS_FOUND_OK)
-
 	IF(OIS_INCLUDE_DIR AND OIS_LIBRARIES)
-		SET(OIS_FOUND_OK "Yes")
+		SET(OIS_FOUND "Yes")
 	ENDIF(OIS_INCLUDE_DIR AND OIS_LIBRARIES)		
 ENDIF(WIN32)
 
