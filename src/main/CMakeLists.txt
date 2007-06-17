@@ -18,6 +18,7 @@ include_directories(
     ${OPDE_SOURCE_DIR}/src/services/binary
     ${OPDE_SOURCE_DIR}/src/services/game
     ${OPDE_SOURCE_DIR}/src/services/worldrep
+    ${OPDE_SOURCE_DIR}/src/services/link
 )
 
 
@@ -43,6 +44,8 @@ add_executable (opde WIN32
     GameLoadState.cpp
     DTypeScriptCompiler.cpp
     DTypeScriptLoader.cpp
+    PLDefScriptCompiler.cpp
+    PLDefScriptLoader.cpp
 )
 
 target_link_libraries( opde
@@ -57,6 +60,7 @@ target_link_libraries( opde
     OpdeWorldRepService
     OpdeBinaryService
     OpdeGameService
+    OpdeLinkService
     OpdeBase
 )
 
