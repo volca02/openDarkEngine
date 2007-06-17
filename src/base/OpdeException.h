@@ -32,7 +32,7 @@ namespace Opde {
 	
 	/** @brief A standard OPDE exception
 	*
-	* This exception is ment as a useful yet powerful tool. Based largely on the Ogre's exception idea.
+	* This is a basic OPDE exception. Based largely on the Ogre's exception idea.
 	* For simple usage, use the OPDE_EXCEPT macro */
 	class BasicException : public std::exception {
 		protected:
