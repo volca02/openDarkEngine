@@ -22,9 +22,11 @@
 #include "ConsoleBackend.h"
 #include "ConsoleFrontend.h"
 #include <OIS.h>
+#include <string.h>
 
 using namespace Ogre;
 using namespace OIS;
+using namespace std;
 
 namespace Opde {
     
@@ -66,8 +68,22 @@ namespace Opde {
 		} else if (e.key == KC_PGDOWN) {
 			mConsoleBackend->scroll(30);
 		}
-		else	
-			mCommand += (char)e.text;
+		else {
+			string allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ,./:;'-_+=[]{}()| \"\t";
+			/*
+			string key = "" + (char)(e.text);
+			
+			if (allowed.find(key) != string::npos) {
+				mCommand += key;
+			}*/
+			
+			char key[2];
+			key[0]  = (char)(e.text);
+			key[1] = 0;
+			
+			if (allowed.find(key) != string::npos)
+				mCommand += key;
+		}
 		
 		mCommandLine->setCaption(">" + mCommand);
 		
