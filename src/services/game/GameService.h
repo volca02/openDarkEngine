@@ -24,6 +24,7 @@
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
 #include "FileGroup.h"
+#include "SharedPtr.h"
 
 namespace Opde {
 	
@@ -44,9 +45,6 @@ namespace Opde {
 			/// Retrieve a readonly database file by it's name
 			DarkFileGroup* getDBFileNamed(const std::string& filename);
 			
-			/// Assign the parent file for the given db. Calls itself recursively as needed to build the whole chain
-			void assignDBParents(DarkFileGroup* db);
-			
 			/// Load and assign a mission database to the db (has to be a SaveGame), then loads the gamesys for the loaded miss file
 			void _loadMissionDB(DarkFileGroup* db);
 			
@@ -55,6 +53,9 @@ namespace Opde {
 			
 			DarkFileGroup* mCurDB;
 	};
+	
+	/// Shared pointer to game service
+	typedef shared_ptr<GameService> GameServicePtr;
 	
 	
 	/// Factory for the GameService objects

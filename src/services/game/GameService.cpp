@@ -21,6 +21,7 @@
 #include "GameService.h"
 #include "WorldRepService.h"
 #include "BinaryService.h"
+#include "LinkService.h"
 #include "OpdeException.h"
 
 using namespace std;
@@ -35,35 +36,31 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	GameService::~GameService() {
-		
 	}
 	
 	//------------------------------------------------------
 	void GameService::load(const std::string& filename) {
 		// if there is another game in progress, release it now
-		if (mCurDB != NULL) // TODO: some consistent indicator would be better here
+		if (mCurDB != NULL)
 			unload();
 
 		// TODO: Here, a query to mission database would be nice instead of direct file opening
 		mCurDB = getDBFileNamed(filename);
 		
-		// Also, assign parents for the file group (MIS+GAM file for Savegames, GAM for mission files)
-		assignDBParents(mCurDB);
-		
-		WorldRepService* wr_s = static_cast<WorldRepService*>(mServiceManager->getService("WorldRepService"));
-			
-		// Now call all the services to load
-		wr_s->loadFromDarkDatabase(mCurDB);
+		_loadMissionDB(mCurDB);
 	}
 	
 	//------------------------------------------------------
 	DarkFileGroup* GameService::getDBFileNamed(const std::string& filename) {
-		return new DarkFileGroup(new StdFile(filename, File::FILE_R));
+		FilePtr fp = FilePtr(new StdFile(filename, File::FILE_R));
+		
+		return new DarkFileGroup(fp);
 	}
 	
 	//------------------------------------------------------
 	void GameService::unload() {
-		WorldRepService* wr_s = static_cast<WorldRepService*>(mServiceManager->getService("WorldRepService"));
+		// TODO: Just submit a message to all services having LOADER flag, once the flag system is implemented
+		WorldRepServicePtr wr_s = mServiceManager->getService("WorldRepService").as<WorldRepService>();
 		
 		wr_s->unload();
 		
@@ -75,81 +72,44 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
-	void GameService::assignDBParents(DarkFileGroup* db) {
-		// detect the DB type
-		uint32 ftype;
-		
-		File* ft = db->getFile("FILE_TYPE");
-		
-		ft->readElem(&ftype, sizeof(uint32));
-		
-		ft->release();
-		
-		db->addRef();
-		
-		bool loadGameSys = false;
-		bool loadMission = false;
-		
-		// now, we detect the file type by looking at the uint32 we read
-		switch (ftype) {
-			// TODO: Find a suitable solution for this. Do not include those numbers directly
-			// The ftype seems to be a bitmap of stored info in the file
-			case 0x00031900: // MIS
-				db->setType(DFG_MISSION);
-				_loadGameSysDB(db);
-				break;
-			
-			case 0x00011900: // SAV
-				db->setType(DFG_SAVEGAME);
-				_loadMissionDB(db);
-				break;
-			
-			default:
-				db->release();
-				OPDE_EXCEPT("Invalid game database type by FILE_TYPE", "GameService::assignDBParents");
-		}
-		
-		// Okay, all DBs should be loaded
-	}
-	
-	//------------------------------------------------------
 	void GameService::_loadMissionDB(DarkFileGroup* db) {
-		// TODO: One of the game specific things, SS2 seems not to handle savegames this way
-		// Actually, this code is rather a quick hack to let me load all databases I need
-		// FileGroup should get a getParent/setParent and getType/setType rather
-		
+		/* Game Save:
 		// DARKMISS chunk contains the mission name (without the .mis extension)
 		// This is better handled with binary service
+		
 		BinaryService* bs = static_cast<BinaryService*>(mServiceManager->getService("BinaryService"));
 		
 		DTypeDef* dm = bs->getType("chunks", "DARKMISS");
 		
-		File* fdm = db->getFile("DARKMISS");
+		FilePtr fdm = db->getFile("DARKMISS");
 		
 		char* data = new char[dm->size()];
 		
 		DVariant val = dm->get(data, "path");
 		
 		DarkFileGroup* mis = getDBFileNamed(val.toString() + ".mis");
+		*/
 		
-		mis->setType(DFG_MISSION);
-		// now read the mission file for the savegame
-		db->setParent(mis);
+		_loadGameSysDB(db);
 		
-		_loadGameSysDB(mis);
-		
-		delete data;
+		// Load the Mission
 		
 		
-		mis->release();
-		dm->release();
-		fdm->release();
+		// Get the link service
+		LinkServicePtr ls = mServiceManager->getService("LinkService").as<LinkService>();
+		
+		// Get the world geometry service
+		WorldRepServicePtr wr_s = mServiceManager->getService("WorldRepService").as<WorldRepService>();
+			
+		// Now call all the services to load
+		wr_s->loadFromDarkDatabase(db);
+		ls->load(db);
 	}
 	
 	//------------------------------------------------------
 	void GameService::_loadGameSysDB(DarkFileGroup* db) {
 		// GAM_FILE
-		File* fdm = db->getFile("GAM_FILE");
+		FilePtr fdm = db->getFile("GAM_FILE");
 		
 		char* data = new char[fdm->size()];
 		
@@ -159,16 +119,16 @@ namespace Opde {
 		
 		DarkFileGroup* gs = getDBFileNamed(data);
 		
-		gs->setType(DFG_GAMESYS);
+		// load the gamesys
+		// Get the link service
+		LinkServicePtr ls = mServiceManager->getService("LinkService").as<LinkService>();
 		
-		// now read the mission file for the savegame
-		db->setParent(gs);
+		// Now call all the services to load
+		ls->load(gs);
 		
 		gs->release();
 		
 		delete data;
-		
-		fdm->release();	
 	}
 	
 	
