@@ -30,7 +30,43 @@
 
 namespace Opde {
 
-	/** DType (Dynamic typedef) script compiler. Compiles the C-like syntax (sort-of) from the given DataStream, and fills the BinaryService, with the resulting structures. */
+	/** DType (Dynamic typedef) script compiler. Compiles the C-like syntax (sort-of) from the given DataStream, and fills the BinaryService, with the resulting structures.
+	* the syntax of such scripts is this: <code><br>
+	<B>enum definition</B> <br>
+	enum EnumName : VariantType {<br>
+		key Name Value<br>
+		key "Name 2" "Value 2"<br>
+		...etc...<br>
+	}<br>
+	<br>
+	<B>VariantType is one of: <i>uint, int, float, bool, string, vector</i></B> <br>
+	<br>
+	<B>bitfield definition, simmilar to enum</B><br>
+	bitfield Name {<br>
+		...key definitions, the same as in enum...<br>
+	}<br>
+	<br>
+	<B>Variable type definitions</B><br>
+	<B>A previously defined type alias</B><br>
+	alias Type NewType;<br>
+	<B>struct / union definition</B><br>
+	struct Str1 [ [len] ] {<br>
+		...type definitions, structs, unions...<br>
+	}<br>
+	union Un1 {<br>
+		...type definitions, structs, unions...<br>
+	}<br>
+	<br>
+	Type [use Enum/Bitfield] name [ [array size] ] name [ = "default value string" ]<br>
+	<br>
+	<B>in case of type == char (fixed string), a box brace follows the char like this:</B><br>
+	char [64] a_long_string;<br>
+	<br>
+	<B>Type is one of: <i>uintXX, intXX, float, boolXX, varstr, vector, char [len]</i></B> <br>
+	<br>
+	<B>varstr (variable length string) cannot be contained in a struct/union/array</B>
+	</code>
+	*/
 	class DTypeScriptCompiler : public Ogre::Compiler2Pass {
 		public:
 			/** Compiler */
@@ -96,7 +132,7 @@ namespace Opde {
 			CompileStateID state;
 			bool unioned; // true if the created struct should be unioned
 			DTypeDefVector types; // for struct, list of members.
-			DEnum *enumeration;
+			DEnumPtr enumeration;
 			DVariant::Type enumvaltype;
 			size_t arraylen;
 			std::string name;
@@ -112,10 +148,7 @@ namespace Opde {
 		CompileState mCurrentState;
 		
 		/// BinaryService the compiler fills with the result
-		BinaryService* mBinaryService;
-		
-		/** Releases all typedefs that are in the vector */
-		void releaseAll(DTypeDefVector& toRel);
+		BinaryServicePtr mBinaryService;
 		
 		/** Pop a state from the state stack 
 		* @return Previous current state */
@@ -134,13 +167,13 @@ namespace Opde {
 		int getDataLenFromID(TokenID id);
 				
 		/** get the typedef from binary service. First the namespace's, then the global if not found in namespace */
-		DTypeDef* getTypeDef(const std::string& name);
+		DTypeDefPtr getTypeDef(const std::string& name);
 		
 		/** get the enumeration from binary service. First the namespace's, then the global if not found in namespace */
-		DEnum* getEnum(const std::string& name);
+		DEnumPtr getEnum(const std::string& name);
 		
 		/** Dispatches the type definition according to the current state */
-		void dispatchType(DTypeDef* def);
+		void dispatchType(DTypeDefPtr def);
 
 		/** Expects, and reads the number of elements in the [] parenthesis. Returns the parsed number */
 		int parseBoxBrace();

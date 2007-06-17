@@ -113,7 +113,7 @@ namespace Opde {
 		mGroupName = "";
 
 		ServiceManager* svcmgr = ServiceManager::getSingletonPtr();
-		mBinaryService = static_cast<BinaryService*>(svcmgr->getService("BinaryService"));
+		mBinaryService = svcmgr->getService("BinaryService").as<BinaryService>();
 	}
 	
 	//-----------------------------------------------------------------------
@@ -195,8 +195,6 @@ namespace Opde {
 				// in finding a valid terminal token to complete the rule expression.
 				logParseError(ogreException.getDescription());
 			} catch (BasicException& ogreException) {
-				// an unknown token found or BNF Grammer rule was not successful
-				// in finding a valid terminal token to complete the rule expression.
 				logParseError(ogreException.getDetails());
 			}
 		}
@@ -209,17 +207,6 @@ namespace Opde {
 		OGRE_EXCEPT(Ogre::Exception::ERR_INTERNAL_ERROR,
                     "Error in script at line " + StringConverter::toString(mCurrentLine) +
 			" of " + mSourceName + ": " + error, "DTypeScriptCompiler::logParseError");
-	}
-    
-	//-----------------------------------------------------------------------
-	void DTypeScriptCompiler::releaseAll(DTypeDefVector& toRel) {
-		DTypeDefVector::iterator it = toRel.begin();
-		    
-		for (; it != toRel.end(); it++) {
-			(*it)->release();
-		}
-		    
-		toRel.clear();
 	}
     
 	//-----------------------------------------------------------------------
@@ -258,20 +245,15 @@ namespace Opde {
 		
 		if (was.state == CS_ENUM) { // Closing the enum/bitfield definition
 			if (mCurrentState.state == CS_STRUCT) {
-				was.enumeration->release();
 				logParseError("Enum cannot be created inside structs, use pre-defined enums only.");
 			}
 			
 			if (mCurrentState.state == CS_ENUM) {
-				was.enumeration->release();
 				logParseError("Enum inside enum error - found enum " + mCurrentState.name + " when closing " + was.name );
 			}
 			
 			// register the finished enum, and release
 			mBinaryService->addEnum(mGroupName, was.name, was.enumeration);
-			
-			// release the handle to the enumeration
-			was.enumeration->release();
 		}
 		
 		if (was.state == CS_STRUCT) {
@@ -284,14 +266,12 @@ namespace Opde {
 			if (was.arraylen > 1) {
 				// wrap up
 				DTypeDef *nta = new DTypeDef(nt, was.arraylen);
-				nt->release();
 				
 				nt = nta;
 			}
 			
 			// create the struct according to the 'was' structure fields
 			dispatchType(nt); // will release if needed
-			releaseAll(was.types);
 		}
 		
  		if (was.state == CS_NAMESPACE) // closing namespace, erase the namespace's name
@@ -346,17 +326,13 @@ namespace Opde {
 	}
 	
 	//-----------------------------------------------------------------------
-	DTypeDef* DTypeScriptCompiler::getTypeDef(const std::string& name) {
-		DTypeDef* nt;
-		
+	DTypeDefPtr DTypeScriptCompiler::getTypeDef(const std::string& name) {
 		try {
-			nt = mBinaryService->getType(mGroupName, name);
-			return nt;
+			return mBinaryService->getType(mGroupName, name);
 		} catch (BasicException& ex) {
 			try {
 				if (mGroupName != "") {
-					nt = mBinaryService->getType("", name);
-					return nt;
+					return mBinaryService->getType("", name);
 				} else {
 					logParseError("Type definition not found : " + name);
 				}
@@ -367,17 +343,13 @@ namespace Opde {
 	}
 	
 	//-----------------------------------------------------------------------
-	DEnum* DTypeScriptCompiler::getEnum(const std::string& name) {
-		DEnum* en;
-		
+	DEnumPtr DTypeScriptCompiler::getEnum(const std::string& name) {
 		try {
-			en = mBinaryService->getEnum(mGroupName, name);
-			return en;
+			return mBinaryService->getEnum(mGroupName, name);
 		} catch (BasicException& ex) {
 			try {
 				if (mGroupName != "") {
-					en = mBinaryService->getEnum("", name);
-					return en;
+					return mBinaryService->getEnum("", name);
 				} else {
 					logParseError("Enum definition not found : " + name);
 				}
@@ -388,16 +360,14 @@ namespace Opde {
 	}
 	
 	//-----------------------------------------------------------------------
-	void DTypeScriptCompiler::dispatchType(DTypeDef* def) {
+	void DTypeScriptCompiler::dispatchType(DTypeDefPtr def) {
 		if (mCurrentState.state == CS_STRUCT) {
 			// insert the alias into the queue of the struct's members
 			mCurrentState.types.push_back(def); // will get released on closing brace
 		} else if (mCurrentState.state == CS_ENUM) {
-			def->release();
 			logParseError("Alias inside the enum definition not possible");
 		} else {
 			mBinaryService->addType(mGroupName, def);
-			def->release();
 		}
 	}
 
@@ -444,7 +414,7 @@ namespace Opde {
 		// enumeration/bitfield key
 		// key "" ""
 
-		assert(mCurrentState.enumeration != NULL);
+		assert(!mCurrentState.enumeration.isNull());
 		assert(mCurrentState.state == CS_ENUM);
 		
 		const String keyname = getNextTokenLabel();
@@ -466,14 +436,14 @@ namespace Opde {
 		const String type = getNextTokenLabel();
 		const String newname = getNextTokenLabel();
 		
-		DTypeDef *typ = getTypeDef(type);
-		DTypeDef *newt = typ->alias(newname);
+		DTypeDefPtr typ = getTypeDef(type);
+		DTypeDefPtr newt = typ->alias(newname);
 		
 		if (testNextTokenID(ID_OPENBRACE)) {
 			int len = parseBoxBrace();
 			
-			DTypeDef *arrayt = new DTypeDef(newt, len);
-			newt->release();
+			DTypeDefPtr arrayt = new DTypeDef(newt, len);
+
 			dispatchType(arrayt);
 		} else
 			dispatchType(newt);
@@ -562,7 +532,7 @@ namespace Opde {
 		// get the field type out of the current token ID
 		DVariant::Type type = getDVTypeFromID(typei);
 		
-		DEnum* enm = NULL;
+		DEnumPtr enm = NULL;
 		
 		size_t array_len = 1;
 		
@@ -625,7 +595,6 @@ namespace Opde {
 			dispatchType(ndef);
 		} else {
 			DTypeDef* arr = new DTypeDef(ndef, array_len);
-			ndef->release();
 		
 			dispatchType(arr);
 		}
