@@ -36,6 +36,7 @@
 
 #include "FileGroup.h"
 #include "DarkDBDefs.h"
+#include "SharedPtr.h"
 
 // The name of the group that stores the built textures and materials
 #define TEMPTEXTURE_RESOURCE_GROUP "WrTextures"
@@ -113,7 +114,7 @@ namespace Opde {
 			void clearData();
 		
 			/** Internal method which loads the data from the found WR/WRRGB chunk, and constructs level geometry for the SceneManager */
-			void loadFromChunk(File *wrChunk, int lightSize);
+			void loadFromChunk(FilePtr& wrChunk, int lightSize);
 		
 			/** Sets sky box according to the SKYMODE chunk contents. Does not do NewSky */
 			void setSkyBox(FileGroup *db);
@@ -139,6 +140,8 @@ namespace Opde {
 			void createSkyHack(Ogre::String resourceGroup);
 	};
 	
+	/// Shared pointer to worldrep service
+	typedef shared_ptr<WorldRepService> WorldRepServicePtr;
 	
 	/// Factory for the WorldRep service
 	class WorldRepServiceFactory : public ServiceFactory {

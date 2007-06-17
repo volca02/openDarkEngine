@@ -77,7 +77,7 @@ namespace Opde {
 		
 		int lightSize = 1;
 		
-		File* wrChunk;
+		FilePtr wrChunk;
 		
 		if (db->hasFile("WR")) {
 			wrChunk = db->getFile("WR");
@@ -91,17 +91,15 @@ namespace Opde {
 		
 		loadFromChunk(wrChunk, lightSize);
 		
-		wrChunk->release();
-		
 		// --- Finally, set sky according to the SKY chunk
 		setSkyBox(db);
 	}
 	
 	
 	void WorldRepService::setSkyBox(FileGroup *db) {
-		File* skyChunk = db->getFile("SKYMODE");
+		FilePtr skyChunk = db->getFile("SKYMODE");
 		
-		if (skyChunk != NULL) { // Thief1 sky. Thief2 has NewSky. Will need to make a custom scene node for this. 
+		if (!skyChunk.isNull()) { // Thief1 sky. Thief2 has NewSky. Will need to make a custom scene node for this. 
 			uint32_t skyMode;
 			
 			skyChunk->readElem(&skyMode, sizeof(skyMode), 1);
@@ -113,8 +111,6 @@ namespace Opde {
 				
 			}
 		}
-
-		skyChunk->release();
 	}
 	
 	
@@ -128,21 +124,19 @@ namespace Opde {
 	
 	void WorldRepService::clearData() {
 		LOG_INFO("WorldRepService::clearData called");
-		mSceneMgr->clearScene();
 		
-		if (mCells != NULL)
-			delete[] mCells;
+		delete[] mCells;
+		mCells = NULL;
 		
-		if (mExtraPlanes != NULL)
-			delete[] mExtraPlanes;
+		delete[] mExtraPlanes;
+		mExtraPlanes = NULL;
 		
-		if (mAtlas != NULL)
-			delete mAtlas;
+		delete mAtlas;
+		mAtlas = NULL;
 		
 		// Unregister all the resources in the WorldResourceGroup, including unreloadable
 		
 		// if there is a LightMap or WrTextures resource group, clean up those...
-		
 		try {
 			ResourceGroupManager::getSingleton().clearResourceGroup(TEMPTEXTURE_RESOURCE_GROUP);
 		} catch (Exception &e) {
@@ -150,17 +144,18 @@ namespace Opde {
 				 TEMPTEXTURE_RESOURCE_GROUP, e.getDescription().c_str());
 		}
 		
-		if (mFamilies != NULL)
-			delete[] mFamilies;
+		delete[] mFamilies;
+		mFamilies = NULL;
 		
-		if (mTextures != NULL)
-			delete[] mTextures;
 		
+		delete[] mTextures;
+		mTextures = NULL;
+
 		LOG_INFO("WorldRepService::clearData : finished cleaning up");
 	}
 	
 	// ----------------------- The level loading methods follow
-	void WorldRepService::loadFromChunk(File* wrChunk, int lightSize) {
+	void WorldRepService::loadFromChunk(FilePtr& wrChunk, int lightSize) {
 		wr_hdr_t header;
 		wrChunk->read(&header, sizeof(wr_hdr_t));
 		
@@ -484,9 +479,10 @@ namespace Opde {
 	//-----------------------------------------------------------------------
 	void WorldRepService::loadFlowTextures(FileGroup *db) {
 		// Load the TXLIST chunk from the resource mission file.
-		Opde::File* flow_tex = db->getFile("FLOW_TEX");
-		
-		if (flow_tex == NULL) {
+		Opde::FilePtr flow_tex;
+		try {
+			flow_tex = db->getFile("FLOW_TEX");
+		} catch (FileException &e) {
 			LOG_INFO("Flow chunk does not exist. Water materials may not be correctly displayed", "WorldRepService::loadFlowTextures");
 			return;
 		}
@@ -500,8 +496,6 @@ namespace Opde {
 			// load
 			flow_tex->read(&flows, flow_tex->size()); // To be sure we do not overlap
 		} catch (Ogre::Exception& e) {
-			flow_tex->release();
-			
 			// Connect the original exception to the printout:
 			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Could not load flow textures : ") + e.getFullDescription(), "WorldRepService::loadFlowTextures");
 		}
@@ -552,10 +546,8 @@ namespace Opde {
 				
 			}
 		}
-		
-		// Release the file handle for flow tex
-		flow_tex->release();
 	}
+	
 	//-----------------------------------------------------------------------
 	void WorldRepService::createStandardMaterial(std::string matName, std::string textureName, std::string resourceGroup) {
 		Image tex;
@@ -616,9 +608,7 @@ namespace Opde {
 				"WorldRepService::loadMaterials");
 		
 		// Load the TXLIST chunk from the resource mission file.
-		Opde::File* txtList = db->getFile("TXLIST");
-		
-		assert(txtList != false);
+		Opde::FilePtr txtList = db->getFile("TXLIST");
 		
 		// TODO: Exception handling on the chunk readout!
 		// Okay, we are ready to map the arrays
@@ -646,13 +636,10 @@ namespace Opde {
 			// load texture names
 			txtList->read(&(mTextures[0]), sizeof(DarkDBTXLIST_texture) * mTxlistHeader.txt_count);
 		} catch (Ogre::Exception& e) {
-			delete txtList;
 			if (mFamilies != NULL)
 				delete[] mFamilies;
 			if (mTextures != NULL)
 				delete[] mTextures;
-			
-			txtList->release();
 			
 			// Connect the original exception to the printout:
 			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Could not load texture list : ") + e.getFullDescription(), "BspLevel::loadMaterials");
@@ -696,8 +683,6 @@ namespace Opde {
 			}
 			// This is it. Material @templateXX created
 		}
-		
-		txtList->release();
 		
 		// Initialize the flow textures (do this first so water specialisation will override)
 		loadFlowTextures(db);

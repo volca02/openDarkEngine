@@ -78,7 +78,7 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------------------------------------
-	void WRCell::loadFromChunk(unsigned int _cell_num, File *chunk, int lightSize) {
+	void WRCell::loadFromChunk(unsigned int _cell_num, FilePtr& chunk, int lightSize) {
 		assert(!loaded);
 		
 		// Copy the Cell id
