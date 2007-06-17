@@ -26,6 +26,7 @@
 #include "OpdeException.h"
 #include "OgreDataStream.h"
 #include "RefCounted.h"
+#include "SharedPtr.h"
 #include "integers.h"
 #include <fstream>
 
@@ -54,7 +55,7 @@ namespace Opde {
 		public:
 			FileException(const FileError& err, const std::string& desc, 
 					const std::string& src, char* file = NULL, long line = -1) : BasicException(desc,src,file,line), error(err) {
-						details = std::string("FileException: " + details);
+				details = std::string("FileException: " + details);
 			}
 			
 			/** Helping status getter. Returns why the exception was thrown in a machine readable form */
@@ -70,7 +71,7 @@ namespace Opde {
 	* The class is exception based, that means, any error happening while reading/writing will raise an exception.
 	* @todo Line read/write functionality might be useful
 	*/
-	class File : public RefCounted {
+	class File {
 		public:
 			/** File open mode. Read/Write/Read+Write access */
 			typedef enum {
@@ -163,6 +164,9 @@ namespace Opde {
 			std::string mFileName;
 			AccessMode mAccessMode;
 	};
+	
+	/** Shared file pointer */
+	typedef shared_ptr<File> FilePtr;
 	
 	/** File class implementation using std::fstream class as a base */
 	class StdFile : public File {
@@ -311,7 +315,7 @@ namespace Opde {
 	class FilePart : public File {
 		public:
 			/** Constructor - Takes a file instance, an absolute position, and length */
-			FilePart(const std::string& name, AccessMode accm, File* src, file_pos_t pos, file_size_t size); 
+			FilePart(const std::string& name, AccessMode accm, FilePtr& src, file_pos_t pos, file_size_t size); 
 			
 			/** destructor */
 			~FilePart();
@@ -345,7 +349,7 @@ namespace Opde {
 			
 					
 			/** Source (underlying) file */
-			File*	mSrcFile;
+			FilePtr	mSrcFile;
 			
 			/** Offset position - offset from the start of the underlying to this part's */
 			file_size_t mOffPos;

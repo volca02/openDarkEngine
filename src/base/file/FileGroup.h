@@ -35,7 +35,7 @@ namespace Opde {
 	class FileGroup : public RefCounted {
 		public:
 			/** File source FileGroup constructor. Loads the chunk list from a given file. */
-			FileGroup(File* source);
+			FileGroup(FilePtr& source);
 			
 			/** Empty FileGroup constructor. Initializes an empty file group */
 			FileGroup();
@@ -47,8 +47,10 @@ namespace Opde {
 			/** Returns true if this file group contains the given file */
 			virtual bool hasFile(const std::string& name) const = 0;
 			
-			/** Get stored file handle */
-			virtual File* getFile(const std::string& name) = 0;
+			/** Get stored file handle
+			* @note This function does not return a clone to the file, rather always the file itself. Usage at two places simultaneously will cause an unexpected seek behavior
+			* @return Will return FilePtr seeked at the beginning of the file */
+			virtual FilePtr getFile(const std::string& name) = 0;
 			
 			/** Get the file header (Name, version info) */
 			virtual const DarkDBChunkHeader& getFileHeader(const std::string& name) = 0;
@@ -57,7 +59,7 @@ namespace Opde {
 			* @return newly created file
 			* @note Old file is disposed if existed
 			* @note The previous file is returned if read only (May be null) */
-			virtual File* createFile(const std::string& name, uint32_t ver_maj, uint32_t ver_min) = 0;
+			virtual FilePtr createFile(const std::string& name, uint32_t ver_maj, uint32_t ver_min) = 0;
 			
 			/** Deletes a certain file from the group */
 			virtual void deleteFile(const std::string& name) = 0;
@@ -65,28 +67,15 @@ namespace Opde {
 			/** Write the current state of the FileGroup to the file dest.
 			@warning Do not use the source file as destination. The source file data are read on demand, so owerwriting the source is not a good idea 
 			@note the above limitation should not cause any complications, as all the standard writing is done into an empty file group */
-			virtual void write(File* dest) = 0;
+			virtual void write(FilePtr& dest) = 0;
 		
-			/** Set the parent file */
-			void setParent(FileGroup* parent);
-			
-			/** Get the parent file */
-			inline FileGroup* getParent() { return mParent; };
-			
-			/** A custom defined type for this file group. Defaults to 0 */
-			inline void setType(int type) { mType = type; };
-			
-			/** Returns the custom defined type for this file group. Defaults to 0 */
-			inline int getType() { return mType; };
-			
-			/** Search for the database with the given type id through the parents and self 
-			* @return Pointer to specified group (release after usage), or NULL if not found */
-			FileGroup* getGroupTyped(int type);
-			
+			/** Get the File name of this database, or empty string if no underlying file is used */
+			std::string getName();
+					
 			/** Chunk duo - it's header and the file that contains the data */
 			typedef struct Chunk {
 				DarkDBChunkHeader header;
-				File *file;
+				FilePtr file;
 			};
 			
 			typedef std::map<std::string, Chunk> ChunkMap;
@@ -101,36 +90,19 @@ namespace Opde {
 			virtual const_iterator end() const = 0;
 		protected:
 			/** Source file, if not created empty */
-			File* mSrcFile;
-			
-			/** Custom defined parent FileGroup */
-			FileGroup* mParent;
-			
-			/** Custom defined file type for this FileGroup */
-			int mType;
+			FilePtr mSrcFile;
 	};
 	
 	//------------------------ DarkDatabase FileGroup
-	
-	typedef enum { 
-		/// Unknown dark file group type
-		DFG_UNKNOWN = 0,
-		/// Dark's game system
-		DFG_GAMESYS = 1,
-		/// Dark's mission file
-		DFG_MISSION = 2,
-		/// Dark's savegame
-		DFG_SAVEGAME = 3
-	} DarkFileGroupType;
-	
+
 	/** File group implemented on LG's MIS/COW/GAM/SAV type files. 
 	* This class exposes the chunks of that format as separate files, which can be replaced, deleted or added. The new database 
 	of chunks can be written to a new file. This allows modifications to be done on a database, leaving the chunks in an original form
 	if not touched. The order of the chunks is not guaranteed to stay equal. This is not a problem for DarkEngine. */
 	class DarkFileGroup : public FileGroup {
 		public:
-			/** @copydoc FileGroup::FileGroup(File*,bool) */
-			DarkFileGroup(File* source);
+			/** @copydoc FileGroup::FileGroup(FilePtr&) */
+			DarkFileGroup(FilePtr& source);
 			
 			/** @copydoc FileGroup::FileGroup() */
 			DarkFileGroup();
@@ -145,16 +117,16 @@ namespace Opde {
 			virtual const DarkDBChunkHeader& getFileHeader(const std::string& name);
 						
 			/** @copydoc FileGroup::getFile() */
-			virtual File* getFile(const std::string& name);
+			virtual FilePtr getFile(const std::string& name);
 			
 			/** @copydoc FileGroup::createFile() */
-			virtual File* createFile(const std::string& name, uint32_t ver_maj, uint32_t ver_min);
+			virtual FilePtr createFile(const std::string& name, uint32_t ver_maj, uint32_t ver_min);
 			
 			/** @copydoc FileGroup::deleteFile() */
 			virtual void deleteFile(const std::string& name);
 			
 			/** @copydoc FileGroup::write() */
-			virtual void write(File* dest);
+			virtual void write(FilePtr& dest);
 			
 			/** @copydoc FileGroup::begin() */
 			virtual const_iterator begin() const;
@@ -175,7 +147,7 @@ namespace Opde {
 			/** Platform safe inventory writer 
 			* @param inventory Pre-allocated inventory array to write
 			* @param count the count of inventory items to write */
-			void writeInventory(File* dest, DarkDBInvItem* inventory, uint count);
+			void writeInventory(FilePtr& dest, DarkDBInvItem* inventory, uint count);
 			
 			/** Platform safe chunk header reader 
 			* @param hdr The header to read
@@ -185,7 +157,7 @@ namespace Opde {
 			/** Platform safe chunk header writer 
 			* @param hdr The header to written
 			*/
-			void writeChunkHeader(File* dest, const DarkDBChunkHeader& hdr);
+			void writeChunkHeader(FilePtr& dest, const DarkDBChunkHeader& hdr);
 			
 			/** File (Chunk) map */
 			ChunkMap mFiles;

@@ -29,7 +29,7 @@ namespace Opde {
 	/*------------------------------------------------------*/
 	/*------------------------- File -----------------------*/
 	/*------------------------------------------------------*/
-	File::File(const std::string& name, AccessMode mode) : mFileName(name), mAccessMode(mode), RefCounted() {
+	File::File(const std::string& name, AccessMode mode) : mFileName(name), mAccessMode(mode) {
 	}
 	
 	//------------------------------------	
@@ -310,7 +310,7 @@ namespace Opde {
 				npos = pos;
 				break;
 			case FSEEK_END : 
-				npos = mSize + pos;
+				npos = mSize - pos;
 				break;
 			case FSEEK_CUR :
 				npos += pos;
@@ -491,8 +491,8 @@ namespace Opde {
 	/*----------------------------------------------------*/
 
 	//------------------------------------	
-	FilePart::FilePart(const std::string& name, AccessMode accm, File* src, file_pos_t pos, file_size_t size) 
-			: File(name, accm) {
+	FilePart::FilePart(const std::string& name, AccessMode accm, FilePtr& src, file_pos_t pos, file_size_t size) 
+			: File(name, accm), mFilePos(0) {
 		
 		// only allow write if the underlying supports
 		if ((accm & FILE_W) && !src->isWriteable())
@@ -501,19 +501,13 @@ namespace Opde {
 			
 		mSrcFile = src;
 		
-		mSrcFile->addRef();
-		
 		mOffPos = pos;
 		mSize = size;
-		
-		mFilePos = 0;
 	}
 			
 	//------------------------------------	
 	FilePart::~FilePart() {
-		mSrcFile->release();
 	}
-			
 
 	//------------------------------------	
 	const file_size_t FilePart::size() {
@@ -531,7 +525,7 @@ namespace Opde {
 				npos = pos;
 				break;
 			case FSEEK_END : 
-				npos = mSize + pos;
+				npos = mSize - pos;
 				break;
 			case FSEEK_CUR :
 				npos += pos;

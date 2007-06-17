@@ -27,8 +27,7 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- FileGroup ---------------------*/
 	/*----------------------------------------------------*/
-	FileGroup::FileGroup(File* source) : mSrcFile(source), mParent(NULL) {
-		mSrcFile->addRef();
+	FileGroup::FileGroup(FilePtr& source) : mSrcFile(source) {
 	}
 	
 	//------------------------------------	
@@ -36,41 +35,20 @@ namespace Opde {
 	
 	//------------------------------------	
 	FileGroup::~FileGroup() {
-		if (mParent != NULL)
-			mParent->release();
-		
-		if (mParent != NULL)
-			mParent->release();
 	}
 
-	//------------------------------------ 
-	void FileGroup::setParent(FileGroup* parent) {
-		parent->addRef(); 
-		
-		if (mParent)
-			mParent->release(); 
-		
-		mParent = parent; 
+	std::string FileGroup::getName() {
+		if (!mSrcFile.isNull())
+			return mSrcFile->getName();
+		else 
+			return "";
 	}
 	
-	//------------------------------------
-	FileGroup* FileGroup::getGroupTyped(int type) {
-		if (mType == type) {
-			this->addRef();
-			return this;
-		} else {
-			if (mParent != NULL)
-				return mParent->getGroupTyped(type);
-			else
-				return NULL;
-		}
-	}
 	/*--------------------------------------------------------*/
 	/*-------------------- DarkFileGroup ---------------------*/
 	/*--------------------------------------------------------*/
-	DarkFileGroup::DarkFileGroup(File* source) : FileGroup(source), mFiles() {
-		
-		if (mSrcFile != NULL) {
+	DarkFileGroup::DarkFileGroup(FilePtr& source) : FileGroup(source), mFiles() {
+		if (!mSrcFile.isNull()) {
 			// Read the header and stuff from the source file
 			_initSource();
 		}
@@ -84,18 +62,12 @@ namespace Opde {
 	//------------------------------------	
 	DarkFileGroup::~DarkFileGroup() {
 		// destroy all files in the map
-		ChunkMap::iterator it = mFiles.begin();
-		
-		for (; it!=mFiles.end(); it++) {
-			it->second.file->release();
-		}
-		
 		mFiles.clear();
 	}
 	
 	//------------------------------------	
 	void DarkFileGroup::_initSource() {
-		assert(mSrcFile != NULL);
+		assert(!mSrcFile.isNull());
 		
 		mSrcFile->seek(0);
 		
@@ -150,7 +122,7 @@ namespace Opde {
 	
 	//------------------------------------	
 	void DarkFileGroup::readInventory(DarkDBInvItem* inventory, uint count) {
-		assert(mSrcFile != NULL);
+		assert(!mSrcFile.isNull());
 		
 		for (uint i = 0; i < count; i++) {
 			mSrcFile->read(&inventory[i].name, sizeof(inventory[i].name));
@@ -160,8 +132,8 @@ namespace Opde {
 	}
 	
 	//------------------------------------	
-	void DarkFileGroup::writeInventory(File* dest, DarkDBInvItem* inventory, uint count) {
-		assert(dest != NULL);
+	void DarkFileGroup::writeInventory(FilePtr& dest, DarkDBInvItem* inventory, uint count) {
+		assert(!dest.isNull());
 		
 		for (uint i = 0; i < count; i++) {
 			dest->write(&inventory[i].name, sizeof(inventory[i].name));
@@ -173,7 +145,7 @@ namespace Opde {
 	
 	//------------------------------------	
 	void DarkFileGroup::readChunkHeader(DarkDBChunkHeader* hdr) {
-		assert(mSrcFile != NULL);
+		assert(!mSrcFile.isNull());
 		
 		mSrcFile->read(&hdr->name, sizeof(hdr->name));
 		mSrcFile->readElem(&hdr->version_high, sizeof(hdr->version_high), 1);
@@ -182,8 +154,8 @@ namespace Opde {
 	}
 	
 	//------------------------------------	
-	void DarkFileGroup::writeChunkHeader(File* dest, const DarkDBChunkHeader& hdr) {
-		assert(dest != NULL);
+	void DarkFileGroup::writeChunkHeader(FilePtr& dest, const DarkDBChunkHeader& hdr) {
+		assert(!dest.isNull());
 		
 		dest->write(&hdr.name, sizeof(hdr.name));
 		dest->writeElem(&hdr.version_high, sizeof(hdr.version_high), 1);
@@ -208,18 +180,21 @@ namespace Opde {
 	}
 	
 	//------------------------------------	
-	File* DarkFileGroup::getFile(const std::string& name) {
-		ChunkMap::iterator it = mFiles.find(name);
+	FilePtr DarkFileGroup::getFile(const std::string& name) {
+		string sname;
+		sname = name.substr(0, 11);
+		
+		ChunkMap::iterator it = mFiles.find(sname);
 		
 		if (it != mFiles.end()) {
-			it->second.file->addRef();
+			it->second.file->seek(0);
 			return it->second.file;
 		} else
-			OPDE_FILEEXCEPT(FILE_OP_FAILED, string("File named ") + name + " was not found in this FileGroup", "DarkFileGroup::getFile");
+			OPDE_FILEEXCEPT(FILE_OP_FAILED, string("File named ") + sname + " was not found in this FileGroup", "DarkFileGroup::getFile");
 	}
 	
 	//------------------------------------	
-	File* DarkFileGroup::createFile(const std::string& name, uint32_t ver_maj, uint32_t ver_min) {
+	FilePtr DarkFileGroup::createFile(const std::string& name, uint32_t ver_maj, uint32_t ver_min) {
 		// look if the file map contained a file of that name before
 		ChunkMap::iterator it = mFiles.find(name);
 		
@@ -239,12 +214,11 @@ namespace Opde {
 				
 		MemoryFile* newfile = new MemoryFile(name, File::FILE_RW);
 		
-		ch.file = newfile;
+		ch.file = FilePtr(newfile);
 		
 		mFiles.insert(make_pair(name, ch));
 		
-		newfile->addRef();
-		return newfile;
+		return ch.file;
 	}
 			
 	//------------------------------------	
@@ -252,8 +226,6 @@ namespace Opde {
 		ChunkMap::iterator it = mFiles.find(name);
 		
 		if (it != mFiles.end()) {
-			it->second.file->release();
-			
 			mFiles.erase(it);
 		} else {
 			OPDE_EXCEPT(string("File requested for deletion was not found : ") + name, "DarkFileGroup::deleteFile");
@@ -261,7 +233,7 @@ namespace Opde {
 	}
 	
 	//------------------------------------	
-	void DarkFileGroup::write(File* dest) {
+	void DarkFileGroup::write(FilePtr& dest) {
 		/*
 		First, calculate the inventory offset, it is:
 		Size of the main header. + size of all chunks (including the chunk header)
