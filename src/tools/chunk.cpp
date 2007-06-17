@@ -65,18 +65,15 @@ int main(int argc, char* argv[]) {
 	}
 	
 	try {
-		File *src = new StdFile(argv[1], File::FILE_R);
+		FilePtr src = FilePtr(new StdFile(argv[1], File::FILE_R));
 		DarkFileGroup* gr = new DarkFileGroup(src);
-		src->release();
 		
 		if (!display) {
-			File *chunk = gr->getFile(argv[2]);
+			FilePtr chunk = gr->getFile(argv[2]);
 			
 			StdFile dest(argv[3], File::FILE_W);
 			
 			chunk->writeToFile(dest);
-			
-			chunk->release();
 		} else {
 			listChunks(gr);
 		}
