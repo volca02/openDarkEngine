@@ -24,6 +24,9 @@
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
 #include "FileGroup.h"
+#include "LinkCommon.h"
+#include "Relation.h"
+#include "SharedPtr.h"
 
 namespace Opde {
 	
@@ -34,18 +37,79 @@ namespace Opde {
 			LinkService(ServiceManager *manager);
 			virtual ~LinkService();
 			
-		protected:
+			/** Load the links from the database and it's parents */ 
+			void load(DarkFileGroup* db);
 			
+			/** Convert the relation name to a flavour */
+			int nameToFlavour(const std::string& name);
+			
+			/** Creates a relation type (link kind)
+			* @param id The ID the relation will have (>0)
+			* @param name The relation name
+			* @param type The type defining the data format for link data 
+			* @param hidden The hidden relations (true) will not show up on public link list places */
+			void createRelation(const std::string& name, DTypeDefPtr type, bool hidden);
+			
+			/** Registers a listener for relation events (link addition/removal/chage)
+			* @param relname The name of the relation (Link Kind) the listener wants to listen to
+			* @param listener a pointer to a LinkChangeListenerPtr struct containing instance and method pointers
+			* @note The same pointer to the listener struct has to be supplied to the unregisterLinkListener in order to suceed with unregistration
+			*/
+			void registerLinkListener(const std::string& relname, LinkChangeListenerPtr* listener);
+			
+			/** Unregisters a listener for relation events (link addition/removal/chage)
+			* @param relname The name of the relation (Link Kind) the listener wants to listen to
+			* @param listener a pointer to a LinkChangeListenerPtr struct containing instance and method pointers
+			* @note The same pointer to the LinkChangeListenerPtr as the one used to registration has to be used 
+			*/
+			void unregisterLinkListener(const std::string& relname, LinkChangeListenerPtr* listener);
+			
+			/** Get relation given it's name
+			* @param name The realtion's name
+			* @note The relation will be .isNull() if it was not found
+			*/
+			RelationPtr getRelation(const std::string& name);
+			
+		protected:
+			/** load links from a single database */
+			void _load(DarkFileGroup* db);
+			
+			/** Clears all the data and the relation mappings */
+			void _clear();
+			
+			/** request a mapping Name->Flavour and reverse 
+			* @param id The flavour value requested
+			* @param name The name for that flavour (Relation name)
+			* @param rel The relation instance to associate with that id
+			* @return false if conflict happened, true if all went ok, and new mapping is inserted (or already was registered) 
+			*/
+			bool requestRelationFlavourMap(int id, const std::string& name, RelationPtr rel);
+			
+			typedef std::map<int, std::string> FlavourToName;
+			typedef std::map<std::string, int> NameToFlavour;
+			
+			/// Name to Relation instance. The primary storage of Relation instances.
+			typedef std::map<std::string, RelationPtr> RelationNameMap;
+			
+			/// ID to Relation instance. Secondary storage of Relation instances, mapped per request when loading
+			typedef std::map<int, RelationPtr> RelationIDMap;
+			
+			FlavourToName mFlavourToName;
+			NameToFlavour mNameToFlavour;
+			RelationIDMap mRelationIDMap;
+			RelationNameMap mRelationNameMap;
 	};
 	
+	/// Shared pointer to Link service
+	typedef shared_ptr<LinkService> LinkServicePtr;
 	
-	/// Factory for the GameService objects
+	/// Factory for the LinkService objects
 	class LinkServiceFactory : public ServiceFactory {
 		public:
 			LinkServiceFactory();
 			~LinkServiceFactory() {};
 			
-			/** Creates a GameService instance */
+			/** Creates a LinkService instance */
 			Service* createInstance(ServiceManager* manager);
 			
 			virtual const std::string& getName();
