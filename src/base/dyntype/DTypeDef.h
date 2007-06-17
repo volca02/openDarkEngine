@@ -32,14 +32,14 @@
 #include <sstream>
 #include "vector3.h"
 #include "integers.h"
-#include "RefCounted.h"
+#include "SharedPtr.h"
 #include "DVariant.h"
 
 namespace Opde {
 	/** Type aware variant based enumeration definition. Used for enumeration and bitfields. 
 	@note For bitfields, the base type must be DV_UINT
 	@note No check on multiple keys with the same values is made */
-	class DEnum : public RefCounted {
+	class DEnum {
 		private:
 			typedef std::map<std::string, DVariant> StrValMap;
 			
@@ -84,14 +84,58 @@ namespace Opde {
 			inline bool isBitfield() const { return mBitField; };
 	};
 	
+	/// Shared pointer to DEnum
+	typedef shared_ptr<DEnum> DEnumPtr;
+	
 	// Forward declaration 
 	class DTypeDef;
 	
-	/** vector of type definitions. Used to fill in a struct type. */
-	typedef std::vector<DTypeDef*> DTypeDefVector;
+	typedef shared_ptr<DTypeDef> DTypeDefPtr;
 	
-	// Forward declaration of the internal DTypeDef data holder. Defined in DTypeDef.cpp file
-	class DTPrivateBase;
+	/** vector of type definitions. Used to fill in a struct type. */
+	typedef std::vector<DTypeDefPtr> DTypeDefVector;
+	
+	/// Base definition of the DTypes dat storage
+	class DTPrivateBase {
+		public:
+			/** DTypeDef private node type */
+			typedef enum NodeType {
+				/// Simple value holder
+				NT_SIMPLE, 
+				/// Array of elements
+				NT_ARRAY, 
+				/// Struct/Union
+				NT_STRUCT
+			};
+		
+			/// Type of this node
+			NodeType mNodeType;
+			
+			/// Destructor
+			virtual ~DTPrivateBase() {
+			}
+			
+			virtual bool isEnumerated() {
+				return false;
+			}
+			
+			virtual DEnumPtr getEnum() {
+				return DEnumPtr(NULL);
+			}
+			
+			virtual DVariant::Type type() {
+				return DVariant::DV_INVALID;
+			}
+			
+			/// Size getter
+			virtual int size() = 0;
+			
+		protected:
+			/// Constructor
+			DTPrivateBase(NodeType type) : mNodeType(type) {};
+	};
+	
+	typedef shared_ptr<DTPrivateBase> DTPrivateBasePtr;
 	
 	/** Reference counted dynamic type definition. Used to create a descriptive object, which can be used to access structures/arrays/unions in
 	* memory. 
@@ -103,21 +147,21 @@ namespace Opde {
 	*
 	* 
 	*/
-	class DTypeDef : public RefCounted {
+	class DTypeDef {
 		public:
 			/// Construct as a copy of other DTypeDef, with different name
 			DTypeDef(const std::string& name, const DTypeDef& src);
 					
-			/// Constucts a possibly enumerated (if _enum is not NULL) type with default value and type taken from templ
-			DTypeDef(const std::string& name, const DVariant& templ, int size, DEnum* _enum = NULL);
+			/// Constucts a possibly enumerated (if _enum member is not NULL) type with default value and type taken from templ
+			DTypeDef(const std::string& name, const DVariant& templ, int size, DEnumPtr _enum = NULL);
 			
 			/// Constucts a possibly enumerated (if _enum is not NULL) type with type taken from templ
-			DTypeDef(const std::string& name, DVariant::Type type, int size, DEnum* _enum = NULL);
+			DTypeDef(const std::string& name, DVariant::Type type, int size, DEnumPtr _enum = NULL);
 			
 			/** Construct an array type, with the type defined by member, and default value of the fields defined by member, sized size
 			* @note The base name is taken from the member
 			*/
-			DTypeDef(DTypeDef* member, int size);
+			DTypeDef(DTypeDefPtr member, int size);
 			
 			/// Construct a Structure with members defined by the list. If unioned is true, all the fields share the same start offset (0)
 			DTypeDef(const std::string& name, DTypeDefVector members, bool unioned = false);
@@ -143,12 +187,12 @@ namespace Opde {
 			* @param name New name for this typedef
 			* @note Setting the default value must be done after aliasing, as this also aliases container types
 			*/
-			inline DTypeDef* alias(std::string name) {
-				return new DTypeDef(name, *this);
+			inline DTypeDefPtr alias(std::string name) {
+				return DTypeDefPtr(new DTypeDef(name, *this));
 			}
 			
 			/** Create a new data instance based on the default values. Deallocation of the returned data is to be done by caller */
-			void* create();
+			char* create();
 			
 			/** Returns the size of this type def */
 			int size();
@@ -159,12 +203,13 @@ namespace Opde {
 			DVariant get(void* dataptr, const std::string& field);
 			
 			/** Sets the data of a certain field.
-			* @return New pointer if the data must have been reallocated (var-length string), otherwise NULL */
-			void* set(void* dataptr, const std::string& field, DVariant& nval);
+			* @return New pointer if the data must have been reallocated (var-length string), otherwise NULL 
+			* @note Even if reallocation took place, the old data are NOT deleted by this method */
+			void* set(void* dataptr, const std::string& field, const DVariant& nval);
 			
 			/** Value setter, the char* version
 			* @see set*/
-			inline void* set(void *dataptr, char* field, DVariant& val) {
+			inline void* set(void *dataptr, char* field, const DVariant& val) {
 				std::string fld(field);
 				
 				return set(dataptr, fld, val);
@@ -178,13 +223,18 @@ namespace Opde {
 			std::string toLabel(const std::string& fname);
 			
 			/** Field only - get the enumeration for the field */
-			const DEnum* getEnum();
+			const DEnumPtr getEnum();
 			
 			/// Gets the default value for this typedef
 			inline const DVariant& getDefault() {
 				return mDefVal;
 			}
 
+			/// Returns true if this field has any default value
+			inline bool hasDefault() {
+				return mDefaultUsed;
+			}
+			
 			/// Sets the default value for this typedef
 			void setDefault(const DVariant& val);
 			
@@ -192,10 +242,14 @@ namespace Opde {
 			typedef struct FieldDef {
 				unsigned int	offset;
 				std::string	name; // Absolute name
-				DTypeDef* 	type;
+				DTypeDefPtr 	type;
 				
-				inline void* set(void *dataptr, DVariant& val) const {
+				inline void* set(void *dataptr, const DVariant& val) const {
 					return type->_set(reinterpret_cast<char*>(dataptr) + offset, val);
+				}
+				
+				inline void* setDefault(void *dataptr) const {
+					return type->_set(reinterpret_cast<char*>(dataptr) + offset, type->getDefault());
 				}
 				
 				inline DVariant get(void *dataptr) const {
@@ -248,7 +302,7 @@ namespace Opde {
 			std::string mTypeName;
 			
 			/// The real definition of the field(s)
-			DTPrivateBase* mPriv;
+			DTPrivateBasePtr mPriv;
 			
 			/// Default value. Only valid if the dtypedef is simple. This fills the fields of a newly created type
 			DVariant mDefVal;
@@ -261,10 +315,10 @@ namespace Opde {
 		
 		private:
 			// Hidden copy constructor
-			DTypeDef(const DTypeDef &b) : mDefVal(0), RefCounted() {};
+			DTypeDef(const DTypeDef &b) : mDefVal(0) {};
 			
 			// Hidden default constructor
-			DTypeDef()  : mDefVal(0), RefCounted() {};
+			DTypeDef()  : mDefVal(0) {};
 			
 			DTypeDef& operator =(const DTypeDef &b) {};
 	};

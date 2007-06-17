@@ -122,36 +122,11 @@ namespace Opde {
 	/*------------------- DTypeDef -------------------------*/
 	/*------------------------------------------------------*/
 	/** Reference counted private type definition base. */
-	class DTPrivateBase : public RefCounted {
-		public:
-			/** DTypeDef private node type */
-			typedef enum NodeType {
-				/// Simple value holder
-				NT_SIMPLE, 
-				/// Array of elements
-				NT_ARRAY, 
-				/// Struct/Union
-				NT_STRUCT
-			};
-		
-			/// Type of this node
-			NodeType pNodeType;
-			
-			/// Destructor
-			virtual ~DTPrivateBase() {
-			}
-			
-			/// Size getter
-			virtual size_t size() = 0;
-			
-		protected:
-			/// Constructor
-			DTPrivateBase(NodeType type) : pNodeType(type), RefCounted() {};
-	};
+	
 	
 	/** Simple value holder. */
 	class DTPrivateSimple : public DTPrivateBase {
-		public:
+		protected:
 			/// Type of the field
 			DVariant::Type mType;
 		
@@ -159,30 +134,35 @@ namespace Opde {
 			int mSize;
 			
 			/// Enum holder. for enumerated types, NULL otherwise
-			DEnum* mEnum;
+			DEnumPtr mEnum;
 			
+		public:
 			/// Constructor
-			DTPrivateSimple(const DVariant::Type& type, size_t size, DEnum *_enum) : DTPrivateBase(NT_SIMPLE), 
+			DTPrivateSimple(const DVariant::Type& type, size_t size, DEnumPtr _enum) : DTPrivateBase(NT_SIMPLE), 
 				mType(type), mEnum(_enum), mSize(size) {
-				
-				if (mEnum != NULL)
-					mEnum->addRef();
 			};
 		
 			/// Destructor
 			virtual ~DTPrivateSimple() {
-				if (mEnum != NULL)
-					mEnum->release();
+			}
+			
+			/// Enum getter
+			virtual DEnumPtr getEnum() {
+				return mEnum;
 			}
 			
 			/// true if the simple type uses enumeration/bitfield
 			bool isEnumerated() {
-				return (mEnum != NULL);
+				return (!mEnum.isNull());
 			}
 			
 			/// Size of the simple type (of the data holder)
-			virtual size_t size() {
+			virtual int size() {
 				return mSize;
+			}
+			
+			virtual DVariant::Type type() {
+				return mType;
 			}
 	};
 	
@@ -199,33 +179,22 @@ namespace Opde {
 			bool mUnioned;
 			
 			/// Array type constructor. Constructs an array type
-			DTPrivateStructured(DTypeDef* type, size_t size) : DTPrivateBase(NT_ARRAY), mArraySize(size), mSubTypes(), mUnioned(false) {
+			DTPrivateStructured(DTypeDefPtr type, size_t size) : DTPrivateBase(NT_ARRAY), mArraySize(size), mSubTypes(), mUnioned(false) {
 				mSubTypes.push_back(type);
-				type->addRef();
 			}
 			
 			/// Struct/Union constructor
 			DTPrivateStructured(const DTypeDefVector& types, bool unioned) : DTPrivateBase(NT_STRUCT), mArraySize(0), 
 					mSubTypes(types), mUnioned(unioned) {
-				// Reference the contained type defs
-				DTypeDefVector::const_iterator it = mSubTypes.begin();
-				for(; it != mSubTypes.end(); it++) {
-					(*it)->addRef();
-				}
 			}
 			
 			/// Destructor
 			virtual ~DTPrivateStructured() {
-				DTypeDefVector::const_iterator it = mSubTypes.begin();
-				
-				for(; it != mSubTypes.end(); it++) 
-					(*it)->release();
-					
 				mSubTypes.clear();
 			}
 			
 			/// Calculates the total size of this structured private type
-			virtual size_t size() {
+			virtual int size() {
 				if (mArraySize == 0) { // Struct/union
 					// For struct, sum all the members. For Union, compute maximum.
 					size_t maxsz = 0, sumsz = 0;
@@ -255,17 +224,17 @@ namespace Opde {
 	
 	
 	//------------------------------------
-	DTypeDef::DTypeDef(const std::string& name, const DTypeDef& src) : mDefVal(0), RefCounted() {
+	DTypeDef::DTypeDef(const std::string& name, const DTypeDef& src) : mDefVal(0) {
 		mPriv = src.mPriv;
-		mPriv->addRef();
 		
 		mDefVal = src.mDefVal;
 		mTypeName = name;
+		mDefaultUsed = src.mDefaultUsed;
 	}
 	
 	//------------------------------------
 	// Field constructor
-	DTypeDef::DTypeDef(const std::string& name, const DVariant& templ, int size, DEnum* _enum) : mTypeName(name), mDefVal(templ), RefCounted() {
+	DTypeDef::DTypeDef(const std::string& name, const DVariant& templ, int size, DEnumPtr _enum) : mTypeName(name), mDefVal(templ) {
 		// Check for constraints
 		
 		// zero size is meaningles
@@ -282,7 +251,7 @@ namespace Opde {
 		
 		// Bitfield controled field which is not uint
 		
-		if (_enum != NULL && _enum->isBitfield() && templ.type() != DVariant::DV_UINT)
+		if (!_enum.isNull() && _enum->isBitfield() && templ.type() != DVariant::DV_UINT)
 			OPDE_EXCEPT("Only uint can be used for bitfield controled fields", "DTypeDef::DTypeDef");
 		
 		// Size <=0 and not string
@@ -298,7 +267,7 @@ namespace Opde {
 	
 	//------------------------------------
 	// Field constructor, no default value
-	DTypeDef::DTypeDef(const std::string& name, const DVariant::Type type, int size, DEnum* _enum) : mTypeName(name), mDefVal(), RefCounted() {
+	DTypeDef::DTypeDef(const std::string& name, const DVariant::Type type, int size, DEnumPtr _enum) : mTypeName(name), mDefVal() {
 		// Check for constraints
 		
 		// zero size is meaningles
@@ -315,7 +284,7 @@ namespace Opde {
 		
 		// Bitfield controled field which is not uint
 		
-		if (_enum != NULL && _enum->isBitfield() && type != DVariant::DV_UINT)
+		if (!_enum.isNull() && _enum->isBitfield() && type != DVariant::DV_UINT)
 			OPDE_EXCEPT("Only uint can be used for bitfield controled fields", "DTypeDef::DTypeDef");
 		
 		
@@ -325,7 +294,6 @@ namespace Opde {
 		
 		mTypeName = name;
 		
-		mDefVal = DVariant();
 		mDefaultUsed = false;
 		
 		mPriv = new DTPrivateSimple(type, size, _enum);
@@ -333,7 +301,7 @@ namespace Opde {
 	
 	//------------------------------------
 	// Array constructor
-	DTypeDef::DTypeDef(DTypeDef* member, int size) : mTypeName(member->name()), mDefVal(0), RefCounted() {
+	DTypeDef::DTypeDef(DTypeDefPtr member, int size) : mTypeName(member->name()), mDefVal() {
 		// Check the member for being a dynamic length string (prohibited)
 		if (member->size() <= 0)
 			OPDE_EXCEPT("Dynamic sized type is not supported as a field", "DTypeDef::DTypeDef");
@@ -384,12 +352,14 @@ namespace Opde {
 		
 		_makeFieldMap();
 		
+		mDefaultUsed = false;
+		
 		mPriv = new DTPrivateStructured(member, size);
 	}
 	
 	//------------------------------------
 	// Struct/Union constructor
-	DTypeDef::DTypeDef(const std::string& name, DTypeDefVector members, bool unioned) :  mDefVal(0), RefCounted() {
+	DTypeDef::DTypeDef(const std::string& name, DTypeDefVector members, bool unioned) :  mDefVal() {
 		// Check all the members, if any of those is variable length, throw an exception
 		DTypeDefVector::const_iterator mit = members.begin();
 		
@@ -410,7 +380,7 @@ namespace Opde {
 		// Now build the field cache.
 		for (; mit != members.end(); mit++) {
 			
-			DTypeDef* member = *mit;
+			DTypeDefPtr member = *mit;
 			
 			// if the member is a container
 			if (!member->isField()) { // unfold the fields
@@ -457,35 +427,55 @@ namespace Opde {
 		
 		_makeFieldMap();
 		
+		mDefaultUsed = false;
+		
 		mPriv = new DTPrivateStructured(members, unioned);
 	}
 	
 	//------------------------------------
 	DTypeDef::~DTypeDef() {
-		mPriv->release();
 	}
 	
 	//------------------------------------
 	bool DTypeDef::isField() const {
-		return (mPriv->pNodeType == DTPrivateBase::NT_SIMPLE);
+		return (mPriv->mNodeType == DTPrivateBase::NT_SIMPLE);
 	}
 	
 	//------------------------------------
 	bool DTypeDef::isArray() const {
-		return (mPriv->pNodeType == DTPrivateBase::NT_ARRAY);
+		return (mPriv->mNodeType == DTPrivateBase::NT_ARRAY);
 	}
 	
 	//------------------------------------
 	bool DTypeDef::isStruct() const {
-		return (mPriv->pNodeType == DTPrivateBase::NT_STRUCT);
+		return (mPriv->mNodeType == DTPrivateBase::NT_STRUCT);
 	}
 	
 	//------------------------------------
 	bool DTypeDef::isEnumerated() const {
 		if (isField()) {
-			return dynamic_cast<DTPrivateSimple*>(mPriv)->isEnumerated();
+			return mPriv->isEnumerated();
 		} else 
 			return false;
+	}
+	
+	//------------------------------------
+	char* DTypeDef::create() {
+		char* data = new char[size()];
+		
+		// memset anyone?
+		for (int x = 0; x < size(); ++x) 
+			data[x] = '\0';
+		
+		// iterate the fields. If the field has a default value, fill
+		Fields::iterator it = mFields.begin();
+		
+		for (; it != mFields.end(); ++it) {
+			if (it->type->hasDefault())
+				it->setDefault(data);
+		}
+		
+		return data;
 	}
 	
 	//------------------------------------
@@ -494,11 +484,8 @@ namespace Opde {
 	}
 	
 	//------------------------------------
-	const DEnum* DTypeDef::getEnum() {
-		if (isField()) {
-			return dynamic_cast<DTPrivateSimple*>(mPriv)->mEnum;
-		} else 
-			return false;
+	const DEnumPtr DTypeDef::getEnum() {
+		return mPriv->getEnum();
 	}
 	
 	//------------------------------------
@@ -507,6 +494,7 @@ namespace Opde {
 			OPDE_EXCEPT("Default value can only be set on field types", "DTypeDef::setDefault");
 		
 		mDefVal = val;
+		mDefaultUsed = true;
 	}
 	
 	//------------------------------------
@@ -524,7 +512,7 @@ namespace Opde {
 	}
 	
 	//------------------------------------
-	void* DTypeDef::set(void* dataptr, const std::string& field, DVariant& nval) {
+	void* DTypeDef::set(void* dataptr, const std::string& field, const DVariant& nval) {
 		if (isField()) //  && field=="" - I do not waste time to check, I choose to believe!
 			_set(dataptr, nval);
 		
@@ -540,12 +528,11 @@ namespace Opde {
 	//------------------------------------
 	DVariant DTypeDef::_get(void *ptr) {
 		// Based on the type of the data and size, construct the Variant and return
-		const DTPrivateSimple* ps = dynamic_cast<DTPrivateSimple*>(mPriv);
 		
-		if (ps->mType == DVariant::DV_BOOL) {
+		if (mPriv->type() == DVariant::DV_BOOL) {
 			bool bl;
 			
-			switch (ps->mSize) {
+			switch (mPriv->size()) {
 				case 1: bl = *reinterpret_cast<uint8_t*>(ptr) != 0; break;
 				case 2: bl = *reinterpret_cast<uint16_t*>(ptr) != 0; break;
 				case 4: bl = *reinterpret_cast<uint32_t*>(ptr) != 0; break;
@@ -554,16 +541,16 @@ namespace Opde {
 			}
 			return DVariant(bl);
 			
-		} else if(ps->mType == DVariant::DV_FLOAT) {
-			switch (ps->mSize) {
+		} else if(mPriv->type() == DVariant::DV_FLOAT) {
+			switch (mPriv->size()) {
 				case 4: return DVariant(*reinterpret_cast<float*>(ptr));
 				case 8: return DVariant((float)*reinterpret_cast<double*>(ptr));
 				default:
 					OPDE_EXCEPT("Unsupported float size", "DTypeDef::_get");
 			}
 			
-		} else if(ps->mType == DVariant::DV_INT) {
-			switch (ps->mSize) {
+		} else if(mPriv->type() == DVariant::DV_INT) {
+			switch (mPriv->size()) {
 				case 1: return DVariant(*reinterpret_cast<int8_t*>(ptr));
 				case 2: return DVariant(*reinterpret_cast<int16_t*>(ptr));
 				case 4: return DVariant(*reinterpret_cast<int32_t*>(ptr));
@@ -571,8 +558,8 @@ namespace Opde {
 					OPDE_EXCEPT("Unsupported int size", "DTypeDef::_get");
 			}
 			
-		} else if(ps->mType == DVariant::DV_UINT) {
-			switch (ps->mSize) {
+		} else if(mPriv->type() == DVariant::DV_UINT) {
+			switch (mPriv->size()) {
 				case 1: return DVariant(*reinterpret_cast<uint8_t*>(ptr));
 				case 2: return DVariant(*reinterpret_cast<uint16_t*>(ptr));
 				case 4: return DVariant(*reinterpret_cast<uint32_t*>(ptr));
@@ -580,10 +567,10 @@ namespace Opde {
 					OPDE_EXCEPT("Unsupported int size", "DTypeDef::_get");
 			}
 			
-		} else if(ps->mType == DVariant::DV_STRING) {
+		} else if(mPriv->type() == DVariant::DV_STRING) {
 				// special - either zero terminated, fixed size, or length specified as a first byte.
 				// I can only support the variable length string alone, which is ok
-				if (ps->mSize == -1) {// Variable length string
+				if (mPriv->size() == -1) {// Variable length string
 					// First 4 bytes size uint, then data
 					uint32_t* uptr = reinterpret_cast<uint32_t*>(ptr);
 					
@@ -591,12 +578,12 @@ namespace Opde {
 				} else {
 					// compose a string out of the buffer (max len is mSize, can be less)
 					int len = strlen(reinterpret_cast<char*>(ptr));
-					return DVariant(reinterpret_cast<char*>(ptr), std::min(ps->mSize, len));
+					return DVariant(reinterpret_cast<char*>(ptr), std::min(mPriv->size(), len));
 				}
 				
 				OPDE_EXCEPT("String not supported now", "DTypeDef::_get");
 				
-		} else if(ps->mType == DVariant::DV_VECTOR) {			
+		} else if(mPriv->type() == DVariant::DV_VECTOR) {			
 				float x, y, z;
 				float* fptr = (float*)ptr;
 				
@@ -612,10 +599,8 @@ namespace Opde {
 	
 	//------------------------------------
 	void* DTypeDef::_set(void* ptr, const DVariant& val) {
-		const DTPrivateSimple* ps = dynamic_cast<DTPrivateSimple*>(mPriv);
-		
-		if (ps->mType == DVariant::DV_BOOL) {
-			switch (ps->mSize) {
+		if (mPriv->type() == DVariant::DV_BOOL) {
+			switch (mPriv->size()) {
 				case 1: 
 					*reinterpret_cast<uint8_t*>(ptr) = val.toBool(); 
 					return ptr;
@@ -632,8 +617,8 @@ namespace Opde {
 					OPDE_EXCEPT("Unsupported bool size", "DTypeDef::_get");
 			}
 		
-		} else if(ps->mType == DVariant::DV_FLOAT) {
-			switch (ps->mSize) {
+		} else if(mPriv->type() == DVariant::DV_FLOAT) {
+			switch (mPriv->size()) {
 				case 4: 
 					*reinterpret_cast<float*>(ptr) = val.toFloat(); 
 					return ptr;
@@ -646,8 +631,8 @@ namespace Opde {
 					OPDE_EXCEPT("Unsupported float size", "DTypeDef::_get");
 			}
 			
-		} else if(ps->mType == DVariant::DV_INT) {
-			switch (ps->mSize) {
+		} else if(mPriv->type() == DVariant::DV_INT) {
+			switch (mPriv->size()) {
 				case 1: 
 					*reinterpret_cast<int8_t*>(ptr)  = val.toInt();
 					return ptr;
@@ -663,8 +648,8 @@ namespace Opde {
 					OPDE_EXCEPT("Unsupported int size", "DTypeDef::_get");
 			}
 			
-		} else if(ps->mType == DVariant::DV_UINT) {
-			switch (ps->mSize) {
+		} else if(mPriv->type() == DVariant::DV_UINT) {
+			switch (mPriv->size()) {
 				case 1: 
 					*reinterpret_cast<uint8_t*>(ptr)  = val.toUInt();
 					return ptr;
@@ -681,10 +666,10 @@ namespace Opde {
 					OPDE_EXCEPT("Unsupported int size", "DTypeDef::_get");
 			}
 			
-		} else if(ps->mType == DVariant::DV_STRING) {
+		} else if(mPriv->type() == DVariant::DV_STRING) {
 				// special - either zero terminated, fixed size, or length specified as a first byte.
 				// I can only support the variable length string alone, which is ok
-				if (ps->mSize == -1) {// Variable length string
+				if (mPriv->size() == -1) {// Variable length string
 					/* I would have to look at the previous size of the void, which I do not have.
 					 I simply alloc a new one and let the caller do the deallocation and stuff
 					*/
@@ -714,17 +699,17 @@ namespace Opde {
 					int len = s.length();
 					
 					// Copy the string to the buffer. Limit by 1 to have a trailing zero at end
-					s.copy(reinterpret_cast<char*>(ptr), ps->mSize - 1);
+					s.copy(reinterpret_cast<char*>(ptr), mPriv->size() - 1);
 					
 					// Terminating zero.
-					cptr[min(ps->mSize - 1, len)] = '\0';
+					cptr[min(mPriv->size() - 1, len)] = '\0';
 					
 					return ptr;
 				}
 				
 				OPDE_EXCEPT("String not supported now", "DTypeDef::_get");
 				
-		} else if(ps->mType == DVariant::DV_VECTOR) {			
+		} else if(mPriv->type() == DVariant::DV_VECTOR) {			
 				float* fptr = reinterpret_cast<float*>(ptr);
 				
 				Vector3 v = val.toVector();
