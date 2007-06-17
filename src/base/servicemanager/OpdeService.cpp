@@ -25,4 +25,6 @@ namespace Opde {
 	Service::Service(ServiceManager* manager) : mServiceManager(manager) {
 	}
 	
+	Service::~Service() {
+	}
 }

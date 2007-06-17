@@ -36,14 +36,14 @@ namespace Opde {
 	class ServiceManager : public Singleton<ServiceManager>, public NonCopyable {
 		private:
 			typedef std::map< std::string, ServiceFactory* > ServiceFactoryMap;
-			typedef std::map< std::string, Service* > ServiceInstanceMap;
+			typedef std::map< std::string, ServicePtr > ServiceInstanceMap;
 		
-			ServiceFactoryMap serviceFactories;
-			ServiceInstanceMap serviceInstances;
+			ServiceFactoryMap mServiceFactories;
+			ServiceInstanceMap mServiceInstances;
 		
 			ServiceFactory* findFactory(const std::string& name);
-			Service* findService(const std::string& name);
-			Service* createInstance(const std::string& name);
+			ServicePtr findService(const std::string& name);
+			ServicePtr createInstance(const std::string& name);
 		public:
 			ServiceManager();
 			
@@ -61,7 +61,7 @@ namespace Opde {
 			* @param name The service type name (The name returned by the ServiceFactory)
 			* @see ServiceFactory
 			*/
-			Service* getService(const std::string& name);
+			ServicePtr getService(const std::string& name);
 	};
 }
 

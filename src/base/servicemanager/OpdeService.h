@@ -21,8 +21,8 @@
 #ifndef __OPDESERVICE_H
 #define __OPDESERVICE_H
  
-#include "OpdeNonCopyable.h" 
-#include "OpdeServiceManager.h" 
+#include "NonCopyable.h" 
+#include "SharedPtr.h"
 
 namespace Opde {
 	 
@@ -36,8 +36,11 @@ namespace Opde {
 		
 			public:
 				Service(ServiceManager* manager);
+				virtual ~Service();
 	};
-		
+	
+	/// A shared pointer to service
+	typedef shared_ptr<Service> ServicePtr;
 }
  
  

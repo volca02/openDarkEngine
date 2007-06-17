@@ -19,11 +19,12 @@
  *
  *****************************************************************************/
  
+#include <iostream>
 
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
 #include "OpdeException.h"
-
+#include "logger.h"
 
 using namespace std;
 
@@ -31,19 +32,35 @@ namespace Opde {
 	
 	template<> ServiceManager* Singleton<ServiceManager>::ms_Singleton = 0;
 		
-	ServiceManager::ServiceManager() {
+	ServiceManager::ServiceManager() : mServiceFactories(), mServiceInstances() {
 		
 	}
 	
 	ServiceManager::~ServiceManager() {
-		// delete all factories registered
-		ServiceFactoryMap::iterator factory_it = serviceFactories.begin();
+		// Will release all services
+		LOG_DEBUG("ServiceManager: Releasing all services");
 		
-		for (; factory_it != serviceFactories.end(); factory_it++) {
+		ServiceInstanceMap::iterator s_it = mServiceInstances.begin();
+		
+		for (; s_it != mServiceInstances.end(); ++s_it) {
+			std::cerr << " * Delete of " << s_it->first << std::endl;
+			s_it->second.setNull();
+		}
+		
+		mServiceInstances.clear();
+		LOG_DEBUG("ServiceManager: Services released");
+		
+		// delete all factories registered
+		
+		LOG_DEBUG("ServiceManager: Deleting all service factories");
+		ServiceFactoryMap::iterator factory_it = mServiceFactories.begin();
+		
+		for (; factory_it != mServiceFactories.end(); ++factory_it) {
 			delete factory_it->second;
 		}
 		
-		serviceFactories.clear();
+		mServiceFactories.clear();
+		LOG_DEBUG("ServiceManager: Service factories deleted");
 	}
 	
 	ServiceManager& ServiceManager::getSingleton(void) {
@@ -57,45 +74,50 @@ namespace Opde {
 	
 	//------------------ Main implementation ------------------
 	void ServiceManager::addServiceFactory(ServiceFactory* factory) {
-		serviceFactories.insert(make_pair(factory->getName(), factory));
+		mServiceFactories.insert(make_pair(factory->getName(), factory));
 	}
 	
 	ServiceFactory* ServiceManager::findFactory(const std::string& name) {
 		
-		ServiceFactoryMap::const_iterator factory_it = serviceFactories.find(name);
+		ServiceFactoryMap::const_iterator factory_it = mServiceFactories.find(name);
 		
-		if (factory_it != serviceFactories.end()) {
+		if (factory_it != mServiceFactories.end()) {
 			return factory_it->second;
 		} else {
 			return NULL;
 		}
 	}
 	
-	Service* ServiceManager::findService(const std::string& name) {
+	ServicePtr ServiceManager::findService(const std::string& name) {
 		
-		ServiceInstanceMap::iterator service_it = serviceInstances.find(name);
+		ServiceInstanceMap::iterator service_it = mServiceInstances.find(name);
 		
-		if (service_it != serviceInstances.end()) {
+		if (service_it != mServiceInstances.end()) {
 			return service_it->second;
 		} else {
-			return NULL;
+			ServicePtr n(NULL);
+			return n;
 		}
 	}
 	
-	Service* ServiceManager::createInstance(const std::string& name) {
+	ServicePtr ServiceManager::createInstance(const std::string& name) {
 		ServiceFactory* factory = findFactory(name);
 		
+		LOG_DEBUG("ServiceManager: Service instance for %s not found, will create.", name.c_str());
+		
 		if (factory != NULL) { // Found a factory for the Service name
-			return factory->createInstance(this);
+			ServicePtr ns = factory->createInstance(this);
+			mServiceInstances.insert(make_pair(name, ns));
+			return ns;
 		} else {
 			OPDE_EXCEPT(string("Factory named ") + name + string(" not found"), "OpdeServiceManager::getService");
 		}
 	}
 	
-	Service* ServiceManager::getService(const std::string& name) {
-		Service *service = findService(name);
+	ServicePtr ServiceManager::getService(const std::string& name) {
+		ServicePtr service = findService(name);
 		
-		if (service != NULL) 
+		if (!service.isNull()) 
 			return service;
 		else {
 			return createInstance(name);
