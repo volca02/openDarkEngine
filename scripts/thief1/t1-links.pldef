@@ -1,0 +1,286 @@
+// ******************************************************************************
+// *
+// *    This file is part of openDarkEngine project
+// *    Copyright (C) 2005-2006 openDarkEngine team
+// *
+// *    This program is free software; you can redistribute it and/or modify
+// *    it under the terms of the GNU General Public License as published by
+// *    the Free Software Foundation; either version 2 of the License, or
+// *    (at your option) any later version.
+// *
+// *    This program is distributed in the hope that it will be useful,
+// *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+// *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// *    GNU General Public License for more details.
+// *
+// *    You should have received a copy of the GNU General Public License
+// *    along with this program; if not, write to the Free Software
+// *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// *
+// *****************************************************************************
+
+// The thief 1 relation definitions
+
+relation MetaProp {
+    hidden
+}
+
+
+relation Contains {
+}
+
+
+relation Corpse {
+    no_data
+}
+
+
+relation Flinderize {
+}
+
+
+relation CulpableFor {
+    no_data
+}
+
+
+relation Receptron {
+    hidden
+}
+
+
+relation StimSensor {
+}
+
+
+relation ReactParam {
+}
+
+
+relation arSrc {
+    hidden
+}
+
+
+relation arSrcDesc {
+    hidden
+}
+
+
+relation PlayerFactory {
+    no_data
+}
+
+
+relation Firer {
+    no_data
+}
+
+
+relation FrobProxy {
+}
+
+
+relation CurWeapon {
+}
+
+
+relation Weapon {
+    no_data
+}
+
+
+relation WHInflated {
+    no_data
+}
+
+
+relation WHBlock {
+}
+
+
+relation Lock {
+}
+
+
+relation FlowContact {
+}
+
+
+relation ScriptContact {
+    no_data
+}
+
+
+relation SoundDescription {
+    no_data
+}
+
+
+relation ControlDevice {
+    no_data
+}
+
+
+relation Route {
+    no_data
+}
+
+
+relation ScriptParams {
+}
+
+
+relation Owns {
+    no_data
+}
+
+
+relation Population {
+    no_data
+}
+
+
+relation Transmute {
+    no_data
+}
+
+
+relation OldConversation {
+    no_data
+}
+
+
+relation CreatureAttachment {
+}
+
+
+relation CorpsePart {
+    no_data
+}
+
+
+relation NowPicking {
+}
+
+
+relation RenderFlash {
+    no_data
+}
+
+
+relation VoiceOver {
+}
+
+
+relation AIConversationActor {
+}
+
+
+relation AIProjectile {
+}
+
+
+relation AIPtDibs {
+    no_data
+}
+
+
+relation AIPatrol {
+    no_data
+}
+
+
+relation AICurrentPatrol {
+    no_data
+}
+
+
+relation AIAttack {
+}
+
+
+relation AIRangedWeapon {
+    no_data
+}
+
+
+relation AIFleeSource {
+    no_data
+}
+
+
+relation AIFleeDest {
+}
+
+
+relation AINoFlee {
+}
+
+
+relation AIWatchObj {
+    no_data // Just a hack, the data seem to be present!
+}
+
+
+relation AIDefendObj {
+}
+
+
+relation AICamera {
+}
+
+
+relation AIRetreatPtDibs {
+    no_data
+}
+
+
+relation AIVantagePtDibs {
+    no_data
+}
+
+
+relation AIFollowObj {
+}
+
+
+relation AIDoor {
+}
+
+
+relation AIInvest {
+    no_data
+}
+
+
+relation AIAwareness {
+}
+
+
+relation VoiceLink {
+    no_data
+}
+
+
+relation TPath {
+}
+
+
+relation TPathInit {
+    no_data
+}
+
+
+relation TPathNext {
+    no_data
+}
+
+
+relation PhysAttach {
+    no_data
+}
+
+
+relation ParticleAttachement {
+}
