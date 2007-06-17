@@ -157,22 +157,21 @@ namespace Opde {
 		
 		std::deque < Ogre::String >::iterator it;
 		
-		if (mMessages.size() <= lines) { // no mPosition involvable
-			it = mMessages.begin();
-			lines = mMessages.size();
-		} else {
-			if (mPosition >= lines) { // enough lines in the past to do current position
-				it = mMessages.begin() + (mPosition - lines);
-			} else { // Not enough lines in the past. Do from start
-				it = mMessages.begin();
-				lines = mMessages.size() > lines ? lines : mMessages.size();
-				
-				
-				
-			}
+		size_t size = mMessages.size();
+		
+		if (mPosition >= size) {
+			mPosition = size - 1;
 		}
 		
-		for (;lines > 0; lines--, ++it) {
+		if (mPosition < 0) {
+			mPosition = 0;
+		}
+
+		it = mMessages.begin() + mPosition;
+		lines = (mMessages.size() - mPosition) > lines ? lines : (mMessages.size() - mPosition);
+		
+		
+		for (;lines > 0; --lines, ++it) {
 			target.push_back(*it);
 		}
 	}
