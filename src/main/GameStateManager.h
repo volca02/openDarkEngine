@@ -36,7 +36,9 @@
 #include "stdlog.h"
 #include "ConsoleBackend.h"
 #include "OpdeServiceManager.h"
+
 #include "DTypeScriptLoader.h"
+#include "PLDefScriptLoader.h"
 
 namespace Opde {
 	
@@ -134,6 +136,9 @@ namespace Opde {
 			
 			// Loader for the DType scripts
 			DTypeScriptLoader* mDTypeScriptLdr;
+			
+			// Loader for the PLDef scripts
+			PLDefScriptLoader* mPLDefScriptLdr;
 	};
 	
 }

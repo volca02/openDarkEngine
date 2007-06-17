@@ -27,6 +27,7 @@
 #include "WorldRepService.h"
 #include "BinaryService.h"
 #include "GameService.h"
+#include "LinkService.h"
 
 #include <OgreRoot.h>
 #include <OgreWindowEventUtilities.h>
@@ -66,17 +67,17 @@ namespace Opde {
 			delete mDarkSMFactory;
 		}
 		
-		delete mLogger;
-		delete mStdLog;
-		delete mConsoleBackend;
-		
 		delete mDTypeScriptLdr; // Unregisters itself
+		delete mPLDefScriptLdr; // Unregisters itself
 		
 		OIS::InputManager::destroyInputSystem(mInputSystem);
 		
-		
 		delete mServiceMgr;
 		
+		delete mLogger;
+		delete mStdLog;
+		
+		delete mConsoleBackend;
 		delete mRoot;
 	}
 	
@@ -153,6 +154,9 @@ namespace Opde {
 		// Allocate and register the DType script loader. Registers itself
 		mDTypeScriptLdr = new DTypeScriptLoader();
 		
+		// Allocate and register the PLDef script loader. Registers itself
+		mPLDefScriptLdr = new PLDefScriptLoader();
+		
 		// Setup resources.
 		setupResources();
 	
@@ -197,6 +201,7 @@ namespace Opde {
 		new WorldRepServiceFactory();
 		new BinaryServiceFactory();
 		new GameServiceFactory();
+		new LinkServiceFactory();
 	}
 			
 	/// Method which will define the source of resources (other than current folder)
@@ -263,6 +268,20 @@ namespace Opde {
 		windowHndStr << (unsigned int) windowHnd;
 		paramList.insert( std::make_pair( std::string( "WINDOW" ), windowHndStr.str() ) );
 	
+		/* // Non-exclusive input - for debugging purposes
+		#if defined OIS_WIN32_PLATFORM
+		paramList.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_FOREGROUND" )));
+		paramList.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_NONEXCLUSIVE")));
+		paramList.insert(std::make_pair(std::string("w32_keyboard"), std::string("DISCL_FOREGROUND")));
+		paramList.insert(std::make_pair(std::string("w32_keyboard"), std::string("DISCL_NONEXCLUSIVE")));
+		#elif defined OIS_LINUX_PLATFORM
+		paramList.insert(std::make_pair(std::string("x11_mouse_grab"), std::string("false")));
+		paramList.insert(std::make_pair(std::string("x11_mouse_hide"), std::string("false")));
+		paramList.insert(std::make_pair(std::string("x11_keyboard_grab"), std::string("false")));
+		paramList.insert(std::make_pair(std::string("XAutoRepeatOn"), std::string("true")));
+		#endif
+		*/
+		
 		// Create inputsystem
 		mInputSystem = OIS::InputManager::createInputSystem( paramList );
 	
