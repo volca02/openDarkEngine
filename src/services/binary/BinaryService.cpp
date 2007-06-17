@@ -20,6 +20,8 @@
  
 #include "BinaryService.h"
 #include "OpdeException.h"
+#include "logger.h"
+#include "ConsoleBackend.h"
 
 using namespace std;
 
@@ -29,6 +31,8 @@ namespace Opde {
 	/*-------------------- BinaryService -------------------*/
 	/*------------------------------------------------------*/
 	BinaryService::BinaryService(ServiceManager* manager) : mTypeGroups(), mEnumGroups(), Service(manager) {
+		Opde::ConsoleBackend::getSingleton().registerCommandListener("dtdesc", dynamic_cast<ConsoleCommandListener*>(this));
+		Opde::ConsoleBackend::getSingleton().setCommandHint("dtdesc", "Describe a dynamic type (param : dtype path)");
 	};
 
 	//------------------------------------	
@@ -37,8 +41,8 @@ namespace Opde {
 	};
 
 	//------------------------------------	
-	void BinaryService::addType(const std::string& group, DTypeDef* def) {
-		def->addRef();
+	void BinaryService::addType(const std::string& group, DTypeDefPtr def) {
+		LOG_DEBUG("BinaryService: Inserting type %s/%s", group.c_str(), def->name().c_str());
 		
 		std::pair<TypeGroups::iterator, bool> grp = mTypeGroups.insert(TypeGroups::value_type(group, TypeMap()));
 		
@@ -46,8 +50,8 @@ namespace Opde {
 	}
 
 	//------------------------------------	
-	void BinaryService::addEnum(const std::string& group, const std::string& name, DEnum* enm) {
-		enm->addRef();
+	void BinaryService::addEnum(const std::string& group, const std::string& name, DEnumPtr enm) {
+		LOG_DEBUG("BinaryService: Inserting enum %s/%s", group.c_str(), name.c_str());
 		
 		std::pair<EnumGroups::iterator, bool> grp = mEnumGroups.insert(EnumGroups::value_type(group, EnumMap()));
 		
@@ -55,7 +59,7 @@ namespace Opde {
 	}
 
 	//------------------------------------	
-	DTypeDef* BinaryService::getType(const std::string& name) const {
+	DTypeDefPtr BinaryService::getType(const std::string& name) const {
 		// If the separator is present, split group - typename
 		std::pair<string, string> path = splitPath(name);
 		
@@ -63,7 +67,7 @@ namespace Opde {
 	}
 
 	//------------------------------------	
-	DTypeDef* BinaryService::getType(const std::string& group, const std::string& name) const {
+	DTypeDefPtr BinaryService::getType(const std::string& group, const std::string& name) const {
 		// find the group
 		TypeGroups::const_iterator git = mTypeGroups.find(group);
 		
@@ -72,7 +76,6 @@ namespace Opde {
 			TypeMap::const_iterator it = git->second.find(name);
 			
 			if (it != git->second.end()) {
-				(*it).second->addRef();
 				return ((*it).second);
 			} else
 				OPDE_EXCEPT(string("Could not find type ") + name + " in group " + group, "BinaryService::getType");
@@ -81,7 +84,7 @@ namespace Opde {
 	}
 	
 	//------------------------------------	
-	DEnum* BinaryService::getEnum(const std::string& name) const {
+	DEnumPtr BinaryService::getEnum(const std::string& name) const {
 		// If the separator is present, split group - typename
 		std::pair<string, string> path = splitPath(name);
 		
@@ -89,7 +92,7 @@ namespace Opde {
 	}
 
 	//------------------------------------	
-	DEnum* BinaryService::getEnum(const std::string& group, const std::string& name) const {
+	DEnumPtr BinaryService::getEnum(const std::string& group, const std::string& name) const {
 		// find the group
 		EnumGroups::const_iterator git = mEnumGroups.find(group);
 		
@@ -98,7 +101,6 @@ namespace Opde {
 			EnumMap::const_iterator it = git->second.find(name);
 			
 			if (it != git->second.end()) {
-				(*it).second->addRef();
 				return ((*it).second);
 			} else
 				OPDE_EXCEPT(string("Could not find enum ") + name + " in group " + group, "BinaryService::getEnum");
@@ -113,13 +115,6 @@ namespace Opde {
 		
 		for (; git != mTypeGroups.end(); git++) {
 			// iterate all the dtypedefs, release and clear after this is done
-			
-			TypeMap::iterator it = ((TypeMap)git->second).begin();
-			
-			for (; it != git->second.end(); it++) {
-				it->second->release();
-			}
-			
 			git->second.clear();
 		}
 		
@@ -127,21 +122,12 @@ namespace Opde {
 		
 		for (; egit != mEnumGroups.end(); egit++) {
 			// iterate all the dtypedefs, release and clear after this is done
-			
-			EnumMap::iterator it = ((EnumMap)egit->second).begin();
-			
-			for (; it != egit->second.end(); it++) {
-				it->second->release();
-			}
-			
 			egit->second.clear();
 		}
 	}
 	
 	//------------------------------------	
 	void BinaryService::clearAll() {
-		clear();
-		
 		// clear all the groups too
 		mTypeGroups.clear();
 		mEnumGroups.clear();
@@ -166,6 +152,28 @@ namespace Opde {
 		
 		return std::pair<std::string, std::string>(group_part, name_part);
 	}
+	
+	void BinaryService::commandExecuted(std::string command, std::string parameters) {
+		if (command == "dtdesc") {
+			DTypeDefPtr type;
+			
+			try {
+				DTypeDefPtr type = getType(parameters);
+			} catch (BasicException &e) {
+				LOG_ERROR("Type not found : %s", parameters.c_str());
+				return;
+			}
+			
+			
+			DTypeDef::const_iterator it = type->begin(); 
+			
+			// describe the type. Iterate through the fields, write field name, size, type
+			for (; it != type->end(); it++) {
+				LOG_INFO("[%d] %s (%d)",it->offset, it->name.c_str(), it->type->size());
+			}
+		} else LOG_ERROR("Command %s not understood by BinaryService", command.c_str());
+	}
+
 	
 	//-------------------------- Factory implementation
 	std::string BinaryServiceFactory::mName = "BinaryService";
