@@ -61,9 +61,6 @@ namespace Opde {
 		
 		mViewport = mWindow->addViewport( mCamera );
 		
-		
-		LOG_INFO("GamePlayState: Started");
-		
 		mSceneMgr->clearSpecialCaseRenderQueues();
 		mSceneMgr->setSpecialCaseRenderQueueMode(SceneManager::SCRQM_EXCLUDE);
 		
@@ -95,6 +92,8 @@ namespace Opde {
 		mConsole = new ConsoleFrontend();
 		
 		mWindow->resetStatistics();
+		
+		LOG_INFO("GamePlayState: Started");
 	}
 	
 	void GamePlayState::exit() {
@@ -107,9 +106,8 @@ namespace Opde {
 		// remove all viewports
 		mRoot->getAutoCreatedWindow()->removeAllViewports();
 		
-		delete mConsole;
-		delete mPortalOverlay;
-		delete mDebugOverlay;
+		mPortalOverlay->hide();
+		mDebugOverlay->hide();
 		
 		LOG_INFO("GamePlayState: Exited");
 	}

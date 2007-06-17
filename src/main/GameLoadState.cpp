@@ -67,8 +67,6 @@ namespace Opde {
 	}
 	
 	void GameLoadState::exit() {
-		GamePlayState* st = new GamePlayState();
-		
 		mLoadingOverlay->hide();
 		
 		mSceneMgr->destroyAllCameras();
@@ -77,8 +75,11 @@ namespace Opde {
 		
 		LOG_INFO("LoadState: Exited");
 		
-		pushState(st);
-		st->release();
+		if (mLoaded) {
+			GamePlayState* st = new GamePlayState();
+			pushState(st);
+			st->release();
+		}
 	}
 	
 	void GameLoadState::suspend() {
@@ -92,7 +93,7 @@ namespace Opde {
 			
 			mRoot->renderOneFrame();
 			
-			GameService* gsvc = static_cast<GameService*>(mServiceMgr->getService("GameService"));
+			GameServicePtr gsvc = mServiceMgr->getService("GameService").as<GameService>();
 			
 			gsvc->load("miss1.mis");
 		
