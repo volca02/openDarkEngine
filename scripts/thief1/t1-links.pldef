@@ -21,6 +21,10 @@
 
 // The thief 1 relation definitions
 
+// Default versions, both link data chunk and link chunk are 2.0
+l_ver 2.0
+d_ver 2.0
+
 relation MetaProp {
     hidden
 }
@@ -46,6 +50,8 @@ relation CulpableFor {
 
 relation Receptron {
     hidden
+    l_ver 2.1
+    d_ver 2.1
 }
 
 
@@ -59,6 +65,8 @@ relation ReactParam {
 
 relation arSrc {
     hidden
+    l_ver 2.1
+    d_ver 2.1
 }
 
 
@@ -104,13 +112,16 @@ relation Lock {
 
 
 relation FlowContact {
+    l_ver 2.1
+    d_ver 2.1
 }
 
 
 relation ScriptContact {
     no_data
+    l_ver 2.1
+    d_ver 2.1    
 }
-
 
 relation SoundDescription {
     no_data
@@ -246,6 +257,8 @@ relation AIFollowObj {
 
 
 relation AIDoor {
+    l_ver 2.1
+    d_ver 2.1
 }
 
 

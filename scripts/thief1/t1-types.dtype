@@ -2480,15 +2480,6 @@ namespace properties {
 }
 
 namespace links {
-	// Link Format (link itself)
-	struct LINK {
-	    uint32 id
-            int32 src
-	    int32 dest
-    	    uint16 flavor
-	}
-
-
 	// Label: AIAttack
 	struct AIAttack {
 		uint32 use aipriority priority = "3"
