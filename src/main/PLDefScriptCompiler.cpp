@@ -39,22 +39,25 @@ namespace Opde {
     String PLDefScriptCompiler::pldefScript_BNF =
 		"<Script> ::= {<Script_Properties>} \n"
 	
-		"<Script_Properties> ::= <LinkDefinition> \n"
+		"<Script_Properties> ::= <LinkDefinition> | <DChunkVersion> | <LChunkVersion> \n" // so I can define default version for the chunks
 	
 		"<LinkDefinition> ::= 'relation' <Unquoted_Label> '{' {<LinkParams>} '}' \n"
 		
-		"<LinkParams> ::= <DTypeName> | <QueryCache> | <LinkHidden> | <NoDType> \n"
+		"<LinkParams> ::= <DTypeName> | <FakeSize> | <LinkHidden> | <NoDType> | <DChunkVersion> | <LChunkVersion> \n"
 	
 		"<DTypeName> ::= 'dtype' <Flex_Label> \n"
 		
 		"<NoDType> ::= 'no_data' \n"
 		
-		"<QueryCache> ::= 'cache' <QueryCacheType>\n"
-	
-		"<QueryCacheType> ::= 'none' | 'all' | 'incoming' | 'outgoing' \n"
+		"<FakeSize> ::= 'fake_size' <Integer> \n" // if dark reports a different size, report that one
 		
-		"<LinkHidden> ::= 'hidden' \n" // So the link will not show up in editor or such
+		"<LinkHidden> ::= 'hidden' \n" 
 		
+		"<DChunkVersion> ::= 'd_ver' <Version> \n"
+		"<LChunkVersion> ::= 'l_ver' <Version> \n"
+		
+		"<Version> ::= <Integer> '.' <Integer> \n"
+
 		// common rules
 		"<Label> ::= <Quoted_Label> | <Unquoted_Label> \n"
 		"<Flex_Label> ::= <Quoted_Label> | <Spaced_Label> \n"
@@ -92,9 +95,11 @@ namespace Opde {
 		
 		addLexemeTokenAction("relation", ID_RELATION, &PLDefScriptCompiler::parseRelation);
 		addLexemeTokenAction("dtype", ID_DTYPE, &PLDefScriptCompiler::parseDType);
-		addLexemeTokenAction("cache", ID_CACHE, &PLDefScriptCompiler::parseCache);
+		addLexemeTokenAction("fake_size", ID_FAKESIZE, &PLDefScriptCompiler::parseFakeSize);
 		addLexemeTokenAction("no_data", ID_NO_DATA, &PLDefScriptCompiler::parseNoData);
 		
+		addLexemeTokenAction("d_ver", ID_D_VER, &PLDefScriptCompiler::parseVersion);
+		addLexemeTokenAction("l_ver", ID_L_VER, &PLDefScriptCompiler::parseVersion);
 	}
 
 	//-----------------------------------------------------------------------
@@ -151,7 +156,16 @@ namespace Opde {
 			if (!mCurrentState.no_data) // if data definition is requested
 				dt = getTypeDef("links", mCurrentState.dtypename); // TODO: Hardcoded. A problem?
 			
-			mLinkService->createRelation(mCurrentState.name, dt, mCurrentState.hidden);
+			RelationPtr rel = mLinkService->createRelation(mCurrentState.name, dt, mCurrentState.hidden);
+			
+			if (mCurrentState.fake_size >= 0)
+				rel->setFakeSize(mCurrentState.fake_size);
+			
+			rel->setChunkVersions(	mCurrentState.lmajor, 
+					     	mCurrentState.lminor, 
+					     	mCurrentState.dmajor, 
+					     	mCurrentState.dminor
+					     );
 		}
 		
 		
@@ -185,6 +199,11 @@ namespace Opde {
 		mCurrentState.dtypename = mCurrentState.name; // default
 		mCurrentState.hidden = false;
 		mCurrentState.no_data = false;
+		mCurrentState.fake_size = -1; // no fake size
+		mCurrentState.dmajor = mDefaultDMajor; // fill in the default versions
+		mCurrentState.dminor = mDefaultDMinor;
+		mCurrentState.lmajor = mDefaultLMajor;
+		mCurrentState.lminor = mDefaultLMinor;
 	}
 	
 	//-----------------------------------------------------------------------
@@ -192,11 +211,18 @@ namespace Opde {
 		// Next token contains the Dtype name
 		mCurrentState.dtypename = getNextTokenLabel();
 	}
-		
 	
 	//-----------------------------------------------------------------------
-	void PLDefScriptCompiler::parseCache(void) {
-		mCurrentState.cachetype = getNextTokenLabel();
+	void PLDefScriptCompiler::parseFakeSize(void) {
+		String slen = getNextTokenLabel();
+		
+		// convert to int
+		int fake_size = StringConverter::parseLong(slen);
+			
+		if (fake_size == 0)
+			logParseError("Zero or invalid fake_size : " + slen);
+		
+		mCurrentState.fake_size = fake_size;
 	}
 		
 	
@@ -208,6 +234,42 @@ namespace Opde {
 	//-----------------------------------------------------------------------
 	void PLDefScriptCompiler::parseNoData(void) {
 		mCurrentState.no_data = true;
+	}
+	
+	//-----------------------------------------------------------------------
+	void PLDefScriptCompiler::parseVersion(void) {
+		bool datachunk = getCurrentTokenID() == ID_D_VER ? true : false;
+		
+		// now read next two tokens, and set the resulting version numbers
+		String svmaj = getNextTokenLabel();
+		
+		getNextToken(); // skip the dot
+		
+		String svmin = getNextTokenLabel();
+		
+		// convert to int
+		uint maj = StringConverter::parseLong(svmaj);
+		uint min = StringConverter::parseLong(svmin);
+		
+		if (mCurrentState.state == CS_RELATION) { 
+			// fill the current state only
+			if (datachunk) {
+				mCurrentState.dmajor = maj;
+				mCurrentState.dminor = min;
+			} else {
+				mCurrentState.lmajor = maj;
+				mCurrentState.lminor = min;
+			}
+			
+		} else { // global default
+			if (datachunk) {
+				mDefaultLMajor = maj;
+				mDefaultLMinor = min;
+			} else {
+				mDefaultDMajor = maj;
+				mDefaultDMinor = min;
+			}
+		}
 	}
 
 	
