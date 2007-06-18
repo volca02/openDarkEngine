@@ -36,8 +36,8 @@ namespace Opde {
 	LinkService::~LinkService() {
 		mRelationNameMap.clear();
 		mRelationIDMap.clear();
-		mNameToFlavour.clear();
-		mFlavourToName.clear();
+		mNameToFlavor.clear();
+		mFlavorToName.clear();
 	}
 	
 	//------------------------------------------------------
@@ -51,10 +51,10 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
-	int LinkService::nameToFlavour(const std::string& name) {
-		NameToFlavour::const_iterator it = mNameToFlavour.find(name);
+	int LinkService::nameToFlavor(const std::string& name) {
+		NameToFlavor::const_iterator it = mNameToFlavor.find(name);
 		
-		if (it != mNameToFlavour.end()) {
+		if (it != mNameToFlavor.end()) {
 			return it->second;
 		} else {
 			LOG_DEBUG("LinkService: Relation not found : %s", name.c_str());
@@ -63,20 +63,22 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
-	void LinkService::createRelation(const std::string& name, DTypeDefPtr type, bool hidden) {
+	RelationPtr LinkService::createRelation(const std::string& name, DTypeDefPtr type, bool hidden) {
 		RelationPtr nr = new Relation(name, type, hidden);
 		
 		std::pair<RelationNameMap::iterator, bool> res = mRelationNameMap.insert(make_pair(name, nr));
 		
 		if (!res.second)
 			OPDE_EXCEPT("Failed to insert new instance of Relation", "LinkService::createRelation");
+		
+		return nr;
 	}
 	
 	//------------------------------------------------------
 	void LinkService::_load(DarkFileGroup* db) {
 		LOG_INFO("LinkService: Loading link definitions from file group '%s'", db->getName().c_str());
 		
-		// First, try to build the Relation Name -> flavour and reverse records
+		// First, try to build the Relation Name -> flavor and reverse records
 		/*
 		The Relations chunk should be present, and the same for all File Groups
 		As we do not know if something was already initialised or not, we just request mapping and see if it goes or not
@@ -105,10 +107,10 @@ namespace Opde {
 			RelationPtr rel = rnit->second;
 			
 			// Request the mapping to ID
-			if (!requestRelationFlavourMap(i, text, rel))
-				OPDE_EXCEPT(string("Could not map relation ") + text + " to flavour. Name/ID conflict", "LinkService::_load");
+			if (!requestRelationFlavorMap(i, text, rel))
+				OPDE_EXCEPT(string("Could not map relation ") + text + " to flavor. Name/ID conflict", "LinkService::_load");
 			
-			LOG_DEBUG("Mapped relation %s to flavour %d", text, i);
+			LOG_DEBUG("Mapped relation %s to flavor %d", text, i);
 			
 			// TODO: request relation ID map, must not fail
 			
@@ -123,8 +125,8 @@ namespace Opde {
 	void LinkService::_clear() {
 		// clear all the mappings
 		mRelationIDMap.clear();
-		mFlavourToName.clear();
-		mNameToFlavour.clear();
+		mFlavorToName.clear();
+		mNameToFlavor.clear();
 		
 		// clear all the relations
 		RelationNameMap::iterator it = mRelationNameMap.begin();
@@ -136,15 +138,15 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
-	bool LinkService::requestRelationFlavourMap(int id, const std::string& name, RelationPtr rel) {
-		std::pair<FlavourToName::iterator, bool> res1 = mFlavourToName.insert(make_pair(id, name));
+	bool LinkService::requestRelationFlavorMap(int id, const std::string& name, RelationPtr rel) {
+		std::pair<FlavorToName::iterator, bool> res1 = mFlavorToName.insert(make_pair(id, name));
 		
 		if (!res1.second) {
 			if (res1.first->second != name)
 				return false;
 		}
 		
-		std::pair<NameToFlavour::iterator, bool> res2 = mNameToFlavour.insert(make_pair(name, id));
+		std::pair<NameToFlavor::iterator, bool> res2 = mNameToFlavor.insert(make_pair(name, id));
 		
 		if (!res2.second) {
 			if (res2.first->second != id)

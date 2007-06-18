@@ -31,11 +31,30 @@ using namespace std;
 namespace Opde {
 	
 	// --------------------------------------------------------------------------
-	Relation::Relation(const std::string& name, DTypeDefPtr type, bool hidden) : mID(-1), mName(name), mType(type), mHidden(hidden), mLinkMap() {
+	Relation::Relation(const std::string& name, DTypeDefPtr type, bool hidden) : 
+			mID(-1), 
+			mName(name), 
+			mType(type), 
+			mHidden(hidden), 
+			mLinkMap(),
+			mSrcDstLinkMap(),
+			mDstSrcLinkMap() {
+			
 		// clear out the maximal ID info
 		for (int i = 0; i < 16; ++i) {
 			mMaxID[i] = 0;
 		}
+		
+		if (mType.isNull())
+				mFakeSize = 0;
+			else
+				mFakeSize = mType->size();
+		
+		// Some default version values
+		mLCVMaj = 2;
+		mLCVMin = 0;
+		mDCVMaj = 2;
+		mDCVMin = 0;
 	}
 	
 	// --------------------------------------------------------------------------
@@ -143,9 +162,12 @@ namespace Opde {
 			assert(LINK_ID_FLAVOR(link->mID) == mID);
 			
 			if (load_data) {
+				assert(dsize > 0);
+				
 				// Will get deleted automatically once the LinkPtr is released...
 				link->mData = new char[dsize];
 				
+				// NOTE: It does not happen that the link data would be variable length, but if it would, reading size, then data into the buffer would be needed. It could be fine to write some serializing helpers...
 				fldata->read(link->mData, dsize); 
 			}
 			
@@ -154,8 +176,79 @@ namespace Opde {
 	}
 	
 	// --------------------------------------------------------------------------
+	// TODO: Save mask. Archetypal/non-archetypal/both binary encoded pattern
+	void Relation::save(FileGroup* db, uint saveMask) {
+		LOG_DEBUG("Relation::save starting");
+		
+		// load the links and thei're data
+		BinaryServicePtr bs = ServiceManager::getSingleton().getService("BinaryService").as<BinaryService>();
+		
+		// Link chunk name
+		string lchn = "L$" + mName;
+		string ldchn = "LD$" + mName;
+		
+		FilePtr flnk = db->createFile(lchn, mLCVMaj, mLCVMin);
+		FilePtr fldt = db->createFile(ldchn, mDCVMaj, mDCVMin);
+		
+		uint32_t dtsz = 0;
+		
+		if (!mType.isNull()) {
+			uint32_t dtsz = mType->size();
+			assert(dtsz > 0);
+			
+			fldt->writeElem(&mFakeSize, sizeof(uint32_t));
+		}
+		
+		// No need to order those. If it shows up that it would be actually better, no problem sorting those by link_id_t
+		DTypeDefPtr linkstruct = bs->getType("links", "LINK");
+		
+		char* lnkdta = linkstruct->create();
+		
+		// just write the links as they go, and write the data in parallel
+		LinkMap::const_iterator it = mLinkMap.begin();
+		
+		for (; it != mLinkMap.end(); it++) {
+			LinkPtr link = it->second;
+			
+			// Test against the link write mask
+			int conc = LINK_ID_CONCRETE(link->mID);
+			
+			
+			if (saveMask & 1 << conc) { // mask says save!
+				// write according to the structure
+				linkstruct->set(lnkdta, "id", link->mID);
+				linkstruct->set(lnkdta, "src", link->mSrc);
+				linkstruct->set(lnkdta, "dest", link->mDst);
+				linkstruct->set(lnkdta, "flavor", link->mFlavor);
+				
+				
+				flnk->write(lnkdta, linkstruct->size());
+				
+				if (!mType.isNull()) { // write the data into the data chunk
+					fldt->write(lnkdta, dtsz);
+				}
+			}
+		}
+		
+		delete lnkdta;
+		
+		LOG_DEBUG("Relation::save ended ok.");
+	}
+	
+	// --------------------------------------------------------------------------
 	void Relation::clear() {
+		// first, broadcast that we're gonna erase
+		LinkChangeMsg m;
+	
+		m.change = LNK_RELATION_CLEARED;
+		m.linkID = 0; // all links, no meaning
+	
+		// Inform the listeners about the change of data
+		broadcastLinkMessage(m);
+		
 		mLinkMap.clear();
+		mSrcDstLinkMap.clear();
+		mDstSrcLinkMap.clear();
 	}
 	
 	
@@ -251,6 +344,76 @@ namespace Opde {
 	}
 	
 	// --------------------------------------------------------------------------
+	LinkQueryResultPtr Relation::getAllLinks(int src, int dst) const {
+		// based on case of the query, return result
+		assert(src != 0 || dst != 0 ); // No all-links query
+		
+		if (src == 0) { // all link sources
+			LinkQueryResultPtr res = new LinkQueryResult();
+			
+			ObjectLinkMap::const_iterator r = mDstSrcLinkMap.find(dst);
+			
+			if (r != mDstSrcLinkMap.end()) {
+				// all the components of the secondary map go into the set
+				ObjectIDToLinks::const_iterator ri = r->second.begin();
+			
+				for (; ri != r->second.end(); ++ri) {
+					res->insert(ri->second.begin(), ri->second.end());
+				}
+				
+				return res;
+			}
+			
+		} else if (dst == 0) { // all link destinations
+			
+			LinkQueryResultPtr res = new LinkQueryResult();
+			
+			ObjectLinkMap::const_iterator r = mSrcDstLinkMap.find(src);
+			
+			if (r != mSrcDstLinkMap.end()) {
+				// all the components of the secondary map go into the set
+				ObjectIDToLinks::const_iterator ri = r->second.begin();
+			
+				for (; ri != r->second.end(); ++ri) {
+					res->insert(ri->second.begin(), ri->second.end());
+				}
+				
+				return res;
+			}
+			
+		} else { // both src and dst are nonzero
+			LinkQueryResultPtr res = new LinkQueryResult();
+			
+			ObjectLinkMap::const_iterator r = mSrcDstLinkMap.find(src);
+			
+			if (r != mSrcDstLinkMap.end()) {
+				// all the components of the secondary map go into the set
+				ObjectIDToLinks::const_iterator ri = r->second.find(dst);
+			
+				if (ri != r->second.end())
+					res->insert(ri->second.begin(), ri->second.end());
+				
+				
+				return res;
+			}
+		}
+		
+	}
+		
+	// --------------------------------------------------------------------------
+	LinkPtr Relation::getOneLink(int src, int dst) const {
+		LinkQueryResultPtr res = getAllLinks(src, dst);
+		
+		// I also could just return the first even if there would be more than one, but that could lead to programmers headaches
+		assert(res->size() > 1);
+		
+		if (res->size() > 0)
+			return *res->begin();
+		else
+			return NULL;
+	}
+	
+	// --------------------------------------------------------------------------
 	// --------------------------------------------------------------------------
 	void Relation::_addLink(LinkPtr link) {
 		// Insert, and detect the presence of such link already inserted (same ID)
@@ -262,8 +425,18 @@ namespace Opde {
 			// Update the free link info
 			allocateLinkID(link->mID);
 			
-			// TODO: Update the query databases
+			// Update the query databases
+			// Src->Dst->LinkList
+			pair<ObjectLinkMap::iterator, bool> r = mSrcDstLinkMap.insert(make_pair(link->mSrc, ObjectIDToLinks()));
+			pair<ObjectIDToLinks::iterator, bool> ri = r.first->second.insert(make_pair(link->mDst, LinkSet()));
 			
+			ri.first->second.insert(link);
+			
+			
+			r = mDstSrcLinkMap.insert(make_pair(link->mDst, ObjectIDToLinks()));
+			ri = r.first->second.insert(make_pair(link->mDst, LinkSet()));
+			
+			ri.first->second.insert(link);
 			
 			// fire the notification about inserted link
 			LinkChangeMsg m;
@@ -278,14 +451,35 @@ namespace Opde {
 	
 	// --------------------------------------------------------------------------
 	void Relation::_removeLink(link_id_t id) {
-		// Insert, and detect the presence of such link already inserted (same ID)
 		LinkMap::iterator it = mLinkMap.find(id);
 		
 		if (it != mLinkMap.end()) {
 			unallocateLinkID(id);
 			
-			// TODO: Update the query databases
+			LinkPtr to_remove = it->second;
 			
+			// Update the query databases
+			// SrcDst
+			ObjectLinkMap::iterator r = mSrcDstLinkMap.find(to_remove->mSrc);
+			
+			assert(r != mSrcDstLinkMap.end());
+			
+			ObjectIDToLinks::iterator ri = r->second.find(to_remove->mDst);
+			
+			assert(ri != mSrcDstLinkMap.end());
+			
+			ri->second.erase(to_remove);
+			
+			// DstSrc
+			r = mSrcDstLinkMap.find(to_remove->mSrc);
+			
+			assert(r != mSrcDstLinkMap.end());
+			
+			ri = r->second.find(to_remove->mDst);
+			
+			assert(ri != mSrcDstLinkMap.end());
+			
+			ri->second.erase(to_remove);
 			
 			// fire the notification about inserted link
 			LinkChangeMsg m;
@@ -338,7 +532,7 @@ namespace Opde {
 	}
 	
 	// --------------------------------------------------------------------------
-	void Relation::broadcastLinkMessage(const LinkChangeMsg& msg) {
+	void Relation::broadcastLinkMessage(const LinkChangeMsg& msg) const {
 		LinkListeners::iterator it = mLinkListeners.begin();
 		
 		for (; it != mLinkListeners.end(); ++it) {

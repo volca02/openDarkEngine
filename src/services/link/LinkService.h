@@ -40,15 +40,15 @@ namespace Opde {
 			/** Load the links from the database and it's parents */ 
 			void load(DarkFileGroup* db);
 			
-			/** Convert the relation name to a flavour */
-			int nameToFlavour(const std::string& name);
+			/** Convert the relation name to a flavor */
+			int nameToFlavor(const std::string& name);
 			
 			/** Creates a relation type (link kind)
 			* @param id The ID the relation will have (>0)
 			* @param name The relation name
 			* @param type The type defining the data format for link data 
 			* @param hidden The hidden relations (true) will not show up on public link list places */
-			void createRelation(const std::string& name, DTypeDefPtr type, bool hidden);
+			RelationPtr createRelation(const std::string& name, DTypeDefPtr type, bool hidden);
 			
 			/** Registers a listener for relation events (link addition/removal/chage)
 			* @param relname The name of the relation (Link Kind) the listener wants to listen to
@@ -77,16 +77,16 @@ namespace Opde {
 			/** Clears all the data and the relation mappings */
 			void _clear();
 			
-			/** request a mapping Name->Flavour and reverse 
-			* @param id The flavour value requested
-			* @param name The name for that flavour (Relation name)
+			/** request a mapping Name->Flavor and reverse 
+			* @param id The flavor value requested
+			* @param name The name for that flavor (Relation name)
 			* @param rel The relation instance to associate with that id
 			* @return false if conflict happened, true if all went ok, and new mapping is inserted (or already was registered) 
 			*/
-			bool requestRelationFlavourMap(int id, const std::string& name, RelationPtr rel);
+			bool requestRelationFlavorMap(int id, const std::string& name, RelationPtr rel);
 			
-			typedef std::map<int, std::string> FlavourToName;
-			typedef std::map<std::string, int> NameToFlavour;
+			typedef std::map<int, std::string> FlavorToName;
+			typedef std::map<std::string, int> NameToFlavor;
 			
 			/// Name to Relation instance. The primary storage of Relation instances.
 			typedef std::map<std::string, RelationPtr> RelationNameMap;
@@ -94,8 +94,8 @@ namespace Opde {
 			/// ID to Relation instance. Secondary storage of Relation instances, mapped per request when loading
 			typedef std::map<int, RelationPtr> RelationIDMap;
 			
-			FlavourToName mFlavourToName;
-			NameToFlavour mNameToFlavour;
+			FlavorToName mFlavorToName;
+			NameToFlavor mNameToFlavor;
 			RelationIDMap mRelationIDMap;
 			RelationNameMap mRelationNameMap;
 	};

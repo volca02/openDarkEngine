@@ -38,14 +38,27 @@ namespace Opde {
 			/** Loads the relation data from the given FileGroup */
 			void load(FileGroup* db);
 			
+			/** Saves the relation data to the fiven file group 
+			* @todo Save Mask implementation */
+			void save(FileGroup* db, uint saveMask);
+			
+			void setChunkVersions(uint lmajor, uint lminor, uint dmajor, uint dminor) {
+				mLCVMaj = lmajor;
+				mLCVMin = lminor;
+				mDCVMaj = dmajor;
+				mDCVMin = dminor;
+			}
+					
 			/** Clears out all the links, releses data, clears query caches */
 			void clear();
 
-			/** Sets the ID of this Relation. Must be done prior to any operation with the relation instance */			
+			/** Sets the ID of this Relation. Must be done prior to any operation with the relation instance */
 			inline void setID(int id) { mID = id; };
 			
 			/** Returns the ID of this relation. */
 			inline int getID() { return mID; }
+			
+			void setFakeSize(int size) { assert(size<=0); mFakeSize = size; };
 
 
 			// ----------------- Link management methods --------------------
@@ -98,10 +111,23 @@ namespace Opde {
 			void setLinkData(link_id_t id, char* data);
 			
 			// ----------------- Link query methods --------------------
+			/** Gets all links that come from source to destination 
+			* @param src Source object ID, or 0 if any source 
+			* @param dst Destination object ID or 0 if any destination
+			* @note only one of the parameters can be zero
+			* @return LinkQueryResultPtr filled with the query result */
+			LinkQueryResultPtr getAllLinks(int src, int dst) const;
 			
+			/** Gets single link ID that is coming from source to destination
+			* @param src Source object ID, or 0 if any source 
+			* @param dst Destination object ID or 0 if any destination
+			* @return LinkPtr link instance that fulfills the requirements
+			* @note only one of the parameters can be zero
+			* @throws BasicException if there was more than one link that could be returned
+			*/
+			LinkPtr getOneLink(int src, int dst) const;
 			
-			
-			// ----------------- Listener releted methods --------------------			
+			// ----------------- Listener releted methods --------------------
 
 			/** Registers a relation change listener.
 			* @param listener A pointer to LinkChangeListenerPtr
@@ -117,7 +143,7 @@ namespace Opde {
 			
 		protected:
 			/// Send a message to all listeners of relation change
-			void broadcastLinkMessage(const LinkChangeMsg& msg);
+			void broadcastLinkMessage(const LinkChangeMsg& msg) const;
 
 			/** Internal method for link insertion. Inserts the link to the map, notifies listeners and query databases
 			* @param newlnk The link to be inserted
@@ -155,6 +181,21 @@ namespace Opde {
 			/// A set of listeners
 			typedef std::set< LinkChangeListenerPtr* > LinkListeners;
 			
+			/// Vector storage of links
+			typedef std::set< LinkPtr > LinkSet;
+			
+			/// Map of all links that have an object ID in either target or source
+			typedef std::map< int,  LinkSet > ObjectIDToLinks;
+			
+			/// Map of all maps that share a certain object ID
+			typedef std::map< int, ObjectIDToLinks > ObjectLinkMap;
+			
+			/// Map of links in source object ID, destination object id order
+			ObjectLinkMap mSrcDstLinkMap;
+			
+			/// Map of links in destination object ID, source object ID order
+			ObjectLinkMap mDstSrcLinkMap;
+			
 			/// ID of this relation (Flavour)
 			int mID;
 			
@@ -175,6 +216,15 @@ namespace Opde {
 			
 			/// Listeners for the link changes
 			LinkListeners mLinkListeners;
+			
+			/// fake size. This size is written as the data size into the LD$ chunks
+			uint32_t mFakeSize;
+			
+			/// chunk versions. Both Link and LinkData
+			uint mLCVMaj;
+			uint mLCVMin;
+			uint mDCVMaj;
+			uint mDCVMin;
 	};
 	
 	

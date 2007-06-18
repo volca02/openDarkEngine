@@ -36,11 +36,9 @@ namespace Opde {
 		/// Link was removed
 		LNK_REMOVED, 
 		/// Link has changed data
-		LNK_CHANGED
-		/* If considered a good idea to stream the clears through the callbacks, implement this one too:
+		LNK_CHANGED,
 		/// All the links were removed from the relation
 		LNK_RELATION_CLEARED
-		*/
 	} LinkChangeType;
 	
 	/// Link chage message
@@ -63,7 +61,7 @@ namespace Opde {
 		LinkChangeListener* listener;
 		LinkChangeMethodPtr method;
 	};
-	 
+	
 	/** A link container. Contains source, destination, ID, flavour and link data
 	*/
 	class Link {
@@ -73,25 +71,73 @@ namespace Opde {
 			link_id_t mID;
 			int mSrc;
 			int mDst;
-			uint mFlavour;
+			uint mFlavor;
 		
 			char* mData;
 			
 			// DTypeDefPtr would be nice here, but I guess it would be too much waste to do
 		public:
-			Link(uint ID, int src, int dst, uint flavour, char* data = NULL) 
+			Link(uint ID, int src, int dst, uint flavor, char* data = NULL) 
 				: mID(ID), 
 				mSrc(src), 
 				mDst(dst), 
-				mFlavour(flavour), 
+				mFlavor(flavor), 
 				mData(NULL) {	};
 			
 			~Link() {
 				delete mData;
 			};
+			
+			inline link_id_t id() { return mID; };
 	};
 	
 	typedef shared_ptr< Link > LinkPtr;
+	
+	/// Supportive Link comparison operator for sets and maps
+	inline bool operator<(const LinkPtr& a, const LinkPtr& b) {
+		return a->id() < b->id();
+	}
+	
+	/** Class representing a link query result.
+	*/
+	class LinkQueryResult {
+			friend class Relation;
+			
+		protected:
+			typedef std::set< LinkPtr > LinkQueryResultSet;
+			
+		public:	
+			typedef LinkQueryResultSet::iterator iterator;
+			
+		protected:
+			LinkQueryResultSet mResultSet;
+			
+			/** Internal method - pushes a link into the result vector. */
+			inline void insert(LinkPtr res) {
+				mResultSet.insert(res);
+			}
+			
+			/** Internal method - pushes a link into the result vector. */
+			inline void insert(iterator begin, iterator end) {
+				mResultSet.insert(begin, end);
+			}
+			
+		public:
+			LinkQueryResult() : mResultSet() {};
+			~LinkQueryResult() { mResultSet.clear(); };
+			
+			
+			/// Returns the begin iterator of the query result
+			inline iterator begin() { return mResultSet.begin(); };
+			
+			/// Returns the end iterator of the query result
+			inline iterator end() { return mResultSet.end(); };
+			
+			size_t size() { return mResultSet.size(); };
+	};
+	
+	/// Shared pointer instance to link query result
+	typedef shared_ptr< LinkQueryResult > LinkQueryResultPtr;
 	
 	// Create a link ID from flavour, concreteness and index
 #define LINK_MAKE_ID(flavor, concrete, index) (flavor<<20 | concrete << 16 | index)
