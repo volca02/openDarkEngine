@@ -37,10 +37,10 @@ namespace Opde {
 			LinkService(ServiceManager *manager);
 			virtual ~LinkService();
 			
-			/** Load the links from the database and it's parents */ 
+			/** Load the links from the database */ 
 			void load(DarkFileGroup* db);
 			
-			/** Saves the link data according to the saveMask */
+			/** Saves the links and link data according to the saveMask */
 			void save(DarkFileGroup* db, uint saveMask);
 			
 			/** Sets the Relation chunk version */
