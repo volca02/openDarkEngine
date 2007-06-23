@@ -185,17 +185,6 @@ namespace Opde {
 		}
 		
 		delete dlink;
-
-		
-		// End - loading stats
-		file_size_t flpos = flink->tell();
-		file_size_t flsize = flink->size();
-		
-		file_size_t fldpos = fldata->tell();
-		file_size_t fldsize = fldata->size();
-		
-		LOG_DEBUG("...Read Relation '%s'. L$ remaining size : %d, LD$ chunk rem. size: %d", mName.c_str(), flsize-flpos, fldsize-fldpos);
-		
 	}
 	
 	// --------------------------------------------------------------------------
@@ -269,8 +258,6 @@ namespace Opde {
 				}
 			}
 		}	
-		
-		LOG_DEBUG("Relation::save ended ok.");
 	}
 	
 	// --------------------------------------------------------------------------
@@ -355,7 +342,7 @@ namespace Opde {
 			// Inform the listeners about the change of data
 			broadcastLinkMessage(m);
 		} else {
-			LOG_ERROR("Relation::setLinkData : Link %d was not found in relation %d", id, mID);
+			LOG_ERROR("Relation::setLinkField : Link %d was not found in relation %d", id, mID);
 		}
 	}
 		
@@ -366,7 +353,7 @@ namespace Opde {
 		if (it != mLinkDataMap.end()) {
 			return mType->get(it->second->mData, field);
 		} else {
-			LOG_ERROR("Relation::getLinkData : Link %d was not found in relation %d", id, mID);
+			LOG_ERROR("Relation::getLinkField : Link %d was not found in relation %d", id, mID);
 			return DVariant();
 		}
 	}
@@ -389,7 +376,18 @@ namespace Opde {
 			// Inform the listeners about the change of data
 			broadcastLinkMessage(m);
 		} else {
-			LOG_ERROR("Relation::setLinkData : Link %d was not found in relation %d", id, mID);
+			LOG_ERROR("Relation::setLinkData : Link data %d was not found in relation %d", id, mID);
+		}
+	}
+	
+	// --------------------------------------------------------------------------
+	LinkDataPtr Relation::getLinkData(link_id_t id) {
+		LinkDataMap::iterator it = mLinkDataMap.find(id);
+		
+		if (it != mLinkDataMap.end()) {
+			return it->second;
+		} else {
+			LOG_ERROR("Relation::getLinkData : Link data %d was not found in relation %d", id, mID);
 		}
 	}
 	

@@ -111,6 +111,11 @@ namespace Opde {
 			*/
 			void setLinkData(link_id_t id, char* data);
 			
+			/** Returns link data for the given link ID
+			* @param id The link id
+			*/
+			LinkDataPtr getLinkData(link_id_t id);
+			
 			// ----------------- Link query methods --------------------
 			/** Gets all links that come from source to destination 
 			* @param src Source object ID, or 0 if any source 
