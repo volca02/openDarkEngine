@@ -51,6 +51,37 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
+	void LinkService::save(DarkFileGroup* db, uint saveMask) {
+		// Iterates through all the relations. Writes the name into the Relations file, and writes the relation's data using relation->save(db, saveMask) call
+		
+		// I do not want to have gaps in the relations indexing, which is implicit given the record order
+		int order = 1;
+		
+		FilePtr rels = db->createFile("Relations", mRelVMaj, mRelVMin);
+		
+		RelationIDMap::iterator it = mRelationIDMap.begin();
+		
+		for (; it != mRelationIDMap.end(); ++it, ++order) {
+			if (order != it->first)
+				OPDE_EXCEPT("Index order mismatch, could not continue...", "LinkService::save");
+			
+			// Write the relation's name
+			char title[32];
+			
+			// get the name, and write
+			const std::string& rname = it->second->getName();
+			
+			rname.copy(title, 32 - 1);
+			
+			// write
+			rels->write(title, 32);
+			
+			// write the relation
+			it->second->save(db, saveMask);
+		}
+	}
+	
+	//------------------------------------------------------
 	int LinkService::nameToFlavor(const std::string& name) {
 		NameToFlavor::const_iterator it = mNameToFlavor.find(name);
 		

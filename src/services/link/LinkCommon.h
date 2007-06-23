@@ -31,13 +31,13 @@ namespace Opde {
 
 	/// Link change types
 	typedef enum {
-		/// Link was added
+		/// Link was added (Sent after the addition)
 		LNK_ADDED = 1,
-		/// Link was removed
+		/// Link was removed (Sent before the removal)
 		LNK_REMOVED, 
-		/// Link has changed data
+		/// Link has changed data (Sent after the change)
 		LNK_CHANGED,
-		/// All the links were removed from the relation
+		/// All the links were removed from the relation (Sent before the cleanout)
 		LNK_RELATION_CLEARED
 	} LinkChangeType;
 	
@@ -47,6 +47,7 @@ namespace Opde {
 		LinkChangeType change;
 		/// An ID of link that was added/removed/modified
 		link_id_t linkID;
+		/// TODO: What about adding a linkPtr here?
 	};
 	
 	/** Relation listener abstract class
@@ -72,26 +73,41 @@ namespace Opde {
 			int mSrc;
 			int mDst;
 			uint mFlavor;
-		
-			char* mData;
 			
 			// DTypeDefPtr would be nice here, but I guess it would be too much waste to do
 		public:
-			Link(uint ID, int src, int dst, uint flavor, char* data = NULL) 
+			Link(uint ID, int src, int dst, uint flavor) 
 				: mID(ID), 
 				mSrc(src), 
 				mDst(dst), 
-				mFlavor(flavor), 
-				mData(NULL) {	};
-			
-			~Link() {
-				delete mData;
-			};
+				mFlavor(flavor) {	};
 			
 			inline link_id_t id() { return mID; };
 	};
 	
+	/** Link data container. Holds link ID and it's data as a char array.
+	*/
+	class LinkData {
+		friend class Relation;
+		
+		protected:
+			link_id_t mID;
+			char* mData;
+			size_t mSize;
+		
+		public:
+			/// Constructor - Allocates the mData as a char[size] array
+			LinkData(link_id_t id, size_t size) : mID(id), mData(NULL), mSize(size) { mData = new char[size]; };
+			
+			/// Constructor - Reuses existing data
+			LinkData(link_id_t id, char *data, size_t size) : mID(id), mData(data), mSize(size) { };
+			
+			/// Destructor - Deletes the data
+			~LinkData() { delete[] mData; };
+	};
+	
 	typedef shared_ptr< Link > LinkPtr;
+	typedef shared_ptr< LinkData > LinkDataPtr;
 	
 	/// Supportive Link comparison operator for sets and maps
 	inline bool operator<(const LinkPtr& a, const LinkPtr& b) {
@@ -139,11 +155,23 @@ namespace Opde {
 	/// Shared pointer instance to link query result
 	typedef shared_ptr< LinkQueryResult > LinkQueryResultPtr;
 	
-	// Create a link ID from flavour, concreteness and index
+/// Creates a link ID from flavour, concreteness and index
 #define LINK_MAKE_ID(flavor, concrete, index) (flavor<<20 | concrete << 16 | index)
+/// Extracts Flavor ID from the link ID
 #define LINK_ID_FLAVOR(id) (id >> 20)
+/// Extracts Concreteness from the link ID
 #define LINK_ID_CONCRETE(id) (id >>16 & 0x0F)
+/// Extracts the index of the link from link ID	
 #define LINK_ID_INDEX(id) (id & 0x0FFFF)
+
+// --------- Concreteness of the links -----------------
+/// Archetype links (<0) -> (<0)	
+#define LINKC_ARCHETYPES	(1 << 0)
+/// Links to concrete objects
+#define LINKC_CONCRETE	(1 << 1)
+/// All link concreteness types	
+#define LINKC_ALL	(0x0F)
+	
 }
  
 #endif

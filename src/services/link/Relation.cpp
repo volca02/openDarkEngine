@@ -60,6 +60,7 @@ namespace Opde {
 	// --------------------------------------------------------------------------
 	Relation::~Relation() {
 		// deletion of Relation instance will not cause a messagging havok, as with only deleting a single Link
+		// Only will inform about totally cleared DB
 		clear();
 	}
 
@@ -101,12 +102,7 @@ namespace Opde {
 		
 		// now load the data
 		size_t link_count = flink->size() / lsize;
-		
-		// calculate what the size of the data should be, based on the link count and the Link data file size
-		size_t real_dsize = 0;
-		if (link_count > 0) {
-			real_dsize = (fldata->size() - sizeof(uint32_t)) / link_count;
-		}
+		size_t link_data_count = 0;
 		
 		// if the chunk LD exists, and contains at least the data size, load the data size, and set to load data as well
 		bool load_data = false;
@@ -122,22 +118,45 @@ namespace Opde {
 			
 				// check for data len
 				if (dsize != mType->size()) {
+					// This just happens. Some links have the size totally different the real
 					LOG_FATAL("Data size for relation %s differ : Type: %d, Chunk: %d", mName.c_str(), mType->size(), dsize);
 					// we respect our data size
 					dsize = mType->size();
 				}
 				
-				/* Too often to fill log with. Seems not to matter (?!) - the question is why the chunks are often bigger in size than expected
-				if (dsize != real_dsize && real_dsize != 0) {
-					LOG_ERROR("Data size for relation %s differ : Calculated: %d, Chunk info: %d (DType: %d)", mName.c_str(), real_dsize, dsize, mType->size());
-				}
-				*/
+				// as the last thing, count the data entries
+				link_data_count = (fldata->size() - sizeof(uint32_t)) / dsize;
 			}
 		}
 		
-		for (int idx = 0; idx < link_count; idx++) {
-			char* dlink = new char[lsize];
+		// If data should be loaded, load the data chunk
+		if (load_data) {
+			assert(dsize > 0);
 			
+			// The count of data and links should be the same
+			assert(link_count == link_data_count);
+				
+			for (int idx = 0; idx < link_count; idx++) {
+				// Will get deleted automatically once the LinkPtr is released...
+				// link->mData = new char[dsize];
+				
+				// Link ID goes first, then the data
+				link_id_t id;
+				fldata->readElem(&id, 4);
+				
+				LinkDataPtr ldta = new LinkData(id, dsize);
+				
+				// NOTE: It does not happen that the link data would be variable length, but if it would, reading size, then data into the buffer would be needed. It could be fine to write some serializing helpers... Properties have size of the data prior to data, so we're ok!
+				fldata->read(ldta->mData, dsize);
+				
+				// Link data are inserted silently
+				_assignLinkData(id, ldta);
+			}
+		}
+		
+		char* dlink = new char[lsize];
+		
+		for (int idx = 0; idx < link_count; idx++) {
 			flink->read(dlink, lsize);
 			
 			LinkPtr link = LinkPtr(new Link(
@@ -161,24 +180,27 @@ namespace Opde {
 			// Check if the flavor fits
 			assert(LINK_ID_FLAVOR(link->mID) == mID);
 			
-			if (load_data) {
-				assert(dsize > 0);
-				
-				// Will get deleted automatically once the LinkPtr is released...
-				link->mData = new char[dsize];
-				
-				// NOTE: It does not happen that the link data would be variable length, but if it would, reading size, then data into the buffer would be needed. It could be fine to write some serializing helpers...
-				fldata->read(link->mData, dsize); 
-			}
-			
+			// Add link, notify listeners... Will search for data and throw if did not find them
 			_addLink(link);
 		}
+		
+		delete dlink;
+
+		
+		// End - loading stats
+		file_size_t flpos = flink->tell();
+		file_size_t flsize = flink->size();
+		
+		file_size_t fldpos = fldata->tell();
+		file_size_t fldsize = fldata->size();
+		
+		LOG_DEBUG("...Read Relation '%s'. L$ remaining size : %d, LD$ chunk rem. size: %d", mName.c_str(), flsize-flpos, fldsize-fldpos);
+		
 	}
 	
 	// --------------------------------------------------------------------------
-	// TODO: Save mask. Archetypal/non-archetypal/both binary encoded pattern
 	void Relation::save(FileGroup* db, uint saveMask) {
-		LOG_DEBUG("Relation::save starting");
+		LOG_DEBUG("Relation::save Saving relation %s", mName.c_str());
 		
 		// load the links and thei're data
 		BinaryServicePtr bs = ServiceManager::getSingleton().getService("BinaryService").as<BinaryService>();
@@ -193,11 +215,12 @@ namespace Opde {
 		uint32_t dtsz = 0;
 		
 		if (!mType.isNull()) {
-			uint32_t dtsz = mType->size();
+			dtsz = mType->size();
 			assert(dtsz > 0);
-			
-			fldt->writeElem(&mFakeSize, sizeof(uint32_t));
-		}
+		} 
+		
+		// mmh. Rather always write the fake size. It seems to always be present
+		fldt->writeElem(&mFakeSize, sizeof(uint32_t));
 		
 		// No need to order those. If it shows up that it would be actually better, no problem sorting those by link_id_t
 		DTypeDefPtr linkstruct = bs->getType("links", "LINK");
@@ -207,30 +230,45 @@ namespace Opde {
 		// just write the links as they go, and write the data in parallel
 		LinkMap::const_iterator it = mLinkMap.begin();
 		
-		for (; it != mLinkMap.end(); it++) {
+		// Write the links
+		for (; it != mLinkMap.end(); ++it) {
 			LinkPtr link = it->second;
 			
 			// Test against the link write mask
 			int conc = LINK_ID_CONCRETE(link->mID);
 			
-			
-			if (saveMask & 1 << conc) { // mask says save!
+			if (saveMask & (1 << conc)) { // mask says save!
 				// write according to the structure
 				linkstruct->set(lnkdta, "id", link->mID);
 				linkstruct->set(lnkdta, "src", link->mSrc);
 				linkstruct->set(lnkdta, "dest", link->mDst);
 				linkstruct->set(lnkdta, "flavor", link->mFlavor);
 				
-				
 				flnk->write(lnkdta, linkstruct->size());
-				
-				if (!mType.isNull()) { // write the data into the data chunk
-					fldt->write(lnkdta, dtsz);
-				}
+			} else {
+				LOG_DEBUG("Link concreteness of link %d was out of requested : %d", link->mID, conc);
 			}
 		}
 		
 		delete lnkdta;
+		
+		// just write the links as they go, and write the data in parallel
+		LinkDataMap::const_iterator dit = mLinkDataMap.begin();
+		
+		// Write the link data if exists
+		if (!mType.isNull()) { // write the data into the data chunk
+			for (; dit != mLinkDataMap.end(); ++dit) {
+				LinkDataPtr ldt = dit->second;
+				
+				// Test against the link write mask
+				int conc = LINK_ID_CONCRETE(ldt->mID);
+				
+				if (saveMask & (1 << conc)) { // mask says save!
+					fldt->writeElem(&ldt->mID, sizeof(link_id_t));
+					fldt->write(ldt->mData, dtsz);
+				}
+			}
+		}	
 		
 		LOG_DEBUG("Relation::save ended ok.");
 	}
@@ -247,8 +285,17 @@ namespace Opde {
 		broadcastLinkMessage(m);
 		
 		mLinkMap.clear();
+		mLinkDataMap.clear();
 		mSrcDstLinkMap.clear();
 		mDstSrcLinkMap.clear();
+		
+		
+		// clear maximal link id's
+		for (int i = 0; i < 16; ++i) {
+			mMaxID[i] = 0;
+		}
+		
+		// Done...
 	}
 	
 	
@@ -276,7 +323,10 @@ namespace Opde {
 		
 		LinkPtr newl = new Link(id, from, to, mID);
 		
-		newl->mData = data;
+		LinkDataPtr newd = new LinkData(id, data, mType->size());
+		
+		// assign link data in advance, as it would fail on _addLink otherwise
+		_assignLinkData(id, newd);
 		
 		// Last, insert the link to the database and notify
 		_addLink(newl);
@@ -292,9 +342,9 @@ namespace Opde {
 	
 	// --------------------------------------------------------------------------
 	void Relation::setLinkField(link_id_t id, const std::string& field, const DVariant& value) {
-		LinkMap::iterator it = mLinkMap.find(id);
+		LinkDataMap::iterator it = mLinkDataMap.find(id);
 		
-		if (it != mLinkMap.end()) {
+		if (it != mLinkDataMap.end()) {
 			mType->set(it->second->mData, field, value);
 			
 			LinkChangeMsg m;
@@ -311,9 +361,9 @@ namespace Opde {
 		
 	// --------------------------------------------------------------------------
 	DVariant Relation::getLinkField(link_id_t id, const std::string& field) {
-		LinkMap::iterator it = mLinkMap.find(id);
+		LinkDataMap::iterator it = mLinkDataMap.find(id);
 		
-		if (it != mLinkMap.end()) {
+		if (it != mLinkDataMap.end()) {
 			return mType->get(it->second->mData, field);
 		} else {
 			LOG_ERROR("Relation::getLinkData : Link %d was not found in relation %d", id, mID);
@@ -323,9 +373,9 @@ namespace Opde {
 	
 	// --------------------------------------------------------------------------
 	void Relation::setLinkData(link_id_t id, char* data) {
-		LinkMap::iterator it = mLinkMap.find(id);
+		LinkDataMap::iterator it = mLinkDataMap.find(id);
 		
-		if (it != mLinkMap.end()) {
+		if (it != mLinkDataMap.end()) {
 			// swap the data
 			char* odl = it->second->mData;
 			it->second->mData = data;
@@ -438,12 +488,19 @@ namespace Opde {
 			
 			ri.first->second.insert(link);
 			
+			// Verify link data exist
+			LinkDataMap::iterator dit = mLinkDataMap.find(link->mID);
+			
+			if (dit == mLinkDataMap.end() && !mType.isNull()) 
+				OPDE_EXCEPT("Link Data not defined prior to link insertion for link id " + link->mID, "Relation::_addLink");
+			
+			
 			// fire the notification about inserted link
 			LinkChangeMsg m;
 		
 			m.change = LNK_ADDED;
 			m.linkID = link->mID;
-		
+					
 			// Inform the listeners about the change
 			broadcastLinkMessage(m);
 		}
@@ -481,6 +538,8 @@ namespace Opde {
 			
 			ri->second.erase(to_remove);
 			
+			
+			
 			// fire the notification about inserted link
 			LinkChangeMsg m;
 		
@@ -492,9 +551,29 @@ namespace Opde {
 			
 			// last, erase the link
 			mLinkMap.erase(it);
+			
+			_removeLink(id);
+			_removeLinkData(id);
 		} else {
 			LOG_ERROR("Relation %d: Link requested for removal was not found :ID: %d", mID, id);
 		} 
+	}
+	
+	// --------------------------------------------------------------------------
+	void Relation::_assignLinkData(link_id_t id, LinkDataPtr data) {
+		std::pair<LinkDataMap::iterator, bool> ires = mLinkDataMap.insert(make_pair(id, data));
+		
+		if (!ires.second) {
+			// data already present
+			ires.first->second = data;
+		}
+		
+		// Done.
+	}
+		
+	// --------------------------------------------------------------------------
+	void Relation::_removeLinkData(link_id_t id) {
+		mLinkDataMap.erase(id);
 	}
 	
 	// --------------------------------------------------------------------------

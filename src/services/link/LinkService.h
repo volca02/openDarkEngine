@@ -40,6 +40,15 @@ namespace Opde {
 			/** Load the links from the database and it's parents */ 
 			void load(DarkFileGroup* db);
 			
+			/** Saves the link data according to the saveMask */
+			void save(DarkFileGroup* db, uint saveMask);
+			
+			/** Sets the Relation chunk version */
+			void setChunkVersion(uint major, uint minor) {
+				mRelVMaj = major;
+				mRelVMin = minor;
+			}
+			
 			/** Convert the relation name to a flavor */
 			int nameToFlavor(const std::string& name);
 			
@@ -98,6 +107,9 @@ namespace Opde {
 			NameToFlavor mNameToFlavor;
 			RelationIDMap mRelationIDMap;
 			RelationNameMap mRelationNameMap;
+			
+			/// Relations chunk versions
+			uint mRelVMaj, mRelVMin;
 	};
 	
 	/// Shared pointer to Link service

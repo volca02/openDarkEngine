@@ -60,6 +60,7 @@ namespace Opde {
 			
 			void setFakeSize(int size) { assert(size<=0); mFakeSize = size; };
 
+			const std::string& getName() { return mName; };
 
 			// ----------------- Link management methods --------------------
 			/** Deletes a link specified by it's ID
@@ -148,11 +149,13 @@ namespace Opde {
 			/** Internal method for link insertion. Inserts the link to the map, notifies listeners and query databases
 			* @param newlnk The link to be inserted
 			* @note Always use this method to internally insert new links, if not in a situation when the standard sequence of link addition is needed (notification, query database refresh)
+			* @note The link data have to be assigned prior to calling this method
 			*/
 			void _addLink(LinkPtr newlnk);
 			
 			/** Internal method for link removal handling. Notifies the listeners, refreshes query databases.
-			* @param id The id of the link to be removed  
+			* @param id The id of the link to be removed
+			* @note Also removes the link data
 			*/
 			void _removeLink(link_id_t id);
 			
@@ -162,6 +165,17 @@ namespace Opde {
 			* @ret
 			*/
 			link_id_t getFreeLinkID(uint cidx);
+			
+			/** Assigns the link data to a link ID
+			* @param id Link id to assign the data to
+			* @param data The link data to be assigned
+			*/
+			void _assignLinkData(link_id_t id, LinkDataPtr data);
+			
+			/** Removes link data for a link ID
+			* @param id the ID of the link for which data should be removed
+			*/
+			void _removeLinkData(link_id_t id);
 			
 			/** Allocates the link ID, meaning it wont be given as free now.
 			* @param id The link that was allocated
@@ -175,8 +189,11 @@ namespace Opde {
 			*/
 			void unallocateLinkID(link_id_t id);
 			
-			/// Map of links. Indexed by whole link id, contains the link data
+			/// Map of links. Indexed by whole link id, contains the link class (LinkPtr)
 			typedef std::map< link_id_t, LinkPtr > LinkMap;
+			
+			/// Map of link data. Indexed by whole link id, contains the link data (LinkDataPtr)
+			typedef std::map< link_id_t, LinkDataPtr > LinkDataMap;
 			
 			/// A set of listeners
 			typedef std::set< LinkChangeListenerPtr* > LinkListeners;
@@ -211,8 +228,11 @@ namespace Opde {
 			/// Hidden relations are those which should not be mentioned by editor as a normal links (metaproperty and such)
 			bool mHidden;
 			
-			/// The map of ID->linkptr
+			/// The map of ID->LinkPtr (Stores link info per link ID)
 			LinkMap mLinkMap;
+			
+			/// The map of ID->LinkDataPtr (Stores link data per link ID)
+			LinkDataMap mLinkDataMap;
 			
 			/// Listeners for the link changes
 			LinkListeners mLinkListeners;
