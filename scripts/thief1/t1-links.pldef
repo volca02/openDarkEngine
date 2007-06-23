@@ -21,9 +21,13 @@
 
 // The thief 1 relation definitions
 
+// version of the relations chunk
+rel_ver 1.0
+
 // Default versions, both link data chunk and link chunk are 2.0
 l_ver 2.0
 d_ver 2.0
+
 
 relation MetaProp {
     hidden
