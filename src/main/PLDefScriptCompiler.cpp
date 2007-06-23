@@ -39,7 +39,7 @@ namespace Opde {
     String PLDefScriptCompiler::pldefScript_BNF =
 		"<Script> ::= {<Script_Properties>} \n"
 	
-		"<Script_Properties> ::= <LinkDefinition> | <DChunkVersion> | <LChunkVersion> \n" // so I can define default version for the chunks
+		"<Script_Properties> ::= <LinkDefinition> | <DChunkVersion> | <LChunkVersion> | <RelChunkVersion> \n" // so I can define default version for the chunks
 	
 		"<LinkDefinition> ::= 'relation' <Unquoted_Label> '{' {<LinkParams>} '}' \n"
 		
@@ -55,6 +55,8 @@ namespace Opde {
 		
 		"<DChunkVersion> ::= 'd_ver' <Version> \n"
 		"<LChunkVersion> ::= 'l_ver' <Version> \n"
+		    
+		"<RelChunkVersion> ::= 'rel_ver' <Version> \n" // version of the relations chunk
 		
 		"<Version> ::= <Integer> '.' <Integer> \n"
 
@@ -100,6 +102,8 @@ namespace Opde {
 		
 		addLexemeTokenAction("d_ver", ID_D_VER, &PLDefScriptCompiler::parseVersion);
 		addLexemeTokenAction("l_ver", ID_L_VER, &PLDefScriptCompiler::parseVersion);
+		
+		addLexemeTokenAction("rel_ver", ID_REL_VER, &PLDefScriptCompiler::parseVersion);
 	}
 
 	//-----------------------------------------------------------------------
@@ -238,7 +242,8 @@ namespace Opde {
 	
 	//-----------------------------------------------------------------------
 	void PLDefScriptCompiler::parseVersion(void) {
-		bool datachunk = getCurrentTokenID() == ID_D_VER ? true : false;
+		int vid = getCurrentTokenID();
+		 ID_D_VER ? true : false;
 		
 		// now read next two tokens, and set the resulting version numbers
 		String svmaj = getNextTokenLabel();
@@ -253,21 +258,26 @@ namespace Opde {
 		
 		if (mCurrentState.state == CS_RELATION) { 
 			// fill the current state only
-			if (datachunk) {
+			if (vid == ID_D_VER) {
 				mCurrentState.dmajor = maj;
 				mCurrentState.dminor = min;
-			} else {
+			} else if (vid == ID_L_VER) {
 				mCurrentState.lmajor = maj;
 				mCurrentState.lminor = min;
+			} else {
+				logParseError("Only data/link versions are allowed while in relation definition");
 			}
 			
 		} else { // global default
-			if (datachunk) {
+			if (vid == ID_D_VER) {
 				mDefaultLMajor = maj;
 				mDefaultLMinor = min;
-			} else {
+			} else if (vid == ID_L_VER) {
 				mDefaultDMajor = maj;
 				mDefaultDMinor = min;
+			} else if (vid == ID_REL_VER) {
+				// Just call version setting on the LinkService
+				mLinkService->setChunkVersion(maj, min);
 			}
 		}
 	}
