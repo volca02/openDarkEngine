@@ -65,15 +65,36 @@ namespace Opde {
 		if (mDarkSMFactory) {
 			Root::getSingleton().removeSceneManagerFactory(mDarkSMFactory);
 			delete mDarkSMFactory;
+			mDarkSMFactory = NULL;
 		}
 		
 		delete mDTypeScriptLdr; // Unregisters itself
+		mDTypeScriptLdr = NULL;
+		
 		delete mPLDefScriptLdr; // Unregisters itself
+		mPLDefScriptLdr = NULL;
 		
-		OIS::InputManager::destroyInputSystem(mInputSystem);
+		// release the mouse and keyboard, then the whole inputsystem
+		if (mInputSystem) {
+			if( mMouse ) {
+				mInputSystem->destroyInputObject( mMouse );
+				mMouse = NULL;
+			}
+	
+			if( mKeyboard ) {
+				mInputSystem->destroyInputObject( mKeyboard );
+				mKeyboard = NULL;
+			}
+			
+			mInputSystem->destroyInputSystem(mInputSystem);
+			mInputSystem = NULL;
+		}
 		
+		// Delete the service manager
 		delete mServiceMgr;
+		mServiceMgr = NULL;
 		
+		// Releas
 		delete mLogger;
 		delete mStdLog;
 		
