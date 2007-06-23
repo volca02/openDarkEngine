@@ -21,7 +21,7 @@
 
 // Thief 1 (R) DType type definitions
 // Converted from the Telliamed's xml file Thief1-structs.xml, released under GNU GPL
-// Original file is copirighted : Copyright (C) 2006 Tom N Harris <telliamed@whoopdedo.org>
+// Original file is copyrighted : Copyright (C) 2006 Tom N Harris <telliamed@whoopdedo.org>
 
 bitfield aiawarenessflags {
 	key "Seen" 0x01
