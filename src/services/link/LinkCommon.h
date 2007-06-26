@@ -20,12 +20,13 @@
  *****************************************************************************/
 
  
-#ifndef __LINK_H
-#define __LINK_H
+#ifndef __LINKCOMMON_H
+#define __LINKCOMMON_H
 
 #include "compat.h"
 #include "integers.h"
 #include "SharedPtr.h"
+#include "DTypeDef.h"
 
 namespace Opde {
 	/// Link ID type. 32bit number at least...
@@ -89,30 +90,45 @@ namespace Opde {
 	
 	/** Link data container. Holds link ID and it's data as a char array.
 	*/
-	class LinkData {
+	class LinkData : public DType {
 		friend class Relation;
 		
 		protected:
 			link_id_t mID;
-			char* mData;
-			size_t mSize;
 		
 		public:
-			/// Constructor - Allocates the mData as a char[size] array
-			LinkData(link_id_t id, size_t size) : mID(id), mData(NULL), mSize(size) { mData = new char[size]; };
+			/// Constructor - Creates empty data defined by default values in type
+			LinkData(link_id_t id, DTypeDefPtr type) : mID(id), DType(type) { };
 			
-			/// Constructor - Reuses existing data
-			LinkData(link_id_t id, char *data, size_t size) : mID(id), mData(data), mSize(size) { };
+			/// Constructor - Loads data from FilePtr
+			LinkData(link_id_t id, DTypeDefPtr type, FilePtr file, int _size) : mID(id), DType(type,file,_size) { };
+			
+			/// Constructor - copies the data from another DType instance
+			LinkData(link_id_t id, const DType& type) : mID(id), DType(type) {};
+			
+			/// Constructor - copies the data from DTypePtr instance
+			LinkData(link_id_t id, const DTypePtr type) : mID(id), DType(*type) {};
 			
 			/// Destructor - Deletes the data
-			~LinkData() { delete[] mData; };
+			~LinkData() {  };
+			
+			/// ID getter. @return The id of the link this data belong to
+			inline link_id_t id() { return mID; };
 	};
 	
+	/// Shared pointer to Link
 	typedef shared_ptr< Link > LinkPtr;
+	
+	/// Shared pointer to Link Data
 	typedef shared_ptr< LinkData > LinkDataPtr;
 	
 	/// Supportive Link comparison operator for sets and maps
 	inline bool operator<(const LinkPtr& a, const LinkPtr& b) {
+		return a->id() < b->id();
+	}
+	
+	/// Supportive LinkData comparison operator for sets and maps
+	inline bool operator<(const LinkDataPtr& a, const LinkDataPtr& b) {
 		return a->id() < b->id();
 	}
 	
