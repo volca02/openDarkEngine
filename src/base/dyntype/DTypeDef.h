@@ -34,6 +34,8 @@
 #include "integers.h"
 #include "SharedPtr.h"
 #include "DVariant.h"
+#include "File.h"
+#include "NonCopyable.h"
 
 namespace Opde {
 	/** Type aware variant based enumeration definition. Used for enumeration and bitfields. 
@@ -147,7 +149,7 @@ namespace Opde {
 	*
 	* 
 	*/
-	class DTypeDef {
+	class DTypeDef : public NonCopyable {
 		public:
 			/// Construct as a copy of other DTypeDef, with different name
 			DTypeDef(const std::string& name, const DTypeDef& src);
@@ -194,26 +196,28 @@ namespace Opde {
 			/** Create a new data instance based on the default values. Deallocation of the returned data is to be done by caller */
 			char* create();
 			
-			/** Returns the size of this type def */
+			/** Returns the size of this type definition, or -1 if variable sized
+			* @note use size(char* data) for dynamically sized typedefs */
 			int size();
+			
+			int size(char *dataptr) {
+				int sz = size();
+				if (sz < 0) {
+					return static_cast<uint32_t>(*dataptr) + sizeof(uint32_t);
+				} else {
+					return sz;
+				}
+			}
 			
 			/** Get the value of the field specified by name, reading the data from the dataptr mem. location 
 			* @note The field name has to exist, and has to be a simple field (Not array/union/struct field) 
 			* @note No check on the dataptr allocated size is done. This means the allocated size has to be at least the same as the size of this dtypedef */
-			DVariant get(void* dataptr, const std::string& field);
+			DVariant get(char* dataptr, const std::string& field);
 			
 			/** Sets the data of a certain field.
 			* @return New pointer if the data must have been reallocated (var-length string), otherwise NULL 
 			* @note Even if reallocation took place, the old data are NOT deleted by this method */
-			void* set(void* dataptr, const std::string& field, const DVariant& nval);
-			
-			/** Value setter, the char* version
-			* @see set*/
-			inline void* set(void *dataptr, char* field, const DVariant& val) {
-				std::string fld(field);
-				
-				return set(dataptr, fld, val);
-			}
+			char* set(char* dataptr, const std::string& field, const DVariant& nval);
 			
 			/** Get the definition of a specific field from the built cache
 			* @note The field name has to exist, and has to be a simple field (Not array/union/struct field) */
@@ -244,15 +248,15 @@ namespace Opde {
 				std::string	name; // Absolute name
 				DTypeDefPtr 	type;
 				
-				inline void* set(void *dataptr, const DVariant& val) const {
+				inline char* set(char* dataptr, const DVariant& val) const {
 					return type->_set(reinterpret_cast<char*>(dataptr) + offset, val);
 				}
 				
-				inline void* setDefault(void *dataptr) const {
+				inline char* setDefault(char* dataptr) const {
 					return type->_set(reinterpret_cast<char*>(dataptr) + offset, type->getDefault());
 				}
 				
-				inline DVariant get(void *dataptr) const {
+				inline DVariant get(char* dataptr) const {
 					return type->_get(reinterpret_cast<char*>(dataptr) + offset);
 				}
 			};
@@ -279,13 +283,13 @@ namespace Opde {
 			
 		protected:
 			/** Internal field getter */
-			DVariant _get(void* ptr);
+			DVariant _get(char* ptr);
 			
 			/** Internal field setter 
 			* @param ptr Direct pointer to the start of the data to be set 
 			* @return ptr if there was no reallocation needed, new pointer if reallocation was done (var length string)
 			*/
-			void* _set(void* ptr, const DVariant& val);
+			char* _set(char* ptr, const DVariant& val);
 			
 			/** find field def by it's name (or throw an error if not found) */
 			FieldDef& getByName(const std::string& name);
@@ -323,7 +327,108 @@ namespace Opde {
 			DTypeDef& operator =(const DTypeDef &b) {};
 	};
 	
+	/** DTypeDef 'variable'. */
+	class DType {
+		public:
+			DType(const DType& b) {
+				char* odata = mData;
+				
+				int sz = b.size();
+				mData = new char[sz];
+				
+				// copy the data
+				memcpy(mData, b.mData, sz);
+				
+				mType = b.mType;
+				
+				delete[] odata;
+			}
+			
+			DType(DTypeDefPtr type) : mType(type) {
+				assert(!mType.isNull()); // no type def, no meaning!
+				
+				mData = mType->create();
+			}
+			
+			/** Constructor, using FilePtr to read the DType values 
+			* @param file The file used as data source 
+			* @param size The size of the data expected
+			* @note for dynamic size types (variable length strings), the size should be the overall length of the data (32bits size + the data itself) */
+			DType(DTypeDefPtr type, FilePtr file, int _size) : mType(type) {
+				if (mType->size() < 0) { // dyn. size. we have to use the size
+					mData = new char[_size];
+					
+					file->read(mData, _size);
+					
+					// inconsistency smells badly
+					assert(static_cast<uint32_t>(*mData) == (_size - sizeof(uint32_t)));
+				} else {
+					assert(size() == _size);
+					mData = mType->create();
+					file->read(mData, size());
+				}
+			}
+			
+			/** Value setter. 
+			* @see DTypeDef.set */
+			void set(const std::string& field, const DVariant& value) {
+				char* ndata = mType->set(mData, field, value);
+				
+				if (ndata != mData) {
+					char* odata = mData;
+					mData = ndata;
+					delete odata;
+				}
+			}
+			
+			/** Value getter. 
+			* @see DTypeDef.get */
+			DVariant get(const std::string& field) const {
+				return mType->get(mData, field);
+			}
+			
+			/** Copy operator */
+			const DType& operator =(const DType& b) {
+				char* odata = mData;
+				
+				int sz = b.size();
+				mData = new char[sz];
+				
+				// copy the data
+				memcpy(mData, b.mData, sz);
+				
+				mType = b.mType;
+				
+				delete[] odata;
+				
+				return *this;
+			}
+		
+			/** Real size of the data. 
+			@note In case of a dynamic field, returns the size of the uint32 + bytes the field is consisted of */
+			int size() const {
+				return mType->size(mData);
+			}
+			
+			/** Serializer. Writes the type data into a FilePtr
+			* @param file The file pointer to write into */
+			void serialize(FilePtr file) const {
+				file->write(mData, size());
+			}
+			
+			/** Type getter. 
+			*@return Type pointer DTypeDefPtr. */
+			DTypeDefPtr type() {
+				return mType;
+			}
+			
+		
+		protected:
+			DTypeDefPtr mType;
+			char* mData; 
+	};
 	
+	typedef shared_ptr< DType > DTypePtr;
 } // namespace Opde
 
 #endif

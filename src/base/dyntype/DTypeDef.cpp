@@ -461,21 +461,38 @@ namespace Opde {
 	
 	//------------------------------------
 	char* DTypeDef::create() {
-		char* data = new char[size()];
+		char* data = NULL;
 		
-		// memset anyone?
-		for (int x = 0; x < size(); ++x) 
-			data[x] = '\0';
-		
-		// iterate the fields. If the field has a default value, fill
-		Fields::iterator it = mFields.begin();
-		
-		for (; it != mFields.end(); ++it) {
-			if (it->type->hasDefault())
-				it->setDefault(data);
+		if (size() < 0) {
+			// dynamic sized can be only field. I know set on dyn field will always return a new pointer
+			if (mDefaultUsed) {
+				data = _set(data, mDefVal);
+				return data;
+			} else {
+				data = new char[sizeof(uint32_t)];
+				
+				uint32_t* lenptr = (uint32_t*)(data); // TODO: Big-endian
+				*lenptr = 0;
+				
+				return data;
+			}
+		} else {
+			char* data = new char[size()];
+			
+			// memset anyone?
+			for (int x = 0; x < size(); ++x) 
+				data[x] = '\0';
+			
+			// iterate the fields. If the field has a default value, fill
+			Fields::iterator it = mFields.begin();
+			
+			for (; it != mFields.end(); ++it) {
+				if (it->type->hasDefault())
+					it->setDefault(data);
+			}
+			
+			return data;
 		}
-		
-		return data;
 	}
 	
 	//------------------------------------
@@ -498,35 +515,35 @@ namespace Opde {
 	}
 	
 	//------------------------------------
-	DVariant DTypeDef::get(void* dataptr, const std::string& field) {
+	DVariant DTypeDef::get(char* dataptr, const std::string& field) {
 		if (isField()) //  && field=="" - I do not waste time to check, I choose to believe!
 			return _get(dataptr);
 		
 		FieldDef& fld = getByName(field);
 		
 		if (!fld.type->isField())
-			OPDE_EXCEPT("Field get resulted in non-field _get","DTypeDef::_get");
+			OPDE_EXCEPT("Field get resulted in non-field _get","DTypeDef::get");
 		
 		// offset the data and call the getter
 		return fld.type->_get(((char *)dataptr) + fld.offset);
 	}
 	
 	//------------------------------------
-	void* DTypeDef::set(void* dataptr, const std::string& field, const DVariant& nval) {
+	char* DTypeDef::set(char* dataptr, const std::string& field, const DVariant& nval) {
 		if (isField()) //  && field=="" - I do not waste time to check, I choose to believe!
-			_set(dataptr, nval);
+			return _set(dataptr, nval);
 		
 		FieldDef& fld = getByName(field);
 		
 		if (!fld.type->isField())
-			OPDE_EXCEPT("Field set resulted in non-field _set","DTypeDef::_set");
+			OPDE_EXCEPT("Field set resulted in non-field _set","DTypeDef::set");
 		
 		// offset the data and call the getter
 		return fld.type->_set(((char *)dataptr) + fld.offset, nval);
 	}
 	
 	//------------------------------------
-	DVariant DTypeDef::_get(void *ptr) {
+	DVariant DTypeDef::_get(char* ptr) {  // TODO: Big-endian
 		// Based on the type of the data and size, construct the Variant and return
 		
 		if (mPriv->type() == DVariant::DV_BOOL) {
@@ -572,7 +589,7 @@ namespace Opde {
 				// I can only support the variable length string alone, which is ok
 				if (mPriv->size() == -1) {// Variable length string
 					// First 4 bytes size uint, then data
-					uint32_t* uptr = reinterpret_cast<uint32_t*>(ptr);
+					uint32_t* uptr = reinterpret_cast<uint32_t*>(ptr); // TODO: Big-endian
 					
 					return DVariant(reinterpret_cast<char*>(uptr + 1), *uptr);
 				} else {
@@ -583,7 +600,7 @@ namespace Opde {
 				
 				OPDE_EXCEPT("String not supported now", "DTypeDef::_get");
 				
-		} else if(mPriv->type() == DVariant::DV_VECTOR) {			
+		} else if(mPriv->type() == DVariant::DV_VECTOR) {
 				float x, y, z;
 				float* fptr = (float*)ptr;
 				
@@ -598,7 +615,7 @@ namespace Opde {
 	}
 	
 	//------------------------------------
-	void* DTypeDef::_set(void* ptr, const DVariant& val) {
+	char* DTypeDef::_set(char* ptr, const DVariant& val) {
 		if (mPriv->type() == DVariant::DV_BOOL) {
 			switch (mPriv->size()) {
 				case 1: 
@@ -614,7 +631,7 @@ namespace Opde {
 					return ptr;
 					
 				default:
-					OPDE_EXCEPT("Unsupported bool size", "DTypeDef::_get");
+					OPDE_EXCEPT("Unsupported bool size", "DTypeDef::_set");
 			}
 		
 		} else if(mPriv->type() == DVariant::DV_FLOAT) {
@@ -628,7 +645,7 @@ namespace Opde {
 					return ptr;
 					
 				default:
-					OPDE_EXCEPT("Unsupported float size", "DTypeDef::_get");
+					OPDE_EXCEPT("Unsupported float size", "DTypeDef::_set");
 			}
 			
 		} else if(mPriv->type() == DVariant::DV_INT) {
@@ -645,7 +662,7 @@ namespace Opde {
 					return ptr;
 					
 				default:
-					OPDE_EXCEPT("Unsupported int size", "DTypeDef::_get");
+					OPDE_EXCEPT("Unsupported int size", "DTypeDef::_set");
 			}
 			
 		} else if(mPriv->type() == DVariant::DV_UINT) {
@@ -663,7 +680,7 @@ namespace Opde {
 					return ptr;
 					
 				default:
-					OPDE_EXCEPT("Unsupported int size", "DTypeDef::_get");
+					OPDE_EXCEPT("Unsupported int size", "DTypeDef::_set");
 			}
 			
 		} else if(mPriv->type() == DVariant::DV_STRING) {
@@ -680,15 +697,15 @@ namespace Opde {
 					char* newptr = new char[size + sizeof(uint32_t)];
 					
 					// First 4 bytes size uint, then data
-					uint32_t* uptr = reinterpret_cast<uint32_t*>(newptr);
+					uint32_t* uptr = reinterpret_cast<uint32_t*>(newptr);  // TODO: Big-endian
 					
-					*uptr = size;
+					*uptr = size; // write the size into the first 32 bits
 					
 					// now copy the string
 					s.copy(&newptr[sizeof(uint32_t)], size - 1);
 					
 					// terminate. the string
-					newptr[size + sizeof(uint32_t)] = '\0';
+					newptr[size + sizeof(uint32_t) - 1] = '\0';
 					
 					return newptr;
 				} else {
@@ -706,9 +723,6 @@ namespace Opde {
 					
 					return ptr;
 				}
-				
-				OPDE_EXCEPT("String not supported now", "DTypeDef::_get");
-				
 		} else if(mPriv->type() == DVariant::DV_VECTOR) {			
 				float* fptr = reinterpret_cast<float*>(ptr);
 				
@@ -729,8 +743,8 @@ namespace Opde {
 		// Search for field in mFieldMap
 		FieldMap::iterator f = mFieldMap.find(name);
 		
-		if (f==mFieldMap.end())
-			OPDE_EXCEPT(string("Field not found : ") + name,"DTypeDef::get");
+		if (f == mFieldMap.end())
+			OPDE_EXCEPT(string("Field not found : ") + name,"DTypeDef::getByName");
 		
 		return f->second;
 	}
