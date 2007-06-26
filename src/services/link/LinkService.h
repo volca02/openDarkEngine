@@ -40,10 +40,10 @@ namespace Opde {
 			virtual ~LinkService();
 			
 			/** Load the links from the database */ 
-			void load(DarkFileGroup* db);
+			void load(FileGroup* db);
 			
 			/** Saves the links and link data according to the saveMask */
-			void save(DarkFileGroup* db, uint saveMask);
+			void save(FileGroup* db, uint saveMask);
 			
 			/** Sets the Relation chunk version */
 			void setChunkVersion(uint major, uint minor) {
@@ -83,7 +83,7 @@ namespace Opde {
 			
 		protected:
 			/** load links from a single database */
-			void _load(DarkFileGroup* db);
+			void _load(FileGroup* db);
 			
 			/** Clears all the data and the relation mappings */
 			void _clear();

@@ -43,7 +43,7 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
-	void LinkService::load(DarkFileGroup* db) {
+	void LinkService::load(FileGroup* db) {
 		try {
 			_load(db);
 		} catch (FileException &e) {
@@ -53,7 +53,7 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
-	void LinkService::save(DarkFileGroup* db, uint saveMask) {
+	void LinkService::save(FileGroup* db, uint saveMask) {
 		// Iterates through all the relations. Writes the name into the Relations file, and writes the relation's data using relation->save(db, saveMask) call
 		
 		// I do not want to have gaps in the relations indexing, which is implicit given the record order
@@ -108,7 +108,7 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
-	void LinkService::_load(DarkFileGroup* db) {
+	void LinkService::_load(FileGroup* db) {
 		LOG_INFO("LinkService: Loading link definitions from file group '%s'", db->getName().c_str());
 		
 		// First, try to build the Relation Name -> flavor and reverse records
