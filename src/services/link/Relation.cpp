@@ -136,7 +136,7 @@ namespace Opde {
 			assert(dsize > 0);
 			
 			// The count of data and links should be the same
-			assert(link_count == link_data_count);
+			// assert(link_count == link_data_count);
 				
 			for (int idx = 0; idx < link_count; idx++) {
 				// Will get deleted automatically once the LinkPtr is released...
@@ -146,10 +146,11 @@ namespace Opde {
 				link_id_t id;
 				fldata->readElem(&id, 4);
 				
-				LinkDataPtr ldta = new LinkData(id, dsize);
+				LinkDataPtr ldta = new LinkData(id, mType, fldata, dsize);
 				
-				// NOTE: It does not happen that the link data would be variable length, but if it would, reading size, then data into the buffer would be needed. It could be fine to write some serializing helpers... Properties have size of the data prior to data, so we're ok!
-				fldata->read(ldta->mData, dsize);
+				/*if (mName == "MetaProp")
+					std::cerr << "MP PRIO Id " << id << " : "<< ldta->get("priority").toUInt() << std::endl;
+				*/
 				
 				// Link data are inserted silently
 				_assignLinkData(id, ldta);
@@ -255,8 +256,12 @@ namespace Opde {
 				int conc = LINK_ID_CONCRETE(ldt->mID);
 				
 				if (saveMask & (1 << conc)) { // mask says save!
+					// TODO: What exactly is the rule that one should follow selecting what to write into GAM/MIS?
+					// I mean: there is MP link from 1 to some -X in GAM file. Hmmmm. (I guess this does not matter for in-game)
+					
 					fldt->writeElem(&ldt->mID, sizeof(link_id_t));
-					fldt->write(ldt->mData, dtsz);
+					
+					ldt->serialize(fldt);
 				}
 			}
 		}	
@@ -290,18 +295,6 @@ namespace Opde {
 	
 	// --------------------------------------------------------------------------
 	link_id_t Relation::create(int from, int to) {
-		char* data = NULL;
-		
-		// allocate the data if needed
-		if (!mType.isNull()) {
-			data = mType->create();
-		}
-		
-		return create(from, to, data);
-	}
-	
-	// --------------------------------------------------------------------------
-	link_id_t Relation::create(int from, int to, char* data) {
 		// Request an id. First let's see what concreteness we have
 		unsigned int cidx = 0;
 		
@@ -312,7 +305,34 @@ namespace Opde {
 		
 		LinkPtr newl = new Link(id, from, to, mID);
 		
-		LinkDataPtr newd = new LinkData(id, data, mType->size());
+		LinkDataPtr newd = new LinkData(id, mType);
+		
+		// assign link data in advance, as it would fail on _addLink otherwise
+		_assignLinkData(id, newd);
+		
+		// Last, insert the link to the database and notify
+		_addLink(newl);
+		
+		return id;
+	}
+	
+	// --------------------------------------------------------------------------
+	link_id_t Relation::create(int from, int to, DTypePtr data) {
+		// Request an id. First let's see what concreteness we have
+		unsigned int cidx = 0;
+		
+		// simply compare the type pointers...
+		if (data->type() != mType)
+			OPDE_EXCEPT("Incompatible types when creating link data", "Relation::create");
+		
+		if (from >= 0 || to >= 0)
+			cidx = 1;
+		
+		link_id_t id = getFreeLinkID(cidx);
+		
+		LinkPtr newl = new Link(id, from, to, mID);
+		
+		LinkDataPtr newd = new LinkData(id, data);
 		
 		// assign link data in advance, as it would fail on _addLink otherwise
 		_assignLinkData(id, newd);
@@ -523,7 +543,7 @@ namespace Opde {
 			
 			ObjectIDToLinks::iterator ri = r->second.find(to_remove->mDst);
 			
-			assert(ri != mSrcDstLinkMap.end());
+			assert(ri !=  r->second.end());
 			
 			ri->second.erase(to_remove);
 			
@@ -534,7 +554,7 @@ namespace Opde {
 			
 			ri = r->second.find(to_remove->mDst);
 			
-			assert(ri != mSrcDstLinkMap.end());
+			assert(ri != r->second.end());
 			
 			ri->second.erase(to_remove);
 			
@@ -620,10 +640,12 @@ namespace Opde {
 		}
 	}
 	
+	// --------------------------------------------------------------------------
 	void Relation::registerListener(LinkChangeListenerPtr* listener) {
 		mLinkListeners.insert(listener);
 	}
 	
+	// --------------------------------------------------------------------------
 	void Relation::unregisterListener(LinkChangeListenerPtr* listener) {
 		mLinkListeners.erase(listener);
 	}

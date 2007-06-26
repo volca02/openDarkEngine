@@ -85,7 +85,7 @@ namespace Opde {
 			* @note this version does create the link including the data, so a time and plenty of broadcasts is saved.
 			* @note to create and fill the data, use DTypeDef::create to obtain a valid buffer to fill, then use DTypeDef::set to fill the fields. Once ready, supply the final buffer to the createLink
 			*/
-			link_id_t create(int from, int to, char* data);
+			link_id_t create(int from, int to, DTypePtr data);
 			
 			/** getter for the DTypeDef this relation uses. 
 			* @note The returned object is better be tested by doing DTypeDefPtr::isNull() to determine if the object is usable. Relations with no data will just return null DTypeDefPtr */
