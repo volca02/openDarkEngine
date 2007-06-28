@@ -36,9 +36,20 @@ namespace Opde {
 			/** Constructor. Constructs new data buffer, filled with zeros */
 			PropertyData(int id, DTypeDefPtr type) : mID(id), DType(type) {	};
 			
-			/** Constructor - loads data from FilePtr */
+			/** Constructor - loads data from FilePtr 
+			* @param id The object ID
+			* @param type The DTypeDef pointer to use (type definition)
+			* @param file The File pointer (FilePtr) to load data from
+			* @param _size the size of the data to be loaded
+			* */
 			PropertyData(int id, DTypeDefPtr type, FilePtr file, int _size) : mID(id), DType(type, file, _size) { };
 			
+			/** Constructor - takes object id and data instance 
+			* @param id The object ID
+			* @param data The Data instance to copy the data from */
+			PropertyData(int id, DTypePtr data) : mID(id), DType(*data) { };
+			
+			/** Destructor */
 			~PropertyData() { };
 		
 			inline int id() { return mID; };
