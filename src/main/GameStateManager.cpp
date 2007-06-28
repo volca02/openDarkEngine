@@ -29,6 +29,7 @@
 #include "BinaryService.h"
 #include "GameService.h"
 #include "LinkService.h"
+#include "PropertyService.h"
 
 #include <OgreRoot.h>
 #include <OgreWindowEventUtilities.h>
@@ -219,11 +220,12 @@ namespace Opde {
 	}
 	
 	void GameStateManager::registerServiceFactories() {
-		// register the worldrep factory
+		// register the service factories
 		new WorldRepServiceFactory();
 		new BinaryServiceFactory();
 		new GameServiceFactory();
 		new LinkServiceFactory();
+		new PropertyServiceFactory();
 	}
 			
 	/// Method which will define the source of resources (other than current folder)
