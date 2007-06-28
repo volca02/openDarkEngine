@@ -59,6 +59,7 @@ namespace Opde {
 		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
 		
 		for (; it != mPropertyGroupMap.end(); ++it) {
+			LOG_DEBUG("PropertyService: Loading property group %s", it->first.c_str());
 			it->second->load(db);
 		}
 	}
