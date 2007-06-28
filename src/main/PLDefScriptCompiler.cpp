@@ -39,8 +39,9 @@ namespace Opde {
     String PLDefScriptCompiler::pldefScript_BNF =
 		"<Script> ::= {<Script_Properties>} \n"
 	
-		"<Script_Properties> ::= <LinkDefinition> | <DChunkVersion> | <LChunkVersion> | <RelChunkVersion> \n" // so I can define default version for the chunks
+		"<Script_Properties> ::= <LinkDefinition> | <PropertyDefinition> | <DChunkVersion> | <LChunkVersion> | <RelChunkVersion> | <PChunkVersion> \n" // so I can define default version for the chunks
 	
+		// Link definition part
 		"<LinkDefinition> ::= 'relation' <Unquoted_Label> '{' {<LinkParams>} '}' \n"
 		
 		"<LinkParams> ::= <DTypeName> | <FakeSize> | <LinkHidden> | <NoDType> | <DChunkVersion> | <LChunkVersion> \n"
@@ -57,10 +58,20 @@ namespace Opde {
 		"<LChunkVersion> ::= 'l_ver' <Version> \n"
 		    
 		"<RelChunkVersion> ::= 'rel_ver' <Version> \n" // version of the relations chunk
+		    
+		// Property definition part
+		"<PropertyDefinition> ::= 'property' <Unquoted_Label> '{' {<PropertyParams>} '}' \n"
 		
-		"<Version> ::= <Integer> '.' <Integer> \n"
+		"<PropertyParams> ::= <DTypeName> | <PropLabel> | <PChunkVersion> | <PInheritor> \n"
+		    
+		"<PropLabel> ::= 'label' <Quoted_Label> \n"
+		    
+		"<PInheritor> ::= 'inherit' <Unquoted_Label> \n"
 
+		"<PChunkVersion> ::= 'p_ver' <Version> \n" // property chunk version
+		    
 		// common rules
+		"<Version> ::= <Integer> '.' <Integer> \n"
 		"<Label> ::= <Quoted_Label> | <Unquoted_Label> \n"
 		"<Flex_Label> ::= <Quoted_Label> | <Spaced_Label> \n"
 		"<Quoted_Label> ::= -'\"' <Spaced_Label> -'\"' \n"
@@ -81,6 +92,7 @@ namespace Opde {
 		
 		mLinkService = svcmgr->getService("LinkService").as<LinkService>();
 		mBinaryService = svcmgr->getService("BinaryService").as<BinaryService>();
+		mPropertyService = svcmgr->getService("PropertyService").as<PropertyService>();		
 		
 		mCurrentState.state = CS_UNKNOWN;
 	}
@@ -104,6 +116,14 @@ namespace Opde {
 		addLexemeTokenAction("l_ver", ID_L_VER, &PLDefScriptCompiler::parseVersion);
 		
 		addLexemeTokenAction("rel_ver", ID_REL_VER, &PLDefScriptCompiler::parseVersion);
+		
+		addLexemeTokenAction("property", ID_PROPERTY, &PLDefScriptCompiler::parseProperty);
+		
+		addLexemeTokenAction("p_ver", ID_P_VER, &PLDefScriptCompiler::parseVersion);
+		
+		addLexemeTokenAction("label", ID_LABEL, &PLDefScriptCompiler::parseLabel);
+		
+		addLexemeTokenAction("inherit", ID_INHERIT, &PLDefScriptCompiler::parseInherit);
 	}
 
 	//-----------------------------------------------------------------------
@@ -170,6 +190,17 @@ namespace Opde {
 					     	mCurrentState.dmajor, 
 					     	mCurrentState.dminor
 					     );
+		} else if (mCurrentState.state == CS_PROPERTY) {
+			DTypeDefPtr dt;
+			
+			dt = getTypeDef("properties", mCurrentState.dtypename);
+			
+			if (mCurrentState.label == "") // default to property chunk name silently
+				mCurrentState.label = mCurrentState.name;
+			
+			PropertyGroupPtr rel = mPropertyService->createPropertyGroup(mCurrentState.label, mCurrentState.name, dt, mCurrentState.pmajor, mCurrentState.pminor);
+		} else {
+			logParseError("Closing an unknown state!");
 		}
 		
 		
@@ -211,9 +242,31 @@ namespace Opde {
 	}
 	
 	//-----------------------------------------------------------------------
+	void PLDefScriptCompiler::parseProperty(void) {
+		// Next token contains the relation name
+		mCurrentState.state = CS_PROPERTY;
+		mCurrentState.name = getNextTokenLabel();
+		mCurrentState.label = "";
+		mCurrentState.dtypename = mCurrentState.name; // default
+		mCurrentState.inherit = "always";
+		mCurrentState.pmajor = mDefaultPMajor; // fill in the default versions
+		mCurrentState.pminor = mDefaultPMinor;
+	}
+	
+	//-----------------------------------------------------------------------
 	void PLDefScriptCompiler::parseDType(void) {
 		// Next token contains the Dtype name
 		mCurrentState.dtypename = getNextTokenLabel();
+	}
+	
+	//-----------------------------------------------------------------------
+	void PLDefScriptCompiler::parseLabel(void) {
+		mCurrentState.label = getNextTokenLabel();
+	}
+	
+	//-----------------------------------------------------------------------
+	void PLDefScriptCompiler::parseInherit(void) {
+		mCurrentState.inherit = getNextTokenLabel();
 	}
 	
 	//-----------------------------------------------------------------------
@@ -264,8 +317,11 @@ namespace Opde {
 			} else if (vid == ID_L_VER) {
 				mCurrentState.lmajor = maj;
 				mCurrentState.lminor = min;
+			} else if (vid == ID_P_VER) {
+				mCurrentState.pmajor = maj;
+				mCurrentState.pminor = min;
 			} else {
-				logParseError("Only data/link versions are allowed while in relation definition");
+				logParseError("Only data/link/property versions are allowed while in property/relation definition");
 			}
 			
 		} else { // global default
@@ -278,6 +334,9 @@ namespace Opde {
 			} else if (vid == ID_REL_VER) {
 				// Just call version setting on the LinkService
 				mLinkService->setChunkVersion(maj, min);
+			} else if (vid == ID_P_VER) {
+				mDefaultPMajor = maj;
+				mDefaultPMinor = maj;
 			}
 		}
 	}
