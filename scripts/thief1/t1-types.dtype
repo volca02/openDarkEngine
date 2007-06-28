@@ -660,7 +660,7 @@ struct short-vector {
 
 struct pseudoscript {
 	uint32 use pscriptaction action
-	char [64] args
+	char [64] args [4]
 }
 
 
@@ -721,16 +721,16 @@ namespace properties {
 	struct AI_AlrtRs {
 		uint32 use alertlevel level
 		uint32 use aipriority priority
-		int32 unknown
-		alias pseudoscript step
-		alias pseudoscript extra
+		int32 unknown [4]
+		alias pseudoscript step [6]
+		alias pseudoscript extra [2]
 	}
 
 	
 	// Label: AIAlertSenseMultiplier
 	struct AI_AlSnMu {
 		
-		struct level {
+		struct level [4] {
 			float hangle
 			float vangle
 			float range
@@ -743,7 +743,7 @@ namespace properties {
 	
 	// Label: AIAwarenessCapacitor
 	struct AI_AwareC {
-		float discharge
+		float discharge [3]
 		int32 unknown
 	}
 
@@ -762,7 +762,7 @@ namespace properties {
 	struct AI_BcstSe {
 		bool32 disable
 		
-		struct state {
+		struct state [8] {
 			uint32 use broadcastschema schema
 			uint32 use broadcasttype type
 			char [16] custom
@@ -798,9 +798,9 @@ namespace properties {
 	// Label: AICombatResponse
 	struct AI_CbtRsp {
 		uint32 use aipriority priority
-		int32 unknown
-		alias pseudoscript step
-		alias pseudoscript extra
+		int32 unknown [4]
+		alias pseudoscript step [6]
+		alias pseudoscript extra [2]
 	}
 
 	
@@ -897,7 +897,7 @@ namespace properties {
 		int32 mintime
 		int32 maxtime
 		
-		struct direction {
+		struct direction [4] {
 			int32 facing
 			int32 weight
 		}
@@ -1053,9 +1053,9 @@ namespace properties {
 	struct AI_SigRsp {
 		char [32] signal
 		uint32 use aipriority priority
-		int32 unknown
-		alias pseudoscript step
-		alias pseudoscript extra
+		int32 unknown [4]
+		alias pseudoscript step [6]
+		alias pseudoscript extra [2]
 	}
 
 	varstr AI_SndTag
@@ -1087,9 +1087,9 @@ namespace properties {
 	struct AI_ThrtRs {
 		uint32 use aithreat threat
 		uint32 use aipriority priority
-		int32 unknown
-		alias pseudoscript step
-		alias pseudoscript extra
+		int32 unknown [4]
+		alias pseudoscript step [6]
+		alias pseudoscript extra [2]
 	}
 
 	
@@ -1137,9 +1137,9 @@ namespace properties {
 	
 	// Label: AIVisionDescription
 	struct AI_VisDes {
-		int32 unknown
+		int32 unknown [8]
 		
-		struct viscone {
+		struct viscone [10] {
 			uint32 use aivisionflags flags
 			int32 angle
 			int32 zangle
@@ -1175,7 +1175,7 @@ namespace properties {
 	
 	// Label: AIWatchPoint
 	struct AI_WtchPn {
-		int32 unknown1
+		int32 unknown1 [15]
 		uint32 trigger
 		uint32 use alertlevel awareness
 		uint32 use aiwatchvisibility visibility
@@ -1190,8 +1190,8 @@ namespace properties {
 		uint32 use aipriority priority
 		int32 radius
 		int32 height
-		alias pseudoscript step
-		alias pseudoscript extra
+		alias pseudoscript step [7]
+		alias pseudoscript extra [1]
 	}
 
 	
@@ -1214,7 +1214,7 @@ namespace properties {
 		int32 volume
 		uint32 use ambienthackedflags flags
 		char [16] schema
-		char [16] aux
+		char [16] aux [2]
 	}
 
 	
