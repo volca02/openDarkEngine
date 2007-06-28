@@ -439,7 +439,7 @@ namespace Opde {
 		DTypeDefPtr typ = getTypeDef(type);
 		DTypeDefPtr newt = typ->alias(newname);
 		
-		if (testNextTokenID(ID_OPENBRACE)) {
+		if (testNextTokenID(ID_OPENBOX)) {
 			int len = parseBoxBrace();
 			
 			DTypeDefPtr arrayt = new DTypeDef(newt, len);
