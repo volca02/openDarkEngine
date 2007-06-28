@@ -201,7 +201,7 @@ namespace Opde {
 					
 					DTypeDefVector::const_iterator it = mSubTypes.begin();
 					
-					for (; it != mSubTypes.end(); it++) {
+					for (; it != mSubTypes.end(); ++it) {
 						size_t elemsz = (*it)->size();
 						
 						if (maxsz < elemsz)
