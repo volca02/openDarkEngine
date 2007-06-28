@@ -100,12 +100,20 @@ namespace Opde {
 			*/
 			void clear();
 			
-			/** Creates a property for given object ID
+			/** Creates a property for given object ID, using the default values for the property fields
 			* @param obj_id The id of the object to create the property for 
 			* @return true if the property was created, false if the object ID already holds the given property
 			* @note Broadcasts a PROP_ADDED on success 
 			* @note Notifies inheritor about the change */
 			bool createProperty(int obj_id);
+			
+			/** Creates a property for given object ID, using specified values for the property fields
+			* @param obj_id The id of the object to create the property for 
+			* @param data The property data to use ()
+			* @return true if the property was created, false if the object ID already holds the given property
+			* @note Broadcasts a PROP_ADDED on success 
+			* @note Notifies inheritor about the change */
+			bool createProperty(int obj_id, DTypePtr data);
 			
 			/** Creates a property for given object ID
 			* @param obj_id The id of the object to create the property for 
@@ -183,6 +191,11 @@ namespace Opde {
 			void unregisterListener(PropertyChangeListenerPtr* listener);
 			
 		protected:
+			/** Inserts the property into the group, notifies inheritors and broadcasts the change
+			* @param propd The property to add
+			*/
+			bool _addProperty(PropertyDataPtr propd);
+			
 			/// Send a message to all listeners of relation change
 			void broadcastPropertyMessage(const PropertyChangeMsg& msg) const;
 
