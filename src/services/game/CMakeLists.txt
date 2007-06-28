@@ -9,9 +9,11 @@ include_directories (
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
     ${OPDE_SOURCE_DIR}/src/base/console
     ${OPDE_SOURCE_DIR}/src/base/file
+    ${OPDE_SOURCE_DIR}/src/base/logger
     ${OPDE_SOURCE_DIR}/src/services/worldrep
     ${OPDE_SOURCE_DIR}/src/services/binary
     ${OPDE_SOURCE_DIR}/src/services/link
+    ${OPDE_SOURCE_DIR}/src/services/property
 )
 
 link_directories ( 

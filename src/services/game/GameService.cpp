@@ -24,6 +24,7 @@
 #include "WorldRepService.h"
 #include "BinaryService.h"
 #include "LinkService.h"
+#include "PropertyService.h"
 #include "OpdeException.h"
 
 using namespace std;
@@ -100,12 +101,15 @@ namespace Opde {
 		// Get the link service
 		LinkServicePtr ls = mServiceManager->getService("LinkService").as<LinkService>();
 		
+		PropertyServicePtr ps = mServiceManager->getService("PropertyService").as<PropertyService>();
+		
 		// Get the world geometry service
 		WorldRepServicePtr wr_s = mServiceManager->getService("WorldRepService").as<WorldRepService>();
 			
 		// Now call all the services to load
 		wr_s->loadFromDarkDatabase(db);
 		ls->load(db);
+		ps->load(db);
 	}
 	
 	//------------------------------------------------------
@@ -125,21 +129,26 @@ namespace Opde {
 		// Get the link service
 		LinkServicePtr ls = mServiceManager->getService("LinkService").as<LinkService>();
 		
+		PropertyServicePtr ps = mServiceManager->getService("PropertyService").as<PropertyService>();
+
 		// Now call all the services to load
 		ls->load(gs);
+		ps->load(gs);
 		
 		gs->release();
 		
 		/*
-		// Debug test. Save the Link DB
+		// Debug test. Save the Link and Prop DB
 		DarkFileGroup* tdb = new DarkFileGroup();
+		
 		ls->save(tdb, 1); // only gamesys data
+		ps->save(tdb, 1); // only gamesys data
 		
 		FilePtr tf = new StdFile("dbgtest.vbr", File::FILE_W);
 		
 		tdb->write(tf);
+		
 		delete tdb;
-
 		
 		delete data;
 		*/
