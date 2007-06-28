@@ -1,0 +1,1065 @@
+// ******************************************************************************
+// *
+// *    This file is part of openDarkEngine project
+// *    Copyright (C) 2005-2006 openDarkEngine team
+// *
+// *    This program is free software; you can redistribute it and/or modify
+// *    it under the terms of the GNU General Public License as published by
+// *    the Free Software Foundation; either version 2 of the License, or
+// *    (at your option) any later version.
+// *
+// *    This program is distributed in the hope that it will be useful,
+// *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+// *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// *    GNU General Public License for more details.
+// *
+// *    You should have received a copy of the GNU General Public License
+// *    along with this program; if not, write to the Free Software
+// *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// *
+// *****************************************************************************
+
+// The Thief 1 property definitions
+// Created usingthe Telliamed's xml file Thief1-structs.xml, released under GNU GPL
+// Original file is copyrighted : Copyright (C) 2006 Tom N Harris <telliamed@whoopdedo.org>
+
+// Default version for property chunks is 2.0
+p_ver 2.4
+
+// Some notes:
+// Default inheritance is "always", it can be changed by "inherit INH_TYPE". INH_TYPE then would be always, never, archetype
+// Type definition for the property can be overriden with "dtype TYPE_PATH", otherwise it uses the properties/<PropertyName>
+// In special cases the property should have the chunk name defined - otherwise, it is taken from the property declaration
+
+// -------------------------------------------------------------------------------------------------------------------------
+
+property Acoustics {
+	label "Acoustics"
+	p_ver 2.131084
+}
+
+property AI {
+	label "AI"
+	p_ver 2.32
+}
+
+property AI_AlertC {
+	label "AIAlertCap"
+	p_ver 2.12
+}
+
+property AI_Alertn {
+	label "AIAlertness"
+	p_ver 2.131080
+}
+
+property AI_AlrtRs {
+	label "AIAlertResponse"
+	p_ver 2.2104
+}
+
+property AI_AlSnMu {
+	label "AIAlertSenseMultiplier"
+	p_ver 2.68
+}
+
+property AI_AwareC {
+	label "AIAwarenessCapacitor"
+	p_ver 2.16
+}
+
+property AI_AwrDel {
+	label "AIAwarenessDelay"
+}
+
+property AI_BcstSe {
+	label "AIBroadcastSettings"
+}
+
+property AI_BlkVis {
+	label "AIBlocksVision"
+}
+
+property AI_BodyRs {
+	label "AIBodyResponse"
+}
+
+property AI_Camera {
+	label "AICamera"
+}
+
+property AI_CbtRsp {
+	label "AICombatResponse"
+}
+
+property AI_Conver {
+	label "AIConversation"
+}
+
+property AICoverPt {
+	label "AICoverPoint"
+}
+
+property AI_Device {
+	label "AIDevice"
+}
+
+property AI_Effici {
+	label "AIEfficiency"
+}
+
+property AI_Fidget {
+	label "AIFidget"
+}
+
+property AI_FleeCo {
+	label "AIFleeCondition"
+}
+
+property AI_FleePo {
+	label "AIFleePoint"
+}
+
+property AI_FreeKn {
+	label "AIFreeSenseKnowledge"
+}
+
+property AI_Frozen {
+	label "AIFrozen"
+}
+
+property AI_IdleDi {
+	label "AIIdleDirections"
+}
+
+property AI_IdleOr {
+	label "AIIdleOrigin"
+}
+
+property AI_IdlRet {
+	label "AIIdleReturnToOrigin"
+}
+
+property AI_InfDly {
+	label "AIInformDelay"
+}
+
+property AI_InfDst {
+	label "AIInformDistance"
+}
+
+property AI_InfExp {
+	label "AIInformExpiration"
+}
+
+property AI_InfMxP {
+	label "AIInformMaxPasses"
+}
+
+property AI_InfOtr {
+	label "AIInformOthers"
+}
+
+property AI_InfRsp {
+	label "AIInformResponse"
+}
+
+property AI_InvKnd {
+	label "AIInvestigationKind"
+}
+
+property AI_Launch {
+	label "AILaunchVisible"
+}
+
+property AI_Mode {
+	label "AIMode"
+}
+
+property AI_MoveSp {
+	label "AIMoveSpeed"
+}
+
+property AI_MoveZO {
+	label "AIMoveZOffset"
+}
+
+property AI_NCDmRs {
+	label "AINonCombatRespondToDamage"
+}
+
+property AI_NonHst {
+	label "AINonHostile"
+}
+
+property AI_ObjAvo {
+	label "AIObjectAvoid"
+}
+
+property AI_ObjPat {
+	label "AIObjectPathable"
+}
+
+property AI_Patrol {
+	label "AIPatrol"
+}
+
+property AI_PtrlRn {
+	label "AIPatrolRandom"
+}
+
+property AIRCProp {
+	label "AIRangedCombatParams"
+}
+
+property AI_SaveCo {
+	label "AISaveConversation"
+}
+
+property AI_SeesPr {
+	label "AISeesProjectiles"
+}
+
+property AI_SigRsp {
+	label "AISignalResponse"
+}
+
+property AI_SndTyp {
+	label "AISoundType"
+}
+
+property AISuprise {
+	label "AISurprise"
+}
+
+property AI_Team {
+	label "AITeam"
+}
+
+property AI_ThrtRs {
+	label "AIThreatResponse"
+}
+
+property AI_TurnRa {
+	label "AITurnRate"
+}
+
+property AI_Turret {
+	label "AITurret"
+}
+
+property AI_UsesDo {
+	label "AIUsesDoors"
+}
+
+property AIVantage {
+	label "AIVantagePoint"
+}
+
+property AI_VisCtr {
+	label "AIVisibilityControl"
+}
+
+property AI_VisDes {
+	label "AIVisionDescription"
+}
+
+property AI_Visibi {
+	label "AIVisibility"
+}
+
+property AI_VisMod {
+	label "AIVisibilityModifier"
+}
+
+property AI_VisType {
+	label "AIVisionType"
+}
+
+property AI_WtchPn {
+	label "AIWatchPoint"
+}
+
+property AirSupply {
+	label "AirSupply"
+}
+
+property Ambient {
+	label "AmbientRoom"
+}
+
+property AmbientHa {
+	label "AmbientSound"
+}
+
+property AngleLimi {
+	label "AIAngleLimits"
+}
+
+property AnimLight {
+	label "AnimLight"
+}
+
+property offset {
+	label "Offset"
+}
+
+property AnimTex {
+	label "AnimTexture"
+}
+
+property Automap {
+	label "Automap"
+}
+
+property AutoVBR {
+	label "AutoMultibrush"
+}
+
+property BaseWpnDm {
+	label "BaseWeaponDamage"
+}
+
+property BashFacto {
+	label "BashFactor"
+}
+
+property BashParam {
+	label "BashParams"
+}
+
+property BitmapAni {
+	label "BitmapAnimation"
+}
+
+property Blood {
+	label "Blood"
+}
+
+property BloodCaus {
+	label "BloodCause"
+}
+
+property BloodMaxD {
+	label "BloodMaxDamage"
+}
+
+property BreathCon {
+	label "BreathConfig"
+}
+
+property CanAttach {
+	label "CanAttach"
+}
+
+property CfgTweqEm {
+	label "TweqEmitterConfig"
+}
+
+property velocity {
+	label "Velocity"
+}
+
+property CfgTweqJo {
+	label "TweqJointsConfig"
+}
+
+property CfgTweqLo {
+	label "TweqLockConfig"
+}
+
+property CfgTweqMo {
+	label "TweqModelsConfig"
+}
+
+property CfgTweqRo {
+	label "TweqRotateConfig"
+}
+
+property x {
+	label "X-Axis"
+}
+
+property y {
+	label "Y-Axis"
+}
+
+property z {
+	label "Z-Axis"
+}
+
+property CfgTweqSc {
+	label "TweqScaleConfig"
+}
+
+property x {
+	label "X-Scale"
+}
+
+property y {
+	label "Y-Scale"
+}
+
+property z {
+	label "Z-Scale"
+}
+
+property Class Tag {
+	label "ClassTags"
+}
+
+property Climbabil {
+	label "Climbability"
+}
+
+property Collision {
+	label "CollisionType"
+}
+
+property CombineTy {
+	label "CombineType"
+}
+
+property Creature {
+	label "CreatureType"
+}
+
+property CretPose {
+	label "CreaturePose"
+}
+
+property CSArrow {
+	label "CollisionSoundArrow"
+}
+
+property CSProject {
+	label "CollisionSoundProjectile"
+}
+
+property CSPropert {
+	label "CollisionSoundProperty"
+}
+
+property Culpable {
+	label "Culpable"
+}
+
+property CurWpnDmg {
+	label "CurrentWeaponDamage"
+}
+
+property DAI_FrogE {
+	label "AIFrogExplodeRange"
+}
+
+property DarkStat {
+	label "DarkStats"
+}
+
+property DeathStag {
+	label "DeathStage"
+}
+
+property DiffPermi {
+	label "DiffPermit"
+}
+
+property DonorType {
+	label "DonorType"
+}
+
+property Elasticit {
+	label "Elasticity"
+}
+
+property ExtraLigh {
+	label "ExtraLight"
+}
+
+property Firer {
+	label "Firer"
+}
+
+property FlowColor {
+	label "FlowColorIndex"
+}
+
+property FlowGroup {
+	label "FlowGroup"
+}
+
+property FrameAniC {
+	label "FrameAnimationConfig"
+}
+
+property FrameAniS {
+	label "FrameAnimationState"
+}
+
+property Friction {
+	label "Friction"
+}
+
+property FrobInfo {
+	label "FrobInfo"
+}
+
+property FrobLocal {
+	label "FrobLocally"
+}
+
+property FromBrief {
+	label "FromBriefcase"
+}
+
+property Fungus {
+	label "Fungus"
+}
+
+property HasBrush {
+	label "HasBrush"
+}
+
+property HasRefs {
+	label "HasRefs"
+}
+
+property HeatDisks {
+	label "HeatDisks"
+}
+
+property start {
+	label "Start Offset"
+}
+
+property end {
+	label "End Offset"
+}
+
+property HitPoints {
+	label "HitPoints"
+}
+
+property HTHAudioR {
+	label "HtHAudioResponse"
+}
+
+property HTHCombat {
+	label "HtHCombatDistances"
+}
+
+property HTHGruntA {
+	label "HtHGruntAlways"
+}
+
+property HTHModeOv {
+	label "HtHModeOverride"
+}
+
+property HTHMotion {
+	label "HtHMotionResponse"
+}
+
+property Immobile {
+	label "Immobile"
+}
+
+property InvLimbMo {
+	label "InventoryLimbModel"
+}
+
+property InvRendTy {
+	label "InventoryRenderType"
+}
+
+property InvType {
+	label "InventoryType"
+}
+
+property ItemStore {
+	label "ItemStore"
+}
+
+property JointPos {
+	label "JointPositions"
+}
+
+property KeyDst {
+	label "KeyDest"
+}
+
+property LauncherM {
+	label "LauncherMass"
+}
+
+property Light {
+	label "Light"
+}
+
+property offset {
+	label "Offset"
+}
+
+property LightColo {
+	label "LightColor"
+}
+
+property LockCnt {
+	label "LockCount (?)"
+}
+
+property Locked {
+	label "Locked"
+}
+
+property Loot {
+	label "Loot"
+}
+
+property MAX_HP {
+	label "MaxHitPoints"
+}
+
+property MaxSpchPa {
+	label "MaxSpeechPause"
+}
+
+property MeshAttac {
+	label "MeshAttach"
+}
+
+property angle {
+	label "Angle"
+}
+
+property offset {
+	label "Offset"
+}
+
+property MinSpchPa {
+	label "MinSpeechPause"
+}
+
+property ModelName {
+	label "ModelName"
+}
+
+property MotActorT {
+	label "MotionActorTags"
+}
+
+property MotGaitDe {
+	label "MotionGaitDescription"
+}
+
+property MotorCont {
+	label "MotorController"
+}
+
+property MotPhysLi {
+	label "MotionPhysLimits"
+}
+
+property MotPlyrLi {
+	label "MotionPlayerLimbOffset"
+}
+
+property position {
+	label "Position"
+}
+
+property angle {
+	label "Angle"
+}
+
+property MovingTer {
+	label "MovingTerrain"
+}
+
+property NoDrop {
+	label "NoDrop"
+}
+
+property NoFlash {
+	label "FlashInvulnerable"
+}
+
+property NonPhysCr {
+	label "NonPhysicalCreature"
+}
+
+property Particle {
+	label "Particle"
+}
+
+property ParticleG {
+	label "ParticleGroup"
+}
+
+property velocity {
+	label "Velocity"
+}
+
+property gravity {
+	label "Gravity"
+}
+
+property spinspeed {
+	label "Spin Speed"
+}
+
+property PGLaunchI {
+	label "ParticleGroupLaunchInfo"
+}
+
+property boxmin {
+	label "Min. Bounds"
+}
+
+property boxmax {
+	label "Max. Bounds"
+}
+
+property velocitymin {
+	label "Min. Velocity"
+}
+
+property velocitymax {
+	label "Max. Velocity"
+}
+
+property PhysAICol {
+	label "PhysAICollidesWith"
+}
+
+property PhysAttr {
+	label "PhysicsModelAttributes"
+}
+
+property cog {
+	label "Center of Gravity"
+}
+
+property PhysContr {
+	label "PhysicsModelControls"
+}
+
+property translation {
+	label "Axis Velocity"
+}
+
+property velocity {
+	label "Velocity"
+}
+
+property rotation {
+	label "Rotational Velocity"
+}
+
+property PhysDims {
+	label "PhysicsModelDimensions"
+}
+
+property size {
+	label "Bounding-Box Size"
+}
+
+property PhysExplo {
+	label "PhysProjectileExplosion"
+}
+
+property PhysFaceV {
+	label "PhysProjectileFacesVelocity"
+}
+
+property PhysInitV {
+	label "PhysProjectileInitialVelocity"
+}
+
+property PhysPPlat {
+	label "PhysicsPressurePlate"
+}
+
+property PhysRope {
+	label "PhysRope"
+}
+
+property PhysState {
+	label "PhysicsModelState"
+}
+
+property location {
+	label "Location"
+}
+
+property facing {
+	label "Rotation"
+}
+
+property velocity {
+	label "Velocity"
+}
+
+property rotvelocity {
+	label "Rotational Velocity"
+}
+
+property PhysType {
+	label "PhysicsModelType"
+}
+
+property PickBias {
+	label "PickBias"
+}
+
+property PickCfg {
+	label "PickDestConfig"
+}
+
+property PickDist {
+	label "PickDistance"
+}
+
+property PickSrc {
+	label "PickSourceConfig"
+}
+
+property PickState {
+	label "PickState"
+}
+
+property Position {
+	label "Position"
+}
+
+property position {
+	label "Location"
+}
+
+property facing {
+	label "Rotation"
+}
+
+property Puppet {
+	label "Puppet"
+}
+
+property RenderAlp {
+	label "RenderAlpha"
+}
+
+property RenderFla {
+	label "RenderFlash"
+}
+
+property color {
+	label "Color"
+}
+
+property RenderTyp {
+	label "RenderType"
+}
+
+property RoomGrav {
+	label "RoomGravity"
+}
+
+property RotDoor {
+	label "RotatingDoor"
+}
+
+property closedposition {
+	label "Closed Position"
+}
+
+property openposition {
+	label "Open Position"
+}
+
+property startposition {
+	label "Start Position"
+}
+
+property startfacing {
+	label "Start Rotation"
+}
+
+property haltclose {
+	label "Closed Rotation"
+}
+
+property haltopen {
+	label "Open Rotation"
+}
+
+property SalePrice {
+	label "SalePrice"
+}
+
+property Scale {
+	label "ModelScale"
+}
+
+property SchAction {
+	label "SchemaActionSound"
+}
+
+property SchAttFac {
+	label "SchemaAttenuationFactor"
+}
+
+property SchLastSa {
+	label "SchemaLastSample"
+}
+
+property SchLoopPa {
+	label "SchemaLoopParams"
+}
+
+property SchMsg {
+	label "SchemaMessage"
+}
+
+property SchPlayPa {
+	label "SchemaPlayParams"
+}
+
+property SchPriori {
+	label "SchemaPriority"
+}
+
+property Scripts {
+	label "Scripts"
+}
+
+property ScriptTim {
+	label "ScriptTiming"
+}
+
+property SelfIllum {
+	label "SelfIllumination"
+}
+
+property SelfLit {
+	label "DynamicLight"
+}
+
+property Shadow {
+	label "Shadow"
+}
+
+property SlayResul {
+	label "SlayResult"
+}
+
+property Spark {
+	label "SFXSpark"
+}
+
+property SpchNextP {
+	label "SpeechLastPlayed"
+}
+
+property SpchVoice {
+	label "SpeechVoice"
+}
+
+property Speech {
+	label "CurrentSpeech"
+}
+
+property Spotlight {
+	label "Spotlight"
+}
+
+property StackCoun {
+	label "StackCount"
+}
+
+property StimKO {
+	label "StimIsKnockout"
+}
+
+property StTweqJoi {
+	label "TweqJointsState"
+}
+
+property StTweqLoc {
+	label "TweqLockState"
+}
+
+property StTweqRot {
+	label "TweqRotateState"
+}
+
+property StTweqSca {
+	label "TweqScaleState"
+}
+
+property SwingExpo {
+	label "SwingExposure"
+}
+
+property SwordActi {
+	label "SwordActionType"
+}
+
+property TextureID {
+	label "TextureIndex"
+}
+
+property TextureRa {
+	label "RetextureRadius"
+}
+
+property TimeWarp {
+	label "CreatureTimeWarp"
+}
+
+property ToolReach {
+	label "InventoryToolReach"
+}
+
+property TransDoor {
+	label "TranslatingDoor"
+}
+
+property closedposition {
+	label "Closed Position"
+}
+
+property openposition {
+	label "Open Position"
+}
+
+property startposition {
+	label "Start Position"
+}
+
+property startfacing {
+	label "Start Rotation"
+}
+
+property Transient {
+	label "Transient"
+}
+
+property VoiceIdx {
+	label "VoiceIndex"
+}
+
+property WaterColo {
+	label "WaterColor"
+}
+
+property WeaponDam {
+	label "WeaponDamage"
+}
+
+property WeaponTyp {
+	label "WeaponType"
+}
+
+property WpnExposu {
+	label "WeaponExposure"
+}
