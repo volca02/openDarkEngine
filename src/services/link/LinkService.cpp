@@ -150,7 +150,12 @@ namespace Opde {
 			// Now load the data of the relation
 			LOG_DEBUG("Loading relation %s", text);
 			
-			rel->load(db);
+			try {
+				rel->load(db);
+			} catch (BasicException &e) {
+				LOG_FATAL("LinkService: Caught a fatal exception while loading Relation %s : %s", text, e.getDetails().c_str() );
+			}
+			
 		}
 	}
 	

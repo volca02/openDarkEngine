@@ -91,7 +91,7 @@ namespace Opde {
 			fldata = db->getFile(ldchn);
 		} catch (BasicException& e) {
 			if (mType.isNull()) {
-				LOG_INFO("Relation::load : Link data chunk %s (It's ok since data type not registered either)", ldchn.c_str());
+				LOG_INFO("Relation::load : Link data chunk %s not found (It's ok since data type not registered either)", ldchn.c_str());
 			} else {
 				LOG_FATAL("Relation::load : Could not find the Link data chunk %s with : %s", ldchn.c_str(), e.getDetails().c_str());
 				return;
@@ -114,14 +114,14 @@ namespace Opde {
 			fldata->readElem(&dsize, sizeof(uint32_t));
 			
 			if (mType.isNull())
-				LOG_FATAL("Data for relation %s exist, but dyntype not set", mName.c_str()); // Maybe I just should stop with exception
+				LOG_FATAL("Relation (%s): Data exist, but dyntype not set", mName.c_str()); // Maybe I just should stop with exception
 			else {
 				load_data = true;
 			
 				// check for data len
 				if (dsize != mType->size()) {
 					// This just happens. Some links have the size totally different the real
-					LOG_FATAL("Data size for relation %s differ : Type: %d, Chunk: %d", mName.c_str(), mType->size(), dsize);
+					LOG_FATAL("Relation (%s): Data size differ : Type: %d, Chunk: %d", mName.c_str(), mType->size(), dsize);
 					// we respect our data size
 					dsize = mType->size();
 				}
@@ -129,6 +129,9 @@ namespace Opde {
 				// as the last thing, count the data entries
 				link_data_count = (fldata->size() - sizeof(uint32_t)) / dsize;
 			}
+		} else {
+			if (!mType.isNull())
+				LOG_FATAL("Relation (%s): Link data not present in file, but type defined", mName.c_str());
 		}
 		
 		// If data should be loaded, load the data chunk
@@ -148,10 +151,7 @@ namespace Opde {
 				
 				LinkDataPtr ldta = new LinkData(id, mType, fldata, dsize);
 				
-				/*if (mName == "MetaProp")
-					std::cerr << "MP PRIO Id " << id << " : "<< ldta->get("priority").toUInt() << std::endl;
-				*/
-				
+				LOG_DEBUG("Relation (%s): Loaded link data for link id %d", mName.c_str(), id);
 				// Link data are inserted silently
 				_assignLinkData(id, ldta);
 			}
@@ -169,7 +169,7 @@ namespace Opde {
 				linkstruct->get(dlink, "flavor").toUInt()
 			));
 			
-			LOG_DEBUG("Relation: Read link [%s - %d] ID %d, from %d to %d (F,C,IX: %d, %d, %d)", 
+			LOG_DEBUG("Relation (%s - %d): Read link ID %d, from %d to %d (F,C,IX: %d, %d, %d)", 
 				  mName.c_str(), 
 				  mID, 
 				  link->mID, 
@@ -238,7 +238,7 @@ namespace Opde {
 				
 				flnk->write(lnkdta, linkstruct->size());
 			} else {
-				LOG_DEBUG("Link concreteness of link %d was out of requested : %d", link->mID, conc);
+				LOG_DEBUG("Relation (%s): Link concreteness of link %d was out of requested : %d", mName.c_str(), link->mID, conc);
 			}
 		}
 		
@@ -512,7 +512,7 @@ namespace Opde {
 			LinkDataMap::iterator dit = mLinkDataMap.find(link->mID);
 			
 			if (dit == mLinkDataMap.end() && !mType.isNull()) 
-				OPDE_EXCEPT("Link Data not defined prior to link insertion for link id " + link->mID, "Relation::_addLink");
+				OPDE_EXCEPT("Relation (" + mName + "): Link Data not defined prior to link insertion", "Relation::_addLink"); // for link id " + link->mID
 			
 			
 			// fire the notification about inserted link
