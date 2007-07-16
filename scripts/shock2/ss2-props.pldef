@@ -1,0 +1,2021 @@
+// ******************************************************************************
+// *
+// *    This file is part of openDarkEngine project
+// *    Copyright (C) 2005-2006 openDarkEngine team
+// *
+// *    This program is free software; you can redistribute it and/or modify
+// *    it under the terms of the GNU General Public License as published by
+// *    the Free Software Foundation; either version 2 of the License, or
+// *    (at your option) any later version.
+// *
+// *    This program is distributed in the hope that it will be useful,
+// *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+// *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// *    GNU General Public License for more details.
+// *
+// *    You should have received a copy of the GNU General Public License
+// *    along with this program; if not, write to the Free Software
+// *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+// *
+// *****************************************************************************
+
+// The System Shock 2 property definitions
+// Created using the Telliamed's xml file Shock2-structs.xml, released under GNU GPL
+// Original file is copyrighted : Copyright (C) 2006 Tom N Harris <telliamed@whoopdedo.org>
+
+// Default version for property chunks is 2.4
+p_ver 2.4
+
+// Some notes:
+// Default inheritance is "always", it can be changed by "inherit INH_TYPE". INH_TYPE then would be always, never, archetype
+// Type definition for the property can be overriden with "dtype TYPE_PATH", otherwise it uses the properties/<PropertyName>
+// In special cases the property should have the chunk name defined - otherwise, it is taken from the property declaration
+
+// -------------------------------------------------------------------------------------------------------------------------
+
+property RadDrain {
+	label "RadDrain"
+}
+
+property CharGenYe {
+	label "CharGenYear"
+	p_ver 2.65540
+}
+
+property StimKO {
+	label "StimIsKnockout"
+}
+
+property ObjBroken {
+	label "ObjectBrokenIcon"
+	p_ver 2.16
+}
+
+property AI_RngFle {
+	label "AIRangedFleeParams"
+	p_ver 2.65560
+}
+
+property BloodType {
+	label "BloodType"
+	p_ver 2.17
+}
+
+property MinSpchPa {
+	label "MinSpeechPause"
+}
+
+property KeyDst {
+	label "KeyDest"
+	p_ver 2.6
+}
+
+property AI_Team {
+	label "AITeam"
+}
+
+property AI_InfOtr {
+	label "AIInformOthers"
+}
+
+property AI_Fidget {
+	label "AIFidget"
+}
+
+property StackCoun {
+	label "StackCount"
+}
+
+property AI_Defens {
+	label "AIDefensiveness"
+}
+
+property AI_CbtTim {
+	label "AICombatTiming"
+	p_ver 2.16
+}
+
+property SpchVoice {
+	label "SpeechVoice"
+	p_ver 2.16
+}
+
+property Ecology {
+	label "Ecology"
+	p_ver 2.52
+}
+
+property DiffTurnO {
+	label "DiffTurnOn/Off"
+}
+
+property AIRCWndSn {
+	label "AIRangedCombatWoundSound"
+	p_ver 2.12
+}
+
+property SchPlayPa {
+	label "SchemaPlayParams"
+	p_ver 2.20
+}
+
+property FromBrief {
+	label "FromBriefcase"
+}
+
+property CSProject {
+	label "CollisionSoundProjectile"
+	p_ver 2.16
+}
+
+property DoorClose {
+	label "DoorCloseSound"
+	p_ver 2.65552
+}
+
+property SlayResul {
+	label "SlayResult"
+}
+
+property Fabricate {
+	label "FabricateQuantity"
+	p_ver 2.65540
+}
+
+property AI_NoHand {
+	label "AINoHandoff"
+	p_ver 
+}
+
+property CameraObj {
+	label "CameraAttach"
+	p_ver 2.65572
+}
+
+property SymName {
+	label "SymbolicName"
+	p_ver 2.17
+}
+
+property Spotlight {
+	label "Spotlight"
+	p_ver 2.65548
+}
+
+property AutoVBR {
+	label "AutoMultibrush"
+	p_ver 2.16
+}
+
+property MotPhysLi {
+	label "MotionPhysLimits"
+	p_ver 2.8
+}
+
+property HackVisi {
+	label "HackVisibility"
+}
+
+property AI_BodyRs {
+	label "AIBodyResponse"
+	p_ver 2.2100
+}
+
+property CfgTweq3E {
+	label "TweqEmitter3Config"
+	p_ver 2.52
+}
+
+property CurWpnDmg {
+	label "CurrentWeaponDamage"
+	p_ver 2.65540
+}
+
+property AI_VisDes {
+	label "AIVisionDescription"
+	p_ver 2.236
+}
+
+property Shove {
+	label "Shove"
+	p_ver 2.12
+}
+
+property MapRef {
+	label "MapRefInfo"
+	p_ver 2.12
+}
+
+property Z-Bias {
+	label "RendererZBias"
+}
+
+property PsiState {
+	label "PsiState"
+	p_ver 2.65548
+}
+
+property AI_SndTag {
+	label "AISoundTags"
+	p_ver 2.17
+}
+
+property StTweqEmi {
+	label "TweqEmitterState"
+	p_ver 2.8
+}
+
+property AI_PtrlRn {
+	label "AIPatrolRandom"
+}
+
+property PsiOver2D {
+	label "PsiOverload2State"
+	p_ver 2.65540
+}
+
+property HTHModeOv {
+	label "HtHModeOverride"
+}
+
+property Recycle {
+	label "RadLevel"
+}
+
+property AI_InfRsp {
+	label "AIInformResponse"
+	p_ver 2.2108
+}
+
+property EcoType {
+	label "EcologyType"
+}
+
+property StackInc {
+	label "StackIncrement"
+}
+
+property CfgTweqMo {
+	label "TweqModelsConfig"
+	p_ver 2.104
+}
+
+property HackTime {
+	label "HackDuration"
+}
+
+property GunReliab {
+	label "GunReliability"
+	p_ver 2.65552
+}
+
+property ReqTechDe {
+	label "RequiredTechSkills"
+	p_ver 2.65556
+}
+
+property AI_RngApp {
+	label "AIRangedApplicabilities"
+	p_ver 2.65572
+}
+
+property CfgTweqJo {
+	label "TweqJointsConfig"
+	p_ver 2.132
+}
+
+property WpnExposu {
+	label "WeaponExposure"
+	p_ver 2.65540
+}
+
+property SpchNextP {
+	label "SpeechLastPlayed"
+	p_ver 
+}
+
+property Service {
+	label "PlayerService"
+}
+
+property Logs9 {
+	label "LogsDeck9"
+	p_ver 2.65552
+}
+
+property GuarLoot {
+	label "BorgLoot"
+	p_ver 2.16
+}
+
+property SchMsg {
+	label "SchemaMessage"
+	p_ver 2.16
+}
+
+property RenderTyp {
+	label "RenderType"
+}
+
+property AI_Conver {
+	label "AIConversation"
+	p_ver 2.19332
+}
+
+property Logs4 {
+	label "LogsDeck4"
+	p_ver 2.65552
+}
+
+property AI_IdleDi {
+	label "AIIdleDirections"
+	p_ver 2.40
+}
+
+property AI_AlSnMu {
+	label "AIAlertSenseMultiplier"
+	p_ver 2.68
+}
+
+property DelayTime {
+	label "DelayTime"
+}
+
+property AI_Alertn {
+	label "AIAlertness"
+	p_ver 2.131080
+}
+
+property Borrowed {
+	label "Borrowed"
+}
+
+property Homing {
+	label "HomingProjectile"
+	p_ver 2.65556
+}
+
+property PickBias {
+	label "PickBias"
+}
+
+property SHead2 {
+	label "GunSettingHeader2"
+	p_ver 2.17
+}
+
+property CharGenRo {
+	label "CharGenRoom"
+	p_ver 2.65540
+}
+
+property BaseWpnDm {
+	label "BaseWeaponDamage"
+	p_ver 2.65540
+}
+
+property AI_AlertC {
+	label "AIAlertCap"
+	p_ver 2.12
+}
+
+property OTxtRepr0 {
+	label "TextureReplace0"
+	p_ver 2.17
+}
+
+property CanAttach {
+	label "CanAttach"
+}
+
+property CfgTweqBl {
+	label "TweqFlickerConfig"
+	p_ver 2.8
+}
+
+property AI_WtchPn {
+	label "AIWatchPoint"
+	p_ver 2.2196
+}
+
+property Sett2 {
+	label "GunSettingText2"
+	p_ver 2.17
+}
+
+property Logs6 {
+	label "LogsDeck6"
+	p_ver 2.65552
+}
+
+property PhysAttr {
+	label "PhysicsModelAttributes"
+	p_ver 2.66536
+}
+
+property TransDoor {
+	label "TranslatingDoor"
+	p_ver 2.66536
+}
+
+property RenderFla {
+	label "RenderFlash"
+	p_ver 2.28
+}
+
+property NameType {
+	label "ObjNameType"
+}
+
+property AI_IsProx {
+	label "AIIsProxy"
+	p_ver 
+}
+
+property ReqStatsD {
+	label "RequiredStats"
+	p_ver 2.65556
+}
+
+property Material  {
+	label "MaterialTags"
+	p_ver 
+}
+
+property AnimPost {
+	label "GunAnimPost"
+	p_ver 2.65560
+}
+
+property AI_TurnRa {
+	label "AITurnRate"
+}
+
+property arSrcScal {
+	label "ARSourceScale"
+}
+
+property AIRCProp {
+	label "AIRangedCombatParams"
+	p_ver 2.65564
+}
+
+property NetworkCa {
+	label "NetworkCategory"
+}
+
+property CfgTweqSc {
+	label "TweqScaleConfig"
+	p_ver 2.48
+}
+
+property AI_Launch {
+	label "AILaunchVisible"
+}
+
+property AngleLimi {
+	label "AIAngleLimits"
+	p_ver 2.65544
+}
+
+property "Class Tag" {
+	label "ClassTags"
+	dtype ClassTag
+	p_ver 2.256
+}
+
+property AI_Hearin {
+	label "AIHearing"
+}
+
+property Speech {
+	label "CurrentSpeech"
+	p_ver 
+}
+
+property HackLock {
+	label "HackLock"
+}
+
+property VoiceIdx {
+	label "VoiceIndex"
+}
+
+property StTweqRot {
+	label "TweqRotateState"
+	p_ver 2.16
+}
+
+property PlotCriti {
+	label "PlotCritical"
+}
+
+property NotPullab {
+	label "NotPullable"
+	p_ver 2.65540
+}
+
+property AI_MoveSp {
+	label "AIMoveSpeed"
+}
+
+property AnimTex {
+	label "AnimTexture"
+	p_ver 2.8
+}
+
+property ShkAIRang {
+	label "AIShockRanged"
+	p_ver 2.65552
+}
+
+property Scripts {
+	label "Scripts"
+	p_ver 2.65668
+}
+
+property ObjState {
+	label "ObjectState"
+}
+
+property CSPropert {
+	label "CollisionSoundProperty"
+	p_ver 2.16
+}
+
+property AI_BlkVis {
+	label "AIBlocksVision"
+}
+
+property Alchemy {
+	label "Alchemy"
+	p_ver 2.65540
+}
+
+property StTweq2Em {
+	label "TweqEmitter2State"
+	p_ver 2.8
+}
+
+property HasRefs {
+	label "HasRefs"
+}
+
+property AI_InfMxP {
+	label "AIInformMaxPasses"
+}
+
+property AI_NoGhos {
+	label "AINoGhost"
+}
+
+property AI_OnlyPl {
+	label "AIOnlyNoticePlayer"
+}
+
+property RoomGrav {
+	label "RoomGravity"
+	p_ver 2.65540
+}
+
+property PhysPPlat {
+	label "PhysicsPressurePlate"
+	p_ver 2.66536
+}
+
+property HackKey {
+	label "HackKey"
+}
+
+property MotActorT {
+	label "MotionActorTags"
+	p_ver 2.800
+}
+
+property HandoffNu {
+	label "HandoffNumber"
+}
+
+property RepHacked {
+	label "RepHackedContents"
+	p_ver 2.408
+}
+
+property BaseStats {
+	label "BaseStats"
+	p_ver 2.65556
+}
+
+property LockCnt {
+	label "LockCount (?)"
+}
+
+property GunState {
+	label "GunState"
+	p_ver 2.65552
+}
+
+property WeaponDam {
+	label "WeaponDamage"
+}
+
+property ModifyDif {
+	label "ModifyDifficulty"
+	p_ver 2.12
+}
+
+property MapLoc {
+	label "MapLocation"
+	p_ver 2.65540
+}
+
+property AIRCRange {
+	label "AIRangedCombatRanges"
+	p_ver 2.65552
+}
+
+property BlockFrob {
+	label "BlockFrob"
+}
+
+property LocalCopy {
+	label "LocalCopy"
+}
+
+property ImplTechD {
+	label "ImplantSkills"
+	p_ver 2.65556
+}
+
+property AI {
+	label "AI"
+	p_ver 2.32
+}
+
+property LauncherM {
+	label "LauncherMass"
+	p_ver 2.65540
+}
+
+property InvDims {
+	label "InvDimensions"
+	p_ver 2.8
+}
+
+property Melee Typ {
+	label "MeleeType"
+}
+
+property JointPos {
+	label "JointPositions"
+	p_ver 2.24
+}
+
+property AI_FreeKn {
+	label "AIFreeSenseKnowledge"
+}
+
+property UseType {
+	label "UseType"
+}
+
+property Logs3 {
+	label "LogsDeck3"
+	p_ver 2.65552
+}
+
+property StTweqSca {
+	label "TweqScaleState"
+	p_ver 2.16
+}
+
+property StartLoc {
+	label "MultilevelStartLocation"
+}
+
+property UseCursor {
+	label "UseCursorString"
+	p_ver 2.17
+}
+
+property InvCursor {
+	label "InvCursorString"
+	p_ver 2.17
+}
+
+property TargetTyp {
+	label "TargetType"
+	p_ver 2.65540
+}
+
+property RGuarLoot {
+	label "GuaranteeLoot"
+	p_ver 2.16
+}
+
+property ShakeAmt {
+	label "ShakeStrength"
+}
+
+property CfgTweq5E {
+	label "TweqEmitter5Config"
+	p_ver 2.52
+}
+
+property AI_NotMelee {
+	label "AINotMeleeTarget"
+	p_ver 
+}
+
+property PhysAICol {
+	label "PhysAICollidesWith"
+}
+
+property AI_InfExp {
+	label "AIInformExpiration"
+}
+
+property RsrchTxt {
+	label "ResearchText"
+	p_ver 2.17
+}
+
+property AI_InvKnd {
+	label "AIInvestigationKind"
+}
+
+property AI_FleePo {
+	label "AIFleePoint"
+}
+
+property SelfLit {
+	label "DynamicLight"
+}
+
+property Modify1 {
+	label "Modification1"
+	p_ver 2.17
+}
+
+property AI_NonHst {
+	label "AINonHostile"
+}
+
+property ExP {
+	label "ExpCookies"
+}
+
+property AirSupply {
+	label "AirSupply"
+}
+
+property TraitsDes {
+	label "PlayerTraits"
+	p_ver 2.65552
+}
+
+property ShodanExp {
+	label "ShodanExplodeRange"
+}
+
+property HackDiff {
+	label "HackDifficulty"
+	p_ver 2.12
+}
+
+property SchLoopPa {
+	label "SchemaLoopParams"
+	p_ver 2.8
+}
+
+property BashFacto {
+	label "BashFactor"
+}
+
+property SchAttFac {
+	label "SchemaAttenuationFactor"
+}
+
+property Psi Tags {
+	label "PsiTags"
+	p_ver 2.256
+}
+
+property StTweqMod {
+	label "TweqModelsState"
+	p_ver 2.8
+}
+
+property DrainRate {
+	label "DrainRate"
+}
+
+property ProtocolE {
+	label "ProtocolDroidExplodeRange"
+}
+
+property MapText {
+	label "MapText"
+	p_ver 2.17
+}
+
+property FrobHandl {
+	label "FrobHandler"
+}
+
+property Cannister {
+	label "GunCannister"
+	p_ver 2.12
+}
+
+property RepairDif {
+	label "RepairDifficulty"
+	p_ver 2.12
+}
+
+property TextureRa {
+	label "RetextureRadius"
+	p_ver 2.65540
+}
+
+property AI_IdleOr {
+	label "AIIdleOrigin"
+	p_ver 2.16
+}
+
+property WeaponTyp {
+	label "WeaponType"
+}
+
+property TextureID {
+	label "TextureIndex"
+	p_ver 
+}
+
+property PhysContr {
+	label "PhysicsModelControls"
+	p_ver 2.66536
+}
+
+property DrainAmt {
+	label "DrainAmount"
+}
+
+property ArmrStats {
+	label "ArmorStats"
+	p_ver 2.65556
+}
+
+property InvLimbMo {
+	label "InventoryLimbModel"
+	p_ver 2.16
+}
+
+property StTweq3Em {
+	label "TweqEmitter3State"
+	p_ver 2.8
+}
+
+property WaterColo {
+	label "WaterColor"
+	p_ver 2.8
+}
+
+property AICoverPt {
+	label "AICoverPoint"
+	p_ver 2.65548
+}
+
+property BaseWeapo {
+	label "WeaponSkills"
+	p_ver 2.65552
+}
+
+property ObjLookS {
+	label "ObjectLookString"
+	p_ver 2.17
+}
+
+property FailSound {
+	label "FailureSound"
+	p_ver 2.16
+}
+
+property Shadow {
+	label "Shadow"
+}
+
+property DiffClose {
+	label "DiffClose/OpenDoor"
+}
+
+property AI_Visibi {
+	label "AIVisibility"
+	p_ver 
+}
+
+property UseMsg {
+	label "UseMessage"
+	p_ver 2.17
+}
+
+property AI_FleeCo {
+	label "AIFleeCondition"
+	p_ver 2.12
+}
+
+property AI_AwrDel {
+	label "AIAwarenessDelay"
+	p_ver 2.20
+}
+
+property Elasticit {
+	label "Elasticity"
+}
+
+property BaseGunDe {
+	label "BaseGunDescription"
+	p_ver 2.65656
+}
+
+property SHead1 {
+	label "GunSettingHeader1"
+	p_ver 2.17
+}
+
+property DoorTimer {
+	label "DoorTimer"
+	p_ver 2.65540
+}
+
+property AutoPicku {
+	label "AutoPickup"
+}
+
+property MapObjRot {
+	label "MapIconRotated"
+}
+
+property HUDTime {
+	label "HUDDuration"
+}
+
+property MetapropT {
+	label "MetapropType"
+	p_ver 2.17
+}
+
+property CfgTweq2E {
+	label "TweqEmitter2Config"
+	p_ver 2.52
+}
+
+property AI_VisMod {
+	label "AIVisibilityModifier"
+	p_ver 2.65560
+}
+
+property AI_Effici {
+	label "AIEfficiency"
+	p_ver 2.36
+}
+
+property AIGun {
+	label "AIGun"
+	p_ver 2.16
+}
+
+property SchPriori {
+	label "SchemaPriority"
+}
+
+property AI_Grub_C {
+	label "AIGrubCombat"
+	p_ver 2.60
+}
+
+property CfgTweqEm {
+	label "TweqEmitterConfig"
+	p_ver 2.52
+}
+
+property AI_ObjPat {
+	label "AIObjectPathable"
+}
+
+property DistinctA {
+	label "DistinctAvatar"
+}
+
+property AI_Sloth {
+	label "AISloth"
+}
+
+property ObjName {
+	label "ObjectName"
+	p_ver 2.131089
+}
+
+property AvatarZOf {
+	label "AvatarZOffset"
+}
+
+property Locked {
+	label "Locked"
+}
+
+property Particle {
+	label "Particle"
+}
+
+property DrugStats {
+	label "DrugStats"
+	p_ver 2.65556
+}
+
+property PhysFaceV {
+	label "PhysProjectileFacesVelocity"
+}
+
+property PsiPower2 {
+	label "PsiPowers2"
+	p_ver 2.65540
+}
+
+property DeathStag {
+	label "DeathStage"
+}
+
+property Initted {
+	label "ScriptInitted"
+}
+
+property AI_Frozen {
+	label "AIFrozen"
+	p_ver 2.8
+}
+
+property MovingTer {
+	label "MovingTerrain"
+	p_ver 2.65544
+}
+
+property AI_Mode {
+	label "AIMode"
+}
+
+property KeypadCod {
+	label "KeypadCode"
+}
+
+property PsiOverDe {
+	label "PsiOverloadState"
+	p_ver 2.65540
+}
+
+property Transient {
+	label "Transient"
+}
+
+property Modify2 {
+	label "Modification2"
+	p_ver 2.17
+}
+
+property SchLastSa {
+	label "SchemaLastSample"
+	p_ver 
+}
+
+property ProxyStor {
+	label "ProxyStorage"
+}
+
+property StTweq5Em {
+	label "TweqEmitter5State"
+	p_ver 2.8
+}
+
+property AI_RngSho {
+	label "AIRangedShootParams"
+	p_ver 2.65580
+}
+
+property Toxin {
+	label "Toxin"
+}
+
+property AI_Patrol {
+	label "AIPatrol"
+}
+
+property AI_UsesDo {
+	label "AIUsesDoors"
+}
+
+property OTxtRepr3 {
+	label "TextureReplace3"
+	p_ver 2.17
+}
+
+property AI_InfDly {
+	label "AIInformDelay"
+}
+
+property DonorType {
+	label "DonorType"
+}
+
+property AI_SeesPr {
+	label "AISeesProjectiles"
+}
+
+property HUDSelect {
+	label "HUDSelectable"
+}
+
+property AnimLight {
+	label "AnimLight"
+	p_ver 2.68
+}
+
+property Logs2 {
+	label "LogsDeck2"
+	p_ver 2.65552
+}
+
+property Logs7 {
+	label "LogsDeck7"
+	p_ver 2.65552
+}
+
+property MaxSpchPa {
+	label "MaxSpeechPause"
+}
+
+property ExtraLigh {
+	label "ExtraLight"
+	p_ver 2.65544
+}
+
+property RadAmb {
+	label "RadAmbient"
+}
+
+property Acoustics {
+	label "Acoustics"
+	p_ver 2.131084
+}
+
+property BookData {
+	label "BookData"
+	p_ver 2.16
+}
+
+property AIRCWound {
+	label "AIRangedCombatWoundMotion"
+	p_ver 2.12
+}
+
+property BashParam {
+	label "BashParams"
+	p_ver 2.1000
+}
+
+property PsiShield {
+	label "PsiShield"
+	p_ver 2.65548
+}
+
+property MiniGames {
+	label "MiniGames"
+}
+
+property CretPose {
+	label "CreaturePose"
+	p_ver 2.96
+}
+
+property DiffPermi {
+	label "DiffPermit"
+}
+
+property Friction {
+	label "Friction"
+}
+
+property AI_BcstSe {
+	label "AIBroadcastSettings"
+	p_ver 2.708
+}
+
+property FabCost {
+	label "FabricateCost"
+	p_ver 2.65540
+}
+
+property FlowGroup {
+	label "FlowGroup"
+}
+
+property AI_NCDmgR {
+	label "AINonCombatDamageResponse"
+	p_ver 2.12
+}
+
+property PlayerNam {
+	label "PlayerName"
+	p_ver 2.65553
+}
+
+property Modify2Di {
+	label "Modify2Difficulty"
+	p_ver 2.12
+}
+
+property AI_InfDst {
+	label "AIInformDistance"
+}
+
+property AmbientHa {
+	label "AmbientSound"
+	p_ver 2.60
+}
+
+property ShockWeap {
+	label "ShockWeaponType"
+}
+
+property Collision {
+	label "CollisionType"
+}
+
+property AnimPre {
+	label "GunAnimPre"
+	p_ver 2.65560
+}
+
+property RenderAlp {
+	label "RenderAlpha"
+	p_ver 2.65540
+}
+
+property FrobInfo {
+	label "FrobInfo"
+	p_ver 2.16
+}
+
+property PhysExplo {
+	label "PhysProjectileExplosion"
+	p_ver 2.1000
+}
+
+property MotGaitDe {
+	label "MotionGaitDescription"
+	p_ver 2.72
+}
+
+property PsiRadar {
+	label "PsiRadarType"
+	p_ver 2.65540
+}
+
+property ParticleG {
+	label "ParticleGroup"
+	p_ver 2.1005
+}
+
+property ShowHP {
+	label "ShowHP"
+}
+
+property MotorCont {
+	label "MotorController"
+}
+
+property DestLevel {
+	label "MultiLevelMission"
+	p_ver 2.16
+}
+
+property AI_Aggres {
+	label "AIAggression"
+}
+
+property ElevOffse {
+	label "ElevatorOffset"
+	p_ver 2.12
+}
+
+property PhysRope {
+	label "PhysRope"
+	p_ver 2.66537
+}
+
+property DestLoc {
+	label "MultiLevelLocation"
+}
+
+property Immobile {
+	label "Immobile"
+}
+
+property AI_ThrtRs {
+	label "AIThreatResponse"
+	p_ver 2.2104
+}
+
+property Culpable {
+	label "Culpable"
+}
+
+property HasBrush {
+	label "HasBrush"
+}
+
+property InvRendTy {
+	label "InventoryRenderType"
+	p_ver 2.65556
+}
+
+property Spark {
+	label "SFXSpark"
+	p_ver 2.40
+}
+
+property QBVal {
+	label "QBValue"
+}
+
+property Projectil {
+	label "ProjectileDescription"
+	p_ver 2.65542
+}
+
+property ChemNeede {
+	label "ChemicalsNeeded"
+	p_ver 2.476
+}
+
+property CombineTy {
+	label "CombineType"
+	p_ver 2.16
+}
+
+property HackText {
+	label "HackText"
+	p_ver 2.17
+}
+
+property PrjSound {
+	label "ProjectileSound"
+	p_ver 2.17
+}
+
+property MAX_HP {
+	label "MaxHitPoints"
+}
+
+property OTxtRepr2 {
+	label "TextureReplace2"
+	p_ver 2.17
+}
+
+property AI_Swarm {
+	label "AISwarm"
+	p_ver 2.8
+}
+
+property GunKick {
+	label "GunKickback"
+	p_ver 2.65632
+}
+
+property GunAnim {
+	label "GunAnim"
+	p_ver 
+}
+
+property StTweqDel {
+	label "TweqDeleteState"
+	p_ver 2.8
+}
+
+property AI_Verbos {
+	label "AIVerbosity"
+}
+
+property MeshAttac {
+	label "MeshAttach"
+	p_ver 2.120
+}
+
+property BreathCon {
+	label "BreathConfig"
+	p_ver 2.16
+}
+
+property FlowColor {
+	label "FlowColorIndex"
+}
+
+property RepConten {
+	label "RepContents"
+	p_ver 2.408
+}
+
+property BitmapAni {
+	label "BitmapAnimation"
+}
+
+property Climbabil {
+	label "Climbability"
+}
+
+property Energy {
+	label "Energy"
+}
+
+property AI_IdlRet {
+	label "AIIdleReturnToOrigin"
+}
+
+property AI_VisJoi {
+	label "AIVisionJoint"
+}
+
+property HTHGruntA {
+	label "HtHGruntAlways"
+}
+
+property PickDist {
+	label "PickDistance"
+}
+
+property ContainDi {
+	label "ContainerDimensions"
+	p_ver 2.8
+}
+
+property AI_SndTyp {
+	label "AISoundType"
+	p_ver 2.131112
+}
+
+property CfgTweqLo {
+	label "TweqLockConfig"
+	p_ver 2.32
+}
+
+property Firer {
+	label "Firer"
+}
+
+property AI_Turret {
+	label "AITurret"
+	p_ver 2.16
+}
+
+property StTweqBli {
+	label "TweqFlickerState"
+	p_ver 2.8
+}
+
+property PhysInitV {
+	label "PhysProjectileInitialVelocity"
+	p_ver 2.12
+}
+
+property NoBorrow {
+	label "NoBorrow"
+	p_ver 
+}
+
+property AIGunDesc {
+	label "AIGunDescription"
+	p_ver 2.65566
+}
+
+property PsiPowerD {
+	label "PsiPowers"
+	p_ver 2.65540
+}
+
+property Position {
+	label "Position"
+	p_ver 2.65558
+}
+
+property AI_Device {
+	label "AIDevice"
+	p_ver 2.24
+}
+
+property SwingExpo {
+	label "SwingExposure"
+	p_ver 2.65540
+}
+
+property HitPoints {
+	label "HitPoints"
+}
+
+property Heartbeat {
+	label "Heartbeat"
+}
+
+property MsgTime {
+	label "MessageTime"
+}
+
+property Spawn {
+	label "Spawn"
+	p_ver 2.280
+}
+
+property SelfIllum {
+	label "SelfIllumination"
+	p_ver 2.65540
+}
+
+property AI_Notice {
+	label "AINoticeDamage"
+}
+
+property EcoState {
+	label "EcologyState"
+}
+
+property PhysType {
+	label "PhysicsModelType"
+	p_ver 2.66538
+}
+
+property PhysDims {
+	label "PhysicsModelDimensions"
+	p_ver 2.66537
+}
+
+property ObjShort {
+	label "ObjectShortName"
+	p_ver 2.17
+}
+
+property ObjList {
+	label "ObjArgList"
+	p_ver 2.17
+}
+
+property AI_Vision {
+	label "AIVision"
+}
+
+property Sett1 {
+	label "GunSettingText1"
+	p_ver 2.17
+}
+
+property AI_VisTyp {
+	label "AIVisionType"
+}
+
+property RotDoor {
+	label "RotatingDoor"
+	p_ver 2.66537
+}
+
+property NonPhysCr {
+	label "NonPhysicalCreature"
+}
+
+property ModelName {
+	label "ModelName"
+	p_ver 2.16
+}
+
+property TransRate {
+	label "TransluceRate"
+}
+
+property StTweq4Em {
+	label "TweqEmitter4State"
+	p_ver 2.8
+}
+
+property Ambient {
+	label "AmbientRoom"
+	p_ver 2.65604
+}
+
+property AI_Dodgin {
+	label "AIDodginess"
+}
+
+property MapObjIco {
+	label "MapIcon"
+	p_ver 2.16
+}
+
+property Preload {
+	label "Preload"
+}
+
+property LootInfo {
+	label "Loot"
+	p_ver 2.436
+}
+
+property AISuprise {
+	label "AISurprise"
+	p_ver 2.12
+}
+
+property ObjSoundN {
+	label "ObjectSound"
+	p_ver 2.16
+}
+
+property AI_NCDmRs {
+	label "AINonCombatRespondToDamage"
+}
+
+property DiffScript {
+	label "DiffScript"
+	p_ver 
+}
+
+property SchAction {
+	label "SchemaActionSound"
+	p_ver 2.16
+}
+
+property AI_NtcBod {
+	label "AINoticeBodies"
+}
+
+property FrobSound {
+	label "FrobSound"
+	p_ver 2.16
+}
+
+property RsrchRep {
+	label "ResearchReports"
+}
+
+property AI_MotTag {
+	label "AIMotionTags"
+	p_ver 2.17
+}
+
+property Creature {
+	label "CreatureType"
+	p_ver 2.65544
+}
+
+property HUDUse {
+	label "HUDUseString"
+	p_ver 2.17
+}
+
+property AI_CbtRsp {
+	label "AICombatResponse"
+	p_ver 2.2100
+}
+
+property FrameAniC {
+	label "FrameAnimationConfig"
+	p_ver 2.8
+}
+
+property SoftType {
+	label "SoftwareType"
+}
+
+property AI_VisCtr {
+	label "AIVisibilityControl"
+	p_ver 2.48
+}
+
+property ElevAble {
+	label "HasElevator"
+}
+
+property DiffLock {
+	label "DiffLock/Unlock"
+}
+
+property AI_AwareC {
+	label "AIAwarenessCapacitor"
+	p_ver 2.16
+}
+
+property ObjIcon {
+	label "ObjectIcon"
+	p_ver 2.16
+}
+
+property AI_Aptitu {
+	label "AIAptitude"
+}
+
+property PhysState {
+	label "PhysicsModelState"
+	p_ver 2.65584
+}
+
+property DiffDestr {
+	label "DiffDestroy"
+}
+
+property StTweqJoi {
+	label "TweqJointsState"
+	p_ver 2.28
+}
+
+property BaseTechD {
+	label "TechSkills"
+	p_ver 2.65556
+}
+
+property AI_SaveCo {
+	label "AISaveConversation"
+}
+
+property AudioLog {
+	label "AudioLog"
+	p_ver 2.16
+}
+
+property AI_SigRsp {
+	label "AISignalResponse"
+	p_ver 2.2132
+}
+
+property CfgTweqDe {
+	label "TweqDeleteConfig"
+	p_ver 2.8
+}
+
+property MotPlyrLi {
+	label "MotionPlayerLimbOffset"
+	p_ver 2.24
+}
+
+property DoorOpenS {
+	label "DoorOpenSound"
+	p_ver 2.65552
+}
+
+property QBName {
+	label "QBName"
+	p_ver 2.17
+}
+
+property AI_Wander {
+	label "AIWander"
+}
+
+property WorldCurs {
+	label "WorldCursorString"
+	p_ver 2.17
+}
+
+property RsrchTime {
+	label "ResearchTime"
+}
+
+property OTxtRepr1 {
+	label "TextureReplace1"
+	p_ver 2.17
+}
+
+property KeySrc {
+	label "KeySource"
+	p_ver 2.6
+}
+
+property TimeWarp {
+	label "CreatureTimeWarp"
+}
+
+property AI_StandT {
+	label "AIStandingTags"
+	p_ver 2.17
+}
+
+property Bump Map {
+	label "BumpMap"
+}
+
+property CfgTweq4E {
+	label "TweqEmitter4Config"
+	p_ver 2.52
+}
+
+property PsiStatsD {
+	label "PsiStats"
+	p_ver 2.65556
+}
+
+property HTHCombat {
+	label "HtHCombatDistances"
+	p_ver 2.12
+}
+
+property HelpText {
+	label "HelpText"
+}
+
+property AI_ObjAvo {
+	label "AIObjectAvoid"
+	p_ver 2.8
+}
+
+property Puppet {
+	label "Puppet"
+	p_ver 2.16
+}
+
+property Armor {
+	label "Armor"
+	p_ver 2.12
+}
+
+property AI_AlrtRs {
+	label "AIAlertResponse"
+	p_ver 2.2104
+}
+
+property SrcRand {
+	label "StimSourceRandomize"
+}
+
+property ImplantDe {
+	label "ImplantType"
+	p_ver 2.65540
+}
+
+property CfgTweqRo {
+	label "TweqRotateConfig"
+	p_ver 2.48
+}
+
+property HTHMotion {
+	label "HtHMotionResponse"
+	p_ver 2.12
+}
+
+property Alarm {
+	label "Alarm"
+}
+
+property FrameAniS {
+	label "FrameAnimationState"
+	p_ver 2.16
+}
+
+property SignalTyp {
+	label "SignalType"
+	p_ver 2.17
+}
+
+property RadAbsorb {
+	label "RadAbsorb"
+}
+
+property CSArrow {
+	label "CollisionSoundArrow"
+	p_ver 2.16
+}
+
+property LightColo {
+	label "LightColor"
+	p_ver 2.8
+}
+
+property PsiPower {
+	label "PsiPowerDescription"
+	p_ver 2.65564
+}
+
+property HeatDisks {
+	label "HeatDisks"
+	p_ver 2.52
+}
+
+property BloodMaxD {
+	label "BloodMaxDamage"
+}
+
+property Scale {
+	label "ModelScale"
+	p_ver 2.12
+}
+
+property PGLaunchI {
+	label "ParticleGroupLaunchInfo"
+	p_ver 2.1000
+}
+
+property HTHAudioR {
+	label "HtHAudioResponse"
+	p_ver 2.12
+}
+
+property AI_MoveZO {
+	label "AIMoveZOffset"
+}
+
+property ImplStats {
+	label "ImplantStats"
+	p_ver 2.65556
+}
+
+property StTweqLoc {
+	label "TweqLockState"
+	p_ver 2.12
+}
+
+property SoftLevel {
+	label "SoftwareLevel"
+}
+
+property TripFlags {
+	label "TrapControlFlags"
+}
+
+property BloodCaus {
+	label "BloodCause"
+}
+
+property Logs1 {
+	label "LogsDeck1"
+	p_ver 2.65552
+}
+
+property Light {
+	label "Light"
+	p_ver 2.20
+}
+
+property AIVantage {
+	label "AIVantagePoint"
+	p_ver 2.65544
+}
+
+property AI_Camera {
+	label "AICamera"
+	p_ver 2.12
+}
+
+property ConsumeTy {
+	label "ConsumeType"
+	p_ver 2.17
+}
+
+property RadRecove {
+	label "RadRecoverRate"
+}
+
+property PlayerGun {
+	label "PlayerGunDescription"
+	p_ver 2.65606
+}
+
+property ApparID {
+	label "Apparition"
+	p_ver 2.16
+}
+
+property LockMsg {
+	label "LockMessage"
+	p_ver 2.17
+}
+
+property SwordActi {
+	label "SwordActionType"
+}
+
+property RadLevel {
+	label "RadLevel"
+}
+
+property Borrowing {
+	label "Borrowing"
+	p_ver 
+}
+
+property Logs8 {
+	label "LogsDeck8"
+	p_ver 2.65552
+}
+
+property MelDesImp {
+	label "MeleeImpactDestroy"
+}
+
+property Logs5 {
+	label "LogsDeck5"
+	p_ver 2.65552
+}
+
