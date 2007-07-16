@@ -733,7 +733,7 @@ struct color {
 
 struct pseudoscript {
 	uint32 use pscriptaction action
-	char [64] args
+	char [64] args [4]
 }
 
 
@@ -759,6 +759,27 @@ struct sttweqsimple {
 	uint16 frame
 }
 
+struct AI_WtchPn {
+		int32 unknown1 [15]
+		uint32 trigger
+		uint32 use alertlevel awareness
+		uint32 use aiwatchvisibility visibility
+		int32 unknown2
+		uint32 use aiwatchkillcondition killcondition
+		bool32 killlikelinks
+		bool32 onceonly
+		int32 reusetime
+		int32 resettime
+		uint32 use alertlevel minalertness
+		uint32 use alertlevel maxalertness
+		uint32 use aipriority priority
+		int32 radius
+		int32 height
+		alias pseudoscript step [7]
+		alias pseudoscript extra [9]
+	}
+
+
 namespace properties {
 	
 	// Label: Acoustics
@@ -772,7 +793,7 @@ namespace properties {
 	// Label: AdvPickSoundCfg
 	struct AdvPickSo {
 		
-		struct stage {
+		struct stage [9] {
 			char [24] pick1
 			char [24] pick2
 			char [24] pick3
@@ -787,14 +808,14 @@ namespace properties {
 		uint32 source1
 		uint32 source2
 		uint32 source3
-		int32 time
+		int32 time [9]
 	}
 
 	
 	// Label: AdvPickTransCfg
 	struct AdvPickTr {
 		
-		struct stage {
+		struct stage [9] {
 			int32 pick1
 			int32 pick2
 			int32 pick3
@@ -808,6 +829,7 @@ namespace properties {
 		char [32] behaviorset
 	}
 
+	alias aiaptitude AI_Aggres
 	
 	// Label: AIAlertCap
 	struct AI_AlertC {
@@ -828,16 +850,16 @@ namespace properties {
 	struct AI_AlrtRs {
 		uint32 use alertlevel level
 		uint32 use aipriority priority
-		int32 unknown
-		alias pseudoscript step
-		alias pseudoscript extra
+		int32 unknown [4]
+		alias pseudoscript step [6]
+		alias pseudoscript extra [10]
 	}
 
 	
 	// Label: AIAlertSenseMultiplier
 	struct AI_AlSnMu {
 		
-		struct level {
+		struct level [4] {
 			float hangle
 			float vangle
 			float range
@@ -847,10 +869,11 @@ namespace properties {
 		float combat
 	}
 
+	alias aiaptitude AI_Aptitu
 	
 	// Label: AIAwarenessCapacitor
 	struct AI_AwareC {
-		float discharge
+		float discharge [3]
 		int32 unknown
 	}
 
@@ -869,7 +892,7 @@ namespace properties {
 	struct AI_BcstSe {
 		bool32 disable
 		
-		struct state {
+		struct state [8] {
 			uint32 use broadcastschema2 schema
 			uint32 use broadcasttype type
 			char [16] custom
@@ -888,9 +911,9 @@ namespace properties {
 	// Label: AIBodyResponse
 	struct AI_BodyRs {
 		uint32 use aipriority priority
-		int32 unknown
-		alias pseudoscript step
-		alias pseudoscript extra
+		int32 unknown [4]
+		alias pseudoscript step [6]
+		alias pseudoscript extra [10]
 	}
 
 	
@@ -905,9 +928,9 @@ namespace properties {
 	// Label: AICombatResponse
 	struct AI_CbtRsp {
 		uint32 use aipriority priority
-		int32 unknown
-		alias pseudoscript step
-		alias pseudoscript extra
+		int32 unknown [4]
+		alias pseudoscript step [6]
+		alias pseudoscript extra [10]
 	}
 
 	
@@ -928,13 +951,13 @@ namespace properties {
 	
 	// Label: AIConversation
 	struct AI_Conver {
-		int32 unknown1
+		int32 unknown1 [4]
 		uint32 use alertlevel abort_level
 		uint32 use aipriority abort_priority
-		int32 unknown2
+		int32 unknown2 [3]
 		
-		alias AI_Conver_step step
-		alias AI_Conver_step extra
+		alias AI_Conver_step step [6]
+		alias AI_Conver_step extra [66]
 	}
 
 	
@@ -945,6 +968,7 @@ namespace properties {
 		bool32 canduck
 	}
 
+	alias aiaptitude AI_Defens
 	
 	// Label: AIDevice
 	struct AI_Device {
@@ -957,6 +981,7 @@ namespace properties {
 		bool32 rotate_on
 	}
 
+	alias aiaptitude AI_Dodgin
 	
 	// Helper: Efficiency record
 	struct AIEfficiency_record {
@@ -965,11 +990,11 @@ namespace properties {
 		float exit
 		float exit_height
 	}
-	
+
 	// Label: AIEfficiency
 	struct AI_Effici {
 		bool32 enabled
-
+		
 		alias AIEfficiency_record normal
 		alias AIEfficiency_record super
 	}
@@ -1038,13 +1063,14 @@ namespace properties {
 		int16 aimerror
 	}
 
+	alias aiaptitude AI_Hearin
 	
 	// Label: AIIdleDirections
 	struct AI_IdleDi {
 		int32 mintime
 		int32 maxtime
 		
-		struct direction {
+		struct direction [4] {
 			int32 facing
 			int32 weight
 		}
@@ -1117,9 +1143,9 @@ namespace properties {
 	struct AI_InfRsp {
 		bool32 disable
 		bool32 nodefault
-		int32 unknown
-		alias pseudoscript step
-		alias pseudoscript extra
+		int32 unknown [5]
+		alias pseudoscript step [2]
+		alias pseudoscript extra [6]
 	}
 
 	
@@ -1345,11 +1371,12 @@ namespace properties {
 	struct AI_SigRsp {
 		char [32] signal
 		uint32 use aipriority priority
-		int32 unknown
-		alias pseudoscript step
-		alias pseudoscript extra
+		int32 unknown [4]
+		alias pseudoscript step [6]
+		alias pseudoscript extra [10]
 	}
 
+	alias aiaptitude AI_Sloth
 	varstr AI_SndTag
 	
 	// Label: AISoundType
@@ -1372,9 +1399,9 @@ namespace properties {
 	// Label: AISuspiciousResponse
 	struct AI_SuspRs {
 		uint32 use aipriority priority
-		int32 unknown
-		alias pseudoscript step
-		alias pseudoscript extra
+		int32 unknown [4]
+		alias pseudoscript step [6]
+		alias pseudoscript extra [10]
 	}
 
 	
@@ -1388,9 +1415,9 @@ namespace properties {
 	struct AI_ThrtRs {
 		uint32 use aithreat threat
 		uint32 use aipriority priority
-		int32 unknown
-		alias pseudoscript step
-		alias pseudoscript extra
+		int32 unknown [4]
+		alias pseudoscript step [6]
+		alias pseudoscript extra [10]
 	}
 
 	
@@ -1433,6 +1460,7 @@ namespace properties {
 		float decayspeed
 	}
 
+	alias aiaptitude AI_Verbos
 	
 	// Label: AIVisibilityControl
 	struct AI_VisCtr {
@@ -1453,9 +1481,9 @@ namespace properties {
 	
 	// Label: AIVisionDescription
 	struct AI_VisDes {
-		int32 unknown
+		int32 unknown [8]
 		
-		struct viscone {
+		struct viscone [10] {
 			uint32 use aivisionflags flags
 			int32 angle
 			int32 zangle
@@ -1476,6 +1504,7 @@ namespace properties {
 		int32 lastupdate
 	}
 
+	alias aiaptitude AI_Vision
 	
 	// Label: AIVisionJoint
 	struct AI_VisJoi {
@@ -1485,7 +1514,7 @@ namespace properties {
 	
 	// Label: AIVisibilityModifier
 	struct AI_VisMod {
-		float vistype
+		float vistype [6]
 	}
 
 	
@@ -1496,25 +1525,8 @@ namespace properties {
 
 	
 	// Label: AIWatchPoint
-	struct AI_WtchPn {
-		int32 unknown1
-		uint32 trigger
-		uint32 use alertlevel awareness
-		uint32 use aiwatchvisibility visibility
-		int32 unknown2
-		uint32 use aiwatchkillcondition killcondition
-		bool32 killlikelinks
-		bool32 onceonly
-		int32 reusetime
-		int32 resettime
-		uint32 use alertlevel minalertness
-		uint32 use alertlevel maxalertness
-		uint32 use aipriority priority
-		int32 radius
-		int32 height
-		alias pseudoscript step
-		alias pseudoscript extra
-	}
+	// OK since not in the same namespace
+	alias AI_WtchPn AI_WtchPn
 
 	
 	// Label: AirSupply
@@ -1544,7 +1556,7 @@ namespace properties {
 		int32 volume
 		uint32 use ambienthackedflags flags
 		char [16] schema
-		char [16] aux
+		char [16] aux [2]
 	}
 
 	
@@ -1614,7 +1626,7 @@ namespace properties {
 	// Label: BaseGunDescription
 	struct BaseGunDe {
 		
-		struct setting {
+		struct setting [3] {
 			int32 burst
 			int32 clip
 			int32 spray
@@ -1628,7 +1640,7 @@ namespace properties {
 		}
 
 		int32 numsettings
-		float zoomfactor
+		float zoomfactor [3]
 	}
 
 	
@@ -1725,6 +1737,8 @@ namespace properties {
 		uint32 use terrainattachtype type
 	}
 
+	alias cfgtweqsimple CfgTweqBl
+	alias cfgtweqsimple CfgTweqDe
 	
 	// Label: TweqEmitterConfig
 	struct CfgTweqEm {
@@ -1740,6 +1754,10 @@ namespace properties {
 		vector anglerandom
 	}
 
+	alias CfgTweqEm CfgTweq2E
+	alias CfgTweqEm CfgTweq3E
+	alias CfgTweqEm CfgTweq4E
+	alias CfgTweqEm CfgTweq5E
 	
 	// Label: TweqJointsConfig
 	struct CfgTweqJo {
@@ -1750,18 +1768,18 @@ namespace properties {
 		uint16 use tweqmiscflags misc
 		uint16 zero
 		
-		struct joint {
+		struct joint [6] {
 			uint8 unk1
 			uint8 use tweqcurveflags curve
 			uint8 use tweqanimflags anim
-			uint8 zero
+			uint8 zero [5]
 			float rate
 			float low
 			float high
 		}
 
 		int8 primary
-		uint8 unused
+		uint8 unused [3]
 	}
 
 	
@@ -1773,12 +1791,12 @@ namespace properties {
 		uint8 use tweqhaltcfg halt
 		uint16 use tweqmiscflags misc
 		uint16 zero
-		int32 zero2
+		int32 zero2 [2]
 		float rate
 		float low
 		float high
 		int8 joint
-		uint8 zero3
+		uint8 zero3 [3]
 	}
 
 	
@@ -1790,7 +1808,7 @@ namespace properties {
 		uint8 use tweqhaltcfg halt
 		uint16 use tweqmiscflags misc
 		uint16 rate
-		char [16] modelname
+		char [16] modelname [6]
 	}
 
 	// Helper: Tweq Axis
@@ -1799,7 +1817,7 @@ namespace properties {
 		float low
 		float high
 	}
-	
+
 	// Label: TweqRotateConfig
 	struct CfgTweqRo {
 		uint8 unknown
@@ -1956,6 +1974,11 @@ namespace properties {
 		uint32 use difficultylevels levels
 	}
 
+	alias DiffPermi DiffClose
+	alias DiffPermi DiffDestr
+	alias DiffPermi DiffLock
+	alias DiffPermi DiffScript
+	alias DiffPermi DiffTurnO
 	
 	// Label: DistinctAvatar
 	struct DistinctA {
@@ -1990,7 +2013,7 @@ namespace properties {
 		char [16] wince
 		char [16] surprise
 		char [16] stunned
-		char [16] extra
+		char [16] extra [8]
 	}
 
 	
@@ -2003,7 +2026,7 @@ namespace properties {
 	// Label: FaceState
 	struct FaceStat {
 		bool32 istalking
-		int32 unknown
+		int32 unknown [3]
 		uint32 use facevisage currentvisage
 		int32 priority
 		int32 endtime
@@ -2224,7 +2247,7 @@ namespace properties {
 	
 	// Label: JointPositions
 	struct JointPos {
-		float position
+		float position [6]
 	}
 
 	
@@ -2235,6 +2258,7 @@ namespace properties {
 		uint8 lockid
 	}
 
+	alias KeyDst KeySrc
 	
 	// Label: LauncherMass
 	struct LauncherM {
@@ -2291,6 +2315,7 @@ namespace properties {
 		float value
 	}
 
+	alias ClassTag Material 
 	
 	// Label: MaxHitPoints
 	struct MAX_HP {
@@ -2309,12 +2334,12 @@ namespace properties {
 		uint32 custom
 		uint32 accessory
 		
-		struct attachment {
+		struct attachment [4] {
 			int32 object
 			uint32 use meshjoint joint
 			alias short-vector angle
-			uint16 zero
-			vector offset
+			uint16 zero [4]
+			vector offset [4]
 		}
 
 	}
@@ -2323,7 +2348,7 @@ namespace properties {
 	// Label: MeshTextures
 	struct MeshTex {
 		
-		struct texture {
+		struct texture [12] {
 			char [16] original
 			char [16] replacement
 		}
@@ -2366,7 +2391,7 @@ namespace properties {
 		float minvelocity
 		int32 numturns
 		
-		struct turn {
+		struct turn [3] {
 			int32 angle
 			int32 offset
 		}
@@ -2450,16 +2475,16 @@ namespace properties {
 	
 	// Label: ParticleGroup
 	struct ParticleG {
-		int32 unknown1
+		int32 unknown1 [10]
 		uint32 use particlegrouptype type = "4"
 		uint32 use particlegroupmotion motion = "4"
 		uint32 use particlegroupanimation animation = "1"
-		int32 unknown2
+		int32 unknown2 [2]
 		int32 numparticles
-		int32 unknown3
+		int32 unknown3 [6]
 		vector velocity
 		vector gravity
-		uint8 colors
+		uint8 colors [3]
 		uint8 alpha
 		bool8 simalways
 		bool8 simgroup
@@ -2467,7 +2492,7 @@ namespace properties {
 		bool8 sortparticles
 		uint16 zero2
 		bool8 ignorerefs
-		uint8 zero3
+		uint8 zero3 [5]
 		vector spinspeed
 		int32 pulsecycle
 		float pulsesize
@@ -2476,18 +2501,18 @@ namespace properties {
 		bool8 spinandpulse
 		bool8 subpixelalpha
 		bool8 subpixelskip
-		uint8 zero4
+		uint8 zero4 [3]
 		bool8 active
 		int32 animtimeoffset
 		float particlesize
-		int32 unknown4
+		int32 unknown4 [5]
 		float scalespeed
-		int32 unknown5
+		int32 unknown5 [15]
 		int32 launchtime
 		char [16] bitmap
 		int32 unknown6
 		int32 fadetime
-		int32 unknown7
+		int32 unknown7 [11]
 		bool32 matchunrefs
 	}
 
@@ -2506,7 +2531,7 @@ namespace properties {
 		float timemax
 		bool32 worldvelocity
 		bool32 worldlocation
-		int32 unknown
+		int32 unknown [16]
 	}
 
 	
@@ -2549,8 +2574,8 @@ namespace properties {
 	
 	// Label: PhysicsModelDimensions
 	struct PhysDims {
-		float radius
-		vector offset
+		float radius [2]
+		vector offset [2]
 		vector size
 		bool32 pointterrain
 		bool32 pointspecial
@@ -2585,7 +2610,7 @@ namespace properties {
 		float speed
 		float pause
 		bool32 blockvision
-		int32 zero
+		int32 zero [2]
 	}
 
 	
@@ -2624,7 +2649,7 @@ namespace properties {
 	// Label: PickDestConfig
 	struct PickCfg {
 		
-		struct stage {
+		struct stage [3] {
 			uint32 lockbits
 			int16 pins
 			int16 percent
@@ -2759,7 +2784,7 @@ namespace properties {
 		vector startposition
 		alias short-vector startfacing
 		float unknown
-		int32 room
+		int32 room [2]
 		bool32 clockwise
 		alias short-vector haltclose
 		alias short-vector haltopen
@@ -2833,7 +2858,7 @@ namespace properties {
 	
 	// Label: Scripts
 	struct Scripts {
-		char [32] scripts
+		char [32] scripts [4]
 		bool32 dontinherit
 	}
 
@@ -2873,9 +2898,9 @@ namespace properties {
 		uint32 flags
 		uint16 color
 		uint16 anglejitter
-		uint16 angle
+		uint16 angle [3]
 		uint16 zero
-		float size
+		float size [3]
 		float sizejitter
 		float light
 		float lightjitter
@@ -2932,12 +2957,19 @@ namespace properties {
 		bool32 isknockout
 	}
 
+	alias sttweqsimple StTweqBli
+	alias sttweqsimple StTweqDel
+	alias sttweqsimple StTweqEmi
+	alias sttweqsimple StTweq2Em
+	alias sttweqsimple StTweq3Em
+	alias sttweqsimple StTweq4Em
+	alias sttweqsimple StTweq5Em
 	
 	// Label: TweqJointsState
 	struct StTweqJoi {
 		uint16 use tweqstateflags anim
 		uint16 use tweqnullflags misc
-		uint32 use tweqstateflags joint
+		uint32 use tweqstateflags joint [6]
 	}
 
 	
@@ -2949,6 +2981,7 @@ namespace properties {
 		uint32 stage
 	}
 
+	alias sttweqsimple StTweqMod
 	
 	// Label: TweqRotateState
 	struct StTweqRot {
@@ -3035,7 +3068,7 @@ namespace properties {
 		vector startposition
 		alias short-vector startfacing
 		float unknown
-		int32 room
+		int32 room [2]
 	}
 
 	
@@ -3139,7 +3172,7 @@ namespace links {
 	// Label: AICamera
 	struct AICamera {
 		char [32] message
-		char [32] data
+		char [32] data [3]
 	}
 
 	
@@ -3151,16 +3184,16 @@ namespace links {
 	
 	// Label: AIDefendObject
 	struct AIDefendObj {
-		int32 unknown1
+		int32 unknown1 [14]
 		uint32 use aispeed returnspeed = "3"
-		int32 unknown2
+		int32 unknown2 [20]
 		
-		struct range {
+		struct range [3] {
 			int32 radius
 			int32 height
 			uint32 use alertlevel minalertness
 			uint32 use alertlevel maxalertness
-			int32 unknown3
+			int32 unknown3 [4]
 		}
 
 	}
@@ -3187,13 +3220,13 @@ namespace links {
 	
 	// Label: AIFollowObject
 	struct AIFollowObj {
-		int32 unknown1
+		int32 unknown1 [2]
 		
 		alias AIFollowObject_Axis x
 		alias AIFollowObject_Axis y
 		alias AIFollowObject_Axis z
 		
-		int32 unknown2
+		int32 unknown2 [2]
 	}
 
 	
@@ -3215,7 +3248,7 @@ namespace links {
 		int32 burst
 		uint32 use aircpriority accuracy = "2"
 		uint32 use meshjoint joint
-		int32 unknown
+		int32 unknown [3]
 	}
 
 	
@@ -3224,6 +3257,7 @@ namespace links {
 		int32 timeseen
 	}
 
+	alias AI_WtchPn AIWatchObj
 	
 	// Label: ARSourceLink
 	struct arSrc {
@@ -3250,11 +3284,11 @@ namespace links {
 		uint32 use meshjoint joint
 		bool32 isweapon
 		float unknown1
-		int32 unknown2
+		int32 unknown2 [3]
 		float unknown3
-		int32 unknown4
+		int32 unknown4 [3]
 		float unknown5
-		int32 unknown6
+		int32 unknown6 [3]
 		int32 unknown7
 	}
 
@@ -3276,7 +3310,7 @@ namespace links {
 	
 	// Label: FlowContact
 	struct FlowContact {
-		int32 unknown
+		int32 unknown [4]
 	}
 
 	
@@ -3350,6 +3384,7 @@ namespace links {
 		int32 receptron
 	}
 
+	alias FlowContact ScriptContact
 	
 	// Label: ScriptParams
 	struct ScriptParams {
@@ -3381,7 +3416,7 @@ namespace links {
 	// Label: WeaponOffset
 	struct WeaponOffset {
 		uint32 use weaponmode modes
-		vector transform
+		vector transform [4]
 		uint32 use meshjoint joint
 	}
 
@@ -3391,9 +3426,9 @@ namespace links {
 		int32 unknown
 	}
 
-}
+// }
+// namespace stimsource {
 
-namespace stimsource {
 	enum arsourcetype : int {
 		key "None" 0
 		key "Contact" 1
@@ -3458,7 +3493,7 @@ namespace stimsource {
 				uint32 use arcontactflags types
 				float velocitycoeff
 				float frobtimecoeff
-				int32 zero
+				int32 zero [5]
 			}
 
 			
@@ -3467,7 +3502,7 @@ namespace stimsource {
 				float distance
 				uint32 use arradiusflags flags
 				uint32 use arradiustype dispersion
-				int32 zero
+				int32 zero [5]
 			}
 		}
 		
@@ -3477,15 +3512,15 @@ namespace stimsource {
 			int32 period
 			int32 maxfirings
 			float slope
-			int32 zero
+			int32 zero [4]
 		}
 
 		char [32] use arsourcename typename
 	}
 
-}
+// }
+// namespace reactions {
 
-namespace reactions {
 	bitfield receptronflags {
 		key "No Min" 1
 		key "No Max" 2
@@ -3534,6 +3569,10 @@ namespace reactions {
 		key "Can't Hear" 2
 		key "Stunned" 4
 		key "Not an AI" 8
+	}
+
+	// Helper struct. Unknown/no params
+	struct none {
 	}
 
 	// Label: Receptron
@@ -3649,7 +3688,7 @@ namespace reactions {
 				int32 type
 				float multiply
 				bool32 stimtype
-			}	
+			}
 	
 			// Label: Change Model
 			struct set_model {
@@ -3673,8 +3712,18 @@ namespace reactions {
 
 		
 			// Label: Null Reaction
-			struct none {
-			}
+			alias none none
+
+			alias none abort
+			alias none add_metaprop
+			alias none rem_metaprop
+			alias none destroy_obj
+			alias none frob_obj
+			alias none slay
+			alias none clone_props
+			alias none knockout
+			alias none weapon_hit
+			alias none weapon_block
 		}
 	}
 }
@@ -3696,11 +3745,12 @@ namespace chunks {
 		alias AI_Acuity moveonly
 		alias AI_Acuity lowlight
 	}
+
 	
 	// Label: AICreatureSizes
 	struct AICRTSZ {
 		
-		struct type {
+		struct type [8] {
 			float width
 			float height
 		}
@@ -3796,7 +3846,7 @@ namespace chunks {
 	struct BRHEAD {
 		char [16] creator
 		char [16] lastsave
-		uint32 unknown1
+		uint32 unknown1 [16]
 		int32 gridsize
 		bool32 showgrid
 		uint32 shading
@@ -3860,11 +3910,12 @@ namespace chunks {
 		int32 next_mission
 	}
 
+	alias GameSysEAX MissionEAX
 	
 	// Label: WaterColors
 	struct WATERBANKS {
 		
-		struct color {
+		struct color [4] {
 			int8 red
 			int8 green
 			int8 blue
@@ -3878,7 +3929,7 @@ namespace chunks {
 	// Label: FlowTextureColors
 	struct FLOW_TEX {
 		
-		struct flow {
+		struct flow [256] {
 			int16 in_texture
 			int16 out_texture
 			char [28] name
@@ -3890,18 +3941,18 @@ namespace chunks {
 	// Label: CellMotion
 	struct CELL_MOTION {
 		
-		struct anchor {
+		struct anchor [256] {
 			vector position
-			alias short-vector rotation
+			alias short-vector rotation [256]
 			uint32 flags
 			int16 use physaxistype axis
 			int8 zero
 		}
 
 		
-		struct delta {
+		struct delta [256] {
 			vector position
-			alias short-vector rotation
+			alias short-vector rotation [256]
 		}
 
 	}
@@ -3922,7 +3973,7 @@ namespace chunks {
 		float fov
 		vector position
 		alias short-vector rotation
-		int16 unknown
+		int16 unknown [3]
 		int32 attached_id
 	}
 
@@ -3937,7 +3988,7 @@ namespace chunks {
 		float sunhue
 		float sunsaturation
 		float sunbrightness
-		float unknown
+		float unknown [5]
 	}
 
 	
@@ -4077,3 +4128,4 @@ namespace chunks {
 	}
 
 }
+
