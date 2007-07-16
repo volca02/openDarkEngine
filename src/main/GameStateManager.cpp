@@ -174,12 +174,6 @@ namespace Opde {
 		// Register the worldrep service factory
 		registerServiceFactories();
 
-		// Allocate and register the DType script loader. Registers itself
-		mDTypeScriptLdr = new DTypeScriptLoader();
-		
-		// Allocate and register the PLDef script loader. Registers itself
-		mPLDefScriptLdr = new PLDefScriptLoader();
-		
 		// Setup resources.
 		setupResources();
 	
@@ -230,6 +224,14 @@ namespace Opde {
 			
 	/// Method which will define the source of resources (other than current folder)
 	void GameStateManager::setupResources(void) {
+		// First, register the script loaders...
+		
+		// Allocate and register the DType script loader. Registers itself
+		mDTypeScriptLdr = new DTypeScriptLoader();
+		
+		// Allocate and register the PLDef script loader. Registers itself
+		mPLDefScriptLdr = new PLDefScriptLoader();
+
 		// Load resource paths from config file
 		ConfigFile cf;
 		cf.load("resources.cfg");
