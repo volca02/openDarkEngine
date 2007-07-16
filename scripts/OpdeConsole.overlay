@@ -1,0 +1,42 @@
+Opde/Console
+{
+	zorder 600
+
+	container BorderPanel(Opde/ConsolePanel)
+	{
+		metrics_mode relative
+		vert_align top
+		left 0 
+		top 0
+		width 1
+		height 0.5
+		material Opde/Console
+
+		element TextArea(Opde/ConsoleText)
+		{
+			metrics_mode pixels
+			left 0
+			top 0
+			font_name BlueHighway
+			char_height 12
+			caption --Console--
+			colour_top 1 1 1
+			colour_bottom 1 1 1
+		}
+		
+		element TextArea(Opde/CommandLine)
+		{
+			metrics_mode pixels
+			vert_align bottom
+			left 0
+			top -20
+			width 0
+			height 30
+			font_name BlueHighway
+			char_height 14
+			caption >
+			colour_top 0.2 0.7 0.5
+			colour_bottom 0.2 0.7 0.5
+		}
+	}
+}
