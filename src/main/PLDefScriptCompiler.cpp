@@ -42,7 +42,7 @@ namespace Opde {
 		"<Script_Properties> ::= <LinkDefinition> | <PropertyDefinition> | <DChunkVersion> | <LChunkVersion> | <RelChunkVersion> | <PChunkVersion> \n" // so I can define default version for the chunks
 	
 		// Link definition part
-		"<LinkDefinition> ::= 'relation' <Unquoted_Label> '{' {<LinkParams>} '}' \n"
+		"<LinkDefinition> ::= 'relation' <Label> '{' {<LinkParams>} '}' \n"
 		
 		"<LinkParams> ::= <DTypeName> | <FakeSize> | <LinkHidden> | <NoDType> | <DChunkVersion> | <LChunkVersion> \n"
 	
@@ -60,7 +60,7 @@ namespace Opde {
 		"<RelChunkVersion> ::= 'rel_ver' <Version> \n" // version of the relations chunk
 		    
 		// Property definition part
-		"<PropertyDefinition> ::= 'property' <Unquoted_Label> '{' {<PropertyParams>} '}' \n"
+		"<PropertyDefinition> ::= 'property' <Label> '{' {<PropertyParams>} '}' \n"
 		
 		"<PropertyParams> ::= <DTypeName> | <PropLabel> | <PChunkVersion> | <PInheritor> \n"
 		    
