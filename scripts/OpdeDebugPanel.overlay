@@ -1,4 +1,4 @@
-// Ogre overlay scripts - Slightly modified for opde
+// Ogre overlay scripts
 Opde/OpdeDebugOverlay
 {
 	zorder 500
@@ -67,5 +67,34 @@ Opde/OpdeDebugOverlay
 			colour_bottom 0.3 0.5 0.3
 		}
 				
+		element TextArea(Opde/TravTime)
+		{
+			metrics_mode pixels
+			left 5
+			top 70
+			width 90
+			height 30
+			font_name BlueHighway
+			char_height 16
+			caption Traversal Time:
+			colour_top 0.5 0.7 0.5
+			colour_bottom 0.3 0.5 0.3
+		}
+		
+		element TextArea(Opde/StaticRenderTime)
+		{
+			metrics_mode pixels
+			left 5
+			top 85
+			width 90
+			height 30
+			font_name BlueHighway
+			char_height 16
+			caption Static Render Time:
+			colour_top 0.5 0.7 0.5
+			colour_bottom 0.3 0.5 0.3
+		}
+		
+
 	}
 }

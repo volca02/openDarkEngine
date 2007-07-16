@@ -1,4 +1,4 @@
-// Ogre overlay scripts - slightly modified for Opde
+// Ogre overlay scripts
 Opde/LoadOverlay
 {
 	zorder 510
