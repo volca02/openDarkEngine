@@ -144,7 +144,6 @@ property Fabricate {
 
 property AI_NoHand {
 	label "AINoHandoff"
-	p_ver 
 }
 
 property CameraObj {
@@ -239,7 +238,8 @@ property HTHModeOv {
 }
 
 property Recycle {
-	label "RadLevel"
+	// I had to modify the label - collision with the RadLevel property label
+	label "Recycle RadLevel"
 }
 
 property AI_InfRsp {
@@ -291,7 +291,6 @@ property WpnExposu {
 
 property SpchNextP {
 	label "SpeechLastPlayed"
-	p_ver 
 }
 
 property Service {
@@ -429,7 +428,6 @@ property NameType {
 
 property AI_IsProx {
 	label "AIIsProxy"
-	p_ver 
 }
 
 property ReqStatsD {
@@ -437,9 +435,8 @@ property ReqStatsD {
 	p_ver 2.65556
 }
 
-property Material  {
+property Material {
 	label "MaterialTags"
-	p_ver 
 }
 
 property AnimPost {
@@ -490,7 +487,6 @@ property AI_Hearin {
 
 property Speech {
 	label "CurrentSpeech"
-	p_ver 
 }
 
 property HackLock {
@@ -662,8 +658,9 @@ property InvDims {
 	p_ver 2.8
 }
 
-property Melee Typ {
+property "Melee Typ" {
 	label "MeleeType"
+	dtype MeleeTyp
 }
 
 property JointPos {
@@ -724,7 +721,6 @@ property CfgTweq5E {
 
 property AI_NotMelee {
 	label "AINotMeleeTarget"
-	p_ver 
 }
 
 property PhysAICol {
@@ -796,9 +792,10 @@ property SchAttFac {
 	label "SchemaAttenuationFactor"
 }
 
-property Psi Tags {
+property "Psi Tags" {
 	label "PsiTags"
 	p_ver 2.256
+	dtype PsiTags
 }
 
 property StTweqMod {
@@ -849,7 +846,6 @@ property WeaponTyp {
 
 property TextureID {
 	label "TextureIndex"
-	p_ver 
 }
 
 property PhysContr {
@@ -911,7 +907,6 @@ property DiffClose {
 
 property AI_Visibi {
 	label "AIVisibility"
-	p_ver 
 }
 
 property UseMsg {
@@ -1084,7 +1079,6 @@ property Modify2 {
 
 property SchLastSa {
 	label "SchemaLastSample"
-	p_ver 
 }
 
 property ProxyStor {
@@ -1393,7 +1387,6 @@ property GunKick {
 
 property GunAnim {
 	label "GunAnim"
-	p_ver 
 }
 
 property StTweqDel {
@@ -1488,7 +1481,6 @@ property PhysInitV {
 
 property NoBorrow {
 	label "NoBorrow"
-	p_ver 
 }
 
 property AIGunDesc {
@@ -1641,7 +1633,6 @@ property AI_NCDmRs {
 
 property DiffScript {
 	label "DiffScript"
-	p_ver 
 }
 
 property SchAction {
@@ -1803,8 +1794,9 @@ property AI_StandT {
 	p_ver 2.17
 }
 
-property Bump Map {
+property "Bump Map" {
 	label "BumpMap"
+	dtype BumpMap
 }
 
 property CfgTweq4E {
@@ -1831,10 +1823,11 @@ property AI_ObjAvo {
 	p_ver 2.8
 }
 
-property Puppet {
-	label "Puppet"
-	p_ver 2.16
-}
+// Commented out for now. The size differs (shock.gam has one record, size 4, type is sized 16)
+// property Puppet {
+// 	label "Puppet"
+//	p_ver 2.16
+//}
 
 property Armor {
 	label "Armor"
@@ -2002,7 +1995,6 @@ property RadLevel {
 
 property Borrowing {
 	label "Borrowing"
-	p_ver 
 }
 
 property Logs8 {

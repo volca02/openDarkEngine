@@ -1006,6 +1006,26 @@ struct statsdesc {
 	int32 cyber
 }
 
+struct AI_WtchPn {
+	int32 unknown1 [15]
+	uint32 trigger
+	uint32 use alertlevel awareness
+	uint32 use aiwatchvisibility visibility
+	int32 unknown2
+	uint32 use aiwatchkillcondition killcondition
+	bool32 killlikelinks
+	bool32 onceonly
+	int32 reusetime
+	int32 resettime
+	uint32 use alertlevel minalertness
+	uint32 use alertlevel maxalertness
+	uint32 use aipriority priority
+	int32 radius
+	int32 height
+	alias pseudoscript step [7]
+	alias pseudoscript extra
+}
+
 namespace properties {
 	
 	// Label: Acoustics
@@ -1153,6 +1173,7 @@ namespace properties {
 		alias AI_Conver_step extra [66]
 	}
 
+	alias aiaptitude AI_Defens
 	
 	// Label: AICoverPoint
 	struct AICoverPt {
@@ -1682,26 +1703,7 @@ namespace properties {
 
 	
 	// Label: AIWatchPoint
-	struct AI_WtchPn {
-		int32 unknown1 [15]
-		uint32 trigger
-		uint32 use alertlevel awareness
-		uint32 use aiwatchvisibility visibility
-		int32 unknown2
-		uint32 use aiwatchkillcondition killcondition
-		bool32 killlikelinks
-		bool32 onceonly
-		int32 reusetime
-		int32 resettime
-		uint32 use alertlevel minalertness
-		uint32 use alertlevel maxalertness
-		uint32 use aipriority priority
-		int32 radius
-		int32 height
-		alias pseudoscript step [7]
-		alias pseudoscript extra
-	}
-
+	alias AI_WtchPn AI_WtchPn
 	
 	// Label: AirSupply
 	struct AirSupply {
@@ -1780,6 +1782,8 @@ namespace properties {
 		alias GunAnim_record secondary
 	}
 
+	alias GunAnim AnimPre
+	alias GunAnim AnimPost
 	
 	// Label: AnimTexture
 	struct AnimTex {
@@ -4061,9 +4065,9 @@ namespace links {
 		int32 zero
 	}
 
-}
+// }
+// namespace stimsource { 
 
-namespace stimsource {
 	enum arsourcetype : int {
 		key "None" 0
 		key "Contact" 1
@@ -4152,9 +4156,9 @@ namespace stimsource {
 		char [32] use arsourcename typename
 	}
 
-}
+// }
+// namespace reactions {
 
-namespace reactions {
 	bitfield receptronflags {
 		key "No Min" 1
 		key "No Max" 2
@@ -4192,6 +4196,21 @@ namespace reactions {
 		key "Radiate" radiate
 		key "Toxin" toxin
 	}
+
+	enum reactionimpactresult : uint {
+                key "Bounce" 2
+                key "Stick" 3
+                key "Slay" 4
+        }
+
+        bitfield reactionawarenessflags {
+                key "Can't See" 1
+                key "Can't Hear" 2
+                key "Stunned" 4
+                key "Not an AI" 8
+        }
+
+
 
 	struct none {
 	}
