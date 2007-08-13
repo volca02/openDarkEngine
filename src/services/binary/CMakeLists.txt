@@ -8,6 +8,7 @@ include_directories (
     ${OPDE_SOURCE_DIR}/src/base/dyntype
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
     ${OPDE_SOURCE_DIR}/src/base/console
+    ${OPDE_SOURCE_DIR}/src/services
 )
 
 link_directories ( 
