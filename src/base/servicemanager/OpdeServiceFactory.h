@@ -46,6 +46,11 @@ namespace Opde {
 			/** Get the name of the created objects. What object this factory creates? */
 			virtual const std::string& getName() = 0;
 			
+			/** Get the mask of the service.
+			* Masks are freely chosen bitmaps that describe what the requirements/capabilities of the service are 
+			* @returns 0 in this case, to be overriden by the factory implemetation */
+			virtual const uint getMask() { return 0; };
+			
 	};
 }
 
