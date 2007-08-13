@@ -18,8 +18,8 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *****************************************************************************/
- 
- 
+
+
 #ifndef __GAMESTATEMANAGER_H
 #define __GAMESTATEMANAGER_H
 
@@ -42,106 +42,106 @@
 #include "PLDefScriptLoader.h"
 
 namespace Opde {
-	
+
 	/** The game state manager. A main piece of code, which controls the flow of the program. Also dispatcher for input device events.
 	* A state is a class inheriting GameState abstract class, which controls a single state of the game. GameState's instance
 	* then receives events from keyboard and other input devices, event for frame update, etc.
 	*
 	* @note This class should implements a custom game loop.
-	*	
-	* @see GameState 
+	*
+	* @see GameState
 	* @todo add OIS::JoyStickListener
 	*/
 	class GameStateManager : public Singleton<GameStateManager>, public OIS::KeyListener, public OIS::MouseListener {
-                public:
-                        GameStateManager();
-			~GameStateManager();
+        public:
+            GameStateManager();
+            ~GameStateManager();
 
-                        // Singleton releted
-                        static GameStateManager& getSingleton(void);
-                        static GameStateManager* getSingletonPtr(void);
-			
+            // Singleton releted
+            static GameStateManager& getSingleton(void);
+            static GameStateManager* getSingletonPtr(void);
+
 			/// Terminates the execution of the game loop
 			void terminate();
-			
+
 			/** Pushes a new state to the stack, and calls start() on this new state
 			* If the stack was not empty before, suspend() is called on previous top
 			*/
 			void pushState(GameState* state);
-			
+
 			/** Pops the topmost state from stack, if possible. Calls exit() on such state
 			*
 			*/
 			void popState();
-			
-			/** Initialize the state manager, then run the loop with the given state. Initializes ogre, resources, input system, etc. 
+
+			/** Initialize the state manager, then run the loop with the given state. Initializes ogre, resources, input system, etc.
 			* @return true if game should procede, false otherwise */
 			bool run(GameState* state);
-			
+
 		protected:
 			/** Registers all the service factories */
 			void registerServiceFactories();
-			
+
 			/** Loads the resources from the resources.cfg */
 			void setupResources(void);
-			
+
 			/** Configures the ogre's rendering - window and scene manager. */
 			bool configure();
-			
+
 			/** Setup the OIS input system. */
 			void setupInputSystem();
-			
+
 			/** Capture the inputs */
 			void captureInputs();
-			
+
 			bool keyPressed( const OIS::KeyEvent &e );
     			bool keyReleased( const OIS::KeyEvent &e );
 
     			bool mouseMoved( const OIS::MouseEvent &e );
     			bool mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id );
     			bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id );
-			
+
 			typedef std::stack<GameState*> StateStack;
-			
+
 			/// Stack of the game states
 			StateStack mStateStack;
-			
+
 			/// the game loop should end if true
 			bool	mTerminate;
-			
+
 			/// Input system releted objects
 			OIS::InputManager *mInputSystem;
     			OIS::Mouse        *mMouse;
     			OIS::Keyboard     *mKeyboard;
-			
+
 			/// last frame's time
 			unsigned long mTimeLastFrame;
-			
+
 			///  Stderr logger
 			StdLog* mStdLog;
-			
+
 			ConsoleBackend* mConsoleBackend;
-			
+
 			Logger *mLogger;
-					
+
 			/// Factory instance for the DarkSceneManager
 			Ogre::DarkSceneManagerFactory* mDarkSMFactory;
-			
+
 			// --- Ogre instances
 			Ogre::Root *mRoot;
-			
+
 			Ogre::RenderWindow* mRenderWindow;
-			
+
 			// Service manager handle
 			ServiceManager* mServiceMgr;
-			
+
 			// Loader for the DType scripts
 			DTypeScriptLoader* mDTypeScriptLdr;
-			
+
 			// Loader for the PLDef scripts
 			PLDefScriptLoader* mPLDefScriptLdr;
 	};
-	
+
 }
 
 #endif

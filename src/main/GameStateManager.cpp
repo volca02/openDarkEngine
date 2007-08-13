@@ -30,6 +30,7 @@
 #include "GameService.h"
 #include "LinkService.h"
 #include "PropertyService.h"
+#include "InheritService.h"
 
 #include <OgreRoot.h>
 #include <OgreWindowEventUtilities.h>
@@ -38,13 +39,13 @@
 using namespace Ogre;
 
 namespace Opde {
-	
-	// The instance owner	
+
+	// The instance owner
 	template<> GameStateManager* Singleton<GameStateManager>::ms_Singleton = 0;
 
-	GameStateManager::GameStateManager() : 
-			mStateStack(), 
-			mTerminate(false), 
+	GameStateManager::GameStateManager() :
+			mStateStack(),
+			mTerminate(false),
 			mRoot(NULL),
 			mDarkSMFactory(NULL),
 			mLogger(NULL),
@@ -54,90 +55,90 @@ namespace Opde {
 			mRenderWindow(NULL),
 			mServiceMgr(NULL),
 			mDTypeScriptLdr(NULL) {
-		
+
 	}
-	
+
 	GameStateManager::~GameStateManager() {
 		while (!mStateStack.empty()) {
 			GameState* state = mStateStack.top();
 			mStateStack.pop();
 			state->exit();
 		}
-		
+
 		if (mDarkSMFactory) {
 			Root::getSingleton().removeSceneManagerFactory(mDarkSMFactory);
 			delete mDarkSMFactory;
 			mDarkSMFactory = NULL;
 		}
-		
+
 		delete mDTypeScriptLdr; // Unregisters itself
 		mDTypeScriptLdr = NULL;
-		
+
 		delete mPLDefScriptLdr; // Unregisters itself
 		mPLDefScriptLdr = NULL;
-		
+
 		// release the mouse and keyboard, then the whole inputsystem
 		if (mInputSystem) {
 			if( mMouse ) {
 				mInputSystem->destroyInputObject( mMouse );
 				mMouse = NULL;
 			}
-	
+
 			if( mKeyboard ) {
 				mInputSystem->destroyInputObject( mKeyboard );
 				mKeyboard = NULL;
 			}
-			
+
 			mInputSystem->destroyInputSystem(mInputSystem);
 			mInputSystem = NULL;
 		}
-		
+
 		// Delete the service manager
 		delete mServiceMgr;
 		mServiceMgr = NULL;
-		
+
 		// Releas
 		delete mLogger;
 		delete mStdLog;
-		
+
 		delete mConsoleBackend;
 		delete mRoot;
 	}
-	
+
 	GameStateManager& GameStateManager::getSingleton(void) {
 		assert( ms_Singleton );  return ( *ms_Singleton );
 	}
-		
+
 	GameStateManager* GameStateManager::getSingletonPtr(void) {
 		return ms_Singleton;
 	}
-	
+
 	//------------------ Main implementation ------------------
 	void GameStateManager::terminate() {
 		mTerminate = true;
 	}
-	
+
 	void GameStateManager::pushState(GameState* state) {
 		if (!mStateStack.empty()) {
 			mStateStack.top()->suspend();
 		}
-		
+
 		state->addRef();
 		mStateStack.push(state);
-		
+
 		state->start();
 	}
-	
+
 	void GameStateManager::popState() {
 		if (!mStateStack.empty()) {
 			GameState* old = mStateStack.top();
-			
+
 			mStateStack.pop();
-			
+
 			old->exit();
-			
+
 			old->release();
-			
+
 			if (!mStateStack.empty()) { // There is another state in the stack
 				mStateStack.top()->resume();
 			} else {
@@ -148,47 +149,50 @@ namespace Opde {
 		}
 	}
 
-	
+
 	bool GameStateManager::run(GameState* state) {
 		// Initialize opde logger and console backend
 		mLogger = new Logger();
-			
+
 		mStdLog = new StdLog();
-		
+
 		mLogger->registerLogListener(mStdLog);
-		
+
 		// Create an ogre's root
 		mRoot = new Root();
-		
+
 		mConsoleBackend = new Opde::ConsoleBackend();
-		
+
 		// So console will write the messages from the logger
 		mLogger->registerLogListener(mConsoleBackend);
-		
+
 		mConsoleBackend->putMessage("==Console Starting==");
-		
-		
+
+
 		// Create the service manager
 		mServiceMgr = new ServiceManager();
-		
+
 		// Register the worldrep service factory
 		registerServiceFactories();
 
 		// Setup resources.
 		setupResources();
-	
-		if (!configure()) 
+
+		if (!configure())
 			return false;
-	
+
 		// Set default mipmap level (NB some APIs ignore this)
 		TextureManager::getSingleton().setDefaultNumMipmaps(5);
-	
+
 		// Initialize the input system
 		setupInputSystem(); // must be after configure. as configure creates the window
-		
+
+        // Initialize all the services
+        ServiceManager::getSingleton().initServices();
+
 		// Push the initial state
 		pushState(state);
-		
+
 		// Run the game loop
 		// Main while-loop
 		while( !mTerminate ) {
@@ -196,23 +200,23 @@ namespace Opde {
 			unsigned long lTimeCurrentFrame = mRoot->getTimer()->getMilliseconds();
 			unsigned long lTimeSinceLastFrame = lTimeCurrentFrame - mTimeLastFrame;
 			mTimeLastFrame = lTimeCurrentFrame;
-		
+
 			// Update inputmanager
 			captureInputs();
-		
+
 			// Update current state
 			mStateStack.top()->update( lTimeSinceLastFrame );
-		
+
 			// Render next frame
 			mRoot->renderOneFrame();
-		
+
 			// Deal with platform specific issues
 			Ogre::WindowEventUtilities::messagePump();
 		}
 
 		return true;
 	}
-	
+
 	void GameStateManager::registerServiceFactories() {
 		// register the service factories
 		new WorldRepServiceFactory();
@@ -220,15 +224,16 @@ namespace Opde {
 		new GameServiceFactory();
 		new LinkServiceFactory();
 		new PropertyServiceFactory();
+		new InheritServiceFactory();
 	}
-			
+
 	/// Method which will define the source of resources (other than current folder)
 	void GameStateManager::setupResources(void) {
 		// First, register the script loaders...
-		
+
 		// Allocate and register the DType script loader. Registers itself
 		mDTypeScriptLdr = new DTypeScriptLoader();
-		
+
 		// Allocate and register the PLDef script loader. Registers itself
 		mPLDefScriptLdr = new PLDefScriptLoader();
 
@@ -240,12 +245,12 @@ namespace Opde {
 		ConfigFile::SectionIterator seci = cf.getSectionIterator();
 
 		String secName, typeName, archName;
-		
+
 		while (seci.hasMoreElements()) {
 			secName = seci.peekNextKey();
 			ConfigFile::SettingsMultiMap *settings = seci.getNext();
 			ConfigFile::SettingsMultiMap::iterator i;
-			
+
 			for (i = settings->begin(); i != settings->end(); ++i) {
 				typeName = i->first;
 				archName = i->second;
@@ -254,7 +259,7 @@ namespace Opde {
 			}
 		}
 	}
-	
+
 	bool GameStateManager::configure() {
 		// Copied from the OIS Example. Thanks
 		// Load config settings from ogre.cfg
@@ -266,34 +271,34 @@ namespace Opde {
 
 		// Initialise and create a default rendering window
 		mRenderWindow = mRoot->initialise( true, "openDarkEngine" );
-		
+
 		// Initialise resources
 		ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
-		
+
 		mDarkSMFactory = new DarkSceneManagerFactory();
 
 		// Register
 		Root::getSingleton().addSceneManagerFactory(mDarkSMFactory);
-			
+
 		mRoot->createSceneManager(ST_INTERIOR, "DarkSceneManager");
-		
+
 		return true;
 	}
-	
+
 	void GameStateManager::setupInputSystem() {
 		// Copied from the OIS Example. Thanks
 		// Setup basic variables
-		OIS::ParamList paramList;    
+		OIS::ParamList paramList;
 		size_t windowHnd = 0;
 		std::ostringstream windowHndStr;
-	
+
 		// Get window handle
 		mRenderWindow->getCustomAttribute( "WINDOW", &windowHnd );
-			
+
 		// Fill parameter list
 		windowHndStr << (unsigned int) windowHnd;
 		paramList.insert( std::make_pair( std::string( "WINDOW" ), windowHndStr.str() ) );
-	
+
 		/* // Non-exclusive input - for debugging purposes
 		#if defined OIS_WIN32_PLATFORM
 		paramList.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_FOREGROUND" )));
@@ -307,33 +312,33 @@ namespace Opde {
 		paramList.insert(std::make_pair(std::string("XAutoRepeatOn"), std::string("true")));
 		#endif
 		*/
-		
+
 		// Create inputsystem
 		mInputSystem = OIS::InputManager::createInputSystem( paramList );
-	
+
 		// If possible create a buffered keyboard
 		if( mInputSystem->numKeyBoards() > 0 ) {
 			mKeyboard = static_cast<OIS::Keyboard*>( mInputSystem->createInputObject( OIS::OISKeyboard, true ) );
 			mKeyboard->setEventCallback( this );
 		}
-	
+
 		// If possible create a buffered mouse
 		if( mInputSystem->numMice() > 0 ) {
 			mMouse = static_cast<OIS::Mouse*>( mInputSystem->createInputObject( OIS::OISMouse, true ) );
 			mMouse->setEventCallback( this );
-	
+
 			// Get window size
 			unsigned int width, height, depth;
 			int left, top;
 			mRenderWindow->getMetrics( width, height, depth, left, top );
-	
+
 			// Set mouse region
 			const OIS::MouseState &mouseState = mMouse->getMouseState();
     			mouseState.width  = width;
     			mouseState.height = height;
 		}
 	}
-	
+
 	void GameStateManager::captureInputs() {
 		if( mMouse ) {
 		        mMouse->capture();
@@ -343,13 +348,13 @@ namespace Opde {
         		mKeyboard->capture();
     		}
 	}
-	
+
 	bool GameStateManager::keyPressed( const OIS::KeyEvent &e ) {
 		if (!mStateStack.empty()) {
 			mStateStack.top()->keyPressed(e);
 		}
 	}
-	
+
 	bool GameStateManager::keyReleased( const OIS::KeyEvent &e ) {
 		if (!mStateStack.empty()) {
 			mStateStack.top()->keyReleased(e);
@@ -361,13 +366,13 @@ namespace Opde {
 			mStateStack.top()->mouseMoved(e);
 		}
 	}
-	
+
 	bool GameStateManager::mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
 		if (!mStateStack.empty()) {
 			mStateStack.top()->mousePressed(e, id);
 		}
 	}
-	
+
 	bool GameStateManager::mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
 		if (!mStateStack.empty()) {
 			mStateStack.top()->mouseReleased(e, id);
