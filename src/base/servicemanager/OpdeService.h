@@ -37,6 +37,10 @@ namespace Opde {
 		
 			public:
 				Service(ServiceManager* manager);
+				
+				/// Intialization of the service. Guaranteed to be called after construction. Used to estabilish relations with other services
+				virtual void init() {};
+				
 				virtual ~Service();
 	};
 	
