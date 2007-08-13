@@ -122,6 +122,11 @@ namespace Opde {
 			* @note Notifies inheritor about the change */
 			bool removeProperty(int obj_id);
 			
+			/** Creates a new property by cloning a given property on object ID 
+			* @param obj_id Target object ID (id to create) 
+			* @param src_id The id of the object to clone property from */
+			bool cloneProperty(int obj_id, int src_id);
+			
 			// ----------------- Data manipulation releted methods --------------------
 			/** Manual broadcaster of data change. To be used as the last call in a block of property manipulation calls using the PropertyDataPtr from getData call.
 			* @see getData

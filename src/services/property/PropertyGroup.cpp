@@ -70,7 +70,7 @@ namespace Opde {
 		
 		// Can't calculate the count of the properties, as they can have any size
 		// load. Each record has: OID, size (32 bit uint's)
-		int id;
+		int id = 0xDEADBABE;
 		uint32_t size;
 		
 		while (!fprop->eof()) {
@@ -193,7 +193,19 @@ namespace Opde {
 			return false;
 		}
 	}
-
+	
+	// --------------------------------------------------------------------------
+	bool PropertyGroup::cloneProperty(int obj_id, int src_id) {
+		PropertyDataPtr pd = getData(src_id);
+		
+		if (!pd.isNull()) {
+			/*PropertyDataPtr propd = new PropertyData(obj_id, *pd);
+			
+			return _addProperty(propd);*/
+		}
+	}
+	
+	
 	// --------------------------------------------------------------------------
 	bool PropertyGroup::_addProperty(PropertyDataPtr propd) {
 		pair<PropertyStore::iterator, bool> res = mPropertyStore.insert(make_pair(propd->id(), propd));
