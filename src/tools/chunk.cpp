@@ -43,7 +43,7 @@ void listChunks(FileGroup* gr) {
 	for (;itr != gr->end(); itr++) {
 		const DarkDBChunkHeader& head = itr->second.header;
 		
-		printf("%12s %8d %4d.%d\n", itr->first.c_str(), itr->second.file->size(), head.version_high, head.version_low);
+		printf("%-12s %8d %4d.%d\n", itr->first.c_str(), itr->second.file->size(), head.version_high, head.version_low);
 	}
 }
 
