@@ -20,6 +20,7 @@ include_directories(
     ${OPDE_SOURCE_DIR}/src/services/worldrep
     ${OPDE_SOURCE_DIR}/src/services/link
     ${OPDE_SOURCE_DIR}/src/services/property
+    ${OPDE_SOURCE_DIR}/src/services/inherit
 )
 
 
@@ -63,6 +64,7 @@ target_link_libraries( opde
     OpdeGameService
     OpdeLinkService
     OpdePropertyService
+    OpdeInheritService
     OpdeBase
 )
 
