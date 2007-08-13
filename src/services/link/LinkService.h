@@ -37,7 +37,10 @@ namespace Opde {
 	class LinkService : public Service {
 		public:
 			LinkService(ServiceManager *manager);
+			
 			virtual ~LinkService();
+			
+			virtual void init();
 			
 			/** Load the links from the database */ 
 			void load(FileGroup* db);

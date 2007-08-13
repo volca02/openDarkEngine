@@ -19,7 +19,7 @@
  *
  *****************************************************************************/
 
- 
+
 #ifndef __RELATION_H
 #define __RELATION_H
 
@@ -28,69 +28,70 @@
 #include "DTypeDef.h"
 #include "LinkCommon.h"
 #include "FileGroup.h"
+#include "MessageSource.h"
 
 namespace Opde {
 	/** @brief Relation. A store of a group of links of the same flavour.
 	*/
-	class Relation : public NonCopyable {
+	class Relation : public NonCopyable, public MessageSource<LinkChangeMsg, LinkChangeListenerPtr> {
 		public:
 			Relation(const std::string& name, DTypeDefPtr type, bool hidden = false);
 			virtual ~Relation();
-			
+
 			/** Loads the relation data from the given FileGroup */
 			void load(FileGroup* db);
-			
-			/** Saves the relation data to the fiven file group 
+
+			/** Saves the relation data to the fiven file group
 			* @todo Save Mask implementation */
 			void save(FileGroup* db, uint saveMask);
-			
+
 			void setChunkVersions(uint lmajor, uint lminor, uint dmajor, uint dminor) {
 				mLCVMaj = lmajor;
 				mLCVMin = lminor;
 				mDCVMaj = dmajor;
 				mDCVMin = dminor;
 			}
-					
+
 			/** Clears out all the links, releses data, clears query caches */
 			void clear();
 
 			/** Sets the ID of this Relation. Must be done prior to any operation with the relation instance */
 			inline void setID(int id) { mID = id; };
-			
+
 			/** Returns the ID of this relation. */
 			inline int getID() { return mID; }
-			
+
 			void setFakeSize(int size) { assert(size<=0); mFakeSize = size; };
 
 			const std::string& getName() { return mName; };
 
 			// ----------------- Link management methods --------------------
 			/** Deletes a link specified by it's ID
-			* @param id The ID of the link that should be deleted 
+			* @param id The ID of the link that should be deleted
 			* @note Broadcasts the link removal message (LNK_REMOVED) */
 			void remove(link_id_t id);
-			
+
 			/** Creates a new link, returning it's ID
 			* @param from The source object ID of this link
 			* @param to The destination obect ID of this link
 			* @note This version of createLink does initialize the Link data with zero values, if the DTypeDefPtr.isNull() is not true. This is not always the requested bahavior. Use create(int,int,char*) to create a link with already preset data
 			* @return the id of the newly created link (The concreteness of the link is autodetected given the from and to values (both < 0 - non concrete, otherwise concrete))
 			* @note Broadcasts the link creation message
-			* @todo Some relations could be limited to one link between obect pair(!). This could be  
+			* @todo Some relations could be limited to one link between obect pair(!). This could be
 			*/
 			link_id_t create(int from, int to);
-			
+
 			/** Creates a new link, returning it's ID
 			* @see createLink(int, int)
 			* @note this version does create the link including the data, so a time and plenty of broadcasts is saved.
 			* @note to create and fill the data, use DTypeDef::create to obtain a valid buffer to fill, then use DTypeDef::set to fill the fields. Once ready, supply the final buffer to the createLink
 			*/
 			link_id_t create(int from, int to, DTypePtr data);
-			
-			/** getter for the DTypeDef this relation uses. 
+
+			/** getter for the DTypeDef this relation uses.
 			* @note The returned object is better be tested by doing DTypeDefPtr::isNull() to determine if the object is usable. Relations with no data will just return null DTypeDefPtr */
 			inline DTypeDefPtr getTypeDef() { return mType; };
-			
+
 			/** Sets the link data field
 			* @param id The link id
 			* @param field The name of the field the modification is requested on
@@ -98,13 +99,13 @@ namespace Opde {
 			* @todo If DTypeDef will implement indexing, create a version with index int as a first parameter
 			*/
 			void setLinkField(link_id_t id, const std::string& field, const DVariant& value);
-			
+
 			/** Gets the link data field value
 			* @param id The link id
-			* @param field The name of the field the modification is requested on 
+			* @param field The name of the field the modification is requested on
 			*/
 			DVariant getLinkField(link_id_t id, const std::string& field);
-			
+
 			/** Swaps the link data for new data. Deletes the old data
 			For more massive data overwriting.
 			* @param id The link id
@@ -112,151 +113,134 @@ namespace Opde {
 			* @note deallocates the original data. All the references to the original data are then invalid and potentially harmful
 			*/
 			void setLinkData(link_id_t id, char* data);
-			
+
 			/** Returns link data for the given link ID
 			* @param id The link id
 			*/
 			LinkDataPtr getLinkData(link_id_t id);
-			
+
 			// ----------------- Link query methods --------------------
-			/** Gets all links that come from source to destination 
-			* @param src Source object ID, or 0 if any source 
+			/** Gets all links that come from source to destination
+			* @param src Source object ID, or 0 if any source
 			* @param dst Destination object ID or 0 if any destination
 			* @note only one of the parameters can be zero
 			* @return LinkQueryResultPtr filled with the query result */
 			LinkQueryResultPtr getAllLinks(int src, int dst) const;
-			
+
 			/** Gets single link ID that is coming from source to destination
-			* @param src Source object ID, or 0 if any source 
+			* @param src Source object ID, or 0 if any source
 			* @param dst Destination object ID or 0 if any destination
 			* @return LinkPtr link instance that fulfills the requirements
 			* @note only one of the parameters can be zero
 			* @throws BasicException if there was more than one link that could be returned
 			*/
 			LinkPtr getOneLink(int src, int dst) const;
-			
-			// ----------------- Listener releted methods --------------------
 
-			/** Registers a relation change listener.
-			* @param listener A pointer to LinkChangeListenerPtr
-			* @note The same pointer has to be supplied to the unregisterListener in order to succeed with unregistration  
+            /** Gets single link given the link ID
+			* @param id The link's ID
+			* @return LinkPtr link instance that fulfills the requirements, or NULL
 			*/
-			void registerListener(LinkChangeListenerPtr* listener);
-			
-			/** Unregisters a relation change listener.
-			* @param listener A pointer to LinkChangeListenerPtr
-			* @note The pointer has to be the same as the one supplied to the registerListener (not a big deal, just supply a pointer to a member variable)
-			*/
-			void unregisterListener(LinkChangeListenerPtr* listener);
-			
+			LinkPtr getLink(link_id_t id) const;
+
 		protected:
-			/// Send a message to all listeners of relation change
-			void broadcastLinkMessage(const LinkChangeMsg& msg) const;
-
 			/** Internal method for link insertion. Inserts the link to the map, notifies listeners and query databases
 			* @param newlnk The link to be inserted
 			* @note Always use this method to internally insert new links, if not in a situation when the standard sequence of link addition is needed (notification, query database refresh)
 			* @note The link data have to be assigned prior to calling this method
 			*/
 			void _addLink(LinkPtr newlnk);
-			
+
 			/** Internal method for link removal handling. Notifies the listeners, refreshes query databases.
 			* @param id The id of the link to be removed
 			* @note Also removes the link data
 			*/
 			void _removeLink(link_id_t id);
-			
+
 			/** Returns the id that can be used to create a link (a free ID that is).
 			* @param cidx Concreteness index of the requested link (0-15)
 			* @note concreteness 0 is usually used for abstract links (both src and dst ID's end up < 0), concreteness 1 is used for links having at least one end in positive object ID space (non abstract objects)
 			* @ret
 			*/
 			link_id_t getFreeLinkID(uint cidx);
-			
+
 			/** Assigns the link data to a link ID
 			* @param id Link id to assign the data to
 			* @param data The link data to be assigned
 			*/
 			void _assignLinkData(link_id_t id, LinkDataPtr data);
-			
+
 			/** Removes link data for a link ID
 			* @param id the ID of the link for which data should be removed
 			*/
 			void _removeLinkData(link_id_t id);
-			
+
 			/** Allocates the link ID, meaning it wont be given as free now.
 			* @param id The link that was allocated
 			* @note This now only increments the maximal index for the concreteness of the link if it is bigger than that
 			*/
 			void allocateLinkID(link_id_t id);
-			
+
 			/** Unallocates the link ID, meaning it will be available again.
 			* @param id The link that was allocated
 			* @note This now only decrements the maximal index of the concreteness the id has, if it was the maximal id
 			*/
 			void unallocateLinkID(link_id_t id);
-			
+
 			/// Map of links. Indexed by whole link id, contains the link class (LinkPtr)
 			typedef std::map< link_id_t, LinkPtr > LinkMap;
-			
+
 			/// Map of link data. Indexed by whole link id, contains the link data (LinkDataPtr)
 			typedef std::map< link_id_t, LinkDataPtr > LinkDataMap;
-			
-			/// A set of listeners
-			typedef std::set< LinkChangeListenerPtr* > LinkListeners;
-			
+
 			/// Vector storage of links
 			typedef std::set< LinkPtr > LinkSet;
-			
+
 			/// Map of all links that have an object ID in either target or source
 			typedef std::map< int,  LinkSet > ObjectIDToLinks;
-			
+
 			/// Map of all maps that share a certain object ID
 			typedef std::map< int, ObjectIDToLinks > ObjectLinkMap;
-			
+
 			/// Map of links in source object ID, destination object id order
 			ObjectLinkMap mSrcDstLinkMap;
-			
+
 			/// Map of links in destination object ID, source object ID order
 			ObjectLinkMap mDstSrcLinkMap;
-			
+
 			/// ID of this relation (Flavour)
 			int mID;
-			
+
 			/// The maximal ID of the given concreteness level (only the index part)
 			link_id_t mMaxID[16];
-			
+
 			/// Name of this relation
 			std::string mName;
-			
+
 			/// Typedef pointer used by this relation (or null if no data are used)
 			DTypeDefPtr mType;
-			
+
 			/// Hidden relations are those which should not be mentioned by editor as a normal links (metaproperty and such)
 			bool mHidden;
-			
+
 			/// The map of ID->LinkPtr (Stores link info per link ID)
 			LinkMap mLinkMap;
-			
+
 			/// The map of ID->LinkDataPtr (Stores link data per link ID)
 			LinkDataMap mLinkDataMap;
-			
-			/// Listeners for the link changes
-			LinkListeners mLinkListeners;
-			
+
 			/// fake size. This size is written as the data size into the LD$ chunks
 			uint32_t mFakeSize;
-			
+
 			/// chunk versions. Both Link and LinkData
 			uint mLCVMaj;
 			uint mLCVMin;
 			uint mDCVMaj;
 			uint mDCVMin;
 	};
-	
-	
+
+
 	/// Shared pointer on Relation
 	typedef shared_ptr< Relation > RelationPtr;
 }
- 
+
 #endif
