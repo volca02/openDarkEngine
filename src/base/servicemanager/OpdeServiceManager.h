@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *****************************************************************************/
- 
+
 #ifndef __OPDESERVICEMANAGER_H
 #define __OPDESERVICEMANAGER_H
 
@@ -28,40 +28,48 @@
 #include <map>
 
 namespace Opde {
-	 
-	/** Central manager for the Services. Each service must have the ServiceFactory implemented, and must implement Service class. 
+
+	/** Central manager for the Services. Each service must have the ServiceFactory implemented, and must implement Service class.
 	* @see ServiceFactory
-	* @see Service 
+	* @see Service
 	*/
 	class ServiceManager : public Singleton<ServiceManager>, public NonCopyable {
 		private:
 			typedef std::map< std::string, ServiceFactory* > ServiceFactoryMap;
 			typedef std::map< std::string, ServicePtr > ServiceInstanceMap;
-		
+
 			ServiceFactoryMap mServiceFactories;
 			ServiceInstanceMap mServiceInstances;
-		
+
 			ServiceFactory* findFactory(const std::string& name);
 			ServicePtr findService(const std::string& name);
 			ServicePtr createInstance(const std::string& name);
 		public:
 			ServiceManager();
-			
+
 			/// Destructor. Deletes all registered factories
 			~ServiceManager();
 
 			// Singleton releted
 			static ServiceManager& getSingleton(void);
 			static ServiceManager* getSingletonPtr(void);
-		
+
 			/** Registration for the services */
 			void addServiceFactory(ServiceFactory* factory);
-		
+
 			/** Returns the service, named name, pointer.
 			* @param name The service type name (The name returned by the ServiceFactory)
 			* @see ServiceFactory
 			*/
 			ServicePtr getService(const std::string& name);
+
+			/** Mass creation of services. All services which will have nonzero '&' operation with the factories service mask will be created.
+			* Typical usage: Creation of listeners
+			* @param mask The mask to use */
+			void createByMask(uint mask);
+
+			/** Calls the method Service::init() on all instanced services. */
+            void initServices();
 	};
 }
 
