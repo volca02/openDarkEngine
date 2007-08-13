@@ -503,6 +503,7 @@ namespace Opde {
 		
 		mOffPos = pos;
 		mSize = size;
+		mEof = (mSize <= mFilePos); // Eof if the size is 0
 	}
 			
 	//------------------------------------	
