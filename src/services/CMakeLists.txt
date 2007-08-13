@@ -4,4 +4,5 @@ add_subdirectory(game)
 
 # Object system services
 add_subdirectory(link)
+add_subdirectory(inherit)
 add_subdirectory(property)
