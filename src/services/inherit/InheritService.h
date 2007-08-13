@@ -43,6 +43,16 @@ namespace Opde {
 
     typedef shared_ptr< InheritLink > InheritLinkPtr;
 
+    /** Inheritance query result. Put like this for effectiveness */
+    class InheritQuery {
+        public:
+            virtual InheritLinkPtr next() = 0;
+            virtual bool end() = 0;
+    };
+
+    /// Shared pointer to InheritQuery
+    typedef shared_ptr< InheritQuery > InheritQueryPtr;
+
 	/** Inherit Service - service managing object inheritance and metaproperties.
 	* This service is responsible for Inheritor management. Inheritors are classes that are used to track inheritance of certain qualities of an object (be it abstract or concrete).
 	*  An example usage of Inheritor is property inheritance. Properties internally use the inheritors to transparently return values not directly assigned to the object ID, but rather inherited from the Effective object.
@@ -56,29 +66,37 @@ namespace Opde {
 			/// Destructor
 			virtual ~InheritService();
 
+            /// Service initialization - @see Service::init()
 			virtual void init();
 
 			/** Registers an inheritor factory */
-			void addInheritorFactory(InheritorFactory* factory);
+			void addInheritorFactory(InheritorFactoryPtr factory);
 
 			/** Creates an inheritor instance, given the inheritor name
 			 * @return Inheritor pointer on success
 			 * @throw BasicException if the inheritor name was not found in factories */
-			InheritorPtr createInheritor(std::string name);
+			InheritorPtr createInheritor(const std::string& name);
 
 			/** Requests all sources for inheritance for the given object ID
 			 * @param objID the object id to get the Sources for */
-			const InheritLinkList& getSources(int objID);
+			InheritQueryPtr getSources(int objID) const;
 
 			/** Requests all inheritance targets for given object ID
 			 * @param objID the id of the object to get inheritance targets for
 			 * */
-			const InheritLinkList& getTargets(int objID);
+			InheritQueryPtr getTargets(int objID) const;
 
 			/// Todo: AddMetaProp, RemoveMetaProp, ...
 
             /// Clears out the inheritance map (leaves the other things intact)
             void clear();
+
+            /// Map of object (src/dst) to inherit link
+            typedef std::map< int, InheritLinkPtr > InheritLinkMap;
+
+			/// Map of the effective object ID's
+			typedef std::map< int, InheritLinkMap > InheritMap;
+
 		private:
             /** Adds an inheritance link.
             * @param link The link to be added as InheritLink
@@ -96,13 +114,7 @@ namespace Opde {
 			/// Listener for the metaprop
 			void onMetaPropMsg(const LinkChangeMsg& msg);
 
-            /// Map of object (src/dst) to inherit link
-            typedef std::map< int, InheritLinkPtr > InheritLinkMap;
-
-			/// Map of the effective object ID's
-			typedef std::map< int, InheritLinkMap > InheritMap;
-
-			/// Inheritance sources
+      		/// Inheritance sources
 			InheritMap mInheritSources;
 
 			/// Inheritance destinations

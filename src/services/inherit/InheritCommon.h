@@ -36,13 +36,16 @@ namespace Opde {
 	 * given an object id. */
 	class Inheritor {
 		public:
+			/** Returns true if the objID has true 'implements' record */
+			virtual bool getImplements(int objID) const = 0;
+
 			/** Manual method for setting that a certain object ID directly implements (or not) the inherited quality */
-			virtual void implements(int objID, bool impl) = 0;
+            virtual void setImplements(int objID, bool impl) = 0;
 
 			/** Returns the effective object ID for the given object ID
 			 * @note The effective object is the object holding the used value for the object ID given
-			 * @return The effective object ID */
-			virtual int getEffectiveID(int srcID) = 0;
+			 * @return The effective object ID, or srcID, if no effective is found (the object itself is effective) */
+			virtual int getEffectiveID(int srcID) const = 0;
 
 			/** The core inheritance describing method.
 			 * This method is used to validate the given inheritance situation to be acceptible or not.
@@ -71,7 +74,7 @@ namespace Opde {
 			virtual bool validate(int srcID, int dstID, unsigned int priority) = 0;
 
 			/// Used upon total cleanout of the database
-			virtual void clear();
+			virtual void clear() = 0;
 	};
 
 	/// Shared pointer to Inheritor
@@ -118,9 +121,9 @@ namespace Opde {
 		public:
 			InheritorFactory() {};
 
-			virtual void getName() = 0;
+			virtual std::string getName() const = 0;
 
-			virtual InheritorPtr createInstance() = 0;
+			virtual InheritorPtr createInstance(InheritService* is) const = 0;
 	};
 
 	typedef shared_ptr< InheritorFactory > InheritorFactoryPtr;

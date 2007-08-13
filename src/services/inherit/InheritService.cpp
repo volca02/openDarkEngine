@@ -22,11 +22,32 @@
 #include "ServiceCommon.h"
 #include "InheritService.h"
 #include "logger.h"
-// TODO: #include "DefaultCachedInheritor.h" - always inherit scheme...
+#include "CachedInheritor.h"
 
 using namespace std;
 
 namespace Opde {
+	/*------------------------------------------------------------*/
+	/*--------------------- SimpleInheritQuery -------------------*/
+	/*------------------------------------------------------------*/
+	class SimpleInheritQuery : public InheritQuery {
+	    public:
+            SimpleInheritQuery(const InheritService::InheritLinkMap& linkmap) : mLinkMap(linkmap), InheritQuery() {
+                mIter = mLinkMap.begin();
+            }
+
+            virtual InheritLinkPtr next() {
+                return (mIter++)->second;
+            }
+
+            virtual bool end() {
+                return mIter == mLinkMap.end();
+            }
+
+        protected:
+            const InheritService::InheritLinkMap& mLinkMap;
+            InheritService::InheritLinkMap::const_iterator mIter;
+	};
 
 	/*--------------------------------------------------------*/
 	/*--------------------- InheritService -------------------*/
@@ -34,7 +55,8 @@ namespace Opde {
 	InheritService::InheritService(ServiceManager *manager) : Service(manager) {
         // Register some common factories.
         // If a special factory would be needed, it has to be registered prior to it's usage, okay?
-
+        InheritorFactoryPtr if_cached = new CachedInheritorFactory();
+        addInheritorFactory(if_cached);
 	}
 
 	//------------------------------------------------------
@@ -43,6 +65,22 @@ namespace Opde {
 	    if (!mMetaPropRelation.isNull())
             mMetaPropRelation->unregisterListener(&mMetaPropListener);
 	}
+
+    //------------------------------------------------------
+    void InheritService::addInheritorFactory(InheritorFactoryPtr factory) {
+        mInheritorFactoryMap.insert(make_pair(factory->getName(), factory));
+    }
+
+    //------------------------------------------------------
+    InheritorPtr InheritService::createInheritor(const std::string& name) {
+        InheritorFactoryMap::iterator it = mInheritorFactoryMap.find(name);
+
+        if (it != mInheritorFactoryMap.end()) {
+            InheritorPtr inh = it->second->createInstance(this);
+            return inh;
+        } else
+            OPDE_EXCEPT(string("No inheritor factory found for name : ") + name, "InheritService::createInheritor");
+    }
 
 	//------------------------------------------------------
 	void InheritService::init() {
@@ -123,6 +161,31 @@ namespace Opde {
         mInheritSources.clear();
         mInheritTargets.clear();
     }
+
+    //------------------------------------------------------
+    InheritQueryPtr InheritService::getSources(int objID) const {
+        InheritMap::const_iterator it = mInheritSources.find(objID);
+
+        if (it != mInheritSources.end()) {
+            InheritQueryPtr res = static_cast<InheritQuery*>(new SimpleInheritQuery(it->second));
+            return res;
+        }
+        else
+            return NULL;
+
+    }
+
+    //------------------------------------------------------
+	InheritQueryPtr InheritService::getTargets(int objID) const {
+	    InheritMap::const_iterator it = mInheritTargets.find(objID);
+
+        if (it != mInheritSources.end()) {
+            InheritQueryPtr res = new SimpleInheritQuery(it->second);
+            return res;
+        }
+        else
+            return NULL;
+	}
 
     //------------------------------------------------------
     void InheritService::_addLink(LinkPtr link, unsigned int priority) {

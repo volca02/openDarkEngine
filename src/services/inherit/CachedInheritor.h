@@ -25,67 +25,88 @@
 #include "InheritService.h"
 
 namespace Opde {
-		/** Base class for cached inheritor implementations.
-		 * This class implements some basic methods common to usual cached Inheritor implementations (refreshed every change, quick reads).
+		/** Base class for cached inheritor implementations. Works self as "always" inheritor, inheriting in every situation.
+		 * This class implements all methods common to usual cached Inheritor implementations (refreshed every change, quick reads).
 		 * To accomplish this, the inheritor registers as a listener to the InheritService, and upon a change, it refreshes the cache. */
 		class CachedInheritor : public Inheritor, public InheritChangeListener {
 				public:
 					/// Constructor
-					CachedInheritor(InheritServicePtr is) : mInheritService(is) {};
+					CachedInheritor(InheritService* is);
 
 					/// Destructor
-					~CachedInheritor() {};
+					~CachedInheritor();
 
-					/// @see Inheritor::implements
-					virtual void implements(int objID, bool impl);
+					/// @see Inheritor::setImplements
+					virtual void setImplements(int objID, bool impl);
+
+					/// @see Inheritor::getImplements
+					virtual bool getImplements(int objID) const;
 
 					/// @see Inheritor::getEffectiveID
-					virtual int getEffectiveID(int srcID) {
-					}
+					virtual int getEffectiveID(int srcID) const;
 
-					virtual bool refresh(int srcID) {
-						// Look at the source objects, sorted by priority desc, assign the first valid
-						// If our source changes, broadcast to all objects inheriting from this
-					}
+                    /** Sets new cached effective ID for the given object
+                    * @param srcID the object to set effective ID for
+                    * @param the new effective ID */
+					virtual bool setEffectiveID(int srcID, int effID);
 
-					/** Propagates new Effective source, recursively, on all inheritor targets.
+					/** Erases the effective ID record altogether, meaning that object has no effective value
+                    * @param srcID the object to set effective ID for
+                    * @param the new effective ID */
+					virtual void unsetEffectiveID(int srcID);
+
+                    /** Propagates new Effective source, recursively, on all inheritor targets.
 					*
 					* This method changes the records in Effective object cache. For each object, a list of the sources is queried. Then:
-					* @li If the propagated effective ID is zero, a vote for new effective object is done (highest priority), querying parent objects for thei're effective ID's.
-					* That ID is then recursively propagated.
-					* @li If the propagated new effective ID is non-zero and if the source object ID matches to the effective parent,
-					* the propagated new ID is taken as effective, and propagated to the child objects
+					* @li A vote for new effective object is done (highest priority), querying parent objects for thei're effective ID's.
+					* That ID is then recursively propagated, but only if a change happened to the effective ID of the Object.
 					*
-					* @param objID the object the change is propagated to
 					* @param srcID the source of the propagation (a parent object ID)
-					* @param newEffID the new effective object ID (or 0, if the propagation removes the inheritance source)
 					*
 					* @note The propagation stops (won't recurse) when:
-					* @li The effective object is encountered as a target object (objID) - a cycle
 					* @li The propagated effective ID encounters an object where the srcID propagation is masked ineffective
 					* @li No targets are found to propagate to
+					* @li No change hapened to the object's effective ID
 					*/
-					virtual void propagate(int objID, int srcID, int newEffID);
+					virtual bool refresh(int srcID);
 
+                    bool validate(int srcID, int dstID, unsigned int priority);
+
+                    virtual void clear();
+
+                    void onInheritMsg(const InheritChangeMsg& msg);
 				protected:
 					/// InheritService reference
-					InheritServicePtr mInheritService;
+					InheritService* mInheritService;
+
+                    /// Inheritance change listener
+                    InheritChangeListenerPtr mInheritListener;
 
 					/// Map of effective object ID's
 					typedef std::map < int, int > EffectiveObjectMap;
 
 					/// Map of effective object ID's - instance
 					EffectiveObjectMap mEffObjMap;
+
+					/// Map of implementing object IDs - id->true means object implements the inherited property
+					typedef std::map <int, bool> ImplementsMap;
+
+					ImplementsMap mImplements;
 			};
 
 
+        /** Cached inheritor factory. The inheritor produced is named "always" and will, as the name suggests,
+         * inherit in all situations. */
 		class CachedInheritorFactory : public InheritorFactory {
 				public:
 					CachedInheritorFactory();
 
-					virtual void getName();
+					virtual std::string getName() const;
 
-					InheritorPtr createInstance();
+					InheritorPtr createInstance(InheritService* is) const;
+
+                protected:
+                    static std::string mName;
 			};
 	}
 
