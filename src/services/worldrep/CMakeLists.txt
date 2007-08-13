@@ -9,7 +9,7 @@ include_directories (
     ${OPDE_SOURCE_DIR}/src/base/
     ${OPDE_SOURCE_DIR}/src/base/Dark
     ${OPDE_SOURCE_DIR}/src/scenemanager
-    ${OPDE_SOURCE_DIR}/src/services/database
+    ${OPDE_SOURCE_DIR}/src/services
 )
 
 link_directories ( 
