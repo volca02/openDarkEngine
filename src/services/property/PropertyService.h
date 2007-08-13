@@ -55,7 +55,6 @@ namespace Opde {
 			/** Clears out all the PropertyGroups (effectively wiping out all properties) */
 			void clear();
 			
-			
 		protected:
 			/// maps property groups to their names
 			typedef std::map< std::string, PropertyGroupPtr > PropertyGroupMap;

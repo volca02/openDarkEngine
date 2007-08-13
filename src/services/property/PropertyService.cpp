@@ -23,6 +23,7 @@
 #include "PropertyService.h"
 #include "BinaryService.h"
 #include "logger.h"
+#include "ServiceCommon.h"
 
 using namespace std;
 
@@ -32,7 +33,8 @@ namespace Opde {
 	/*--------------------- PropertyService ------------------*/
 	/*--------------------------------------------------------*/
 	PropertyService::PropertyService(ServiceManager *manager) : Service(manager) {
-		
+		// Ensure listeners are created
+		mServiceManager->createByMask(SERVICE_PROPERTY_LISTENER);
 	}
 	
 	// --------------------------------------------------------------------------
@@ -59,9 +61,14 @@ namespace Opde {
 		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
 		
 		for (; it != mPropertyGroupMap.end(); ++it) {
-			LOG_DEBUG("PropertyService: Loading property group %s", it->first.c_str());
-			it->second->load(db);
+			try {
+				LOG_DEBUG("PropertyService: Loading property group %s", it->first.c_str());
+				it->second->load(db);
+			} catch (BasicException &e) {
+				LOG_FATAL("PropertyService: Caught a fatal exception while loading PropertyGroup %s : %s", it->first.c_str(), e.getDetails().c_str() );
+			}
 		}
+		
 	}
 			
 	// --------------------------------------------------------------------------
