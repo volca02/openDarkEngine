@@ -158,6 +158,7 @@ property AI_SndTag {
 property StTweqEmi {
 	label "TweqEmitterState"
 	p_ver 2.8
+	inherit never
 }
 
 property AI_PtrlRn {
@@ -290,6 +291,7 @@ property AI_WtchPn {
 property PhysAttr {
 	label "PhysicsModelAttributes"
 	p_ver 2.66536
+	inherit archetype
 }
 
 property TransDoor {
@@ -354,6 +356,7 @@ property VoiceIdx {
 property StTweqRot {
 	label "TweqRotateState"
 	p_ver 2.16
+	inherit never
 }
 
 property AI_MoveSp {
@@ -382,6 +385,7 @@ property CSPropert {
 property StTweq2Em {
 	label "TweqEmitter2State"
 	p_ver 2.8
+	inherit never
 }
 
 property HasRefs {
@@ -450,6 +454,7 @@ property AI_FreeKn {
 property StTweqSca {
 	label "TweqScaleState"
 	p_ver 2.16
+	inherit never
 }
 
 property CfgTweq5E {
@@ -506,6 +511,7 @@ property SchAttFac {
 property StTweqMod {
 	label "TweqModelsState"
 	p_ver 2.8
+	inherit never
 }
 
 property TextureRa {
@@ -538,6 +544,7 @@ property InvLimbMo {
 property StTweq3Em {
 	label "TweqEmitter3State"
 	p_ver 2.8
+	inherit never	
 }
 
 property WaterColo {
@@ -658,6 +665,7 @@ property SchLastSa {
 property StTweq5Em {
 	label "TweqEmitter5State"
 	p_ver 2.8
+	inherit never
 }
 
 property AI_Patrol {
@@ -693,6 +701,7 @@ property InvCycleO {
 property AnimLight {
 	label "AnimLight"
 	p_ver 2.68
+	inherit archetype
 }
 
 property BookArt {
@@ -854,6 +863,7 @@ property OTxtRepr2 {
 property StTweqDel {
 	label "TweqDeleteState"
 	p_ver 2.8
+	inherit never
 }
 
 property AI_Verbos {
@@ -920,11 +930,13 @@ property PhysInitV {
 property StTweqBli {
 	label "TweqFlickerState"
 	p_ver 2.8
+	inherit never
 }
 
 property Position {
 	label "Position"
 	p_ver 2.65558
+	inherit never
 }
 
 property AI_Device {
@@ -981,6 +993,7 @@ property ModelName {
 property StTweq4Em {
 	label "TweqEmitter4State"
 	p_ver 2.8
+	inherit never
 }
 
 property Ambient {
@@ -1060,6 +1073,7 @@ property PhysState {
 property StTweqJoi {
 	label "TweqJointsState"
 	p_ver 2.28
+	inherit never
 }
 
 property AI_SaveCo {
@@ -1204,6 +1218,7 @@ property GameDesc {
 property StTweqLoc {
 	label "TweqLockState"
 	p_ver 2.12
+	inherit never
 }
 
 property BloodCaus {
