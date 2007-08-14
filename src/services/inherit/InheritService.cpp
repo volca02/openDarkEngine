@@ -27,9 +27,21 @@
 using namespace std;
 
 namespace Opde {
-	/*------------------------------------------------------------*/
-	/*--------------------- SimpleInheritQuery -------------------*/
-	/*------------------------------------------------------------*/
+	/*--------------------------------------------------------*/
+	/*--------------------- InheritQueries -------------------*/
+	/*--------------------------------------------------------*/
+	/// Just an empty result of a query
+    class EmptyInheritQuery : public InheritQuery {
+	    public:
+            EmptyInheritQuery() : InheritQuery() {  };
+
+            virtual InheritLinkPtr next() {  };
+
+            virtual bool end() {
+                return true;
+            };
+	};
+
 	class SimpleInheritQuery : public InheritQuery {
 	    public:
             SimpleInheritQuery(const InheritService::InheritLinkMap& linkmap) : mLinkMap(linkmap), InheritQuery() {
@@ -37,17 +49,27 @@ namespace Opde {
             }
 
             virtual InheritLinkPtr next() {
-                return (mIter++)->second;
+                if (!end()) {
+                    InheritLinkPtr l = mIter->second;
+
+                    ++mIter;
+
+                    return l;
+                } else {
+                    return NULL;
+                }
             }
 
             virtual bool end() {
-                return mIter == mLinkMap.end();
+                return (mIter == mLinkMap.end());
             }
 
         protected:
             const InheritService::InheritLinkMap& mLinkMap;
             InheritService::InheritLinkMap::const_iterator mIter;
 	};
+
+
 
 	/*--------------------------------------------------------*/
 	/*--------------------- InheritService -------------------*/
@@ -77,6 +99,7 @@ namespace Opde {
 
         if (it != mInheritorFactoryMap.end()) {
             InheritorPtr inh = it->second->createInstance(this);
+            mInheritors.push_back(inh); // no need map by name
             return inh;
         } else
             OPDE_EXCEPT(string("No inheritor factory found for name : ") + name, "InheritService::createInheritor");
@@ -167,11 +190,12 @@ namespace Opde {
         InheritMap::const_iterator it = mInheritSources.find(objID);
 
         if (it != mInheritSources.end()) {
-            InheritQueryPtr res = static_cast<InheritQuery*>(new SimpleInheritQuery(it->second));
+            InheritQueryPtr res = new SimpleInheritQuery(it->second);
+            return res;
+        } else {
+            InheritQueryPtr res = new EmptyInheritQuery();
             return res;
         }
-        else
-            return NULL;
 
     }
 
@@ -179,12 +203,13 @@ namespace Opde {
 	InheritQueryPtr InheritService::getTargets(int objID) const {
 	    InheritMap::const_iterator it = mInheritTargets.find(objID);
 
-        if (it != mInheritSources.end()) {
+        if (it != mInheritTargets.end()) {
             InheritQueryPtr res = new SimpleInheritQuery(it->second);
             return res;
+        } else {
+            InheritQueryPtr res = new EmptyInheritQuery();
+            return res;
         }
-        else
-            return NULL;
 	}
 
     //------------------------------------------------------
@@ -192,25 +217,26 @@ namespace Opde {
         // It works like this. link.src() is the target for inheritance, link.dst() is the source for inheritance
         InheritLinkPtr ilp = new InheritLink;
 
+        // we've got the link reverse. MetaProp has src the target for inh, and dst the parent.
         ilp->srcID = link->dst();
         ilp->dstID = link->src();
         ilp->priority = priority;
 
-        pair<InheritMap::iterator, bool> r = mInheritSources.insert(make_pair(link->dst(), InheritLinkMap()));
+        pair<InheritMap::iterator, bool> r = mInheritSources.insert(make_pair(ilp->dstID, InheritLinkMap()));
 
         // now insert for the link.src, with the InheritLinkPtr struct
-        pair<InheritLinkMap::iterator, bool> ri = r.first->second.insert(make_pair(link->src(), ilp));
+        pair<InheritLinkMap::iterator, bool> ri = r.first->second.insert(make_pair(ilp->srcID, ilp));
 
-        if (ri.second)
+        if (!ri.second)
             OPDE_EXCEPT("Multiple inheritance for the same src/dst pair is not allowed!", "InheritService::_addLink");
 
         // Repeat for the mInheritTarget's
 
-        r = mInheritTargets.insert(make_pair(link->src(), InheritLinkMap()));
+        r = mInheritTargets.insert(make_pair(ilp->srcID, InheritLinkMap()));
 
-        ri = r.first->second.insert(make_pair(link->dst(), ilp));
+        ri = r.first->second.insert(make_pair(ilp->dstID, ilp));
 
-        if (ri.second)
+        if (!ri.second)
             OPDE_EXCEPT("Multiple inheritance for the same src/dst pair is not allowed!", "InheritService::_addLink");
     }
 
