@@ -71,7 +71,7 @@ namespace Opde {
 			 * @param srcID The source object ID
 			 * @param dstID The destination object ID
 			 * @return true if the source is valid, false if the source is not valid inheritance source */
-			virtual bool validate(int srcID, int dstID, unsigned int priority) = 0;
+			virtual bool validate(int srcID, int dstID, unsigned int priority) const = 0;
 
 			/// Used upon total cleanout of the database
 			virtual void clear() = 0;
