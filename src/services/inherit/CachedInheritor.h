@@ -70,7 +70,9 @@ namespace Opde {
 					*/
 					virtual bool refresh(int srcID);
 
-                    bool validate(int srcID, int dstID, unsigned int priority);
+                    /** Dummy CachedInheritor validator. Always returns true. To be overriden to customize the inheritance schemas.
+                   * @see Inheritor::validate */
+                    virtual bool validate(int srcID, int dstID, unsigned int priority) const;
 
                     virtual void clear();
 

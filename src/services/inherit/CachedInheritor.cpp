@@ -20,6 +20,7 @@
  *****************************************************************************/
 
 #include "CachedInheritor.h"
+#include "logger.h"
 
 using namespace std;
 
@@ -129,43 +130,40 @@ namespace Opde {
         InheritQueryPtr sources = mInheritService->getSources(srcID);
 
         int maxPrio = -1; // no inheritance indicator itself
+        int newEffID = 0; // Detected new effective ID
 
+        int niter = 0;
         InheritLinkPtr effective(NULL);
-        // now for each of the sources, find the one with the max. priority.
+
+        // now for each of the sources, find the one with the max. priority that still implements.
         // Some logic to accept the self assigned is also present
         while (!sources->end()) {
             InheritLinkPtr il = sources->next();
+            ++niter;
 
-            // validate and compare to the maximal. If priority is bigger, we have a new winner
-            if (validate(il->srcID, il->dstID, il->priority) && il->priority > maxPrio) {
+            int effID = getEffectiveID(il->srcID); // look for the effective ID of the source
+
+            /*
+            validate and compare to the maximal. If priority is greater,
+            we have a new winner (but only if it validates and the source has some effective ID)
+            */
+            // Comparing the priority to signed int...
+            if (validate(il->srcID, il->dstID, il->priority) && (il->priority > maxPrio) && (effID != 0)) {
                 effective = il;
                 maxPrio = il->priority;
+                newEffID = effID;
             }
         }
 
 
-        /* Let's list possible situations:
-        1. Object does not implement, and no inh. source does supply - removeEffectiveID record then!
-        2. Object does not implement, but inh. source does supply - add effective ID from the source with max. priority
-        3. Object does implement and:
-            a/ No source supplies - effective ID is the objects self ID
-            b/ Source supplies
-                I/ Source supplies max priority 0 - effective ID is self obj. ID
-                II/ Source supplies priority >0 - effective ID is inherited from the loudest source (max prio.)
-        */
-
-        int newEffID = 0;
-
+        // If self-implements
         if (getImplements(srcID)) {
-            // If there is no source supply, set self. Otherwise prio decides
-            if (!effective.isNull() && maxPrio > 0) {
-                newEffID = getEffectiveID(effective->srcID);
-            } else
-                newEffID = srcID;
-        } else {
-            // no self implementation. choose the max source if even present
-            if (!effective.isNull())
-                newEffID = getEffectiveID(effective->srcID);
+
+            // If there is no source supply, set self. Respect priority>0 as metaprop
+            if (effective.isNull() || maxPrio <= 0) {
+                newEffID = srcID; // self, because we mask 0 prio inh. or no source was found
+            }
+
         }
 
         if (newEffID != 0)
@@ -177,10 +175,8 @@ namespace Opde {
         if (newEffID != oldEffID) {
             InheritQueryPtr targets = mInheritService->getTargets(srcID);
 
-            InheritLinkPtr effective(NULL);
-
             while (!targets->end()) {
-                InheritLinkPtr il = sources->next();
+                InheritLinkPtr il = targets->next();
 
                 refresh(il->dstID); // refresh the target object
             }
@@ -188,7 +184,7 @@ namespace Opde {
     }
 
     //------------------------------------------------------
-    bool CachedInheritor::validate(int srcID, int dstID, unsigned int priority) {
+    bool CachedInheritor::validate(int srcID, int dstID, unsigned int priority) const {
         return true;
     }
 
