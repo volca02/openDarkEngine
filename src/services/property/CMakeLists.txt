@@ -10,6 +10,8 @@ include_directories (
     ${OPDE_SOURCE_DIR}/src/base/logger
     ${OPDE_SOURCE_DIR}/src/services
     ${OPDE_SOURCE_DIR}/src/services/binary
+    ${OPDE_SOURCE_DIR}/src/services/link
+    ${OPDE_SOURCE_DIR}/src/services/inherit
 )
 
 link_directories ( 

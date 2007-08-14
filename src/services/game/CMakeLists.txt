@@ -14,6 +14,7 @@ include_directories (
     ${OPDE_SOURCE_DIR}/src/services/worldrep
     ${OPDE_SOURCE_DIR}/src/services/binary
     ${OPDE_SOURCE_DIR}/src/services/link
+    ${OPDE_SOURCE_DIR}/src/services/inherit
     ${OPDE_SOURCE_DIR}/src/services/property
 )
 
