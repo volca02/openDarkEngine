@@ -23,6 +23,8 @@
 #include "InheritService.h"
 #include "logger.h"
 #include "CachedInheritor.h"
+#include "NeverInheritor.h"
+#include "ArchetypeInheritor.h"
 
 using namespace std;
 
@@ -79,6 +81,12 @@ namespace Opde {
         // If a special factory would be needed, it has to be registered prior to it's usage, okay?
         InheritorFactoryPtr if_cached = new CachedInheritorFactory();
         addInheritorFactory(if_cached);
+
+        InheritorFactoryPtr if_never = new NeverInheritorFactory();
+        addInheritorFactory(if_never);
+
+        InheritorFactoryPtr if_arch = new ArchetypeInheritorFactory();
+        addInheritorFactory(if_arch);
 	}
 
 	//------------------------------------------------------
