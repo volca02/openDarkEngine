@@ -35,8 +35,8 @@ namespace Opde {
 		int 	srcID;
 		/// Source object ID
 		int 	dstID;
-		/// The priority of this inheritance definition
-		unsigned int	priority;
+		/// The priority of this inheritance definition (It's int to help comparison with negative values)
+		int	priority;
 	};
 
 	typedef std::vector< InheritLink > InheritLinkList;
@@ -134,6 +134,12 @@ namespace Opde {
 
 			/// Direct link to the metaprop relation
 			RelationPtr mMetaPropRelation;
+
+            /// List of instanced inheritors
+			typedef std::vector< InheritorPtr > InheritorList;
+
+            /// All instanced inheritors are here
+			InheritorList mInheritors;
 	};
 
 	/// Shared pointer to Link service
