@@ -45,9 +45,17 @@ namespace Opde {
 					/// @see Inheritor::getEffectiveID
 					virtual int getEffectiveID(int srcID) const;
 
+                    /** Dummy CachedInheritor validator. Always returns true. To be overriden to customize the inheritance schemas.
+                   * @see Inheritor::validate */
+                    virtual bool validate(int srcID, int dstID, unsigned int priority) const;
+
+                    virtual void clear();
+
+                    void onInheritMsg(const InheritChangeMsg& msg);
+				protected:
                     /** Sets new cached effective ID for the given object
-                    * @param srcID the object to set effective ID for
-                    * @param the new effective ID */
+                  * @param srcID the object to set effective ID for
+                  * @param the new effective ID */
 					virtual bool setEffectiveID(int srcID, int effID);
 
 					/** Erases the effective ID record altogether, meaning that object has no effective value
@@ -70,14 +78,6 @@ namespace Opde {
 					*/
 					virtual bool refresh(int srcID);
 
-                    /** Dummy CachedInheritor validator. Always returns true. To be overriden to customize the inheritance schemas.
-                   * @see Inheritor::validate */
-                    virtual bool validate(int srcID, int dstID, unsigned int priority) const;
-
-                    virtual void clear();
-
-                    void onInheritMsg(const InheritChangeMsg& msg);
-				protected:
 					/// InheritService reference
 					InheritService* mInheritService;
 
