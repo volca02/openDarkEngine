@@ -19,7 +19,7 @@
  *
  *****************************************************************************/
 
- 
+
 #ifndef __PROPERTYSERVICE_H
 #define __PROPERTYSERVICE_H
 
@@ -37,50 +37,50 @@ namespace Opde {
 		public:
 			PropertyService(ServiceManager *manager);
 			virtual ~PropertyService();
-			
+
 			/** Creates a property group - a family of properties of the same type.
 			* @see PropertyGroup::PropertyGroup
 			*/
-			PropertyGroupPtr createPropertyGroup(const std::string& name, const std::string& chunk_name, DTypeDefPtr type, uint ver_maj, uint ver_min);
-			
-			/** Load the properties from the database 
-			* @param db The database file group to use */ 
+			PropertyGroupPtr createPropertyGroup(const std::string& name, const std::string& chunk_name, DTypeDefPtr type, uint ver_maj, uint ver_min, std::string inheritorName);
+
+			/** Load the properties from the database
+			* @param db The database file group to use */
 			void load(FileGroup* db);
-			
-			/** Saves the properties according to the saveMask 
-			* @param db The database file group to save to 
+
+			/** Saves the properties according to the saveMask
+			* @param db The database file group to save to
 			* @param saveMask The save mask (1 - Archetypes, 2 - Instances, 3 - both) */
 			void save(FileGroup* db, uint saveMask);
-		
+
 			/** Clears out all the PropertyGroups (effectively wiping out all properties) */
 			void clear();
-			
+
 		protected:
 			/// maps property groups to their names
 			typedef std::map< std::string, PropertyGroupPtr > PropertyGroupMap;
-			
+
 			/// maps the properties by their names
 			PropertyGroupMap mPropertyGroupMap;
 	};
-	
+
 	/// Shared pointer to Link service
 	typedef shared_ptr<PropertyService> PropertyServicePtr;
-	
+
 	/// Factory for the LinkService objects
 	class PropertyServiceFactory : public ServiceFactory {
 		public:
 			PropertyServiceFactory();
 			~PropertyServiceFactory() {};
-			
+
 			/** Creates a LinkService instance */
 			Service* createInstance(ServiceManager* manager);
-			
+
 			virtual const std::string& getName();
-		
+
 		private:
 			static std::string mName;
 	};
 }
- 
- 
+
+
 #endif

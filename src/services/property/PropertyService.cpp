@@ -19,7 +19,7 @@
  *
  *****************************************************************************/
 
- 
+
 #include "PropertyService.h"
 #include "BinaryService.h"
 #include "logger.h"
@@ -28,7 +28,7 @@
 using namespace std;
 
 namespace Opde {
-	
+
 	/*--------------------------------------------------------*/
 	/*--------------------- PropertyService ------------------*/
 	/*--------------------------------------------------------*/
@@ -36,30 +36,30 @@ namespace Opde {
 		// Ensure listeners are created
 		mServiceManager->createByMask(SERVICE_PROPERTY_LISTENER);
 	}
-	
+
 	// --------------------------------------------------------------------------
 	PropertyService::~PropertyService() {
-		
+
 	}
-	
+
 	// --------------------------------------------------------------------------
-	PropertyGroupPtr PropertyService::createPropertyGroup(const std::string& name, const std::string& chunk_name, DTypeDefPtr type, uint ver_maj, uint ver_min) {
-		PropertyGroupPtr nr = new PropertyGroup(name, chunk_name, type, ver_maj, ver_min);
-		
+	PropertyGroupPtr PropertyService::createPropertyGroup(const std::string& name, const std::string& chunk_name, DTypeDefPtr type, uint ver_maj, uint ver_min, string inheritorName) {
+		PropertyGroupPtr nr = new PropertyGroup(name, chunk_name, type, ver_maj, ver_min, inheritorName);
+
 		std::pair<PropertyGroupMap::iterator, bool> res = mPropertyGroupMap.insert(make_pair(name, nr));
-		
+
 		if (!res.second)
-			OPDE_EXCEPT("Failed to insert new instance of PropertyGroup, name already allocated : " + name, 
+			OPDE_EXCEPT("Failed to insert new instance of PropertyGroup, name already allocated : " + name,
 				    "PropertyService::createPropertyGroup");
-		
+
 		return nr;
 	}
-	
+
 	// --------------------------------------------------------------------------
 	void PropertyService::load(FileGroup* db) {
 		// We just give the db to all registered groups
 		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
-		
+
 		for (; it != mPropertyGroupMap.end(); ++it) {
 			try {
 				LOG_DEBUG("PropertyService: Loading property group %s", it->first.c_str());
@@ -68,42 +68,42 @@ namespace Opde {
 				LOG_FATAL("PropertyService: Caught a fatal exception while loading PropertyGroup %s : %s", it->first.c_str(), e.getDetails().c_str() );
 			}
 		}
-		
+
 	}
-			
+
 	// --------------------------------------------------------------------------
 	void PropertyService::save(FileGroup* db, uint saveMask) {
 		// We just give the db to all registered groups
 		// We just give the db to all registered groups
 		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
-		
+
 		for (; it != mPropertyGroupMap.end(); ++it) {
 			it->second->save(db, saveMask);
 		}
 	}
-	
+
 	// --------------------------------------------------------------------------
 	void PropertyService::clear() {
 		// We just give the db to all registered groups
 		// We just give the db to all registered groups
 		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
-		
+
 		for (; it != mPropertyGroupMap.end(); ++it) {
 			it->second->clear();
 		}
 	}
-	
+
 	//-------------------------- Factory implementation
 	std::string PropertyServiceFactory::mName = "PropertyService";
-	
-	PropertyServiceFactory::PropertyServiceFactory() : ServiceFactory() { 
+
+	PropertyServiceFactory::PropertyServiceFactory() : ServiceFactory() {
 		ServiceManager::getSingleton().addServiceFactory(this);
 	};
-	
+
 	const std::string& PropertyServiceFactory::getName() {
 		return mName;
 	}
-	
+
 	Service* PropertyServiceFactory::createInstance(ServiceManager* manager) {
 		return new PropertyService(manager);
 	}
