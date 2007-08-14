@@ -59,8 +59,8 @@ namespace Opde {
 			};
 
 
-        /** Cached inheritor factory. The inheritor produced is named "always" and will, as the name suggests,
-         * inherit in all situations. */
+        /** Never inheritor factory. The inheritor produced is named "never" and will, as the name suggests,
+         * never inherit. */
 		class NeverInheritorFactory : public InheritorFactory {
 				public:
 					NeverInheritorFactory();

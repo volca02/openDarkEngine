@@ -26,7 +26,7 @@
 #include "InheritService.h"
 
 namespace Opde {
-		/** Never Inheritor. This inheritor never inherits. Always uses only the existing self value for any object ID */
+		/** Archetype Inheritor. This inheritor only inherits to destination objects having ID < 0 */
 		class ArchetypeInheritor : public CachedInheritor {
 				public:
 					/// Constructor
@@ -39,8 +39,8 @@ namespace Opde {
 			};
 
 
-        /** Cached inheritor factory. The inheritor produced is named "always" and will, as the name suggests,
-         * inherit in all situations. */
+        /** Archetype inheritor factory. The inheritor produced is named "archetype" and will, as the name suggests,
+         * inherit for archetypes (excluding concrete objects). */
 		class ArchetypeInheritorFactory : public InheritorFactory {
 				public:
 					ArchetypeInheritorFactory();
