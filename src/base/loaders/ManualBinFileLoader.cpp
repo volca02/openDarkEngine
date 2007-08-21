@@ -22,16 +22,28 @@
 #include "File.h"
 #include "BinFormat.h"
 #include "lgcolors.h"
+#include <OgreStringConverter.h>
+#include <OgreMaterial.h>
+#include <OgreMaterialManager.h>
+#include <OgreTechnique.h>
+
+using namespace std;
+using namespace Opde; // For the Opde::File
 
 namespace Ogre {
 
     /** Helper SubMesh filler class. Receives a pointer to the UV and Vertex arrays, and is filled with triangles */
     class SubMeshFiller {
         public:
-            SubMeshFiller(Vertex* vertices, UVMap* uvs, bool useuvmap);
-            ~SubMeshFiller();
+            SubMeshFiller(Vertex* vertices, UVMap* uvs, bool useuvmap) : mVertices(vertices), mUVs(uvs), mUseUV(useuvmap), mBuilt(false) {};
+            ~SubMeshFiller() {};
 
             void setMaterialName(String& matname) { mMaterialName = matname; };
+            bool needsUV() {return mUseUV; };
+
+            void addPolygon(size_t numverts, uint16_t* vidx, uint16_t* normidx, uint16_t* uvidx = NULL);
+
+            void build();
 
         protected:
             /// Global vertex data pointer
@@ -40,7 +52,22 @@ namespace Ogre {
             UVMap* mUVs;
             /// used Material name
             String mMaterialName;
+            /// Uses UVs
+            bool mUseUV;
+            /// Already built
+            bool mBuilt;
     };
+
+
+    void SubMeshFiller::addPolygon(size_t numverts, uint16_t* vidx, uint16_t* normidx, uint16_t* uvidx) {
+
+    }
+
+    void SubMeshFiller::build() {
+
+
+        mBuilt = true;
+    }
 
     /* Loader classes. Not for public use */
 
@@ -48,7 +75,7 @@ namespace Ogre {
     * This class fills the supplied mesh with a Ogre's version of the Mesh. */
     class ObjectMeshLoader {
         public:
-            ObjectMeshLoader(Mesh* mesh, FilePtr file, unsigned int version) : mMesh(mesh),
+            ObjectMeshLoader(Mesh* mesh, Opde::FilePtr file, unsigned int version) : mMesh(mesh),
                         mFile(file),
                         mVersion(version),
                         mMaterials(NULL),
@@ -59,13 +86,13 @@ namespace Ogre {
                         mSubObjects(NULL) {
 
                 if ((mVersion != 3) && (mVersion != 4))
-                    OGRE_EXCEPT("Unsupported object mesh version : " + StringConverter::toString(mVersion),"ObjectMeshLoader::ObjectMeshLoader");
+                    OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Unsupported object mesh version : " + StringConverter::toString(mVersion),"ObjectMeshLoader::ObjectMeshLoader");
             };
 
             ~ObjectMeshLoader() {
                 // cleanout
-                delete[] materials;
-                delete[] materialsExtra;
+                delete[] mMaterials;
+                delete[] mMaterialsExtra;
                 delete[] mVHots;
                 delete[] mVertices;
                 delete[] mUVs;
@@ -75,7 +102,7 @@ namespace Ogre {
 
                 for (; it != mFillers.end(); ++it) {
                     delete it->second;
-                    mFillers->erase(it);
+                    mFillers.erase(it);
                 }
             };
 
@@ -96,14 +123,15 @@ namespace Ogre {
 
             int getMaterialIndex(int slotidx);
             /// Creates a material from the pallete index (solid color material)
-            void createPalMaterial(String& matname, int palindex);
+            MaterialPtr createPalMaterial(String& matname, int palindex);
 
             void readVertex(Vertex& vtx);
-            MaterialPtr prepareMaterial(String& matname, MeshMaterial& mat, MeshMaterialExtra& matext);
+            MaterialPtr prepareMaterial(String matname, MeshMaterial& mat, MeshMaterialExtra& matext);
 
 
+            unsigned int mVersion;
             Mesh* mMesh;
-            FilePtr mFile;
+            Opde::FilePtr mFile;
 
             BinHeader mHdr;
             MeshMaterial* mMaterials;
@@ -120,7 +148,11 @@ namespace Ogre {
             typedef std::map< int, SubMeshFiller* > FillerMap;
 
             FillerMap mFillers;
-    }
+
+            typedef std::map<int, MaterialPtr> OgreMaterials;
+
+            OgreMaterials mOgreMaterials;
+    };
 
     //---------------------------------------------------------------
     void ObjectMeshLoader::load() {
@@ -128,10 +160,10 @@ namespace Ogre {
         readBinHeader();
 
         // progress with loading. Calculate the count of the UV records
-        mNumUVs = (bhdr.offset_vhots - bhdr.offset_uv) / sizeof (UVMap);
+        mNumUVs = (mHdr.offset_vhots - mHdr.offset_uv) / sizeof (UVMap);
 
         // some material should be present
-        assert(bhdr.num_mats != 0);
+        assert(mHdr.num_mats != 0);
 
         // Read the materials
         readMaterials();
@@ -147,6 +179,15 @@ namespace Ogre {
 
         // Everything is ready. Can proceed with the filling
         readObjects();
+
+        // Final step. Build the submeshes
+        FillerMap::iterator it = mFillers.begin();
+
+        for (; it != mFillers.end(); ++it) {
+            it->second->build();
+        }
+
+        // DONE!
     }
 
 
@@ -167,7 +208,7 @@ namespace Ogre {
             mFile->readElem(&mSubObjects[n].trans.f, 4, 9);
 
             // the joint position
-            readVertex(&mSubObjects[n].trans.AxlePoint);
+            readVertex(mSubObjects[n].trans.AxlePoint);
 
             // the rest of the struct
             mFile->readElem(&mSubObjects[n].child_sub_obj, 2, 12); // Todo: short int == 2 bytes?
@@ -199,7 +240,7 @@ namespace Ogre {
         NodeCall    nc;
         NodeSplit   ns;
 
-        switch (splittype) {
+        switch (type) {
             case MD_NODE_HDR:
                 // in.read((char *) &ndhdr, sizeof(NodeHeader));
                 mFile->read(&ndhdr.flag, 1);
@@ -211,7 +252,7 @@ namespace Ogre {
                 break;
 
             case MD_NODE_SPLIT:
-                readVertex(&ns.sphere_center);
+                readVertex(ns.sphere_center);
                 mFile->readElem(&ns.sphere_radius, 4);
                 mFile->readElem(&ns.pgon_before_count, 2);
                 mFile->readElem(&ns.normal, 2);
@@ -229,7 +270,7 @@ namespace Ogre {
                 break;
 
             case MD_NODE_CALL:
-                readVertex(&nc.sphere_center);
+                readVertex(nc.sphere_center);
                 mFile->readElem(&nc.sphere_radius, 4);
                 mFile->readElem(&nc.pgon_before_count, 2);
                 mFile->readElem(&nc.call_node, 2);
@@ -244,7 +285,7 @@ namespace Ogre {
                 break;
 
             case MD_NODE_RAW:
-                readVertex(&nr.sphere_center);
+                readVertex(nr.sphere_center);
                 mFile->readElem(&nr.sphere_radius, 4);
                 mFile->readElem(&nr.pgon_count, 2);
 
@@ -252,8 +293,10 @@ namespace Ogre {
 
                 break;
 
-            default: log_error("Unknown node type %d at offset %04lX", splittype,  hdr.offset_nodes + offset);
-        }
+            default:
+                OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Unknown node type " + StringConverter::toString(type)
+                        + " at offset " + StringConverter::toString(offset), "ObjectMeshLoader::loadSubNode");
+        };
     }
 
     //-------------------------------------------------------------------
@@ -278,14 +321,29 @@ namespace Ogre {
             mFile->readElem(&op.norm, 2);
             mFile->readElem(&op.d, 4);
 
-            SubMeshFiller* f = getFillerForPolygon(op);
+            SubMeshFiller* f = getFillerForPolygon(op); // Won't give us a filler that does not need UV's when we have those or oposite
 
             // Load the indices for all 3 types, as needed
+            uint16_t* verts = new uint16_t[op.num_verts];
+            mFile->readElem(verts, 2, op.num_verts);
 
+            uint16_t* norms = new uint16_t[op.num_verts];
+            mFile->readElem(verts, 2, op.num_verts);
 
+            uint16_t* uvs = NULL;
+
+            if (f->needsUV()) {
+                uvs = new uint16_t[op.num_verts];
+            }
+
+            f->addPolygon(op.num_verts, verts, norms, uvs);
+
+            delete[] verts;
+            delete[] norms;
+            delete[] uvs;
         }
 
-        delete[] polyidx;
+        delete[] polys;
     }
 
     //-------------------------------------------------------------------
@@ -328,7 +386,7 @@ namespace Ogre {
 
     //-------------------------------------------------------------------
     void ObjectMeshLoader::readMaterials() {
-        mFile->seek(bhdr.offset_mats);
+        mFile->seek(mHdr.offset_mats);
 
         // Allocate the materials
         mMaterials = new MeshMaterial[mHdr.num_mats];
@@ -336,32 +394,32 @@ namespace Ogre {
         int n;
 
         // for each of the materials, load the struct
-        for (n = 0; n < hdr.num_mats; n++) {
+        for (n = 0; n < mHdr.num_mats; n++) {
             // load a single material
             mFile->read(mMaterials[n].name, 16);
             mFile->read(&mMaterials[n].type, 1);
             mFile->read(&mMaterials[n].slot_num, 1);
 
             // Material type variable part. 8 bytes total
-            if (materials[n].type == MD_MAT_COLOR) {
+            if (mMaterials[n].type == MD_MAT_COLOR) {
                 mFile->read(mMaterials[n].colour, 4);
                 mFile->readElem(&mMaterials[n].ipal_index, 4);
-            } else if (materials[n].type == MD_MAT_TMAP) {
+            } else if (mMaterials[n].type == MD_MAT_TMAP) {
                 mFile->readElem(&mMaterials[n].handle, 4);
                 mFile->readElem(&mMaterials[n].uvscale, 4);
             } else
-                OGRE_EXCEPT("Unknown Material type : " + materials[n].type, "ManualBinFileLoader::readBinHeader");
+                OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR,"Unknown Material type : " + mMaterials[n].type, "ManualBinFileLoader::readBinHeader");
         }
 
         // construct anyway
-        mMaterialsExtra = new MeshMaterialExtra[hdr.num_mats];
+        mMaterialsExtra = new MeshMaterialExtra[mHdr.num_mats];
 
         // if we need extended material attributes
-        if ( hdr.mat_flags & MD_MAT_TRANS || hdr.mat_flags & MD_MAT_ILLUM ) {
+        if ( mHdr.mat_flags & MD_MAT_TRANS || mHdr.mat_flags & MD_MAT_ILLUM ) {
 
-            for (int n = 0; n < bhdr.num_mats; n++) {
-                f->readElem(&materialsExtra[n].illum, 4);
-                f->readElem(&materialsExtra[n].trans, 4);
+            for (int n = 0; n < mHdr.num_mats; n++) {
+                mFile->readElem(&mMaterialsExtra[n].illum, 4);
+                mFile->readElem(&mMaterialsExtra[n].trans, 4);
             }
 
         }
@@ -377,9 +435,9 @@ namespace Ogre {
 
         // Now prepare the raw material index to Ogre Material reference mapping to be used through the conversion
         for (int n = 0; n < mHdr.num_mats; n++) {
-            MaterialPtr mat = prepareMaterial(mMesh.getName() + "/" + mMaterials[n].name, mMaterials[n], mMaterialsExtra[n]);
+            MaterialPtr mat = prepareMaterial(mMesh->getName() + "/" + mMaterials[n].name, mMaterials[n], mMaterialsExtra[n]);
 
-            mOgreMaterial.push_back(mat);
+            mOgreMaterials.insert(make_pair(n,mat));
         }
     }
 
@@ -393,7 +451,7 @@ namespace Ogre {
 
             for (int n = 0; n < mHdr.num_vhots; n++) {
                 mFile->readElem(&mVHots[n].index, 4);
-                readVertex(&mVHots[n].point);
+                readVertex(mVHots[n].point);
             }
         }
     }
@@ -408,8 +466,8 @@ namespace Ogre {
             mFile->seek(mHdr.offset_uv);
 
             for (int n = 0; n < mNumUVs; n++) {
-                mFile->readElem(mUVs[n].u, 4);
-                mFile->readElem(mUVs[n].v, 4);
+                mFile->readElem(&mUVs[n].u, 4);
+                mFile->readElem(&mUVs[n].v, 4);
             }
         }
     }
@@ -425,7 +483,7 @@ namespace Ogre {
                 readVertex(mVertices[n]);
 
         } else
-            OGRE_EXCEPT("Number of vertices is zero!", "ObjectMeshLoader::readVertices");
+            OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR,"Number of vertices is zero!", "ObjectMeshLoader::readVertices");
     }
 
     //-------------------------------------------------------------------
@@ -437,8 +495,8 @@ namespace Ogre {
 
     //-------------------------------------------------------------------
     SubMeshFiller* ObjectMeshLoader::getFillerForPolygon(ObjPolygon& ply) {
-        int type = ply->type & 0x07;
-        int color_mode = ply->type & 0x60; // used only for MD_PGON_SOLID or MD_PGON_WIRE (WIRE is just a guess)
+        int type = ply.type & 0x07;
+        int color_mode = ply.type & 0x60; // used only for MD_PGON_SOLID or MD_PGON_WIRE (WIRE is just a guess)
 
         FillerMap::iterator it;
         String matName = "";
@@ -450,7 +508,7 @@ namespace Ogre {
         if (type == MD_PGON_TMAP) {
             // sanity check the material index
             if (ply.index >= mHdr.num_mats)
-                OGRE_EXCEPT("Material index out of range", "ObjectMeshLoader::getFillerForPolygon");
+                OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR,"Material index out of range", "ObjectMeshLoader::getFillerForPolygon");
 
             // Get the material index from the index (can be slot idx...)
             int matidx = getMaterialIndex(ply.index);
@@ -458,33 +516,35 @@ namespace Ogre {
             // Color mode is ignored. We search the filler table simply by the material index
             it = mFillers.find(matidx);
             fillerIdx = matidx;
-            matName = mMesh.getName() + "/" + mMaterials[matidx].name;
+            matName = mMesh->getName() + "/" + mMaterials[matidx].name;
 
         } else if (type == MD_PGON_SOLID) {
             // Solid color polygon. This means we need to see if we use Material or Color table index
-            if (color_mode == MD_PGON_COLOR_PAL) {
+            if (color_mode == MD_PGON_SOLID_COLOR_PAL) {
                 // Dynamically created material. We allocate negative numbers for these fillers
                 // Color mode is ignored. We search the filler table simply by the material index
 
-                matName = mMesh.getName() + "/Color" + ply.index;
+                matName = mMesh->getName() + "/Color" + StringConverter::toString(ply.index);
 
                 // Generate the solid material...
-                createPalMaterial(matName, ply.index);
+                MaterialPtr material = createPalMaterial(matName, ply.index);
 
                 FillerMap::iterator it = mFillers.find(-ply.index);
                 fillerIdx = -ply.index;
 
-            } else if (color_mode == MD_PGON_COLOR_VCOLOR) {
+                mOgreMaterials.insert(make_pair(-ply.index,material));
+
+            } else if (color_mode == MD_PGON_SOLID_COLOR_VCOLOR) {
 
                 int matidx = getMaterialIndex(ply.index);
 
                 FillerMap::iterator it = mFillers.find(matidx);
                 fillerIdx = matidx;
-                matName = mMesh.getName() + "/" + mMaterials[matidx].name;
+                matName = mMesh->getName() + "/" + mMaterials[matidx].name;
             } else
-                OGRE_EXCEPT("Unrecognized color_mode for polygon", "ObjectMeshLoader::getFillerForPolygon");
+                OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR,"Unrecognized color_mode for polygon", "ObjectMeshLoader::getFillerForPolygon");
         } else
-            OGRE_EXCEPT("Unknown or invalid polygon type: " + ply.type, "ObjectMeshLoader::getFillerForPolygon");
+            OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR,"Unknown or invalid polygon type: " + ply.type, "ObjectMeshLoader::getFillerForPolygon");
 
 
         if (it == mFillers.end()) {
@@ -492,7 +552,7 @@ namespace Ogre {
             // Set the material for the submesh
             f->setMaterialName(matName);
 
-            mFillers.insert(fillerIdx, f);
+            mFillers.insert(make_pair(fillerIdx, f));
 
             return f;
         } else
@@ -506,13 +566,14 @@ namespace Ogre {
         if (it != mSlotToMatNum.end()) {
             return it->second;
         } else
-            OGRE_EXCEPT("Unknown material slot index : " + slotidx, "ObjectMeshLoader::getMaterialIndex");
+            OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR,"Unknown material slot index : " + slotidx, "ObjectMeshLoader::getMaterialIndex");
     }
+
     //-------------------------------------------------------------------
-    MaterialPtr ObjectMeshLoader::prepareMaterial(String& matname, MeshMaterial& mat, MeshMaterialExtra& matext) {
+    MaterialPtr ObjectMeshLoader::prepareMaterial(String matname, MeshMaterial& mat, MeshMaterialExtra& matext) {
         // Look if the material is already defined or not (This enables anyone to replace the material without modifying anything)
         if (MaterialManager::getSingleton().resourceExists(matname)) {
-            MaterialPtr fmat = MaterialManager::getSingleton().getByName(path);
+            MaterialPtr fmat = MaterialManager::getSingleton().getByName(matname);
             return fmat;
         }
 
@@ -531,7 +592,7 @@ namespace Ogre {
             tus->setTextureFiltering(TFO_BILINEAR);
 
             // If the transparency or illumination is used
-            if (( hdr.mat_flags & MD_MAT_TRANS || hdr.mat_flags & MD_MAT_ILLUM ) && (matext.trans < 1)) {
+            if (( mHdr.mat_flags & MD_MAT_TRANS || mHdr.mat_flags & MD_MAT_ILLUM ) && (matext.trans < 1)) {
                 // set at least the transparency value for the material
                 tus->setColourOperation(LBO_ALPHA_BLEND);
                 tus->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, matext.trans);
@@ -550,7 +611,7 @@ namespace Ogre {
             // set the material color. Now I don't know what illumination is, so I just ignore
             tus->setColourOperationEx(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, ColourValue(mat.colour[2], mat.colour[1], mat.colour[0])); // , mat.colour[3]
 
-            if (( hdr.mat_flags & MD_MAT_TRANS || hdr.mat_flags & MD_MAT_ILLUM ) && (matext.trans < 1)) {
+            if (( mHdr.mat_flags & MD_MAT_TRANS || mHdr.mat_flags & MD_MAT_ILLUM ) && (matext.trans < 1)) {
                 tus->setColourOperation(LBO_ALPHA_BLEND);
                 tus->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, matext.trans);
                 tus->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, matext.trans);
@@ -561,12 +622,14 @@ namespace Ogre {
         }
 
 		omat->load();
+
+		return omat;
     }
 
     //-------------------------------------------------------------------
-    void ObjectMeshLoader::createPalMaterial(String& matname, int palindex) {
+    MaterialPtr ObjectMeshLoader::createPalMaterial(String& matname, int palindex) {
         if (MaterialManager::getSingleton().resourceExists(matname)) {
-            MaterialPtr fmat = MaterialManager::getSingleton().getByName(path);
+            MaterialPtr fmat = MaterialManager::getSingleton().getByName(matname);
             return fmat;
         }
 
@@ -579,7 +642,7 @@ namespace Ogre {
         Pass *pass = omat->getTechnique(0)->getPass(0);
 
         // Fill in a color-only material
-        TextureUnitState* tus = pass->createTextureUnitState(mat.name);
+        TextureUnitState* tus = pass->createTextureUnitState(0);
 
         // set the material color from the lg system color table
         tus->setColourOperationEx(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT,
@@ -593,6 +656,8 @@ namespace Ogre {
         tus->setColourOperation(LBO_REPLACE);
 
         omat->load();
+
+        return omat;
     }
 
     /*-----------------------------------------------------------------*/
@@ -615,9 +680,9 @@ namespace Ogre {
         String group = m->getGroup();
 
         //Open the file, and detect the mesh type (Model/AI)
-        Ogre::DataStreamPtr stream = Ogre::ResourceGroupManager::getSingleton().openResource(mName, mGroup, true, this);
+        Ogre::DataStreamPtr stream = Ogre::ResourceGroupManager::getSingleton().openResource(m->getName(), m->getGroup(), true, resource);
 
-        FilePtr f = OgreFile(stream);
+        FilePtr f = new OgreFile(stream);
 
         char _hdr[5];
         _hdr[4] = 0;
@@ -630,14 +695,14 @@ namespace Ogre {
 
         String header(_hdr);
 
-        if (hdr == "LGMM") {
+        if (_hdr == "LGMM") {
             // AI mesh. Not yet supported
-        } else if (hdr == "LGMD") {
+        } else if (_hdr == "LGMD") {
             // model. Supported for good. Load!
             ObjectMeshLoader ldr(m, f, version);
             ldr.load(); // that's all. Will do what's needed
         } else
-            OGRE_EXCEPT("Unknown BIN model format : " + hdr, "ManualBinFileLoader::loadResource");
+            OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Unknown BIN model format : ") + _hdr, "ManualBinFileLoader::loadResource");
     }
 }
 

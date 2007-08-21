@@ -1,7 +1,8 @@
-include_directories ( 
+include_directories (
     ${OGRE_INCLUDE_DIR}
     ${OPDE_BINARY_DIR}
     ${OPDE_SOURCE_DIR}/src/base
+    ${OPDE_SOURCE_DIR}/src/base/file
     ${OPDE_SOURCE_DIR}/src/base/Dark
     ${OPDE_SOURCE_DIR}/src/compat
 )
