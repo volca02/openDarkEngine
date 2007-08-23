@@ -34,8 +34,8 @@ ENDIF(UNIX)
 IF(WIN32)
     # Include path when using the ogre SDK. Other drives/dirs?
     SET(OIS_INC_SEARCH_PATH
-	/OIS/include
-	$ENV{OIS_HOME}/include
+	/OIS/includes
+	$ENV{OIS_HOME}/includes
      )
      
      SET(OIS_LIB_SEARCH_PATH
