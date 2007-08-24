@@ -43,11 +43,9 @@ IF(WIN32)
 	/OIS/bin/debug
 	/OIS/bin/release
 	$ENV{OIS_HOME}/lib
-	$ENV{OIS_HOME}/bin/debug
-	$ENV{OIS_HOME}/bin/release
      )
 
-	SET(OIS_LIBNAMES OIS)
+	SET(OIS_LIBNAMES OIS_static)
 
 	# Include paths search
 	FIND_PATH(OIS_INCLUDE_DIR OIS.h ${OIS_INC_SEARCH_PATH})
