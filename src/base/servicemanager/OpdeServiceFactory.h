@@ -22,6 +22,7 @@
 #ifndef __OPDESERVICEFACTORY_H
 #define __OPDESERVICEFACTORY_H
 
+#include "compat.h"
 #include <string>
 #include "OpdeServiceManager.h"
 
