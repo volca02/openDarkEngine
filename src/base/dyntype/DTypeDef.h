@@ -330,6 +330,7 @@ namespace Opde {
 	/** DTypeDef 'variable'. */
 	class DType {
 		public:
+			/** Copy constructor. Copies the data and the type definition from another DType instance */
 			DType(const DType& b) {
 				char* odata = mData;
 				
@@ -344,6 +345,7 @@ namespace Opde {
 				delete[] odata;
 			}
 			
+			/** Empty constructor. Constructs a new type instance using the default values. */
 			DType(DTypeDefPtr type) : mType(type) {
 				assert(!mType.isNull()); // no type def, no meaning!
 				
@@ -354,14 +356,25 @@ namespace Opde {
 			* @param file The file used as data source 
 			* @param size The size of the data expected
 			* @note for dynamic size types (variable length strings), the size should be the overall length of the data (32bits size + the data itself) */
-			DType(DTypeDefPtr type, FilePtr file, int _size) : mType(type) {
+			DType(DTypeDefPtr type, FilePtr file, uint _size) : mType(type) {
 				if (mType->size() < 0) { // dyn. size. we have to use the size
+					// Size always has to be at least 4 bytes
+					assert(_size >= sizeof(uint32_t));
+					
 					mData = new char[_size];
 					
-					file->read(mData, _size);
+					uint32_t size = 0;
+					
+					// Read the size
+					file->readElem(mData, sizeof(uint32_t));
+					
+					size = *(reinterpret_cast<uint32_t*>(mData));
 					
 					// inconsistency smells badly
-					assert(static_cast<uint32_t>(*mData) == (_size - sizeof(uint32_t)));
+					assert(size == (_size - sizeof(uint32_t)));
+					
+					// Read the rest
+					file->read(&mData[sizeof(uint32_t)], size);
 				} else {
 					assert(size() == _size);
 					mData = mType->create();
