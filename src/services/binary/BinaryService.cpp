@@ -19,7 +19,7 @@
  *
  *****************************************************************************/
 
- 
+
 #include "BinaryService.h"
 #include "OpdeException.h"
 #include "logger.h"
@@ -28,7 +28,7 @@
 using namespace std;
 
 namespace Opde {
-	
+
 	/*------------------------------------------------------*/
 	/*-------------------- BinaryService -------------------*/
 	/*------------------------------------------------------*/
@@ -37,138 +37,138 @@ namespace Opde {
 		Opde::ConsoleBackend::getSingleton().setCommandHint("dtdesc", "Describe a dynamic type (param : dtype path)");
 	};
 
-	//------------------------------------	
+	//------------------------------------
 	BinaryService::~BinaryService() {
 		clearAll();
 	};
 
-	//------------------------------------	
+	//------------------------------------
 	void BinaryService::addType(const std::string& group, DTypeDefPtr def) {
 		LOG_DEBUG("BinaryService: Inserting type %s/%s", group.c_str(), def->name().c_str());
-		
+
 		std::pair<TypeGroups::iterator, bool> grp = mTypeGroups.insert(TypeGroups::value_type(group, TypeMap()));
-		
+
 		grp.first->second.insert(TypeMap::value_type(def->name(), def));
 	}
 
-	//------------------------------------	
+	//------------------------------------
 	void BinaryService::addEnum(const std::string& group, const std::string& name, DEnumPtr enm) {
 		LOG_DEBUG("BinaryService: Inserting enum %s/%s", group.c_str(), name.c_str());
-		
+
 		std::pair<EnumGroups::iterator, bool> grp = mEnumGroups.insert(EnumGroups::value_type(group, EnumMap()));
-		
+
 		grp.first->second.insert(EnumMap::value_type(name, enm));
 	}
 
-	//------------------------------------	
+	//------------------------------------
 	DTypeDefPtr BinaryService::getType(const std::string& name) const {
 		// If the separator is present, split group - typename
 		std::pair<string, string> path = splitPath(name);
-		
+
 		return getType(path.first, path.second);
 	}
 
-	//------------------------------------	
+	//------------------------------------
 	DTypeDefPtr BinaryService::getType(const std::string& group, const std::string& name) const {
 		// find the group
 		TypeGroups::const_iterator git = mTypeGroups.find(group);
-		
+
 		if (git != mTypeGroups.end()) {
 			// search for the type in the group
 			TypeMap::const_iterator it = git->second.find(name);
-			
+
 			if (it != git->second.end()) {
 				return ((*it).second);
 			} else
 				OPDE_EXCEPT(string("Could not find type ") + name + " in group " + group, "BinaryService::getType");
-		} else 
+		} else
 			OPDE_EXCEPT(string("Could not find group ") + group, "BinaryService::getType");
 	}
-	
-	//------------------------------------	
+
+	//------------------------------------
 	DEnumPtr BinaryService::getEnum(const std::string& name) const {
 		// If the separator is present, split group - typename
 		std::pair<string, string> path = splitPath(name);
-		
+
 		return getEnum(path.first, path.second);
 	}
 
-	//------------------------------------	
+	//------------------------------------
 	DEnumPtr BinaryService::getEnum(const std::string& group, const std::string& name) const {
 		// find the group
 		EnumGroups::const_iterator git = mEnumGroups.find(group);
-		
+
 		if (git != mEnumGroups.end()) {
 			// search for the type in the group
 			EnumMap::const_iterator it = git->second.find(name);
-			
+
 			if (it != git->second.end()) {
 				return ((*it).second);
 			} else
 				OPDE_EXCEPT(string("Could not find enum ") + name + " in group " + group, "BinaryService::getEnum");
-		} else 
+		} else
 			OPDE_EXCEPT(string("Could not find group ") + group, "BinaryService::getEnum");
 	}
 
-	//------------------------------------	
+	//------------------------------------
 	void BinaryService::clear() {
 		// Release all the enumerations and type definitions in all groups
 		TypeGroups::iterator git = mTypeGroups.begin();
-		
+
 		for (; git != mTypeGroups.end(); git++) {
 			// iterate all the dtypedefs, release and clear after this is done
 			git->second.clear();
 		}
-		
+
 		EnumGroups::iterator egit = mEnumGroups.begin();
-		
+
 		for (; egit != mEnumGroups.end(); egit++) {
 			// iterate all the dtypedefs, release and clear after this is done
 			egit->second.clear();
 		}
 	}
-	
-	//------------------------------------	
+
+	//------------------------------------
 	void BinaryService::clearAll() {
 		// clear all the groups too
 		mTypeGroups.clear();
 		mEnumGroups.clear();
 	}
-	
-	//------------------------------------	
+
+	//------------------------------------
 	std::pair<std::string, std::string> BinaryService::splitPath(const std::string& path) const {
 		// Split the command on the first space... make it a Command PARAMETERS
 		size_t sep_pos = path.find(BINARY_GROUP_SEPARATOR);
-		
+
 		string group_part = "";
 		string name_part = path;
 
-		if (sep_pos != string::npos) { 
+		if (sep_pos != string::npos) {
 			// First substring to command, second to params
 			group_part = path.substr(0,sep_pos);
 			name_part = path.substr(sep_pos+1, path.length() - (sep_pos + 1));
-			
+
 			if (name_part.find(BINARY_GROUP_SEPARATOR) != string::npos)
 				OPDE_EXCEPT("More than one separator found in path","BinaryService::splitPath");
-		}	
-		
+		}
+
 		return std::pair<std::string, std::string>(group_part, name_part);
 	}
-	
+
 	void BinaryService::commandExecuted(std::string command, std::string parameters) {
 		if (command == "dtdesc") {
 			DTypeDefPtr type;
-			
+
 			try {
-				DTypeDefPtr type = getType(parameters);
+				type = getType(parameters);
 			} catch (BasicException &e) {
 				LOG_ERROR("Type not found : %s", parameters.c_str());
 				return;
 			}
-			
-			
-			DTypeDef::const_iterator it = type->begin(); 
-			
+
+
+			DTypeDef::const_iterator it = type->begin();
+
 			// describe the type. Iterate through the fields, write field name, size, type
 			for (; it != type->end(); it++) {
 				LOG_INFO("[%d] %s (%d)",it->offset, it->name.c_str(), it->type->size());
@@ -176,10 +176,10 @@ namespace Opde {
 		} else LOG_ERROR("Command %s not understood by BinaryService", command.c_str());
 	}
 
-	
+
 	//-------------------------- Factory implementation
 	std::string BinaryServiceFactory::mName = "BinaryService";
-	
+
 	BinaryServiceFactory::BinaryServiceFactory() : ServiceFactory() {
 		ServiceManager::getSingleton().addServiceFactory(this);
 	};
@@ -187,9 +187,9 @@ namespace Opde {
 	const std::string& BinaryServiceFactory::getName() {
 		return mName;
 	}
-	
+
 	Service* BinaryServiceFactory::createInstance(ServiceManager* manager) {
 		return new BinaryService(manager);
 	}
-	
+
 }
