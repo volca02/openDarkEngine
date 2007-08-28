@@ -29,6 +29,8 @@ namespace Opde {
 	/** A simple shared pointer implementation
 	* @TODO To be made thread-safe, and/or replaced by boosts shared_ptr (which does not have downcasting) */
 	template<class T> class shared_ptr {
+		template < typename U > friend class shared_ptr;
+
 		protected:
 			unsigned int* mReferences;
 			T* mPtr;
@@ -53,12 +55,6 @@ namespace Opde {
 			/// NULL ctor
 			shared_ptr() : mReferences(NULL), mPtr(NULL) { };
 
-			/** Helper ctor for shared_ptr casting. Do not use directly
-			* @note I know, I know, this constructor should be private, and a friend declaration should be done
-			*/
-			shared_ptr(T* ptr, unsigned int *refs) : mPtr(ptr), mReferences(refs) {
-			}
-		
 			/// Copy constructor
 			shared_ptr(const shared_ptr& b) : mPtr(b.mPtr), mReferences(b.mReferences) {
 				if (mReferences)
@@ -124,6 +120,12 @@ namespace Opde {
 				
 				mPtr = NULL;
 				mReferences = NULL;
+			}
+
+		private:
+			/** Helper ctor for shared_ptr casting with as<U>()
+			*/
+			shared_ptr(T* ptr, unsigned int *refs) : mPtr(ptr), mReferences(refs) {
 			}
 	};
 	
