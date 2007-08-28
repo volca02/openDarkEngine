@@ -35,7 +35,7 @@
 #define _wcsicmp wcscasecmp
 #define ltoa(i,s,n) snprintf(s,n,"%ld",i)
 #define _ultoa(i,s,n) snprintf(s,n,"%lu",i)
-#define min(a,b) (a>b?b:a)
+// #define min(a,b) (a>b?b:a)
 #endif
 
 
