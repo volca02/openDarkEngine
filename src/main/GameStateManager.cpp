@@ -353,30 +353,35 @@ namespace Opde {
 		if (!mStateStack.empty()) {
 			mStateStack.top()->keyPressed(e);
 		}
+		return false;
 	}
 
 	bool GameStateManager::keyReleased( const OIS::KeyEvent &e ) {
 		if (!mStateStack.empty()) {
 			mStateStack.top()->keyReleased(e);
 		}
+		return false;
 	}
 
 	bool GameStateManager::mouseMoved( const OIS::MouseEvent &e ) {
 		if (!mStateStack.empty()) {
 			mStateStack.top()->mouseMoved(e);
 		}
+		return false;
 	}
 
 	bool GameStateManager::mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
 		if (!mStateStack.empty()) {
 			mStateStack.top()->mousePressed(e, id);
 		}
+		return false;
 	}
 
 	bool GameStateManager::mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
 		if (!mStateStack.empty()) {
 			mStateStack.top()->mouseReleased(e, id);
 		}
+		return false;
 	}
 
 }

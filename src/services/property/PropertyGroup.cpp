@@ -209,6 +209,7 @@ namespace Opde {
 
 			return _addProperty(propd);*/
 		}
+		return false;
 	}
 
 
@@ -236,7 +237,7 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	void PropertyGroup::broadcastPropertyMessage(const PropertyChangeMsg& msg) const {
-		PropertyListeners::iterator it = mPropertyListeners.begin();
+		PropertyListeners::const_iterator it = mPropertyListeners.begin();
 
 		for (; it != mPropertyListeners.end(); ++it) {
 			// Call the method on the listener pointer

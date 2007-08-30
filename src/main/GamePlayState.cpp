@@ -291,12 +291,15 @@ namespace Opde {
 	bool GamePlayState::mouseMoved( const OIS::MouseEvent &e ) {
 		mRotX -= Degree( e.state.X.rel * 20.00);
 		mRotY -= Degree( e.state.Y.rel * 20.00);
+		return false;
 	}
 	
 	bool GamePlayState::mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
+		return false;
 	}
 	
 	bool GamePlayState::mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
+		return false;
 	}
 	
 }

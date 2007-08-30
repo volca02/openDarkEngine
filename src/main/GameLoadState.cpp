@@ -108,6 +108,7 @@ namespace Opde {
 	}
 
 	bool GameLoadState::keyPressed( const OIS::KeyEvent &e ) {
+		return false;
 	}
 	
 	bool GameLoadState::keyReleased( const OIS::KeyEvent &e ) {
@@ -116,15 +117,19 @@ namespace Opde {
 			if (mLoaded)
 				popState();
     		}
+		return false;
 	}
 	
 	bool GameLoadState::mouseMoved( const OIS::MouseEvent &e ) {
+		return false;
 	}
 	
 	bool GameLoadState::mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
+		return false;
 	}
 	
 	bool GameLoadState::mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
+		return false;
 	}
 	
 }

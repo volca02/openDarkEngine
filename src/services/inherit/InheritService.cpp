@@ -37,7 +37,7 @@ namespace Opde {
 	    public:
             EmptyInheritQuery() : InheritQuery() {  };
 
-            virtual InheritLinkPtr next() {  };
+            virtual InheritLinkPtr next() { return NULL; };
 
             virtual bool end() {
                 return true;

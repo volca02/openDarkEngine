@@ -109,7 +109,7 @@ namespace Opde {
 			typedef std::set< LinkPtr > LinkQueryResultSet;
 
 		public:
-			typedef LinkQueryResultSet::iterator iterator;
+			typedef LinkQueryResultSet::const_iterator iterator;
 
 		protected:
 			LinkQueryResultSet mResultSet;

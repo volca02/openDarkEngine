@@ -181,6 +181,7 @@ namespace Opde {
                 refresh(il->dstID); // refresh the target object
             }
         }
+		return false;
     }
 
     //------------------------------------------------------
