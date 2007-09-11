@@ -1,3 +1,5 @@
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/Services.cmake )
+
 include_directories(
     ${OGRE_INCLUDE_DIR}
     ${CEGUI_INCLUDE_DIR}
@@ -9,18 +11,14 @@ include_directories(
     ${OPDE_SOURCE_DIR}/src/base/gui
     ${OPDE_SOURCE_DIR}/src/base/console
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
+    ${OPDE_SOURCE_DIR}/src/base/loaders
     ${OPDE_SOURCE_DIR}/src/scenemanager
     ${OPDE_SOURCE_DIR}/src/base/Dark
     ${OPDE_SOURCE_DIR}/src/base/dyntype
     ${OPDE_SOURCE_DIR}/src/base
     ${OPDE_SOURCE_DIR}/src/main
     ${OPDE_SOURCE_DIR}/src/widgets
-    ${OPDE_SOURCE_DIR}/src/services/binary
-    ${OPDE_SOURCE_DIR}/src/services/game
-    ${OPDE_SOURCE_DIR}/src/services/worldrep
-    ${OPDE_SOURCE_DIR}/src/services/link
-    ${OPDE_SOURCE_DIR}/src/services/property
-    ${OPDE_SOURCE_DIR}/src/services/inherit
+    ${OPDE_SERVICE_INCLUDES}
 )
 
 
@@ -58,13 +56,7 @@ target_link_libraries( opde
     OpdeLogger
     OpdeConsole
     DarkSceneManager
-    OpdeServiceManager
-    OpdeWorldRepService
-    OpdeBinaryService
-    OpdeGameService
-    OpdeLinkService
-    OpdePropertyService
-    OpdeInheritService
+    ${OPDE_SERVICE_LIBRARIES}
     OpdeBase
 )
 
