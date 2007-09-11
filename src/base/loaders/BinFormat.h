@@ -110,10 +110,10 @@ typedef struct BinHeader {
 	uint16_t	num_pgons;
 	uint16_t	num_verts;
 	uint16_t	num_parms;
-	unsigned char	num_mats;
-	unsigned char	num_vcalls;
-	unsigned char	num_vhots;
-	unsigned char	num_objs;
+	uint8_t	num_mats;
+	uint8_t	num_vcalls;
+	uint8_t	num_vhots;
+	uint8_t	num_objs;
 
 	uint32_t            offset_objs;
 	uint32_t            offset_mats;
@@ -146,8 +146,8 @@ typedef struct      VHotObj
 // Material definitions
 typedef struct MeshMaterial {
 	char		name[16];
-	unsigned char	type;		// MD_MAT_COLOR or MD_MAT_TMAP
-	unsigned char	slot_num;
+	uint8_t	type;		// MD_MAT_COLOR or MD_MAT_TMAP
+	uint8_t	slot_num;
 
 	union {
 		// MD_MAT_TMAP
@@ -158,7 +158,7 @@ typedef struct MeshMaterial {
 
 		// MD_MAT_COLOR
 		struct {
-			unsigned char	colour[4];
+			uint8_t	colour[4];
 			uint32_t	ipal_index;	// Couldn't care less
 		};
 	};
@@ -170,20 +170,19 @@ struct MeshMaterialExtra {
 	float		illum;
 };
 
-
-
 typedef struct {
-    uint32_t	    JointNumber; // A numbered joint identification
+    int32_t	    parent; // A numbered parent identification (Parent sub-object index) or -1 if no parent exists.
+    // Comment: I expect this to rather be an SubObject index.
     float           min_range;   // minimal angle/translation ?
     float           max_range;   // maximal angle/translation ?
-    float           f[9]; // Transformation matrix
-    Vertex          AxlePoint;   // seems to be a Joint position
+    float           rot[9]; // Transformation matrix. Rotation and translation comparing the parent object (not used for parent imho)
+    Vertex           AxlePoint;   // Position of this sub-object
 } SubObjTransform;
 
 typedef struct {
 	char	name[8];
 
-	unsigned char movement; // the movement of the object 0 - none, 1 - rotate, 2 - slide
+	uint8_t movement; // the movement of the object 0 - none, 1 - rotate, 2 - slide
 
 	SubObjTransform trans;
 
@@ -204,11 +203,11 @@ typedef struct {
 // geometry nodes definitions
 typedef struct      NodeHeader
 {
-    char            flag;
+    uint8_t            flag;
     // This is probably used if MD_NODE_CALL skips from one object to another.
     // I would reckon that the transform of object indicated here is used rather than the one given by the object in progress
-    char            object_number;
-    char            c_unk1;
+    uint8_t            object_number;
+    uint8_t            c_unk1;
 
 } NodeHeader;
 
@@ -216,10 +215,10 @@ typedef struct      NodeHeader
 
 typedef struct      NodeSplit
 {
-    Vertex          sphere_center;
+    Vertex           sphere_center;
     float           sphere_radius;
-    short           pgon_before_count;
-    short           normal;             // Split plane normal
+    int16_t         pgon_before_count;
+    uint16_t        normal;             // Split plane normal
     float           d;                  // Split plane d
     short           behind_node;        // offset to the node on the behind (from offset_nodes)
     short           front_node;         // offset to the node on the front (from offset_nodes)
@@ -254,12 +253,12 @@ typedef struct      NodeRaw // Simple Node. No splitting
 // In any version, if type is MD_PGON_SOLID_COLOR_PAL data is the palette index
 
 typedef struct      ObjPolygon {
-    unsigned short  index;              // Index of the Polygon
-    short           data;               // ?
-    unsigned char   type;               // MD_PGON Type
-    unsigned char   num_verts;          // Number of verts in polygon
-    unsigned short  norm;               // Polygon normal number
-    float           d;                  // ?
+    uint16_t  index;              // Index of the Polygon
+    int8_t    data;               // ?
+    uint8_t   type;               // MD_PGON Type
+    uint8_t   num_verts;          // Number of verts in polygon
+    uint16_t  norm;               // Polygon normal number
+    float     d;                  // ?
 } ObjPolygon;
 
 

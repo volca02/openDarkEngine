@@ -28,7 +28,7 @@ namespace Ogre {
 
     /** ManualResourceLoader for BIN meshes. Used to load BIN meshes as Ogre::Mesh instances */
     class ManualBinFileLoader : public ManualResourceLoader {
-
+        public:
             ManualBinFileLoader();
             virtual ~ManualBinFileLoader();
 
