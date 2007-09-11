@@ -188,6 +188,10 @@ namespace Opde {
 		}
 
 		delete dlink;
+
+		LOG_DEBUG("Relation (%s - %d): Done!",
+				  mName.c_str(),
+				  mID);
 	}
 
 	// --------------------------------------------------------------------------
