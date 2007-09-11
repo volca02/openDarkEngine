@@ -61,7 +61,7 @@ namespace Opde {
 					/** Erases the effective ID record altogether, meaning that object has no effective value
                     * @param srcID the object to set effective ID for
                     * @param the new effective ID */
-					virtual void unsetEffectiveID(int srcID);
+					virtual bool unsetEffectiveID(int srcID);
 
                     /** Propagates new Effective source, recursively, on all inheritor targets.
 					*

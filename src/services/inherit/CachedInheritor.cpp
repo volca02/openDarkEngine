@@ -112,13 +112,16 @@ namespace Opde {
     }
 
     //------------------------------------------------------
-    void  CachedInheritor::unsetEffectiveID(int srcID) {
+    bool CachedInheritor::unsetEffectiveID(int srcID) {
         EffectiveObjectMap::iterator it = mEffObjMap.find(srcID);
         bool changed = false;
 
         if (it != mEffObjMap.end()) {
+            changed = true;
             mEffObjMap.erase(it);
         }
+
+        return changed;
     }
 
     //------------------------------------------------------
@@ -166,10 +169,35 @@ namespace Opde {
 
         }
 
-        if (newEffID != 0)
-            setEffectiveID(srcID, newEffID);
+        if (newEffID != 0)  {
+            if (setEffectiveID(srcID, newEffID)) {
+                // Broadcast the change to a new ID
+                InheritValueChangeMsg msg;
+
+                if (oldEffID != 0) {
+                    msg.change = INH_VAL_CHANGED;
+                } else {
+                    msg.change = INH_VAL_ADDED;
+                }
+
+
+                msg.objectID = srcID;
+                msg.srcID = newEffID;
+
+                broadcastMessage(msg);
+            }
+        }
         else
-            unsetEffectiveID(srcID);
+            if (unsetEffectiveID(srcID)) {
+                InheritValueChangeMsg msg;
+
+                msg.change = INH_VAL_REMOVED;
+
+                msg.objectID = srcID;
+                msg.srcID = 0;
+
+                broadcastMessage(msg);
+            }
 
         // If there was a change, propagate
         if (newEffID != oldEffID) {
