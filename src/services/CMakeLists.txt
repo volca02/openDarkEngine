@@ -6,3 +6,6 @@ add_subdirectory(game)
 add_subdirectory(link)
 add_subdirectory(inherit)
 add_subdirectory(property)
+
+# Renderer service
+add_subdirectory(render)
