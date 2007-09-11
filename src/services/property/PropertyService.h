@@ -29,6 +29,7 @@
 #include "OpdeService.h"
 #include "FileGroup.h"
 #include "SharedPtr.h"
+#include "MessageSource.h"
 
 namespace Opde {
 	/** @brief Property service - service managing in-game object properties
@@ -55,6 +56,10 @@ namespace Opde {
 			/** Clears out all the PropertyGroups (effectively wiping out all properties) */
 			void clear();
 
+            /** Retrieves the property group given it's name, or NULL if not found
+            * @param name The name of the property to retrieve the group for
+            * @return PropertyGroupPtr of the PropertyGroup named name if found, isNull()==true otherwise */
+            PropertyGroupPtr getPropertyGroup(const std::string& name);
 		protected:
 			/// maps property groups to their names
 			typedef std::map< std::string, PropertyGroupPtr > PropertyGroupMap;

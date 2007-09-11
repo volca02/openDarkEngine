@@ -93,6 +93,17 @@ namespace Opde {
 		}
 	}
 
+	// --------------------------------------------------------------------------
+	PropertyGroupPtr PropertyService::getPropertyGroup(const std::string& name) {
+	    PropertyGroupMap::iterator it = mPropertyGroupMap.find(name);
+
+		if (it != mPropertyGroupMap.end()) {
+		    return it->second;
+		} else
+            return NULL;
+
+	}
+
 	//-------------------------- Factory implementation
 	std::string PropertyServiceFactory::mName = "PropertyService";
 

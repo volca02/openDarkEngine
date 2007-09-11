@@ -36,7 +36,7 @@ namespace Opde {
 	/** @brief Property group - a group of properties of the same kind (name, type).
 	* Property group holds all the properties of the same kind for all the objects.
 	*/
-	class PropertyGroup : public NonCopyable {
+	class PropertyGroup : public NonCopyable, public MessageSource<PropertyChangeMsg, PropertyChangeListenerPtr>, public InheritValueChangeListener {
 		public:
 			/** PropertyGroup Constructor
 			* @param name The property name
@@ -141,7 +141,7 @@ namespace Opde {
 				msg.objectID = data->id();
 				msg.data = data;
 
-				broadcastPropertyMessage(msg);
+				broadcastMessage(msg);
 			}
 
 			/** Direct data setter.
@@ -181,30 +181,14 @@ namespace Opde {
 				return DVariant();
 			}
 
-
-			// ----------------- Listener releted methods --------------------
-			/** Registers a property change listener.
-			* @param listener A pointer to PropertyChangeListenerPtr
-			* @note The same pointer has to be supplied to the unregisterListener in order to succeed with unregistration
-			*/
-			void registerListener(PropertyChangeListenerPtr* listener);
-
-
-			/** Unregisters a property change listener
-			* @param listener A pointer to PropertyChangeListenerPtr
-			* @note The same pointer has to be supplied to the unregisterListener in order to succeed with unregistration
-			*/
-			void unregisterListener(PropertyChangeListenerPtr* listener);
-
 		protected:
 			/** Inserts the property into the group, notifies inheritors and broadcasts the change
 			* @param propd The property to add
 			*/
 			bool _addProperty(PropertyDataPtr propd);
 
-			/// Send a message to all listeners of relation change
-			void broadcastPropertyMessage(const PropertyChangeMsg& msg) const;
-
+            /// The listener to the inheritance messages
+            void onInheritChange(const InheritValueChangeMsg& msg);
 
 			/** Returns an ID of the object which is responsible for the current property values
 			* As the properties can be inherited using both archetype links and MetaProps,
@@ -243,6 +227,9 @@ namespace Opde {
 
             /// Inheritor used to determine property inheritance
 			InheritorPtr mInheritor;
+
+			/// Inheritor value changes listener
+			InheritValueChangeListenerPtr mInheritorListener;
 	};
 
 	/// Shared pointer to property group

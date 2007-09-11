@@ -38,13 +38,18 @@ namespace Opde {
 		// Find the inheritor by the name, and assign too
 		InheritServicePtr inhs = ServiceManager::getSingleton().getService("InheritService").as<InheritService>();
 		mInheritor = inhs->createInheritor(inheritorName);
+
+		// And as a final step, register as inheritor listener
+		mInheritorListener.listener = this;
+        mInheritorListener.method = (InheritValueChangeMethodPtr)(&PropertyGroup::onInheritChange);
+        mInheritor->registerListener(&mInheritorListener);
 	}
 
 	// --------------------------------------------------------------------------
 	PropertyGroup::~PropertyGroup() {
 		clear();
 		mPropertyListeners.clear(); // those which did not ask for removal
-
+        mInheritor->unregisterListener(&mInheritorListener);
 
 	}
 
@@ -154,7 +159,7 @@ namespace Opde {
 		msg.objectID = 0;
 		msg.data = PropertyDataPtr(); // NULL that means
 
-		broadcastPropertyMessage(msg);
+		broadcastMessage(msg);
 
 		mPropertyStore.clear();
 		mInheritor->clear();
@@ -171,7 +176,7 @@ namespace Opde {
 	bool PropertyGroup::createProperty(int obj_id, DTypePtr data) {
 		// simply compare the type pointers...
 		if (data->type() != mType)
-			OPDE_EXCEPT("Incompatible types when creating link data", "PropertyGroup::createProperty");
+			OPDE_EXCEPT("Incompatible types when creating property data", "PropertyGroup::createProperty");
 
 		PropertyDataPtr propd = new PropertyData(obj_id, data);
 
@@ -181,18 +186,9 @@ namespace Opde {
 	// --------------------------------------------------------------------------
 	bool PropertyGroup::removeProperty(int obj_id) {
 		size_t erased = mPropertyStore.erase(obj_id);
-        mInheritor->setImplements(obj_id, false);
 
 		if (erased) {
-			// TODO: Notify inheritor!
-
-			PropertyChangeMsg msg;
-
-			msg.change = PROP_REMOVED;
-			msg.objectID = obj_id;
-			msg.data = PropertyDataPtr(); // NULL that means
-
-			broadcastPropertyMessage(msg);
+			mInheritor->setImplements(obj_id, false);
 
 			return true;
 		} else {
@@ -205,6 +201,9 @@ namespace Opde {
 		PropertyDataPtr pd = getData(src_id);
 
 		if (!pd.isNull()) {
+		    // TODO: clone the data!
+		    // FIX: Implement this method
+		    OPDE_EXCEPT("Property cloning is not yet implemented!", "PropertyGroup::cloneProperty");
 			/*PropertyDataPtr propd = new PropertyData(obj_id, *pd);
 
 			return _addProperty(propd);*/
@@ -216,18 +215,9 @@ namespace Opde {
 	// --------------------------------------------------------------------------
 	bool PropertyGroup::_addProperty(PropertyDataPtr propd) {
 		pair<PropertyStore::iterator, bool> res = mPropertyStore.insert(make_pair(propd->id(), propd));
-        mInheritor->setImplements(propd->id(), true);
 
 		if (res.second) {
-			// TODO: Notify inheritor!
-
-			PropertyChangeMsg msg;
-
-			msg.change = PROP_ADDED;
-			msg.objectID = propd->id();
-			msg.data = propd;
-
-			broadcastPropertyMessage(msg);
+            mInheritor->setImplements(propd->id(), true);
 
 			return true;
 		} else {
@@ -235,26 +225,37 @@ namespace Opde {
 		}
 	}
 
-	// --------------------------------------------------------------------------
-	void PropertyGroup::broadcastPropertyMessage(const PropertyChangeMsg& msg) const {
-		PropertyListeners::const_iterator it = mPropertyListeners.begin();
+    // --------------------------------------------------------------------------
+    void PropertyGroup::onInheritChange(const InheritValueChangeMsg& msg) {
+            // Consult the inheritor value change, and build a property change message
 
-		for (; it != mPropertyListeners.end(); ++it) {
-			// Call the method on the listener pointer
-			((*it)->listener->*(*it)->method)(msg);
-		}
-	}
+            /* The broadcast of the property change is not done directly in the methods above but here.
+            The reason for this is that only the inheritor knows the real character of the change, and the objects that the change inflicted
+            */
 
-	// --------------------------------------------------------------------------
-	void PropertyGroup::registerListener(PropertyChangeListenerPtr* listener) {
-		mPropertyListeners.insert(listener);
-	}
+            PropertyChangeMsg pmsg;
 
-	// --------------------------------------------------------------------------
-	void PropertyGroup::unregisterListener(PropertyChangeListenerPtr* listener) {
-		mPropertyListeners.erase(listener);
-	}
+            switch (msg.change) {
+                case INH_VAL_ADDED: // Property was added to an object
+                    pmsg.change = PROP_ADDED;
+                    pmsg.objectID = msg.objectID;
+                    pmsg.data = getData(msg.srcID);
+                    break;
+                case INH_VAL_CHANGED:
+                    pmsg.change = PROP_CHANGED;
+                    pmsg.objectID = msg.objectID;
+                    pmsg.data = getData(msg.srcID);
+                    break;
+                case INH_VAL_REMOVED:
+                    pmsg.change = PROP_REMOVED;
+                    pmsg.objectID = msg.objectID;
+                    pmsg.data = NULL;
+                default:
+                    return;
+            }
 
+            broadcastMessage(pmsg);
+    }
 
 }
 
