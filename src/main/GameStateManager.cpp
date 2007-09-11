@@ -31,6 +31,7 @@
 #include "LinkService.h"
 #include "PropertyService.h"
 #include "InheritService.h"
+#include "RenderService.h"
 
 #include <OgreRoot.h>
 #include <OgreWindowEventUtilities.h>
@@ -225,6 +226,7 @@ namespace Opde {
 		new LinkServiceFactory();
 		new PropertyServiceFactory();
 		new InheritServiceFactory();
+		new RenderServiceFactory();
 	}
 
 	/// Method which will define the source of resources (other than current folder)
@@ -299,7 +301,8 @@ namespace Opde {
 		windowHndStr << (unsigned int) windowHnd;
 		paramList.insert( std::make_pair( std::string( "WINDOW" ), windowHndStr.str() ) );
 
-		/* // Non-exclusive input - for debugging purposes
+		// Non-exclusive input - for debugging purposes
+/*
 		#if defined OIS_WIN32_PLATFORM
 		paramList.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_FOREGROUND" )));
 		paramList.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_NONEXCLUSIVE")));
@@ -311,7 +314,8 @@ namespace Opde {
 		paramList.insert(std::make_pair(std::string("x11_keyboard_grab"), std::string("false")));
 		paramList.insert(std::make_pair(std::string("XAutoRepeatOn"), std::string("true")));
 		#endif
-		*/
+		/**/
+
 
 		// Create inputsystem
 		mInputSystem = OIS::InputManager::createInputSystem( paramList );
