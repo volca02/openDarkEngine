@@ -58,7 +58,21 @@ namespace Opde {
                 mImplements.erase(it);
                 modified = true;
             }
+        }
 
+        if (modified) {
+            // Build up and broadcast the message that the object now implements or not
+            InheritValueChangeMsg msg;
+
+            if (impl)
+                msg.change = INH_VAL_ADDED;
+            else
+                msg.change = INH_VAL_REMOVED;
+
+            msg.objectID = objID;
+            msg.srcID = objID;
+
+            broadcastMessage(msg);
         }
 	}
 

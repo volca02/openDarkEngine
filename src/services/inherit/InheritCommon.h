@@ -30,11 +30,51 @@ namespace Opde {
 	// Forward declaration
 	class InheritService;
 
+    /** Inheritance value change message types.
+    * This is not a converted version of the link message as InheritChangeType,
+    * but rather the description of what that change caused to the implemented values on object ID's
+    */
+	typedef enum {
+		/// Object gained an inherited value, did not implement before
+		INH_VAL_ADDED = 1,
+		/// Inheritance of the value was canceled (object stopped implementing a value)
+		INH_VAL_REMOVED,
+		/// Object changed the inheritance source, did implement before
+		INH_VAL_CHANGED
+	} InheritValueChangeType;
+
+	/// Inheritance change message
+	typedef struct InheritValueChangeMsg {
+		/// A change that happened
+		InheritValueChangeType change;
+		/// An ID of the affected object
+		int objectID;
+		/// An ID of the new source, or zero if the inherited value has been removed
+		int srcID;
+	};
+
+	/** Inheritance change listener abstract class.
+	* This class is to be inherited by classes wanting to listen to Inheritor messages */
+	class InheritValueChangeListener {};
+
+	/// Callback method declaration
+	typedef void (InheritValueChangeListener::*InheritValueChangeMethodPtr)(const InheritValueChangeMsg& msg);
+
+	/// Listener pair. InheritChangeListener
+	typedef struct InheritValueChangeListenerPtr {
+		InheritValueChangeListener* listener;
+		InheritValueChangeMethodPtr method;
+	};
+
+
+
 	/** Inheritor interface
 	 * Inheritors are used to query effective object id
 	 * (the id of an object holding effective value)
-	 * given an object id. */
-	class Inheritor {
+	 * given an object id.
+	 * The inheritor is a source of the implementation messages.
+	 * This means that all the objects that are changed by the inheritance modification can be notified through the listener */
+	class Inheritor : public MessageSource<InheritValueChangeMsg, InheritValueChangeListenerPtr> {
 		public:
 			/** Returns true if the objID has true 'implements' record */
 			virtual bool getImplements(int objID) const = 0;
@@ -44,7 +84,7 @@ namespace Opde {
 
 			/** Returns the effective object ID for the given object ID
 			 * @note The effective object is the object holding the used value for the object ID given
-			 * @return The effective object ID, or srcID, if no effective is found (the object itself is effective) */
+			 * @return The effective object ID, or 0, if no effective is found (the object itself is effective) */
 			virtual int getEffectiveID(int srcID) const = 0;
 
 			/** The core inheritance describing method.
