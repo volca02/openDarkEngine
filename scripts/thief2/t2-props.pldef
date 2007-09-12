@@ -1426,7 +1426,7 @@ property AI_Frustr {
 	p_ver 2.12
 }
 
-property Bump Map {
+property BumpMap {
 	label "BumpMap"
 }
 
