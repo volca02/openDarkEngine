@@ -69,7 +69,6 @@ property KeyDst {
 
 property AI_VisType {
 	label "AIVisionType"
-	p_ver 
 }
 
 property AI_Team {
@@ -142,7 +141,7 @@ property AI_NoHand {
 	label "AINoHandoff"
 }
 
-property Face Pos {
+property FacePos {
 	label "FaceMotions"
 	p_ver 2.65540
 }
@@ -250,7 +249,6 @@ property WpnExposu {
 
 property SpchNextP {
 	label "SpeechLastPlayed"
-	p_ver 
 }
 
 property DAI_FrogE {
@@ -387,7 +385,6 @@ property Fixture {
 
 property Material  {
 	label "MaterialTags"
-	p_ver 
 }
 
 property DarkStat {
@@ -442,7 +439,6 @@ property AI_Hearin {
 
 property Speech {
 	label "CurrentSpeech"
-	p_ver 
 }
 
 property AI_SuspRs {
@@ -713,7 +709,6 @@ property WeaponTyp {
 
 property TextureID {
 	label "TextureIndex"
-	p_ver 
 }
 
 property PhysContr {
@@ -743,7 +738,6 @@ property AICoverPt {
 
 property AI_FleeAw {
 	label "AIFleeAware"
-	p_ver 
 }
 
 property Shadow {
@@ -756,7 +750,6 @@ property DiffClose {
 
 property AI_Visibi {
 	label "AIVisibility"
-	p_ver 
 }
 
 property AI_NGOBB {
@@ -806,7 +799,7 @@ property ParticleT {
 	p_ver 2.17
 }
 
-property Face Stat {
+property FaceStat {
 	label "FaceState"
 	p_ver 2.65564
 }
@@ -880,7 +873,6 @@ property Transient {
 
 property SchLastSa {
 	label "SchemaLastSample"
-	p_ver 
 }
 
 property StTweq5Em {
