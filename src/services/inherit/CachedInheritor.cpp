@@ -130,7 +130,7 @@ namespace Opde {
         int oldEffID = getEffectiveID(srcID);
 
         // Let' vote for a new effective object ID
-        InheritQueryPtr sources = mInheritService->getSources(srcID);
+        InheritQueryResultPtr sources = mInheritService->getSources(srcID);
 
         int maxPrio = -1; // no inheritance indicator itself
         int newEffID = 0; // Detected new effective ID
@@ -201,7 +201,7 @@ namespace Opde {
 
         // If there was a change, propagate
         if (newEffID != oldEffID) {
-            InheritQueryPtr targets = mInheritService->getTargets(srcID);
+            InheritQueryResultPtr targets = mInheritService->getTargets(srcID);
 
             while (!targets->end()) {
                 InheritLinkPtr il = targets->next();

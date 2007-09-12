@@ -33,24 +33,24 @@ namespace Opde {
 	/*--------------------- InheritQueries -------------------*/
 	/*--------------------------------------------------------*/
 	/// Just an empty result of a query
-    class EmptyInheritQuery : public InheritQuery {
+    class EmptyInheritQueryResult : public InheritQueryResult {
 	    public:
-            EmptyInheritQuery() : InheritQuery() {  };
+            EmptyInheritQueryResult() : InheritQueryResult() {  };
 
-            virtual InheritLinkPtr next() { return NULL; };
+            virtual const InheritLinkPtr next() { return NULL; };
 
-            virtual bool end() {
+            virtual bool end() const {
                 return true;
             };
 	};
 
-	class SimpleInheritQuery : public InheritQuery {
+	class SimpleInheritQueryResult : public InheritQueryResult {
 	    public:
-            SimpleInheritQuery(const InheritService::InheritLinkMap& linkmap) : mLinkMap(linkmap), InheritQuery() {
+            SimpleInheritQueryResult(const InheritService::InheritLinkMap& linkmap) : mLinkMap(linkmap), InheritQueryResult() {
                 mIter = mLinkMap.begin();
             }
 
-            virtual InheritLinkPtr next() {
+            virtual const InheritLinkPtr next() {
                 if (!end()) {
                     InheritLinkPtr l = mIter->second;
 
@@ -62,7 +62,7 @@ namespace Opde {
                 }
             }
 
-            virtual bool end() {
+            virtual bool end() const {
                 return (mIter == mLinkMap.end());
             }
 
@@ -194,28 +194,28 @@ namespace Opde {
     }
 
     //------------------------------------------------------
-    InheritQueryPtr InheritService::getSources(int objID) const {
+    InheritQueryResultPtr InheritService::getSources(int objID) const {
         InheritMap::const_iterator it = mInheritSources.find(objID);
 
         if (it != mInheritSources.end()) {
-            InheritQueryPtr res = new SimpleInheritQuery(it->second);
+            InheritQueryResultPtr res = new SimpleInheritQueryResult(it->second);
             return res;
         } else {
-            InheritQueryPtr res = new EmptyInheritQuery();
+            InheritQueryResultPtr res = new EmptyInheritQueryResult();
             return res;
         }
 
     }
 
     //------------------------------------------------------
-	InheritQueryPtr InheritService::getTargets(int objID) const {
+	InheritQueryResultPtr InheritService::getTargets(int objID) const {
 	    InheritMap::const_iterator it = mInheritTargets.find(objID);
 
         if (it != mInheritTargets.end()) {
-            InheritQueryPtr res = new SimpleInheritQuery(it->second);
+            InheritQueryResultPtr res = new SimpleInheritQueryResult(it->second);
             return res;
         } else {
-            InheritQueryPtr res = new EmptyInheritQuery();
+            InheritQueryResultPtr res = new EmptyInheritQueryResult();
             return res;
         }
 	}

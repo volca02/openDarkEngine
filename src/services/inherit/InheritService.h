@@ -27,6 +27,7 @@
 #include "OpdeService.h"
 #include "SharedPtr.h"
 #include "InheritCommon.h"
+#include "Iterator.h"
 
 namespace Opde {
 
@@ -44,14 +45,10 @@ namespace Opde {
     typedef shared_ptr< InheritLink > InheritLinkPtr;
 
     /** Inheritance query result. Put like this for effectiveness */
-    class InheritQuery {
-        public:
-            virtual InheritLinkPtr next() = 0;
-            virtual bool end() = 0;
-    };
+    typedef ConstIterator< InheritLinkPtr > InheritQueryResult;
 
     /// Shared pointer to InheritQuery
-    typedef shared_ptr< InheritQuery > InheritQueryPtr;
+    typedef shared_ptr< InheritQueryResult > InheritQueryResultPtr;
 
 	/** Inherit Service - service managing object inheritance and metaproperties.
 	* This service is responsible for Inheritor management. Inheritors are classes that are used to track inheritance of certain qualities of an object (be it abstract or concrete).
@@ -79,12 +76,12 @@ namespace Opde {
 
 			/** Requests all sources for inheritance for the given object ID
 			 * @param objID the object id to get the Sources for */
-			InheritQueryPtr getSources(int objID) const;
+			InheritQueryResultPtr getSources(int objID) const;
 
 			/** Requests all inheritance targets for given object ID
 			 * @param objID the id of the object to get inheritance targets for
 			 * */
-			InheritQueryPtr getTargets(int objID) const;
+			InheritQueryResultPtr getTargets(int objID) const;
 
 			/// Todo: AddMetaProp, RemoveMetaProp, ...
 
