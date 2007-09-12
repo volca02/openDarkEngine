@@ -1315,7 +1315,6 @@ property AI_NCDmRs {
 
 property DiffScript {
 	label "DiffScript"
-	p_ver 
 }
 
 property SchAction {
@@ -1458,7 +1457,6 @@ property AI_AlrtRs {
 
 property AIFiresTh {
 	label "AIFiresThrough"
-	p_ver 
 }
 
 property CfgTweqRo {
