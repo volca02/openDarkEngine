@@ -23,6 +23,7 @@
 #include "OpdeException.h"
 #include "logger.h"
 #include "stdlog.h"
+#include "filelog.h"
 
 // All the services
 #include "WorldRepService.h"
@@ -101,6 +102,7 @@ namespace Opde {
 		// Releas
 		delete mLogger;
 		delete mStdLog;
+      delete mFileLog;
 
 		delete mConsoleBackend;
 		delete mRoot;
@@ -156,8 +158,9 @@ namespace Opde {
 		mLogger = new Logger();
 
 		mStdLog = new StdLog();
+      mFileLog = new FileLog();
 
-		mLogger->registerLogListener(mStdLog);
+		mLogger->registerLogListener(mFileLog);
 
 		// Create an ogre's root
 		mRoot = new Root();

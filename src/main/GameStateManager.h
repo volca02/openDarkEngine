@@ -35,6 +35,7 @@
 #include "OpdeSingleton.h"
 #include "GameState.h"
 #include "stdlog.h"
+#include "filelog.h"
 #include "ConsoleBackend.h"
 #include "OpdeServiceManager.h"
 
@@ -119,6 +120,7 @@ namespace Opde {
 
 			///  Stderr logger
 			StdLog* mStdLog;
+         FileLog* mFileLog;
 
 			ConsoleBackend* mConsoleBackend;
 
