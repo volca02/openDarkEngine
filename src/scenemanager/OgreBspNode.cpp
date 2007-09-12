@@ -41,6 +41,9 @@ namespace Ogre {
 	// update the fragment as wellBspNode
 	mCellFragment.fragmentType = SceneQuery::WFT_CUSTOM_GEOMETRY;
 	mCellFragment.geometry = this;
+	
+	mFrameNum = -1;
+	mOrder = -1;
     }
 
     //-----------------------------------------------------------------------
