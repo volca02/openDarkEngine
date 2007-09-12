@@ -43,7 +43,6 @@ namespace Ogre {
 	mCellFragment.geometry = this;
 	
 	mFrameNum = -1;
-	mOrder = -1;
     }
 
     //-----------------------------------------------------------------------
