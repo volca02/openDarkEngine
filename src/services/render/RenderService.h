@@ -46,12 +46,12 @@ namespace Opde {
 			virtual void init();
 
 		protected:
-            void onPropPositionMsg(PropertyChangeMsg& msg);
-            void onPropModelNameMsg(PropertyChangeMsg& msg);
+            void onPropPositionMsg(const PropertyChangeMsg& msg);
+            void onPropModelNameMsg(const PropertyChangeMsg& msg);
 
-            void createSceneNode(PropertyChangeMsg& msg);
-            void setSceneNodePosition(PropertyChangeMsg& msg);
-            void removeSceneNode(PropertyChangeMsg& msg);
+            void createSceneNode(const PropertyChangeMsg& msg);
+            void setSceneNodePosition(const PropertyChangeMsg& msg);
+            void removeSceneNode(const PropertyChangeMsg& msg);
 
             void prepareMesh(const Ogre::String& name);
 

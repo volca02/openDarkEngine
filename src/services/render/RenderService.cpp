@@ -88,7 +88,7 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	void RenderService::onPropPositionMsg(PropertyChangeMsg& msg) {
+	void RenderService::onPropPositionMsg(const PropertyChangeMsg& msg) {
 		// Update the scene node's position and orientation
 		// (hrm. The BspSceneNode should report cell it is in for us, but well, there is no need besides SaveGame compatibility)
 		// Two keys are interesting: position and facing
@@ -125,7 +125,7 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	void RenderService::onPropModelNameMsg(PropertyChangeMsg& msg) {
+	void RenderService::onPropModelNameMsg(const PropertyChangeMsg& msg) {
 		// Update the Model (mesh) for the object
 		if (msg.change == PROP_GROUP_CLEARED) {
                 clear();
@@ -188,7 +188,7 @@ namespace Opde {
 	}
 
     // --------------------------------------------------------------------------
-    void RenderService::createSceneNode(PropertyChangeMsg& msg) {
+    void RenderService::createSceneNode(const PropertyChangeMsg& msg) {
         // Search for scene node, if not created, create. then set position
         ObjectSceneNodeMap::iterator it = mSceneNodeMap.find(msg.objectID);
 
@@ -201,7 +201,7 @@ namespace Opde {
     }
 
     // --------------------------------------------------------------------------
-    void RenderService::setSceneNodePosition(PropertyChangeMsg& msg) {
+    void RenderService::setSceneNodePosition(const PropertyChangeMsg& msg) {
         ObjectSceneNodeMap::iterator it = mSceneNodeMap.find(msg.objectID);
 
         if (it != mSceneNodeMap.end()) {
@@ -232,7 +232,7 @@ namespace Opde {
     }
 
     // --------------------------------------------------------------------------
-    void RenderService::removeSceneNode(PropertyChangeMsg& msg) {
+    void RenderService::removeSceneNode(const PropertyChangeMsg& msg) {
         ObjectSceneNodeMap::iterator it = mSceneNodeMap.find(msg.objectID);
 
         if (it != mSceneNodeMap.end()) {
