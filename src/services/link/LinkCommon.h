@@ -27,6 +27,7 @@
 #include "integers.h"
 #include "SharedPtr.h"
 #include "DTypeDef.h"
+#include "Iterator.h"
 
 namespace Opde {
 	/// Link ID type. 32bit number at least...
@@ -100,43 +101,8 @@ namespace Opde {
 		return a->id() < b->id();
 	}
 
-	/** Class representing a link query result.
-	*/
-	class LinkQueryResult {
-			friend class Relation;
-
-		protected:
-			typedef std::set< LinkPtr > LinkQueryResultSet;
-
-		public:
-			typedef LinkQueryResultSet::const_iterator iterator;
-
-		protected:
-			LinkQueryResultSet mResultSet;
-
-			/** Internal method - pushes a link into the result vector. */
-			inline void insert(LinkPtr res) {
-				mResultSet.insert(res);
-			}
-
-			/** Internal method - pushes a link into the result vector. */
-			inline void insert(iterator begin, iterator end) {
-				mResultSet.insert(begin, end);
-			}
-
-		public:
-			LinkQueryResult() : mResultSet() {};
-			~LinkQueryResult() { mResultSet.clear(); };
-
-
-			/// Returns the begin iterator of the query result
-			inline iterator begin() { return mResultSet.begin(); };
-
-			/// Returns the end iterator of the query result
-			inline iterator end() { return mResultSet.end(); };
-
-			size_t size() { return mResultSet.size(); };
-	};
+	/// Class representing a link query result.
+	typedef ConstIterator< LinkPtr > LinkQueryResult;
 
 	/// Shared pointer instance to link query result
 	typedef shared_ptr< LinkQueryResult > LinkQueryResultPtr;

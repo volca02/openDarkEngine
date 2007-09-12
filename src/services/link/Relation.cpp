@@ -32,7 +32,61 @@ using namespace std;
 
 namespace Opde {
 
-	// --------------------------------------------------------------------------
+    /*-----------------------------------------------------*/
+	/*--------------------- LinkQueries -------------------*/
+	/*-----------------------------------------------------*/
+	/// Just an empty result of a query
+    class EmptyLinkQueryResult : public LinkQueryResult {
+	    public:
+            EmptyLinkQueryResult() : LinkQueryResult() {  };
+
+            virtual const LinkPtr next() { return NULL; };
+
+            virtual bool end() const {
+                return true;
+            };
+	};
+
+    /// Single source link query (multiple targets), or in reverse
+	class Relation::MultiTargetLinkQueryResult : public LinkQueryResult {
+	    public:
+            MultiTargetLinkQueryResult(const Relation::ObjectIDToLinks& linkmap,
+                                        Relation::ObjectIDToLinks::const_iterator begin,
+                                        Relation::ObjectIDToLinks::const_iterator end) :
+
+                            mLinkMap(linkmap),
+                            mBegin(begin),
+                            mEnd(end),
+                            LinkQueryResult() {
+                mIter = mBegin;
+            }
+
+            virtual const LinkPtr next() {
+                if (!end()) {
+                    const LinkPtr l = mIter->second;
+
+                    ++mIter;
+
+                    return l;
+
+                } else {
+
+                    return NULL;
+                }
+            }
+
+            virtual bool end() const {
+                return (mIter == mEnd);
+            }
+
+        protected:
+            const Relation::ObjectIDToLinks& mLinkMap;
+            Relation::ObjectIDToLinks::const_iterator mIter, mBegin, mEnd;
+	};
+
+	/*-----------------------------------------------------*/
+	/*----------------------- Relation --------------------*/
+	/*-----------------------------------------------------*/
 	Relation::Relation(const std::string& name, DTypeDefPtr type, bool hidden) :
 			mID(-1),
 			mName(name),
@@ -423,70 +477,63 @@ namespace Opde {
 		assert(src != 0 || dst != 0 ); // No all-links query
 
 		if (src == 0) { // all link sources
-			LinkQueryResultPtr res = new LinkQueryResult();
-
 			ObjectLinkMap::const_iterator r = mDstSrcLinkMap.find(dst);
 
 			if (r != mDstSrcLinkMap.end()) {
-				// all the components of the secondary map go into the set
-				ObjectIDToLinks::const_iterator ri = r->second.begin();
+    			LinkQueryResultPtr res;
 
-				for (; ri != r->second.end(); ++ri) {
-					res->insert(ri->second.begin(), ri->second.end());
-				}
+			    // We have the source object. Now branch on the dest
+			    res = new MultiTargetLinkQueryResult(r->second, r->second.begin(), r->second.end());
 
 				return res;
 			}
 
 		} else if (dst == 0) { // all link destinations
 
-			LinkQueryResultPtr res = new LinkQueryResult();
-
 			ObjectLinkMap::const_iterator r = mSrcDstLinkMap.find(src);
 
 			if (r != mSrcDstLinkMap.end()) {
-				// all the components of the secondary map go into the set
-				ObjectIDToLinks::const_iterator ri = r->second.begin();
+    			LinkQueryResultPtr res;
 
-				for (; ri != r->second.end(); ++ri) {
-					res->insert(ri->second.begin(), ri->second.end());
-				}
+				// We have the source object. Now branch on the dest
+			    res = new MultiTargetLinkQueryResult(r->second, r->second.begin(), r->second.end());
 
 				return res;
 			}
 
 		} else { // both src and dst are nonzero
-			LinkQueryResultPtr res = new LinkQueryResult();
-
 			ObjectLinkMap::const_iterator r = mSrcDstLinkMap.find(src);
 
 			if (r != mSrcDstLinkMap.end()) {
 				// all the components of the secondary map go into the set
 				ObjectIDToLinks::const_iterator ri = r->second.find(dst);
 
-				if (ri != r->second.end())
-					res->insert(ri->second.begin(), ri->second.end());
-
-
-				return res;
+				if (ri != r->second.end()) {
+	    			LinkQueryResultPtr res;
+                    res = new MultiTargetLinkQueryResult(r->second, ri, r->second.upper_bound(dst));
+                    return res;
+				}
 			}
 		}
 
+        LinkQueryResultPtr r = new EmptyLinkQueryResult();
+        return r;
 	}
 
 	// --------------------------------------------------------------------------
 	LinkPtr Relation::getOneLink(int src, int dst) const {
 		LinkQueryResultPtr res = getAllLinks(src, dst);
 
-		// I also could just return the first even if there would be more than one, but that could lead to programmers headaches
-		if (res->size() > 1) {
-            OPDE_EXCEPT("More than one link fulfilled the requirement", "Relation::getOneLink");
-		}
+        if (res->end())
+            return NULL;
 
-		if (res->size() > 0)
-			return *res->begin();
-		else
-			return NULL;
+        LinkPtr l = res->next();
+
+		// I also could just return the first even if there would be more than one, but that could lead to programmers headaches
+		if (!res->end())
+            OPDE_EXCEPT("More than one link fulfilled the requirement", "Relation::getOneLink");
+
+		return l;
 	}
 
 	// --------------------------------------------------------------------------
@@ -509,28 +556,22 @@ namespace Opde {
 		if (!ires.second) {
 			LOG_ERROR("Relation: Found link with conflicting ID in relation %d (%s): ID: %d (stored %d) - link already existed", mID, mName.c_str(), link->mID, ires.first->second->mID );
 		} else {
+            // Verify link data exist
+			LinkDataMap::iterator dit = mLinkDataMap.find(link->mID);
+
+			if (dit == mLinkDataMap.end() && !mType.isNull())
+				OPDE_EXCEPT("Relation (" + mName + "): Link Data not defined prior to link insertion", "Relation::_addLink"); // for link id " + link->mID
+
 			// Update the free link info
 			allocateLinkID(link->mID);
 
 			// Update the query databases
 			// Src->Dst->LinkList
 			pair<ObjectLinkMap::iterator, bool> r = mSrcDstLinkMap.insert(make_pair(link->mSrc, ObjectIDToLinks()));
-			pair<ObjectIDToLinks::iterator, bool> ri = r.first->second.insert(make_pair(link->mDst, LinkSet()));
-
-			ri.first->second.insert(link);
-
+			r.first->second.insert(make_pair(link->mDst, link));
 
 			r = mDstSrcLinkMap.insert(make_pair(link->mDst, ObjectIDToLinks()));
-			ri = r.first->second.insert(make_pair(link->mDst, LinkSet()));
-
-			ri.first->second.insert(link);
-
-			// Verify link data exist
-			LinkDataMap::iterator dit = mLinkDataMap.find(link->mID);
-
-			if (dit == mLinkDataMap.end() && !mType.isNull())
-				OPDE_EXCEPT("Relation (" + mName + "): Link Data not defined prior to link insertion", "Relation::_addLink"); // for link id " + link->mID
-
+			r.first->second.insert(make_pair(link->mDst, link));
 
 			// fire the notification about inserted link
 			LinkChangeMsg m;
@@ -559,10 +600,16 @@ namespace Opde {
 			assert(r != mSrcDstLinkMap.end());
 
 			ObjectIDToLinks::iterator ri = r->second.find(to_remove->mDst);
+			ObjectIDToLinks::iterator rend = r->second.upper_bound(to_remove->mDst);
 
-			assert(ri !=  r->second.end());
+			assert(ri != r->second.end());
 
-			ri->second.erase(to_remove);
+            // cycle through the result, find the occurence of the link with the given ID, then remove
+            for (; ri != rend; ++ri) {
+                if (ri->second->mID == id) {
+                    r->second.erase(ri);
+                }
+            }
 
 			// DstSrc
 			r = mSrcDstLinkMap.find(to_remove->mSrc);
@@ -570,12 +617,15 @@ namespace Opde {
 			assert(r != mSrcDstLinkMap.end());
 
 			ri = r->second.find(to_remove->mDst);
+			rend = r->second.upper_bound(to_remove->mDst);
 
 			assert(ri != r->second.end());
 
-			ri->second.erase(to_remove);
-
-
+			for (; ri != rend; ++ri) {
+                if (ri->second->mID == id) {
+                    r->second.erase(ri);
+                }
+            }
 
 			// fire the notification about inserted link
 			LinkChangeMsg m;

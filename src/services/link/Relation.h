@@ -143,6 +143,8 @@ namespace Opde {
 			LinkPtr getLink(link_id_t id) const;
 
 		protected:
+            class MultiTargetLinkQueryResult;
+
 			/** Internal method for link insertion. Inserts the link to the map, notifies listeners and query databases
 			* @param newlnk The link to be inserted
 			* @note Always use this method to internally insert new links, if not in a situation when the standard sequence of link addition is needed (notification, query database refresh)
@@ -192,11 +194,8 @@ namespace Opde {
 			/// Map of link data. Indexed by whole link id, contains the link data (LinkDataPtr)
 			typedef std::map< link_id_t, LinkDataPtr > LinkDataMap;
 
-			/// Vector storage of links
-			typedef std::set< LinkPtr > LinkSet;
-
 			/// Map of all links that have an object ID in either target or source
-			typedef std::map< int,  LinkSet > ObjectIDToLinks;
+			typedef std::multimap< int,  LinkPtr > ObjectIDToLinks;
 
 			/// Map of all maps that share a certain object ID
 			typedef std::map< int, ObjectIDToLinks > ObjectLinkMap;
