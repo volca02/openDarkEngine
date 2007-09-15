@@ -53,8 +53,11 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	RenderService::~RenderService() {
-		mPropPosition->unregisterListener(&mPropPositionListener);
-		mPropModelName->unregisterListener(&mPropModelNameListener);
+		if (!mPropPosition.isNull())
+		    mPropPosition->unregisterListener(&mPropPositionListener);
+		    
+		if (!mPropModelName.isNull())
+		    mPropModelName->unregisterListener(&mPropModelNameListener);
 	}
 
 	// --------------------------------------------------------------------------
