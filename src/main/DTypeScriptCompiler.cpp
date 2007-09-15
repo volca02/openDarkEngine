@@ -114,7 +114,9 @@ namespace Opde {
 
 		ServiceManager* svcmgr = ServiceManager::getSingletonPtr();
 		mBinaryService = svcmgr->getService("BinaryService").as<BinaryService>();
+		mCurrentState.state = CS_UNKNOWN;
 	}
+
 
 	//-----------------------------------------------------------------------
 	DTypeScriptCompiler::~DTypeScriptCompiler(void) {
