@@ -6,8 +6,8 @@ Last updated on 01-Apr-2007
 Requirements
 ------------
 OPDE needs:
-* OGRE3D library, 1.2 series and Devil image library (an ogre requirement, should be a part of SDK under windows).
-* CEGUI (The part of Ogre SDK under windows, do not install separately) - 0.4 series
+* OGRE3D library, 1.4 series and FreeImage library (an ogre requirement, should be a part of SDK under windows).
+* OIS (The part of Ogre SDK under windows, do not install separately)
 * CMake
 
 
@@ -27,10 +27,6 @@ Note: You can also use ccmake instead of cmake, which is a GUI frontend to cmake
 building, build type, debug code building. This works on both windows and *nix platforms.
 
 On windows, please ensure that the OGRE_HOME environmental variables is set (should be if the installation was done using the ogre sdk).
-
-If the cmake will have problem locating the CEGUI libs/headers, you can try setting these environmental variables:
-SET CEGUI_HOME=/OgreSDK
-SET CEGUI_EXTRA_INCLUDE_DIR=/OgreSDK/samples/include
 
 Ensure, that MinGW/Visual C++ make systems are usable. (Cmake should test this first time it is run)
 
