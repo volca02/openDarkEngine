@@ -129,8 +129,14 @@ namespace Opde {
 		// TODO: ConfigurationService::getKey("Core","InheritanceLinkName").toString();
 
 		mLinkService = ServiceManager::getSingleton().getService("LinkService").as<LinkService>();
+		
+		if (mLinkService.isNull())
+		    OPDE_EXCEPT("LinkService does not exist?", "InheritService::init");
 
 		mMetaPropRelation = mLinkService->getRelation("MetaProp");
+
+		if (mMetaPropRelation.isNull())
+		    OPDE_EXCEPT("MetaProp relation not found. Fatal.", "InheritService::init");
 
 		mMetaPropRelation->registerListener(&mMetaPropListener); // TODO: hardcoded for now.
 
