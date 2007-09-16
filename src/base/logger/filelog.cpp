@@ -36,6 +36,7 @@ namespace Opde {
 	void FileLog::logMessage(LogLevel level, char *message) {
 	   fputs(message, LogFile); 
 	   fputs("\n", LogFile); 
+	   fflush (LogFile);
       //LogFile << "LOG [" << level << "] : " << message << std::endl;
 	}
 }
