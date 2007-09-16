@@ -243,7 +243,6 @@ namespace Opde {
 	//------------------------------------
 	int DVariant::toInt() const {
 		std::stringstream ssStream;
-		int iReturn;
 		
 		switch (mPrivate.type) {
 			case DV_BOOL :
@@ -286,7 +285,6 @@ namespace Opde {
 	//------------------------------------
 	float DVariant::toFloat() const {
 		std::stringstream ssStream;
-		float fReturn;
 
 		switch (mPrivate.type) {
 			case DV_BOOL :
