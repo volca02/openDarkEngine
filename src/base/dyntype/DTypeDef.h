@@ -378,7 +378,7 @@ namespace Opde {
 				} else {
 					assert(size() == _size);
 					mData = mType->create();
-					file->read(mData, size());
+					file->read(mData, _size);
 				}
 			}
 			
