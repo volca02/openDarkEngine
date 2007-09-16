@@ -36,7 +36,7 @@ namespace Opde {
 	* The template parameter I is the instance class */
     template <class MSG, class I> class ClassCallback : public Callback<MSG> {
 		public:
-			typedef typename void (I::*Method)(const MSG& msg);
+			typedef void (I::*Method)(const MSG& msg);
 
 			ClassCallback(I* instance, Method method) : mInstance(instance), mMethod(method) {};
 

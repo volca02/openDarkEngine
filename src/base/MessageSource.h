@@ -33,7 +33,7 @@ namespace Opde {
     template <typename M> class MessageSource {
 		public:
 			typedef size_t ListenerID;
-			typedef typename Callback<M> Listener;
+			typedef Callback<M> Listener;
 			typedef shared_ptr< Listener >  ListenerPtr;
 
 		protected:
@@ -47,7 +47,7 @@ namespace Opde {
 
             /// Sends a message to all listeners
             void broadcastMessage(const M& msg) {
-                Listeners::iterator it = mListeners.begin();
+                typename Listeners::iterator it = mListeners.begin();
 
                 for (; it != mListeners.end(); ++it) {
                     // Use the callback functor to fire the callback
@@ -73,7 +73,7 @@ namespace Opde {
 			* @note The pointer has to be the same as the one supplied to the registerListener (not a big deal, just supply a pointer to a member variable)
 			*/
 			void unregisterListener(ListenerID id) {
-				Listeners::iterator it = mListeners.find(id);
+				typename Listeners::iterator it = mListeners.find(id);
 
 				if (it != mListeners.end()) {
 					mListeners.erase(it);
