@@ -36,7 +36,7 @@ namespace Opde {
 	/** @brief Property group - a group of properties of the same kind (name, type).
 	* Property group holds all the properties of the same kind for all the objects.
 	*/
-	class PropertyGroup : public NonCopyable, public MessageSource<PropertyChangeMsg, PropertyChangeListenerPtr>, public InheritValueChangeListener {
+	class PropertyGroup : public NonCopyable, public MessageSource<PropertyChangeMsg> {
 		public:
 			/** PropertyGroup Constructor
 			* @param name The property name
@@ -134,7 +134,7 @@ namespace Opde {
 			* @param data The new data (will not replace the old, used for objectID and data fields in the broadcast)
 			*
 			*/
-			void dataChangeFinished(PropertyDataPtr data) const {
+			void dataChangeFinished(PropertyDataPtr data) {
 				// TODO: Create a broadcast message, and send
 				PropertyChangeMsg msg;
 				msg.change = PROP_CHANGED;
@@ -202,12 +202,6 @@ namespace Opde {
 			/// Stores objectID -> Property
 			typedef std::map< int, PropertyDataPtr > PropertyStore;
 
-			/// Listener set
-			typedef std::set< PropertyChangeListenerPtr* > PropertyListeners;
-
-			/// Set of listeners that receive property events
-			PropertyListeners mPropertyListeners;
-
 			/// Property store instance
 			PropertyStore mPropertyStore;
 
@@ -229,7 +223,7 @@ namespace Opde {
 			InheritorPtr mInheritor;
 
 			/// Inheritor value changes listener
-			InheritValueChangeListenerPtr mInheritorListener;
+			Inheritor::ListenerID mInheritorListenerID;
 	};
 
 	/// Shared pointer to property group

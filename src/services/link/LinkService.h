@@ -64,20 +64,6 @@ namespace Opde {
 			* @param hidden The hidden relations (true) will not show up on public link list places */
 			RelationPtr createRelation(const std::string& name, DTypeDefPtr type, bool hidden);
 			
-			/** Registers a listener for relation events (link addition/removal/chage)
-			* @param relname The name of the relation (Link Kind) the listener wants to listen to
-			* @param listener a pointer to a LinkChangeListenerPtr struct containing instance and method pointers
-			* @note The same pointer to the listener struct has to be supplied to the unregisterLinkListener in order to suceed with unregistration
-			*/
-			void registerLinkListener(const std::string& relname, LinkChangeListenerPtr* listener);
-			
-			/** Unregisters a listener for relation events (link addition/removal/chage)
-			* @param relname The name of the relation (Link Kind) the listener wants to listen to
-			* @param listener a pointer to a LinkChangeListenerPtr struct containing instance and method pointers
-			* @note The same pointer to the LinkChangeListenerPtr as the one used to registration has to be used 
-			*/
-			void unregisterLinkListener(const std::string& relname, LinkChangeListenerPtr* listener);
-			
 			/** Get relation given it's name
 			* @param name The realtion's name
 			* @note The relation will be .isNull() if it was not found

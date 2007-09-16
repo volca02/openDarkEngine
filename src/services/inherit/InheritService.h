@@ -55,7 +55,7 @@ namespace Opde {
 	*  An example usage of Inheritor is property inheritance. Properties internally use the inheritors to transparently return values not directly assigned to the object ID, but rather inherited from the Effective object.
 	* Effective object is the carrier of the effective value - the value that has the maximal priority.
 	* */
-	class InheritService : public Service, public LinkChangeListener, public MessageSource<InheritChangeMsg, InheritChangeListenerPtr> {
+	class InheritService : public Service, public MessageSource<InheritChangeMsg> {
 		public:
 			/// Constructor
 			InheritService(ServiceManager *manager);
@@ -123,8 +123,8 @@ namespace Opde {
 			/// Map of inheritor factories
 			InheritorFactoryMap mInheritorFactoryMap;
 
-			/// Link (Relation metaproperty) listener registration struct
-			LinkChangeListenerPtr mMetaPropListener;
+			/// Link (Relation metaproperty) listener registration ID
+			Relation::ListenerID mMetaPropListenerID;
 
 			/// Handle to the link service
 			LinkServicePtr mLinkService;

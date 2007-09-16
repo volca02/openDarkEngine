@@ -94,7 +94,8 @@ namespace Opde {
 			mHidden(hidden),
 			mLinkMap(),
 			mSrcDstLinkMap(),
-			mDstSrcLinkMap() {
+			mDstSrcLinkMap(),
+			mLinkDataMap() {
 
 		// clear out the maximal ID info
 		for (int i = 0; i < 16; ++i) {
@@ -195,7 +196,7 @@ namespace Opde {
 			// The count of data and links should be the same
 			// assert(link_count == link_data_count);
 
-			for (int idx = 0; idx < link_count; idx++) {
+			for (unsigned int idx = 0; idx < link_count; idx++) {
 				// Will get deleted automatically once the LinkPtr is released...
 				// link->mData = new char[dsize];
 
@@ -213,7 +214,7 @@ namespace Opde {
 
 		char* dlink = new char[lsize];
 
-		for (int idx = 0; idx < link_count; idx++) {
+		for (unsigned int idx = 0; idx < link_count; idx++) {
 			flink->read(dlink, lsize);
 
 			LinkPtr link = LinkPtr(new Link(
@@ -428,7 +429,8 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	DVariant Relation::getLinkField(link_id_t id, const std::string& field) {
-		LinkDataMap::iterator it = mLinkDataMap.find(id);
+		LOG_DEBUG("LinkDataMap size : %d", mLinkDataMap.size());
+		LinkDataMap::const_iterator it = mLinkDataMap.find(id);
 
 		if (it != mLinkDataMap.end()) {
 			return mType->get(it->second->mData, field);
@@ -468,6 +470,7 @@ namespace Opde {
 			return it->second;
 		} else {
 			LOG_ERROR("Relation::getLinkData : Link data %d was not found in relation %d", id, mID);
+			return NULL;
 		}
 	}
 

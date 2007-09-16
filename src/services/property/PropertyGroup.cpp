@@ -28,7 +28,6 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	PropertyGroup::PropertyGroup(const std::string& name, const std::string& chunk_name, DTypeDefPtr type, uint ver_maj, uint ver_min, string inheritorName) :
-			mPropertyListeners(),
 			mName(name),
 			mChunkName(chunk_name),
 			mType(type),
@@ -40,17 +39,17 @@ namespace Opde {
 		mInheritor = inhs->createInheritor(inheritorName);
 
 		// And as a final step, register as inheritor listener
-		mInheritorListener.listener = this;
-        mInheritorListener.method = (InheritValueChangeMethodPtr)(&PropertyGroup::onInheritChange);
-        mInheritor->registerListener(&mInheritorListener);
+		Inheritor::ListenerPtr cil = new ClassCallback<InheritValueChangeMsg, PropertyGroup>(this, &PropertyGroup::onInheritChange);
+		
+        mInheritorListenerID = mInheritor->registerListener(cil);
 	}
 
 	// --------------------------------------------------------------------------
 	PropertyGroup::~PropertyGroup() {
 		clear();
-		mPropertyListeners.clear(); // those which did not ask for removal
-        mInheritor->unregisterListener(&mInheritorListener);
 
+		if (! mInheritor.isNull())
+			mInheritor->unregisterListener(mInheritorListenerID);
 	}
 
 	// --------------------------------------------------------------------------
@@ -61,6 +60,7 @@ namespace Opde {
 			return it->second;
 		else
 			LOG_ERROR("PropertyGroup::getData : Property for object ID %d was not found in group %s", obj_id, mName.c_str());
+			return NULL;
 	}
 
 	// --------------------------------------------------------------------------

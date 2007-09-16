@@ -38,7 +38,7 @@ namespace Opde {
 	* Some preliminary notes: VHot will probably be converted to TagPoints somehow
 	* The 0,0,0 bug will reveal itself here too, maybe. This is caused by default object coordinates being 0,0,0 and we have to wait for Position prop message to come in order to move the node
 	*/
-	class RenderService : public Service, public PropertyChangeListener {
+	class RenderService : public Service {
 		public:
 			RenderService(ServiceManager *manager);
 			virtual ~RenderService();
@@ -75,10 +75,10 @@ namespace Opde {
 			ObjectEntityMap mEntityMap;
 
 			// Listener structs for property messages. We have 2 now: Position and ModelName
-			PropertyChangeListenerPtr mPropPositionListener;
+			PropertyGroup::ListenerID mPropPositionListenerID;
 			PropertyGroupPtr mPropPosition;
 
-			PropertyChangeListenerPtr mPropModelNameListener;
+			PropertyGroup::ListenerID mPropModelNameListenerID;
 			PropertyGroupPtr mPropModelName;
 
 

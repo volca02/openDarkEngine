@@ -54,10 +54,10 @@ namespace Opde {
 	// --------------------------------------------------------------------------
 	RenderService::~RenderService() {
 		if (!mPropPosition.isNull())
-		    mPropPosition->unregisterListener(&mPropPositionListener);
+		    mPropPosition->unregisterListener(mPropPositionListenerID);
 		    
 		if (!mPropModelName.isNull())
-		    mPropModelName->unregisterListener(&mPropModelNameListener);
+		    mPropModelName->unregisterListener(mPropModelNameListenerID);
 	}
 
 	// --------------------------------------------------------------------------
@@ -68,11 +68,11 @@ namespace Opde {
 
 		mSceneMgr = mRoot->getSceneManager("DarkSceneManager"); // TODO: Really bad idea. Same goes to the WorldrepService
 
-		mPropPositionListener.listener = this;
-		mPropPositionListener.method = (PropertyChangeMethodPtr)(&RenderService::onPropPositionMsg);
+		PropertyGroup::ListenerPtr cposc =
+			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropPositionMsg);
 
-        mPropModelNameListener.listener = this;
-        mPropModelNameListener.method = (PropertyChangeMethodPtr)(&RenderService::onPropModelNameMsg);
+		PropertyGroup::ListenerPtr cmodelc =
+			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropModelNameMsg);
 
 		// Get the PropertyService, then the group Position
 
@@ -82,10 +82,10 @@ namespace Opde {
 		mPropertyService = ServiceManager::getSingleton().getService("PropertyService").as<PropertyService>();
 
 		mPropPosition = mPropertyService->getPropertyGroup("Position");
-		mPropPosition->registerListener(&mPropPositionListener);
+		mPropPositionListenerID = mPropPosition->registerListener(cposc);
 
 		mPropModelName = mPropertyService->getPropertyGroup("ModelName"); // TODO: hardcoded, maybe not a problem after all
-		mPropModelName->registerListener(&mPropModelNameListener);
+		mPropModelNameListenerID = mPropModelName->registerListener(cmodelc);
 
 		LOG_INFO("RenderService::init() - done");
 	}
@@ -176,7 +176,7 @@ namespace Opde {
 
 
                     } catch (FileNotFoundException &e) {
-                        LOG_ERROR("RenderService: Could not find the requested model %s", name.c_str());
+                        LOG_ERROR("RenderService: Could not find the requested model %s (exception encountered)", name.c_str());
                     }
 
                     break;

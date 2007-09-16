@@ -23,6 +23,7 @@
 #ifndef __PROPERTYCOMMON_H
 #define __PROPERTYCOMMON_H
 
+#include "compat.h"
 #include "DTypeDef.h"
 #include "File.h"
 
@@ -89,19 +90,6 @@ namespace Opde {
 		/// Property data that are now in use for object, or NULL if removal happened
 		PropertyDataPtr data;
 	};
-	
-	/** Relation listener abstract class
-	* This class is to be inherited by classes wanting to listen to PropertyGroup messages */	
-	class PropertyChangeListener {};
-	
-	/// Callback method declaration
-	typedef void (PropertyChangeListener::*PropertyChangeMethodPtr)(const PropertyChangeMsg& msg);
-
-	/// Listener pair. PropertyChangeListener 
-	typedef struct PropertyChangeListenerPtr {
-		PropertyChangeListener* listener;
-		PropertyChangeMethodPtr method;
-	};	
 	
 }
  

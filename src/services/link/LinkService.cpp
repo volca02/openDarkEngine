@@ -132,7 +132,7 @@ namespace Opde {
 
 		LOG_DEBUG("LinkService: Loading Relations map (%d items - %d size)", count, rels->size());
 
-		for (int i = 1; i <= count; i++) {
+		for (unsigned int i = 1; i <= count; i++) {
 			char text[32];
 
 			rels->read(text, 32);
@@ -209,26 +209,6 @@ namespace Opde {
 		rel->setID(id);
 
 		return true;
-	}
-
-	//------------------------------------------------------
-	void LinkService::registerLinkListener(const std::string& relname, LinkChangeListenerPtr* listener) {
-		RelationNameMap::iterator rnit = mRelationNameMap.find(relname);
-
-		if (rnit == mRelationNameMap.end())
-			OPDE_EXCEPT(string("Could not find relation named ") + relname, "LinkService::registerLinkListener");
-		else
-			rnit->second->registerListener(listener);
-	}
-
-	//------------------------------------------------------
-	void LinkService::unregisterLinkListener(const std::string& relname, LinkChangeListenerPtr* listener) {
-		RelationNameMap::iterator rnit = mRelationNameMap.find(relname);
-
-		if (rnit == mRelationNameMap.end())
-			OPDE_EXCEPT(string("Could not find relation named ") + relname, "LinkService::unregisterLinkListener");
-		else
-			rnit->second->unregisterListener(listener);
 	}
 
 	//------------------------------------------------------

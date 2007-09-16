@@ -28,7 +28,7 @@ namespace Opde {
 		/** Base class for cached inheritor implementations. Works self as "always" inheritor, inheriting in every situation.
 		 * This class implements all methods common to usual cached Inheritor implementations (refreshed every change, quick reads).
 		 * To accomplish this, the inheritor registers as a listener to the InheritService, and upon a change, it refreshes the cache. */
-		class CachedInheritor : public Inheritor, public InheritChangeListener {
+		class CachedInheritor : public Inheritor {
 				public:
 					/// Constructor
 					CachedInheritor(InheritService* is);
@@ -81,8 +81,8 @@ namespace Opde {
 					/// InheritService reference
 					InheritService* mInheritService;
 
-                    /// Inheritance change listener
-                    InheritChangeListenerPtr mInheritListener;
+                    /// Inheritance change listener ID
+					InheritService::ListenerID mListenerID;
 
 					/// Map of effective object ID's
 					typedef std::map < int, int > EffectiveObjectMap;

@@ -76,7 +76,10 @@ namespace Opde {
 	/*--------------------------------------------------------*/
 	/*--------------------- InheritService -------------------*/
 	/*--------------------------------------------------------*/
-	InheritService::InheritService(ServiceManager *manager) : Service(manager) {
+	InheritService::InheritService(ServiceManager *manager) : 
+			Service(manager), 
+			mMetaPropListenerID(0),	
+			mMetaPropRelation() {
         // Register some common factories.
         // If a special factory would be needed, it has to be registered prior to it's usage, okay?
         InheritorFactoryPtr if_cached = new CachedInheritorFactory();
@@ -93,7 +96,7 @@ namespace Opde {
 	InheritService::~InheritService() {
 	    // It may so happen that the init() was not called...
 	    if (!mMetaPropRelation.isNull())
-            mMetaPropRelation->unregisterListener(&mMetaPropListener);
+            mMetaPropRelation->unregisterListener(mMetaPropListenerID);
 	}
 
     //------------------------------------------------------
@@ -119,9 +122,8 @@ namespace Opde {
 		// So we can register as a link service listener
         LOG_INFO("InheritService::init()");
 
-		mMetaPropListener.listener = this;
-		mMetaPropListener.method = (LinkChangeMethodPtr)(&InheritService::onMetaPropMsg);
-
+		Relation::ListenerPtr metaPropCallback = 
+			new ClassCallback<LinkChangeMsg, InheritService>(this, &InheritService::onMetaPropMsg);
 
 		// Get the LinkService, then the relation metaprop
 
@@ -138,13 +140,17 @@ namespace Opde {
 		if (mMetaPropRelation.isNull())
 		    OPDE_EXCEPT("MetaProp relation not found. Fatal.", "InheritService::init");
 
-		mMetaPropRelation->registerListener(&mMetaPropListener); // TODO: hardcoded for now.
+		mMetaPropListenerID = mMetaPropRelation->registerListener(metaPropCallback);
+
+		LOG_DEBUG("InheritService::init() with this %X", this);
 
 		LOG_INFO("InheritService::init() - done");
 	}
 
 	//------------------------------------------------------
 	void InheritService::onMetaPropMsg(const LinkChangeMsg& msg) {
+		LOG_DEBUG("InheritService::onMetaPropMsg() with this %X", this);
+
 	    // If the message indicates reset of the database
 	    if (msg.change == LNK_RELATION_CLEARED) {
 	        clear(); // Will itself broadcast

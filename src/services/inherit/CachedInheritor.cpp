@@ -29,14 +29,15 @@ namespace Opde {
     /*--------------------- CachedInheritor -------------------*/
 	/*---------------------------------------------------------*/
     CachedInheritor::CachedInheritor(InheritService* is) : mInheritService(is) {
-        mInheritListener.listener = this;
-        mInheritListener.method = (InheritChangeMethodPtr)(&CachedInheritor::onInheritMsg);
-        mInheritService->registerListener(&mInheritListener);
+		InheritService::ListenerPtr callback = new
+			ClassCallback<InheritChangeMsg, CachedInheritor>(this, &CachedInheritor::onInheritMsg);
+
+		mListenerID = mInheritService->registerListener(callback);
     };
 
     //------------------------------------------------------
     CachedInheritor::~CachedInheritor() {
-        mInheritService->unregisterListener(&mInheritListener);
+        mInheritService->unregisterListener(mListenerID);
     }
 
     //------------------------------------------------------

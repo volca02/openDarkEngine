@@ -128,18 +128,6 @@ namespace Opde {
 		link_id_t linkID;
 	};
 
-	/** Relation listener abstract class
-	* This class is to be inherited by classes wanting to listen to Relation messages */
-	class LinkChangeListener {};
-
-	/// Callback method declaration (thanks betajaen for this idea)
-	typedef void (LinkChangeListener::*LinkChangeMethodPtr)(const LinkChangeMsg& msg);
-
-	/// Listener pair. LinkChangeListener
-	typedef struct LinkChangeListenerPtr {
-		LinkChangeListener* listener;
-		LinkChangeMethodPtr method;
-	};
 
 /// Creates a link ID from flavour, concreteness and index
 #define LINK_MAKE_ID(flavor, concrete, index) (flavor<<20 | concrete << 16 | index)

@@ -33,7 +33,7 @@
 namespace Opde {
 	/** @brief Relation. A store of a group of links of the same flavour.
 	*/
-	class Relation : public NonCopyable, public MessageSource<LinkChangeMsg, LinkChangeListenerPtr> {
+	class Relation : public NonCopyable, public MessageSource<LinkChangeMsg> {
 		public:
 			Relation(const std::string& name, DTypeDefPtr type, bool hidden = false);
 			virtual ~Relation();

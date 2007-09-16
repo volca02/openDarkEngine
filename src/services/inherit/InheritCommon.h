@@ -53,28 +53,13 @@ namespace Opde {
 		int srcID;
 	};
 
-	/** Inheritance change listener abstract class.
-	* This class is to be inherited by classes wanting to listen to Inheritor messages */
-	class InheritValueChangeListener {};
-
-	/// Callback method declaration
-	typedef void (InheritValueChangeListener::*InheritValueChangeMethodPtr)(const InheritValueChangeMsg& msg);
-
-	/// Listener pair. InheritChangeListener
-	typedef struct InheritValueChangeListenerPtr {
-		InheritValueChangeListener* listener;
-		InheritValueChangeMethodPtr method;
-	};
-
-
-
 	/** Inheritor interface
 	 * Inheritors are used to query effective object id
 	 * (the id of an object holding effective value)
 	 * given an object id.
 	 * The inheritor is a source of the implementation messages.
 	 * This means that all the objects that are changed by the inheritance modification can be notified through the listener */
-	class Inheritor : public MessageSource<InheritValueChangeMsg, InheritValueChangeListenerPtr> {
+	class Inheritor : public MessageSource<InheritValueChangeMsg> {
 		public:
 			/** Returns true if the objID has true 'implements' record */
 			virtual bool getImplements(int objID) const = 0;
@@ -142,19 +127,6 @@ namespace Opde {
 		int dstID;
 		/// Priority of the inheritance
 		unsigned int priority;
-	};
-
-	/** Inheritance change listener abstract class.
-	* This class is to be inherited by classes wanting to listen to Inheritor messages */
-	class InheritChangeListener {};
-
-	/// Callback method declaration
-	typedef void (InheritChangeListener::*InheritChangeMethodPtr)(const InheritChangeMsg& msg);
-
-	/// Listener pair. InheritChangeListener
-	typedef struct InheritChangeListenerPtr {
-		InheritChangeListener* listener;
-		InheritChangeMethodPtr method;
 	};
 
 	class InheritorFactory {
