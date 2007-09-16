@@ -22,44 +22,62 @@
 #ifndef __MESSAGESOURCE_H
 #define __MESSAGESOURCE_H
 
+#include "SharedPtr.h"
+#include "Callback.h"
+
 namespace Opde {
 
     /** Message Source - a message sending class template.
     * M stands for the message type sended
-    * L stands for the Listener type used */
-    template <typename M, typename L> class MessageSource {
-        protected:
-            /// A set of listeners
-			typedef typename std::set< L* > Listeners;
+    */
+    template <typename M> class MessageSource {
+		public:
+			typedef size_t ListenerID;
+			typedef typename Callback<M> Listener;
+			typedef shared_ptr< Listener >  ListenerPtr;
+
+		protected:
+			ListenerID mCurrent;
+
+		    /// A set of listeners
+			typedef typename std::map< ListenerID, ListenerPtr > Listeners;
 
 			/// Listeners for the link changes
 			Listeners mListeners;
 
             /// Sends a message to all listeners
-            void broadcastMessage(const M& msg) const {
-                typename Listeners::const_iterator it = mListeners.begin();
+            void broadcastMessage(const M& msg) {
+                Listeners::iterator it = mListeners.begin();
 
                 for (; it != mListeners.end(); ++it) {
-                    // Call the method on the listener pointer
-                    ((*it)->listener->*(*it)->method)(msg);
+                    // Use the callback functor to fire the callback
+					(*it->second)(msg);
                 }
             }
 
         public:
+			MessageSource() : mCurrent(0) {};
+			~MessageSource() { mListeners.clear(); };
+
 			/** Registers a listener.
 			* @param listener A pointer to L
 			* @note The same pointer has to be supplied to the unregisterListener in order to succeed with unregistration
 			*/
-			void registerListener(L* listener) {
-                mListeners.insert(listener);
-            }
+			ListenerID registerListener(ListenerPtr listener) {
+				mListeners.insert(std::make_pair(mCurrent, listener));
+				return mCurrent++;
+			}
 
 			/** Unregisters a listener.
-			* @param listener A pointer to L
+			* @param listener ID returned by the registerListener call
 			* @note The pointer has to be the same as the one supplied to the registerListener (not a big deal, just supply a pointer to a member variable)
 			*/
-			void unregisterListener(L* listener) {
-                mListeners.erase(listener);
+			void unregisterListener(ListenerID id) {
+				Listeners::iterator it = mListeners.find(id);
+
+				if (it != mListeners.end()) {
+					mListeners.erase(it);
+				}
             }
     };
 
