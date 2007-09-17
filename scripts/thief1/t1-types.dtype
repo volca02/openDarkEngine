@@ -3184,23 +3184,23 @@ namespace chunks {
 
 	
 	// Label: CellMotion
-	struct CELL_MOTION {
-		
-		struct anchor [256] {
-			vector position
-			alias short-vector rotation [256]
-			uint32 flags
-			int16 use physaxistype axis
-			int8 zero
-		}
-
-		
-		struct delta [256] {
-			vector position
-			alias short-vector rotation [256]
-		}
-
-	}
+	// struct CELL_MOTION {
+	//	
+	// 	struct anchor [256] {
+	// 		vector position
+	// 		alias short-vector rotation [256]
+	// 		uint32 flags
+	// 		int16 use physaxistype axis
+	// 		int8 zero
+	// 	}
+	// 
+	// 	
+	// 	struct delta [256] {
+	// 		vector position
+	// 		alias short-vector rotation [256]
+	// 	}
+	// 
+	// }
 
 	
 	// Label: RenderParams
