@@ -31,6 +31,7 @@
 #include <OgreLogManager.h>
 #include <OgreSkeletonManager.h>
 #include <OgreBone.h>
+#include <OgreTextureManager.h>
 
 #include <OgreMeshSerializer.h>
 #include <OgreSkeletonSerializer.h>
@@ -408,8 +409,9 @@ namespace Ogre {
 
                 for (; it != mFillers.end(); ++it) {
                     delete it->second;
-                    mFillers.erase(it);
                 }
+
+                mFillers.clear();
             };
 
             void load();
@@ -1028,7 +1030,20 @@ namespace Ogre {
         if (mat.type == MD_MAT_TMAP) {
 
             // Texture unit state for the main texture...
-            TextureUnitState* tus = pass->createTextureUnitState(String("txt/") + String(mat.name));
+            TextureUnitState* tus;
+
+            String txtname = String("txt16/") + String(mat.name);
+            // First, let's look into txt16 dir, then into the txt dir. I try to
+             try {
+
+                    TextureManager::getSingleton().load(txtname,
+                                                ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_2D);
+             } catch (Exception &e) {
+                    // Error loading from txt16...
+                    txtname = String("txt/") + String(mat.name);
+                }
+
+            tus = pass->createTextureUnitState(txtname);
 
             tus->setTextureAddressingMode(TextureUnitState::TAM_WRAP);
             tus->setTextureCoordSet(0);
@@ -1088,7 +1103,7 @@ namespace Ogre {
         Pass *pass = omat->getTechnique(0)->getPass(0);
 
         // Fill in a color-only material
-        TextureUnitState* tus = pass->createTextureUnitState(0);
+        TextureUnitState* tus = pass->createTextureUnitState();
 
         // set the material color from the lg system color table
         tus->setColourOperationEx(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT,
