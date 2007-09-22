@@ -77,7 +77,7 @@ namespace Opde {
 			Ogre::Radian mRotX, mRotY;
 			float mMoveScale;
 			Ogre::Degree mRotScale;
-			Ogre::Real mMoveSpeed;
+			Ogre::Real mMoveSpeed, mRotateYFactor;
 			Ogre::Degree mRotateSpeed;
 			Ogre::Vector3 mTranslateVector;
 			

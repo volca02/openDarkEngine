@@ -324,7 +324,7 @@ namespace Opde {
 		mInputSystem = OIS::InputManager::createInputSystem( paramList );
 
 		// If possible create a buffered keyboard
-		if( mInputSystem->numKeyBoards() > 0 ) {
+		if( mInputSystem->numKeyboards() > 0 ) {
 			mKeyboard = static_cast<OIS::Keyboard*>( mInputSystem->createInputObject( OIS::OISKeyboard, true ) );
 			mKeyboard->setEventCallback( this );
 		}

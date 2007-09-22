@@ -23,6 +23,7 @@
 #include "GamePlayState.h"
 #include "logger.h"
 #include "integers.h"
+#include <OgreConfigFile.h> 
 
 #include <OgreRenderWindow.h>
 #include <OgreOverlayElement.h>
@@ -36,8 +37,28 @@ namespace Opde {
 	template<> GamePlayState* Singleton<GamePlayState>::ms_Singleton = 0;
 	
 	GamePlayState::GamePlayState() : mSceneMgr(NULL), mDebugOverlay(NULL) {
-		mRotateSpeed = 36;
-		mMoveSpeed = 50;
+			mRotateSpeed = mMoveSpeed = mRotateYFactor = 0;
+    try  {  // load a few options
+      Ogre::ConfigFile cf;
+      Ogre::StringConverter sc;
+      cf.load("opde.cfg");
+      Ogre::String tmp = cf.getSetting("move_speed");
+      mMoveSpeed = sc.parseInt(tmp);
+      tmp = cf.getSetting("mouse_speed");
+      mRotateSpeed = sc.parseInt(tmp);
+      tmp = cf.getSetting("mouse_invert");
+      mRotateYFactor = sc.parseInt(tmp);
+    }
+    catch (Ogre::Exception e)
+    {
+        // Guess the file didn't exist
+    }
+  	if (mMoveSpeed == 0.0) 
+			mMoveSpeed = 50;
+		if (mRotateSpeed.valueDegrees() == 0.0) 
+			mRotateSpeed = 36;
+		if (mRotateYFactor == 0.0) 
+			mRotateYFactor = 1;
 		
 		mTranslateVector = Vector3::ZERO;
 		mRotX = 0;
@@ -290,7 +311,8 @@ namespace Opde {
 	
 	bool GamePlayState::mouseMoved( const OIS::MouseEvent &e ) {
 		mRotX -= Degree( e.state.X.rel * 20.00);
-		mRotY -= Degree( e.state.Y.rel * 20.00);
+		// use Y axis invert
+		mRotY -= Degree( e.state.Y.rel * 20.00 * mRotateYFactor);
 		return false;
 	}
 	
