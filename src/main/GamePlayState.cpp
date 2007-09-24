@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *****************************************************************************/
- 
+
 #include "OIS.h"
 #include "GamePlayState.h"
 #include "logger.h"
@@ -71,6 +71,7 @@ namespace Opde {
 		mScreenShot = false;
 		
 		mSceneDetailIndex = 0;
+		mNumScreenShots = 1;
 	}
 	
 	void GamePlayState::start() {
@@ -188,7 +189,17 @@ namespace Opde {
 			
 			mPortalDisplay = false;
 		}
-		
+
+		if (mScreenShot) {
+            char tmp[20];
+            sprintf(tmp, "screenshot_%d.png", ++mNumScreenShots);
+            RenderWindow* w = Ogre::Root::getSingleton().getAutoCreatedWindow();
+
+            w->writeContentsToFile(tmp);
+
+		    mScreenShot = false;
+		}
+
 		mConsole->update(timePassed);
 		
 		// Temporary: Debug Overlay 
@@ -197,6 +208,7 @@ namespace Opde {
 		static String bestFps = "Best FPS: ";
 		static String worstFps = "Worst FPS: ";
 		static String tris = "Triangle Count: ";
+		static String batches = "Batch Count: ";
 
 		// update stats when necessary
 		try {
@@ -214,8 +226,11 @@ namespace Opde {
 		    guiWorst->setCaption(worstFps + StringConverter::toString(stats.worstFPS)
 			+" "+StringConverter::toString(stats.worstFrameTime)+" ms");
 
-		    OverlayElement* guiTris = OverlayManager::getSingleton().getOverlayElement("Core/NumTris");
+		    OverlayElement* guiTris = OverlayManager::getSingleton().getOverlayElement("Opde/NumTris");
 		    guiTris->setCaption(tris + StringConverter::toString(stats.triangleCount));
+
+		    OverlayElement* guiBatches = OverlayManager::getSingleton().getOverlayElement("Opde/NumBatches");
+		    guiBatches->setCaption(batches + StringConverter::toString(stats.batchCount));
 
 		    // OverlayElement* guiDbg = OverlayManager::getSingleton().getOverlayElement("Core/DebugText");
 		}
@@ -226,31 +241,39 @@ namespace Opde {
 		
 		// update the portal statistics
 		try {
+			// Volca: I've disabled the timing reports, they need a patch of SM to work
 			OverlayElement* guibc = OverlayManager::getSingleton().getOverlayElement("Opde/BackCulls");
 			OverlayElement* guiep = OverlayManager::getSingleton().getOverlayElement("Opde/EvalPorts");
 			OverlayElement* guirc = OverlayManager::getSingleton().getOverlayElement("Opde/RendCells");
-			
-			// Temporary: Debug Overlay 
+			// OverlayElement* guitt = OverlayManager::getSingleton().getOverlayElement("Opde/TravTime");
+			// OverlayElement* guisr = OverlayManager::getSingleton().getOverlayElement("Opde/StaticRenderTime");
+
+			// Temporary: Debug Overlay
 			static String sbc = "Backface culls: ";
 			static String sep = "Evaluated portals: ";
 			static String src = "Rendered cells: ";
-			
-			uint bculls, eports, rendc;
-			
+			// static String stt = "Traversal Time: ";
+			// static String ssr = "Static Render Time: ";
+
+			uint bculls, eports, rendc, travtm, statrt;
+
 			mSceneMgr->getOption("BackfaceCulls", &bculls);
 			mSceneMgr->getOption("CellsRendered", &rendc);
 			mSceneMgr->getOption("EvaluatedPortals", &eports);
-			
-			
+			// mSceneMgr->getOption("TraversalTime", &travtm);
+			// mSceneMgr->getOption("StaticRenderTime", &statrt);
+
 			guibc->setCaption(sbc + StringConverter::toString(bculls));
 			guiep->setCaption(sep + StringConverter::toString(eports));
 			guirc->setCaption(src + StringConverter::toString(rendc));
+			// guitt->setCaption(stt + StringConverter::toString(travtm) + " ms");
+			// guisr->setCaption(ssr + StringConverter::toString(statrt) + " ms");
 		}
 		catch(...)
 		{
 		    // ignore
 		}
-	
+
 	}
 
 	bool GamePlayState::keyPressed( const OIS::KeyEvent &e ) {
@@ -258,18 +281,18 @@ namespace Opde {
         		mConsole->setActive(!mConsole->isActive());
 			return true;
     		}
-		
+
 		if (!mConsole->injectKeyPress(e)) {
-			if(e.key == KC_W) { 
+			if(e.key == KC_W) {
 				mForward = true;
 				return true;
-			} else if(e.key == KC_S) { 
+			} else if(e.key == KC_S) {
 				mBackward = true;
 				return true;
-			} else if(e.key == KC_A) { 
+			} else if(e.key == KC_A) {
 				mLeft = true;
 				return true;
-			} else if(e.key == KC_D) { 
+			} else if(e.key == KC_D) {
 				mRight = true;
 				return true;
 			} else if (e.key == KC_SYSRQ) {
@@ -286,19 +309,19 @@ namespace Opde {
 			return true;
 		}
 	}
-	
+
 	bool GamePlayState::keyReleased( const OIS::KeyEvent &e ) {
 		if (!mConsole->isActive()) {
-			if(e.key == KC_W) { 
+			if(e.key == KC_W) {
 				mForward = false;
 				return true;
-			} else if(e.key == KC_S) { 
+			} else if(e.key == KC_S) {
 				mBackward = false;
 				return true;
-			} else if(e.key == KC_A) { 
+			} else if(e.key == KC_A) {
 				mLeft = false;
 				return true;
-			} else if(e.key == KC_D) { 
+			} else if(e.key == KC_D) {
 				mRight = false;
 				return true;
 			} else	if( e.key == KC_ESCAPE ) {
@@ -306,23 +329,23 @@ namespace Opde {
 				return true;
 			}
     		}
-		
+
 	}
-	
+
 	bool GamePlayState::mouseMoved( const OIS::MouseEvent &e ) {
 		mRotX -= Degree( e.state.X.rel * 20.00);
 		// use Y axis invert
 		mRotY -= Degree( e.state.Y.rel * 20.00 * mRotateYFactor);
 		return false;
 	}
-	
+
 	bool GamePlayState::mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
 		return false;
 	}
-	
+
 	bool GamePlayState::mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
 		return false;
 	}
-	
+
 }
 
