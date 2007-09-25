@@ -18,8 +18,8 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *****************************************************************************/
- 
- 
+
+
 #ifndef __GAMEPLAYSTATE_H
 #define __GAMEPLAYSTATE_H
 
@@ -34,18 +34,18 @@
 
 
 namespace Opde {
-	
+
 	class GamePlayState : public Singleton<GamePlayState>, public GameState {
 		public:
 			GamePlayState();
-			
+
 			virtual void start();
-			virtual void exit(); 
+			virtual void exit();
 			virtual void suspend();
-			virtual void resume(); 
-			
+			virtual void resume();
+
 			virtual void update(unsigned long timePassed);
-			
+
 			virtual bool keyPressed( const OIS::KeyEvent &e );
 			virtual bool keyReleased( const OIS::KeyEvent &e );
 			virtual bool mouseMoved( const OIS::MouseEvent &e );
@@ -58,20 +58,20 @@ namespace Opde {
 			Ogre::OverlayManager *mOverlayMgr;
 			Ogre::Camera *mCamera;
 			Ogre::Viewport *mViewport;
-			
+
 			// Movements:
 			bool mForward;
 			bool mBackward;
 			bool mLeft;
 			bool mRight;
-		
+
 			// Screenshot requested
 			bool mScreenShot;
-			
+
 			// Mode display - Solid, wireframe
 			bool mSceneDisplay;
-			
-			// Display portal meshes 
+
+			// Display portal meshes
 			bool mPortalDisplay;
 			
 			Ogre::Radian mRotX, mRotY;
@@ -80,17 +80,19 @@ namespace Opde {
 			Ogre::Real mMoveSpeed, mRotateYFactor;
 			Ogre::Degree mRotateSpeed;
 			Ogre::Vector3 mTranslateVector;
-			
+
 			int mSceneDetailIndex;
-			
+
 			// Debug overlay, Temporary
 			Ogre::Overlay* mDebugOverlay;
 			Ogre::Overlay* mPortalOverlay;
-			
+
 			Ogre::RenderWindow* mWindow;
-			
+
 			ConsoleFrontend* mConsole;
-	};	
+
+			int mNumScreenShots;
+	};
 }
 
 #endif
