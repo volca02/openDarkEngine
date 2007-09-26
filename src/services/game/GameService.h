@@ -19,62 +19,51 @@
  *
  *****************************************************************************/
 
- 
+
 #ifndef __GAMESERVICE_H
 #define __GAMESERVICE_H
 
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
+#include "DatabaseService.h"
 #include "FileGroup.h"
 #include "SharedPtr.h"
 
 namespace Opde {
-	
-	/** @brief Game service - service defining game states, and mission loading/saving
+
+	/** @brief Game service - service defining game states (Temporary code. Will be filled with a high level state management - screens)
 	*/
 	class GameService : public Service {
 		public:
 			GameService(ServiceManager *manager);
 			virtual ~GameService();
-			
-			/// Loads a game database. Can be either savegame, or mission
+
+			/// Loads a game database using the database service
 			void load(const std::string& filename);
-			
-			/// Unload the game data. Release all the data that are connected to a game's mission in progress
-			void unload();
+
 		protected:
-			
-			/// Retrieve a readonly database file by it's name
-			DarkFileGroup* getDBFileNamed(const std::string& filename);
-			
-			/// Load and assign a mission database to the db (has to be a SaveGame), then loads the gamesys for the loaded miss file
-			void _loadMissionDB(DarkFileGroup* db);
-			
-			/// Load and assign a gamesys database to the db (has to be a mission or savegame)
-			void _loadGameSysDB(DarkFileGroup* db);
-			
-			DarkFileGroup* mCurDB;
+			DatabaseServicePtr mDbService;
 	};
-	
+
 	/// Shared pointer to game service
 	typedef shared_ptr<GameService> GameServicePtr;
-	
-	
+
+
 	/// Factory for the GameService objects
 	class GameServiceFactory : public ServiceFactory {
 		public:
 			GameServiceFactory();
 			~GameServiceFactory() {};
-			
+
 			/** Creates a GameService instance */
 			Service* createInstance(ServiceManager* manager);
-			
+
 			virtual const std::string& getName();
-		
+
 		private:
 			static std::string mName;
 	};
 }
- 
- 
+
+
 #endif
