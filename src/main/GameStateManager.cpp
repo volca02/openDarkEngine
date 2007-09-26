@@ -317,7 +317,7 @@ namespace Opde {
 		paramList.insert( std::make_pair( std::string( "WINDOW" ), windowHndStr.str() ) );
 
 		// Non-exclusive input - for debugging purposes
-
+/*
 		#if defined OIS_WIN32_PLATFORM
 		paramList.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_FOREGROUND" )));
 		paramList.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_NONEXCLUSIVE")));
