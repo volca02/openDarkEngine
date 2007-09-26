@@ -9,3 +9,6 @@ add_subdirectory(property)
 
 # Renderer service
 add_subdirectory(render)
+
+# Dark Database handling service
+add_subdirectory(database)

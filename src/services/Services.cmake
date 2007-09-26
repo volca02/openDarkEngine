@@ -10,6 +10,7 @@ SET(OPDE_SERVICE_INCLUDES
     ${OPDE_SOURCE_DIR}/src/services/property
     ${OPDE_SOURCE_DIR}/src/services/inherit
     ${OPDE_SOURCE_DIR}/src/services/render
+    ${OPDE_SOURCE_DIR}/src/services/database
 )
 
 # All the resulting libraries in a nice package as well
@@ -22,6 +23,7 @@ SET(OPDE_SERVICE_LIBRARIES
     OpdePropertyService
     OpdeInheritService
     OpdeRenderService
+    OpdeDatabaseService
 )
 
 # To use this, just do INCLUDE(${OPDE_SOURCE_DIR}/src/services/Services.cmake)
