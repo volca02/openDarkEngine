@@ -76,9 +76,9 @@ namespace Opde {
 	/*--------------------------------------------------------*/
 	/*--------------------- InheritService -------------------*/
 	/*--------------------------------------------------------*/
-	InheritService::InheritService(ServiceManager *manager) : 
-			Service(manager), 
-			mMetaPropListenerID(0),	
+	InheritService::InheritService(ServiceManager *manager) :
+			Service(manager),
+			mMetaPropListenerID(0),
 			mMetaPropRelation() {
         // Register some common factories.
         // If a special factory would be needed, it has to be registered prior to it's usage, okay?
@@ -120,20 +120,25 @@ namespace Opde {
 	void InheritService::init() {
    		// Link Service should have created us automatically through service masks.
 		// So we can register as a link service listener
-        LOG_INFO("InheritService::init()");
+		mLinkService = ServiceManager::getSingleton().getService("LinkService").as<LinkService>();
 
-		Relation::ListenerPtr metaPropCallback = 
+		if (mLinkService.isNull())
+		    OPDE_EXCEPT("LinkService does not exist?", "InheritService::init");
+	}
+
+    //------------------------------------------------------
+    void InheritService::bootstrapFinished() {
+       	// Link Service should have created us automatically through service masks.
+		// So we can register as a link service listener
+        LOG_INFO("InheritService::bootstrapFinished()");
+
+		Relation::ListenerPtr metaPropCallback =
 			new ClassCallback<LinkChangeMsg, InheritService>(this, &InheritService::onMetaPropMsg);
 
 		// Get the LinkService, then the relation metaprop
 
         // contact the config. service, and look for the inheritance link name
 		// TODO: ConfigurationService::getKey("Core","InheritanceLinkName").toString();
-
-		mLinkService = ServiceManager::getSingleton().getService("LinkService").as<LinkService>();
-		
-		if (mLinkService.isNull())
-		    OPDE_EXCEPT("LinkService does not exist?", "InheritService::init");
 
 		mMetaPropRelation = mLinkService->getRelation("MetaProp");
 
@@ -142,15 +147,12 @@ namespace Opde {
 
 		mMetaPropListenerID = mMetaPropRelation->registerListener(metaPropCallback);
 
-		LOG_DEBUG("InheritService::init() with this %X", this);
 
-		LOG_INFO("InheritService::init() - done");
-	}
+        LOG_INFO("InheritService::bootstrapFinished() - done");
+    }
 
 	//------------------------------------------------------
 	void InheritService::onMetaPropMsg(const LinkChangeMsg& msg) {
-		LOG_DEBUG("InheritService::onMetaPropMsg() with this %X", this);
-
 	    // If the message indicates reset of the database
 	    if (msg.change == LNK_RELATION_CLEARED) {
 	        clear(); // Will itself broadcast

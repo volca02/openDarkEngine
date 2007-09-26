@@ -66,6 +66,9 @@ namespace Opde {
             /// Service initialization - @see Service::init()
 			virtual void init();
 
+			/// Service bootstraping ended - @see Service::bootstrapFinished()
+			virtual void bootstrapFinished();
+
 			/** Registers an inheritor factory */
 			void addInheritorFactory(InheritorFactoryPtr factory);
 
