@@ -32,7 +32,7 @@ namespace Opde {
 
 	template<> ServiceManager* Singleton<ServiceManager>::ms_Singleton = 0;
 
-	ServiceManager::ServiceManager() : mServiceFactories(), mServiceInstances() {
+	ServiceManager::ServiceManager() : mServiceFactories(), mServiceInstances(), mBootstrapFinished(false) {
 
 	}
 
@@ -103,11 +103,16 @@ namespace Opde {
 	ServicePtr ServiceManager::createInstance(const std::string& name) {
 		ServiceFactory* factory = findFactory(name);
 
-		LOG_DEBUG("ServiceManager: Service instance for %s not found, will create.", name.c_str());
+        LOG_DEBUG("ServiceManager: Creating service %s", name.c_str());
 
 		if (factory != NULL) { // Found a factory for the Service name
 			ServicePtr ns = factory->createInstance(this);
-			mServiceInstances.insert(make_pair(name, ns));
+			mServiceInstances.insert(make_pair(factory->getName(), ns));
+			ns->init();
+
+			if (mBootstrapFinished) // Bootstrap already over, call the after-bootstrap init too
+                ns->bootstrapFinished();
+
 			return ns;
 		} else {
 			OPDE_EXCEPT(string("Factory named ") + name + string(" not found"), "OpdeServiceManager::getService");
@@ -120,6 +125,7 @@ namespace Opde {
 		if (!service.isNull())
 			return service;
 		else {
+    		LOG_DEBUG("ServiceManager: Service instance for %s not found, will create.", name.c_str());
 			return createInstance(name);
 		}
 	}
@@ -130,18 +136,22 @@ namespace Opde {
 		for (; factory_it != mServiceFactories.end(); ++factory_it) {
 
 			if (factory_it->second->getMask() & mask) { // if the mask fits
-				ServicePtr ns = factory_it->second->createInstance(this); // Create the instance
-				mServiceInstances.insert(make_pair(factory_it->second->getName(), ns)); // and register it in the list
+			    ServicePtr service = getService(factory_it->second->getName());
 			}
 		}
 	}
 
-	void ServiceManager::initServices() {
+	void ServiceManager::bootstrapFinished() {
+	    if (mBootstrapFinished) // just do this once
+            return;
+
         ServiceInstanceMap::iterator it = mServiceInstances.begin();
 
         for (; it != mServiceInstances.end() ; ++it ) {
-            it->second->init();
+            it->second->bootstrapFinished();
         };
+
+        mBootstrapFinished = true;
 	}
 
 }

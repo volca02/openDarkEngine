@@ -32,6 +32,8 @@ namespace Opde {
 	/** Central manager for the Services. Each service must have the ServiceFactory implemented, and must implement Service class.
 	* @see ServiceFactory
 	* @see Service
+	* @note Two phases exist in the service manager. Bootstrap and normal run. Bootstrap phase is used to initialize services without any dependencies
+	* @note Services are guaranteed to receive calls in this order: Constructor, init(), bootstrapFinished()
 	*/
 	class ServiceManager : public Singleton<ServiceManager>, public NonCopyable {
 		private:
@@ -40,6 +42,8 @@ namespace Opde {
 
 			ServiceFactoryMap mServiceFactories;
 			ServiceInstanceMap mServiceInstances;
+
+			bool mBootstrapFinished;
 
 			ServiceFactory* findFactory(const std::string& name);
 			ServicePtr findService(const std::string& name);
@@ -68,8 +72,9 @@ namespace Opde {
 			* @param mask The mask to use */
 			void createByMask(uint mask);
 
-			/** Calls the method Service::init() on all instanced services. */
-            void initServices();
+            /** Inform the services that bootstraping has finished
+            */
+			void bootstrapFinished();
 	};
 }
 
