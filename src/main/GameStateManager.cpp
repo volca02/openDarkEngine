@@ -68,6 +68,7 @@ namespace Opde {
 		while (!mStateStack.empty()) {
 			GameState* state = mStateStack.top();
 			mStateStack.pop();
+
 			state->exit();
 		}
 
@@ -106,7 +107,7 @@ namespace Opde {
 		// Releas
 		delete mLogger;
 		delete mStdLog;
-      delete mFileLog;
+        delete mFileLog;
 
 		delete mConsoleBackend;
 		delete mRoot;
@@ -224,6 +225,13 @@ namespace Opde {
 
 			// Deal with platform specific issues
 			Ogre::WindowEventUtilities::messagePump();
+		}
+
+        while (!mStateStack.empty()) {
+			GameState* state = mStateStack.top();
+			mStateStack.pop();
+
+			state->exit();
 		}
 
         delete ps;
