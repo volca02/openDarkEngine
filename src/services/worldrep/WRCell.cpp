@@ -233,13 +233,14 @@ namespace Opde {
 			if (flags != 0) {
 				tmp << txtName.str(); // directly name after the original. This will cause the material to be found
 			} else {
+				// !NLM!
 				tmp << "Shader" << texture << "#" << atlasnum;
+				// tmp << txtName.str();
 			}
 		}
 		std::string shaderName = tmp.str();
 		
 		MaterialPtr shadMat = MaterialManager::getSingleton().getByName(shaderName);
-		
 		
 		// If the material was not yet constructed, we'll do so now...
 		if (shadMat.isNull()) {
@@ -318,7 +319,8 @@ namespace Opde {
 		
 		manual->textureCoord(vert.texcoords[0], vert.texcoords[1]);
 		
-		manual->textureCoord(vert.lightmap[0], vert.lightmap[1]);
+		// !NLM!
+		// manual->textureCoord(vert.lightmap[0], vert.lightmap[1]);
 		
 		Vector3 normal(vert.normal[0], vert.normal[1], vert.normal[2]);
 	}
@@ -615,67 +617,6 @@ namespace Opde {
 
 			LOG_DEBUG("   - Attaching cell water portal %d geometry : done", cellNum);
 		}
-		
-		// NOTE: The following code adds a white wireframe object for every portal in the scene. Ment as a debug tool it is
-		// TODO: Remove once the scene queries run ok
-		
-		// Create a white wireframe material first
-		/*
-		for (int polyNum = portalStart; polyNum < header.num_polygons; polyNum++) {
-			// Prepare the object's name
-			StringUtil::StrStreamType modelName;
-			modelName << "cell_" << cellNum << "_portal_" << polyNum << "_edge";	
-			
-			// Each portal's mech gets it's own manual object. This way we minimize the mesh attachments to hopefully minimal set	
-			ManualObject* manual = sceneMgr->createManualObject(modelName.str());
-			
-    			manual->begin("BaseWhiteNoLighting", RenderOperation::OT_LINE_STRIP);
-			
-			wr_coord_t polyCenter = vertices[ poly_indices[polyNum][0] ];
-			Vector3 nodeCenter = Vector3(polyCenter.x, polyCenter.y, polyCenter.z);
-			
-			// for each vertex, insert into the model
-			for (int vert = 0; vert < face_maps[polyNum].count; vert++)  {
-				wr_coord_t vrelative = vertices[ poly_indices[polyNum][vert] ];
-				
-				// Subtract the center
-				vrelative.x = vrelative.x - polyCenter.x;
-				vrelative.y = vrelative.y - polyCenter.y;
-				vrelative.z = vrelative.z - polyCenter.z;
-				
-				manual->position(vrelative.x, vrelative.y, vrelative.z);
-			}
-			
-			// now feed the indexes
-			for (int t = 0; t <= face_maps[polyNum].count; t++) {
-				// push back the index
-				manual->index(t % face_maps[polyNum].count);
-			}
-			
-
-			manual->end();
-
-			// LOG_DEBUG("Attaching cell %d geometry to it's scene node", cellNum);
-			
-			// Attach the resulting object to the node with the center in the center vertex of the mesh...
-			SceneNode* meshNode = sceneMgr->createSceneNode(modelName.str());
-			
-			
-			(static_cast<DarkSceneNode*>(meshNode))->attachObject(manual);
-			
-			meshNode->setPosition(nodeCenter);
-			
-			if(meshNode) {
-				meshNode->needUpdate(true);
-			}
-
-			// Attach the new scene node to the root node of the scene (this ensures no further transforms, other than we want, 
-			// take place, and that the geom will be visible only when needed)
-			sceneMgr->getRootSceneNode()->addChild(meshNode);
-			
-
-		}
-		*/
 	}
 	
 	//------------------------------------------------------------------------------------
@@ -833,7 +774,7 @@ namespace Opde {
 		// for each of the polygons
 		for (int polyNum = 0; polyNum < faceCount; polyNum++) {
 			std::pair< Ogre::uint, Ogre::uint > dimensions;
-			
+			 
 			MaterialPtr shadMat = getMaterial(face_infos[polyNum].txt, lightMaps[polyNum]->getAtlasIndex(), dimensions, face_maps[polyNum].flags);
 			
 			// HACKY... I dunno the real calculation behind lightmaps yet

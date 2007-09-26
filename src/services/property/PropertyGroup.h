@@ -88,13 +88,13 @@ namespace Opde {
 
 			/** Loads properties from a file group
 			* @param db The database to load from */
-			void load(FileGroup* db);
+			void load(FileGroupPtr db);
 
 			/** Saves properties to a file group
 			* @param db The database to save to
 			* @param saveMask The mask to use while saving (1 - archetypes, 2 - instances, 3 - both)
 			*/
-			void save(FileGroup* db, uint saveMask);
+			void save(FileGroupPtr db, uint saveMask);
 
 			/** Clears the whole property group.
 			* Clears out all the properties, and broadcasts PROP_GROUP_CLEARED

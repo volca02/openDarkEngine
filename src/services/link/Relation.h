@@ -39,11 +39,11 @@ namespace Opde {
 			virtual ~Relation();
 
 			/** Loads the relation data from the given FileGroup */
-			void load(FileGroup* db);
+			void load(FileGroupPtr db);
 
 			/** Saves the relation data to the fiven file group
 			* @todo Save Mask implementation */
-			void save(FileGroup* db, uint saveMask);
+			void save(FileGroupPtr db, uint saveMask);
 
 			void setChunkVersions(uint lmajor, uint lminor, uint dmajor, uint dminor) {
 				mLCVMaj = lmajor;

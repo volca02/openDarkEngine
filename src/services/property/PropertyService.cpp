@@ -39,7 +39,17 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	PropertyService::~PropertyService() {
+        if (!mDatabaseService.isNull())
+            mDatabaseService->unregisterListener(mDbCallback);
+	}
 
+	// --------------------------------------------------------------------------
+	void PropertyService::bootstrapFinished() {
+	    // Register as a database listener
+		mDbCallback = new ClassCallback<DatabaseChangeMsg, PropertyService>(this, &PropertyService::onDBChange);
+
+	    mDatabaseService = ServiceManager::getSingleton().getService("DatabaseService").as<DatabaseService>();
+		mDatabaseService->registerListener(mDbCallback, DBP_PROPERTY);
 	}
 
 	// --------------------------------------------------------------------------
@@ -55,8 +65,38 @@ namespace Opde {
 		return nr;
 	}
 
+
+    //------------------------------------------------------
+	void PropertyService::onDBChange(const DatabaseChangeMsg& m) {
+	    if (m.change == DBC_DROPPING) {
+	        _clear();
+	    } else if (m.change == DBC_LOADING) {
+            try {
+                // Skip if target is savegame, and mission file is encountered
+                if (m.dbtarget == DBT_SAVEGAME && m.dbtype == DBT_MISSION)
+                    return;
+
+                _load(m.db);
+            } catch (FileException &e) {
+                OPDE_EXCEPT("Caught a FileException while loading the links : " + e.getDetails(), "PropertyService::onDBChange");
+            }
+	    } else if (m.change == DBC_SAVING) {
+            try {
+                uint savemask = 0xF;
+
+                if (m.dbtarget == DBT_SAVEGAME)
+                    savemask = 0x0E; // No archetypes
+
+                _save(m.db, savemask);
+
+            } catch (FileException &e) {
+                OPDE_EXCEPT("Caught a FileException while loading the links : " + e.getDetails(), "PropertyService::onDBChange");
+            }
+	    }
+	}
+
 	// --------------------------------------------------------------------------
-	void PropertyService::load(FileGroup* db) {
+	void PropertyService::_load(FileGroupPtr db) {
 		// We just give the db to all registered groups
 		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
 
@@ -72,8 +112,7 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	void PropertyService::save(FileGroup* db, uint saveMask) {
-		// We just give the db to all registered groups
+	void PropertyService::_save(FileGroupPtr db, uint saveMask) {
 		// We just give the db to all registered groups
 		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
 
@@ -83,9 +122,7 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	void PropertyService::clear() {
-		// We just give the db to all registered groups
-		// We just give the db to all registered groups
+	void PropertyService::_clear() {
 		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
 
 		for (; it != mPropertyGroupMap.end(); ++it) {
@@ -117,5 +154,9 @@ namespace Opde {
 
 	Service* PropertyServiceFactory::createInstance(ServiceManager* manager) {
 		return new PropertyService(manager);
+	}
+
+	const uint PropertyServiceFactory::getMask() {
+	    return SERVICE_DATABASE_LISTENER;
 	}
 }

@@ -122,7 +122,7 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	void Relation::load(FileGroup* db) {
+	void Relation::load(FileGroupPtr db) {
 		// load the links and thei're data
 		BinaryServicePtr bs = ServiceManager::getSingleton().getService("BinaryService").as<BinaryService>();
 
@@ -250,7 +250,7 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	void Relation::save(FileGroup* db, uint saveMask) {
+	void Relation::save(FileGroupPtr db, uint saveMask) {
 		LOG_DEBUG("Relation::save Saving relation %s", mName.c_str());
 
 		// load the links and thei're data

@@ -44,43 +44,59 @@ namespace Opde {
 			*/
 			PropertyGroupPtr createPropertyGroup(const std::string& name, const std::string& chunk_name, DTypeDefPtr type, uint ver_maj, uint ver_min, std::string inheritorName);
 
-			/** Load the properties from the database
-			* @param db The database file group to use */
-			void load(FileGroup* db);
-
-			/** Saves the properties according to the saveMask
-			* @param db The database file group to save to
-			* @param saveMask The save mask (1 - Archetypes, 2 - Instances, 3 - both) */
-			void save(FileGroup* db, uint saveMask);
-
-			/** Clears out all the PropertyGroups (effectively wiping out all properties) */
-			void clear();
-
             /** Retrieves the property group given it's name, or NULL if not found
             * @param name The name of the property to retrieve the group for
             * @return PropertyGroupPtr of the PropertyGroup named name if found, isNull()==true otherwise */
             PropertyGroupPtr getPropertyGroup(const std::string& name);
+
 		protected:
+            /// service initialization
+            virtual void bootstrapFinished();
+
+            /// Database change message callback
+            void onDBChange(const DatabaseChangeMsg& m);
+
+            /** Load the properties from the database
+			* @param db The database file group to use */
+			void _load(FileGroupPtr db);
+
+			/** Saves the properties according to the saveMask
+			* @param db The database file group to save to
+			* @param saveMask The save mask (1 - Archetypes, 2 - Instances, 3 - both) */
+			void _save(FileGroupPtr db, uint saveMask);
+
+			/** Clears out all the PropertyGroups (effectively wiping out all properties) */
+			void _clear();
+
+
 			/// maps property groups to their names
 			typedef std::map< std::string, PropertyGroupPtr > PropertyGroupMap;
 
 			/// maps the properties by their names
 			PropertyGroupMap mPropertyGroupMap;
+
+            /// Database callback
+            DatabaseService::ListenerPtr mDbCallback;
+
+            /// Database service
+            DatabaseServicePtr mDatabaseService;
 	};
 
-	/// Shared pointer to Link service
+	/// Shared pointer to Property service
 	typedef shared_ptr<PropertyService> PropertyServicePtr;
 
-	/// Factory for the LinkService objects
+	/// Factory for the PropertyService objects
 	class PropertyServiceFactory : public ServiceFactory {
 		public:
 			PropertyServiceFactory();
 			~PropertyServiceFactory() {};
 
-			/** Creates a LinkService instance */
+			/** Creates a PropertyService instance */
 			Service* createInstance(ServiceManager* manager);
 
 			virtual const std::string& getName();
+
+            virtual const uint getMask();
 
 		private:
 			static std::string mName;

@@ -44,7 +44,7 @@ namespace Opde {
 			/** Vertex normal vector */
 			float normal[3];
 			/** Colour of the vertex - ?*/
-			int colour; // TODO: Can I safely remove this one?
+			// int colour; // TODO: Can I safely remove this one?
 			/** Texturing UV */
 			float texcoords[2];
 			/** Lightmapping UV */

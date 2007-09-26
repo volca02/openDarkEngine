@@ -43,9 +43,11 @@ namespace Opde {
 			RenderService(ServiceManager *manager);
 			virtual ~RenderService();
 
-			virtual void init();
+			
 
 		protected:
+		
+		virtual void bootstrapFinished();
             void onPropPositionMsg(const PropertyChangeMsg& msg);
             void onPropModelNameMsg(const PropertyChangeMsg& msg);
 

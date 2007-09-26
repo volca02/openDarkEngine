@@ -40,7 +40,7 @@ namespace Opde {
 
 		// And as a final step, register as inheritor listener
 		Inheritor::ListenerPtr cil = new ClassCallback<InheritValueChangeMsg, PropertyGroup>(this, &PropertyGroup::onInheritChange);
-		
+
         mInheritorListenerID = mInheritor->registerListener(cil);
 	}
 
@@ -64,7 +64,7 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	void PropertyGroup::load(FileGroup* db) {
+	void PropertyGroup::load(FileGroupPtr db) {
 		// Open the chunk specified by "P$" + mChunkName
 		FilePtr fprop;
 
@@ -102,7 +102,7 @@ namespace Opde {
 
 
 	// --------------------------------------------------------------------------
-	void PropertyGroup::save(FileGroup* db, uint saveMask) {
+	void PropertyGroup::save(FileGroupPtr db, uint saveMask) {
 		// Open the chunk specified by "P$" + mChunkName
 		FilePtr fprop;
 

@@ -61,7 +61,7 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	void RenderService::init() {
+	void RenderService::bootstrapFinished() {
 		// Property Service should have created us automatically through service masks.
 		// So we can register as a link service listener
 		LOG_INFO("RenderService::init()");

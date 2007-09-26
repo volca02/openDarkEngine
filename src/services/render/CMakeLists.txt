@@ -15,6 +15,7 @@ include_directories (
     ${OPDE_SOURCE_DIR}/src/services/property
     ${OPDE_SOURCE_DIR}/src/services/link
     ${OPDE_SOURCE_DIR}/src/services/inherit
+    ${OPDE_SOURCE_DIR}/src/services/database
 )
 
 link_directories ( 

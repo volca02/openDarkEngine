@@ -32,9 +32,7 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- LinkService -------------------*/
 	/*----------------------------------------------------*/
-	LinkService::LinkService(ServiceManager *manager) : Service(manager) {
-		// Ensure link listeners are created
-		mServiceManager->createByMask(SERVICE_LINK_LISTENER);
+	LinkService::LinkService(ServiceManager *manager) : Service(manager), mDatabaseService(NULL) {
 	}
 
 	//------------------------------------------------------
@@ -43,25 +41,54 @@ namespace Opde {
 		mRelationIDMap.clear();
 		mNameToFlavor.clear();
 		mFlavorToName.clear();
+
+        if (!mDatabaseService.isNull())
+            mDatabaseService->unregisterListener(mDbCallback);
 	}
 
 	//------------------------------------------------------
-	void LinkService::init() {
+	void LinkService::bootstrapFinished() {
+		// Ensure link listeners are created
+		mServiceManager->createByMask(SERVICE_LINK_LISTENER);
 
+        // Register as a database listener
+		mDbCallback = new ClassCallback<DatabaseChangeMsg, LinkService>(this, &LinkService::onDBChange);
+
+		mDatabaseService = ServiceManager::getSingleton().getService("DatabaseService").as<DatabaseService>();
+		mDatabaseService->registerListener(mDbCallback, DBP_LINK);
 	}
 
 	//------------------------------------------------------
-	void LinkService::load(FileGroup* db) {
-		try {
-			_load(db);
-		} catch (FileException &e) {
-			OPDE_EXCEPT("Caught a FileException while loading the links : " + e.getDetails(), "LinkService::load");
-		}
+	void LinkService::onDBChange(const DatabaseChangeMsg& m) {
+	    if (m.change == DBC_DROPPING) {
+	        _clear();
+	    } else if (m.change == DBC_LOADING) {
+            try {
+                // Skip if target is savegame, and mission file is encountered
+                if (m.dbtarget == DBT_SAVEGAME && m.dbtype == DBT_MISSION)
+                    return;
 
+                _load(m.db);
+            } catch (FileException &e) {
+                OPDE_EXCEPT("Caught a FileException while loading the links : " + e.getDetails(), "LinkService::onDBChange");
+            }
+	    } else if (m.change == DBC_SAVING) {
+            try {
+                uint savemask = 0xF;
+
+                if (m.dbtarget == DBT_SAVEGAME)
+                    savemask = 0x0E; // No archetypes
+
+                _save(m.db, savemask);
+
+            } catch (FileException &e) {
+                OPDE_EXCEPT("Caught a FileException while loading the links : " + e.getDetails(), "LinkService::onDBChange");
+            }
+	    }
 	}
 
 	//------------------------------------------------------
-	void LinkService::save(FileGroup* db, uint saveMask) {
+	void LinkService::_save(FileGroupPtr db, uint saveMask) {
 		// Iterates through all the relations. Writes the name into the Relations file, and writes the relation's data using relation->save(db, saveMask) call
 
 		// I do not want to have gaps in the relations indexing, which is implicit given the record order
@@ -116,7 +143,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void LinkService::_load(FileGroup* db) {
+	void LinkService::_load(FileGroupPtr db) {
 		LOG_INFO("LinkService: Loading link definitions from file group '%s'", db->getName().c_str());
 
 		// First, try to build the Relation Name -> flavor and reverse records
@@ -234,6 +261,10 @@ namespace Opde {
 
 	Service* LinkServiceFactory::createInstance(ServiceManager* manager) {
 		return new LinkService(manager);
+	}
+
+	const uint LinkServiceFactory::getMask() {
+	    return SERVICE_DATABASE_LISTENER;
 	}
 
 }
