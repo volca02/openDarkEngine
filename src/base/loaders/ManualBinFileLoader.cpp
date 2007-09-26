@@ -478,9 +478,6 @@ namespace Ogre {
         mNumUVs = (mHdr.offset_vhots - mHdr.offset_uv) / (sizeof(float) * 2);
         mNumNorms = (mHdr.offset_pgons - mHdr.offset_norms) / (sizeof(float) * 3);
 
-        // some material should be present
-        assert(mHdr.num_mats != 0);
-
         // Read the materials
         readMaterials();
 
