@@ -19,16 +19,19 @@
  *
  *****************************************************************************/
 
- 
+
 #ifndef __SERVICECOMMON_H
 #define __SERVICECOMMON_H
 
-/* 
+/*
 This file contains some global definitions common to all services
 */
 
+// --------------------------------------
 // ---  Bitmasks for service masking  ---
-/* 
+// --------------------------------------
+
+/*
 To be used by service factories getMask() if the service want's to be a listener of particular service.
 This does not do the registration of the listener itself, but will guarantee the service is constructed prior to data manipulations.
 ServiceManager::createByMask() is used to create all the services given the mask before data manipulation takes place (typically in service's constructor).
@@ -43,9 +46,23 @@ ServiceManager::createByMask() is used to create all the services given the mask
 /// Object listener mask
 #define SERVICE_OBJECT_LISTENER 0x0004
 
-namespace Opde {
+/// Database listener mask
+#define SERVICE_DATABASE_LISTENER 0x0008
 
-}
+
+
+// ----------------------------------------
+// --- Dark Database loading priorities ---
+// ----------------------------------------
+/*
+The database service handles mission/gam/savegame database files (both loading and saving). Because there is some loading order needed to be done, here is the place to specify all the
+priorities (not necessary unique) for the database service listeners
+*/
+
+#define DBP_WORLDREP 5
+#define DBP_LINK 10
+#define DBP_PROPERTY 15
+#define DBP_OBJECT 20
 
 
 #endif
