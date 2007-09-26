@@ -33,7 +33,7 @@ namespace Opde {
 	* becomes active again, and exit() when the state is being removed from the queue.
 	* @note To give the control to another state, when exiting this one, just pushState the new state in the exit() method
 	*/
-	class GameState : public RefCounted {
+	class GameState {
 		public:
 			/** Constructor */
 			GameState();

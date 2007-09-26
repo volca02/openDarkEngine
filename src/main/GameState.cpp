@@ -24,7 +24,7 @@
 
 namespace Opde {
 	
-	GameState::GameState() : RefCounted() {
+	GameState::GameState() {
 		
 	}
 	

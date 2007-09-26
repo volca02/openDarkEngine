@@ -18,9 +18,8 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *****************************************************************************/
- 
+
 #include "GameStateManager.h"
-#include "GameLoadState.h"
 #include "OpdeException.h"
 
 using namespace Opde;
@@ -38,30 +37,25 @@ int main(int argc, char**argv)
     GameStateManager* man = new GameStateManager();
 
     try {
-		GameLoadState* ls = new GameLoadState();	
-		
-		man->run(ls);
-		
-		ls->release();
-    
+		man->run();
     } catch( Ogre::Exception& e ) {
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
         MessageBox( NULL, e.getFullDescription().c_str(), "An exception has occured!", MB_OK | MB_ICONERROR | MB_TASKMODAL);
 #else
-        std::cerr << "An exception has occured: " << 
+        std::cerr << "An exception has occured: " <<
             e.getFullDescription().c_str() << std::endl;
 #endif
-    
+
     } catch( BasicException& e ) {
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
         MessageBox( NULL, e.getDetails().c_str(), "An exception has occured!", MB_OK | MB_ICONERROR | MB_TASKMODAL);
 #else
-        std::cerr << "An exception has occured: " << 
+        std::cerr << "An exception has occured: " <<
             e.getDetails().c_str() << std::endl;
 #endif
     }
 
     delete man;
-    
+
     return 0;
 }

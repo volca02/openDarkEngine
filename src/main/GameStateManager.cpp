@@ -33,6 +33,10 @@
 #include "PropertyService.h"
 #include "InheritService.h"
 #include "RenderService.h"
+#include "DatabaseService.h"
+#include "GameLoadState.h"
+#include "GamePlayState.h"
+
 
 #include <OgreRoot.h>
 #include <OgreWindowEventUtilities.h>
@@ -126,7 +130,6 @@ namespace Opde {
 			mStateStack.top()->suspend();
 		}
 
-		state->addRef();
 		mStateStack.push(state);
 
 		state->start();
@@ -140,8 +143,6 @@ namespace Opde {
 
 			old->exit();
 
-			old->release();
-
 			if (!mStateStack.empty()) { // There is another state in the stack
 				mStateStack.top()->resume();
 			} else {
@@ -153,7 +154,7 @@ namespace Opde {
 	}
 
 
-	bool GameStateManager::run(GameState* state) {
+	bool GameStateManager::run() {
 		// Initialize opde logger and console backend
 		mLogger = new Logger();
 
@@ -185,17 +186,24 @@ namespace Opde {
 		if (!configure())
 			return false;
 
+        // For now, set the loaded mission name here
+        setParam("mission", "earth.mis");
+
+        // TODO: Remove this temporary nonsense. In fact. Remove the whole class this method is in!
+        GamePlayState* ps = new GamePlayState();
+        GameLoadState* ls = new GameLoadState();
+
 		// Set default mipmap level (NB some APIs ignore this)
 		TextureManager::getSingleton().setDefaultNumMipmaps(5);
 
 		// Initialize the input system
 		setupInputSystem(); // must be after configure. as configure creates the window
 
-        // Initialize all the services
-        ServiceManager::getSingleton().initServices();
+        // TODO: Broadcast to all services: bootstrapFinished
+        mServiceMgr->bootstrapFinished();
 
 		// Push the initial state
-		pushState(state);
+		pushState(ls);
 
 		// Run the game loop
 		// Main while-loop
@@ -218,6 +226,9 @@ namespace Opde {
 			Ogre::WindowEventUtilities::messagePump();
 		}
 
+        delete ps;
+        delete ls;
+
 		return true;
 	}
 
@@ -230,6 +241,7 @@ namespace Opde {
 		new PropertyServiceFactory();
 		new InheritServiceFactory();
 		new RenderServiceFactory();
+		new DatabaseServiceFactory();
 	}
 
 	/// Method which will define the source of resources (other than current folder)
@@ -305,7 +317,7 @@ namespace Opde {
 		paramList.insert( std::make_pair( std::string( "WINDOW" ), windowHndStr.str() ) );
 
 		// Non-exclusive input - for debugging purposes
-/*
+
 		#if defined OIS_WIN32_PLATFORM
 		paramList.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_FOREGROUND" )));
 		paramList.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_NONEXCLUSIVE")));
@@ -391,4 +403,23 @@ namespace Opde {
 		return false;
 	}
 
+    void GameStateManager::setParam(std::string param, std::string value) {
+        Parameters::iterator it = mParameters.find(param);
+
+        if (it != mParameters.end()) {
+            it->second = value;
+        } else {
+            mParameters.insert(make_pair(param, value));
+        }
+    }
+
+    std::string GameStateManager::getParam(std::string param) {
+        Parameters::const_iterator it = mParameters.find(param);
+
+        if (it != mParameters.end()) {
+            return it->second;
+        } else {
+            return "";
+        }
+    }
 }

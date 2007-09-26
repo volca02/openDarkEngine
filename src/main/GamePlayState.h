@@ -35,7 +35,7 @@
 
 namespace Opde {
 
-	class GamePlayState : public Singleton<GamePlayState>, public GameState {
+	class GamePlayState : public Singleton<GamePlayState>, public GameState, public ConsoleCommandListener {
 		public:
 			GamePlayState();
 
@@ -51,7 +51,9 @@ namespace Opde {
 			virtual bool mouseMoved( const OIS::MouseEvent &e );
 			virtual bool mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id );
 			virtual bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id );
-		
+
+			virtual void commandExecuted(std::string command, std::string parameters);
+
 		protected:
 			Ogre::Root *mRoot;
 			Ogre::SceneManager *mSceneMgr;
@@ -73,7 +75,9 @@ namespace Opde {
 
 			// Display portal meshes
 			bool mPortalDisplay;
-			
+
+			bool mToLoadScreen;
+
 			Ogre::Radian mRotX, mRotY;
 			float mMoveScale;
 			Ogre::Degree mRotScale;

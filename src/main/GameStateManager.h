@@ -77,9 +77,18 @@ namespace Opde {
 
 			/** Initialize the state manager, then run the loop with the given state. Initializes ogre, resources, input system, etc.
 			* @return true if game should procede, false otherwise */
-			bool run(GameState* state);
+			bool run();
+
+			/** Set a parameter */
+			void setParam(std::string param, std::string value);
+
+            /** get a parameter */
+			std::string getParam(std::string param);
 
 		protected:
+            typedef std::map< std::string, std::string > Parameters;
+            Parameters mParameters;
+
 			/** Registers all the service factories */
 			void registerServiceFactories();
 

@@ -20,10 +20,12 @@
  *****************************************************************************/
 
 #include "OIS.h"
+#include "GameStateManager.h"
 #include "GamePlayState.h"
+#include "GameLoadState.h"
 #include "logger.h"
 #include "integers.h"
-#include <OgreConfigFile.h> 
+#include <OgreConfigFile.h>
 
 #include <OgreRenderWindow.h>
 #include <OgreOverlayElement.h>
@@ -33,114 +35,128 @@ using namespace Ogre;
 using namespace OIS;
 
 namespace Opde {
-	
+
 	template<> GamePlayState* Singleton<GamePlayState>::ms_Singleton = 0;
-	
-	GamePlayState::GamePlayState() : mSceneMgr(NULL), mDebugOverlay(NULL) {
-			mRotateSpeed = mMoveSpeed = mRotateYFactor = 0;
-    try  {  // load a few options
-      Ogre::ConfigFile cf;
-      Ogre::StringConverter sc;
-      cf.load("opde.cfg");
-      Ogre::String tmp = cf.getSetting("move_speed");
-      mMoveSpeed = sc.parseInt(tmp);
-      tmp = cf.getSetting("mouse_speed");
-      mRotateSpeed = sc.parseInt(tmp);
-      tmp = cf.getSetting("mouse_invert");
-      mRotateYFactor = sc.parseInt(tmp);
-    }
-    catch (Ogre::Exception e)
-    {
-        // Guess the file didn't exist
-    }
-  	if (mMoveSpeed == 0.0) 
-			mMoveSpeed = 50;
-		if (mRotateSpeed.valueDegrees() == 0.0) 
-			mRotateSpeed = 36;
-		if (mRotateYFactor == 0.0) 
-			mRotateYFactor = 1;
-		
+
+	GamePlayState::GamePlayState() : mSceneMgr(NULL), mDebugOverlay(NULL), mToLoadScreen(true) {
+	    /// Register as a command listener, so we can load different levels
+	    Opde::ConsoleBackend::getSingleton().registerCommandListener("load", dynamic_cast<ConsoleCommandListener*>(this));
+		Opde::ConsoleBackend::getSingleton().setCommandHint("load", "Loads a specified mission file");
+
+		mRotateSpeed = 36;
+		mMoveSpeed = 50;
+		mRotateYFactor = 1;
+
+        try  {  // load a few options
+          Ogre::ConfigFile cf;
+          cf.load("opde.cfg");
+
+          Ogre::String tmp = cf.getSetting("move_speed");
+          mMoveSpeed = StringConverter::parseInt(tmp);
+          tmp = cf.getSetting("mouse_speed");
+          mRotateSpeed = StringConverter::parseInt(tmp);
+          tmp = cf.getSetting("mouse_invert");
+          mRotateYFactor = StringConverter::parseInt(tmp);
+        }
+        catch (Ogre::Exception e)
+        {
+            // Guess the file didn't exist
+        }
+
 		mTranslateVector = Vector3::ZERO;
 		mRotX = 0;
 		mRotY = 0;
-		
+
 		mForward = false;
 		mBackward = false;
 		mLeft = false;
 		mRight = false;
 		mScreenShot = false;
-		
+
 		mSceneDetailIndex = 0;
 		mNumScreenShots = 1;
+
+		mDebugOverlay = OverlayManager::getSingleton().getByName("Opde/DebugOverlay");
+
+		// Portal stats overlay
+		mPortalOverlay = OverlayManager::getSingleton().getByName("Opde/OpdeDebugOverlay");
 	}
-	
+
 	void GamePlayState::start() {
 		mRoot = Root::getSingletonPtr();
 		mOverlayMgr = OverlayManager::getSingletonPtr();
 		mSceneMgr = mRoot->getSceneManager( "DarkSceneManager" );
 		mCamera	= mSceneMgr->createCamera( "MainCamera" );
-		
+
 		mWindow = mRoot->getAutoCreatedWindow();
-		
+
 		mViewport = mWindow->addViewport( mCamera );
-		
+
 		mSceneMgr->clearSpecialCaseRenderQueues();
 		mSceneMgr->setSpecialCaseRenderQueueMode(SceneManager::SCRQM_EXCLUDE);
-		
-		
+
+
 		mCamera->setNearClipDistance(0.5);
 		mCamera->setFarClipDistance(4000);
-	
+
 		// Also change position, and set Quake-type orientation
 		ViewPoint vp = mSceneMgr->getSuggestedViewpoint(true);
 		mCamera->setPosition(vp.position);
-		mCamera->pitch(Degree(90)); 
+		mCamera->pitch(Degree(90));
 		mCamera->rotate(vp.orientation);
-		
+
 		// Don't yaw along variable axis, causes leaning
 		mCamera->setFixedYawAxis(true, Vector3::UNIT_Z);
-		
-				
+
+
 		// Thiefy FOV
 		mCamera->setFOVy(Degree(70));
-		
+
 		// debug overlay
-		mDebugOverlay = OverlayManager::getSingleton().getByName("Opde/DebugOverlay");
 		mDebugOverlay->show();
-		
+
 		// Portal stats overlay
-		mPortalOverlay = OverlayManager::getSingleton().getByName("Opde/OpdeDebugOverlay");
 		mPortalOverlay->show();
-		
+
 		mConsole = new ConsoleFrontend();
-		
+
 		mWindow->resetStatistics();
-		
+
+        mToLoadScreen = false;
+
 		LOG_INFO("GamePlayState: Started");
 	}
-	
+
 	void GamePlayState::exit() {
 		// clear the scene
 		mSceneMgr->clearScene();
-		
+
 		// Destroy cameras
 		mSceneMgr->destroyAllCameras();
-		
+
 		// remove all viewports
 		mRoot->getAutoCreatedWindow()->removeAllViewports();
-		
+
 		mPortalOverlay->hide();
 		mDebugOverlay->hide();
-		
+
+		delete mConsole;
+
+		if (mToLoadScreen) {
+            pushState(GameLoadState::getSingletonPtr());
+            mToLoadScreen = false;
+        }
+
 		LOG_INFO("GamePlayState: Exited");
 	}
-	
+
 	void GamePlayState::suspend() {
 	}
-	
+
 	void GamePlayState::resume() {
+   		mToLoadScreen = false;
 	}
-	
+
 	void GamePlayState::update(unsigned long timePassed) {
 		if (timePassed == 0) {
 			mMoveScale = 0.1f;
@@ -149,14 +165,14 @@ namespace Opde {
 			mMoveScale = mMoveSpeed * timePassed / 1000;
 			mRotScale = mRotateSpeed * timePassed / 1000;
 		}
-		
+
 		// Quick hack. Let the camera move:
 		if (mForward)
 			mTranslateVector.z = -mMoveScale;
-		
+
 		if (mBackward)
 			mTranslateVector.z =  mMoveScale;
-		
+
 		if (mLeft)
 			mTranslateVector.x = -mMoveScale;
 
@@ -166,11 +182,11 @@ namespace Opde {
 		mCamera->yaw(mRotX * mRotScale);
 		mCamera->pitch(mRotY * mRotScale);
 		mCamera->moveRelative(mTranslateVector);
-		
+
 		mTranslateVector = Vector3::ZERO;
 		mRotX = 0;
 		mRotY = 0;
-		
+
 		if (mSceneDisplay) {
 			mSceneDetailIndex = (mSceneDetailIndex+1)%2 ; // I Do not need points for now
 			switch(mSceneDetailIndex) {
@@ -180,13 +196,13 @@ namespace Opde {
 			}
 			mSceneDisplay = false;
 		}
-		
+
 		if (mPortalDisplay) {
 			// reuse
 			mSceneMgr->getOption("ShowPortals", &mPortalDisplay);
 			mPortalDisplay = !mPortalDisplay;
 			mSceneMgr->setOption("ShowPortals", &mPortalDisplay);
-			
+
 			mPortalDisplay = false;
 		}
 
@@ -201,8 +217,8 @@ namespace Opde {
 		}
 
 		mConsole->update(timePassed);
-		
-		// Temporary: Debug Overlay 
+
+		// Temporary: Debug Overlay
 		static String currFps = "Current FPS: ";
 		static String avgFps = "Average FPS: ";
 		static String bestFps = "Best FPS: ";
@@ -238,7 +254,7 @@ namespace Opde {
 		{
 		    // ignore
 		}
-		
+
 		// update the portal statistics
 		try {
 			// Volca: I've disabled the timing reports, they need a patch of SM to work
@@ -345,6 +361,17 @@ namespace Opde {
 
 	bool GamePlayState::mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
 		return false;
+	}
+
+	void GamePlayState::commandExecuted(std::string command, std::string parameters) {
+	    std::cerr << "command " << command  << " " << parameters << std::endl;
+
+	    if (command == "load") {
+	        // specify the mission file to load by the load state, then switch to the load state
+	        GameStateManager::getSingleton().setParam("mission", parameters);
+            mToLoadScreen = true;
+            popState();
+	    }
 	}
 
 }
