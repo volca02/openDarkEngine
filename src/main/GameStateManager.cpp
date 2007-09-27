@@ -60,8 +60,8 @@ namespace Opde {
 			mInputSystem(NULL),
 			mRenderWindow(NULL),
 			mServiceMgr(NULL),
-			mDTypeScriptLdr(NULL) {
-		mConfigService = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
+			mDTypeScriptLdr(NULL),
+			mConfigService(NULL) {
 	}
 
 	GameStateManager::~GameStateManager() {
@@ -180,6 +180,7 @@ namespace Opde {
 
 		// Register the worldrep service factory
 		registerServiceFactories();
+		mConfigService = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
 
 		// Setup resources.
 		setupResources();
