@@ -42,6 +42,8 @@ namespace Opde {
 	    /// Register as a command listener, so we can load different levels
 	    Opde::ConsoleBackend::getSingleton().registerCommandListener("load", dynamic_cast<ConsoleCommandListener*>(this));
 		Opde::ConsoleBackend::getSingleton().setCommandHint("load", "Loads a specified mission file");
+		Opde::ConsoleBackend::getSingleton().registerCommandListener("fps", dynamic_cast<ConsoleCommandListener*>(this));
+		Opde::ConsoleBackend::getSingleton().setCommandHint("fps", "Dump FPS stats");
 
 		mRotateSpeed = 36;
 		mMoveSpeed = 50;
@@ -119,11 +121,15 @@ namespace Opde {
 		// Thiefy FOV
 		mCamera->setFOVy(Degree(70));
 
-		// debug overlay
-		mDebugOverlay->show();
+        if (GameStateManager::getSingleton().getParam("debug") == true) {
+            // debug overlay
+            mDebugOverlay->show();
 
-		// Portal stats overlay
-		mPortalOverlay->show();
+            // Portal stats overlay
+            mPortalOverlay->show();
+
+            mDebug = true;
+        }
 
         // hidden as default
 		mConsole->setActive(false);
@@ -239,71 +245,71 @@ namespace Opde {
 		static String tris = "Triangle Count: ";
 		static String batches = "Batch Count: ";
 
-/*
-		// update stats when necessary
-		try {
-		    OverlayElement* guiAvg = OverlayManager::getSingleton().getOverlayElement("Opde/AverageFps");
-		    OverlayElement* guiCurr = OverlayManager::getSingleton().getOverlayElement("Opde/CurrFps");
-		    OverlayElement* guiBest = OverlayManager::getSingleton().getOverlayElement("Opde/BestFps");
-		    OverlayElement* guiWorst = OverlayManager::getSingleton().getOverlayElement("Opde/WorstFps");
+        if (mDebug) {
+            // update stats when necessary
+            try {
+                OverlayElement* guiAvg = OverlayManager::getSingleton().getOverlayElement("Opde/AverageFps");
+                OverlayElement* guiCurr = OverlayManager::getSingleton().getOverlayElement("Opde/CurrFps");
+                OverlayElement* guiBest = OverlayManager::getSingleton().getOverlayElement("Opde/BestFps");
+                OverlayElement* guiWorst = OverlayManager::getSingleton().getOverlayElement("Opde/WorstFps");
 
-		    const RenderTarget::FrameStats& stats = mWindow->getStatistics();
+                const RenderTarget::FrameStats& stats = mWindow->getStatistics();
 
-		    guiAvg->setCaption(avgFps + StringConverter::toString(stats.avgFPS));
-		    guiCurr->setCaption(currFps + StringConverter::toString(stats.lastFPS));
-		    guiBest->setCaption(bestFps + StringConverter::toString(stats.bestFPS)
-			+" "+StringConverter::toString(stats.bestFrameTime)+" ms");
-		    guiWorst->setCaption(worstFps + StringConverter::toString(stats.worstFPS)
-			+" "+StringConverter::toString(stats.worstFrameTime)+" ms");
+                guiAvg->setCaption(avgFps + StringConverter::toString(stats.avgFPS));
+                guiCurr->setCaption(currFps + StringConverter::toString(stats.lastFPS));
+                guiBest->setCaption(bestFps + StringConverter::toString(stats.bestFPS)
+                +" "+StringConverter::toString(stats.bestFrameTime)+" ms");
+                guiWorst->setCaption(worstFps + StringConverter::toString(stats.worstFPS)
+                +" "+StringConverter::toString(stats.worstFrameTime)+" ms");
 
-		    OverlayElement* guiTris = OverlayManager::getSingleton().getOverlayElement("Opde/NumTris");
-		    guiTris->setCaption(tris + StringConverter::toString(stats.triangleCount));
+                OverlayElement* guiTris = OverlayManager::getSingleton().getOverlayElement("Opde/NumTris");
+                guiTris->setCaption(tris + StringConverter::toString(stats.triangleCount));
 
-		    OverlayElement* guiBatches = OverlayManager::getSingleton().getOverlayElement("Opde/NumBatches");
-		    guiBatches->setCaption(batches + StringConverter::toString(stats.batchCount));
+                OverlayElement* guiBatches = OverlayManager::getSingleton().getOverlayElement("Opde/NumBatches");
+                guiBatches->setCaption(batches + StringConverter::toString(stats.batchCount));
 
-		    // OverlayElement* guiDbg = OverlayManager::getSingleton().getOverlayElement("Core/DebugText");
-		}
-		catch(...)
-		{
-		    // ignore
-		}
+                // OverlayElement* guiDbg = OverlayManager::getSingleton().getOverlayElement("Core/DebugText");
+            }
+            catch(...)
+            {
+                // ignore
+            }
 
-		// update the portal statistics
-		try {
-			// Volca: I've disabled the timing reports, they need a patch of SM to work
-			OverlayElement* guibc = OverlayManager::getSingleton().getOverlayElement("Opde/BackCulls");
-			OverlayElement* guiep = OverlayManager::getSingleton().getOverlayElement("Opde/EvalPorts");
-			OverlayElement* guirc = OverlayManager::getSingleton().getOverlayElement("Opde/RendCells");
-			// OverlayElement* guitt = OverlayManager::getSingleton().getOverlayElement("Opde/TravTime");
-			// OverlayElement* guisr = OverlayManager::getSingleton().getOverlayElement("Opde/StaticRenderTime");
+            // update the portal statistics
+            try {
+                // Volca: I've disabled the timing reports, they need a patch of SM to work
+                OverlayElement* guibc = OverlayManager::getSingleton().getOverlayElement("Opde/BackCulls");
+                OverlayElement* guiep = OverlayManager::getSingleton().getOverlayElement("Opde/EvalPorts");
+                OverlayElement* guirc = OverlayManager::getSingleton().getOverlayElement("Opde/RendCells");
+                // OverlayElement* guitt = OverlayManager::getSingleton().getOverlayElement("Opde/TravTime");
+                // OverlayElement* guisr = OverlayManager::getSingleton().getOverlayElement("Opde/StaticRenderTime");
 
-			// Temporary: Debug Overlay
-			static String sbc = "Backface culls: ";
-			static String sep = "Evaluated portals: ";
-			static String src = "Rendered cells: ";
-			// static String stt = "Traversal Time: ";
-			// static String ssr = "Static Render Time: ";
+                // Temporary: Debug Overlay
+                static String sbc = "Backface culls: ";
+                static String sep = "Evaluated portals: ";
+                static String src = "Rendered cells: ";
+                // static String stt = "Traversal Time: ";
+                // static String ssr = "Static Render Time: ";
 
-			uint bculls, eports, rendc, travtm, statrt;
+                uint bculls, eports, rendc, travtm, statrt;
 
-			mSceneMgr->getOption("BackfaceCulls", &bculls);
-			mSceneMgr->getOption("CellsRendered", &rendc);
-			mSceneMgr->getOption("EvaluatedPortals", &eports);
-			// mSceneMgr->getOption("TraversalTime", &travtm);
-			// mSceneMgr->getOption("StaticRenderTime", &statrt);
+                mSceneMgr->getOption("BackfaceCulls", &bculls);
+                mSceneMgr->getOption("CellsRendered", &rendc);
+                mSceneMgr->getOption("EvaluatedPortals", &eports);
+                // mSceneMgr->getOption("TraversalTime", &travtm);
+                // mSceneMgr->getOption("StaticRenderTime", &statrt);
 
-			guibc->setCaption(sbc + StringConverter::toString(bculls));
-			guiep->setCaption(sep + StringConverter::toString(eports));
-			guirc->setCaption(src + StringConverter::toString(rendc));
-			// guitt->setCaption(stt + StringConverter::toString(travtm) + " ms");
-			// guisr->setCaption(ssr + StringConverter::toString(statrt) + " ms");
-		}
-		catch(...)
-		{
-		    // ignore
-		}
-*/
+                guibc->setCaption(sbc + StringConverter::toString(bculls));
+                guiep->setCaption(sep + StringConverter::toString(eports));
+                guirc->setCaption(src + StringConverter::toString(rendc));
+                // guitt->setCaption(stt + StringConverter::toString(travtm) + " ms");
+                // guisr->setCaption(ssr + StringConverter::toString(statrt) + " ms");
+            }
+            catch(...)
+            {
+                // ignore
+            }
+        }
 	}
 
 	bool GamePlayState::keyPressed( const OIS::KeyEvent &e ) {
@@ -385,6 +391,12 @@ namespace Opde {
 	        GameStateManager::getSingleton().setParam("mission", parameters);
             mToLoadScreen = true;
             popState();
+	    } else if (command == "fps") {
+	            const RenderTarget::FrameStats& stats = mWindow->getStatistics();
+
+                LOG_INFO("Average FPS : %10.2f", stats.avgFPS);
+                LOG_INFO("Last FPS    : %10.2f", stats.lastFPS);
+                LOG_INFO("Worst FPS   : %10.2f", stats.worstFPS);
 	    }
 	}
 

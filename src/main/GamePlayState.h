@@ -77,6 +77,9 @@ namespace Opde {
 			// Display portal meshes
 			bool mPortalDisplay;
 
+			// debug enabled
+			bool mDebug;
+
 			bool mToLoadScreen;
 
 			Ogre::Radian mRotX, mRotY;
