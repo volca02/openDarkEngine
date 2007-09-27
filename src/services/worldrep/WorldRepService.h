@@ -68,6 +68,7 @@ namespace Opde {
 			* @note name is formed from FAMILY and NAME like this: FAMILY/NAME or NAME (for no-family textures) */
 			Ogre::String getMaterialName(int mat_index);
 
+            void addWorldMaterial(const Ogre::MaterialPtr material);
 		protected:
             virtual void bootstrapFinished();
 
@@ -116,7 +117,7 @@ namespace Opde {
 			LightAtlasList *mAtlas;
 
 			/** Loaded structure of the cells */
-			WRCell* mCells;
+			WRCell** mCells;
 
 			/** Bsp Leaf nodes */
 			Ogre::BspNode* mLeafNodes;
@@ -155,6 +156,12 @@ namespace Opde {
 
             /// Database service
             DatabaseServicePtr mDatabaseService;
+
+            /// Set of loaded materials
+            typedef std::vector< Ogre::MaterialPtr > MaterialList;
+
+            /// Gets filled with all the materials loaded (for unloading)
+            MaterialList mLoadedMaterials;
 	};
 
 	/// Shared pointer to worldrep service

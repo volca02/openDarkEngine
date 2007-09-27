@@ -38,6 +38,7 @@ using namespace Ogre;
 namespace Opde {
 	// Implementation of the WorldRep service
 	WorldRepService::WorldRepService(ServiceManager *manager) : Service(manager) {
+	    // ResourceGroupManager::getSingleton().setWorldResourceGroupName(TEMPTEXTURE_RESOURCE_GROUP);
 
 	}
 
@@ -81,6 +82,11 @@ namespace Opde {
 		mDatabaseService->unregisterListener(mDbCallback);
 		clearData();
 	}
+
+
+    void WorldRepService::addWorldMaterial(const MaterialPtr material) {
+        mLoadedMaterials.push_back(material);
+    }
 
 	// ---- The ServiceInterface mathods ---
 	void WorldRepService::onDBChange(const DatabaseChangeMsg& m) {
@@ -144,6 +150,13 @@ namespace Opde {
 	void WorldRepService::clearData() {
 		LOG_INFO("WorldRepService::clearData called");
 
+        if (mCells != NULL) {
+            for (int i = 0; i < mNumCells; i++) {
+                LOG_DEBUG("WorldRepService::clearData deleting cell %d of %d", i, mNumCells);
+                delete mCells[i];
+            }
+        }
+
 		delete[] mCells;
 		mCells = NULL;
 
@@ -156,12 +169,16 @@ namespace Opde {
 		// Unregister all the resources in the WorldResourceGroup, including unreloadable
 
 		// if there is a LightMap or WrTextures resource group, clean up those...
-		try {
-			ResourceGroupManager::getSingleton().clearResourceGroup(TEMPTEXTURE_RESOURCE_GROUP);
-		} catch (Exception &e) {
-			LOG_INFO("Problem cleaning up the temporary resource groups. Exception : %s",
-				 TEMPTEXTURE_RESOURCE_GROUP, e.getDescription().c_str());
+		MaterialList::const_iterator it = mLoadedMaterials.begin();
+
+		while ( it != mLoadedMaterials.end() ) {
+		    LOG_DEBUG("WorldRepService::clearData Removing material %s", (*it)->getName().c_str());
+		    MaterialManager::getSingleton().remove((*it)->getName());
+
+		    ++it;
 		}
+
+		mLoadedMaterials.clear();
 
 		delete[] mFamilies;
 		mFamilies = NULL;
@@ -169,6 +186,11 @@ namespace Opde {
 
 		delete[] mTextures;
 		mTextures = NULL;
+
+        delete mAtlas;
+        mAtlas = NULL;
+
+		mNumCells = 0;
 
 		LOG_INFO("WorldRepService::clearData : finished cleaning up");
 	}
@@ -181,18 +203,24 @@ namespace Opde {
 		SceneNode *rootSceneNode = mSceneMgr->getRootSceneNode();
 
 		// If there is some scene already, clear it
-		clearData();
+		// clearData();
 
 		mNumCells = header.num_cells;
 
 		mAtlas = new LightAtlasList();
-		mCells = new WRCell[header.num_cells];
+
+		mCells = new WRCell*[header.num_cells];
+
+		for (int i = 0; i<header.num_cells; i++) {
+            mCells[i] = new WRCell(this);
+		}
+
 		mLeafNodes = new BspNode[header.num_cells];
 
 		unsigned int idx;
 		for (idx=0; idx < header.num_cells; idx++) {
 			// Load one Cell
-			mCells[idx].loadFromChunk(idx, wrChunk, lightSize);
+			mCells[idx]->loadFromChunk(idx, wrChunk, lightSize);
 		}
 
 		// -- Load the extra planes
@@ -204,7 +232,7 @@ namespace Opde {
 		LOG_INFO("Worldrep: queueing lightmaps");
 		// -- Atlas the lightmaps
 		for (idx=0; idx < header.num_cells; idx++)
-			mCells[idx].atlasLightMaps(mAtlas);
+			mCells[idx]->atlasLightMaps(mAtlas);
 
 
 		LOG_INFO("Worldrep: Atlasing lightmaps");
@@ -215,7 +243,7 @@ namespace Opde {
 
 		// Attach the leaf BspNodes to their cells
 		for (idx=0; idx < header.num_cells; idx++) {
-			mCells[idx].setBspNode(&mLeafNodes[idx]);
+			mCells[idx]->setBspNode(&mLeafNodes[idx]);
 			mLeafNodes[idx].setCellNum(idx);
 			mLeafNodes[idx].setOwner(mSceneMgr);
 		}
@@ -229,9 +257,9 @@ namespace Opde {
 		int totalFaceGroups = 0;
 
 		for (idx=0; idx < header.num_cells; idx++) {
-			totalVertices += mCells[idx].getVertexCount();
-			totalIndices += mCells[idx].getIndexCount();
-			totalFaceGroups += mCells[idx].getFaceCount();
+			totalVertices += mCells[idx]->getVertexCount();
+			totalIndices += mCells[idx]->getIndexCount();
+			totalFaceGroups += mCells[idx]->getFaceCount();
 		}
 
 		// nowprepare the buffers with the knowledge of the total vbuf/idxbuf sizes
@@ -289,12 +317,12 @@ namespace Opde {
 		for (idx=0; idx < header.num_cells; idx++) {
 			LOG_DEBUG("Worldrep: Building cell %d / %d geom.", idx, header.num_cells);
 
-			optimized += mCells[idx].attachPortals(mCells);
-			mCells[idx].buildStaticGeometry(&pVert[actVert], &srcIdx[actIdx], &mFaceGroups[actFace], actVert, actIdx, actFace);
+			optimized += mCells[idx]->attachPortals(mCells);
+			mCells[idx]->buildStaticGeometry(&pVert[actVert], &srcIdx[actIdx], &mFaceGroups[actFace], actVert, actIdx, actFace);
 
-			actVert += mCells[idx].getVertexCount();
-			actIdx  += mCells[idx].getIndexCount();
-			actFace += mCells[idx].getFaceCount();
+			actVert += mCells[idx]->getVertexCount();
+			actIdx  += mCells[idx]->getIndexCount();
+			actFace += mCells[idx]->getFaceCount();
 
 		}
 
@@ -322,7 +350,7 @@ namespace Opde {
 		//TODO: Portal meshes need to be constructed. This will guarantee the other meshes can be attached if this one works ok
 		// Hmm. Actually, it renders quite a lot of the meshes that should not be seen.
 		for (idx=0; idx < header.num_cells; idx++) {
-			mCells[idx].constructPortalMeshes(mSceneMgr);
+			mCells[idx]->constructPortalMeshes(mSceneMgr);
 		}
 		//*/
 
@@ -420,7 +448,7 @@ namespace Opde {
 					node->setSplitPlane(constructPlane(mExtraPlanes[wr_node->plane])); // Extra planes
 				} else {
 					assert(wr_node->cell < mNumCells);
-					node->setSplitPlane(mCells[wr_node->cell].getPlane(wr_node->plane));
+					node->setSplitPlane(mCells[wr_node->cell]->getPlane(wr_node->plane));
 				}
 
 				// node->mCellNum = i;
@@ -444,7 +472,7 @@ namespace Opde {
 
 						if (it != leafMap.end()) {
 							assert(it->second < mNumCells);
-							back = mCells[it->second].getBspNode();
+							back = mCells[it->second]->getBspNode();
 						} else {
 							OPDE_EXCEPT("Row index not found in leaf or non-leaf", "WorldRepService::createBSP");
 						}
@@ -463,7 +491,7 @@ namespace Opde {
 						std::map<int, int>::const_iterator it = leafMap.find(wr_node->front);
 
 						if (it != leafMap.end()) {
-							front = mCells[it->second].getBspNode();
+							front = mCells[it->second]->getBspNode();
 						} else {
 							OPDE_EXCEPT("Row index not found in leaf or non-leaf", "WorldRepService::createBSP");
 						}
@@ -544,6 +572,8 @@ namespace Opde {
 
 					MaterialPtr shadMat = origMat->clone(matName.str() );
 					shadMat->load();
+
+					addWorldMaterial(shadMat);
 					LOG_INFO("Flow now defined : %s (template %s_in)", matName.str().c_str(), matname.c_str());
 				} else {
 					LOG_ERROR("Material not found : %s_in", matname.c_str());
@@ -562,6 +592,8 @@ namespace Opde {
 
 					MaterialPtr shadMat = origMat->clone(matName.str() );
 					shadMat->load();
+
+					addWorldMaterial(shadMat);
 					LOG_INFO("Flow now defined : %s (template %s_in)", matName.str().c_str(), matname.c_str());
 				} else {
 					LOG_ERROR("Material not found : %s_out", matname.c_str());
@@ -620,6 +652,8 @@ namespace Opde {
 
 
 		shadMat->load();
+
+		addWorldMaterial(shadMat);
 	}
 
 	// ---------------------------------------------------------------------
@@ -701,6 +735,8 @@ namespace Opde {
 				MaterialPtr shadMat = origMat->clone(matName.str(), true, resourceGroup);
 
 				shadMat->load();
+
+				addWorldMaterial(shadMat);
 			} else { // The material script was not found
 				createStandardMaterial(matName.str(), path, resourceGroup);
 			}
