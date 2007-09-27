@@ -39,12 +39,18 @@ namespace Opde {
 	template<> GameLoadState* Singleton<GameLoadState>::ms_Singleton = 0;
 
 	GameLoadState::GameLoadState() : mSceneMgr(NULL), mOverlayMgr(NULL), mLoaded(false) {
-		mLoadingOverlay = OverlayManager::getSingleton().getByName("Opde/LoadOverlay");
+        mRoot = Root::getSingletonPtr();
+		mOverlayMgr = OverlayManager::getSingletonPtr();
+		mServiceMgr = ServiceManager::getSingletonPtr();
 	}
 
+    GameLoadState::~GameLoadState() {
+
+    }
+
 	void GameLoadState::start() {
-		mRoot = Root::getSingletonPtr();
-		mOverlayMgr = OverlayManager::getSingletonPtr();
+	    LOG_INFO("LoadState: Starting");
+
 		mSceneMgr = mRoot->getSceneManager( "DarkSceneManager" );
 
 		mSceneMgr->clearSpecialCaseRenderQueues();
@@ -55,9 +61,8 @@ namespace Opde {
 
 		mViewport = mRoot->getAutoCreatedWindow()->addViewport( mCamera );
 
-		mServiceMgr = ServiceManager::getSingletonPtr();
-
 		// display loading... message
+        mLoadingOverlay = OverlayManager::getSingleton().getByName("Opde/LoadOverlay");
 
 		// Create a panel
 		mLoadingOverlay->show();
@@ -69,7 +74,10 @@ namespace Opde {
 	}
 
 	void GameLoadState::exit() {
-		mLoadingOverlay->hide();
+	    LOG_INFO("LoadState: Exiting");
+		// mLoadingOverlay->hide();
+
+        mLoadingOverlay->hide();
 
 		mSceneMgr->destroyAllCameras();
 
@@ -83,12 +91,16 @@ namespace Opde {
 	}
 
 	void GameLoadState::suspend() {
+	    LOG_INFO("LoadState: Suspend?!");
 	}
 
 	void GameLoadState::resume() {
+	    LOG_INFO("LoadState: Resume?!");
 	    mLoaded = false;
 		mFirstTime = true;
-        mLoadingOverlay->show();
+
+
+        // mLoadingOverlay->show();
 	}
 
 	void GameLoadState::update(unsigned long timePassed) {
@@ -107,6 +119,8 @@ namespace Opde {
 			mLoaded = true;
 
 			guiLdr->setCaption("Loaded, press ESC...");
+
+			popState(); // Hardcoded, so no escape key is needed
 		}
 
 		mFirstTime = false;

@@ -38,6 +38,7 @@
 #include "filelog.h"
 #include "ConsoleBackend.h"
 #include "OpdeServiceManager.h"
+#include "DVariant.h"
 
 #include "DTypeScriptLoader.h"
 #include "PLDefScriptLoader.h"
@@ -80,11 +81,16 @@ namespace Opde {
 			bool run();
 
 			/** Set a parameter */
-			void setParam(std::string param, std::string value);
+			void setParam(const std::string& param, const std::string& value);
 
             /** get a parameter */
-			std::string getParam(std::string param);
+			DVariant getParam(const std::string& param);
 
+            /** determine an existence of a parameter */
+			bool hasParam(const std::string& param);
+
+			/** Injects the settings from a ogre's cfg file */
+			void loadParams(const std::string& cfgfile);
 		protected:
             typedef std::map< std::string, std::string > Parameters;
             Parameters mParameters;

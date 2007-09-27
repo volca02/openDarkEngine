@@ -38,6 +38,7 @@ namespace Opde {
 	class GamePlayState : public Singleton<GamePlayState>, public GameState, public ConsoleCommandListener {
 		public:
 			GamePlayState();
+			virtual ~GamePlayState();
 
 			virtual void start();
 			virtual void exit();

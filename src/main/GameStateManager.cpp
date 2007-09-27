@@ -128,7 +128,7 @@ namespace Opde {
 
 	void GameStateManager::pushState(GameState* state) {
 		if (!mStateStack.empty()) {
-			mStateStack.top()->suspend();
+			mStateStack.top()->exit();
 		}
 
 		mStateStack.push(state);
@@ -145,7 +145,7 @@ namespace Opde {
 			old->exit();
 
 			if (!mStateStack.empty()) { // There is another state in the stack
-				mStateStack.top()->resume();
+				// mStateStack.top()->start();
 			} else {
 				// mTerminate = true; // Terminate automatically if this state was the last?
 			}
@@ -187,8 +187,11 @@ namespace Opde {
 		if (!configure())
 			return false;
 
-        // For now, set the loaded mission name here
-        setParam("mission", "earth.mis");
+        // Temporary code: try to load opde.cfg
+        loadParams("opde.cfg");
+
+        if (!hasParam("mission")) // Failback
+            setParam("mission", "miss1.mis");
 
         // TODO: Remove this temporary nonsense. In fact. Remove the whole class this method is in!
         GamePlayState* ps = new GamePlayState();
@@ -214,11 +217,11 @@ namespace Opde {
 			unsigned long lTimeSinceLastFrame = lTimeCurrentFrame - mTimeLastFrame;
 			mTimeLastFrame = lTimeCurrentFrame;
 
+            // Update current state
+			mStateStack.top()->update( lTimeSinceLastFrame );
+
 			// Update inputmanager
 			captureInputs();
-
-			// Update current state
-			mStateStack.top()->update( lTimeSinceLastFrame );
 
 			// Render next frame
 			mRoot->renderOneFrame();
@@ -325,19 +328,24 @@ namespace Opde {
 		paramList.insert( std::make_pair( std::string( "WINDOW" ), windowHndStr.str() ) );
 
 		// Non-exclusive input - for debugging purposes
-/*
-		#if defined OIS_WIN32_PLATFORM
-		paramList.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_FOREGROUND" )));
-		paramList.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_NONEXCLUSIVE")));
-		paramList.insert(std::make_pair(std::string("w32_keyboard"), std::string("DISCL_FOREGROUND")));
-		paramList.insert(std::make_pair(std::string("w32_keyboard"), std::string("DISCL_NONEXCLUSIVE")));
-		#elif defined OIS_LINUX_PLATFORM
-		paramList.insert(std::make_pair(std::string("x11_mouse_grab"), std::string("false")));
-		paramList.insert(std::make_pair(std::string("x11_mouse_hide"), std::string("false")));
-		paramList.insert(std::make_pair(std::string("x11_keyboard_grab"), std::string("false")));
-		paramList.insert(std::make_pair(std::string("XAutoRepeatOn"), std::string("true")));
-		#endif
-		/**/
+		bool nonex = false;
+
+        if (hasParam("nonexclusive"))
+            nonex = getParam("nonexclusive").toBool();
+
+        if (nonex) {
+            #if defined OIS_WIN32_PLATFORM
+            paramList.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_FOREGROUND" )));
+            paramList.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_NONEXCLUSIVE")));
+            paramList.insert(std::make_pair(std::string("w32_keyboard"), std::string("DISCL_FOREGROUND")));
+            paramList.insert(std::make_pair(std::string("w32_keyboard"), std::string("DISCL_NONEXCLUSIVE")));
+            #elif defined OIS_LINUX_PLATFORM
+            paramList.insert(std::make_pair(std::string("x11_mouse_grab"), std::string("false")));
+            paramList.insert(std::make_pair(std::string("x11_mouse_hide"), std::string("false")));
+            paramList.insert(std::make_pair(std::string("x11_keyboard_grab"), std::string("false")));
+            paramList.insert(std::make_pair(std::string("XAutoRepeatOn"), std::string("true")));
+            #endif
+        }
 
 
 		// Create inputsystem
@@ -411,7 +419,7 @@ namespace Opde {
 		return false;
 	}
 
-    void GameStateManager::setParam(std::string param, std::string value) {
+    void GameStateManager::setParam(const std::string& param, const std::string& value) {
         Parameters::iterator it = mParameters.find(param);
 
         if (it != mParameters.end()) {
@@ -421,13 +429,47 @@ namespace Opde {
         }
     }
 
-    std::string GameStateManager::getParam(std::string param) {
+    DVariant GameStateManager::getParam(const std::string& param) {
         Parameters::const_iterator it = mParameters.find(param);
 
         if (it != mParameters.end()) {
-            return it->second;
+            return DVariant(it->second);
         } else {
             return "";
+        }
+    }
+
+    bool GameStateManager::hasParam(const std::string& param) {
+        Parameters::const_iterator it = mParameters.find(param);
+
+        if (it != mParameters.end()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    void GameStateManager::loadParams(const std::string& cfgfile) {
+        try  {  // load a few options
+            Ogre::ConfigFile cf;
+            cf.load(cfgfile);
+
+            // Get the iterator over values - no section
+            ConfigFile::SettingsIterator it = cf.getSettingsIterator();
+
+
+            while (it.hasMoreElements()) {
+                std::string key = it.peekNextKey();
+                std::string val = it.peekNextValue();
+
+                setParam(key, val);
+
+                it.moveNext();
+            }
+        }
+        catch (Ogre::Exception e)
+        {
+            // Guess the file didn't exist
         }
     }
 }

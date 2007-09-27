@@ -25,7 +25,7 @@
 #include "GameLoadState.h"
 #include "logger.h"
 #include "integers.h"
-#include <OgreConfigFile.h>
+
 
 #include <OgreRenderWindow.h>
 #include <OgreOverlayElement.h>
@@ -47,21 +47,18 @@ namespace Opde {
 		mMoveSpeed = 50;
 		mRotateYFactor = 1;
 
-        try  {  // load a few options
-          Ogre::ConfigFile cf;
-          cf.load("opde.cfg");
+        // Try to remap the parameters with those listed in the configuration
+        GameStateManager* gsm = GameStateManager::getSingletonPtr();
 
-          Ogre::String tmp = cf.getSetting("move_speed");
-          mMoveSpeed = StringConverter::parseInt(tmp);
-          tmp = cf.getSetting("mouse_speed");
-          mRotateSpeed = StringConverter::parseInt(tmp);
-          tmp = cf.getSetting("mouse_invert");
-          mRotateYFactor = StringConverter::parseInt(tmp);
-        }
-        catch (Ogre::Exception e)
-        {
-            // Guess the file didn't exist
-        }
+
+        if (gsm->hasParam("move_speed"))
+          mMoveSpeed = gsm->getParam("move_speed").toFloat();
+
+        if (gsm->hasParam("mouse_speed"))
+          mRotateSpeed = gsm->getParam("mouse_speed").toFloat();
+
+        if (gsm->hasParam("mouse_invert"))
+          mRotateYFactor = gsm->getParam("mouse_invert").toFloat();
 
 		mTranslateVector = Vector3::ZERO;
 		mRotX = 0;
@@ -76,15 +73,20 @@ namespace Opde {
 		mSceneDetailIndex = 0;
 		mNumScreenShots = 1;
 
-		mDebugOverlay = OverlayManager::getSingleton().getByName("Opde/DebugOverlay");
-
-		// Portal stats overlay
-		mPortalOverlay = OverlayManager::getSingleton().getByName("Opde/OpdeDebugOverlay");
-	}
-
-	void GamePlayState::start() {
 		mRoot = Root::getSingletonPtr();
 		mOverlayMgr = OverlayManager::getSingletonPtr();
+
+		mConsole = new ConsoleFrontend();
+        mConsole->setActive(false);
+	}
+
+    GamePlayState::~GamePlayState() {
+        delete mConsole;
+    }
+
+	void GamePlayState::start() {
+	    LOG_INFO("GamePlayState: Starting");
+
 		mSceneMgr = mRoot->getSceneManager( "DarkSceneManager" );
 		mCamera	= mSceneMgr->createCamera( "MainCamera" );
 
@@ -112,13 +114,19 @@ namespace Opde {
 		// Thiefy FOV
 		mCamera->setFOVy(Degree(70));
 
+		mDebugOverlay = OverlayManager::getSingleton().getByName("Opde/DebugOverlay");
+
+		// Portal stats overlay
+		mPortalOverlay = OverlayManager::getSingleton().getByName("Opde/OpdeDebugOverlay");
+
 		// debug overlay
 		mDebugOverlay->show();
 
 		// Portal stats overlay
 		mPortalOverlay->show();
 
-		mConsole = new ConsoleFrontend();
+        // hidden as default
+		mConsole->setActive(false);
 
 		mWindow->resetStatistics();
 
@@ -128,6 +136,10 @@ namespace Opde {
 	}
 
 	void GamePlayState::exit() {
+	    LOG_INFO("GamePlayState: Exiting");
+
+	    mConsole->setActive(false);
+
 		// clear the scene
 		mSceneMgr->clearScene();
 
@@ -140,8 +152,6 @@ namespace Opde {
 		mPortalOverlay->hide();
 		mDebugOverlay->hide();
 
-		delete mConsole;
-
 		if (mToLoadScreen) {
             pushState(GameLoadState::getSingletonPtr());
             mToLoadScreen = false;
@@ -151,9 +161,12 @@ namespace Opde {
 	}
 
 	void GamePlayState::suspend() {
+	    LOG_INFO("GamePlayState: Suspend?!");
+	    mToLoadScreen = false;
 	}
 
 	void GamePlayState::resume() {
+	    LOG_INFO("GamePlayState: Resume?!");
    		mToLoadScreen = false;
 	}
 
@@ -226,6 +239,7 @@ namespace Opde {
 		static String tris = "Triangle Count: ";
 		static String batches = "Batch Count: ";
 
+/*
 		// update stats when necessary
 		try {
 		    OverlayElement* guiAvg = OverlayManager::getSingleton().getOverlayElement("Opde/AverageFps");
@@ -289,7 +303,7 @@ namespace Opde {
 		{
 		    // ignore
 		}
-
+*/
 	}
 
 	bool GamePlayState::keyPressed( const OIS::KeyEvent &e ) {
@@ -298,7 +312,7 @@ namespace Opde {
 			return true;
     		}
 
-		if (!mConsole->injectKeyPress(e)) {
+        if (!mConsole->injectKeyPress(e)) {
 			if(e.key == KC_W) {
 				mForward = true;
 				return true;
