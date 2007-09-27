@@ -28,7 +28,7 @@ using namespace std;
 namespace Opde {
 
 	/*----------------------------------------------------*/
-	/*-------------------- GameService -------------------*/
+	/*-------------------- ConfigService -------------------*/
 	/*----------------------------------------------------*/
 	ConfigService::ConfigService(ServiceManager *manager) : Service(manager) {
 	    mDbService = ServiceManager::getSingleton().getService("DatabaseService").as<DatabaseService>();
@@ -36,11 +36,6 @@ namespace Opde {
 
 	//------------------------------------------------------
 	ConfigService::~ConfigService() {
-	}
-
-	//------------------------------------------------------
-	void ConfigService::load(const std::string& filename) {
-		mDbService->load(filename);
 	}
 
 	//-------------------------- Factory implementation

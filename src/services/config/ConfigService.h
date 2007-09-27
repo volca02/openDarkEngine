@@ -31,15 +31,12 @@
 
 namespace Opde {
 
-	/** @brief Game service - service defining game states (Temporary code. Will be filled with a high level state management - screens)
+	/** @brief config service
 	*/
 	class ConfigService : public Service {
 		public:
 			ConfigService(ServiceManager *manager);
 			virtual ~ConfigService();
-
-			/// Loads a game database using the database service
-			void load(const std::string& filename);
 
 		protected:
 			DatabaseServicePtr mDbService;
