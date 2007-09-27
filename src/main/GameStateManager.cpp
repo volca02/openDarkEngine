@@ -29,6 +29,7 @@
 #include "WorldRepService.h"
 #include "BinaryService.h"
 #include "GameService.h"
+#include "ConfigService.h"
 #include "LinkService.h"
 #include "PropertyService.h"
 #include "InheritService.h"
@@ -248,6 +249,7 @@ namespace Opde {
 		new WorldRepServiceFactory();
 		new BinaryServiceFactory();
 		new GameServiceFactory();
+		new ConfigServiceFactory();
 		new LinkServiceFactory();
 		new PropertyServiceFactory();
 		new InheritServiceFactory();
