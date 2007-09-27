@@ -78,6 +78,11 @@ namespace Opde {
 
 		mConsole = new ConsoleFrontend();
         mConsole->setActive(false);
+
+		mDebugOverlay = OverlayManager::getSingleton().getByName("Opde/DebugOverlay");
+
+		// Portal stats overlay
+		mPortalOverlay = OverlayManager::getSingleton().getByName("Opde/OpdeDebugOverlay");
 	}
 
     GamePlayState::~GamePlayState() {
@@ -113,11 +118,6 @@ namespace Opde {
 
 		// Thiefy FOV
 		mCamera->setFOVy(Degree(70));
-
-		mDebugOverlay = OverlayManager::getSingleton().getByName("Opde/DebugOverlay");
-
-		// Portal stats overlay
-		mPortalOverlay = OverlayManager::getSingleton().getByName("Opde/OpdeDebugOverlay");
 
 		// debug overlay
 		mDebugOverlay->show();
