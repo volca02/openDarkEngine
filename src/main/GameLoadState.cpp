@@ -42,6 +42,7 @@ namespace Opde {
         mRoot = Root::getSingletonPtr();
 		mOverlayMgr = OverlayManager::getSingletonPtr();
 		mServiceMgr = ServiceManager::getSingletonPtr();
+		mConfigService = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
 	}
 
     GameLoadState::~GameLoadState() {
@@ -112,7 +113,7 @@ namespace Opde {
 
 			GameServicePtr gsvc = mServiceMgr->getService("GameService").as<GameService>();
 
-            std::string misFile = GameStateManager::getSingleton().getParam("mission");
+      std::string misFile = mConfigService->getParam("mission");
 
 			gsvc->load(misFile);
 

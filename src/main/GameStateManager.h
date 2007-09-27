@@ -38,6 +38,7 @@
 #include "filelog.h"
 #include "ConsoleBackend.h"
 #include "OpdeServiceManager.h"
+#include "ConfigService.h"
 #include "DVariant.h"
 
 #include "DTypeScriptLoader.h"
@@ -79,22 +80,7 @@ namespace Opde {
 			/** Initialize the state manager, then run the loop with the given state. Initializes ogre, resources, input system, etc.
 			* @return true if game should procede, false otherwise */
 			bool run();
-
-			/** Set a parameter */
-			void setParam(const std::string& param, const std::string& value);
-
-            /** get a parameter */
-			DVariant getParam(const std::string& param);
-
-            /** determine an existence of a parameter */
-			bool hasParam(const std::string& param);
-
-			/** Injects the settings from a ogre's cfg file */
-			void loadParams(const std::string& cfgfile);
 		protected:
-            typedef std::map< std::string, std::string > Parameters;
-            Parameters mParameters;
-
 			/** Registers all the service factories */
 			void registerServiceFactories();
 
@@ -157,6 +143,9 @@ namespace Opde {
 
 			// Loader for the PLDef scripts
 			PLDefScriptLoader* mPLDefScriptLdr;
+
+			// config service
+			ConfigServicePtr mConfigService;
 	};
 
 }

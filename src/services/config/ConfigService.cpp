@@ -19,11 +19,13 @@
  *
  *****************************************************************************/
 
-
 #include "ConfigService.h"
 #include "OpdeException.h"
+#include <OgreConfigFile.h>
+#include <OgreException.h>
 
 using namespace std;
+using namespace Ogre;
 
 namespace Opde {
 
@@ -37,7 +39,61 @@ namespace Opde {
 	ConfigService::~ConfigService() {
 	}
 
-	//-------------------------- Factory implementation
+	
+    void ConfigService::setParam(const std::string& param, const std::string& value) {
+        Parameters::iterator it = mParameters.find(param);
+
+        if (it != mParameters.end()) {
+            it->second = value;
+        } else {
+            mParameters.insert(make_pair(param, value));
+        }
+    }
+
+    DVariant ConfigService::getParam(const std::string& param) {
+        Parameters::const_iterator it = mParameters.find(param);
+
+        if (it != mParameters.end()) {
+            return DVariant(it->second);
+        } else {
+            return "";
+        }
+    }
+
+    bool ConfigService::hasParam(const std::string& param) {
+        Parameters::const_iterator it = mParameters.find(param);
+
+        if (it != mParameters.end()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    void ConfigService::loadParams(const std::string& cfgfile) {
+        try  {  // load a few options
+            Ogre::ConfigFile cf;
+            cf.load(cfgfile);
+
+            // Get the iterator over values - no section
+            ConfigFile::SettingsIterator it = cf.getSettingsIterator();
+
+
+            while (it.hasMoreElements()) {
+                std::string key = it.peekNextKey();
+                std::string val = it.peekNextValue();
+
+                setParam(key, val);
+
+                it.moveNext();
+            }
+        }
+        catch (Ogre::Exception e)
+        {
+            // Guess the file didn't exist
+        }
+    }
+//-------------------------- Factory implementation
 	std::string ConfigServiceFactory::mName = "ConfigService";
 
 	ConfigServiceFactory::ConfigServiceFactory() : ServiceFactory() {

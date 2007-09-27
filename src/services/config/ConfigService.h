@@ -28,6 +28,7 @@
 #include "DatabaseService.h"
 #include "FileGroup.h"
 #include "SharedPtr.h"
+#include "DVariant.h"
 
 namespace Opde {
 
@@ -38,7 +39,21 @@ namespace Opde {
 			ConfigService(ServiceManager *manager);
 			virtual ~ConfigService();
 
+			/** Set a parameter */
+			void setParam(const std::string& param, const std::string& value);
+
+            /** get a parameter */
+			DVariant getParam(const std::string& param);
+
+            /** determine an existence of a parameter */
+			bool hasParam(const std::string& param);
+
+			/** Injects the settings from a ogre's cfg file */
+			void loadParams(const std::string& cfgfile);
+
 		protected:
+      typedef std::map< std::string, std::string > Parameters;
+      Parameters mParameters;
 	};
 
 	/// Shared pointer to game service

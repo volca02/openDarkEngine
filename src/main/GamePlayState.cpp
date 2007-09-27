@@ -40,7 +40,7 @@ namespace Opde {
 
 	GamePlayState::GamePlayState() : mSceneMgr(NULL), mDebugOverlay(NULL), mToLoadScreen(true) {
 	    /// Register as a command listener, so we can load different levels
-	    Opde::ConsoleBackend::getSingleton().registerCommandListener("load", dynamic_cast<ConsoleCommandListener*>(this));
+	  Opde::ConsoleBackend::getSingleton().registerCommandListener("load", dynamic_cast<ConsoleCommandListener*>(this));
 		Opde::ConsoleBackend::getSingleton().setCommandHint("load", "Loads a specified mission file");
 		Opde::ConsoleBackend::getSingleton().registerCommandListener("fps", dynamic_cast<ConsoleCommandListener*>(this));
 		Opde::ConsoleBackend::getSingleton().setCommandHint("fps", "Dump FPS stats");
@@ -50,17 +50,18 @@ namespace Opde {
 		mRotateYFactor = 1;
 
         // Try to remap the parameters with those listed in the configuration
+		mConfigService = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
         GameStateManager* gsm = GameStateManager::getSingletonPtr();
 
 
-        if (gsm->hasParam("move_speed"))
-          mMoveSpeed = gsm->getParam("move_speed").toFloat();
+        if (mConfigService->hasParam("move_speed"))
+					mMoveSpeed = mConfigService->getParam("move_speed").toFloat();
 
-        if (gsm->hasParam("mouse_speed"))
-          mRotateSpeed = gsm->getParam("mouse_speed").toFloat();
+        if (mConfigService->hasParam("mouse_speed"))
+          mRotateSpeed = mConfigService->getParam("mouse_speed").toFloat();
 
-        if (gsm->hasParam("mouse_invert"))
-          mRotateYFactor = gsm->getParam("mouse_invert").toFloat();
+        if (mConfigService->hasParam("mouse_invert"))
+          mRotateYFactor = mConfigService->getParam("mouse_invert").toFloat();
 
 		mTranslateVector = Vector3::ZERO;
 		mRotX = 0;
@@ -121,7 +122,7 @@ namespace Opde {
 		// Thiefy FOV
 		mCamera->setFOVy(Degree(70));
 
-        if (GameStateManager::getSingleton().getParam("debug") == true) {
+		if (mConfigService->getParam("debug") == true) {
             // debug overlay
             mDebugOverlay->show();
 
@@ -388,7 +389,7 @@ namespace Opde {
 
 	    if (command == "load") {
 	        // specify the mission file to load by the load state, then switch to the load state
-	        GameStateManager::getSingleton().setParam("mission", parameters);
+	        mConfigService->setParam("mission", parameters);
             mToLoadScreen = true;
             popState();
 	    } else if (command == "fps") {

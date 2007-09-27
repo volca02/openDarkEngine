@@ -38,7 +38,6 @@
 #include "GameLoadState.h"
 #include "GamePlayState.h"
 
-
 #include <OgreRoot.h>
 #include <OgreWindowEventUtilities.h>
 #include <OgreConfigFile.h>
@@ -62,7 +61,7 @@ namespace Opde {
 			mRenderWindow(NULL),
 			mServiceMgr(NULL),
 			mDTypeScriptLdr(NULL) {
-
+		mConfigService = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
 	}
 
 	GameStateManager::~GameStateManager() {
@@ -189,10 +188,10 @@ namespace Opde {
 			return false;
 
         // Temporary code: try to load opde.cfg
-        loadParams("opde.cfg");
+        mConfigService->loadParams("opde.cfg");
 
-        if (!hasParam("mission")) // Failback
-            setParam("mission", "miss1.mis");
+        if (!mConfigService->hasParam("mission")) // Failback
+            mConfigService->setParam("mission", "miss1.mis");
 
         // TODO: Remove this temporary nonsense. In fact. Remove the whole class this method is in!
         GamePlayState* ps = new GamePlayState();
@@ -332,8 +331,8 @@ namespace Opde {
 		// Non-exclusive input - for debugging purposes
 		bool nonex = false;
 
-        if (hasParam("nonexclusive"))
-            nonex = getParam("nonexclusive").toBool();
+        if (mConfigService->hasParam("nonexclusive"))
+            nonex = mConfigService->getParam("nonexclusive").toBool();
 
         if (nonex) {
             #if defined OIS_WIN32_PLATFORM
@@ -420,58 +419,4 @@ namespace Opde {
 		}
 		return false;
 	}
-
-    void GameStateManager::setParam(const std::string& param, const std::string& value) {
-        Parameters::iterator it = mParameters.find(param);
-
-        if (it != mParameters.end()) {
-            it->second = value;
-        } else {
-            mParameters.insert(make_pair(param, value));
-        }
-    }
-
-    DVariant GameStateManager::getParam(const std::string& param) {
-        Parameters::const_iterator it = mParameters.find(param);
-
-        if (it != mParameters.end()) {
-            return DVariant(it->second);
-        } else {
-            return "";
-        }
-    }
-
-    bool GameStateManager::hasParam(const std::string& param) {
-        Parameters::const_iterator it = mParameters.find(param);
-
-        if (it != mParameters.end()) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    void GameStateManager::loadParams(const std::string& cfgfile) {
-        try  {  // load a few options
-            Ogre::ConfigFile cf;
-            cf.load(cfgfile);
-
-            // Get the iterator over values - no section
-            ConfigFile::SettingsIterator it = cf.getSettingsIterator();
-
-
-            while (it.hasMoreElements()) {
-                std::string key = it.peekNextKey();
-                std::string val = it.peekNextValue();
-
-                setParam(key, val);
-
-                it.moveNext();
-            }
-        }
-        catch (Ogre::Exception e)
-        {
-            // Guess the file didn't exist
-        }
-    }
 }

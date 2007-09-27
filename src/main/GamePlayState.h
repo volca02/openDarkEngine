@@ -100,6 +100,8 @@ namespace Opde {
 			ConsoleFrontend* mConsole;
 
 			int mNumScreenShots;
+			// config service
+			ConfigServicePtr mConfigService;
 	};
 }
 

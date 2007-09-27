@@ -68,6 +68,9 @@ namespace Opde {
 			bool mLoaded;
 
 			Ogre::Overlay* mLoadingOverlay;
+
+			// config service
+			ConfigServicePtr mConfigService;
 	};
 }
 
