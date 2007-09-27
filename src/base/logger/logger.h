@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *****************************************************************************/
- 
+
 #ifndef __LOGGER_H
 #define __LOGGER_H
 
@@ -27,12 +27,12 @@
 #include <set>
 
 namespace Opde {
-	/** Logging levels 
+	/** Logging levels
 	* @todo << operator for this enum maybe? */
 	typedef enum{LOG_FATAL=0, LOG_ERROR, LOG_INFO, LOG_DEBUG, LOG_VERBOSE} LogLevel;
 
-	
-	/** Log events listener class interface. The logEventRecieved gets called each time a message is logged. Do not use logging methods in implementation. 
+
+	/** Log events listener class interface. The logEventRecieved gets called each time a message is logged. Do not use logging methods in implementation.
 	* Also, the instance needs to be registered to the logging singleton Logger for the log listener to work.
 	* Basicaly, this should implement a log writer to some target (File, Console, etc.).
 	* @see Logger */
@@ -42,49 +42,52 @@ namespace Opde {
 			virtual ~LogListener() {};
 			virtual void logMessage(LogLevel level, char *message) = 0;
 	};
-	
-	
+
+
 	/** Main logger class. This class is intended for logging purposes. Logging listeners, registered using registerLogListener method recieve logging messages formated by vsnprintf function */
 	class Logger : public Singleton<Logger> {
 		private:
 			/** A set of listener classes */
 			std::set<LogListener*> listeners;
-		
+
 			/** A global log level. Set by setLogLevel. All messages having higher log level are ignored */
 			LogLevel loggingLevel;
-			
+
 			/** Message dispatching method. Sends the logging message to all log listeners */
 			void dispatchLogMessage(LogLevel level, char *msg);
-		
+
 		public:
 			/** Constructor */
 			Logger();
-		
+
 			/** Destructor. Does not deallocate the listeners, as this is not a wanted behavior. */
 			~Logger();
-			
+
 			/** Log a message using printf syntax. */
 			void log(LogLevel level, char* fmt, ...);
-		
+
 			/** Register a new listener instance. The instance will receive all logging messages. */
 			void registerLogListener(LogListener* listener);
-	
+
+            /** Translates the log level into something readable */
+			const std::string getLogLevelStr(LogLevel level) const;
+
 			/** C++ cout-like stream operator. Logs to INFO level */
-			template<typename T> Logger& operator<< (const T& t); 
-		
+			template<typename T> Logger& operator<< (const T& t);
+
 			/** Logging level setter. */
 			void setLogLevel(LogLevel level);
-		
+
 			// Singleton releted stuff
 			static Logger& getSingleton(void);
 			static Logger* getSingletonPtr(void);
 	};
-	
+
 	// Printf-like logging helping defines
 	#define LOG_FATAL(...) Logger::getSingleton().log(LOG_ERROR, __VA_ARGS__)
 	#define LOG_ERROR(...) Logger::getSingleton().log(LOG_ERROR, __VA_ARGS__)
 	#define LOG_INFO(...) Logger::getSingleton().log(LOG_INFO, __VA_ARGS__)
-	
+
 	// the debug+verbose loggers are conditionaly built in when the DEBUG flag is defined
 	#ifdef OPDE_DEBUG
 		#define LOG_DEBUG(...) Logger::getSingleton().log(LOG_DEBUG, __VA_ARGS__)
@@ -93,7 +96,7 @@ namespace Opde {
 		#define LOG_DEBUG(...)
 		#define LOG_VERBOSE(...)
 	#endif
-	
+
 	// Shortcut to the Logger instance
 	#define LOG Logger::getSingleton()
 }

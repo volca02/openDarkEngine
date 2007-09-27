@@ -18,80 +18,91 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *****************************************************************************/
- 
- 
+
+
 #include "logger.h"
 #include <iostream>
 #include <cstdarg>
 #include <sstream>
-  
+
 namespace Opde {
 
 	/** Just a helping array for the log string construction method */
 	const char* LOG_LEVEL_STRINGS[5] = {"FATAL","ERROR","INFO ","DEBUG", "ALL  "};
-	
+
 	template<> Logger* Singleton<Logger>::ms_Singleton = 0;
-		
+
 	Logger::Logger() {
 		listeners.clear();
 		loggingLevel = LOG_DEBUG;
 	}
-	
+
 	Logger::~Logger() {
-		
+
 	}
-	
+
 	Logger& Logger::getSingleton(void) {
-		assert( ms_Singleton );  return ( *ms_Singleton );  
+		assert( ms_Singleton );  return ( *ms_Singleton );
 	}
-	
+
 	Logger* Logger::getSingletonPtr(void) {
 		return ms_Singleton;
 	}
-	
+
 	void Logger::dispatchLogMessage(LogLevel level, char *message) {
 		std::set<LogListener*>::iterator it = listeners.begin();
-		
+
 		for (; it != listeners.end(); it++) {
 			LogListener* listener = *it;
 
 			listener->logMessage(level, message);
 		}
 	}
-	
+
 	void Logger::log(LogLevel level, char *fmt, ...) {
 		// Ignore the message if the level is too high
 		if (loggingLevel < level)
 			return;
-		
+
 		va_list argptr;
 		char result[255];
-		
+
 		va_start(argptr, fmt);
 		vsnprintf(result, 255, fmt, argptr);
 		va_end(argptr);
-		
+
 		// This is how the log listener could work:
 		// printf("Log (%s) : %s\n", LOG_LEVEL_STRINGS[level], result);
-		
+
 		dispatchLogMessage(level, result);
 	}
-	
-	
+
+
 	void Logger::registerLogListener(LogListener* listener) {
 		listeners.insert(listener);
 	}
-	
+
+	const std::string Logger::getLogLevelStr(LogLevel level) const {
+	    if (level < 0)
+            return "<????";
+
+        if (level > LOG_VERBOSE)
+            return ">????";
+
+        return LOG_LEVEL_STRINGS[level];
+	}
+
+
 	template<typename T> Logger& Logger::operator<< (const T& t) {
 		// Convert to stdstream
 		std::ostringstream str;
-		
+
 		str << t;
-		
+
 		log(LOG_INFO,"%s",str.str().c_str());
 		return *this;
 	}
-	
+
 	void Logger::setLogLevel(LogLevel level) {
 		loggingLevel = level;
 	}

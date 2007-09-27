@@ -18,24 +18,26 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *****************************************************************************/
- 
+
 #include "filelog.h"
 #include <stdio.h>
-
+#include <string>
 
 namespace Opde {
-	
+
 	FileLog::FileLog() {
       LogFile = fopen("opde.log", "w");
    };
-	
+
 	FileLog::~FileLog() {
       fclose(LogFile);
    };
-		
+
 	void FileLog::logMessage(LogLevel level, char *message) {
-	   fputs(message, LogFile); 
-	   fputs("\n", LogFile); 
+	   // Put in the severity/log level too
+	   fprintf(LogFile, "LOG [%s] : ", Logger::getSingleton().getLogLevelStr(level).c_str());
+	   fputs(message, LogFile);
+	   fputs("\n", LogFile);
 	   fflush (LogFile);
       //LogFile << "LOG [" << level << "] : " << message << std::endl;
 	}
