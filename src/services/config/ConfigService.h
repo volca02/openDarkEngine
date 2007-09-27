@@ -39,7 +39,6 @@ namespace Opde {
 			virtual ~ConfigService();
 
 		protected:
-			DatabaseServicePtr mDbService;
 	};
 
 	/// Shared pointer to game service

@@ -31,7 +31,6 @@ namespace Opde {
 	/*-------------------- ConfigService -------------------*/
 	/*----------------------------------------------------*/
 	ConfigService::ConfigService(ServiceManager *manager) : Service(manager) {
-	    mDbService = ServiceManager::getSingleton().getService("DatabaseService").as<DatabaseService>();
 	}
 
 	//------------------------------------------------------
