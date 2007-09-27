@@ -18,8 +18,8 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *****************************************************************************/
- 
- 
+
+
 #include "ConsoleBackend.h"
 #include "ConsoleFrontend.h"
 #include <OIS.h>
@@ -30,35 +30,34 @@ using namespace OIS;
 using namespace std;
 
 namespace Opde {
-    
+
 	ConsoleFrontend::ConsoleFrontend() : mIsActive(false) {
 	    	mRoot = Root::getSingletonPtr();
 		mOverlayMgr = OverlayManager::getSingletonPtr();
-		
+
 		mConsoleOverlay = OverlayManager::getSingleton().getByName("Opde/Console");
 		mConsoleOverlay->hide();
-		
+
 		// prepare the handle to the Opde/CommandLine
 		mCommandLine = OverlayManager::getSingleton().getOverlayElement("Opde/CommandLine");
-		
+
 		mConsoleText = OverlayManager::getSingleton().getOverlayElement("Opde/ConsoleText");
-		
+
 		mConsoleBackend = ConsoleBackend::getSingletonPtr();
 	}
-    
+
 	ConsoleFrontend::~ConsoleFrontend() {
 		mConsoleOverlay->hide();
-		delete mConsoleOverlay;
 	}
-	
+
 	void ConsoleFrontend::setActive(bool active) {
 		mIsActive = active;
 	}
-	
+
 	bool ConsoleFrontend::injectKeyPress(const OIS::KeyEvent &e) {
-		if (!mIsActive) 
+		if (!mIsActive)
 			return false;
-		
+
 		if (e.key == KC_RETURN) {
 			ConsoleBackend::getSingleton().executeCommand(mCommand);
 			mCommand = "";
@@ -73,25 +72,25 @@ namespace Opde {
 			string allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ,./:;'-_+=[]{}()| \"\t";
 			/*
 			string key = "" + (char)(e.text);
-			
+
 			if (allowed.find(key) != string::npos) {
 				mCommand += key;
 			}*/
-			
+
 			char key[2];
 			key[0]  = (char)(e.text);
 			key[1] = 0;
-			
+
 			if (allowed.find(key) != string::npos)
 				mCommand += key;
 		}
-		
+
 		mCommandLine->setCaption(">" + mCommand);
-		
+
 		return true;
-		
+
 	}
-	
+
 	void ConsoleFrontend::update(int timems) {
 		if (mIsActive) {
 			mConsoleOverlay->show();
@@ -99,37 +98,37 @@ namespace Opde {
 				// need to update the text window
 				std::vector< Ogre::String > texts;
 				mConsoleBackend->pullMessages(texts, 30);
-				
+
 				String text;
-				
+
 				std::vector< Ogre::String >::iterator it = texts.begin();
-				
+
 				for (;it != texts.end(); ++it) {
 					text += *it + "\n";
 				}
-				
+
 				mConsoleText->setCaption(text);
 			}
-		} else 
+		} else
 			mConsoleOverlay->hide();
 		/*
 		Real scrollY = mConsoleOverlay->_getTop();
-		
+
 		if (mIsActive && scrollY < 0) {
 			scrollY += timems/1000;
-			
-			if (scrollY > 1) 
+
+			if (scrollY > 1)
 				scrollY = 1;
-				
+
 			mConsoleOverlay->setTop(scrollY);
 		}
-		
+
 		if (!mIsActive && scrollY > -0.5) {
 			scrollY -= timems/1000;
-			
-			if (scrollY < -0.5) 
+
+			if (scrollY < -0.5)
 				scrollY = -0.5;
-				
+
 			mConsoleOverlay->setTop(scrollY);
 		}*/
 	}
