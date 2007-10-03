@@ -299,7 +299,8 @@ namespace Opde {
 		if (shadMat->getNumTechniques() > 0)
 				if (shadMat->getTechnique(0)->getNumPasses() > 0)
 					if (shadMat->getTechnique(0)->getPass(0)->getNumTextureUnitStates() > 0)
-						dimensions = shadMat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureDimensions();
+                        if (!shadMat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->isBlank())
+                            dimensions = shadMat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureDimensions();
 
 		return shadMat;
 	}
