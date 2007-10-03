@@ -21,6 +21,8 @@
 
 #include "ConfigService.h"
 #include "OpdeException.h"
+#include "logger.h"
+
 #include <OgreConfigFile.h>
 #include <OgreException.h>
 
@@ -32,14 +34,36 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- ConfigService -------------------*/
 	/*----------------------------------------------------*/
-	ConfigService::ConfigService(ServiceManager *manager) : Service(manager) {
+	ConfigService::ConfigService(ServiceManager *manager) : Service(manager), mConfigFileName("opde.cfg") {
 	}
 
 	//------------------------------------------------------
 	ConfigService::~ConfigService() {
 	}
 
-	
+    //------------------------------------------------------
+    void ConfigService::init() {
+        DVariant acfg;
+
+        // Reinitialize to the config_file parameter, if such is found
+        if (false) { // TODO: Get a commandline parameter specifying the config file, or do the loading of this file externally while bootstrapping, as the first thing
+            mConfigFileName = acfg;
+
+            if (!loadParams(mConfigFileName)) {
+                LOG_INFO("Did not find the alternate config file, defaulting to opde.cfg");
+                mConfigFileName = "opde.cfg";
+            }  else {
+                return;
+            }
+        }
+
+        if (!loadParams(mConfigFileName)) {
+            LOG_FATAL("Did not find the opde.cfg file. Can be fatal!");
+        }
+    }
+
+
+    //------------------------------------------------------
     void ConfigService::setParam(const std::string& param, const std::string& value) {
         Parameters::iterator it = mParameters.find(param);
 
@@ -50,16 +74,30 @@ namespace Opde {
         }
     }
 
+    //------------------------------------------------------
     DVariant ConfigService::getParam(const std::string& param) {
         Parameters::const_iterator it = mParameters.find(param);
 
         if (it != mParameters.end()) {
             return DVariant(it->second);
         } else {
-            return "";
+            return DVariant();
         }
     }
 
+    //------------------------------------------------------
+    bool ConfigService::getParam(const std::string& param, DVariant& tgt) {
+        Parameters::const_iterator it = mParameters.find(param);
+
+        if (it != mParameters.end()) {
+            tgt = it->second;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    //------------------------------------------------------
     bool ConfigService::hasParam(const std::string& param) {
         Parameters::const_iterator it = mParameters.find(param);
 
@@ -70,7 +108,8 @@ namespace Opde {
         }
     }
 
-    void ConfigService::loadParams(const std::string& cfgfile) {
+    //------------------------------------------------------
+    bool ConfigService::loadParams(const std::string& cfgfile) {
         try  {  // load a few options
             Ogre::ConfigFile cf;
             cf.load(cfgfile);
@@ -87,9 +126,12 @@ namespace Opde {
 
                 it.moveNext();
             }
+
+            return true;
         }
-        catch (Ogre::Exception e)
-        {
+        catch (Ogre::Exception e) {
+            LOG_ERROR("Config file '%s' was not found", cfgfile.c_str());
+            return false;
             // Guess the file didn't exist
         }
     }

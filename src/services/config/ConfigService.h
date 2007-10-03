@@ -39,21 +39,35 @@ namespace Opde {
 			ConfigService(ServiceManager *manager);
 			virtual ~ConfigService();
 
+            /** initializes the service. Tries to load opde.cfg */
+            virtual void init();
+
 			/** Set a parameter */
 			void setParam(const std::string& param, const std::string& value);
 
-            /** get a parameter */
+            /** get a parameter
+            * @param param The parameter name
+            * @return The parameter value, or Empty DVariant if the parameter was not found */
 			DVariant getParam(const std::string& param);
+
+			/** get a parameter
+			* @param param The parameter name
+			* @param tgt The DVariant instance to fill if successful (will not overwrite if no param found)
+			* @return true if parameter was changed */
+			bool getParam(const std::string& param, DVariant& tgt);
 
             /** determine an existence of a parameter */
 			bool hasParam(const std::string& param);
 
 			/** Injects the settings from a ogre's cfg file */
-			void loadParams(const std::string& cfgfile);
+			bool loadParams(const std::string& cfgfile);
 
 		protected:
-      typedef std::map< std::string, std::string > Parameters;
-      Parameters mParameters;
+
+            std::string mConfigFileName;
+
+            typedef std::map< std::string, std::string > Parameters;
+            Parameters mParameters;
 	};
 
 	/// Shared pointer to game service
