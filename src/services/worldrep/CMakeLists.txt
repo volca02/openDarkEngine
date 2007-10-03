@@ -23,4 +23,5 @@ add_library (OpdeWorldRepService WorldRepService.cpp WRCell.cpp LightmapAtlas.cp
 target_link_libraries(OpdeWorldRepService
     OpdeServiceManager
     OpdeFile
+    DarkSceneManager
 )
