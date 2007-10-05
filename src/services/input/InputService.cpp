@@ -50,7 +50,7 @@ namespace Opde {
     //------------------------------------------------------
     void InputService::bootstrapFinished() {
     	// So the services will be able to catch up
-		ServiceManager::getSingleton().createByMask(SERVICE_INPUT_LISTENER);
+	ServiceManager::getSingleton().createByMask(SERVICE_INPUT_LISTENER);
     }
 
 
