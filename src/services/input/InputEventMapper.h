@@ -23,44 +23,67 @@
 #ifndef __INPUTCONTEXTMAPPER_H
 #define __INPUTCONTEXTMAPPER_H
 
-#include "shared_ptr.h"
+#include "SharedPtr.h"
 
 #include <string>
 #include <map>
 
 namespace Opde {
+	class InputService;
 
 	/** @brief Input Event Mapper - Manages bindings in a specific context
 	* This class remaps input events to text commands according to the bindings.
 	*/
 	class InputEventMapper {
 		public:
-			InputEventMapper(const std::string& name);
+			/// Command event transformation
+			typedef enum CommandEventType {
+				/// Go positive on keypress, negative on release (Edge detection)
+				CET_PEDGE,
+				/// Go negative on keypress, positive on release (Edge detection)
+				CET_NEDGE,
+				/// call command every time the state is DOWN (pressed)
+				CET_ONDOWN
+			};
+
+			/// Parsed command (bind format: "[+/-]command (params)")
+			typedef struct {
+				/// Type of the event to handle
+				CommandEventType type;
+				/// Command to emit on the event
+				std::string command;
+				/// Parameters of the command - optional
+				std::string params;
+			} SplitCommand;
+
+			InputEventMapper(InputService* is);
 			virtual ~InputEventMapper();
 
 			/** Unmaps an event to a command.
 			* @param event The event to unmap
 			* @param unmapped the command that this event is mapped to
 			* @return true if a command was found for the event, false otherwise */
-			bool unmapEvent(const std::string& event, std::string& unmapped);
+			bool unmapEvent(const std::string& event, SplitCommand& unmapped);
 
 			/** Gets the list of events leading to a command */
 			std::vector<std::string> getCommandEvents(const std::string& command);
 
-			bool bind(const std::string& event, const std::string& command);
+			/// Executes a command. The only supported command is "bind event command"
+			bool command(const std::string& cmd);
 
 		protected:
-			typedef multimap<std::string, std::string> StringMultiMap;
-			typedef map<std::string, std::string> StringMap;
+
+			typedef std::map<std::string, SplitCommand> EventToCommandMap;
 
 			/// Map of command
-			StringMap mKeyToCommand;
-			/// Command to key (more keys can have the same command)
-			StringMultiMap mCommandToKey;
+			EventToCommandMap mEventToCommand;
+
+			/// The input service owner of this event mapper
+			InputService* mInputService;
 	};
 
 	/// Shared pointer to game service
-	typedef shared_ptr<InputContextMapper> InputContextMapperPtr;
+	typedef shared_ptr<InputEventMapper> InputEventMapperPtr;
 
 }
 

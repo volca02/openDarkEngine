@@ -23,17 +23,20 @@
 #include "InputService.h"
 #include "OpdeException.h"
 #include "logger.h"
+#include "StringTokenizer.h"
 
 #include <OgreResourceGroupManager.h>
+#include <cctype>
 
 using namespace std;
 
 namespace Opde {
 
-    /*-----------------------------------------------------*/
+    /*---------------------------------------------------*/
     /*-------------------- InputEventMapper -------------*/
-    /*-----------------------------------------------------*/
-    InputEventMapper::InputEventMapper() {
+    /*---------------------------------------------------*/
+    InputEventMapper::InputEventMapper(InputService* is) : mInputService(is) {
+    	assert(mInputService != NULL);
     }
 
     //------------------------------------------------------
@@ -41,14 +44,14 @@ namespace Opde {
     }
 
     //------------------------------------------------------
-    bool InputEventMapper::unmapEvent(const std::string& event, std::string& unmapped) {
-	StringMap::const_iterator it = mEventToCommand.find(event);
+    bool InputEventMapper::unmapEvent(const std::string& event, SplitCommand& unmapped) {
+		EventToCommandMap::const_iterator it = mEventToCommand.find(event);
 
-	if (it != mEventToCommand.end()) {
-	    unmapped = it->second;
-	    return true;
-	} else
-	    return false;
+		if (it != mEventToCommand.end()) {
+			unmapped = it->second;
+			return true;
+		} else
+			return false;
     }
 
     //------------------------------------------------------
@@ -57,18 +60,78 @@ namespace Opde {
     }
 
     //------------------------------------------------------
-    bool InputEventMapper::bind(const std::string& event, const std::string& command) {
-	// event to command lookup
-	pair<StringMap::const_iterator, bool> res = mEventToCommand.insert(make_pair<event, command>);
+    bool InputEventMapper::command(const std::string& cmd) {
+    	WhitespaceStringTokenizer stok(cmd, false);
 
-	if (res.second) { // did insert
-	    return true;
-	}
+    	if (stok.end())
+			return false;
 
-	// Reverse lookup helper (command to keys)
-	// TODO: Code. Not needed for now. I guess that this one should search on command part, not the whole command
+    	// if the bind keyword is not present, return false
+		if (stok.next() != "bind")
+			return false;
 
-	return false;
+		// validate the keyboard command
+
+		if (stok.end())
+			return false;
+
+		string ev = stok.next();
+
+		if (stok.end())
+			return false;
+
+		// The whole command, with parameters and binding type
+		string wcommand = stok.next();
+
+		// Split the command
+		WhitespaceStringTokenizer cst(wcommand);
+
+		if (cst.end())
+			return false;
+
+		SplitCommand spc;
+
+		// peek at the first character
+		std::string cmd1 = cst.next();
+
+		if (cmd1 == "")
+			return false;
+
+		spc.type = CET_ONDOWN;
+
+		if (cmd.substr(1,1) == "+") {
+			spc.command = cmd1.substr(1);
+			spc.type = CET_PEDGE;
+		} else if (cmd.substr(1,1) == "-") {
+			spc.command = cmd1.substr(1);
+			spc.type = CET_NEDGE;
+		}
+
+		spc.command = cmd;
+		spc.params = cst.rest();
+
+		// The bnd files are not case sensitive. Thus, I convert the ev to lower case before validating/inserting
+		// (Argh. The lower case conversion is way complicated in c++, the reason being locales and stuff like that. I simply ignore this here, OK?)
+		transform(ev.begin(), ev.end(), ev.begin(), ::tolower);
+
+		if (!mInputService->validateEventString(ev)) {
+			LOG_ERROR("Encountered invalid event code: %s" ,ev.c_str());
+			return false;
+		}
+
+		// event to command lookup
+		pair<EventToCommandMap::const_iterator, bool> res = mEventToCommand.insert(make_pair(ev, spc));
+
+		LOG_DEBUG("InputEventMapper::command: Mapping '%s' to cmd '%s'", ev.c_str(), wcommand.c_str());
+
+		if (res.second) { // did insert
+			return true;
+		}
+
+		// Reverse lookup helper (command to keys)
+		// TODO: Code. Not needed for now. I guess that this one should search on command part, not the whole command
+
+		return false;
     }
 
 }
