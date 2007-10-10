@@ -18,14 +18,14 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *****************************************************************************/
- 
+
 #ifndef __SHAREDPTR_H
 #define __SHAREDPTR_H
 
 #include <stdio.h>
 
 namespace Opde {
-	
+
 	/** A simple shared pointer implementation
 	* @TODO To be made thread-safe, and/or replaced by boosts shared_ptr (which does not have downcasting) */
 	template<class T> class shared_ptr {
@@ -34,7 +34,7 @@ namespace Opde {
 		protected:
 			unsigned int* mReferences;
 			T* mPtr;
-			
+
 			void release() {
 				if (mReferences) {
 					if (--(*mReferences) == 0) {
@@ -42,15 +42,15 @@ namespace Opde {
 					}
 				}
 			}
-			
+
 			void destroy() {
 				delete mPtr;
 				delete mReferences;
-				
+
 				mPtr = NULL;
 				mReferences = NULL;
 			}
-		
+
 		public:
 			/// NULL ctor
 			shared_ptr() : mReferences(NULL), mPtr(NULL) { };
@@ -60,64 +60,76 @@ namespace Opde {
 				if (mReferences)
 					++(*mReferences);
 			}
-			
+
 			/// Ctor from instance pointer
 			shared_ptr(T* ptr) : mPtr(ptr), mReferences(NULL) {
 				if (mPtr) {
 					mReferences = new unsigned int(1);
 				}
 			};
-			
+
 			~shared_ptr() {
 				release();
 			}
-			
+
 			shared_ptr& operator=(const shared_ptr& b) {
 				// the same instance
 				if (mPtr == b.mPtr)
 					return *this;
-				
+
 				release();
-				
+
 				mPtr = b.mPtr;
-				
+
 				mReferences = b.mReferences;
-				
+
 				if (mReferences)
 					++(*mReferences);
-				
+
 				return *this;
 			}
-			
+
 			/** pointer getter */
 			T* ptr() const { return mPtr; };
-			
+
 			inline T& operator*() const { assert(mPtr); return *mPtr; };
 			inline T* operator->() const { assert(mPtr); return mPtr; };
-			
+
 			inline bool isNull() const {
 				return (mPtr == NULL);
 			}
-			
+
 			/// static cast
 			template<class U> shared_ptr<U> as() {
 				// of course, Dynamic cast would be safer, then again, slower
 				U* ptr = static_cast<U*>(mPtr);
-				
+
 				++(*mReferences);
-				
+
 				shared_ptr<U> n = shared_ptr<U>(ptr, mReferences);
-				
+
 				return n;
 			}
-			
+
+			/// static cast conversion operator
+			template<class U> operator shared_ptr<U>() {
+				// of course, Dynamic cast would be safer, then again, slower
+				U* ptr = static_cast<U*>(mPtr);
+
+				++(*mReferences);
+
+				shared_ptr<U> n = shared_ptr<U>(ptr, mReferences);
+
+				return n;
+			}
+
 			unsigned int getRefCount() {
 				return (*mReferences);
 			}
-			
+
 			void setNull() {
 				release();
-				
+
 				mPtr = NULL;
 				mReferences = NULL;
 			}
@@ -128,7 +140,7 @@ namespace Opde {
 			shared_ptr(T* ptr, unsigned int *refs) : mPtr(ptr), mReferences(refs) {
 			}
 	};
-	
+
 	template<class A, class B> inline bool operator==(shared_ptr<A> const& a, shared_ptr<B> const& b) {
 		return a.ptr() == b.ptr();
         }
@@ -136,7 +148,7 @@ namespace Opde {
         template<class A, class B> inline bool operator!=(shared_ptr<A> const& a, shared_ptr<B> const& b) {
         	return a.ptr() != b.ptr();
         }
-	
+
 } // namespace Opde
 
 #endif
