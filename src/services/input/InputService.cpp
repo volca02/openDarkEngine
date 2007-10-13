@@ -362,7 +362,7 @@ namespace Opde {
 
 	//------------------------------------------------------
 	DVariant InputService::command(const std::string& command) {
-		LOG_INFO("InputService::command: '%s'", command.c_str());
+		LOG_DEBUG("InputService::command: '%s'", command.c_str());
 		string cmd = stripComment(command);
 
 		// Peek at first or second position. If we find bind command
@@ -517,7 +517,7 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void InputService::setVariable(const std::string& var, const DVariant& val) {
-		LOG_INFO("InputService::setVariable: '%s' -> %s", var.c_str(), val.toString().c_str());
+		LOG_DEBUG("InputService::setVariable: '%s' -> %s", var.c_str(), val.toString().c_str());
 		ValueMap::iterator it = mVariables.find(var);
 
 		if (it != mVariables.end()) {
