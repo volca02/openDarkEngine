@@ -32,6 +32,7 @@
 #include "LightmapAtlas.h"
 #include "integers.h"
 #include "DatabaseService.h"
+#include "RenderService.h"
 #include "Callback.h"
 
 #include <OgreHardwareBufferManager.h>
@@ -70,6 +71,7 @@ namespace Opde {
 
             void addWorldMaterial(const Ogre::MaterialPtr material);
 		protected:
+            virtual bool init();
             virtual void bootstrapFinished();
 
 			/// Database change callback
@@ -156,6 +158,10 @@ namespace Opde {
 
             /// Database service
             DatabaseServicePtr mDatabaseService;
+
+            /// Render service
+            RenderServicePtr mRenderService;
+
 
             /// Set of loaded materials
             typedef std::vector< Ogre::MaterialPtr > MaterialList;

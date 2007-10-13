@@ -42,10 +42,22 @@ namespace Opde {
 
 	}
 
+    bool WorldRepService::init() {
+        mRenderService = ServiceManager::getSingleton().getService("RenderService");
+
+        if (mRenderService.isNull()) {
+            LOG_ERROR("RenderService instance was not found. Fatal");
+            return false;
+        }
+
+   		mRoot = mRenderService->getOgreRoot();
+        mSceneMgr = dynamic_cast<DarkSceneManager *>(mRenderService->getSceneManager());
+
+        return true;
+    }
+
 	void WorldRepService::bootstrapFinished() {
 	    // Get a reference to the sceneManager. We can get DarkSceneManager directly because of the format of the data we load (BSP/Portals)
-		mRoot = Ogre::Root::getSingletonPtr();
-		mSceneMgr = dynamic_cast<DarkSceneManager *>(mRoot->getSceneManager("DarkSceneManager"));
 
 		mCells = NULL;
 		mExtraPlanes = NULL;
