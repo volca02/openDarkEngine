@@ -33,7 +33,6 @@ p_ver 2.4
 
 // -------------------------------------------------------------------------------------------------------------------------
 
-
 property SalePrice {
 	label "SalePrice"
 	p_ver 2.65540
@@ -427,14 +426,14 @@ property AngleLimi {
 	p_ver 2.65544
 }
 
+property AI_Hearin {
+	label "AIHearing"
+}
+
 property "Class Tag" {
 	label "ClassTags"
 	dtype ClassTag
 	p_ver 2.256
-}
-
-property AI_Hearin {
-	label "AIHearing"
 }
 
 property Speech {
@@ -779,14 +778,14 @@ property ToolReach {
 	label "InventoryToolReach"
 }
 
-property CfgTweq2E {
-	label "TweqEmitter2Config"
-	p_ver 2.52
-}
-
 property AI_VisMod {
 	label "AIVisibilityModifier"
 	p_ver 2.65560
+}
+
+property CfgTweq2E {
+	label "TweqEmitter2Config"
+	p_ver 2.52
 }
 
 property AI_Effici {
@@ -922,6 +921,7 @@ property InvCycleO {
 property AnimLight {
 	label "AnimLight"
 	p_ver 2.76
+	inherit archetype
 }
 
 property BookArt {
@@ -1016,14 +1016,14 @@ property Collision {
 	label "CollisionType"
 }
 
-property RenderAlp {
-	label "RenderAlpha"
-	p_ver 2.65540
-}
-
 property FrobInfo {
 	label "FrobInfo"
 	p_ver 2.16
+}
+
+property RenderAlp {
+	label "RenderAlpha"
+	p_ver 2.65540
 }
 
 property MotGaitDe {
@@ -1170,9 +1170,8 @@ property PickDist {
 	label "PickDistance"
 }
 
-property AI_SndTyp {
-	label "AISoundType"
-	p_ver 2.131112
+property Firer {
+	label "Firer"
 }
 
 property CfgTweqLo {
@@ -1180,8 +1179,9 @@ property CfgTweqLo {
 	p_ver 2.32
 }
 
-property Firer {
-	label "Firer"
+property AI_SndTyp {
+	label "AISoundType"
+	p_ver 2.131112
 }
 
 property BitmapWor {
@@ -1322,6 +1322,11 @@ property SchAction {
 	p_ver 2.16
 }
 
+property Creature {
+	label "CreatureType"
+	p_ver 2.65544
+}
+
 property AI_NtcBod {
 	label "AINoticeBodies"
 }
@@ -1329,11 +1334,6 @@ property AI_NtcBod {
 property AI_MotTag {
 	label "AIMotionTags"
 	p_ver 2.17
-}
-
-property Creature {
-	label "CreatureType"
-	p_ver 2.65544
 }
 
 property AI_CbtRsp {
@@ -1382,14 +1382,14 @@ property AI_SaveCo {
 	label "AISaveConversation"
 }
 
-property AI_SigRsp {
-	label "AISignalResponse"
-	p_ver 2.4212
-}
-
 property CfgTweqDe {
 	label "TweqDeleteConfig"
 	p_ver 2.8
+}
+
+property AI_SigRsp {
+	label "AISignalResponse"
+	p_ver 2.4212
 }
 
 property MotPlyrLi {
@@ -1407,13 +1407,13 @@ property OTxtRepr1 {
 	p_ver 2.17
 }
 
-property TimeWarp {
-	label "CreatureTimeWarp"
-}
-
 property TerrRepOf {
 	label "TerrainReplaceOff"
 	p_ver 2.17
+}
+
+property TimeWarp {
+	label "CreatureTimeWarp"
 }
 
 property AI_StandT {
@@ -1493,14 +1493,14 @@ property BloodMaxD {
 	label "BloodMaxDamage"
 }
 
-property Scale {
-	label "ModelScale"
-	p_ver 2.12
-}
-
 property PGLaunchI {
 	label "ParticleGroupLaunchInfo"
 	p_ver 2.1000
+}
+
+property Scale {
+	label "ModelScale"
+	p_ver 2.12
 }
 
 property HTHAudioR {
@@ -1513,12 +1513,12 @@ property TerrRepDe {
 	p_ver 2.17
 }
 
-property ScriptTim {
-	label "ScriptTiming"
-}
-
 property AI_MoveZO {
 	label "AIMoveZOffset"
+}
+
+property ScriptTim {
+	label "ScriptTiming"
 }
 
 property DesignNot {
@@ -1545,14 +1545,14 @@ property Light {
 	p_ver 2.28
 }
 
-property AIVantage {
-	label "AIVantagePoint"
-	p_ver 2.65544
-}
-
 property AI_Camera {
 	label "AICamera"
 	p_ver 2.12
+}
+
+property AIVantage {
+	label "AIVantagePoint"
+	p_ver 2.65544
 }
 
 property SwordActi {
