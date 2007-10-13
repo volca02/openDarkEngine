@@ -43,7 +43,8 @@ namespace Opde {
 		ServiceInstanceMap::iterator s_it = mServiceInstances.begin();
 
 		for (; s_it != mServiceInstances.end(); ++s_it) {
-			std::cerr << " * Delete of " << s_it->first << std::endl;
+			LOG_INFO(" * Releasing service %s (ref. count %d)", s_it->first.c_str(), s_it->second.getRefCount());
+			s_it->second->shutdown();
 			s_it->second.setNull();
 		}
 

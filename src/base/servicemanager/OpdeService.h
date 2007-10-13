@@ -25,6 +25,8 @@
 #include "NonCopyable.h"
 #include "SharedPtr.h"
 
+#include <string>
+
 namespace Opde {
 
 	// Forward declaration
@@ -34,10 +36,11 @@ namespace Opde {
 	class Service : public NonCopyable {
 			protected:
 				ServiceManager* mServiceManager;
+				std::string mName;
 
 			public:
                 /** Constructor. Do not implement inheritance resolving here! (Can cycle if you'll do so)*/
-				Service(ServiceManager* manager);
+				Service(ServiceManager* manager, const std::string& name);
 
 				/** Intialization of the service. Guaranteed to be called after construction (If constructor was sucessful).
 				* Used to estabilish relations with other services. Only the dependencies that are fixed can be resolved here, otherwise use the bootstrapFinished.
@@ -52,6 +55,11 @@ namespace Opde {
 				* Called by ServiceManager::bootstrapFinished()
 				* This method  */
 				virtual void bootstrapFinished() {};
+
+				/** This will be called right before the service manager releases the service from it's evidence. All shared pointers to other services
+				* should be released here to enable seamles shutdown.
+				*/
+				virtual void shutdown() {};
 
                 /** Destructor. When using service dependencies, be aware that if an error happened, the fields can be non-initialized.
                 */

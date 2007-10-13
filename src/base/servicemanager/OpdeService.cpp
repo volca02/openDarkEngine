@@ -18,14 +18,16 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *****************************************************************************/
- 
+
 #include "OpdeService.h"
+#include "logger.h"
 
 namespace Opde {
 
-	Service::Service(ServiceManager* manager) : mServiceManager(manager) {
+	Service::Service(ServiceManager* manager,  const std::string& name) : mServiceManager(manager), mName(name) {
 	}
-	
+
 	Service::~Service() {
+		LOG_DEBUG("Service:: Destroying service with name %s", mName.c_str());
 	}
 }
