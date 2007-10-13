@@ -206,6 +206,7 @@ namespace Opde {
 
         // TODO: Broadcast to all services: bootstrapFinished
         mServiceMgr->bootstrapFinished();
+				ps->bootstrapFinished();
 
 		// Push the initial state
 		pushState(ls);

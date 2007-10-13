@@ -55,6 +55,9 @@ namespace Opde {
 
 			virtual void commandExecuted(std::string command, std::string parameters);
 
+			virtual void bootstrapFinished();
+			void onPropSymNameMsg(const PropertyChangeMsg& msg);
+
 		protected:
 			Ogre::Root *mRoot;
 			Ogre::SceneManager *mSceneMgr;
@@ -98,6 +101,9 @@ namespace Opde {
 			Ogre::RenderWindow* mWindow;
 
 			ConsoleFrontend* mConsole;
+
+			PropertyGroup::ListenerID mPropSymNameListenerID;
+			PropertyGroupPtr mPropSymName;
 
 			int mNumScreenShots;
 			// config service

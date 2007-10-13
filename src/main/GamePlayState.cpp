@@ -401,5 +401,25 @@ namespace Opde {
 	    }
 	}
 
+	void GamePlayState::onPropSymNameMsg(const PropertyChangeMsg& msg) {
+/*		switch (msg.change) {
+			case PROP_ADDED   :
+			case PROP_CHANGED : {
+                // Find the scene node by it's object id, and update the position and orientation
+				std::string symName = msg.data->get("").toString();
+
+        LOG_INFO("GamePlayState: Found property %s", symName);
+				break;
+			}
+		}*/
+	}
+
+	void GamePlayState::bootstrapFinished() {
+		PropertyGroup::ListenerPtr cnamec =
+			new ClassCallback<PropertyChangeMsg, GamePlayState>(this, &GamePlayState::onPropSymNameMsg);
+		mPropSymName = ServiceManager::getSingleton().getService("PropertyService").as<PropertyService>()->getPropertyGroup("SymName"); // TODO: hardcoded, maybe not a problem after all
+		mPropSymNameListenerID = mPropSymName->registerListener(cnamec);
+	}
+
 }
 

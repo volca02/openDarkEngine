@@ -83,7 +83,6 @@ namespace Opde {
 			PropertyGroup::ListenerID mPropModelNameListenerID;
 			PropertyGroupPtr mPropModelName;
 
-
 			/// Shared pointer to the property service
 			PropertyServicePtr mPropertyService;
 
