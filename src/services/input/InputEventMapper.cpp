@@ -56,8 +56,9 @@ namespace Opde {
 
     //------------------------------------------------------
     std::vector<std::string> InputEventMapper::getCommandEvents(const std::string& command) {
-
-    }
+			std::vector<std::string> a;
+			return a;
+		}
 
     //------------------------------------------------------
     bool InputEventMapper::command(const std::string& cmd) {
