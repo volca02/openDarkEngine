@@ -67,6 +67,8 @@ namespace Opde {
 			OPDE_EXCEPT("Failed to insert new instance of PropertyGroup, name already allocated : " + name,
 				    "PropertyService::createPropertyGroup");
 
+		LOG_INFO("PropertyService::createPropertyGroup: Created a property group %s (With chunk name %s)", name.c_str(), chunk_name.c_str());
+
 		return nr;
 	}
 
