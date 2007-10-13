@@ -50,6 +50,10 @@ namespace Opde {
 			/** Destructor */
 			virtual ~PropertyGroup();
 
+			/// Name getter. Returns the name of property this group manages
+			const std::string& getName() { return mName; };
+
+
 			/** Property data getter. Used for more massive property changes.
 			* @param obj_id Object ID of the property to fetch
 			* @note call dataChangeFinished(obj_id), otherwise listeners will not receive broadcasts about the data modification
