@@ -42,7 +42,7 @@ namespace Opde {
 	/*--------------------------------------------------------*/
 	/*--------------------- RenderService --------------------*/
 	/*--------------------------------------------------------*/
-	RenderService::RenderService(ServiceManager *manager) : Service(manager) {
+	RenderService::RenderService(ServiceManager *manager) : Service(manager), mSceneMgr(NULL), mRoot(NULL), mDarkSMFactory(NULL) {
 	    // TODO: This is just plain wrong. This service should be the maintainer of the used scene manager, if any other service needs the direct handle, etc.
 	    // The fact is this service is probably game only, and should be the initialiser of graphics as the whole. This will be the
 	    // modification that should be done soon in order to let the code look and be nice
@@ -53,20 +53,73 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	RenderService::~RenderService() {
+        LOG_INFO("RenderService::~RenderService()");
+
 		if (!mPropPosition.isNull())
 		    mPropPosition->unregisterListener(mPropPositionListenerID);
-		    
+
 		if (!mPropModelName.isNull())
 		    mPropModelName->unregisterListener(mPropModelNameListenerID);
+
+        if (mDarkSMFactory) {
+			Root::getSingleton().removeSceneManagerFactory(mDarkSMFactory);
+			delete mDarkSMFactory;
+			mDarkSMFactory = NULL;
+		}
 	}
+
+    // --------------------------------------------------------------------------
+    bool RenderService::init() {
+        // TODO: These can be gathered from the config file. Usage of the config service would be a nice thing to do
+        if( !mRoot->restoreConfig() ) {
+        		// If there is no config file, show the configuration dialog
+        		if( !mRoot->showConfigDialog() ) {
+            			LOG_ERROR("RenderService::init: The renderer setup was canceled. Application termination in progress.");
+            			return false;
+        		}
+        }
+
+        // Initialise and create a default rendering window
+		mRenderWindow = mRoot->initialise( true, "openDarkEngine" );
+
+        // Dark scene manager factory
+		mDarkSMFactory = new DarkSceneManagerFactory();
+
+		// Register
+		Root::getSingleton().addSceneManagerFactory(mDarkSMFactory);
+
+		mRoot->createSceneManager(ST_INTERIOR, "DarkSceneManager");
+
+        // Get the resolution parameters, and instantinate ogre display. We expect the Ogre::Root to be already defined
+		mSceneMgr = mRoot->getSceneManager("DarkSceneManager"); // TODO: Really bad idea. Same goes to the WorldrepService
+
+		return true;
+    }
+
+
+    // --------------------------------------------------------------------------
+    Ogre::Root* RenderService::getOgreRoot() {
+        assert(mRoot);
+        return mRoot;
+    }
+
+    // --------------------------------------------------------------------------
+    Ogre::SceneManager* RenderService::getSceneManager() {
+        assert(mSceneMgr);
+        return mSceneMgr;
+    }
+
+    // --------------------------------------------------------------------------
+    Ogre::RenderWindow* RenderService::getRenderWindow() {
+        assert(mRenderWindow);
+        return mRenderWindow;
+    }
 
 	// --------------------------------------------------------------------------
 	void RenderService::bootstrapFinished() {
 		// Property Service should have created us automatically through service masks.
 		// So we can register as a link service listener
-		LOG_INFO("RenderService::init()");
-
-		mSceneMgr = mRoot->getSceneManager("DarkSceneManager"); // TODO: Really bad idea. Same goes to the WorldrepService
+		LOG_INFO("RenderService::bootstrapFinished()");
 
 		PropertyGroup::ListenerPtr cposc =
 			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropPositionMsg);
@@ -74,20 +127,29 @@ namespace Opde {
 		PropertyGroup::ListenerPtr cmodelc =
 			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropModelNameMsg);
 
+
 		// Get the PropertyService, then the group Position
 
 		// contact the config. service, and look for the inheritance link name
 		// TODO: ConfigurationService::getKey("Core","InheritanceLinkName").toString();
 
-		mPropertyService = ServiceManager::getSingleton().getService("PropertyService").as<PropertyService>();
+		mPropertyService = ServiceManager::getSingleton().getService("PropertyService");
 
 		mPropPosition = mPropertyService->getPropertyGroup("Position");
+
+		if (mPropPosition.isNull())
+            OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "RenderService::bootstrapFinished");
+
 		mPropPositionListenerID = mPropPosition->registerListener(cposc);
 
 		mPropModelName = mPropertyService->getPropertyGroup("ModelName"); // TODO: hardcoded, maybe not a problem after all
+
+		if (mPropModelName.isNull())
+            OPDE_EXCEPT("Could not get ModelName property group. Not defined. Fatal", "RenderService::bootstrapFinished");
+
 		mPropModelNameListenerID = mPropModelName->registerListener(cmodelc);
 
-		LOG_INFO("RenderService::init() - done");
+		LOG_INFO("RenderService::bootstrapFinished() - done");
 	}
 
 	// --------------------------------------------------------------------------

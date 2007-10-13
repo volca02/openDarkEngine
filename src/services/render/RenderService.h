@@ -29,6 +29,8 @@
 #include "PropertyService.h"
 #include "SharedPtr.h"
 #include "ManualBinFileLoader.h"
+#include "OgreDarkSceneManager.h"
+
 #include <OgreEntity.h>
 #include <OgreSceneNode.h>
 
@@ -43,11 +45,16 @@ namespace Opde {
 			RenderService(ServiceManager *manager);
 			virtual ~RenderService();
 
-			
+            Ogre::Root* getOgreRoot();
+            Ogre::SceneManager* getSceneManager();
+            Ogre::RenderWindow* getRenderWindow();
+
+
 
 		protected:
-		
-		virtual void bootstrapFinished();
+            virtual bool init();
+            virtual void bootstrapFinished();
+
             void onPropPositionMsg(const PropertyChangeMsg& msg);
             void onPropModelNameMsg(const PropertyChangeMsg& msg);
 
@@ -86,8 +93,15 @@ namespace Opde {
 			/// Shared pointer to the property service
 			PropertyServicePtr mPropertyService;
 
+            // --- RENDERING INSTANCES ---
+            /// Ogre root handle
             Ogre::Root* mRoot;
+            /// Scene manager handle
 			Ogre::SceneManager* mSceneMgr;
+			/// Render window handle
+			Ogre::RenderWindow* mRenderWindow;
+			/// Factory instance for the DarkSceneManager
+			Ogre::DarkSceneManagerFactory* mDarkSMFactory;
 
 			/// Manual loader for bin meshes
 			Ogre::ManualBinFileLoader* mManualBinFileLoader;
