@@ -31,7 +31,6 @@
 
 #include <stack>
 
-#include "OgreDarkSceneManager.h"
 #include "OpdeSingleton.h"
 #include "GameState.h"
 #include "stdlog.h"
@@ -39,6 +38,7 @@
 #include "ConsoleBackend.h"
 #include "OpdeServiceManager.h"
 #include "ConfigService.h"
+#include "InputService.h"
 #include "DVariant.h"
 
 #include "DTypeScriptLoader.h"
@@ -55,7 +55,7 @@ namespace Opde {
 	* @see GameState
 	* @todo add OIS::JoyStickListener
 	*/
-	class GameStateManager : public Singleton<GameStateManager>, public OIS::KeyListener, public OIS::MouseListener {
+	class GameStateManager : public Singleton<GameStateManager>, public DirectInputListener {
         public:
             GameStateManager();
             ~GameStateManager();
@@ -87,21 +87,16 @@ namespace Opde {
 			/** Loads the resources from the resources.cfg */
 			void setupResources(void);
 
-			/** Configures the ogre's rendering - window and scene manager. */
-			bool configure();
-
 			/** Setup the OIS input system. */
 			void setupInputSystem();
 
-			/** Capture the inputs */
-			void captureInputs();
-
 			bool keyPressed( const OIS::KeyEvent &e );
-    			bool keyReleased( const OIS::KeyEvent &e );
+			bool keyReleased( const OIS::KeyEvent &e );
 
-    			bool mouseMoved( const OIS::MouseEvent &e );
-    			bool mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id );
-    			bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id );
+			bool mouseMoved( const OIS::MouseEvent &e );
+			bool mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id );
+			bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id );
+
 
 			typedef std::stack<GameState*> StateStack;
 
@@ -111,29 +106,19 @@ namespace Opde {
 			/// the game loop should end if true
 			bool	mTerminate;
 
-			/// Input system releted objects
-			OIS::InputManager *mInputSystem;
-    			OIS::Mouse        *mMouse;
-    			OIS::Keyboard     *mKeyboard;
-
 			/// last frame's time
 			unsigned long mTimeLastFrame;
 
 			///  Stderr logger
 			StdLog* mStdLog;
-         FileLog* mFileLog;
+			FileLog* mFileLog;
 
 			ConsoleBackend* mConsoleBackend;
 
 			Logger *mLogger;
 
-			/// Factory instance for the DarkSceneManager
-			Ogre::DarkSceneManagerFactory* mDarkSMFactory;
-
 			// --- Ogre instances
 			Ogre::Root *mRoot;
-
-			Ogre::RenderWindow* mRenderWindow;
 
 			// Service manager handle
 			ServiceManager* mServiceMgr;
@@ -146,6 +131,8 @@ namespace Opde {
 
 			// config service
 			ConfigServicePtr mConfigService;
+
+			InputServicePtr mInputService;
 	};
 
 }

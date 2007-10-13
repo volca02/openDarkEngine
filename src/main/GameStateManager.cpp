@@ -35,6 +35,8 @@
 #include "InheritService.h"
 #include "RenderService.h"
 #include "DatabaseService.h"
+#include "InputService.h"
+
 #include "GameLoadState.h"
 #include "GamePlayState.h"
 
@@ -53,18 +55,17 @@ namespace Opde {
 			mStateStack(),
 			mTerminate(false),
 			mRoot(NULL),
-			mDarkSMFactory(NULL),
 			mLogger(NULL),
 			mStdLog(NULL),
 			mConsoleBackend(NULL),
-			mInputSystem(NULL),
-			mRenderWindow(NULL),
 			mServiceMgr(NULL),
 			mDTypeScriptLdr(NULL),
 			mConfigService(NULL) {
 	}
 
 	GameStateManager::~GameStateManager() {
+		mInputService->unsetDirectListener();
+
 		while (!mStateStack.empty()) {
 			GameState* state = mStateStack.top();
 			mStateStack.pop();
@@ -72,33 +73,11 @@ namespace Opde {
 			state->exit();
 		}
 
-		if (mDarkSMFactory) {
-			Root::getSingleton().removeSceneManagerFactory(mDarkSMFactory);
-			delete mDarkSMFactory;
-			mDarkSMFactory = NULL;
-		}
-
 		delete mDTypeScriptLdr; // Unregisters itself
 		mDTypeScriptLdr = NULL;
 
 		delete mPLDefScriptLdr; // Unregisters itself
 		mPLDefScriptLdr = NULL;
-
-		// release the mouse and keyboard, then the whole inputsystem
-		if (mInputSystem) {
-			if( mMouse ) {
-				mInputSystem->destroyInputObject( mMouse );
-				mMouse = NULL;
-			}
-
-			if( mKeyboard ) {
-				mInputSystem->destroyInputObject( mKeyboard );
-				mKeyboard = NULL;
-			}
-
-			mInputSystem->destroyInputSystem(mInputSystem);
-			mInputSystem = NULL;
-		}
 
 		// Delete the service manager
 		delete mServiceMgr;
@@ -160,7 +139,7 @@ namespace Opde {
 		mLogger = new Logger();
 
 		mStdLog = new StdLog();
-      mFileLog = new FileLog();
+        mFileLog = new FileLog();
 
 		mLogger->registerLogListener(mFileLog);
 
@@ -174,22 +153,22 @@ namespace Opde {
 
 		mConsoleBackend->putMessage("==Console Starting==");
 
-
 		// Create the service manager
 		mServiceMgr = new ServiceManager();
 
 		// Register the worldrep service factory
 		registerServiceFactories();
-		mConfigService = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
+
+		mConfigService = ServiceManager::getSingleton().getService("ConfigService");
+		RenderServicePtr rends;
+
+		rends = ServiceManager::getSingleton().getService("RenderService").as<RenderService>();
 
 		// Setup resources.
 		setupResources();
 
-		if (!configure())
-			return false;
-
-        // Temporary code: try to load opde.cfg
-        mConfigService->loadParams("opde.cfg");
+		// Initialise resources
+		ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
         if (!mConfigService->hasParam("mission")) // Failback
             mConfigService->setParam("mission", "miss1.mis");
@@ -201,12 +180,12 @@ namespace Opde {
 		// Set default mipmap level (NB some APIs ignore this)
 		TextureManager::getSingleton().setDefaultNumMipmaps(5);
 
-		// Initialize the input system
-		setupInputSystem(); // must be after configure. as configure creates the window
+		setupInputSystem();
 
         // TODO: Broadcast to all services: bootstrapFinished
         mServiceMgr->bootstrapFinished();
-				ps->bootstrapFinished();
+
+		ps->bootstrapFinished();
 
 		// Push the initial state
 		pushState(ls);
@@ -222,8 +201,8 @@ namespace Opde {
             // Update current state
 			mStateStack.top()->update( lTimeSinceLastFrame );
 
-			// Update inputmanager
-			captureInputs();
+			// InputService::captureInputs()
+			mInputService->captureInputs();
 
 			// Render next frame
 			mRoot->renderOneFrame();
@@ -256,6 +235,7 @@ namespace Opde {
 		new InheritServiceFactory();
 		new RenderServiceFactory();
 		new DatabaseServiceFactory();
+		new InputServiceFactory();
 	}
 
 	/// Method which will define the source of resources (other than current folder)
@@ -291,100 +271,16 @@ namespace Opde {
 		}
 	}
 
-	bool GameStateManager::configure() {
-		// Copied from the OIS Example. Thanks
-		// Load config settings from ogre.cfg
-    		if( !mRoot->restoreConfig() ) {
-        		// If there is no config file, show the configuration dialog
-        		if( !mRoot->showConfigDialog() )
-            			return false;
-    		}
-
-		// Initialise and create a default rendering window
-		mRenderWindow = mRoot->initialise( true, "openDarkEngine" );
-
-		// Initialise resources
-		ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
-
-		mDarkSMFactory = new DarkSceneManagerFactory();
-
-		// Register
-		Root::getSingleton().addSceneManagerFactory(mDarkSMFactory);
-
-		mRoot->createSceneManager(ST_INTERIOR, "DarkSceneManager");
-
-		return true;
-	}
-
 	void GameStateManager::setupInputSystem() {
-		// Copied from the OIS Example. Thanks
-		// Setup basic variables
-		OIS::ParamList paramList;
-		size_t windowHnd = 0;
-		std::ostringstream windowHndStr;
+		mInputService = ServiceManager::getSingleton().getService("InputService");
 
-		// Get window handle
-		mRenderWindow->getCustomAttribute( "WINDOW", &windowHnd );
+		mInputService->createBindContext("game");
+		mInputService->setBindContext("game");
 
-		// Fill parameter list
-		windowHndStr << (unsigned int) windowHnd;
-		paramList.insert( std::make_pair( std::string( "WINDOW" ), windowHndStr.str() ) );
+		mInputService->setInputMode(IM_DIRECT);
+		mInputService->loadBNDFile("dark.bnd");
 
-		// Non-exclusive input - for debugging purposes
-		bool nonex = false;
-
-        if (mConfigService->hasParam("nonexclusive"))
-            nonex = mConfigService->getParam("nonexclusive").toBool();
-
-        if (nonex) {
-            #if defined OIS_WIN32_PLATFORM
-            paramList.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_FOREGROUND" )));
-            paramList.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_NONEXCLUSIVE")));
-            paramList.insert(std::make_pair(std::string("w32_keyboard"), std::string("DISCL_FOREGROUND")));
-            paramList.insert(std::make_pair(std::string("w32_keyboard"), std::string("DISCL_NONEXCLUSIVE")));
-            #elif defined OIS_LINUX_PLATFORM
-            paramList.insert(std::make_pair(std::string("x11_mouse_grab"), std::string("false")));
-            paramList.insert(std::make_pair(std::string("x11_mouse_hide"), std::string("false")));
-            paramList.insert(std::make_pair(std::string("x11_keyboard_grab"), std::string("false")));
-            paramList.insert(std::make_pair(std::string("XAutoRepeatOn"), std::string("true")));
-            #endif
-        }
-
-
-		// Create inputsystem
-		mInputSystem = OIS::InputManager::createInputSystem( paramList );
-
-		// If possible create a buffered keyboard
-		if( mInputSystem->numKeyboards() > 0 ) {
-			mKeyboard = static_cast<OIS::Keyboard*>( mInputSystem->createInputObject( OIS::OISKeyboard, true ) );
-			mKeyboard->setEventCallback( this );
-		}
-
-		// If possible create a buffered mouse
-		if( mInputSystem->numMice() > 0 ) {
-			mMouse = static_cast<OIS::Mouse*>( mInputSystem->createInputObject( OIS::OISMouse, true ) );
-			mMouse->setEventCallback( this );
-
-			// Get window size
-			unsigned int width, height, depth;
-			int left, top;
-			mRenderWindow->getMetrics( width, height, depth, left, top );
-
-			// Set mouse region
-			const OIS::MouseState &mouseState = mMouse->getMouseState();
-    			mouseState.width  = width;
-    			mouseState.height = height;
-		}
-	}
-
-	void GameStateManager::captureInputs() {
-		if( mMouse ) {
-		        mMouse->capture();
-    		}
-
-		if( mKeyboard ) {
-        		mKeyboard->capture();
-    		}
+		mInputService->setDirectListener(this);
 	}
 
 	bool GameStateManager::keyPressed( const OIS::KeyEvent &e ) {
@@ -421,4 +317,5 @@ namespace Opde {
 		}
 		return false;
 	}
+
 }

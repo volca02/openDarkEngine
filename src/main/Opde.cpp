@@ -22,6 +22,8 @@
 #include "GameStateManager.h"
 #include "OpdeException.h"
 
+#include <OgreException.h>
+
 using namespace Opde;
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32

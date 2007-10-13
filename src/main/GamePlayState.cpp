@@ -79,8 +79,8 @@ namespace Opde {
 		mRoot = Root::getSingletonPtr();
 		mOverlayMgr = OverlayManager::getSingletonPtr();
 
-		mConsole = new ConsoleFrontend();
-        mConsole->setActive(false);
+	/*	mConsole = new ConsoleFrontend();
+        mConsole->setActive(false);*/
 
 		mDebugOverlay = OverlayManager::getSingleton().getByName("Opde/DebugOverlay");
 
@@ -89,7 +89,7 @@ namespace Opde {
 	}
 
     GamePlayState::~GamePlayState() {
-        delete mConsole;
+        // delete mConsole;
     }
 
 	void GamePlayState::start() {
@@ -122,18 +122,20 @@ namespace Opde {
 		// Thiefy FOV
 		mCamera->setFOVy(Degree(70));
 
-		if (mConfigService->getParam("debug") == true) {
-            // debug overlay
-            mDebugOverlay->show();
+        if (mConfigService->hasParam("debug")) {
+            if (mConfigService->getParam("debug") == true) {
+                // debug overlay
+                mDebugOverlay->show();
 
-            // Portal stats overlay
-            mPortalOverlay->show();
+                // Portal stats overlay
+                mPortalOverlay->show();
 
-            mDebug = true;
+                mDebug = true;
+            }
         }
 
         // hidden as default
-		mConsole->setActive(false);
+		// mConsole->setActive(false);
 
 		mWindow->resetStatistics();
 
@@ -145,7 +147,7 @@ namespace Opde {
 	void GamePlayState::exit() {
 	    LOG_INFO("GamePlayState: Exiting");
 
-	    mConsole->setActive(false);
+	    // mConsole->setActive(false);
 
 		// clear the scene
 		mSceneMgr->clearScene();
@@ -236,7 +238,7 @@ namespace Opde {
 		    mScreenShot = false;
 		}
 
-		mConsole->update(timePassed);
+		// mConsole->update(timePassed);
 
 		// Temporary: Debug Overlay
 		static String currFps = "Current FPS: ";
@@ -315,11 +317,11 @@ namespace Opde {
 
 	bool GamePlayState::keyPressed( const OIS::KeyEvent &e ) {
 		if( e.key == KC_F12 ) {
-        		mConsole->setActive(!mConsole->isActive());
+        		// mConsole->setActive(!mConsole->isActive());
 			return true;
     		}
 
-        if (!mConsole->injectKeyPress(e)) {
+        // if (!mConsole->injectKeyPress(e)) {
 			if(e.key == KC_W) {
 				mForward = true;
 				return true;
@@ -342,13 +344,13 @@ namespace Opde {
 				mPortalDisplay = true;
 				return true;
 			}
-		} else {
+		// } else {
 			return true;
-		}
+		//}
 	}
 
 	bool GamePlayState::keyReleased( const OIS::KeyEvent &e ) {
-		if (!mConsole->isActive()) {
+		//if (!mConsole->isActive()) {
 			if(e.key == KC_W) {
 				mForward = false;
 				return true;
@@ -365,7 +367,7 @@ namespace Opde {
         			requestTermination();
 				return true;
 			}
-    		}
+    		//}
 
 	}
 
