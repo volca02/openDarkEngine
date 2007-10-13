@@ -13,3 +13,6 @@ add_subdirectory(render)
 
 # Dark Database handling service
 add_subdirectory(database)
+
+# Input management service
+add_subdirectory(input)

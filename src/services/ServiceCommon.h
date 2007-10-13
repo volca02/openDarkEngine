@@ -37,6 +37,8 @@ This does not do the registration of the listener itself, but will guarantee the
 ServiceManager::createByMask() is used to create all the services given the mask before data manipulation takes place (typically in service's constructor).
 */
 
+// I just hope we won't run out of mask bits! :D
+
 /// Link listener mask
 #define SERVICE_LINK_LISTENER 0x0001
 
@@ -48,6 +50,9 @@ ServiceManager::createByMask() is used to create all the services given the mask
 
 /// Database listener mask
 #define SERVICE_DATABASE_LISTENER 0x0008
+
+/// Input service listener mask
+#define SERVICE_INPUT_LISTENER 0x0010
 
 
 
