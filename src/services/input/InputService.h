@@ -105,10 +105,6 @@ namespace Opde {
 			/// Creates bind context (e.g. a switchable context, that maps events to commands if IM_MAPPED is active, using the mapper of this context)
 			void createBindContext(const std::string& ctx);
 
-			// these four are here to estabilish compatibility with Dark's BND files
-			/// registers OIS::KeyCode to textual representation and inverse mappings
-			void registerValidKey(OIS::KeyCode kc, const std::string& txt);
-
 			/// returns true if the key text is a valid key name
 			bool isKeyTextValid(std::string& txt);
 
@@ -170,6 +166,14 @@ namespace Opde {
             bool init();
             void bootstrapFinished();
 
+			/// registers OIS::KeyCode to textual representation and inverse mappings
+			void registerValidKey(OIS::KeyCode kc, const std::string& txt);
+
+			/// Attaches the ctrl, alt and shift texts if they are pressed
+			void attachModifiers(std::string& tgt);
+
+			/// Processes the received key event with current mapper, and if it finds a match, sends an event
+			void processKeyEvent(const OIS::KeyEvent &e);
 
 			bool keyPressed( const OIS::KeyEvent &e );
 			bool keyReleased( const OIS::KeyEvent &e );

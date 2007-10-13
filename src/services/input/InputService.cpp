@@ -414,8 +414,6 @@ namespace Opde {
 				} else {
 					result += var;
 				}
-
-
 			}
 		}
 
@@ -531,6 +529,22 @@ namespace Opde {
 
 
 	//------------------------------------------------------
+	void InputService::attachModifiers(std::string& tgt) {
+		// Order is cruical here. The bindings also use this order (and it is ALT, CTRL, SHIFT)
+		if (mKeyboard->isModifierDown(Keyboard::Alt)) {
+			tgt += "+" + getKeyText(KC_LMENU);
+		}
+
+		if (mKeyboard->isModifierDown(Keyboard::Ctrl)) {
+			tgt += "+" + getKeyText(KC_LCONTROL);
+		}
+
+		if (mKeyboard->isModifierDown(Keyboard::Shift)) {
+			tgt += "+" + getKeyText(KC_LSHIFT);
+		}
+	}
+
+	//------------------------------------------------------
 	void InputService::captureInputs() {
 		if( mMouse ) {
 			mMouse->capture();
@@ -541,7 +555,39 @@ namespace Opde {
 		}
 
 		// now iterate through the events, for the repeated events, dispatch command
+	}
 
+	//------------------------------------------------------
+	void InputService::processKeyEvent(const OIS::KeyEvent &e) {
+		// Some safety checks
+		if (mInputMode == IM_DIRECT)
+			return;
+
+		if (mCurrentMapper.isNull()) {
+			LOG_ERROR("InputService::processKeyEvent: Mapped input, but no mapper set for the current state!");
+			return;
+		}
+
+		// dispatch the key event using the mapper
+		string key = getKeyText(e.key);
+
+		// SplitCommand result;
+/*
+		// Try to find the key without the modifiers
+		if (mCurrentMapper->unmapEvent(key, result)) {
+			// TODO: Send the event
+			return;
+		}
+
+		// no event for the key itself, try the modifiers
+		// Attach the pressed modifiers (is this right?)
+		attachModifiers(key);
+
+		if (mCurrentMapper->unmapEvent(key, result)) {
+			// TODO: Send the event
+			return;
+		}
+		*/
 	}
 
 	//------------------------------------------------------
@@ -551,7 +597,7 @@ namespace Opde {
 			if (mDirectListener)
 				return mDirectListener->keyPressed(e);
 		} else {
-			// dispatch the key event using the mapper
+
 		}
 
 		return false;
