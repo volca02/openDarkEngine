@@ -34,7 +34,7 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- ConfigService -------------------*/
 	/*----------------------------------------------------*/
-	ConfigService::ConfigService(ServiceManager *manager) : Service(manager), mConfigFileName("opde.cfg") {
+	ConfigService::ConfigService(ServiceManager *manager, const std::string& name) : Service(manager, name), mConfigFileName("opde.cfg") {
 	}
 
 	//------------------------------------------------------
@@ -148,7 +148,7 @@ namespace Opde {
 	}
 
 	Service* ConfigServiceFactory::createInstance(ServiceManager* manager) {
-		return new ConfigService(manager);
+		return new ConfigService(manager, mName);
 	}
 
 }

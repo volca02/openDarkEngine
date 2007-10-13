@@ -37,7 +37,7 @@ namespace Opde {
     /*-----------------------------------------------------*/
     /*-------------------- InputService -------------------*/
     /*-----------------------------------------------------*/
-    InputService::InputService(ServiceManager *manager) : Service(manager), mMouse(NULL), mKeyboard(NULL), mDirectListener(NULL) {
+    InputService::InputService(ServiceManager *manager, const std::string& name) : Service(manager, name), mMouse(NULL), mKeyboard(NULL), mDirectListener(NULL) {
     	// Initialize the valid keys
 		registerValidKey(KC_ESCAPE, "esc");
 
@@ -224,6 +224,7 @@ namespace Opde {
 			mInputSystem = NULL;
 		}
 
+		mRenderService.setNull();
     }
 
 	//------------------------------------------------------
@@ -347,6 +348,11 @@ namespace Opde {
 		ServiceManager::getSingleton().createByMask(SERVICE_INPUT_LISTENER);
     }
 
+	//------------------------------------------------------
+	void InputService::shutdown() {
+		LOG_DEBUG("InputService::shutdown");
+		mConfigService.setNull();
+	}
 
 	//------------------------------------------------------
 	void InputService::setBindContext(const std::string& context) {
@@ -668,7 +674,7 @@ namespace Opde {
     }
 
     Service* InputServiceFactory::createInstance(ServiceManager* manager) {
-	return new InputService(manager);
+	return new InputService(manager, mName);
     }
 
 }

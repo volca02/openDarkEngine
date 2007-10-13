@@ -37,7 +37,7 @@ namespace Opde {
 	*/
 	class LinkService : public Service {
 		public:
-			LinkService(ServiceManager *manager);
+			LinkService(ServiceManager *manager, const std::string& name);
 
 			virtual ~LinkService();
 

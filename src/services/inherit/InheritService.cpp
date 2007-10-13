@@ -76,8 +76,8 @@ namespace Opde {
 	/*--------------------------------------------------------*/
 	/*--------------------- InheritService -------------------*/
 	/*--------------------------------------------------------*/
-	InheritService::InheritService(ServiceManager *manager) :
-			Service(manager),
+	InheritService::InheritService(ServiceManager *manager, const std::string& name) :
+			Service(manager, name),
 			mMetaPropListenerID(0),
 			mMetaPropRelation() {
         // Register some common factories.
@@ -326,7 +326,7 @@ namespace Opde {
 	}
 
 	Service* InheritServiceFactory::createInstance(ServiceManager* manager) {
-		return new InheritService(manager);
+		return new InheritService(manager, mName);
 	}
 
 }

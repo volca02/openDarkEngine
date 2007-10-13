@@ -73,7 +73,7 @@ namespace Opde {
 	*/
 	class DatabaseService : public Service, public PrioritizedMessageSource<DatabaseChangeMsg> {
 		public:
-			DatabaseService(ServiceManager *manager);
+			DatabaseService(ServiceManager *manager, const std::string& name);
 			virtual ~DatabaseService();
 
 			/// Loads a game database. Can be either savegame, or mission

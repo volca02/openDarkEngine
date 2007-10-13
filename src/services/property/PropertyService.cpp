@@ -32,7 +32,7 @@ namespace Opde {
 	/*--------------------------------------------------------*/
 	/*--------------------- PropertyService ------------------*/
 	/*--------------------------------------------------------*/
-	PropertyService::PropertyService(ServiceManager *manager) : Service(manager) {
+	PropertyService::PropertyService(ServiceManager *manager, const std::string& name) : Service(manager, name) {
 		// Ensure listeners are created
 		mServiceManager->createByMask(SERVICE_PROPERTY_LISTENER);
 	}
@@ -160,7 +160,7 @@ namespace Opde {
 	}
 
 	Service* PropertyServiceFactory::createInstance(ServiceManager* manager) {
-		return new PropertyService(manager);
+		return new PropertyService(manager, mName);
 	}
 
 	const uint PropertyServiceFactory::getMask() {

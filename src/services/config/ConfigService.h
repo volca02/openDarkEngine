@@ -36,7 +36,7 @@ namespace Opde {
 	*/
 	class ConfigService : public Service {
 		public:
-			ConfigService(ServiceManager *manager);
+			ConfigService(ServiceManager *manager, const std::string& name);
 			virtual ~ConfigService();
 
             /** initializes the service. Tries to load opde.cfg */

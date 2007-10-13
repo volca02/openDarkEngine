@@ -299,13 +299,19 @@ namespace Opde {
 		if (shadMat->getNumTechniques() > 0)
 				if (shadMat->getTechnique(0)->getNumPasses() > 0)
 					if (shadMat->getTechnique(0)->getPass(0)->getNumTextureUnitStates() > 0)
-                        if (!shadMat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->isBlank())
-                            dimensions = shadMat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureDimensions();
-                            /*
+                        if (!shadMat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->isBlank()) {
+                        	TextureUnitState* tus = shadMat->getTechnique(0)->getPass(0)->getTextureUnitState(0);
+                            dimensions = tus->getTextureDimensions();
+                            std::pair<int, int> dons = tus->getTextureDimensions();
+
                             // scale by the U and V scale respectively
-                            dimensions.first  *= shadMat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureUScale();
-                            dimensions.second *= shadMat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureVScale();
-                            */
+                            dimensions.first  = tus->getTextureUScale() * dimensions.first;
+                            dimensions.second = tus->getTextureVScale() * dimensions.second;
+
+                            if (tus->getTextureUScale() != 1.0) {
+                            	LOG_DEBUG("WRCELL: Scaled the txt size to %d x %d from (%d x %d) on %s", dimensions.first, dimensions.second, dons.first, dons.second, tus->getTextureName().c_str());
+                            }
+		}
 
 		return shadMat;
 	}

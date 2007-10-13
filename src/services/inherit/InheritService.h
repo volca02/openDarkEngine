@@ -58,7 +58,7 @@ namespace Opde {
 	class InheritService : public Service, public MessageSource<InheritChangeMsg> {
 		public:
 			/// Constructor
-			InheritService(ServiceManager *manager);
+			InheritService(ServiceManager *manager, const std::string& name);
 
 			/// Destructor
 			virtual ~InheritService();

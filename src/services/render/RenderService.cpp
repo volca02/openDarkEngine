@@ -42,7 +42,7 @@ namespace Opde {
 	/*--------------------------------------------------------*/
 	/*--------------------- RenderService --------------------*/
 	/*--------------------------------------------------------*/
-	RenderService::RenderService(ServiceManager *manager) : Service(manager), mSceneMgr(NULL), mRoot(NULL), mDarkSMFactory(NULL) {
+	RenderService::RenderService(ServiceManager *manager, const std::string& name) : Service(manager, name), mSceneMgr(NULL), mRoot(NULL), mDarkSMFactory(NULL) {
 	    // TODO: This is just plain wrong. This service should be the maintainer of the used scene manager, if any other service needs the direct handle, etc.
 	    // The fact is this service is probably game only, and should be the initialiser of graphics as the whole. This will be the
 	    // modification that should be done soon in order to let the code look and be nice
@@ -371,6 +371,6 @@ namespace Opde {
 	}
 
 	Service* RenderServiceFactory::createInstance(ServiceManager* manager) {
-		return new RenderService(manager);
+		return new RenderService(manager, mName);
 	}
 }

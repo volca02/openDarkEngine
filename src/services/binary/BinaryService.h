@@ -39,7 +39,7 @@ namespace Opde {
 	class BinaryService : public Service, public ConsoleCommandListener {
 		public:
 			/** Initializes the Service */
-			BinaryService(ServiceManager* manager);
+			BinaryService(ServiceManager* manager, const std::string& name);
 
 			/** Destructs the WorldRepService instance, and unallocates the data, if any. */
 			virtual ~BinaryService();

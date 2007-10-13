@@ -36,7 +36,7 @@ namespace Opde {
 	*/
 	class PropertyService : public Service {
 		public:
-			PropertyService(ServiceManager *manager);
+			PropertyService(ServiceManager *manager, const std::string& name);
 			virtual ~PropertyService();
 
 			/** Creates a property group - a family of properties of the same type.

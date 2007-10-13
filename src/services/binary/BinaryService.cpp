@@ -32,7 +32,7 @@ namespace Opde {
 	/*------------------------------------------------------*/
 	/*-------------------- BinaryService -------------------*/
 	/*------------------------------------------------------*/
-	BinaryService::BinaryService(ServiceManager* manager) : mTypeGroups(), mEnumGroups(), Service(manager) {
+	BinaryService::BinaryService(ServiceManager* manager, const std::string& name) : mTypeGroups(), mEnumGroups(), Service(manager, name) {
 		Opde::ConsoleBackend::getSingleton().registerCommandListener("dtdesc", dynamic_cast<ConsoleCommandListener*>(this));
 		Opde::ConsoleBackend::getSingleton().setCommandHint("dtdesc", "Describe a dynamic type (param : dtype path)");
 	};
@@ -195,7 +195,7 @@ namespace Opde {
 	}
 
 	Service* BinaryServiceFactory::createInstance(ServiceManager* manager) {
-		return new BinaryService(manager);
+		return new BinaryService(manager, mName);
 	}
 
 }

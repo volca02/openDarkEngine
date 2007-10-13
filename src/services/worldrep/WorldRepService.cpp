@@ -37,7 +37,7 @@ using namespace Ogre;
 
 namespace Opde {
 	// Implementation of the WorldRep service
-	WorldRepService::WorldRepService(ServiceManager *manager) : Service(manager) {
+	WorldRepService::WorldRepService(ServiceManager *manager, const std::string& name) : Service(manager, name) {
 	    // ResourceGroupManager::getSingleton().setWorldResourceGroupName(TEMPTEXTURE_RESOURCE_GROUP);
 
 	}
@@ -810,7 +810,7 @@ namespace Opde {
 	};
 
 	Service* WorldRepServiceFactory::createInstance(ServiceManager* manager) {
-		return new WorldRepService(manager);
+		return new WorldRepService(manager, mName);
 	}
 
 	const std::string& WorldRepServiceFactory::getName() {

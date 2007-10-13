@@ -35,7 +35,7 @@ namespace Opde {
 	*/
 	class GameService : public Service {
 		public:
-			GameService(ServiceManager *manager);
+			GameService(ServiceManager *manager, const std::string& name);
 			virtual ~GameService();
 
 			/// Loads a game database using the database service

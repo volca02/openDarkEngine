@@ -58,7 +58,7 @@ namespace Opde {
 	class WorldRepService : public Service {
 		public:
 			/** Initializes the Service */
-			WorldRepService(ServiceManager* manager);
+			WorldRepService(ServiceManager* manager, const std::string& name);
 
 			/** Destructs the WorldRepService instance, and unallocates the data, if any. */
 			virtual ~WorldRepService();

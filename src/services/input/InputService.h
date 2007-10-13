@@ -99,7 +99,7 @@ namespace Opde {
 	/** @brief Input service - service which handles user input, and user input mapping */
 	class InputService : public Service, public OIS::KeyListener, public OIS::MouseListener {
 		public:
-			InputService(ServiceManager *manager);
+			InputService(ServiceManager *manager, const std::string& name);
 			virtual ~InputService();
 
 			/// Creates bind context (e.g. a switchable context, that maps events to commands if IM_MAPPED is active, using the mapper of this context)
@@ -165,6 +165,7 @@ namespace Opde {
 		protected:
             bool init();
             void bootstrapFinished();
+            void shutdown();
 
 			/// registers OIS::KeyCode to textual representation and inverse mappings
 			void registerValidKey(OIS::KeyCode kc, const std::string& txt);

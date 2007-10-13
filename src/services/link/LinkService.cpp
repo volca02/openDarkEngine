@@ -32,7 +32,7 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- LinkService -------------------*/
 	/*----------------------------------------------------*/
-	LinkService::LinkService(ServiceManager *manager) : Service(manager), mDatabaseService(NULL) {
+	LinkService::LinkService(ServiceManager *manager, const std::string& name) : Service(manager, name), mDatabaseService(NULL) {
 	}
 
 	//------------------------------------------------------
@@ -265,7 +265,7 @@ namespace Opde {
 	}
 
 	Service* LinkServiceFactory::createInstance(ServiceManager* manager) {
-		return new LinkService(manager);
+		return new LinkService(manager, mName);
 	}
 
 	const uint LinkServiceFactory::getMask() {

@@ -42,7 +42,7 @@ namespace Opde {
 	*/
 	class RenderService : public Service {
 		public:
-			RenderService(ServiceManager *manager);
+			RenderService(ServiceManager *manager, const std::string& name);
 			virtual ~RenderService();
 
             Ogre::Root* getOgreRoot();

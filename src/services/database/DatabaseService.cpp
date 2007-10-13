@@ -34,7 +34,7 @@ namespace Opde {
 	/*--------------------------------------------------------*/
 	/*-------------------- DatabaseService -------------------*/
 	/*--------------------------------------------------------*/
-	DatabaseService::DatabaseService(ServiceManager *manager) : Service(manager), mCurDB(NULL) {
+	DatabaseService::DatabaseService(ServiceManager *manager, const std::string& name) : Service(manager, name), mCurDB(NULL) {
 
 	}
 
@@ -151,7 +151,7 @@ namespace Opde {
 	}
 
 	Service* DatabaseServiceFactory::createInstance(ServiceManager* manager) {
-		return new DatabaseService(manager);
+		return new DatabaseService(manager, mName);
 	}
 
 }
