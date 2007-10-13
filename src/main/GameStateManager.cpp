@@ -65,6 +65,8 @@ namespace Opde {
 
 	GameStateManager::~GameStateManager() {
 		mInputService->unsetDirectListener();
+		mInputService.setNull();
+		mConfigService.setNull();
 
 		while (!mStateStack.empty()) {
 			GameState* state = mStateStack.top();
@@ -83,13 +85,13 @@ namespace Opde {
 		delete mServiceMgr;
 		mServiceMgr = NULL;
 
-		// Releas
+		delete mConsoleBackend;
+		delete mRoot;
+
+		// Release the loggers
 		delete mLogger;
 		delete mStdLog;
         delete mFileLog;
-
-		delete mConsoleBackend;
-		delete mRoot;
 	}
 
 	GameStateManager& GameStateManager::getSingleton(void) {
