@@ -301,6 +301,11 @@ namespace Opde {
 					if (shadMat->getTechnique(0)->getPass(0)->getNumTextureUnitStates() > 0)
                         if (!shadMat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->isBlank())
                             dimensions = shadMat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureDimensions();
+                            /*
+                            // scale by the U and V scale respectively
+                            dimensions.first  *= shadMat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureUScale();
+                            dimensions.second *= shadMat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->getTextureVScale();
+                            */
 
 		return shadMat;
 	}
