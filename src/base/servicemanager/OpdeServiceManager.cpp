@@ -108,7 +108,10 @@ namespace Opde {
 		if (factory != NULL) { // Found a factory for the Service name
 			ServicePtr ns = factory->createInstance(this);
 			mServiceInstances.insert(make_pair(factory->getName(), ns));
-			ns->init();
+
+			if (!ns->init()) {
+			    OPDE_EXCEPT("Initialization of service " + factory->getName() + " failed. Fatal. Please consult OPDE log for details", "ServiceManager::createInstance");
+			}
 
 			if (mBootstrapFinished) // Bootstrap already over, call the after-bootstrap init too
                 ns->bootstrapFinished();
@@ -148,6 +151,8 @@ namespace Opde {
         ServiceInstanceMap::iterator it = mServiceInstances.begin();
 
         for (; it != mServiceInstances.end() ; ++it ) {
+            LOG_DEBUG("ServiceManager: Bootstrap finished: informing %s", it->first.c_str());
+
             it->second->bootstrapFinished();
         };
 

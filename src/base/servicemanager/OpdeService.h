@@ -41,8 +41,9 @@ namespace Opde {
 
 				/** Intialization of the service. Guaranteed to be called after construction (If constructor was sucessful).
 				* Used to estabilish relations with other services. Only the dependencies that are fixed can be resolved here, otherwise use the bootstrapFinished.
+				* @return true on success, false on a fatal error
 				*/
-				virtual void init() {};
+				virtual bool init() = 0;
 
 				/** Tells the service that bootstraping has finished. Bootstraping process initializes the default and needed values in the services.
 				* This method is called after the bootstraping happened, so the services can use data that were initialized by the bootstraping
