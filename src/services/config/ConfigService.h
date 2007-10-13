@@ -40,7 +40,7 @@ namespace Opde {
 			virtual ~ConfigService();
 
             /** initializes the service. Tries to load opde.cfg */
-            virtual void init();
+            bool init();
 
 			/** Set a parameter */
 			void setParam(const std::string& param, const std::string& value);

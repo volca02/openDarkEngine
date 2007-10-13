@@ -42,7 +42,7 @@ namespace Opde {
 	}
 
     //------------------------------------------------------
-    void ConfigService::init() {
+    bool ConfigService::init() {
         DVariant acfg;
 
         // Reinitialize to the config_file parameter, if such is found
@@ -53,12 +53,13 @@ namespace Opde {
                 LOG_INFO("Did not find the alternate config file, defaulting to opde.cfg");
                 mConfigFileName = "opde.cfg";
             }  else {
-                return;
+                return true;
             }
         }
 
         if (!loadParams(mConfigFileName)) {
             LOG_FATAL("Did not find the opde.cfg file. Can be fatal!");
+            return false;
         }
     }
 

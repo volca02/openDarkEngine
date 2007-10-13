@@ -82,7 +82,7 @@ namespace Opde {
 			/// Unload the game data. Release all the data that are connected to a game's mission in progress
 			void unload();
 		protected:
-            virtual void init();
+            virtual bool init();
 
 			/// Retrieve a readonly database file by it's name
 			FileGroupPtr getDBFileNamed(const std::string& filename);

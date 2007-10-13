@@ -42,6 +42,12 @@ namespace Opde {
 		clearAll();
 	};
 
+
+	//------------------------------------
+	bool BinaryService::init() {
+	    return true;
+	}
+
 	//------------------------------------
 	void BinaryService::addType(const std::string& group, DTypeDefPtr def) {
 		LOG_DEBUG("BinaryService: Inserting type %s/%s", group.c_str(), def->name().c_str());

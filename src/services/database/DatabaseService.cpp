@@ -39,7 +39,7 @@ namespace Opde {
 	}
 
     //------------------------------------------------------
-    void DatabaseService::init() {
+    bool DatabaseService::init() {
         // Create all services listening to the database messages...
 	    ServiceManager::getSingleton().createByMask(SERVICE_DATABASE_LISTENER);
     }
