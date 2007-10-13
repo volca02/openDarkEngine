@@ -64,7 +64,8 @@ namespace Opde {
 			RelationPtr getRelation(const std::string& name);
 
 		protected:
-            virtual void bootstrapFinished();
+            bool init();
+            void bootstrapFinished();
 
 			/** Database change callback */
             void onDBChange(const DatabaseChangeMsg& m);

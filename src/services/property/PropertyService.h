@@ -51,7 +51,10 @@ namespace Opde {
 
 		protected:
             /// service initialization
-            virtual void bootstrapFinished();
+            bool init();
+
+            /// service initialization
+            void bootstrapFinished();
 
             /// Database change message callback
             void onDBChange(const DatabaseChangeMsg& m);

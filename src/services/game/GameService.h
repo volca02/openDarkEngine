@@ -42,6 +42,8 @@ namespace Opde {
 			void load(const std::string& filename);
 
 		protected:
+            bool init();
+
 			DatabaseServicePtr mDbService;
 	};
 

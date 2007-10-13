@@ -64,7 +64,7 @@ namespace Opde {
 			virtual ~InheritService();
 
             /// Service initialization - @see Service::init()
-			virtual void init();
+			virtual bool init();
 
 			/// Service bootstraping ended - @see Service::bootstrapFinished()
 			virtual void bootstrapFinished();

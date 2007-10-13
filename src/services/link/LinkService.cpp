@@ -47,6 +47,11 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
+	bool LinkService::init() {
+	    return true;
+	}
+
+	//------------------------------------------------------
 	void LinkService::bootstrapFinished() {
 		// Ensure link listeners are created
 		mServiceManager->createByMask(SERVICE_LINK_LISTENER);

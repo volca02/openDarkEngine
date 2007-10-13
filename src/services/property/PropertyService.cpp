@@ -43,6 +43,11 @@ namespace Opde {
             mDatabaseService->unregisterListener(mDbCallback);
 	}
 
+    // --------------------------------------------------------------------------
+    bool PropertyService::init() {
+        return true;
+    }
+
 	// --------------------------------------------------------------------------
 	void PropertyService::bootstrapFinished() {
 	    // Register as a database listener

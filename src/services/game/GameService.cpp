@@ -34,6 +34,11 @@ namespace Opde {
 	    mDbService = ServiceManager::getSingleton().getService("DatabaseService").as<DatabaseService>();
 	}
 
+    //------------------------------------------------------
+	bool GameService::init() {
+	    return true;
+	}
+
 	//------------------------------------------------------
 	GameService::~GameService() {
 	}

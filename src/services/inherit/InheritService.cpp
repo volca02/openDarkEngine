@@ -117,13 +117,17 @@ namespace Opde {
     }
 
 	//------------------------------------------------------
-	void InheritService::init() {
+	bool InheritService::init() {
    		// Link Service should have created us automatically through service masks.
 		// So we can register as a link service listener
 		mLinkService = ServiceManager::getSingleton().getService("LinkService").as<LinkService>();
 
-		if (mLinkService.isNull())
-		    OPDE_EXCEPT("LinkService does not exist?", "InheritService::init");
+		if (mLinkService.isNull()) {
+		    LOG_FATAL("InheritService::init: LinkService does not exist?");
+		    return false;
+		}
+
+		return true;
 	}
 
     //------------------------------------------------------
