@@ -8,6 +8,7 @@ include_directories (
     ${OPDE_SOURCE_DIR}/src/base/dtype
     ${OPDE_SOURCE_DIR}/src/base/loaders
     ${OPDE_SOURCE_DIR}/src/compat
+    ${OPDE_SOURCE_DIR}/src/scenemanager
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
     ${OPDE_SOURCE_DIR}/src/base/dyntype
     ${OPDE_SOURCE_DIR}/src/services
