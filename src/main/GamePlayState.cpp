@@ -419,8 +419,13 @@ namespace Opde {
 	void GamePlayState::bootstrapFinished() {
 		PropertyGroup::ListenerPtr cnamec =
 			new ClassCallback<PropertyChangeMsg, GamePlayState>(this, &GamePlayState::onPropSymNameMsg);
-		mPropSymName = ServiceManager::getSingleton().getService("PropertyService").as<PropertyService>()->getPropertyGroup("SymName"); // TODO: hardcoded, maybe not a problem after all
-		mPropSymNameListenerID = mPropSymName->registerListener(cnamec);
+		mPropSymName = ServiceManager::getSingleton().getService("PropertyService").as<PropertyService>()->getPropertyGroup("SymbolicName"); // TODO: hardcoded, maybe not a problem after all
+
+		if (!mPropSymName.isNull()) {
+			mPropSymNameListenerID = mPropSymName->registerListener(cnamec);
+		} else {
+			LOG_ERROR("GamePlayState::bootstrapFinished: Could not find the SymbolicName property group defined!");
+		}
 	}
 
 }
