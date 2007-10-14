@@ -18,8 +18,8 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *****************************************************************************/
- 
- 
+
+
 #ifndef __consolebackend_h
 #define __consolebackend_h
 
@@ -41,68 +41,66 @@ namespace Opde {
 		private:
 			/** Map of the string to the Listeners which handle them */
 			std::map<std::string, ConsoleCommandListener *> mCommandMap;
-			
+
 			/** Map of the string to the Listeners which handle them */
 			std::map<std::string, std::string> mHintMap;
-		
+
 			/** Command accelerator - tab completion map*/
 			std::map<std::string, std::set<std::string> > mCompletionMap;
-		
+
 			/** Console texts list */
 			std::deque< Ogre::String > mMessages;
-		
-			/** Current view position. Use method scroll to move the actual view.
-			* @note the update of this value is smart. If the mPosition was previously at bottom, will stay there */
-			int mPosition;
 
 			/** Internal method for adding text rows */
 			void addText(std::string text);
-				
+
 			/** Indicates true if the console text / scroll changed till last time and should be redrawn */
 			bool mChanged;
 
 			unsigned int mTextHistory;
 		public:
-			/** constructor */ 
+			/** constructor */
 			ConsoleBackend(unsigned int text_history = 1000);
-		
+
 			/** Will register the command Command with the ConsoleCommandListener listener
 			* @note When the command is already registered, the listener will be reregistered, allowing this to be called in the constructors */
 			void registerCommandListener(std::string Command, ConsoleCommandListener *listener);
-		
+
 			/** Register a help (or a short description) for a command
 			* @param command Command name
 			* @param hint Hint text
 			*/
 			void setCommandHint(std::string command, std::string hint);
-			
+
 			/** execute the command, given on the commandline. Will tokenize by " " to find the first word, try to find that word as a command, and if sucessfull, will execute the commandListener's method commandExecuted */
 			void executeCommand(std::string Command);
-		
+
 			/** Will puts a tab completion message, or just complete the command if only one candidate is found */
 			std::string tabComplete(std::string Text);
-		
+
 			/* Writes a simple message to the console */
 			void putMessage(std::string text);
-		
+
 			/** Ogre's log listener implementation. Used as a to console logger for the ogre Logging system. This means that one can se the ogre logger to write messages to console too */
 			virtual void messageLogged( const Ogre::String& message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String &logName );
-			
+
 			/** Opde logging method implementation */
 			virtual void logMessage(LogLevel level, char *message);
-			
+
 			/** Returns true, if the console text was changed from last time, and resets the indicator - asking twice will return true,false */
 			bool getChanged();
-			
+
+            void setChanged() { mChanged = true; };
+
 			/** Scroll the view window a defined number of lines */
 			void scroll(int lines);
 
 			/** Pulls a set of messages out of the memory of messages.
 			@param linenum The start line to load. -1 means we will pull up to #lines from end of the vector
-			@param lines the maximal count of lines to load 
+			@param lines the maximal count of lines to load
 			*/
-			void pullMessages(std::vector<Ogre::String>& target, unsigned int lines);
-			
+			void pullMessages(std::vector<Ogre::String>& target, int pos, unsigned int lines);
+
 			// Singleton stuff
 			static ConsoleBackend& getSingleton(void);
 			static ConsoleBackend* getSingletonPtr(void);

@@ -18,8 +18,8 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *****************************************************************************/
- 
-#include "ConsoleBackend.h"	
+
+#include "ConsoleBackend.h"
 
 namespace Opde {
 	using namespace Ogre;
@@ -28,37 +28,33 @@ namespace Opde {
 	const char* logLevels[5] = {"FATAL","ERROR","INFO","DEBUG","VERBOSE"};
 
 	template<> ConsoleBackend* Singleton<ConsoleBackend>::ms_Singleton = 0;
-	
-	ConsoleBackend::ConsoleBackend(unsigned int text_history) : mTextHistory(text_history), mCommandMap(), mCompletionMap(), mPosition(0) {
+
+	ConsoleBackend::ConsoleBackend(unsigned int text_history) : mTextHistory(text_history), mCommandMap(), mCompletionMap() {
 		mCommandMap.clear();
 		mCompletionMap.clear();
 		mMessages.clear();
-		mPosition = 0;
 		mChanged = true;
 
 		// Register as an ogre logger
-		//LogManager::getSingleton().getDefaultLog()->addListener(this); 
+		//LogManager::getSingleton().getDefaultLog()->addListener(this);
 	}
-		
+
 	void ConsoleBackend::addText(std::string text) {
 		// split the text on newlines, to aid line counting
 		std::vector< String > lines = StringUtil::split(text, "\r\n");
-		
+
 		std::vector< String >::iterator it = lines.begin();
-		
-		
-		
+
+
+
 		for (;it != lines.end(); it++) {
-			if (mPosition >= mMessages.size())
-				mPosition++;
-			
 			mMessages.push_back(*it);
 		}
-		
+
 		// if the size is greater the mTextHistory, remove till sufficient
-		while (mMessages.size() > mTextHistory) 
+		while (mMessages.size() > mTextHistory)
 			mMessages.pop_front();
-		
+
 		mChanged = true;
 	}
 
@@ -72,22 +68,22 @@ namespace Opde {
 			mCommandMap.insert(make_pair(command, listener));
 		}
 	}
-	
+
 	void ConsoleBackend::setCommandHint(std::string command, std::string hint) {
 		mHintMap.insert(make_pair(command, hint));
 	}
-		
+
 	void ConsoleBackend::executeCommand(std::string command) {
 		addText(">" + command);
 
 		// Split the command on the first space... make it a Command PARAMETERS
 		size_t space_pos = command.find(' ');
-		
+
 		// If there are no parameters at all... as a default
 		string command_part = command;
 		string command_parameters = "";
 
-		if (space_pos != string::npos) { 
+		if (space_pos != string::npos) {
 			// First substring to command, second to params
 			command_part = command.substr(0,space_pos);
 			command_parameters = command.substr(space_pos+1, command.length() - (space_pos + 1));
@@ -98,10 +94,10 @@ namespace Opde {
 			map<string, ConsoleCommandListener *>::iterator commands = mCommandMap.begin();
 
 			for (;commands != mCommandMap.end(); commands++) {
-				
+
 				// Try to look for a hint text
 				map<string, string>::const_iterator hintIt = mHintMap.find(commands->first);
-					
+
 				if (hintIt != mHintMap.end()) // if a hint text was found, use it
 					addText("  " + (commands->first) + " - " + hintIt->second);
 				else {
@@ -110,7 +106,7 @@ namespace Opde {
 			}
 			return;
 		}
-			
+
 		// Find the command listener, as we are not the handler
 		map<string, ConsoleCommandListener *>::iterator commandIt = mCommandMap.find(command_part);
 
@@ -127,7 +123,7 @@ namespace Opde {
 		//TODO: Code
 		return Text;
 	}
-		
+
 	void ConsoleBackend::putMessage(std::string text) {
 		addText(text);
 	}
@@ -136,7 +132,7 @@ namespace Opde {
 		if (lml = LML_CRITICAL)
 			addText("OgreLog: (" + logName + ") : " + message);
 	}
-	
+
 	void ConsoleBackend::logMessage(LogLevel level, char *message) {
 		std::string smessage(message);
 		addText("LOG[" + string(logLevels[level]) + "] : " + smessage);
@@ -152,49 +148,48 @@ namespace Opde {
 		return false;
 	}
 
-	void ConsoleBackend::pullMessages(std::vector<Ogre::String>& target, unsigned int lines) {
+	void ConsoleBackend::pullMessages(std::vector<Ogre::String>& target, int pos, unsigned int lines) {
 		// add the lines from the mMessages backwards
-		
+
 		std::deque < Ogre::String >::iterator it;
-		
-		size_t size = mMessages.size();
-		
-		if (mPosition >= size) {
-			mPosition = size - 1;
-		}
-		
-		if (mPosition < 0) {
-			mPosition = 0;
+
+		int size = mMessages.size();
+
+		if (pos >= size) {
+			pos = size - 1;
 		}
 
-		it = mMessages.begin() + mPosition;
-		lines = (mMessages.size() - mPosition) > lines ? lines : (mMessages.size() - mPosition);
-		
-		
+		if (pos < 0) { // from end
+			pos = size + (pos + 1);
+			
+			if (size - pos < lines) // if there could be more lines visible, justify
+                pos = size - lines;
+
+            if (pos < 0) { // if the resulting position is less than zero, justify both position and size
+                pos = 0;
+                
+                if (lines > size)
+					lines = size;
+            }
+
+            it = mMessages.begin() + pos;
+		} else {
+            // If the pos was negative, fill the screen
+            it = mMessages.begin() + pos;
+            lines = (size - pos) > lines ? lines : (size - pos);
+		}
+
 		for (;lines > 0; --lines, ++it) {
 			target.push_back(*it);
 		}
 	}
-	
+
 	ConsoleBackend& ConsoleBackend::getSingleton(void) {
-		assert( ms_Singleton );  return ( *ms_Singleton );  
+		assert( ms_Singleton );  return ( *ms_Singleton );
 	}
-	
+
 	ConsoleBackend* ConsoleBackend::getSingletonPtr(void) {
 		return ms_Singleton;
 	}
-	
-	void ConsoleBackend::scroll(int lines) {
-		int prev_pos = mPosition;
-		
-		mPosition += lines;
-		
-		if (mPosition > static_cast<int>(mMessages.size()))
-			mPosition = mMessages.size();
-		
-		if (mPosition < 0)
-			mPosition = 0;
-		
-		mChanged = (prev_pos != mPosition);
-	}
+
 }

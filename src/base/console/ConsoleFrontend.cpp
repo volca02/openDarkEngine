@@ -44,6 +44,8 @@ namespace Opde {
 		mConsoleText = OverlayManager::getSingleton().getOverlayElement("Opde/ConsoleText");
 
 		mConsoleBackend = ConsoleBackend::getSingletonPtr();
+
+		mPosition = -1; // follow
 	}
 
 	ConsoleFrontend::~ConsoleFrontend() {
@@ -64,9 +66,17 @@ namespace Opde {
 		} else if (e.key == KC_BACK) {
 			mCommand = mCommand.substr(0, mCommand.length()-1);
 		} else if (e.key == KC_PGUP) {
-			mConsoleBackend->scroll(-30);
+			mPosition -= 28; // let two lines be the same
+			mConsoleBackend->setChanged();
 		} else if (e.key == KC_PGDOWN) {
-			mConsoleBackend->scroll(30);
+			mPosition += 28;
+			mConsoleBackend->setChanged();
+		} else if (e.key == KC_END) {
+			mPosition = -1;
+			mConsoleBackend->setChanged();
+		}else if (e.key == KC_HOME) {
+			mPosition = 0;
+			mConsoleBackend->setChanged();
 		}
 		else {
 			string allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ,./:;'-_+=[]{}()| \"\t";
@@ -97,7 +107,7 @@ namespace Opde {
 			if (mConsoleBackend->getChanged()) {
 				// need to update the text window
 				std::vector< Ogre::String > texts;
-				mConsoleBackend->pullMessages(texts, 30);
+				mConsoleBackend->pullMessages(texts, mPosition, 30);
 
 				String text;
 

@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *****************************************************************************/
- 
+
 #ifndef __CONSOLEFRONTEND_H
 #define __CONSOLEFRONTEND_H
 
@@ -33,39 +33,41 @@
 
 
 namespace Opde {
-	
+
 	class ConsoleFrontend {
                 public:
                         ConsoleFrontend();
 			~ConsoleFrontend();
-			
+
 			/** Injects an ois keyboard event into the console
 			* @return true if the keyboard event was consumed, false otherwise (Console not visible)
 			*/
 			bool injectKeyPress(const OIS::KeyEvent &e);
-			
+
 			void setActive(bool active);
-			
+
 			inline bool isActive() const { return mIsActive; };
-			 
+
 			/** Frame update method. Call every time frame update happens */
 			void update(int timems);
-			
+
 		protected:
 			bool mIsActive;
-			
+
 			Ogre::Root *mRoot;
 			Ogre::OverlayManager *mOverlayMgr;
 			Ogre::Overlay* mConsoleOverlay;
-			
+
 			Ogre::OverlayElement* mCommandLine;
 			Ogre::OverlayElement* mConsoleText;
-			
+
 			Ogre::String mCommand;
-			
+
+			int mPosition;
+
 			ConsoleBackend* mConsoleBackend;
 	};
-	
+
 }
 
 #endif
