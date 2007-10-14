@@ -1066,15 +1066,17 @@ namespace Ogre {
             TextureUnitState* tus = pass->createTextureUnitState();
 
             // set the material color. Now I don't know what illumination is, so I just ignore
-            tus->setColourOperationEx(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, ColourValue(mat.colour[2], mat.colour[1], mat.colour[0])); // , mat.colour[3]
+            tus->setColourOperationEx(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, ColourValue(mat.colour[2] / 255.0, mat.colour[1] / 255.0, mat.colour[0] / 255.0)); // , mat.colour[3]
 
             if (( mHdr.mat_flags & MD_MAT_TRANS || mHdr.mat_flags & MD_MAT_ILLUM ) && (matext.trans > 0)) {
-                tus->setColourOperation(LBO_ALPHA_BLEND);
+                // tus->setColourOperation(LBO_ALPHA_BLEND);
                 tus->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, 1 - matext.trans);
                 // tus->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, matext.trans);
             } else {
-                tus->setColourOperation(LBO_REPLACE);
+                // tus->setColourOperation(LBO_REPLACE);
             }
+            
+            omat->setCullingMode(CULL_ANTICLOCKWISE);
 
         } else
             OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Invalid material type : ") + StringConverter::toString(mat.type), "ObjectMeshLoader::prepareMaterial");
