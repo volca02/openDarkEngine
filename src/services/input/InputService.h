@@ -173,9 +173,21 @@ namespace Opde {
 			/// Attaches the ctrl, alt and shift texts if they are pressed
 			void attachModifiers(std::string& tgt);
 
-			/// Processes the received key event with current mapper, and if it finds a match, sends an event
-			void processKeyEvent(const OIS::KeyEvent &e);
+			/// Calls a trap for a command
+			/// @returns true if the command was found, false otherwise
+			bool callCommandTrap(const InputEventMsg& msg);
 
+			/// returns true if the command trap exists for a given command
+			bool hasCommandTrap(const std::string& cmd);
+
+			/// Splits the given command on first whitespace to command an parameters parts
+			std::pair<std::string, std::string> splitCommand(const std::string& cmd) const;
+
+			/// Processes the received key event with current mapper, and if it finds a match, sends an event
+			void processKeyEvent(const OIS::KeyEvent &e, InputEventType t);
+
+
+			// ---- OIS input events ----
 			bool keyPressed( const OIS::KeyEvent &e );
 			bool keyReleased( const OIS::KeyEvent &e );
 
@@ -183,8 +195,10 @@ namespace Opde {
     		bool mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id );
     		bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id );
 
+			/// Finds a mapper (Or NULL) for the specified context
             InputEventMapperPtr findMapperForContext(const std::string& ctx);
 
+			/// Strips a comment (any text after ';' including that character)
 			std::string stripComment(const std::string& cmd);
 
 			/// Named context to an event mapper map
@@ -195,16 +209,35 @@ namespace Opde {
 
 			/// map of OIS::KeyCode to the code text
 			typedef std::map< OIS::KeyCode, std::string > KeyMap; // (lower case please)
+			
+			/// map of the command text to the ois key code
 			typedef std::map< std::string, OIS::KeyCode > ReverseKeyMap; // (lower case please)
 
+			/// map of command text to the handling listener
+			typedef std::map< std::string, ListenerPtr > ListenerMap;
+			
+			/// map of the context name to the mapper
 			ContextToMapper mMappers;
+			
+			/// Variable list
 			ValueMap mVariables;
+			
+			/// Key map
 			KeyMap mKeyMap;
+			/// Reverse key map
 			ReverseKeyMap mReverseKeyMap;
 
+			/// Current mapper
 			InputEventMapperPtr mCurrentMapper;
+			
+			/// Current input mode
 			InputMode mInputMode;
 
+			/// Map of the command trappers
+			ListenerMap mCommandTraps;
+
+			/// Current direct listener 
+			/// TODO: Maybe this will become a stack
 			DirectInputListener* mDirectListener;
 
 			// Input system releted objects
@@ -216,9 +249,13 @@ namespace Opde {
     		OIS::Keyboard     *mKeyboard;
 
 
+			/// Renderer window we listen on
 			Ogre::RenderWindow* mRenderWindow;
 
+			/// Config service pointer
 			ConfigServicePtr mConfigService;
+			
+			/// Render service pointer
 			RenderServicePtr mRenderService;
 	};
 

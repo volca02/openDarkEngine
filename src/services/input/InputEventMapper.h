@@ -52,9 +52,7 @@ namespace Opde {
 				CommandEventType type;
 				/// Command to emit on the event
 				std::string command;
-				/// Parameters of the command - optional
-				std::string params;
-			} SplitCommand;
+			} Command;
 
 			InputEventMapper(InputService* is);
 			virtual ~InputEventMapper();
@@ -63,7 +61,7 @@ namespace Opde {
 			* @param event The event to unmap
 			* @param unmapped the command that this event is mapped to
 			* @return true if a command was found for the event, false otherwise */
-			bool unmapEvent(const std::string& event, SplitCommand& unmapped);
+			bool unmapEvent(const std::string& event, Command& unmapped);
 
 			/** Gets the list of events leading to a command */
 			std::vector<std::string> getCommandEvents(const std::string& command);
@@ -73,7 +71,7 @@ namespace Opde {
 
 		protected:
 
-			typedef std::map<std::string, SplitCommand> EventToCommandMap;
+			typedef std::map<std::string, Command> EventToCommandMap;
 
 			/// Map of command
 			EventToCommandMap mEventToCommand;

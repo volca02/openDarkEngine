@@ -44,7 +44,7 @@ namespace Opde {
     }
 
     //------------------------------------------------------
-    bool InputEventMapper::unmapEvent(const std::string& event, SplitCommand& unmapped) {
+    bool InputEventMapper::unmapEvent(const std::string& event, Command& unmapped) {
 		EventToCommandMap::const_iterator it = mEventToCommand.find(event);
 
 		if (it != mEventToCommand.end()) {
@@ -84,32 +84,22 @@ namespace Opde {
 		// The whole command, with parameters and binding type
 		string wcommand = stok.next();
 
-		// Split the command
-		WhitespaceStringTokenizer cst(wcommand);
+		Command spc;
 
-		if (cst.end())
-			return false;
-
-		SplitCommand spc;
-
-		// peek at the first character
-		std::string cmd1 = cst.next();
-
-		if (cmd1 == "")
+		if (wcommand == "")
 			return false;
 
 		spc.type = CET_ONDOWN;
 
-		if (cmd.substr(1,1) == "+") {
-			spc.command = cmd1.substr(1);
+		if (wcommand.substr(1,1) == "+") {
+			spc.command = wcommand.substr(1);
 			spc.type = CET_PEDGE;
 		} else if (cmd.substr(1,1) == "-") {
-			spc.command = cmd1.substr(1);
+			spc.command = wcommand.substr(1);
 			spc.type = CET_NEDGE;
+		} else {
+			spc.command = wcommand;
 		}
-
-		spc.command = cmd;
-		spc.params = cst.rest();
 
 		// The bnd files are not case sensitive. Thus, I convert the ev to lower case before validating/inserting
 		// (Argh. The lower case conversion is way complicated in c++, the reason being locales and stuff like that. I simply ignore this here, OK?)

@@ -335,8 +335,8 @@ namespace Opde {
 
 			// Set mouse region
 			const OIS::MouseState &mouseState = mMouse->getMouseState();
-    			mouseState.width  = width;
-    			mouseState.height = height;
+			mouseState.width  = width;
+			mouseState.height = height;
 		}
 
 		return true;
@@ -421,8 +421,17 @@ namespace Opde {
 					result += var;
 				}
 			}
-		}
+		} /*else if (commandDefined(f)) {
+			string f1 = "";
 
+			if (!st.end())
+				f1 = st.rest();
+
+			callCommandTrap(f, f1);
+
+			return true;
+		}
+*/
 		if (st.end()) {
 			LOG_DEBUG("InputService::command: incomplete command?");
 			return false;
@@ -564,7 +573,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void InputService::processKeyEvent(const OIS::KeyEvent &e) {
+	void InputService::processKeyEvent(const OIS::KeyEvent &e, InputEventType t) {
 		// Some safety checks
 		if (mInputMode == IM_DIRECT)
 			return;
@@ -577,23 +586,101 @@ namespace Opde {
 		// dispatch the key event using the mapper
 		string key = getKeyText(e.key);
 
-		// SplitCommand result;
-/*
+		InputEventMapper::Command result;
+
 		// Try to find the key without the modifiers
 		if (mCurrentMapper->unmapEvent(key, result)) {
 			// TODO: Send the event
-			return;
+			// Split the command to cmd and params parts
+			std::pair<string, string> split = splitCommand(result.command);
+			
+			InputEventMsg msg;
+			msg.command = split.first;
+			msg.params = split.second;
+			msg.event = t;
+
+			if (callCommandTrap(msg)) {
+				return;
+			}
 		}
 
 		// no event for the key itself, try the modifiers
-		// Attach the pressed modifiers (is this right?)
 		attachModifiers(key);
 
 		if (mCurrentMapper->unmapEvent(key, result)) {
-			// TODO: Send the event
-			return;
+			std::pair<string, string> split = splitCommand(result.command);
+			
+			InputEventMsg msg;
+			msg.command = split.first;
+			msg.params = split.second;
+			msg.event = t;
+			
+			if (callCommandTrap(msg)) {
+				return;
+			}
 		}
-		*/
+	}
+
+	//------------------------------------------------------	
+	void InputService::registerCommandTrap(const std::string& command, ListenerPtr listener) {
+		if (mCommandTraps.find(command) != mCommandTraps.end()) {
+			// Already registered command. LOG an error
+			LOG_ERROR("The command %s already has a registered trap. Not registering", command.c_str());
+			return;
+		} else {
+			mCommandTraps.insert(make_pair(command, listener));
+		}
+	}
+
+	//------------------------------------------------------	
+	void InputService::unregisterCommandTrap(ListenerPtr listener) {
+		// Iterate through the trappers, find the ones with this listener ptr, remove
+		ListenerMap::iterator it = mCommandTraps.begin();
+		
+		while (it != mCommandTraps.end()) {
+			ListenerMap::iterator pos = it++;
+			
+			if (pos->second == listener) {
+				mCommandTraps.erase(pos);
+			}
+		}
+		
+	}
+	
+	//------------------------------------------------------	
+	bool InputService::callCommandTrap(const InputEventMsg& msg) {
+		ListenerMap::const_iterator it = mCommandTraps.find(msg.command);
+		
+		if (it != mCommandTraps.end()) {
+			(*it->second)(msg);
+			return true;
+		}
+		
+		return false;
+	}
+
+	//------------------------------------------------------
+	bool InputService::hasCommandTrap(const std::string& cmd) {
+		if (mCommandTraps.find(cmd) != mCommandTraps.end()) {
+			return true;
+		}
+		
+		return false;
+	}
+
+	//------------------------------------------------------
+	std::pair<std::string, std::string> InputService::splitCommand(const std::string& cmd) const {
+		WhitespaceStringTokenizer stok(cmd);
+		
+		std::pair<std::string, std::string> res = make_pair("", "");
+		
+		if (!stok.end())
+			res.first = stok.next();
+		
+		if (!stok.end())
+			res.second = stok.rest();
+			
+		return res;
 	}
 
 	//------------------------------------------------------
@@ -603,7 +690,7 @@ namespace Opde {
 			if (mDirectListener)
 				return mDirectListener->keyPressed(e);
 		} else {
-
+			processKeyEvent(e, IET_KEYBOARD_PRESS);
 		}
 
 		return false;
@@ -617,6 +704,7 @@ namespace Opde {
 				return mDirectListener->keyReleased(e);
 		} else {
 			// dispatch the key event using the mapper
+			processKeyEvent(e, IET_KEYBOARD_RELEASE);
 		}
 
 		return false;
