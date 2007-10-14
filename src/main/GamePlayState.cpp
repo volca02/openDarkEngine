@@ -404,16 +404,16 @@ namespace Opde {
 	}
 
 	void GamePlayState::onPropSymNameMsg(const PropertyChangeMsg& msg) {
-/*		switch (msg.change) {
+		switch (msg.change) {
 			case PROP_ADDED   :
 			case PROP_CHANGED : {
                 // Find the scene node by it's object id, and update the position and orientation
 				std::string symName = msg.data->get("").toString();
-
-        LOG_INFO("GamePlayState: Found property %s", symName);
+				if (symName == "StartingPoint")
+					LOG_INFO("GamePlayState: Found StartingPoint");
 				break;
 			}
-		}*/
+		}
 	}
 
 	void GamePlayState::bootstrapFinished() {
