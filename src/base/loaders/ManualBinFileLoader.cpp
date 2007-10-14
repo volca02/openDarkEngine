@@ -641,12 +641,13 @@ namespace Ogre {
         switch (type) {
             case MD_NODE_HDR:
                 // in.read((char *) &ndhdr, sizeof(NodeHeader));
-                mFile->read(&ndhdr.flag, 1);
+                mFile->read(&ndhdr.subObjectID, 1);
                 mFile->read(&ndhdr.object_number, 1);
                 mFile->read(&ndhdr.c_unk1, 1);
 
-                // TODO: Door handles. One instance for two handles. Same node tree(?)
-                loadSubNode(obj, offset + NODE_HEADER_SIZE); // only skip this node's size
+				if (obj == ndhdr.subObjectID)
+					loadSubNode(obj, offset + NODE_HEADER_SIZE); // only skip this node's size
+					
                 break;
 
             case MD_NODE_SPLIT:
@@ -660,6 +661,7 @@ namespace Ogre {
                 mFile->readElem(&ns.pgon_after_count, 2);
 
                 loadPolygons(obj, ns.pgon_before_count + ns.pgon_after_count);
+
 
                 loadSubNode (obj, ns.behind_node);
                 loadSubNode (obj, ns.front_node);

@@ -203,7 +203,7 @@ typedef struct {
 // geometry nodes definitions
 typedef struct      NodeHeader
 {
-    uint8_t            flag;
+    uint8_t            subObjectID; // So I can skip those sub-objs that don't match
     // This is probably used if MD_NODE_CALL skips from one object to another.
     // I would reckon that the transform of object indicated here is used rather than the one given by the object in progress
     uint8_t            object_number;
