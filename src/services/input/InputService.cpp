@@ -588,37 +588,48 @@ namespace Opde {
 
 		InputEventMapper::Command result;
 
-		// Try to find the key without the modifiers
-		if (mCurrentMapper->unmapEvent(key, result)) {
-			// TODO: Send the event
-			// Split the command to cmd and params parts
-			std::pair<string, string> split = splitCommand(result.command);
+		// first cycle without mods, second with them
+		for (int it = 0; it < 2; it++) { // Just to run this two times
 			
-			InputEventMsg msg;
-			msg.command = split.first;
-			msg.params = split.second;
-			msg.event = t;
-
-			if (callCommandTrap(msg)) {
-				return;
+			// Try to find the key without the modifiers
+			if (mCurrentMapper->unmapEvent(key, result)) {
+				// TODO: Send the event
+				// Split the command to cmd and params parts
+				std::pair<string, string> split = splitCommand(result.command);
+				
+				InputEventMsg msg;
+				
+				msg.command = split.first;
+				msg.params = split.second;
+				msg.event = t;
+				
+				// If it is denoted by plus sign, we replace the param with on/off 1.0/0.0 (- does the opposite, really)
+				if (result.type == InputEventMapper::CET_PEDGE) { 
+					if (t == IET_KEYBOARD_PRESS)
+						msg.params = 1.0f;
+					else
+						msg.params = 0.0f;
+				} else if (result.type == InputEventMapper::CET_NEDGE) {
+					if (t == IET_KEYBOARD_PRESS)
+						msg.params = 0.0f;
+					else
+						msg.params = 1.0f;
+				}
+				
+				// No key repeat for now...
+				// If it would be CET_NORMAL. We could mark the event as running, then process every frame/key repeat
+				// Don't worry. It will definatelly be implemented.
+				
+				// If the binding is not +/-, only progress on button press. This will be handled differently with the key repeats
+				if (t != IET_KEYBOARD_RELEASE && result.type == InputEventMapper::CET_NORMAL)
+					if (callCommandTrap(msg))
+						return;
 			}
-		}
 
-		// no event for the key itself, try the modifiers
-		attachModifiers(key);
-
-		if (mCurrentMapper->unmapEvent(key, result)) {
-			std::pair<string, string> split = splitCommand(result.command);
-			
-			InputEventMsg msg;
-			msg.command = split.first;
-			msg.params = split.second;
-			msg.event = t;
-			
-			if (callCommandTrap(msg)) {
-				return;
-			}
+			// no event for the key itself, try the modifiers
+			attachModifiers(key);
 		}
+		
 	}
 
 	//------------------------------------------------------	

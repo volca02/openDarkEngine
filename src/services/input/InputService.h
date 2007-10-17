@@ -44,12 +44,15 @@ namespace Opde {
 	// First, I have to specify if the input servis has to be stateful or stateless
 	typedef enum {
 			IET_KEYBOARD_PRESS,
+			IET_KEYBOARD_HOLD,
 			IET_KEYBOARD_RELEASE,
 			IET_MOUSE_MOVE,
 			IET_MOUSE_PRESS,
+			IET_MOUSE_HOLD,
 			IET_MOUSE_RELEASE,
 			IET_JOYSTICK_MOVE,
 			IET_JOYSTICK_PRESS,
+			IET_JOYSTICK_HOLD,
 			IET_JOYSTICK_RELEASE
 	} InputEventType;
 
@@ -58,7 +61,7 @@ namespace Opde {
 		 // unmapped command, or empty
 		std::string command;
 		// Parameters of the command
-		std::string params;
+		DVariant params;
 	} InputEventMsg;
 
 	/// The state of input modifiers
@@ -216,6 +219,9 @@ namespace Opde {
 			/// map of command text to the handling listener
 			typedef std::map< std::string, ListenerPtr > ListenerMap;
 			
+			/// Set of commands that receive event on hold, every refresh
+			typedef std::set< std::string > CommandSet;
+			
 			/// map of the context name to the mapper
 			ContextToMapper mMappers;
 			
@@ -224,6 +230,7 @@ namespace Opde {
 			
 			/// Key map
 			KeyMap mKeyMap;
+			
 			/// Reverse key map
 			ReverseKeyMap mReverseKeyMap;
 
@@ -236,6 +243,9 @@ namespace Opde {
 			/// Map of the command trappers
 			ListenerMap mCommandTraps;
 
+			/// Set of commands that receive events every refresh if the button is holded
+			CommandSet mOnPressCommands;
+
 			/// Current direct listener 
 			/// TODO: Maybe this will become a stack
 			DirectInputListener* mDirectListener;
@@ -247,7 +257,6 @@ namespace Opde {
 			OIS::Mouse        *mMouse;
 			/// OIS keyboard pointer
     		OIS::Keyboard     *mKeyboard;
-
 
 			/// Renderer window we listen on
 			Ogre::RenderWindow* mRenderWindow;

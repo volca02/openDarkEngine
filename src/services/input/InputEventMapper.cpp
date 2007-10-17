@@ -89,7 +89,7 @@ namespace Opde {
 		if (wcommand == "")
 			return false;
 
-		spc.type = CET_ONDOWN;
+		spc.type = CET_NORMAL;
 
 		if (wcommand.substr(1,1) == "+") {
 			spc.command = wcommand.substr(1);

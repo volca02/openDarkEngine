@@ -43,7 +43,7 @@ namespace Opde {
 				/// Go negative on keypress, positive on release (Edge detection)
 				CET_NEDGE,
 				/// call command every time the state is DOWN (pressed)
-				CET_ONDOWN
+				CET_NORMAL
 			};
 
 			/// Parsed command (bind format: "[+/-]command (params)")
