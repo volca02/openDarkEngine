@@ -112,18 +112,18 @@ namespace Opde {
 
 			/** Returns a prepared material pointer for combination texture/atlasnum
 			* @note fills the dimensions parameter with the texture dimensions */
-			const Ogre::MaterialPtr getMaterial(unsigned int texture, unsigned int atlasnum, std::pair< Ogre::uint, Ogre::uint > &dimensions, unsigned int flags);
+			const Ogre::MaterialPtr getMaterial(unsigned int texture, unsigned int atlasnum, std::pair< Ogre::uint, Ogre::uint > &dimensions, std::pair< float, float > &tscale, unsigned int flags);
 
 			/** Returns a prepared material name for combination texture/atlasnum
 			* @note fills the dimensions parameter with the texture dimensions */
-			const Ogre::String getMaterialName(unsigned int texture, unsigned int atlasnum, std::pair< Ogre::uint, Ogre::uint > &dimensions, unsigned int flags);
+			const Ogre::String getMaterialName(unsigned int texture, unsigned int atlasnum, std::pair< Ogre::uint, Ogre::uint > &dimensions, std::pair< float, float > &tscale, unsigned int flags);
 
 			/** Inserts a new vertex into the manual object. Calculates all the UV values needed
 			* @deprecated For moving towards the geometry by buffers */
-			void insertTexturedVertex(Ogre::ManualObject *manual, int faceNum, wr_coord_t pos, Ogre::Vector2 displacement, std::pair< Ogre::uint, Ogre::uint > dimensions);
+			void insertTexturedVertex(Ogre::ManualObject *manual, int faceNum, wr_coord_t pos, Ogre::Vector2 displacement, std::pair< Ogre::uint, Ogre::uint > dimensions, std::pair< float, float > tscale);
 
 			/** Constructs a BSPVertex out of our data */
-			void constructBspVertex(int faceNum, wr_coord_t pos, Ogre::Vector2 displacement, std::pair< Ogre::uint, Ogre::uint > dimensions, BspVertex *vtx);
+			void constructBspVertex(int faceNum, wr_coord_t pos, Ogre::Vector2 displacement, std::pair< Ogre::uint, Ogre::uint > dimensions, std::pair< float, float > scale, BspVertex *vtx);
 
 			/** Calculates the Lightmap center in texture space, using Bounding coordinates as the base. */
 			Ogre::Vector2 calcLightmapDisplacement(int polyNum);

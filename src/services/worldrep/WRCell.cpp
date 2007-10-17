@@ -212,7 +212,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------------------------------------
-	const MaterialPtr WRCell::getMaterial(unsigned int texture, unsigned int atlasnum, std::pair< Ogre::uint, Ogre::uint > &dimensions, unsigned int flags) {
+	const MaterialPtr WRCell::getMaterial(unsigned int texture, unsigned int atlasnum, std::pair< Ogre::uint, Ogre::uint > &dimensions, std::pair< float, float > &tscale, unsigned int flags) {
 		assert(loaded);
 		assert(atlased); // not exactly needed, but will not harm
 
@@ -242,6 +242,11 @@ namespace Opde {
 		std::string shaderName = tmp.str();
 
 		MaterialPtr shadMat = MaterialManager::getSingleton().getByName(shaderName);
+
+		tscale.first = 1.0f;
+		tscale.second = 1.0f;
+		dimensions = std::make_pair((Ogre::uint)64, (Ogre::uint)64); // failback to 64x64
+		
 
 		// If the material was not yet constructed, we'll do so now...
 		if (shadMat.isNull()) {
@@ -287,47 +292,48 @@ namespace Opde {
 					tex->setTextureName(lightmapName.str());
 					tex->setTextureCoordSet(1);
 				}
+
+				// TXT scale to fit the size texture had originally
+				if (shadPass->getNumTextureUnitStates() > 0) {
+					TextureUnitState* tus = shadMat->getTechnique(0)->getPass(0)->getTextureUnitState(0);
+					
+					dimensions = tus->getTextureDimensions();
+					
+					// update the scale
+					tscale.first  = tus->getTextureUScale();
+					tscale.second = tus->getTextureVScale();
+							
+					tus->setTextureUScale(1.0f);
+					tus->setTextureVScale(1.0f);
+					
+					dimensions.first  = tscale.first * dimensions.first;
+					dimensions.second = tscale.second * dimensions.second;
+				}
+				
 			} else {
 				LOG_DEBUG("Material %s is water-typed, not adding lightmap. This should not happen since we use the original material", txtName.str().c_str());
 			}
-		}
-
-		// Get the texture dimensions. TODO: Num - 0 Technique is not guaranteed to be the used one.
-
-		dimensions = std::make_pair((Ogre::uint)64, (Ogre::uint)64); // failback to 64x64
-
-		if (shadMat->getNumTechniques() > 0)
-				if (shadMat->getTechnique(0)->getNumPasses() > 0)
-					if (shadMat->getTechnique(0)->getPass(0)->getNumTextureUnitStates() > 0)
-                        if (!shadMat->getTechnique(0)->getPass(0)->getTextureUnitState(0)->isBlank()) {
-                        	TextureUnitState* tus = shadMat->getTechnique(0)->getPass(0)->getTextureUnitState(0);
-                            dimensions = tus->getTextureDimensions();
-                            std::pair<int, int> dons = tus->getTextureDimensions();
-
-                            // scale by the U and V scale respectively
-                            dimensions.first  = tus->getTextureUScale() * dimensions.first;
-                            dimensions.second = tus->getTextureVScale() * dimensions.second;
-
-                            if (tus->getTextureUScale() != 1.0) {
-                            	LOG_DEBUG("WRCELL: Scaled the txt size to %d x %d from (%d x %d) on %s", dimensions.first, dimensions.second, dons.first, dons.second, tus->getTextureName().c_str());
-                            }
+			
+			
 		}
 
 		return shadMat;
 	}
 
 	//------------------------------------------------------------------------------------
-	const Ogre::String WRCell::getMaterialName(unsigned int texture, unsigned int atlasnum, std::pair< Ogre::uint, Ogre::uint > &dimensions, unsigned int flags) {
-		MaterialPtr mat = getMaterial(texture, atlasnum, dimensions, flags);
+	const Ogre::String WRCell::getMaterialName(unsigned int texture, unsigned int atlasnum, std::pair< Ogre::uint, Ogre::uint > &dimensions, std::pair< float, float > &tscale, unsigned int flags) {
+		MaterialPtr mat = getMaterial(texture, atlasnum, dimensions, tscale, flags);
 
 		return mat->getName();
 	}
 
 	//------------------------------------------------------------------------------------
-	void WRCell::insertTexturedVertex(Ogre::ManualObject *manual, int faceNum, wr_coord_t coord, Ogre::Vector2 displacement, std::pair< Ogre::uint, Ogre::uint > dimensions) {
+	void WRCell::insertTexturedVertex(Ogre::ManualObject *manual, int faceNum, wr_coord_t coord, Ogre::Vector2 displacement,
+										std::pair< Ogre::uint, Ogre::uint > dimensions, std::pair< float, float > tscale) {
+
 		BspVertex vert;
 
-		constructBspVertex(faceNum, coord, displacement, dimensions, &vert);
+		constructBspVertex(faceNum, coord, displacement, dimensions, tscale, &vert);
 
 		manual->position(vert.position[0], vert.position[1], vert.position[2]);
 
@@ -340,7 +346,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------------------------------------
-	void WRCell::constructBspVertex(int faceNum, wr_coord_t pos, Ogre::Vector2 displacement, std::pair< Ogre::uint, Ogre::uint > dimensions, BspVertex *vtx) {
+	void WRCell::constructBspVertex(int faceNum, wr_coord_t pos, Ogre::Vector2 displacement, std::pair< Ogre::uint, Ogre::uint > dimensions, std::pair< float, float > tscale, BspVertex *vtx) {
 		// Position copy
 		vtx->position[0] = pos.x;
 		vtx->position[1] = pos.y;
@@ -571,9 +577,10 @@ namespace Opde {
 
 			// Iterate through the faces, and add all the triangles we can construct using the polygons defined
 			std::pair< Ogre::uint, Ogre::uint > dimensions;
+			std::pair< float, float > tscale;
 
 			// begin inserting one polygon
-			manual->begin(getMaterialName(face_infos[polyNum].txt, lightMaps[polyNum]->getAtlasIndex(), dimensions, face_maps[polyNum].flags));
+			manual->begin(getMaterialName(face_infos[polyNum].txt, lightMaps[polyNum]->getAtlasIndex(), dimensions, tscale, face_maps[polyNum].flags));
 
 			// temporary array of indices (for polygon triangulation)
 			Vector2 displacement = calcLightmapDisplacement(polyNum);
@@ -585,7 +592,7 @@ namespace Opde {
 
 			wr_coord_t zero;
 			zero.x = 0; zero.y = 0; zero.z = 0;
-			insertTexturedVertex(manual, polyNum, zero , displacement, dimensions);
+			insertTexturedVertex(manual, polyNum, zero, displacement, dimensions, tscale);
 
 			// for each vertex, insert into the model
 			for (int vert = 0; vert < face_maps[polyNum].count; vert++)  {
@@ -596,7 +603,7 @@ namespace Opde {
 				vrelative.y = vrelative.y - polyCenter.y;
 				vrelative.z = vrelative.z - polyCenter.z;
 
-				insertTexturedVertex(manual, polyNum, vrelative, displacement, dimensions);
+				insertTexturedVertex(manual, polyNum, vrelative, displacement, dimensions, tscale);
 			}
 
 			// now feed the indexes
@@ -788,15 +795,16 @@ namespace Opde {
 		// for each of the polygons
 		for (int polyNum = 0; polyNum < faceCount; polyNum++) {
 			std::pair< Ogre::uint, Ogre::uint > dimensions;
+			std::pair< float, float > tscale;
 
-			MaterialPtr shadMat = getMaterial(face_infos[polyNum].txt, lightMaps[polyNum]->getAtlasIndex(), dimensions, face_maps[polyNum].flags);
+			MaterialPtr shadMat = getMaterial(face_infos[polyNum].txt, lightMaps[polyNum]->getAtlasIndex(), dimensions, tscale, face_maps[polyNum].flags);
 
 			// HACKY... I dunno the real calculation behind lightmaps yet
 			Vector2 displacement = calcLightmapDisplacement(polyNum);
 
 			// Copy the vertex data
 			for (int t = 0; t < face_maps[polyNum].count; t++) {
-				constructBspVertex(polyNum, vertices[ poly_indices[polyNum][t] ], displacement, dimensions, vertexPtr++);
+				constructBspVertex(polyNum, vertices[ poly_indices[polyNum][t] ], displacement, dimensions, tscale, vertexPtr++);
 			}
 			// HMM. The triangle count = polygon_points - 2
 			for (int t = 1; t < face_maps[polyNum].count - 1; t++) {
