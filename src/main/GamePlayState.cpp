@@ -96,9 +96,16 @@ namespace Opde {
     LOG_INFO("GamePlayState: Starting");
 		PropertyGroupPtr PropertyGroup = ServiceManager::getSingleton().getService("PropertyService").
 				as<PropertyService>()->getPropertyGroup("Position");
+		
 		if (PropertyGroup.isNull())
-      OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "GamePlayState::start");
+			OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "GamePlayState::start");
+		
+		LOG_DEBUG("Starting Point object id : %d", StartingPointObjID);	
+		
 		Vector3 StartingPoint = PropertyGroup->get(StartingPointObjID, "position").toVector();
+		
+		LOG_DEBUG("Starting Point position : %f %f %f", StartingPoint.x, StartingPoint.y, StartingPoint.z);	
+		
 //		std::string tmp = PropertyGroup->get(StartingPointObjID, "SymName").toString();
 		mSceneMgr = mRoot->getSceneManager( "DarkSceneManager" );
 		mCamera	= mSceneMgr->createCamera( "MainCamera" );
@@ -111,12 +118,17 @@ namespace Opde {
 		mSceneMgr->setSpecialCaseRenderQueueMode(SceneManager::SCRQM_EXCLUDE);
 
 
+		
 		mCamera->setNearClipDistance(0.5);
 		mCamera->setFarClipDistance(4000);
 
 		// Also change position, and set Quake-type orientation
 		ViewPoint vp = mSceneMgr->getSuggestedViewpoint(true);
 		mCamera->setPosition(vp.position);
+		
+		if (StartingPointObjID != 0)
+			mCamera->setPosition(StartingPoint);
+			
 		mCamera->pitch(Degree(90));
 		mCamera->rotate(vp.orientation);
 
@@ -415,7 +427,7 @@ namespace Opde {
 				LOG_INFO("GamePlayState: Found StartingPoint");
         // get the Link ref.
         LinkPtr l = mPlayerFactoryRelation->getLink(msg.linkID);
-				StartingPointObjID = l->dst();
+				StartingPointObjID = l->src();
 				break;
 			}
 		}
