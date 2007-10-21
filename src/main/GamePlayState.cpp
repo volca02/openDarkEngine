@@ -102,7 +102,12 @@ namespace Opde {
 		
 		LOG_DEBUG("Starting Point object id : %d", StartingPointObjID);	
 		
-		Vector3 StartingPoint = PropertyGroup->get(StartingPointObjID, "position").toVector();
+		DVariant spoint = PropertyGroup->get(StartingPointObjID, "position");
+		
+		Vector3 StartingPoint(0,0,0);
+		
+		if (spoint.type() == DVariant::DV_VECTOR)
+			StartingPoint = spoint.toVector();
 		
 		LOG_DEBUG("Starting Point position : %f %f %f", StartingPoint.x, StartingPoint.y, StartingPoint.z);	
 		
