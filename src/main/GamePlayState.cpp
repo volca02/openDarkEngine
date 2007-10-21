@@ -93,8 +93,13 @@ namespace Opde {
     }
 
 	void GamePlayState::start() {
-	    LOG_INFO("GamePlayState: Starting");
-
+    LOG_INFO("GamePlayState: Starting");
+		PropertyGroupPtr PropertyGroup = ServiceManager::getSingleton().getService("PropertyService").
+				as<PropertyService>()->getPropertyGroup("Position");
+		if (PropertyGroup.isNull())
+      OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "GamePlayState::start");
+		Vector3 StartingPoint = PropertyGroup->get(StartingPointObjID, "position").toVector();
+//		std::string tmp = PropertyGroup->get(StartingPointObjID, "SymName").toString();
 		mSceneMgr = mRoot->getSceneManager( "DarkSceneManager" );
 		mCamera	= mSceneMgr->createCamera( "MainCamera" );
 
@@ -296,7 +301,7 @@ namespace Opde {
                 // static String stt = "Traversal Time: ";
                 // static String ssr = "Static Render Time: ";
 
-                uint bculls, eports, rendc, travtm, statrt;
+                uint bculls, eports, rendc;
 
                 mSceneMgr->getOption("BackfaceCulls", &bculls);
                 mSceneMgr->getOption("CellsRendered", &rendc);
@@ -323,7 +328,7 @@ namespace Opde {
 			return true;
 		}
 
-        if (!mConsole->injectKeyPress(e)) {
+    if (!mConsole->injectKeyPress(e)) {
 			if(e.key == KC_W) {
 				mForward = true;
 				return true;
@@ -345,10 +350,10 @@ namespace Opde {
 			} else if (e.key == KC_P) {
 				mPortalDisplay = true;
 				return true;
-			}
+			} else return true;
 		 } else {
 			return true;
-		}
+		};
 	}
 
 	bool GamePlayState::keyReleased( const OIS::KeyEvent &e ) {
@@ -368,8 +373,8 @@ namespace Opde {
 			} else	if( e.key == KC_ESCAPE ) {
         			requestTermination();
 				return true;
-			}
-    	}
+			} else return true;
+    } else return true;
 	}
 
 	bool GamePlayState::mouseMoved( const OIS::MouseEvent &e ) {
@@ -407,46 +412,26 @@ namespace Opde {
 	void GamePlayState::onPropSymNameMsg(const LinkChangeMsg& msg) {
 		switch (msg.change) {
 			case PROP_ADDED   : {
-/*				std::string symName = msg.data->get("").toString();
-
-				LOG_DEBUG("GamePlayState: Found obj. name '%s'", symName.c_str());
-                // Find the scene node by it's object id, and update the position and orientation
-
-				if (symName == "StartingPoint")*/
 				LOG_INFO("GamePlayState: Found StartingPoint");
-				PlayerFactoryLinkId = msg.linkID;
+        // get the Link ref.
+        LinkPtr l = mPlayerFactoryRelation->getLink(msg.linkID);
+				StartingPointObjID = l->dst();
 				break;
 			}
 		}
 	}
 
 	void GamePlayState::bootstrapFinished() {
-/*		PropertyGroup::ListenerPtr cnamec =
-			new ClassCallback<PropertyChangeMsg, GamePlayState>(this, &GamePlayState::onPropSymNameMsg);
-		mPropSymName = ServiceManager::getSingleton().getService("PropertyService").as<PropertyService>()->getPropertyGroup("SymbolicName"); // TODO: hardcoded, maybe not a problem after all
-
-		if (!mPropSymName.isNull()) {
-			mPropSymNameListenerID = mPropSymName->registerListener(cnamec);
-		} else {
-			LOG_ERROR("GamePlayState::bootstrapFinished: Could not find the SymbolicName property group defined!");
-		}*/
 		mLinkService = ServiceManager::getSingleton().getService("LinkService").as<LinkService>();
 		Relation::ListenerPtr metaPropCallback =
 			new ClassCallback<LinkChangeMsg, GamePlayState>(this, &GamePlayState::onPropSymNameMsg);
 
-		// Get the LinkService, then the relation metaprop
+		mPlayerFactoryRelation = mLinkService->getRelation("PlayerFactory");
 
-        // contact the config. service, and look for the inheritance link name
-		// TODO: ConfigurationService::getKey("Core","InheritanceLinkName").toString();
-
-		mMetaPropRelation = mLinkService->getRelation("PlayerFactory");
-
-		if (mMetaPropRelation.isNull())
+		if (mPlayerFactoryRelation.isNull())
 		    OPDE_EXCEPT("MetaProp relation not found. Fatal.", "InheritService::init");
 
-		mMetaPropListenerID = mMetaPropRelation->registerListener(metaPropCallback);
-
-
+		mPlayerFactoryListenerID = mPlayerFactoryRelation->registerListener(metaPropCallback);
     LOG_INFO("GamePlayState::bootstrapFinished() - done");
 	}
 

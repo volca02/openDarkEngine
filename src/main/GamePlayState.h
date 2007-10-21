@@ -102,21 +102,17 @@ namespace Opde {
 
 			ConsoleFrontend* mConsole;
 
-			PropertyGroup::ListenerID mPropSymNameListenerID;
-			PropertyGroupPtr mPropSymName;
-
 			int mNumScreenShots;
 			// config service
 			ConfigServicePtr mConfigService;
-
-			/// Direct link to the metaprop relation
-			RelationPtr mMetaPropRelation;
+	private:
+			/// Direct link to the player factory relation
+			RelationPtr mPlayerFactoryRelation;
 			/// Handle to the link service
 			LinkServicePtr mLinkService;
-			int PlayerFactoryLinkId;
-
-			/// Link (Relation metaproperty) listener registration ID
-			Relation::ListenerID mMetaPropListenerID;
+			int StartingPointObjID;
+			/// Link (Relation player factory) listener registration ID
+			Relation::ListenerID mPlayerFactoryListenerID;
 	};
 }
 
