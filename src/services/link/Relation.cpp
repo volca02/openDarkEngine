@@ -577,7 +577,8 @@ namespace Opde {
 			r.first->second.insert(make_pair(link->mDst, link));
 
 			// fire the notification about inserted link
-			LinkChangeMsg m;
+			LinkPtr lcopy = new Link(*link);
+			LinkChangeMsg m(lcopy);
 
 			m.change = LNK_ADDED;
 			m.linkID = link->mID;

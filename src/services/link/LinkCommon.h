@@ -51,6 +51,13 @@ namespace Opde {
 				mDst(dst),
 				mFlavor(flavor) {	};
 
+			/// Copy constructor
+			Link(Link& b) :
+				mID(b.mID),
+				mSrc(b.mSrc),
+				mDst(b.mDst),
+				mFlavor(b.mFlavor) { };
+
 			inline link_id_t id() { return mID; };
 			inline int src() { return mSrc; };
 			inline int dst() { return mDst; };
@@ -122,10 +129,15 @@ namespace Opde {
 
 	/// Link chage message
 	typedef struct LinkChangeMsg {
+		LinkChangeMsg() : link(NULL) {};
+		LinkChangeMsg(LinkPtr lnk) : link(lnk) {};
+		
 		/// A change that happened
 		LinkChangeType change;
 		/// An ID of link that was added/removed/modified
 		link_id_t linkID;
+		/// The link itself. Do not modify!
+		const LinkPtr link;
 	};
 
 
