@@ -406,15 +406,15 @@ namespace Opde {
 
 	void GamePlayState::onPropSymNameMsg(const LinkChangeMsg& msg) {
 		switch (msg.change) {
-			case PROP_ADDED   :
-			case PROP_CHANGED : {
+			case PROP_ADDED   : {
 /*				std::string symName = msg.data->get("").toString();
 
 				LOG_DEBUG("GamePlayState: Found obj. name '%s'", symName.c_str());
                 // Find the scene node by it's object id, and update the position and orientation
 
-				if (symName == "StartingPoint")
-					LOG_INFO("GamePlayState: Found StartingPoint");*/
+				if (symName == "StartingPoint")*/
+				LOG_INFO("GamePlayState: Found StartingPoint");
+				PlayerFactoryLinkId = msg.linkID;
 				break;
 			}
 		}
@@ -439,7 +439,7 @@ namespace Opde {
         // contact the config. service, and look for the inheritance link name
 		// TODO: ConfigurationService::getKey("Core","InheritanceLinkName").toString();
 
-		mMetaPropRelation = mLinkService->getRelation("MetaProp");
+		mMetaPropRelation = mLinkService->getRelation("PlayerFactory");
 
 		if (mMetaPropRelation.isNull())
 		    OPDE_EXCEPT("MetaProp relation not found. Fatal.", "InheritService::init");

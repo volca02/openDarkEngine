@@ -113,6 +113,7 @@ namespace Opde {
 			RelationPtr mMetaPropRelation;
 			/// Handle to the link service
 			LinkServicePtr mLinkService;
+			int PlayerFactoryLinkId;
 
 			/// Link (Relation metaproperty) listener registration ID
 			Relation::ListenerID mMetaPropListenerID;
