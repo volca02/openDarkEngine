@@ -99,6 +99,7 @@ namespace Opde {
 		// I could use render service for that, but it could create a circular reference 
 		// (not likely, loop clients are weak pointers in fact, but anyway)
 		mRoot = Ogre::Root::getSingletonPtr();
+		return true;
 	}
 	
 	//------------------------------------------------------

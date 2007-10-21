@@ -404,24 +404,24 @@ namespace Opde {
 	    }
 	}
 
-	void GamePlayState::onPropSymNameMsg(const PropertyChangeMsg& msg) {
+	void GamePlayState::onPropSymNameMsg(const LinkChangeMsg& msg) {
 		switch (msg.change) {
 			case PROP_ADDED   :
 			case PROP_CHANGED : {
-				std::string symName = msg.data->get("").toString();
+/*				std::string symName = msg.data->get("").toString();
 
 				LOG_DEBUG("GamePlayState: Found obj. name '%s'", symName.c_str());
                 // Find the scene node by it's object id, and update the position and orientation
 
 				if (symName == "StartingPoint")
-					LOG_INFO("GamePlayState: Found StartingPoint");
+					LOG_INFO("GamePlayState: Found StartingPoint");*/
 				break;
 			}
 		}
 	}
 
 	void GamePlayState::bootstrapFinished() {
-		PropertyGroup::ListenerPtr cnamec =
+/*		PropertyGroup::ListenerPtr cnamec =
 			new ClassCallback<PropertyChangeMsg, GamePlayState>(this, &GamePlayState::onPropSymNameMsg);
 		mPropSymName = ServiceManager::getSingleton().getService("PropertyService").as<PropertyService>()->getPropertyGroup("SymbolicName"); // TODO: hardcoded, maybe not a problem after all
 
@@ -429,7 +429,25 @@ namespace Opde {
 			mPropSymNameListenerID = mPropSymName->registerListener(cnamec);
 		} else {
 			LOG_ERROR("GamePlayState::bootstrapFinished: Could not find the SymbolicName property group defined!");
-		}
+		}*/
+		mLinkService = ServiceManager::getSingleton().getService("LinkService").as<LinkService>();
+		Relation::ListenerPtr metaPropCallback =
+			new ClassCallback<LinkChangeMsg, GamePlayState>(this, &GamePlayState::onPropSymNameMsg);
+
+		// Get the LinkService, then the relation metaprop
+
+        // contact the config. service, and look for the inheritance link name
+		// TODO: ConfigurationService::getKey("Core","InheritanceLinkName").toString();
+
+		mMetaPropRelation = mLinkService->getRelation("MetaProp");
+
+		if (mMetaPropRelation.isNull())
+		    OPDE_EXCEPT("MetaProp relation not found. Fatal.", "InheritService::init");
+
+		mMetaPropListenerID = mMetaPropRelation->registerListener(metaPropCallback);
+
+
+    LOG_INFO("GamePlayState::bootstrapFinished() - done");
 	}
 
 }

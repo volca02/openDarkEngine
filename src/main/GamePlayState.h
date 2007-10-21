@@ -56,7 +56,7 @@ namespace Opde {
 			virtual void commandExecuted(std::string command, std::string parameters);
 
 			virtual void bootstrapFinished();
-			void onPropSymNameMsg(const PropertyChangeMsg& msg);
+			void onPropSymNameMsg(const LinkChangeMsg& msg);
 
 		protected:
 			Ogre::Root *mRoot;
@@ -108,6 +108,14 @@ namespace Opde {
 			int mNumScreenShots;
 			// config service
 			ConfigServicePtr mConfigService;
+
+			/// Direct link to the metaprop relation
+			RelationPtr mMetaPropRelation;
+			/// Handle to the link service
+			LinkServicePtr mLinkService;
+
+			/// Link (Relation metaproperty) listener registration ID
+			Relation::ListenerID mMetaPropListenerID;
 	};
 }
 

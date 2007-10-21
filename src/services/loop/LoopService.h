@@ -199,7 +199,7 @@ namespace Opde {
 			void run();
 
 			/// @return The current absolute time in ms
-			unsigned long getCurrentTime() { mRoot->getTimer()->getMilliseconds(); };
+			unsigned long getCurrentTime() { return mRoot->getTimer()->getMilliseconds(); };
 			
 			/// Logs DEBUG level info of one frame timings
 			void debugOneFrame();
