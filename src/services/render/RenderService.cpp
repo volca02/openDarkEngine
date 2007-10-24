@@ -29,6 +29,7 @@
 #include <OgreRoot.h>
 #include <OgreStringConverter.h>
 #include <OgreMeshManager.h>
+#include <OgreRenderWindow.h>
 #include <OgreBone.h>
 #include <OgreNode.h>
 
@@ -116,6 +117,23 @@ namespace Opde {
     }
 
 	// --------------------------------------------------------------------------
+	void RenderService::setScreenSize(bool fullScreen, unsigned int width, unsigned int height) {
+		assert(mRenderWindow);
+		
+		mRenderWindow->setFullscreen(fullScreen, width, height);
+		
+		RenderServiceMsg msg;
+		
+		msg.msg_type = RENDER_WINDOW_SIZE_CHANGE;
+		
+		msg.size.fullscreen = fullScreen;
+		msg.size.width = width;
+		msg.size.height = height;
+		
+		broadcastMessage(msg);
+	}
+	
+	// --------------------------------------------------------------------------
 	void RenderService::bootstrapFinished() {
 		// Property Service should have created us automatically through service masks.
 		// So we can register as a link service listener
@@ -150,6 +168,12 @@ namespace Opde {
 		mPropModelNameListenerID = mPropModelName->registerListener(cmodelc);
 
 		LOG_INFO("RenderService::bootstrapFinished() - done");
+	}
+
+	// --------------------------------------------------------------------------
+	void RenderService::loopStep(float deltaTime) {
+		// Rendering step...
+		mRoot->renderOneFrame();
 	}
 
 	// --------------------------------------------------------------------------

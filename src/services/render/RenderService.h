@@ -30,17 +30,46 @@
 #include "SharedPtr.h"
 #include "ManualBinFileLoader.h"
 #include "OgreDarkSceneManager.h"
+#include "MessageSource.h"
+#include "LoopService.h"
 
 #include <OgreEntity.h>
 #include <OgreSceneNode.h>
 
 namespace Opde {
+	/// Render System message type
+	typedef enum {
+	    /// Render window changed the size
+	    RENDER_WINDOW_SIZE_CHANGE = 1
+	} RenderMessageType;	
+
+
+	/// window size message details
+	typedef struct RenderWindowSize {
+		/// The message type
+		RenderMessageType msg_type;
+		/// New width of the window (pixels)
+		unsigned int width;
+		/// New height of the window (pixels)
+		unsigned int height;
+		/// The new window is fullscreen (or windowed)
+		bool fullscreen;
+		// TODO: Pixelformat
+	};
+
+	/// Render service message (Used to signalize a change in the renderer setup)
+	typedef union {
+		RenderMessageType msg_type;
+		
+		RenderWindowSize size;
+	} RenderServiceMsg;
+
 
 	/** @brief Render service - service managing in-game object rendering
 	* Some preliminary notes: VHot will probably be converted to TagPoints somehow
 	* The 0,0,0 bug will reveal itself here too, maybe. This is caused by default object coordinates being 0,0,0 and we have to wait for Position prop message to come in order to move the node
 	*/
-	class RenderService : public Service {
+	class RenderService : public Service, public MessageSource< RenderServiceMsg >, public LoopClient {
 		public:
 			RenderService(ServiceManager *manager, const std::string& name);
 			virtual ~RenderService();
@@ -49,11 +78,14 @@ namespace Opde {
             Ogre::SceneManager* getSceneManager();
             Ogre::RenderWindow* getRenderWindow();
 
-
+			/// Screen size setter. Please use this instead of the Ogre::RenderWindow methods, as it broadcasts a message about the change
+			void setScreenSize(bool fullScreen, unsigned int width, unsigned int height);
 
 		protected:
             virtual bool init();
             virtual void bootstrapFinished();
+            
+			void loopStep(float deltaTime);
 
             void onPropPositionMsg(const PropertyChangeMsg& msg);
             void onPropModelNameMsg(const PropertyChangeMsg& msg);
