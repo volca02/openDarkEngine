@@ -100,6 +100,15 @@ namespace Opde {
 	    }
 	}
     }
+
+    /*---------------------------------------------------*/
+    /*-------------------- LoopClient -------------------*/
+    /*---------------------------------------------------*/
+	void LoopClient::loopModeStarted(const LoopModeDefinition& loopMode) {
+	}
+	
+	void LoopClient::loopModeEnded(const LoopModeDefinition& loopMode) {
+	}
     
     /*----------------------------------------------------*/
     /*-------------------- LoopService -------------------*/

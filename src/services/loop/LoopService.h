@@ -95,13 +95,13 @@ namespace Opde {
 			* this client is a listener of the new loop mode
 			* @param loopMode The new active loop mode
 			*/
-			virtual void loopModeStarted(const LoopModeDefinition& loopMode) = 0;
+			virtual void loopModeStarted(const LoopModeDefinition& loopMode);
 			
 			/** Loop mode ended event. Called on the end of the frame, if a loop mode changed and 
 			* this client is a listener of the old loop mode
 			* @param loopMode The old loop mode
 			*/
-			virtual void loopModeEnded(const LoopModeDefinition& loopMode) = 0;
+			virtual void loopModeEnded(const LoopModeDefinition& loopMode);
 			
 			/** Loop step event. Called every frame by the active loop mode, if this mode is the member of the new mode
 			* @param deltaTime The time that passed since the start of the last frame to the start of this frame
