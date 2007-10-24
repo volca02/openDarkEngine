@@ -1,22 +1,13 @@
+INCLUDE(${OPDE_SOURCE_DIR}/src/services/Services.cmake)
+INCLUDE(${OPDE_SOURCE_DIR}/src/base/Base.cmake)
+
 include_directories ( 
     ${OGRE_INCLUDE_DIR} 
     ${OPDE_BINARY_DIR}
-    ${OPDE_SOURCE_DIR}/src/base
-    ${OPDE_SOURCE_DIR}/src/base/console
-    ${OPDE_SOURCE_DIR}/src/base/file
-    ${OPDE_SOURCE_DIR}/src/base/logger
-    ${OPDE_SOURCE_DIR}/src/base/dtype
-    ${OPDE_SOURCE_DIR}/src/base/loaders
+    ${OPDE_BASE_INCLUDES}
     ${OPDE_SOURCE_DIR}/src/compat
     ${OPDE_SOURCE_DIR}/src/scenemanager
-    ${OPDE_SOURCE_DIR}/src/base/servicemanager
-    ${OPDE_SOURCE_DIR}/src/base/dyntype
-    ${OPDE_SOURCE_DIR}/src/services
-    ${OPDE_SOURCE_DIR}/src/services/binary
-    ${OPDE_SOURCE_DIR}/src/services/property
-    ${OPDE_SOURCE_DIR}/src/services/link
-    ${OPDE_SOURCE_DIR}/src/services/inherit
-    ${OPDE_SOURCE_DIR}/src/services/database
+    ${OPDE_SERVICE_INCLUDES}
 )
 
 link_directories ( 
