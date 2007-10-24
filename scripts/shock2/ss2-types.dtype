@@ -942,12 +942,6 @@ bitfield tweqnullflags {
 }
 
 
-struct vector {
-	float x
-	float y
-	float z
-}
-
 
 struct int-vector {
 	int32 x
