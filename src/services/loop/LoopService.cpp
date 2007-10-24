@@ -27,7 +27,7 @@
 using namespace std;
 
 namespace Opde {
-	/*-------------------------------------------------*/
+    /*-------------------------------------------------*/
     /*-------------------- LoopMode -------------------*/
     /*-------------------------------------------------*/
     
@@ -36,26 +36,30 @@ namespace Opde {
     
     //------------------------------------------------------
     void LoopMode::loopModeStarted() {
-    	LoopClientSet::iterator it = mLoopClients.begin();
+    	LoopClientMap::iterator it = mLoopClients.begin();
     	
     	while (it != mLoopClients.end()) {
-    		(*(it++))->loopModeStarted(mLoopModeDef);
+    		it->second->loopModeStarted(mLoopModeDef);
+
+		++it;
     	}
     }
 
 	//------------------------------------------------------
 	void LoopMode::loopModeEnded() {
-    	LoopClientSet::iterator it = mLoopClients.begin();
+    	LoopClientMap::iterator it = mLoopClients.begin();
     	
     	while (it != mLoopClients.end()) {
-    		(*(it++))->loopModeEnded(mLoopModeDef);
+    		it->second->loopModeEnded(mLoopModeDef);
+
+		++it;
     	}
 
 	}
 			
-	//------------------------------------------------------
-	void LoopMode::loopStep(float deltaTime) {
-    	LoopClientSet::iterator it = mLoopClients.begin();
+    //------------------------------------------------------
+    void LoopMode::loopStep(float deltaTime) {
+    	LoopClientMap::iterator it = mLoopClients.begin();
     	
     	bool debugFrame = mDebugNextFrame;
     	mDebugNextFrame = false;
@@ -65,7 +69,9 @@ namespace Opde {
     	while (it != mLoopClients.end()) {
     		unsigned long stTime = mOwner->getCurrentTime();
     		
-    		LoopClient* client = *(it++);
+    		LoopClient* client = it->second;
+		
+		it++;
     		
     		client->loopStep(deltaTime);
     		
@@ -78,7 +84,22 @@ namespace Opde {
     		corder++;
     	}
 
+    }
+    
+    //------------------------------------------------------
+    void LoopMode::removeLoopClient(LoopClient* client) {
+	LoopClientMap::iterator it = mLoopClients.find(client->getPriority());
+	
+	while (it != mLoopClients.end()) {
+	    if (it->second == client) {
+		LoopClientMap::iterator rem = it++;
+		
+		mLoopClients.erase(rem);
+	    } else {
+		it++;
+	    }
 	}
+    }
     
     /*----------------------------------------------------*/
     /*-------------------- LoopService -------------------*/

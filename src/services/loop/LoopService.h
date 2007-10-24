@@ -56,6 +56,9 @@ namespace Opde {
 	/// @typedef The loop mode mask
 	typedef uint64_t LoopModeMask;
 	
+	/// @typedef The priority of the client (inverse)
+	typedef int64_t LoopClientPriority;
+	
 	/// Mask that permits all the clients to run
 	#define LOOPMODE_MASK_ALL_CLIENTS 0xFFFFFFFFFFFFFFFF
 	
@@ -67,6 +70,8 @@ namespace Opde {
 		LoopModeMask mask;
 		/// A descriptive name of the loop client name (for debugging)
 		std::string name;
+		/// The clients priority (not necesarilly unique) - lower number -> client called sooner in the loop
+		LoopClientPriority priority;
 	} LoopClientDefinition;
 
 	/// Loop mode definition struct
@@ -106,6 +111,9 @@ namespace Opde {
 			/// @returns the Loop mask of this client
 			LoopModeMask getLoopMask() { return mLoopClientDef.mask; };
 			
+			/// @returns the clients priority
+			LoopClientPriority getPriority() { return mLoopClientDef.priority; };
+			
 			/** The loop client definition getter.
 			* @return The loop client definition struct reference.
 			*/
@@ -115,7 +123,7 @@ namespace Opde {
 			LoopClientDefinition mLoopClientDef;
 	};
 
-	typedef std::set< LoopClient* > LoopClientSet;
+	typedef std::multimap< LoopClientPriority, LoopClient* > LoopClientMap;
 
 	/** The loop mode definition. */
 	class LoopMode {
@@ -143,14 +151,14 @@ namespace Opde {
 			const std::string& getLoopModeName() const { return mLoopModeDef.name; };
 			
 			/// Adds a loop client into this loop mode
-			void addLoopClient(LoopClient* client) { mLoopClients.insert(client); };
+			void addLoopClient(LoopClient* client) { mLoopClients.insert( std::make_pair(client->getPriority(), client)); };
 			
 			/// Removes a loop client from this loop mode
-			void removeLoopClient(LoopClient* client) { mLoopClients.erase(client); };
+			void removeLoopClient(LoopClient* client);
 
 		protected:
 			LoopModeDefinition mLoopModeDef;
-			LoopClientSet mLoopClients;
+			LoopClientMap mLoopClients;
 			LoopService* mOwner; // Used to get timing info if debug is on for the loop
 			
 			bool mDebugNextFrame;
