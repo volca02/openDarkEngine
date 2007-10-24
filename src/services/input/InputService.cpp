@@ -355,6 +355,12 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
+	void InputService::loopStep(float deltaTime) {
+		// TODO: For now. The code will move here for 0.3
+		captureInputs();
+	}
+	
+	//------------------------------------------------------
 	void InputService::setBindContext(const std::string& context) {
 		InputEventMapperPtr iemp = findMapperForContext(context);
 

@@ -31,6 +31,7 @@
 #include "Callback.h"
 #include "ConfigService.h"
 #include "RenderService.h"
+#include "LoopService.h"
 
 #include <OISMouse.h>
 #include <OISKeyboard.h>
@@ -100,7 +101,7 @@ namespace Opde {
 
 
 	/** @brief Input service - service which handles user input, and user input mapping */
-	class InputService : public Service, public OIS::KeyListener, public OIS::MouseListener {
+	class InputService : public Service, public OIS::KeyListener, public OIS::MouseListener, public LoopClient {
 		public:
 			InputService(ServiceManager *manager, const std::string& name);
 			virtual ~InputService();
@@ -169,6 +170,8 @@ namespace Opde {
             bool init();
             void bootstrapFinished();
             void shutdown();
+
+			void loopStep(float deltaTime);
 
 			/// registers OIS::KeyCode to textual representation and inverse mappings
 			void registerValidKey(OIS::KeyCode kc, const std::string& txt);
