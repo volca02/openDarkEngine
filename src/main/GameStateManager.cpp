@@ -280,7 +280,8 @@ namespace Opde {
 		mInputService->setBindContext("game");
 
 		mInputService->setInputMode(IM_DIRECT);
-		mInputService->loadBNDFile("dark.bnd");
+		// Commented out for now, as it is not needed
+		// mInputService->loadBNDFile("dark.bnd");
 
 		mInputService->setDirectListener(this);
 	}
