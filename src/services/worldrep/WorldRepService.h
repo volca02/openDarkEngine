@@ -70,6 +70,12 @@ namespace Opde {
 			Ogre::String getMaterialName(int mat_index);
 
             void addWorldMaterial(const Ogre::MaterialPtr material);
+            
+            // Texture scale getter (for custom texture overrides)
+            std::pair<float, float> getTextureScale(const std::string& txtName);
+            
+            // Texture scale setter (for custom texture overrides)
+            void setTextureScale(const std::string& txtName, std::pair<float, float> scale);
 		protected:
             virtual bool init();
             virtual void bootstrapFinished();
@@ -165,9 +171,13 @@ namespace Opde {
 
             /// Set of loaded materials
             typedef std::vector< Ogre::MaterialPtr > MaterialList;
+            
+            typedef std::map<std::string, std::pair <float, float> > TxtScaleMap;
 
             /// Gets filled with all the materials loaded (for unloading)
             MaterialList mLoadedMaterials;
+            
+            TxtScaleMap mTxtScaleMap;
 	};
 
 	/// Shared pointer to worldrep service

@@ -155,6 +155,8 @@ namespace Opde {
 	void WorldRepService::unload() {
 	    mIndexes.setNull();
 	    mSceneMgr->clearScene();
+	    
+		mTxtScaleMap.clear();
 
 		clearData();
 	}
@@ -616,6 +618,23 @@ namespace Opde {
 	}
 
 	//-----------------------------------------------------------------------
+	std::pair<float, float> WorldRepService::getTextureScale(const std::string& txtName) {
+		TxtScaleMap::const_iterator it = mTxtScaleMap.find(txtName);
+		
+		if (it != mTxtScaleMap.end()) {
+			return it->second;
+		} else {
+			// Default to 1,1
+			return std::pair<float, float>(1.0f, 1.0f);
+		}
+	}
+    
+    //-----------------------------------------------------------------------        
+    void WorldRepService::setTextureScale(const std::string& txtName, std::pair<float, float> scale) {
+    	mTxtScaleMap.insert(make_pair(txtName, scale));
+    }
+
+	//-----------------------------------------------------------------------
 	void WorldRepService::createStandardMaterial(std::string matName, std::string textureName, std::string resourceGroup) {
 		Image tex;
 		bool loaded = false; // indicates we were succesful finding the texture
@@ -654,6 +673,9 @@ namespace Opde {
 		tus->setTextureAddressingMode(TextureUnitState::TAM_WRAP);
 		tus->setTextureCoordSet(0);
 		tus->setTextureFiltering(TFO_BILINEAR);
+
+		tus->setTextureUScale(1.0f);
+		tus->setTextureVScale(1.0f);
 		// tus->setTextureFiltering(TFO_NONE);
 
 		// Set culling mode to none
@@ -661,6 +683,8 @@ namespace Opde {
 
 		// No dynamic lighting
 		shadMat->setLightingEnabled(false);
+
+		
 
 
 		shadMat->load();

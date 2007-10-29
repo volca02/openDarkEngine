@@ -294,29 +294,44 @@ namespace Opde {
 				}
 
 				// TXT scale to fit the size texture had originally
-				if (shadPass->getNumTextureUnitStates() > 0) {
-					TextureUnitState* tus = shadMat->getTechnique(0)->getPass(0)->getTextureUnitState(0);
+				if (shadPass->getNumTextureUnitStates() > 0) { // This only applies to the scaled version.
+					
+					TextureUnitState* tus = shadPass->getTextureUnitState(0);
 					
 					dimensions = tus->getTextureDimensions();
 					
 					// update the scale
 					tscale.first  = tus->getTextureUScale();
 					tscale.second = tus->getTextureVScale();
-							
-					tus->setTextureUScale(1.0f);
-					tus->setTextureVScale(1.0f);
 					
-					dimensions.first  = tscale.first * dimensions.first;
-					dimensions.second = tscale.second * dimensions.second;
+					// register the texture scale...	
+					mOwner->setTextureScale(txtName.str(), tscale);
 				}
-				
+			
 			} else {
 				LOG_DEBUG("Material %s is water-typed, not adding lightmap. This should not happen since we use the original material", txtName.str().c_str());
 			}
-			
-			
 		}
-
+		
+		if (shadMat->getNumTechniques() > 0) {
+			Pass *shadPass = shadMat->getTechnique(0)->getPass(0);
+			
+			// TXT scale to fit the size texture had originally
+			if (shadPass->getNumTextureUnitStates() > 0) {
+				TextureUnitState* tus = shadPass->getTextureUnitState(0);
+				
+				dimensions = tus->getTextureDimensions();
+				
+				tscale = mOwner->getTextureScale(txtName.str());
+				
+				tus->setTextureUScale(1.0f);
+				tus->setTextureVScale(1.0f);
+				
+				dimensions.first  = tscale.first * dimensions.first;
+				dimensions.second = tscale.second * dimensions.second;
+			}
+		}
+		
 		return shadMat;
 	}
 
