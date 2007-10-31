@@ -250,16 +250,18 @@ namespace Opde {
                         ent->_initialise(true);
 
                         // Update the bones to be manual
-                        Skeleton::BoneIterator bi = ent->getSkeleton()->getBoneIterator();
+                        if (ent->hasSkeleton()) {
+							
+							Skeleton::BoneIterator bi = ent->getSkeleton()->getBoneIterator();
 
-                        while (bi.hasMoreElements()) {
-                            Bone* n = bi.getNext();
+							while (bi.hasMoreElements()) {
+								Bone* n = bi.getNext();
 
-                            n->setManuallyControlled(true);
+								n->setManuallyControlled(true);
+							}
+
+							ent->getSkeleton()->setBindingPose();
                         }
-
-                        ent->getSkeleton()->setBindingPose();
-
 
                     } catch (FileNotFoundException &e) {
                         LOG_ERROR("RenderService: Could not find the requested model %s (exception encountered)", name.c_str());
