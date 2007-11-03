@@ -87,15 +87,16 @@ namespace Opde {
 	/*-----------------------------------------------------*/
 	/*----------------------- Relation --------------------*/
 	/*-----------------------------------------------------*/
-	Relation::Relation(const std::string& name, DTypeDefPtr type, bool hidden) :
+	Relation::Relation(const std::string& name, DTypeDefPtr type, bool isInverse, bool hidden) :
 			mID(-1),
 			mName(name),
 			mType(type),
 			mHidden(hidden),
 			mLinkMap(),
 			mSrcDstLinkMap(),
-			mDstSrcLinkMap(),
-			mLinkDataMap() {
+			mLinkDataMap(),
+			mInverse(NULL),
+			mIsInverse(isInverse) {
 
 		// clear out the maximal ID info
 		for (int i = 0; i < 16; ++i) {
@@ -123,6 +124,8 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	void Relation::load(FileGroupPtr db) {
+		assert(!mIsInverse);
+		
 		// load the links and thei're data
 		BinaryServicePtr bs = ServiceManager::getSingleton().getService("BinaryService").as<BinaryService>();
 
@@ -176,7 +179,11 @@ namespace Opde {
 				// check for data len
 				if (dsize != mType->size()) {
 					// This just happens. Some links have the size totally different the real
-					LOG_FATAL("Relation (%s): Data size differ : Type: %d, Chunk: %d", mName.c_str(), mType->size(), dsize);
+					
+					// Only if we have the fake size wrong as well
+					if (dsize != mFakeSize)
+						LOG_FATAL("Relation (%s): Data sizes differ : Type: %d, Fake %d, Chunk: %d", mName.c_str(), mType->size(), mFakeSize, dsize);
+					
 					// we respect our data size
 					dsize = mType->size();
 				}
@@ -207,8 +214,12 @@ namespace Opde {
 				LinkDataPtr ldta = new LinkData(id, mType, fldata, dsize);
 
 				LOG_DEBUG("Relation (%s): Loaded link data for link id %d", mName.c_str(), id);
+				
 				// Link data are inserted silently
 				_assignLinkData(id, ldta);
+				
+				// And to the inverse relation as well
+				mInverse->_assignLinkData(id, ldta);
 			}
 		}
 
@@ -240,6 +251,11 @@ namespace Opde {
 
 			// Add link, notify listeners... Will search for data and throw if did not find them
 			_addLink(link);
+			
+			// Inverse relation will get an inverse link to use
+			LinkPtr ilink = createInverseLink(link);
+			
+			mInverse->_addLink(ilink);
 		}
 
 		delete dlink;
@@ -251,6 +267,8 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	void Relation::save(FileGroupPtr db, uint saveMask) {
+		assert(!mIsInverse);
+		
 		LOG_DEBUG("Relation::save Saving relation %s", mName.c_str());
 
 		// load the links and thei're data
@@ -327,6 +345,22 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
+	Relation* Relation::inverse() { 
+		assert(mInverse != NULL);
+		assert(mInverse->isInverse() == isInverse());
+		
+		return mInverse; 
+	};
+	
+	// --------------------------------------------------------------------------
+	void Relation::setInverseRelation(Relation* rel) { 
+		assert(mInverse==NULL); 
+		assert(rel->isInverse() != isInverse());
+		
+		mInverse = rel; 
+	};
+	
+	// --------------------------------------------------------------------------
 	void Relation::clear() {
 		// first, broadcast that we're gonna erase
 		LinkChangeMsg m;
@@ -340,7 +374,6 @@ namespace Opde {
 		mLinkMap.clear();
 		mLinkDataMap.clear();
 		mSrcDstLinkMap.clear();
-		mDstSrcLinkMap.clear();
 
 
 		// clear maximal link id's
@@ -369,8 +402,14 @@ namespace Opde {
 		// assign link data in advance, as it would fail on _addLink otherwise
 		_assignLinkData(id, newd);
 
+		mInverse->_assignLinkData(id, newd);
+
 		// Last, insert the link to the database and notify
 		_addLink(newl);
+		
+		LinkPtr ilink = createInverseLink(newl);
+		
+		mInverse->_addLink(ilink);
 
 		return id;
 	}
@@ -395,9 +434,16 @@ namespace Opde {
 
 		// assign link data in advance, as it would fail on _addLink otherwise
 		_assignLinkData(id, newd);
+		
+		mInverse->_assignLinkData(id, newd);
 
 		// Last, insert the link to the database and notify
 		_addLink(newl);
+		
+		LinkPtr ilink = createInverseLink(newl);
+		
+		mInverse->_addLink(ilink);
+
 
 		return id;
 	}
@@ -406,6 +452,8 @@ namespace Opde {
 	void Relation::remove(link_id_t id) {
 		// A waste I smell here. Maybe there will be a difference in Broadcasts later
 		_removeLink(id);
+		
+		mInverse->_removeLink(id);
 	}
 
 	// --------------------------------------------------------------------------
@@ -477,21 +525,9 @@ namespace Opde {
 	// --------------------------------------------------------------------------
 	LinkQueryResultPtr Relation::getAllLinks(int src, int dst) const {
 		// based on case of the query, return result
-		assert(src != 0 || dst != 0 ); // No all-links query
+		assert(src != 0); // Source can't be zero
 
-		if (src == 0) { // all link sources
-			ObjectLinkMap::const_iterator r = mDstSrcLinkMap.find(dst);
-
-			if (r != mDstSrcLinkMap.end()) {
-    			LinkQueryResultPtr res;
-
-			    // We have the source object. Now branch on the dest
-			    res = new MultiTargetLinkQueryResult(r->second, r->second.begin(), r->second.end());
-
-				return res;
-			}
-
-		} else if (dst == 0) { // all link destinations
+		if (dst == 0) { // all link destinations
 
 			ObjectLinkMap::const_iterator r = mSrcDstLinkMap.find(src);
 
@@ -504,7 +540,7 @@ namespace Opde {
 				return res;
 			}
 
-		} else { // both src and dst are nonzero
+		} else { // both dst is nonzero (one link destination)
 			ObjectLinkMap::const_iterator r = mSrcDstLinkMap.find(src);
 
 			if (r != mSrcDstLinkMap.end()) {
@@ -571,9 +607,6 @@ namespace Opde {
 			// Update the query databases
 			// Src->Dst->LinkList
 			pair<ObjectLinkMap::iterator, bool> r = mSrcDstLinkMap.insert(make_pair(link->mSrc, ObjectIDToLinks()));
-			r.first->second.insert(make_pair(link->mDst, link));
-
-			r = mDstSrcLinkMap.insert(make_pair(link->mDst, ObjectIDToLinks()));
 			r.first->second.insert(make_pair(link->mDst, link));
 
 			// fire the notification about inserted link
@@ -643,7 +676,6 @@ namespace Opde {
 			// last, erase the link
 			mLinkMap.erase(it);
 
-			_removeLink(id);
 			_removeLinkData(id);
 		} else {
 			LOG_ERROR("Relation %d: Link requested for removal was not found :ID: %d", mID, id);
@@ -699,5 +731,19 @@ namespace Opde {
 		if (mMaxID[cidx] == lidx) {
 			mMaxID[cidx]--;
 		}
+		
+		// TODO: insert the link id into available for ID reuse...
+	}
+	
+	// --------------------------------------------------------------------------
+	LinkPtr Relation::createInverseLink(LinkPtr src) {
+		LinkPtr inv = new Link(
+			src->id(),
+			src->dst(),
+			src->src(),
+			src->flavor()
+		);
+		
+		return inv;
 	}
 }

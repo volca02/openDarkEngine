@@ -130,16 +130,45 @@ namespace Opde {
 		if (it != mNameToFlavor.end()) {
 			return it->second;
 		} else {
-			LOG_DEBUG("LinkService: Relation not found : %s", name.c_str());
+			LOG_ERROR("LinkService: Relation not found : %s", name.c_str());
 			return 0; // just return 0, so no exception will be thrown
+		}
+	}
+	
+	//------------------------------------------------------
+	std::string LinkService::flavorToName(int flavor) {
+		FlavorToName::const_iterator it = mFlavorToName.find(flavor);
+
+		if (it != mFlavorToName.end()) {
+			return it->second;
+		} else {
+			LOG_ERROR("LinkService: Relation not found by flavor : %d", flavor);
+			return ""; // just return empty string
 		}
 	}
 
 	//------------------------------------------------------
 	RelationPtr LinkService::createRelation(const std::string& name, DTypeDefPtr type, bool hidden) {
-		RelationPtr nr = new Relation(name, type, hidden);
+		if (name.substr(0,1) == "~")
+			OPDE_EXCEPT("Name conflict: Relation can't use ~ character as the first one, it's reserved for inverse relations. Conflicting name: " + name, "LinkService::createRelation");
+		
+		std::string inverse = "~" + name;
+		
+		RelationPtr nr = new Relation(name, type, false, hidden);
+		RelationPtr nrinv = new Relation(inverse, type, true, hidden);
 
+		// Assign inverse relations...
+		nr->setInverseRelation(nrinv.ptr());
+		nrinv->setInverseRelation(nr.ptr());
+
+		// insert both
 		std::pair<RelationNameMap::iterator, bool> res = mRelationNameMap.insert(make_pair(name, nr));
+
+		if (!res.second)
+			OPDE_EXCEPT("Failed to insert new instance of Relation", "LinkService::createRelation");
+			
+		// Inverse relation now
+		res = mRelationNameMap.insert(make_pair(inverse, nrinv));
 
 		if (!res.second)
 			OPDE_EXCEPT("Failed to insert new instance of Relation", "LinkService::createRelation");
@@ -169,6 +198,11 @@ namespace Opde {
 
 			rels->read(text, 32);
 
+			std::string stxt = text;
+
+			if (stxt.substr(0,1) == "~")
+				OPDE_EXCEPT("Conflicting name. Character ~ is reserved for inverse relations. Conflicting name : " + stxt, "LinkService::_load");
+
 			// Look for relation with the specified Name
 
 			// TODO: Look for the relation name. Have to find it.
@@ -184,6 +218,22 @@ namespace Opde {
 				OPDE_EXCEPT(string("Could not map relation ") + text + " to flavor. Name/ID conflict", "LinkService::_load");
 
 			LOG_DEBUG("Mapped relation %s to flavor %d", text, i);
+			
+			std::string inverse = "~" + stxt;
+			
+			// --- Assign the inverse relation as well here:
+			rnit = mRelationNameMap.find(inverse);
+
+			if (rnit == mRelationNameMap.end())
+				OPDE_EXCEPT(string("Could not find inverse relation ") + inverse + " predefined. Could not continue", "LinkService::_load");
+
+			RelationPtr irel = rnit->second;
+
+			// Request the mapping to ID
+			if (!requestRelationFlavorMap(-i, inverse, irel))
+				OPDE_EXCEPT(string("Could not map inverse relation ") + inverse + " to flavor. Name/ID conflict", "LinkService::_load");
+
+			LOG_DEBUG("Mapped relation pair %s, %s to flavor %d, %d", text, inverse.c_str(), i, -i);
 
 			// TODO: request relation ID map, must not fail
 
@@ -191,7 +241,7 @@ namespace Opde {
 			LOG_DEBUG("Loading relation %s", text);
 
 			try {
-				rel->load(db);
+				rel->load(db); // only normal relation is loaded. Inverse is mapped automatically
 			} catch (BasicException &e) {
 				LOG_FATAL("LinkService: Caught a fatal exception while loading Relation %s : %s", text, e.getDetails().c_str() );
 			}
@@ -248,11 +298,21 @@ namespace Opde {
 		RelationNameMap::iterator rnit = mRelationNameMap.find(name);
 
 		if (rnit == mRelationNameMap.end())
-			return RelationPtr();
+			return RelationPtr(); // return NULL pointer
 		else
 			return rnit->second;
 	}
 
+	//------------------------------------------------------
+	RelationPtr LinkService::getRelation(int flavor) {
+		RelationIDMap::iterator rnit = mRelationIDMap.find(flavor);
+
+		if (rnit == mRelationIDMap.end())
+			return RelationPtr(); // return NULL pointer
+		else
+			return rnit->second;
+	}
+	
 	//-------------------------- Factory implementation
 	std::string LinkServiceFactory::mName = "LinkService";
 

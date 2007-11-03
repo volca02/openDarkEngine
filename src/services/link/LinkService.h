@@ -47,8 +47,15 @@ namespace Opde {
 				mRelVMin = minor;
 			}
 
-			/** Convert the relation name to a flavor */
+			/** Convert the relation name to a flavor 
+			  * @param name the relation name
+			  * @return int The relation id (Flavor), or zero if not found */
 			int nameToFlavor(const std::string& name);
+			
+			/** Convert the relation name to a flavor 
+			  * @param name the relation name
+			  * @return int The relation id (Flavor), or empty string if not found */
+			std::string flavorToName(int flavor);
 
 			/** Creates a relation type (link kind)
 			* @param id The ID the relation will have (>0)
@@ -58,10 +65,18 @@ namespace Opde {
 			RelationPtr createRelation(const std::string& name, DTypeDefPtr type, bool hidden);
 
 			/** Get relation given it's name
-			* @param name The realtion's name
+			* @param name The relation's name
+			* @return A shared_pointer to the relation, or NULL if not found
 			* @note The relation will be .isNull() if it was not found
 			*/
 			RelationPtr getRelation(const std::string& name);
+			
+			/** Get relation given it's flavor
+			* @param flavor The relation's flavor
+			* @return A shared_pointer to the relation, or NULL if not found
+			* @note The relation will be .isNull() if it was not found
+			*/
+			RelationPtr getRelation(int flavor);
 
 		protected:
             bool init();

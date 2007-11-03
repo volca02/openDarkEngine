@@ -31,11 +31,11 @@
 #include "MessageSource.h"
 
 namespace Opde {
-	/** @brief Relation. A store of a group of links of the same flavour.
+	/** @brief Relation. A store of a group of links of the same flavor.
 	*/
 	class Relation : public NonCopyable, public MessageSource<LinkChangeMsg> {
 		public:
-			Relation(const std::string& name, DTypeDefPtr type, bool hidden = false);
+			Relation(const std::string& name, DTypeDefPtr type, bool isInverse, bool hidden = false);
 			virtual ~Relation();
 
 			/** Loads the relation data from the given FileGroup */
@@ -52,17 +52,27 @@ namespace Opde {
 				mDCVMin = dminor;
 			}
 
+			/// Inverse relation getter. Will return a relation with the links going in opposite direction
+			Relation* inverse();
+			
+			bool isInverse() { return mIsInverse; };
+			
+			/// Sets a inverse relation to this relation. Can only be done once.
+			void setInverseRelation(Relation* rel);
+
 			/** Clears out all the links, releses data, clears query caches */
 			void clear();
 
-			/** Sets the ID of this Relation. Must be done prior to any operation with the relation instance */
+			/** Sets the ID (flavor) of this Relation. Must be done prior to any operation with the relation instance */
 			inline void setID(int id) { mID = id; };
 
-			/** Returns the ID of this relation. */
+			/** Returns the ID (flavor) of this relation. */
 			inline int getID() { return mID; }
 
-			void setFakeSize(int size) { assert(size<=0); mFakeSize = size; };
+			/** Sets a fake size of the link data structure (some relation do not store a real size, but a fake one) */
+			void setFakeSize(int size) { assert(size>0); mFakeSize = size; };
 
+			/** @return the name of this relation */
 			const std::string& getName() { return mName; };
 
 			// ----------------- Link management methods --------------------
@@ -187,6 +197,12 @@ namespace Opde {
 			* @note This now only decrements the maximal index of the concreteness the id has, if it was the maximal id
 			*/
 			void unallocateLinkID(link_id_t id);
+			
+			/** Creates an inverse link for the given link. The links share the same data, but have src and dst object id's swapped
+			* @param src The source link
+			* @return LinkPtr of the new inverse link
+			*/
+			LinkPtr createInverseLink(LinkPtr src);
 
 			/// Map of links. Indexed by whole link id, contains the link class (LinkPtr)
 			typedef std::map< link_id_t, LinkPtr > LinkMap;
@@ -203,10 +219,7 @@ namespace Opde {
 			/// Map of links in source object ID, destination object id order
 			ObjectLinkMap mSrcDstLinkMap;
 
-			/// Map of links in destination object ID, source object ID order
-			ObjectLinkMap mDstSrcLinkMap;
-
-			/// ID of this relation (Flavour)
+			/// ID of this relation (Flavor)
 			int mID;
 
 			/// The maximal ID of the given concreteness level (only the index part)
@@ -229,6 +242,12 @@ namespace Opde {
 
 			/// fake size. This size is written as the data size into the LD$ chunks
 			uint32_t mFakeSize;
+			
+			/// The pointer to inverse relation
+			Relation* mInverse;
+
+			/// This relation is an inverse relation...
+			bool mIsInverse;
 
 			/// chunk versions. Both Link and LinkData
 			uint mLCVMaj;
