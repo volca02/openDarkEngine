@@ -28,6 +28,8 @@ Rewritten to use in the openDarkEngine project by Filip Volejnik <f.volejnik@cen
 #include "config.h"
 #include "OgreDarkSceneManager.h"
 #include "OgreBspNode.h"
+
+#include "OgreRoot.h"
 #include "OgreException.h"
 #include "OgreRenderSystem.h"
 #include "OgreCamera.h"
@@ -252,7 +254,10 @@ namespace Ogre {
 		// TODO: Once the sky system is solved, do a direct rendering (using renderOps) of the sky mesh
 
 		// Render static level geometry first
+		int begin = Root::getSingleton().getTimer()->getMilliseconds();
+
 		renderStaticGeometry();
+		mStaticRenderTime = Root::getSingleton().getTimer()->getMilliseconds() - begin;
 
 		if (mShowPortals)
 			renderPortals();
@@ -441,6 +446,8 @@ namespace Ogre {
 
 	//-----------------------------------------------------------------------
 	BspNode* DarkSceneManager::walkTree(Camera* camera, RenderQueue *queue, bool onlyShadowCasters) {
+		int begin = Root::getSingleton().getTimer()->getMilliseconds();
+
 		BspNode* cameraNode = NULL;
 
 		if (mBspTree != NULL) // Locate the leaf node where the camera is located
@@ -474,6 +481,9 @@ namespace Ogre {
 
 			for (;it != mActiveCells.rend(); it++)
 				queueBspNode((*it), camera, onlyShadowCasters);
+
+			// Include the queueing into the traversal time
+			mTraversalTime = Root::getSingleton().getTimer()->getMilliseconds() - begin;
 		}
 
 		mTraversalLog = false;
@@ -728,6 +738,14 @@ namespace Ogre {
 	    	} else if ( key == "EvaluatedPortals" ) {
 			unsigned int * uptr = ((unsigned int *)(val));
         		*uptr = mEvalPortals;
+        		return true;
+	    	} else if ( key == "TraversalTime" ) {
+			unsigned int * uptr = ((unsigned int *)(val));
+        		*uptr = mTraversalTime;
+        		return true;
+	    	} else if ( key == "StaticRenderTime" ) {
+			unsigned int * uptr = ((unsigned int *)(val));
+        		*uptr = mStaticRenderTime;
         		return true;
 	    	}
 

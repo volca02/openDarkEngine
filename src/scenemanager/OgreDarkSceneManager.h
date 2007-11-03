@@ -59,7 +59,9 @@ namespace Ogre {
 			unsigned int	mBackfaced;
 			unsigned int	mCellsRendered;
 			unsigned int	mEvalPortals;
-		    
+		    unsigned int 	mTraversalTime;
+			unsigned int	mStaticRenderTime;
+			
 			// State variables for rendering WIP
 			RenderOperation mRenderOp;
 		

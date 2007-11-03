@@ -308,29 +308,29 @@ namespace Opde {
                 OverlayElement* guibc = OverlayManager::getSingleton().getOverlayElement("Opde/BackCulls");
                 OverlayElement* guiep = OverlayManager::getSingleton().getOverlayElement("Opde/EvalPorts");
                 OverlayElement* guirc = OverlayManager::getSingleton().getOverlayElement("Opde/RendCells");
-                // OverlayElement* guitt = OverlayManager::getSingleton().getOverlayElement("Opde/TravTime");
-                // OverlayElement* guisr = OverlayManager::getSingleton().getOverlayElement("Opde/StaticRenderTime");
+                OverlayElement* guitt = OverlayManager::getSingleton().getOverlayElement("Opde/TravTime");
+                OverlayElement* guisr = OverlayManager::getSingleton().getOverlayElement("Opde/StaticRenderTime");
 
                 // Temporary: Debug Overlay
                 static String sbc = "Backface culls: ";
                 static String sep = "Evaluated portals: ";
                 static String src = "Rendered cells: ";
-                // static String stt = "Traversal Time: ";
-                // static String ssr = "Static Render Time: ";
+                static String stt = "Traversal Time: ";
+                static String ssr = "Static Render Time: ";
 
-                uint bculls, eports, rendc;
+                uint bculls, eports, rendc, travtm, statrt;
 
                 mSceneMgr->getOption("BackfaceCulls", &bculls);
                 mSceneMgr->getOption("CellsRendered", &rendc);
                 mSceneMgr->getOption("EvaluatedPortals", &eports);
-                // mSceneMgr->getOption("TraversalTime", &travtm);
-                // mSceneMgr->getOption("StaticRenderTime", &statrt);
+                mSceneMgr->getOption("TraversalTime", &travtm);
+                mSceneMgr->getOption("StaticRenderTime", &statrt);
 
                 guibc->setCaption(sbc + StringConverter::toString(bculls));
                 guiep->setCaption(sep + StringConverter::toString(eports));
                 guirc->setCaption(src + StringConverter::toString(rendc));
-                // guitt->setCaption(stt + StringConverter::toString(travtm) + " ms");
-                // guisr->setCaption(ssr + StringConverter::toString(statrt) + " ms");
+                guitt->setCaption(stt + StringConverter::toString(travtm) + " ms");
+                guisr->setCaption(ssr + StringConverter::toString(statrt) + " ms");
             }
             catch(...)
             {
