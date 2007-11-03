@@ -48,6 +48,36 @@ namespace Opde {
             * @param name The name of the property to retrieve the group for
             * @return PropertyGroupPtr of the PropertyGroup named name if found, isNull()==true otherwise */
             PropertyGroupPtr getPropertyGroup(const std::string& name);
+            
+            /** Determines if the given object has a property mapped (either itself, or by inheritance through MetaProperty link)
+            * @param obj_id The object id to query
+            * @param propName The name of the property to query for
+            * @return true if the object has the specified property, false if not
+            */
+            bool has(int obj_id, const std::string& propName);
+            
+            /** Determines if the given object is a direct owner of a given property
+            * @param obj_id The object id to query
+            * @param propName The name of the property to query for
+            * @return true if the object owns the specified property, false if not
+            */
+            bool owns(int obj_id, const std::string& propName);
+            
+            
+            /** Property setter. Sets a value of a property field
+            * @param obj_id The object id
+            * @param propName The name of the property group
+            * @param propField The field path to set
+            * @param value The new value
+            */
+            void set(int obj_id, const std::string& propName, const std::string& propField, const DVariant& value);
+            
+            /** Property getter. Gets a value of a property field
+            * @param obj_id The object id
+            * @param propName The name of the property group
+            * @param propField The field path to get
+            */
+            DVariant get(int obj_id, const std::string& propName, const std::string& propField);
 
 		protected:
             /// service initialization

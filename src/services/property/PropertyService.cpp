@@ -147,6 +147,53 @@ namespace Opde {
             return NULL;
 
 	}
+	
+	// --------------------------------------------------------------------------
+	bool PropertyService::has(int obj_id, const std::string& propName) {
+		PropertyGroupPtr prop = getPropertyGroup(propName);
+		
+		if (!prop.isNull()) {
+			return prop->has(obj_id);
+		}
+		
+		return false;
+	}
+    
+	// --------------------------------------------------------------------------
+    bool PropertyService::owns(int obj_id, const std::string& propName) {
+		PropertyGroupPtr prop = getPropertyGroup(propName);
+		
+		if (!prop.isNull()) {
+			return prop->has(obj_id);
+		}
+		
+		return false;
+    }
+    
+	// --------------------------------------------------------------------------
+    void PropertyService::set(int obj_id, const std::string& propName, const std::string& propField, const DVariant& value) {
+		PropertyGroupPtr prop = getPropertyGroup(propName);
+		
+		if (!prop.isNull()) {
+			prop->set(obj_id, propField, value);
+			return;
+		}
+		
+		LOG_ERROR("Invalid or undefined property name '%s' on call to PropertyService::set", propName.c_str());
+    }
+	
+	// --------------------------------------------------------------------------
+	DVariant PropertyService::get(int obj_id, const std::string& propName, const std::string& propField) {
+				PropertyGroupPtr prop = getPropertyGroup(propName);
+		
+		if (!prop.isNull()) {
+			return prop->get(obj_id, propField);
+		}
+		
+		LOG_ERROR("Invalid or undefined property name '%s' on call to PropertyService::get. Returning invalid Variant", propName.c_str());
+		
+		return DVariant();
+	}
 
 	//-------------------------- Factory implementation
 	std::string PropertyServiceFactory::mName = "PropertyService";
