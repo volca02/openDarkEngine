@@ -64,7 +64,9 @@ namespace Opde {
 	}
 
 	GameStateManager::~GameStateManager() {
-		mInputService->unsetDirectListener();
+		if (!mInputService.isNull())
+			mInputService->unsetDirectListener();
+			
 		mInputService.setNull();
 		mConfigService.setNull();
 
