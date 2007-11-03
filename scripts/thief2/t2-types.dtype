@@ -2338,8 +2338,8 @@ namespace properties {
 			int32 object
 			uint32 use meshjoint joint
 			alias short-vector angle
-			uint16 zero [4]
-			vector offset [4]
+			uint16 zero
+			vector offset
 		}
 
 	}
