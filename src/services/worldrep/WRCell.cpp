@@ -212,7 +212,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------------------------------------
-	const MaterialPtr WRCell::getMaterial(unsigned int texture, unsigned int atlasnum, std::pair< Ogre::uint, Ogre::uint > &dimensions, std::pair< float, float > &tscale, unsigned int flags) {
+	const MaterialPtr WRCell::getMaterial(unsigned int texture, unsigned int atlasnum, std::pair< Ogre::uint, Ogre::uint > &dimensions, unsigned int flags) {
 		assert(loaded);
 		assert(atlased); // not exactly needed, but will not harm
 
@@ -242,6 +242,8 @@ namespace Opde {
 		std::string shaderName = tmp.str();
 
 		MaterialPtr shadMat = MaterialManager::getSingleton().getByName(shaderName);
+		
+		std::pair<float, float> tscale;
 
 		tscale.first = 1.0f;
 		tscale.second = 1.0f;
@@ -318,17 +320,20 @@ namespace Opde {
 			
 			// TXT scale to fit the size texture had originally
 			if (shadPass->getNumTextureUnitStates() > 0) {
-				TextureUnitState* tus = shadPass->getTextureUnitState(0);
 				
-				dimensions = tus->getTextureDimensions();
-				
-				tscale = mOwner->getTextureScale(txtName.str());
-				
-				tus->setTextureUScale(1.0f);
-				tus->setTextureVScale(1.0f);
-				
-				dimensions.first  = tscale.first * dimensions.first;
-				dimensions.second = tscale.second * dimensions.second;
+				if (shadPass->getNumTextureUnitStates() > 0) {
+					TextureUnitState* tus = shadPass->getTextureUnitState(0);
+					
+					dimensions = tus->getTextureDimensions();
+					
+					tscale = mOwner->getTextureScale(txtName.str());
+					
+					tus->setTextureUScale(1.0f);
+					tus->setTextureVScale(1.0f);
+					
+					dimensions.first  = tscale.first * dimensions.first;
+					dimensions.second = tscale.second * dimensions.second;
+				}
 			}
 		}
 		
@@ -336,32 +341,32 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------------------------------------
-	const Ogre::String WRCell::getMaterialName(unsigned int texture, unsigned int atlasnum, std::pair< Ogre::uint, Ogre::uint > &dimensions, std::pair< float, float > &tscale, unsigned int flags) {
-		MaterialPtr mat = getMaterial(texture, atlasnum, dimensions, tscale, flags);
+	const Ogre::String WRCell::getMaterialName(unsigned int texture, unsigned int atlasnum, std::pair< Ogre::uint, Ogre::uint > &dimensions, unsigned int flags) {
+		MaterialPtr mat = getMaterial(texture, atlasnum, dimensions, flags);
 
 		return mat->getName();
 	}
 
 	//------------------------------------------------------------------------------------
 	void WRCell::insertTexturedVertex(Ogre::ManualObject *manual, int faceNum, wr_coord_t coord, Ogre::Vector2 displacement,
-										std::pair< Ogre::uint, Ogre::uint > dimensions, std::pair< float, float > tscale) {
+										std::pair< Ogre::uint, Ogre::uint > dimensions, Vector3 origin) {
 
 		BspVertex vert;
 
-		constructBspVertex(faceNum, coord, displacement, dimensions, tscale, &vert);
+		constructBspVertex(faceNum, coord, displacement, dimensions, &vert);
 
-		manual->position(vert.position[0], vert.position[1], vert.position[2]);
+		manual->position(vert.position[0] - origin.x, vert.position[1] - origin.y, vert.position[2] - origin.z);
 
 		manual->textureCoord(vert.texcoords[0], vert.texcoords[1]);
 
 		// !NLM!
-		// manual->textureCoord(vert.lightmap[0], vert.lightmap[1]);
+		manual->textureCoord(vert.lightmap[0], vert.lightmap[1]);
 
 		Vector3 normal(vert.normal[0], vert.normal[1], vert.normal[2]);
 	}
 
 	//------------------------------------------------------------------------------------
-	void WRCell::constructBspVertex(int faceNum, wr_coord_t pos, Ogre::Vector2 displacement, std::pair< Ogre::uint, Ogre::uint > dimensions, std::pair< float, float > tscale, BspVertex *vtx) {
+	void WRCell::constructBspVertex(int faceNum, wr_coord_t pos, Ogre::Vector2 displacement, std::pair< Ogre::uint, Ogre::uint > dimensions, BspVertex *vtx) {
 		// Position copy
 		vtx->position[0] = pos.x;
 		vtx->position[1] = pos.y;
@@ -592,10 +597,9 @@ namespace Opde {
 
 			// Iterate through the faces, and add all the triangles we can construct using the polygons defined
 			std::pair< Ogre::uint, Ogre::uint > dimensions;
-			std::pair< float, float > tscale;
 
 			// begin inserting one polygon
-			manual->begin(getMaterialName(face_infos[polyNum].txt, lightMaps[polyNum]->getAtlasIndex(), dimensions, tscale, face_maps[polyNum].flags));
+			manual->begin(getMaterialName(face_infos[polyNum].txt, lightMaps[polyNum]->getAtlasIndex(), dimensions, face_maps[polyNum].flags));
 
 			// temporary array of indices (for polygon triangulation)
 			Vector2 displacement = calcLightmapDisplacement(polyNum);
@@ -607,31 +611,22 @@ namespace Opde {
 
 			wr_coord_t zero;
 			zero.x = 0; zero.y = 0; zero.z = 0;
-			insertTexturedVertex(manual, polyNum, zero, displacement, dimensions, tscale);
+			// insertTexturedVertex(manual, polyNum, zero, displacement, dimensions, nodeCenter);
 
 			// for each vertex, insert into the model
 			for (int vert = 0; vert < face_maps[polyNum].count; vert++)  {
 				wr_coord_t vrelative = vertices[ poly_indices[polyNum][vert] ];
 
-				// Subtract the center
-				vrelative.x = vrelative.x - polyCenter.x;
-				vrelative.y = vrelative.y - polyCenter.y;
-				vrelative.z = vrelative.z - polyCenter.z;
-
-				insertTexturedVertex(manual, polyNum, vrelative, displacement, dimensions, tscale);
+				insertTexturedVertex(manual, polyNum, vrelative, displacement, dimensions, nodeCenter);
 			}
 
 			// now feed the indexes
-			for (int t = 1; t < face_maps[polyNum].count + 1; t++) {
+			for (int t = 1; t < face_maps[polyNum].count - 1; t++) {
 				// push back the indexes
 				manual->index(0);
 				manual->index(t);
 
-				if (t < face_maps[polyNum].count)
-						manual->index(t+1);
-					else
-						manual->index(1);
-
+				manual->index(t+1);
 			}
 
 			manual->end();
@@ -789,6 +784,127 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------------------------------------
+	Ogre::SceneNode* WRCell::createSceneNode(Ogre::SceneManager *sceneMgr) {
+		// some checks on the status. These are hard mistakes
+		assert(loaded);
+		assert(atlased);
+
+		int portalStart = header.num_polygons - header.num_portals;
+
+		// Contains material name -> polygon list
+		std::map<std::string, std::vector<int> > matToPolys;
+		// polygon index to txt Dimensions
+		std::map<int, std::pair<uint,uint> > polyToDim;
+		
+		int faceCount = header.num_polygons - header.num_portals;
+		
+		// Cell is recentered with this
+		wr_coord_t cellCenter = header.center;
+		Vector3 nodeCenter = Vector3(cellCenter.x, cellCenter.y, cellCenter.z);
+		
+		// Now let's iterate over the materials
+		// Prepare the object's name
+		StringUtil::StrStreamType modelName;
+		modelName << "cell_" << cellNum;
+
+		
+		// Attach the resulting object to the node with the center in the center vertex of the mesh...
+		SceneNode* meshNode = sceneMgr->createSceneNode(modelName.str());
+		meshNode->setPosition(nodeCenter);
+
+		if (faceCount <= 0) {
+			LOG_INFO("A geometry - less cell encountered, skipping the mesh generation");
+			return meshNode;
+		}
+		
+		// Step one. Map materials and polygons to iterate over
+		for (int polyNum = 0; polyNum < faceCount; polyNum++) {
+			std::pair< Ogre::uint, Ogre::uint > dimensions;
+			
+			std::string matname = getMaterialName(face_infos[polyNum].txt, lightMaps[polyNum]->getAtlasIndex(), dimensions, face_maps[polyNum].flags);
+			
+			// insert the poly index into the list of that material
+			std::pair< std::map<std::string, std::vector<int> >::iterator, bool > res = matToPolys.insert(make_pair(matname, std::vector<int>()));
+			res.first->second.push_back(polyNum);
+			
+			// Could be rather per material. But well. just for test anyway
+			polyToDim.insert(make_pair(polyNum, dimensions));
+		}
+		
+
+		// Each portal's mesh gets it's own manual object. This way we minimize the mesh attachments to hopefully minimal set
+		ManualObject* manual = sceneMgr->createManualObject(modelName.str());
+		
+		std::map<std::string, std::vector<int> >::iterator it = matToPolys.begin();
+		
+		for (; it != matToPolys.end(); it++) {
+			// begin inserting the polygons of that material
+			manual->begin(it->first);
+
+			std::vector<int>::iterator pi = it->second.begin();
+			
+			// index relativeness. I'm not doing it effectively, but well. a test it is
+			uint idxpos = 0;
+			
+			// each of those polygons
+			for (; pi != it->second.end(); pi++) {
+				// Iterate through the faces, and add all the triangles we can construct using the polygons defined
+				std::pair< Ogre::uint, Ogre::uint > dimensions;
+				
+				int polyNum = *pi;
+				
+				std::map<int, std::pair<uint, uint> >::iterator dimi = polyToDim.find(polyNum);
+				
+				if (dimi == polyToDim.end())
+					OPDE_EXCEPT("Missing polygon texture dimensions!", "WrCell::constructCellMesh");
+				
+				dimensions = dimi->second;
+
+				Vector2 displacement = calcLightmapDisplacement(polyNum);
+
+				wr_coord_t zero;
+
+				// for each vertex, insert into the model
+				for (int vert = 0; vert < face_maps[polyNum].count; vert++)  {
+					wr_coord_t vrelative = vertices[ poly_indices[polyNum][vert] ];
+
+					insertTexturedVertex(manual, polyNum, vrelative, displacement, dimensions, nodeCenter);
+				}
+
+				// now feed the indexes
+				for (int t = 1; t < face_maps[polyNum].count - 1; t++) {
+					// push back the indexes
+					manual->index(idxpos);
+					manual->index(idxpos + t);
+					manual->index(idxpos + t + 1);
+				}
+				
+				idxpos += face_maps[polyNum].count;
+			}
+			
+			manual->end();
+		}
+		
+		MeshPtr result = manual->convertToMesh(modelName.str(), ResourceGroupManager::getSingleton().getWorldResourceGroupName());
+		
+		LOG_DEBUG("Attaching cell %d geometry...", cellNum);
+		
+		// Create a entity from the mesh.
+		meshNode->attachObject(sceneMgr->createEntity(modelName.str(), modelName.str()));
+		
+		
+		// (static_cast<DarkSceneNode*>(meshNode))->attachObject(manual);
+
+		if(meshNode) {
+			meshNode->needUpdate(true);
+		}
+
+		LOG_DEBUG("   - Attaching cell %d geometry : done", cellNum);
+		
+		return meshNode;
+	}
+
+	//------------------------------------------------------------------------------------
 	int WRCell::buildStaticGeometry(BspVertex* vertexPtr, unsigned int* indexPtr, Ogre::StaticFaceGroup* facePtr,
 					int startVertex, int startIndex, int startFace) {
 		assert(loaded);
@@ -810,16 +926,15 @@ namespace Opde {
 		// for each of the polygons
 		for (int polyNum = 0; polyNum < faceCount; polyNum++) {
 			std::pair< Ogre::uint, Ogre::uint > dimensions;
-			std::pair< float, float > tscale;
 
-			MaterialPtr shadMat = getMaterial(face_infos[polyNum].txt, lightMaps[polyNum]->getAtlasIndex(), dimensions, tscale, face_maps[polyNum].flags);
+			MaterialPtr shadMat = getMaterial(face_infos[polyNum].txt, lightMaps[polyNum]->getAtlasIndex(), dimensions, face_maps[polyNum].flags);
 
 			// HACKY... I dunno the real calculation behind lightmaps yet
 			Vector2 displacement = calcLightmapDisplacement(polyNum);
 
 			// Copy the vertex data
 			for (int t = 0; t < face_maps[polyNum].count; t++) {
-				constructBspVertex(polyNum, vertices[ poly_indices[polyNum][t] ], displacement, dimensions, tscale, vertexPtr++);
+				constructBspVertex(polyNum, vertices[ poly_indices[polyNum][t] ], displacement, dimensions, vertexPtr++);
 			}
 			// HMM. The triangle count = polygon_points - 2
 			for (int t = 1; t < face_maps[polyNum].count - 1; t++) {

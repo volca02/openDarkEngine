@@ -112,21 +112,23 @@ namespace Opde {
 
 			/** Returns a prepared material pointer for combination texture/atlasnum
 			* @note fills the dimensions parameter with the texture dimensions */
-			const Ogre::MaterialPtr getMaterial(unsigned int texture, unsigned int atlasnum, std::pair< Ogre::uint, Ogre::uint > &dimensions, std::pair< float, float > &tscale, unsigned int flags);
+			const Ogre::MaterialPtr getMaterial(unsigned int texture, unsigned int atlasnum, std::pair< Ogre::uint, Ogre::uint > &dimensions, unsigned int flags);
 
 			/** Returns a prepared material name for combination texture/atlasnum
 			* @note fills the dimensions parameter with the texture dimensions */
-			const Ogre::String getMaterialName(unsigned int texture, unsigned int atlasnum, std::pair< Ogre::uint, Ogre::uint > &dimensions, std::pair< float, float > &tscale, unsigned int flags);
+			const Ogre::String getMaterialName(unsigned int texture, unsigned int atlasnum, std::pair< Ogre::uint, Ogre::uint > &dimensions, unsigned int flags);
 
 			/** Inserts a new vertex into the manual object. Calculates all the UV values needed
 			* @deprecated For moving towards the geometry by buffers */
-			void insertTexturedVertex(Ogre::ManualObject *manual, int faceNum, wr_coord_t pos, Ogre::Vector2 displacement, std::pair< Ogre::uint, Ogre::uint > dimensions, std::pair< float, float > tscale);
+			void insertTexturedVertex(Ogre::ManualObject *manual, int faceNum, wr_coord_t pos, Ogre::Vector2 displacement, 
+				std::pair< Ogre::uint, Ogre::uint > dimensions, Ogre::Vector3 origin);
 
 			/** Constructs a BSPVertex out of our data */
-			void constructBspVertex(int faceNum, wr_coord_t pos, Ogre::Vector2 displacement, std::pair< Ogre::uint, Ogre::uint > dimensions, std::pair< float, float > scale, BspVertex *vtx);
+			void constructBspVertex(int faceNum, wr_coord_t pos, Ogre::Vector2 displacement, std::pair< Ogre::uint, Ogre::uint > dimensions, BspVertex *vtx);
 
 			/** Calculates the Lightmap center in texture space, using Bounding coordinates as the base. */
 			Ogre::Vector2 calcLightmapDisplacement(int polyNum);
+
 
 			/** The bsp node constructed by this class. Filled with static geometry and otherwise initialized */
 			Ogre::BspNode* bspNode;
@@ -155,6 +157,10 @@ namespace Opde {
 			* @note Note that Materials \@templateXXXX are expected to exist as those are cloned in the construction process
 			*/
 			void constructPortalMeshes(Ogre::SceneManager *sceneMgr);
+
+
+			/// Creates a scene node with all non-portal geometry attached as a mesh
+			Ogre::SceneNode* createSceneNode(Ogre::SceneManager *sceneMgr);
 
 			/** Return the exact vertex count needed to set-up the vertex buffer with the cell data.
 			* @note The vertex count is not a plain vertex list count, but the count of vertices which are counted as the resulting polygons
