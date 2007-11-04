@@ -139,16 +139,18 @@ namespace Opde {
 	void LightAtlas::updateLightMapBuffer(FreeSpaceInfo& fsi, lmpixel* rgb) {
 		const PixelBox &pb = atlas->getCurrentLock();
 
-		int x_off = fsi.x * 3;
-
 		for (int y = 0; y < fsi.h; y++) {
-			uint8_t *data = static_cast<uint8_t*>(pb.data) + (y + fsi.y)*pb.rowPitch;
+			uint32_t *data = static_cast<uint32_t*>(pb.data) + (y + fsi.y) * pb.rowPitch * 3;
 
 			int a = 0;
 			for (int x = 0; x < fsi.w; x++) {
-				data[a++ + x_off] = rgb[x + y * fsi.w].R; 
-				data[a++ + x_off] = rgb[x + y * fsi.w].G; 
-				data[a++ + x_off] = rgb[x + y * fsi.w].B; 
+				uint32 R, G, B;
+				
+				R = rgb[x + y * fsi.w].R;
+				G = rgb[x + y * fsi.w].G;
+				B = rgb[x + y * fsi.w].B;
+				
+				data[x + fsi.x] = (R << 16) | (G << 8) | B; 
 			}
 		}
 	}
@@ -156,10 +158,8 @@ namespace Opde {
 	void LightAtlas::updateLightMapBuffer(FreeSpaceInfo& fsi, Ogre::Vector3* rgb) {
 		const PixelBox &pb = atlas->getCurrentLock();
 	
-		int x_off = fsi.x * 3;
-
 		for (int y = 0; y < fsi.h; y++) {
-			uint8 *data = static_cast<uint8_t*>(pb.data) + (y + fsi.y)*pb.rowPitch;
+			uint32_t *data = static_cast<uint32_t*>(pb.data) + (y + fsi.y) * pb.rowPitch;
 
 			int a = 0;
 			for (int x = 0; x < fsi.w; x++) {
@@ -175,9 +175,10 @@ namespace Opde {
 				G = (G > 255) ? 255 : ((G < 0)? 0 : G);
 				B = (B > 255) ? 255 : ((B < 0)? 0 : B);
 
-				data[a++ + x_off] = R; 
-				data[a++ + x_off] = G; 
-				data[a++ + x_off] = B; 
+				uint32 ARGB = (R << 16) | (G << 8) | B;
+
+				// Write a A8R8G8B8 conversion of the lmpixel
+				data[x + fsi.x] = ARGB;
 			}
 		}
 	}
