@@ -65,10 +65,10 @@ namespace Opde {
 			return;
 
 		va_list argptr;
-		char result[255];
+		char result[2048];
 
 		va_start(argptr, fmt);
-		vsnprintf(result, 255, fmt, argptr);
+		vsnprintf(result, 2047, fmt, argptr);
 		va_end(argptr);
 
 		// This is how the log listener could work:
