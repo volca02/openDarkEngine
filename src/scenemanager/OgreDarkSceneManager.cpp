@@ -477,11 +477,9 @@ namespace Ogre {
 
 			traversePortals(cameraNode, camera, queue, screen, onlyShadowCasters);
 
-			// TODO: No need to order back-to-front now, the rendering in underlying sceneManager will handle this
-			// Maybe this is a key for the skyhack to work. Leave it as it is
-			std::vector<BspNode *>::reverse_iterator it = mActiveCells.rbegin();
+			std::vector<BspNode *>::iterator it = mActiveCells.begin();
 
-			for (;it != mActiveCells.rend(); it++)
+			for (;it != mActiveCells.end(); it++)
 				queueBspNode((*it), camera, onlyShadowCasters);
 
 			// Include the queueing into the traversal time
