@@ -71,7 +71,7 @@ typedef struct Vertex {
 	float x;
 	float y;
 	float z;
-	
+
 	Vertex() { x = y = z = 0; };
 	Vertex(float _x, float _y, float _z) {
 		x = _x;
@@ -168,7 +168,7 @@ typedef struct      VHotObj
     Vertex          point;
 } VHotObj;
 
-// Material definitions 
+// Material definitions
 typedef struct MeshMaterial {
 	char		name[16];
 	unsigned char	type;		// MD_MAT_COLOR or MD_MAT_TMAP
@@ -207,11 +207,11 @@ typedef struct {
 
 typedef struct {
 	char	name[8];
-	
+
 	unsigned char movement; // the movement of the object 0 - none, 1 - rotate, 2 - slide
-	
+
 	SubObjTransform trans;
-	
+
 	short           child_sub_obj;
 	short           next_sub_obj;
 	short           vhot_start;
@@ -240,8 +240,8 @@ typedef struct      NodeSplit
     Vertex          sphere_center;
     float           sphere_radius;
     short           pgon_before_count;
-    short           normal;             // ??
-    float           d;                  // ??
+    short           normal;             // Split plane normal
+    float           d;                  // Split plane d
     short           behind_node;        // offset to the node on the behind (from offset_nodes)
     short           front_node;         // offset to the node on the front (from offset_nodes)
     short           pgon_after_count;
@@ -253,12 +253,12 @@ typedef struct      NodeCall
     Vertex          sphere_center;
     float           sphere_radius;
     short           pgon_before_count;
-    short           call_node;
+    short           call_node; // Inserted node?
     short           pgon_after_count;
 } NodeCall;
 
 
-typedef struct      NodeRaw
+typedef struct      NodeRaw // Simple Node. No splitting
 {
     Vertex          sphere_center;
     float           sphere_radius;
@@ -293,28 +293,28 @@ std::ostream& operator<<(std::ostream& os, const SubObjTransform& t) {
 	os << "Min range:" << t.min_range << std::endl;
 	os << "Max range:" << t.max_range << std::endl;
 	os << "Matrix: ";
-	
-	
+
+
 	for (int x = 0; x < 9; x++) {
-		
+
 		if (x % 3 == 0) {
 			os.width(10);
 			os << std::right;
 			os << std::endl;
 		}
-		
+
 		os.precision(3);
 		os.width(5);
 		os << std::right;
 		os << " " << t.f[x];
-		
-		
+
+
 	}
-	
+
 	os << "\n";
-	
+
 	os << "Joint (axle) point : " << t.AxlePoint;
-	
+
 	return os;
 }
 
@@ -326,8 +326,8 @@ std::ostream& operator<<(std::ostream& os, const SubObjTransform& t) {
 // smm.setTransform(NULL / SubObjHdr);
 // smm.addTriangle(ida,idb,idc); // error if textured
 // smm.addTriangle(ida,idb,idc, uva, uvb, uvc); // error if non-textured
-// smm.output... ? -> 
-//	take all the vertices needed. 
+// smm.output... ? ->
+//	take all the vertices needed.
 //	Make a conversion map - global -> local indexes
 //	convert vertices using transformation, if needed
 //	convert all indices (vertex / uv) to the local number.
@@ -345,85 +345,85 @@ class SingleMaterialMesh {
 		vector< int > vertices; // vertex indices (for triangles)
 		vector< int > uvmapping; // uv map indices (for vertex UV mapping)
 		vector< int > objidxs; // map of the sub-object indices per vertex
-	
+
 		vector< PolyParts > triangles; // indexed triangle list
 		bool hasuv;
-		
+
 		int material;
 		char *baseName;
-	
+
 		Vertex *srcvertices;
 		int num_vertices;
-	
+
 		UVMap *uvmaps;
 		int num_uvmaps;
-	
+
 		SubObjectHeader *objects;
 		int num_objects;
-	
+
 		int addVertex(int objidx, int vidx) {
 			if (hasuv) {
 				log_error("singleMaterialMesh.addVertex() : The material %d is textured. I need UV!", material);
 				return -1;
 			}
-			
+
 			// first we go through the allready inserted vertices, and look for the same combination. if found, we have the resulting index
 			// of vertex to be added to triangle definitions, otherwise, we have to insert a new one
 			for (unsigned int idx = 0; idx < vertices.size(); idx++) {
-				if ((vertices[idx] == vidx) && (objidxs[idx] == objidx)) 
+				if ((vertices[idx] == vidx) && (objidxs[idx] == objidx))
 					return idx;
 			}
-			
-			// we're here, so none found 
+
+			// we're here, so none found
 			vertices.push_back(vidx);
 			objidxs.push_back(objidx);
-			
+
 			return vertices.size() - 1 ; // the last index is the one
 		}
-		
+
 		int addVertexUV(int objidx, int vidx, int uvidx) {
 			if (!hasuv) {
 				log_error("singleMaterialMesh.addVertexUV() : The material %d is non-textured. I don't need UV!", material);
 				return -1;
 			}
-			
+
 			// first we go through the allready inserted vertices, and look for the same combination. if found, we have the resulting index
 			// of vertex to be added to triangle definitions, otherwise, we have to insert a new one
 			for (unsigned int idx = 0; idx < vertices.size(); idx++) {
 				if ((vertices[idx] == vidx) && (uvmapping[idx] == uvidx) && (objidxs[idx] == objidx))
 					return idx;
 			}
-			
-			// we're here, so none found 
+
+			// we're here, so none found
 			vertices.push_back(vidx);
 			uvmapping.push_back(uvidx);
 			objidxs.push_back(objidx);
-			
+
 			return vertices.size() - 1 ; // the last index is the one
 		}
-		
+
 		/**
 			Recalc the vertex coordinates using the given transformation;
 		*/
 		Vertex transformVertex(int index) {
 			Vertex in = srcvertices[vertices[index]];
-			
+
 			int objidx = objidxs[index];
 			if (objidx == 0) // zero object index -> no transform
 				return in;
-			
+
 			Vertex out;
 			const SubObjTransform &trans = objects[objidx].trans;
-			
+
 			out.x = in.x * trans.f[0] + in.y * trans.f[3] + in.z * trans.f[6] + trans.AxlePoint.x;
 			out.y = in.x * trans.f[1] + in.y * trans.f[4] + in.z * trans.f[7] + trans.AxlePoint.y;
 			out.z = in.x * trans.f[2] + in.y * trans.f[5] + in.z * trans.f[8] + trans.AxlePoint.z;
-		
+
 			return out;
 		}
-		
+
 	public: //---------------------------------------------------
-	
+
 		SingleMaterialMesh(char *baseName, int materialnum, bool textured) {
 			this->baseName = baseName;
 			this->material = materialnum;
@@ -433,133 +433,133 @@ class SingleMaterialMesh {
 			srcvertices = NULL;
 			uvmaps = NULL;
 		}
-		
+
 		void setObjects(SubObjectHeader *objects, int count) {
 			this->objects = objects;
 			num_objects = count;
 		}
-		
+
 		void setVertices(Vertex *srcvtxs, int count) {
 			this->srcvertices = srcvtxs;
 			num_vertices = count;
 		}
-		
+
 		void setUVMaps(UVMap *uvmaps, int count) {
 			this->uvmaps = uvmaps;
 			num_vertices = count;
 		}
-		
+
 		void addTriangle(int objidx, short a, short b, short c) {
 			if (hasuv) {
 				log_error("singleMaterialMesh.addTriangle(a,b,c) : The material %d is textured. I need UV!", material);
 				return;
 			}
-			
+
 			// because we are nontextured, we only use vertices vector
 			short ra = addVertex(objidx, a);
 			short rb = addVertex(objidx, b);
 			short rc = addVertex(objidx, c);
-			
+
 			PolyParts tri;
 			tri.a = ra;
 			tri.b = rb;
 			tri.c = rc;
-			
+
 			triangles.push_back(tri);
 		}
-		
+
 		void addTriangle(int objidx, short a, short b, short c, short uva, short uvb, short uvc) {
 			if (!hasuv) {
 				log_error("singleMaterialMesh.addTriangle(a,b,c,-uv-) : The material %d is non-textured. I need no UV!", material);
 				return;
 			}
-			
+
 			// because we are nontextured, we only use vertices vector
 			short ra = addVertexUV(objidx, a, uva);
 			short rb = addVertexUV(objidx, b, uvb);
 			short rc = addVertexUV(objidx, c, uvc);
-			
+
 			PolyParts tri;
 			tri.a = ra;
 			tri.b = rb;
 			tri.c = rc;
-			
+
 			triangles.push_back(tri);
 		}
-		
+
 		// preline should contain the right ammount of \t characters to indent the xml correctly
 		void output(ofstream &outter, char *preline) {
 			// output function
 			//  we transform each of the entries according to the objidxs index (non-zero), zero index means no transform
-			// so the vertices are transformed, 
-			
+			// so the vertices are transformed,
+
 			if (objects == NULL) {
 				log_error("singleMaterialMesh : Object list not set!");
 				return;
 			}
-			
+
 			if (srcvertices == NULL) {
 				log_error("singleMaterialMesh : Vertex list not set!");
 				return;
 			}
-			
+
 			// the submesh header (an awfully long line)
 			outter << preline << "<submesh material=\"" << baseName << "/" << "Mat" << material << "\" usesharedvertices=\"false\" use32bitindexes=\"false\" operationtype=\"triangle_list\">"  << endl;
-			
+
 			// output the triangles
 			outter << preline << "\t<faces count=\"" << triangles.size() << "\">" << endl;
-			
+
 			for (unsigned int n=0; n < triangles.size(); n++) {
 				PolyParts &p = triangles[n];
-				
+
 				outter << preline << "\t\t<face ";
 				outter << "v1=\"" << p.a << "\" ";
 				outter << "v2=\"" << p.b << "\" ";
 				outter << "v3=\"" << p.c << "\"/>" << endl;
 			}
-			
+
 			outter << preline << "\t</faces>" << endl;
-			
+
 			// geometry (vertices and uvs)
 			outter << preline << "\t<geometry vertexcount=\"" << vertices.size() << "\">" << endl;
-			
+
 			outter << preline << "\t\t<vertexbuffer positions=\"true\" normals=\"false\">" << endl;
-			
+
 			// output vertices
 			for (unsigned int n = 0; n < vertices.size(); n++) {
 				outter << preline << "\t\t\t<vertex>" << endl;
 				outter << preline << "\t\t\t\t<position ";
-				
+
 				Vertex v = transformVertex(n);
-				
+
 				outter << "x=\"" << v.x << "\" ";
 				outter << "y=\"" << v.y << "\" ";
 				outter << "z=\"" << v.z << "\"/>" << endl;
-				
+
 				outter << preline << "\t\t\t</vertex>" << endl;
 			}
-			
+
 			outter << preline <<"\t\t</vertexbuffer>" << endl;
-			
+
 			// if we texture
 			if (hasuv) {
 				outter << preline << "\t\t<vertexbuffer texture_coord_dimensions_0=\"2\" texture_coords=\"1\">" << endl;
-				
+
 				for (unsigned int n = 0; n < vertices.size(); n++) {
 					outter << preline << "\t\t\t<vertex>" << endl;
 					outter << preline << "\t\t\t\t<texcoord ";
-					
+
 					const UVMap& u = uvmaps[uvmapping[n]];
-					
+
 					outter << "u=\"" << u.u << "\" ";
 					outter << "v=\"" << u.v << "\"/>" << endl;
-					
+
 					outter << preline << "\t\t\t</vertex>" << endl;
 				}
-				
+
 				outter << preline << "\t\t</vertexbuffer>" << endl;
 			}
-			
+
 			outter << preline << "\t</geometry>" << endl;
 
 			outter << preline << "</submesh>" << endl;
