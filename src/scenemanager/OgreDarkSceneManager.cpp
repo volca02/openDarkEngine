@@ -256,7 +256,9 @@ namespace Ogre {
 		// Render static level geometry first
 		int begin = Root::getSingleton().getTimer()->getMilliseconds();
 
+#ifndef __STATIC_GEOMETRY
 		renderStaticGeometry();
+#endif
 		mStaticRenderTime = Root::getSingleton().getTimer()->getMilliseconds() - begin;
 
 		if (mShowPortals)
@@ -496,6 +498,7 @@ namespace Ogre {
 	void DarkSceneManager::queueBspNode(BspNode* node, Camera* camera, bool onlyShadowCasters) {
 		MaterialPtr pMat;
 
+#ifndef __STATIC_GEOMETRY
 		// Skip world geometry if we're only supposed to process shadow casters
 		// World is pre-lit
 		if (!onlyShadowCasters) {
@@ -537,7 +540,7 @@ namespace Ogre {
 				matgrpi.first->second.push_back(faceGroup);
 			}
 		}
-
+#endif
 		const BspNode::IntersectingObjectSet& objects = node->getObjects();
 		BspNode::IntersectingObjectSet::const_iterator oi, oiend;
 

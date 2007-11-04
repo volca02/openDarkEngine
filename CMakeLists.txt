@@ -34,6 +34,11 @@ OPTION(GLOBAL_DEBUG
     "Build the debugging code"
     OFF)
 
+# Experimental rendering using static geometry
+OPTION(__STATIC_GEOMETRY
+    "Rendering using static geometry (no dynamic IB handling)"
+    OFF)
+
 # Option to build the documentation
 OPTION(GENERATE_DOC
     "Build the doxy documentation"

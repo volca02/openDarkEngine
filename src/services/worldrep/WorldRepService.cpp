@@ -21,11 +21,16 @@
 
 
 #include <Ogre.h>
+#include <OgreSceneNode.h>
+
+#include "config.h"
 
 #include "ServiceCommon.h"
 #include "WorldRepService.h"
+#include "ConfigService.h"
 #include "WRTypes.h"
 #include "OgreBspNode.h"
+
 #include "OgreDarkSceneManager.h"
 #include "integers.h"
 #include "OpdeException.h"
@@ -34,6 +39,7 @@
 #include "File.h"
 
 using namespace Ogre;
+
 
 namespace Opde {
 	// Implementation of the WorldRep service
@@ -265,7 +271,7 @@ namespace Opde {
 		// --------------------------------------------------------------------------------
 		// Now construct the static geometry
 
-		// TODO: Finish this stuff:
+#ifndef __STATIC_GEOMETRY
 		int totalVertices = 0;
 		int totalIndices = 0;
 		int totalFaceGroups = 0;
@@ -346,7 +352,16 @@ namespace Opde {
 		assert(totalFaceGroups == actFace);
 
 		LOG_INFO("Worldrep: Optimization removed %d vertices", optimized);
+#else
+		
+		int optimized = 0;
 
+		for (idx=0; idx < header.num_cells; idx++) {
+			optimized += mCells[idx]->attachPortals(mCells);
+		}
+
+		LOG_INFO("Worldrep: Optimization removed %d vertices", optimized);
+#endif
 		// --------------------------------------------------------------------------------
 
 		// -- Load and process the BSP tree
@@ -360,15 +375,58 @@ namespace Opde {
 		// Create the BspTree
 		createBSP(BspRows, Bsp);
 
-
+#ifdef __STATIC_GEOMETRY
+		Ogre::StaticGeometry* sg = mSceneMgr->createStaticGeometry("MISSION_GEOMETRY");
+		
+		// 100 units per sg region
+		DVariant size = 100.0f;
+		
+		// Try to get an override from the ConfigService
+		ConfigServicePtr cfs = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
+		
+		if (cfs->getParam("region_size", size)) {
+			LOG_INFO("Worldrep: Found a region size override in the config file... new value : %10.2f", size.toFloat());
+		}
+		
+		sg->setRegionDimensions(Vector3(size.toFloat(), size.toFloat(), size.toFloat()));
+		
+		// no displacement
+		sg->setOrigin(Vector3(0, 0, 0));
+		
+		std::vector< std::string > nodesToDestroy;
+#endif
+		
 		//TODO: Portal meshes need to be constructed. This will guarantee the other meshes can be attached if this one works ok
 		// Hmm. Actually, it renders quite a lot of the meshes that should not be seen.
 		for (idx=0; idx < header.num_cells; idx++) {
 			mCells[idx]->constructPortalMeshes(mSceneMgr);
+			
+#ifdef __STATIC_GEOMETRY
+			Ogre::SceneNode* node = mCells[idx]->createSceneNode(mSceneMgr);
+			
+			// Non - sg rendering - slower
+			// mSceneMgr->getRootSceneNode()->addChild(node);
+			sg->addSceneNode(node);
+			
+			// mSceneMgr->destroySceneNode(node->getName());
+			nodesToDestroy.push_back(node->getName());
+#endif
 		}
-		//*/
+
+#ifdef __STATIC_GEOMETRY
+		LOG_DEBUG("Worldrep: Building static geometry...");
+		sg->build();
+/*
+		std::vector<std::string>::iterator it = nodesToDestroy.begin();
+		
+		for(; it != nodesToDestroy.end(); it++)
+			mSceneMgr->destroySceneNode(*it);
+			*/
+#endif
+
 
 		// --------------------------------------------------------------------------------
+#ifndef __STATIC_GEOMETRY
 		// the final move - copy the index data to the hw idx buffer
 		mIndexes->writeData(0, sizeof(unsigned int) * totalIndices, srcIdx);
 		vbuf->unlock();
@@ -382,10 +440,14 @@ namespace Opde {
 
 		// Set the static geometry buffers in the scene manager
 		mSceneMgr->setStaticGeometry(mVertexData, mIndexes, mFaceGroups, totalIndices, totalFaceGroups);
+#endif
 
 		// We have done all we could, bringing the level data to the SceneManager. Now delete the used data
 		LOG_DEBUG("Worldrep: Freeing temporary buffers");
+		
+#ifndef __STATIC_GEOMETRY		
 		delete[] srcIdx; // and delete the source
+#endif
 		delete[] mCells;
 		mCells = NULL;
 		delete[] mExtraPlanes;
