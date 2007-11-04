@@ -76,7 +76,7 @@ relation HostObj {
 }
 
 relation PlayerFactory {
-	
+	no_data
 }
 
 relation Firer {
