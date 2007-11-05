@@ -20,6 +20,8 @@
  *****************************************************************************/
 
 
+#include "compat.h"
+#include "integers.h"
 #include "LightmapAtlas.h"
 #include "OgreStringConverter.h"
 #include "ConsoleBackend.h"
@@ -52,7 +54,7 @@ namespace Opde {
 		// I Place the lightmaps into a separate resource group for easy unloading
 		ptex = TextureManager::getSingleton().createManual(
 			name.str(), TEMPTEXTURE_RESOURCE_GROUP,
-			TEX_TYPE_2D, ATLAS_WIDTH, ATLAS_HEIGHT, 0, PF_BYTE_RGB,
+			TEX_TYPE_2D, ATLAS_WIDTH, ATLAS_HEIGHT, 0, PF_X8R8G8B8,
 			TU_DYNAMIC_WRITE_ONLY);
 
 		atlas = ptex->getBuffer(0, 0);
@@ -62,16 +64,10 @@ namespace Opde {
 		const PixelBox &pb = atlas->getCurrentLock();
 
 		for (int y = 0; y < ATLAS_HEIGHT; y++) {
-			// not that easy, but we save the alpha, as it is definetaly not needed.
-			
-			uint8_t *data = static_cast<uint8_t*>(pb.data) + y*pb.rowPitch;
+			uint32 *data = static_cast<uint32*>(pb.data) + y*pb.rowPitch;
 
-			int x;
-
-			for (x = 0; x < ATLAS_WIDTH * 3;)
-				data[x++] = 0;
-				data[x++] = 0;
-				data[x++] = 0;
+			for (int x = 0; x < ATLAS_WIDTH; x++)
+				data[x] = 0;
 		}
 
 		atlas->unlock();
@@ -140,28 +136,19 @@ namespace Opde {
 		const PixelBox &pb = atlas->getCurrentLock();
 
 		for (int y = 0; y < fsi.h; y++) {
-			uint32_t *data = static_cast<uint32_t*>(pb.data) + (y + fsi.y) * pb.rowPitch * 3;
+			uint32 *data = static_cast<uint32*>(pb.data) + (y + fsi.y)*pb.rowPitch;
 
-			int a = 0;
-			for (int x = 0; x < fsi.w; x++) {
-				uint32 R, G, B;
-				
-				R = rgb[x + y * fsi.w].R;
-				G = rgb[x + y * fsi.w].G;
-				B = rgb[x + y * fsi.w].B;
-				
-				data[x + fsi.x] = (R << 16) | (G << 8) | B; 
-			}
+			for (int x = 0; x < fsi.w; x++)
+				data[x + fsi.x] = rgb[x + y * fsi.w].ARGB(); // Write a A8R8G8B8 conversion of the lmpixel
 		}
 	}
 
 	void LightAtlas::updateLightMapBuffer(FreeSpaceInfo& fsi, Ogre::Vector3* rgb) {
 		const PixelBox &pb = atlas->getCurrentLock();
-	
-		for (int y = 0; y < fsi.h; y++) {
-			uint32_t *data = static_cast<uint32_t*>(pb.data) + (y + fsi.y) * pb.rowPitch;
 
-			int a = 0;
+		for (int y = 0; y < fsi.h; y++) {
+			uint32 *data = static_cast<uint32*>(pb.data) + (y + fsi.y)*pb.rowPitch;
+
 			for (int x = 0; x < fsi.w; x++) {
 				Vector3 pixel = rgb[x + (y * fsi.w)];
 
