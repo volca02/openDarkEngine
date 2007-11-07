@@ -39,6 +39,11 @@ OPTION(__STATIC_GEOMETRY
     "Rendering using static geometry (no dynamic IB handling)"
     OFF)
 
+# Option to build using our PCX/GIF image loading hooks (for transparency)
+OPTION(CUSTOM_IMAGE_HOOKS 
+    "Build the support for palletized image transparecy (requires freeimage)"
+    OFF)
+
 # Option to build the documentation
 OPTION(GENERATE_DOC
     "Build the doxy documentation"
@@ -101,11 +106,23 @@ CONFIGURE_FILE(config.h.cmake ${CMAKE_BINARY_DIR}/config.h )
 # Solve the dependencies
 SET(OIS_DIR ${CMAKE_MODULE_PATH})
 SET(OGRE_DIR ${CMAKE_MODULE_PATH})
-SET(CEGUI_DIR ${CMAKE_MODULE_PATH})
+SET(FREEIMAGE_DIR ${CMAKE_MODULE_PATH})
 
 FIND_PACKAGE(OIS REQUIRED)
 FIND_PACKAGE(OGRE REQUIRED)
-FIND_PACKAGE(CEGUI REQUIRED)
+
+# Custom image hooks was selected
+IF(CUSTOM_IMAGE_HOOKS)
+    FIND_PACKAGE(FREEIMAGE REQUIRED)
+    
+    IF(FREEIMAGE_FOUND)
+	MESSAGE(STATUS "FreeImage Found OK")
+        MESSAGE(STATUS " - FreeImage includes ${FREEIMAGE_INCLUDE_DIR}")
+	MESSAGE(STATUS " - FreeImage libs ${FREEIMAGE_LIBRARIES}")
+    ELSE(FREEIMAGE_FOUND)
+	MESSAGE(FATAL_ERROR "FreeImage not found and selected in options!")
+    ENDIF(FREEIMAGE_FOUND)
+ENDIF(CUSTOM_IMAGE_HOOKS)
 
 # Only visual check enabling verbose output, and package found info
 
