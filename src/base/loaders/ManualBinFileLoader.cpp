@@ -1042,11 +1042,12 @@ namespace Ogre {
                     txtname = String("txt/") + String(mat.name);
                 }
 
+			pass->setAlphaRejectSettings(CMPF_EQUAL, 255); // Alpha rejection
             tus = pass->createTextureUnitState(txtname);
 
             tus->setTextureAddressingMode(TextureUnitState::TAM_WRAP);
             tus->setTextureCoordSet(0);
-            tus->setTextureFiltering(TFO_BILINEAR);
+            tus->setTextureFiltering(TFO_TRILINEAR);
             tus->setColourOperation(LBO_REPLACE);
 
 
