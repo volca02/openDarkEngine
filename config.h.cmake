@@ -5,6 +5,7 @@
 
 #cmakedefine OPDE_DEBUG
 #cmakedefine __STATIC_GEOMETRY
+#cmakedefine CUSTOM_IMAGE_HOOKS
 
 #define OPDE_VER_MAJOR ${OPDE_VER_MAJOR}
 #define OPDE_VER_MINOR ${OPDE_VER_MINOR}
