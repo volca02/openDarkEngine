@@ -40,6 +40,11 @@
 #include "GameLoadState.h"
 #include "GamePlayState.h"
 
+// If custom codec is to be used
+#ifdef CUSTOM_IMAGE_HOOKS
+#include "CustomImageCodec.h"
+#endif
+
 #include <OgreRoot.h>
 #include <OgreWindowEventUtilities.h>
 #include <OgreConfigFile.h>
@@ -86,6 +91,10 @@ namespace Opde {
 		// Delete the service manager
 		delete mServiceMgr;
 		mServiceMgr = NULL;
+
+#ifdef CUSTOM_IMAGE_HOOKS
+		CustomImageCodec::shutdown();
+#endif
 
 		delete mConsoleBackend;
 		delete mRoot;
@@ -149,6 +158,10 @@ namespace Opde {
 
 		// Create an ogre's root
 		mRoot = new Root();
+		
+#ifdef CUSTOM_IMAGE_HOOKS
+		CustomImageCodec::startup();
+#endif
 
 		mConsoleBackend = new Opde::ConsoleBackend();
 
