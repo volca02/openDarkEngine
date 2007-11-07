@@ -198,9 +198,9 @@ namespace Ogre {
 					*(pDstRow++) = pal[pidx].rgbRed;
 					
 					if (pidx == _TRANSPARENT_PAL_INDEX) 
-						*(pDstRow++) = 255;
-					else
 						*(pDstRow++) = 0;
+					else
+						*(pDstRow++) = 255;
 				}
 
 				pDst += dstPitch;
