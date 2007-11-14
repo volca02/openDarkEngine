@@ -1,8 +1,9 @@
 /******************************************************************************
- *    fon.h
+ *    DarkFontConverter.h
  *
- *    This file is part of DarkUtils
- *    Copyright (C) 2004 Tom N Harris <telliamed@whoopdedo.cjb.net>
+ *    This file is part of openDarkEngine project
+ *    Copyright (C) 2005-2007 openDarkEngine team
+ *    Based on Thief Font Converter by Tom N Harris <telliamed@whoopdedo.cjb.net>
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -52,7 +53,6 @@ struct CharInfo
 	uint16	Height;
 	sint32	X,Y;
 };
-
 
 static const COLORREF	ColorTable[] = {
 	0x000000, 0xDDDDDD, 0xB6B6B6, 0x969696, 0x7C7C7C, 0x666666, 0x545454, 0x454545,
