@@ -75,14 +75,14 @@ typedef struct tagBITMAPFILEHEADER {
 
 typedef struct tagBITMAPINFOHEADER {
     DWORD  biSize;
-    long   biWidth;
-    long   biHeight;
+    DWORD   biWidth;
+    DWORD   biHeight;
     WORD   biPlanes;
     WORD   biBitCount;
     DWORD  biCompression;
     DWORD  biSizeImage;
-    long   biXPelsPerMeter;
-    long   biYPelsPerMeter;
+    DWORD   biXPelsPerMeter;
+    DWORD   biYPelsPerMeter;
     DWORD  biClrUsed;
     DWORD  biClrImportant;
 } BITMAPINFOHEADER;
