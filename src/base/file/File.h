@@ -170,7 +170,7 @@ namespace Opde {
 			
 			/** Writes a structure to the file. @see File::readStruct
 			*/
-			File& writeStruct(void* buf, char* format, uint count = 1);
+			File& writeStruct(const void* buf, char* format, uint count = 1);
 
 		protected:
 			/** swaps the endianness of the given buffer

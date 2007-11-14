@@ -71,18 +71,8 @@ namespace Opde {
 		
 		mSrcFile->seek(0);
 		
-		// read the header. Field after field
-		mSrcFile->readElem(&mHeader.inv_offset, sizeof(mHeader.inv_offset), 1);
-		mSrcFile->readElem(&mHeader.zero, sizeof(mHeader.zero), 1);
-		mSrcFile->readElem(&mHeader.one, sizeof(mHeader.one), 1);
-		
-		// just a couple of zero bytes
-		mSrcFile->read(&mHeader.zeros, sizeof(mHeader.zeros));
-		
-		// dead_beef at end
-		mSrcFile->readElem(&mHeader.dead_beef, sizeof(mHeader.dead_beef), 1);
-		
-		// -- Header read
+		// read the header
+		mSrcFile->readStruct(&mHeader, "4ic4i256ci");
 		
 		// Sanity check
 		if (mHeader.dead_beef != 0x0EFBEADDE) // Little endian encoded. would be 0xDEADBEEF on big-endian, etc.
@@ -125,9 +115,7 @@ namespace Opde {
 		assert(!mSrcFile.isNull());
 		
 		for (uint i = 0; i < count; i++) {
-			mSrcFile->read(&inventory[i].name, sizeof(inventory[i].name));
-			mSrcFile->readElem(&inventory[i].offset, sizeof(inventory[i].offset), 1);
-			mSrcFile->readElem(&inventory[i].length, sizeof(inventory[i].length), 1);
+			mSrcFile->readStruct(&inventory[i], "12c2i");
 		}
 	}
 	
@@ -136,9 +124,7 @@ namespace Opde {
 		assert(!dest.isNull());
 		
 		for (uint i = 0; i < count; i++) {
-			dest->write(&inventory[i].name, sizeof(inventory[i].name));
-			dest->writeElem(&inventory[i].offset, sizeof(inventory[i].offset), 1);
-			dest->writeElem(&inventory[i].length, sizeof(inventory[i].length), 1);
+			dest->writeStruct(&inventory[i], "12c2i");
 		}
 	}
 
@@ -147,20 +133,14 @@ namespace Opde {
 	void DarkFileGroup::readChunkHeader(DarkDBChunkHeader* hdr) {
 		assert(!mSrcFile.isNull());
 		
-		mSrcFile->read(&hdr->name, sizeof(hdr->name));
-		mSrcFile->readElem(&hdr->version_high, sizeof(hdr->version_high), 1);
-		mSrcFile->readElem(&hdr->version_low, sizeof(hdr->version_low), 1);
-		mSrcFile->readElem(&hdr->zero, sizeof(hdr->zero), 1);
+		mSrcFile->readStruct(hdr, "12c3i");
 	}
 	
 	//------------------------------------	
 	void DarkFileGroup::writeChunkHeader(FilePtr& dest, const DarkDBChunkHeader& hdr) {
 		assert(!dest.isNull());
 		
-		dest->write(&hdr.name, sizeof(hdr.name));
-		dest->writeElem(&hdr.version_high, sizeof(hdr.version_high), 1);
-		dest->writeElem(&hdr.version_low, sizeof(hdr.version_low), 1);
-		dest->writeElem(&hdr.zero, sizeof(hdr.zero), 1);
+		dest->writeStruct(&hdr, "12c3i");
 	}
 	
 	//------------------------------------	
@@ -260,18 +240,7 @@ namespace Opde {
 		mHeader.dead_beef = 0x0EFBEADDE;
 		
 		// --- Let's write the header
-		
-		// read the header. Field after field
-		dest->writeElem(&mHeader.inv_offset, sizeof(mHeader.inv_offset), 1);
-		dest->writeElem(&mHeader.zero, sizeof(mHeader.zero), 1);
-		dest->writeElem(&mHeader.one, sizeof(mHeader.one), 1);
-		
-		// just a couple of zero bytes
-		dest->write(&mHeader.zeros, sizeof(mHeader.zeros));
-		
-		dest->writeElem(&mHeader.dead_beef, sizeof(mHeader.dead_beef), 1);
-		
-		// --- End of the header write
+		dest->writeStruct(&mHeader, "4ic4i256ci");
 		
 		
 		it = mFiles.begin();

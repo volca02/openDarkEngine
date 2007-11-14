@@ -131,8 +131,10 @@ namespace Opde {
 				// Go to next char, would you kindly? ;)
 				act++;
 				
-				// Read the single element
-				readElem(bpos, elem_size, rep);
+				if (elem_size > 1)
+				    readElem(bpos, elem_size, rep);
+				else
+				    read(bpos, rep);
 				
 				// Increment the position
 				bpos += elem_size * rep;
@@ -143,10 +145,10 @@ namespace Opde {
 	}
 	
 	//------------------------------------
-	File& File::writeStruct(void* buf, char* format, uint count) {
+	File& File::writeStruct(const void* buf, char* format, uint count) {
 		for (int i = 0; i < count; i++) {
 			char* act = format;
-			char* bpos = static_cast<char*>(buf);
+			const char* bpos = static_cast<const char*>(buf);
 		    
 			while (*act) {
 				int rep = 0;
@@ -178,14 +180,17 @@ namespace Opde {
 					case 'q' : elem_size = 8; break;
 					
 					default:
-						OPDE_FILEEXCEPT(FILE_OTHER_ERROR, "Bad readStruct format!", "File::readStruct");
+						OPDE_FILEEXCEPT(FILE_OTHER_ERROR, "Bad writeStruct format!", "File::writeStruct");
 				}
 				
 				// Go to next char, would you kindly? ;)
 				act++;
 				
-				// Read the single element
-				writeElem(bpos, elem_size, rep);
+
+				if (elem_size > 1)
+				    writeElem(bpos, elem_size, rep);
+				else
+				    write(bpos, rep);
 				
 				// Increment the position
 				bpos += elem_size * rep;
