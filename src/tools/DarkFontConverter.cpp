@@ -23,7 +23,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <windows.h>
 
 #include "DarkFontConverter.h"
 
@@ -44,8 +43,7 @@ char** ReadFont(char *FontData, int *ResultingWidth, int *ResultingHeight, int *
 	unsigned int X, Y;
 	unsigned int N, I;
 	char *Ptr;
-	HANDLE hFile;
-	DWORD dwBytes;
+	FILE *FilePointer;
 	char FontDefData[100];
 
 	FontHeader = (struct DarkFontHeader*)FontData;
@@ -104,9 +102,14 @@ char** ReadFont(char *FontData, int *ResultingWidth, int *ResultingHeight, int *
 	}
 
 	sprintf(FontDefData,"%s.fontdef", FontName);
-	hFile = CreateFile(FontDefData, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	FilePointer = fopen(FontDefData, "w");
+	if (FilePointer == 0)
+	{
+		fprintf(stdout,"Can not create %s\n", FontDefData);
+		return NULL;
+	}
 	sprintf(FontDefData,"%s\n{\n\n\ttype\timage\n\tsource\t%s.bmp\n\n", FontName, FontName);
-	WriteFile(hFile, FontDefData, strlen(FontDefData), &dwBytes, NULL);
+	fwrite(FontDefData, strlen(FontDefData), 1, FilePointer);
 
 
 	for (N = 0; N < NumChars ; N++)
@@ -114,11 +117,11 @@ char** ReadFont(char *FontData, int *ResultingWidth, int *ResultingHeight, int *
 		X = Chars[N].X;
 		Y = Chars[N].Y++;
 		sprintf(FontDefData,"\t\tglyph %c %f %f %f %f\n", FontHeader->FirstChar + N, (float)(Chars[N].X - 2) / ImageWidth, (float)(Chars[N].Y - 2) / ImageHeight, (float)(Chars[N].X + Chars[N].Width + 2) / ImageWidth, (float)(Chars[N].Y + FontHeader->NumRows + 2) / ImageHeight);
-		WriteFile(hFile, FontDefData, strlen(FontDefData), &dwBytes, NULL);
+		fwrite(FontDefData, strlen(FontDefData), 1, FilePointer);
 	}
 
-	WriteFile(hFile, "\n\n}\n", 4, &dwBytes, NULL);
-	CloseHandle(hFile);
+	fwrite("\n\n}\n", 4, 1, FilePointer);
+	fclose(FilePointer);
 
 	if (FontHeader->Format == 0)
 	{
@@ -141,7 +144,7 @@ char** ReadFont(char *FontData, int *ResultingWidth, int *ResultingHeight, int *
 		{
 			for (N = 0; N < NumChars; N++)
 			{
-				memcpy(RowPointers[Chars[N].Y + I]+Chars[N].X, Ptr, Chars[N].Width);
+				memcpy(RowPointers[Chars[N].Y + I]+Chars[N].X, Ptr, Chars[N].Width);				
 				Ptr += Chars[N].Width;
 			}
 		}
@@ -168,12 +171,11 @@ char** ReadFont(char *FontData, int *ResultingWidth, int *ResultingHeight, int *
 }
 
 
-DWORD WriteImage(HANDLE hImageFile, RGBQUAD *ColorTable, char **RowPointers, int ImageWidth, int ImageHeight)
+int WriteImage(FILE *FilePointer, RGBQUAD *ColorTable, char **RowPointers, int ImageWidth, int ImageHeight)
 {
 	BITMAPFILEHEADER	FileHeader;
 	BITMAPINFOHEADER	BitmapHeader;
 	int 	RowWidth, Row;
-	DWORD	dwBytes;
 	char	Zero[4] = {0,0,0,0};
 
 	FileHeader.bfType = 0x4D42;
@@ -194,28 +196,28 @@ DWORD WriteImage(HANDLE hImageFile, RGBQUAD *ColorTable, char **RowPointers, int
 	BitmapHeader.biSizeImage = RowWidth * ImageHeight;
 	FileHeader.bfSize = FileHeader.bfOffBits + BitmapHeader.biSizeImage;
 
-	if (!WriteFile(hImageFile, &FileHeader, sizeof(BITMAPFILEHEADER), &dwBytes, NULL))
-		return GetLastError();
-	if (!WriteFile(hImageFile, &BitmapHeader, sizeof(BITMAPINFOHEADER), &dwBytes, NULL))
-		return GetLastError();
-	if (!WriteFile(hImageFile, ColorTable, sizeof(RGBQUAD)*256, &dwBytes, NULL))
-		return GetLastError();
+	if(!fwrite(&FileHeader, sizeof(BITMAPFILEHEADER), 1, FilePointer))
+		return -1;
+	if(!fwrite(&BitmapHeader, sizeof(BITMAPINFOHEADER), 1, FilePointer))
+		return -1;
+	if(!fwrite(ColorTable, sizeof(RGBQUAD) * 256, 1, FilePointer))
+		return -1;
 	RowWidth -= ImageWidth;
 	for (Row = ImageHeight-1; Row >= 0; Row--)
 	{
-		if (!WriteFile(hImageFile, RowPointers[Row], ImageWidth, &dwBytes, NULL))
-			return GetLastError();
+		if(!fwrite(RowPointers[Row], ImageWidth, 1, FilePointer))
+			return -1;
 		if (RowWidth != 0)
 		{
-			if (!WriteFile(hImageFile, Zero, RowWidth, &dwBytes, NULL))
-				return GetLastError();
+			if(!fwrite(Zero, RowWidth, 1, FilePointer))
+				return -1;
 		}
 	}
 	return 0;
 }
 
 
-RGBQUAD* ReadPalette(HANDLE hPalFile)
+RGBQUAD* ReadPalette(FILE *FilePointer)
 {
 	struct
 	{
@@ -236,7 +238,7 @@ RGBQUAD* ReadPalette(HANDLE hPalFile)
 	Palette = (RGBQUAD*)calloc(256, sizeof(RGBQUAD));
 	if (!Palette)
 		return NULL;
-	ReadFile(hPalFile, &PaletteHeader, 20, &Bytes, NULL);
+	fread(&PaletteHeader, 20, 1, FilePointer);
 	if (PaletteHeader.RiffSig == 0x46464952)
 	{
 		if (PaletteHeader.PSig1 != 0x204C4150)
@@ -244,11 +246,11 @@ RGBQUAD* ReadPalette(HANDLE hPalFile)
 			free(Palette);
 			return NULL;
 		}
-		SetFilePointer(hPalFile, 2, NULL, FILE_CURRENT);
-		ReadFile(hPalFile, &Count, 2, &Bytes, NULL);
+		fseek(FilePointer, 2L, SEEK_CUR);
+		fread(&Count, 2, 1, FilePointer);
 		if (Count > 256)
 			Count = 256;
-		ReadFile(hPalFile, Palette, sizeof(RGBQUAD)*Count, &Bytes, NULL);
+		fread(Palette, sizeof(RGBQUAD) * Count, 1, FilePointer);
 		for (I = 0; I < Count; I++)
 		{
 			S = Palette[I].rgbRed;
@@ -258,14 +260,14 @@ RGBQUAD* ReadPalette(HANDLE hPalFile)
 	}
 	else if (PaletteHeader.RiffSig == 0x4353414A)
 	{
-		SetFilePointer(hPalFile, 0, 0, FILE_BEGIN);
+		rewind(FilePointer);
 		Buffer = (char*)malloc(3360);
 		if (!Buffer)
 		{
 			free(Palette);
 			return NULL;
 		}
-		ReadFile(hPalFile, Buffer, 3352, &Bytes, NULL);
+		fread(Buffer, 3352, 1, FilePointer);
 		if (strncmp(Buffer, "JASC-PAL", 8))
 		{
 			free(Buffer);
@@ -290,14 +292,14 @@ RGBQUAD* ReadPalette(HANDLE hPalFile)
 	}
 	else
 	{
-		SetFilePointer(hPalFile, 0, 0, FILE_BEGIN);
+		rewind(FilePointer);
 		P = (RGBTRIPLE*)calloc(256,sizeof(RGBTRIPLE));
 		if (!P)
 		{
 			free(Palette);
 			return NULL;
 		}
-		ReadFile(hPalFile, P, sizeof(RGBTRIPLE)*256, &Bytes, NULL);
+		Bytes = fread(P, sizeof(RGBTRIPLE) * 256, 1, FilePointer) * sizeof(RGBTRIPLE) * 256;
 		Count = (WORD)Bytes / sizeof(RGBTRIPLE);
 		for (I = 0; I < Count; I++)
 		{
@@ -311,23 +313,25 @@ RGBQUAD* ReadPalette(HANDLE hPalFile)
 }
 
 
-char* loadfile(HANDLE hFile)
+char* LoadFile(FILE *FilePointer)
 {
-	HANDLE hFileMap;
 	char *pRet;
+	unsigned long FileSize;
 
-	hFileMap = CreateFileMapping(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
-	if (!hFileMap)
+	fseek(FilePointer, 0L, SEEK_END);
+	FileSize = ftell(FilePointer);
+	rewind (FilePointer);
+	pRet = (char *)calloc(FileSize + 1, sizeof(char));	
+	if (!pRet)
 		return NULL;
-	pRet = (char *)MapViewOfFile(hFileMap, FILE_MAP_READ, 0, 0, 0);
-	CloseHandle(hFileMap);
+	fread(pRet, FileSize, 1, FilePointer);
 	return pRet;
 }
 
 
-int fon2image(const char *FontName, const char *PaletteFile)
+int FontToImage(const char *FontName, const char *PaletteFile)
 {
-	HANDLE hFile;
+	FILE *FilePointer;
 	COLORREF *PaletteData;
 	char **ImageRows;
 	int ImageWidth, ImageHeight;
@@ -338,14 +342,14 @@ int fon2image(const char *FontName, const char *PaletteFile)
 
 	if (PaletteFile)
 	{
-		hFile = CreateFile(PaletteFile, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-		if (hFile == INVALID_HANDLE_VALUE)
+		FilePointer = fopen(PaletteFile, "r");
+		if (FilePointer == 0)
 		{
 			fprintf(stdout, "\n%s could not be opened.\n", PaletteFile);
-			return GetLastError();
+			return -1;
 		}
-		PaletteData = (COLORREF*)ReadPalette(hFile);
-		CloseHandle(hFile);
+		PaletteData = (COLORREF*)ReadPalette(FilePointer);
+		fclose(FilePointer);
 		if (!PaletteData)
 		{
 			return 2;
@@ -354,26 +358,25 @@ int fon2image(const char *FontName, const char *PaletteFile)
 	else
 		PaletteData = (COLORREF*)ColorTable;
 	sprintf(FileName,"%s.fon", FontName);
-	hFile = CreateFile(FileName, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hFile == INVALID_HANDLE_VALUE)
+	FilePointer = fopen(FileName, "rb");
+	if (FilePointer == 0)
 	{
 		fprintf(stdout, "\n%s could not be opened.\n", FileName);
 		if (PaletteData != ColorTable)
 			free(PaletteData);
-		return GetLastError();
+		return -1;
 	}
-	FontDefData = loadfile(hFile);
-	Error = GetLastError();
+	FontDefData = LoadFile(FilePointer);	
 	if (!FontDefData)
 	{
-		CloseHandle(hFile);
+		fclose(FilePointer);
 		if (PaletteData != ColorTable)
 			free(PaletteData);
-		return Error;
+		return -1;
 	}
 	ImageRows = ReadFont(FontDefData, &ImageWidth, &ImageHeight, &Color, FontName);
-	UnmapViewOfFile(FontDefData);
-	CloseHandle(hFile);
+	free(FontDefData);
+	fclose(FilePointer);
 	if (!ImageRows)
 	{
 		if (PaletteData != ColorTable)
@@ -381,19 +384,19 @@ int fon2image(const char *FontName, const char *PaletteFile)
 		return 2;
 	}
 	sprintf(FileName,"%s.bmp", FontName);
-	hFile = CreateFile(FileName, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hFile == INVALID_HANDLE_VALUE)
+	FilePointer = fopen(FileName, "wb");
+	if (FilePointer == 0)
 	{
 		free(*ImageRows);
 		free(ImageRows);
 		if (PaletteData != ColorTable)
 			free(PaletteData);
-		return GetLastError();
+		return -1;
 	}
 	if (Color == 2 && PaletteData == ColorTable)
 		PaletteData = (COLORREF*)AntiAliasedColorTable;
-	Error = WriteImage(hFile, (RGBQUAD*)PaletteData, ImageRows, ImageWidth, ImageHeight);
-	CloseHandle(hFile);
+	Error = WriteImage(FilePointer, (RGBQUAD*)PaletteData, ImageRows, ImageWidth, ImageHeight);
+	fclose(FilePointer);
 	free(*ImageRows);
 	free(ImageRows);
 	if (PaletteData != ColorTable && PaletteData != AntiAliasedColorTable)
@@ -418,7 +421,7 @@ int main(int argc, char **argv)
 	}
 	Font = argv[1];
 	Palette = (argc > 1) ? argv[2] : NULL;
-	Error = fon2image(Font, Palette);
+	Error = FontToImage(Font, Palette);
 
 	return Error;
 }

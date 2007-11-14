@@ -28,6 +28,11 @@ typedef signed long		sint32;
 typedef unsigned short	uint16;
 typedef signed short	sint16;
 typedef unsigned char	uint8;
+typedef unsigned long   DWORD;
+typedef int             BOOL;
+typedef unsigned char   BYTE;
+typedef unsigned short  WORD;
+typedef DWORD COLORREF;
 
 
 struct DarkFontHeader
@@ -53,6 +58,48 @@ struct CharInfo
 	uint16	Height;
 	sint32	X,Y;
 };
+
+#pragma pack(1)
+
+typedef struct tagBITMAPFILEHEADER { 
+  WORD    bfType; 
+  DWORD   bfSize; 
+  WORD    bfReserved1; 
+  WORD    bfReserved2; 
+  DWORD   bfOffBits; 
+} BITMAPFILEHEADER;
+
+typedef struct tagBITMAPINFOHEADER {
+    DWORD  biSize;
+    long   biWidth;
+    long   biHeight;
+    WORD   biPlanes;
+    WORD   biBitCount;
+    DWORD  biCompression;
+    DWORD  biSizeImage;
+    long   biXPelsPerMeter;
+    long   biYPelsPerMeter;
+    DWORD  biClrUsed;
+    DWORD  biClrImportant;
+} BITMAPINFOHEADER;
+
+typedef struct tagRGBQUAD {
+  BYTE    rgbBlue; 
+  BYTE    rgbGreen; 
+  BYTE    rgbRed; 
+  BYTE    rgbReserved; 
+} RGBQUAD;
+
+typedef struct tagBITMAPINFO {
+   BITMAPINFOHEADER bmiHeader;
+   RGBQUAD bmiColors[1];
+} BITMAPINFO;
+
+typedef struct tagRGBTRIPLE { 
+  BYTE rgbtBlue; 
+  BYTE rgbtGreen; 
+  BYTE rgbtRed; 
+} RGBTRIPLE; 
 
 static const COLORREF	ColorTable[] = {
 	0x000000, 0xDDDDDD, 0xB6B6B6, 0x969696, 0x7C7C7C, 0x666666, 0x545454, 0x454545,
@@ -124,5 +171,7 @@ static const COLORREF	AntiAliasedColorTable[] = {
 	0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF,
 	0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFF00FF, 0xFFFFFF
 };
+
+#pragma pack()
 
 #endif //__DARKFONTCONVERTER_H
