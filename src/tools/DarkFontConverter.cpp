@@ -412,7 +412,7 @@ int main(int argc, char **argv)
 
 	fprintf(stdout, "Dark Font Converter\n");
 
-	if (argc < 1)
+	if (argc < 2)
 	{
 		fprintf(stdout, "Copyright (C) 2005-2007 openDarkEngine team\n");
     	fprintf(stdout, "Based on Thief Font Converter by Tom N Harris <telliamed@whoopdedo.cjb.net>\n\n");

@@ -23,43 +23,47 @@
 #ifndef __DARKFONTCONVERTER_H
 #define __DARKFONTCONVERTER_H
 
+#include "integers.h"
+
+/*
 typedef unsigned long	uint32;
 typedef signed long		sint32;
 typedef unsigned short	uint16;
 typedef signed short	sint16;
 typedef unsigned char	uint8;
-typedef unsigned long   DWORD;
-typedef int             BOOL;
-typedef unsigned char   BYTE;
-typedef unsigned short  WORD;
+*/
+typedef uint32_t  DWORD;
+typedef int32_t   BOOL;
+typedef uint8_t   BYTE;
+typedef uint16_t  WORD;
 typedef DWORD COLORREF;
 
 
 struct DarkFontHeader
 {
-	uint16	Format;		/* 1 - anti-aliased, 0xCCCC - 8bpp, else - 1bpp */
-	uint8	Unknown;	/* set to 10 if Format is 1 */
-	uint8	Palette;	/* 0 - use current, 1 - standard */
-	uint8	Zeros1[32];
-	sint16	FirstChar;
-	sint16	LastChar;
-	uint8	Zeros2[32];
-	uint32	WidthOffset;
-	uint32	BitmapOffset;
-	uint16	RowWidth;	/* in bytes */
-	uint16	NumRows;
+	uint16_t	Format;		/* 1 - anti-aliased, 0xCCCC - 8bpp, else - 1bpp */
+	uint8_t	Unknown;	/* set to 10 if Format is 1 */
+	uint8_t	Palette;	/* 0 - use current, 1 - standard */
+	uint8_t	Zeros1[32];
+	int16_t	FirstChar;
+	int16_t	LastChar;
+	uint8_t	Zeros2[32];
+	uint32_t	WidthOffset;
+	uint32_t	BitmapOffset;
+	uint16_t	RowWidth;	/* in bytes */
+	uint16_t	NumRows;
 };
 
 struct CharInfo
 {
-	sint16	Code;
-	uint16	Column;
-	uint16	Width;
-	uint16	Height;
-	sint32	X,Y;
+	int16_t	Code;
+	uint16_t	Column;
+	uint16_t	Width;
+	uint16_t	Height;
+	int32_t	X,Y;
 };
 
-#pragma pack(1)
+#pragma pack(push, 1)
 
 typedef struct tagBITMAPFILEHEADER { 
   WORD    bfType; 
@@ -172,6 +176,6 @@ static const COLORREF	AntiAliasedColorTable[] = {
 	0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFF00FF, 0xFFFFFF
 };
 
-#pragma pack()
+#pragma pack(pop)
 
 #endif //__DARKFONTCONVERTER_H
