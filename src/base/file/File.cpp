@@ -59,6 +59,7 @@ namespace Opde {
 		seek(_pos);
 	}
 
+	//------------------------------------
 	File& File::readElem(void* buf, file_size_t size, uint count) {
 		read(buf, size * count);
 
@@ -68,6 +69,7 @@ namespace Opde {
 		return *this;
 	}
 
+	//------------------------------------
 	File& File::writeElem(const void* buf, file_size_t size, uint count) {
 #ifdef __OPDE_BIG_ENDIAN
 		file_size_t bsize = size * count;
@@ -87,6 +89,113 @@ namespace Opde {
 		return *this;
 	}
 
+	//------------------------------------
+	File& File::readStruct(void* buf, char* format, uint count) {
+		for (int i = 0; i < count; i++) {
+			char* act = format;
+			char* bpos = static_cast<char*>(buf);
+		    
+			while (*act) {
+				int rep = 0;
+				bool haverep = false;
+			
+				// While the char is a number, compose an integer out of it
+				while (*act >= '0' && *act <= '9') {
+					rep *= 10;
+					rep += *act - '0';
+			    
+					act++;
+					
+					haverep = true; // A repetitions count was supplied
+				}
+			
+				if (!haverep) // no repetitions supplied
+					rep = 1;
+			
+				size_t elem_size = 0;
+				
+				if (!*act) // End of line after repetitions? That is not format compliant!
+					OPDE_FILEEXCEPT(FILE_OTHER_ERROR, "Element count should be followed by format!", "File::readStruct");
+				
+				switch (*act) {
+					case 'c' : elem_size = 1; break;
+					case 'w' : elem_size = 2; break;
+					case 'i' :
+					case 'f' : elem_size = 4; break;
+					case 'q' : elem_size = 8; break;
+					
+					default:
+						OPDE_FILEEXCEPT(FILE_OTHER_ERROR, "Bad readStruct format!", "File::readStruct");
+				}
+				
+				// Go to next char, would you kindly? ;)
+				act++;
+				
+				// Read the single element
+				readElem(bpos, elem_size, rep);
+				
+				// Increment the position
+				bpos += elem_size * rep;
+			}
+		}
+		
+		return *this;
+	}
+	
+	//------------------------------------
+	File& File::writeStruct(void* buf, char* format, uint count) {
+		for (int i = 0; i < count; i++) {
+			char* act = format;
+			char* bpos = static_cast<char*>(buf);
+		    
+			while (*act) {
+				int rep = 0;
+				bool haverep = false;
+			
+				// While the char is a number, compose an integer out of it
+				while (*act >= '0' && *act <= '9') {
+					rep *= 10;
+					rep += *act - '0';
+			    
+					act++;
+					
+					haverep = true; // A repetitions count was supplied
+				}
+			
+				if (!haverep) // no repetitions supplied
+					rep = 1;
+			
+				size_t elem_size = 0;
+				
+				if (!*act) // End of line after repetitions? That is not format compliant!
+					OPDE_FILEEXCEPT(FILE_OTHER_ERROR, "Element count should be followed by format!", "File::readStruct");
+				
+				switch (*act) {
+					case 'c' : elem_size = 1; break;
+					case 'w' : elem_size = 2; break;
+					case 'i' :
+					case 'f' : elem_size = 4; break;
+					case 'q' : elem_size = 8; break;
+					
+					default:
+						OPDE_FILEEXCEPT(FILE_OTHER_ERROR, "Bad readStruct format!", "File::readStruct");
+				}
+				
+				// Go to next char, would you kindly? ;)
+				act++;
+				
+				// Read the single element
+				writeElem(bpos, elem_size, rep);
+				
+				// Increment the position
+				bpos += elem_size * rep;
+			}
+		}
+		
+		return *this;
+	}
+
+	//------------------------------------
 	void File::swapEndian(void* buf, file_size_t size, uint count) {
 		// swap all elements
 		for (uint i = 0; i < count; i++) {
@@ -101,6 +210,7 @@ namespace Opde {
 			}
 		}
 	}
+	
 	/*------------------------------------------------------*/
 	/*---------------------- StdFile -----------------------*/
 	/*------------------------------------------------------*/

@@ -153,6 +153,24 @@ namespace Opde {
 			* @param size the element size
 			* @param count the element count */
 			File& writeElem(const void* buf, file_size_t size, uint count = 1);
+			
+			/** Reads structured data from the file
+			The format string determines how to load the data. The format is specified as this
+			@li c Character (one byte). No byte swapping is done, direct read
+			@li w Word (2 byte structure). Swaps bytes as expected on big-endian machines
+			@li i (or f) Integer(float) - 32bit structure. Swaps
+			@li q Quad - 64bit structure - Swapped
+			@note The format byte can be prefixed with numbers [0-9], telling the reader to read N those structures
+			@warning The struct that is read to has to be packed (surrounded with #pragma(pack,1), #pragma(pop)) as the code expects the fields to be next to each other in memmory
+			@param buf The buffer to read to
+			@param format The format to use
+			@param count The count of the structures to read (use in case of struct array)
+			*/
+			File& readStruct(void* buf, char* format, uint count = 1);
+			
+			/** Writes a structure to the file. @see File::readStruct
+			*/
+			File& writeStruct(void* buf, char* format, uint count = 1);
 
 		protected:
 			/** swaps the endianness of the given buffer
