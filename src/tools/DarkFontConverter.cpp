@@ -30,9 +30,9 @@ static char BLACK_INDEX =	0;
 static char WHITE_INDEX =	1;
 
 
-char** ReadFont(char *FontData, int *ResultingWidth, int *ResultingHeight, int *ResultingColor, const char *FontName)
+char** ReadFont(FILE *FontFilePointer, int *ResultingWidth, int *ResultingHeight, int *ResultingColor, const char *FontName)
 {
-	struct DarkFontHeader *FontHeader;
+	struct DarkFontHeader FontHeader;
 	unsigned short *Widths;
 	char *BitmapData;
 	unsigned int NumChars;
@@ -45,31 +45,57 @@ char** ReadFont(char *FontData, int *ResultingWidth, int *ResultingHeight, int *
 	char *Ptr;
 	FILE *FilePointer;
 	char FontDefData[100];
+	unsigned long FileSize;
 
-	FontHeader = (struct DarkFontHeader*)FontData;
-	Widths = (unsigned short*)(FontData + FontHeader->WidthOffset);
-	BitmapData = FontData + FontHeader->BitmapOffset;
-	if (FontHeader->BitmapOffset < FontHeader->WidthOffset)
+	fread(&FontHeader, sizeof(FontHeader), 1, FontFilePointer);
+	NumChars = FontHeader.LastChar - FontHeader.FirstChar + 1;
+
+	Widths = (unsigned short *)calloc(NumChars + 1, sizeof(unsigned short));
+	if (!Widths)
 		return NULL;
-	NumChars = FontHeader->LastChar - FontHeader->FirstChar + 1;
+	fseek(FontFilePointer, FontHeader.WidthOffset, SEEK_SET);
+	fread(Widths, (NumChars + 1) * sizeof(unsigned short), 1, FontFilePointer);
+
+	fseek(FontFilePointer, 0L, SEEK_END);
+	FileSize = ftell(FontFilePointer);
+	BitmapData = (char *)calloc(FileSize + 1, sizeof(char));
+	if (!BitmapData)
+	{
+		free(Widths);
+		return NULL;
+	}
+	fseek(FontFilePointer, FontHeader.BitmapOffset, SEEK_SET);
+	fread(BitmapData, FileSize - FontHeader.BitmapOffset, 1, FontFilePointer);
+	if (FontHeader.BitmapOffset < FontHeader.WidthOffset)
+	{
+		free(Widths);
+		free(BitmapData);
+		return NULL;
+	}
 
 	Chars = (struct CharInfo*)calloc(NumChars, sizeof(struct CharInfo));
 	if (!Chars)
+	{
+		free(Widths);
+		free(BitmapData);
 		return NULL;
+	}
 
-	ImageHeight = ((NumChars / 16) + 2) * (FontHeader->NumRows + 4);
+	ImageHeight = ((NumChars / 16) + 2) * (FontHeader.NumRows + 4);
 	RowPointers = (char**)calloc(ImageHeight, sizeof(char*));
 	if (!RowPointers)
 	{
 		free(Chars);
+		free(Widths);
+		free(BitmapData);
 		return NULL;
 	}
-	Y = (FontHeader->NumRows / 2) + 2;
+	Y = (FontHeader.NumRows / 2) + 2;
 	X = 2;
 	ImageWidth = 2;
 	for (N = 0; N < NumChars; N++)
 	{
-		Chars[N].Code = FontHeader->FirstChar + N;
+		Chars[N].Code = FontHeader.FirstChar + N;
 		Chars[N].Column = Widths[N];
 		Chars[N].Width = Widths[N+1] - Widths[N];
 		Chars[N].X = X;
@@ -77,7 +103,7 @@ char** ReadFont(char *FontData, int *ResultingWidth, int *ResultingHeight, int *
 		X += Chars[N].Width + 6;
 		if ((N & 0xF) == 0xF)
 		{
-			Y += FontHeader->NumRows + 4;
+			Y += FontHeader.NumRows + 4;
 			if (X > ImageWidth)
 				ImageWidth = X;
 			X = 2;
@@ -91,6 +117,8 @@ char** ReadFont(char *FontData, int *ResultingWidth, int *ResultingHeight, int *
 	{
 		free(RowPointers);
 		free(Chars);
+		free(Widths);
+		free(BitmapData);
 		return NULL;
 	}
 	memset(ImageData, BLACK_INDEX, ImageHeight * ImageWidth);
@@ -116,17 +144,17 @@ char** ReadFont(char *FontData, int *ResultingWidth, int *ResultingHeight, int *
 	{
 		X = Chars[N].X;
 		Y = Chars[N].Y++;
-		sprintf(FontDefData,"\t\tglyph %c %f %f %f %f\n", FontHeader->FirstChar + N, (float)(Chars[N].X - 2) / ImageWidth, (float)(Chars[N].Y - 2) / ImageHeight, (float)(Chars[N].X + Chars[N].Width + 2) / ImageWidth, (float)(Chars[N].Y + FontHeader->NumRows + 2) / ImageHeight);
+		sprintf(FontDefData,"\t\tglyph %c %f %f %f %f\n", FontHeader.FirstChar + N, (float)(Chars[N].X - 2) / ImageWidth, (float)(Chars[N].Y - 2) / ImageHeight, (float)(Chars[N].X + Chars[N].Width + 2) / ImageWidth, (float)(Chars[N].Y + FontHeader.NumRows + 2) / ImageHeight);
 		fwrite(FontDefData, strlen(FontDefData), 1, FilePointer);
 	}
 
 	fwrite("\n\n}\n", 4, 1, FilePointer);
 	fclose(FilePointer);
 
-	if (FontHeader->Format == 0)
+	if (FontHeader.Format == 0)
 	{
 		Ptr = BitmapData;
-		for (I = 0; I < FontHeader->NumRows; I++)
+		for (I = 0; I < FontHeader.NumRows; I++)
 		{
 			for (N = 0; N < NumChars; N++)
 			{
@@ -134,13 +162,13 @@ char** ReadFont(char *FontData, int *ResultingWidth, int *ResultingHeight, int *
 				for (X = 0; X < Chars[N].Width; Y++, X++)
 					RowPointers[Chars[N].Y + I][Chars[N].X + X] = ((Ptr[Y / 8]>>(7 - (Y % 8))) & 1) ? WHITE_INDEX : BLACK_INDEX;
 			}
-			Ptr += FontHeader->RowWidth;
+			Ptr += FontHeader.RowWidth;
 		}
 	}
 	else
 	{
 		Ptr = BitmapData;
-		for (I = 0; I < FontHeader->NumRows; I++)
+		for (I = 0; I < FontHeader.NumRows; I++)
 		{
 			for (N = 0; N < NumChars; N++)
 			{
@@ -150,23 +178,26 @@ char** ReadFont(char *FontData, int *ResultingWidth, int *ResultingHeight, int *
 		}
 	}
 	free(Chars);
-	fprintf(stdout, "Read %d glyphs (first char = 0x%02x)\n", NumChars, FontHeader->FirstChar);
+	fprintf(stdout, "Read %d glyphs (first char = 0x%02x)\n", NumChars, FontHeader.FirstChar);
 	*ResultingWidth = ImageWidth;
 	*ResultingHeight = ImageHeight;
-	switch (FontHeader->Format)
+	switch (FontHeader.Format)
 	{
 	case 0:
 		*ResultingColor = 1; break;
 	case 1:
 		*ResultingColor = 2; break;
 	case 0xCCCC:
-		*ResultingColor = (FontHeader->Palette == 1) ? -1 : 0;
+		*ResultingColor = (FontHeader.Palette == 1) ? -1 : 0;
 		break;
 	default:
-		fprintf(stdout, "Unknown pixel Format! (0x%04X) Assuming 8bpp.\n", FontHeader->Format);
+		fprintf(stdout, "Unknown pixel Format! (0x%04X) Assuming 8bpp.\n", FontHeader.Format);
 		*ResultingColor = 0;
 		break;
 	}
+
+	free(Widths);
+	free(BitmapData);
 	return RowPointers;
 }
 
@@ -313,29 +344,12 @@ RGBQUAD* ReadPalette(FILE *FilePointer)
 }
 
 
-char* LoadFile(FILE *FilePointer)
-{
-	char *pRet;
-	unsigned long FileSize;
-
-	fseek(FilePointer, 0L, SEEK_END);
-	FileSize = ftell(FilePointer);
-	rewind (FilePointer);
-	pRet = (char *)calloc(FileSize + 1, sizeof(char));	
-	if (!pRet)
-		return NULL;
-	fread(pRet, FileSize, 1, FilePointer);
-	return pRet;
-}
-
-
 int FontToImage(const char *FontName, const char *PaletteFile)
 {
 	FILE *FilePointer;
 	COLORREF *PaletteData;
 	char **ImageRows;
 	int ImageWidth, ImageHeight;
-	char *FontDefData;
 	int Color;
 	int Error;
 	char FileName[30];
@@ -366,16 +380,7 @@ int FontToImage(const char *FontName, const char *PaletteFile)
 			free(PaletteData);
 		return -1;
 	}
-	FontDefData = LoadFile(FilePointer);	
-	if (!FontDefData)
-	{
-		fclose(FilePointer);
-		if (PaletteData != ColorTable)
-			free(PaletteData);
-		return -1;
-	}
-	ImageRows = ReadFont(FontDefData, &ImageWidth, &ImageHeight, &Color, FontName);
-	free(FontDefData);
+	ImageRows = ReadFont(FilePointer, &ImageWidth, &ImageHeight, &Color, FontName);
 	fclose(FilePointer);
 	if (!ImageRows)
 	{
