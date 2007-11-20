@@ -39,7 +39,7 @@ char** ReadFont(FILE *FontFilePointer, int *ResultingWidth, int *ResultingHeight
 	struct CharInfo *Chars;
 	char *ImageData;
 	char **RowPointers;
-	unsigned int ImageWidth, ImageHeight;
+	unsigned int ImageWidth, ImageHeight, FinalSize = 1;
 	unsigned int X, Y;
 	unsigned int N, I;
 	char *Ptr;
@@ -82,14 +82,7 @@ char** ReadFont(FILE *FontFilePointer, int *ResultingWidth, int *ResultingHeight
 	}
 
 	ImageHeight = ((NumChars / 16) + 2) * (FontHeader.NumRows + 4);
-	RowPointers = (char**)calloc(ImageHeight, sizeof(char*));
-	if (!RowPointers)
-	{
-		free(Chars);
-		free(Widths);
-		free(BitmapData);
-		return NULL;
-	}
+	
 	Y = (FontHeader.NumRows / 2) + 2;
 	X = 2;
 	ImageWidth = 2;
@@ -112,7 +105,19 @@ char** ReadFont(FILE *FontFilePointer, int *ResultingWidth, int *ResultingHeight
 	if (X > ImageWidth)
 		ImageWidth = X;
 
-	ImageData = (char*)malloc(ImageHeight * ImageWidth);
+	while ((FinalSize < ImageWidth) || (FinalSize < ImageHeight))
+		FinalSize <<= 1;
+
+	RowPointers = (char**)calloc(FinalSize, sizeof(char*));
+	if (!RowPointers)
+	{
+		free(Chars);
+		free(Widths);
+		free(BitmapData);
+		return NULL;
+	}
+
+	ImageData = (char*)malloc(FinalSize * FinalSize);
 	if (!ImageData)
 	{
 		free(RowPointers);
@@ -121,12 +126,12 @@ char** ReadFont(FILE *FontFilePointer, int *ResultingWidth, int *ResultingHeight
 		free(BitmapData);
 		return NULL;
 	}
-	memset(ImageData, BLACK_INDEX, ImageHeight * ImageWidth);
+	memset(ImageData, BLACK_INDEX, FinalSize * FinalSize);
 	Ptr = ImageData;
-	for (N = 0; N < ImageHeight; N++)
+	for (N = 0; N < FinalSize; N++)
 	{
 		RowPointers[N] = Ptr;
-		Ptr += ImageWidth;
+		Ptr += FinalSize;
 	}
 
 	sprintf(FontDefData,"%s.fontdef", FontName);
@@ -144,7 +149,7 @@ char** ReadFont(FILE *FontFilePointer, int *ResultingWidth, int *ResultingHeight
 	{
 		X = Chars[N].X;
 		Y = Chars[N].Y++;
-		sprintf(FontDefData,"\t\tglyph %c %f %f %f %f\n", FontHeader.FirstChar + N, (float)(Chars[N].X - 2) / ImageWidth, (float)(Chars[N].Y - 2) / ImageHeight, (float)(Chars[N].X + Chars[N].Width + 2) / ImageWidth, (float)(Chars[N].Y + FontHeader.NumRows + 2) / ImageHeight);
+		sprintf(FontDefData,"\t\tglyph %c %f %f %f %f\n", FontHeader.FirstChar + N, (float)(Chars[N].X - 2) / FinalSize, (float)(Chars[N].Y - 2) / FinalSize, (float)(Chars[N].X + Chars[N].Width + 2) / FinalSize, (float)(Chars[N].Y + FontHeader.NumRows + 2) / FinalSize);
 		fwrite(FontDefData, strlen(FontDefData), 1, FilePointer);
 	}
 
@@ -179,8 +184,7 @@ char** ReadFont(FILE *FontFilePointer, int *ResultingWidth, int *ResultingHeight
 	}
 	free(Chars);
 	fprintf(stdout, "Read %d glyphs (first char = 0x%02x)\n", NumChars, FontHeader.FirstChar);
-	*ResultingWidth = ImageWidth;
-	*ResultingHeight = ImageHeight;
+	*ResultingWidth = *ResultingHeight = FinalSize;
 	switch (FontHeader.Format)
 	{
 	case 0:
