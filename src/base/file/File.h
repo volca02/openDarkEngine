@@ -164,13 +164,14 @@ namespace Opde {
 			@warning The struct that is read to has to be packed (surrounded with #pragma(pack,1), #pragma(pop)) as the code expects the fields to be next to each other in memmory
 			@param buf The buffer to read to
 			@param format The format to use
-			@param count The count of the structures to read (use in case of struct array)
+			@param ExpectedLen The numbers of bytes expected to be read/written
+			@param count The count of the structures to read (use in case of struct array)			
 			*/
-			File& readStruct(void* buf, char* format, uint count = 1);
+			File& readStruct(void* buf, char* format, uint32_t ExpectedLen, uint count = 1);
 			
 			/** Writes a structure to the file. @see File::readStruct
 			*/
-			File& writeStruct(const void* buf, char* format, uint count = 1);
+			File& writeStruct(const void* buf, char* format, uint32_t ExpectedLen, uint count = 1);
 
 		protected:
 			/** swaps the endianness of the given buffer

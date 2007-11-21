@@ -72,7 +72,7 @@ namespace Opde {
 		mSrcFile->seek(0);
 		
 		// read the header
-		mSrcFile->readStruct(&mHeader, "4ic4i256ci");
+		mSrcFile->readStruct(&mHeader, "4ic4i256ci", sizeof(DarkDBHeader));
 		
 		// Sanity check
 		if (mHeader.dead_beef != 0x0EFBEADDE) // Little endian encoded. would be 0xDEADBEEF on big-endian, etc.
@@ -115,7 +115,7 @@ namespace Opde {
 		assert(!mSrcFile.isNull());
 		
 		for (uint i = 0; i < count; i++) {
-			mSrcFile->readStruct(&inventory[i], "12c2i");
+			mSrcFile->readStruct(&inventory[i], "12c2i", sizeof(DarkDBInvItem));
 		}
 	}
 	
@@ -124,7 +124,7 @@ namespace Opde {
 		assert(!dest.isNull());
 		
 		for (uint i = 0; i < count; i++) {
-			dest->writeStruct(&inventory[i], "12c2i");
+			dest->writeStruct(&inventory[i], "12c2i", sizeof(DarkDBInvItem));
 		}
 	}
 
@@ -133,14 +133,14 @@ namespace Opde {
 	void DarkFileGroup::readChunkHeader(DarkDBChunkHeader* hdr) {
 		assert(!mSrcFile.isNull());
 		
-		mSrcFile->readStruct(hdr, "12c3i");
+		mSrcFile->readStruct(hdr, "12c3i", sizeof(DarkDBChunkHeader));
 	}
 	
 	//------------------------------------	
 	void DarkFileGroup::writeChunkHeader(FilePtr& dest, const DarkDBChunkHeader& hdr) {
 		assert(!dest.isNull());
 		
-		dest->writeStruct(&hdr, "12c3i");
+		dest->writeStruct(&hdr, "12c3i", sizeof(DarkDBChunkHeader));
 	}
 	
 	//------------------------------------	
@@ -240,7 +240,7 @@ namespace Opde {
 		mHeader.dead_beef = 0x0EFBEADDE;
 		
 		// --- Let's write the header
-		dest->writeStruct(&mHeader, "4ic4i256ci");
+		dest->writeStruct(&mHeader, "4ic4i256ci", sizeof(DarkDBHeader));
 		
 		
 		it = mFiles.begin();

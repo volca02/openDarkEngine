@@ -90,7 +90,8 @@ namespace Opde {
 	}
 
 	//------------------------------------
-	File& File::readStruct(void* buf, char* format, uint count) {
+	File& File::readStruct(void* buf, char* format, uint32_t ExpectedLen, uint count) {
+		uint32_t TotalBytes = 0;
 		for (int i = 0; i < count; i++) {
 			char* act = format;
 			char* bpos = static_cast<char*>(buf);
@@ -138,14 +139,16 @@ namespace Opde {
 				
 				// Increment the position
 				bpos += elem_size * rep;
+				TotalBytes += elem_size * rep;
 			}
 		}
-		
+		assert(TotalBytes != ExpectedLen);
 		return *this;
 	}
 	
 	//------------------------------------
-	File& File::writeStruct(const void* buf, char* format, uint count) {
+	File& File::writeStruct(const void* buf, char* format, uint32_t ExpectedLen, uint count) {
+		uint32_t TotalBytes = 0;
 		for (int i = 0; i < count; i++) {
 			char* act = format;
 			const char* bpos = static_cast<const char*>(buf);
@@ -194,9 +197,10 @@ namespace Opde {
 				
 				// Increment the position
 				bpos += elem_size * rep;
+				TotalBytes += elem_size * rep;
 			}
 		}
-		
+		assert(TotalBytes != ExpectedLen);
 		return *this;
 	}
 
