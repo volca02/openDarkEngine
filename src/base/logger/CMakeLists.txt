@@ -3,4 +3,6 @@ include_directories (
     ${OPDE_SOURCE_DIR}/src/base
 )
 
-add_library(OpdeLogger logger.cpp stdlog.cpp filelog.cpp)
+file(GLOB OPDE_LOGGER_HEADERS *.h)
+
+add_library(OpdeLogger logger.cpp stdlog.cpp filelog.cpp ${OPDE_LOGGER_HEADERS})

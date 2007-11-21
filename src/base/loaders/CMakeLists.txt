@@ -12,8 +12,10 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base
 )
 
+file(GLOB OPDE_MANUALLOADERS_HEADERS *.h)
+
 # Various types of manual resource loaders
-add_library (OpdeManualLoaders ManualBinFileLoader.cpp)
+add_library (OpdeManualLoaders ManualBinFileLoader.cpp ${OPDE_MANUALLOADERS_HEADERS})
 
 target_link_libraries( OpdeManualLoaders
 	OpdeBase

@@ -16,7 +16,12 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 
-add_library (OpdeInputService InputService.cpp InputEventMapper.cpp)
+add_library (OpdeInputService 
+    InputService.cpp
+    InputEventMapper.cpp
+    InputService.h
+    InputEventMapper.h
+)
 
 target_link_libraries (OpdeInputService
     OpdeServiceManager

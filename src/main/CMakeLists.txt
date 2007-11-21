@@ -4,7 +4,7 @@ SET(LIB_ADDITION_CUSTOM_IMAGE)
 SET(INCLUDE_ADDITION_CUSTOM_IMAGE)
 # If custom image hooks was selected
 if(CUSTOM_IMAGE_HOOKS)
-    add_library(OpdeCustomImageCodec CustomImageCodec.cpp)
+    add_library(OpdeCustomImageCodec CustomImageCodec.cpp CustomImageCodec.h)
     
     SET(LIB_ADDITION_CUSTOM_IMAGE OpdeCustomImageCodec ${FREEIMAGE_LIBS})
     SET(INCLUDE_ADDITION_CUSTOM_IMAGE OpdeCustomImageCodec ${FREEIMAGE_INCLUDE_DIR})
@@ -12,7 +12,6 @@ endif(CUSTOM_IMAGE_HOOKS)
 
 include_directories(
     ${OGRE_INCLUDE_DIR}
-    ${CEGUI_INCLUDE_DIR}
     ${OIS_INCLUDE_DIR}
     ${OPDE_BINARY_DIR}
     ${INCLUDE_ADDITION_CUSTOM_IMAGE}
@@ -57,6 +56,14 @@ add_executable (opde WIN32
     DTypeScriptLoader.cpp
     PLDefScriptCompiler.cpp
     PLDefScriptLoader.cpp
+    GameStateManager.h
+    GameState.h
+    GamePlayState.h
+    GameLoadState.h
+    DTypeScriptCompiler.h
+    DTypeScriptLoader.h
+    PLDefScriptCompiler.h
+    PLDefScriptLoader.h
 )
 
 

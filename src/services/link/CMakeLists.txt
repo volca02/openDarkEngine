@@ -19,7 +19,13 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 
-add_library (OpdeLinkService LinkService.cpp Relation.cpp)
+add_library (OpdeLinkService
+    LinkService.cpp
+    Relation.cpp
+    LinkService.h
+    Relation.h
+    LinkCommon.h
+)
 
 target_link_libraries(OpdeLinkService
     OpdeBase

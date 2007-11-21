@@ -15,7 +15,7 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 
-add_library (OpdeLoopService LoopService.cpp)
+add_library (OpdeLoopService LoopService.cpp LoopService.h)
 
 target_link_libraries (OpdeLoopService
     OpdeServiceManager

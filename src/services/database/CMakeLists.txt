@@ -19,7 +19,7 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 
-add_library (OpdeDatabaseService DatabaseService.cpp)
+add_library (OpdeDatabaseService DatabaseService.cpp DatabaseService.h)
 
 target_link_libraries(OpdeDatabaseService
     OpdeBase

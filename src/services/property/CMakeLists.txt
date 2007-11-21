@@ -21,7 +21,13 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 
-add_library (OpdePropertyService PropertyService.cpp PropertyGroup.cpp)
+add_library (OpdePropertyService
+    PropertyService.cpp
+    PropertyGroup.cpp
+    PropertyService.h
+    PropertyGroup.h
+    PropertyCommon.h
+)
 
 target_link_libraries(OpdePropertyService
     OpdeBase

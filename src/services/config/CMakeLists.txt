@@ -25,7 +25,7 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 
-add_library (OpdeConfigService ConfigService.cpp)
+add_library (OpdeConfigService ConfigService.cpp ConfigService.h)
 
 target_link_libraries(OpdeConfigService
     OpdeBase

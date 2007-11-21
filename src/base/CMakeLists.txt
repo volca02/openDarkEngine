@@ -7,4 +7,8 @@ add_subdirectory(dyntype)
 # Commented for now. In progress - not compilable
 add_subdirectory(loaders)
 
-add_library ( OpdeBase OpdeException.cpp RefCounted.cpp )
+FILE(GLOB OPDE_BASE_HEADERS *.h)
+
+add_library ( OpdeBase OpdeException.cpp RefCounted.cpp 
+    ${OPDE_BASE_HEADERS}
+)

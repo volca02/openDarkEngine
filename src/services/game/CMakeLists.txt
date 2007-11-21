@@ -25,7 +25,7 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 
-add_library (OpdeGameService GameService.cpp)
+add_library (OpdeGameService GameService.cpp GameService.h)
 
 target_link_libraries(OpdeGameService
     OpdeBase

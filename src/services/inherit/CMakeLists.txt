@@ -20,7 +20,17 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 
-add_library (OpdeInheritService InheritService.cpp CachedInheritor.cpp NeverInheritor.cpp ArchetypeInheritor.cpp)
+add_library (OpdeInheritService 
+    InheritService.cpp 
+    CachedInheritor.cpp 
+    NeverInheritor.cpp 
+    ArchetypeInheritor.cpp
+    InheritService.h
+    CachedInheritor.h 
+    NeverInheritor.h 
+    ArchetypeInheritor.h
+    InheritCommon.h
+)
 
 target_link_libraries(OpdeInheritService
     OpdeBase

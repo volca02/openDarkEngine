@@ -6,4 +6,6 @@ include_directories (
     ${OGRE_INCLUDE_DIR}
 )
 
-add_library (OpdeServiceManager OpdeServiceManager.cpp OpdeService.cpp)
+file(GLOB OPDE_SERVICEMANAGER_HEADERS *.h)
+
+add_library (OpdeServiceManager OpdeServiceManager.cpp OpdeService.cpp ${OPDE_SERVICEMANAGER_HEADERS})
