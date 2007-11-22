@@ -44,6 +44,12 @@ OPTION(CUSTOM_IMAGE_HOOKS
     "Build the support for palletized image transparecy (requires freeimage)"
     OFF)
 
+# Python support option (will become mandatory later, probably)
+OPTION(PYTHON_SUPPORT
+    "Build in a support for python scripting"
+    OFF)
+
+
 # Option to build the documentation
 OPTION(GENERATE_DOC
     "Build the doxy documentation"
@@ -99,9 +105,7 @@ ELSE(GLOBAL_DEBUG)
     MESSAGE(STATUS "Debugging is Off")
 ENDIF(GLOBAL_DEBUG)
 
-# Some configuration checks to allow platform independence
-INCLUDE(ConfigureChecks.cmake)
-CONFIGURE_FILE(config.h.cmake ${CMAKE_BINARY_DIR}/config.h )
+
 
 # Solve the dependencies
 SET(OIS_DIR ${CMAKE_MODULE_PATH})
@@ -124,8 +128,25 @@ IF(CUSTOM_IMAGE_HOOKS)
     ENDIF(FREEIMAGE_FOUND)
 ENDIF(CUSTOM_IMAGE_HOOKS)
 
-# Only visual check enabling verbose output, and package found info
+IF(PYTHON_SUPPORT)
+    FIND_PACKAGE(PythonLibs REQUIRED)
+    
+    # Aditional libraries - deps of the python lib
+    INCLUDE(PythonDeps.cmake)
+    FIND_PYTHON_DEPS(PYTHON_LIBRARIES)
+    
+    IF(PYTHON_LIBRARIES)
+	MESSAGE(STATUS "Python Found OK")
+        MESSAGE(STATUS " - Python includes ${PYTHON_INCLUDE_DIR}")
+	MESSAGE(STATUS " - FreeImage libs ${PYTHON_LIBRARIES}")
+    ELSE(PYTHON_LIBRARIES)
+	MESSAGE(FATAL_ERROR "Python not found and selected in options!")
+    ENDIF(PYTHON_LIBRARIES)
+ENDIF(PYTHON_SUPPORT)
 
+
+
+# Only visual check enabling verbose output, and package found info
 IF(OIS_FOUND)
      MESSAGE(STATUS "OIS Found OK")
      MESSAGE(STATUS " - OIS includes ${OIS_INCLUDE_DIR}")
@@ -150,6 +171,9 @@ ENDIF(OGRE_FOUND)
 #    MESSAGE(FATAL_ERROR "CEGUI not found")
 #ENDIF(CEGUI_FOUND)
 
+# Some configuration checks to allow platform independence
+INCLUDE(ConfigureChecks.cmake)
+CONFIGURE_FILE(config.h.cmake ${CMAKE_BINARY_DIR}/config.h )
 
 # Add the subdirectories which contain aditional CMakeLists.txt files
 add_subdirectory (src)
