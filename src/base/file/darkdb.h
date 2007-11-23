@@ -32,6 +32,7 @@ namespace Opde {
 	/*
 	* Header for Dark-engine Database.
 	*/
+	static const char *DarkDBHeader_Format = "3i256ci";
 	typedef struct DarkDBHeader
 	{
 		uint32_t	inv_offset;		// Offset to inventory TOC from top of header

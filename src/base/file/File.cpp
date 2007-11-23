@@ -19,10 +19,12 @@
  *
  *****************************************************************************/
 
+#include <OgreLogManager.h>
 #include "config.h"
 #include "File.h"
 
 using namespace std;
+using namespace Ogre;
 
 namespace Opde {
 
@@ -90,22 +92,22 @@ namespace Opde {
 	}
 
 	//------------------------------------
-	File& File::readStruct(void* buf, char* format, uint32_t ExpectedLen, uint count) {
-		uint32_t TotalBytes = 0;
+	File& File::readStruct(void* buf, const char* format, uint32_t ExpectedLen, uint count) {
+		uint32_t TotalBytes = 0;		
 		for (int i = 0; i < count; i++) {
-			char* act = format;
+			uint32_t Index = 0;
 			char* bpos = static_cast<char*>(buf);
 		    
-			while (*act) {
+			while (format[Index]) {
 				int rep = 0;
 				bool haverep = false;
 			
 				// While the char is a number, compose an integer out of it
-				while (*act >= '0' && *act <= '9') {
+				while (format[Index] >= '0' && format[Index] <= '9') {
 					rep *= 10;
-					rep += *act - '0';
+					rep += format[Index] - '0';
 			    
-					act++;
+					Index++;
 					
 					haverep = true; // A repetitions count was supplied
 				}
@@ -115,10 +117,10 @@ namespace Opde {
 			
 				size_t elem_size = 0;
 				
-				if (!*act) // End of line after repetitions? That is not format compliant!
+				if (!format[Index]) // End of line after repetitions? That is not format compliant!
 					OPDE_FILEEXCEPT(FILE_OTHER_ERROR, "Element count should be followed by format!", "File::readStruct");
 				
-				switch (*act) {
+				switch (format[Index]) {
 					case 'c' : elem_size = 1; break;
 					case 'w' : elem_size = 2; break;
 					case 'i' :
@@ -130,7 +132,7 @@ namespace Opde {
 				}
 				
 				// Go to next char, would you kindly? ;)
-				act++;
+				Index++;
 				
 				if (elem_size > 1)
 				    readElem(bpos, elem_size, rep);
@@ -141,28 +143,29 @@ namespace Opde {
 				bpos += elem_size * rep;
 				TotalBytes += elem_size * rep;
 			}
-		}
-		assert(TotalBytes != ExpectedLen);
+		}		
+		if(TotalBytes != ExpectedLen)
+			LogManager::getSingleton().logMessage("readStruct warning: ExpectedLen != TotalBytes");
 		return *this;
 	}
 	
 	//------------------------------------
-	File& File::writeStruct(const void* buf, char* format, uint32_t ExpectedLen, uint count) {
+	File& File::writeStruct(const void* buf, const char* format, uint32_t ExpectedLen, uint count) {
 		uint32_t TotalBytes = 0;
 		for (int i = 0; i < count; i++) {
-			char* act = format;
+			uint32_t Index = 0;
 			const char* bpos = static_cast<const char*>(buf);
 		    
-			while (*act) {
+			while (format[Index]) {
 				int rep = 0;
 				bool haverep = false;
 			
 				// While the char is a number, compose an integer out of it
-				while (*act >= '0' && *act <= '9') {
+				while (format[Index] >= '0' && format[Index] <= '9') {
 					rep *= 10;
-					rep += *act - '0';
+					rep += format[Index] - '0';
 			    
-					act++;
+					Index++;
 					
 					haverep = true; // A repetitions count was supplied
 				}
@@ -172,10 +175,10 @@ namespace Opde {
 			
 				size_t elem_size = 0;
 				
-				if (!*act) // End of line after repetitions? That is not format compliant!
+				if (!format[Index]) // End of line after repetitions? That is not format compliant!
 					OPDE_FILEEXCEPT(FILE_OTHER_ERROR, "Element count should be followed by format!", "File::readStruct");
 				
-				switch (*act) {
+				switch (format[Index]) {
 					case 'c' : elem_size = 1; break;
 					case 'w' : elem_size = 2; break;
 					case 'i' :
@@ -187,7 +190,7 @@ namespace Opde {
 				}
 				
 				// Go to next char, would you kindly? ;)
-				act++;
+				Index++;
 				
 
 				if (elem_size > 1)
@@ -200,7 +203,9 @@ namespace Opde {
 				TotalBytes += elem_size * rep;
 			}
 		}
-		assert(TotalBytes != ExpectedLen);
+		if(TotalBytes != ExpectedLen)
+			LogManager::getSingleton().logMessage("writeStruct warning: ExpectedLen != TotalBytes");
+
 		return *this;
 	}
 

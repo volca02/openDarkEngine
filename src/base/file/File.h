@@ -167,11 +167,11 @@ namespace Opde {
 			@param ExpectedLen The numbers of bytes expected to be read/written
 			@param count The count of the structures to read (use in case of struct array)			
 			*/
-			File& readStruct(void* buf, char* format, uint32_t ExpectedLen, uint count = 1);
+			File& readStruct(void* buf, const char* format, uint32_t ExpectedLen, uint count = 1);
 			
 			/** Writes a structure to the file. @see File::readStruct
 			*/
-			File& writeStruct(const void* buf, char* format, uint32_t ExpectedLen, uint count = 1);
+			File& writeStruct(const void* buf, const char* format, uint32_t ExpectedLen, uint count = 1);
 
 		protected:
 			/** swaps the endianness of the given buffer
