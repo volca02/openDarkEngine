@@ -34,13 +34,14 @@ namespace Ogre {
     /** ManualResourceLoader for BIN meshes. Used to load BIN meshes as Ogre::Mesh instances */
     class ManualFonFileLoader : public ManualResourceLoader {
 
-	private:
-			CharInfo *Chars;
+		private:
+			CharInfo *mChars;
+			unsigned int mNumChars, mImageDim;
 
 			RGBQUAD* ReadPalette(StdFile *FilePointer);
-			int FontToImage(MemoryFile* MemFile, String PaletteFileName);
-			int WriteImage(StdFile* BitmapFile, RGBQUAD *ColorTable, char **RowPointers, int ImageSize);
-			char** ManualFonFileLoader::ReadFont(MemoryFile* MemFile, int *ResultingSize, int *ResultingColor);			
+			int LoadFont(MemoryFile* MemFile, String PaletteFileName);
+			int WriteImage(StdFile* BitmapFile, RGBQUAD *ColorTable, char **RowPointers);
+			char** ManualFonFileLoader::ReadFont(MemoryFile* MemFile, int *ResultingColor);			
 
         public:
             ManualFonFileLoader();

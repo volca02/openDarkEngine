@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2007 openDarkEngine team
  *	  Includes code based on Thief Font Converter by Tom N Harris <telliamed@whoopdedo.cjb.net>
  *
  *    This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,6 @@
  *
  *****************************************************************************/
 
-/*
-thanks go to shadowspawn for his great contribution (and Ryan Nunn for his work on this thing too, as well as maybe other, which I do not know about)
-*/
-
 #ifndef __FONFORMAT_H
 #define __FONFORMAT_H
 
@@ -41,8 +37,8 @@ static char WHITE_INDEX =	1;
 struct DarkFontHeader
 {
 	uint16_t	Format;		/* 1 - anti-aliased, 0xCCCC - 8bpp, else - 1bpp */
-	uint8_t	Unknown;	/* set to 10 if Format is 1 */
-	uint8_t	Palette;	/* 0 - use current, 1 - standard */
+	uint8_t	Unknown;		/* set to 10 if Format is 1 */
+	uint8_t	Palette;		/* 0 - use current, 1 - standard */
 	uint8_t	Zeros1[32];
 	int16_t	FirstChar;
 	int16_t	LastChar;

@@ -24,15 +24,8 @@
 #include <OgreMaterial.h>
 #include <OgreMaterialManager.h>
 #include <OgreTechnique.h>
-#include <OgreSubMesh.h>
-#include <OgreHardwareBufferManager.h>
 #include <OgreLogManager.h>
-#include <OgreSkeletonManager.h>
-#include <OgreBone.h>
 #include <OgreTextureManager.h>
-
-#include <OgreMeshSerializer.h>
-#include <OgreSkeletonSerializer.h>
 
 using namespace std;
 using namespace Opde; // For the Opde::File
@@ -51,25 +44,24 @@ namespace Ogre
     //-------------------------------------------------------------------
     ManualFonFileLoader::~ManualFonFileLoader() 
 	{
-		delete [] Chars;
+		delete [] mChars;
     }
 
 	//-------------------------------------------------------------------
-	char** ManualFonFileLoader::ReadFont(MemoryFile* MemFile, int *ResultingSize, int *ResultingColor)
+	char** ManualFonFileLoader::ReadFont(MemoryFile* MemFile, int *ResultingColor)
 	{
-		struct DarkFontHeader FontHeader;
-		unsigned int NumChars;		
+		struct DarkFontHeader FontHeader;		
 		unsigned int ImageWidth, ImageHeight, FinalSize = 1;
 		unsigned int X, Y;
 		unsigned int N, I;
 		char *Ptr;
 
 		MemFile->read(&FontHeader, sizeof(FontHeader));
-		NumChars = FontHeader.LastChar - FontHeader.FirstChar + 1;
+		mNumChars = FontHeader.LastChar - FontHeader.FirstChar + 1;
 
 		vector <unsigned short> Widths;
 		MemFile->seek(FontHeader.WidthOffset, File::FSEEK_BEG);
-		for(I = 0;I < NumChars + 1; I++)
+		for(I = 0;I < mNumChars + 1; I++)
 		{
 			unsigned short Temp;
 			MemFile->readElem(&Temp, sizeof(Temp));
@@ -87,26 +79,26 @@ namespace Ogre
 			return NULL;
 		}
 
-		Chars = new CharInfo[NumChars];
-		if (!Chars)
+		mChars = new CharInfo[mNumChars];
+		if (!mChars)
 		{
 			delete [] BitmapData;
 			return NULL;
 		}
 
-		ImageHeight = ((NumChars / 16) + 2) * (FontHeader.NumRows + 4);
+		ImageHeight = ((mNumChars / 16) + 2) * (FontHeader.NumRows + 4);
 		
 		Y = (FontHeader.NumRows / 2) + 2;
 		X = 2;
 		ImageWidth = 2;
-		for (N = 0; N < NumChars; N++)
+		for (N = 0; N < mNumChars; N++)
 		{
-			Chars[N].Code = FontHeader.FirstChar + N;
-			Chars[N].Column = Widths[N];
-			Chars[N].Width = Widths[N+1] - Widths[N];
-			Chars[N].X = X;
-			Chars[N].Y = Y;
-			X += Chars[N].Width + 6;
+			mChars[N].Code = FontHeader.FirstChar + N;
+			mChars[N].Column = Widths[N];
+			mChars[N].Width = Widths[N+1] - Widths[N];
+			mChars[N].X = X;
+			mChars[N].Y = Y;
+			X += mChars[N].Width + 6;
 			if ((N & 0xF) == 0xF)
 			{
 				Y += FontHeader.NumRows + 4;
@@ -148,11 +140,11 @@ namespace Ogre
 			Ptr = BitmapData;
 			for (I = 0; I < FontHeader.NumRows; I++)
 			{
-				for (N = 0; N < NumChars; N++)
+				for (N = 0; N < mNumChars; N++)
 				{
-					Y = Chars[N].Column;
-					for (X = 0; X < Chars[N].Width; Y++, X++)
-						RowPointers[Chars[N].Y + I][Chars[N].X + X] = ((Ptr[Y / 8]>>(7 - (Y % 8))) & 1) ? WHITE_INDEX : BLACK_INDEX;
+					Y = mChars[N].Column;
+					for (X = 0; X < mChars[N].Width; Y++, X++)
+						RowPointers[mChars[N].Y + I][mChars[N].X + X] = ((Ptr[Y / 8]>>(7 - (Y % 8))) & 1) ? WHITE_INDEX : BLACK_INDEX;
 				}
 				Ptr += FontHeader.RowWidth;
 			}
@@ -162,24 +154,29 @@ namespace Ogre
 			Ptr = BitmapData;
 			for (I = 0; I < FontHeader.NumRows; I++)
 			{
-				for (N = 0; N < NumChars; N++)
+				for (N = 0; N < mNumChars; N++)
 				{
-					memcpy(RowPointers[Chars[N].Y + I]+Chars[N].X, Ptr, Chars[N].Width);				
-					Ptr += Chars[N].Width;
+					memcpy(RowPointers[mChars[N].Y + I]+mChars[N].X, Ptr, mChars[N].Width);				
+					Ptr += mChars[N].Width;
 				}
 			}
 		}
-		delete [] Chars;
-		*ResultingSize = FinalSize;
+		
+		mImageDim = FinalSize;
 		switch (FontHeader.Format)
 		{
 		case 0:
-			*ResultingColor = 1; break;
+			*ResultingColor = 1; 			
+			break;
+
 		case 1:
-			*ResultingColor = 2; break;
+			*ResultingColor = 2; 
+			break;
+
 		case 0xCCCC:
 			*ResultingColor = (FontHeader.Palette == 1) ? -1 : 0;
 			break;
+
 		default:
 			*ResultingColor = 0;//Unknown pixel Format, assuming 8bpp.
 			break;
@@ -197,7 +194,7 @@ namespace Ogre
 	}
 
 	//-------------------------------------------------------------------
-	int WriteImage(StdFile* BitmapFile, RGBQUAD *ColorTable, char **RowPointers, int ImageSize)
+	int ManualFonFileLoader::WriteImage(StdFile* BitmapFile, RGBQUAD *ColorTable, char **RowPointers)
 	{
 		BITMAPFILEHEADER	FileHeader;
 		BITMAPINFOHEADER	BitmapHeader;
@@ -209,8 +206,8 @@ namespace Ogre
 		FileHeader.bfReserved2 = 0;
 		FileHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + (sizeof(RGBQUAD)*256);
 		BitmapHeader.biSize = sizeof(BITMAPINFOHEADER);
-		BitmapHeader.biWidth = ImageSize;
-		BitmapHeader.biHeight = ImageSize;
+		BitmapHeader.biWidth = mImageDim;
+		BitmapHeader.biHeight = mImageDim;
 		BitmapHeader.biPlanes = 1;
 		BitmapHeader.biBitCount = 8;
 		BitmapHeader.biCompression = 0;
@@ -218,18 +215,18 @@ namespace Ogre
 		BitmapHeader.biYPelsPerMeter = 0xB13;
 		BitmapHeader.biClrUsed = 256;
 		BitmapHeader.biClrImportant = 256;
-		RowWidth = (ImageSize + 3) & ~3;
-		BitmapHeader.biSizeImage = RowWidth * ImageSize;
+		RowWidth = (mImageDim + 3) & ~3;
+		BitmapHeader.biSizeImage = RowWidth * mImageDim;
 		FileHeader.bfSize = FileHeader.bfOffBits + BitmapHeader.biSizeImage;
 
 		BitmapFile->write(&FileHeader, sizeof(BITMAPFILEHEADER));
 		BitmapFile->write(&BitmapHeader, sizeof(BITMAPINFOHEADER));
 		BitmapFile->write(&ColorTable, sizeof(RGBQUAD) * 256);
 
-		RowWidth -= ImageSize;
-		for (Row = ImageSize - 1; Row >= 0; Row--)
+		RowWidth -= mImageDim;
+		for (Row = mImageDim - 1; Row >= 0; Row--)
 		{
-			BitmapFile->write(RowPointers[Row], ImageSize);
+			BitmapFile->write(RowPointers[Row], mImageDim);
 			if (RowWidth != 0)
 				BitmapFile->write(Zero, RowWidth);
 		}
@@ -237,11 +234,10 @@ namespace Ogre
 	}
 
 	//-------------------------------------------------------------------
-	int ManualFonFileLoader::FontToImage(MemoryFile* MemFile, String PaletteFileName)
+	int ManualFonFileLoader::LoadFont(MemoryFile* MemFile, String PaletteFileName)
 	{
 		COLORREF *PaletteData;
 		char **ImageRows;
-		int ImageSize;
 		int Color;
 
 		/*if (PaletteFileName != "")
@@ -263,7 +259,7 @@ namespace Ogre
 		else*/
 			PaletteData = (COLORREF*)ColorTable;
 
-		ImageRows = ReadFont(MemFile, &ImageSize, &Color);
+		ImageRows = ReadFont(MemFile, &Color);
 		if (!ImageRows)
 		{
 			//if (PaletteData != ColorTable)
@@ -274,10 +270,10 @@ namespace Ogre
 			PaletteData = (COLORREF*)AntiAliasedColorTable;
 
 		StdFile* BitmapFile = new StdFile("Font.bmp", File::FILE_W);		
-		WriteImage(BitmapFile, (RGBQUAD*)PaletteData, ImageRows, ImageSize);
+		WriteImage(BitmapFile, (RGBQUAD*)PaletteData, ImageRows);
 		delete BitmapFile;
 
-		for (int N = 0; N < ImageSize; N++)
+		for (unsigned int N = 0; N < mImageDim; N++)
 			delete [] ImageRows[N];
 		delete [] ImageRows;
 		//if (PaletteData != ColorTable && PaletteData != AntiAliasedColorTable)
@@ -315,7 +311,7 @@ namespace Ogre
         MemoryFile* MemFile = new MemoryFile(BaseName, File::FILE_R);
         MemFile->initFromFile(*FontFile, FontFile->size()); // read the whole contents into the memory file
 
-        if(FontToImage(MemFile, ""))
+        if(LoadFont(MemFile, ""))
 			LogManager::getSingleton().logMessage("An error happened while loading the font " + BaseName);
 		delete MemFile;
 
