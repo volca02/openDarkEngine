@@ -286,7 +286,7 @@ namespace Opde {
 			*/
 			std::pair<size_t, int> decomposePos(file_pos_t pos);
 
-			/** Internal write. does not do read-olny checks. */
+			/** Internal write. does not do read-only checks. */
 			virtual File& _write(const void* buf, file_size_t size);
 
 			/** Internal read. Works even on write-only files. */
