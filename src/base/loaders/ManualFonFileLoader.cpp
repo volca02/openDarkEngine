@@ -221,7 +221,7 @@ namespace Ogre
 
 		BitmapFile->write(&FileHeader, sizeof(BITMAPFILEHEADER));
 		BitmapFile->write(&BitmapHeader, sizeof(BITMAPINFOHEADER));
-		BitmapFile->write(&ColorTable, sizeof(RGBQUAD) * 256);
+		BitmapFile->write(ColorTable, sizeof(RGBQUAD) * 256);
 
 		RowWidth -= mImageDim;
 		for (Row = mImageDim - 1; Row >= 0; Row--)
