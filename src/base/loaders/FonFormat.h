@@ -36,6 +36,7 @@ namespace Ogre
 	static char BLACK_INDEX =	0;
 	static char WHITE_INDEX =	1;
 
+	static const char DarkFontHeader_Format[]="w34c2w32c2i2w";
 	struct DarkFontHeader
 	{
 		uint16_t	Format;		/* 1 - anti-aliased, 0xCCCC - 8bpp, else - 1bpp */
@@ -61,7 +62,8 @@ namespace Ogre
 	};
 
 	#pragma pack(push, 1)
-
+	
+	static const char BITMAPFILEHEADER_Format[]="wi2wi";
 	typedef struct tagBITMAPFILEHEADER { 
 	  WORD    bfType; 
 	  DWORD   bfSize; 
@@ -70,6 +72,7 @@ namespace Ogre
 	  DWORD   bfOffBits; 
 	} BITMAPFILEHEADER;
 
+	static const char BITMAPINFOHEADER_Format[]="3i2w6i";
 	typedef struct tagBITMAPINFOHEADER {
 		DWORD  biSize;
 		DWORD   biWidth;
@@ -84,6 +87,7 @@ namespace Ogre
 		DWORD  biClrImportant;
 	} BITMAPINFOHEADER;
 
+	static const char RGBQUAD_Format[]="4c";
 	typedef struct tagRGBQUAD {
 	  BYTE    rgbBlue; 
 	  BYTE    rgbGreen; 
@@ -102,6 +106,7 @@ namespace Ogre
 	  BYTE rgbtRed; 
 	} RGBTRIPLE; 
 
+	static const char ColorTable_Format[]="256i";
 	static const COLORREF	ColorTable[] = {
 		0x000000, 0xDDDDDD, 0xB6B6B6, 0x969696, 0x7C7C7C, 0x666666, 0x545454, 0x454545,
 		0x393939, 0x2F2F2F, 0x272727, 0x202020, 0x1A1A1A, 0x161616, 0x121212, 0x0F0F0F,

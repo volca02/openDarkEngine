@@ -56,7 +56,7 @@ namespace Ogre
 		unsigned int N, I;
 		char *Ptr;
 
-		MemFile->read(&FontHeader, sizeof(FontHeader));
+		MemFile->readStruct(&FontHeader, DarkFontHeader_Format, sizeof(DarkFontHeader));
 		mNumChars = FontHeader.LastChar - FontHeader.FirstChar + 1;
 
 		vector <unsigned short> Widths;
@@ -219,9 +219,9 @@ namespace Ogre
 		BitmapHeader.biSizeImage = RowWidth * mImageDim;
 		FileHeader.bfSize = FileHeader.bfOffBits + BitmapHeader.biSizeImage;
 
-		BitmapFile->write(&FileHeader, sizeof(BITMAPFILEHEADER));
-		BitmapFile->write(&BitmapHeader, sizeof(BITMAPINFOHEADER));
-		BitmapFile->write(ColorTable, sizeof(RGBQUAD) * 256);
+		BitmapFile->writeStruct(&FileHeader, BITMAPFILEHEADER_Format, sizeof(BITMAPFILEHEADER));
+		BitmapFile->writeStruct(&BitmapHeader, BITMAPINFOHEADER_Format, sizeof(BITMAPINFOHEADER));
+		BitmapFile->writeStruct(ColorTable, ColorTable_Format, sizeof(RGBQUAD) * 256);
 
 		RowWidth -= mImageDim;
 		for (Row = mImageDim - 1; Row >= 0; Row--)
@@ -273,8 +273,6 @@ namespace Ogre
 		WriteImage(BitmapFile, (RGBQUAD*)PaletteData, ImageRows);
 		delete BitmapFile;
 
-		for (unsigned int N = 0; N < mImageDim; N++)
-			delete [] ImageRows[N];
 		delete [] ImageRows;
 		//if (PaletteData != ColorTable && PaletteData != AntiAliasedColorTable)
 		//	free(PaletteData);
