@@ -147,8 +147,6 @@ char** ReadFont(FILE *FontFilePointer, int *ResultingWidth, int *ResultingHeight
 
 	for (N = 0; N < NumChars ; N++)
 	{
-		X = Chars[N].X;
-		Y = Chars[N].Y++;
 		if(FontHeader.FirstChar + N == ' ')
 			sprintf(FontDefData,"\t\t//glyph %c %f %f %f %f\n", FontHeader.FirstChar + N, (float)(Chars[N].X - 2) / FinalSize, (float)(Chars[N].Y - 2) / FinalSize, (float)(Chars[N].X + Chars[N].Width + 2) / FinalSize, (float)(Chars[N].Y + FontHeader.NumRows + 2) / FinalSize); //Ogre doesn't like the space character
 		else
