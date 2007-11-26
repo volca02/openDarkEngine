@@ -3,6 +3,7 @@
  *    This file is part of openDarkEngine project
  *    Copyright (C) 2005-2007 openDarkEngine team
  *	  Includes code based on Thief Font Converter by Tom N Harris <telliamed@whoopdedo.cjb.net>
+ *	  Includes code by Hervé Drolon and Floris van den Berg
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free Software
@@ -41,7 +42,7 @@ namespace Ogre {
 			RGBQUAD* ReadPalette(StdFile *FilePointer);
 			int LoadFont(MemoryFile* MemFile, String PaletteFileName);
 			int WriteImage(StdFile* BitmapFile, RGBQUAD *ColorTable, char **RowPointers);
-			char** ManualFonFileLoader::ReadFont(MemoryFile* MemFile, int *ResultingColor);			
+			char** ReadFont(MemoryFile* MemFile, int *ResultingColor);			
 
         public:
             ManualFonFileLoader();
