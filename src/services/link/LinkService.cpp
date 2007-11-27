@@ -189,11 +189,11 @@ namespace Opde {
 
 		FilePtr rels = db->getFile("Relations");
 
-		uint count = rels->size() / 32;
+		int count = rels->size() / 32;
 
 		LOG_DEBUG("LinkService: Loading Relations map (%d items - %d size)", count, rels->size());
 
-		for (unsigned int i = 1; i <= count; i++) {
+		for (int i = 1; i <= count; i++) {
 			char text[32];
 
 			rels->read(text, 32);
