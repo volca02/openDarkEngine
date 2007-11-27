@@ -30,7 +30,6 @@ namespace Ogre {
 		// we definetally should throw an exception if the poly is null...
 		
 		// we create a new frustum planes using a 3*Vector3 constructor
-		unsigned int idx;
 		const PortalPoints& pnts = poly->getPoints();
 		
 		if (pnts.size() < 3) 

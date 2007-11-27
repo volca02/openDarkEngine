@@ -24,6 +24,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef _MSC_VER
+#pragma warning( disable : 4996 )
+#endif
+
 #include "DarkFontConverter.h"
 
 static char BLACK_INDEX =	0;

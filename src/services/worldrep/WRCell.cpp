@@ -862,8 +862,6 @@ namespace Opde {
 
 				Vector2 displacement = calcLightmapDisplacement(polyNum);
 
-				wr_coord_t zero;
-
 				// for each vertex, insert into the model
 				for (int vert = 0; vert < face_maps[polyNum].count; vert++)  {
 					wr_coord_t vrelative = vertices[ poly_indices[polyNum][vert] ];

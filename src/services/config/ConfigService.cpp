@@ -61,6 +61,7 @@ namespace Opde {
             LOG_FATAL("Did not find the opde.cfg file. Can be fatal!");
             return false;
         }
+		return true;
     }
 
 

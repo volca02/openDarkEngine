@@ -171,7 +171,7 @@ namespace Opde {
 		LOG_INFO("WorldRepService::clearData called");
 
         if (mCells != NULL) {
-            for (int i = 0; i < mNumCells; i++) {
+            for (uint32_t i = 0; i < mNumCells; i++) {
                 LOG_DEBUG("WorldRepService::clearData deleting cell %d of %d", i, mNumCells);
                 delete mCells[i];
             }
@@ -231,7 +231,7 @@ namespace Opde {
 
 		mCells = new WRCell*[header.num_cells];
 
-		for (int i = 0; i<header.num_cells; i++) {
+		for (uint32_t i = 0; i<header.num_cells; i++) {
             mCells[i] = new WRCell(this);
 		}
 
