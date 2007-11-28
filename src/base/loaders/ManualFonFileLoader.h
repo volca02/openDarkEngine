@@ -2,8 +2,7 @@
  *
  *    This file is part of openDarkEngine project
  *    Copyright (C) 2005-2007 openDarkEngine team
- *	  Includes code based on Thief Font Converter by Tom N Harris <telliamed@whoopdedo.cjb.net>
- *	  Includes code by Hervé Drolon and Floris van den Berg
+ *	  Contains code based on Thief Font Converter by Tom N Harris <telliamed@whoopdedo.cjb.net>
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free Software
@@ -37,11 +36,15 @@ namespace Ogre {
 
 		private:
 			CharInfo *mChars;
-			unsigned int mNumChars, mImageDim;
+			unsigned char *mMemBuff;
+			DWORD mBmpFileSize;
+			unsigned int mNumChars, mImageDim, mNumRows;
 
 			RGBQUAD* ReadPalette(StdFile *FilePointer);
-			int LoadFont(MemoryFile* MemFile, String PaletteFileName);
-			int WriteImage(StdFile* BitmapFile, RGBQUAD *ColorTable, char **RowPointers);
+			int AddAlpha();
+			int CreateOgreFont(Font* DarkFont);
+			int LoadDarkFont(MemoryFile* MemFile, String PaletteFileName);
+			int WriteImage(RGBQUAD *ColorTable, char **RowPointers);
 			char** ReadFont(MemoryFile* MemFile, int *ResultingColor);			
 
         public:

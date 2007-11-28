@@ -2,7 +2,7 @@
  *
  *    This file is part of openDarkEngine project
  *    Copyright (C) 2005-2007 openDarkEngine team
- *	  Includes code based on Thief Font Converter by Tom N Harris <telliamed@whoopdedo.cjb.net>
+ *	  Contains code based on Thief Font Converter by Tom N Harris <telliamed@whoopdedo.cjb.net>
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free Software
@@ -19,35 +19,39 @@
  * http://www.gnu.org/copyleft/lesser.txt.
  *****************************************************************************/
 
+//---------------------------- El cargador de los fuentes para El Motor Oscuro --------------------
+
+#include "FreeImage.h"
 #include "ManualFonFileLoader.h"
-#include <OgreStringConverter.h>
-#include <OgreMaterial.h>
-#include <OgreMaterialManager.h>
-#include <OgreTechnique.h>
 #include <OgreLogManager.h>
-#include <OgreTextureManager.h>
 
 using namespace std;
-using namespace Opde; // For the Opde::File
+using namespace Opde; //For the Opde::File
 
 namespace Ogre 
 {
-
-
     /*-----------------------------------------------------------------*/
 	/*--------------------- ManualFonFileLoader -----------------------*/
 	/*-----------------------------------------------------------------*/
     ManualFonFileLoader::ManualFonFileLoader() : ManualResourceLoader() 
 	{
+		mChars = NULL;
+		mMemBuff = NULL;
     }
 
     //-------------------------------------------------------------------
     ManualFonFileLoader::~ManualFonFileLoader() 
 	{
-		delete [] mChars;
+		if(!mChars)
+			delete [] mChars;
+		if(!mMemBuff)
+			delete [] mMemBuff;
     }
 
-	//-------------------------------------------------------------------
+
+	/*-----------------------------------------------------------------*/
+	/*------------------------ Bitmap stuff ---------------------------*/
+	/*-----------------------------------------------------------------*/
 	char** ManualFonFileLoader::ReadFont(MemoryFile* MemFile, int *ResultingColor)
 	{
 		struct DarkFontHeader FontHeader;		
@@ -58,10 +62,11 @@ namespace Ogre
 
 		MemFile->readStruct(&FontHeader, DarkFontHeader_Format, sizeof(DarkFontHeader));
 		mNumChars = FontHeader.LastChar - FontHeader.FirstChar + 1;
+		mNumRows = FontHeader.NumRows;
 
 		vector <unsigned short> Widths;
 		MemFile->seek(FontHeader.WidthOffset, File::FSEEK_BEG);
-		for(I = 0;I < mNumChars + 1; I++)
+		for(I = 0; I < mNumChars + 1; I++)
 		{
 			unsigned short Temp;
 			MemFile->readElem(&Temp, sizeof(Temp));
@@ -95,7 +100,7 @@ namespace Ogre
 		{
 			mChars[N].Code = FontHeader.FirstChar + N;
 			mChars[N].Column = Widths[N];
-			mChars[N].Width = Widths[N+1] - Widths[N];
+			mChars[N].Width = Widths[N + 1] - Widths[N];
 			mChars[N].X = X;
 			mChars[N].Y = Y;
 			X += mChars[N].Width + 6;
@@ -156,7 +161,7 @@ namespace Ogre
 			{
 				for (N = 0; N < mNumChars; N++)
 				{
-					memcpy(RowPointers[mChars[N].Y + I]+mChars[N].X, Ptr, mChars[N].Width);				
+					memcpy(RowPointers[mChars[N].Y + I] + mChars[N].X, Ptr, mChars[N].Width);				
 					Ptr += mChars[N].Width;
 				}
 			}
@@ -194,12 +199,18 @@ namespace Ogre
 	}
 
 	//-------------------------------------------------------------------
-	int ManualFonFileLoader::WriteImage(StdFile* BitmapFile, RGBQUAD *ColorTable, char **RowPointers)
+	int ManualFonFileLoader::WriteImage(RGBQUAD *ColorTable, char **RowPointers)
 	{
 		BITMAPFILEHEADER	FileHeader;
 		BITMAPINFOHEADER	BitmapHeader;
 		int 	RowWidth, Row;
 		char	Zero[4] = {0,0,0,0};
+
+		mBmpFileSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + (sizeof(RGBQUAD) * 256) + (mImageDim * mImageDim);
+		mMemBuff = new unsigned char[mBmpFileSize];
+		if(!mMemBuff)
+			return -1;
+		unsigned char *Ptr = mMemBuff;
 
 		FileHeader.bfType = 0x4D42;
 		FileHeader.bfReserved1 = 0;
@@ -219,22 +230,38 @@ namespace Ogre
 		BitmapHeader.biSizeImage = RowWidth * mImageDim;
 		FileHeader.bfSize = FileHeader.bfOffBits + BitmapHeader.biSizeImage;
 
-		BitmapFile->writeStruct(&FileHeader, BITMAPFILEHEADER_Format, sizeof(BITMAPFILEHEADER));
-		BitmapFile->writeStruct(&BitmapHeader, BITMAPINFOHEADER_Format, sizeof(BITMAPINFOHEADER));
-		BitmapFile->writeStruct(ColorTable, ColorTable_Format, sizeof(RGBQUAD) * 256);
+		memcpy(Ptr, &FileHeader, sizeof(BITMAPFILEHEADER));
+		Ptr += sizeof(BITMAPFILEHEADER);
+
+		memcpy(Ptr, &BitmapHeader, sizeof(BITMAPINFOHEADER));
+		Ptr += sizeof(BITMAPINFOHEADER);
+
+		memcpy(Ptr, ColorTable, sizeof(RGBQUAD) * 256);
+		Ptr += sizeof(RGBQUAD) * 256;
 
 		RowWidth -= mImageDim;
 		for (Row = mImageDim - 1; Row >= 0; Row--)
 		{
-			BitmapFile->write(RowPointers[Row], mImageDim);
+			memcpy(Ptr, RowPointers[Row], mImageDim);
+			Ptr += mImageDim;
+
 			if (RowWidth != 0)
-				BitmapFile->write(Zero, RowWidth);
+			{
+				memcpy(Ptr, Zero, mImageDim);
+				Ptr += RowWidth;
+			}
 		}
+
+		//Uncommenting the following block will generate the intermediate bitmap file
+		/*StdFile* BitmapFile = new StdFile("Font.bmp", File::FILE_W);
+		BitmapFile->write(mMemBuff, mBmpFileSize);
+		delete BitmapFile;*/
+
 		return 0;
 	}
 
 	//-------------------------------------------------------------------
-	int ManualFonFileLoader::LoadFont(MemoryFile* MemFile, String PaletteFileName)
+	int ManualFonFileLoader::LoadDarkFont(MemoryFile* MemFile, String PaletteFileName)
 	{
 		COLORREF *PaletteData;
 		char **ImageRows;
@@ -269,9 +296,7 @@ namespace Ogre
 		if (Color == 2 && PaletteData == ColorTable)
 			PaletteData = (COLORREF*)AntiAliasedColorTable;
 
-		StdFile* BitmapFile = new StdFile("Font.bmp", File::FILE_W);		
-		WriteImage(BitmapFile, (RGBQUAD*)PaletteData, ImageRows);
-		delete BitmapFile;
+		WriteImage((RGBQUAD*)PaletteData, ImageRows);		
 
 		delete [] ImageRows;
 		//if (PaletteData != ColorTable && PaletteData != AntiAliasedColorTable)
@@ -279,6 +304,61 @@ namespace Ogre
 		return 0;
 	}
 
+	/*-----------------------------------------------------------------*/
+	/*------------------------- Alpha stuff ---------------------------*/
+	/*-----------------------------------------------------------------*/	
+	int ManualFonFileLoader::AddAlpha()
+	{
+#ifdef FREEIMAGE_LIB
+		FreeImage_Initialise();
+#endif //FREEIMAGE_LIB
+
+		FIMEMORY *BmpMem = FreeImage_OpenMemory(mMemBuff, mBmpFileSize);
+
+		FIBITMAP *Src = FreeImage_LoadFromMemory(FIF_BMP, BmpMem, 0);
+		if(!Src)
+			return -1;
+
+		FIBITMAP *Dst = FreeImage_ConvertTo32Bits(Src);
+
+		FreeImage_Invert(Src);
+		FIBITMAP *Mask = FreeImage_ConvertToGreyscale(Src);
+		FreeImage_Invert(Src);
+		FreeImage_SetChannel(Dst, Mask, FICC_ALPHA);
+		FreeImage_Unload(Mask);
+
+		FreeImage_Save(FIF_PNG, Dst, "Font.PNG");
+
+		FreeImage_Unload(Dst);
+		FreeImage_Unload(Src);		
+		FreeImage_CloseMemory(BmpMem);		
+
+#ifdef FREEIMAGE_LIB
+		FreeImage_DeInitialise();
+#endif //FREEIMAGE_LIB
+
+		return 0;
+	}
+
+
+	/*-----------------------------------------------------------------*/
+	/*------------------------- Ogre stuff ----------------------------*/
+	/*-----------------------------------------------------------------*/
+	int ManualFonFileLoader::CreateOgreFont(Font* DarkFont)
+	{
+		DarkFont->setSource("Font.PNG");
+		DarkFont->setType(FT_IMAGE);
+		for(unsigned int I = 0; I < mNumChars; I++)
+		{
+			if(isalnum(mChars[I].Code))
+				DarkFont->setGlyphTexCoords(mChars[I].Code, (float)(mChars[I].X - 2) / mImageDim,
+					(float)(mChars[I].Y - 2) / mImageDim, (float)(mChars[I].X + mChars[I].Width + 2) / mImageDim,
+					(float)(mChars[I].Y + mNumRows + 2) / mImageDim, 1.0);
+		}		
+		DarkFont->load();			//Let's rock!
+
+		return 0;
+	}
 	
 	//-------------------------------------------------------------------
     void ManualFonFileLoader::loadResource(Resource* resource) 
@@ -301,20 +381,21 @@ namespace Ogre
 
         BaseName += ".fon";
 
-        //Open the file, and detect the mesh type (Model/AI)
+        //Open the file
         Ogre::DataStreamPtr Stream = Ogre::ResourceGroupManager::getSingleton().openResource(BaseName, DarkFont->getGroup(), true, resource);
 
         FilePtr FontFile = new OgreFile(Stream);
 
         MemoryFile* MemFile = new MemoryFile(BaseName, File::FILE_R);
-        MemFile->initFromFile(*FontFile, FontFile->size()); // read the whole contents into the memory file
-
-        if(LoadFont(MemFile, ""))
+        MemFile->initFromFile(*FontFile, FontFile->size());
+        if(LoadDarkFont(MemFile, ""))
 			LogManager::getSingleton().logMessage("An error happened while loading the font " + BaseName);
 		delete MemFile;
 
-		//  OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Unknown FON model format : '") + header + "'", "ManualFonFileLoader::loadResource");
+		if(AddAlpha())
+			LogManager::getSingleton().logMessage("An error happened while adding Alpha Channel");
+
+		if(CreateOgreFont(DarkFont))
+			LogManager::getSingleton().logMessage("An error happened creating Ogre font");
     }
 }
-
-
