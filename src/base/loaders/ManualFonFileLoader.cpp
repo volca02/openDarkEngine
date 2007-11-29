@@ -19,7 +19,7 @@
  * http://www.gnu.org/copyleft/lesser.txt.
  *****************************************************************************/
 
-//---------------------------- El cargador de los fuentes para El Motor Oscuro --------------------
+//---------------------------- El cargador de las fuentes para El Motor Oscuro --------------------
 
 #include "FreeImage.h"
 #include "ManualFonFileLoader.h"
@@ -42,9 +42,9 @@ namespace Ogre
     //-------------------------------------------------------------------
     ManualFonFileLoader::~ManualFonFileLoader() 
 	{
-		if(!mChars)
+		if(mChars)
 			delete [] mChars;
-		if(!mMemBuff)
+		if(mMemBuff)
 			delete [] mMemBuff;
     }
 
@@ -195,7 +195,80 @@ namespace Ogre
 	//-------------------------------------------------------------------
 	RGBQUAD* ManualFonFileLoader::ReadPalette(StdFile *FilePointer)
 	{		
-		return NULL;	//Add support for external palettes later.
+		ExternalPaletteHeader PaletteHeader;
+		WORD Count;
+		char *Buffer, *C;
+		BYTE S;
+		unsigned int I;
+
+		RGBQUAD *Palette = new RGBQUAD[256];
+		if (!Palette)
+			return NULL;
+		FilePointer->readStruct(&PaletteHeader, ExternalPaletteHeader_Format, sizeof(ExternalPaletteHeader));
+		if (PaletteHeader.RiffSig == 0x46464952)
+		{
+			if (PaletteHeader.PSig1 != 0x204C4150)
+			{
+				delete []Palette;
+				return NULL;
+			}
+			FilePointer->seek(2L, StdFile::FSEEK_CUR);
+			FilePointer->readElem(&Count, 2);
+			if (Count > 256)
+				Count = 256;
+			for (I = 0; I < Count; I++)
+			{
+				FilePointer->readStruct(&Palette[I], RGBQUAD_Format, sizeof(RGBQUAD));
+				S = Palette[I].rgbRed;
+				Palette[I].rgbRed = Palette[I].rgbBlue;
+				Palette[I].rgbBlue = S;
+			}
+		}
+		else if (PaletteHeader.RiffSig == 0x4353414A)
+		{
+			FilePointer->seek(0);
+			Buffer = new char[3360];
+			if (!Buffer)
+			{
+				delete []Palette;
+				return NULL;
+			}
+			FilePointer->read(Buffer, 3352);
+			if (strncmp(Buffer, "JASC-PAL", 8))
+			{
+				delete []Buffer;
+				delete []Palette;
+				return NULL;
+			}
+			C = strchr(Buffer, '\n')+1;
+			C = strchr(C, '\n')+1;
+			Count = (WORD)strtoul(C, NULL, 10);
+			if (Count > 256)
+				Count = 256;
+			for (I = 0; I < Count; I++)
+			{
+				C = strchr(C, '\n')+1;
+				Palette[I].rgbRed = (BYTE)strtoul(C, &C, 10);
+				C++;
+				Palette[I].rgbGreen = (BYTE)strtoul(C, &C, 10);
+				C++;
+				Palette[I].rgbBlue = (BYTE)strtoul(C, &C, 10);
+			}
+			delete []Buffer;
+		}
+		else
+		{
+			FilePointer->seek(0);
+			RGBTRIPLE P;
+			for (I = 0; I < FilePointer->size() / sizeof(RGBTRIPLE); I++)
+			{
+				FilePointer->readStruct(&P, RGBTRIPLE_Format, sizeof(RGBTRIPLE));
+				Palette[I].rgbRed = P.rgbtBlue;
+				Palette[I].rgbGreen = P.rgbtGreen;
+				Palette[I].rgbBlue = P.rgbtRed;
+			}
+		}
+		return Palette;
 	}
 
 	//-------------------------------------------------------------------
@@ -267,7 +340,7 @@ namespace Ogre
 		char **ImageRows;
 		int Color;
 
-		/*if (PaletteFileName != "")
+		if (PaletteFileName != "")
 		{
 			StdFile *PaletteFile = new StdFile(PaletteFileName, File::FILE_R);
 			if (PaletteFile == 0)
@@ -283,14 +356,14 @@ namespace Ogre
 				return -2;
 			}
 		}
-		else*/
+		else
 			PaletteData = (COLORREF*)ColorTable;
 
 		ImageRows = ReadFont(MemFile, &Color);
 		if (!ImageRows)
 		{
-			//if (PaletteData != ColorTable)
-			//	free(PaletteData);
+			if (PaletteData != ColorTable)
+				delete []PaletteData;
 			return 2;
 		}
 		if (Color == 2 && PaletteData == ColorTable)
@@ -299,8 +372,8 @@ namespace Ogre
 		WriteImage((RGBQUAD*)PaletteData, ImageRows);		
 
 		delete [] ImageRows;
-		//if (PaletteData != ColorTable && PaletteData != AntiAliasedColorTable)
-		//	free(PaletteData);
+		if (PaletteData != ColorTable && PaletteData != AntiAliasedColorTable)
+			delete []PaletteData;
 		return 0;
 	}
 
@@ -331,7 +404,9 @@ namespace Ogre
 
 		FreeImage_Unload(Dst);
 		FreeImage_Unload(Src);		
-		FreeImage_CloseMemory(BmpMem);		
+		FreeImage_CloseMemory(BmpMem);
+		delete [] mMemBuff;
+		mMemBuff = NULL;
 
 #ifdef FREEIMAGE_LIB
 		FreeImage_DeInitialise();
@@ -350,13 +425,14 @@ namespace Ogre
 		DarkFont->setType(FT_IMAGE);
 		for(unsigned int I = 0; I < mNumChars; I++)
 		{
-			if(isalnum(mChars[I].Code))
-				DarkFont->setGlyphTexCoords(mChars[I].Code, (float)(mChars[I].X - 2) / mImageDim,
-					(float)(mChars[I].Y - 2) / mImageDim, (float)(mChars[I].X + mChars[I].Width + 2) / mImageDim,
-					(float)(mChars[I].Y + mNumRows + 2) / mImageDim, 1.0);
-		}		
+			DarkFont->setGlyphTexCoords(mChars[I].Code, (float)(mChars[I].X - 2) / mImageDim,
+				(float)(mChars[I].Y - 2) / mImageDim, (float)(mChars[I].X + mChars[I].Width + 2) / mImageDim,
+				(float)(mChars[I].Y + mNumRows + 2) / mImageDim, 1.0);
+		}
 		DarkFont->load();			//Let's rock!
 
+		delete [] mChars;		
+		mChars = NULL;
 		return 0;
 	}
 	
@@ -396,6 +472,6 @@ namespace Ogre
 			LogManager::getSingleton().logMessage("An error happened while adding Alpha Channel");
 
 		if(CreateOgreFont(DarkFont))
-			LogManager::getSingleton().logMessage("An error happened creating Ogre font");
+			LogManager::getSingleton().logMessage("An error happened creating Ogre font");		
     }
 }

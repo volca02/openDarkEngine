@@ -52,6 +52,16 @@ namespace Ogre
 		uint16_t	NumRows;
 	};
 
+	static const char ExternalPaletteHeader_Format[]="5i";
+	struct ExternalPaletteHeader
+	{
+		DWORD RiffSig;
+		DWORD RiffLength;
+		DWORD PSig1;
+		DWORD PSig2;
+		DWORD Length;
+	} ;
+
 	struct CharInfo
 	{
 		int16_t	Code;
@@ -100,6 +110,7 @@ namespace Ogre
 	   RGBQUAD bmiColors[1];
 	} BITMAPINFO;
 
+	static const char RGBTRIPLE_Format[]="3c";
 	typedef struct tagRGBTRIPLE { 
 	  BYTE rgbtBlue; 
 	  BYTE rgbtGreen; 
