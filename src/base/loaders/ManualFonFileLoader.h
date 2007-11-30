@@ -35,7 +35,7 @@ namespace Ogre {
     class ManualFonFileLoader : public ManualResourceLoader {
 
 		private:
-			CharInfo *mChars;
+			CharInfoList mChars;
 			unsigned char *mMemBuff;
 			DWORD mBmpFileSize;
 			unsigned int mNumChars, mImageDim, mNumRows;
@@ -43,9 +43,9 @@ namespace Ogre {
 			RGBQUAD* ReadPalette(StdFile *FilePointer);
 			int AddAlpha();
 			int CreateOgreFont(Font* DarkFont);
-			int LoadDarkFont(MemoryFile* MemFile, String PaletteFileName);
+			int LoadDarkFont(FilePtr MemFile, String PaletteFileName);
 			int WriteImage(RGBQUAD *ColorTable, char **RowPointers);
-			char** ReadFont(MemoryFile* MemFile, int *ResultingColor);			
+			char** ReadFont(FilePtr MemFile, int *ResultingColor);			
 
         public:
             ManualFonFileLoader();

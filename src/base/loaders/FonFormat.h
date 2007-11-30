@@ -70,6 +70,7 @@ namespace Ogre
 		uint16_t	Height;
 		int32_t	X,Y;
 	};
+	typedef std::vector<CharInfo> CharInfoList;
 
 	#pragma pack(push, 1)
 	

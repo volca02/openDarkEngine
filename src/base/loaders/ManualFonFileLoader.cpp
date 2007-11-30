@@ -35,15 +35,12 @@ namespace Ogre
 	/*-----------------------------------------------------------------*/
     ManualFonFileLoader::ManualFonFileLoader() : ManualResourceLoader() 
 	{
-		mChars = NULL;
 		mMemBuff = NULL;
     }
 
     //-------------------------------------------------------------------
     ManualFonFileLoader::~ManualFonFileLoader() 
 	{
-		if(mChars)
-			delete [] mChars;
 		if(mMemBuff)
 			delete [] mMemBuff;
     }
@@ -52,7 +49,7 @@ namespace Ogre
 	/*-----------------------------------------------------------------*/
 	/*------------------------ Bitmap stuff ---------------------------*/
 	/*-----------------------------------------------------------------*/
-	char** ManualFonFileLoader::ReadFont(MemoryFile* MemFile, int *ResultingColor)
+	char** ManualFonFileLoader::ReadFont(FilePtr FontFile, int *ResultingColor)
 	{
 		struct DarkFontHeader FontHeader;		
 		unsigned int ImageWidth, ImageHeight, FinalSize = 1;
@@ -60,32 +57,25 @@ namespace Ogre
 		unsigned int N, I;
 		char *Ptr;
 
-		MemFile->readStruct(&FontHeader, DarkFontHeader_Format, sizeof(DarkFontHeader));
+		FontFile->readStruct(&FontHeader, DarkFontHeader_Format, sizeof(DarkFontHeader));
 		mNumChars = FontHeader.LastChar - FontHeader.FirstChar + 1;
 		mNumRows = FontHeader.NumRows;
 
 		vector <unsigned short> Widths;
-		MemFile->seek(FontHeader.WidthOffset, File::FSEEK_BEG);
+		FontFile->seek(FontHeader.WidthOffset, File::FSEEK_BEG);
 		for(I = 0; I < mNumChars + 1; I++)
 		{
 			unsigned short Temp;
-			MemFile->readElem(&Temp, sizeof(Temp));
+			FontFile->readElem(&Temp, sizeof(Temp));
 			Widths.push_back(Temp);
 		}
 
-		char *BitmapData = new char[MemFile->size() + 1];
+		char *BitmapData = new char[FontFile->size() + 1];
 		if (!BitmapData)
 			return NULL;
-		MemFile->seek(FontHeader.BitmapOffset, File::FSEEK_BEG);
-		MemFile->read(BitmapData, MemFile->size() - FontHeader.BitmapOffset);		
+		FontFile->seek(FontHeader.BitmapOffset, File::FSEEK_BEG);
+		FontFile->read(BitmapData, FontFile->size() - FontHeader.BitmapOffset);		
 		if (FontHeader.BitmapOffset < FontHeader.WidthOffset)
-		{
-			delete [] BitmapData;
-			return NULL;
-		}
-
-		mChars = new CharInfo[mNumChars];
-		if (!mChars)
 		{
 			delete [] BitmapData;
 			return NULL;
@@ -96,14 +86,16 @@ namespace Ogre
 		Y = (FontHeader.NumRows / 2) + 2;
 		X = 2;
 		ImageWidth = 2;
+
 		for (N = 0; N < mNumChars; N++)
 		{
-			mChars[N].Code = FontHeader.FirstChar + N;
-			mChars[N].Column = Widths[N];
-			mChars[N].Width = Widths[N + 1] - Widths[N];
-			mChars[N].X = X;
-			mChars[N].Y = Y;
-			X += mChars[N].Width + 6;
+			CharInfo Char;
+			Char.Code = FontHeader.FirstChar + N;
+			Char.Column = Widths[N];
+			Char.Width = Widths[N + 1] - Widths[N];
+			Char.X = X;
+			Char.Y = Y;
+			X += Char.Width + 6;
 			if ((N & 0xF) == 0xF)
 			{
 				Y += FontHeader.NumRows + 4;
@@ -111,7 +103,9 @@ namespace Ogre
 					ImageWidth = X;
 				X = 2;
 			}
+			mChars.push_back(Char);
 		}
+
 		if (X > ImageWidth)
 			ImageWidth = X;
 
@@ -334,7 +328,7 @@ namespace Ogre
 	}
 
 	//-------------------------------------------------------------------
-	int ManualFonFileLoader::LoadDarkFont(MemoryFile* MemFile, String PaletteFileName)
+	int ManualFonFileLoader::LoadDarkFont(FilePtr FontFile, String PaletteFileName)
 	{
 		COLORREF *PaletteData;
 		char **ImageRows;
@@ -359,7 +353,7 @@ namespace Ogre
 		else
 			PaletteData = (COLORREF*)ColorTable;
 
-		ImageRows = ReadFont(MemFile, &Color);
+		ImageRows = ReadFont(FontFile, &Color);
 		if (!ImageRows)
 		{
 			if (PaletteData != ColorTable)
@@ -423,16 +417,16 @@ namespace Ogre
 	{
 		DarkFont->setSource("Font.PNG");
 		DarkFont->setType(FT_IMAGE);
-		for(unsigned int I = 0; I < mNumChars; I++)
+
+		for(CharInfoList::const_iterator It = mChars.begin(); It != mChars.end(); It++)
 		{
-			DarkFont->setGlyphTexCoords(mChars[I].Code, (float)(mChars[I].X - 2) / mImageDim,
-				(float)(mChars[I].Y - 2) / mImageDim, (float)(mChars[I].X + mChars[I].Width + 2) / mImageDim,
-				(float)(mChars[I].Y + mNumRows + 2) / mImageDim, 1.0);
+			const CharInfo& Char = *It;
+			DarkFont->setGlyphTexCoords(Char.Code, (float)(Char.X - 2) / mImageDim,
+				(float)(Char.Y - 2) / mImageDim, (float)(Char.X + Char.Width + 2) / mImageDim,
+				(float)(Char.Y + mNumRows + 2) / mImageDim, 1.0);
 		}
 		DarkFont->load();			//Let's rock!
 
-		delete [] mChars;		
-		mChars = NULL;
 		return 0;
 	}
 	
@@ -462,16 +456,13 @@ namespace Ogre
 
         FilePtr FontFile = new OgreFile(Stream);
 
-        MemoryFile* MemFile = new MemoryFile(BaseName, File::FILE_R);
-        MemFile->initFromFile(*FontFile, FontFile->size());
-        if(LoadDarkFont(MemFile, ""))
-			LogManager::getSingleton().logMessage("An error happened while loading the font " + BaseName);
-		delete MemFile;
+        if(LoadDarkFont(FontFile, ""))
+			LogManager::getSingleton().logMessage("An error occurred while loading the font " + BaseName);
 
 		if(AddAlpha())
-			LogManager::getSingleton().logMessage("An error happened while adding Alpha Channel");
+			LogManager::getSingleton().logMessage("An error occurred while adding Alpha Channel");
 
 		if(CreateOgreFont(DarkFont))
-			LogManager::getSingleton().logMessage("An error happened creating Ogre font");		
+			LogManager::getSingleton().logMessage("An error occurred creating Ogre font");		
     }
 }
