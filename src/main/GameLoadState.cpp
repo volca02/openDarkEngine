@@ -43,13 +43,50 @@ namespace Opde {
 		mOverlayMgr = OverlayManager::getSingletonPtr();
 		mServiceMgr = ServiceManager::getSingletonPtr();
 		mConfigService = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
+		
+		mFontTest = false;
+		
+		mManualFonLoader = new ManualFonFileLoader();
+		
+		// T1 only. Does not matter much though. This is only a sort of unit test. Will be removed
+		mFontList.push_back("object/textfont.fon");
+		mFontList.push_back("objectlo/textfont.fon");
+		mFontList.push_back("objectlou/textfont.fon");
+		mFontList.push_back("OBJECTU/textfont.fon");
+		mFontList.push_back("ledger2/TEXTFONT.FON");
+		mFontList.push_back("demo/TEXTFONT.FON");
+		mFontList.push_back("parch/TEXTFONT.FON");
+		mFontList.push_back("parch2/TEXTFONT.FON");
+		mFontList.push_back("STONED4/TEXTFONT.FON");
+		mFontList.push_back("mapscrap/TEXTFONT.FON");
+		mFontList.push_back("graveD10/TEXTFONT.FON");
+		mFontList.push_back("PBOOK/TEXTFONT.FON");
+		mFontList.push_back("plaque/TEXTFONT.FON");
+		mFontList.push_back("pbook2/TEXTFONT.FON");
+		mFontList.push_back("keepmap/TEXTFONT.FON");
+		mFontList.push_back("parch3/TEXTFONT.FON");
+		mFontList.push_back("ledger/TEXTFONT.FON");
+		mFontList.push_back("font.fon");
+		mFontList.push_back("textfont.fon");
+		mFontList.push_back("FONTAA36.FON");
+		mFontList.push_back("SMALFONT.FON");
+		mFontList.push_back("FONTAA29.FON");
+		mFontList.push_back("TEXTFONT.FON");
+		mFontList.push_back("FONTAA20.FON");
+		mFontList.push_back("FONTAA16.FON");
+		mFontList.push_back("FONTAA12.FON");
 	}
 
     GameLoadState::~GameLoadState() {
-
+    	delete mManualFonLoader;
     }
 
 	void GameLoadState::start() {
+		DVariant fnttst;
+		
+		if (mConfigService->getParam("font_test", fnttst))
+			mFontTest = fnttst.toBool();
+		
 	    LOG_INFO("LoadState: Starting");
 
 		mSceneMgr = mRoot->getSceneManager( "DarkSceneManager" );
@@ -62,12 +99,20 @@ namespace Opde {
 
 		mViewport = mRoot->getAutoCreatedWindow()->addViewport( mCamera );
 
-		// display loading... message
-        mLoadingOverlay = OverlayManager::getSingleton().getByName("Opde/LoadOverlay");
+		if (mFontTest) {
+			// create all the fonts in T1 as a test
+			// You may have some trouble here - I searched for all the .fon files in probably all .crf files of T1
+			// So be sure to fill your resources.cfg to reflect this is you wanna use this code (font_test=true in opde.cfg)
+			// Anyway, this is the list
+			createTestFontOverlays();
+		} else {
+			// display loading... message
+			mLoadingOverlay = OverlayManager::getSingleton().getByName("Opde/LoadOverlay");
 
-		// Create a panel
-		mLoadingOverlay->show();
-
+			// Create a panel
+			mLoadingOverlay->show();
+		}
+		
 		LOG_INFO("LoadState: Started");
 
 		mLoaded = false;
@@ -152,5 +197,54 @@ namespace Opde {
 		return false;
 	}
 
+	void GameLoadState::createTestFontOverlays() {
+		// Iterate through the list, create an overlay for each font
+		OverlayManager& overlayManager = OverlayManager::getSingleton();
+		
+		mLoadingOverlay = overlayManager.create("TestFonts");
+
+		// Create a panel
+		OverlayContainer* panel = static_cast<OverlayContainer*>(
+			overlayManager.createOverlayElement("Panel", "PanelName"));
+		
+		panel->setMetricsMode(Ogre::GMM_PIXELS);
+		panel->setPosition(0, 0);
+		panel->setDimensions(640, 480);
+		// TODO: Background material?
+
+
+		std::vector<std::string>::iterator it = mFontList.begin();
+		int posy = 0;
+		
+		for (; it != mFontList.end(); it++) {
+			// Create a text area
+			TextAreaOverlayElement* textArea = static_cast<TextAreaOverlayElement*>(
+				overlayManager.createOverlayElement("TextArea", *it));
+			
+			Ogre::LogManager::getSingleton().logMessage("Loading font test " + *it);
+				
+			Ogre::FontPtr fnt = FontManager::getSingleton().load(*it, "General", true, mManualFonLoader);
+				
+			textArea->setMetricsMode(Ogre::GMM_PIXELS);
+			textArea->setPosition(0, posy);
+			textArea->setDimensions(640, 45);
+			textArea->setCaption(*it);
+			textArea->setCharHeight(16); // Todo: size
+			textArea->setFontName(fnt->getName()); // *it
+			textArea->setColourBottom(ColourValue(0.3, 0.5, 0.3));
+			textArea->setColourTop(ColourValue(0.5, 0.7, 0.5));
+			
+			posy += 18;
+			
+			// Add the text area to the panel
+			panel->addChild(textArea);
+		}
+
+		mLoadingOverlay->add2D(panel);
+
+		// Show the overlay
+		mLoadingOverlay->show();
+		
+	}
 }
 

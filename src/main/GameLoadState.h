@@ -28,6 +28,7 @@
 #include "FileGroup.h"
 #include "WorldRepService.h"
 #include "OpdeServiceManager.h"
+#include "ManualFonFileLoader.h"
 
 #include <OgreRoot.h>
 #include <OgreSceneManager.h>
@@ -56,6 +57,8 @@ namespace Opde {
 			virtual bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id );
 
 		protected:
+			void createTestFontOverlays();
+		
 			Ogre::Root *mRoot;
 			Ogre::SceneManager *mSceneMgr;
 			Ogre::OverlayManager *mOverlayMgr;
@@ -66,8 +69,14 @@ namespace Opde {
 
 			bool mFirstTime;
 			bool mLoaded;
+			
+			bool mFontTest;
 
 			Ogre::Overlay* mLoadingOverlay;
+
+			// Temporary for font testing
+			std::vector<std::string> mFontList;
+			Ogre::ManualFonFileLoader* mManualFonLoader;
 
 			// config service
 			ConfigServicePtr mConfigService;
