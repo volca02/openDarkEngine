@@ -36,9 +36,9 @@ namespace Ogre {
 
 		private:
 			CharInfoList mChars;
-			unsigned char *mMemBuff;
+			unsigned char *mpMemBuff;
 			DWORD mBmpFileSize;
-			unsigned int mNumChars, mImageDim, mNumRows;
+			unsigned int mImageDim, mNumRows;
 
 			RGBQUAD* ReadPalette(StdFile *FilePointer);
 			int AddAlpha();

@@ -35,14 +35,14 @@ namespace Ogre
 	/*-----------------------------------------------------------------*/
     ManualFonFileLoader::ManualFonFileLoader() : ManualResourceLoader() 
 	{
-		mMemBuff = NULL;
+		mpMemBuff = NULL;
     }
 
     //-------------------------------------------------------------------
     ManualFonFileLoader::~ManualFonFileLoader() 
 	{
-		if(mMemBuff)
-			delete [] mMemBuff;
+		if(mpMemBuff)
+			delete [] mpMemBuff;
     }
 
 
@@ -55,15 +55,16 @@ namespace Ogre
 		unsigned int ImageWidth, ImageHeight, FinalSize = 1;
 		unsigned int X, Y;
 		unsigned int N, I;
+		unsigned int NumChars;
 		char *Ptr;
 
 		FontFile->readStruct(&FontHeader, DarkFontHeader_Format, sizeof(DarkFontHeader));
-		mNumChars = FontHeader.LastChar - FontHeader.FirstChar + 1;
+		NumChars = FontHeader.LastChar - FontHeader.FirstChar + 1;
 		mNumRows = FontHeader.NumRows;
 
 		vector <unsigned short> Widths;
 		FontFile->seek(FontHeader.WidthOffset, File::FSEEK_BEG);
-		for(I = 0; I < mNumChars + 1; I++)
+		for(I = 0; I < NumChars + 1; I++)
 		{
 			unsigned short Temp;
 			FontFile->readElem(&Temp, sizeof(Temp));
@@ -81,13 +82,13 @@ namespace Ogre
 			return NULL;
 		}
 
-		ImageHeight = ((mNumChars / 16) + 2) * (FontHeader.NumRows + 4);
+		ImageHeight = ((NumChars / 16) + 2) * (FontHeader.NumRows + 4);
 		
 		Y = (FontHeader.NumRows / 2) + 2;
 		X = 2;
 		ImageWidth = 2;
 
-		for (N = 0; N < mNumChars; N++)
+		for (N = 0; N < NumChars; N++)
 		{
 			CharInfo Char;
 			Char.Code = FontHeader.FirstChar + N;
@@ -139,11 +140,12 @@ namespace Ogre
 			Ptr = BitmapData;
 			for (I = 0; I < FontHeader.NumRows; I++)
 			{
-				for (N = 0; N < mNumChars; N++)
+				for (CharInfoList::const_iterator It = mChars.begin(); It != mChars.end(); It++)
 				{
-					Y = mChars[N].Column;
-					for (X = 0; X < mChars[N].Width; Y++, X++)
-						RowPointers[mChars[N].Y + I][mChars[N].X + X] = ((Ptr[Y / 8]>>(7 - (Y % 8))) & 1) ? WHITE_INDEX : BLACK_INDEX;
+					const CharInfo& Char = *It;
+					Y = Char.Column;
+					for (X = 0; X < Char.Width; Y++, X++)
+						RowPointers[Char.Y + I][Char.X + X] = ((Ptr[Y / 8]>>(7 - (Y % 8))) & 1) ? WHITE_INDEX : BLACK_INDEX;
 				}
 				Ptr += FontHeader.RowWidth;
 			}
@@ -153,10 +155,11 @@ namespace Ogre
 			Ptr = BitmapData;
 			for (I = 0; I < FontHeader.NumRows; I++)
 			{
-				for (N = 0; N < mNumChars; N++)
+				for (CharInfoList::const_iterator It = mChars.begin(); It != mChars.end(); It++)
 				{
-					memcpy(RowPointers[mChars[N].Y + I] + mChars[N].X, Ptr, mChars[N].Width);				
-					Ptr += mChars[N].Width;
+					const CharInfo& Char = *It;
+					memcpy(RowPointers[Char.Y + I] + Char.X, Ptr, Char.Width);				
+					Ptr += Char.Width;
 				}
 			}
 		}
@@ -274,10 +277,10 @@ namespace Ogre
 		char	Zero[4] = {0,0,0,0};
 
 		mBmpFileSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + (sizeof(RGBQUAD) * 256) + (mImageDim * mImageDim);
-		mMemBuff = new unsigned char[mBmpFileSize];
-		if(!mMemBuff)
+		mpMemBuff = new unsigned char[mBmpFileSize];
+		if(!mpMemBuff)
 			return -1;
-		unsigned char *Ptr = mMemBuff;
+		unsigned char *Ptr = mpMemBuff;
 
 		FileHeader.bfType = 0x4D42;
 		FileHeader.bfReserved1 = 0;
@@ -321,7 +324,7 @@ namespace Ogre
 
 		//Uncommenting the following block will generate the intermediate bitmap file
 		/*StdFile* BitmapFile = new StdFile("Font.bmp", File::FILE_W);
-		BitmapFile->write(mMemBuff, mBmpFileSize);
+		BitmapFile->write(mpMemBuff, mBmpFileSize);
 		delete BitmapFile;*/
 
 		return 0;
@@ -380,7 +383,7 @@ namespace Ogre
 		FreeImage_Initialise();
 #endif //FREEIMAGE_LIB
 
-		FIMEMORY *BmpMem = FreeImage_OpenMemory(mMemBuff, mBmpFileSize);
+		FIMEMORY *BmpMem = FreeImage_OpenMemory(mpMemBuff, mBmpFileSize);
 
 		FIBITMAP *Src = FreeImage_LoadFromMemory(FIF_BMP, BmpMem, 0);
 		if(!Src)
@@ -399,8 +402,8 @@ namespace Ogre
 		FreeImage_Unload(Dst);
 		FreeImage_Unload(Src);		
 		FreeImage_CloseMemory(BmpMem);
-		delete [] mMemBuff;
-		mMemBuff = NULL;
+		delete [] mpMemBuff;
+		mpMemBuff = NULL;
 
 #ifdef FREEIMAGE_LIB
 		FreeImage_DeInitialise();
