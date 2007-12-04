@@ -36,9 +36,10 @@ namespace Ogre {
 
 		private:
 			CharInfoList mChars;
-			unsigned char *mMemBuff;
+			unsigned char *mpMemBuff;
 			DWORD mBmpFileSize;
-			unsigned int mNumChars, mImageDim, mNumRows;
+			unsigned int mImageDim, mNumRows;
+			int mNumChars;
 
 			std::string mTxtName, mFontGroup; // the name of the dynamically generated texture
 
@@ -46,7 +47,7 @@ namespace Ogre {
 			int AddAlpha();
 			int CreateOgreFont(Font* DarkFont);
 			int LoadDarkFont(FilePtr MemFile, String PaletteFileName);
-			int WriteImage(RGBQUAD *ColorTable, char **RowPointers);
+			int WriteImage(RGBQUAD *ColorTable, unsigned char **RowPointers);
 			unsigned char** ReadFont(FilePtr MemFile, int *ResultingColor);
 
 			void createOgreTexture(unsigned char** img, RGBQUAD* palette);
