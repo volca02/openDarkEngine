@@ -20,75 +20,76 @@
  *****************************************************************************/
 
 //---------------------------- El cargador de las fuentes para El Motor Oscuro --------------------
-
 #include "FreeImage.h"
 #include "ManualFonFileLoader.h"
 #include <OgreLogManager.h>
+#include <OgreStringConverter.h>
+#include <OgreTextureManager.h>
+#include <OgreHardwarePixelBuffer.h>
 
 using namespace std;
 using namespace Opde; //For the Opde::File
 
-namespace Ogre 
+namespace Ogre
 {
     /*-----------------------------------------------------------------*/
 	/*--------------------- ManualFonFileLoader -----------------------*/
 	/*-----------------------------------------------------------------*/
-    ManualFonFileLoader::ManualFonFileLoader() : ManualResourceLoader() 
+    ManualFonFileLoader::ManualFonFileLoader() : ManualResourceLoader()
 	{
-		mpMemBuff = NULL;
+		mMemBuff = NULL;
     }
 
     //-------------------------------------------------------------------
-    ManualFonFileLoader::~ManualFonFileLoader() 
+    ManualFonFileLoader::~ManualFonFileLoader()
 	{
-		if(mpMemBuff)
-			delete [] mpMemBuff;
+		if(mMemBuff)
+			delete [] mMemBuff;
     }
 
 
 	/*-----------------------------------------------------------------*/
 	/*------------------------ Bitmap stuff ---------------------------*/
 	/*-----------------------------------------------------------------*/
-	char** ManualFonFileLoader::ReadFont(FilePtr FontFile, int *ResultingColor)
+	unsigned char** ManualFonFileLoader::ReadFont(FilePtr FontFile, int *ResultingColor)
 	{
-		struct DarkFontHeader FontHeader;		
+		struct DarkFontHeader FontHeader;
 		unsigned int ImageWidth, ImageHeight, FinalSize = 1;
 		unsigned int X, Y;
 		unsigned int N, I;
-		unsigned int NumChars;
-		char *Ptr;
+		unsigned char *Ptr;
 
 		FontFile->readStruct(&FontHeader, DarkFontHeader_Format, sizeof(DarkFontHeader));
-		NumChars = FontHeader.LastChar - FontHeader.FirstChar + 1;
+		mNumChars = FontHeader.LastChar - FontHeader.FirstChar + 1;
 		mNumRows = FontHeader.NumRows;
 
 		vector <unsigned short> Widths;
 		FontFile->seek(FontHeader.WidthOffset, File::FSEEK_BEG);
-		for(I = 0; I < NumChars + 1; I++)
+		for(I = 0; I < mNumChars + 1; I++)
 		{
 			unsigned short Temp;
 			FontFile->readElem(&Temp, sizeof(Temp));
 			Widths.push_back(Temp);
 		}
 
-		char *BitmapData = new char[FontFile->size() + 1];
+		unsigned char *BitmapData = new unsigned char[FontFile->size() + 1];
 		if (!BitmapData)
 			return NULL;
 		FontFile->seek(FontHeader.BitmapOffset, File::FSEEK_BEG);
-		FontFile->read(BitmapData, FontFile->size() - FontHeader.BitmapOffset);		
+		FontFile->read(BitmapData, FontFile->size() - FontHeader.BitmapOffset);
 		if (FontHeader.BitmapOffset < FontHeader.WidthOffset)
 		{
 			delete [] BitmapData;
 			return NULL;
 		}
 
-		ImageHeight = ((NumChars / 16) + 2) * (FontHeader.NumRows + 4);
-		
+		ImageHeight = ((mNumChars / 16) + 2) * (FontHeader.NumRows + 4);
+
 		Y = (FontHeader.NumRows / 2) + 2;
 		X = 2;
 		ImageWidth = 2;
 
-		for (N = 0; N < NumChars; N++)
+		for (N = 0; N < mNumChars; N++)
 		{
 			CharInfo Char;
 			Char.Code = FontHeader.FirstChar + N;
@@ -113,14 +114,14 @@ namespace Ogre
 		while ((FinalSize < ImageWidth) || (FinalSize < ImageHeight))
 			FinalSize <<= 1;
 
-		char ** RowPointers = new char* [FinalSize];
+		unsigned char ** RowPointers = new unsigned char* [FinalSize];
 		if (!RowPointers)
-		{			
+		{
 			delete [] BitmapData;
 			return NULL;
 		}
 
-		char *ImageData = new char[FinalSize * FinalSize];
+		unsigned char *ImageData = new unsigned char[FinalSize * FinalSize];
 		if (!ImageData)
 		{
 			delete [] RowPointers;
@@ -135,17 +136,22 @@ namespace Ogre
 			Ptr += FinalSize;
 		}
 
+		String s = "Loading font " + FontFile->getName();
+		s += " format ";
+		s +=  StringConverter::toString(FontHeader.Format);
+
+		LogManager::getSingleton().logMessage(s);
+
 		if (FontHeader.Format == 0)
 		{
 			Ptr = BitmapData;
 			for (I = 0; I < FontHeader.NumRows; I++)
 			{
-				for (CharInfoList::const_iterator It = mChars.begin(); It != mChars.end(); It++)
+				for (N = 0; N < mNumChars; N++)
 				{
-					const CharInfo& Char = *It;
-					Y = Char.Column;
-					for (X = 0; X < Char.Width; Y++, X++)
-						RowPointers[Char.Y + I][Char.X + X] = ((Ptr[Y / 8]>>(7 - (Y % 8))) & 1) ? WHITE_INDEX : BLACK_INDEX;
+					Y = mChars[N].Column;
+					for (X = 0; X < mChars[N].Width; Y++, X++)
+						RowPointers[mChars[N].Y + I][mChars[N].X + X] = ((Ptr[Y / 8]>>(7 - (Y % 8))) & 1) ? WHITE_INDEX : BLACK_INDEX;
 				}
 				Ptr += FontHeader.RowWidth;
 			}
@@ -155,24 +161,23 @@ namespace Ogre
 			Ptr = BitmapData;
 			for (I = 0; I < FontHeader.NumRows; I++)
 			{
-				for (CharInfoList::const_iterator It = mChars.begin(); It != mChars.end(); It++)
+				for (N = 0; N < mNumChars; N++)
 				{
-					const CharInfo& Char = *It;
-					memcpy(RowPointers[Char.Y + I] + Char.X, Ptr, Char.Width);				
-					Ptr += Char.Width;
+					memcpy(RowPointers[mChars[N].Y + I] + mChars[N].X, Ptr, mChars[N].Width);
+					Ptr += mChars[N].Width;
 				}
 			}
 		}
-		
+
 		mImageDim = FinalSize;
 		switch (FontHeader.Format)
 		{
 		case 0:
-			*ResultingColor = 1; 			
+			*ResultingColor = 1;
 			break;
 
 		case 1:
-			*ResultingColor = 2; 
+			*ResultingColor = 2;
 			break;
 
 		case 0xCCCC:
@@ -191,7 +196,7 @@ namespace Ogre
 
 	//-------------------------------------------------------------------
 	RGBQUAD* ManualFonFileLoader::ReadPalette(StdFile *FilePointer)
-	{		
+	{
 		ExternalPaletteHeader PaletteHeader;
 		WORD Count;
 		char *Buffer, *C;
@@ -277,10 +282,10 @@ namespace Ogre
 		char	Zero[4] = {0,0,0,0};
 
 		mBmpFileSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + (sizeof(RGBQUAD) * 256) + (mImageDim * mImageDim);
-		mpMemBuff = new unsigned char[mBmpFileSize];
-		if(!mpMemBuff)
+		mMemBuff = new unsigned char[mBmpFileSize];
+		if(!mMemBuff)
 			return -1;
-		unsigned char *Ptr = mpMemBuff;
+		unsigned char *Ptr = mMemBuff;
 
 		FileHeader.bfType = 0x4D42;
 		FileHeader.bfReserved1 = 0;
@@ -324,7 +329,7 @@ namespace Ogre
 
 		//Uncommenting the following block will generate the intermediate bitmap file
 		/*StdFile* BitmapFile = new StdFile("Font.bmp", File::FILE_W);
-		BitmapFile->write(mpMemBuff, mBmpFileSize);
+		BitmapFile->write(mMemBuff, mBmpFileSize);
 		delete BitmapFile;*/
 
 		return 0;
@@ -334,11 +339,14 @@ namespace Ogre
 	int ManualFonFileLoader::LoadDarkFont(FilePtr FontFile, String PaletteFileName)
 	{
 		COLORREF *PaletteData;
-		char **ImageRows;
+		unsigned char **ImageRows;
 		int Color;
 
 		if (PaletteFileName != "")
 		{
+			// Small comment: This would better be done using Ogre::DataStream
+			// Also, the StdFile (as others) will throw an exception when the file was not found,
+			// so the condition will always fail...
 			StdFile *PaletteFile = new StdFile(PaletteFileName, File::FILE_R);
 			if (PaletteFile == 0)
 			{
@@ -366,7 +374,10 @@ namespace Ogre
 		if (Color == 2 && PaletteData == ColorTable)
 			PaletteData = (COLORREF*)AntiAliasedColorTable;
 
-		WriteImage((RGBQUAD*)PaletteData, ImageRows);		
+		// WriteImage((RGBQUAD*)PaletteData, ImageRows);
+		// For now... Can also be done directly when loading (And probably better too)
+		createOgreTexture(ImageRows, (RGBQUAD*)PaletteData);
+
 
 		delete [] ImageRows;
 		if (PaletteData != ColorTable && PaletteData != AntiAliasedColorTable)
@@ -374,16 +385,55 @@ namespace Ogre
 		return 0;
 	}
 
+    //-------------------------------------------------------------------
+	void ManualFonFileLoader::createOgreTexture(unsigned char** img, RGBQUAD* palette) {
+		// Create a texure, then fill it
+		TexturePtr txt = TextureManager::getSingleton().createManual(mTxtName, mFontGroup, TEX_TYPE_2D, mImageDim, mImageDim, 1, PF_A8R8G8B8);
+
+		// Lock the texture, obtain a pointer
+		HardwarePixelBufferSharedPtr pbuf = txt->getBuffer(0, 0);
+
+		// Erase the lmap atlas pixel buffer
+		pbuf->lock(HardwareBuffer::HBL_DISCARD);
+		const PixelBox &pb = pbuf->getCurrentLock();
+
+		// Copy the image data, converting to 32bit on the fly...
+		for (int y = 0; y < mImageDim; y++) {
+		    unsigned char* row = img[y];
+			uint32 *data = static_cast<uint32*>(pb.data) + y*pb.rowPitch;
+
+			for (int x = 0; x < mImageDim; x++) {
+				int palidx = 255 - row[x];
+
+                unsigned char r,g,b,a;
+                r = palette[palidx].rgbRed;
+                g = palette[palidx].rgbGreen;
+                b = palette[palidx].rgbBlue;
+
+                a = 0;
+
+                if (palidx == WHITE_INDEX)
+                    a = 255;
+
+				// Write the ARGB data
+				data[x] = a | (r << 8) | (g << 16) | (b << 24);
+			}
+
+		}
+
+		pbuf->unlock();
+	}
+
 	/*-----------------------------------------------------------------*/
 	/*------------------------- Alpha stuff ---------------------------*/
-	/*-----------------------------------------------------------------*/	
+	/*-----------------------------------------------------------------*/
 	int ManualFonFileLoader::AddAlpha()
 	{
 #ifdef FREEIMAGE_LIB
 		FreeImage_Initialise();
 #endif //FREEIMAGE_LIB
 
-		FIMEMORY *BmpMem = FreeImage_OpenMemory(mpMemBuff, mBmpFileSize);
+		FIMEMORY *BmpMem = FreeImage_OpenMemory(mMemBuff, mBmpFileSize);
 
 		FIBITMAP *Src = FreeImage_LoadFromMemory(FIF_BMP, BmpMem, 0);
 		if(!Src)
@@ -400,10 +450,10 @@ namespace Ogre
 		FreeImage_Save(FIF_PNG, Dst, "Font.PNG");
 
 		FreeImage_Unload(Dst);
-		FreeImage_Unload(Src);		
+		FreeImage_Unload(Src);
 		FreeImage_CloseMemory(BmpMem);
-		delete [] mpMemBuff;
-		mpMemBuff = NULL;
+		delete [] mMemBuff;
+		mMemBuff = NULL;
 
 #ifdef FREEIMAGE_LIB
 		FreeImage_DeInitialise();
@@ -418,7 +468,7 @@ namespace Ogre
 	/*-----------------------------------------------------------------*/
 	int ManualFonFileLoader::CreateOgreFont(Font* DarkFont)
 	{
-		DarkFont->setSource("Font.PNG");
+		DarkFont->setSource(mTxtName);
 		DarkFont->setType(FT_IMAGE);
 
 		for(CharInfoList::const_iterator It = mChars.begin(); It != mChars.end(); It++)
@@ -428,20 +478,23 @@ namespace Ogre
 				(float)(Char.Y - 2) / mImageDim, (float)(Char.X + Char.Width + 2) / mImageDim,
 				(float)(Char.Y + mNumRows + 2) / mImageDim, 1.0);
 		}
+
+		DarkFont->setParameter("size", StringConverter::toString(mNumRows)); // seems mNumRows (NumRows) means Y size of the font...
 		DarkFont->load();			//Let's rock!
+
 
 		return 0;
 	}
-	
+
 	//-------------------------------------------------------------------
-    void ManualFonFileLoader::loadResource(Resource* resource) 
+    void ManualFonFileLoader::loadResource(Resource* resource)
 	{
         // Cast to font, and fill
         Font* DarkFont = static_cast<Font*>(resource);
 
         // Fill. Find the file to be loaded by the name, and load it
         String FontName = DarkFont->getName();
-        String FontGroup = DarkFont->getGroup();
+        mFontGroup = DarkFont->getGroup();
 
         // Get the real filename from the nameValuePairList
         // That means: truncate to the last dot, append .fon to the filename
@@ -452,6 +505,8 @@ namespace Ogre
             BaseName = FontName.substr(0, DotPos);
         }
 
+		mTxtName = BaseName + "_Txt";
+
         BaseName += ".fon";
 
         //Open the file
@@ -461,11 +516,11 @@ namespace Ogre
 
         if(LoadDarkFont(FontFile, ""))
 			LogManager::getSingleton().logMessage("An error occurred while loading the font " + BaseName);
-
+		/*
 		if(AddAlpha())
-			LogManager::getSingleton().logMessage("An error occurred while adding Alpha Channel");
+			LogManager::getSingleton().logMessage("An error occurred while adding Alpha Channel");*/
 
 		if(CreateOgreFont(DarkFont))
-			LogManager::getSingleton().logMessage("An error occurred creating Ogre font");		
+			LogManager::getSingleton().logMessage("An error occurred creating Ogre font");
     }
 }
