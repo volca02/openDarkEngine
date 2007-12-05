@@ -425,8 +425,9 @@ namespace Ogre
 
 				unsigned char r,g,b,a;
 
+                a = 255;
 				if (palidx == BLACK_INDEX)
-                    a = 255;
+                    a = 0;
 
 				palidx = 255 - palidx;
 
@@ -434,12 +435,9 @@ namespace Ogre
                 g = palette[palidx].rgbGreen;
                 b = palette[palidx].rgbBlue;
 
-                a = 0;
-
-                
 
 				// Write the ARGB data
-				data[x] = a | (r << 8) | (g << 16) | (b << 24);
+				data[x] = b | (g << 8) | (r << 16) | (a << 24);
 			}
 
 		}
