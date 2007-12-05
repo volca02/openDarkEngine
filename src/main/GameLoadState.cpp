@@ -66,17 +66,17 @@ namespace Opde {
 		mFontList.push_back("keepmap/TEXTFONT.FON");
 		mFontList.push_back("parch3/TEXTFONT.FON");
 		mFontList.push_back("ledger/TEXTFONT.FON");
-/*
+
 		mFontList.push_back("font.fon");
-		// mFontList.push_back("textfont.fon");
+		mFontList.push_back("textfont.fon");
 
 		mFontList.push_back("FONTAA36.FON");
-		//mFontList.push_back("SMALFONT.FON");
+		mFontList.push_back("SMALFONT.FON");
 		mFontList.push_back("FONTAA29.FON");
-		// mFontList.push_back("TEXTFONT.FON");
+		mFontList.push_back("TEXTFONT.FON");
 		mFontList.push_back("FONTAA20.FON");
 		mFontList.push_back("FONTAA16.FON");
-		mFontList.push_back("FONTAA12.FON");*/
+		mFontList.push_back("FONTAA12.FON");
 	}
 
     GameLoadState::~GameLoadState() {
