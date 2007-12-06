@@ -17,6 +17,10 @@
  * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
  * Place - Suite 330, Boston, MA 02111-1307, USA, or go to
  * http://www.gnu.org/copyleft/lesser.txt.
+ *
+ *
+ *  $Id$
+ *
  *****************************************************************************/
 
 #ifndef __MANUALFONFILELOADER_H
@@ -38,8 +42,7 @@ namespace Ogre {
 			CharInfoList mChars;
 			unsigned char *mpMemBuff;
 			DWORD mBmpFileSize;
-			unsigned int mImageDim, mNumRows;
-			int mNumChars;
+			unsigned int mImageDim, mNumRows;			
 
 			std::string mTxtName, mFontGroup; // the name of the dynamically generated texture
 

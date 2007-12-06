@@ -50,8 +50,7 @@ namespace Ogre
     //-------------------------------------------------------------------
     ManualFonFileLoader::~ManualFonFileLoader() 
 	{
-		if(mpMemBuff)
-			delete [] mpMemBuff;
+		delete [] mpMemBuff;
     }
 
 
@@ -63,21 +62,22 @@ namespace Ogre
 		struct DarkFontHeader FontHeader;
 		unsigned int ImageWidth, ImageHeight, FinalSize = 1;
 		unsigned int X, Y;
-		unsigned int N, I;
+		unsigned int N;
 		unsigned char *Ptr;
+		unsigned int NumChars;
 
 		mChars.clear();
 
 		FontFile->readStruct(&FontHeader, DarkFontHeader_Format, sizeof(DarkFontHeader));
-		mNumChars = FontHeader.LastChar - FontHeader.FirstChar + 1;
+		NumChars = FontHeader.LastChar - FontHeader.FirstChar + 1;
 		mNumRows = FontHeader.NumRows;
 
-		if (mNumChars < 0)
+		if (NumChars < 0)
 			return NULL;
 
 		vector <unsigned short> Widths;
 		FontFile->seek(FontHeader.WidthOffset, File::FSEEK_BEG);
-		for(I = 0; I < mNumChars + 1; I++)
+		for(N = 0; N < NumChars + 1; N++)
 		{
 			unsigned short Temp;
 			FontFile->readElem(&Temp, sizeof(Temp));
@@ -104,7 +104,7 @@ namespace Ogre
 		ImageWidth  = 0;
 		ImageHeight = 0;
 
-		for (N = 0; N < mNumChars; N++)
+		for (N = 0; N < NumChars; N++)
 		{
 			CharInfo Char;
 			
@@ -164,14 +164,14 @@ namespace Ogre
 		if (FontHeader.Format == 0)
 		{
 			Ptr = BitmapData;
-			for (I = 0; I < FontHeader.NumRows; I++)
+			for (N = 0; N < FontHeader.NumRows; N++)
 			{
 				for (CharInfoList::const_iterator It = mChars.begin(); It != mChars.end(); It++)
 				{
 					const CharInfo& Char = *It;
 					Y = Char.Column;
 					for (X = 0; X < Char.Width; Y++, X++)
-						RowPointers[Char.Y + I][Char.X + X] = ((Ptr[Y / 8]>>(7 - (Y % 8))) & 1) ? WHITE_INDEX : BLACK_INDEX;
+						RowPointers[Char.Y + N][Char.X + X] = ((Ptr[Y / 8]>>(7 - (Y % 8))) & 1) ? WHITE_INDEX : BLACK_INDEX;
 				}
 				Ptr += FontHeader.RowWidth;
 			}
@@ -179,13 +179,13 @@ namespace Ogre
 		else
 		{
 			Ptr = BitmapData;
-			for (I = 0; I < FontHeader.NumRows; I++) // Scanline of the font character...
+			for (N = 0; N < FontHeader.NumRows; N++) // Scanline of the font character...
 			{
 				for (CharInfoList::const_iterator It = mChars.begin(); It != mChars.end(); It++)
 				{
 					const CharInfo& Char = *It;
 
-					memcpy(RowPointers[Char.Y + I] + Char.X, Ptr, Char.Width);				
+					memcpy(RowPointers[Char.Y + N] + Char.X, Ptr, Char.Width);				
 					Ptr += Char.Width;
 				}
 			}
@@ -420,11 +420,11 @@ namespace Ogre
 		const PixelBox &pb = pbuf->getCurrentLock();
 
 		// Copy the image data, converting to 32bit on the fly...
-		for (int y = 0; y < mImageDim; y++) {
+		for (unsigned int y = 0; y < mImageDim; y++) {
 		    unsigned char* row = img[y];
 			uint32 *data = static_cast<uint32*>(pb.data) + y*pb.rowPitch;
 
-			for (int x = 0; x < mImageDim; x++) {
+			for (unsigned int x = 0; x < mImageDim; x++) {
 				int palidx = row[x];
 
 				unsigned char r,g,b,a;
@@ -438,7 +438,6 @@ namespace Ogre
                 r = palette[palidx].rgbRed;
                 g = palette[palidx].rgbGreen;
                 b = palette[palidx].rgbBlue;
-
 
 				// Write the ARGB data
 				data[x] = b | (g << 8) | (r << 16) | (a << 24);
