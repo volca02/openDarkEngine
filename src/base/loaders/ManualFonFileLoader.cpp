@@ -358,13 +358,13 @@ namespace Ogre
 	}
 
 	//-------------------------------------------------------------------
-	int ManualFonFileLoader::LoadDarkFont(FilePtr FontFile, String PaletteFileName)
+	int ManualFonFileLoader::LoadDarkFont(FilePtr FontFile, FilePtr BookFile, bool HasBook)
 	{
 		COLORREF *PaletteData;
 		unsigned char **ImageRows;
 		int Color;
 
-		if (PaletteFileName != "")
+		/*if (PaletteFileName != "")
 		{
 			// Small comment: This would better be done using Ogre::DataStream
 			// Also, the StdFile (as others) will throw an exception when the file was not found,
@@ -382,6 +382,26 @@ namespace Ogre
 				LogManager::getSingleton().logMessage("Invalid palette file : " + PaletteFileName);
 				return -2;
 			}
+		}*/
+		if(HasBook)	//TODO: Check how NULL can be tested on BookFile directly
+		{
+			RGBQUAD *Palette = new RGBQUAD[256];
+			BookFile->seek(3 * 256 + 1, File::FSEEK_END);
+			BYTE Padding;
+			BookFile->readElem(&Padding, 1);
+			if(Padding == 0x0C)
+			{
+				for (unsigned int I = 0; I < 256; I++)
+				{
+					BookFile->readElem(&Palette[I].rgbRed, 1);		//TODO: Endianess
+					BookFile->readElem(&Palette[I].rgbGreen, 1);
+					BookFile->readElem(&Palette[I].rgbBlue, 1);
+					Palette[I].rgbReserved = 0;
+				}
+				PaletteData = (COLORREF*)Palette;
+			}			
+			else
+				PaletteData = (COLORREF*)ColorTable;	//Not an 8bpp or invalid PCX, use the standard palette
 		}
 		else
 			PaletteData = (COLORREF*)ColorTable;
@@ -522,22 +542,35 @@ namespace Ogre
         // Get the real filename from the nameValuePairList
         // That means: truncate to the last dot, append .fon to the filename
         size_t DotPos = FontName.find_last_of(".");
-
         String BaseName = FontName;
-        if (DotPos != String::npos){
+        if (DotPos != String::npos)
             BaseName = FontName.substr(0, DotPos);
-        }
+		
+		size_t SlashPos = FontName.find_last_of("/");
+        String BookName = "";
+        if (SlashPos != String::npos)
+            BookName = BaseName.substr(0, SlashPos + 1);	//Include the slash
+		BookName += "BOOK.PCX";
+
 
 		mTxtName = BaseName + "_Txt";
 
         BaseName += ".fon";
 
         //Open the file
-        Ogre::DataStreamPtr Stream = Ogre::ResourceGroupManager::getSingleton().openResource(BaseName, DarkFont->getGroup(), true, resource);
+        Ogre::DataStreamPtr Stream = Ogre::ResourceGroupManager::getSingleton().openResource(BaseName, mFontGroup, true, resource);
+		FilePtr FontFile = new OgreFile(Stream);
 
-        FilePtr FontFile = new OgreFile(Stream);
+		FilePtr BookFile;
+		bool HasBook = FALSE;
+		if(Ogre::ResourceGroupManager::getSingleton().resourceExists (mFontGroup, BookName))
+		{
+			Ogre::DataStreamPtr BStream = Ogre::ResourceGroupManager::getSingleton().openResource(BookName, mFontGroup, true, resource);
+			BookFile = new OgreFile(BStream);
+			HasBook = TRUE;
+		}
 
-        if(LoadDarkFont(FontFile, ""))
+        if(LoadDarkFont(FontFile, BookFile, HasBook))
 			LogManager::getSingleton().logMessage("An error occurred while loading the font " + BaseName);
 		/*
 		if(AddAlpha())

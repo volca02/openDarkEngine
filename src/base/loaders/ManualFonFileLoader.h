@@ -49,7 +49,7 @@ namespace Ogre {
 			RGBQUAD* ReadPalette(StdFile *FilePointer);
 			int AddAlpha();
 			int CreateOgreFont(Font* DarkFont);
-			int LoadDarkFont(FilePtr MemFile, String PaletteFileName);
+			int LoadDarkFont(FilePtr FontFile, FilePtr BookFile, bool HasBook);
 			int WriteImage(RGBQUAD *ColorTable, unsigned char **RowPointers);
 			unsigned char** ReadFont(FilePtr MemFile, int *ResultingColor);
 
