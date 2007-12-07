@@ -453,7 +453,7 @@ namespace Ogre
 				if (palidx == BLACK_INDEX)
                     a = 0;
 
-				palidx = 255 - palidx;
+				// palidx = 255 - palidx;
 
                 r = palette[palidx].rgbRed;
                 g = palette[palidx].rgbGreen;

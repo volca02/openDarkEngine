@@ -62,22 +62,22 @@ namespace Opde {
 		mFontList.push_back("parch/TEXTFONT.FON");
 		mFontList.push_back("parch2/TEXTFONT.FON");
 		mFontList.push_back("STONED4/TEXTFONT.FON");
-		mFontList.push_back("mapscrap/TEXTFONT.FON");
+		// mFontList.push_back("mapscrap/TEXTFONT.FON"); // TODO:  Shows up as totally transparent
 		mFontList.push_back("graveD10/TEXTFONT.FON");
 		mFontList.push_back("PBOOK/TEXTFONT.FON");
 		mFontList.push_back("plaque/TEXTFONT.FON");
 		mFontList.push_back("pbook2/TEXTFONT.FON");
-		mFontList.push_back("keepmap/TEXTFONT.FON");
+		// mFontList.push_back("keepmap/TEXTFONT.FON"); // TODO:  Shows up as totally transparent
 		mFontList.push_back("parch3/TEXTFONT.FON");
 		mFontList.push_back("ledger/TEXTFONT.FON");
 
-		mFontList.push_back("font.fon");
-		mFontList.push_back("textfont.fon");
+		// mFontList.push_back("font.fon"); // Monochromatic, always ok
+		// mFontList.push_back("textfont.fon");  // Monochromatic, always ok
 
 		mFontList.push_back("FONTAA36.FON");
-		mFontList.push_back("SMALFONT.FON");
+		// mFontList.push_back("SMALFONT.FON");  // Monochromatic, always ok
 		mFontList.push_back("FONTAA29.FON");
-		mFontList.push_back("TEXTFONT.FON");
+		// mFontList.push_back("TEXTFONT.FON");  // Monochromatic, always ok
 		mFontList.push_back("FONTAA20.FON");
 		mFontList.push_back("FONTAA16.FON");
 		mFontList.push_back("FONTAA12.FON");
@@ -172,7 +172,7 @@ namespace Opde {
 
 			guiLdr->setCaption("Loaded, press ESC...");
 
-			popState(); // Hardcoded, so no escape key is needed
+			// popState(); // Hardcoded, so no escape key is needed
 		}
 
 		mFirstTime = false;
@@ -212,7 +212,7 @@ namespace Opde {
 		material->getTechnique(0)->getPass(0)->setDiffuse(1,0,0,0);
 		material->getTechnique(0)->getPass(0)->setSpecular(1,0,0,0);*/
 		material->getTechnique(0)->getPass(0)->createTextureUnitState();
-		material->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setColourOperationEx(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, ColourValue(0.5, 0, 0));
+		material->getTechnique(0)->getPass(0)->getTextureUnitState(0)->setColourOperationEx(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, ColourValue(0.58, 0.56, 0.35));
 
 		// Iterate through the list, create an overlay for each font
 		OverlayManager& overlayManager = OverlayManager::getSingleton();
@@ -253,7 +253,7 @@ namespace Opde {
 			// textArea->setCaption(*it);
 			textArea->setCaption("Keepers would like this font: " + *it+ ", LOADING!");
 
-            height = 16;
+            // height = 16;
 			textArea->setCharHeight(height); // Todo: size
 			textArea->setFontName(fnt->getName()); // *it
 
