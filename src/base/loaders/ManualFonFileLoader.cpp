@@ -383,13 +383,17 @@ namespace Ogre
 				return -2;
 			}
 		}*/
+		PaletteData = (COLORREF*)ColorTable;
 		if(HasBook)	//TODO: Check how NULL can be tested on BookFile directly
 		{
 			RGBQUAD *Palette = new RGBQUAD[256];
+			BookFile->seek(3, File::FSEEK_BEG);
+			BYTE Bpp;
+			BookFile->readElem(&Bpp, 1);
 			BookFile->seek(3 * 256 + 1, File::FSEEK_END);
 			BYTE Padding;
 			BookFile->readElem(&Padding, 1);
-			if(Padding == 0x0C)
+			if((Bpp == 8) && (Padding == 0x0C)) //Make sure it is an 8bpp and a valid PCX
 			{
 				for (unsigned int I = 0; I < 256; I++)
 				{
@@ -400,11 +404,7 @@ namespace Ogre
 				}
 				PaletteData = (COLORREF*)Palette;
 			}			
-			else
-				PaletteData = (COLORREF*)ColorTable;	//Not an 8bpp or invalid PCX, use the standard palette
 		}
-		else
-			PaletteData = (COLORREF*)ColorTable;
 
 		ImageRows = ReadFont(FontFile, &Color);
 		if (!ImageRows)
