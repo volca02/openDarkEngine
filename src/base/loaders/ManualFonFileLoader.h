@@ -35,23 +35,26 @@ using namespace Opde; // For the Opde::File
 
 namespace Ogre {
 
-    /** ManualResourceLoader for BIN meshes. Used to load BIN meshes as Ogre::Mesh instances */
+    /* ManualResourceLoader for FON files.*/
+	enum ePaletteOptions {eDefaultPalette = 0, eBookPalette, eExternalPalette};
+
     class ManualFonFileLoader : public ManualResourceLoader {
 
 		private:
 			CharInfoList mChars;
 			unsigned char *mpMemBuff;
 			DWORD mBmpFileSize;
-			unsigned int mImageDim, mNumRows;			
+			unsigned int mImageDim, mNumRows;
+			FilePtr mFontFile, mBookFile, mPaletteFile;
 
 			std::string mTxtName, mFontGroup; // the name of the dynamically generated texture
 
-			RGBQUAD* ReadPalette(StdFile *FilePointer);
+			RGBQUAD* ReadPalette();
 			int AddAlpha();
 			int CreateOgreFont(Font* DarkFont);
-			int LoadDarkFont(FilePtr FontFile, FilePtr BookFile, bool HasBook);
+			int LoadDarkFont(ePaletteOptions PalOptions);
 			int WriteImage(RGBQUAD *ColorTable, unsigned char **RowPointers);
-			unsigned char** ReadFont(FilePtr MemFile, int *ResultingColor);
+			unsigned char** ReadFont(int *ResultingColor);
 
 			void createOgreTexture(unsigned char** img, RGBQUAD* palette);
 

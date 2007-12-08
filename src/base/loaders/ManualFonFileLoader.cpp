@@ -57,7 +57,7 @@ namespace Ogre
 	/*-----------------------------------------------------------------*/
 	/*------------------------ Bitmap stuff ---------------------------*/
 	/*-----------------------------------------------------------------*/
-	unsigned char** ManualFonFileLoader::ReadFont(FilePtr FontFile, int *ResultingColor)
+	unsigned char** ManualFonFileLoader::ReadFont(int *ResultingColor)
 	{
 		struct DarkFontHeader FontHeader;
 		unsigned int ImageWidth, ImageHeight, FinalSize = 1;
@@ -68,7 +68,7 @@ namespace Ogre
 
 		mChars.clear();
 
-		FontFile->readStruct(&FontHeader, DarkFontHeader_Format, sizeof(DarkFontHeader));
+		mFontFile->readStruct(&FontHeader, DarkFontHeader_Format, sizeof(DarkFontHeader));
 		NumChars = FontHeader.LastChar - FontHeader.FirstChar + 1;
 		mNumRows = FontHeader.NumRows;
 
@@ -76,25 +76,25 @@ namespace Ogre
 			return NULL;
 
 		vector <unsigned short> Widths;
-		FontFile->seek(FontHeader.WidthOffset, File::FSEEK_BEG);
+		mFontFile->seek(FontHeader.WidthOffset, File::FSEEK_BEG);
 		for(N = 0; N < NumChars + 1; N++)
 		{
 			unsigned short Temp;
-			FontFile->readElem(&Temp, sizeof(Temp));
+			mFontFile->readElem(&Temp, sizeof(Temp));
 			Widths.push_back(Temp);
 		}
 
 		if (FontHeader.BitmapOffset < FontHeader.WidthOffset)
 			return NULL;
 
-		unsigned char *BitmapData = new unsigned char[FontFile->size() + 1];
+		unsigned char *BitmapData = new unsigned char[mFontFile->size() + 1];
 		
 		if (!BitmapData)
 			return NULL;
 		
 
-		FontFile->seek(FontHeader.BitmapOffset, File::FSEEK_BEG);
-		FontFile->read(BitmapData, FontFile->size() - FontHeader.BitmapOffset);		
+		mFontFile->seek(FontHeader.BitmapOffset, File::FSEEK_BEG);
+		mFontFile->read(BitmapData, mFontFile->size() - FontHeader.BitmapOffset);		
 		
 		// No precalc. Let's organise the Font into groups of 16, the resolution will come out
 
@@ -217,7 +217,7 @@ namespace Ogre
 
 
 	//-------------------------------------------------------------------
-	RGBQUAD* ManualFonFileLoader::ReadPalette(StdFile *FilePointer)
+	RGBQUAD* ManualFonFileLoader::ReadPalette()
 	{
 		ExternalPaletteHeader PaletteHeader;
 		WORD Count;
@@ -228,7 +228,7 @@ namespace Ogre
 		RGBQUAD *Palette = new RGBQUAD[256];
 		if (!Palette)
 			return NULL;
-		FilePointer->readStruct(&PaletteHeader, ExternalPaletteHeader_Format, sizeof(ExternalPaletteHeader));
+		mPaletteFile->readStruct(&PaletteHeader, ExternalPaletteHeader_Format, sizeof(ExternalPaletteHeader));
 		if (PaletteHeader.RiffSig == 0x46464952)
 		{
 			if (PaletteHeader.PSig1 != 0x204C4150)
@@ -236,13 +236,13 @@ namespace Ogre
 				delete []Palette;
 				return NULL;
 			}
-			FilePointer->seek(2L, StdFile::FSEEK_CUR);
-			FilePointer->readElem(&Count, 2);
+			mPaletteFile->seek(2L, StdFile::FSEEK_CUR);
+			mPaletteFile->readElem(&Count, 2);
 			if (Count > 256)
 				Count = 256;
 			for (I = 0; I < Count; I++)
 			{
-				FilePointer->readStruct(&Palette[I], RGBQUAD_Format, sizeof(RGBQUAD));
+				mPaletteFile->readStruct(&Palette[I], RGBQUAD_Format, sizeof(RGBQUAD));
 				S = Palette[I].rgbRed;
 				Palette[I].rgbRed = Palette[I].rgbBlue;
 				Palette[I].rgbBlue = S;
@@ -250,14 +250,14 @@ namespace Ogre
 		}
 		else if (PaletteHeader.RiffSig == 0x4353414A)
 		{
-			FilePointer->seek(0);
+			mPaletteFile->seek(0);
 			Buffer = new char[3360];
 			if (!Buffer)
 			{
 				delete []Palette;
 				return NULL;
 			}
-			FilePointer->read(Buffer, 3352);
+			mPaletteFile->read(Buffer, 3352);
 			if (strncmp(Buffer, "JASC-PAL", 8))
 			{
 				delete []Buffer;
@@ -282,11 +282,11 @@ namespace Ogre
 		}
 		else
 		{
-			FilePointer->seek(0);
+			mPaletteFile->seek(0);
 			RGBTRIPLE P;
-			for (I = 0; I < FilePointer->size() / sizeof(RGBTRIPLE); I++)
+			for (I = 0; I < mPaletteFile->size() / sizeof(RGBTRIPLE); I++)
 			{
-				FilePointer->readStruct(&P, RGBTRIPLE_Format, sizeof(RGBTRIPLE));
+				mPaletteFile->readStruct(&P, RGBTRIPLE_Format, sizeof(RGBTRIPLE));
 				Palette[I].rgbRed = P.rgbtBlue;
 				Palette[I].rgbGreen = P.rgbtGreen;
 				Palette[I].rgbBlue = P.rgbtRed;
@@ -358,55 +358,45 @@ namespace Ogre
 	}
 
 	//-------------------------------------------------------------------
-	int ManualFonFileLoader::LoadDarkFont(FilePtr FontFile, FilePtr BookFile, bool HasBook)
+	int ManualFonFileLoader::LoadDarkFont(ePaletteOptions PalOptions)
 	{
 		COLORREF *PaletteData;
 		unsigned char **ImageRows;
 		int Color;
 
-		/*if (PaletteFileName != "")
+		PaletteData = (COLORREF*)ColorTable;
+		if (PalOptions == eExternalPalette)
 		{
-			// Small comment: This would better be done using Ogre::DataStream
-			// Also, the StdFile (as others) will throw an exception when the file was not found,
-			// so the condition will always fail...
-			StdFile *PaletteFile = new StdFile(PaletteFileName, File::FILE_R);
-			if (PaletteFile == 0)
-			{
-				LogManager::getSingleton().logMessage(PaletteFileName + " not found.");
-				return -1;
-			}
-			PaletteData = (COLORREF*)ReadPalette(PaletteFile);
-			delete PaletteFile;
+			PaletteData = (COLORREF*)ReadPalette();
 			if (!PaletteData)
 			{
-				LogManager::getSingleton().logMessage("Invalid palette file : " + PaletteFileName);
+				LogManager::getSingleton().logMessage("Invalid palette file");
 				return -2;
 			}
-		}*/
-		PaletteData = (COLORREF*)ColorTable;
-		if(HasBook)	//TODO: Check how NULL can be tested on BookFile directly
+		}
+		else if(PalOptions == eBookPalette)
 		{
 			RGBQUAD *Palette = new RGBQUAD[256];
-			BookFile->seek(3, File::FSEEK_BEG);
+			mBookFile->seek(3, File::FSEEK_BEG);
 			BYTE Bpp;
-			BookFile->readElem(&Bpp, 1);
-			BookFile->seek(3 * 256 + 1, File::FSEEK_END);
+			mBookFile->readElem(&Bpp, 1);
+			mBookFile->seek(3 * 256 + 1, File::FSEEK_END);
 			BYTE Padding;
-			BookFile->readElem(&Padding, 1);
+			mBookFile->readElem(&Padding, 1);
 			if((Bpp == 8) && (Padding == 0x0C)) //Make sure it is an 8bpp and a valid PCX
 			{
 				for (unsigned int I = 0; I < 256; I++)
 				{
-					BookFile->readElem(&Palette[I].rgbRed, 1);		//TODO: Endianess
-					BookFile->readElem(&Palette[I].rgbGreen, 1);
-					BookFile->readElem(&Palette[I].rgbBlue, 1);
+					mBookFile->readElem(&Palette[I].rgbRed, 1);		//TODO: Endianess
+					mBookFile->readElem(&Palette[I].rgbGreen, 1);
+					mBookFile->readElem(&Palette[I].rgbBlue, 1);
 					Palette[I].rgbReserved = 0;
 				}
 				PaletteData = (COLORREF*)Palette;
 			}			
 		}
 
-		ImageRows = ReadFont(FontFile, &Color);
+		ImageRows = ReadFont(&Color);
 		if (!ImageRows)
 		{
 			if (PaletteData != ColorTable)
@@ -535,6 +525,8 @@ namespace Ogre
         // Cast to font, and fill
         Font* DarkFont = static_cast<Font*>(resource);
 
+		ePaletteOptions PalOptions = eDefaultPalette;
+
         // Fill. Find the file to be loaded by the name, and load it
         String FontName = DarkFont->getName();
         mFontGroup = DarkFont->getGroup();
@@ -559,18 +551,18 @@ namespace Ogre
 
         //Open the file
         Ogre::DataStreamPtr Stream = Ogre::ResourceGroupManager::getSingleton().openResource(BaseName, mFontGroup, true, resource);
-		FilePtr FontFile = new OgreFile(Stream);
+		mFontFile = new OgreFile(Stream);
 
-		FilePtr BookFile;
-		bool HasBook = FALSE;
 		if(Ogre::ResourceGroupManager::getSingleton().resourceExists (mFontGroup, BookName))
 		{
 			Ogre::DataStreamPtr BStream = Ogre::ResourceGroupManager::getSingleton().openResource(BookName, mFontGroup, true, resource);
-			BookFile = new OgreFile(BStream);
-			HasBook = TRUE;
+			mBookFile = new OgreFile(BStream);
+			PalOptions = eBookPalette;
 		}
 
-        if(LoadDarkFont(FontFile, BookFile, HasBook))
+		//TODO: Add DataStream code for mPaletteFile
+
+        if(LoadDarkFont(PalOptions))
 			LogManager::getSingleton().logMessage("An error occurred while loading the font " + BaseName);
 		/*
 		if(AddAlpha())
