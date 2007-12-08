@@ -241,9 +241,23 @@ namespace Opde {
 
 			Ogre::LogManager::getSingleton().logMessage("Loading font test " + *it);
 
+			String text = "Keepers would like this font: " + *it+ ", LOADING!";
+			
 			Ogre::FontPtr fnt = FontManager::getSingleton().create(*it, "General");
+			
+			// A test. For parch book load a custom font palette
+			if (*it == "FONTAA36.FON") {
+				mManualFonLoader->setParameter("palette_type","pcx");
+				mManualFonLoader->setParameter("palette_file","MAIN.PCX");
+					
+				LOG_INFO("Loading a custom palette for the font %s", (*it).c_str());
+				text = "Garrett would like pcx palette font: " + *it+ ", LOADING!";
+			} else {
+				mManualFonLoader->resetParameters();
+			}
+			
+			
 			mManualFonLoader->loadResource(&(*fnt));
-			// fnt->load();
 
 			height = StringConverter::parseInt(fnt->getParameter("size"));
 
@@ -252,7 +266,7 @@ namespace Opde {
 			textArea->setDimensions(640, 45);
 
 			// textArea->setCaption(*it);
-			textArea->setCaption("Keepers would like this font: " + *it+ ", LOADING!");
+			textArea->setCaption(text);
 
             // height = 16;
 			textArea->setCharHeight(height); // Todo: size
