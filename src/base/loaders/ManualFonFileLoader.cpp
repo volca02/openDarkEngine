@@ -35,7 +35,7 @@ using namespace std;
 using namespace Opde; //For the Opde::File
 
 // Both horizontal and vertical spacing for characters
-#define _SPACING 2
+#define _SPACING 3
 
 namespace Ogre 
 {
