@@ -1,4 +1,5 @@
 INCLUDE( ${OPDE_SOURCE_DIR}/src/services/Services.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/base/Base.cmake )
 
 SET(LIB_ADDITION_CUSTOM_IMAGE)
 SET(INCLUDE_ADDITION_CUSTOM_IMAGE)
@@ -15,17 +16,10 @@ include_directories(
     ${OIS_INCLUDE_DIR}
     ${OPDE_BINARY_DIR}
     ${INCLUDE_ADDITION_CUSTOM_IMAGE}
+    ${OPDE_BASE_INCLUDES}
     ${OPDE_SOURCE_DIR}/src/compat
-    ${OPDE_SOURCE_DIR}/src/base/logger
-    ${OPDE_SOURCE_DIR}/src/base/file
-    ${OPDE_SOURCE_DIR}/src/base/gui
-    ${OPDE_SOURCE_DIR}/src/base/console
-    ${OPDE_SOURCE_DIR}/src/base/servicemanager
-    ${OPDE_SOURCE_DIR}/src/base/loaders
-    ${OPDE_SOURCE_DIR}/src/scenemanager
     ${OPDE_SOURCE_DIR}/src/base/Dark
-    ${OPDE_SOURCE_DIR}/src/base/dyntype
-    ${OPDE_SOURCE_DIR}/src/base
+    ${OPDE_SOURCE_DIR}/src/scenemanager
     ${OPDE_SOURCE_DIR}/src/main
     ${OPDE_SOURCE_DIR}/src/widgets
     ${OPDE_SERVICE_INCLUDES}
