@@ -62,12 +62,12 @@ namespace Opde {
 		mFontList.push_back("parch/TEXTFONT.FON");
 		mFontList.push_back("parch2/TEXTFONT.FON");
 		mFontList.push_back("STONED4/TEXTFONT.FON");
-		// mFontList.push_back("mapscrap/TEXTFONT.FON"); // TODO:  Shows up as totally transparent
+		mFontList.push_back("mapscrap/TEXTFONT.FON"); // TODO:  Shows up as totally transparent
 		mFontList.push_back("graveD10/TEXTFONT.FON");
 		mFontList.push_back("PBOOK/TEXTFONT.FON");
 		mFontList.push_back("plaque/TEXTFONT.FON");
 		mFontList.push_back("pbook2/TEXTFONT.FON");
-		// mFontList.push_back("keepmap/TEXTFONT.FON"); // TODO:  Shows up as totally transparent
+		mFontList.push_back("keepmap/TEXTFONT.FON"); // TODO:  Shows up as totally transparent
 		mFontList.push_back("parch3/TEXTFONT.FON");
 		mFontList.push_back("ledger/TEXTFONT.FON");
 
@@ -223,9 +223,10 @@ namespace Opde {
 		OverlayContainer* panel = static_cast<OverlayContainer*>(
 			overlayManager.createOverlayElement("Panel", "PanelName"));
 
-		panel->setMetricsMode(Ogre::GMM_PIXELS);
+		panel->setMetricsMode(Ogre::GMM_RELATIVE);
 		panel->setPosition(0, 0);
-		panel->setDimensions(1024, 768);
+		panel->setDimensions(1, 1); // Full screen
+		
 		// TODO: Background material?
 		panel->setMaterialName("Colour/Red");
 
