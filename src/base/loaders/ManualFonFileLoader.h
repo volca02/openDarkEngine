@@ -34,11 +34,29 @@
 using namespace Opde; // For the Opde::File
 
 namespace Ogre {
-
-    /* ManualResourceLoader for FON files.*/
-	enum ePaletteOptions {eDefaultPalette = 0, eBookPalette, eExternalPalette};
-
+	
+	/** ManualResourceLoader for FON files. 
+	* Font resource parameters:
+	* Palette type: Paramater <b>palette_type</b>
+	* @li external External Palette File (RIFF)
+	* @li pcx PCX file palette
+	* @li default Default (LG's default) palette
+	* Palette file name paramater: <b>palette_file</b>
+	*/
     class ManualFonFileLoader : public ManualResourceLoader {
+		protected:
+		    /// Internal - Palette type specifier
+		    enum PaletteType {
+		    	/// Default palette
+				PT_Default = 0, 
+				/// PCX file palette
+				PT_PCX, 
+				/// External palette
+				PT_External
+			};
+			
+			typedef std::map<String, String> Parameters;
+			Parameters mParams;
 
 		private:
 			CharInfoList mChars;
@@ -48,21 +66,34 @@ namespace Ogre {
 			FilePtr mFontFile, mBookFile, mPaletteFile;
 
 			std::string mTxtName, mFontGroup; // the name of the dynamically generated texture
+			
+			PaletteType mPaletteType;
+			String mPaletteFileName;
 
 			RGBQUAD* ReadPalette();
 			int AddAlpha();
 			int CreateOgreFont(Font* DarkFont);
-			int LoadDarkFont(ePaletteOptions PalOptions);
+			int LoadDarkFont();
 			int WriteImage(RGBQUAD *ColorTable, unsigned char **RowPointers);
 			unsigned char** ReadFont(int *ResultingColor);
 
 			void createOgreTexture(unsigned char** img, RGBQUAD* palette);
+		
 
         public:
             ManualFonFileLoader();
             virtual ~ManualFonFileLoader();
 
             virtual void loadResource(Resource* resource);
+            
+            /// Will set a parameter value
+            void setParameter(String name, String value);
+            
+            /// Will set a parameter value
+            const String getParameter(String name);
+            
+            /// Will clean the parameter list - always use this one before loading a new font
+            void resetParameters();
     };
 
 }

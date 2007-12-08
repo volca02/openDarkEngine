@@ -24,12 +24,14 @@
  *****************************************************************************/
 
 //---------------------------- El cargador de las fuentes para El Motor Oscuro --------------------
-#include "FreeImage.h"
 #include "ManualFonFileLoader.h"
+
+#include <FreeImage.h>
 #include <OgreLogManager.h>
 #include <OgreStringConverter.h>
 #include <OgreTextureManager.h>
 #include <OgreHardwarePixelBuffer.h>
+#include <OgreException.h>
 
 using namespace std;
 using namespace Opde; //For the Opde::File
@@ -225,9 +227,74 @@ namespace Ogre
 		BYTE S;
 		unsigned int I;
 
+		// Open the file
+		Ogre::DataStreamPtr stream;
+		
+		try {
+			stream = Ogre::ResourceGroupManager::getSingleton().openResource(mPaletteFileName, mFontGroup, true);
+			mPaletteFile = new OgreFile(stream);
+		} catch(Ogre::FileNotFoundException &e) {
+			// Could not find resource, use the default table
+			LogManager::getSingleton().logMessage("Specified palette file not found - using default palette!");
+			return (RGBQUAD*)ColorTable;
+		}
+		
 		RGBQUAD *Palette = new RGBQUAD[256];
 		if (!Palette)
 			return NULL;
+		
+
+		
+		if(mPaletteType == PT_PCX) // PCX file specified...
+		{
+			RGBQUAD *Palette = new RGBQUAD[256];
+			
+			// Test to see if we're facing a PCX file. (0A) (xx) (01)
+			uint8_t manuf, enc;
+			mPaletteFile->read(&manuf, 1);
+			mPaletteFile->seek(2);
+			mPaletteFile->read(&enc, 1);
+			
+			if (manuf != 0x0A || enc != 0x01) { // invalid file, does not seem like a PCX at all
+				delete[] Palette; // Clean up!
+				LogManager::getSingleton().logMessage("Invalid palette file specified - seems not to be a PCX file!");
+				return (RGBQUAD*)ColorTable; // Should not matter - the cast (if packed)
+			}
+			
+			BYTE Bpp;
+			mPaletteFile->readElem(&Bpp, 1);
+			
+			mPaletteFile->seek(3 * 256 + 1, File::FSEEK_END);
+			BYTE Padding;
+			mPaletteFile->readElem(&Padding, 1);
+			
+			if((Bpp == 8) && (Padding == 0x0C)) //Make sure it is an 8bpp and a valid PCX
+			{
+				// Byte sized structures - endianness always ok
+				for (unsigned int I = 0; I < 256; I++)
+				{
+					
+					mPaletteFile->read(&Palette[I].rgbRed, 1);
+					mPaletteFile->read(&Palette[I].rgbGreen, 1);
+					mPaletteFile->read(&Palette[I].rgbBlue, 1);
+					Palette[I].rgbReserved = 0;
+				}
+			} else {
+				delete[] Palette; // Clean up!
+				LogManager::getSingleton().logMessage("Invalid palette file specified - not 8 BPP or invalid Padding!");
+				return (RGBQUAD*)ColorTable; // Return default palette
+			}
+			
+			return Palette;
+		}
+		
+		if (mPaletteType != PT_External) {
+			delete[] Palette; // Clean up!
+			LogManager::getSingleton().logMessage("Invalid palette type specified!");
+			return (RGBQUAD*)ColorTable;
+		}
+		
+		// We're sure that we have external palette here:
 		mPaletteFile->readStruct(&PaletteHeader, ExternalPaletteHeader_Format, sizeof(ExternalPaletteHeader));
 		if (PaletteHeader.RiffSig == 0x46464952)
 		{
@@ -358,53 +425,39 @@ namespace Ogre
 	}
 
 	//-------------------------------------------------------------------
-	int ManualFonFileLoader::LoadDarkFont(ePaletteOptions PalOptions)
+	int ManualFonFileLoader::LoadDarkFont()
 	{
-		COLORREF *PaletteData;
+		COLORREF *PaletteData = const_cast<COLORREF*>(ColorTable);
 		unsigned char **ImageRows;
 		int Color;
 
-		PaletteData = (COLORREF*)ColorTable;
-		if (PalOptions == eExternalPalette)
-		{
+		// Default palette
+		
+		if (mPaletteType != PT_Default) {
 			PaletteData = (COLORREF*)ReadPalette();
-			if (!PaletteData)
-			{
-				LogManager::getSingleton().logMessage("Invalid palette file");
-				return -2;
+			
+			if (!PaletteData) {
+				LogManager::getSingleton().logMessage("Could not load palette data, defaulting to default palette");
+				// return -2;
+				PaletteData = const_cast<COLORREF*>(ColorTable);
 			}
 		}
-		else if(PalOptions == eBookPalette)
-		{
-			RGBQUAD *Palette = new RGBQUAD[256];
-			mBookFile->seek(3, File::FSEEK_BEG);
-			BYTE Bpp;
-			mBookFile->readElem(&Bpp, 1);
-			mBookFile->seek(3 * 256 + 1, File::FSEEK_END);
-			BYTE Padding;
-			mBookFile->readElem(&Padding, 1);
-			if((Bpp == 8) && (Padding == 0x0C)) //Make sure it is an 8bpp and a valid PCX
-			{
-				for (unsigned int I = 0; I < 256; I++)
-				{
-					mBookFile->readElem(&Palette[I].rgbRed, 1);		//TODO: Endianess
-					mBookFile->readElem(&Palette[I].rgbGreen, 1);
-					mBookFile->readElem(&Palette[I].rgbBlue, 1);
-					Palette[I].rgbReserved = 0;
-				}
-				PaletteData = (COLORREF*)Palette;
-			}			
-		}
-
+		
 		ImageRows = ReadFont(&Color);
+		
 		if (!ImageRows)
 		{
 			if (PaletteData != ColorTable)
 				delete []PaletteData;
 			return 2;
 		}
-		if (Color == 2 && PaletteData == ColorTable)
+		
+		if (Color == 2 && PaletteData == ColorTable) {
+			if (PaletteData != ColorTable)
+				delete[] PaletteData; // Clean up!
+				
 			PaletteData = (COLORREF*)AntiAliasedColorTable;
+		}
 
 		// WriteImage((RGBQUAD*)PaletteData, ImageRows);
 		// For now... Can also be done directly when loading (And probably better too)
@@ -525,7 +578,7 @@ namespace Ogre
         // Cast to font, and fill
         Font* DarkFont = static_cast<Font*>(resource);
 
-		ePaletteOptions PalOptions = eDefaultPalette;
+		mPaletteType = PT_Default;
 
         // Fill. Find the file to be loaded by the name, and load it
         String FontName = DarkFont->getName();
@@ -535,15 +588,45 @@ namespace Ogre
         // That means: truncate to the last dot, append .fon to the filename
         size_t DotPos = FontName.find_last_of(".");
         String BaseName = FontName;
+        
         if (DotPos != String::npos)
             BaseName = FontName.substr(0, DotPos);
 		
-		size_t SlashPos = FontName.find_last_of("/");
-        String BookName = "";
-        if (SlashPos != String::npos)
-            BookName = BaseName.substr(0, SlashPos + 1);	//Include the slash
-		BookName += "BOOK.PCX";
-
+		
+		// Hint for the palette name
+		mPaletteFileName = ""; mPaletteType = PT_Default;
+		String palname = getParameter("palette_file");
+		String paltype = getParameter("palette_type");
+		
+		StringUtil::toLowerCase(paltype);
+		
+		if (paltype == "") {
+			// No type specified - default to LG's default palette 
+			mPaletteType = PT_Default;
+			mPaletteFileName = "";
+		} else {
+			if (paltype == "external")
+				mPaletteType = PT_External;
+			else if (paltype == "pcx")
+				mPaletteType = PT_PCX;
+			else if (paltype == "default")
+				mPaletteType = PT_Default;
+				
+			if (palname != "" && mPaletteType != PT_Default) { // Palette file specified
+				//
+				/* To be presented by loader user...
+				size_t SlashPos = FontName.find_last_of("/");
+				String BookName = "";
+				if (SlashPos != String::npos)
+					BookName = BaseName.substr(0, SlashPos + 1);	//Include the slash
+				BookName += "BOOK.PCX";
+				*/
+				mPaletteFileName = palname;
+				LogManager::getSingleton().logMessage("Font DEBUG: Will load a custom file palette");
+			} else {
+				LogManager::getSingleton().logMessage("Non-Default palette type, but no filename specified (Defaulting to LG's default pal). Font name " + BaseName);
+			}
+		}
 
 		mTxtName = BaseName + "_Txt";
 
@@ -553,16 +636,9 @@ namespace Ogre
         Ogre::DataStreamPtr Stream = Ogre::ResourceGroupManager::getSingleton().openResource(BaseName, mFontGroup, true, resource);
 		mFontFile = new OgreFile(Stream);
 
-		if(Ogre::ResourceGroupManager::getSingleton().resourceExists (mFontGroup, BookName))
-		{
-			Ogre::DataStreamPtr BStream = Ogre::ResourceGroupManager::getSingleton().openResource(BookName, mFontGroup, true, resource);
-			mBookFile = new OgreFile(BStream);
-			PalOptions = eBookPalette;
-		}
-
 		//TODO: Add DataStream code for mPaletteFile
 
-        if(LoadDarkFont(PalOptions))
+        if(LoadDarkFont())
 			LogManager::getSingleton().logMessage("An error occurred while loading the font " + BaseName);
 		/*
 		if(AddAlpha())
@@ -571,4 +647,24 @@ namespace Ogre
 		if(CreateOgreFont(DarkFont))
 			LogManager::getSingleton().logMessage("An error occurred creating Ogre font");
     }
+    
+    //-------------------------------------------------------------------
+    void ManualFonFileLoader::setParameter(String name, String value) {
+    	mParams.insert(Parameters::value_type(name, value));
+    }
+	
+	//-------------------------------------------------------------------
+	const String ManualFonFileLoader::getParameter(String name) {
+		Parameters::const_iterator it = mParams.find(name);
+		
+		if (it != mParams.end())
+			return it->second;
+		else
+			return "";
+	}
+	
+	//-------------------------------------------------------------------
+	void ManualFonFileLoader::resetParameters() {
+		mParams.clear();
+	}
 }
