@@ -40,6 +40,7 @@ namespace Ogre {
 	* Palette type: Paramater <b>palette_type</b>
 	* @li external External Palette File (RIFF)
 	* @li pcx PCX file palette
+	* @li defaultbook Palette from accompanying BOOK.PCX
 	* @li default Default (LG's default) palette
 	* Palette file name paramater: <b>palette_file</b>
 	*/
@@ -48,11 +49,13 @@ namespace Ogre {
 		    /// Internal - Palette type specifier
 		    enum PaletteType {
 		    	/// Default palette
-				PT_Default = 0, 
+				ePT_Default = 0, 
+				/// Palette from accompanying BOOK.PCX
+				ePT_DefaultBook, 
 				/// PCX file palette
-				PT_PCX, 
+				ePT_PCX, 
 				/// External palette
-				PT_External
+				ePT_External
 			};
 			
 			typedef std::map<String, String> Parameters;

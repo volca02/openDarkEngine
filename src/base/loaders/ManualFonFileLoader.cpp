@@ -228,11 +228,11 @@ namespace Ogre
 		unsigned int I;
 
 		// Open the file
-		Ogre::DataStreamPtr stream;
+		Ogre::DataStreamPtr Stream;
 		
 		try {
-			stream = Ogre::ResourceGroupManager::getSingleton().openResource(mPaletteFileName, mFontGroup, true);
-			mPaletteFile = new OgreFile(stream);
+			Stream = Ogre::ResourceGroupManager::getSingleton().openResource(mPaletteFileName, mFontGroup, true);
+			mPaletteFile = new OgreFile(Stream);
 		} catch(Ogre::FileNotFoundException &e) {
 			// Could not find resource, use the default table
 			LogManager::getSingleton().logMessage("Specified palette file not found - using default palette!");
@@ -245,30 +245,30 @@ namespace Ogre
 		
 
 		
-		if(mPaletteType == PT_PCX) // PCX file specified...
+		if((mPaletteType == ePT_PCX) || (mPaletteType == ePT_DefaultBook))// PCX file specified...
 		{
 			RGBQUAD *Palette = new RGBQUAD[256];
 			
 			// Test to see if we're facing a PCX file. (0A) (xx) (01)
-			uint8_t manuf, enc;
-			mPaletteFile->read(&manuf, 1);
+			uint8_t Manuf, Enc;
+			mPaletteFile->read(&Manuf, 1);
 			mPaletteFile->seek(2);
-			mPaletteFile->read(&enc, 1);
+			mPaletteFile->read(&Enc, 1);
 			
-			if (manuf != 0x0A || enc != 0x01) { // invalid file, does not seem like a PCX at all
+			if (Manuf != 0x0A || Enc != 0x01) { // Invalid file, does not seem like a PCX at all
 				delete[] Palette; // Clean up!
 				LogManager::getSingleton().logMessage("Invalid palette file specified - seems not to be a PCX file!");
 				return (RGBQUAD*)ColorTable; // Should not matter - the cast (if packed)
 			}
 			
-			BYTE Bpp;
-			mPaletteFile->readElem(&Bpp, 1);
+			BYTE BPP;
+			mPaletteFile->readElem(&BPP, 1);
 			
 			mPaletteFile->seek(3 * 256 + 1, File::FSEEK_END);
 			BYTE Padding;
 			mPaletteFile->readElem(&Padding, 1);
 			
-			if((Bpp == 8) && (Padding == 0x0C)) //Make sure it is an 8bpp and a valid PCX
+			if((BPP == 8) && (Padding == 0x0C)) //Make sure it is an 8bpp and a valid PCX
 			{
 				// Byte sized structures - endianness always ok
 				for (unsigned int I = 0; I < 256; I++)
@@ -288,7 +288,7 @@ namespace Ogre
 			return Palette;
 		}
 		
-		if (mPaletteType != PT_External) {
+		if (mPaletteType != ePT_External) {
 			delete[] Palette; // Clean up!
 			LogManager::getSingleton().logMessage("Invalid palette type specified!");
 			return (RGBQUAD*)ColorTable;
@@ -433,7 +433,7 @@ namespace Ogre
 
 		// Default palette
 		
-		if (mPaletteType != PT_Default) {
+		if (mPaletteType != ePT_Default) {
 			PaletteData = (COLORREF*)ReadPalette();
 			
 			if (!PaletteData) {
@@ -471,44 +471,45 @@ namespace Ogre
 	}
 
     //-------------------------------------------------------------------
-	void ManualFonFileLoader::createOgreTexture(unsigned char** img, RGBQUAD* palette) {
+	void ManualFonFileLoader::createOgreTexture(unsigned char** Img, RGBQUAD* Palette) 
+	{
 		// Create a texure, then fill it
-		TexturePtr txt = TextureManager::getSingleton().createManual(mTxtName, mFontGroup, TEX_TYPE_2D, mImageDim, mImageDim, 1, PF_A8R8G8B8);
+		TexturePtr Txt = TextureManager::getSingleton().createManual(mTxtName, mFontGroup, TEX_TYPE_2D, mImageDim, mImageDim, 1, PF_A8R8G8B8);
 
 		// Lock the texture, obtain a pointer
-		HardwarePixelBufferSharedPtr pbuf = txt->getBuffer(0, 0);
+		HardwarePixelBufferSharedPtr pBuf = Txt->getBuffer(0, 0);
 
 		// Erase the lmap atlas pixel buffer
-		pbuf->lock(HardwareBuffer::HBL_DISCARD);
-		const PixelBox &pb = pbuf->getCurrentLock();
+		pBuf->lock(HardwareBuffer::HBL_DISCARD);
+		const PixelBox &pB = pBuf->getCurrentLock();
 
 		// Copy the image data, converting to 32bit on the fly...
-		for (unsigned int y = 0; y < mImageDim; y++) {
-		    unsigned char* row = img[y];
-			uint32 *data = static_cast<uint32*>(pb.data) + y*pb.rowPitch;
+		for (unsigned int Y = 0; Y < mImageDim; Y++) {
+		    unsigned char* Row = Img[Y];
+			uint32 *Data = static_cast<uint32*>(pB.data) + Y * pB.rowPitch;
 
-			for (unsigned int x = 0; x < mImageDim; x++) {
-				int palidx = row[x];
+			for (unsigned int X = 0; X < mImageDim; X++) {
+				int PalIdx = Row[X];
 
-				unsigned char r,g,b,a;
+				unsigned char Red , Green, Blue, Alpha;
 
-                a = 255;
-				if (palidx == BLACK_INDEX)
-                    a = 0;
+                Alpha = 255;
+				if (PalIdx == BLACK_INDEX)
+                    Alpha = 0;
 
 				// palidx = 255 - palidx;
 
-                r = palette[palidx].rgbRed;
-                g = palette[palidx].rgbGreen;
-                b = palette[palidx].rgbBlue;
+                Red = Palette[PalIdx].rgbRed;
+                Green = Palette[PalIdx].rgbGreen;
+                Blue = Palette[PalIdx].rgbBlue;
 
 				// Write the ARGB data
-				data[x] = b | (g << 8) | (r << 16) | (a << 24);
+				Data[X] = Blue | (Green << 8) | (Red << 16) | (Alpha << 24);
 			}
 
 		}
 
-		pbuf->unlock();
+		pBuf->unlock();
 	}
 
 	/*-----------------------------------------------------------------*/
@@ -573,12 +574,32 @@ namespace Ogre
 	}
 
 	//-------------------------------------------------------------------
+    void ManualFonFileLoader::setParameter(String Name, String Value) {
+    	mParams.insert(Parameters::value_type(Name, Value));
+    }
+	
+	//-------------------------------------------------------------------
+	const String ManualFonFileLoader::getParameter(String Name) {
+		Parameters::const_iterator it = mParams.find(Name);
+		
+		if (it != mParams.end())
+			return it->second;
+		else
+			return "";
+	}
+	
+	//-------------------------------------------------------------------
+	void ManualFonFileLoader::resetParameters() {
+		mParams.clear();
+	}
+
+	//-------------------------------------------------------------------
     void ManualFonFileLoader::loadResource(Resource* resource)
 	{
         // Cast to font, and fill
         Font* DarkFont = static_cast<Font*>(resource);
 
-		mPaletteType = PT_Default;
+		mPaletteType = ePT_Default;
 
         // Fill. Find the file to be loaded by the name, and load it
         String FontName = DarkFont->getName();
@@ -594,36 +615,42 @@ namespace Ogre
 		
 		
 		// Hint for the palette name
-		mPaletteFileName = ""; mPaletteType = PT_Default;
-		String palname = getParameter("palette_file");
-		String paltype = getParameter("palette_type");
+		mPaletteFileName = "";
+		mPaletteType = ePT_Default;
+
+		String PalName = getParameter("palette_file");
+		String PalType = getParameter("palette_type");
 		
-		StringUtil::toLowerCase(paltype);
+		StringUtil::toLowerCase(PalType);
 		
-		if (paltype == "") {
-			// No type specified - default to LG's default palette 
-			mPaletteType = PT_Default;
-			mPaletteFileName = "";
-		} else {
-			if (paltype == "external")
-				mPaletteType = PT_External;
-			else if (paltype == "pcx")
-				mPaletteType = PT_PCX;
-			else if (paltype == "default")
-				mPaletteType = PT_Default;
-				
-			if (palname != "" && mPaletteType != PT_Default) { // Palette file specified
-				//
-				/* To be presented by loader user...
-				size_t SlashPos = FontName.find_last_of("/");
-				String BookName = "";
-				if (SlashPos != String::npos)
-					BookName = BaseName.substr(0, SlashPos + 1);	//Include the slash
-				BookName += "BOOK.PCX";
-				*/
-				mPaletteFileName = palname;
+		if(PalType != "")
+		{
+			if (PalType == "external")
+				mPaletteType = ePT_External;
+			else if (PalType == "pcx")
+				mPaletteType = ePT_PCX;
+			else if (PalType == "defaultbook")
+				mPaletteType = ePT_DefaultBook;
+			else if (PalType == "default")
+				mPaletteType = ePT_Default;
+					
+			if ((mPaletteType == ePT_DefaultBook) || (PalName != "" && mPaletteType != ePT_Default))  // Palette file specified
+			{
+				if (mPaletteType == ePT_DefaultBook)
+				{
+					// Find the accompanying BOOK.PCX
+					size_t SlashPos = FontName.find_last_of("/");
+					mPaletteFileName = "";
+					if (SlashPos != String::npos)
+						mPaletteFileName = BaseName.substr(0, SlashPos + 1);	//Include the slash
+					mPaletteFileName += "BOOK.PCX";
+				}
+				else
+					mPaletteFileName = PalName;
 				LogManager::getSingleton().logMessage("Font DEBUG: Will load a custom file palette");
-			} else {
+			} 
+			else 
+			{
 				LogManager::getSingleton().logMessage("Non-Default palette type, but no filename specified (Defaulting to LG's default pal). Font name " + BaseName);
 			}
 		}
@@ -636,8 +663,6 @@ namespace Ogre
         Ogre::DataStreamPtr Stream = Ogre::ResourceGroupManager::getSingleton().openResource(BaseName, mFontGroup, true, resource);
 		mFontFile = new OgreFile(Stream);
 
-		//TODO: Add DataStream code for mPaletteFile
-
         if(LoadDarkFont())
 			LogManager::getSingleton().logMessage("An error occurred while loading the font " + BaseName);
 		/*
@@ -646,25 +671,5 @@ namespace Ogre
 
 		if(CreateOgreFont(DarkFont))
 			LogManager::getSingleton().logMessage("An error occurred creating Ogre font");
-    }
-    
-    //-------------------------------------------------------------------
-    void ManualFonFileLoader::setParameter(String name, String value) {
-    	mParams.insert(Parameters::value_type(name, value));
-    }
-	
-	//-------------------------------------------------------------------
-	const String ManualFonFileLoader::getParameter(String name) {
-		Parameters::const_iterator it = mParams.find(name);
-		
-		if (it != mParams.end())
-			return it->second;
-		else
-			return "";
-	}
-	
-	//-------------------------------------------------------------------
-	void ManualFonFileLoader::resetParameters() {
-		mParams.clear();
-	}
+    }    
 }
