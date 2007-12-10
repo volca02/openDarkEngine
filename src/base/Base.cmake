@@ -17,7 +17,7 @@ SET(OPDE_BASE_LIBRARIES
     OpdeConsole
     OpdeDynType
     OpdeFile
-    OpdeLoaders
+    OpdeManualLoaders
     OpdeLogger
     OpdeServiceManager
 )
