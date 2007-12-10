@@ -130,6 +130,11 @@ namespace Opde {
 			void setNull() {
 				release();
 
+				forceNull();
+			}
+			
+			/// DANGEROUS! Don't use if you really don't know what it does!
+			void forceNull() {
 				mPtr = NULL;
 				mReferences = NULL;
 			}
