@@ -29,5 +29,6 @@ add_library (OpdeConfigService ConfigService.cpp ConfigService.h)
 
 target_link_libraries(OpdeConfigService
     OpdeBase
+    OpdeLogger
     OpdeServiceManager
 )
