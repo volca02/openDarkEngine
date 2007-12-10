@@ -1,3 +1,5 @@
+# $Id$
+
 add_subdirectory(PHYS_SYSTEM)
 
 if(PYTHON_SUPPORT)
