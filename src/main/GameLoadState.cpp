@@ -247,13 +247,11 @@ namespace Opde {
 			
 			// A test. For parch book load a custom font palette
 			if ((*it == "FONTAA36.FON") || (*it == "FONTAA29.FON")) {
-				mManualFonLoader->setParameter("palette_type", "DefaultBook");	//Default BOOK.PCX
-				//mManualFonLoader->setParameter("palette_file", "MAIN.PCX");
-					
+				mManualFonLoader->setPalette(ManualFonFileLoader::ePT_PCX, "BOOK.PCX");
 				LOG_INFO("Loading a custom palette for the font %s", (*it).c_str());
 				text = "Garrett would like pcx palette font: " + *it+ ", LOADING!";
 			} else {
-				mManualFonLoader->resetParameters();
+				mManualFonLoader->setPalette();
 			}
 			
 			

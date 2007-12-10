@@ -35,35 +35,31 @@ using namespace Opde; // For the Opde::File
 
 namespace Ogre {
 	
-	/** ManualResourceLoader for FON files. 
-	* Font resource parameters:
-	* Palette type: Paramater <b>palette_type</b>
-	* @li external External Palette File (RIFF)
-	* @li pcx PCX file palette
-	* @li defaultbook Palette from accompanying BOOK.PCX
-	* @li default Default (LG's default) palette
-	* Palette file name paramater: <b>palette_file</b>
-	*/
-    class ManualFonFileLoader : public ManualResourceLoader {
-		protected:
-		    /// Internal - Palette type specifier
-		    enum PaletteType {
-		    	/// Default palette
-				ePT_Default = 0, 
-				/// Palette from accompanying BOOK.PCX
-				ePT_DefaultBook, 
-				/// PCX file palette
-				ePT_PCX, 
-				/// External palette
-				ePT_External
+	/// ManualResourceLoader for FON files.
+    class ManualFonFileLoader : public ManualResourceLoader 
+	{		
+        public:
+			/// Palette type specifier
+		    enum PaletteType {		    	
+				ePT_Default = 0, /// Default palette				
+				ePT_DefaultBook, /// Palette from accompanying BOOK.PCX				
+				ePT_PCX,		 /// PCX file palette				
+				ePT_External	 /// External palette
 			};
-			
+            ManualFonFileLoader();
+            virtual ~ManualFonFileLoader();
+
+            virtual void loadResource(Resource* resource);
+            
+			/// Set the palette type
+            void setPalette(PaletteType PalType = ePT_Default, String PalFileName = "");
+            
+		protected:			
 			typedef std::map<String, String> Parameters;
 			Parameters mParams;
 
 		private:
-			CharInfoList mChars;
-			unsigned char *mpMemBuff;
+			CharInfoList mChars;			
 			DWORD mBmpFileSize;
 			unsigned int mImageDim, mNumRows;
 			FilePtr mFontFile, mBookFile, mPaletteFile;
@@ -81,24 +77,7 @@ namespace Ogre {
 			unsigned char** ReadFont(int *ResultingColor);
 
 			void createOgreTexture(unsigned char** img, RGBQUAD* palette);
-		
-
-        public:
-            ManualFonFileLoader();
-            virtual ~ManualFonFileLoader();
-
-            virtual void loadResource(Resource* resource);
-            
-            /// Will set a parameter value
-            void setParameter(String name, String value);
-            
-            /// Will set a parameter value
-            const String getParameter(String name);
-            
-            /// Will clean the parameter list - always use this one before loading a new font
-            void resetParameters();
     };
-
 }
 
 #endif	//__MANUALFONFILELOADER_H
