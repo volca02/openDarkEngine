@@ -1,10 +1,34 @@
+/******************************************************************************
+ *
+ *    This file is part of openDarkEngine project
+ *    Copyright (C) 2005-2006 openDarkEngine team
+ *
+ *    This program is free software; you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation; either version 2 of the License, or
+ *    (at your option) any later version.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program; if not, write to the Free Software
+ *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *
+ *	   $Id:$
+ *
+ *****************************************************************************/
+
 #include "bindings.h"
 #include "ConfigServiceBinder.h"
 
 namespace Opde {
 
 	namespace Python {
-		
+
 		// -------------------- Config Service --------------------
 		char* ConfigServiceBinder::msName = "ConfigService";
 
@@ -42,48 +66,48 @@ namespace Opde {
 			0,			              /* struct memberlist *tp_members; */
 			0,			              /* struct getsetlist *tp_getset; */
 		};
-		
+
 		// ------------------------------------------
 		PyMethodDef ConfigServiceBinder::msMethods[] = {
 			{"setParam", setParam, METH_VARARGS},
-			{"getParam", getParam, METH_VARARGS},			
+			{"getParam", getParam, METH_VARARGS},
 			{"hasParam", hasParam, METH_VARARGS},
-			{"loadParams", loadParams, METH_VARARGS},						
+			{"loadParams", loadParams, METH_VARARGS},
 			{NULL, NULL},
 		};
-		
+
 		// ------------------------------------------
 		void ConfigServiceBinder::dealloc(PyObject* self) {
 			// cast the object to ConfigServiceBinder::Object
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			// Decreases the shared_ptr counter
 			o->mInstance.setNull();
 		}
-		
+
 		// ------------------------------------------
 		PyObject* ConfigServiceBinder::getattr(PyObject *self, char *name) {
 			return Py_FindMethod(msMethods, self, name);
 		}
-		
+
 		// ------------------------------------------
 		PyObject* ConfigServiceBinder::create() {
 			Object* object;
 
 			object = PyObject_New(Object, &msType);
-			
-			// At this point, the shared_ptr instance in the object is invalid (I.E. Allocated, but not initialized). 
+
+			// At this point, the shared_ptr instance in the object is invalid (I.E. Allocated, but not initialized).
 			// If we try to assign into it, we'll segfault. Because of that, we have to erase the member data first
 			if (object != NULL) {
 				// Here, tidy!
 				object->mInstance.forceNull();
-				
+
 				object->mInstance = ServiceManager::getSingleton().getService(msName).as<ConfigService>();
 			}
-			
+
 			return (PyObject *)object;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* ConfigServiceBinder::setParam(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
@@ -96,10 +120,10 @@ namespace Opde {
 				result = Py_None;
 				Py_INCREF(result);
 			}
-			
+
 			return result;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* ConfigServiceBinder::getParam(PyObject* self, PyObject* args) {
 			PyObject *result = Py_None;
@@ -115,7 +139,7 @@ namespace Opde {
 				return NULL;
 			}
 		}
-		
+
 		// ------------------------------------------
 		PyObject* ConfigServiceBinder::hasParam(PyObject* self, PyObject* args) {
 			PyObject *result = Py_None;
@@ -133,7 +157,7 @@ namespace Opde {
 				return NULL;
 			}
 		}
-		
+
 		// ------------------------------------------
 		PyObject* ConfigServiceBinder::loadParams(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
@@ -145,19 +169,19 @@ namespace Opde {
 				result = Py_None;
 				Py_INCREF(result);
 			}
-			
+
 			return result;
 		}
 
 		PyMethodDef sOpdeMethods[] = {
 			{NULL, NULL},
 		};
-		
+
 		// ------------------------------------------
 		void ConfigServiceBinder::init() {
-			
+
 		}
 	}
-	
+
 } // namespace Opde
 
