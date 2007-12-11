@@ -41,6 +41,11 @@ int main(void) {
 		"print \"Got config service! Yay Yay!\"\n"
 		"print \"Do we have a parameter test?: '\" + str(s.hasParam(\"test\")) + \"'\";\n"
 		"print \"Python read config parameter: '\" + s.getParam(\"test\") + \"'\";\n"
+		"log_fatal(\"A fatal log test!\")\n"
+		"log_error(\"Error test\")\n"
+		"log_info(\"Info test\")\n"
+		"log_debug(\"Debug test\")\n"
+		"log_verbose(\"Verbose test\")\n"
 	);
 	
 	PythonLanguage::term();
