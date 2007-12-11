@@ -18,12 +18,13 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *	   $Id:$
+ *	   $Id$
  *
  *****************************************************************************/
  
 #include "bindings.h"
 #include "ServiceBinder.h"
+#include "logger.h"
 
 namespace Opde {
 	namespace Python {
@@ -68,9 +69,51 @@ namespace Opde {
 			
 		}
 
+		// Logging methods
+		// LEVELS: fatal error info debug verbose
+		PyObject* Py_Log(PyObject *self, Logger::LogLevel level, PyObject* args) {
+			const char* text;
+			PyObject* result = NULL;
+			
+			if (PyArg_ParseTuple(args, "s", &text)) {
+				Logger::getSingleton().log(level, "Python: %s", text);
+				
+				result = Py_None;
+				Py_INCREF(result);
+			} else {
+				PyErr_SetString(PyExc_TypeError, "Expected string argument!");
+			}
+
+			return result;
+		}
+		
+		PyObject* Py_Log_Fatal(PyObject *self, PyObject* args) {
+			return Py_Log(self, Logger::LOG_FATAL, args);
+		}
+		
+		PyObject* Py_Log_Error(PyObject *self, PyObject* args) {
+			return Py_Log(self, Logger::LOG_ERROR, args);
+		}
+		
+		PyObject* Py_Log_Info(PyObject *self, PyObject* args) {
+			return Py_Log(self, Logger::LOG_INFO, args);
+		}
+
+		PyObject* Py_Log_Debug(PyObject *self, PyObject* args) {
+			return Py_Log(self, Logger::LOG_DEBUG, args);
+		}
+		
+		PyObject* Py_Log_Verbose(PyObject *self, PyObject* args) {
+			return Py_Log(self, Logger::LOG_VERBOSE, args);
+		}
 	} // namespace Python
 	
 	PyMethodDef sOpdeMethods[] = {
+		{"log_fatal", Python::Py_Log_Fatal, METH_VARARGS},
+		{"log_error", Python::Py_Log_Error, METH_VARARGS},
+		{"log_info", Python::Py_Log_Info, METH_VARARGS},
+		{"log_debug", Python::Py_Log_Debug, METH_VARARGS},
+		{"log_verbose", Python::Py_Log_Verbose, METH_VARARGS},
 		{NULL, NULL},
 	};
 	
@@ -84,6 +127,7 @@ namespace Opde {
 		PyObject *servicemod = Python::ServiceBinder::init(module);
 		
 		if (PyErr_Occurred()) {
+			// TODO: Do something useful here, or forget it
 			PyErr_Print();
 			PyErr_Clear();
 		}
