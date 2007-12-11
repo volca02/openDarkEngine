@@ -31,7 +31,7 @@ namespace Opde {
 		public:
 			StdLog();
 			virtual ~StdLog();
-			virtual void logMessage(LogLevel level, char *message);
+			virtual void logMessage(Logger::LogLevel level, char *message);
 	};
 }
 

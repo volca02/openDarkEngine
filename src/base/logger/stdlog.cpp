@@ -29,7 +29,7 @@ namespace Opde {
 	
 	StdLog::~StdLog() {};
 		
-	void StdLog::logMessage(LogLevel level, char *message) {
+	void StdLog::logMessage(Logger::LogLevel level, char *message) {
 		std::cerr << "LOG [" << level << "] : " << message << std::endl;
 	}
 }

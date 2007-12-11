@@ -133,7 +133,7 @@ namespace Opde {
 			addText("OgreLog: (" + logName + ") : " + message);
 	}
 
-	void ConsoleBackend::logMessage(LogLevel level, char *message) {
+	void ConsoleBackend::logMessage(Logger::LogLevel level, char *message) {
 		std::string smessage(message);
 		addText("LOG[" + string(logLevels[level]) + "] : " + smessage);
 	}

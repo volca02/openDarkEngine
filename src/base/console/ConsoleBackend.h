@@ -85,7 +85,7 @@ namespace Opde {
 			virtual void messageLogged( const Ogre::String& message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String &logName );
 
 			/** Opde logging method implementation */
-			virtual void logMessage(LogLevel level, char *message);
+			virtual void logMessage(Logger::LogLevel level, char *message);
 
 			/** Returns true, if the console text was changed from last time, and resets the indicator - asking twice will return true,false */
 			bool getChanged();

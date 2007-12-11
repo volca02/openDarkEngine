@@ -33,7 +33,7 @@ namespace Opde {
       fclose(LogFile);
    };
 
-	void FileLog::logMessage(LogLevel level, char *message) {
+	void FileLog::logMessage(Logger::LogLevel level, char *message) {
 	   // Put in the severity/log level too
 	   fprintf(LogFile, "LOG [%s] : ", Logger::getSingleton().getLogLevelStr(level).c_str());
 	   fputs(message, LogFile);

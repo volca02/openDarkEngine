@@ -32,7 +32,7 @@ namespace Opde {
 		public:
 			FileLog();
 			virtual ~FileLog();
-			virtual void logMessage(LogLevel level, char *message);
+			virtual void logMessage(Logger::LogLevel level, char *message);
 	};
 }
 
