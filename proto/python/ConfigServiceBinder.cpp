@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *	   $Id:$
+ *	   $Id$
  *
  *****************************************************************************/
 
@@ -164,7 +164,7 @@ namespace Opde {
 			Object* o = python_cast<Object*>(self, &msType);
 			const char* fname;
 
-			if (PyArg_ParseTuple(args, "ss", &fname)) {
+			if (PyArg_ParseTuple(args, "s", &fname)) {
 				o->mInstance->loadParams(fname);
 				result = Py_None;
 				Py_INCREF(result);
