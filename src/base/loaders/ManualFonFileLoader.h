@@ -70,7 +70,6 @@ namespace Ogre {
 			String mPaletteFileName;
 
 			RGBQUAD* ReadPalette();
-			int AddAlpha();
 			int CreateOgreFont(Font* DarkFont);
 			int LoadDarkFont();
 			int WriteImage(RGBQUAD *ColorTable, unsigned char **RowPointers);

@@ -26,7 +26,6 @@
 //---------------------------- El cargador de las fuentes para El Motor Oscuro --------------------
 #include "ManualFonFileLoader.h"
 
-#include <FreeImage.h>
 #include <OgreLogManager.h>
 #include <OgreStringConverter.h>
 #include <OgreTextureManager.h>
@@ -461,8 +460,9 @@ namespace Ogre
 			PaletteData = (COLORREF*)AntiAliasedColorTable;
 		}
 
+		// Enable to see the resulting BMP
 		// WriteImage((RGBQUAD*)PaletteData, ImageRows);
-		// For now... Can also be done directly when loading (And probably better too)
+
 		createOgreTexture(ImageRows, (RGBQUAD*)PaletteData);
 
 
@@ -514,45 +514,6 @@ namespace Ogre
 		}
 		pBuf->unlock();
 	}
-
-	/*-----------------------------------------------------------------*/
-	/*------------------------- Alpha stuff ---------------------------*/
-	/*-----------------------------------------------------------------*/
-	int ManualFonFileLoader::AddAlpha()
-	{
-#ifdef FREEIMAGE_LIB
-		FreeImage_Initialise();
-#endif //FREEIMAGE_LIB
-
-/*		FIMEMORY *BmpMem = FreeImage_OpenMemory(mpMemBuff, mBmpFileSize);
-
-		FIBITMAP *Src = FreeImage_LoadFromMemory(FIF_BMP, BmpMem, 0);
-		if(!Src)
-			return -1;
-
-		FIBITMAP *Dst = FreeImage_ConvertTo32Bits(Src);
-
-		FreeImage_Invert(Src);
-		FIBITMAP *Mask = FreeImage_ConvertToGreyscale(Src);
-		FreeImage_Invert(Src);
-		FreeImage_SetChannel(Dst, Mask, FICC_ALPHA);
-		FreeImage_Unload(Mask);
-
-		FreeImage_Save(FIF_PNG, Dst, "Font.PNG");
-
-		FreeImage_Unload(Dst);
-		FreeImage_Unload(Src);
-		FreeImage_CloseMemory(BmpMem);
-		delete [] mpMemBuff;
-		mpMemBuff = NULL;*/
-
-#ifdef FREEIMAGE_LIB
-		FreeImage_DeInitialise();
-#endif //FREEIMAGE_LIB
-
-		return 0;
-	}
-
 
 	/*-----------------------------------------------------------------*/
 	/*------------------------- Ogre stuff ----------------------------*/
@@ -633,9 +594,6 @@ namespace Ogre
 
         if(LoadDarkFont())
 			LogManager::getSingleton().logMessage("An error occurred while loading the font " + BaseName);
-		/*
-		if(AddAlpha())
-			LogManager::getSingleton().logMessage("An error occurred while adding Alpha Channel");*/
 
 		if(CreateOgreFont(DarkFont))
 			LogManager::getSingleton().logMessage("An error occurred creating Ogre font");
