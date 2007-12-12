@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *		$Id:$
+ *		$Id$
  *
  *****************************************************************************/
 
@@ -133,15 +133,11 @@ namespace Opde {
 			void setNull() {
 				release();
 
-				forceNull();
-			}
-			
-			/// DANGEROUS! Don't use if you really don't know what it does!
-			void forceNull() {
 				mPtr = NULL;
 				mReferences = NULL;
-			}
 
+			}
+			
 		private:
 			/** Helper ctor for shared_ptr casting with as<U>()
 			*/
