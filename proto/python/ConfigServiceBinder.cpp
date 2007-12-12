@@ -83,6 +83,12 @@ namespace Opde {
 
 			// Decreases the shared_ptr counter
 			o->mInstance.setNull();
+			
+			// Call the destructor to clean up
+			(&o->mInstance)->~ConfigServicePtr();
+			
+			// Finally delete the object
+			PyObject_Del(self);
 		}
 
 		// ------------------------------------------
@@ -97,11 +103,11 @@ namespace Opde {
 			object = PyObject_New(Object, &msType);
 
 			// At this point, the shared_ptr instance in the object is invalid (I.E. Allocated, but not initialized).
-			// If we try to assign into it, we'll segfault. Because of that, we have to erase the member data first
+			// If we try to assign into it, we'll segfault. Because of that, we have to call constructor manually
 			if (object != NULL) {
 				// Here, tidy!
-				object->mInstance.forceNull();
-
+				::new (&object->mInstance) ConfigServicePtr();
+				
 				object->mInstance = ServiceManager::getSingleton().getService(msName).as<ConfigService>();
 			}
 
