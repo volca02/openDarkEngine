@@ -18,12 +18,12 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *	   $Id:$
+ *	   $Id$
  *
  *****************************************************************************/
  
-#ifndef __SERVICES_H
-#define __SERVICES_H
+#ifndef __SERVICEBINDER_H
+#define __SERVICEBINDER_H
 
 #include "bindings.h"
 
@@ -39,6 +39,7 @@ namespace Opde {
 				static PyObject* init(PyObject* container);
 			
 				static PyObject* getConfigService(PyObject* self, PyObject* args);
+				static PyObject* getLinkService(PyObject* self, PyObject* args);
 			
 			protected:
 				static PyMethodDef msMethods[];
