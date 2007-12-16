@@ -18,12 +18,12 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *	   $Id:$
+ *	   $Id$
  *
  *****************************************************************************/
 
-#ifndef __PYCONFIGSERVICE_H
-#define __PYCONFIGSERVICE_H
+#ifndef __CONFIGSERVICEBINDER_H
+#define __CONFIGSERVICEBINDER_H
 
 #include  "ConfigService.h"
 
