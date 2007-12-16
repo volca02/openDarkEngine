@@ -7,6 +7,8 @@
 #include "stdlog.h"
 #include "OpdeServiceManager.h"
 #include "ConfigService.h"
+#include "LinkService.h"
+#include "DatabaseService.h"
 
 using namespace Opde;
 
@@ -23,6 +25,8 @@ int main(void) {
 
 	// New service factory for Config service
 	new ConfigServiceFactory();
+	new LinkServiceFactory();
+	new DatabaseServiceFactory();
 
 	// Run a python string to test the setup
 	ConfigServicePtr configService = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
@@ -35,6 +39,13 @@ int main(void) {
 	// To tidy mem...
 	configService.setNull();
 	
+	LinkServicePtr ls = ServiceManager::getSingleton().getService("LinkService").as<LinkService>();
+	
+	ls->createRelation("TestRelation", NULL, false); 
+	// Can't do mapping test without a data file - the mapping is determined from RELATIONS chunk
+	
+	ls.setNull();
+	
 	PyRun_SimpleString("from Opde import *\n"
 		"print \"Loaded Opde module! Yay!\"\n"
 		"s = Services.ConfigService()\n"
@@ -46,11 +57,12 @@ int main(void) {
 		"log_info(\"Info test\")\n"
 		"log_debug(\"Debug test\")\n"
 		"log_verbose(\"Verbose test\")\n"
+		"ls = Services.LinkService()\n"
+		"print \"Link flavor 0 name:\" + ls.flavorToName(0)\n" // Translate the link ID 1 to name
 	);
 	
 	PythonLanguage::term();
 	
 	delete serviceMgr;
 	delete logger;
-	
 }
