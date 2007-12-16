@@ -18,12 +18,14 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *	   $Id:$
+ *	   $Id$
  *
  *****************************************************************************/
  
 #include "ServiceBinder.h"
+
 #include "ConfigServiceBinder.h"
+#include "LinkServiceBinder.h"
 
 namespace Opde {
 	namespace Python {
@@ -33,11 +35,16 @@ namespace Opde {
 		
 		PyMethodDef ServiceBinder::msMethods[] = {
 			{"ConfigService", getConfigService, METH_NOARGS},
+			{"LinkService", getLinkService, METH_NOARGS},
 			{NULL, NULL},
 		};
 		
 		PyObject* ServiceBinder::getConfigService(PyObject* self, PyObject* args) {
 			return ConfigServiceBinder::create();
+		}
+		
+		PyObject* ServiceBinder::getLinkService(PyObject* self, PyObject* args) {
+			return LinkServiceBinder::create();
 		}
 		
 		PyObject* ServiceBinder::init(PyObject* container) {
