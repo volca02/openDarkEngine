@@ -38,10 +38,10 @@ namespace Opde {
 					return Py_None;
 
 				case DVariant::DV_BOOL: {
-							PyObject* ret = inst.toBool() ? Py_True : Py_False;
-							Py_INCREF(ret);
-							return ret;
-					}
+					PyObject* ret = inst.toBool() ? Py_True : Py_False;
+					Py_INCREF(ret);
+					return ret;
+				}
 
 				case DVariant::DV_FLOAT:
 					return PyFloat_FromDouble(inst.toFloat());
@@ -60,6 +60,10 @@ namespace Opde {
 					const Ogre::Vector3& v = inst.toVector();
 					return Py_BuildValue("[fff]", v.x, v.y, v.z);
 				}
+	
+				default:	//All possible paths must return a value
+					Py_INCREF(Py_None);
+					return Py_None;
 			}
 		}
 		
@@ -67,6 +71,7 @@ namespace Opde {
 			// Do a conversion from python object to DVariant instance
 			// Look for the type of the python object
 			
+			return NULL; //This is added to make Windows build work (MSVC requires a return)
 		}
 
 		// Logging methods
