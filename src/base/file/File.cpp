@@ -17,6 +17,7 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *	  $Id$
  *****************************************************************************/
 
 #include <OgreLogManager.h>
@@ -94,7 +95,7 @@ namespace Opde {
 	//------------------------------------
 	File& File::readStruct(void* buf, const char* format, uint32_t ExpectedLen, uint count) {
 		uint32_t TotalBytes = 0;		
-		for (int i = 0; i < count; i++) {
+		for (uint i = 0; i < count; i++) {
 			uint32_t Index = 0;
 			char* bpos = static_cast<char*>(buf);
 		    
@@ -152,7 +153,7 @@ namespace Opde {
 	//------------------------------------
 	File& File::writeStruct(const void* buf, const char* format, uint32_t ExpectedLen, uint count) {
 		uint32_t TotalBytes = 0;
-		for (int i = 0; i < count; i++) {
+		for (uint i = 0; i < count; i++) {
 			uint32_t Index = 0;
 			const char* bpos = static_cast<const char*>(buf);
 		    
@@ -485,7 +486,7 @@ namespace Opde {
 
 			char *page = mPages.at(pgp.first);
 
-			int toEnd;
+			uint toEnd;
 
 			if (pgp.first >= mPages.size()) { // last page. or error
 				toEnd = (mSize % MEMORY_FILE_BUF_LEN) - pgp.second;
@@ -556,7 +557,7 @@ namespace Opde {
 
 			char *page = mPages.at(pgp.first);
 
-			int toEnd;
+			uint toEnd;
 
 			toEnd = MEMORY_FILE_BUF_LEN - pgp.second;
 
