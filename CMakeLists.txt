@@ -14,6 +14,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program; if not, write to the Free Software
 #    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#    $Id$
 
 
 project (OPDE)
@@ -132,8 +134,10 @@ IF(PYTHON_SUPPORT)
     FIND_PACKAGE(PythonLibs REQUIRED)
     
     # Aditional libraries - deps of the python lib
-    INCLUDE(PythonDeps.cmake)
-    FIND_PYTHON_DEPS(PYTHON_LIBRARIES)
+	IF(UNIX)
+		INCLUDE(PythonDeps.cmake)
+		FIND_PYTHON_DEPS(PYTHON_LIBRARIES)
+	ENDIF(UNIX)
     
     IF(PYTHON_LIBRARIES)
 	MESSAGE(STATUS "Python Found OK")
