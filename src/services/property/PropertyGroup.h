@@ -17,6 +17,8 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+  *	  $Id$
+ *
  *****************************************************************************/
 
 
@@ -132,7 +134,7 @@ namespace Opde {
 			* @param src_id The id of the object to clone property from */
 			bool cloneProperty(int obj_id, int src_id);
 
-			// ----------------- Data manipulation releted methods --------------------
+			// ----------------- Data manipulation related methods --------------------
 			/** Manual broadcaster of data change. To be used as the last call in a block of property manipulation calls using the PropertyDataPtr from getData call.
 			* @see getData
 			* @param data The new data (will not replace the old, used for objectID and data fields in the broadcast)

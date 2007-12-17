@@ -17,6 +17,8 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *	  $Id$
+ *
  *****************************************************************************/
 
 
@@ -54,7 +56,7 @@ namespace Opde {
 			/** Update the state, given timePassed time since last update call */
 			virtual void update(unsigned long timePassed) = 0;
 			
-			//---------- input events releted methods
+			//---------- input events related methods
 			
 			/** Keyboard key was pressed event. */
 			virtual bool keyPressed( const OIS::KeyEvent &e ) = 0;
@@ -71,7 +73,7 @@ namespace Opde {
 			/** Mouse button was released event. */
 			virtual bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) = 0;
 			
-			//---------- StateManager releted methods
+			//---------- StateManager related methods
 			
 			/** Request the StateManager to push in a new state */
 			void pushState(GameState* state);

@@ -17,6 +17,8 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *	  $Id$
+ *
  *****************************************************************************/
 
 #ifndef __OPDESERVICEMANAGER_H
@@ -54,7 +56,7 @@ namespace Opde {
 			/// Destructor. Deletes all registered factories
 			~ServiceManager();
 
-			// Singleton releted
+			// Singleton related
 			static ServiceManager& getSingleton(void);
 			static ServiceManager* getSingletonPtr(void);
 

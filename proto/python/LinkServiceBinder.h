@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *	   $Id:$
+ *	   $Id$
  *
  *****************************************************************************/
 
@@ -36,7 +36,7 @@ namespace Opde {
 		/// Link service python binder
 		class LinkServiceBinder {
 			public:
-				// --- Python type releted methods ---
+				// --- Python type related methods ---
 				static void dealloc(PyObject *self);
 				
 				static PyObject* getattr(PyObject *self, char *name);

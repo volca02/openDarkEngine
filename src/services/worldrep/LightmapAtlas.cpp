@@ -17,6 +17,8 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *	  $Id$
+ *
  *****************************************************************************/
 
 
@@ -463,7 +465,7 @@ namespace Opde {
 		owner = _owner;
 		position = tgt;
 
-		// register as a light releted lightmap
+		// register as a light related lightmap
 		std::map<int, float>::iterator it = intensities.begin();
 
 		for (; it != intensities.end(); it++) {

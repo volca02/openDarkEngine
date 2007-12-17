@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *		$Id:$
+ *		$Id$
  *
  *****************************************************************************/
 
@@ -71,7 +71,7 @@ namespace Opde {
 			/** Logging level setter. */
 			void setLogLevel(LogLevel level);
 
-			// Singleton releted stuff
+			// Singleton related stuff
 			static Logger& getSingleton(void);
 			static Logger* getSingletonPtr(void);
 	};

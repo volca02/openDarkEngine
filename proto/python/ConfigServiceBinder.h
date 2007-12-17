@@ -36,7 +36,7 @@ namespace Opde {
 			public:
 				static void init();
 
-				// --- Python type releted methods ---
+				// --- Python type related methods ---
 
 				static void dealloc(PyObject *self);
 				static PyObject* getattr(PyObject *self, char *name);

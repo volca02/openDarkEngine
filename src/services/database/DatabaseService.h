@@ -17,6 +17,8 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *	  $Id$
+ *
  *****************************************************************************/
 
 
@@ -69,7 +71,7 @@ namespace Opde {
 	* Typically, a service wanting to handle database events will register as a listener, and handle the events given from this service.
 	* There are some rules:
 	* @li Mission loading will drop with DB_COMPLETE
-	* @li Savegame loading will have DB_SAVEGAME as dbtarget (so the services handling savegame releted chunks will not process the mission's chunks)
+	* @li Savegame loading will have DB_SAVEGAME as dbtarget (so the services handling savegame related chunks will not process the mission's chunks)
 	*/
 	class DatabaseService : public Service, public PrioritizedMessageSource<DatabaseChangeMsg> {
 		public:

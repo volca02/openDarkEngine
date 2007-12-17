@@ -1,3 +1,5 @@
+//	$Id$
+
 #include <stdio.h>
 #include <string.h>
 #include "integers.h"
@@ -56,7 +58,7 @@ typedef struct { // SIZE: 18 longs (72 bytes)
 	
 	
 	
-	// float   a2, b2;   //   Unknown (Angle releted?)
+	// float   a2, b2;   //   Unknown (Angle related?)
 
 	t_coord pos2;     //   Seems to be copy of pos1, but matbe not 100% of the time
 
@@ -440,7 +442,7 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	fpos(f);
 	
 	
-	// This looks rope releted
+	// This looks rope related
 	printf("\t Float List for sub-objects (%d) : \n", num_subobjs);
 	for (int n = 0; n < num_subobjs; n++) {
 		printf("\t\t %d : ", n);

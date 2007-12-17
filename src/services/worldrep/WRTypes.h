@@ -17,6 +17,8 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *	  $Id$
+ *
  *****************************************************************************/
 
 
@@ -81,7 +83,7 @@ namespace Opde {
 	
 	typedef struct { // SIZE: 12+12+12+12 = 48
 		wr_coord_t	ax_u; // U axis 
-		wr_coord_t	ax_v; // V axis - both directions of texture growth (e.g. U axis and V axis) - and they are not normalised! (in some way releted to scale)
+		wr_coord_t	ax_v; // V axis - both directions of texture growth (e.g. U axis and V axis) - and they are not normalised! (in some way related to scale)
 		
 		int16_t		u; // txt shift u (must divide by 1024 to get float number (and I dunno why, I had to invert it too))
 		int16_t		v; // txt shift v

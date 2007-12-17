@@ -17,6 +17,8 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *	  $Id$
+ *
  *****************************************************************************/
 
 
@@ -219,7 +221,7 @@ namespace Opde {
 		StringUtil::StrStreamType tmp;
 
 		// Lightmaps should only be used for non-flow textures. I dunno if non-flow water uses lmaps or not, but flow textures do not use it for sure
-		// So if the polygon flags are nonzero, do not add lightmap (the flags seem to be releted to the transparency [having 14 value])
+		// So if the polygon flags are nonzero, do not add lightmap (the flags seem to be related to the transparency [having 14 value])
 		// This means no cloning at all
 
 		// Texture and prototype name
