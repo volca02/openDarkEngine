@@ -70,8 +70,28 @@ namespace Opde {
 		DVariant PyObjectToDVariant(PyObject* obj) {
 			// Do a conversion from python object to DVariant instance
 			// Look for the type of the python object
+
+			if (PyInt_Check(obj)) 
+				return DVariant(PyInt_AsLong(obj));
+			else if (PyBool_Check(obj))
+			{
+				if(obj == Py_True)
+					return DVariant((bool)true);
+				else
+					return DVariant((bool)false);
+			}
+			else if (PyFloat_Check(obj))
+				return DVariant((float)PyFloat_AsDouble(obj));
+			else if (PyString_Check(obj))
+				return DVariant(PyString_AsString(obj));
+			else if (PyModule_Check(obj))
+			{
+				float X, Y, Z;
+				PyArg_Parse(obj, "[fff]", &X, &Y, &Z);
+				return DVariant(X, Y, Z);
+			}
 			
-			return NULL; //This is added to make Windows build work (MSVC requires a return)
+			return DVariant(DVariant::DV_INVALID); //Py_None, or a non-handled type
 		}
 
 		// Logging methods
