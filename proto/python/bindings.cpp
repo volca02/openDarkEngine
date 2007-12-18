@@ -72,7 +72,7 @@ namespace Opde {
 			// Look for the type of the python object
 
 			if (PyInt_Check(obj)) 
-				return DVariant(PyInt_AsLong(obj));
+				return DVariant(static_cast<int>(PyInt_AsLong(obj)));
 			else if (PyBool_Check(obj))
 			{
 				if(obj == Py_True)
