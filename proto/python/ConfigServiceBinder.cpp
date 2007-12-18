@@ -77,37 +77,15 @@ namespace Opde {
 		};
 
 		// ------------------------------------------
-		void ConfigServiceBinder::dealloc(PyObject* self) {
-			// cast the object to ConfigServiceBinder::Object
-			Object* o = python_cast<Object*>(self, &msType);
-
-			// Decreases the shared_ptr counter
-			o->mInstance.setNull();
-			
-			// Call the destructor to clean up
-			(&o->mInstance)->~ConfigServicePtr();
-			
-			// Finally delete the object
-			PyObject_Del(self);
-		}
-
-		// ------------------------------------------
 		PyObject* ConfigServiceBinder::getattr(PyObject *self, char *name) {
 			return Py_FindMethod(msMethods, self, name);
 		}
 
 		// ------------------------------------------
 		PyObject* ConfigServiceBinder::create() {
-			Object* object;
+			Object* object = construct(&msType);
 
-			object = PyObject_New(Object, &msType);
-
-			// At this point, the shared_ptr instance in the object is invalid (I.E. Allocated, but not initialized).
-			// If we try to assign into it, we'll segfault. Because of that, we have to call constructor manually
 			if (object != NULL) {
-				// Here, tidy!
-				::new (&object->mInstance) ConfigServicePtr();
-				
 				object->mInstance = ServiceManager::getSingleton().getService(msName).as<ConfigService>();
 			}
 

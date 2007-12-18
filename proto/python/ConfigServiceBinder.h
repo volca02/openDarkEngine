@@ -32,13 +32,11 @@ namespace Opde {
 	namespace Python {
 
 		/// Config service python binder
-		class ConfigServiceBinder {
+		class ConfigServiceBinder : public shared_ptr_binder<ConfigServicePtr> {
 			public:
 				static void init();
 
 				// --- Python type related methods ---
-
-				static void dealloc(PyObject *self);
 				static PyObject* getattr(PyObject *self, char *name);
 
 				static PyObject* create();
@@ -51,9 +49,6 @@ namespace Opde {
 				static PyObject* loadParams(PyObject* self, PyObject* args);
 
 			protected:
-				/// Python object instance definition
-				typedef ObjectBase<ConfigServicePtr> Object;
-
 				/// Static type definition for ConfigService
 				static PyTypeObject msType;
 

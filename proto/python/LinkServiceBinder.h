@@ -34,11 +34,9 @@ namespace Opde {
 	namespace Python {
 
 		/// Link service python binder
-		class LinkServiceBinder {
+		class LinkServiceBinder : public shared_ptr_binder<LinkServicePtr> {
 			public:
 				// --- Python type related methods ---
-				static void dealloc(PyObject *self);
-				
 				static PyObject* getattr(PyObject *self, char *name);
 
 				static PyObject* create();
@@ -47,11 +45,9 @@ namespace Opde {
 				static PyObject* setChunkVersion(PyObject* self, PyObject* args);
 				static PyObject* nameToFlavor(PyObject* self, PyObject* args);
 				static PyObject* flavorToName(PyObject* self, PyObject* args);
+				static PyObject* getRelation(PyObject* self, PyObject* args);
 				
 			protected:
-				/// Python object instance definition
-				typedef ObjectBase<LinkServicePtr> Object;
-
 				/// Static type definition for LinkService
 				static PyTypeObject msType;
 

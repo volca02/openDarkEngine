@@ -24,6 +24,7 @@
 
 #include "bindings.h"
 #include "LinkServiceBinder.h"
+#include "RelationBinder.h"
 
 namespace Opde {
 
@@ -73,6 +74,7 @@ namespace Opde {
 			{"setChunkVersion", setChunkVersion, METH_VARARGS},
 			{"nameToFlavor", nameToFlavor, METH_VARARGS},
 			{"flavorToName", flavorToName, METH_VARARGS},
+			{"getRelation", getRelation, METH_VARARGS},
 			{NULL, NULL},
 		};
 
@@ -81,10 +83,10 @@ namespace Opde {
 			PyObject *result = Py_None;
 			Object* o = python_cast<Object*>(self, &msType);
 			
-			unsigned int major;
-			unsigned int minor;
+			int major;
+			int minor;
 
-			if (PyArg_ParseTuple(args, "uu", &major, &minor)) {
+			if (PyArg_ParseTuple(args, "ii", &major, &minor)) {
 				o->mInstance->setChunkVersion(major, minor);
 
 				Py_INCREF(result);
@@ -133,20 +135,34 @@ namespace Opde {
 				return NULL;
 			}
 		}
-
+		
 		// ------------------------------------------
-		void LinkServiceBinder::dealloc(PyObject* self) {
-			// cast the object to LinkServiceBinder::Object
+		PyObject* LinkServiceBinder::getRelation(PyObject* self, PyObject* args) {
+			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
 
-			// Decreases the shared_ptr counter
-			o->mInstance.setNull();
+			PyObject* object;
+			if (!PyArg_ParseTuple(args, "O", &object)) {
+				PyErr_SetString(PyExc_TypeError, "Expected an integer or string argument!");
+				return NULL;
+			}
 			
-			// Call the destructor to clean up
-			(&o->mInstance)->~LinkServicePtr();
-			
-			// Finally delete the object
-			PyObject_Del(self);
+			// two possibilities here : name or flavor
+			if (PyString_Check(object)) {
+				RelationPtr rel = o->mInstance->getRelation(PyString_AsString(object));
+
+				result = RelationBinder::create(rel);
+				return result;
+			} else if (PyInt_Check(object)) {
+				RelationPtr rel = o->mInstance->getRelation(static_cast<int>(PyInt_AsLong(object)));
+
+				result = RelationBinder::create(rel);
+				return result;
+			} else {
+				// Invalid parameters
+				PyErr_SetString(PyExc_TypeError, "Expected an integer or string argument!");
+				return NULL;
+			}
 		}
 
 		// ------------------------------------------
@@ -156,12 +172,8 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* LinkServiceBinder::create() {
-			Object* object;
+			Object* object = construct(&msType);
 
-			object = PyObject_New(Object, &msType);
-
-			// At this point, the shared_ptr instance in the object is invalid (I.E. Allocated, but not initialized).
-			// If we try to assign into it, we'll segfault. Because of that, we have to call constructor manually
 			if (object != NULL) {
 				// Here, tidy!
 				::new (&object->mInstance) LinkServicePtr();
