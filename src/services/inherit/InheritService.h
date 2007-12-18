@@ -17,6 +17,9 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *
+ *		$Id$
+ *
  *****************************************************************************/
 
 
@@ -63,11 +66,6 @@ namespace Opde {
 			/// Destructor
 			virtual ~InheritService();
 
-            /// Service initialization - @see Service::init()
-			virtual bool init();
-
-			/// Service bootstraping ended - @see Service::bootstrapFinished()
-			virtual void bootstrapFinished();
 
 			/** Registers an inheritor factory */
 			void addInheritorFactory(InheritorFactoryPtr factory);
@@ -98,6 +96,12 @@ namespace Opde {
 			typedef std::map< int, InheritLinkMap > InheritMap;
 
 		private:
+		            /// Service initialization - @see Service::init()
+			virtual bool init();
+
+			/// Service bootstraping ended - @see Service::bootstrapFinished()
+			virtual void bootstrapFinished();
+
             /** Adds an inheritance link.
             * @param link The link to be added as InheritLink
             * @param priority The priority of the link to be added */

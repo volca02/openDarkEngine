@@ -17,6 +17,9 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *
+ *		$Id$
+ *
  *****************************************************************************/
 
 
@@ -39,8 +42,6 @@ namespace Opde {
 			ConfigService(ServiceManager *manager, const std::string& name);
 			virtual ~ConfigService();
 
-            /** initializes the service. Tries to load opde.cfg */
-            bool init();
 
 			/** Set a parameter */
 			void setParam(const std::string& param, const std::string& value);
@@ -63,6 +64,8 @@ namespace Opde {
 			bool loadParams(const std::string& cfgfile);
 
 		protected:
+            /** initializes the service. Tries to load opde.cfg */
+            bool init();
 
             std::string mConfigFileName;
 
