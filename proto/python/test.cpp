@@ -41,12 +41,16 @@ int main(void) {
 	
 	LinkServicePtr ls = ServiceManager::getSingleton().getService("LinkService").as<LinkService>();
 	
-	ls->createRelation("TestRelation", NULL, false); 
+	RelationPtr r = ls->createRelation("TestRelation", NULL, false); 
 	// Can't do mapping test without a data file - the mapping is determined from RELATIONS chunk
 	
+	r->setID(1);
+	
+	r.setNull();
 	ls.setNull();
 	
-	PyRun_SimpleString("from Opde import *\n"
+	PyRun_SimpleString(
+		"from Opde import *\n"
 		"print \"Loaded Opde module! Yay!\"\n"
 		"s = Services.ConfigService()\n"
 		"print \"Got config service! Yay Yay!\"\n"
@@ -59,6 +63,9 @@ int main(void) {
 		"log_verbose(\"Verbose test\")\n"
 		"ls = Services.LinkService()\n"
 		"print \"Link flavor 0 name:\" + ls.flavorToName(0)\n" // Translate the link ID 1 to name
+		"rel = ls.getRelation(\"TestRelation\")\n"
+		"print \"Relation's flavor : \" + str(rel.getID())\n"
+		"print \"Relation's name   : \" + rel.getName()\n"
 	);
 	
 	PythonLanguage::term();
