@@ -70,7 +70,6 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyMethodDef LinkServiceBinder::msMethods[] = {
-//			{"setParam", setParam, METH_VARARGS},
 			{"setChunkVersion", setChunkVersion, METH_VARARGS},
 			{"nameToFlavor", nameToFlavor, METH_VARARGS},
 			{"flavorToName", flavorToName, METH_VARARGS},

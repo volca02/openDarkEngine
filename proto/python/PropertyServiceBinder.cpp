@@ -133,6 +133,7 @@ namespace Opde
 				value = PyObjectToDVariant(Object);
 				o->mInstance->set(obj_id, propName, propField, value);
 
+				result = Py_None;
 				Py_INCREF(result);
 				return result;
 			} 

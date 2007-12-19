@@ -40,12 +40,17 @@ int main(void) {
 	configService.setNull();
 	
 	LinkServicePtr ls = ServiceManager::getSingleton().getService("LinkService").as<LinkService>();
+
+	// a simple int dtype, with default value 0
+	DVariant zint = Opde::uint(1);
+    DTypeDefPtr dint = new DTypeDef("int", zint, 4);
 	
-	RelationPtr r = ls->createRelation("TestRelation", NULL, false); 
+	RelationPtr r = ls->createRelation("TestRelation", dint, false); 
 	// Can't do mapping test without a data file - the mapping is determined from RELATIONS chunk
 	
 	r->setID(1);
 	
+	dint.setNull();
 	r.setNull();
 	ls.setNull();
 	
@@ -66,6 +71,12 @@ int main(void) {
 		"rel = ls.getRelation(\"TestRelation\")\n"
 		"print \"Relation's flavor : \" + str(rel.getID())\n"
 		"print \"Relation's name   : \" + rel.getName()\n"
+		"id = rel.create(0,1)\n" // link from 0 to 1
+		"print \"New link id       : \" + str(id)\n"
+		"print \"Link field value  : \" + str(rel.getLinkField(id, \"\"))\n"
+		"rel.setLinkField(id,\"\",3)\n"
+		"print \"set to 3!\"\n"
+		"print \"Link field value  : \" + str(rel.getLinkField(id, \"\"))\n"
 	);
 	
 	PythonLanguage::term();

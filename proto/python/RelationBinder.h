@@ -47,6 +47,9 @@ namespace Opde {
 				static PyObject* getID(PyObject* self, PyObject* args);
 				static PyObject* getName(PyObject* self, PyObject* args);
 				static PyObject* remove(PyObject* self, PyObject* args);
+				static PyObject* createLink(PyObject* self, PyObject* args);
+				static PyObject* getLinkField(PyObject* self, PyObject* args);
+				static PyObject* setLinkField(PyObject* self, PyObject* args);
 				
 			protected:
 				/// Static type definition for LinkService

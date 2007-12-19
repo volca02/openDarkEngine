@@ -24,6 +24,7 @@
 
 #include "bindings.h"
 #include "RelationBinder.h"
+#include "DTypeBinder.h"
 
 namespace Opde {
 
@@ -72,6 +73,9 @@ namespace Opde {
 			{"getID", getID, METH_NOARGS},
 			{"getName", getName, METH_NOARGS},
 			{"remove", remove, METH_VARARGS},
+			{"create", createLink, METH_VARARGS},
+			{"getLinkField", getLinkField, METH_VARARGS},
+			{"setLinkField", setLinkField, METH_VARARGS},
 			{NULL, NULL},
 		};
 		
@@ -110,7 +114,85 @@ namespace Opde {
 			}
 		}
 
+		// ------------------------------------------
+		PyObject* RelationBinder::createLink(PyObject* self, PyObject* args) {
+			Object* o = python_cast<Object*>(self, &msType);
+			
+			int from, to;
+			PyObject* object = NULL;
 
+			if (PyArg_ParseTuple(args, "ii|O", &from, &to, &object)) {
+				link_id_t id;
+				
+				if (object == NULL) // No data create
+				{
+					id = o->mInstance->create(from, to);
+				} else {
+					// Wrap the DType, call with it
+					DTypePtr t = DTypeBinder::extractDType(object);
+					
+					id = o->mInstance->create(from, to, t);
+				}
+				
+				return PyLong_FromUnsignedLong(id);
+			} else {
+				// Invalid parameters
+				PyErr_SetString(PyExc_TypeError, "Expected two integer arguments (from, to) and optional link data values (DType)!");
+				return NULL;
+			}
+		}
+
+		// ------------------------------------------
+		PyObject* RelationBinder::getLinkField(PyObject* self, PyObject* args) {
+			PyObject *result = NULL;
+			Object* o = python_cast<Object*>(self, &msType);
+			
+			int id;
+			const char* field;
+
+			if (PyArg_ParseTuple(args, "is", &id, &field)) 
+			{
+				DVariant value;
+				value = o->mInstance->getLinkField(id, field);
+
+				result = DVariantToPyObject(value);
+				return result;
+			} 
+			else 
+			{
+				// Invalid parameters
+				PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
+				return NULL;
+			}
+		}
+		
+		// ------------------------------------------
+		PyObject* RelationBinder::setLinkField(PyObject* self, PyObject* args) {
+			PyObject *result = NULL;
+			Object* o = python_cast<Object*>(self, &msType);
+			
+			int id;
+			const char* field;
+			PyObject* Object = NULL;
+
+			if (PyArg_ParseTuple(args, "isO", &id, &field, &Object)) 
+			{
+				DVariant value;
+				value = PyObjectToDVariant(Object);
+				o->mInstance->setLinkField(id, field, value);
+
+				result = Py_None;
+				Py_INCREF(result);
+				return result;
+			} 
+			else 
+			{
+				// Invalid parameters
+				PyErr_SetString(PyExc_TypeError, "Expected a string and a value!");
+				return NULL;
+			}
+		}
+		
 		// ------------------------------------------
 		PyObject* RelationBinder::getattr(PyObject *self, char *name) {
 			return Py_FindMethod(msMethods, self, name);
