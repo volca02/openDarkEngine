@@ -176,9 +176,6 @@ namespace Opde
 
 			if (object != NULL) 
 			{
-				// Here, tidy!
-				::new (&object->mInstance) PropertyServicePtr();
-				
 				object->mInstance = ServiceManager::getSingleton().getService(msName).as<PropertyService>();
 			}
 			return (PyObject *)object;

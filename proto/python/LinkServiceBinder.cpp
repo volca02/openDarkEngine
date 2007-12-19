@@ -175,9 +175,6 @@ namespace Opde {
 			Object* object = construct(&msType);
 
 			if (object != NULL) {
-				// Here, tidy!
-				::new (&object->mInstance) LinkServicePtr();
-				
 				object->mInstance = ServiceManager::getSingleton().getService(msName).as<LinkService>();
 			}
 
