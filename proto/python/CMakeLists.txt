@@ -26,6 +26,8 @@ add_library(OpdePythonBindings
     LinkServiceBinder.h
     RelationBinder.cpp
     RelationBinder.h
+    PropertyServiceBinder.h
+    PropertyServiceBinder.cpp
 )
 
 add_executable(pytest test.cpp test.h)

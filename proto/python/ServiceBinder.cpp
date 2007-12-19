@@ -26,6 +26,7 @@
 
 #include "ConfigServiceBinder.h"
 #include "LinkServiceBinder.h"
+#include "PropertyServiceBinder.h"
 
 namespace Opde {
 	namespace Python {
@@ -36,6 +37,7 @@ namespace Opde {
 		PyMethodDef ServiceBinder::msMethods[] = {
 			{"ConfigService", getConfigService, METH_NOARGS},
 			{"LinkService", getLinkService, METH_NOARGS},
+			{"PropertyService", getPropertyService, METH_NOARGS},
 			{NULL, NULL},
 		};
 		
@@ -46,7 +48,11 @@ namespace Opde {
 		PyObject* ServiceBinder::getLinkService(PyObject* self, PyObject* args) {
 			return LinkServiceBinder::create();
 		}
-		
+
+		PyObject* ServiceBinder::getPropertyService(PyObject* self, PyObject* args) {
+			return PropertyServiceBinder::create();
+		}
+
 		PyObject* ServiceBinder::init(PyObject* container) {
 			PyObject* module = Py_InitModule(msName, msMethods);
 			
