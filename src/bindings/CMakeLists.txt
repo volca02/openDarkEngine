@@ -32,17 +32,9 @@ add_library(OpdePythonBindings
     DTypeBinder.h
 )
 
-add_executable(pytest test.cpp test.h)
-
 target_link_libraries(OpdePythonBindings
     ${OGRE_LIBRARIES}
     ${OPDE_BASE_LIBRARIES}
     ${PYTHON_LIBRARIES}
     ${OPDE_SERVICE_LIBRARIES}
-)
-
-target_link_libraries(pytest 
-    ${OPDE_BASE_LIBRARIES}
-    ${OPDE_SERVICE_LIBRARIES}
-    OpdePythonBindings
 )
