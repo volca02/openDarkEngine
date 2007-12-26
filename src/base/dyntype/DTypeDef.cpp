@@ -491,14 +491,19 @@ namespace Opde {
 			for (int x = 0; x < size(); ++x)
 				data[x] = '\0';
 
-			// iterate the fields. If the field has a default value, fill
-			Fields::iterator it = mFields.begin();
+			if (isField()) {
+				if (mDefaultUsed)
+					_set(data, mDefVal);
+			} else {
+				// iterate the fields. If the field has a default value, fill
+				Fields::iterator it = mFields.begin();
 
-			for (; it != mFields.end(); ++it) {
-				if (it->type->hasDefault())
-					it->setDefault(data);
+				for (; it != mFields.end(); ++it) {
+					if (it->type->hasDefault()) 
+						it->set(data, mDefVal);
+				}
 			}
-
+			
 			return data;
 		}
 	}
