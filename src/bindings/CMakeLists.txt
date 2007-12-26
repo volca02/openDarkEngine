@@ -26,6 +26,8 @@ add_library(OpdePythonBindings
     LinkServiceBinder.h
     RelationBinder.cpp
     RelationBinder.h
+    LinkQueryResultBinder.cpp
+    LinkQueryResultBinder.h
     PropertyServiceBinder.cpp
     PropertyServiceBinder.h
     DTypeBinder.cpp
