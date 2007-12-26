@@ -131,9 +131,8 @@ namespace Opde {
 
 			// ----------------- Link query methods --------------------
 			/** Gets all links that come from source to destination
-			* @param src Source object ID, or 0 if any source
+			* @param src Source object ID
 			* @param dst Destination object ID or 0 if any destination
-			* @note only one of the parameters can be zero
 			* @return LinkQueryResultPtr filled with the query result */
 			LinkQueryResultPtr getAllLinks(int src, int dst) const;
 
