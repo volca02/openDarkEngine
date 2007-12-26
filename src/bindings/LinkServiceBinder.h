@@ -60,18 +60,21 @@ namespace Opde {
 		};
 		
 		// -------------------------------
-		inline PyObject* LinkPtrToPyObject(LinkPtr link) {
+		inline PyObject* LinkPtrToPyObject(LinkPtr& link) {
 			// We'll create a dict to store all the values.
-			
-			PyObject* base = PyDict_New();
-			
-			// Enrich the object with items.
-			PyDict_SetItem(base, PyString_FromString("id"), PyLong_FromLong(link->id()));
-			PyDict_SetItem(base, PyString_FromString("src"), PyLong_FromLong(link->src()));
-			PyDict_SetItem(base, PyString_FromString("dst"), PyLong_FromLong(link->dst()));
-			PyDict_SetItem(base, PyString_FromString("flavor"), PyLong_FromLong(link->flavor()));
-			
-			return base;
+			if (!link.isNull()) {
+				PyObject* base = PyDict_New();
+				
+				PyDict_SetItem(base, PyString_FromString("id"), PyLong_FromLong(link->id()));
+				PyDict_SetItem(base, PyString_FromString("src"), PyLong_FromLong(link->src()));
+				PyDict_SetItem(base, PyString_FromString("dst"), PyLong_FromLong(link->dst()));
+				PyDict_SetItem(base, PyString_FromString("flavor"), PyLong_FromLong(link->flavor()));
+				
+				return base;
+			} else {
+				Py_INCREF(Py_None);
+				return Py_None;
+			}
 		}
 	}
 }
