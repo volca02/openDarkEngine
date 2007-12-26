@@ -69,7 +69,7 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyMethodDef DTypeBinder::msMethods[] = {
-			{"set", set, METH_VARARGS},
+			// {"set", set, METH_VARARGS}, // Volca: Commented setter. Would lead to inappropriate usage (no data change broadcast)
 			{"get", get, METH_VARARGS},
 			{NULL, NULL},
 		};
