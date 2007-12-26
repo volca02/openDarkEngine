@@ -88,10 +88,11 @@ namespace Opde {
 			PyObject* next = NULL;
 			
 			if ((!o->mInstance.isNull()) && !o->mInstance->end()) {
-				PyObject* val = LinkPtrToPyObject(o->mInstance->next());
-				
-				return val;
+				LinkPtr l = o->mInstance->next();
+				next = LinkPtrToPyObject(l);
 			}
+			
+			return next;
 		}
 		
 		// ------------------------------------------
