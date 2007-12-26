@@ -44,7 +44,7 @@ namespace Opde {
 			ConfigServiceBinder::getattr,  /* getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  /* setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          /* cmpfunc  tp_compare;  /* __cmp__ */
-			0,			              /* reprfunc  tp_repr;    /* __repr__ */
+			repr,		              /* reprfunc  tp_repr;    /* __repr__ */
 			0,				          /* PyNumberMethods *tp_as_number; */
 			0,                        /* PySequenceMethods *tp_as_sequence; */
 			0,                        /* PyMappingMethods *tp_as_mapping; */
@@ -161,9 +161,11 @@ namespace Opde {
 			{NULL, NULL},
 		};
 
-		// ------------------------------------------
-		void ConfigServiceBinder::init() {
 
+
+		// ------------------------------------------
+		PyObject* ConfigServiceBinder::repr(PyObject* self) {
+			return PyString_FromFormat("<ConfigService at %p>", self);
 		}
 	}
 
