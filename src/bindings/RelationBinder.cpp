@@ -25,6 +25,7 @@
 #include "bindings.h"
 #include "RelationBinder.h"
 #include "DTypeBinder.h"
+#include "LinkQueryResultBinder.h"
 
 namespace Opde {
 
@@ -45,7 +46,7 @@ namespace Opde {
 			RelationBinder::getattr,  /* getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  /* setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          /* cmpfunc  tp_compare;  /* __cmp__ */
-			0,			              /* reprfunc  tp_repr;    /* __repr__ */
+			repr,		              /* reprfunc  tp_repr;    /* __repr__ */
 			0,				          /* PyNumberMethods *tp_as_number; */
 			0,                        /* PySequenceMethods *tp_as_sequence; */
 			0,                        /* PyMappingMethods *tp_as_mapping; */
@@ -55,7 +56,7 @@ namespace Opde {
 			0,			              /* getattrofunc tp_getattro; */
 			0,			              /* setattrofunc tp_setattro; */
 			0,			              /* PyBufferProcs *tp_as_buffer; */
-			0,			              /* long tp_flags; */
+			0,					      /* long tp_flags; */
 			0,			              /* char *tp_doc;  */
 			0,			              /* traverseproc tp_traverse; */
 			0,			              /* inquiry tp_clear; */
@@ -76,6 +77,8 @@ namespace Opde {
 			{"create", createLink, METH_VARARGS},
 			{"getLinkField", getLinkField, METH_VARARGS},
 			{"setLinkField", setLinkField, METH_VARARGS},
+			{"getAllLinks", getAllLinks, METH_VARARGS},
+			{"getOneLink", getOneLink, METH_VARARGS},
 			{NULL, NULL},
 		};
 		
@@ -194,8 +197,40 @@ namespace Opde {
 		}
 		
 		// ------------------------------------------
+		PyObject* RelationBinder::getAllLinks(PyObject* self, PyObject* args) {
+			PyObject *result = NULL;
+			Object* o = python_cast<Object*>(self, &msType);
+			
+			int src, dst;
+			
+			if (PyArg_ParseTuple(args, "ii", &src, &dst)) 
+			{
+				LinkQueryResultPtr res = o->mInstance->getAllLinks(src, dst);
+				
+				return LinkQueryResultBinder::create(res);
+			} 
+			else 
+			{
+				// Invalid parameters
+				PyErr_SetString(PyExc_TypeError, "Expected two integer parameters: src and dst!");
+				return NULL;
+			}
+			
+			
+		}
+		
+		// ------------------------------------------
+		PyObject* RelationBinder::getOneLink(PyObject* self, PyObject* args) {
+		}
+		
+		// ------------------------------------------
 		PyObject* RelationBinder::getattr(PyObject *self, char *name) {
 			return Py_FindMethod(msMethods, self, name);
+		}
+		
+		// ------------------------------------------
+		PyObject* RelationBinder::repr(PyObject *self) {
+			return PyString_FromFormat("<Relation at %p>", self);
 		}
 
 		// ------------------------------------------

@@ -28,6 +28,7 @@
 #include  "DTypeDef.h"
 #include  "BinaryService.h"
 #include  "LinkService.h"
+#include  "DTypeBinder.h"
 
 namespace Opde {
 
@@ -57,6 +58,21 @@ namespace Opde {
 				/// Method list
 				static PyMethodDef msMethods[];
 		};
+		
+		// -------------------------------
+		inline PyObject* LinkPtrToPyObject(LinkPtr link) {
+			// We'll create a dict to store all the values.
+			
+			PyObject* base = PyDict_New();
+			
+			// Enrich the object with items.
+			PyDict_SetItem(base, PyString_FromString("id"), PyLong_FromLong(link->id()));
+			PyDict_SetItem(base, PyString_FromString("src"), PyLong_FromLong(link->src()));
+			PyDict_SetItem(base, PyString_FromString("dst"), PyLong_FromLong(link->dst()));
+			PyDict_SetItem(base, PyString_FromString("flavor"), PyLong_FromLong(link->flavor()));
+			
+			return base;
+		}
 	}
 }
 

@@ -56,8 +56,6 @@ namespace Opde {
 		PyObject* ServiceBinder::init(PyObject* container) {
 			PyObject* module = Py_InitModule(msName, msMethods);
 			
-			ConfigServiceBinder::init();
-			
 			assert(module);
 			
 			// Register itself as a member of the container we got
