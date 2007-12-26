@@ -41,7 +41,7 @@ int main(void) {
 	
 	LinkServicePtr ls = ServiceManager::getSingleton().getService("LinkService").as<LinkService>();
 
-	// a simple int dtype, with default value 0
+	// a simple int dtype, with default value 1
 	DVariant zint = Opde::uint(1);
     DTypeDefPtr dint = new DTypeDef("int", zint, 4);
 	
@@ -71,12 +71,21 @@ int main(void) {
 		"rel = ls.getRelation(\"TestRelation\")\n"
 		"print \"Relation's flavor : \" + str(rel.getID())\n"
 		"print \"Relation's name   : \" + rel.getName()\n"
-		"id = rel.create(0,1)\n" // link from 0 to 1
+		"id = rel.create(1,2)\n" // link from 1 to 2
 		"print \"New link id       : \" + str(id)\n"
 		"print \"Link field value  : \" + str(rel.getLinkField(id, \"\"))\n"
-		"rel.setLinkField(id,\"\",3)\n"
-		"print \"set to 3!\"\n"
+		"rel.setLinkField(id,\"\",4)\n"
+		"print \"set to 4!\"\n"
 		"print \"Link field value  : \" + str(rel.getLinkField(id, \"\"))\n"
+		"print \"Repr of rel : \" + repr(rel)\n"
+		"id = rel.create(1,3)\n" // second link, 1 to 3
+		"rel.setLinkField(id,\"\",6)\n"
+		"for l in rel.getAllLinks(1,0):\n" // Query all links that start in 1
+		"	print \"Link ID:\" + str(l['id']) + \" goes \" + str(l['src']) + \" -> \" + str(l['dst']) + \" flav. \" + str(l['flavor'])\n"
+		"	print \" * Link data val : \" + str(rel.getLinkField(l['id'],''))\n"
+		"print \"-- One Link -- \"\n"
+		"lnk = rel.getOneLink(1,3)\n"
+		"print \"1 -> 3 link id : \" + str(lnk['id'])\n"
 	);
 	
 	PythonLanguage::term();
