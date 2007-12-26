@@ -26,6 +26,7 @@
 #include "RelationBinder.h"
 #include "DTypeBinder.h"
 #include "LinkQueryResultBinder.h"
+#include "LinkServiceBinder.h"
 
 namespace Opde {
 
@@ -215,12 +216,27 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected two integer parameters: src and dst!");
 				return NULL;
 			}
-			
-			
 		}
 		
 		// ------------------------------------------
 		PyObject* RelationBinder::getOneLink(PyObject* self, PyObject* args) {
+			// Nearly the same as getAllLinks. Only that it returns PyObject for LinkPtr directly
+			PyObject *result = NULL;
+			Object* o = python_cast<Object*>(self, &msType);
+			
+			int src, dst;
+			
+			if (PyArg_ParseTuple(args, "ii", &src, &dst)) 
+			{
+				LinkPtr res = o->mInstance->getOneLink(src, dst);
+				return LinkPtrToPyObject(res);
+			} 
+			else 
+			{
+				// Invalid parameters
+				PyErr_SetString(PyExc_TypeError, "Expected two integer parameters: src and dst!");
+				return NULL;
+			}
 		}
 		
 		// ------------------------------------------
