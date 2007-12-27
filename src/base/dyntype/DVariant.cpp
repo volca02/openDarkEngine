@@ -37,7 +37,8 @@ namespace Opde {
 	//------------------------------------
 	DVariant::DVariant(Type t, void *val) {
 		mPrivate.isShared = false;
-
+		mPrivate.type = t;
+		
 		switch (t) {
 			case DV_BOOL :
 				mPrivate.data.dbool = val ? *static_cast<bool *>(val) : false;
@@ -68,15 +69,13 @@ namespace Opde {
 			default :
 				throw runtime_error("DVariant::DVariant() - invalid type");
 		}
-
-
-		mPrivate.type = t;
 	}
 
 	//------------------------------------
 	DVariant::DVariant(Type t, const std::string& txtval) {
 		mPrivate.isShared = false;
-
+		mPrivate.type = t;
+		
 		switch (t) {
 			case DV_BOOL :
 				mPrivate.data.dbool = StringToBool(txtval);
@@ -107,8 +106,6 @@ namespace Opde {
 			default :
 				throw runtime_error("DVariant::DVariant() - invalid type");
 		}
-
-		mPrivate.type = t;
 	}
 
 	//------------------------------------
@@ -257,8 +254,10 @@ namespace Opde {
 				return StringToInt((*((dynamic_cast<Shared<string>*>(mPrivate.data.shared))->data)));
 			case DV_VECTOR :
 				throw runtime_error("DVariant::toInt() - vector cannot be converted to int");
-			default:
+			case DV_INVALID:
 				throw runtime_error("DVariant::toInt() - invalid type specified");
+			default:
+				throw runtime_error("DVariant::toInt() - unknown type specified");
 		}
 	}
 
