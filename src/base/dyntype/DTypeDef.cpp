@@ -500,7 +500,7 @@ namespace Opde {
 
 				for (; it != mFields.end(); ++it) {
 					if (it->type->hasDefault()) 
-						it->set(data, mDefVal);
+						it->set(data, it->type->getDefault());
 				}
 			}
 			
