@@ -44,26 +44,26 @@ namespace Opde {
 		A single texture, containing many lightmaps. used in the texturelist construction
 	*/
 	LightAtlas::LightAtlas(int idx) {
-		name << "@lightmap" << idx; // so we can find the atlas by number in the returned AtlasInfo
+		mName << "@lightmap" << idx; // so we can find the atlas by number in the returned AtlasInfo
 
-		this->idx = idx;
+		this->mIdx = idx;
 
-		count = 0;
+		mCount = 0;
 
 		// initialise the free space - initially whole lmap
-		freeSpace = new FreeSpaceInfo(0,0,ATLAS_WIDTH,ATLAS_HEIGHT);
+		mFreeSpace = new FreeSpaceInfo(0,0,ATLAS_WIDTH,ATLAS_HEIGHT);
 
 		// I Place the lightmaps into a separate resource group for easy unloading
-		ptex = TextureManager::getSingleton().createManual(
-			name.str(), TEMPTEXTURE_RESOURCE_GROUP,
+		mTex = TextureManager::getSingleton().createManual(
+			mName.str(), TEMPTEXTURE_RESOURCE_GROUP,
 			TEX_TYPE_2D, ATLAS_WIDTH, ATLAS_HEIGHT, 0, PF_X8R8G8B8,
 			TU_DYNAMIC_WRITE_ONLY);
 
-		atlas = ptex->getBuffer(0, 0);
+		mAtlas = mTex->getBuffer(0, 0);
 
 		// Erase the lmap atlas pixel buffer
-		atlas->lock(HardwareBuffer::HBL_DISCARD);
-		const PixelBox &pb = atlas->getCurrentLock();
+		mAtlas->lock(HardwareBuffer::HBL_DISCARD);
+		const PixelBox &pb = mAtlas->getCurrentLock();
 
 		for (int y = 0; y < ATLAS_HEIGHT; y++) {
 			uint32 *data = static_cast<uint32*>(pb.data) + y*pb.rowPitch;
@@ -72,49 +72,48 @@ namespace Opde {
 				data[x] = 0;
 		}
 
-		atlas->unlock();
+		mAtlas->unlock();
 	}
 
 
 	LightAtlas::~LightAtlas() {
 		// TODO: for_each(lightmaps.begin(), lightmaps.end(), delete lmap);
-		if (freeSpace != NULL)
-			delete freeSpace;
+		delete mFreeSpace;
 
-        TextureManager::getSingleton().remove(name.str());
+        TextureManager::getSingleton().remove(mName.str());
 
         // delete all the lmaps.
-        std::vector< LightMap* >::iterator it = lightmaps.begin();
+        std::vector< LightMap* >::iterator it = mLightmaps.begin();
 
-        while (it != lightmaps.end()) {
+        while (it != mLightmaps.end()) {
             delete (*it);
             ++it;
         }
 
-        lightmaps.clear();
+        mLightmaps.clear();
 	}
 
 	bool LightAtlas::addLightMap(LightMap *lmap) {
 		std::pair<int, int> dim = lmap->getDimensions();
 
 		// get the origin for our lmap
-		FreeSpaceInfo* area = freeSpace->allocate(dim.first, dim.second);
+		FreeSpaceInfo* area = mFreeSpace->allocate(dim.first, dim.second);
 
 		if (area == NULL) // didn't fit
 			return false;
 
 		// calculate some important UV conversion data
 		// +0.5? to display only the inner transition of lmap texture, the outer goes to black color
-		lmap->uv.x = ((float)area->x + 0.5 ) / ATLAS_WIDTH;
-		lmap->uv.y = ((float)area->y + 0.5 ) / ATLAS_HEIGHT;
+		lmap->mUV.x = ((float)area->x + 0.5 ) / ATLAS_WIDTH;
+		lmap->mUV.y = ((float)area->y + 0.5 ) / ATLAS_HEIGHT;
 
 		// size conversion to atlas coords
-		lmap->suv.x = ((float)dim.first - 1)/ATLAS_WIDTH;
-		lmap->suv.y = ((float)dim.second - 1)/ATLAS_HEIGHT;
+		lmap->mSizeUV.x = ((float)dim.first - 1)/ATLAS_WIDTH;
+		lmap->mSizeUV.y = ((float)dim.second - 1)/ATLAS_HEIGHT;
 
 		// finally increment the count of stored lightmaps
-		count++;
-		lightmaps.push_back(lmap);
+		mCount++;
+		mLightmaps.push_back(lmap);
 
 		lmap->setPlacement(this, area);
 
@@ -122,20 +121,20 @@ namespace Opde {
 	}
 
 	bool LightAtlas::render() {
-		atlas->lock(HardwareBuffer::HBL_DISCARD);
+		mAtlas->lock(HardwareBuffer::HBL_DISCARD);
 
-		std::vector< LightMap * >::const_iterator lmaps_it = lightmaps.begin();
+		std::vector< LightMap * >::const_iterator lmaps_it = mLightmaps.begin();
 
-		for (; lmaps_it != lightmaps.end(); lmaps_it++)
+		for (; lmaps_it != mLightmaps.end(); ++lmaps_it)
 			(*lmaps_it)->refresh();
 
-		atlas->unlock();
+		mAtlas->unlock();
 
 		return true;
 	}
 
 	void LightAtlas::updateLightMapBuffer(FreeSpaceInfo& fsi, lmpixel* rgb) {
-		const PixelBox &pb = atlas->getCurrentLock();
+		const PixelBox &pb = mAtlas->getCurrentLock();
 
 		for (int y = 0; y < fsi.h; y++) {
 			uint32 *data = static_cast<uint32*>(pb.data) + (y + fsi.y)*pb.rowPitch;
@@ -146,7 +145,7 @@ namespace Opde {
 	}
 
 	void LightAtlas::updateLightMapBuffer(FreeSpaceInfo& fsi, Ogre::Vector3* rgb) {
-		const PixelBox &pb = atlas->getCurrentLock();
+		const PixelBox &pb = mAtlas->getCurrentLock();
 
 		for (int y = 0; y < fsi.h; y++) {
 			uint32 *data = static_cast<uint32*>(pb.data) + (y + fsi.y)*pb.rowPitch;
@@ -174,40 +173,40 @@ namespace Opde {
 
 	void LightAtlas::registerAnimLight(int id, LightMap* target) {
 		// Try to find the set, if not make a new one...
-		std::map< int, std::set<LightMap*> >::iterator light_it = lights.find(id);
+		std::map< int, std::set<LightMap*> >::iterator light_it = mLights.find(id);
 
-		if (light_it != lights.end()) {
+		if (light_it != mLights.end()) {
 			light_it->second.insert(target);
 		} else {
 			std::set<LightMap *> new_set;
 			new_set.insert(target);
-			lights.insert(std::make_pair(id, new_set));
+			mLights.insert(std::make_pair(id, new_set));
 		}
 	}
 
 	void LightAtlas::setLightIntensity(int id, float intensity) {
 		// iterate throught the map lights, and call the setLightIntensity on all registered lightmaps
-		std::map< int, std::set<LightMap*> >::iterator light_it = lights.find(id);
+		std::map< int, std::set<LightMap*> >::iterator light_it = mLights.find(id);
 
-		if (light_it != lights.end()) {
-			atlas->lock(HardwareBuffer::HBL_DISCARD);
+		if (light_it != mLights.end()) {
+			mAtlas->lock(HardwareBuffer::HBL_DISCARD);
 
 			std::set<LightMap *>::const_iterator lmaps_it = light_it->second.begin();
 
 			for (;lmaps_it != light_it->second.end(); lmaps_it++)
 				(*lmaps_it)->setLightIntensity(id, intensity);
 
-			atlas->unlock();
+			mAtlas->unlock();
 		}
 	}
 
 	int LightAtlas::getIndex() {
-		return idx;
+		return mIdx;
 	}
 
 
 	int LightAtlas::getUnusedArea() {
-		return freeSpace->getLeafArea();
+		return mFreeSpace->getLeafArea();
 	}
 
 	// ---------------- LightAtlasList Methods ----------------------
@@ -222,29 +221,29 @@ namespace Opde {
 	}
 
 	LightAtlasList::~LightAtlasList() {
-		std::vector< LightAtlas* >::iterator it = list.begin();
+		std::vector< LightAtlas* >::iterator it = mList.begin();
 
-		for (; it != list.end(); it++)
+		for (; it != mList.end(); ++it)
 			delete *it;
 
-		list.clear();
+		mList.clear();
 	}
 
 	bool LightAtlasList::placeLightMap(LightMap* lmap) {
-		if (list.size() == 0)
-			list.push_back(new LightAtlas(0));
+		if (mList.size() == 0)
+			mList.push_back(new LightAtlas(0));
 
-		int last = list.size();
+		int last = mList.size();
 
 		// iterate through existing Atlases, and see if any of them accepts our lightmap
 		for (int i = 0; i < last; i++) {
-				if (list.at(i)->addLightMap(lmap))
+				if (mList.at(i)->addLightMap(lmap))
 					return false;
 		}
 
 		// add new atlas to list if none of them accepted the lmap
 		LightAtlas* la = new LightAtlas(last);
-		list.push_back(la);
+		mList.push_back(la);
 
 		la->addLightMap(lmap);
 		return true;
@@ -273,7 +272,7 @@ namespace Opde {
 	}
 
 	int LightAtlasList::getCount() {
-		return list.size();
+		return mList.size();
 	}
 
 	bool LightAtlasList::render() {
@@ -304,7 +303,7 @@ namespace Opde {
 		}
 
 		// Step2. Render
-		for (std::vector<LightAtlas *>::iterator it = list.begin(); it != list.end(); it++)
+		for (std::vector<LightAtlas *>::iterator it = mList.begin(); it != mList.end(); ++it)
 			if (!(*it)->render())
 				OPDE_EXCEPT("Could not render the lightmaps!","LightAtlasList::render()");
 
@@ -337,11 +336,11 @@ namespace Opde {
 			int total_pixels = 0;
 			int unused_pixels = 0;
 
-			int last = list.size();
+			int last = mList.size();
 
 			// iterate through existing Atlases, and see if any of them accepts our lightmap
 			for (int i = 0; i < last; i++) {
-				unused_pixels += list.at(i)->getUnusedArea();
+				unused_pixels += mList.at(i)->getUnusedArea();
 				total_pixels += ATLAS_WIDTH * ATLAS_HEIGHT;
 			}
 
@@ -372,42 +371,42 @@ namespace Opde {
 		// First we calculate the new version of the lmap. Then we post it to the atlas
 		// Float version of lmap
 		// TODO: Int will be sufficient and quicker
-		Vector3* f_lmap = new Vector3[sx * sy];
+		Vector3* f_lmap = new Vector3[mSizeX * mSizeY];
 
 		// copy the static lmap...
-		for (unsigned int i = 0; i < sx * sy; i++) {
-			f_lmap[i].x = static_lmap[i].R;
-			f_lmap[i].y = static_lmap[i].G;
-			f_lmap[i].z = static_lmap[i].B;
+		for (unsigned int i = 0; i < mSizeX * mSizeY; i++) {
+			f_lmap[i].x = mStaticLmap[i].R;
+			f_lmap[i].y = mStaticLmap[i].G;
+			f_lmap[i].z = mStaticLmap[i].B;
 		}
 
 
-		std::map<int, lmpixel *>::const_iterator lmap_it = switchable_lmap.begin();
+		ObjectToLightMap::const_iterator lmap_it = mSwitchableLmaps.begin();
 
-		for  (;lmap_it != switchable_lmap.end(); lmap_it++) {
+		for  (;lmap_it != mSwitchableLmaps.end(); ++lmap_it) {
 			lmpixel* act_lmap = lmap_it->second;
 
 			int light_id = lmap_it->first;
 
 			float intensity = 0;
 
-			std::map<int, float>::iterator intens_it = intensities.find(light_id);
+			std::map<int, float>::iterator intens_it = mIntensities.find(light_id);
 
 			// Just to be sure we get the intensity
-			if (intens_it == intensities.end())  {
-				intensities.insert(std::make_pair(light_id, 0.0f));
+			if (intens_it == mIntensities.end())  {
+				mIntensities.insert(std::make_pair(light_id, 0.0f));
 			} else {
 				intensity = intens_it->second;
 			}
 
 			if (intensity > 0) {
-				for (unsigned int i = 0; i < sx * sy; i++) {
+				for (unsigned int i = 0; i < mSizeX * mSizeY; i++) {
 					f_lmap[i] += intensity * act_lmap[i];
 				}
 			}
 		}
 
-		owner->updateLightMapBuffer(*position, f_lmap);
+		mOwner->updateLightMapBuffer(*mPosition, f_lmap);
 
 		// Get rid of the helping array
 		delete[] f_lmap;
@@ -439,14 +438,14 @@ namespace Opde {
 	}
 
 	void LightMap::AddSwitchableLightmap(int id, lmpixel *data) {
-		switchable_lmap.insert(std::make_pair(id, data));
-		intensities.insert(std::make_pair(id, float(1)));
+		mSwitchableLmaps.insert(std::make_pair(id, data));
+		mIntensities[id] = 1.0f;
 	}
 
 	void LightMap::setLightIntensity(int id, float intensity) {
-		std::map<int, float>::iterator intens = intensities.find(id);
+		std::map<int, float>::iterator intens = mIntensities.find(id);
 
-		if (intens != intensities.end()) {
+		if (intens != mIntensities.end()) {
 			// only if the value changed
 			if (intens->second != intensity) {
 				intens->second = intensity;
@@ -457,24 +456,24 @@ namespace Opde {
 	}
 
 	int LightMap::getAtlasIndex() {
-		return owner->getIndex();
+		return mOwner->getIndex();
 	}
 
 
 	void LightMap::setPlacement(LightAtlas* _owner, FreeSpaceInfo* tgt) {
-		owner = _owner;
-		position = tgt;
+		mOwner = _owner;
+		mPosition = tgt;
 
 		// register as a light related lightmap
-		std::map<int, float>::iterator it = intensities.begin();
+		std::map<int, float>::iterator it = mIntensities.begin();
 
-		for (; it != intensities.end(); it++) {
-			owner->registerAnimLight(it->first, this);
+		for (; it != mIntensities.end(); it++) {
+			mOwner->registerAnimLight(it->first, this);
 		}
 	}
 
 	std::pair<int, int> LightMap::getDimensions() const {
-		return std::pair<int,int>(sx, sy);
+		return std::pair<int,int>(mSizeX, mSizeY);
 	}
 } // namespace ogre
 
