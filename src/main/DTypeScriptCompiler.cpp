@@ -16,6 +16,9 @@
  * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
  * Place - Suite 330, Boston, MA 02111-1307, USA, or go to
  * http://www.gnu.org/copyleft/lesser.txt.
+ *
+ * $Id$
+ *
  *****************************************************************************/
 
 // Inspired by Ogre's material compiler, parts of the code were taken from the Ogre projects
@@ -498,6 +501,7 @@ namespace Opde {
 
 			default :
 				logParseError("Invalid type specified for DVariant type");
+				return DVariant::DV_INVALID;	//To keep MSVC happy
 		}
 	}
 
@@ -524,6 +528,7 @@ namespace Opde {
 
 			default :
 				logParseError("Invalid type specified or size can't be determined");
+				return 0;	//To keep MSVC happy
 		}
 	}
 

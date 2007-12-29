@@ -17,6 +17,8 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *	  $Id$
+ *
  *****************************************************************************/
 
 #include <stdlib.h>
@@ -31,6 +33,10 @@
 #include "meshconvert.h"
 #include "logging.h"
 #include "compat.h"
+
+#ifdef _MSC_VER 
+#pragma warning( disable : 4996 )
+#endif
 
 using namespace std;
 using std::string;

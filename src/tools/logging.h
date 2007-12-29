@@ -17,10 +17,16 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *	  $Id$
+ *
  *****************************************************************************/
  
 #ifndef logging_h
 #define logging_h
+
+#ifdef _MSC_VER 
+#pragma warning( disable : 4996 )
+#endif
 
 //////////////////// logging mumbo - jumbo
 char* LOG_LEVEL_STRINGS[5] = {"FATAL","ERROR","INFO ","DEBUG", "ALL  "};
