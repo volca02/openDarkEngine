@@ -32,6 +32,8 @@ add_library(OpdePythonBindings
     PropertyServiceBinder.h
     DTypeBinder.cpp
     DTypeBinder.h
+	LoopServiceBinder.cpp
+	LoopServiceBinder.h
 )
 
 target_link_libraries(OpdePythonBindings
