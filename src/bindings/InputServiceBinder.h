@@ -21,35 +21,40 @@
  *	   $Id$
  *
  *****************************************************************************/
- 
-#ifndef __SERVICEBINDER_H
-#define __SERVICEBINDER_H
 
-#include "bindings.h"
+#ifndef __INPUTSERVICEBINDER_H
+#define __INPUTSERVICEBINDER_H
 
-namespace Opde {
-	namespace Python {
-		
-		/** A Service interface for python. Manages a module "Opde.services".
-		* Exposes getters for services. Each getter is named exactly the same as the service itself.
-		* @note When creating a new service, remember to expose it here
-		*/
-		class ServiceBinder {
+#include  "DTypeDef.h"
+#include  "InputService.h"
+
+namespace Opde 
+{
+	namespace Python 
+	{
+
+		/// Property service python binder
+		class InputServiceBinder : public shared_ptr_binder<InputServicePtr> {
 			public:
-				static PyObject* init(PyObject* container);
-			
-				static PyObject* getConfigService(PyObject* self, PyObject* args);
-				static PyObject* getLinkService(PyObject* self, PyObject* args);
-				static PyObject* getPropertyService(PyObject* self, PyObject* args);
-				static PyObject* getLoopService(PyObject* self, PyObject* args);
-				static PyObject* getInputService(PyObject* self, PyObject* args);
-			
+				// --- Python type related methods ---
+				static PyObject* getattr(PyObject *self, char *name);
+
+				/// creates a python object representation of the relation
+				static PyObject* create();
+
+				// --- Methods ---
+				
 			protected:
-				static PyMethodDef msMethods[];
+				/// Static type definition for InputService
+				static PyTypeObject msType;
+
+				/// Name of the python type
 				static char* msName;
+
+				/// Method list
+				static PyMethodDef msMethods[];
 		};
 	}
 }
 
-
-#endif
+#endif	// __INPUTSERVICEBINDER_H

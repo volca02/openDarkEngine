@@ -12,6 +12,7 @@ include_directories(
     ${OPDE_BASE_INCLUDES}
     ${OPDE_SERVICE_INCLUDES}
     ${PYTHON_INCLUDE_PATH}
+	${OPDE_SOURCE_DIR}/src/scenemanager
 )
 
 
@@ -34,6 +35,8 @@ add_library(OpdePythonBindings
     DTypeBinder.h
 	LoopServiceBinder.cpp
 	LoopServiceBinder.h
+	InputServiceBinder.cpp
+	InputServiceBinder.h
 )
 
 target_link_libraries(OpdePythonBindings
