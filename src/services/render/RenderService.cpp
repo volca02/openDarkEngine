@@ -56,6 +56,11 @@ namespace Opde {
 	RenderService::~RenderService() {
         LOG_INFO("RenderService::~RenderService()");
 
+		// Good thing about services. Render service will be released as the last 
+		// one thanks to the shared_ptr. This means using the scene manager/whatever
+		// is safe outside this class as long as it is done in a service which has 
+		// a member pointer to render service
+
 		if (!mPropPosition.isNull())
 		    mPropPosition->unregisterListener(mPropPositionListenerID);
 
@@ -67,6 +72,17 @@ namespace Opde {
 			delete mDarkSMFactory;
 			mDarkSMFactory = NULL;
 		}
+
+		if (mRenderWindow)
+			mRenderWindow->removeAllViewports();
+			
+		if (mSceneMgr)
+			mSceneMgr->destroyAllCameras();
+			
+		if (!mLoopService.isNull())
+			mLoopService->removeLoopClient(this);
+			
+		// TODO: Delete Ogre::Root safe here?
 	}
 
     // --------------------------------------------------------------------------
@@ -93,6 +109,15 @@ namespace Opde {
 
         // Get the resolution parameters, and instantinate ogre display. We expect the Ogre::Root to be already defined
 		mSceneMgr = mRoot->getSceneManager("DarkSceneManager"); // TODO: Really bad idea. Same goes to the WorldrepService
+		
+		// Next step. We create a default camera in the mRenderWindow
+		mDefaultCamera = mSceneMgr->createCamera( "MainCamera" );
+
+		mRenderWindow->addViewport( mDefaultCamera );
+
+		// Last step: Get the loop service and register as a listener
+		mLoopService = ServiceManager::getSingleton().getService("LoopService").as<LoopService>();
+		mLoopService->addLoopClient(this);
 
 		return true;
     }
@@ -115,6 +140,18 @@ namespace Opde {
         assert(mRenderWindow);
         return mRenderWindow;
     }
+    
+	// --------------------------------------------------------------------------
+    Ogre::Viewport* RenderService::getDefaultViewport() {
+    	return mDefaultCamera->getViewport();
+    }
+            
+    // --------------------------------------------------------------------------
+    Ogre::Camera* RenderService::getDefaultCamera() {
+		return mDefaultCamera;
+    }
+    
+
 
 	// --------------------------------------------------------------------------
 	void RenderService::setScreenSize(bool fullScreen, unsigned int width, unsigned int height) {

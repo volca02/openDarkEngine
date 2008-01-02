@@ -77,6 +77,18 @@ namespace Opde {
             Ogre::Root* getOgreRoot();
             Ogre::SceneManager* getSceneManager();
             Ogre::RenderWindow* getRenderWindow();
+            
+            /**
+            Getter for the default viewport. Most of the time sufficient (for game)
+            @returns The default viewport (Viewport of the default camera )
+			*/
+            Ogre::Viewport* getDefaultViewport();
+            
+            /**
+            Getter for the default camera. Default camera is a camera named "DefaultCamera" that is autocreated and added to the autocreated window
+            @returns The default camera
+			*/
+            Ogre::Camera* getDefaultCamera();
 
 			/// Screen size setter. Please use this instead of the Ogre::RenderWindow methods, as it broadcasts a message about the change
 			void setScreenSize(bool fullScreen, unsigned int width, unsigned int height);
@@ -134,9 +146,14 @@ namespace Opde {
 			Ogre::RenderWindow* mRenderWindow;
 			/// Factory instance for the DarkSceneManager
 			Ogre::DarkSceneManagerFactory* mDarkSMFactory;
+			/// Default camera. Used solely for game mode
+			Ogre::Camera* mDefaultCamera;
 
 			/// Manual loader for bin meshes
 			Ogre::ManualBinFileLoader* mManualBinFileLoader;
+			
+			/// Pointer for loop service
+			LoopServicePtr mLoopService;
 	};
 
 	/// Shared pointer to Link service
