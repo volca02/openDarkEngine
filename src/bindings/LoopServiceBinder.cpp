@@ -74,6 +74,8 @@ namespace Opde
 		PyMethodDef LoopServiceBinder::msMethods[] = 
 		{
 			{"run",  run, METH_VARARGS},
+			{"requestLoopMode", requestLoopMode, METH_VARARGS},
+			{"requestTermination", requestTermination, METH_VARARGS},
 			{NULL, NULL},
 		};
 
@@ -88,7 +90,41 @@ namespace Opde
 			Py_INCREF(result);
 			return result;
 		}
+		
+		// ------------------------------------------
+		PyObject* LoopServiceBinder::requestTermination(PyObject* self, PyObject* args) 
+		{
+			PyObject *result = NULL;
+			Object* o = python_cast<Object*>(self, &msType);
+			
+			o->mInstance->requestTermination();
+			
+			result = Py_None;
+			Py_INCREF(result);
+			return result;
+		}
 
+		// ------------------------------------------
+		PyObject* LoopServiceBinder::requestLoopMode(PyObject* self, PyObject* args) 
+		{
+			// Let's request a new loop mode. Python version only works for strings to make it simple
+			PyObject *result = NULL;
+			Object* o = python_cast<Object*>(self, &msType);
+			
+			char* name;
+			
+			if (PyArg_ParseTuple(args, "s", &name)) {
+				bool res = o->mInstance->requestLoopMode(name);
+				
+				result = res ? Py_True : Py_False;
+				Py_INCREF(result);
+			} else {
+				PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
+			}
+			
+			return result;
+		}
+		
 		// ------------------------------------------
 		PyObject* LoopServiceBinder::getattr(PyObject *self, char *name) 
 		{
