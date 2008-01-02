@@ -14,6 +14,7 @@ include_directories (
 link_directories ( 
     ${OGRE_LIB_DIR}
     ${OIS_LIB_DIR}
+
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 
@@ -25,4 +26,5 @@ add_library (OpdeGUIService
 target_link_libraries (OpdeGUIService
     OpdeServiceManager
     OpdeBase
+    QuickGUI
 )
