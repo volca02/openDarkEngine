@@ -272,6 +272,9 @@ namespace Opde {
 			
 			/// Render service pointer
 			RenderServicePtr mRenderService;
+			
+			/// Loop service pointer
+			LoopServicePtr mLoopService;
 	};
 
 	/// Shared pointer to input service

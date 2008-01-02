@@ -38,6 +38,12 @@ namespace Opde {
     /*-------------------- InputService -------------------*/
     /*-----------------------------------------------------*/
     InputService::InputService(ServiceManager *manager, const std::string& name) : Service(manager, name), mMouse(NULL), mKeyboard(NULL), mDirectListener(NULL) {
+    	// Loop client definition
+    	mLoopClientDef.id = LOOPCLIENT_ID_INPUT;
+    	mLoopClientDef.mask = LOOPMODE_RENDER;
+    	mLoopClientDef.priority = LOOPCLIENT_PRIORITY_RENDERER;
+    	mLoopClientDef.name = mName;
+    	
     	// Initialize the valid keys
 		registerValidKey(KC_ESCAPE, "esc");
 
@@ -224,6 +230,10 @@ namespace Opde {
 			mInputSystem = NULL;
 		}
 
+
+		if (!mLoopService.isNull())
+			mLoopService->removeLoopClient(this);
+			
 		mRenderService.setNull();
     }
 
@@ -339,6 +349,11 @@ namespace Opde {
 			mouseState.height = height;
 		}
 
+
+		// Last step: Get the loop service and register as a listener
+		mLoopService = ServiceManager::getSingleton().getService("LoopService").as<LoopService>();
+		mLoopService->addLoopClient(this);
+		
 		return true;
     }
 
