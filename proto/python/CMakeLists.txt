@@ -13,9 +13,22 @@ include_directories(
     ${OPDE_SERVICE_INCLUDES}
     ${PYTHON_INCLUDE_PATH}
     ${OPDE_SOURCE_DIR}/src/bindings
+    ${OPDE_SOURCE_DIR}/src/scenemanager
+    ${OPDE_SOURCE_DIR}/src/main
 )
 
-add_executable(pytest test.cpp test.h)
+add_executable(pytest 
+    test.cpp 
+    test.h 
+    ../../src/main/DTypeScriptLoader.cpp
+    ../../src/main/DTypeScriptLoader.h
+    ../../src/main/PLDefScriptLoader.cpp
+    ../../src/main/PLDefScriptLoader.h
+    ../../src/main/DTypeScriptCompiler.cpp
+    ../../src/main/DTypeScriptCompiler.h
+    ../../src/main/PLDefScriptCompiler.cpp
+    ../../src/main/PLDefScriptCompiler.h
+)
 
 
 target_link_libraries(pytest 
