@@ -75,4 +75,19 @@ priorities (not necessary unique) for the database service listeners
 // And script modules are initialized
 #define DBP_SCRIPT 25
 
+
+// ---------------------------------------------
+// --- Loop modes id's and client priorities ---
+// ---------------------------------------------
+#define LOOPMODE_INPUT 1
+#define LOOPMODE_RENDER 2
+
+
+// Loop client ids and priorities
+#define LOOPCLIENT_ID_INPUT 1
+#define LOOPCLIENT_ID_RENDERER 2
+
+#define LOOPCLIENT_PRIORITY_INPUT 1
+#define LOOPCLIENT_PRIORITY_RENDERER 1024
+
 #endif
