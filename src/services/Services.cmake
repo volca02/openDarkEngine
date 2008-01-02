@@ -14,6 +14,7 @@ SET(OPDE_SERVICE_INCLUDES
     ${OPDE_SOURCE_DIR}/src/services/database
     ${OPDE_SOURCE_DIR}/src/services/input
     ${OPDE_SOURCE_DIR}/src/services/loop
+    ${OPDE_SOURCE_DIR}/src/services/script
 )
 
 # All the resulting libraries in a nice package as well
@@ -30,6 +31,7 @@ SET(OPDE_SERVICE_LIBRARIES
     OpdeDatabaseService
     OpdeInputService
     OpdeLoopService
+    OpdeScriptService
 )
 
 # To use this, just do INCLUDE(${OPDE_SOURCE_DIR}/src/services/Services.cmake)
