@@ -114,7 +114,7 @@ namespace Opde {
     /*-------------------- LoopService -------------------*/
     /*----------------------------------------------------*/
     LoopService::LoopService(ServiceManager *manager, const std::string& name) : Service(manager, name), 
-			mTerminationRequested(false), mNewLoopModeID(0), mLastFrameTime(0), mNewModeRequested(false) {
+			mTerminationRequested(false), mNewLoopMode(NULL), mLastFrameTime(0), mNewModeRequested(false) {
 				
 		mActiveMode.setNull();
     }
@@ -137,16 +137,24 @@ namespace Opde {
 		LOG_DEBUG("LoopService::createLoopMode: Creating new loop mode '%s'", modeDef.name.c_str());
 		
 		// First, look if the ID is not already reserved
-		LoopModeMap::const_iterator it = mLoopModes.find(modeDef.id);
+		LoopModeIDMap::const_iterator it = mLoopModes.find(modeDef.id);
 		
 		if (it != mLoopModes.end()) {
-			LOG_ERROR("LoopService::createLoopMode: Loop mode ID %llX already reserved by '%s'", it->second->getLoopModeName().c_str());
+			LOG_ERROR("LoopService::createLoopMode: Loop mode ID %llX already reserved by '%s'", modeDef.id, it->second->getLoopModeName().c_str());
+			return;
+		}
+		
+		LoopModeNameMap::const_iterator it1 = mLoopNamedModes.find(modeDef.name);
+		
+		if (it1 != mLoopNamedModes.end()) {
+			LOG_ERROR("LoopService::createLoopMode: Loop mode name %s already reserved by '%s'", modeDef.name, it->second->getLoopModeName().c_str());
 			return;
 		}
 		
 		LoopModePtr mode = new LoopMode(modeDef, this);
 		
-		mLoopModes.insert(make_pair(modeDef.id, mode));
+		mLoopModes[modeDef.id] = mode;
+		mLoopNamedModes[modeDef.name] = mode;
 		
 		// Loop mode created...
 	}
@@ -154,7 +162,7 @@ namespace Opde {
 	//------------------------------------------------------
 	void LoopService::addLoopClient(LoopClient* client) {
 		// iterate through the loop modes. If the mask complies, add the client
-		LoopModeMap::const_iterator it = mLoopModes.begin();
+		LoopModeIDMap::const_iterator it = mLoopModes.begin();
 		
 		while( it != mLoopModes.end())  {
 			if (it->second->getLoopMask() & client->getLoopMask()) {
@@ -168,7 +176,7 @@ namespace Opde {
 	//------------------------------------------------------
 	void LoopService::removeLoopClient(LoopClient* client) {
 		// iterate through the loop modes. If the mask complies, add the client
-		LoopModeMap::const_iterator it = mLoopModes.begin();
+		LoopModeIDMap::const_iterator it = mLoopModes.begin();
 		
 		while( it != mLoopModes.end())  {
 			// The worst thing that could happen is that there was no client in that loop
@@ -178,14 +186,34 @@ namespace Opde {
 			it++;
 		}
 	}
+
 	
 	//------------------------------------------------------
-	void LoopService::requestLoopMode(LoopModeID newLoopMode) {
-		mNewLoopModeID = newLoopMode;
-		mNewModeRequested = true;
+	bool LoopService::requestLoopMode(LoopModeID newLoopMode) {
+		LoopModeIDMap::const_iterator it = mLoopModes.find(newLoopMode);
+		
+		if (it != mLoopModes.end()) {
+			mNewLoopMode = it->second;
+			mNewModeRequested = true;
+			return true;
+		} else {
+			return false;
+		}
 	}
-	
-	
+
+	//------------------------------------------------------
+	bool LoopService::requestLoopMode(const std::string& name) {
+		LoopModeNameMap::const_iterator it = mLoopNamedModes.find(name);
+		
+		if (it != mLoopNamedModes.end()) {
+			mNewLoopMode = it->second;
+			mNewModeRequested = true;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	//------------------------------------------------------
 	void LoopService::requestTermination() {
 		LOG_DEBUG("LoopService: Termination was requested!");
@@ -196,6 +224,12 @@ namespace Opde {
 	//------------------------------------------------------
 	void LoopService::run() {
 		float deltaTime = 0.0;
+		
+		if (mNewModeRequested) { // See if there is a loop mode pending...
+			mNewModeRequested = false;
+			setLoopMode(mNewLoopMode);
+			mActiveMode->loopModeStarted();
+		}
 		
 		if (mActiveMode.isNull()) {
 			LOG_FATAL("LoopService::run: No loop mode set prior to run(). Terminating");
@@ -221,14 +255,16 @@ namespace Opde {
 				mNewModeRequested = false;
 				mActiveMode->loopModeEnded();
 				
-				
 				// Search for the new loop mode. If not found, log fatal, terminate
-				if (!setLoopMode(mNewLoopModeID)) {
-					LOG_FATAL("LoopService::run: The new requested loop mode (%llX) is invalid. Terminating", mNewLoopModeID);
-					mTerminationRequested = true;
+				if (!mNewLoopMode.isNull()) {
+					setLoopMode(mNewLoopMode);
 				} else {
-					mActiveMode->loopModeStarted();
+					LOG_FATAL("LoopService::run: The new requested loop mode is invalid (NULL mode pointer encountered). Terminating");
+					mTerminationRequested = true;
 				}
+			
+				// Signalize the start of the loop
+				mActiveMode->loopModeStarted();
 			}
 			
 			if (debugFrame) {
@@ -245,15 +281,8 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	bool LoopService::setLoopMode(LoopModeID newModeID) {
-		LoopModeMap::const_iterator it = mLoopModes.find(newModeID);
-		
-		if (it != mLoopModes.end()) {
-			mActiveMode = it->second;
-			return true;
-		} else {
-			return false;
-		}
+	void LoopService::setLoopMode(LoopModePtr newMode) {
+		mActiveMode = mNewLoopMode;
 	}
 	
 	//------------------------------------------------------

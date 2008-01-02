@@ -197,8 +197,15 @@ namespace Opde {
 			
 			/** Requests a transition to a new loop mode
 			* @param newLoopMode The new loop mode to be used. If the loop mode is invalid, the loop service's run() method will terminate
+			* @return true if the loop mode was found and request was queued, false otherwise
 			*/
-			void requestLoopMode(LoopModeID newLoopMode);
+			bool requestLoopMode(LoopModeID newLoopMode);
+			
+			/** Requests a transition to a new loop mode
+			* @param newLoopMode The new loop mode to be used. If the loop mode is invalid, the loop service's run() method will terminate
+			* @return true if the loop mode was found and request was queued, false otherwise
+			*/
+			bool requestLoopMode(const std::string& name);
 			
 			/// Requests the termination of the loop (program exit)
 			void requestTermination();
@@ -217,15 +224,14 @@ namespace Opde {
 			bool init();
 			
 			/** sets a new loop mode
-			* @returns true on success (new loop mode was found, the mActiveMode was set), false if the loop mode with the given ID was not found
 			*/
-			bool setLoopMode(LoopModeID newModeID);
+			void setLoopMode(LoopModePtr newMode);
 			
 			/// Termination was requested
 			bool mTerminationRequested;
 			
 			/// The new requested loop mode (if the mNewModeRequested is true)
-			LoopModeID mNewLoopModeID;
+			LoopModePtr mNewLoopMode;
 			
 			/// True if something requested a change in the loop mode
 			bool mNewModeRequested;
@@ -233,10 +239,13 @@ namespace Opde {
 			/// The active loop mode
 			LoopModePtr mActiveMode;
 			
-			typedef std::map<LoopModeID, LoopModePtr > LoopModeMap;
+			typedef std::map<LoopModeID, LoopModePtr > LoopModeIDMap;
+			typedef std::map<std::string, LoopModePtr > LoopModeNameMap;
 			
-			/// Loop mode map
-			LoopModeMap mLoopModes;
+			/// Loop mode map - per ID
+			LoopModeIDMap mLoopModes;
+			/// Loop mode map - per Name
+			LoopModeNameMap mLoopNamedModes;
 			
 			/// Ogre::Root for timing purposes
 			Ogre::Root* mRoot;
