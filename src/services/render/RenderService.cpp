@@ -50,6 +50,11 @@ namespace Opde {
 	    // FIX!
 	    mRoot = Root::getSingletonPtr();
 	    mManualBinFileLoader = new ManualBinFileLoader();
+	    
+		mLoopClientDef.id = LOOPCLIENT_ID_RENDERER;
+		mLoopClientDef.mask = LOOPMODE_RENDER;
+		mLoopClientDef.name = mName;
+		mLoopClientDef.priority = LOOPCLIENT_PRIORITY_RENDERER;
 	}
 
 	// --------------------------------------------------------------------------
