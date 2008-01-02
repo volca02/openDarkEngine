@@ -185,15 +185,15 @@ namespace Opde {
     //-------------------------- Factory implementation
     std::string GUIServiceFactory::mName = "GUIService";
 
-    InputServiceFactory::InputServiceFactory() : ServiceFactory() {
+    GUIServiceFactory::GUIServiceFactory() : ServiceFactory() {
 		ServiceManager::getSingleton().addServiceFactory(this);
     };
 
-    const std::string& InputServiceFactory::getName() {
+    const std::string& GUIServiceFactory::getName() {
 		return mName;
     }
 
-    Service* InputServiceFactory::createInstance(ServiceManager* manager) {
+    Service* GUIServiceFactory::createInstance(ServiceManager* manager) {
 		return new GUIService(manager, mName);
     }
 
