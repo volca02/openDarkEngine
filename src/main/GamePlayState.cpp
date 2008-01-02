@@ -113,17 +113,15 @@ namespace Opde {
 		
 //		std::string tmp = PropertyGroup->get(StartingPointObjID, "SymName").toString();
 		mSceneMgr = mRoot->getSceneManager( "DarkSceneManager" );
-		mCamera	= mSceneMgr->createCamera( "MainCamera" );
-
-		mWindow = mRoot->getAutoCreatedWindow();
-
-		mViewport = mWindow->addViewport( mCamera );
+		RenderServicePtr renderSrv = ServiceManager::getSingleton().getService("RenderService").as<RenderService>();
+		
+		mCamera = renderSrv->getDefaultCamera();
+		mViewport = renderSrv->getDefaultViewport();
+		mWindow = renderSrv->getRenderWindow();
 
 		mSceneMgr->clearSpecialCaseRenderQueues();
 		mSceneMgr->setSpecialCaseRenderQueueMode(SceneManager::SCRQM_EXCLUDE);
 
-
-		
 		mCamera->setNearClipDistance(0.5);
 		mCamera->setFarClipDistance(4000);
 
@@ -173,12 +171,6 @@ namespace Opde {
 
 		// clear the scene
 		mSceneMgr->clearScene();
-
-		// Destroy cameras
-		mSceneMgr->destroyAllCameras();
-
-		// remove all viewports
-		mRoot->getAutoCreatedWindow()->removeAllViewports();
 
 		mPortalOverlay->hide();
 		mDebugOverlay->hide();

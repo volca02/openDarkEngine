@@ -36,6 +36,7 @@
 #include "RenderService.h"
 #include "DatabaseService.h"
 #include "InputService.h"
+#include "LoopService.h"
 
 #include "GameLoadState.h"
 #include "GamePlayState.h"
@@ -253,6 +254,7 @@ namespace Opde {
 		new RenderServiceFactory();
 		new DatabaseServiceFactory();
 		new InputServiceFactory();
+		new LoopServiceFactory();
 	}
 
 	/// Method which will define the source of resources (other than current folder)

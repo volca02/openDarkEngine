@@ -182,6 +182,7 @@ CONFIGURE_FILE(config.h.cmake ${CMAKE_BINARY_DIR}/config.h )
 # Add the subdirectories which contain aditional CMakeLists.txt files
 add_subdirectory (src)
 add_subdirectory (proto)
+add_subdirectory (thirdparty)
 
 # Generate the doxyfile if selected as an option
 IF (GENERATE_DOC)

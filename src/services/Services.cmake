@@ -14,6 +14,7 @@ SET(OPDE_SERVICE_INCLUDES
     ${OPDE_SOURCE_DIR}/src/services/database
     ${OPDE_SOURCE_DIR}/src/services/input
     ${OPDE_SOURCE_DIR}/src/services/loop
+    ${OPDE_SOURCE_DIR}/src/services/gui
     ${OPDE_SOURCE_DIR}/src/services/script
 )
 
@@ -31,6 +32,7 @@ SET(OPDE_SERVICE_LIBRARIES
     OpdeDatabaseService
     OpdeInputService
     OpdeLoopService
+    OpdeGUIService
     OpdeScriptService
 )
 

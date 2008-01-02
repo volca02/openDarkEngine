@@ -9,6 +9,7 @@
 #include "ConfigService.h"
 #include "LinkService.h"
 #include "DatabaseService.h"
+#include "GUIService.h"
 #include "ScriptService.h"
 #include "RenderService.h"
 #include "PropertyService.h"
@@ -72,8 +73,9 @@ int main(void) {
 	new ConfigServiceFactory();
 	new LinkServiceFactory();
 	new DatabaseServiceFactory();
-	new ScriptServiceFactory();
 	new RenderServiceFactory();
+	new GUIServiceFactory();
+	new ScriptServiceFactory();
 	new PropertyServiceFactory();
 	new BinaryServiceFactory();
 	new InheritServiceFactory();

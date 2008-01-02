@@ -33,5 +33,8 @@ add_subdirectory(input)
 # Loop service. The main loop code run by the main.cpp
 add_subdirectory(loop)
 
+# GUI service. Handles gui and overlays
+add_subdirectory(gui)
+
 # Script service. Script execution and object scripts
 add_subdirectory(script)

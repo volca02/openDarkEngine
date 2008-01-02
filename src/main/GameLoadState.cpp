@@ -101,9 +101,10 @@ namespace Opde {
 		mSceneMgr->addSpecialCaseRenderQueue(RENDER_QUEUE_OVERLAY);
 		mSceneMgr->setSpecialCaseRenderQueueMode(SceneManager::SCRQM_INCLUDE);
 
-		mCamera	= mSceneMgr->createCamera( "LoadCamera" );
-
-		mViewport = mRoot->getAutoCreatedWindow()->addViewport( mCamera );
+		RenderServicePtr renderSrv = ServiceManager::getSingleton().getService("RenderService").as<RenderService>();
+		
+		mCamera = renderSrv->getDefaultCamera();
+		mViewport = renderSrv->getDefaultViewport();
 
 		if (mFontTest) {
 			// create all the fonts in T1 as a test
@@ -130,10 +131,6 @@ namespace Opde {
 		// mLoadingOverlay->hide();
 
         mLoadingOverlay->hide();
-
-		mSceneMgr->destroyAllCameras();
-
-		mRoot->getAutoCreatedWindow()->removeAllViewports();
 
 		LOG_INFO("LoadState: Exited");
 
