@@ -24,12 +24,23 @@
 
 #include "bindings.h"
 #include "InputServiceBinder.h"
+#include "PythonCallback.h"
 
 namespace Opde 
 {
 
 	namespace Python 
 	{
+
+		class PythonMessageConverter {
+			public:
+				PyObject* operator()(const InputEventMsg& ev) {
+					// TODO: !!! We'll convert the event to some native structure here...
+					// Later. For now, we incref and return Py_None;
+					Py_INCREF(Py_None);
+					return Py_None;
+				}
+		};
 
 		// -------------------- Property Service --------------------
 		char* InputServiceBinder::msName = "InputService";
