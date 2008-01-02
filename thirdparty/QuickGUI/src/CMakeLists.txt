@@ -22,12 +22,10 @@ SET ( QUICKGUI_SRCS
 	QuickGUIPanel.cpp 
 	QuickGUIPoint.cpp 
 	QuickGUIPrecompiledHeaders.cpp
-	QuickGUIProgressBar.cpp 
-	QuickGUIQuad.cpp 
+	QuickGUIProgressBar.cpp
+	QuickGUIQuad.cpp
+	QuickGUIQuadContainer.cpp
 	QuickGUIRect.cpp
-#	QuickGUIRenderBatch.cpp
-#	QuickGUIRenderComponent.cpp
-#	QuickGUIRenderManager.cpp
 	QuickGUIRoot.cpp
 	QuickGUIScrollPane.cpp
 	QuickGUISheet.cpp 
@@ -38,6 +36,7 @@ SET ( QUICKGUI_SRCS
 	QuickGUITextBox.cpp 
 	QuickGUITextHelper.cpp
 	QuickGUIText.cpp 
+	QuickGUITree.cpp 
 	QuickGUITitleBar.cpp 
 	QuickGUIUtility.cpp
 	QuickGUIVertexBuffer.cpp 
@@ -45,7 +44,7 @@ SET ( QUICKGUI_SRCS
 	QuickGUIVerticalTrackBar.cpp
 	QuickGUIWidget.cpp 
 	QuickGUIWindow.cpp 
-	)
+)
 
 INCLUDE_DIRECTORIES (../include ${OGRE_INCLUDE_DIR})
 
@@ -53,3 +52,6 @@ LINK_DIRECTORIES (${OGRE_LIB_DIR})
 
 ADD_LIBRARY (QuickGUI ${QUICKGUI_SRCS})
 
+#	QuickGUIRenderBatch.cpp
+#	QuickGUIRenderComponent.cpp
+#	QuickGUIRenderManager.cpp
