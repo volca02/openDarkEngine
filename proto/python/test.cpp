@@ -21,6 +21,8 @@
 
 #include "ConsoleBackend.h"
 
+#include "ServiceCommon.h"
+
 #include <OgreRoot.h>
 #include <OgreConfigFile.h>
 
@@ -59,6 +61,24 @@ void setupResources(void) {
 }
 
 
+void initLoopModes(LoopServicePtr& ls) {
+	// Create all the required loop services
+	LoopModeDefinition def;
+	
+	def.id = 1;
+	def.name = "GUIOnlyLoopMode";
+	def.mask = LOOPMODE_INPUT | LOOPMODE_RENDER;
+	
+	ls->createLoopMode(def);
+	
+	def.id = 0xFF;
+	def.name = "AllClientsLoopMode";
+	def.mask = LOOPMODE_MASK_ALL_CLIENTS;
+	
+	ls->createLoopMode(def);
+}
+
+
 int main(void) {
 	Logger* logger = new Logger();
 
@@ -67,7 +87,6 @@ int main(void) {
 	logger->registerLogListener(stdLog);
 
 	ServiceManager* serviceMgr = new ServiceManager();
-	PythonLanguage::init();
 
 	// New service factory for Config service
 	new ConfigServiceFactory();
@@ -79,6 +98,7 @@ int main(void) {
 	new PropertyServiceFactory();
 	new BinaryServiceFactory();
 	new InheritServiceFactory();
+	new LoopServiceFactory();
 
 	new ConsoleBackend(); // !!!
 
@@ -86,48 +106,32 @@ int main(void) {
 
 	// Run a python string to test the setup
 	ConfigServicePtr configService = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
-
-
+	// Will load opde.cfg automatically upon being built
+	// To tidy mem...
+	configService.setNull();
+	
     RenderServicePtr rendS = ServiceManager::getSingleton().getService("RenderService").as<RenderService>();
+    rendS.setNull();
 
+	// Resource initialization phase
     setupResources();
     Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
 	ServiceManager::getSingleton().bootstrapFinished();
 
-	// load a config file
-	configService->setParam("test", "Hello World!");
-
-	// To tidy mem...
-	configService.setNull();
-
-	LinkServicePtr ls = ServiceManager::getSingleton().getService("LinkService").as<LinkService>();
-
-	// a simple int dtype, with default value 1
-	DVariant zint = Opde::uint(1);
-    DTypeDefPtr dint = new DTypeDef("int", zint, 4);
-
-	RelationPtr r = ls->createRelation("TestRelation", dint, false);
-	// Can't do mapping test without a data file - the mapping is determined from RELATIONS chunk
-
-	r->setID(1);
-
-	dint.setNull();
-	r.setNull();
-	ls.setNull();
-
     ScriptServicePtr ss = ServiceManager::getSingleton().getService("ScriptService").as<ScriptService>();
 
-    ss->runScript("test.py");
+	LoopServicePtr ls = ServiceManager::getSingleton().getService("LoopService").as<LoopService>();
 
+	initLoopModes(ls);
+
+	ls.setNull();
+
+	ss->runScript("test.py");
     ss.setNull();
 
-	PythonLanguage::term();
-
-
-	delete root;
-
 	delete serviceMgr;
+	
+	delete root;
 	delete logger;
-
 }
