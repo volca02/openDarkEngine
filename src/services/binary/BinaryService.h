@@ -17,6 +17,9 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *
+ *	$Id$
+ *
  *****************************************************************************/
 
 
@@ -41,7 +44,7 @@ namespace Opde {
 			/** Initializes the Service */
 			BinaryService(ServiceManager* manager, const std::string& name);
 
-			/** Destructs the WorldRepService instance, and unallocates the data, if any. */
+			/** Destructs the BinaryService instance, and unallocates the data, if any. */
 			virtual ~BinaryService();
 
 			/** Add a type definition to a certain group (or global, if group=="")
@@ -112,7 +115,7 @@ namespace Opde {
 	/// Shared pointer to binary service
 	typedef shared_ptr<BinaryService> BinaryServicePtr;
 
-	/// Factory for the WorldRep service
+	/// Factory for the binary service
 	class BinaryServiceFactory : public ServiceFactory {
 		public:
 			BinaryServiceFactory();
