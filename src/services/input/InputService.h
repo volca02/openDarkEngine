@@ -274,16 +274,16 @@ namespace Opde {
 			RenderServicePtr mRenderService;
 	};
 
-	/// Shared pointer to game service
+	/// Shared pointer to input service
 	typedef shared_ptr<InputService> InputServicePtr;
 
-	/// Factory for the GameService objects
+	/// Factory for the InputService objects
 	class InputServiceFactory : public ServiceFactory {
 		public:
 			InputServiceFactory();
 			~InputServiceFactory() {};
 
-			/** Creates a GameService instance */
+			/** Creates a InputService instance */
 			Service* createInstance(ServiceManager* manager);
 
 			virtual const std::string& getName();
