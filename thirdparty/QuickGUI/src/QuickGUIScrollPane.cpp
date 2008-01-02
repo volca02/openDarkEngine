@@ -26,7 +26,6 @@ namespace QuickGUI
 		mBottomBar->setVerticalAnchor(ANCHOR_VERTICAL_BOTTOM);
 		mBottomBar->setShowWithParent(false);
 		mBottomBar->addOnScrollEventHandler(&ScrollPane::onHorizontalScroll,this);
-		removeChild(mBottomBar);
 
 		mRightBar = dynamic_cast<VerticalScrollBar*>(_createChild(mInstanceName+".RightScrollBar",TYPE_SCROLLBAR_VERTICAL));
 		mRightBar->setSize(20,mSize.height - 20);
@@ -37,7 +36,6 @@ namespace QuickGUI
 		mRightBar->setVerticalAnchor(ANCHOR_VERTICAL_TOP_BOTTOM);
 		mRightBar->setShowWithParent(false);
 		mRightBar->addOnScrollEventHandler(&ScrollPane::onVerticalScroll,this);
-		removeChild(mRightBar);
 	}
 
 	ScrollPane::~ScrollPane()

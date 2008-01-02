@@ -336,6 +336,11 @@ namespace QuickGUI
 		mUserEventHandlers[EVENT].push_back(function);
 	}
 
+	void Widget::addEventListener(MemberFunctionSlot* function)
+	{
+		mEventListeners.push_back(function);
+	}
+
 	void Widget::allowResizing(bool allow)
 	{
 		mCanResize = allow;
@@ -767,6 +772,15 @@ namespace QuickGUI
 		return mPosition.y;
 	}
 
+	bool Widget::hasMouseButtonHandlers()
+	{
+		return !(mUserEventHandlers[EVENT_MOUSE_BUTTON_DOWN].empty() && 
+				 mUserEventHandlers[EVENT_MOUSE_BUTTON_UP].empty() &&
+				 mUserEventHandlers[EVENT_MOUSE_CLICK].empty() &&
+				 mUserEventHandlers[EVENT_MOUSE_CLICK_DOUBLE].empty() &&
+				 mUserEventHandlers[EVENT_MOUSE_CLICK_TRIPLE].empty());
+	}
+
 	void Widget::hide()
 	{
 		mGrabbed = false;
@@ -876,9 +890,9 @@ namespace QuickGUI
 		setYPosition(mPosition.y + pixelY);
 	}
 
-	bool Widget::fireEvent(Event e, const EventArgs& args)
+	bool Widget::fireEvent(Event e, EventArgs& args)
 	{
-		if(!mEnabled || (mUserEventHandlers[e].empty() && !mPropogateEventFiring[e])) 
+		if(mUserEventHandlers[e].empty() && !mPropogateEventFiring[e]) 
 			return false;
 
 		if(e == EVENT_MOUSE_ENTER)
@@ -896,7 +910,14 @@ namespace QuickGUI
 				mEntered = false;
 		}
 
+		args.eventType = e;
+
+		// Notify any listeners
 		EventHandlerArray::iterator it;
+		for( it = mEventListeners.begin(); it != mEventListeners.end(); ++it )
+			(*it)->execute(args);
+
+		// Execute registered handlers
 		EventHandlerArray* userEventHandlers = &(mUserEventHandlers[e]);
 		for( it = userEventHandlers->begin(); it != userEventHandlers->end(); ++it )
 			(*it)->execute(args);
@@ -1243,10 +1264,19 @@ namespace QuickGUI
 	{
 		SkinSet* ss = SkinSetManager::getSingleton().getSkinSet(skinName);
 		if(ss == NULL)
-			throw Ogre::Exception(Ogre::Exception::ERR_ITEM_NOT_FOUND,"Skin \"" + skinName + "\" does not exist!  Did you forget to load it using the SkinSetManager?","Widget::setSkin");
+			throw Ogre::Exception(Ogre::Exception::ERR_ITEM_NOT_FOUND,"Skin \"" + skinName + "\" does not exist!  Did you forget to load it using the SkinSetManager?","Widget::setSkin");		
 
+		for(WidgetArray::iterator it = mComponents.begin(); it != mComponents.end(); ++it)
+			(*it)->setSkin(skinName,true);
+
+		if(recursive)
+		{
+			for(WidgetArray::iterator it = mChildWidgets.begin(); it != mChildWidgets.end(); ++it)
+				(*it)->setSkin(skinName,recursive);
+		}
+
+		// Update reference to skin
 		mSkinName = skinName;
-
 		Ogre::String textureName = mSkinName + mSkinComponent + ss->getImageExtension();
 
 		if(!ss->containsImage(textureName))
@@ -1262,15 +1292,6 @@ namespace QuickGUI
 			i.load(textureName,Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 			delete mWidgetImage;
 			mWidgetImage = new Ogre::Image(i);
-		}
-
-		for(WidgetArray::iterator it = mComponents.begin(); it != mComponents.end(); ++it)
-			(*it)->setSkin(skinName,true);
-
-		if(recursive)
-		{
-			for(WidgetArray::iterator it = mChildWidgets.begin(); it != mChildWidgets.end(); ++it)
-				(*it)->setSkin(skinName,recursive);
 		}
 
 		if(mHideSkin)

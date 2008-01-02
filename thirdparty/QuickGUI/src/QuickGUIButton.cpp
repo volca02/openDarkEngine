@@ -31,6 +31,8 @@ namespace QuickGUI
 	{
 		// apply button ".down" texture
 		SkinSet* ss = SkinSetManager::getSingleton().getSkinSet(mSkinName);
+		if(ss == NULL)
+			throw Ogre::Exception(Ogre::Exception::ERR_ITEM_NOT_FOUND,"Skin \"" + mSkinName + "\" does not exist!  Did you forget to load it using the SkinSetManager?","Button::applyButtonDownTexture");
 		mQuad->setTextureCoordinates(ss->getTextureCoordinates(mSkinName + mSkinComponent + ".down" + ss->getImageExtension()));
 	}
 
@@ -38,12 +40,16 @@ namespace QuickGUI
 	{
 		// apply button ".over" texture
 		SkinSet* ss = SkinSetManager::getSingleton().getSkinSet(mSkinName);
+		if(ss == NULL)
+			throw Ogre::Exception(Ogre::Exception::ERR_ITEM_NOT_FOUND,"Skin \"" + mSkinName + "\" does not exist!  Did you forget to load it using the SkinSetManager?","Button::applyButtonOverTexture");
 		mQuad->setTextureCoordinates(ss->getTextureCoordinates(mSkinName + mSkinComponent + ".over" + ss->getImageExtension()));
 	}
 
 	void Button::applyDefaultTexture()
 	{
 		SkinSet* ss = SkinSetManager::getSingleton().getSkinSet(mSkinName);
+		if(ss == NULL)
+			throw Ogre::Exception(Ogre::Exception::ERR_ITEM_NOT_FOUND,"Skin \"" + mSkinName + "\" does not exist!  Did you forget to load it using the SkinSetManager?","Button::applyDefaultTexture");
 		mQuad->setTextureCoordinates(ss->getTextureCoordinates(mSkinName + mSkinComponent + ss->getImageExtension()));
 	}
 

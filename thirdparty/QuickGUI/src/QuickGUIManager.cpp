@@ -12,28 +12,27 @@ namespace QuickGUI
 		mActiveSheet(0),
 		mWidgetContainingMouse(0),
 		mActiveWidget(0),
-		mClickTimeout(75),
 		mQueueID(Ogre::RENDER_QUEUE_OVERLAY),
 		mMouseCursor(0),
 		mSceneManager(0),
 		mDraggingWidget(false),
 		mDebugString(""),
-		mUseMouseTimer(false),
-		mMouseTimer(0),
-		mDoubleClickTime(700)
+		mDetermineClickEvents(true),
+		mClickTime(100),
+		mDoubleClickTime(400),
+		mTripleClickTime(400)
 	{
 		mSkinSetManager = SkinSetManager::getSingletonPtr();
 
 		mWidgetNames.clear();
 
-		mMouseButtonDown[0] = NULL;
-		mMouseButtonDown[1] = NULL;
-		mMouseButtonDown[2] = NULL;
-		mMouseButtonDown[3] = NULL;
-		mMouseButtonDown[4] = NULL;
-		mMouseButtonDown[5] = NULL;
-		mMouseButtonDown[6] = NULL;
-		mMouseButtonDown[7] = NULL;		
+		for(int i = 0; i < NUM_MOUSE_BUTTONS; ++i)
+		{
+			mMouseButtonDown[i] = NULL;
+			mTimeOfButtonDown[i] = 0;
+			mTimeOfClick[i] = 0;
+			mTimeOfDoubleClick[i] = 0;
+		}	
 
 		// by default, we support codepoints 9, and 32-166.
 		mSupportedCodePoints.insert(9);
@@ -69,60 +68,6 @@ namespace QuickGUI
 			return;
 
 		mFreeList.push_back(w);
-	}
-
-	void GUIManager::_handleMouseDown(const MouseButtonID& button)
-	{
-		MouseEventArgs args(mWidgetContainingMouse);
-		args.position = mMouseCursor->getPosition();
-		args.button = button;
-		args.keyModifiers = mKeyModifiers;
-
-		// Feature, allowing widgets to be clicked, without transferring focus.  Widget will receive
-		// Mouse Button Down Event.
-		if(!mWidgetContainingMouse->getGainFocusOnClick())
-		{
-			mWidgetContainingMouse->fireEvent(Widget::EVENT_MOUSE_BUTTON_DOWN,args);
-		}
-
-		// mActiveWidget is the last widget the user clicked on, ie TextBox, ComboBox, etc.
-		if( mActiveWidget != mWidgetContainingMouse )
-		{
-			mActiveWidget->fireEvent(Widget::EVENT_LOSE_FOCUS,args);
-
-			// Update active widget reference.
-			mActiveWidget = mWidgetContainingMouse;
-		}
-		
-		args.widget = mActiveWidget;
-		args.position = mMouseCursor->getPosition();
-		args.button = button;
-
-		mActiveWidget->fireEvent(Widget::EVENT_MOUSE_BUTTON_DOWN,args);
-		mActiveWidget->fireEvent(Widget::EVENT_GAIN_FOCUS,args);
-		mActiveWidget->setGrabbed(true);
-			
-		// If the user clicked on a widget that is a part of a window, make sure the window is brought to front.
-		Window* w = mActiveWidget->getParentWindow();
-		if( w != NULL ) 
-			w->bringToFront();
-
-		// Record that the mouse button went down on this widget (non-window)
-		mMouseButtonDown[args.button] = mActiveWidget;
-		
-		mMouseButtonTimings[button] = mTimer->getMilliseconds();
-	}
-
-	void GUIManager::_handleMouseUp(const MouseButtonID& button)
-	{
-	}
-
-	void GUIManager::_handleMouseClick(const MouseButtonID& button)
-	{
-	}
-
-	void GUIManager::_handleMouseDoubleClick(const MouseButtonID& button)
-	{
 	}
 
 	void GUIManager::_menuOpened(Widget* w)
@@ -272,6 +217,11 @@ namespace QuickGUI
 		return mDefaultSheet;
 	}
 
+	bool GUIManager::getDetermineClickEvents()
+	{
+		return mDetermineClickEvents;
+	}
+
 	MouseCursor* GUIManager::getMouseCursor()
 	{
 		return mMouseCursor;
@@ -409,39 +359,73 @@ namespace QuickGUI
 		if( !mMouseCursor->isVisible() ) 
 			return false;
 
-		bool eventHandled = false;
-
-		_handleMouseDown(button);
-		/*
-		if(mMouseButtonEvents.empty())
+		mTimeOfButtonDown[button] = mTimer->getMilliseconds();
+		if(mDetermineClickEvents)
 		{
-			mMouseButtonEvents.push_back(Widget::EVENT_MOUSE_BUTTON_DOWN);
-			mUseMouseTimer = true;
-			mMouseTimer = 0;
-			mMouseButtonDown[button] = mWidgetContainingMouse;
-			return ((mWidgetContainingMouse->getNumberOfHandlers(Widget::EVENT_MOUSE_BUTTON_DOWN) > 0) ||
-					(mWidgetContainingMouse->getNumberOfHandlers(Widget::EVENT_MOUSE_CLICK) > 0) ||
-					(mWidgetContainingMouse->getNumberOfHandlers(Widget::EVENT_MOUSE_CLICK_DOUBLE) > 0));
+			if((mTimeOfButtonDown[button] - mTimeOfDoubleClick[button]) <= mTripleClickTime)
+			{
+				if(mMouseButtonDown[button] == mWidgetContainingMouse)
+					return injectMouseTripleClick(button);
+			}
+			if((mTimeOfButtonDown[button] - mTimeOfClick[button]) <= mDoubleClickTime)
+			{
+				if(mMouseButtonDown[button] == mWidgetContainingMouse)
+					return injectMouseDoubleClick(button);
+			}
 		}
 
-		if((mMouseButtonEvents.front() == Widget::EVENT_MOUSE_CLICK) && (mMouseButtonDown[button] != mWidgetContainingMouse))
-			return false;
+		// If we make it here, a simple mouse button down has occurred.
 
-		if(mMouseButtonEvents.front() == Widget::EVENT_MOUSE_CLICK_DOUBLE)
-			return false;
+		// Setup event args.
+		MouseEventArgs args(mWidgetContainingMouse);
+		args.position = mMouseCursor->getPosition();
+		args.button = button;
+		args.keyModifiers = mKeyModifiers;
 
-		mMouseButtonEvents.push_back(Widget::EVENT_MOUSE_BUTTON_DOWN);
-		*/
+		// Feature, allowing widgets to be clicked, without transferring focus.  Widget will receive
+		// Mouse Button Down Event.  No widgets will gain or lose focus.
+		if(!mWidgetContainingMouse->getGainFocusOnClick())
+			return mWidgetContainingMouse->fireEvent(Widget::EVENT_MOUSE_BUTTON_DOWN,args);
+		
+		bool eventHandlerFired = false;
 
-		return eventHandled;
+		// See if focus has changed from one widget to another.
+		// mActiveWidget is the last widget the user clicked on, ie TextBox, ComboBox, etc.
+		if( mActiveWidget != mWidgetContainingMouse )
+		{
+			if(mActiveWidget->fireEvent(Widget::EVENT_LOSE_FOCUS,args))
+				eventHandlerFired = true;
+
+			// Update active widget reference.
+			mActiveWidget = mWidgetContainingMouse;
+		}
+
+		// Fire Gain Focus event.
+		if(mActiveWidget->fireEvent(Widget::EVENT_GAIN_FOCUS,args))
+			eventHandlerFired = true;
+		mActiveWidget->setGrabbed(true);
+
+		if(mActiveWidget->fireEvent(Widget::EVENT_MOUSE_BUTTON_DOWN,args))
+			eventHandlerFired = true;		
+
+		// If the user clicked on a widget that is a part of a window, make sure the window is brought to front.
+		Window* w = mActiveWidget->getParentWindow();
+		if( w != NULL )
+		{
+			w->bringToFront();
+			eventHandlerFired = true;
+		}
+
+		// Record that the mouse button went down on this widget (non-window)
+		mMouseButtonDown[button] = mActiveWidget;
+
+		return eventHandlerFired;
 	}
 
 	bool GUIManager::injectMouseButtonUp(const MouseButtonID& button)
 	{
 		if( !mMouseCursor->isVisible() ) 
 			return false;
-
-		bool eventHandled = false;
 
 		MouseEventArgs args(mActiveWidget);
 		args.position = mMouseCursor->getPosition();
@@ -453,9 +437,10 @@ namespace QuickGUI
 		{
 			mDraggingWidget = false;
 			mActiveWidget->setGrabbed(false);
-			eventHandled = mActiveWidget->fireEvent(Widget::EVENT_DROPPED,args);
-			return eventHandled;
+			return mActiveWidget->fireEvent(Widget::EVENT_DROPPED,args);
 		}
+
+		bool eventHandled = false;
 
 		// Feature, allowing widgets to be clicked, without transfering focus.  Widget will receive
 		// Mouse Button Up and Click Events, if appropriate.
@@ -463,39 +448,74 @@ namespace QuickGUI
 		{
 			if( mMouseButtonDown[args.button] == mWidgetContainingMouse )
 			{
-				eventHandled = mWidgetContainingMouse->fireEvent(Widget::EVENT_MOUSE_BUTTON_UP,args);
-				// check if time elapsed it within click time.
-				if( (mTimer->getMilliseconds() - mMouseButtonTimings[button]) < mClickTimeout ) 
-					eventHandled = mWidgetContainingMouse->fireEvent(Widget::EVENT_MOUSE_CLICK,args);
+				if(mWidgetContainingMouse->fireEvent(Widget::EVENT_MOUSE_BUTTON_UP,args))
+					eventHandled = true;
+				if(mDetermineClickEvents)
+				{
+					if((mTimer->getMilliseconds() - mTimeOfButtonDown[button]) <= mClickTime)
+					{
+						if(injectMouseClick(button))
+							eventHandled = true;
+					}
+				}
 			}
 			return eventHandled;
 		}
 
 		// If the MouseButton was not pressed on this widget, do not register the button being released on the widget
-		if( mWidgetContainingMouse != mActiveWidget  )
-		{
-			if(mActiveWidget->fireEvent(Widget::EVENT_LOSE_FOCUS,args))
-				eventHandled = true;
-
-			return eventHandled;
-		}
+		if( mWidgetContainingMouse != mActiveWidget )
+			return mActiveWidget->fireEvent(Widget::EVENT_LOSE_FOCUS,args);
 
 		// after this point, we know that the user had mouse button down on this widget, and is now doing mouse button up
-
-		args.widget = mActiveWidget;
-		args.position = mMouseCursor->getPosition();
-		args.button = button;
 
 		if(mActiveWidget->fireEvent(Widget::EVENT_MOUSE_BUTTON_UP,args))
 			eventHandled = true;
 		mActiveWidget->setGrabbed(false);
 
-		// check if time elapsed it within click time.
-		if( (mTimer->getMilliseconds() - mMouseButtonTimings[button]) < mClickTimeout ) 
-			if(mWidgetContainingMouse->fireEvent(Widget::EVENT_MOUSE_CLICK,args))
-				eventHandled = true;
+		if(mDetermineClickEvents)
+		{
+			if((mTimer->getMilliseconds() - mTimeOfButtonDown[button]) <= mClickTime)
+			{
+				if(injectMouseClick(button))
+					eventHandled = true;
+			}
+		}
 
 		return eventHandled;
+	}
+
+	bool GUIManager::injectMouseClick(const MouseButtonID& button)
+	{
+		mTimeOfClick[button] = mTimer->getMilliseconds();
+
+		MouseEventArgs args(mActiveWidget);
+		args.position = mMouseCursor->getPosition();
+		args.button = button;
+		args.keyModifiers = mKeyModifiers;
+
+		return mWidgetContainingMouse->fireEvent(Widget::EVENT_MOUSE_CLICK,args);
+	}
+
+	bool GUIManager::injectMouseDoubleClick(const MouseButtonID& button)
+	{
+		mTimeOfDoubleClick[button] = mTimer->getMilliseconds();
+
+		MouseEventArgs args(mActiveWidget);
+		args.position = mMouseCursor->getPosition();
+		args.button = button;
+		args.keyModifiers = mKeyModifiers;
+
+		return mWidgetContainingMouse->fireEvent(Widget::EVENT_MOUSE_CLICK_DOUBLE,args);
+	}
+
+	bool GUIManager::injectMouseTripleClick(const MouseButtonID& button)
+	{
+		MouseEventArgs args(mActiveWidget);
+		args.position = mMouseCursor->getPosition();
+		args.button = button;
+		args.keyModifiers = mKeyModifiers;
+
+		return mWidgetContainingMouse->fireEvent(Widget::EVENT_MOUSE_CLICK_TRIPLE,args);
 	}
 
 	bool GUIManager::injectMouseLeaves(void)
@@ -631,18 +651,6 @@ namespace QuickGUI
 
 			injectMouseMove(0,0);
 		}
-
-		if(mUseMouseTimer)
-			mMouseTimer += time;
-
-		if(mMouseTimer >= mDoubleClickTime)
-		{
-			// handle events on stack
-			mMouseButtonEvents.clear();
-
-			mMouseTimer = 0;
-			mUseMouseTimer = false;
-		}
 	}
 
 	bool GUIManager::isKeyModifierDown(KeyModifier k)
@@ -735,13 +743,13 @@ namespace QuickGUI
 
 		mActiveSheet = s;
 
-		// Make sure active widget loses focus.
-		mActiveWidget->fireEvent(Widget::EVENT_LOSE_FOCUS,EventArgs());
-		
-		// Make sure mouse over widget has mouse leave event.
 		MouseEventArgs args(mWidgetContainingMouse);
 		args.position = mMouseCursor->getPosition();
 
+		// Make sure active widget loses focus.
+		mActiveWidget->fireEvent(Widget::EVENT_LOSE_FOCUS,args);
+		
+		// Make sure mouse over widget has mouse leave event.
 		mWidgetContainingMouse->fireEvent(Widget::EVENT_MOUSE_LEAVE,args);
 
 		// Update the active widget
@@ -773,6 +781,11 @@ namespace QuickGUI
 	void GUIManager::setDebugString(const Ogre::String s)
 	{
 		mDebugString = s;
+	}
+
+	void GUIManager::setDetermineClickEvents(bool determine)
+	{
+		mDetermineClickEvents = determine;
 	}
 
 	void GUIManager::setRenderQueueID(Ogre::uint8 id)

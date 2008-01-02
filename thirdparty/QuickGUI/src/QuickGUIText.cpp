@@ -282,7 +282,7 @@ namespace QuickGUI
 				_setCaptionVertical(mCaption);
 
 			// Make sure the caption matches the visibly displayed text!
-			mCaption.erase(static_cast<Ogre::UTFString::size_type>(mCharacters.size()));
+			//mCaption.erase(static_cast<Ogre::UTFString::size_type>(mCharacters.size()));
 
 			_calculateDimensions();
 
@@ -560,7 +560,8 @@ namespace QuickGUI
 
 		// Invert colors of selected characters, and make sure non selected characters are
 		// appropriately colored.
-		for(unsigned int index = 0; index < mCaption.length(); ++index )
+		unsigned int index;
+		for( index = 0; index < static_cast<unsigned int>(mCharacters.size()); ++index )
 		{
 			if( (static_cast<int>(index) >= mSelectStart) && (static_cast<int>(index) <= mSelectEnd) )
 				mCharacters[index]->setColor(mSelectColor);
@@ -570,12 +571,22 @@ namespace QuickGUI
 
 		// set dimensions of background selection quad.
 		Rect dimensions;
-		Quad* q = mCharacters[mSelectStart];
+		
+		Quad* q;
+
+		// Get the dimensions of the starting position of the selection quad.
+		q = mCharacters[mSelectStart];
 		dimensions.x = q->getPosition().x;
 		dimensions.y = q->getPosition().y;
-		q = mCharacters[mSelectEnd];
+
+		// Get the dimensions of the ending position of the selection quad.
+		if(mSelectEnd >= static_cast<int>(mCharacters.size()))
+			q = mCharacters[index - 1];
+		else
+			q = mCharacters[mSelectEnd];
 		dimensions.width = (q->getPosition().x + q->getSize().width) - dimensions.x;
 		dimensions.height = (q->getPosition().y + q->getSize().height) - dimensions.y;
+
 		mCharacterBackground->setDimensions(dimensions);
 		mCharacterBackground->setVisible(true);
 	}

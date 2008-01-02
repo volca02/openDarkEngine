@@ -124,6 +124,7 @@ namespace QuickGUI
 	void Label::onSizeChanged(const EventArgs& args)
 	{
 		Widget::onSizeChanged(args);
+
 		mText->redraw();
 	}
 

@@ -42,30 +42,30 @@ namespace QuickGUI
 		mOnTopBorder = false;
 		mOnLeftBorder = false;
 
-		if (mPixelPosition.x >= (mGUIManager->getViewportWidth() - 1 - mPixelSize.width))
+		if (mPixelPosition.x >= (mGUIManager->getViewportWidth() - 1 - (mPixelSize.width / 2)))
 		{
-			mPixelPosition.x = mGUIManager->getViewportWidth() - 1 - mPixelSize.width;
+			mPixelPosition.x = mGUIManager->getViewportWidth() - 1 - (mPixelSize.width / 2);
 			mOnRightBorder = true;
 			offScreen = true;
 		}
 
-		if (mPixelPosition.y >= (mGUIManager->getViewportHeight() - 1 - mPixelSize.height))
+		if (mPixelPosition.y >= (mGUIManager->getViewportHeight() - 1 - (mPixelSize.height / 2)))
 		{
-			mPixelPosition.y = mGUIManager->getViewportHeight() - 1 - mPixelSize.height;
+			mPixelPosition.y = mGUIManager->getViewportHeight() - 1 - (mPixelSize.height / 2);
 			mOnBotBorder = true;
 			offScreen = true;
 		}
 
-		if (mPixelPosition.y <= 0)
+		if (mPixelPosition.y <= (-mPixelSize.height / 2))
 		{
-			mPixelPosition.y = 0;
+			mPixelPosition.y = (-mPixelSize.height / 2);
 			mOnTopBorder = true;
 			offScreen = true;
 		}
 
-		if (mPixelPosition.x <= 0)
+		if (mPixelPosition.x <= (-mPixelSize.width / 2))
 		{
-			mPixelPosition.x = 0;
+			mPixelPosition.x = (-mPixelSize.width / 2);
 			mOnLeftBorder = true;
 			offScreen = true;
 		}

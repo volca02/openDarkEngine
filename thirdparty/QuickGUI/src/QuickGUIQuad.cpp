@@ -32,9 +32,15 @@ namespace QuickGUI
 		mClippingWidget(NULL),
 		mInheritClippingWidget(true),
 		mInheritQuadLayer(true),
-		mShowWithOwner(true)
+		mShowWithOwner(true),
+		mDirectXUsed(false)
 	{
 		mRenderSystem = Ogre::Root::getSingleton().getRenderSystem();
+
+		// Determine if dirext X renderer used.
+		if(mRenderSystem->getName().find("Direct") != Ogre::String::npos)
+			mDirectXUsed = true;
+
 		_updateVertexColor();
 	}
 
@@ -519,7 +525,21 @@ namespace QuickGUI
 
 	void Quad::setTextureCoordinates(const Ogre::Vector4& textureCoordinates)
 	{
-		mTextureCoordinates = textureCoordinates;
+		// DirectX interprets UV coords from a different location than OpenGL, so
+		// we have to modify the coordinates to get the same results.
+/*		if(mDirectXUsed)
+		{
+			Ogre::Real xVal = 0.5 / mPixelDimensions.width; 
+			Ogre::Real yVal = 0.5 / mPixelDimensions.height;
+
+			mTextureCoordinates = Ogre::Vector4(
+				textureCoordinates.x + xVal,
+				textureCoordinates.y + yVal,
+				textureCoordinates.z + xVal,
+				textureCoordinates.w + yVal);
+		}
+		else */
+			mTextureCoordinates = textureCoordinates;
 
 		mTextureCoordsChanged = true;
 

@@ -46,10 +46,14 @@ namespace QuickGUI
 				mScrollPane = dynamic_cast<ScrollPane*>(_createChild(mInstanceName+".ScrollPane",TYPE_SCROLL_PANE));
 				mScrollPane->setSize(mSize);
 
+				mScrollPane->removeChild(mScrollPane->mRightBar);
+				// store reference to the scroll bar
 				mRightScrollBar = mScrollPane->mRightBar;
 				addChild(mRightScrollBar);
 				mRightScrollBar->setPosition(mSize.width - 20,0);
 
+				mScrollPane->removeChild(mScrollPane->mBottomBar);
+				// store reference to the scroll bar
 				mBottomScrollBar = mScrollPane->mBottomBar;
 				addChild(mBottomScrollBar);
 				mBottomScrollBar->setPosition(0,mSize.height - 20);
