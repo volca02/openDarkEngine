@@ -2,6 +2,9 @@
 #define QUICKGUIMOUSEBUTTONID_H
 
 #include "QuickGUIPrerequisites.h"
+
+#define NUM_MOUSE_BUTTONS (MB_Button7 + 1)
+
 namespace QuickGUI
 {
 	/* Copied from OISMouse.h */

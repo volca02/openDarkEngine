@@ -17,7 +17,6 @@
 #include "QuickGUIUtility.h"
 
 #include <algorithm>
-#include <deque>
 #include <list>
 #include <map>
 #include <set>
@@ -97,6 +96,7 @@ namespace QuickGUI
 		* Returns the default sheet, automatically created with the GUI manager.
 		*/
 		Sheet* getDefaultSheet();
+		bool getDetermineClickEvents();
 
 		MouseCursor* getMouseCursor();
 		Widget* getMouseOverWidget();
@@ -131,6 +131,9 @@ namespace QuickGUI
 
 		bool injectMouseButtonDown(const MouseButtonID& button);
 		bool injectMouseButtonUp(const MouseButtonID& button);
+		bool injectMouseClick(const MouseButtonID& button);
+		bool injectMouseDoubleClick(const MouseButtonID& button);
+		bool injectMouseTripleClick(const MouseButtonID& button);
 		/**
 		* Injection when the mouse leaves the primary render window
 		*/
@@ -170,6 +173,7 @@ namespace QuickGUI
 		*/
 		void setActiveWidget(Widget* w);
 		void setDebugString(const Ogre::String s);
+		void setDetermineClickEvents(bool determine);
 		/*
 		* Sets the Render Queue Group to render on.  By default, this is RENDER_QUEUE_OVERLAY.
 		*/
@@ -228,18 +232,21 @@ namespace QuickGUI
 		// list of widgets to delete on next frame.
 		WidgetArray	mFreeList;
 
-		bool					mUseMouseTimer;
-		unsigned long			mMouseTimer;
-		unsigned long			mDoubleClickTime;
-		std::deque<Widget::Event> mMouseButtonEvents;
-
-		// timer used to get time readings
+		bool					mDetermineClickEvents;
+		// timer used to get time readings.
 		Ogre::Timer*			mTimer;
-		unsigned long			mClickTimeout;	// max number of milliseconds a click can be performed in
-		unsigned long			mMouseButtonTimings[8];
+		// Maximum number of milliseconds a click can be performed in.
+		unsigned long			mClickTime;				// time from mouse down to mouse up
+		unsigned long			mDoubleClickTime;		// time from mouse click to mouse down
+		unsigned long			mTripleClickTime;		// time from mouse double click to mouse down
+		// Store the last time a click was performed.
+		unsigned long			mTimeOfButtonDown[NUM_MOUSE_BUTTONS];
+		unsigned long			mTimeOfClick[NUM_MOUSE_BUTTONS];
+		unsigned long			mTimeOfDoubleClick[NUM_MOUSE_BUTTONS];
+
 		// Keep track of mouse button down/up and on what widget.  This prevents left mouse button down on button A,
 		// moving the mouse to button B, and releasing the left mouse button, causing button B to be pressed. (example)
-		Widget*					mMouseButtonDown[8];
+		Widget*					mMouseButtonDown[NUM_MOUSE_BUTTONS];
 
 		Widget*					mWidgetContainingMouse;
 		// Stores reference to last clicked Widget.
@@ -266,11 +273,6 @@ namespace QuickGUI
 		GUIManager(const Ogre::String& name, Ogre::Viewport* vp);
 		/** Standard Destructor. */
 		~GUIManager();
-
-		void _handleMouseDown(const MouseButtonID& button);
-		void _handleMouseUp(const MouseButtonID& button);
-		void _handleMouseClick(const MouseButtonID& button);
-		void _handleMouseDoubleClick(const MouseButtonID& button);
     };
 }
 

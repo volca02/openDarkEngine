@@ -104,6 +104,7 @@ namespace QuickGUI
 		GUIManager*			mGUIManager;
 		QuadContainer*		mQuadContainer;
 		Ogre::RenderSystem* mRenderSystem;
+		bool				mDirectXUsed;
 
 		Layer				mLayer;
 		bool				mInheritQuadLayer;

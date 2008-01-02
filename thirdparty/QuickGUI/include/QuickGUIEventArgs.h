@@ -51,6 +51,7 @@ namespace QuickGUI
 
 		// handlers should set this to true if they handled the event.
 		bool	handled;
+		int		eventType;
 
 		Type	type;
 	};

@@ -24,8 +24,15 @@
 #include <iostream>
 #include <vector>
 
+using std::vector;
+using std::string;
+using std::map;
+
 namespace QuickGUI
 {
+	class Tree;
+	class TreeItem;
+
 	/** Represents an Item in the Tree
 		@remarks
 			A Tree Widget can hold a number of TreeItems.
@@ -35,97 +42,122 @@ namespace QuickGUI
 	public:
 		/** Constructor
             @param
-                name The name to be given to the TreeItem (must be unique).
+                name The name to be given to the TreeItem .
+			@param
+                id The id to be given to the TreeItem (must be unique).
             @param
                 skinName The name of the skin to get graphics from
         */
-		TreeItem(const std::string& name, const std::string& skinName, Tree* tree, double iconsize, GUIManager* mGuiManager);
+		TreeItem(const string &name,const string &id, const string &skinName, Tree *tree, double iconsize, GUIManager *mGuiManager);
 		~TreeItem();
 
-		double getLag() { return _lag; }
-		bool getVisible() { return _visible; }
-		bool getPlace() { return _place; }
+		double					getLag(){ return _lag; }
+		bool					getVisible(){ return _visible; }
+		bool					getPlace(){ return _place; }
+		TreeItem				*getParent(){ return _parent; }
+		vector<TreeItem *>		&getChilds();
+		string					&getName(){ return _name;}
+		string					&getId(){ return _id;}
+		MenuLabel *				getItem() { return _item; }
+		Image	*				getImage(){ return _minus; }
+		Image	*				getThumbtails(){ return _thumbtails; }
+		TreeItem				*getPrevious(){ return _previous; }
+		TreeItem				*getNext(){ return _next; }
 
-		std::vector<TreeItem *>& getChildren();
+
+		void					removeChild(const string &name);
+		void					setYPosition(double y);
+		void					setVisible(bool vis);
+		void					setItem(MenuLabel *item);
+		void					setPrevious(TreeItem *pre){ _previous = pre; }
+		void					setNext(TreeItem * next){ _next = next; }
+		QuickGUI::Image			*addChild(TreeItem *Item);
+		void					setParent(TreeItem *Item){ _parent = Item; }
+		void					setLag(double lag){ _lag = lag; }
+		void					setPlace(bool place){ _place = place; }
+		void					setThumbtails(const string &pic);
+		void					onMouseButtonDownItemLeave();
+	private: //effects
 		
-		TreeItem* getParent() { return _parent; }
-		std::string& getName() { return _name; }
-		MenuLabel* getItem() { return _item; }
-		Image* getImage() { return _minus; }
-		Image* getThumbtails() { return _thumbtails; }
-		TreeItem* getPrevious() { return _previous; }
-		TreeItem* getNext() { return _next; }
-
-		QuickGUI::Image* addChild(TreeItem* Item);
-		void removeChild(const std::string& name);
-
-		void setYPosition(double y);
-		void setVisible(bool vis);
-		void setPrevious(TreeItem* prev) { _previous = prev; }
-		void setNext(TreeItem* next) { _next = next; }
-		
+		void onMouseClickDouble(const EventArgs& args);
 		void onMouseButtonDown(const EventArgs& args);
-		void setParent(TreeItem* item) { _parent = item; }
-		void setLag(double lag) { _lag = lag; }
-		void setItem(MenuLabel* item) { _item = item; }
-		void setThumbtails(const std::string& pic);
+		void onMouseEntersItem(const EventArgs& args);
+		void onMouseLeavesItem(const EventArgs& args);
+		void onMouseButtonDownItem(const EventArgs& args);
 
 	private:
-		GUIManager*	_guiManager;
-		QuickGUI::Image* _minus;		// - + button
-		QuickGUI::Image* _thumbtails;
-		TreeItem* _parent;
-		std::vector<TreeItem *> _child;
-		double _lag;
-		double _IconSize;
-		bool _place;
-		bool _visible;
+		GUIManager *				_guiManager;
+		QuickGUI::Image				*_minus;		// - + button
+		QuickGUI::Image				*_thumbtails;
+		TreeItem					*_parent;
+		vector<TreeItem *>		_child;
+		double						_lag;
+		double						_IconSize;
+		bool						_place;
+		bool						_visible;
+		bool						_down;
 
 		/* heritage */
-		TreeItem* _next;
-		TreeItem* _previous;
-		Tree* _tree;
-		std::string mSkinName;
-		std::string _name;
-		MenuLabel* _item;
+		TreeItem					*_next;
+		TreeItem					*_previous;
+		Tree						*_tree;
+		string					mSkinName;
+		string					_id;
+		string					_name;
+		MenuLabel					*_item;
 	};
+
 
 	/** Represents a Tree View Widget
 	*/
+
 	class _QuickGUIExport Tree :
 		public List
 	{
 	public:
 		/** Constructor
             @param
-                name The name to be given to the Tree Widget (must be unique).
+                name The name to be given to the Tree Widget.
             @param
                 mGUIManager
+			@param
+                padding ChildTreeItem's left padding inherited from parent TreeItem. Default value 20
         */
-		Tree(const std::string& name, QuickGUI::GUIManager* mGUIManager);
-		
-		void addInList(const std::string& name, const std::string& text, const std::string& parent = "root", const std::string& LoadAfter = "");
-		void hideTreeItems(const std::string& name);
-		void showTreeItems(const std::string& name);
+		Tree(const string &name, QuickGUI::GUIManager *mGUIManager, double padding = 20);
 
-		void setTitle(const std::string& title);
-		void deleteItem(const std::string& name);
-		void addAfterTreeItem(const std::string& name, TreeItem* item);
-		std::string	GetLastChild(const std::string& name, const std::string& parent = "");
-		void setThumbtails(const std::string& name, const std::string& pic);
+		const string addInList(const string &name, const string &text, const string &parent = "root", const string &LoadAfter = "");
+		void		hideTreeItems(const string &name);
+		void		showTreeItems(const string &name);
+
+		void		deleteItem(const string &name);
+		void		addAfterTreeItem(const string &name, TreeItem *item);
+		string		GetLastChild(const string &name, const string &parent = "");
+		void		setThumbtails(const string &name, const string &pic);
+		void		onItemPushDown(const string &name);
+		const string GetSelectedName();
+		const string GetSelectedID();
+		void					close(const string &id);
+		void					open(const string &id);
+
 	private:
 		~Tree();
-		bool hasParent(TreeItem* child, const std::string& name);
-		bool parentIsPlace(TreeItem* child);
-		void slideUp(TreeItem* child);
-		void slideDown(TreeItem* child);
-		void deleteChild(TreeItem* me);
+		bool		hasParent(TreeItem *child, const string &name);
+		bool		parentIsPlace(TreeItem *child);
+		void		slideUp(TreeItem *child);
+		void		slideDown(TreeItem *child);
+		void		deleteChild(TreeItem *me);
+		string	createId(const string& name);
+		void		resize();
+		
 	private:
-		std::string _name;
-		double _iconSize;
-		TreeItem* _lastChild;
-		std::map<std::string, TreeItem*> _lists;
-		QuickGUI::GUIManager* _guiManager;
+		double											_padding;
+		TreeItem										*_selected;
+		string										_name;
+		string										_id;
+		double											_iconSize;
+		TreeItem										*_lastChild;
+		map<string, TreeItem *>				_lists;
+		QuickGUI::GUIManager							*_guiManager;
 	};
 }
 

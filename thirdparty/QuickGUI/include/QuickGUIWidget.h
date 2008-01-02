@@ -92,6 +92,7 @@ namespace QuickGUI
 			EVENT_MOUSE_BUTTON_UP		,
 			EVENT_MOUSE_CLICK			,
 			EVENT_MOUSE_CLICK_DOUBLE	,
+			EVENT_MOUSE_CLICK_TRIPLE	,
 			EVENT_MOUSE_ENTER			,
 			EVENT_MOUSE_LEAVE			,
 			EVENT_MOUSE_MOVE			,
@@ -163,6 +164,13 @@ namespace QuickGUI
 			mUserEventHandlers[EVENT].push_back(new MemberFunctionPointer<T>(function,obj));
 		}
 		void addEventHandler(Event EVENT, MemberFunctionSlot* function);
+
+		template<typename T> void addEventListener(Event EVENT, void (T::*function)(const EventArgs&), T* obj)
+		{
+			mEventListeners.push_back(new MemberFunctionPointer<T>(function,obj));
+		}
+		void addEventListener(MemberFunctionSlot* function);
+
 		void allowResizing(bool allow);
 		/**
 		* Alters the widgets offset to be higher than widget w.  Widget w must be in the
@@ -201,7 +209,7 @@ namespace QuickGUI
 		* Event Handler that executes the appropriate User defined Event Handlers for a given event.
 		* Returns true if the event was handled, false otherwise.
 		*/
-		bool fireEvent(Event e, const EventArgs& args);
+		bool fireEvent(Event e, EventArgs& args);
 		/**
 		* Sets focus to the widget by firing an activation event.
 		*/
@@ -308,6 +316,7 @@ namespace QuickGUI
 		Ogre::Real getWidth();
 		Ogre::Real getXPosition();
 		Ogre::Real getYPosition();
+		bool hasMouseButtonHandlers();
 		/**
 		* Sets mVisible to false.  Widgets should override this to implement how they handle
 		* hiding.
@@ -548,6 +557,8 @@ namespace QuickGUI
 		// Event handlers! One List per event per widget
 		EventHandlerArray mUserEventHandlers[EVENT_END_OF_LIST];
 		bool mPropogateEventFiring[EVENT_END_OF_LIST];
+
+		EventHandlerArray mEventListeners;
 
 		void _initEventHandlers();
 

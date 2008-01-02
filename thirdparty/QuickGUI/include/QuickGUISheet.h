@@ -21,15 +21,6 @@ namespace QuickGUI
 	public:
 		friend class GUIManager;
 	public:
-		/** Constructor
-            @param
-                name The name to be given to the widget (must be unique).
-			@note
-				If you want a transparent background, pass "" as the material.
-        */
-		Sheet(const Ogre::String& name, const Ogre::String &skinName, GUIManager* gm);
-		virtual ~Sheet();
-
 		/** Create a Window with material, borders, and TitleBar
             @param
                 dimensions The relative x Position, y Position, width, and height of the window.
@@ -53,6 +44,15 @@ namespace QuickGUI
 		virtual void setMaterial(const Ogre::String& textureName);
 
 	protected:
+		/** Constructor
+            @param
+                name The name to be given to the widget (must be unique).
+			@note
+				If you want a transparent background, pass "" as the material.
+        */
+		Sheet(const Ogre::String& name, const Ogre::String &skinName, GUIManager* gm);
+		virtual ~Sheet();
+
 		virtual void setHeight(Ogre::Real pixelHeight);
 
 		virtual void setQuadContainer(QuadContainer* container);
