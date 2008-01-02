@@ -102,13 +102,13 @@ namespace Opde {
 	typedef shared_ptr<DatabaseService> DatabaseServicePtr;
 
 
-	/// Factory for the GameService objects
+	/// Factory for the DatabaseService objects
 	class DatabaseServiceFactory : public ServiceFactory {
 		public:
 			DatabaseServiceFactory();
 			~DatabaseServiceFactory() {};
 
-			/** Creates a GameService instance */
+			/** Creates a DatabaseService instance */
 			Service* createInstance(ServiceManager* manager);
 
 			virtual const std::string& getName();
