@@ -21,7 +21,7 @@
  *	   $Id$
  *
  *****************************************************************************/
- 
+
 #include "bindings.h"
 #include "ServiceBinder.h"
 #include "logger.h"
@@ -60,18 +60,18 @@ namespace Opde {
 					const Ogre::Vector3& v = inst.toVector();
 					return Py_BuildValue("[fff]", v.x, v.y, v.z);
 				}
-	
+
 				default:	//All possible paths must return a value
 					Py_INCREF(Py_None);
 					return Py_None;
 			}
 		}
-		
+
 		DVariant PyObjectToDVariant(PyObject* obj) {
 			// Do a conversion from python object to DVariant instance
 			// Look for the type of the python object
 
-			if (PyInt_Check(obj)) 
+			if (PyInt_Check(obj))
 				return DVariant(static_cast<int>(PyInt_AsLong(obj)));
 			else if (PyBool_Check(obj))
 			{
@@ -90,7 +90,7 @@ namespace Opde {
 				PyArg_Parse(obj, "[fff]", &X, &Y, &Z);
 				return DVariant(X, Y, Z);
 			}
-			
+
 			return DVariant(DVariant::DV_INVALID); //Py_None, or a non-handled type
 		}
 
@@ -99,10 +99,10 @@ namespace Opde {
 		PyObject* Py_Log(PyObject *self, Logger::LogLevel level, PyObject* args) {
 			const char* text;
 			PyObject* result = NULL;
-			
+
 			if (PyArg_ParseTuple(args, "s", &text)) {
 				Logger::getSingleton().log(level, "Python: %s", text);
-				
+
 				result = Py_None;
 				Py_INCREF(result);
 			} else {
@@ -111,15 +111,15 @@ namespace Opde {
 
 			return result;
 		}
-		
+
 		PyObject* Py_Log_Fatal(PyObject *self, PyObject* args) {
 			return Py_Log(self, Logger::LOG_FATAL, args);
 		}
-		
+
 		PyObject* Py_Log_Error(PyObject *self, PyObject* args) {
 			return Py_Log(self, Logger::LOG_ERROR, args);
 		}
-		
+
 		PyObject* Py_Log_Info(PyObject *self, PyObject* args) {
 			return Py_Log(self, Logger::LOG_INFO, args);
 		}
@@ -127,12 +127,12 @@ namespace Opde {
 		PyObject* Py_Log_Debug(PyObject *self, PyObject* args) {
 			return Py_Log(self, Logger::LOG_DEBUG, args);
 		}
-		
+
 		PyObject* Py_Log_Verbose(PyObject *self, PyObject* args) {
 			return Py_Log(self, Logger::LOG_VERBOSE, args);
 		}
 	} // namespace Python
-	
+
 	PyMethodDef sOpdeMethods[] = {
 		{"log_fatal", Python::Py_Log_Fatal, METH_VARARGS},
 		{"log_error", Python::Py_Log_Error, METH_VARARGS},
@@ -141,16 +141,16 @@ namespace Opde {
 		{"log_verbose", Python::Py_Log_Verbose, METH_VARARGS},
 		{NULL, NULL},
 	};
-	
+
 	void PythonLanguage::init() {
 		Py_Initialize();
-		
+
 		// Create an Opde module
 		PyObject* module = Py_InitModule("Opde", sOpdeMethods);
-		
+
 		// Call all the binders here. The result is initialized Python VM
 		PyObject *servicemod = Python::ServiceBinder::init(module);
-		
+
 		if (PyErr_Occurred()) {
 			// TODO: Do something useful here, or forget it
 			PyErr_Print();
@@ -158,9 +158,14 @@ namespace Opde {
 		}
 
 	}
-	
+
 	void PythonLanguage::term() {
 		Py_Finalize();
+	}
+
+	void PythonLanguage::runScriptPtr(const char* ptr) {
+	    // Is this the right way?
+        PyRun_SimpleString(ptr);
 	}
 
 } // namespace Opde

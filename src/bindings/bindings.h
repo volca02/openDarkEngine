@@ -21,7 +21,7 @@
  *	   $Id$
  *
  *****************************************************************************/
- 
+
 #ifndef __BINDINGS_H
 #define __BINDINGS_H
 
@@ -35,26 +35,26 @@ namespace Opde {
 		// Global utilities - object conversion and such
 		PyObject* DVariantToPyObject(const DVariant& inst);
 		DVariant PyObjectToDVariant(PyObject* obj);
-		
+
 		/// Template definition of a Python instance holding a single object
 		template<typename T> struct ObjectBase {
 			PyObject_HEAD
 			T mInstance;
 		};
-		
+
 		/// helper function to get type from Object
 		template<typename T> T python_cast(PyObject* obj, PyTypeObject* type) {
 			assert(obj->ob_type == type);
 
 			return reinterpret_cast< T >(obj);
 		}
-		
+
 		/// A template that binds sharedptr typed classes
 		template <typename T> class shared_ptr_binder {
 			protected:
 				/// A python object type
 				typedef ObjectBase<T> Object;
-				
+
 				/// A sort-of constructor method. To be used to create a new NULL Object*
 				static Object* construct(PyTypeObject* type) {
 					Object* object;
@@ -67,10 +67,10 @@ namespace Opde {
 						// Here, tidy!
 						::new (&object->mInstance) T();
 					}
-					
+
 					return object;
 				}
-				
+
 				/// Destructor for the python object. Safely decreases the reference to the shared_ptr. To be used in msType
 				static void dealloc(PyObject *self) {
 					// cast the object to LinkServiceBinder::Object
@@ -78,26 +78,29 @@ namespace Opde {
 
 					// Decreases the shared_ptr counter
 					o->mInstance.setNull();
-					
+
 					// Call the destructor to clean up
 					(&o->mInstance)->~T();
-					
+
 					// Finally delete the object
 					PyObject_Del(self);
 				}
-			
+
 		};
-		
+
 	};
-	
+
     /** Central class for python bindings. Call PythonLanguage::Init() to prepare python environment */
     class PythonLanguage {
     	public:
 			/** Initializes python lang and all the bindings */
 			static void init();
-			
+
 			/** Finalizes python lang */
 			static void term();
+
+			/** Runs a script loaded in memory on a given address */
+			static void runScriptPtr(const char* ptr);
     };
 }
 
