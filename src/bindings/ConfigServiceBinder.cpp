@@ -103,6 +103,8 @@ namespace Opde {
 				o->mInstance->setParam(name, value);
 				result = Py_None;
 				Py_INCREF(result);
+			} else {
+				PyErr_SetString(PyExc_TypeError, "Expected two string parameters!");
 			}
 
 			return result;
@@ -120,6 +122,7 @@ namespace Opde {
 				return DVariantToPyObject(rv);
 			} else {
 				// Invalid parameters
+				PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
 				return NULL;
 			}
 		}
@@ -138,6 +141,7 @@ namespace Opde {
 				return ret;
 			} else {
 				// Invalid parameters
+				PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
 				return NULL;
 			}
 		}
@@ -152,6 +156,8 @@ namespace Opde {
 				o->mInstance->loadParams(fname);
 				result = Py_None;
 				Py_INCREF(result);
+			} else {
+				PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
 			}
 
 			return result;
