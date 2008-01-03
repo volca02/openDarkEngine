@@ -93,7 +93,6 @@ namespace Opde {
 
 	//------------------------------------
 	bool ScriptService::init() {
-	    PythonLanguage::init();
 	    return true;
 	}
 
@@ -104,7 +103,6 @@ namespace Opde {
 
     //------------------------------------
 	void ScriptService::shutdown() {
-	    PythonLanguage::term();
 	}
 
 	//-------------------------- Factory implementation
