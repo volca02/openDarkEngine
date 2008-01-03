@@ -40,6 +40,12 @@ namespace Opde {
 				static PyObject* create();
 
 				// --- Methods ---
+				static PyObject* setActive(PyObject* self, PyObject* args);
+				static PyObject* setVisible(PyObject* self, PyObject* args);
+				static PyObject* getActiveSheet(PyObject* self, PyObject* args);
+				static PyObject* setActiveSheet(PyObject* self, PyObject* args);
+				static PyObject* createSheet(PyObject* self, PyObject* args);
+				static PyObject* destroySheet(PyObject* self, PyObject* args);
 				
 			protected:
 				/// Static type definition for GUIService

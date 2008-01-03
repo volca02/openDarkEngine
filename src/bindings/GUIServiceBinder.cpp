@@ -70,9 +70,82 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyMethodDef GUIServiceBinder::msMethods[] = {
+			{"setActive", setActive, METH_VARARGS},
+			{"setVisible", setVisible, METH_VARARGS},
+			{"getActiveSheet", getActiveSheet, METH_VARARGS},
+			{"setActiveSheet", setActiveSheet, METH_VARARGS},
+			{"createSheet", createSheet, METH_VARARGS},
+			{"destroySheet", destroySheet, METH_VARARGS},
 			{NULL, NULL},
 		};
 
+
+		// ------------------------------------------
+		PyObject* GUIServiceBinder::setActive(PyObject* self, PyObject* args) {
+			PyObject *result = NULL;
+			Object* o = python_cast<Object*>(self, &msType);
+			
+			int active;
+			
+			if (PyArg_ParseTuple(args, "i", &active)) {
+				o->mInstance->setActive(active);
+				
+				result = Py_None;
+				Py_INCREF(result);
+			} else {
+				PyErr_SetString(PyExc_TypeError, "Expected a bool parameter!");
+			}
+			
+			return result;
+		}
+		
+		// ------------------------------------------
+		PyObject* GUIServiceBinder::setVisible(PyObject* self, PyObject* args) {
+			PyObject *result = NULL;
+			Object* o = python_cast<Object*>(self, &msType);
+			
+			int visible;
+			
+			if (PyArg_ParseTuple(args, "i", &visible)) {
+				o->mInstance->setVisible(visible);
+				
+				result = Py_None;
+				Py_INCREF(result);
+			} else {
+				PyErr_SetString(PyExc_TypeError, "Expected a bool parameter!");
+			}
+			
+			return result;
+		}
+		
+		// ------------------------------------------
+		PyObject* GUIServiceBinder::getActiveSheet(PyObject* self, PyObject* args) {
+			// TODO: Code
+			PyErr_SetString(PyExc_TypeError, "NOT IMPLEMENTED YET");
+			return NULL;
+		}
+		
+		// ------------------------------------------
+		PyObject* GUIServiceBinder::setActiveSheet(PyObject* self, PyObject* args) {
+			// TODO: Code
+			PyErr_SetString(PyExc_TypeError, "NOT IMPLEMENTED YET");
+			return NULL;
+		}
+		
+		// ------------------------------------------
+		PyObject* GUIServiceBinder::createSheet(PyObject* self, PyObject* args) {
+			// TODO: Code
+			PyErr_SetString(PyExc_TypeError, "NOT IMPLEMENTED YET");
+			return NULL;
+		}
+		
+		// ------------------------------------------
+		PyObject* GUIServiceBinder::destroySheet(PyObject* self, PyObject* args) {
+			// TODO: Code
+			PyErr_SetString(PyExc_TypeError, "NOT IMPLEMENTED YET");
+			return NULL;
+		}
+		
 		// ------------------------------------------
 		PyObject* GUIServiceBinder::getattr(PyObject *self, char *name) {
 			return Py_FindMethod(msMethods, self, name);
