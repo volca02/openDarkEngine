@@ -40,11 +40,27 @@ namespace Opde {
 		// Will release all services
 		LOG_DEBUG("ServiceManager: Releasing all services");
 
-		ServiceInstanceMap::iterator s_it = mServiceInstances.begin();
+		ServiceInstanceMap::iterator s_it;
+		
+		s_it = mServiceInstances.begin();
+
+		LOG_INFO("ServiceManager: Shutdowning all services");
+
+		// Shutdown loop. Resolver for some possible problems
+		for (; s_it != mServiceInstances.end(); ++s_it) {
+			LOG_INFO(" * Shutting down service '%s'", s_it->first.c_str());
+			s_it->second->shutdown();
+		}
+		
+		s_it = mServiceInstances.begin();
+		LOG_INFO("ServiceManager: Releasing all services");
 
 		for (; s_it != mServiceInstances.end(); ++s_it) {
 			LOG_INFO(" * Releasing service %s (ref. count %d)", s_it->first.c_str(), s_it->second.getRefCount());
-			s_it->second->shutdown();
+			
+			/*if (s_it->second.getRefCount() > 0)
+				LOG_FATAL(" * Service '%s' has reference count > 1. It won't probably be released immediately!", s_it->first.c_str());*/
+			
 			s_it->second.setNull();
 		}
 
