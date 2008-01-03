@@ -35,5 +35,6 @@ add_executable(pytest
 target_link_libraries(pytest 
     ${OPDE_BASE_LIBRARIES}
     ${OPDE_SERVICE_LIBRARIES}
+    ${OIS_LIBRARIES}
     OpdePythonBindings
 )
