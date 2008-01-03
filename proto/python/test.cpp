@@ -62,6 +62,22 @@ void setupResources(void) {
 }
 
 
+void createServiceFactories() {
+	// New service factory for Config service
+	new ConfigServiceFactory();
+	new LinkServiceFactory();
+	new DatabaseServiceFactory();
+	new RenderServiceFactory();
+	new GUIServiceFactory();
+	new ScriptServiceFactory();
+	new PropertyServiceFactory();
+	new BinaryServiceFactory();
+	new InheritServiceFactory();
+	new LoopServiceFactory();
+	new InputServiceFactory();
+
+}
+
 void initLoopModes(LoopServicePtr& ls) {
 	// Create all the required loop services
 	LoopModeDefinition def;
@@ -81,59 +97,62 @@ void initLoopModes(LoopServicePtr& ls) {
 
 
 int main(void) {
-	Logger* logger = new Logger();
-
 	LogListener* stdLog = new StdLog();
-
+	Logger* logger = new Logger();
 	logger->registerLogListener(stdLog);
 
+	logger->log(Logger::LOG_INFO, "----- OPDE STARTING -----");
+
+	Ogre::Root* root = new Ogre::Root();
+
+	PythonLanguage::init();
+
+	ConsoleBackend* cbackend = new ConsoleBackend();
+
+	/// Initializes all service factories and service manager itself
 	ServiceManager* serviceMgr = new ServiceManager();
 
-	// New service factory for Config service
-	new ConfigServiceFactory();
-	new LinkServiceFactory();
-	new DatabaseServiceFactory();
-	new RenderServiceFactory();
-	new GUIServiceFactory();
-	new ScriptServiceFactory();
-	new PropertyServiceFactory();
-	new BinaryServiceFactory();
-	new InheritServiceFactory();
-	new LoopServiceFactory();
-	new InputServiceFactory();
+	createServiceFactories();
 
-	new ConsoleBackend(); // !!!
-
-    Ogre::Root* root = new Ogre::Root();
-
+	/// ------------------ INITIALIZATION ----------------------
+	logger->log(Logger::LOG_INFO, "----- INITIALIZATION -----");
 	LoopServicePtr ls = ServiceManager::getSingleton().getService("LoopService").as<LoopService>();
 
-	// Run a python string to test the setup
-	ConfigServicePtr configService = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
-	// Will load opde.cfg automatically upon being built
-	// To tidy mem...
-	configService.setNull();
+	initLoopModes(ls);
+	ls.setNull();
 	
-    RenderServicePtr rendS = ServiceManager::getSingleton().getService("RenderService").as<RenderService>();
-    rendS.setNull();
-
 	// Resource initialization phase
-    setupResources();
+	/// ------------------ RESOURCE SETUP ----------------------
+	logger->log(Logger::LOG_INFO, "----- RESOURCE SETUP -----");
+
+    setupResources(); // Set's up resource paths, etc.
+
     Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
-	ServiceManager::getSingleton().bootstrapFinished();
+
+	logger->log(Logger::LOG_INFO, "----- RESOURCE BOOSTRAP FINISHED -----");
+	
+	ServiceManager::getSingleton().bootstrapFinished(); // Notifying services bootstrap phase is over...
+
+	logger->log(Logger::LOG_INFO, "----- CORE INITIALIZED, RUNNING MAIN SCRIPT -----");
 
     ScriptServicePtr ss = ServiceManager::getSingleton().getService("ScriptService").as<ScriptService>();
-
-	initLoopModes(ls);
-
-	ls.setNull();
-
 	ss->runScript("test.py");
     ss.setNull();
 
+	logger->log(Logger::LOG_INFO, "----- DEINITIALIZATION -----");
+
+	PythonLanguage::term();
+
 	delete serviceMgr;
 	
+	logger->log(Logger::LOG_INFO, "----- ALL SERVICES STOPPED -----");
+
+	delete cbackend;
+	
 	delete root;
+
+	logger->log(Logger::LOG_INFO, "----- TERMINATED -----");
 	delete logger;
+	delete stdLog;
 }
