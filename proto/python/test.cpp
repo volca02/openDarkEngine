@@ -15,6 +15,7 @@
 #include "PropertyService.h"
 #include "BinaryService.h"
 #include "InheritService.h"
+#include "InputService.h"
 
 #include "DTypeScriptLoader.h"
 #include "PLDefScriptLoader.h"
@@ -99,10 +100,13 @@ int main(void) {
 	new BinaryServiceFactory();
 	new InheritServiceFactory();
 	new LoopServiceFactory();
+	new InputServiceFactory();
 
 	new ConsoleBackend(); // !!!
 
     Ogre::Root* root = new Ogre::Root();
+
+	LoopServicePtr ls = ServiceManager::getSingleton().getService("LoopService").as<LoopService>();
 
 	// Run a python string to test the setup
 	ConfigServicePtr configService = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
@@ -120,8 +124,6 @@ int main(void) {
 	ServiceManager::getSingleton().bootstrapFinished();
 
     ScriptServicePtr ss = ServiceManager::getSingleton().getService("ScriptService").as<ScriptService>();
-
-	LoopServicePtr ls = ServiceManager::getSingleton().getService("LoopService").as<LoopService>();
 
 	initLoopModes(ls);
 
