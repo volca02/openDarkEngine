@@ -79,3 +79,6 @@ else:
     
 # Termination
 log_info("Terminating Opde");
+
+isrv.unregisterCommandTrap("debug_frame")
+isrv.unregisterCommandTrap("exit_request")
