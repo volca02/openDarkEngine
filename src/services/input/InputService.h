@@ -159,6 +159,9 @@ namespace Opde {
 
 			/// Unregisters a command listener
 			void unregisterCommandTrap(ListenerPtr listener);
+			
+			/// Unregisters a command listener by it's name
+			void unregisterCommandTrap(const std::string& command);
 
 			/// Sets a direct listener (only notified when IM_DIRECT is active)
 			void setDirectListener(DirectInputListener* listener) { mDirectListener = listener; };

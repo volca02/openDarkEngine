@@ -676,7 +676,20 @@ namespace Opde {
 				mCommandTraps.erase(pos);
 			}
 		}
+	}
+	
+	//------------------------------------------------------	
+	void InputService::unregisterCommandTrap(const std::string& command) {
+		// Iterate through the trappers, find the ones with the given command name, remove
+		ListenerMap::iterator it = mCommandTraps.begin();
 		
+		while (it != mCommandTraps.end()) {
+			ListenerMap::iterator pos = it++;
+			
+			if (pos->first == command) {
+				mCommandTraps.erase(pos);
+			}
+		}
 	}
 	
 	//------------------------------------------------------	
