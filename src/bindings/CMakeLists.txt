@@ -12,7 +12,8 @@ include_directories(
     ${OPDE_BASE_INCLUDES}
     ${OPDE_SERVICE_INCLUDES}
     ${PYTHON_INCLUDE_PATH}
-	${OPDE_SOURCE_DIR}/src/scenemanager
+    ${OPDE_SOURCE_DIR}/src/scenemanager
+    ${OPDE_SOURCE_DIR}/thirdparty/QuickGUI/include
 )
 
 
@@ -37,6 +38,8 @@ add_library(OpdePythonBindings
 	LoopServiceBinder.h
 	InputServiceBinder.cpp
 	InputServiceBinder.h
+	GUIServiceBinder.cpp
+	GUIServiceBinder.h
 )
 
 target_link_libraries(OpdePythonBindings

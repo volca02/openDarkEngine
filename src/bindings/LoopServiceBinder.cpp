@@ -76,6 +76,7 @@ namespace Opde
 			{"run",  run, METH_VARARGS},
 			{"requestLoopMode", requestLoopMode, METH_VARARGS},
 			{"requestTermination", requestTermination, METH_VARARGS},
+			{"debugOneFrame", debugOneFrame, METH_VARARGS},
 			{NULL, NULL},
 		};
 
@@ -125,6 +126,18 @@ namespace Opde
 			return result;
 		}
 		
+		// ------------------------------------------
+		PyObject* LoopServiceBinder::debugOneFrame(PyObject* self, PyObject* args) 
+		{
+			PyObject *result = NULL;
+			Object* o = python_cast<Object*>(self, &msType);
+			
+			o->mInstance->debugOneFrame();
+			result = Py_None;
+			Py_INCREF(result);
+			return result;
+		}
+
 		// ------------------------------------------
 		PyObject* LoopServiceBinder::getattr(PyObject *self, char *name) 
 		{

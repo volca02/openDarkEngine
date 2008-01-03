@@ -29,6 +29,7 @@
 #include "PropertyServiceBinder.h"
 #include "LoopServiceBinder.h"
 #include "InputServiceBinder.h"
+#include "GUIServiceBinder.h"
 
 namespace Opde {
 	namespace Python {
@@ -41,7 +42,8 @@ namespace Opde {
 			{"LinkService", getLinkService, METH_NOARGS},
 			{"PropertyService", getPropertyService, METH_NOARGS},
 			{"LoopService", getLoopService, METH_NOARGS},
-			{"InputService", getLoopService, METH_NOARGS},
+			{"InputService", getInputService, METH_NOARGS},
+			{"GUIService", getGUIService, METH_NOARGS},
 			{NULL, NULL},
 		};
 		
@@ -62,7 +64,11 @@ namespace Opde {
 		}
 
 		PyObject* ServiceBinder::getInputService(PyObject* self, PyObject* args) {
-			return LoopServiceBinder::create();
+			return InputServiceBinder::create();
+		}
+
+		PyObject* ServiceBinder::getGUIService(PyObject* self, PyObject* args) {
+			return GUIServiceBinder::create();
 		}
 
 		PyObject* ServiceBinder::init(PyObject* container) {
