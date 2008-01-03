@@ -43,7 +43,13 @@ namespace Opde {
 	/*--------------------------------------------------------*/
 	/*--------------------- RenderService --------------------*/
 	/*--------------------------------------------------------*/
-	RenderService::RenderService(ServiceManager *manager, const std::string& name) : Service(manager, name), mSceneMgr(NULL), mRoot(NULL), mDarkSMFactory(NULL) {
+	RenderService::RenderService(ServiceManager *manager, const std::string& name) : Service(manager, name), 
+			mSceneMgr(NULL), 
+			mRoot(NULL), 
+			mDarkSMFactory(NULL), 
+			mRenderWindow(NULL),
+			mLoopService(NULL),
+			mDefaultCamera(NULL) {
 	    // TODO: This is just plain wrong. This service should be the maintainer of the used scene manager, if any other service needs the direct handle, etc.
 	    // The fact is this service is probably game only, and should be the initialiser of graphics as the whole. This will be the
 	    // modification that should be done soon in order to let the code look and be nice
@@ -72,22 +78,20 @@ namespace Opde {
 		if (!mPropModelName.isNull())
 		    mPropModelName->unregisterListener(mPropModelNameListenerID);
 
-        if (mDarkSMFactory) {
-			Root::getSingleton().removeSceneManagerFactory(mDarkSMFactory);
-			delete mDarkSMFactory;
-			mDarkSMFactory = NULL;
-		}
-
 		if (mRenderWindow)
 			mRenderWindow->removeAllViewports();
 			
 		if (mSceneMgr)
 			mSceneMgr->destroyAllCameras();
 			
+		if (mDarkSMFactory) {
+			Root::getSingleton().removeSceneManagerFactory(mDarkSMFactory);
+			delete mDarkSMFactory;
+			mDarkSMFactory = NULL;
+		}
+		
 		if (!mLoopService.isNull())
 			mLoopService->removeLoopClient(this);
-			
-		// TODO: Delete Ogre::Root safe here?
 	}
 
     // --------------------------------------------------------------------------
@@ -110,11 +114,8 @@ namespace Opde {
 		// Register
 		Root::getSingleton().addSceneManagerFactory(mDarkSMFactory);
 
-		mRoot->createSceneManager(ST_INTERIOR, "DarkSceneManager");
+		mSceneMgr = mRoot->createSceneManager(ST_INTERIOR, "DarkSceneManager");
 
-        // Get the resolution parameters, and instantinate ogre display. We expect the Ogre::Root to be already defined
-		mSceneMgr = mRoot->getSceneManager("DarkSceneManager"); // TODO: Really bad idea. Same goes to the WorldrepService
-		
 		// Next step. We create a default camera in the mRenderWindow
 		mDefaultCamera = mSceneMgr->createCamera( "MainCamera" );
 
@@ -148,6 +149,7 @@ namespace Opde {
     
 	// --------------------------------------------------------------------------
     Ogre::Viewport* RenderService::getDefaultViewport() {
+    	assert(mDefaultCamera);
     	return mDefaultCamera->getViewport();
     }
             
