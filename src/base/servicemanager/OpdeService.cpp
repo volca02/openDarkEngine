@@ -28,6 +28,6 @@ namespace Opde {
 	}
 
 	Service::~Service() {
-		LOG_DEBUG("Service:: Destroying service with name %s", mName.c_str());
+		LOG_DEBUG("Service %s destroyed", mName.c_str());
 	}
 }

@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *		$Id:$
+ *		$Id$
  *
  *****************************************************************************/
  
@@ -33,6 +33,6 @@ namespace Opde {
 	StdLog::~StdLog() {};
 		
 	void StdLog::logMessage(Logger::LogLevel level, char *message) {
-		std::cerr << "LOG [" << level << "] : " << message << std::endl;
+		std::cerr << "LOG [" << Logger::getSingleton().getLogLevelStr(level).c_str() << "] : " << message << std::endl;
 	}
 }
