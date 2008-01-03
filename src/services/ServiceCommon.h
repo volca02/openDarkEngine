@@ -88,8 +88,8 @@ priorities (not necessary unique) for the database service listeners
 #define LOOPCLIENT_ID_RENDERER 2
 
 // Input first
-#define LOOPCLIENT_PRIORITY_INPUT 1024
+#define LOOPCLIENT_PRIORITY_INPUT 1
 // Renderer last
-#define LOOPCLIENT_PRIORITY_RENDERER 1
+#define LOOPCLIENT_PRIORITY_RENDERER 1024
 
 #endif
