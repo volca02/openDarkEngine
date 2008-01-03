@@ -47,6 +47,7 @@ namespace Opde
 				static PyObject* setBindContext(PyObject* self, PyObject* args);
 				static PyObject* command(PyObject* self, PyObject* args);
 				static PyObject* registerCommandTrap(PyObject* self, PyObject* args);
+				static PyObject* unregisterCommandTrap(PyObject* self, PyObject* args);
 				
 			protected:
 				/// Static type definition for InputService

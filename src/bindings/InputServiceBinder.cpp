@@ -98,6 +98,7 @@ namespace Opde
 		    {"setBindContext", setBindContext, METH_VARARGS},
 		    {"command", command, METH_VARARGS},
 		    {"registerCommandTrap", registerCommandTrap, METH_VARARGS},
+		    {"unregisterCommandTrap", unregisterCommandTrap, METH_VARARGS},
 		    {NULL, NULL},
 		};
 
@@ -105,97 +106,115 @@ namespace Opde
 		// ------------------------------------------
 		PyObject* InputServiceBinder::createBindContext(PyObject* self, PyObject* args) 
 		{
-                        PyObject *result = NULL;
-                        Object* o = python_cast<Object*>(self, &msType);
-                        
-                        char* name;
+			PyObject *result = NULL;
+			Object* o = python_cast<Object*>(self, &msType);
 			
-                        if (PyArg_ParseTuple(args, "s", &name)) {
+			char* name;
+
+			if (PyArg_ParseTuple(args, "s", &name)) {
 			    o->mInstance->createBindContext(name);
 				    
 			    result = Py_None;
 			    Py_INCREF(result);
 			    return result;
-                        } else {
-                                PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
-                        }
-                        
-                        return result;
+			} else {
+				PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
+			}
+				
+			return result;
 		}
 		
 		// ------------------------------------------
 		PyObject* InputServiceBinder::setBindContext(PyObject* self, PyObject* args) 
 		{
-                        PyObject *result = NULL;
-                        Object* o = python_cast<Object*>(self, &msType);
-                        
-                        char* name;
+			PyObject *result = NULL;
+			Object* o = python_cast<Object*>(self, &msType);
 			
-                        if (PyArg_ParseTuple(args, "s", &name)) {
-			    o->mInstance->setBindContext(name);
-				    
-			    result = Py_None;
-			    Py_INCREF(result);
-			    return result;
-                        } else {
-                                PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
-                        }
-                        
-                        return result;
+			char* name;
+
+			if (PyArg_ParseTuple(args, "s", &name)) {
+				o->mInstance->setBindContext(name);
+					
+				result = Py_None;
+				Py_INCREF(result);
+				return result;
+			} else {
+				PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
+			}
+			
+			return result;
 		}
 
 		// ------------------------------------------
 		PyObject* InputServiceBinder::command(PyObject* self, PyObject* args) 
 		{
-                        PyObject *result = NULL;
-                        Object* o = python_cast<Object*>(self, &msType);
-                        
-                        char* command;
+			PyObject *result = NULL;
+			Object* o = python_cast<Object*>(self, &msType);
 			
-                        if (PyArg_ParseTuple(args, "s", &command)) {
+			char* command;
+
+			if (PyArg_ParseTuple(args, "s", &command)) {
 			    o->mInstance->command(command);
 				    
 			    result = Py_None;
 			    Py_INCREF(result);
 			    return result;
-                        } else {
-                                PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
-                        }
-                        
-                        return result;
+			} else {
+				PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
+			}
+                
+			return result;
 		}
 
 		// ------------------------------------------
 		PyObject* InputServiceBinder::registerCommandTrap(PyObject* self, PyObject* args) 
 		{
-                        PyObject *result = NULL;
-                        Object* o = python_cast<Object*>(self, &msType);
-                        
-                        char* name;
-                        PyObject* callable;
+			PyObject *result = NULL;
+			Object* o = python_cast<Object*>(self, &msType);
 			
-                        if (PyArg_ParseTuple(args, "sO", &name, &callable)) {
-                    		try {        
-				    PythonInputCallbackPtr pcp = new PythonInputCallback(callable);
-				    
-				    // call the is to register the command trap
-				    o->mInstance->registerCommandTrap(name, pcp);
-				    
-				    result = Py_None;
-				    Py_INCREF(result);
-				    return result;
-				} catch (BasicException& ex){
-				    PyErr_SetString(PyExc_TypeError, "Error setting a callback, is the given argument a callable?");
-				    return NULL;
+			char* name;
+			PyObject* callable;
+
+			if (PyArg_ParseTuple(args, "sO", &name, &callable)) {
+				try {        
+					PythonInputCallbackPtr pcp = new PythonInputCallback(callable);
+					
+					// call the is to register the command trap
+					o->mInstance->registerCommandTrap(name, pcp);
+		
+					result = Py_None;
+					Py_INCREF(result);
+					return result;
+				} catch (BasicException& ex) {
+					PyErr_SetString(PyExc_TypeError, "Error setting a callback, is the given argument a callable?");
+					return NULL;
 				}
-                                
-				
-                                
-                        } else {
-                                PyErr_SetString(PyExc_TypeError, "Expected a string and callable parameters!");
-                        }
-                        
-                        return result;
+			} else {
+					PyErr_SetString(PyExc_TypeError, "Expected a string and callable parameters!");
+			}
+			
+			return result;
+		}
+		
+		// ------------------------------------------
+		PyObject* InputServiceBinder::unregisterCommandTrap(PyObject* self, PyObject* args) 
+		{
+			PyObject *result = NULL;
+			Object* o = python_cast<Object*>(self, &msType);
+			
+			char* name;
+
+			if (PyArg_ParseTuple(args, "s", &name)) {
+				o->mInstance->unregisterCommandTrap(name);
+		
+				result = Py_None;
+				Py_INCREF(result);
+				return result;
+			} else {
+					PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
+			}
+			
+			return result;
 		}
 
 		// ------------------------------------------
