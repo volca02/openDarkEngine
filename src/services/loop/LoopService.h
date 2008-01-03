@@ -242,10 +242,15 @@ namespace Opde {
 			typedef std::map<LoopModeID, LoopModePtr > LoopModeIDMap;
 			typedef std::map<std::string, LoopModePtr > LoopModeNameMap;
 			
+			typedef std::list< LoopClient* > LoopClientList;
+			
 			/// Loop mode map - per ID
 			LoopModeIDMap mLoopModes;
 			/// Loop mode map - per Name
 			LoopModeNameMap mLoopNamedModes;
+			
+			/// List of registered loop clients
+			LoopClientList mLoopClients;
 			
 			/// Ogre::Root for timing purposes
 			Ogre::Root* mRoot;

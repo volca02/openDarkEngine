@@ -147,7 +147,7 @@ namespace Opde {
 		LoopModeNameMap::const_iterator it1 = mLoopNamedModes.find(modeDef.name);
 		
 		if (it1 != mLoopNamedModes.end()) {
-			LOG_ERROR("LoopService::createLoopMode: Loop mode name %s already reserved by '%s'", modeDef.name, it->second->getLoopModeName().c_str());
+			LOG_ERROR("LoopService::createLoopMode: Loop mode name %s already reserved by '%s'", modeDef.name.c_str(), it->second->getLoopModeName().c_str());
 			return;
 		}
 		
@@ -156,7 +156,11 @@ namespace Opde {
 		mLoopModes[modeDef.id] = mode;
 		mLoopNamedModes[modeDef.name] = mode;
 		
-		// Loop mode created...
+		// Loop mode created. Loop over already inserted clients and register them as well.
+		LoopClientList::const_iterator cit = mLoopClients.begin();
+		for (; cit != mLoopClients.end(); ++cit) {
+		    mode->addLoopClient(*cit);
+		}
 	}
 	
 	//------------------------------------------------------
@@ -171,6 +175,8 @@ namespace Opde {
 			
 			it++;
 		}
+		
+		mLoopClients.push_back(client);
 	}
 	
 	//------------------------------------------------------
