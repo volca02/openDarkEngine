@@ -61,7 +61,7 @@ namespace Opde {
 			if set to false, we set mapped input mode and hide the cursor
 		*/
 		assert(!mInputSrv.isNull());
-		assert(!mGUIManager);
+		assert(mGUIManager);
 		
 		if (active) {
 			mInputSrv->setInputMode(IM_DIRECT);
@@ -76,7 +76,7 @@ namespace Opde {
 	
 	// -----------------------------------
 	void GUIService::setVisible(bool visible) {
-		assert(!mGUIManager);
+		assert(mGUIManager);
 		
 		QuickGUI::Sheet* sheet;
 		sheet =	mGUIManager->getActiveSheet();
@@ -94,28 +94,28 @@ namespace Opde {
 	
 	// -----------------------------------
 	QuickGUI::Sheet* GUIService::getActiveSheet() {
-		assert(!mGUIManager);
+		assert(mGUIManager);
 		
 		return mGUIManager->getActiveSheet();
 	}
 	
 	// -----------------------------------
 	void GUIService::setActiveSheet(QuickGUI::Sheet* sheet) {
-		assert(!mGUIManager);
+		assert(mGUIManager);
 		
 		mGUIManager->setActiveSheet(sheet);
 	}
 	
 	// -----------------------------------
 	QuickGUI::Sheet* GUIService::createSheet() {
-		assert(!mGUIManager);
+		assert(mGUIManager);
 		
 		return mGUIManager->createSheet();
 	}
 	
 	// -----------------------------------
 	void GUIService::destroySheet(QuickGUI::Sheet* sheet) {
-		assert(!mGUIManager);
+		assert(mGUIManager);
 		
 		mGUIManager->destroySheet(sheet);
 	}
@@ -134,7 +134,13 @@ namespace Opde {
 		// Initialize the QuickGUI for the active viewport
 		mRoot = new QuickGUI::Root();
 		
-        mGUIManager = mRoot->createGUIManager(mRenderSrv->getDefaultViewport());
+		QuickGUI::registerScriptParser();
+		// Load the qgui skin...
+        QuickGUI::SkinSetManager::getSingleton().loadSkin("qgui", QuickGUI::SkinSet::IMAGE_TYPE_PNG, "quickgui");
+		
+		
+		mGUIManager = mRoot->createGUIManager(mRenderSrv->getDefaultViewport());
+        
         mGUIManager->setSceneManager(mRenderSrv->getSceneManager());
         
 		// handler for direct listener
