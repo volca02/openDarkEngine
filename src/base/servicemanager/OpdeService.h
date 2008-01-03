@@ -35,6 +35,8 @@ namespace Opde {
 	/** Interface used for all services. Those must implement the here mentioned methods. */
 	class Service : public NonCopyable {
 			protected:
+				friend class ServiceManager;
+				
 				ServiceManager* mServiceManager;
 				std::string mName;
 
@@ -42,6 +44,11 @@ namespace Opde {
                 /** Constructor. Do not implement inheritance resolving here! (Can cycle if you'll do so)*/
 				Service(ServiceManager* manager, const std::string& name);
 
+                /** Destructor. When using service dependencies, be aware that if an error happened, the fields can be non-initialized.
+                */
+				virtual ~Service();
+
+			protected:
 				/** Intialization of the service. Guaranteed to be called after construction (If constructor was sucessful).
 				* Used to estabilish relations with other services. Only the dependencies that are fixed can be resolved here, otherwise use the bootstrapFinished.
 				* @return true on success, false on a fatal error
@@ -60,10 +67,6 @@ namespace Opde {
 				* should be released here to enable seamles shutdown.
 				*/
 				virtual void shutdown() {};
-
-                /** Destructor. When using service dependencies, be aware that if an error happened, the fields can be non-initialized.
-                */
-				virtual ~Service();
 	};
 
 	/// A shared pointer to service
