@@ -43,8 +43,8 @@ namespace Opde {
     InputService::InputService(ServiceManager *manager, const std::string& name) : Service(manager, name), mMouse(NULL), mKeyboard(NULL), mDirectListener(NULL) {
     	// Loop client definition
     	mLoopClientDef.id = LOOPCLIENT_ID_INPUT;
-    	mLoopClientDef.mask = LOOPMODE_RENDER;
-    	mLoopClientDef.priority = LOOPCLIENT_PRIORITY_RENDERER;
+    	mLoopClientDef.mask = LOOPMODE_INPUT;
+    	mLoopClientDef.priority = LOOPCLIENT_PRIORITY_INPUT;
     	mLoopClientDef.name = mName;
     	
     	// Initialize the valid keys
