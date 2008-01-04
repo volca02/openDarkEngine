@@ -88,7 +88,7 @@ namespace Opde {
 			int active;
 			
 			if (PyArg_ParseTuple(args, "i", &active)) {
-				o->mInstance->setActive(active);
+				o->mInstance->setActive(active != 0);
 				
 				result = Py_None;
 				Py_INCREF(result);
@@ -107,7 +107,7 @@ namespace Opde {
 			int visible;
 			
 			if (PyArg_ParseTuple(args, "i", &visible)) {
-				o->mInstance->setVisible(visible);
+				o->mInstance->setVisible(visible != 0);
 				
 				result = Py_None;
 				Py_INCREF(result);

@@ -17,6 +17,9 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *
+ *	   $Id$
+ *
  *****************************************************************************/
 
 
@@ -105,7 +108,7 @@ namespace Opde {
 			/// char classifier (is Space)
 			struct IsSpace : public std::unary_function<char, bool> {
 				bool operator()(char c) {
-					return isspace(c);
+					return (isspace(c) != 0);
 				}
 			};
 
