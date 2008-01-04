@@ -85,10 +85,10 @@ namespace Opde {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
 			
-			int active;
+			PyObject* active;
 			
-			if (PyArg_ParseTuple(args, "i", &active)) {
-				o->mInstance->setActive(active != 0);
+			if (PyArg_ParseTuple(args, "O", &active)) {
+				o->mInstance->setActive(PyObject_IsTrue(active) != 0);
 				
 				result = Py_None;
 				Py_INCREF(result);
@@ -104,10 +104,10 @@ namespace Opde {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
 			
-			int visible;
+			PyObject* visible;
 			
-			if (PyArg_ParseTuple(args, "i", &visible)) {
-				o->mInstance->setVisible(visible != 0);
+			if (PyArg_ParseTuple(args, "O", &visible)) {
+				o->mInstance->setVisible(PyObject_IsTrue(visible) != 0);
 				
 				result = Py_None;
 				Py_INCREF(result);
