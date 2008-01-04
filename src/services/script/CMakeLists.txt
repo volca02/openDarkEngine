@@ -1,3 +1,5 @@
+# $Id$
+
 INCLUDE( ${OPDE_SOURCE_DIR}/src/services/Services.cmake )
 INCLUDE( ${OPDE_SOURCE_DIR}/src/base/Base.cmake )
 
