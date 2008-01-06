@@ -38,8 +38,7 @@ namespace Opde {
 		public:
 			GUIService(ServiceManager *manager, const std::string& name);
 			virtual ~GUIService();
-
-
+			
 			QuickGUI::GUIManager* getGUIManager();
 			
 			/** Set's the activeness state for GUI.
@@ -67,9 +66,13 @@ namespace Opde {
 			/// Destroys a sheet
 			void destroySheet(QuickGUI::Sheet* sheet);
 			
+			/// Loads a mapping file for gui widgets
+			void loadGUIMapping(const std::string& fname);
+			
 		protected:
 			// Service initialization related methods
 			bool init();
+			
 			void bootstrapFinished();
 			
 			void onRenderServiceMsg(const RenderServiceMsg& message);
@@ -86,11 +89,17 @@ namespace Opde {
 			RenderServicePtr mRenderSrv;
 			QuickGUI::GUIManager* mGUIManager;
 			QuickGUI::Root* mRoot;
+			QuickGUI::SkinSet* mSkinSet;
 			
 			/// Activity indicator
 			bool mActive;
 			/// Visibility indicator
 			bool mVisible;
+			
+			/// Name of the quickgui skin (defaults to 'opde')
+			std::string mSkinName;
+			
+			std::string mGUIMap;
 			
 			RenderService::ListenerID mRenderServiceListenerID;
 	};

@@ -71,7 +71,7 @@ namespace Opde {
     		
     		LoopClient* client = it->second;
 		
-		it++;
+			it++;
     		
     		client->loopStep(deltaTime);
     		

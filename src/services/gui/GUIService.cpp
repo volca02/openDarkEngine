@@ -21,6 +21,9 @@
 
 #include "ServiceCommon.h"
 #include "GUIService.h"
+#include "QuickGUISkinSet.h"
+#include "QuickGUISkinSetManager.h"
+#include "StringTokenizer.h"
 
 using namespace std;
 using namespace Ogre;
@@ -37,7 +40,10 @@ namespace Opde {
 			mGUIManager(NULL),
 			mActive(false),
 			mVisible(false),
-			mRenderServiceListenerID(0) {
+			mRenderServiceListenerID(0),
+			mSkinName("opde"),
+			mSkinSet(NULL),
+			mGUIMap("") {
     }
     
     // -----------------------------------
@@ -119,10 +125,88 @@ namespace Opde {
 		
 		mGUIManager->destroySheet(sheet);
 	}
+	
+	// -----------------------------------
+	void GUIService::loadGUIMapping(const std::string& fname) {
+		Ogre::DataStreamPtr dst = ResourceGroupManager::getSingleton().openResource(fname, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true, NULL);
+			
+		// For simplicity, we expect all the mapping to be for the skin specified in config file...
+		int lineno = 0;
+		
+		// While there is another line left
+		while (!dst->eof()) {
+			lineno++;
+			Ogre::String line = dst->getLine();
+			
+			// Process the line.
+			// objectname[.*] 'imagename'
+			// Quotes are optional, everything after .* before space is ignored
+			WhitespaceStringTokenizer tok(line, false);
+			
+			// Probably an empty line
+			if (tok.end())
+				continue;
+				
+			
+			
+			String name = tok.next();
+			
+			if (name == "#") // comment
+				continue;
+				
+				
+			if (tok.end())	{
+				LOG_ERROR("GUIService: Malformed mapping file '%s' line %d : %s", fname.c_str(), lineno, line.c_str());
+				continue;
+			}
+				
+			String filename = tok.next();
+			
+			bool subscope = false;
+			
+			// See if there are wildcards or not.
+			size_t wildpos = name.find(".*");
+			
+			if (wildpos != String::npos) {
+				// Strip the string of the wildcard
+				subscope = true;
+				
+				name = name.substr(0, wildpos);
+			}
+			
+			// Map to the skinset
+			mSkinSet->setImageMapping(name, filename, subscope);
+		}
+	}
 
 	// -----------------------------------
 	bool GUIService::init() {
+		// Initialize the QuickGUI for the active viewport
+		
 		// Nothing to do, we have to wait for RenderService to settle in init... Better do everything in bootstrapFinished thus
+		// One thing happens here though - loading of the mapping file based on a config file value
+		ConfigServicePtr cfp = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
+		
+		// if we have a config value (and the specified file is loadable), load the mapping file
+		DVariant val;
+		
+		if (cfp->getParam("gui_skin_name", val)) {
+			mSkinName = val.toString();
+			
+			if (mSkinName == "") {
+				LOG_ERROR("GUIService: Empty skin name, defaulting to 'opde'");
+				mSkinName = "opde";
+			}
+		}
+		
+		if (cfp->getParam("gui_mapping", val)) {
+			// Try to open a file, load config
+			mGUIMap = val.toString();
+		} else {
+			mGUIMap = "";
+		}
+		
+		
 		return true;
 	}
 	
@@ -131,16 +215,23 @@ namespace Opde {
 		mInputSrv = ServiceManager::getSingleton().getService("InputService").as<InputService>();
 		mRenderSrv = ServiceManager::getSingleton().getService("RenderService").as<RenderService>();
 		
-		// Initialize the QuickGUI for the active viewport
 		mRoot = new QuickGUI::Root();
 		
 		QuickGUI::registerScriptParser();
-		// Load the qgui skin...
-        QuickGUI::SkinSetManager::getSingleton().loadSkin("qgui", QuickGUI::SkinSet::IMAGE_TYPE_PNG, "quickgui");
+
+		mSkinSet = QuickGUI::SkinSetManager::getSingleton().createSkin(mSkinName, QuickGUI::SkinSet::IMAGE_TYPE_PNG);
+
+		assert(mSkinSet);
 		
+		if (mGUIMap != "")
+			loadGUIMapping(mGUIMap);
 		
-		mGUIManager = mRoot->createGUIManager(mRenderSrv->getDefaultViewport());
+		//		if (!mSkinSet->loadSkin())
+		mSkinSet->buildTexture();
+
+        assert(mRenderSrv->getSceneManager());
         
+   		mGUIManager = mRoot->createGUIManager(mRenderSrv->getDefaultViewport());
         mGUIManager->setSceneManager(mRenderSrv->getSceneManager());
         
 		// handler for direct listener
@@ -149,6 +240,10 @@ namespace Opde {
 		// Register as a listener for the resolution changes
 		RenderService::ListenerPtr renderServiceListener = new ClassCallback<RenderServiceMsg, GUIService>(this, &GUIService::onRenderServiceMsg);
 		mRenderServiceListenerID = mRenderSrv->registerListener(renderServiceListener);
+		
+		// Enable mouse pointer
+		mGUIManager->getMouseCursor()->show();
+		
 	}
 
 
