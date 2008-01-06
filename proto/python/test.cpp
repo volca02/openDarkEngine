@@ -24,6 +24,10 @@
 
 #include "ServiceCommon.h"
 
+#ifdef CUSTOM_IMAGE_HOOKS
+#include "CustomImageCodec.h"
+#endif
+
 #include <OgreRoot.h>
 #include <OgreConfigFile.h>
 
@@ -104,6 +108,10 @@ int main(void) {
 	logger->log(Logger::LOG_INFO, "----- OPDE STARTING -----");
 
 	Ogre::Root* root = new Ogre::Root();
+	
+#ifdef CUSTOM_IMAGE_HOOKS
+	Ogre::CustomImageCodec::startup();
+#endif
 
 	PythonLanguage::init();
 
@@ -119,7 +127,7 @@ int main(void) {
 	LoopServicePtr ls = ServiceManager::getSingleton().getService("LoopService").as<LoopService>();
 
 	initLoopModes(ls);
-	ls.setNull();
+	
 	
 	// Resource initialization phase
 	/// ------------------ RESOURCE SETUP ----------------------
@@ -136,6 +144,7 @@ int main(void) {
 
 	logger->log(Logger::LOG_INFO, "----- CORE INITIALIZED, RUNNING MAIN SCRIPT -----");
 
+
     ScriptServicePtr ss = ServiceManager::getSingleton().getService("ScriptService").as<ScriptService>();
 	ss->runScript("test.py");
     ss.setNull();
@@ -149,6 +158,10 @@ int main(void) {
 	logger->log(Logger::LOG_INFO, "----- ALL SERVICES STOPPED -----");
 
 	delete cbackend;
+	
+#ifdef CUSTOM_IMAGE_HOOKS
+	Ogre::CustomImageCodec::shutdown();
+#endif
 	
 	delete root;
 
