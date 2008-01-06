@@ -74,6 +74,22 @@ namespace QuickGUI
 		mSkinSets[skinName] = skinSet;
 		mSkinSetsbyTextureName[skinSet->getTextureName()] = skinSet;
 	}
+	
+	SkinSet* SkinSetManager::createSkin(const Ogre::String& skinName, SkinSet::ImageType t, const Ogre::String &resourceGroup)
+	{
+		std::map<Ogre::String,SkinSet*>::const_iterator it = mSkinSets.find(skinName);
+		
+		// check if imageset is already created for this skin
+		if( it != mSkinSets.end() )
+			return it->second;
+
+		SkinSet *skinSet = new SkinSet(skinName, t, resourceGroup, false);
+		
+		mSkinSets[skinName] = skinSet;
+		mSkinSetsbyTextureName[skinSet->getTextureName()] = skinSet;
+		
+		return skinSet;
+	}
 
 	bool SkinSetManager::skinLoaded(const Ogre::String& skinName)
 	{

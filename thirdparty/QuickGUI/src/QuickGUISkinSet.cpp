@@ -7,7 +7,7 @@
 
 namespace QuickGUI
 {
-	SkinSet::SkinSet(const Ogre::String& skinName, ImageType t, const Ogre::String &resourceGroup) :
+	SkinSet::SkinSet(const Ogre::String& skinName, ImageType t, const Ogre::String &resourceGroup, bool loadOnCreate) :
 		mSkinName(skinName),
 		mResourceGroup(resourceGroup),
 		mNumIndividualTextures(0),
@@ -21,15 +21,14 @@ namespace QuickGUI
 	{
 		_determineExtension(t);
 
-		// if skinset doesn't exists
-		if (loadSkin() == false)
-		{
-			// assemble texture in a single one
-			buildTexture();
+		if (loadOnCreate) {
+			// if skinset doesn't exists
+			if (loadSkin() == false)
+			{
+				// assemble texture in a single one
+				buildTexture();
+			}
 		}
-
-		if(!Ogre::MaterialManager::getSingleton().resourceExists(mMaterialName))
-			buildMaterial();
 	}
 
 	SkinSet::~SkinSet()
@@ -48,6 +47,8 @@ namespace QuickGUI
 		{
 		case IMAGE_TYPE_PNG:	mImageExtension = ".png";		break;
 		case IMAGE_TYPE_JPG:	mImageExtension = ".jpg";		break;
+		case IMAGE_TYPE_BMP:	mImageExtension = ".bmp";		break;
+		case IMAGE_TYPE_PCX:	mImageExtension = ".pcx";		break;
 		}
 	}
 
@@ -224,7 +225,28 @@ namespace QuickGUI
 			for( Ogre::FileInfoList::iterator fileItr = files->begin(); fileItr != files->end(); ++fileItr ) 
 			{
 				Ogre::String fileName = (*fileItr).filename;
-				mTextureNames.push_back(fileName);
+				mTextureNames.push_back(unmapImageFile(fileName));
+			}
+		}
+		
+		// Also add all the textures referenced by the mapping structs (but leave them unique)
+		std::set<Ogre::String> uniqueImages;
+		
+		ImageFileMap::const_iterator it = mSubscopeMap.begin();
+		
+		for (;it != mSubscopeMap.end(); ++it) {
+			if (uniqueImages.find(it->second) == uniqueImages.end()) {
+				mTextureNames.push_back(it->second);
+				uniqueImages.insert(it->second);
+			}
+		}
+		
+		it = mImageMap.begin();
+		
+		for (;it != mImageMap.end(); ++it) {
+			if (uniqueImages.find(it->second) == uniqueImages.end()) {
+				mTextureNames.push_back(it->second);
+				uniqueImages.insert(it->second);
 			}
 		}
 	}
@@ -264,7 +286,7 @@ namespace QuickGUI
 		mContainedTextures.erase(containedTexItr);
 
 
-		std::map<Ogre::String,Ogre::Vector4>::iterator itTexMap = mTextureMap.find(textureName);
+		std::map<Ogre::String,Ogre::Vector4>::iterator itTexMap = mTextureMap.find(unmapImageFile(textureName));
 		assert (itTexMap != mTextureMap.end());
 		mTextureMap.erase(itTexMap);
 		
@@ -334,6 +356,8 @@ namespace QuickGUI
 				(img.getHeight() + cur_y) * invTextureHeight 
 				);
 			mTextureMap[mTextureNames.at(i)] = dimension;
+			
+			std::cerr << "Dim " << mTextureNames.at(i) << " of " << dimension << std::endl;
 
 			// Shift x over the correct amount
 			cur_x += img.getWidth() + 1;			
@@ -363,8 +387,9 @@ namespace QuickGUI
 		for( texNameItr = mTextureNames.begin(); texNameItr != mTextureNames.end(); ++texNameItr )
 		{
 			Ogre::Image tempImg;
-			Ogre::LogManager::getSingletonPtr()->logMessage("Quickgui : Adding  " + (*texNameItr) + "to skin" + mSkinName);
+			Ogre::LogManager::getSingletonPtr()->logMessage("Quickgui : Adding " + (*texNameItr) + " to skin " + mSkinName);
 
+			// Opde: Unmap filename first
 			tempImg.load((*texNameItr),Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 			images.push_back(tempImg);
 			mContainedTextures.insert((*texNameItr));
@@ -407,21 +432,19 @@ namespace QuickGUI
 								texCoord.z * mTextureWidth, texCoord.w * mTextureHeight));
 		}
 
-		// Following lines are unnecessary... just puts it out to a file to see :-)
-/*		Ogre::Image finalImageSet;
-		finalImageSet.load("QuickGUI.output.png", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-		buf->blitToMemory(finalImageSet.getPixelBox());
-		finalImageSet.save("SkinSetImage.png");
-*/	
 		mDirtyTexture = false;
 
 		// save texture and script describing it
-		saveSkin();
+		// Opde: Disabled. Atlasing is not so big time-eater to not do on every load
+		// saveSkin();
+		
+		if(!Ogre::MaterialManager::getSingleton().resourceExists(mMaterialName))
+			buildMaterial();
 	}
 
 	bool SkinSet::containsImage(Ogre::String textureName)
 	{
-		if(mContainedTextures.find(textureName) != mContainedTextures.end())
+		if(mContainedTextures.find(unmapImageFile(textureName)) != mContainedTextures.end())
 			return true;
 
 		return false;
@@ -444,15 +467,17 @@ namespace QuickGUI
 
 	Ogre::Vector4 SkinSet::getTextureCoordinates(const Ogre::String &imageName) const
 	{
-		std::map<Ogre::String,Ogre::Vector4>::const_iterator itTexMap = mTextureMap.find(imageName);
-		if (itTexMap == mTextureMap.end() )
+		std::map<Ogre::String,Ogre::Vector4>::const_iterator itTexMap = mTextureMap.find(unmapImageFile(imageName));
+		if (itTexMap == mTextureMap.end() ) {
+			std::cerr << "Image not found in skinset " << imageName << std::endl;
 			return Ogre::Vector4(0,0,1,1);
+		}
 		return itTexMap->second;
 	}
 
 	void SkinSet::setTextureCoordinates(const Ogre::String &imageName, const Ogre::Vector4 &texCoord)
 	{
-		std::map<Ogre::String,Ogre::Vector4>::iterator itTexMap = mTextureMap.find(imageName);
+		std::map<Ogre::String,Ogre::Vector4>::iterator itTexMap = mTextureMap.find(unmapImageFile(imageName));
 		if (itTexMap == mTextureMap.end() )
 			return;
 		itTexMap->second = texCoord;
@@ -470,5 +495,61 @@ namespace QuickGUI
 
 		Ogre::TextureUnitState *tu = p->createTextureUnitState(mTextureName);
 		tu->setTextureName(mTextureName);
+	}
+	
+	void SkinSet::setImageMapping(const Ogre::String& imageName, const Ogre::String& fileName, bool subscope) {
+		size_t dotpos = imageName.find(".");
+		
+		Ogre::String skinname = imageName.substr(0, dotpos); 
+		
+		if (skinname != mSkinName) {
+			Ogre::LogManager::getSingletonPtr()->logMessage("Quickgui : Conflicting skin name " + skinname + " to skin " + mSkinName + " while mapping image file...");
+			return;
+		}
+		
+		
+		if (subscope) 
+			mSubscopeMap[imageName] = fileName;
+		else
+			mImageMap[imageName] = fileName;
+	}
+	
+	const Ogre::String& SkinSet::unmapImageFile(const Ogre::String& imageName) const {
+		size_t dotpos = imageName.find_last_of(".");
+		
+		Ogre::String inm;
+		
+		// Strip the extension
+		// if not found, will contain whole str
+		inm = imageName.substr(0, dotpos); 
+		
+		// First look for exact match.
+		ImageFileMap::const_iterator it = mImageMap.find(inm);
+		
+		if (it != mImageMap.end()) 
+		{
+			return it->second;
+		} else 
+		{
+			// try to search for the scoped
+			while (inm != "") {
+				size_t pos = inm.find_last_of(".");
+				
+				if (pos != Ogre::String::npos) 
+				{ // some dots left
+					inm = inm.substr(0, pos);
+				} else {
+					return imageName; // return unchanged (no dots left to search)
+				}
+				
+				it = mSubscopeMap.find(inm);
+				
+				if (it != mSubscopeMap.end())  {
+					return it->second;
+				}
+			}
+			
+			return imageName; // return unchanged (no dots left to search)
+		}
 	}
 }

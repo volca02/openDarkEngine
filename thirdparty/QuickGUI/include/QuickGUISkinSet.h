@@ -33,7 +33,8 @@ namespace QuickGUI
 		{
 			IMAGE_TYPE_PNG		=  0,
 			IMAGE_TYPE_JPG			,
-			IMAGE_TYPE_BMP
+			IMAGE_TYPE_BMP			,
+			IMAGE_TYPE_PCX
 		};
 	public:
 		/*
@@ -106,6 +107,11 @@ namespace QuickGUI
 		const Ogre::StringVector &getTextureNames() const {return mTextureNames;}
 
 
+		/*
+		* Appends mapping of imagename -> filename
+		*/
+		void setImageMapping(const Ogre::String& imageName, const Ogre::String& fileName, bool subscope);
+
 	protected:
 		Ogre::String mSkinName;
 
@@ -127,10 +133,20 @@ namespace QuickGUI
 
 		// Number of images that this SkinSet has
 		size_t mNumIndividualTextures;
+		
+		typedef std::map< Ogre::String, Ogre::String > ImageFileMap;
+		
+		// Map for whole subscope
+		ImageFileMap mSubscopeMap;
+		// Map for one specific case (Higher priority)
+		ImageFileMap mImageMap;
+		
+		// Unmaps the image name to the file name (or leaves value as is if mapping not found)
+		const Ogre::String& unmapImageFile(const Ogre::String& imageName) const;
 
 	private:
 		// Generate a new SkinSet using the skin's image files.
-		SkinSet(const Ogre::String& skinName, ImageType t, const Ogre::String &resourceGroup);
+		SkinSet(const Ogre::String& skinName, ImageType t, const Ogre::String &resourceGroup, bool loadOnCreate = true);
 		// Delete this SkinSet
 		~SkinSet();
 
