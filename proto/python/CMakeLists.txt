@@ -5,6 +5,19 @@
 INCLUDE( ${OPDE_SOURCE_DIR}/src/services/Services.cmake )
 INCLUDE( ${OPDE_SOURCE_DIR}/src/base/Base.cmake )
 
+SET(LIB_ADDITION_CUSTOM_IMAGE)
+SET(INCLUDE_ADDITION_CUSTOM_IMAGE)
+# If custom image hooks was selected
+if(CUSTOM_IMAGE_HOOKS)
+    add_library(OpdeCustomImageCodec 
+    ../../src/main/CustomImageCodec.cpp 
+    ../../src/main/CustomImageCodec.h
+    )
+
+    SET(LIB_ADDITION_CUSTOM_IMAGE OpdeCustomImageCodec ${FREEIMAGE_LIBRARIES})
+    SET(INCLUDE_ADDITION_CUSTOM_IMAGE OpdeCustomImageCodec ${FREEIMAGE_INCLUDE_DIR})
+endif(CUSTOM_IMAGE_HOOKS)
+
 include_directories(
     ${OGRE_INCLUDE_DIR}
     ${OIS_INCLUDE_DIR}
@@ -16,6 +29,7 @@ include_directories(
     ${OPDE_SOURCE_DIR}/src/scenemanager
     ${OPDE_SOURCE_DIR}/thirdparty/QuickGUI/include
     ${OPDE_SOURCE_DIR}/src/main
+    ${INCLUDE_ADDITION_CUSTOM_IMAGE}
 )
 
 add_executable(pytest 
@@ -29,6 +43,7 @@ add_executable(pytest
     ../../src/main/DTypeScriptCompiler.h
     ../../src/main/PLDefScriptCompiler.cpp
     ../../src/main/PLDefScriptCompiler.h
+
 )
 
 
@@ -37,4 +52,5 @@ target_link_libraries(pytest
     ${OPDE_SERVICE_LIBRARIES}
     ${OIS_LIBRARIES}
     OpdePythonBindings
+    ${LIB_ADDITION_CUSTOM_IMAGE}
 )
