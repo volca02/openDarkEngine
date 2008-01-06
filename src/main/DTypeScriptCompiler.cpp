@@ -340,9 +340,11 @@ namespace Opde {
 					return mBinaryService->getType("", name);
 				} else {
 					logParseError("Type definition not found : " + name);
+					return NULL;
 				}
 			} catch (BasicException& ex) {
 				logParseError("Type definition not found : " + name);
+				return NULL;
 			}
 		}
 	}
@@ -357,9 +359,11 @@ namespace Opde {
 					return mBinaryService->getEnum("", name);
 				} else {
 					logParseError("Enum definition not found : " + name);
+					return NULL;
 				}
 			} catch (BasicException& ex) {
 				logParseError("Enum definition not found : " + name);
+				return NULL;
 			}
 		}
 	}

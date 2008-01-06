@@ -169,7 +169,7 @@ typedef struct      VHotObj
 } VHotObj;
 
 // Material definitions
-typedef struct MeshMaterial {
+struct MeshMaterial {
 	char		name[16];
 	unsigned char	type;		// MD_MAT_COLOR or MD_MAT_TMAP
 	unsigned char	slot_num;

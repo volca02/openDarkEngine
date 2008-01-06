@@ -61,7 +61,7 @@ thanks go to shadowspawn for his great contribution (and Ryan Nunn for his work 
 #define MD_NODE_CALL        2
 #define MD_NODE_HDR         4
 
-typedef struct Vertex {
+struct Vertex {
 	float x;
 	float y;
 	float z;
@@ -74,25 +74,25 @@ typedef struct Vertex {
 	}
 };
 
-typedef struct PolyParts {
+struct PolyParts {
     int32_t             a;
     int32_t             b;
     int32_t             c;
 };
 
-typedef struct PolyPartsShorts {
+struct PolyPartsShorts {
     int16_t	      a;
     int16_t           b;
     int16_t           c;
 };
 
-typedef struct UVMap {
+struct UVMap {
     float           u;
     float           v;
 };
 
 // Main header
-typedef struct BinHeadType {
+struct BinHeadType {
     char            ID[4];          // 'LGMD', 'LGMM'
     uint32_t        version;        // 3, 4 - 1
 };
@@ -144,7 +144,7 @@ typedef struct      VHotObj
 } VHotObj;
 
 // Material definitions
-typedef struct MeshMaterial {
+struct MeshMaterial {
 	char		name[16];
 	uint8_t	type;		// MD_MAT_COLOR or MD_MAT_TMAP
 	uint8_t	slot_num;

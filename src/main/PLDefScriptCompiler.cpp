@@ -224,9 +224,11 @@ namespace Opde {
 					return mBinaryService->getType("", name);
 				} else {
 					logParseError("Type definition not found : '" + name + "'");
+					return NULL;
 				}
 			} catch (BasicException& ex) {
 				logParseError("Type definition not found : '" + name +  "'");
+				return NULL;
 			}
 		}
 	}
