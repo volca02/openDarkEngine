@@ -37,6 +37,7 @@
 #include <OgreNode.h>
 
 #include <OgreAnimation.h>
+#include <OgreWindowEventUtilities.h>
 
 using namespace std;
 using namespace Ogre;
@@ -221,6 +222,7 @@ namespace Opde {
 	void RenderService::loopStep(float deltaTime) {
 		// Rendering step...
 		mRoot->renderOneFrame();
+		Ogre::WindowEventUtilities::messagePump();
 	}
 
 	// --------------------------------------------------------------------------

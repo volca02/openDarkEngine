@@ -32,7 +32,7 @@ namespace Opde {
 
 	namespace Python {
 
-		// -------------------- Link Service --------------------
+		// -------------------- Relation --------------------
 		char* RelationBinder::msName = "Relation";
 
 		// ------------------------------------------

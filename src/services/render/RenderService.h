@@ -100,7 +100,7 @@ namespace Opde {
             virtual bool init();
             virtual void bootstrapFinished();
             
-			void loopStep(float deltaTime);
+			virtual void loopStep(float deltaTime);
 
             void onPropPositionMsg(const PropertyChangeMsg& msg);
             void onPropModelNameMsg(const PropertyChangeMsg& msg);
