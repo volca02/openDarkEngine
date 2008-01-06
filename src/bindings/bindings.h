@@ -85,7 +85,38 @@ namespace Opde {
 					// Finally delete the object
 					PyObject_Del(self);
 				}
+		};
+		
+		/// A template that binds a pointer to class (simmilar to shared_ptr_binder, but no special handling is used)
+		template <typename T> class class_ptr_binder {
+			protected:
+				/// A python object type
+				typedef ObjectBase<T*> Object;
 
+				/// A sort-of constructor method. To be used to create a new NULL Object*
+				static Object* construct(PyTypeObject* type) {
+					Object* object;
+
+					object = PyObject_New(Object, type);
+
+					// At this point, the shared_ptr instance in the object is invalid (I.E. Allocated, but not initialized).
+					// If we try to assign into it, we'll segfault. Because of that, we have to do placed new to initialize the object
+					if (object != NULL) {
+						// Here, tidy!
+						object->mInstance = NULL;
+					}
+
+					return object;
+				}
+
+				/// Destructor for the python object. Safely decreases the reference to the shared_ptr. To be used in msType
+				static void dealloc(PyObject *self) {
+					// cast the object to LinkServiceBinder::Object
+					Object* o = reinterpret_cast<Object*>(self);
+
+					// delete the object
+					PyObject_Del(self);
+				}
 		};
 
 	};
