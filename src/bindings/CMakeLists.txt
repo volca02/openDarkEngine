@@ -40,6 +40,8 @@ add_library(OpdePythonBindings
 	InputServiceBinder.h
 	GUIServiceBinder.cpp
 	GUIServiceBinder.h
+	QuickGUIBindings.cpp
+	QuickGUIBindings.h
 )
 
 target_link_libraries(OpdePythonBindings
