@@ -44,7 +44,8 @@ namespace Opde {
 
 		/// helper function to get type from Object
 		template<typename T> T python_cast(PyObject* obj, PyTypeObject* type) {
-			assert(obj->ob_type == type);
+			// More generic: Checks for ancestors as well
+			assert(PyObject_TypeCheck(obj, type));
 
 			return reinterpret_cast< T >(obj);
 		}
