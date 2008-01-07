@@ -73,7 +73,7 @@ namespace Opde {
 
 				/// Destructor for the python object. Safely decreases the reference to the shared_ptr. To be used in msType
 				static void dealloc(PyObject *self) {
-					// cast the object to LinkServiceBinder::Object
+					// cast the object to T::Object
 					Object* o = reinterpret_cast<Object*>(self);
 
 					// Decreases the shared_ptr counter

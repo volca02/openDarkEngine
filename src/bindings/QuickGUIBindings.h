@@ -37,7 +37,7 @@ namespace Opde {
 			public:
 				// --- Python type related methods ---
 				static PyObject* getattr(PyObject *self, char *name);
-				
+
 				/// to string - reprfunc conversion
 				static PyObject* repr(PyObject *self);
 
@@ -55,13 +55,13 @@ namespace Opde {
 				/// Method list
 				static PyMethodDef msMethods[];
 		};
-		
+
 		/// Base Widget representation
 		class QG_WidgetBinder : public class_ptr_binder<QuickGUI::Widget> {
 				public:
 				// --- Python type related methods ---
 				static PyObject* getattr(PyObject *self, char *name);
-				
+
 				/// to string - reprfunc conversion
 				static PyObject* repr(PyObject *self);
 
@@ -70,7 +70,8 @@ namespace Opde {
 
 				// --- Methods ---
 				static PyObject* addChild(PyObject *self, PyObject *args);
-				
+				static PyObject* addEventHandler(PyObject *self, PyObject *args);
+
 			protected:
 				/// Static type definition for LinkService
 				static PyTypeObject msType;
