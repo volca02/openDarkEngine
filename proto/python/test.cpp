@@ -127,8 +127,9 @@ int main(void) {
 	LoopServicePtr ls = ServiceManager::getSingleton().getService("LoopService").as<LoopService>();
 
 	initLoopModes(ls);
-	
-	
+
+	ls.setNull();
+
 	// Resource initialization phase
 	/// ------------------ RESOURCE SETUP ----------------------
 	logger->log(Logger::LOG_INFO, "----- RESOURCE SETUP -----");
