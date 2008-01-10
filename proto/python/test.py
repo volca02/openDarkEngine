@@ -49,7 +49,8 @@ def debugFrameRequest(msg):
 # But would be handled here by PythonCallback (DatabaseProgressMessage), like this:
 # class LoadSaveScreen: .... Holds sheet and ui elements, publishes methods to set progress...
 # loadScreen = LoadSaveScreen.create(guisrv)
-#def databaseProgressUpdate(msg):
+def databaseProgressUpdate(msg):
+    log_info("Loading progress : " + str(msg['completed']  * 100))
 #    loadScreen.setLeftGauge(msg['progress_master'])
 #    loadScreen.setRightGauge(msg['progress_slave'])
 #    rendersrv.renderOneFrame()
@@ -71,6 +72,15 @@ isrv.registerCommandTrap("debug_frame", debugFrameRequest)
 isrv.command("bind esc exit_request") # Would be sim_menu switcher binding, for example.
 isrv.command("bind 1 debug_frame")
 
+# guisrv = Services.GUIService()
+# guisrv.setVisible(True)
+# guisrv.setActive(True)
+
+# A sample mission load
+dbsrv = Services.DatabaseService()
+dbsrv.setProgressListener(databaseProgressUpdate)
+# dbsrv.load("miss1.mis")
+
 # Loop setup and execution
 if (not lsrv.requestLoopMode("GUIOnlyLoopMode")):
     log_error("Could not set loop mode to GUIOnlyLoopMode!")
@@ -82,3 +92,4 @@ log_info("Terminating Opde");
 
 isrv.unregisterCommandTrap("debug_frame")
 isrv.unregisterCommandTrap("exit_request")
+dbsrv.unsetProgressListener()
