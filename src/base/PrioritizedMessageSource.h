@@ -46,7 +46,7 @@ namespace Opde {
 			Listeners mListeners;
 
             /// Sends a message to all listeners
-            void broadcastMessage(const M& msg) {
+            virtual void broadcastMessage(const M& msg) {
                 typename Listeners::iterator it = mListeners.begin();
 
                 for (; it != mListeners.end(); ++it) {
