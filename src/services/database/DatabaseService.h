@@ -56,7 +56,7 @@ namespace Opde {
 	} DatabaseType;
 
 	/// The database change message
-	typedef struct DatabaseChangeMsg {
+	struct DatabaseChangeMsg {
 	    /// A change requested to happen
 	    DatabaseChangeType change;
 	    /// Type of the database distributed by this event
@@ -65,6 +65,33 @@ namespace Opde {
 	    DatabaseType dbtarget;
 	    /// The pointer to the database file to be used
 	    FileGroupPtr db;
+	};
+	
+	
+	/// Progress report of database loading. This is what the Progress Listener get's every now and then to update the display
+	struct  DatabaseProgressMsg {
+	    /// Completion status - 0.0-1.0
+	    float completed; // Only the coarse steps are included here. The fine steps are not
+	    /// Total coarse step count
+	    int totalCoarse; 
+	    /// Current count of the coarse steps
+	    int currentCoarse;
+	    /// Overall count of the fine steps
+	    int overallFine; // Increased on every DatabaseService::fineStep (not cleared). Means the overall step count that happened
+	    
+	    /// Recalculates the completed
+	    void recalc() {
+	        if (totalCoarse > 0) {
+                completed = static_cast<float>(currentCoarse) / static_cast<float>(totalCoarse);
+	        }
+	    }
+	    
+	    void reset() {
+	        completed = 0;
+	        totalCoarse = 0;
+	        currentCoarse = 0;
+	        overallFine = 0;
+	    }
 	};
 
 	/** @brief Database service - service which handles dark database loading and saving
@@ -83,6 +110,23 @@ namespace Opde {
 
 			/// Unload the game data. Release all the data that are connected to a game's mission in progress
 			void unload();
+	
+            /// Listener that receives events every now and then while loading
+			typedef Callback<DatabaseProgressMsg> ProgressListener;
+			
+			/// Progress Listener shared_ptr
+			typedef shared_ptr<ProgressListener> ProgressListenerPtr;
+			
+			/// Setter for the progress listener.
+            void setProgressListener(const ProgressListenerPtr& listener) { mProgressListener = listener; };
+            
+            /// Clears (unsets) the progress listener (disabling it)
+            void unsetProgressListener() { mProgressListener = NULL; };
+	
+            /// A free to use fine step function that calls the Progress Listener to reflect the loading progress
+            /// Use this especially in some long-to load services
+            void fineStep(int count);
+					
 		protected:
             virtual bool init();
 
@@ -95,7 +139,15 @@ namespace Opde {
 			/// Load and assign a gamesys database to the db (has to be a mission or savegame)
 			void _loadGameSysDB(FileGroupPtr db);
 
+            /// Overriden broadcast to support progress reports
+            virtual void broadcastMessage(const DatabaseChangeMsg& msg);
+
 			FileGroupPtr mCurDB;
+			
+			/// Used to report to the Progress Listener
+			DatabaseProgressMsg mLoadingStatus;
+			
+            ProgressListenerPtr mProgressListener;
 	};
 
 	/// Shared pointer to game service

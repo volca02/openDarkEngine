@@ -34,7 +34,7 @@ namespace Opde {
 	/*--------------------------------------------------------*/
 	/*-------------------- DatabaseService -------------------*/
 	/*--------------------------------------------------------*/
-	DatabaseService::DatabaseService(ServiceManager *manager, const std::string& name) : Service(manager, name), mCurDB(NULL) {
+	DatabaseService::DatabaseService(ServiceManager *manager, const std::string& name) : Service(manager, name), mCurDB(NULL), mProgressListener(NULL) {
 
 	}
 
@@ -59,6 +59,11 @@ namespace Opde {
 	    // Try to find the database
 		mCurDB = getDBFileNamed(filename);
 
+        mLoadingStatus.reset();
+        
+        // TODO: Overall coarse step - calculated from TagFile Count * mListeners.size()
+        mLoadingStatus.totalCoarse = mListeners.size() * 2;
+        
 		// Currently hardcoded to mission db
 		_loadMissionDB(mCurDB);
 
@@ -92,6 +97,20 @@ namespace Opde {
 		mCurDB.setNull();
 
 		LOG_DEBUG("DatabaseService::unload - end()");
+	}
+	
+	//------------------------------------------------------
+	void DatabaseService::fineStep(int count) {
+	    // recalculate the status
+        mLoadingStatus.overallFine += count;
+        
+        // Won't probably do anything, but could, in theory
+        mLoadingStatus.recalc();
+                    
+        // call the progress listener if it is set
+        if (!mProgressListener.isNull()) {
+            (*mProgressListener)(mLoadingStatus);
+        }
 	}
 
 	//------------------------------------------------------
@@ -138,6 +157,26 @@ namespace Opde {
         broadcastMessage(m);
 	}
 
+  
+    //------------------------------------------------------
+    void DatabaseService::broadcastMessage(const DatabaseChangeMsg& msg) {
+        Listeners::iterator it = mListeners.begin();
+
+        for (; it != mListeners.end(); ++it) {
+            // Use the callback functor to fire the callback
+            (*it->second)(msg);
+            
+            // recalculate the status
+            mLoadingStatus.currentCoarse++;
+            
+            mLoadingStatus.recalc();
+                        
+            // call the progress listener if it is set
+            if (!mProgressListener.isNull()) {
+                (*mProgressListener)(mLoadingStatus);
+            }
+        }
+    }
 
 	//-------------------------- Factory implementation
 	std::string DatabaseServiceFactory::mName = "DatabaseService";
