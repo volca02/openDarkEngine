@@ -30,6 +30,7 @@
 #include "LoopServiceBinder.h"
 #include "InputServiceBinder.h"
 #include "GUIServiceBinder.h"
+#include "DatabaseServiceBinder.h"
 
 namespace Opde {
 	namespace Python {
@@ -44,31 +45,71 @@ namespace Opde {
 			{"LoopService", getLoopService, METH_NOARGS},
 			{"InputService", getInputService, METH_NOARGS},
 			{"GUIService", getGUIService, METH_NOARGS},
+			{"DatabaseService", getDatabaseService, METH_NOARGS},
 			{NULL, NULL},
 		};
 		
 		PyObject* ServiceBinder::getConfigService(PyObject* self, PyObject* args) {
-			return ConfigServiceBinder::create();
+			try {
+                return ConfigServiceBinder::create();
+			} catch (BasicException &e) {
+			    PyErr_Format(PyExc_EnvironmentError, "Exception happened while getting service: %s", e.getDetails().c_str());
+			    return NULL;
+			}
 		}
 		
 		PyObject* ServiceBinder::getLinkService(PyObject* self, PyObject* args) {
-			return LinkServiceBinder::create();
+			try {
+                return LinkServiceBinder::create();
+			} catch (BasicException &e) {
+			    PyErr_Format(PyExc_EnvironmentError, "Exception happened while getting service: %s", e.getDetails().c_str());
+			    return NULL;
+			}
 		}
 
 		PyObject* ServiceBinder::getPropertyService(PyObject* self, PyObject* args) {
-			return PropertyServiceBinder::create();
+			try {
+                return PropertyServiceBinder::create();
+			} catch (BasicException &e) {
+			    PyErr_Format(PyExc_EnvironmentError, "Exception happened while getting service: %s", e.getDetails().c_str());
+			    return NULL;
+			}
 		}
 
 		PyObject* ServiceBinder::getLoopService(PyObject* self, PyObject* args) {
-			return LoopServiceBinder::create();
+			try {
+                return LoopServiceBinder::create();
+			} catch (BasicException &e) {
+			    PyErr_Format(PyExc_EnvironmentError, "Exception happened while getting service: %s", e.getDetails().c_str());
+			    return NULL;
+			}
 		}
 
 		PyObject* ServiceBinder::getInputService(PyObject* self, PyObject* args) {
-			return InputServiceBinder::create();
+			try {
+                return InputServiceBinder::create();
+			} catch (BasicException &e) {
+			    PyErr_Format(PyExc_EnvironmentError, "Exception happened while getting service: %s", e.getDetails().c_str());
+			    return NULL;
+			}
 		}
 
 		PyObject* ServiceBinder::getGUIService(PyObject* self, PyObject* args) {
-			return GUIServiceBinder::create();
+			try {
+                return GUIServiceBinder::create();
+			} catch (BasicException &e) {
+			    PyErr_Format(PyExc_EnvironmentError, "Exception happened while getting service: %s", e.getDetails().c_str());
+			    return NULL;
+			}
+		}
+		
+		PyObject* ServiceBinder::getDatabaseService(PyObject* self, PyObject* args) {
+			try {
+                return DatabaseServiceBinder::create();
+			} catch (BasicException &e) {
+			    PyErr_Format(PyExc_EnvironmentError, "Exception happened while getting service: %s", e.getDetails().c_str());
+			    return NULL;
+			}
 		}
 
 		PyObject* ServiceBinder::init(PyObject* container) {

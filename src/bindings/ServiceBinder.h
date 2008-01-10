@@ -44,6 +44,7 @@ namespace Opde {
 				static PyObject* getLoopService(PyObject* self, PyObject* args);
 				static PyObject* getInputService(PyObject* self, PyObject* args);
 				static PyObject* getGUIService(PyObject* self, PyObject* args);
+				static PyObject* getDatabaseService(PyObject* self, PyObject* args);
 				
 			protected:
 				static PyMethodDef msMethods[];
