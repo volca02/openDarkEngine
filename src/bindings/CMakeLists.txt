@@ -40,6 +40,8 @@ add_library(OpdePythonBindings
 	InputServiceBinder.h
 	GUIServiceBinder.cpp
 	GUIServiceBinder.h
+	DatabaseServiceBinder.cpp
+	DatabaseServiceBinder.h
 	QuickGUIBindings.cpp
 	QuickGUIBindings.h
 )
