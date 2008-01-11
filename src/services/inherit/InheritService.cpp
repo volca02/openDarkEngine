@@ -237,7 +237,109 @@ namespace Opde {
             return res;
         }
 	}
+	
+	//------------------------------------------------------
+	void InheritService::setArchetype(int objID, int archetypeID) {
+		if (getArchetype(objID) != 0) {
+			OPDE_EXCEPT("Given object already has an archetype set","InheritService::setArchetype");
+		}
+		
+		_createMPLink(objID, archetypeID, 0);
+	}
+	
+	//------------------------------------------------------
+	int InheritService::getArchetype(int objID) const {
+		InheritMap::const_iterator it = mInheritSources.find(objID);
 
+		if (it != mInheritSources.end()) {
+			// The 'it' is a pointer to a map (dstID, LinkDataPtr)
+			InheritLinkMap::const_iterator it2 = it->second.begin();
+			
+			while (it2 != it->second.end()) {
+				if (it2->second->priority == 0) {
+					return it2->second->srcID;
+				}
+			}
+		}
+		
+        return 0;
+	}
+
+	//------------------------------------------------------
+	void InheritService::addMetaProperty(int objID, int mpID) {
+		// First, look if we inherit from the object or not.
+		// if so, we simply return
+		if (inheritsFrom(objID, mpID))
+			return;
+			
+		// does not inherit from the mpID, we can proceed.
+		
+		int mpPrio = 1024;
+		
+		// see if we can have some greater one
+		InheritMap::iterator it = mInheritSources.find(objID);
+
+        if (it != mInheritSources.end()) {
+        	//  object seems to have some MP links
+        	// search for the max mp priority
+        	
+        	InheritLinkMap::iterator it2 = it->second.begin();
+		
+			while (it2 != it->second.end()) {
+				int actPrio = it2->second->priority;
+				if (actPrio > mpPrio) {
+					mpPrio = actPrio + 8; // next free. MP priorities are stepped by 8
+				}
+			}
+        }
+        
+        // whe have our priority. Let's create a new MP link!
+        _createMPLink(objID, mpID, mpPrio);
+	}
+	
+	//------------------------------------------------------
+	void InheritService::removeMetaProperty(int objID, int mpID) {
+		if (getArchetype(objID) == mpID) {
+			LOG_ERROR("Trying to remove MP(%d) from object (%d) which archetype-inherits from it!", objID, mpID);
+			return;
+		}
+		
+		if (!inheritsFrom(objID, mpID))
+			return;
+			
+		
+		// we inherit some mp from the obj. Remove
+		// We simply query mp relation for links that come from objID to mpID, then remove them
+		LinkPtr res = mMetaPropRelation->getOneLink(objID, mpID);
+		
+		mMetaPropRelation->remove(res->id());
+		// done!
+	}
+	
+	//------------------------------------------------------
+	bool InheritService::hasMetaProperty(int objID, int mpID) const {
+		if (getArchetype(objID) == mpID)
+			return false;
+			
+		// The object does not archetype-inherit, so if it inherits at all, it is by MP
+		return inheritsFrom(objID, mpID);
+	}
+
+    //------------------------------------------------------
+	bool InheritService::inheritsFrom(int objID, int srcID) const {
+		InheritMap::const_iterator it = mInheritSources.find(objID);
+
+        if (it != mInheritSources.end()) {
+        	//  object seems to have some links
+        	InheritLinkMap::const_iterator it2 = it->second.find(srcID);
+        	
+        	if (it2 != it->second.end())
+				return true;
+        }
+        
+        return false;
+	}
+	
     //------------------------------------------------------
     void InheritService::_addLink(LinkPtr link, unsigned int priority) {
         // It works like this. link.src() is the target for inheritance, link.dst() is the source for inheritance
@@ -282,7 +384,6 @@ namespace Opde {
 
     //------------------------------------------------------
     void InheritService::_removeLink(LinkPtr link) {
-// Modify priority of the link
         InheritMap::iterator it = mInheritSources.find(link->dst());
 
         if (it != mInheritSources.end()) {
@@ -309,6 +410,18 @@ namespace Opde {
         } else
             OPDE_EXCEPT("Could not find the link to change the priority for", "InheritService::_changeLink");
     }
+
+    //------------------------------------------------------
+	void InheritService::_createMPLink(int objID, int srcID, int priority) {
+		// Modify priority of the link
+		DTypeDefPtr type = mMetaPropRelation->getDataType();
+		DTypePtr ndata = new DType(type);
+		
+		ndata->set("priority", priority);
+		
+		// Create a new link, that will do all the work...
+		mMetaPropRelation->create(objID, srcID, ndata);
+	}
 
 	//-------------------------- Factory implementation
 	std::string InheritServiceFactory::mName = "InheritService";
