@@ -49,18 +49,22 @@ namespace Opde {
 
 
 	//------------------------------------------------------
-	void ObjectService::createObject(int archetype) {
+	int ObjectService::createObject(int archetype) {
 		int newID = getFreeID(false);
 		
 		_beginCreateObject(newID, archetype);
 		_endCreateObject(newID);
+		
+		return newID;
 	}
 	
 	//------------------------------------------------------
-	void ObjectService::beginCreateObject(int archetype) {
+	int ObjectService::beginCreateObject(int archetype) {
 		int newID = getFreeID(false);
 		
 		_beginCreateObject(newID, archetype);
+		
+		return newID;
 	}
 	
 	//------------------------------------------------------
