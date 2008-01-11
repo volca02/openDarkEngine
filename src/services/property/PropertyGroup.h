@@ -186,6 +186,9 @@ namespace Opde {
 				LOG_ERROR("PropertyGroup::get : Property for object ID %d was not found in group %s", id, mName.c_str());
 				return DVariant();
 			}
+			
+			/** Notification that an object was destroyed. @see PropertyService::objectDestroyed */
+			void objectDestroyed(int id);
 
 		protected:
 			/** Inserts the property into the group, notifies inheritors and broadcasts the change

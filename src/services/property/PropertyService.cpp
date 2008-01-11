@@ -195,6 +195,15 @@ namespace Opde {
 		return DVariant();
 	}
 
+	// --------------------------------------------------------------------------
+	void PropertyService::objectDestroyed(int id) {
+		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
+
+		for (; it != mPropertyGroupMap.end(); ++it) {
+			it->second->objectDestroyed(id);
+		}
+	}
+
 	//-------------------------- Factory implementation
 	std::string PropertyServiceFactory::mName = "PropertyService";
 

@@ -79,6 +79,12 @@ namespace Opde {
             */
             DVariant get(int obj_id, const std::string& propName, const std::string& propField);
 
+			/** A notification that object was destroyed (removes all properties of the obj. ID)
+			* @param id The object id that was removed
+			* @note Do NOT call this directly unless you know what it does
+			*/
+			void objectDestroyed(int id);
+
 		protected:
             /// service initialization
             bool init();

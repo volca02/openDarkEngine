@@ -77,6 +77,12 @@ namespace Opde {
 			* @note The relation will be .isNull() if it was not found
 			*/
 			RelationPtr getRelation(int flavor);
+			
+			/** A notification that object was destroyed (removes all links targetted or pointed from the obj. ID)
+			* @param id The object id that was removed
+			* @note Do NOT call this directly unless you know what it does
+			*/
+			void objectDestroyed(int id);
 
 		protected:
             bool init();

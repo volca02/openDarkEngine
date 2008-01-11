@@ -45,6 +45,9 @@ namespace Opde {
 			* @todo Save Mask implementation */
 			void save(FileGroupPtr db, uint saveMask);
 
+			/// @returns the Data Type describing the link data
+			DTypeDefPtr getDataType() { return mType; };
+
 			void setChunkVersions(uint lmajor, uint lminor, uint dmajor, uint dminor) {
 				mLCVMaj = lmajor;
 				mLCVMin = lminor;
@@ -150,6 +153,11 @@ namespace Opde {
 			* @return LinkPtr link instance that fulfills the requirements, or NULL
 			*/
 			LinkPtr getLink(link_id_t id) const;
+			
+			/** Removes all links that connected to a given object ID
+			* @param id the object id to remove all links from
+			*/
+			void objectDestroyed(int id);
 
 		protected:
             class MultiTargetLinkQueryResult;
@@ -202,6 +210,9 @@ namespace Opde {
 			* @return LinkPtr of the new inverse link
 			*/
 			LinkPtr createInverseLink(LinkPtr src);
+			
+			/** internal object destruction handler. @see objectDestroyed */
+			void _objectDestroyed(int id);
 
 			/// Map of links. Indexed by whole link id, contains the link class (LinkPtr)
 			typedef std::map< link_id_t, LinkPtr > LinkMap;

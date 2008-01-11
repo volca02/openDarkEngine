@@ -586,6 +586,11 @@ namespace Opde {
 			return NULL;
 	}
 
+	void Relation::objectDestroyed(int id) {
+		_objectDestroyed(id);
+		mInverse->_objectDestroyed(id);
+	}
+
 	// --------------------------------------------------------------------------
 	// --------------------------------------------------------------------------
 	void Relation::_addLink(LinkPtr link) {
@@ -745,5 +750,28 @@ namespace Opde {
 		);
 		
 		return inv;
+	}
+	
+	// --------------------------------------------------------------------------
+	void Relation::_objectDestroyed(int id) {
+		assert(id != 0); // has to be nonzero. Zero is a wildcard
+
+		ObjectLinkMap::const_iterator r = mSrcDstLinkMap.find(id);
+
+		if (r != mSrcDstLinkMap.end()) {
+			// I could just remove it, but let's be fair and broadcast
+			// This will be very stormy. Maybe we will have to 
+			LinkQueryResultPtr res;
+
+			// We have the source object. Now branch on the dest
+			res = new MultiTargetLinkQueryResult(r->second, r->second.begin(), r->second.end());
+
+			while (!res->end()) {
+				const LinkPtr& l = res->next();
+				
+				_removeLink(l->id());
+				mInverse->_removeLink(l->id());
+			}
+		}
 	}
 }

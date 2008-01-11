@@ -256,6 +256,11 @@ namespace Opde {
 
             broadcastMessage(pmsg);
     }
+    
+    // --------------------------------------------------------------------------
+    void PropertyGroup::objectDestroyed(int id) {
+    	removeProperty(id);
+    }
 
 }
 

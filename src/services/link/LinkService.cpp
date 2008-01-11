@@ -313,6 +313,14 @@ namespace Opde {
 			return rnit->second;
 	}
 	
+	//------------------------------------------------------
+	void LinkService::objectDestroyed(int id) {
+		RelationIDMap::iterator it = mRelationIDMap.begin();
+
+		for (; it != mRelationIDMap.end();++it)
+			it->second->objectDestroyed(id); // Will call the opposing relation ~ as well
+	}
+	
 	//-------------------------- Factory implementation
 	std::string LinkServiceFactory::mName = "LinkService";
 
