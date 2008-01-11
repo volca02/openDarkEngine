@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *		$Id:$
+ *		$Id$
  *
  *****************************************************************************/
 
@@ -1162,6 +1162,7 @@ namespace Ogre {
 
         FilePtr fin = new OgreFile(stream);
 
+		// This here (the mf wrap) prevents the direct use of read on bad file offsets. Don't use normally. Just a fix for zzip segv
         MemoryFile* mf = new MemoryFile(basename, File::FILE_R);
         mf->initFromFile(*fin, fin->size()); // read the whole contents into the mem. file
 
