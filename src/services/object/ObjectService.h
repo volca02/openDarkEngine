@@ -65,14 +65,14 @@ namespace Opde {
 			virtual ~ObjectService();
 			
 			/// Creates a new concrete object, inheriting from archetype archetype, and returns it's id
-			int createObject(int archetype);
+			void createObject(int archetype);
 			
 			/// Begins creating a new object, but does not broadcast yet. 
 			/// Good to use when wanting to prevent broadcasting of the creation before the properties/links are set
-			int beginCreateObject(int archetype);
+			void beginCreateObject(int archetype);
 			
 			/// finalises the creation if the given object (only broadcasts that object was created)
-			int endCreateObject(int objID);
+			void endCreateObject(int objID);
 
 			/// Returns true if the object exists, false otherwise
 			bool exists(int objID);

@@ -49,7 +49,7 @@ namespace Opde {
 
 
 	//------------------------------------------------------
-	int ObjectService::createObject(int archetype) {
+	void ObjectService::createObject(int archetype) {
 		int newID = getFreeID(false);
 		
 		_beginCreateObject(newID, archetype);
@@ -57,14 +57,14 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
-	int ObjectService::beginCreateObject(int archetype) {
+	void ObjectService::beginCreateObject(int archetype) {
 		int newID = getFreeID(false);
 		
 		_beginCreateObject(newID, archetype);
 	}
 	
 	//------------------------------------------------------
-	int ObjectService::endCreateObject(int objID) {
+	void ObjectService::endCreateObject(int objID) {
 		_endCreateObject(objID);
 	}
 
@@ -157,7 +157,7 @@ namespace Opde {
 		// Calculate the objvec bitmap size
 		size_t bsize = mMaxID - mMinID;
 		
-		if (bsize & 0x07 != 0) {// alignment of size needed
+		if ((bsize & 0x07) != 0) {// alignment of size needed
 			bsize += (8 - (bsize & 0x07));
 		}
 
@@ -170,7 +170,7 @@ namespace Opde {
 			// recalc the s to start on obj. id. 0
 			s = -minID >> 3;
 			
-			if (minID & 0x07 != 0) {
+			if ((minID & 0x07) != 0) {
 				// compensate the start bits. not aligned to byte
 				LOG_INFO("ObjectService: ObjVec is not aligned!");
 			}
@@ -203,7 +203,7 @@ namespace Opde {
 		// Free all id's that are not in use for reuse
 		for (int i = 0; i < lastID; i++) {
 			// if the bitmaps is zeroed on the position, free the ID for reuse
-			if (bitmap[(i - minID) >> 3] & (1 << (i & 0x07)) == 0)
+			if ((bitmap[(i - minID) >> 3] & (1 << (i & 0x07))) == 0)
 				freeID(i);
 			
 			// TODO: Check if the ID isn't used in properties/links!
@@ -261,7 +261,7 @@ namespace Opde {
 
 		size_t bsize = mMaxID - mMinID;
 		
-		if (bsize & 0x07 != 0) {// alignment of size needed
+		if ((bsize & 0x07) != 0) {// alignment of size needed
 			bsize += (8 - (bsize & 0x07));
 		}
 		
