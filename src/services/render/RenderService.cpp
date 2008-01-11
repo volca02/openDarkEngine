@@ -199,7 +199,7 @@ namespace Opde {
 		// contact the config. service, and look for the inheritance link name
 		// TODO: ConfigurationService::getKey("Core","InheritanceLinkName").toString();
 
-		mPropertyService = ServiceManager::getSingleton().getService("PropertyService");
+		mPropertyService = ServiceManager::getSingleton().getService("PropertyService").as<PropertyService>();
 
 		mPropPosition = mPropertyService->getPropertyGroup("Position");
 

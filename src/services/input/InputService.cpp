@@ -294,7 +294,7 @@ namespace Opde {
 		size_t windowHnd = 0;
 		std::ostringstream windowHndStr;
 
-		mConfigService = ServiceManager::getSingleton().getService("ConfigService");
+		mConfigService = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
 
         mRenderService = ServiceManager::getSingleton().getService("RenderService").as<RenderService>();
         mRenderWindow = mRenderService->getRenderWindow();

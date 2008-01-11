@@ -177,7 +177,7 @@ namespace Opde {
 		// Register the worldrep service factory
 		registerServiceFactories();
 
-		mConfigService = ServiceManager::getSingleton().getService("ConfigService");
+		mConfigService = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
 		RenderServicePtr rends;
 
 		rends = ServiceManager::getSingleton().getService("RenderService").as<RenderService>();
@@ -291,7 +291,7 @@ namespace Opde {
 	}
 
 	void GameStateManager::setupInputSystem() {
-		mInputService = ServiceManager::getSingleton().getService("InputService");
+		mInputService = ServiceManager::getSingleton().getService("InputService").as<InputService>();
 
 		mInputService->createBindContext("game");
 		mInputService->setBindContext("game");

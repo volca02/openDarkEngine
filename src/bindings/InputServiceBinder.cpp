@@ -177,7 +177,7 @@ namespace Opde
 
 			if (PyArg_ParseTuple(args, "sO", &name, &callable)) {
 				try {        
-					PythonInputCallbackPtr pcp = new PythonInputCallback(callable);
+					InputService::ListenerPtr pcp = new PythonInputCallback(callable);
 					
 					// call the is to register the command trap
 					o->mInstance->registerCommandTrap(name, pcp);

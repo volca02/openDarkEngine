@@ -49,7 +49,7 @@ namespace Opde {
 	}
 
     bool WorldRepService::init() {
-        mRenderService = ServiceManager::getSingleton().getService("RenderService");
+        mRenderService = ServiceManager::getSingleton().getService("RenderService").as<RenderService>();
 
         if (mRenderService.isNull()) {
             LOG_ERROR("RenderService instance was not found. Fatal");

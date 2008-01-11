@@ -114,18 +114,6 @@ namespace Opde {
 				return n;
 			}
 
-			/// static cast conversion operator
-			template<class U> operator shared_ptr<U>() {
-				// of course, Dynamic cast would be safer, then again, slower
-				U* ptr = static_cast<U*>(mPtr);
-
-				++(*mReferences);
-
-				shared_ptr<U> n = shared_ptr<U>(ptr, mReferences);
-
-				return n;
-			}
-
 			unsigned int getRefCount() {
 				return (*mReferences);
 			}
