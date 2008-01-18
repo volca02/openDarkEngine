@@ -52,15 +52,16 @@ namespace Opde
 				PyObject* args; 
 				args = PyTuple_New(1);
 				
-				PyTuple_SetItem(args, 0, py_msg);
+				PyTuple_SetItem(args, 0, py_msg); // Steals reference
 				
 				PyObject* rslt = PyObject_CallObject(mCallable, args);
-				if (rslt) { // To be sure no leak happened
-					Py_XDECREF(rslt);
+				
+				if (rslt) { 
+				    // To be sure no leak happened
+					Py_DECREF(rslt);
 				}
 				
-				Py_XDECREF(py_msg);
-				Py_XDECREF(args);
+				Py_DECREF(args);
 			}
 			
 		protected:
