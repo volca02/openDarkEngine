@@ -60,22 +60,22 @@ namespace Opde {
 		};
 		
 		// -------------------------------
-		inline PyObject* LinkPtrToPyObject(LinkPtr& link) {
-			// We'll create a dict to store all the values.
-			if (!link.isNull()) {
-				PyObject* base = PyDict_New();
+		/// Link class binder. The methods are converted to read-only attributes
+		class LinkBinder : public shared_ptr_binder<LinkPtr> {
+		    public:
+				// --- Python type related methods ---
+				static PyObject* getattr(PyObject *self, char *name);
+
+				static PyObject* create(LinkPtr& link);
 				
-				PyDict_SetItem(base, PyString_FromString("id"), PyLong_FromLong(link->id()));
-				PyDict_SetItem(base, PyString_FromString("src"), PyLong_FromLong(link->src()));
-				PyDict_SetItem(base, PyString_FromString("dst"), PyLong_FromLong(link->dst()));
-				PyDict_SetItem(base, PyString_FromString("flavor"), PyLong_FromLong(link->flavor()));
-				
-				return base;
-			} else {
-				Py_INCREF(Py_None);
-				return Py_None;
-			}
-		}
+            protected:
+				/// Static type definition for LinkService
+				static PyTypeObject msType;
+
+				/// Name of the python type
+				static char* msName;
+		};
+
 	}
 }
 

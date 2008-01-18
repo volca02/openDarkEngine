@@ -79,7 +79,7 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* LinkServiceBinder::setChunkVersion(PyObject* self, PyObject* args) {
-			PyObject *result = Py_None;
+			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
 			
 			int major;
@@ -88,6 +88,7 @@ namespace Opde {
 			if (PyArg_ParseTuple(args, "ii", &major, &minor)) {
 				o->mInstance->setChunkVersion(major, minor);
 
+                result = Py_None;
 				Py_INCREF(result);
 				return result;
 			} else {
@@ -148,14 +149,24 @@ namespace Opde {
 			
 			// two possibilities here : name or flavor
 			if (PyString_Check(object)) {
-				RelationPtr rel = o->mInstance->getRelation(PyString_AsString(object));
+			    char* str = PyString_AsString(object);
+				RelationPtr rel = o->mInstance->getRelation(str);
 
-				result = RelationBinder::create(rel);
+                if (rel.isNull()) {
+                    PyErr_Format(PyExc_ValueError, "Relation not found by name %s", str);
+                } else
+                    result = RelationBinder::create(rel);
+                    
 				return result;
 			} else if (PyInt_Check(object)) {
-				RelationPtr rel = o->mInstance->getRelation(static_cast<int>(PyInt_AsLong(object)));
+			    long id = PyInt_AsLong(object);
+				RelationPtr rel = o->mInstance->getRelation(static_cast<int>(id));
 
-				result = RelationBinder::create(rel);
+                if (rel.isNull()) {
+                    PyErr_Format(PyExc_ValueError, "Relation not found by id %ld", id);
+                } else
+                    result = RelationBinder::create(rel);
+                    
 				return result;
 			} else {
 				// Invalid parameters
@@ -179,7 +190,64 @@ namespace Opde {
 
 			return (PyObject *)object;
 		}
-	}
+	
+        // -------------------- Link --------------------
+		char* LinkBinder::msName = "Link";
 
+		// ------------------------------------------
+		PyTypeObject LinkBinder::msType = {
+			PyObject_HEAD_INIT(&PyType_Type)
+			0,
+			msName,                   /* char *tp_name; */
+			sizeof(LinkBinder::Object),      /* int tp_basicsize; */
+			0,                        /* int tp_itemsize;       /* not used much */
+			LinkBinder::dealloc,   /* destructor tp_dealloc; */
+			0,			              /* printfunc  tp_print;   */
+			LinkBinder::getattr,  /* getattrfunc  tp_getattr; /* __getattr__ */
+		};
+
+        
+        // ------------------------------------------
+		PyObject* LinkBinder::getattr(PyObject *self, char *name) {
+			Object* o = python_cast<Object*>(self, &msType);
+			
+			if (o->mInstance.isNull()) {
+			    // Just return PyNone
+			    PyObject* result = Py_None;
+			    Py_INCREF(result);
+			    return result;
+			}
+			
+			if (strcmp(name, "id") == 0) {
+			    return PyLong_FromLong(o->mInstance->id());
+			} else if (strcmp(name, "src") == 0) {
+			    return PyLong_FromLong(o->mInstance->src());
+			} else if (strcmp(name, "dst") == 0) {
+			    return PyLong_FromLong(o->mInstance->dst());
+            } else if (strcmp(name, "flavor") == 0) {
+			    return PyLong_FromLong(o->mInstance->flavor());
+            } else {
+                PyErr_SetString(PyExc_TypeError, "Unknown attribute specified!");
+            }
+            
+            return NULL;
+		}
+
+		// ------------------------------------------
+		PyObject* LinkBinder::create(LinkPtr& link) {
+			if (link.isNull()) {
+			      PyErr_SetString(PyExc_TypeError, "Null link binding!");
+			      return NULL;
+			}
+			
+			Object* object = construct(&msType);
+			
+			if (object != NULL) {
+				object->mInstance = link;
+			}
+
+			return (PyObject *)object;
+		}
+   	} // namespace Python
 } // namespace Opde
 
