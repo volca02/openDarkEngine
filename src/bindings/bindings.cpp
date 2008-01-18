@@ -62,8 +62,8 @@ namespace Opde {
 				}
 
 				default:	//All possible paths must return a value
-					Py_INCREF(Py_None);
-					return Py_None;
+                    PyErr_SetString(PyExc_TypeError, "Invalid DVariant type");
+                    return NULL;
 			}
 		}
 
@@ -166,6 +166,13 @@ namespace Opde {
 	void PythonLanguage::runScriptPtr(const char* ptr) {
 	    // Is this the right way?
         PyRun_SimpleString(ptr);
+        
+        if (PyErr_Occurred()) {
+			// TODO: Do something useful here, or forget it
+			// TODO: PythonException(BasicException) with the PyErr string probably. Same in the init
+			PyErr_Print();
+			PyErr_Clear();
+		}
 	}
 
 } // namespace Opde

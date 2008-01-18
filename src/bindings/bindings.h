@@ -32,10 +32,89 @@
 
 namespace Opde {
 	namespace Python {
+	    // Type converters
+	    enum VariableType { VT_INVALID, VT_BOOL, VT_INT, VT_LONG, VT_FLOAT, VT_CHARPTR, VT_STRING, VT_CUSTOM_TYPE };
+		
+		struct TypeInfoBase {
+		};
+		
+		template<typename T> struct TypeInfo : public TypeInfoBase {
+			VariableType type;
+			char* typeName;
+			
+			TypeInfo() : typeName("invalid"), type(VT_INVALID) {};
+			
+			PyObject* toPyObject(T val) const {
+				PyErr_SetString(PyExc_TypeError, "Binding error: Type has no conversion or TypeInfo specified!");
+				return NULL;
+			}
+		};
+		
+		
+		template<> struct TypeInfo<bool> {
+			VariableType type;
+			char* typeName;
+			
+			TypeInfo() : typeName("bool"), type(VT_BOOL) {};
+			
+			PyObject* toPyObject(bool val) const {
+				PyObject* res = val ? Py_True : Py_False;
+				
+				Py_INCREF(res);
+				
+				return res;
+			}
+		};
+		
+		template<> struct TypeInfo<int> {
+			VariableType type;
+			char* typeName;
+			
+			TypeInfo() : typeName("int"), type(VT_INT) {};
+			
+			PyObject* toPyObject(int val) const {
+				return PyLong_FromLong(val);
+			}
+		};
+		
+		template<> struct TypeInfo<long> {
+			VariableType type;
+			char* typeName;
+			
+			TypeInfo() : typeName("long"), type(VT_LONG) {};
+			
+			PyObject* toPyObject(long val) const {
+				return PyLong_FromLong(val);
+			}
+		};
+				
+		template<> struct TypeInfo<std::string> {
+			VariableType type;
+			char* typeName;
+			
+			TypeInfo() : typeName("std::string"), type(VT_STRING) {};
+			
+			PyObject* toPyObject(const std::string& val) const {
+				return PyString_FromString(val.c_str());
+			}
+		};
+		
 		// Global utilities - object conversion and such
 		PyObject* DVariantToPyObject(const DVariant& inst);
 		DVariant PyObjectToDVariant(PyObject* obj);
-
+		
+		// DVariant type info
+		template<> struct TypeInfo<DVariant> {
+			VariableType type;
+			char* typeName;
+			
+			TypeInfo() : typeName("DVariant"), type(VT_CUSTOM_TYPE) {};
+			
+			PyObject* toPyObject(const DVariant& val) const {
+				return DVariantToPyObject(val);
+			}
+		};
+		
 		/// Template definition of a Python instance holding a single object
 		template<typename T> struct ObjectBase {
 			PyObject_HEAD
