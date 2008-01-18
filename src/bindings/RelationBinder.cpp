@@ -229,7 +229,7 @@ namespace Opde {
 			if (PyArg_ParseTuple(args, "ii", &src, &dst)) 
 			{
 				LinkPtr res = o->mInstance->getOneLink(src, dst);
-				return LinkPtrToPyObject(res);
+				return LinkBinder::create(res);
 			} 
 			else 
 			{
