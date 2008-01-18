@@ -88,6 +88,18 @@ namespace Opde {
 			}
 		};
 				
+		
+		template<> struct TypeInfo<float> {
+			VariableType type;
+			char* typeName;
+			
+			TypeInfo() : typeName("float"), type(VT_FLOAT) {};
+			
+			PyObject* toPyObject(float val) const {
+				return PyFloat_FromDouble(val);
+			}
+		};
+
 		template<> struct TypeInfo<std::string> {
 			VariableType type;
 			char* typeName;
