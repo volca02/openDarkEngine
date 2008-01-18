@@ -25,25 +25,42 @@
 #include "bindings.h"
 #include "InputServiceBinder.h"
 #include "PythonCallback.h"
+#include "PythonStruct.h"
 
 namespace Opde 
 {
 
 	namespace Python 
 	{
-
+        
+        // InputEventType type info
+		template<> struct TypeInfo<InputEventType> {
+			VariableType type;
+			char* typeName;
+			
+			TypeInfo() : typeName("InputEventType"), type(VT_CUSTOM_TYPE) {};
+			
+			virtual PyObject* toPyObject(InputEventType val) const {
+				return PyLong_FromLong(val);
+			}
+		};
+	    
+		class PythonInputMessage : public PythonStruct<InputEventMsg> {
+			public:
+				static void Init() {
+					field("event", &InputEventMsg::event);
+					field("command", &InputEventMsg::command);
+					field("params", &InputEventMsg::params);
+					// Todo: Expose the InputEventType string repr. to Dict of the module (need PyOBject* param)
+				}
+		};
+		
+		template<> char* PythonStruct<InputEventMsg>::msName = "InputEventMsg";
+		
 		class PythonInputMessageConverter {
 			public:
 				PyObject* operator()(const InputEventMsg& ev) {
-					PyObject* result = PyDict_New();
-					
-					// 1. Event type. Integer. TODO: Could use a python-side enum 
-					PyDict_SetItemString(result, "event", PyInt_FromLong(ev.event));
-					// 2. Command string
-					PyDict_SetItemString(result, "command", PyString_FromString(ev.command.c_str()));
-					// 3. Parameters to the command
-					PyDict_SetItemString(result, "params", DVariantToPyObject(ev.params));
-					
+					PyObject* result = PythonInputMessage::create(ev);
 					return result;
 				}
 		};
@@ -233,6 +250,11 @@ namespace Opde
 				object->mInstance = ServiceManager::getSingleton().getService(msName).as<InputService>();
 			}
 			return (PyObject *)object;
+		}
+		
+		// ------------------------------------------
+		void InputServiceBinder::Init() {
+			PythonInputMessage::Init();
 		}
 	}
 

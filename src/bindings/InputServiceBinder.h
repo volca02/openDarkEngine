@@ -41,6 +41,8 @@ namespace Opde
 
 				/// creates a python object representation of the relation
 				static PyObject* create();
+				
+				static void Init();
 
 				// --- Methods ---
 				static PyObject* createBindContext(PyObject* self, PyObject* args);

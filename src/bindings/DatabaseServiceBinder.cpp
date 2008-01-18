@@ -25,22 +25,29 @@
 #include "bindings.h"
 #include "DatabaseServiceBinder.h"
 #include "PythonCallback.h"
+#include "PythonStruct.h"
 
 namespace Opde {
 
 	namespace Python {
+		
+		class PythonDatabaseProgressMessage : public PythonStruct<DatabaseProgressMsg> {
+			public:
+				static void Init() {
+					field("completed", &DatabaseProgressMsg::completed);
+					field("totalCoarse", &DatabaseProgressMsg::totalCoarse);
+					field("currentCoarse", &DatabaseProgressMsg::currentCoarse);
+					field("overallFine", &DatabaseProgressMsg::overallFine);
+				}
+		};
+		
+		template<> char* PythonStruct<DatabaseProgressMsg>::msName = "DatabaseProgressMsg";
+		
         // -------------------- Database Progress message --------------------
         class PythonDatabaseProgressMessageConverter {
 			public:
 				PyObject* operator()(const DatabaseProgressMsg& ev) {
-					PyObject* result = PyDict_New();
-					
-					PyDict_SetItemString(result, "completed", PyFloat_FromDouble(ev.completed));
-					PyDict_SetItemString(result, "totalCoarse", PyInt_FromLong(ev.totalCoarse));
-					PyDict_SetItemString(result, "currentCoarse", PyInt_FromLong(ev.currentCoarse));
-					PyDict_SetItemString(result, "overallFine", PyInt_FromLong(ev.overallFine));
-			
-					
+					PyObject* result = PythonDatabaseProgressMessage::create(ev);
 					return result;
 				}
 		};
@@ -187,6 +194,11 @@ namespace Opde {
 			}
 
 			return (PyObject *)object;
+		}
+		
+		// ------------------------------------------
+		void DatabaseServiceBinder::Init() {
+            PythonDatabaseProgressMessage::Init();
 		}
 	}
 

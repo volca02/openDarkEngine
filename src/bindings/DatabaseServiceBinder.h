@@ -38,6 +38,8 @@ namespace Opde {
 				static PyObject* getattr(PyObject *self, char *name);
 
 				static PyObject* create();
+				
+				static void Init();
 
 				// --- Methods ---
 				static PyObject* load(PyObject* self, PyObject* args);
