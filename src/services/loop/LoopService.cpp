@@ -31,7 +31,7 @@ namespace Opde {
     /*-------------------- LoopMode -------------------*/
     /*-------------------------------------------------*/
     
-    LoopMode::LoopMode(const LoopModeDefinition& def, LoopService* owner) : mLoopModeDef(def), mOwner(owner) {
+    LoopMode::LoopMode(const LoopModeDefinition& def, LoopService* owner) : mLoopModeDef(def), mOwner(owner), mDebugNextFrame(false) {
     }
     
     //------------------------------------------------------
@@ -114,7 +114,8 @@ namespace Opde {
     /*-------------------- LoopService -------------------*/
     /*----------------------------------------------------*/
     LoopService::LoopService(ServiceManager *manager, const std::string& name) : Service(manager, name), 
-			mTerminationRequested(false), mNewLoopMode(NULL), mLastFrameTime(0), mNewModeRequested(false) {
+			mTerminationRequested(false), mNewLoopMode(NULL), mLastFrameTime(0), mNewModeRequested(false),
+			mDebugOneFrame(false) {
 				
 		mActiveMode.setNull();
     }
