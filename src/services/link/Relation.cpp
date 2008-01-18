@@ -258,7 +258,7 @@ namespace Opde {
 			mInverse->_addLink(ilink);
 		}
 
-		delete dlink;
+		delete[] dlink;
 
 		LOG_DEBUG("Relation (%s - %d): Done!",
 				  mName.c_str(),

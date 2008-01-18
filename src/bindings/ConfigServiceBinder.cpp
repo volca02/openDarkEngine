@@ -112,7 +112,7 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* ConfigServiceBinder::getParam(PyObject* self, PyObject* args) {
-			PyObject *result = Py_None;
+			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
 			const char* name;
 
@@ -129,7 +129,7 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* ConfigServiceBinder::hasParam(PyObject* self, PyObject* args) {
-			PyObject *result = Py_None;
+			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
 			const char* name;
 
@@ -154,6 +154,7 @@ namespace Opde {
 
 			if (PyArg_ParseTuple(args, "s", &fname)) {
 				o->mInstance->loadParams(fname);
+
 				result = Py_None;
 				Py_INCREF(result);
 			} else {
