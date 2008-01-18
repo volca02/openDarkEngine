@@ -117,10 +117,15 @@ namespace Opde {
 			
 			assert(module);
 			
+			// init the services which need it
+			DatabaseServiceBinder::Init();
+			InputServiceBinder::Init();
+			
 			// Register itself as a member of the container we got
 			PyObject *dir = PyModule_GetDict(container);
 			PyDict_SetItemString(dir, "Services", module);
 			
+				
 			return module;
 		}
 		
