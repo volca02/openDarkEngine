@@ -89,7 +89,7 @@ namespace Opde {
 			
 			if ((!o->mInstance.isNull()) && !o->mInstance->end()) {
 				LinkPtr l = o->mInstance->next();
-				next = LinkPtrToPyObject(l);
+				next = LinkBinder::create(l);
 			}
 			
 			return next;
