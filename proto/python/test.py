@@ -35,12 +35,14 @@ def simMenuRequest(msg):
     switchToSimMenu()
 
 def exitRequest(msg):
-    log_info("Received a message for exitRequest " + str(msg['event']))
+#    log_info("Received a message for exitRequest " + str(msg.event))
     log_info("Termination requested!")
     lsrv.requestTermination()
 
 def debugFrameRequest(msg):
     log_info("Received a message for frame debugger. Will debug one frame")
+    log_info("Comand field: " + msg.command)
+    log_info("Comand params: " + str(msg.params))
     lsrv.debugOneFrame()
 
 # ------------ Main code -------------
@@ -50,7 +52,7 @@ def debugFrameRequest(msg):
 # class LoadSaveScreen: .... Holds sheet and ui elements, publishes methods to set progress...
 # loadScreen = LoadSaveScreen.create(guisrv)
 def databaseProgressUpdate(msg):
-    log_info("Loading progress : " + str(msg['completed']  * 100))
+    log_info("Loading progress : " + str(msg.completed  * 100))
 #    loadScreen.setLeftGauge(msg['progress_master'])
 #    loadScreen.setRightGauge(msg['progress_slave'])
 #    rendersrv.renderOneFrame()

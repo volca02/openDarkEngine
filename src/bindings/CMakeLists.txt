@@ -34,16 +34,17 @@ add_library(OpdePythonBindings
     PropertyServiceBinder.h
     DTypeBinder.cpp
     DTypeBinder.h
-	LoopServiceBinder.cpp
-	LoopServiceBinder.h
-	InputServiceBinder.cpp
-	InputServiceBinder.h
-	GUIServiceBinder.cpp
-	GUIServiceBinder.h
-	DatabaseServiceBinder.cpp
-	DatabaseServiceBinder.h
-	QuickGUIBindings.cpp
-	QuickGUIBindings.h
+    LoopServiceBinder.cpp
+    LoopServiceBinder.h
+    InputServiceBinder.cpp
+    InputServiceBinder.h
+    GUIServiceBinder.cpp
+    GUIServiceBinder.h
+    DatabaseServiceBinder.cpp
+    DatabaseServiceBinder.h
+    QuickGUIBindings.cpp
+    QuickGUIBindings.h
+    PythonStruct.h
 )
 
 target_link_libraries(OpdePythonBindings
