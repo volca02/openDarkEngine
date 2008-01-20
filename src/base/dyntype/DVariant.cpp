@@ -65,6 +65,11 @@ namespace Opde {
 				mPrivate.data.shared = new Shared<Vector3>(new Vector3(*static_cast<Vector3 *>(val)));
 				mPrivate.isShared = 1;
 				break;
+				
+			case DV_QUATERNION :
+				mPrivate.data.shared = new Shared<Quaternion>(new Quaternion(*static_cast<Quaternion *>(val)));
+				mPrivate.isShared = 1;
+				break;
 
 			default :
 				throw runtime_error("DVariant::DVariant() - invalid type");
@@ -100,6 +105,11 @@ namespace Opde {
 
 			case DV_VECTOR :
 				mPrivate.data.shared = new Shared<Vector3>(new Vector3(StringToVector(txtval)));
+				mPrivate.isShared = 1;
+				break;
+				
+			case DV_QUATERNION :
+				mPrivate.data.shared = new Shared<Quaternion>(new Quaternion(StringToQuaternion(txtval)));
 				mPrivate.isShared = 1;
 				break;
 
@@ -170,6 +180,13 @@ namespace Opde {
 		mPrivate.data.shared = new Shared<Vector3>(new Vector3(vec));
 		mPrivate.isShared = true;
 	}
+	
+	//------------------------------------
+	DVariant::DVariant(const Quaternion& ori) {
+		mPrivate.type = DV_QUATERNION;
+		mPrivate.data.shared = new Shared<Quaternion>(new Quaternion(ori));
+		mPrivate.isShared = true;
+	}
 
 	//------------------------------------
 	DVariant::DVariant(float x, float y, float z) {
@@ -199,6 +216,8 @@ namespace Opde {
 				return "String";
 			case DV_VECTOR :
 				return "Vector";
+			case DV_QUATERNION :
+				return "Quaternion";
 			default:
                 return "Invalid"; // Be gentle. Do not throw
 		}
@@ -208,6 +227,7 @@ namespace Opde {
 	DVariant::operator std::string() const {
 		std::ostringstream o;
 		Vector3* vecd;
+		Quaternion* qd;
 
 		switch (mPrivate.type) {
 			case DV_BOOL :
@@ -222,10 +242,14 @@ namespace Opde {
 				o << mPrivate.data.duint;
 				return o.str();
 			case DV_STRING :
-				return *((dynamic_cast<Shared<string>*>(mPrivate.data.shared))->data);
+				return *((static_cast<Shared<string>*>(mPrivate.data.shared))->data);
 			case DV_VECTOR :
-				vecd = (dynamic_cast<Shared<Vector3>*>(mPrivate.data.shared))->data;
+				vecd = (static_cast<Shared<Vector3>*>(mPrivate.data.shared))->data;
 				o << vecd->x << ", " << vecd->y << ", " << vecd->z;
+				return o.str();
+			case DV_QUATERNION :
+				qd = (static_cast<Shared<Quaternion>*>(mPrivate.data.shared))->data;
+				o << qd->w << ", " << qd->x << ", " << qd->y << ", " << qd->z;
 				return o.str();
 			default:
 				throw runtime_error("DVariant::string() - invalid type");
@@ -251,9 +275,11 @@ namespace Opde {
 			case DV_UINT :
 				return mPrivate.data.duint;
 			case DV_STRING : // Convert the contained value to string
-				return StringToInt((*((dynamic_cast<Shared<string>*>(mPrivate.data.shared))->data)));
+				return StringToInt((*((static_cast<Shared<string>*>(mPrivate.data.shared))->data)));
 			case DV_VECTOR :
 				throw runtime_error("DVariant::toInt() - vector cannot be converted to int");
+			case DV_QUATERNION :
+				throw runtime_error("DVariant::toInt() - quaternion cannot be converted to int");
 			case DV_INVALID:
 				throw runtime_error("DVariant::toInt() - invalid type specified");
 			default:
@@ -273,9 +299,11 @@ namespace Opde {
 			case DV_UINT :
 				return mPrivate.data.duint;
 			case DV_STRING :
-				return StringToInt((*((dynamic_cast<Shared<string>*>(mPrivate.data.shared))->data)));
+				return StringToInt((*((static_cast<Shared<string>*>(mPrivate.data.shared))->data)));
 			case DV_VECTOR :
-				throw runtime_error("DVariant::toUInt() - vector cannot be cast to int");
+				throw runtime_error("DVariant::toUInt() - vector cannot be converted to uint");
+			case DV_QUATERNION :
+				throw runtime_error("DVariant::toUInt() - quaternion cannot be converted to uint");
 			default:
 				throw runtime_error("DVariant::toUInt() - invalid type specified");
 		}
@@ -295,9 +323,11 @@ namespace Opde {
 			case DV_UINT :
 				return mPrivate.data.duint;
 			case DV_STRING :
-				return StringToFloat(*((dynamic_cast<Shared<string>*>(mPrivate.data.shared))->data));
+				return StringToFloat(*((static_cast<Shared<string>*>(mPrivate.data.shared))->data));
 			case DV_VECTOR :
-				throw runtime_error("DVariant::toFloat() - vector cannot be cast to int");
+				throw runtime_error("DVariant::toFloat() - vector cannot be converted to int");
+			case DV_QUATERNION :
+				throw runtime_error("DVariant::toFloat() - quaternion cannot be converted to int");
 			default:
 				throw runtime_error("DVariant::toFloat() - invalid type specified");
 		}
@@ -315,9 +345,11 @@ namespace Opde {
 			case DV_UINT :
 				return mPrivate.data.duint != 0;
 			case DV_STRING :
-				return StringToBool(*((dynamic_cast<Shared<string>*>(mPrivate.data.shared))->data));
+				return StringToBool(*((static_cast<Shared<string>*>(mPrivate.data.shared))->data));
 			case DV_VECTOR :
-				throw runtime_error("DVariant::toBool() - vector cannot be cast to bool");
+				throw runtime_error("DVariant::toBool() - vector cannot be converted to bool");
+			case DV_QUATERNION :
+				throw runtime_error("DVariant::toBool() - quaternion cannot be converted to bool");
 			default:
 				throw runtime_error("DVariant::toBool() - invalid type specified");
 		}
@@ -327,11 +359,23 @@ namespace Opde {
 	Vector3 DVariant::toVector() const {
 		if (mPrivate.type == DV_VECTOR) {
 			// simply return the value
-			return *((dynamic_cast<Shared<Vector3>*>(mPrivate.data.shared))->data);
+			return *((static_cast<Shared<Vector3>*>(mPrivate.data.shared))->data);
 		} else if (mPrivate.type == DV_STRING) {
-			return StringToVector(*((dynamic_cast<Shared<string>*>(mPrivate.data.shared))->data));
+			return StringToVector(*((static_cast<Shared<string>*>(mPrivate.data.shared))->data));
 		} else {
-			throw runtime_error("DVariant::toVector - Uncompatible source type");
+			throw runtime_error("DVariant::toVector - Incompatible source type");
+		}
+	}
+
+	//------------------------------------
+	Quaternion DVariant::toQuaternion() const {
+		if (mPrivate.type == DV_QUATERNION) {
+			// simply return the value
+			return *((static_cast<Shared<Quaternion>*>(mPrivate.data.shared))->data);
+		} else if (mPrivate.type == DV_STRING) {
+			return StringToQuaternion(*((static_cast<Shared<string>*>(mPrivate.data.shared))->data));
+		} else {
+			throw runtime_error("DVariant::toQuaternion - Incompatible source type");
 		}
 	}
 
@@ -409,7 +453,7 @@ namespace Opde {
 	}
 
 	//------------------------------------
-	const DVariant& DVariant::operator =(std::string s) {
+	const DVariant& DVariant::operator =(const std::string& s) {
 		if (mPrivate.isShared)
 			mPrivate.data.shared->release();
 
@@ -421,13 +465,25 @@ namespace Opde {
 	}
 
 	//------------------------------------
-	const DVariant& DVariant::operator =(Vector3 v) {
+	const DVariant& DVariant::operator =(const Vector3& v) {
 		if (mPrivate.isShared)
 			mPrivate.data.shared->release();
 
 		mPrivate.isShared = true;
 		mPrivate.type = DV_VECTOR;
 		mPrivate.data.shared = new Shared<Vector3>(new Vector3(v));
+
+		return *this;
+	}
+
+	//------------------------------------
+	const DVariant& DVariant::operator =(const Quaternion& q) {
+		if (mPrivate.isShared)
+			mPrivate.data.shared->release();
+
+		mPrivate.isShared = true;
+		mPrivate.type = DV_QUATERNION;
+		mPrivate.data.shared = new Shared<Quaternion>(new Quaternion(q));
 
 		return *this;
 	}
@@ -443,7 +499,7 @@ namespace Opde {
 		if (mPrivate.isShared == false)
 			throw(runtime_error("Invalid shared_cast - cast on non-shared data"));
 
-		Shared<T> *ct = dynamic_cast<Shared<T>*>(mPrivate.data.shared);
+		Shared<T> *ct = static_cast<Shared<T>*>(mPrivate.data.shared);
 
 		if (ct != NULL)
 			return *(ct->data);
@@ -472,6 +528,10 @@ namespace Opde {
 					return 	b.shared_cast<Vector3>() ==
 						shared_cast<Vector3>();
 
+				case DV_QUATERNION:
+					return 	b.shared_cast<Quaternion>() ==
+						shared_cast<Quaternion>();
+
 				default:
 					throw(runtime_error("DVariant: Invalid compare type"));
 			}
@@ -494,6 +554,9 @@ namespace Opde {
 
 				case DV_VECTOR :
 					return shared_cast<Vector3>() == b.toVector();
+					
+				case DV_QUATERNION :
+					return shared_cast<Quaternion>() == b.toQuaternion();
 
 				default :
 					throw runtime_error("DVariant::typeToString() - invalid type");
@@ -543,6 +606,47 @@ namespace Opde {
 
 		// make a vector3 out of the array, and return
 		return Vector3(vec[0], vec[1], vec[2]);
+	}
+	
+	//------------------------------------
+	Quaternion DVariant::StringToQuaternion(const std::string& str) {
+		string src(str);
+
+		float quat[4];
+		quat[0] = quat[1] = quat[2] = quat[3] = 0;
+		int cnt = 0;
+
+		while (cnt <= 3) {
+			// parse the string
+			size_t comma_pos = src.find(',');
+
+			// last value does not end with comma
+			if (cnt == 3) {
+					std::stringstream ssStream(src);
+					ssStream >> quat[cnt];
+
+					if (!ssStream)
+						throw runtime_error(string("DVariant::StringToQuaternion - Parse error for ") + str);
+			} else {
+				if (comma_pos != string::npos) {
+					std::stringstream ssStream(src.substr(0, comma_pos));
+					ssStream >> quat[cnt];
+					ssStream.clear();
+
+					if (!ssStream)
+						throw runtime_error(string("DVariant::StringToQuaternion - Parse error for ") + str);
+
+					src = src.substr(comma_pos + 1, src.length() - (comma_pos + 1));
+				} else {
+					throw runtime_error(string("DVariant::StringToQuaternion - Parse error for ") + str);
+				}
+			}
+
+			cnt++;
+		}
+
+		// make a vector3 out of the array, and return
+		return Quaternion(quat[0], quat[1], quat[2], quat[3]);
 	}
 
 	//------------------------------------

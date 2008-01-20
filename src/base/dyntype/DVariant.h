@@ -27,6 +27,10 @@
 #include "integers.h"
 #include "RefCounted.h"
 
+#include <OgreQuaternion.h>
+
+using Ogre::Quaternion;
+
 namespace Opde {
 	/** a variant class. This is a class that stores a value of a certain type. */
 	class DVariant {
@@ -47,7 +51,9 @@ namespace Opde {
 				/** String type. Shared */
 				DV_STRING	= 5, 
 				/** Vector type. Shared */
-				DV_VECTOR	= 6
+				DV_VECTOR	= 6,
+				/** Quaternion type. Shared */
+				DV_QUATERNION = 7
 			} Type;
 			
 			/** Construct an invalid, empty DVariant instance. */
@@ -101,6 +107,10 @@ namespace Opde {
 			/** Vector3 constructor.
 			* @param vec the source vector to copy value from */
 			DVariant(const Vector3& vec);
+			
+			/** Quaternion constructor.
+			* @param ori the source orientation quaternion to copy value from */
+			DVariant(const Quaternion& ori);
 
 			/** Destructor */
 			virtual ~DVariant();
@@ -136,6 +146,10 @@ namespace Opde {
 			* @throw runtime_error if not convertible */
 			Vector3 toVector() const;
 			
+			/** converts the inner value to Quaternion, if possible.
+			* @throw runtime_error if not convertible */
+			Quaternion toQuaternion() const;
+			
 			/** Asignment operator. Shared pointers are released if needed */
 			const DVariant& operator =(const DVariant& b);
 			
@@ -150,9 +164,12 @@ namespace Opde {
 			/** Asignment operator */
 			const DVariant& operator =(char* s);
 			/** Asignment operator */
-			const DVariant& operator =(std::string s);
+			const DVariant& operator =(const std::string& s);
 			/** Asignment operator */
-			const DVariant& operator =(Vector3 v);
+			const DVariant& operator =(const Vector3& v);
+			/** Asignment operator */
+			const DVariant& operator =(const Quaternion& v);
+			
 			
 			/** Type identifier. Returns the Type of the variant's value */
 			Type type() const;
@@ -209,6 +226,12 @@ namespace Opde {
 			* @param str The string to be parsed 
 			* @throw runtime_error if unsupported format is encountered */
 			static Vector3 StringToVector(const std::string& str);
+			
+			/** Helper conversion routine : Quaternion from string 
+			* Takes comma separated values (first 4 - w,x,y,z, ignoring any further text) 
+			* @param str The string to be parsed 
+			* @throw runtime_error if unsupported format is encountered */
+			static Quaternion StringToQuaternion(const std::string& str);
 			
 			/** Helper conversion routine : int from String 
 			* @param str the string to be parsed
