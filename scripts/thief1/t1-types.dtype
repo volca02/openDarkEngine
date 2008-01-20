@@ -632,25 +632,25 @@ bitfield voiceoverflags {
 }
 
 
-struct vector {
-	float x
-	float y
-	float z
-}
+//struct vector {
+//	float x
+//	float y
+//	float z
+//}
 
 
-struct int-vector {
-	int32 x
-	int32 y
-	int32 z
-}
+//struct int-vector {
+//	int32 x
+//	int32 y
+//	int32 z
+//}
 
 
-struct short-vector {
-	int16 x
-	int16 y
-	int16 z
-}
+//struct short-vector {
+//	int16 x
+//	int16 y
+//	int16 z
+//}
 
 
 // struct var-string {
@@ -1824,7 +1824,7 @@ namespace properties {
 		struct attachment [4] {
 			int32 object
 			uint32 use meshjoint joint
-			alias short-vector angle
+			shortvec angle
 			uint16 zero
 			vector offset
 		}
@@ -2131,7 +2131,7 @@ namespace properties {
 		vector position
 		int16 cell = "-1"
 		int16 zero = "-1"
-		alias short-vector facing
+		shortvec facing
 	}
 
 	
@@ -2197,12 +2197,12 @@ namespace properties {
 		vector closedposition
 		vector openposition
 		vector startposition
-		alias short-vector startfacing
+		shortvec startfacing
 		float unknown
 		int32 room [2]
 		bool32 clockwise
-		alias short-vector haltclose
-		alias short-vector haltopen
+		shortvec haltclose
+		shortvec haltopen
 	}
 
 	
@@ -2465,7 +2465,7 @@ namespace properties {
 		vector closedposition
 		vector openposition
 		vector startposition
-		alias short-vector startfacing
+		shortvec startfacing
 		float unknown
 		int32 room [2]
 	}
@@ -3188,7 +3188,7 @@ namespace chunks {
 	//	
 	// 	struct anchor [256] {
 	// 		vector position
-	// 		alias short-vector rotation [256]
+	// 		shortvec rotation [256]
 	// 		uint32 flags
 	// 		int16 use physaxistype axis
 	// 		int8 zero
@@ -3197,7 +3197,7 @@ namespace chunks {
 	// 	
 	// 	struct delta [256] {
 	// 		vector position
-	// 		alias short-vector rotation [256]
+	// 		shortvec rotation [256]
 	// 	}
 	// 
 	// }

@@ -1496,6 +1496,8 @@ property PsiPowerD {
 property Position {
 	label "Position"
 	p_ver 2.65558
+	inherit never
+	cached
 }
 
 property AI_Device {

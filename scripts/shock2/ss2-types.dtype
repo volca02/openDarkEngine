@@ -950,11 +950,11 @@ struct int-vector {
 }
 
 
-struct short-vector {
-	int16 x
-	int16 y
-	int16 z
-}
+// struct short-vector {
+//	int16 x
+//	int16 y
+//	int16 z
+//}
 
 struct color {
 	float r
@@ -1950,7 +1950,7 @@ namespace properties {
 	// Label: CameraAttach
 	struct CameraObj {
 		vector offset
-		alias short-vector facing
+		shortvec facing
 		int16 zero
 		bool32 lockxaxis
 		bool32 lockyaxis
@@ -2780,7 +2780,7 @@ namespace properties {
 		struct attachment [4] {
 			int32 object
 			uint32 use meshjoint joint
-			alias short-vector angle
+			shortvec angle
 			uint16 zero [4]
 			vector offset [4]
 		}
@@ -3137,7 +3137,7 @@ namespace properties {
 		vector position
 		int16 cell = "-1"
 		int16 zero = "-1"
-		alias short-vector facing
+		shortvec facing
 	}
 
 	
@@ -3341,12 +3341,12 @@ namespace properties {
 		vector closedposition
 		vector openposition
 		vector startposition
-		alias short-vector startfacing
+		shortvec startfacing
 		float unknown
 		int32 room [2]
 		bool32 clockwise
-		alias short-vector haltclose
-		alias short-vector haltopen
+		shortvec haltclose
+		shortvec haltopen
 	}
 
 	
@@ -3710,7 +3710,7 @@ namespace properties {
 		vector closedposition
 		vector openposition
 		vector startposition
-		alias short-vector startfacing
+		shortvec startfacing
 		float unknown
 		int32 room [2]
 	}
