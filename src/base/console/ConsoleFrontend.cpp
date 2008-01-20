@@ -22,8 +22,11 @@
 
 #include "ConsoleBackend.h"
 #include "ConsoleFrontend.h"
+#include "OpdeException.h"
+
 #include <OIS.h>
 #include <string.h>
+
 
 using namespace Ogre;
 using namespace OIS;
@@ -36,6 +39,11 @@ namespace Opde {
 		mOverlayMgr = OverlayManager::getSingletonPtr();
 
 		mConsoleOverlay = OverlayManager::getSingleton().getByName("Opde/Console");
+
+		if (mConsoleOverlay == NULL)
+			OPDE_EXCEPT("Could not create console overlay!", "ConsoleFrontend::ConsoleFrontend");
+			
+			
 		mConsoleOverlay->hide();
 
 		// prepare the handle to the Opde/CommandLine
