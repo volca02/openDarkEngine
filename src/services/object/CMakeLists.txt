@@ -5,6 +5,7 @@ include_directories (
     ${OGRE_INCLUDE_DIR} 
     ${OPDE_BINARY_DIR}
     ${OPDE_BASE_INCLUDES}
+    ${OPDE_SOURCE_DIR}/src/scenemanager/
     ${OPDE_SERVICE_INCLUDES}
 )
 
