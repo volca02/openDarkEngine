@@ -32,10 +32,19 @@
 #include <cctype>
 #include <algorithm>
 #include <string>
+
 #include "integers.h"
 #include "OpdeException.h"
 
+#include <OgreMath.h>
+#include <OgreMatrix3.h>
+
 using namespace std;
+
+using Ogre::Math;
+using Ogre::Radian;
+using Ogre::Matrix3;
+using Ogre::Quaternion;
 
 namespace Opde {
 	class DTypeDef;
@@ -254,6 +263,10 @@ namespace Opde {
 		// Vector with size != 12
 		if (templ.type() == DVariant::DV_VECTOR && size != 12)
 			OPDE_EXCEPT("Only 12-byte float vectors are supported", "DTypeDef::DTypeDef");
+			
+		// Short Vector with size != 6 (converted to quaternion on usage)
+		if (templ.type() == DVariant::DV_QUATERNION && size != 6)
+			OPDE_EXCEPT("Only 6-byte short vectors are supported", "DTypeDef::DTypeDef");
 
 		// Bitfield controled field which is not uint
 
@@ -287,6 +300,10 @@ namespace Opde {
 		// Vector with size != 12
 		if (type == DVariant::DV_VECTOR && size != 12)
 			OPDE_EXCEPT("Only 12-byte float vectors are supported", "DTypeDef::DTypeDef");
+			
+		// Short Vector with size != 6 (converted to quaternion on usage)
+		if (type == DVariant::DV_QUATERNION && size != 6)
+			OPDE_EXCEPT("Only 6-byte short vectors are supported", "DTypeDef::DTypeDef");
 
 		// Bitfield controled field which is not uint
 
@@ -600,30 +617,52 @@ namespace Opde {
 			}
 
 		} else if(mPriv->type() == DVariant::DV_STRING) {
-				// special - either zero terminated, fixed size, or length specified as a first byte.
-				// I can only support the variable length string alone, which is ok
-				if (mPriv->size() == -1) {// Variable length string
-					// First 4 bytes size uint, then data
-					uint32_t* uptr = reinterpret_cast<uint32_t*>(ptr);
+			// special - either zero terminated, fixed size, or length specified as a first byte.
+			// I can only support the variable length string alone, which is ok
+			if (mPriv->size() == -1) {// Variable length string
+				// First 4 bytes size uint, then data
+				uint32_t* uptr = reinterpret_cast<uint32_t*>(ptr);
 
-					return DVariant(reinterpret_cast<char*>(uptr + 1), *uptr);
-				} else {
-					// compose a string out of the buffer (max len is mSize, can be less)
-					int len = strlen(reinterpret_cast<char*>(ptr));
-					return DVariant(reinterpret_cast<char*>(ptr), std::min(mPriv->size(), len));
-				}
+				return DVariant(reinterpret_cast<char*>(uptr + 1), *uptr);
+			} else {
+				// compose a string out of the buffer (max len is mSize, can be less)
+				int len = strlen(reinterpret_cast<char*>(ptr));
+				return DVariant(reinterpret_cast<char*>(ptr), std::min(mPriv->size(), len));
+			}
 
-				OPDE_EXCEPT("String not supported now", "DTypeDef::_get");
+			OPDE_EXCEPT("String not supported now", "DTypeDef::_get");
 
 		} else if(mPriv->type() == DVariant::DV_VECTOR) {
-				float x, y, z;
-				float* fptr = (float*)ptr;
+			float x, y, z;
+			float* fptr = (float*)ptr;
 
-				x = *fptr; // TODO: Compile-time float size check (has to be 4 to let this work)
-				y = *(fptr+1);
-				z = *(fptr+2);
+			x = *fptr; // TODO: Compile-time float size check (has to be 4 to let this work)
+			y = *(fptr+1);
+			z = *(fptr+2);
 
-				return DVariant(Vector3(x, y, z));
+			return DVariant(Vector3(x, y, z));
+		} else if(mPriv->type() == DVariant::DV_QUATERNION) {
+			// 3 short ints, converted to quaternion
+			// This seems kinda time consuming, so it should be probably cached
+			// Also, this seems to still have some conversion problems
+			// And lastly: One loses precision when converting to and from 16 bit short vector!
+			// Maybe we should support some kind of additional storage
+			Ogre::Real x,y,z;
+			
+			int16_t* rot = reinterpret_cast<int16_t*>(ptr);
+
+			x = ((float)(rot[0]) / 32768) * Math::PI; // heading - y
+			y = ((float)(rot[1]) / 32768) * Math::PI; // pitch - x
+			z = ((float)(rot[2]) / 32768) * Math::PI; // bank - z
+
+			Matrix3 m;
+		
+			// Still not there, but close
+			m.FromEulerAnglesYXZ(Radian(y), Radian(x), Radian(z));
+			Quaternion q;
+			q.FromRotationMatrix(m);
+			
+			return DVariant(q);
 		} else {
 			OPDE_EXCEPT("Unsupported type", "DTypeDef::_get");
 		}
@@ -750,6 +789,25 @@ namespace Opde {
 				*(fptr+2) = v.z;
 
 				return ptr;
+		} else if(mPriv->type() == DVariant::DV_QUATERNION) {
+			int16_t* vptr = reinterpret_cast<int16_t*>(ptr);
+			
+			Quaternion q = val.toQuaternion();
+			
+			Matrix3 m;
+			
+			q.ToRotationMatrix(m);
+			
+			Radian x,y,z;
+			
+			// Still not there, but close
+			m.ToEulerAnglesYXZ(x, y, z);
+		
+			int16_t rot = *reinterpret_cast<int16_t*>(ptr);
+
+			vptr[0] = static_cast<int16_t>(x.valueRadians() * 32768 / Math::PI);
+			vptr[1] = static_cast<int16_t>(y.valueRadians() * 32768 / Math::PI);
+			vptr[2] = static_cast<int16_t>(z.valueRadians() * 32768 / Math::PI);
 		} else {
 			OPDE_EXCEPT("Unsupported _set type", "DTypeDef::_set");
 		}

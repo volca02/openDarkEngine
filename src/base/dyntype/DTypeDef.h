@@ -331,7 +331,7 @@ namespace Opde {
 	class DType {
 		public:
 			/** Copy constructor. Copies the data and the type definition from another DType instance */
-			DType(const DType& b) {
+			DType(const DType& b, bool useCache = false) : mCache(), mUseCache(useCache) {
 				char* odata = mData;
 				
 				int sz = b.size();
@@ -341,12 +341,13 @@ namespace Opde {
 				memcpy(mData, b.mData, sz);
 				
 				mType = b.mType;
+				mCache = b.mCache;
 				
 				delete[] odata;
 			}
 			
 			/** Empty constructor. Constructs a new type instance using the default values. */
-			DType(DTypeDefPtr type) : mType(type) {
+			DType(DTypeDefPtr type, bool useCache = false) : mType(type), mUseCache(useCache) {
 				assert(!mType.isNull()); // no type def, no meaning!
 				
 				mData = mType->create();
@@ -356,7 +357,7 @@ namespace Opde {
 			* @param file The file used as data source 
 			* @param size The size of the data expected
 			* @note for dynamic size types (variable length strings), the size should be the overall length of the data (32bits size + the data itself) */
-			DType(DTypeDefPtr type, FilePtr file, uint _size) : mType(type) {
+			DType(DTypeDefPtr type, FilePtr file, uint _size, bool useCache = false) : mType(type), mUseCache(useCache) {
 				if (mType->size() < 0) { // dyn. size. we have to use the size
 					// Size always has to be at least 4 bytes
 					assert(_size >= sizeof(uint32_t));
@@ -392,11 +393,27 @@ namespace Opde {
 					mData = ndata;
 					delete odata;
 				}
+				
+				// cache value if so requested
+				if (mUseCache)
+					mCache[field] = value;
 			}
 			
 			/** Value getter. 
 			* @see DTypeDef.get */
 			DVariant get(const std::string& field) const {
+				if (mUseCache) {
+					ValueCache::const_iterator it = mCache.find(field);
+					
+					if (it != mCache.end())
+						return it->second;
+					else {
+						// No value cached, cache now
+						DVariant val = mType->get(mData, field);
+						mCache[field] = val;
+					}
+				} 
+				
 				return mType->get(mData, field);
 			}
 			
@@ -411,6 +428,9 @@ namespace Opde {
 				memcpy(mData, b.mData, sz);
 				
 				mType = b.mType;
+				
+				mUseCache = b.mUseCache;
+				mCache = b.mCache;
 				
 				delete[] odata;
 				
@@ -439,6 +459,11 @@ namespace Opde {
 		protected:
 			DTypeDefPtr mType;
 			char* mData; 
+			bool mUseCache; // cache for values is used
+			
+			typedef std::map<std::string, DVariant> ValueCache;
+			
+			ValueCache mCache;
 	};
 	
 	typedef shared_ptr< DType > DTypePtr;
