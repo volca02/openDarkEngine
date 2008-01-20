@@ -35,6 +35,7 @@
 #include "OgreDarkSceneManager.h"
 #include "MessageSource.h"
 #include "LoopService.h"
+#include "ObjectService.h"
 
 #include <OgreEntity.h>
 #include <OgreSceneNode.h>
@@ -93,16 +94,22 @@ namespace Opde {
 			*/
             Ogre::Camera* getDefaultCamera();
 
+			// TODO: Here, we need some code to gather possible resolutions to switch to (to fill the GUI with options).
 			/// Screen size setter. Please use this instead of the Ogre::RenderWindow methods, as it broadcasts a message about the change
 			void setScreenSize(bool fullScreen, unsigned int width, unsigned int height);
 
+
+			/** Simplified version of the SpecialCaseRenderQueue switching. Enables/Disables world display based on SCRQ_INCLUDE/SCRQM_EXCLUDE
+				@param visible If set to true, normal rendering takes place, false causes only overlay render queue to be processed
+			*/
+			void setWorldVisible(bool visible);
+			
 		protected:
             virtual bool init();
             virtual void bootstrapFinished();
             
 			virtual void loopStep(float deltaTime);
 
-            void onPropPositionMsg(const PropertyChangeMsg& msg);
             void onPropModelNameMsg(const PropertyChangeMsg& msg);
 
             void createSceneNode(const PropertyChangeMsg& msg);
@@ -119,8 +126,6 @@ namespace Opde {
 
             void clear();
 
-            static Ogre::Quaternion toOrientation(PropertyDataPtr posdata);
-
 			/// Map of objectID -> Entity
 			typedef std::map<int, Ogre::Entity*> ObjectEntityMap;
 			/// Map of objectID -> SceneNode (To which the Entity connects)
@@ -130,10 +135,7 @@ namespace Opde {
 			ObjectSceneNodeMap mSceneNodeMap;
 			ObjectEntityMap mEntityMap;
 
-			// Listener structs for property messages. We have 2 now: Position and ModelName
-			PropertyGroup::ListenerID mPropPositionListenerID;
-			PropertyGroupPtr mPropPosition;
-
+			// Listener structs for property messages
 			PropertyGroup::ListenerID mPropModelNameListenerID;
 			PropertyGroupPtr mPropModelName;
 
@@ -157,6 +159,9 @@ namespace Opde {
 			
 			/// Pointer for loop service
 			LoopServicePtr mLoopService;
+			
+			/// Shared ptr to object service (for scene nodes)
+			ObjectServicePtr mObjectService;
 	};
 
 	/// Shared pointer to Link service

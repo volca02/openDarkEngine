@@ -25,6 +25,7 @@
 #include "RenderService.h"
 
 #include "PropertyService.h"
+#include "ObjectService.h"
 
 #include "logger.h"
 #include "ServiceCommon.h"
@@ -75,9 +76,6 @@ namespace Opde {
 		// one thanks to the shared_ptr. This means using the scene manager/whatever
 		// is safe outside this class as long as it is done in a service which has 
 		// a member pointer to render service
-
-		if (!mPropPosition.isNull())
-		    mPropPosition->unregisterListener(mPropPositionListenerID);
 
 		if (!mPropModelName.isNull())
 		    mPropModelName->unregisterListener(mPropModelNameListenerID);
@@ -182,13 +180,22 @@ namespace Opde {
 	}
 	
 	// --------------------------------------------------------------------------
+	void RenderService::setWorldVisible(bool visible) {
+		mSceneMgr->clearSpecialCaseRenderQueues();
+		
+		if (visible) {
+			mSceneMgr->setSpecialCaseRenderQueueMode(SceneManager::SCRQM_EXCLUDE);
+		} else {
+			mSceneMgr->addSpecialCaseRenderQueue(RENDER_QUEUE_OVERLAY);
+			mSceneMgr->setSpecialCaseRenderQueueMode(SceneManager::SCRQM_INCLUDE);
+		}
+	}
+	
+	// --------------------------------------------------------------------------
 	void RenderService::bootstrapFinished() {
 		// Property Service should have created us automatically through service masks.
 		// So we can register as a link service listener
 		LOG_INFO("RenderService::bootstrapFinished()");
-
-		PropertyGroup::ListenerPtr cposc =
-			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropPositionMsg);
 
 		PropertyGroup::ListenerPtr cmodelc =
 			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropModelNameMsg);
@@ -201,19 +208,14 @@ namespace Opde {
 
 		mPropertyService = ServiceManager::getSingleton().getService("PropertyService").as<PropertyService>();
 
-		mPropPosition = mPropertyService->getPropertyGroup("Position");
-
-		if (mPropPosition.isNull())
-            OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "RenderService::bootstrapFinished");
-
-		mPropPositionListenerID = mPropPosition->registerListener(cposc);
-
 		mPropModelName = mPropertyService->getPropertyGroup("ModelName"); // TODO: hardcoded, maybe not a problem after all
 
 		if (mPropModelName.isNull())
             OPDE_EXCEPT("Could not get ModelName property group. Not defined. Fatal", "RenderService::bootstrapFinished");
 
 		mPropModelNameListenerID = mPropModelName->registerListener(cmodelc);
+		
+		mObjectService = ServiceManager::getSingleton().getService("ObjectService").as<ObjectService>();
 
 		LOG_INFO("RenderService::bootstrapFinished() - done");
 	}
@@ -223,43 +225,6 @@ namespace Opde {
 		// Rendering step...
 		mRoot->renderOneFrame();
 		Ogre::WindowEventUtilities::messagePump();
-	}
-
-	// --------------------------------------------------------------------------
-	void RenderService::onPropPositionMsg(const PropertyChangeMsg& msg) {
-		// Update the scene node's position and orientation
-		// (hrm. The BspSceneNode should report cell it is in for us, but well, there is no need besides SaveGame compatibility)
-		// Two keys are interesting: position and facing
-		// TODO: Could we hijack the system so that the facing would be implemented by quaternions? Would this be worth the trouble?
-		// If there is no sceneNode, we'll create one for messages about change and create
-		if (msg.change == PROP_GROUP_CLEARED) {
-                clear();
-                return;
-		}
-
-		if (msg.objectID <= 0) // no action for archetypes
-            return;
-
-        // LOG_INFO("RenderService: Setting position for node of object %d", msg.objectID);
-
-		switch (msg.change) {
-			case PROP_ADDED   :
-			case PROP_CHANGED : {
-                // Find the scene node by it's object id, and update the position and orientation
-                SceneNode* node = getSceneNode(msg.objectID, true);
-                Vector3 position = msg.data->get("position").toVector();
-                node->setPosition(position);
-
-                LOG_INFO("RenderService: Setting position for node of object %d: %10.2f %10.2f %10.2f", msg.objectID, position.x, position.y, position.z);
-                // Convert the orientation to quaternion
-                node->setOrientation(toOrientation(msg.data));
-
-				break;
-			}
-            case PROP_REMOVED:
-                removeSceneNode(msg);
-                break;
-		}
 	}
 
 	// --------------------------------------------------------------------------
@@ -292,8 +257,15 @@ namespace Opde {
                         // Entity *ent = mSceneMgr->createEntity( "Object" + StringConverter::toString(msg.objectID), "jaiqua.mesh" );
 
                         // bind the ent to the node of the obj.
-                        SceneNode* node = getSceneNode(msg.objectID, true);
-
+                        SceneNode* node = NULL;
+                        
+                        try {
+							node = mObjectService->getSceneNodeForObject(msg.objectID);
+						} catch (BasicException& e) {
+							LOG_ERROR("RenderService: Could not get the sceneNode for object %d! Not attaching object model!", msg.objectID);
+							return;
+						}
+						
                         node->attachObject(ent);
 
                         ent->_initialise(true);
@@ -311,6 +283,7 @@ namespace Opde {
 
 							ent->getSkeleton()->setBindingPose();
                         }
+                        // TODO: Register the entity in some map
 
                     } catch (FileNotFoundException &e) {
                         LOG_ERROR("RenderService: Could not find the requested model %s (exception encountered)", name.c_str());
@@ -326,59 +299,6 @@ namespace Opde {
                 break;
 		}
 	}
-
-    // --------------------------------------------------------------------------
-    void RenderService::createSceneNode(const PropertyChangeMsg& msg) {
-        // Search for scene node, if not created, create. then set position
-        ObjectSceneNodeMap::iterator it = mSceneNodeMap.find(msg.objectID);
-
-        if (it == mSceneNodeMap.end()) {
-            SceneNode * node = mSceneMgr->createSceneNode("Object" + StringConverter::toString(msg.objectID));
-            mSceneNodeMap.insert(make_pair(msg.objectID, node));
-        }
-
-        setSceneNodePosition(msg);
-    }
-
-    // --------------------------------------------------------------------------
-    void RenderService::setSceneNodePosition(const PropertyChangeMsg& msg) {
-        ObjectSceneNodeMap::iterator it = mSceneNodeMap.find(msg.objectID);
-
-        if (it != mSceneNodeMap.end()) {
-            Vector3 position  = msg.data->get("position").toVector();
-            it->second->setPosition(position);
-
-            // Convert the orientation to quaternion
-            it->second->setOrientation(toOrientation(msg.data));
-        }
-    }
-
-    // --------------------------------------------------------------------------
-    SceneNode* RenderService::getSceneNode(int objID, bool create) {
-        ObjectSceneNodeMap::iterator it = mSceneNodeMap.find(objID);
-
-        if (it != mSceneNodeMap.end()) {
-            return it->second;
-        } else {
-            if (create) {
-                SceneNode * node = mSceneMgr->createSceneNode("Object" + StringConverter::toString(objID));
-                mSceneNodeMap.insert(make_pair(objID, node));
-                mSceneMgr->getRootSceneNode()->addChild(node);
-                return node;
-            } else {
-                return NULL;
-            }
-        }
-    }
-
-    // --------------------------------------------------------------------------
-    void RenderService::removeSceneNode(const PropertyChangeMsg& msg) {
-        ObjectSceneNodeMap::iterator it = mSceneNodeMap.find(msg.objectID);
-
-        if (it != mSceneNodeMap.end()) {
-            mSceneNodeMap.erase(it);
-        }
-    }
 
     // --------------------------------------------------------------------------
     void RenderService::prepareMesh(const Ogre::String& name) {
@@ -411,28 +331,6 @@ namespace Opde {
         mSceneNodeMap.clear();
         mEntityMap.clear();
     }
-
-
-    // --------------------------------------------------------------------------
-    Ogre::Quaternion RenderService::toOrientation(PropertyDataPtr posdata) {
-        // Hmm. ok. we have 3 values - x,y,z
-        Ogre::Real x,y,z;
-
-        x = (posdata->get("facing.x").toFloat() / 32768) * Math::PI; // heading - y
-        y = (posdata->get("facing.y").toFloat() / 32768) * Math::PI; // pitch - x
-        z = (posdata->get("facing.z").toFloat() / 32768) * Math::PI; // bank - z
-
-        Matrix3 m;
-
-        // Still not there, but close
-        m.FromEulerAnglesYXZ(Radian(y),Radian(x),Radian(z));
-        Quaternion q;
-        q.FromRotationMatrix(m);
-
-        return  q;
-    }
-
-
 
 	//-------------------------- Factory implementation
 	std::string RenderServiceFactory::mName = "RenderService";
