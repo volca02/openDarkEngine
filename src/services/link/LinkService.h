@@ -83,24 +83,19 @@ namespace Opde {
 			* @note Do NOT call this directly unless you know what it does
 			*/
 			void objectDestroyed(int id);
+			
+			/** load links from a single database */
+			void load(FileGroupPtr db);
+
+			/** Saves the links and link data according to the saveMask */
+			void save(FileGroupPtr db, uint saveMask);
+
+			/** Clears all the data and the relation mappings */
+			void clear();
 
 		protected:
             bool init();
             void bootstrapFinished();
-
-			/** Database change callback */
-            void onDBChange(const DatabaseChangeMsg& m);
-
-			/** load links from a single database */
-			void _load(FileGroupPtr db);
-
-			/** Saves the links and link data according to the saveMask */
-			void _save(FileGroupPtr db, uint saveMask);
-
-
-
-			/** Clears all the data and the relation mappings */
-			void _clear();
 
 			/** request a mapping Name->Flavor and reverse
 			* @param id The flavor value requested
@@ -126,9 +121,6 @@ namespace Opde {
 
 			/// Relations chunk versions
 			uint mRelVMaj, mRelVMin;
-
-            /// Database callback
-            DatabaseService::ListenerPtr mDbCallback;
 
             /// Database service
             DatabaseServicePtr mDatabaseService;

@@ -158,6 +158,14 @@ namespace Opde {
 			* @param id the object id to remove all links from
 			*/
 			void objectDestroyed(int id);
+			
+			/** Sets the relation to cache link data (caches fields so no direct to/from data will be used on loading) 
+			* @param cache if true, writes will set a the value in a cache as well, and reads will search cache first
+			*/
+			void setCacheData(bool cache) { mUseDataCache = cache; };
+			
+			/** @return true if cache for data is used, false otherwise */
+			bool getCacheData() { return mUseDataCache; };
 
 		protected:
             class MultiTargetLinkQueryResult;
@@ -264,6 +272,10 @@ namespace Opde {
 			uint mLCVMin;
 			uint mDCVMaj;
 			uint mDCVMin;
+			
+			/// If true, data caching will be used
+			bool mUseDataCache;
+
 	};
 
 

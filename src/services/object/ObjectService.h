@@ -1,4 +1,4 @@
-/******************************************************************************
+ /******************************************************************************
  *
  *    This file is part of openDarkEngine project
  *    Copyright (C) 2005-2006 openDarkEngine team
@@ -35,6 +35,8 @@
 #include "InheritService.h"
 #include "PropertyService.h"
 
+#include <OgreSceneManager.h>
+
 #include <stack>
 
 namespace Opde {
@@ -56,7 +58,7 @@ namespace Opde {
 		int id;
 	};
 
-	/** @brief Object service - service managing in-game objects
+	/** @brief Object service - service managing in-game objects. Holder of the object's scene nodes
 	*/
 	class ObjectService : public Service, public MessageSource<ObjectServiceMsg> {
 		public:
@@ -77,12 +79,27 @@ namespace Opde {
 			/// Returns true if the object exists, false otherwise
 			bool exists(int objID);
 			
+			// @returns Object's position or 0,0,0 if the object is abstract or has no position yet (while loading f.e.)
+			// TODO: Vector3 getObjectPosition(int objID);
+			
+			// @returns Object's orientation or Quaternion::IDENTITY if the object has no orientation
+			// TODO: Quaternion getObjectOrientation(int objID);
+			
+			/** Getter for SceneNodes of objects. Those only exist for concrete objects.
+			@returns The scene node of the object id (only for concrete objects)
+			@throws BasicException if the method is used on archetypes or on invalid object id (unused id)
+			*/
+			Ogre::SceneNode* getSceneNodeForObject(int objID);
+			
 		protected:
 			bool init();
 			void bootstrapFinished();
 
 			/** Database change callback */
 			void onDBChange(const DatabaseChangeMsg& m);
+			
+			/// Position property changed callback
+			void onPropPositionMsg(const PropertyChangeMsg& msg);
 
 			/** load links from a single database */
 			void _load(FileGroupPtr db, uint clearMask);
@@ -102,6 +119,9 @@ namespace Opde {
 			/// Destroys object, frees accompanying links and properties, broadcasts the change
 			void _destroyObject(int objID);
 			
+			/// Prepares for object. Does necessary steps to fully accept the object (f.e. creates SceneNode for concrete objects)
+			void _prepareForObject(int objID);
+			
 			/// Returns a new free archetype ID. Modifies the mMinID/mMaxID as appropriate, removes the ID from the free id's
 			int getFreeID(bool archetype);
 			
@@ -110,6 +130,9 @@ namespace Opde {
 			
 			/// Resets the min and max id's to some sane values (uses config service values obj_min and obj_max if found)
 			void resetMinMaxID();
+			
+			/// Converts the properties orientation to quaternion
+            static Ogre::Quaternion toOrientation(PropertyDataPtr posdata);
 
 			/** A database of used ID's */
 			typedef std::set<int> ObjectAllocation;
@@ -123,8 +146,14 @@ namespace Opde {
 			/// Name to object map
 			typedef std::map<std::string, int> NameToObject;
 			
+			/// Object id to scene node (only concrete objects)
+			typedef std::map<int, Ogre::SceneNode*> ObjectToNode;
+			
 			/// A set of allocated objects
 			ObjectAllocation mAllocatedObjects;
+			
+			/// Mapping of object id to scenenode
+			ObjectToNode mObjectToNode;
 			
 			/// Database callback
 			DatabaseService::ListenerPtr mDbCallback;
@@ -155,6 +184,12 @@ namespace Opde {
 			
 			/// A shared ptr to property service
 			PropertyServicePtr mPropertyService;
+			
+			PropertyGroup::ListenerID mPropPositionListenerID;
+			PropertyGroupPtr mPropPosition;
+			
+			/// Scene manager pointer
+			Ogre::SceneManager* mSceneMgr;
 	};
 
 	/// Shared pointer to the service

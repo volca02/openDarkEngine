@@ -189,6 +189,15 @@ namespace Opde {
 			
 			/** Notification that an object was destroyed. @see PropertyService::objectDestroyed */
 			void objectDestroyed(int id);
+			
+			
+			/** Sets the property group to cache data (caches fields so no direct to/from data will be used on loading) 
+			* @param cache if true, writes will set a the value in a cache as well, and reads will search cache first
+			*/
+			void setCacheData(bool cache) { mUseDataCache = cache; };
+			
+			/** @return true if cache for data is used, false otherwise */
+			bool getCacheData() { return mUseDataCache; };
 
 		protected:
 			/** Inserts the property into the group, notifies inheritors and broadcasts the change
@@ -233,6 +242,9 @@ namespace Opde {
 
 			/// Inheritor value changes listener
 			Inheritor::ListenerID mInheritorListenerID;
+			
+			/// If true, data caching will be used
+			bool mUseDataCache;
 	};
 
 	/// Shared pointer to property group

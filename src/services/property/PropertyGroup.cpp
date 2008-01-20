@@ -91,9 +91,9 @@ namespace Opde {
 			if (id == 0)
 				LOG_ERROR("PropertyGroup: P$%s : Obj ID == 0", mChunkName.c_str());
 
-			LOG_DEBUG("PropertyGroup: P$%s : Loading property %s for obj %d (Sizes: real %d, type %d)", mChunkName.c_str(), mName.c_str(), id, size, mType->size());
+			LOG_VERBOSE("PropertyGroup: P$%s : Loading property %s for obj %d (Sizes: real %d, type %d)", mChunkName.c_str(), mName.c_str(), id, size, mType->size());
 			// create the property
-			PropertyDataPtr prop = new PropertyData(id, mType, fprop, size);
+			PropertyDataPtr prop = new PropertyData(id, mType, fprop, size, mUseDataCache);
 
 			if (!_addProperty(prop))
 				LOG_ERROR("PropertyGroup: P$%s : Cannot add property for obj %d (already there)", mChunkName.c_str(), id);
@@ -167,7 +167,7 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	bool PropertyGroup::createProperty(int obj_id) {
-		PropertyDataPtr propd = new PropertyData(obj_id, mType);
+		PropertyDataPtr propd = new PropertyData(obj_id, mType, mUseDataCache);
 
 		return _addProperty(propd);
 	}
@@ -178,7 +178,7 @@ namespace Opde {
 		if (data->type() != mType)
 			OPDE_EXCEPT("Incompatible types when creating property data", "PropertyGroup::createProperty");
 
-		PropertyDataPtr propd = new PropertyData(obj_id, data);
+		PropertyDataPtr propd = new PropertyData(obj_id, data, mUseDataCache);
 
 		return _addProperty(propd);
 	}

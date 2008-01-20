@@ -28,7 +28,13 @@
 #include "ConfigService.h"
 #include "logger.h"
 
+#include "RenderService.h"
+
+#include <OgreStringConverter.h>
+#include <OgreMath.h>
+
 using namespace std;
+using namespace Ogre;
 
 namespace Opde {
 
@@ -38,13 +44,17 @@ namespace Opde {
 	ObjectService::ObjectService(ServiceManager *manager, const std::string& name) : Service(manager, name), 
 			mDatabaseService(NULL),
 			mObjVecVerMaj(0), // Seems to be the same for all versions
-			mObjVecVerMin(2) {
+			mObjVecVerMin(2),
+			mSceneMgr(NULL) {
 	}
 
 	//------------------------------------------------------
 	ObjectService::~ObjectService() {
-            if (!mDatabaseService.isNull())
+		if (!mDatabaseService.isNull())
 	        mDatabaseService->unregisterListener(mDbCallback);
+	        
+		if (!mPropPosition.isNull())
+		    mPropPosition->unregisterListener(mPropPositionListenerID);
 	}
 
 
@@ -71,6 +81,27 @@ namespace Opde {
 	void ObjectService::endCreateObject(int objID) {
 		_endCreateObject(objID);
 	}
+	
+	//------------------------------------------------------
+	bool ObjectService::exists(int objID) {
+		ObjectAllocation::iterator it = mAllocatedObjects.find(objID);
+		
+		return (it != mAllocatedObjects.end());
+	}
+	
+
+	//------------------------------------------------------
+	Ogre::SceneNode* ObjectService::getSceneNodeForObject(int objID) {
+		if (objID > 0) {
+			ObjectToNode::iterator snit = mObjectToNode.find(objID);
+			
+			if (snit != mObjectToNode.end()) {
+				return snit->second;
+			}
+		}
+		
+		OPDE_EXCEPT("Could not find scenenode for object. Does object exist?", "ObjectService::getSceneNodeForObject");
+	}
 
 
 	//------------------------------------------------------
@@ -87,13 +118,30 @@ namespace Opde {
 		mDbCallback = new ClassCallback<DatabaseChangeMsg, ObjectService>(this, &ObjectService::onDBChange);
 
 		mDatabaseService = ServiceManager::getSingleton().getService("DatabaseService").as<DatabaseService>();
-		mDatabaseService->registerListener(mDbCallback, DBP_LINK);
+		mDatabaseService->registerListener(mDbCallback, DBP_OBJECT);
 		
 		mInheritService = ServiceManager::getSingleton().getService("InheritService").as<InheritService>();
 		mLinkService = ServiceManager::getSingleton().getService("LinkService").as<LinkService>();
 		mPropertyService = ServiceManager::getSingleton().getService("PropertyService").as<PropertyService>();
-	}
+		
+		// For SceneNodes
+		RenderServicePtr renderService = ServiceManager::getSingleton().getService("RenderService").as<RenderService>();
+		
+		mSceneMgr = renderService->getSceneManager();
 
+		// listener to the position property to control the scenenode
+		PropertyGroup::ListenerPtr cposc =
+			new ClassCallback<PropertyChangeMsg, ObjectService>(this, &ObjectService::onPropPositionMsg);
+
+
+		mPropPosition = mPropertyService->getPropertyGroup("Position");
+
+		if (mPropPosition.isNull())
+            OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "RenderService::bootstrapFinished");
+
+		mPropPositionListenerID = mPropPosition->registerListener(cposc);
+	}
+	
 	//------------------------------------------------------
 	void ObjectService::onDBChange(const DatabaseChangeMsg& m) {
 	    if (m.change == DBC_DROPPING) {
@@ -122,6 +170,7 @@ namespace Opde {
 			loadMask = 0x02;
 		
 		_load(m.db, loadMask);
+		
 	    } else if (m.change == DBC_SAVING) {
 			// Write the object allocation bitmap, whole (as original dark does it)
 			uint savemask = 0x03; // whole system (archetypes and concretes)
@@ -134,6 +183,31 @@ namespace Opde {
 				
 			_save(m.db, savemask);
 	    }
+	}
+	
+	// --------------------------------------------------------------------------
+	void ObjectService::onPropPositionMsg(const PropertyChangeMsg& msg) {
+		// Update the scene node's position and orientation
+		if (msg.objectID <= 0) // no action for archetypes
+            return;
+
+		switch (msg.change) {
+			case PROP_ADDED   :
+			case PROP_CHANGED : {
+				try {
+					// Find the scene node by it's object id, and update the position and orientation
+					Ogre::SceneNode* node = getSceneNodeForObject(msg.objectID);
+					
+					node->setPosition(msg.data->get("position").toVector());
+					node->setOrientation(msg.data->get("facing").toQuaternion());
+				
+				} catch (BasicException& e) {
+					LOG_ERROR("ObjectService: Exception while setting position of object: %s", e.getDetails().c_str());
+				}
+				
+				break;
+			}
+		}
 	}
 	
 	//------------------------------------------------------
@@ -150,6 +224,8 @@ namespace Opde {
 		f->readElem(&minID, 4);
 		f->readElem(&maxID, 4);
 		
+		LOG_DEBUG("ObjectService: ObjVec MinID %d, MaxID %d", minID, maxID);
+		
 		// set the min and max values. Only set min id if loading archetype, and reverse
 		if (loadMask & 0x01)
 			mMinID = minID;
@@ -159,20 +235,29 @@ namespace Opde {
 		
 		// Load and unpack bitmap
 		// Calculate the objvec bitmap size
-		size_t bsize = mMaxID - mMinID;
+		size_t bsize = (mMaxID - mMinID);
 		
 		if ((bsize & 0x07) != 0) {// alignment of size needed
 			bsize += (8 - (bsize & 0x07));
 		}
 
-		char* bitmap = new char[bsize];
+		bsize /= 8;
+
+		if ((bsize + 8) > f->size()) {
+			LOG_ERROR("Expected ObjVec size is greater than file size (truncating)!");
+			bsize = f->size() - 8;
+		}
+
+		unsigned char* bitmap = new unsigned char[bsize];
+	
+		f->read(bitmap, bsize);
 		
-		// act position in the bitmap
-		size_t s = 0;
+		// actual position in the bitmap
+		int id = minID;
 		
 		if (loadMask == 0x02) { // only concrete
 			// recalc the s to start on obj. id. 0
-			s = -minID >> 3;
+			id = 0;
 			
 			if ((minID & 0x07) != 0) {
 				// compensate the start bits. not aligned to byte
@@ -182,37 +267,53 @@ namespace Opde {
 		
 		int lastID = 0;
 		
+		std::vector<int> objectQueue;
+		
 		// Processes one byte a time
-		while (s < bsize) {
-			char b = bitmap[s];
-			
-			int32_t id = s * 8 + minID;
+		while (id < maxID) {
+			unsigned char b = bitmap[(id - minID) >> 3];
 			
 			if (id >= 0 && archetypeOnly)
 				break;
 			
+			int i = id;
+			
 			while (b) {
 				if (b & 1) {
-					_endCreateObject(id);
-					lastID = id;
+					_prepareForObject(i);
+					objectQueue.push_back(i);
+					lastID = i;
+					LOG_VERBOSE("Found object ID %d", i);
 				}
 				
 				b >>= 1;
-				id++;
+				
+				i++;
 			}
 			
-			// Next byte, please!
+			id += 8;
 		}
+		
+		// Now, inform link service and property service (let them load)
+		mLinkService->load(db);
+		mPropertyService->load(db);
+		
 		
 		// Free all id's that are not in use for reuse
 		for (int i = 0; i < lastID; i++) {
 			// if the bitmaps is zeroed on the position, free the ID for reuse
 			if ((bitmap[(i - minID) >> 3] & (1 << (i & 0x07))) == 0)
 				freeID(i);
-			
 			// TODO: Check if the ID isn't used in properties/links!
 			// TNH's purge bad object's that is
 		}
+		
+		std::vector<int>::iterator oit = objectQueue.begin();
+		
+		// Realise the end of creation of the object
+		for ( ; oit != objectQueue.end(); ++oit)
+			_endCreateObject(*oit);
+		
 		
 		// Done loading the allocation, dealloc the bitmap
 		delete[] bitmap;
@@ -231,10 +332,14 @@ namespace Opde {
 				ObjectAllocation::iterator cur = it++;
 				
 				if ((*cur < 0 && clearArchetypes) || (*cur > 0 && clearConcretes))
-					_destroyObject(*cur); // TODO: Will this work I wonder? The iterator should still be valid
+					_destroyObject(*cur); // Will remove properties and links fine
 			}
 		} else { // Total cleanup
+			mLinkService->clear();
+			mPropertyService->clear();
+
 			resetMinMaxID();
+			
 			mAllocatedObjects.clear();
 			
 			while (mFreeArchetypeIDs.size())
@@ -269,14 +374,14 @@ namespace Opde {
 			bsize += (8 - (bsize & 0x07));
 		}
 		
-		char* bitmap = new char[bsize];
+		unsigned char* bitmap = new unsigned char[bsize];
 		memset(bitmap, 0, bsize);
 		
 		ObjectAllocation::const_iterator it = mAllocatedObjects.begin();
 		
 		while (it != mAllocatedObjects.end()) {
 			// set the appropriate bit
-			int id = *it;
+			int id = *it - mMinID;
 			
 			bitmap[id >> 3] |= 1 << (id & 0x07);
 		}
@@ -289,6 +394,10 @@ namespace Opde {
 		ovf->write(bitmap, bsize);
 		
 		delete[] bitmap;
+		
+		// serialize the properties and links
+		mLinkService->save(db, saveMask);
+		mPropertyService->save(db, saveMask);
 	}
 	
 	//------------------------------------------------------
@@ -296,6 +405,8 @@ namespace Opde {
 		// We'll inform property service and link service
 		// NOTE: Those properties which aren't archetype->concrete inherited will be copied
 		// TODO: Links of some kind should be copied as well (particle attachment, targetting obj). Rules?! To be tested in-game with no game db backup
+		_prepareForObject(objID);
+		
 		if (!exists(archetypeID)) {
 			OPDE_EXCEPT("Given archetype ID does not exist!", "ObjectService::_beginCreateObject");
 		}
@@ -327,17 +438,28 @@ namespace Opde {
 		ObjectAllocation::iterator it = mAllocatedObjects.find(objID);
 		
 		if (it != mAllocatedObjects.end()) {
-			// TODO: Inform link and property service first(?)
+			// Destroy the scene node of the object
+			
+			if (objID > 0) {
+				ObjectToNode::iterator snit = mObjectToNode.find(objID);
+				
+				if (snit != mObjectToNode.end()) {
+					mSceneMgr->destroySceneNode(snit->second->getName());
+					mObjectToNode.erase(snit);
+				} else {
+					LOG_FATAL("Expected to find a SceneNode for object (%d), but wasn't there!", objID);
+				}
+			}
+			
+			// Inform LinkService and PropertyService (those are somewhat slaves of ours. Other services need to listen)
+			mLinkService->objectDestroyed(objID);
+			mPropertyService->objectDestroyed(objID);
 			
 			// Insert the id into free id's
 			mAllocatedObjects.erase(it);
 			
 			// Insert into free id's
 			freeID(objID);
-			
-			// Inform LinkService and PropertyService (those are somewhat slaves of ours. Other services need to listen)
-			mLinkService->objectDestroyed(objID);
-			mPropertyService->objectDestroyed(objID);
 			
 			// Prepare the message
 			ObjectServiceMsg m;
@@ -347,6 +469,25 @@ namespace Opde {
 			
 			// Broadcast the change
 			broadcastMessage(m);
+		}
+	}
+	
+	//------------------------------------------------------
+	void ObjectService::_prepareForObject(int objID) {
+		if (objID > 0) {
+			std::string nodeName("Object");
+			
+			nodeName += Ogre::StringConverter::toString(objID);
+			
+			// Use render service to create a scene node for the object
+			Ogre::SceneNode* snode = mSceneMgr->createSceneNode(nodeName);
+			
+			assert(snode != NULL);
+			
+			// Attach the node to the root SN of the scene
+			mSceneMgr->getRootSceneNode()->addChild(snode);
+			
+			mObjectToNode.insert(std::make_pair(objID, snode));
 		}
 	}
 	
@@ -403,7 +544,6 @@ namespace Opde {
 			mMaxID = 2048;
 		}
 	}
-	
 	
 	//-------------------------- Factory implementation
 	std::string ObjectServiceFactory::mName = "ObjectService";

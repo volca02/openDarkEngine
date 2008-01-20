@@ -211,9 +211,9 @@ namespace Opde {
 				link_id_t id;
 				fldata->readElem(&id, 4);
 
-				LinkDataPtr ldta = new LinkData(id, mType, fldata, dsize);
+				LinkDataPtr ldta = new LinkData(id, mType, fldata, dsize, mUseDataCache);
 
-				LOG_DEBUG("Relation (%s): Loaded link data for link id %d", mName.c_str(), id);
+				LOG_VERBOSE("Relation (%s): Loaded link data for link id %d", mName.c_str(), id);
 				
 				// Link data are inserted silently
 				_assignLinkData(id, ldta);
@@ -235,7 +235,7 @@ namespace Opde {
 				linkstruct->get(dlink, "flavor").toUInt()
 			));
 
-			LOG_DEBUG("Relation (%s - %d): Read link ID %d, from %d to %d (F,C,IX: %d, %d, %d)",
+			LOG_VERBOSE("Relation (%s - %d): Read link ID %d, from %d to %d (F,C,IX: %d, %d, %d)",
 				  mName.c_str(),
 				  mID,
 				  link->mID,
@@ -397,7 +397,7 @@ namespace Opde {
 
 		LinkPtr newl = new Link(id, from, to, mID);
 
-		LinkDataPtr newd = new LinkData(id, mType);
+		LinkDataPtr newd = new LinkData(id, mType, mUseDataCache);
 
 		// assign link data in advance, as it would fail on _addLink otherwise
 		_assignLinkData(id, newd);
@@ -430,7 +430,7 @@ namespace Opde {
 
 		LinkPtr newl = new Link(id, from, to, mID);
 
-		LinkDataPtr newd = new LinkData(id, data);
+		LinkDataPtr newd = new LinkData(id, data, mUseDataCache);
 
 		// assign link data in advance, as it would fail on _addLink otherwise
 		_assignLinkData(id, newd);
@@ -477,7 +477,6 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	DVariant Relation::getLinkField(link_id_t id, const std::string& field) {
-		LOG_DEBUG("LinkDataMap size : %d", mLinkDataMap.size());
 		LinkDataMap::const_iterator it = mLinkDataMap.find(id);
 
 		if (it != mLinkDataMap.end()) {

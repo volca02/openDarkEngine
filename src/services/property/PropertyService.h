@@ -85,6 +85,18 @@ namespace Opde {
 			*/
 			void objectDestroyed(int id);
 
+            /** Load the properties from the database
+			* @param db The database file group to use */
+			void load(FileGroupPtr db);
+
+			/** Saves the properties according to the saveMask
+			* @param db The database file group to save to
+			* @param saveMask The save mask (1 - Archetypes, 2 - Instances, 3 - both) */
+			void save(FileGroupPtr db, uint saveMask);
+
+			/** Clears out all the PropertyGroups (effectively wiping out all properties) */
+			void clear();
+
 		protected:
             /// service initialization
             bool init();
@@ -92,30 +104,11 @@ namespace Opde {
             /// service initialization
             void bootstrapFinished();
 
-            /// Database change message callback
-            void onDBChange(const DatabaseChangeMsg& m);
-
-            /** Load the properties from the database
-			* @param db The database file group to use */
-			void _load(FileGroupPtr db);
-
-			/** Saves the properties according to the saveMask
-			* @param db The database file group to save to
-			* @param saveMask The save mask (1 - Archetypes, 2 - Instances, 3 - both) */
-			void _save(FileGroupPtr db, uint saveMask);
-
-			/** Clears out all the PropertyGroups (effectively wiping out all properties) */
-			void _clear();
-
-
 			/// maps property groups to their names
 			typedef std::map< std::string, PropertyGroupPtr > PropertyGroupMap;
 
 			/// maps the properties by their names
 			PropertyGroupMap mPropertyGroupMap;
-
-            /// Database callback
-            DatabaseService::ListenerPtr mDbCallback;
 
             /// Database service
             DatabaseServicePtr mDatabaseService;

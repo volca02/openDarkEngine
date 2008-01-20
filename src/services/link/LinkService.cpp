@@ -41,9 +41,6 @@ namespace Opde {
 		mRelationIDMap.clear();
 		mNameToFlavor.clear();
 		mFlavorToName.clear();
-
-        if (!mDatabaseService.isNull())
-            mDatabaseService->unregisterListener(mDbCallback);
 	}
 
 	//------------------------------------------------------
@@ -56,44 +53,83 @@ namespace Opde {
 		// Ensure link listeners are created
 		mServiceManager->createByMask(SERVICE_LINK_LISTENER);
 
-        // Register as a database listener
-		mDbCallback = new ClassCallback<DatabaseChangeMsg, LinkService>(this, &LinkService::onDBChange);
-
 		mDatabaseService = ServiceManager::getSingleton().getService("DatabaseService").as<DatabaseService>();
-		mDatabaseService->registerListener(mDbCallback, DBP_LINK);
 	}
 
 	//------------------------------------------------------
-	void LinkService::onDBChange(const DatabaseChangeMsg& m) {
-	    if (m.change == DBC_DROPPING) {
-	        _clear();
-	    } else if (m.change == DBC_LOADING) {
-            try {
-                // Skip if target is savegame, and mission file is encountered
-                if (m.dbtarget == DBT_SAVEGAME && m.dbtype == DBT_MISSION)
-                    return;
+	void LinkService::load(FileGroupPtr db) {
+		LOG_INFO("LinkService: Loading link definitions from file group '%s'", db->getName().c_str());
 
-                _load(m.db);
-            } catch (FileException &e) {
-                OPDE_EXCEPT("Caught a FileException while loading the links : " + e.getDetails(), "LinkService::onDBChange");
-            }
-	    } else if (m.change == DBC_SAVING) {
-            try {
-                uint savemask = 0xF;
+		// First, try to build the Relation Name -> flavor and reverse records
+		/*
+		The Relations chunk should be present, and the same for all File Groups
+		As we do not know if something was already initialised or not, we just request mapping and see if it goes or not
+		*/
+		BinaryServicePtr bs = ServiceManager::getSingleton().getService("BinaryService").as<BinaryService>();
 
-                if (m.dbtarget == DBT_SAVEGAME)
-                    savemask = 0x0E; // No archetypes
+		FilePtr rels = db->getFile("Relations");
 
-                _save(m.db, savemask);
+		int count = rels->size() / 32;
 
-            } catch (FileException &e) {
-                OPDE_EXCEPT("Caught a FileException while loading the links : " + e.getDetails(), "LinkService::onDBChange");
-            }
-	    }
+		LOG_DEBUG("LinkService: Loading Relations map (%d items - %d size)", count, rels->size());
+
+		for (int i = 1; i <= count; i++) {
+			char text[32];
+
+			rels->read(text, 32);
+
+			std::string stxt = text;
+
+			if (stxt.substr(0,1) == "~")
+				OPDE_EXCEPT("Conflicting name. Character ~ is reserved for inverse relations. Conflicting name : " + stxt, "LinkService::_load");
+
+			// Look for relation with the specified Name
+
+			// TODO: Look for the relation name. Have to find it.
+			RelationNameMap::iterator rnit = mRelationNameMap.find(text);
+
+			if (rnit == mRelationNameMap.end())
+				OPDE_EXCEPT(string("Could not find relation ") + text + " predefined. Could not continue", "LinkService::_load");
+
+			RelationPtr rel = rnit->second;
+
+			// Request the mapping to ID
+			if (!requestRelationFlavorMap(i, text, rel))
+				OPDE_EXCEPT(string("Could not map relation ") + text + " to flavor. Name/ID conflict", "LinkService::_load");
+
+			LOG_DEBUG("Mapped relation %s to flavor %d", text, i);
+			
+			std::string inverse = "~" + stxt;
+			
+			// --- Assign the inverse relation as well here:
+			rnit = mRelationNameMap.find(inverse);
+
+			if (rnit == mRelationNameMap.end())
+				OPDE_EXCEPT(string("Could not find inverse relation ") + inverse + " predefined. Could not continue", "LinkService::_load");
+
+			RelationPtr irel = rnit->second;
+
+			// Request the mapping to ID
+			if (!requestRelationFlavorMap(-i, inverse, irel))
+				OPDE_EXCEPT(string("Could not map inverse relation ") + inverse + " to flavor. Name/ID conflict", "LinkService::_load");
+
+			LOG_DEBUG("Mapped relation pair %s, %s to flavor %d, %d", text, inverse.c_str(), i, -i);
+
+			// TODO: request relation ID map, must not fail
+
+			// Now load the data of the relation
+			LOG_DEBUG("Loading relation %s", text);
+
+			try {
+				rel->load(db); // only normal relation is loaded. Inverse is mapped automatically
+			} catch (BasicException &e) {
+				LOG_FATAL("LinkService: Caught a fatal exception while loading Relation %s : %s", text, e.getDetails().c_str() );
+			}
+		}
 	}
 
 	//------------------------------------------------------
-	void LinkService::_save(FileGroupPtr db, uint saveMask) {
+	void LinkService::save(FileGroupPtr db, uint saveMask) {
 		// Iterates through all the relations. Writes the name into the Relations file, and writes the relation's data using relation->save(db, saveMask) call
 
 		// I do not want to have gaps in the relations indexing, which is implicit given the record order
@@ -176,81 +212,10 @@ namespace Opde {
 		return nr;
 	}
 
-	//------------------------------------------------------
-	void LinkService::_load(FileGroupPtr db) {
-		LOG_INFO("LinkService: Loading link definitions from file group '%s'", db->getName().c_str());
-
-		// First, try to build the Relation Name -> flavor and reverse records
-		/*
-		The Relations chunk should be present, and the same for all File Groups
-		As we do not know if something was already initialised or not, we just request mapping and see if it goes or not
-		*/
-		BinaryServicePtr bs = ServiceManager::getSingleton().getService("BinaryService").as<BinaryService>();
-
-		FilePtr rels = db->getFile("Relations");
-
-		int count = rels->size() / 32;
-
-		LOG_DEBUG("LinkService: Loading Relations map (%d items - %d size)", count, rels->size());
-
-		for (int i = 1; i <= count; i++) {
-			char text[32];
-
-			rels->read(text, 32);
-
-			std::string stxt = text;
-
-			if (stxt.substr(0,1) == "~")
-				OPDE_EXCEPT("Conflicting name. Character ~ is reserved for inverse relations. Conflicting name : " + stxt, "LinkService::_load");
-
-			// Look for relation with the specified Name
-
-			// TODO: Look for the relation name. Have to find it.
-			RelationNameMap::iterator rnit = mRelationNameMap.find(text);
-
-			if (rnit == mRelationNameMap.end())
-				OPDE_EXCEPT(string("Could not find relation ") + text + " predefined. Could not continue", "LinkService::_load");
-
-			RelationPtr rel = rnit->second;
-
-			// Request the mapping to ID
-			if (!requestRelationFlavorMap(i, text, rel))
-				OPDE_EXCEPT(string("Could not map relation ") + text + " to flavor. Name/ID conflict", "LinkService::_load");
-
-			LOG_DEBUG("Mapped relation %s to flavor %d", text, i);
-			
-			std::string inverse = "~" + stxt;
-			
-			// --- Assign the inverse relation as well here:
-			rnit = mRelationNameMap.find(inverse);
-
-			if (rnit == mRelationNameMap.end())
-				OPDE_EXCEPT(string("Could not find inverse relation ") + inverse + " predefined. Could not continue", "LinkService::_load");
-
-			RelationPtr irel = rnit->second;
-
-			// Request the mapping to ID
-			if (!requestRelationFlavorMap(-i, inverse, irel))
-				OPDE_EXCEPT(string("Could not map inverse relation ") + inverse + " to flavor. Name/ID conflict", "LinkService::_load");
-
-			LOG_DEBUG("Mapped relation pair %s, %s to flavor %d, %d", text, inverse.c_str(), i, -i);
-
-			// TODO: request relation ID map, must not fail
-
-			// Now load the data of the relation
-			LOG_DEBUG("Loading relation %s", text);
-
-			try {
-				rel->load(db); // only normal relation is loaded. Inverse is mapped automatically
-			} catch (BasicException &e) {
-				LOG_FATAL("LinkService: Caught a fatal exception while loading Relation %s : %s", text, e.getDetails().c_str() );
-			}
-
-		}
-	}
+	
 
 	//------------------------------------------------------
-	void LinkService::_clear() {
+	void LinkService::clear() {
 		// clear all the mappings
 		mRelationIDMap.clear();
 		mFlavorToName.clear();
