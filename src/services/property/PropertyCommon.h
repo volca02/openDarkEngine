@@ -35,7 +35,7 @@ namespace Opde {
 		
 		public:
 			/** Constructor. Constructs new data buffer, filled with zeros */
-			PropertyData(int id, DTypeDefPtr type) : mID(id), DType(type) {	};
+			PropertyData(int id, DTypeDefPtr type, bool useCache = false) : mID(id), DType(type, useCache) {	};
 			
 			/** Constructor - loads data from FilePtr 
 			* @param id The object ID
@@ -43,12 +43,12 @@ namespace Opde {
 			* @param file The File pointer (FilePtr) to load data from
 			* @param _size the size of the data to be loaded
 			* */
-			PropertyData(int id, DTypeDefPtr type, FilePtr file, int _size) : mID(id), DType(type, file, _size) { };
+			PropertyData(int id, DTypeDefPtr type, FilePtr file, int _size, bool useCache = false) : mID(id), DType(type, file, _size, useCache) { };
 			
 			/** Constructor - takes object id and data instance 
 			* @param id The object ID
 			* @param data The Data instance to copy the data from */
-			PropertyData(int id, DTypePtr data) : mID(id), DType(*data) { };
+			PropertyData(int id, DTypePtr data, bool useCache = false) : mID(id), DType(*data, useCache) { };
 			
 			/** Destructor */
 			~PropertyData() { };

@@ -80,7 +80,7 @@ namespace Opde {
 
 		"<Type_Definition> ::= <Primitive_Type> | <String_Type> \n"
 
-		"<Primitive_Type> ::= 'int32' | 'uint32' | 'int16' | 'uint16' | 'int8' | 'uint8' | 'float' | 'vector' | 'bool32' | 'bool16' | 'bool8' \n"
+		"<Primitive_Type> ::= 'int32' | 'uint32' | 'int16' | 'uint16' | 'int8' | 'uint8' | 'float' | 'vector' | 'shortvec' | 'bool32' | 'bool16' | 'bool8' \n"
 
 		"<Variant_Type> ::= 'uint' | 'int' | 'float' | 'bool' | 'string' | 'vector' \n"
 
@@ -167,6 +167,7 @@ namespace Opde {
 
 		addLexemeTokenAction("float", ID_FLOAT, &DTypeScriptCompiler::parseField);
 		addLexemeTokenAction("vector", ID_VECTOR, &DTypeScriptCompiler::parseField);
+		addLexemeTokenAction("shortvec", ID_SHORTVECTOR, &DTypeScriptCompiler::parseField);
 
 		addLexemeTokenAction("char", ID_CHAR, &DTypeScriptCompiler::parseField);
 
@@ -502,6 +503,8 @@ namespace Opde {
 
 
 			case ID_VECTOR : return DVariant::DV_VECTOR;
+			
+			case ID_SHORTVECTOR : return DVariant::DV_QUATERNION;
 
 			default :
 				logParseError("Invalid type specified for DVariant type");
@@ -527,6 +530,8 @@ namespace Opde {
 			case ID_FLOAT  : return 4;
 
 			case ID_VECTOR : return 12;
+			
+			case ID_SHORTVECTOR : return 6;
 
 			case ID_VARSTR : return -1;
 

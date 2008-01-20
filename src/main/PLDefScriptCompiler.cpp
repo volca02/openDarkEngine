@@ -44,7 +44,7 @@ namespace Opde {
 		// Link definition part
 		"<LinkDefinition> ::= 'relation' <Label> '{' {<LinkParams>} '}' \n"
 
-		"<LinkParams> ::= <DTypeName> | <FakeSize> | <LinkHidden> | <NoDType> | <DChunkVersion> | <LChunkVersion> \n"
+		"<LinkParams> ::= <DTypeName> | <FakeSize> | <LinkHidden> | <NoDType> | <DChunkVersion> | <LChunkVersion> | <DataCache>\n"
 
 		"<DTypeName> ::= 'dtype' <Flex_Label> \n"
 
@@ -53,6 +53,8 @@ namespace Opde {
 		"<FakeSize> ::= 'fake_size' <Integer> \n" // if dark reports a different size, report that one
 
 		"<LinkHidden> ::= 'hidden' \n"
+		
+		"<DataCache> ::= 'cached' \n"
 
 		"<DChunkVersion> ::= 'd_ver' <Version> \n"
 		"<LChunkVersion> ::= 'l_ver' <Version> \n"
@@ -62,7 +64,7 @@ namespace Opde {
 		// Property definition part
 		"<PropertyDefinition> ::= 'property' <Label> '{' {<PropertyParams>} '}' \n"
 
-		"<PropertyParams> ::= <DTypeName> | <PropLabel> | <PChunkVersion> | <PInheritor> \n"
+		"<PropertyParams> ::= <DTypeName> | <PropLabel> | <PChunkVersion> | <PInheritor> | <DataCache>\n"
 
 		"<PropLabel> ::= 'label' <Quoted_Label> \n"
 
@@ -124,6 +126,8 @@ namespace Opde {
 		addLexemeTokenAction("label", ID_LABEL, &PLDefScriptCompiler::parseLabel);
 
 		addLexemeTokenAction("inherit", ID_INHERIT, &PLDefScriptCompiler::parseInherit);
+		
+		addLexemeTokenAction("cache", ID_CACHED, &PLDefScriptCompiler::parseCached);
 	}
 
 	//-----------------------------------------------------------------------
@@ -205,6 +209,8 @@ namespace Opde {
                 mCurrentState.pmajor,
                 mCurrentState.pminor,
                 mCurrentState.inherit);
+                
+			rel->setCacheData(mCurrentState.cached);
 		} else {
 			logParseError("Closing an unknown state!");
 		}
@@ -247,6 +253,7 @@ namespace Opde {
 		mCurrentState.dminor = mDefaultDMinor;
 		mCurrentState.lmajor = mDefaultLMajor;
 		mCurrentState.lminor = mDefaultLMinor;
+		mCurrentState.cached = false;
 	}
 
 	//-----------------------------------------------------------------------
@@ -259,6 +266,7 @@ namespace Opde {
 		mCurrentState.inherit = "always";
 		mCurrentState.pmajor = mDefaultPMajor; // fill in the default versions
 		mCurrentState.pminor = mDefaultPMinor;
+		mCurrentState.cached = false;
 	}
 
 	//-----------------------------------------------------------------------
@@ -299,6 +307,11 @@ namespace Opde {
 	//-----------------------------------------------------------------------
 	void PLDefScriptCompiler::parseNoData(void) {
 		mCurrentState.no_data = true;
+	}
+
+	//-----------------------------------------------------------------------
+	void PLDefScriptCompiler::parseCached(void) {
+		mCurrentState.cached = true;
 	}
 
 	//-----------------------------------------------------------------------
