@@ -16,6 +16,7 @@
 #include "BinaryService.h"
 #include "InheritService.h"
 #include "InputService.h"
+#include "ObjectService.h"
 
 #include "DTypeScriptLoader.h"
 #include "PLDefScriptLoader.h"
@@ -79,7 +80,7 @@ void createServiceFactories() {
 	new InheritServiceFactory();
 	new LoopServiceFactory();
 	new InputServiceFactory();
-
+	new ObjectServiceFactory();
 }
 
 void initLoopModes(LoopServicePtr& ls) {
