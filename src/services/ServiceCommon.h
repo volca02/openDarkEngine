@@ -66,11 +66,8 @@ priorities (not necessary unique) for the database service listeners
 
 // First, worldrep is loadded
 #define DBP_WORLDREP 5
-// Then come the link database
-#define DBP_LINK 10
-// Properties are loaded (with already defined links, so inheritance refreshes take place)
-#define DBP_PROPERTY 15
-// Then objects are loaded
+// Links and Properties are loaded in object system
+// Object system loading order
 #define DBP_OBJECT 20
 // And script modules are initialized
 #define DBP_SCRIPT 25
