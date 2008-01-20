@@ -401,7 +401,7 @@ namespace Opde {
 			
 			/** Value getter. 
 			* @see DTypeDef.get */
-			DVariant get(const std::string& field) const {
+			DVariant get(const std::string& field) {
 				if (mUseCache) {
 					ValueCache::const_iterator it = mCache.find(field);
 					
