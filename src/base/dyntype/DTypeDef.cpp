@@ -17,6 +17,8 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *	  $Id$
+ *
  *****************************************************************************/
 
 #include "DTypeDef.h"
@@ -808,6 +810,7 @@ namespace Opde {
 			vptr[0] = static_cast<int16_t>(x.valueRadians() * 32768 / Math::PI);
 			vptr[1] = static_cast<int16_t>(y.valueRadians() * 32768 / Math::PI);
 			vptr[2] = static_cast<int16_t>(z.valueRadians() * 32768 / Math::PI);
+			return ptr;
 		} else {
 			OPDE_EXCEPT("Unsupported _set type", "DTypeDef::_set");
 		}
