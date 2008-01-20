@@ -10,6 +10,7 @@ SET(OPDE_SERVICE_INCLUDES
     ${OPDE_SOURCE_DIR}/src/services/link
     ${OPDE_SOURCE_DIR}/src/services/property
     ${OPDE_SOURCE_DIR}/src/services/inherit
+    ${OPDE_SOURCE_DIR}/src/services/object
     ${OPDE_SOURCE_DIR}/src/services/render
     ${OPDE_SOURCE_DIR}/src/services/database
     ${OPDE_SOURCE_DIR}/src/services/input
@@ -28,6 +29,7 @@ SET(OPDE_SERVICE_LIBRARIES
     OpdeLinkService
     OpdePropertyService
     OpdeInheritService
+    OpdeObjectService
     OpdeRenderService
     OpdeDatabaseService
     OpdeInputService
