@@ -260,7 +260,7 @@ namespace Opde {
                         SceneNode* node = NULL;
                         
                         try {
-							node = mObjectService->getSceneNodeForObject(msg.objectID);
+							node = mObjectService->getSceneNode(msg.objectID);
 						} catch (BasicException& e) {
 							LOG_ERROR("RenderService: Could not get the sceneNode for object %d! Not attaching object model!", msg.objectID);
 							return;

@@ -67,14 +67,14 @@ namespace Opde {
 			virtual ~ObjectService();
 			
 			/// Creates a new concrete object, inheriting from archetype archetype, and returns it's id
-			int createObject(int archetype);
+			int create(int archetype);
 			
 			/// Begins creating a new object, but does not broadcast yet. 
 			/// Good to use when wanting to prevent broadcasting of the creation before the properties/links are set
-			int beginCreateObject(int archetype);
+			int beginCreate(int archetype);
 			
 			/// finalises the creation if the given object (only broadcasts that object was created)
-			void endCreateObject(int objID);
+			void endCreate(int objID);
 
 			/// Returns true if the object exists, false otherwise
 			bool exists(int objID);
@@ -89,7 +89,32 @@ namespace Opde {
 			@returns The scene node of the object id (only for concrete objects)
 			@throws BasicException if the method is used on archetypes or on invalid object id (unused id)
 			*/
-			Ogre::SceneNode* getSceneNodeForObject(int objID);
+			Ogre::SceneNode* getSceneNode(int objID);
+			
+			/** Gets the object's name 
+			@param objID the object id to get the name of
+			@return the name of the object
+			*/
+			std::string getName(int objID);
+			
+			/** Sets the object's name 
+			@param objID the object id to set the name for
+			@param name The new name of the object
+			*/
+			void setName(int objID, const std::string& name);
+			
+			/** Finds an object ID for object named name
+			@param name The name of the object to search for
+			@return id of the object, or zero if object was not found
+			*/
+			int named(const std::string& name);
+			
+			/** Teleports an object to new position and orientation
+			* @param pos the new position
+			* @param ori the new orientation
+			* @param relative If true, the position and orientation are taken as differences rather than absolute positions 
+			*/
+			void teleport(int id, Vector3 pos, Quaternion ori, bool relative);
 			
 		protected:
 			bool init();
@@ -100,6 +125,9 @@ namespace Opde {
 			
 			/// Position property changed callback
 			void onPropPositionMsg(const PropertyChangeMsg& msg);
+			
+			/// SymbolicName property changed callback
+			void onPropSymNameMsg(const PropertyChangeMsg& msg);
 
 			/** load links from a single database */
 			void _load(FileGroupPtr db, uint clearMask);
@@ -140,9 +168,6 @@ namespace Opde {
 			/// A stack of id's
 			typedef std::stack<int> ObjectIDStack;
 			
-			/// Object to name map
-			typedef std::map<int, std::string> ObjectToName;
-			
 			/// Name to object map
 			typedef std::map<std::string, int> NameToObject;
 			
@@ -154,6 +179,9 @@ namespace Opde {
 			
 			/// Mapping of object id to scenenode
 			ObjectToNode mObjectToNode;
+			
+			/// Map's symbolic name to object ID
+			NameToObject mNameToID;
 			
 			/// Database callback
 			DatabaseService::ListenerPtr mDbCallback;
@@ -187,6 +215,9 @@ namespace Opde {
 			
 			PropertyGroup::ListenerID mPropPositionListenerID;
 			PropertyGroupPtr mPropPosition;
+			
+			PropertyGroup::ListenerID mPropSymNameListenerID;
+			PropertyGroupPtr mPropSymName;
 			
 			/// Scene manager pointer
 			Ogre::SceneManager* mSceneMgr;

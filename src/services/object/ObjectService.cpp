@@ -59,7 +59,7 @@ namespace Opde {
 
 
 	//------------------------------------------------------
-	int ObjectService::createObject(int archetype) {
+	int ObjectService::create(int archetype) {
 		int newID = getFreeID(false);
 		
 		_beginCreateObject(newID, archetype);
@@ -69,7 +69,7 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
-	int ObjectService::beginCreateObject(int archetype) {
+	int ObjectService::beginCreate(int archetype) {
 		int newID = getFreeID(false);
 		
 		_beginCreateObject(newID, archetype);
@@ -78,7 +78,7 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
-	void ObjectService::endCreateObject(int objID) {
+	void ObjectService::endCreate(int objID) {
 		_endCreateObject(objID);
 	}
 	
@@ -91,7 +91,7 @@ namespace Opde {
 	
 
 	//------------------------------------------------------
-	Ogre::SceneNode* ObjectService::getSceneNodeForObject(int objID) {
+	Ogre::SceneNode* ObjectService::getSceneNode(int objID) {
 		if (objID > 0) {
 			ObjectToNode::iterator snit = mObjectToNode.find(objID);
 			
@@ -103,6 +103,39 @@ namespace Opde {
 		OPDE_EXCEPT("Could not find scenenode for object. Does object exist?", "ObjectService::getSceneNodeForObject");
 	}
 
+	//------------------------------------------------------
+	std::string ObjectService::getName(int objID) {
+		return mPropSymName->get(objID, "");
+	}
+	
+	//------------------------------------------------------
+	void ObjectService::setName(int objID, const std::string& name) {
+		mPropSymName->set(objID, "", name);
+	}
+	
+	//------------------------------------------------------
+	int ObjectService::named(const std::string& name) {
+		return mNameToID[name];
+	}
+
+	//------------------------------------------------------
+	void ObjectService::teleport(int id, Vector3 pos, Quaternion ori, bool relative) {
+		// First look if we exist
+		if (relative) {
+			PropertyDataPtr dta = mPropPosition->getData(id);
+			Vector3 _pos = dta->get("position").toVector() + pos;
+			Quaternion _ori = dta->get("facing").toQuaternion() + ori;
+			dta->set("position", _pos);
+			dta->set("facing", _ori);
+			mPropPosition->dataChangeFinished(dta);
+		} else {
+			// We do this at once to save broadcasts
+			PropertyDataPtr dta = mPropPosition->getData(id);
+			dta->set("position", pos);
+			dta->set("facing", ori);
+			mPropPosition->dataChangeFinished(dta);
+		}
+	}
 
 	//------------------------------------------------------
 	bool ObjectService::init() {
@@ -140,6 +173,19 @@ namespace Opde {
             OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "RenderService::bootstrapFinished");
 
 		mPropPositionListenerID = mPropPosition->registerListener(cposc);
+		
+		
+		// listener to the symbolic name property
+		PropertyGroup::ListenerPtr cnamec =
+			new ClassCallback<PropertyChangeMsg, ObjectService>(this, &ObjectService::onPropSymNameMsg);
+
+
+		mPropSymName = mPropertyService->getPropertyGroup("SymbolicName");
+
+		if (mPropPosition.isNull())
+            OPDE_EXCEPT("Could not get SymbolicName property group. Not defined. Fatal", "RenderService::bootstrapFinished");
+
+		mPropSymNameListenerID = mPropSymName->registerListener(cnamec);
 	}
 	
 	//------------------------------------------------------
@@ -196,7 +242,7 @@ namespace Opde {
 			case PROP_CHANGED : {
 				try {
 					// Find the scene node by it's object id, and update the position and orientation
-					Ogre::SceneNode* node = getSceneNodeForObject(msg.objectID);
+					Ogre::SceneNode* node = getSceneNode(msg.objectID);
 					
 					node->setPosition(msg.data->get("position").toVector());
 					node->setOrientation(msg.data->get("facing").toQuaternion());
@@ -206,6 +252,17 @@ namespace Opde {
 				}
 				
 				break;
+			}
+		}
+	}
+	
+	// --------------------------------------------------------------------------
+	void ObjectService::onPropSymNameMsg(const PropertyChangeMsg& msg) {
+		switch (msg.change) {
+			case PROP_ADDED   :
+			case PROP_CHANGED : {
+				mNameToID[msg.data->get("").toString()] = msg.objectID;
+				return;
 			}
 		}
 	}
@@ -450,6 +507,14 @@ namespace Opde {
 					LOG_FATAL("Expected to find a SceneNode for object (%d), but wasn't there!", objID);
 				}
 			}
+			
+			NameToObject::iterator snit = mNameToID.find(getName(objID));
+			
+			if (snit != mNameToID.end())
+				if (snit->second == objID)
+					mNameToID.erase(snit);
+				else
+					LOG_FATAL("Object ID (%d) mismatch for reverse name lookup!", objID);
 			
 			// Inform LinkService and PropertyService (those are somewhat slaves of ours. Other services need to listen)
 			mLinkService->objectDestroyed(objID);
