@@ -89,6 +89,28 @@ namespace Opde {
 		return (it != mAllocatedObjects.end());
 	}
 	
+	
+	//------------------------------------------------------
+	Vector3 ObjectService::position(int objID) {
+		try {
+			Ogre::SceneNode* sn = getSceneNode(objID);
+			
+			return sn->getWorldPosition();
+		} catch(BasicException &e)  {
+			return Vector3::ZERO;
+		}
+	}
+	
+	//------------------------------------------------------
+	Quaternion ObjectService::orientation(int objID) {
+		try {
+			Ogre::SceneNode* sn = getSceneNode(objID);
+			
+			return sn->getWorldOrientation();
+		} catch(BasicException &e)  {
+			return Quaternion::IDENTITY;
+		}
+	}
 
 	//------------------------------------------------------
 	Ogre::SceneNode* ObjectService::getSceneNode(int objID) {
@@ -110,12 +132,25 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	void ObjectService::setName(int objID, const std::string& name) {
+		// First look if the name is used
+		int prevusage = named(name); 
+		
+		if (prevusage != 0 && prevusage != objID) {
+			LOG_ERROR("Tried to set name '%s' to object %d which was alredy used by object %d", name.c_str(), objID, prevusage);
+			return;
+		}
+		
 		mPropSymName->set(objID, "", name);
 	}
 	
 	//------------------------------------------------------
 	int ObjectService::named(const std::string& name) {
-		return mNameToID[name];
+		NameToObject::iterator it = mNameToID.find(name);
+		
+		if (it != mNameToID.end()) {
+			return it->second;
+		} else
+			return 0;
 	}
 
 	//------------------------------------------------------
@@ -137,6 +172,63 @@ namespace Opde {
 		}
 	}
 
+	//------------------------------------------------------
+	int ObjectService::addMetaProperty(int id, const std::string& mpName) {
+		if (!exists(id)) {
+			LOG_DEBUG("Adding MP '%s' on invalid object %d", mpName.c_str(), id);
+			return 0;
+		}
+		
+		// TODO: Object type should be reviewed as well
+		int mpid = named(mpName);
+		
+		if (mpid == 0) {
+			LOG_DEBUG("Adding invalid MP '%s' to object %d", mpName.c_str(), id);
+			return 0;
+		}
+		
+		// realize the mp addition
+		mInheritService->addMetaProperty(id, mpid);
+		
+		return 1;
+	}
+	
+	//------------------------------------------------------
+	int ObjectService::removeMetaProperty(int id, const std::string& mpName) {
+		if (!exists(id)) {
+			LOG_DEBUG("Removing MP '%s' on invalid object %d", mpName.c_str(), id);
+			return 0;
+		}
+		
+		// TODO: Object type should be reviewed as well
+		int mpid = named(mpName);
+		
+		if (mpid == 0) {
+			LOG_DEBUG("Removing invalid MP '%s' to object %d", mpName.c_str(), id);
+			return 0;
+		}
+		
+		// realize the mp addition
+		mInheritService->removeMetaProperty(id, mpid);
+		
+		return 1;
+	}
+	
+	//------------------------------------------------------
+	bool ObjectService::hasMetaProperty(int id, const std::string& mpName) {
+		if (!exists(id))
+			return false;
+
+		// TODO: Object type should be reviewed as well
+		int mpid = named(mpName);
+		
+		if (mpid == 0)
+			return false;
+		
+		// realize the mp addition
+		return mInheritService->hasMetaProperty(id, mpid);
+	}
+	
 	//------------------------------------------------------
 	bool ObjectService::init() {
 	    return true;

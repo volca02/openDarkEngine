@@ -79,11 +79,11 @@ namespace Opde {
 			/// Returns true if the object exists, false otherwise
 			bool exists(int objID);
 			
-			// @returns Object's position or 0,0,0 if the object is abstract or has no position yet (while loading f.e.)
-			// TODO: Vector3 getObjectPosition(int objID);
+			/// @returns Object's position or 0,0,0 if the object is abstract or has no position yet (while loading f.e.)
+			Vector3 position(int objID);
 			
-			// @returns Object's orientation or Quaternion::IDENTITY if the object has no orientation
-			// TODO: Quaternion getObjectOrientation(int objID);
+			/// @returns Object's orientation or Quaternion::IDENTITY if the object has no orientation
+			Quaternion orientation(int objID);
 			
 			/** Getter for SceneNodes of objects. Those only exist for concrete objects.
 			@returns The scene node of the object id (only for concrete objects)
@@ -91,20 +91,20 @@ namespace Opde {
 			*/
 			Ogre::SceneNode* getSceneNode(int objID);
 			
-			/** Gets the object's name 
+			/** Gets the object's symbolic name 
 			@param objID the object id to get the name of
 			@return the name of the object
 			*/
 			std::string getName(int objID);
 			
-			/** Sets the object's name 
+			/** Sets the object's symbolic name 
 			@param objID the object id to set the name for
 			@param name The new name of the object
 			*/
 			void setName(int objID, const std::string& name);
 			
-			/** Finds an object ID for object named name
-			@param name The name of the object to search for
+			/** Finds an object ID with the given symbolic name
+			@param The id of the object, or zero if it was not found
 			@return id of the object, or zero if object was not found
 			*/
 			int named(const std::string& name);
@@ -115,6 +115,25 @@ namespace Opde {
 			* @param relative If true, the position and orientation are taken as differences rather than absolute positions 
 			*/
 			void teleport(int id, Vector3 pos, Quaternion ori, bool relative);
+			
+			/** Assigns a metaproperty to an object 
+			* @param id The object id to assign the metaproperty to
+			* @param mpName the name of the metaproperty to assign 
+			* @return 1 if sucessful, 0 on error */
+			int addMetaProperty(int id, const std::string& mpName);
+			
+			/** Removes a metaproperty from an object 
+			* @param id The object id to assign the metaproperty to
+			* @param mpName the name of the metaproperty to assign 
+			* @return 1 if sucessful, 0 on error */
+			int removeMetaProperty(int id, const std::string& mpName);
+			
+			/** Determines if the given object has a metaproperty assigned
+			* @param id the id of the object
+			* @param mpName the name of the metaproperty to look for
+			* @return true if the object inherits from the given metaproperty, false otherwise
+			*/
+			bool hasMetaProperty(int id, const std::string& mpName);
 			
 		protected:
 			bool init();
