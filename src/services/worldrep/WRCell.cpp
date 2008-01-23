@@ -333,8 +333,8 @@ namespace Opde {
 					tus->setTextureUScale(1.0f);
 					tus->setTextureVScale(1.0f);
 					
-					dimensions.first  = tscale.first * dimensions.first;
-					dimensions.second = tscale.second * dimensions.second;
+					dimensions.first  = static_cast<unsigned int>(tscale.first * dimensions.first);
+					dimensions.second = static_cast<unsigned int>(tscale.second * dimensions.second);
 				}
 			}
 		}
