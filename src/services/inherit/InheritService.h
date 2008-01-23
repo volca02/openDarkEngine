@@ -108,7 +108,7 @@ namespace Opde {
 			/** Tester for object's inclusion of certain MP.
 			* @param objID the object id to remove the MP from
 			* @param mpID the ID of the metaproperty to remove
-			* @return true if the object inherits from the given mpID with priority > 0, false otherwise
+			* @return true if the object inherits from the given mpID with priority > 0 (==0 is Archetype inheritance!), false otherwise
 			*/
 			bool hasMetaProperty(int objID, int mpID) const;
 			
