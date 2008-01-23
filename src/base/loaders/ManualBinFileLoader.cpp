@@ -1035,6 +1035,7 @@ namespace Ogre {
             // Texture unit state for the main texture...
             TextureUnitState* tus;
 
+			// TODO: This ugly code should be in some special service. Name it ToolsService (getObjectTextureFileName, etc) and should handle language setting!
             String txtname = String("txt16/") + String(mat.name);
             // First, let's look into txt16 dir, then into the txt dir. I try to
              try {
@@ -1046,7 +1047,10 @@ namespace Ogre {
                     txtname = String("txt/") + String(mat.name);
                 }
 
-			pass->setAlphaRejectSettings(CMPF_EQUAL, 255); // Alpha rejection
+			// TODO: This is bad. Should be fixed. Looks awful. See ss2 model loading...
+			pass->setAlphaRejectSettings(CMPF_EQUAL, 255); // Alpha rejection. 
+			
+			// Some basic lightning settings
             tus = pass->createTextureUnitState(txtname);
 
             tus->setTextureAddressingMode(TextureUnitState::TAM_WRAP);
@@ -1055,8 +1059,8 @@ namespace Ogre {
             tus->setColourOperation(LBO_REPLACE);
 
 
-            // If the transparency or illumination is used
-            if (( mHdr.mat_flags & MD_MAT_TRANS || mHdr.mat_flags & MD_MAT_ILLUM ) && (matext.trans > 0)) {
+            // If the transparency is used
+            if (( mHdr.mat_flags & MD_MAT_TRANS) && (matext.trans > 0)) {
                 // set at least the transparency value for the material
                 tus->setColourOperation(LBO_ALPHA_BLEND);
                 tus->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, 1 - matext.trans);
@@ -1065,26 +1069,40 @@ namespace Ogre {
                 // Set replace on all first layer textures for now
                 tus->setColourOperation(LBO_REPLACE);
             }
+            
+            // Illumination of the material. Converted to ambient lightning here
+            if (( mHdr.mat_flags & MD_MAT_ILLUM) && (matext.illum > 0)) {
+                // set the illumination (converted to ambient lightning)
+                pass->setAmbient(matext.illum, matext.illum, matext.illum);
+            }
 
             omat->setCullingMode(CULL_ANTICLOCKWISE);
+            
             omat->setLightingEnabled(true);
+            
+            
         } else if (mat.type == MD_MAT_COLOR) {
             // Fill in a color-only material
             TextureUnitState* tus = pass->createTextureUnitState();
 
-            // set the material color. Now I don't know what illumination is, so I just ignore
-            tus->setColourOperationEx(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, ColourValue(mat.colour[2] / 255.0, mat.colour[1] / 255.0, mat.colour[0] / 255.0)); // , mat.colour[3]
+			ColourValue matcolor(mat.colour[2] / 255.0, mat.colour[1] / 255.0, mat.colour[0] / 255.0);
+			
+            // set the material color
+            tus->setColourOperationEx(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, matcolor);
 
-            if (( mHdr.mat_flags & MD_MAT_TRANS || mHdr.mat_flags & MD_MAT_ILLUM ) && (matext.trans > 0)) {
+            if (( mHdr.mat_flags & MD_MAT_TRANS ) && (matext.trans > 0)) {
                 // tus->setColourOperation(LBO_ALPHA_BLEND);
                 tus->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, 1 - matext.trans);
-                // tus->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, matext.trans);
-            } else {
-                // tus->setColourOperation(LBO_REPLACE);
+            }
+            
+            // Illumination of a color based material. Hmm. Dunno if this is right, but i simply multiply the color with the illumination
+            if (( mHdr.mat_flags & MD_MAT_ILLUM) && (matext.illum > 0)) {
+                // set the illumination (converted to diffuse lightning)
+                pass->setAmbient(matcolor.r * matext.illum, matcolor.g * matext.illum, matcolor.b * matext.illum);
             }
             
             omat->setCullingMode(CULL_ANTICLOCKWISE);
-
+			omat->setLightingEnabled(true);
         } else
             OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Invalid material type : ") + StringConverter::toString(mat.type), "ObjectMeshLoader::prepareMaterial");
 
