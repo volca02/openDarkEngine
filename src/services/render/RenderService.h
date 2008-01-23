@@ -118,21 +118,14 @@ namespace Opde {
 
             void prepareMesh(const Ogre::String& name);
 
-            /** Returns a scene node for a given object ID
-            * @param objID The object ID for which to find the scene node
-            * @param create If true, the method will create a new scene node on 0,0,0 if no was found
-            * @return SceneNode pointer if successfull, NULL otherwise */
-            Ogre::SceneNode* getSceneNode(int objID, bool create = false);
+			/// Removes entity from the given object (meaning it will not have a visible representation)
+			void removeObjectEntity(int id);
 
             void clear();
 
 			/// Map of objectID -> Entity
 			typedef std::map<int, Ogre::Entity*> ObjectEntityMap;
-			/// Map of objectID -> SceneNode (To which the Entity connects)
-			typedef std::map<int, Ogre::SceneNode*> ObjectSceneNodeMap;
 
-
-			ObjectSceneNodeMap mSceneNodeMap;
 			ObjectEntityMap mEntityMap;
 
 			// Listener structs for property messages

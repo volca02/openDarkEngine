@@ -244,17 +244,17 @@ namespace Opde {
 
         // As a test, I'm loading cube.mesh
         switch (msg.change) {
+			case PROP_CHANGED:
+				removeObjectEntity(msg.objectID);
+				
+
 			case PROP_ADDED: {
                     try {
                         prepareMesh(name);
-                        // createMesh, so it will be prepared before the entity creation
-                        //setObjectModel(msg.objectID, name);
-
+                        
                         // TODO: Create a MeshService. Then Entity* ent = meshService->createObjectEntity(name);
                         // That will react to DatabaseSevice notifications, and unload the meshes as needed when changing mission
-
                         Entity *ent = mSceneMgr->createEntity( "Object" + StringConverter::toString(msg.objectID), name + ".mesh" );
-                        // Entity *ent = mSceneMgr->createEntity( "Object" + StringConverter::toString(msg.objectID), "jaiqua.mesh" );
 
                         // bind the ent to the node of the obj.
                         SceneNode* node = NULL;
@@ -263,6 +263,7 @@ namespace Opde {
 							node = mObjectService->getSceneNode(msg.objectID);
 						} catch (BasicException& e) {
 							LOG_ERROR("RenderService: Could not get the sceneNode for object %d! Not attaching object model!", msg.objectID);
+							mSceneMgr->destroyEntity(ent);
 							return;
 						}
 						
@@ -283,7 +284,8 @@ namespace Opde {
 
 							ent->getSkeleton()->setBindingPose();
                         }
-                        // TODO: Register the entity in some map
+                        
+                        mEntityMap.insert(make_pair(msg.objectID, ent));
 
                     } catch (FileNotFoundException &e) {
                         LOG_ERROR("RenderService: Could not find the requested model %s (exception encountered)", name.c_str());
@@ -291,11 +293,8 @@ namespace Opde {
 
                     break;
                 }
-			case PROP_CHANGED:
-                //setObjectModel(msg.objectID, name);
-                break;
             case PROP_REMOVED:
-                // removeSceneNode(msg);
+                removeObjectEntity(msg.objectID);
                 break;
 		}
 	}
@@ -323,12 +322,32 @@ namespace Opde {
                 LOG_ERROR("RenderService::prepareMesh: Could not load the requested model %s", name.c_str());
             }
         }
-
+    }
+    
+    // --------------------------------------------------------------------------
+    void RenderService::removeObjectEntity(int id) {
+		// Not validated in prop service to be any different
+		// just remove the entity, will add a new one
+		ObjectEntityMap::iterator it = mEntityMap.find(id);
+		
+		if (it != mEntityMap.end()) {
+			try {
+				SceneNode* node = mObjectService->getSceneNode(id);
+				
+				node->detachObject(it->second);
+				
+			} catch (BasicException& e) {
+				LOG_ERROR("RenderService: Could not get the sceneNode for object %d! Not detaching entity from scene node!", id);
+			}
+				
+			mSceneMgr->destroyEntity(it->second);
+			
+			mEntityMap.erase(it);
+		}
     }
 
     // --------------------------------------------------------------------------
     void RenderService::clear() {
-        mSceneNodeMap.clear();
         mEntityMap.clear();
     }
 
