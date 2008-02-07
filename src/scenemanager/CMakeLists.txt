@@ -7,15 +7,23 @@ link_directories (
     ${OGRE_LIB_DIR}
 )
 
-file(GLOB OPDE_DARKSCENEMANAGER_HEADERS *.h)
-
 add_library (DarkSceneManager 
-		OgreBspNode.cpp 
-		OgreBspTree.cpp 
-		OgreDarkSceneManager.cpp 
-		OgreDarkSceneNode.cpp
-		OgrePolygon.cpp
-		OgrePortal.cpp
-		OgrePortalFrustum.cpp
-		${OPDE_DARKSCENEMANAGER_HEADERS}
+		DarkBspNode.cpp 
+		DarkBspNode.h
+		DarkBspTree.cpp 
+		DarkBspTree.h
+		DarkSceneNode.cpp
+		DarkSceneNode.h
+		DarkPolygon.cpp
+		DarkPolygon.h
+		DarkPortal.cpp
+		DarkPortal.h
+		DarkPortalFrustum.cpp
+		DarkPortalFrustum.h
+		DarkCamera.cpp
+		DarkCamera.h
+		DarkSceneManager.cpp 
+		DarkSceneManager.h
+		DarkLight.cpp
+		DarkLight.h
 	)
