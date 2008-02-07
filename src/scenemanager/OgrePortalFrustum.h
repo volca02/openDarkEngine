@@ -16,12 +16,17 @@
  * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
  * Place - Suite 330, Boston, MA 02111-1307, USA, or go to
  * http://www.gnu.org/copyleft/lesser.txt.
+ *
+ *
+ *	$Id$
+ *
  *****************************************************************************/
  
-#ifndef _OgrePortalFrustum_H__
-#define _OgrePortalFrustum_H__
+#ifndef __DARKPORTALFRUSTUM_H
+#define __DARKPORTALFRUSTUM_H
 
-#include "OgreBspPrerequisites.h"
+#include "DarkBspPrerequisites.h"
+
 #include <OgrePlane.h>
 #include <OgreVector3.h>
 #include <OgreCamera.h>
@@ -32,22 +37,29 @@ namespace Ogre {
 	
 	typedef std::vector< Plane > FrustumPlanes;
 	
-	/** A Multiple-planed frustum. Defined by either a camera, or a camera and a polygon defining the boundaries of the frustum. */
+	/** A Multiple-planed frustum. Defined by either a camera, or a camera and a polygon defining the boundaries of the frustum. 
+	* @deprecated This class should be deprecated. DarkCamera class should be able to handle all the visibility updates alone */
 	class PortalFrustum {
 		private:
 			FrustumPlanes planes;
 		
 		public:
 			// construct a new Frustum out of a camera and a Portal (which has been clipped as needed previously)
-			PortalFrustum(Camera *cam, Portal *poly);
+			PortalFrustum(const Camera *cam, Portal* poly);
 		
 			// new frustum, based solely on camera... This is the variant we use to start rendering... 
 			// each portal is then rendered using frustum constructed with the other constructor
-			PortalFrustum(Camera *cam);
+			PortalFrustum(const Camera *cam);
 			
-			void addPlane(Plane a);
+			// Constructs the portalfrustum from a positional point and a portal to look through
+			PortalFrustum(const Vector3& point, Portal* poly);
 			
-			FrustumPlanes& getPlanes();
+			// Constructs an N sided portal frustum as an aproximation of cone with inner angle ang
+			PortalFrustum(const Vector3& point, const Vector3& direction, Radian ang, size_t sides = 4);
+			
+			void addPlane(const Plane& a);
+			
+			const FrustumPlanes& getPlanes() const;
 			
 			/** 
 				Classify Portal by it's bounding volume:
@@ -55,13 +67,13 @@ namespace Ogre {
 					 0 intersects
 					 1 all inside
 			*/
-			int getPortalClassification(Portal *src);
+			int getPortalClassification(Portal* src) const;
 		
 			/** 
 			* Clips the ginven Portal by frustum planes.
 			* returns a Portal pointer (not necesi necessarily an new one), or NULL if clipped away
 			*/
-			Portal *clipPortal(Portal *src, bool &didClip);
+			Portal *clipPortal(Portal* src, bool &didClip) const;
 	};
 
 }

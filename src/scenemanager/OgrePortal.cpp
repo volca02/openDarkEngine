@@ -16,25 +16,28 @@
  * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
  * Place - Suite 330, Boston, MA 02111-1307, USA, or go to
  * http://www.gnu.org/copyleft/lesser.txt.
+ *
+ *
+ *	$Id$
+ *
  *****************************************************************************/
  
 #include <OgreHardwareBufferManager.h>
 #include <OgreDefaultHardwareBufferManager.h>
-#include "OgreSimpleRenderable.h"
-#include "OgrePortal.h"
-#include "OgrePortalFrustum.h"
-#include "OgreSceneManager.h"
-#include "OgreBspNode.h"
+#include <OgreSimpleRenderable.h>
 
-
-
-// This Angle defines the tolerance for comparision of the normalised edge directions (testing whether those are equal) - dropping of useless portal vertices
-#define EQUALITY_ANGLE 0.0000000001
+#include "DarkPortal.h"
+#include "DarkPortalFrustum.h"
+#include "DarkSceneManager.h"
+#include "DarkBspNode.h"
 
 namespace Ogre {
 	#define POSITION_BINDING 0
 	
 	const PortalRect PortalRect::EMPTY = PortalRect(INF, -INF, INF, -INF);
+
+	// Some default values for screen
+	const PortalRect PortalRect::SCREEN = PortalRect(0, 1024, 0, 768);
 	
 	// ---------------------------------------------------------------------------------
 	std::ostream& operator<< (std::ostream& o, PortalRect& r) {
@@ -50,6 +53,7 @@ namespace Ogre {
 	int Portal::mScreenWidth2 = 512;
 	int Portal::mScreenHeight2 = 384;
 	
+	// ---------------------------------------------------------------------------------	
 	Portal::Portal(BspNode* source, BspNode* target, Plane plane) : ConvexPolygon(plane) {
 		mFrameNum = 0xFFFFF;
 		mMentions = 0;
@@ -69,21 +73,23 @@ namespace Ogre {
 	Portal::~Portal() {
 		if (mRenderOp.vertexData)
 			delete mRenderOp.vertexData;
+			
+		detach();
 	}
 			
 	// ---------------------------------------------------------------------------------
-	Portal::Portal(Portal *src) : ConvexPolygon(src) {
-		this->mTarget = src->getTarget();
-		this->mSource = src->getSource();
+	Portal::Portal(const Portal& src) : ConvexPolygon(src) {
+		this->mTarget = src.getTarget();
+		this->mSource = src.getSource();
 	}
 		
 	// ---------------------------------------------------------------------------------
-	BspNode* Portal::getTarget() {
+	BspNode* Portal::getTarget() const {
 		return mTarget;
 	}
 	
 	// ---------------------------------------------------------------------------------
-	BspNode* Portal::getSource() {
+	BspNode* Portal::getSource() const {
 		return mSource;
 	}
 	
@@ -96,7 +102,7 @@ namespace Ogre {
 		mRenderOp.vertexData = new VertexData();
 
         	mRenderOp.indexData = 0;
-		mRenderOp.vertexData->vertexCount = mPoints->size() + 1;
+		mRenderOp.vertexData->vertexCount = mPoints.size() + 1;
 		mRenderOp.vertexData->vertexStart = 0; 
 		mRenderOp.operationType = RenderOperation::OT_LINE_LIST; 
 		mRenderOp.useIndexes = false; 
@@ -119,13 +125,11 @@ namespace Ogre {
         	// set basic white material
         	this->setMaterial("BaseWhiteNoLighting");
 		
-		// vbuf =	mRenderOp.vertexData->vertexBufferBinding->getBuffer(POSITION_BINDING);
-
         	float* pPos = static_cast<float*>(vbuf->lock(HardwareBuffer::HBL_DISCARD));
 	
 		// Throw in the vertices (no. 0 goes twice - 1. and last)
-		for (unsigned int x = 0; x <= mPoints->size(); x++) {
-			Vector3 v = mPoints->at(x % mPoints->size());
+		for (unsigned int x = 0; x <= mPoints.size(); x++) {
+			Vector3 v = mPoints.at(x % mPoints.size());
 			(*pPos++) = v.x;
 			(*pPos++) = v.y;
 			(*pPos++) = v.z;
@@ -137,7 +141,7 @@ namespace Ogre {
 	
 	// ---------------------------------------------------------------------------------
 	void Portal::refreshBoundingVolume() {
-		if (mPoints->size() == 0) {
+		if (mPoints.size() == 0) {
 			mCenter = Vector3(0,0,0);
 			mRadius = -1;
 			return;
@@ -145,18 +149,18 @@ namespace Ogre {
 		// first get the center.
 		Vector3 center(0,0,0);
 		
-		for (unsigned int x = 0; x < mPoints->size(); x++)
-			center += mPoints->at(x);
+		for (unsigned int x = 0; x < mPoints.size(); x++)
+			center += mPoints[x];
 				
-		center /= mPoints->size();
+		center /= mPoints.size();
 		
 		mCenter = center;
 		
 		// now the maximal radius
 		float radius = 0;
 		
-		for (unsigned int x = 0; x < mPoints->size(); x++) {
-			Vector3 vdist = mPoints->at(x) - center;
+		for (unsigned int x = 0; x < mPoints.size(); x++) {
+			Vector3 vdist = mPoints[x] - center;
 			
 			float len = vdist.squaredLength();
 			
@@ -181,6 +185,13 @@ namespace Ogre {
 		mTarget->attachIncommingPortal(this);
 	}
 	
+	// ---------------------------------------------------------------------------------
+	void Portal::detach() {
+		mSource->detachPortal(this);
+		mTarget->detachPortal(this);
+	}
+	
+    	
 	// ---------------------------------------------------------------------------------
 	void Portal::getWorldTransforms( Matrix4* xform ) const {
 		// return identity matrix to prevent parent transforms

@@ -23,22 +23,32 @@ http://www.gnu.org/copyleft/lesser.txt.
 -----------------------------------------------------------------------------
 
 Rewritten to be used by the openDarkEngine project by Filip Volejnik <f.volejnik@centrum.cz>
+
+$Id$
+
 */
+
 #ifndef __BspPrerequisites_H__
 #define __BspPrerequisites_H__
 
 #include <OgrePrerequisites.h>
 
 namespace Ogre {
-
     	// Predeclare classes
 	class BspNode;
+	
+	typedef std::set<BspNode*> BspNodeSet;
+	typedef std::deque<BspNode*> BspNodeQueue;
+	typedef std::list<BspNode*> BspNodeList;
+	
+	class BspTree;
 	class PortalFrustum;
-	class Polygon;
+	class ConvexPolygon;
 	class Portal;
 	class DarkSceneManager;
-
+	class DarkCamera;
+	class DarkLight;
+	class DarkLightFactory;
 }
-
 
 #endif

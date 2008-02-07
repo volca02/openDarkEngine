@@ -16,10 +16,14 @@
  * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
  * Place - Suite 330, Boston, MA 02111-1307, USA, or go to
  * http://www.gnu.org/copyleft/lesser.txt.
+ *
+ *
+ *	$Id$
+ *
  *****************************************************************************/
  
-#ifndef _OgrePolygon_H__
-#define _OgrePolygon_H__
+#ifndef __DARKPOLYGON_H
+#define __DARKPOLYGON_H
 
 #include "OgreVector3.h"
 #include "OgrePlane.h"
@@ -37,7 +41,7 @@ namespace Ogre {
 			
 		protected:
 			/** A vector containing the Vector3 values - Portal/portal edge vertices */
-			PolygonPoints 	*mPoints;
+			PolygonPoints 	mPoints;
 	
 			/** The plane on which the portal lies */
 			Plane		mPlane;
@@ -48,29 +52,38 @@ namespace Ogre {
 			* @param plane Polygon's plane (Normal direction does matter) */
 			ConvexPolygon(Plane plane);
 		
-			~ConvexPolygon();
+			/** destructor */
+			virtual ~ConvexPolygon();
 			
-			/** copy ctor */
-			ConvexPolygon(ConvexPolygon *src);
+			/** copy constructor */
+			ConvexPolygon(const ConvexPolygon& src);
 			
+			/** adds a vertex to the polygon definition */
 			void addPoint(float x, float y, float z);
 			
+			/** adds a vertex to the polygon definition */
 			void addPoint(Vector3 a);
 			
-			const PolygonPoints& getPoints();
+			/** returns a const reference to the points defining the polygon */
+			const PolygonPoints& getPoints() const;
 		
+			/** gets the count of the points the polygon is defined with */
 			int getPointCount();
 			
-			const Plane& getPlane();
+			/** gets the polygon's plane */ 
+			const Plane& getPlane() const;
 			
-			void setPlane(Plane plane);
+			/** sets the polygon's plane */
+			void setPlane(const Plane& plane);
 			
 			/** get the number of polygons's vertices outside a given plane
 			* @return the count of points which lie outside (negative distance from the plane)
 			*/
-			unsigned int getOutCount(Plane &plane);
+			unsigned int getOutCount(const Plane &plane);
 			
 			/** Clips the poly using a plane (and replaces instances vertices after success)
+			* @param plane The plane to clip with
+			* @param didClip is set to true if the polygon was changed by the clipping operation
 			* @return number of vertices in the new poly
 			*/
 			int clipByPlane(const Plane &plane, bool &didClip);

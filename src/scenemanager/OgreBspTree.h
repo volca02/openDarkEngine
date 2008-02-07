@@ -23,15 +23,19 @@ http://www.gnu.org/copyleft/lesser.txt.
 -----------------------------------------------------------------------------
 
 Rewritten to be used in the openDarkEngine project by Filip Volejnik <f.volejnik@centrum.cz>
+
+$Id$
+
 */
 
-#ifndef _BspTree_H__
-#define _BspTree_H__
+#ifndef __BSPTREE_H
+#define __BSPTREE_H
 
-#include "OgreBspPrerequisites.h"
-#include "OgreResource.h"
-#include "OgreSceneManager.h"
-#include "OgreBspNode.h"
+#include "DarkBspPrerequisites.h"
+#include "DarkBspNode.h"
+
+#include <OgreResource.h>
+#include <OgreSceneManager.h>
 
 namespace Ogre {
 
@@ -40,14 +44,20 @@ namespace Ogre {
 		friend class DarkSceneManager;
 	public:
 		/** Constructor. */
-		BspTree();
+		BspTree(DarkSceneManager* owner);
 	
 		/** Destructor. Does unallocate the BSP tree (e.g. leaf and non-leaf node list) */
 		~BspTree();
 	
 		/** Returns a pointer to the root node (BspNode) of the BSP tree. */
 		const BspNode* getRootNode(void);
-	
+		
+		/** Sets a new root of the BSP tree */
+		void setRootNode(BspNode* node);
+		
+		/** Sets a new root of the BSP tree */
+		void setRootNode(int id);
+
 		/** Walks the entire BSP tree and returns the leaf
 		    which contains the given point.
 		*/
@@ -62,33 +72,49 @@ namespace Ogre {
 		/** Internal method, makes sure an object is removed from the leaves when detached from a node. */
 		void _notifyObjectDetached(const MovableObject* mov);
 		
-		BspNode* getLeafNodeStart() const { return mLeafNodes; };
-		unsigned int getNumLeafNodes() const { return mNumLeafNodes; };
+		/** Creates a new BSP node 
+		* @param id The BSP node id 
+		* @param leafID the leaf id of this node (if < 0 or unfilled, the node is not a leaf, otherwise
+			it is marked as leaf and registered in mLeafNodeMap) */
+		BspNode* createNode(int id, int leafID = -1);
+		
+		/** Gets the BSP node by id */
+		BspNode* getNode(int id);
+		
+		/** Gets a BSP leaf node by a leaf id */
+		BspNode* getLeafNode(int leafid);
+		
+		/** clears the BSP tree */
+		void clear();
+		
+		/** finds leaf nodes the given sphere touches */
+		void findLeafsForSphere(BspNodeList& destList, const Vector3& pos, Real radius);
+		
 	protected:
-		/** Pointer list for the nodes...
+	
+		void findLeafsForSphereFromNode(BspNode* node, BspNodeList& destList, const Vector3& pos, Real radius);
+		
+		/** Root Bsp Node
 		*/
 		BspNode* mRootNode;
+		
+		typedef std::map<int, BspNode*> BspNodeMap;
+		
+		/// Map of the BSP nodes
+		BspNodeMap mBspNodeMap;
+		
+		/// Map leaf ID -> BspNode
+		BspNodeMap mLeafNodeMap;
 			
-		/** Bsp Leaf nodes */
-		Ogre::BspNode* mLeafNodes;
-		unsigned int mNumLeafNodes;
-		
-		/** Bsp non-leaf nodes */
-		Ogre::BspNode* mNonLeafNodes;
-		unsigned int mNumNonLeafNodes;
-
-		
+		/// Owner of the BSP tree
+		DarkSceneManager* mOwner;
+			
 		typedef std::map<const MovableObject*, std::list<BspNode*> > MovableToNodeMap;
+		
 		/// Map for locating the nodes a movable is currently a member of
 		MovableToNodeMap mMovableToNodeMap;
 
 		void tagNodesWithMovable(BspNode* node, const MovableObject* mov, const Vector3& pos);
-	
-		/** Sets the BspTree root node to the tree root specified by root rootNode */
-		void setBspTree(BspNode* rootNode, BspNode *leafNodes, BspNode* nonLeafNodes, 
-					size_t leafNodeCount, size_t nonLeafNodeCount);
-	
-		
 	};
 }
 

@@ -23,12 +23,17 @@ http://www.gnu.org/copyleft/lesser.txt.
 -----------------------------------------------------------------------------
 
 Rewritten to be used by the openDarkEngine project by Filip Volejnik <f.volejnik@centrum.cz>
-*/
-#ifndef __DarkSceneNode_H__
-#define __DarkSceneNode_H__
 
-#include "OgreBspPrerequisites.h"
-#include "OgreSceneNode.h"
+$Id$
+
+*/
+
+#ifndef __DARKSCENENODE_H
+#define __DARKSCENENODE_H
+
+#include "DarkBspPrerequisites.h"
+
+#include <OgreSceneNode.h>
 
 namespace Ogre {
 	
@@ -70,7 +75,6 @@ namespace Ogre {
 			/** Detaches all objects attached to this node.
 			*/
 			void detachAllObjects(void);
-			
 	};
 }
 

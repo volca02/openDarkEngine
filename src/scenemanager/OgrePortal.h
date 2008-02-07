@@ -16,26 +16,30 @@
  * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
  * Place - Suite 330, Boston, MA 02111-1307, USA, or go to
  * http://www.gnu.org/copyleft/lesser.txt.
+ *
+ *
+ *	$Id$
+ *
  *****************************************************************************/
  
-#ifndef _OgrePortal_H__
-#define _OgrePortal_H__
+#ifndef __DARKPORTAL_H
+#define __DARKPORTAL_H
 
 #include <OgreCamera.h>
 #include <OgreSimpleRenderable.h>
 #include <OgreVector3.h>
 #include <OgrePlane.h>
 
-#include "OgrePortalFrustum.h"
-#include "OgrePolygon.h"
-#include "OgreBspPrerequisites.h"
+#include "DarkPortalFrustum.h"
+#include "DarkPolygon.h"
+#include "DarkBspPrerequisites.h"
 
 #include <iostream>
 
 #define MAX(a,b) ((a>b)?a:b)
 #define MIN(a,b) ((a<b)?a:b)
 
-// Helping 'infinity' macro for PortalRect coords
+// Helping 'infinity' value for PortalRect coords
 #define INF 100000
 
 namespace Ogre {
@@ -47,6 +51,7 @@ namespace Ogre {
 	struct PortalRect {
 			int left, right, bottom, top;
 			static const PortalRect EMPTY;
+			static const PortalRect SCREEN;
 			
 			PortalRect(int l, int r, int b, int t) {
 				left = l;
@@ -60,6 +65,13 @@ namespace Ogre {
 				right = -INF;
 				bottom = INF;
 				top = -INF;
+			}
+			
+			void setToScreen(void) {
+			    left = SCREEN.left;
+			    right = SCREEN.right;
+			    top = SCREEN.top;
+			    bottom = SCREEN.bottom;
 			}
 	};
 	
@@ -76,7 +88,7 @@ namespace Ogre {
 	* @note Please note that the direction of the plane's normal has to comply with the 
 	* portals vertex order derived normal. Also note that no check that the points actualy lie on the plane is done. */
 	class Portal : public ConvexPolygon, public SimpleRenderable {
-		friend class DarkSceneManager;
+		friend class DarkCamera;
 		friend class PortalFrustum;
 			
 		protected:
@@ -133,23 +145,39 @@ namespace Ogre {
 			~Portal();
 			
 			/** Copy ctor */
-			Portal(Portal *src);
+			Portal(const Portal &src);
 			
 			/** Returns the target DarkSceneNode for this portal */
-			BspNode* getTarget();
+			BspNode* getTarget() const;
 			
 			/** Returns the source DarkSceneNode for this portal */
-			BspNode* getSource();
+			BspNode* getSource() const;
 		
 			/** Refresh the center and radius bounding sphere parameters */
 			void refreshBoundingVolume();
+			
+			/** Returns true if the portal is backface-culled for viewer on position pos */
+			bool isBackfaceCulledFor(Vector3 pos) {
+				Vector3 pos2p = mPoints[0] - pos; 
+						
+				float dotp = pos2p.dotProduct(mPlane.normal);
+				
+				return (dotp > 0);
+			}
+			
+			/** Returns a distance this portal has from a given point */
+			Real getDistanceFrom(Vector3 pos) {
+				Vector3 diff = (pos - mCenter);
+				return diff.length();
+			}
+			
 			/**
 			* Refreshes screen projection bounding Rectangle
 			* @param cam Camera which is used by the projection
 			* @param toScreen A precomputed Projection*View matrix matrix4 which is used to project the vertices to screen
 			* @param frust PortalFrustum used to cut away non visible parts of the portal
 			*/
-			void refreshScreenRect(Camera *cam, Matrix4& toScreen, PortalFrustum *frust) {
+			void refreshScreenRect(const Camera *cam, const Matrix4& toScreen, const PortalFrustum &frust) {
 				// inverse coords to let the min/max initialize
 				screenRect = PortalRect::EMPTY;
 				
@@ -157,7 +185,7 @@ namespace Ogre {
 				mActualRect = screenRect;
 				
 				// Backface cull. The portal won't be culled if a vector camera-vertex dotproduct normal will be greater than 0
-				Vector3 camToV0 = mPoints->at(0) - cam->getDerivedPosition(); 
+				Vector3 camToV0 = mPoints[0] - cam->getDerivedPosition(); 
 						
 				float dotp = camToV0.dotProduct(mPlane.normal);
 				
@@ -175,7 +203,7 @@ namespace Ogre {
 				
 				bool didc;
 				
-				Portal *onScreen = frust->clipPortal(this, didc);
+				Portal *onScreen = frust.clipPortal(this, didc);
 				
 				// If we have a non-zero cut result
 				if (onScreen) {
@@ -264,8 +292,12 @@ namespace Ogre {
 			/** Attaches the portal to the source and destination DarkSceneNodes */
 			void attach();
 			
+			/** Detaches the portal from the BSPNodes to which it was attached */
+			void detach();
+			
 			/** Mandatory override from SimpleRenderable */
 			Real getSquaredViewDepth(const Camera* cam) const;
+			
 			/** Mandatory override from SimpleRenderable */
 			virtual Real getBoundingRadius(void) const;
 	};

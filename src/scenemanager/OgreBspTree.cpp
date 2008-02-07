@@ -23,32 +23,36 @@ http://www.gnu.org/copyleft/lesser.txt.
 -----------------------------------------------------------------------------
 
 Rewritten from the BSPLevel class to use in the openDarkEngine project by Filip Volejnik <f.volejnik@centrum.cz>
+
+$Id$
+
 */
 
 
-#include "OgreBspTree.h"
-#include "OgreException.h"
-#include "OgreMovableObject.h"
-#include "OgreSceneManager.h"
-#include "OgreMath.h"
-#include "OgreStringVector.h"
-#include "OgreStringConverter.h"
-#include "OgreLogManager.h"
-#include "OgreSceneManagerEnumerator.h"
-#include "OgreIteratorWrappers.h"
+#include "DarkBspTree.h"
+#include "DarkSceneManager.h"
+
+#include <OgreException.h>
+#include <OgreMovableObject.h>
+#include <OgreSceneManager.h>
+#include <OgreMath.h>
+#include <OgreStringVector.h>
+#include <OgreStringConverter.h>
+#include <OgreLogManager.h>
+#include <OgreSceneManagerEnumerator.h>
+#include <OgreIteratorWrappers.h>
 
 
 namespace Ogre {
 
 	//-----------------------------------------------------------------------
-	BspTree::BspTree() : mRootNode(NULL) {
+	BspTree::BspTree(DarkSceneManager* owner) : mRootNode(NULL), mOwner(owner) {
 		// Nothing. Set-Null somethings!
 	}
 
 	//-----------------------------------------------------------------------
 	BspTree::~BspTree() {
-		delete[] mLeafNodes;
-		delete[] mNonLeafNodes;
+		clear();
 	}
 
 	//-----------------------------------------------------------------------
@@ -56,18 +60,30 @@ namespace Ogre {
 	{
 		return mRootNode;
 	}
+	
+	//-----------------------------------------------------------------------
+	void BspTree::setRootNode(BspNode* node)
+	{
+		mRootNode = node;
+	}
+	
+	//-----------------------------------------------------------------------
+	void BspTree::setRootNode(int id) {
+		mRootNode = getNode(id);
+	}
     
 	//-----------------------------------------------------------------------
 	BspNode* BspTree::findLeaf(const Vector3& point) const
 	{
 		BspNode* node = mRootNode;
+		
+		if (node == NULL)
+			return NULL;
 
-		while (!node->isLeaf())
-		{
+		while (!node->isLeaf()) {
 			node = node->getNextNode(point);
 			
-			// if node is null we have a problem! We're out off world this time.
-			if (node == NULL)
+			if (node == NULL) 
 				return NULL;
 		}
 
@@ -101,6 +117,7 @@ namespace Ogre {
 	void BspTree::tagNodesWithMovable(BspNode* node, const MovableObject* mov,
 		const Vector3& pos)
 	{
+	
 		if (node->isLeaf())
 		{
 			// Add to movable->node map
@@ -119,27 +136,31 @@ namespace Ogre {
 		{
 			// Find distance to dividing plane
 			Real dist = node->getDistance(pos); 
+			
+			BspNode* front = node->getFront();
+			BspNode* back = node->getBack();
+
 
 			if (Math::Abs(dist) < mov->getBoundingRadius())
 			{
 				// Bounding sphere crosses the plane, do both
-				if (node->getBack() != NULL)
-					tagNodesWithMovable(node->getBack(), mov, pos);
+				if (back != NULL)
+					tagNodesWithMovable(back, mov, pos);
 
-				if (node->getFront() != NULL)
-					tagNodesWithMovable(node->getFront(), mov, pos);
+				if (front != NULL)
+					tagNodesWithMovable(front, mov, pos);
 			}
 			else if (dist < 0)
 			{    //-----------------------------------------------------------------------
 				// Do back
-				if (node->getBack() != NULL)
-					tagNodesWithMovable(node->getBack(), mov, pos);
+				if (back != NULL)
+					tagNodesWithMovable(back, mov, pos);
 			}
 			else
 			{
 				// Do front
-				if (node->getFront() != NULL)
-					tagNodesWithMovable(node->getFront(), mov, pos);
+				if (front != NULL)
+					tagNodesWithMovable(front, mov, pos);
 			}
 		}
 	}
@@ -163,17 +184,109 @@ namespace Ogre {
 		}
 	}
 	
-	//----------------------------------------------------------------------
-	void BspTree::setBspTree(BspNode* rootNode, BspNode *leafNodes, BspNode* nonLeafNodes, 
-					size_t leafNodeCount, size_t nonLeafNodeCount) {
-		// TODO: This should only be allowed in the certain parts of the level initialization. Oh well.
-		mRootNode = rootNode;
+	//-----------------------------------------------------------------------
+	BspNode* BspTree::createNode(int id, int leafID) {
+		BspNodeMap::const_iterator it = mBspNodeMap.find(id);
 		
-		mLeafNodes = leafNodes;
-		mNumLeafNodes = leafNodeCount;
+		if (it != mBspNodeMap.end()) 
+			OGRE_EXCEPT(Exception::ERR_DUPLICATE_ITEM,
+                "BSPNode with the given id already exists!",
+                "BspTree::createNode");
+                
+                
+		BspNode* newNode = new BspNode(mOwner, id, leafID >= 0);
 		
-		mNonLeafNodes = nonLeafNodes;
-		mNumNonLeafNodes = nonLeafNodeCount;
+		mBspNodeMap.insert(std::make_pair(id, newNode));
+		
+		if (leafID >= 0) {
+			mLeafNodeMap.insert(std::make_pair(leafID, newNode));
+			newNode->setCellNum(leafID);
+		}
+		
+		return newNode;
+	}
+		
+
+	//-----------------------------------------------------------------------
+	BspNode* BspTree::getNode(int id) {
+		BspNodeMap::const_iterator it = mBspNodeMap.find(id);
+		
+		if (it != mBspNodeMap.end()) 
+			return it->second;
+		else
+			OGRE_EXCEPT(Exception::ERR_DUPLICATE_ITEM,
+                "BSPNode with the given id does not exist!",
+                "BspTree::getNode");
+	}
+	
+	//-----------------------------------------------------------------------
+	BspNode* BspTree::getLeafNode(int leafid) {
+		BspNodeMap::const_iterator it = mLeafNodeMap.find(leafid);
+		
+		if (it != mLeafNodeMap.end()) 
+			return it->second;
+		else
+			OGRE_EXCEPT(Exception::ERR_DUPLICATE_ITEM,
+                "BSPNode with the given leaf id does not exist!",
+                "BspTree::getLeafNode");
+	}
+
+	//-----------------------------------------------------------------------
+	void BspTree::clear() {
+		mMovableToNodeMap.clear();
+		
+		BspNodeMap::const_iterator it = mBspNodeMap.begin();
+		
+		for (; it != mBspNodeMap.end(); ++it) {
+			delete it->second;
+		}
+		
+		mBspNodeMap.clear();
+		mLeafNodeMap.clear();
+		
+		mRootNode = NULL;		
+	}
+
+	//-----------------------------------------------------------------------
+	void BspTree::findLeafsForSphere(BspNodeList& destList, const Vector3& pos, Real radius) {
+		findLeafsForSphereFromNode(mRootNode, destList, pos, radius);
+	}
+	
+	//-----------------------------------------------------------------------
+	void BspTree::findLeafsForSphereFromNode(BspNode* node, BspNodeList& destList, const Vector3& pos, Real radius) {
+		// Much simmilar to TagNodesWithMovable
+		if (node->isLeaf()) {
+			destList.push_back(node);
+		} else {
+			// Find distance to dividing plane
+			Real dist = node->getDistance(pos); 
+			
+			BspNode* front = node->getFront();
+			BspNode* back = node->getBack();
+
+
+			if (Math::Abs(dist) < radius)
+			{
+				// Bounding sphere crosses the plane, do both
+				if (back != NULL)
+					findLeafsForSphereFromNode(back, destList, pos, radius);
+
+				if (front != NULL)
+					findLeafsForSphereFromNode(front, destList, pos, radius);
+			}
+			else if (dist < 0)
+			{    //-----------------------------------------------------------------------
+				// Do back
+				if (back != NULL)
+					findLeafsForSphereFromNode(back, destList, pos, radius);
+			}
+			else
+			{
+				// Do front
+				if (front != NULL)
+					findLeafsForSphereFromNode(front, destList, pos, radius);
+			}
+		}
 	}
 }
 

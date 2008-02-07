@@ -23,19 +23,25 @@ http://www.gnu.org/copyleft/lesser.txt.
 -----------------------------------------------------------------------------
 
 Rewritten to be used in the openDarkEngine project by Filip Volejnik <f.volejnik@centrum.cz>
-*/
-#include "OgreDarkSceneNode.h"
-#include "OgreDarkSceneManager.h"
-#include "OgreSceneManager.h"
 
-//TODO: Destructor should release all DstPortals.
+$Id$
+*/
+
+#include "DarkSceneNode.h"
+#include "DarkSceneManager.h"
+
+#include <OgreSceneManager.h>
+
 namespace Ogre {
+	//-------------------------------------------------------------------------	
 	DarkSceneNode::DarkSceneNode(SceneManager* creator) : SceneNode(creator) {
 	}
-	
+
+	//-------------------------------------------------------------------------	
 	DarkSceneNode::DarkSceneNode(SceneManager* creator, const String& name) : SceneNode(creator, name) {
 	}
 
+	//-------------------------------------------------------------------------
 	void DarkSceneNode::_update(bool updateChildren, bool parentHasChanged)  {
 		bool checkMovables = false;
 
@@ -70,6 +76,7 @@ namespace Ogre {
 		return ret;
 		
 	}
+	
 	//-------------------------------------------------------------------------
 	MovableObject* DarkSceneNode::detachObject(const String& name)
 	{
@@ -77,6 +84,7 @@ namespace Ogre {
 		static_cast<DarkSceneManager*>(mCreator)->_notifyObjectDetached(ret);
 		return ret;
 	}
+	
 	//-------------------------------------------------------------------------
 	void DarkSceneNode::detachAllObjects(void)
 	{
@@ -89,6 +97,7 @@ namespace Ogre {
 		}
 		SceneNode::detachAllObjects();
 	}
+	
 	//-------------------------------------------------------------------------
 	void DarkSceneNode::setInSceneGraph(bool inGraph)
 	{

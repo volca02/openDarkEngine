@@ -23,16 +23,20 @@ http://www.gnu.org/copyleft/lesser.txt.
 -----------------------------------------------------------------------------
 
 Rewritten to be used in openDarkEngine project by Filip Volejnik <f.volejnik@centrum.cz>
+
+$Id$
 */
 
-#ifndef _BspNode_H__
-#define _BspNode_H__
+#ifndef __DARKBSPNODE_H
+#define __DARKBSPNODE_H
 
-#include "OgreBspPrerequisites.h"
-#include "OgrePlane.h"
-#include "OgreAxisAlignedBox.h"
-#include "OgreSceneQuery.h"
-#include "OgrePortal.h"
+#include "DarkBspPrerequisites.h"
+#include "DarkPortal.h"
+
+#include <OgrePlane.h>
+#include <OgreAxisAlignedBox.h>
+#include <OgreSceneQuery.h>
+
 #include <vector>
 
 namespace Ogre {
@@ -53,13 +57,13 @@ namespace Ogre {
 	This version of BspNode, updated to be used by DarkSceneManager, implements Portals as members. It should be considered as a 'Cell' if it is a leaf.
     */
     class BspNode {
-    		// So I'll save some time not calling methods to retrieve/set protected data...
-		friend class DarkSceneManager;
+   		friend class DarkSceneManager;
+		friend class DarkCamera;
 		friend class BspRaySceneQuery;
 		friend class BspIntersectionSceneQuery;
 			
 	public:
-		BspNode(SceneManager* owner, bool isLeaf);
+		BspNode(SceneManager* owner, int id, bool isLeaf);
 
 		BspNode();
 		~BspNode();
@@ -136,35 +140,39 @@ namespace Ogre {
 		// BspNode parameter settings. As we want to construct the BspNodes Externally...
 		/** Sets the Node to be leaf or not */
 		void setIsLeaf(bool isLeaf);
+		
 		/** Sets the splitting plane of this node */
 		void setSplitPlane(const Plane& splitPlane);
+		
 		/** Sets the Front child of this node */
 		void setFrontChild(BspNode* frontChild);
+		
 		/** Sets the back child of this node */
 		void setBackChild(BspNode* backChild);
+		
 		/** Sets the owning SceneManager instance */
 		void setOwner(SceneManager *owner);
 	
-	
-		/** Attaches a Portal as an outgoing portal of this BSPNode
-		*/
+		/** Attaches a Portal as an outgoing portal of this BSPNode */
 		void attachOutgoingPortal(Portal *portal);
 		
-		/** Attaches a Portal as an incomming portal of this BSPNode
-		*/
+		/** Attaches a Portal as an incomming portal of this BSPNode */
 		void attachIncommingPortal(Portal *portal);
+		
+		/** Dettaches a Portal from this BSPNode	*/
+		void detachPortal(Portal *portal);
+		
+		/** Informs this node a light affect's it */
+		void addAffectingLight(DarkLight* light);
+		
+		/** Informs this node a light stopped affecting it */
+		void removeAffectingLight(DarkLight* light);
 		
 		/** Sets the Cell number. For debugging */
 		void setCellNum(unsigned int cellNum);
 		
 		/** gets the Cell number. For debugging */
 		unsigned int getCellNum() const;
-
-		/** sets the Face group start index */
-		void setFaceGroupStart(int fgs);
-		
-		/** sets the Face group count */
-		void setFaceGroupCount(int fgc);
 
 		/** Plane list. For Scene queries */
 		typedef std::list<Plane> CellPlaneList;
@@ -176,8 +184,21 @@ namespace Ogre {
 		/** sets the plane list for scene queries */
 		void setPlaneList(CellPlaneList& planes, PlanePortalMap& portalmap);
 		
-
+    
+		void refreshScreenRect(int frameNum, const Camera* cam, const Matrix4& toScreen, const PortalFrustum& frust);
+		
+		typedef PortalList::iterator PortalIterator;
+		
+		PortalIterator outPortalBegin() { return mDstPortals.begin(); };
+		PortalIterator outPortalEnd() { return mDstPortals.end(); };
+		
+		// Invalidates the screen projection info (so refreshScreenRect will pass)
+		void invalidateScreenRect(int frameNum) { mInitialized = false; mFrameNum = frameNum; };
+		
+		
 	protected:
+		int mID;
+	
 		SceneManager* mOwner; // Back-reference to SceneManager which owns this Node
 		bool mIsLeaf;
 	    
@@ -205,6 +226,9 @@ namespace Ogre {
 		/** The set of movables that could be visible in this BSP node, and thus have to be rendered when this node is visible */
 		IntersectingObjectSet mMovables;
 		
+		typedef std::set< DarkLight* > AffectingLights;
+		
+		AffectingLights mAffectingLights;
 		
 		// ----------- Portal based rendering stuff - leaf only
 		
@@ -213,7 +237,6 @@ namespace Ogre {
 		/** A vector of portals leading out of this cell */
 		PortalList mDstPortals;
 	
-		
 		/* the last frame number this SceneNode was rendered. */
 		unsigned int mFrameNum;
 	
@@ -228,18 +251,6 @@ namespace Ogre {
 		
 		/** Current view rectangle to this cell */
 		PortalRect mViewRect;
-		
-		/** Number of face groups in this node if it is a leaf. */
-		int mNumFaceGroups;
-		
-		/** Index to the part of the main leaf facegroup index buffer(held in BspLevel) for this leaf.
-		    This leaf uses mNumFaceGroups from this pointer onwards. From here you use the index
-		    in this buffer to look up the actual face.
-		    Note that again for simplicity and bulk memory allocation the face
-		    group list itself is allocated by the BspLevel for all nodes, and each leaf node is given a section of it to
-		    work on. This saves lots of small memory allocations / deallocations which limits memory fragmentation.
-		*/
-		int mFaceGroupStart;
 		
 		/** cell's plane list for Leaf nodes */
 		CellPlaneList mPlaneList;
@@ -276,13 +287,12 @@ namespace Ogre {
 			}
 			
 			return changed;
-		}
-	public:
-		const IntersectingObjectSet& getObjects(void) const { return mMovables; }
-		const CellPlaneList& getPlaneList() const { return mPlaneList; }
-
+		};
+		
+		public:
+			const IntersectingObjectSet& getObjects(void) const { return mMovables; }
+			const CellPlaneList& getPlaneList() const { return mPlaneList; }
     };
-
 
 }
 

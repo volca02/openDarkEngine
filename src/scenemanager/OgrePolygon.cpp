@@ -16,22 +16,24 @@
  * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
  * Place - Suite 330, Boston, MA 02111-1307, USA, or go to
  * http://www.gnu.org/copyleft/lesser.txt.
+ *
+ *
+ *	$Id$
+ *   
  *****************************************************************************/
  
-#include "OgrePolygon.h"
-#include "OgreBspNode.h"
-#include "OgreSceneManager.h"
-#include "OgreManualObject.h"
+#include "DarkPolygon.h"
+#include "DarkBspNode.h"
+#include "DarkSceneManager.h"
 
-// #define debug
+#include <OgreManualObject.h>
 
-// I have a feeling that this is slightly speedier than std::max / std::min calls
-// Not that much to be celebrated though
 #define MAX(a,b) ((a>b)?a:b)
 #define MIN(a,b) ((a<b)?a:b)
 
-// This Angle defines the tolerance in comparing the normalised edge directions (testing whether those are equal)
-#define EQUALITY_ANGLE 0.0000000001
+
+// This Angle defines the tolerance for comparision of the normalised edge directions (testing whether those are equal) - dropping of useless portal vertices
+#define EQUALITY_ANGLE 0.0000000001 
 
 namespace Ogre {
 
@@ -39,70 +41,64 @@ namespace Ogre {
 	// ----------------- Polygon Class implementation -----------------------------------
 	// ---------------------------------------------------------------------------------
 	ConvexPolygon::ConvexPolygon(Plane plane) {
-		mPoints = new PolygonPoints();
-		mPoints->clear();
-		
 		this->mPlane = plane;
 	}	
 		
 	// ---------------------------------------------------------------------------------
 	ConvexPolygon::~ConvexPolygon() {
-		delete mPoints;
 	}
 			
 	// ---------------------------------------------------------------------------------
-	ConvexPolygon::ConvexPolygon(ConvexPolygon *src) {
-		const PolygonPoints& pnts = src->getPoints();
+	ConvexPolygon::ConvexPolygon(const ConvexPolygon& src) {
+		const PolygonPoints& pnts = src.getPoints();
 				
-		mPoints = new PolygonPoints();
-		mPoints->clear();
-		
-		mPoints->reserve(pnts.size());
+		mPoints.reserve(pnts.size());
 		
 		for (unsigned int x = 0; x < pnts.size(); x++)
-			mPoints->push_back(pnts.at(x));
+			mPoints.push_back(pnts.at(x));
 
-		this->mPlane = src->getPlane();
+		this->mPlane = src.getPlane();
 	}
 			
 	// ---------------------------------------------------------------------------------
 	void ConvexPolygon::addPoint(float x, float y, float z) {
-		mPoints->push_back(Vector3(x,y,z));
+		mPoints.push_back(Vector3(x,y,z));
 	}
 	
 	// ---------------------------------------------------------------------------------		
 	void ConvexPolygon::addPoint(Vector3 a) {
-		mPoints->push_back(a);
+		mPoints.push_back(a);
 	}
 			
 	// ---------------------------------------------------------------------------------
-	const PolygonPoints& ConvexPolygon::getPoints() {
-		return *mPoints;
+	const PolygonPoints& ConvexPolygon::getPoints() const {
+		return mPoints;
 	}
 			
 	// ---------------------------------------------------------------------------------
 	int ConvexPolygon::getPointCount() {
-		return mPoints->size();
+		return mPoints.size();
 	}
 	
 	// ---------------------------------------------------------------------------------
-	const Plane& ConvexPolygon::getPlane() {
+	const Plane& ConvexPolygon::getPlane() const {
 		return mPlane;
 	}
 	
 	// ---------------------------------------------------------------------------------
-	void ConvexPolygon::setPlane(Plane plane) {
-		this->mPlane = plane;
+	void ConvexPolygon::setPlane(const Plane& plane) {
+		mPlane = plane;
 	}
 	
 	// ---------------------------------------------------------------------------------
-	unsigned int ConvexPolygon::getOutCount(Plane &plane) {
-		unsigned int idx;
-		
+	unsigned int ConvexPolygon::getOutCount(const Plane &plane) {
 		int negative = 0;
 		
-		for (idx = 0; idx < mPoints->size(); idx++) {
-			Plane::Side side = mPlane.getSide(mPoints->at(idx));
+		PolygonPoints::const_iterator it = mPoints.begin();
+		PolygonPoints::const_iterator end = mPoints.end();
+		
+		for (; it != end; ++it) {
+			Plane::Side side = mPlane.getSide(*it);
 			
 			if (side == Plane::NEGATIVE_SIDE)
 				negative++;
@@ -116,15 +112,21 @@ namespace Ogre {
 		int positive = 0;
 		int negative = 0;
 		
-		unsigned int pointcount = mPoints->size();
+		unsigned int pointcount = mPoints.size();
+		
+		if (pointcount == 0)
+		    return 0;
 		
 		//first we mark the vertices
 		Plane::Side *sides = new Plane::Side[pointcount];
 		
 		unsigned int idx;
 		
-		for (idx = 0; idx < pointcount; idx++) {
-			Plane::Side side = plane.getSide(mPoints->at(idx));
+		PolygonPoints::const_iterator it = mPoints.begin();
+		PolygonPoints::const_iterator end = mPoints.end();
+		
+		for (idx = 0; it != end; ++it, ++idx) {
+			Plane::Side side = plane.getSide(*it);
 			sides[idx] = side; // push the side of the vertex into the side buffer...
 			
 			switch (side) {
@@ -138,20 +140,20 @@ namespace Ogre {
 		
 		if (negative == 0) {
 			delete[] sides;
-			return mPoints->size(); // all the vertices were inside
+			return mPoints.size(); // all the vertices were inside
 		}
 		
 		didClip = true;
 		
 		if (positive == 0) { // we clipped away the whole poly
 			delete[] sides;
-			mPoints->clear();
+			mPoints.clear();
 			return 0;
 		}
 		
 		// some vertices were on one side, some on the other
 		
-		PolygonPoints *newpnts = new PolygonPoints();
+		PolygonPoints newpnts;
 		
 		long prev = pointcount - 1; // the last one
 		
@@ -160,46 +162,47 @@ namespace Ogre {
 			
 			if (side == Plane::POSITIVE_SIDE) { 
 				if (sides[prev] == Plane::POSITIVE_SIDE) { 
-					newpnts->push_back(mPoints->at(idx));
+					newpnts.push_back(mPoints.at(idx));
 				} else {
 					// calculate a new boundry positioned vertex
-					const Vector3& v1 = mPoints->at(prev);
-					const Vector3& v2 = mPoints->at(idx);
+					const Vector3& v1 = mPoints.at(prev);
+					const Vector3& v2 = mPoints.at(idx);
 					Vector3 dv = v2 - v1; // vector pointing from v2 to v1 (v1+dv*0=v2 *1=v1)
 					
 					// the dot product is there for a reason! (As I have a tendency to overlook the difference)
 					float t = plane.getDistance(v2) / (plane.normal.dotProduct(dv));
 					
-					newpnts->push_back(v2 - (dv * t)); // a new, boundry placed vertex is inserted
-					newpnts->push_back(v2);
+					newpnts.push_back(v2 - (dv * t)); // a new, boundry placed vertex is inserted
+					newpnts.push_back(v2);
 				}
 			} else { 
 				if (sides[prev] == Plane::POSITIVE_SIDE) { // if we're going outside
 					// calculate a new boundry positioned vertex
-					const Vector3 v1 = mPoints->at(idx);
-					const Vector3 v2 = mPoints->at(prev);
+					const Vector3 v1 = mPoints[idx];
+					const Vector3 v2 = mPoints[prev];
 					const Vector3 dv = v2 - v1;
 					
 					float t = plane.getDistance(v2) / (plane.normal.dotProduct(dv));
 					
-					newpnts->push_back(v2 - (dv * t)); // a new, boundry placed vertex is inserted
+					newpnts.push_back(v2 - (dv * t)); // a new, boundry placed vertex is inserted
 				}
 			}
 			
 			prev = idx;
 		}
 		
-		if (newpnts->size() < 3) { // a degenerate polygon as a result...
-			mPoints->clear();
-			delete[] newpnts;
+		if (newpnts.size() < 3) { // a degenerate polygon as a result...
+			mPoints.clear();
+
 			delete sides;
 			return 0;
 		}
 		
 		delete[] sides;
-		delete mPoints;
-		mPoints = newpnts; 
-		return mPoints->size();
+
+		// Swap the old point list with the new one
+		mPoints.swap(newpnts); 
+		return mPoints.size();
 	}
 
 	// ---------------------------------------------------------------------------------
@@ -216,14 +219,14 @@ namespace Ogre {
 		int removed = 0;
 		unsigned int idx;
 		
-		for (idx = 0; idx < mPoints->size(); idx++) {
+		for (idx = 0; idx < mPoints.size(); idx++) {
 			int prev = idx - 1;
-			prev = (prev < 0) ? mPoints->size()-1 : prev; 
-			int next = (idx + 1) % mPoints->size();
+			prev = (prev < 0) ? mPoints.size()-1 : prev; 
+			int next = (idx + 1) % mPoints.size();
 			
-			Vector3 vprev = mPoints->at(prev);
-			Vector3 vact = mPoints->at(idx);
-			Vector3 vnxt = mPoints->at(next);
+			Vector3 vprev = mPoints.at(prev);
+			Vector3 vact = mPoints.at(idx);
+			Vector3 vnxt = mPoints.at(next);
 			
 			// test if the normalised vectors equal to some degree
 			Vector3 vpta = (vact - vprev);
@@ -234,7 +237,7 @@ namespace Ogre {
 			
 			// If the direction TO is the same as direction FROM, the vertex does not form an edge break (to some degree we can tolerate).
 			if (vpta.directionEquals(vatn, Radian(EQUALITY_ANGLE))) {
-				mPoints->erase(mPoints->begin() + idx);
+				mPoints.erase(mPoints.begin() + idx);
 				
 				idx--; // better go to the next, than skip one
 				removed++;
@@ -248,6 +251,7 @@ namespace Ogre {
 	bool ConvexPolygon::isHitBy(const Ray& ray) const {
 		// Create a RayStart->Edge defined plane. 
 		// If the intersection of the ray to the polygon's plane is inside for all the planes, it is inside the poly
+		// By inside, I mean the point is on positive side of the plane
 		std::pair<bool, Real> intersection = ray.intersects(mPlane);
 		
 		if (!intersection.first) 
@@ -257,11 +261,11 @@ namespace Ogre {
 		Vector3 ip     = ray.getPoint(intersection.second);
 		Vector3 origin = ray.getOrigin();
 				
-		for (unsigned int idx = 0; idx < mPoints->size(); idx++) {
-			int iv2 = (idx + 1) % mPoints->size();
+		for (unsigned int idx = 0; idx < mPoints.size(); idx++) {
+			int iv2 = (idx + 1) % mPoints.size();
 			
-			Vector3 v1 = mPoints->at(idx);
-			Vector3 v2 = mPoints->at(iv2);
+			Vector3 v1 = mPoints[idx];
+			Vector3 v2 = mPoints[iv2];
 			
 			Plane frp(origin, v1, v2);
 			
@@ -284,11 +288,11 @@ namespace Ogre {
 		// intersection circle radius
 		Real irad = radius*radius - distance*distance;
 				
-		for (unsigned int idx = 0; idx < mPoints->size(); idx++) {
-			int iv2 = (idx + 1) % mPoints->size();
+		for (unsigned int idx = 0; idx < mPoints.size(); idx++) {
+			int iv2 = (idx + 1) % mPoints.size();
 			
-			Vector3 v1 = mPoints->at(idx);
-			Vector3 v2 = mPoints->at(iv2);
+			Vector3 v1 = mPoints[idx];
+			Vector3 v2 = mPoints[iv2];
 			Vector3 v3 = v1 + mPlane.normal;
 			
 			Plane frp(v1, v2, v3);
