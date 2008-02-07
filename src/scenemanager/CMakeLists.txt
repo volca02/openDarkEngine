@@ -14,8 +14,8 @@ add_library (DarkSceneManager
 		DarkBspTree.h
 		DarkSceneNode.cpp
 		DarkSceneNode.h
-		DarkPolygon.cpp
-		DarkPolygon.h
+		DarkConvexPolygon.cpp
+		DarkConvexPolygon.h
 		DarkPortal.cpp
 		DarkPortal.h
 		DarkPortalFrustum.cpp

@@ -22,7 +22,7 @@
  *   
  *****************************************************************************/
  
-#include "DarkPolygon.h"
+#include "DarkConvexPolygon.h"
 #include "DarkBspNode.h"
 #include "DarkSceneManager.h"
 

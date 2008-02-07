@@ -31,7 +31,7 @@
 #include <OgrePlane.h>
 
 #include "DarkPortalFrustum.h"
-#include "DarkPolygon.h"
+#include "DarkConvexPolygon.h"
 #include "DarkBspPrerequisites.h"
 
 #include <iostream>
