@@ -133,8 +133,8 @@ namespace Opde {
 		uint32_t back;  // Not used in leaf node
 	} wr_BSP_node_t;
 	
-	#define _BSP_NODENUM(a) (a->ndn_fl & 0x00FFFFFF)
-	#define _BSP_FLAGS(a) (a->ndn_fl  >> 24)
+	#define _BSP_NODENUM(a) (a.ndn_fl & 0x00FFFFFF)
+	#define _BSP_FLAGS(a) (a.ndn_fl  >> 24)
 #pragma pack(pop)
 } // end of Opde namespace
 
