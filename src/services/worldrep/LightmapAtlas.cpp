@@ -439,7 +439,7 @@ namespace Opde {
 
 	void LightMap::AddSwitchableLightmap(int id, lmpixel *data) {
 		mSwitchableLmaps.insert(std::make_pair(id, data));
-		mIntensities[id] = 1.0f;
+		mIntensities[id] = 0.0f;
 	}
 
 	void LightMap::setLightIntensity(int id, float intensity) {
