@@ -271,6 +271,8 @@ namespace Opde {
 				LOG_INFO(" * Src. material empty, not cloning %s", txtName.str().c_str());
 			}
 
+			shadMat->setReceiveShadows(true);
+
 			if (flags == 0) {
 				StringUtil::StrStreamType lightmapName;
 				lightmapName << "@lightmap" << atlasnum;
@@ -365,6 +367,8 @@ namespace Opde {
 		manual->textureCoord(vert.lightmap[0], vert.lightmap[1]);
 
 		Vector3 normal(vert.normal[0], vert.normal[1], vert.normal[2]);
+		
+		manual->normal(normal);
 	}
 
 	//------------------------------------------------------------------------------------
@@ -638,7 +642,7 @@ namespace Opde {
 			SceneNode* meshNode = sceneMgr->createSceneNode(modelName.str());
 			meshNode->setPosition(nodeCenter);
 
-			(static_cast<DarkSceneNode*>(meshNode))->attachObject(manual);
+			meshNode->attachObject(manual);
 
 			// Attach the new scene node to the root node of the scene (this ensures no further transforms, other than we want,
 			// take place, and that the geom will be visible only when needed)
@@ -653,7 +657,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------------------------------------
-	int WRCell::attachPortals(WRCell** cellList) {
+	int WRCell::attachPortals(DarkSceneManager* smgr) {
 		assert(bspNode);
 		assert(!portalsDone);
 
@@ -669,7 +673,7 @@ namespace Opde {
 
 			portalPlane = getPlane(face_maps[portalNum].plane);
 
-			Portal *portal = new Portal(bspNode, cellList[face_maps[portalNum].tgt_cell]->getBspNode(), portalPlane);
+			Portal *portal = smgr->createPortal(smgr->getBspLeaf(cellNum), smgr->getBspLeaf(face_maps[portalNum].tgt_cell), portalPlane);
 
 			for (int vert = 0; vert < face_maps[portalNum].count; vert++) {
 				// for each vertex of that poly
@@ -686,9 +690,6 @@ namespace Opde {
 
 			// Optimize the portal
 			optimized += portal->optimize();
-
-			// Attach the portal to the BspNodes
-			portal->attach();
 
 			// insert to the plane->(portal set) map
 			std::pair<Ogre::BspNode::PlanePortalMap::iterator, bool > ptset =
@@ -875,8 +876,8 @@ namespace Opde {
 				for (int t = 1; t < face_maps[polyNum].count - 1; t++) {
 					// push back the indexes
 					manual->index(idxpos);
-					manual->index(idxpos + t);
 					manual->index(idxpos + t + 1);
+					manual->index(idxpos + t);
 				}
 				
 				idxpos += face_maps[polyNum].count;
@@ -887,14 +888,17 @@ namespace Opde {
 		
 		MeshPtr result = manual->convertToMesh(modelName.str(), ResourceGroupManager::getSingleton().getWorldResourceGroupName());
 		
+		result->buildEdgeList();
+		
 		LOG_DEBUG("Attaching cell %d geometry...", cellNum);
 		
+		Entity* ent = sceneMgr->createEntity(modelName.str(), modelName.str());
+		
+		ent->setCastShadows(false);
+		
 		// Create a entity from the mesh.
-		meshNode->attachObject(sceneMgr->createEntity(modelName.str(), modelName.str()));
+		meshNode->attachObject(ent);
 		
-		
-		// (static_cast<DarkSceneNode*>(meshNode))->attachObject(manual);
-
 		if(meshNode) {
 			meshNode->needUpdate(true);
 		}
@@ -904,88 +908,6 @@ namespace Opde {
 		return meshNode;
 	}
 
-	//------------------------------------------------------------------------------------
-	int WRCell::buildStaticGeometry(BspVertex* vertexPtr, unsigned int* indexPtr, Ogre::StaticFaceGroup* facePtr,
-					int startVertex, int startIndex, int startFace) {
-		assert(loaded);
-		assert(atlased);
-		assert(bspNode);
-		assert(portalsDone);
-
-		int actIdx = 0;
-		int actVertex = 0;
-
-
-		BspNode::CellPlaneList planelist;
-
-		// Now, I'm gonna build the geometry of all textured faces found in this cell (except portals. those go separate, because of the Z sort of transparency)
-
-		// Only the non-transparent geometry, please - no textured portals
-		int faceCount = header.num_polygons - header.num_portals;
-
-		// for each of the polygons
-		for (int polyNum = 0; polyNum < faceCount; polyNum++) {
-			std::pair< Ogre::uint, Ogre::uint > dimensions;
-
-			MaterialPtr shadMat = getMaterial(face_infos[polyNum].txt, lightMaps[polyNum]->getAtlasIndex(), dimensions, face_maps[polyNum].flags);
-
-			// HACKY... I dunno the real calculation behind lightmaps yet
-			Vector2 displacement = calcLightmapDisplacement(polyNum);
-
-			// Copy the vertex data
-			for (int t = 0; t < face_maps[polyNum].count; t++) {
-				constructBspVertex(polyNum, vertices[ poly_indices[polyNum][t] ], displacement, dimensions, vertexPtr++);
-			}
-			// HMM. The triangle count = polygon_points - 2
-			for (int t = 1; t < face_maps[polyNum].count - 1; t++) {
-				// put in the indexes
-				*(indexPtr++) = 0     + startVertex + actVertex;
-				*(indexPtr++) = t     + startVertex + actVertex;
-				*(indexPtr++) = t + 1 + startVertex + actVertex;
-			}
-
-			int matHandle = shadMat->getHandle();
-
-			facePtr[polyNum].fType = FGT_FACE_LIST;
-			facePtr[polyNum].isSky = false;
-			facePtr[polyNum].vertexStart = startVertex + actVertex;
-			facePtr[polyNum].numVertices = face_maps[polyNum].count;
-			facePtr[polyNum].elementStart = startIndex + actIdx;  // absolute index index :)
-			facePtr[polyNum].numElements = 3 * (face_maps[polyNum].count - 2); // The count of the triads * 3 of this poly
-			facePtr[polyNum].materialHandle = shadMat->getHandle();
-			facePtr[polyNum].plane = getPlane(face_maps[polyNum].plane);
-
-			actVertex += facePtr[polyNum].numVertices;
-			actIdx    += facePtr[polyNum].numElements;
-		}
-
-
-		// Because of the ray scene query, I have to add ALL planes of the cell
-		Ogre::BspNode::PlanePortalMap remmapedPortalMap;
-
-		//for (int i = 0; planeit != planeend; planeit++, i++) {
-		for (int i = 0; i < header.num_planes; i++) {
-			Ogre::Plane cplane = getPlane(i);
-
-			int portals = 0;
-
-			// debug cout of portals mapped on a cell's plane
-			Ogre::BspNode::PlanePortalMap::const_iterator ptsetit = mPortalMap.find(i);
-			if  (ptsetit != mPortalMap.end()) {
-				portals = ptsetit->second.size();
-			}
-
-			planelist.push_back(cplane);
-		}
-
-		bspNode->setPlaneList(planelist, mPortalMap);
-
-		// update the BspNode with FaceGroupStart and FaceGroupCount
-		bspNode->setFaceGroupStart(startFace);
-		bspNode->setFaceGroupCount(faceCount);
-
-		return faceCount;
-	}
 	//------------------------------------------------------------------------------------
 	void WRCell::setBspNode(Ogre::BspNode* tgtNode) {
 		bspNode = tgtNode;

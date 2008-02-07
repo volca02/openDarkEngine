@@ -26,12 +26,14 @@
 #include "WRTypes.h"
 #include "FileGroup.h"
 #include "LightmapAtlas.h"
-#include "OgrePortal.h"
-#include "OgreSceneNode.h"
-#include "OgreDarkSceneNode.h"
-#include "OgreBspNode.h"
+
+#include "DarkPortal.h"
+#include "DarkBspNode.h"
+#include "DarkSceneManager.h"
+
 #include <OgreMaterial.h>
 #include <OgreStaticFaceGroup.h>
+#include <OgreSceneNode.h>
 
 namespace Opde {
     class WorldRepService;
@@ -193,14 +195,14 @@ namespace Opde {
 			* @note the written index,vertex and face counts must not be greater than the getXXXXCount calls returned
 			* @note The Light maps have to be atlased before
 			*/
-			int buildStaticGeometry(BspVertex* vertexPtr, unsigned int* indexPtr, Ogre::StaticFaceGroup* facePtr,
-						int startVertex, int startIndex, int startFace);
+			/*int buildStaticGeometry(BspVertex* vertexPtr, unsigned int* indexPtr, Ogre::StaticFaceGroup* facePtr,
+						int startVertex, int startIndex, int startFace);*/
 
 			/** Attaches all the found portals to the source and destination DarkSceneNodes
 			* @param cellList The cell list which the method uses to set source and destination BspNodes
 			* @return int Number of vertices removed by optimization
 			*/
-			int attachPortals(WRCell** cellList);
+			int attachPortals(Ogre::DarkSceneManager* smgr);
 
 			/** Atlases the lightmaps defined in this cell.
 			* @note do this before the constructStaticGeometry, otherwise the material cloning will get confused */
