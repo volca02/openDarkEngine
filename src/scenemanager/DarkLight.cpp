@@ -181,8 +181,6 @@ namespace Ogre {
 	void DarkLight::_traversePortalTree(PortalFrustum& frust, Portal* p, Real radius) {
 		BspNode* tgt = p->getTarget();
 		
-		std::cout << "TPT " << getName() << " " << tgt->getCellNum() << std::endl;
-				
 		if (tgt != NULL) {
 			mAffectedCells.insert(tgt);
 			
