@@ -1,23 +1,43 @@
                         Notes for Developers:            -*-text-*-
                         ---------------------
 
-Last updated on 01-Apr-2007
+Last updated on 07-Feb-2008
 
-Requirements
-------------
+----------------
+- Requirements -
+----------------
 OPDE needs:
 * OGRE3D library, 1.4 series and FreeImage library (an ogre requirement, should be a part of SDK under windows).
 * OIS (The part of Ogre SDK under windows, do not install separately)
 * CMake
 
-
 Building
 --------
-On *nix systems, building with (replace the OPDE_DIR with the directory in which the source resides) should be sufficient:
 
-Note: For out of source builds (prefered method), create a separate directory that will hold the built files, 
+Before building
+---------------
+CMake tool is used to prepare makefiles/project files for openDarkEngine. The result of successful run of cmake is a project file or makefile, that
+can the be used to compile the project. Before compiling, ensure that you set all the cmake variables to the desired values. The current list of those
+is:
+
+CUSTOM_IMAGE_HOOKS: (currently only tested on linux). Builds a custom image loading code, needed to interpret pallete index 0 of palletized images as transparent. 
+GENERATE_DOC: Generates a DoxyFile that can be used to create API documentation.
+GLOBAL_DEBUG: Enables DEBUG level logging.
+PROFILING: (linux only) Enables GNU Profiler usage. Opde binary will generate profiling file if this is used. Can be examined with KProf for example. 
+PYTHON_SUPPORT: Will enable the compilation of Python bindings and support code. This switch will vanish after the python code stabilizes.
+
+
+Unix/Linux
+----------
+On *nix systems, building with the following commands (replace the OPDE_DIR with the directory in which the source resides) should be sufficient:
+
+cd OPDE_DIR
+cmake .
+make
+
+For out-of-source builds (prefered method), create a separate directory that will hold the built files, 
 and run cmake with the path to the source directory (the one containing this readme) as a parameter (replace the BUILD_DIR and OPDE_DIR 
-with your paths):
+with your paths).
 
 cd BUILD_DIR
 cmake OPDE_DIR
@@ -26,17 +46,22 @@ make
 Note: You can also use ccmake instead of cmake, which is a GUI frontend to cmake that will let you change the variables. That means Doxygen
 building, build type, debug code building. This works on both windows and *nix platforms.
 
-On windows, please ensure that the OGRE_HOME environmental variables is set (should be if the installation was done using the ogre sdk).
 
-Ensure, that MinGW/Visual C++ make systems are usable. (Cmake should test this first time it is run)
+Windows
+-------
+
+On windows, please ensure that the OGRE_HOME environmental variables is set (should be if the installation was done using the ogre sdk). 
+Also ensure that MinGW/Visual C++ make systems are usable. (Cmake should test this first time it is run).
 
 Then progress with (from commandline, being in the root directory of OPDE project):
 
 cmake .
 
-or, if wanting to select the generator (for example MinGW makefiles)
+or, if you want to select the used generator (for example MinGW makefiles)
 
 cmake . -G "MinGW Makefiles"
+
+For list of the generators, use "cmake --help" from commandline - you'll get a list of available generators.
 
 Note: You can also use the out of source build approach as *nix building guide notes. This makes your source directory clean. 
 	The windows version of ccmake is CMakeSetup.
@@ -48,12 +73,90 @@ The result should be compilable by your system (VC / mingw32-make for mingw)
 If you have a problem making for Mingw, please ensure that "sh" executable is NOT in path. If it is, and can't be relocated, select MSYS Makefiles rather than MinGW ones.
 
 Currently, Debug mode in VC is too slow for normal operation. For testing purposes, please use Release mode. 
-Windows users: If you run cmake for Debug mode - default, edit the cmakelists.txt, change CMAKE_BUILD_TYPE to Release in the set command, 
-remove the CMakeCache.txt and rerun cmake. This will ensure correct lib files are linked (_d prefixed or not).
 
 
-Running
--------
-You will need to initialize resources.cfg, opde.cfg and plugins.cfg for the main executable to work.
-see the opde wiki for more info:
+--------------
+- Setting up -
+--------------
+
+Note: For some additional info about setting up the resources for opde, please consult the online wiki as well:
     http://opde.sourceforge.net/wiki/index.php/Main_Page
+    
+You will need to initialize resources.cfg, opde.cfg and plugins.cfg for the main executable to work (examples use unix style paths,
+use windows style paths on windows):
+
+resources.cfg
+-------------
+This file should point to the .crf files used in Dark Engine's games, opde scripts (found in the source tree under scripts/),
+ as well as to Ogre's core zipfile (replace "some path" with the appropriate paths to your data).
+
+Example content:
+
+# -- begin of resources.cfg --
+[Bootstrap]
+Zip=/usr/share/doc/ogre-1.4.6/Samples/Media/packs/OgreCore.zip
+
+[General]
+# For temp files, overrides, etc.
+FileSystem=./
+
+# Opde scripts path, common scripts:
+FileSystem=/some path/opde-svn/trunk/scripts
+
+# T1:
+Zip=/some path/fam.crf
+Zip=/some path/obj.crf
+Zip=/some path/books.crf
+Zip=/some path/intrface.crf
+Zip=/some path/editor.crf
+Zip=/some path/default.crf
+Zip=/some path/pal.crf
+
+# Scripts for Thief1:
+FileSystem=/some path/opde-svn/trunk/scripts/thief1
+
+# Missions - should point to directory containing the .gam and .mis files
+FileSystem=/some path/t1/
+# -- end of resources.cfg --
+
+opde.cfg
+--------
+Couple of keys are supported for now, mainly for debugging purposes. One key is mandatory: "mission", 
+naming the mission OPDE should load upon start.
+
+# -- begin of opde.cfg --
+# if set to yes, the input's won't be exclusive to OPDE window. Great for debugging
+# nonexclusive=true
+
+# Mission file to use
+mission=miss1.mis
+
+# The region size used when grouping cell geometry. Has great impact on performance
+region_size=100.0
+
+# Mouse and keyboard movement related
+move_speed=30
+mouse_speed=80
+mouse_invert=1
+
+# Debugging enabled
+debug=true
+# -- end of opde.cfg --
+
+
+plugins.cfg
+-----------
+This file should point to Ogre plugins. Please consult ogre's docs for more information.
+Example content (You'll also probably want to use RenderSystem_Direct3D7 or RenderSystem_Direct3D9 on windows):
+
+# -- begin of plugins.cfg --
+PluginFolder=/usr/lib/OGRE
+
+Plugin=RenderSystem_GL.so
+Plugin=Plugin_ParticleFX.so
+# -- end of plugins.cfg --
+
+-----------
+- Running -
+-----------
+There is not much to do once the application is run succesfully now. The camera is controlled with mouse nad WASD keys.
