@@ -451,8 +451,7 @@ namespace Opde {
 		li.light->setAttenuation(radius, 1.0, 0.0, 0.0);
 		
 		// BW only now...
-		// I suppose 100.0 is the effective maximum, but I just don't know... hmm.
-		// brightness /= 100.0;
+		brightness /= 255.0;
 		
 		li.light->setDiffuseColour(brightness, brightness, brightness);
 		li.light->setSpecularColour(brightness, brightness, brightness);
