@@ -28,7 +28,6 @@
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
 #include "Ogre.h"
-#include "OgreDarkSceneNode.h"
 #include "WRTypes.h"
 #include "WRCell.h"
 #include "LightmapAtlas.h"
@@ -36,6 +35,7 @@
 #include "DatabaseService.h"
 #include "RenderService.h"
 #include "Callback.h"
+#include "DarkSceneManager.h"
 
 #include <OgreHardwareBufferManager.h>
 #include <OgreDefaultHardwareBufferManager.h>
@@ -128,12 +128,6 @@ namespace Opde {
 
 			/** Loaded structure of the cells */
 			WRCell** mCells;
-
-			/** Bsp Leaf nodes */
-			Ogre::BspNode* mLeafNodes;
-
-			/** Bsp non-leaf nodes */
-			Ogre::BspNode* mNonLeafNodes;
 
 			uint32_t mExtraPlaneCount;
 			wr_plane_t* mExtraPlanes;

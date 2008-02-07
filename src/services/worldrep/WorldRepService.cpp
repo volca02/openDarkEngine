@@ -29,9 +29,10 @@
 #include "WorldRepService.h"
 #include "ConfigService.h"
 #include "WRTypes.h"
-#include "OgreBspNode.h"
 
-#include "OgreDarkSceneManager.h"
+#include "DarkBspNode.h"
+#include "DarkSceneManager.h"
+
 #include "integers.h"
 #include "OpdeException.h"
 #include "WRCommon.h"
@@ -58,7 +59,7 @@ namespace Opde {
 
    		mRoot = mRenderService->getOgreRoot();
         mSceneMgr = dynamic_cast<DarkSceneManager *>(mRenderService->getSceneManager());
-
+        
         return true;
     }
 
@@ -235,8 +236,6 @@ namespace Opde {
             mCells[i] = new WRCell(this);
 		}
 
-		mLeafNodes = new BspNode[header.num_cells];
-
 		unsigned int idx;
 		for (idx=0; idx < header.num_cells; idx++) {
 			// Load one Cell
@@ -261,109 +260,8 @@ namespace Opde {
 
 		LOG_INFO("Worldrep: Atlasing Done");
 
-		// Attach the leaf BspNodes to their cells
-		for (idx=0; idx < header.num_cells; idx++) {
-			mCells[idx]->setBspNode(&mLeafNodes[idx]);
-			mLeafNodes[idx].setCellNum(idx);
-			mLeafNodes[idx].setOwner(mSceneMgr);
-		}
-
-		// --------------------------------------------------------------------------------
-		// Now construct the static geometry
-
-#ifndef __STATIC_GEOMETRY
-		int totalVertices = 0;
-		int totalIndices = 0;
-		int totalFaceGroups = 0;
-
-		for (idx=0; idx < header.num_cells; idx++) {
-			totalVertices += mCells[idx]->getVertexCount();
-			totalIndices += mCells[idx]->getIndexCount();
-			totalFaceGroups += mCells[idx]->getFaceCount();
-		}
-
-		// nowprepare the buffers with the knowledge of the total vbuf/idxbuf sizes
-		mVertexData = new VertexData();
-
-		/// Create vertex declaration
-		VertexDeclaration* decl = mVertexData->vertexDeclaration;
-		size_t offset = 0;
-		decl->addElement(0, offset, VET_FLOAT3, VES_POSITION);
-		offset += VertexElement::getTypeSize(VET_FLOAT3);
-		decl->addElement(0, offset, VET_FLOAT3, VES_NORMAL);
-		offset += VertexElement::getTypeSize(VET_FLOAT3);
-
-		// do I need colour? (I sure do not use it)
-		// decl->addElement(0, offset, VET_COLOUR, VES_DIFFUSE);
-		// offset += VertexElement::getTypeSize(VET_COLOUR);
-
-		decl->addElement(0, offset, VET_FLOAT2, VES_TEXTURE_COORDINATES, 0); // txt
-
-		offset += VertexElement::getTypeSize(VET_FLOAT2);
-		decl->addElement(0, offset, VET_FLOAT2, VES_TEXTURE_COORDINATES, 1); // lmap
-
-		/// Create the vertex buffer, allow space for patches
-
-		HardwareVertexBufferSharedPtr vbuf = HardwareBufferManager::getSingleton()
-			.createVertexBuffer(sizeof(BspVertex),
-			totalVertices,
-			HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-
-		// Lock just the non-patch area for now
-		BspVertex* pVert = static_cast<BspVertex*>(
-			vbuf->lock(0, totalIndices * sizeof(BspVertex), HardwareBuffer::HBL_DISCARD) );
-
-		// Index buffer, this is what we also need
-		mIndexes.bind(new DefaultHardwareIndexBuffer(
-			HardwareIndexBuffer::IT_32BIT,
-			totalIndices,
-			HardwareBuffer::HBU_DYNAMIC));
-
-		// temporary index buffer, will be copied after filling
-		unsigned int *srcIdx;
-		srcIdx = new unsigned int[totalIndices];
-
-		// face groups buffer
-		mFaceGroups = new StaticFaceGroup[totalFaceGroups];
-
-		int optimized = 0;
-
-		// Actual vertex, index and face position
-		int actVert = 0;
-		int actIdx  = 0;
-		int actFace = 0;
-
-		// Build the static part of the geometry
-		for (idx=0; idx < header.num_cells; idx++) {
-			LOG_DEBUG("Worldrep: Building cell %d / %d geom.", idx, header.num_cells);
-
-			optimized += mCells[idx]->attachPortals(mCells);
-			mCells[idx]->buildStaticGeometry(&pVert[actVert], &srcIdx[actIdx], &mFaceGroups[actFace], actVert, actIdx, actFace);
-
-			actVert += mCells[idx]->getVertexCount();
-			actIdx  += mCells[idx]->getIndexCount();
-			actFace += mCells[idx]->getFaceCount();
-
-		}
-
-		// Did we do it right? Check the limits
-		assert(totalVertices   == actVert);
-		assert(totalIndices    == actIdx);
-		assert(totalFaceGroups == actFace);
-
-		LOG_INFO("Worldrep: Optimization removed %d vertices", optimized);
-#else
 		
-		int optimized = 0;
-
-		for (idx=0; idx < header.num_cells; idx++) {
-			optimized += mCells[idx]->attachPortals(mCells);
-		}
-
-		LOG_INFO("Worldrep: Optimization removed %d vertices", optimized);
-#endif
 		// --------------------------------------------------------------------------------
-
 		// -- Load and process the BSP tree
 		uint32_t BspRows;
 		wrChunk->read(&BspRows, sizeof(uint32_t));
@@ -374,8 +272,27 @@ namespace Opde {
 
 		// Create the BspTree
 		createBSP(BspRows, Bsp);
+		
+		delete[] Bsp;
 
-#ifdef __STATIC_GEOMETRY
+		// assign the leaf nodes
+		for (idx=0; idx < header.num_cells; idx++) {
+			BspNode* node = mSceneMgr->getBspLeaf(idx);
+			mCells[idx]->setBspNode(node);
+		}
+		
+		// --------------------------------------------------------------------------------
+		// Attach the portals to the BSP tree leafs
+		int optimized = 0;
+
+		for (idx=0; idx < header.num_cells; idx++) {
+			optimized += mCells[idx]->attachPortals(mSceneMgr);
+		}
+
+		LOG_INFO("Worldrep: Optimization removed %d vertices", optimized);
+
+		// --------------------------------------------------------------------------------
+		// Now construct the static geometry
 		Ogre::StaticGeometry* sg = mSceneMgr->createStaticGeometry("MISSION_GEOMETRY");
 		
 		// 100 units per sg region
@@ -394,202 +311,107 @@ namespace Opde {
 		sg->setOrigin(Vector3(0, 0, 0));
 		
 		std::vector< std::string > nodesToDestroy;
-#endif
 		
 		//TODO: Portal meshes need to be constructed. This will guarantee the other meshes can be attached if this one works ok
 		// Hmm. Actually, it renders quite a lot of the meshes that should not be seen.
 		for (idx=0; idx < header.num_cells; idx++) {
 			mCells[idx]->constructPortalMeshes(mSceneMgr);
 			
-#ifdef __STATIC_GEOMETRY
 			Ogre::SceneNode* node = mCells[idx]->createSceneNode(mSceneMgr);
 			
 			// Non - sg rendering - slower
-			// mSceneMgr->getRootSceneNode()->addChild(node);
-			sg->addSceneNode(node);
+			mSceneMgr->getRootSceneNode()->addChild(node);
+			// sg->addSceneNode(node);
 			
 			// mSceneMgr->destroySceneNode(node->getName());
 			nodesToDestroy.push_back(node->getName());
-#endif
 		}
 
-#ifdef __STATIC_GEOMETRY
 		LOG_DEBUG("Worldrep: Building static geometry...");
-		sg->build();
-/*
-		std::vector<std::string>::iterator it = nodesToDestroy.begin();
 		
-		for(; it != nodesToDestroy.end(); it++)
-			mSceneMgr->destroySceneNode(*it);
-			*/
-#endif
+		/*sg->setCastShadows(false);
 
+		sg->build();
+
+		std::vector<std::string>::iterator it = nodesToDestroy.begin();
+
+		for(; it != nodesToDestroy.end(); it++)
+			mSceneMgr->destroySceneNode(*it);*/
 
 		// --------------------------------------------------------------------------------
-#ifndef __STATIC_GEOMETRY
-		// the final move - copy the index data to the hw idx buffer
-		mIndexes->writeData(0, sizeof(unsigned int) * totalIndices, srcIdx);
-		vbuf->unlock();
-
-		// Setup binding
-		mVertexData->vertexBufferBinding->setBinding(0, vbuf);
-
-		// Set other data
-		mVertexData->vertexStart = 0;
-		mVertexData->vertexCount = totalVertices;
-
-		// Set the static geometry buffers in the scene manager
-		mSceneMgr->setStaticGeometry(mVertexData, mIndexes, mFaceGroups, totalIndices, totalFaceGroups);
-#endif
-
 		// We have done all we could, bringing the level data to the SceneManager. Now delete the used data
 		LOG_DEBUG("Worldrep: Freeing temporary buffers");
 		
-#ifndef __STATIC_GEOMETRY		
-		delete[] srcIdx; // and delete the source
-#endif
 		delete[] mCells;
 		mCells = NULL;
 		delete[] mExtraPlanes;
 		mExtraPlanes = NULL;
-		delete[] Bsp;
 		LOG_DEBUG("Worldrep: Freeing done");
 	}
 
 	// ---------------------------------------------------------------------
 	void WorldRepService::createBSP(unsigned int BspRows, wr_BSP_node_t *tree) {
-		// BspNode *mRootNode = new BspNode[BspRows];
-
-		/* Step one. Scan through the tree to find leaf and non-leaf rows. We already have a BspNode array of leaf nodes,
-		so we have to convert the row indexes to the no-gap indices of a table of non-leaf nodes only. With this. we can then proceed
-		*/
-		unsigned int nonleafs = 0;
-		unsigned int leafs = 0;
-
-		LOG_DEBUG("Worldrep: Preparing for BSP build");
-		// the map of the non-leaf row indexes to the non-gap version of the array
-		std::map<int, int> nonLeafMap;
-
-		// the map of the row index to cell index
-		std::map<int, int> leafMap;
-
+		// First pass - creates all the BSP nodes
 		for (unsigned int i = 0; i < BspRows; i++) {
-			wr_BSP_node_t *wr_node =  &tree[i];
-
+			const wr_BSP_node_t& wr_node = tree[i];
+			
 			if (_BSP_FLAGS(wr_node) & 0x01) { // leaf node
-				// 'Front' in this case contains the cell number
-				leafMap.insert(std::make_pair(i,wr_node->front));
-				leafs++;
-			} else { // Non-leaf node
-				nonLeafMap.insert(std::make_pair(i,nonleafs));
-				nonleafs++;
-			}
-		}
-
-		LOG_DEBUG("Worldrep: Finished preparing for BSP build - Non-Leaf's: %d", nonleafs);
-
-		// Allocate for all the non-leaf members.
-		mNonLeafNodes = new BspNode[nonleafs];
-
-		LOG_DEBUG("Worldrep: Doing the BSP build");
-
-		// Step two, fill the non-leaf rows now.
-		for (unsigned int i = 0; i < BspRows; i++) {
-			// BspNode* node = &mRootNode[i];
-			wr_BSP_node_t *wr_node =  &tree[i];
-
-			// Set bounding box
-			// node->mBounds.setMinimum(Vector3(&q3node->bbox[0]));
-			// node->mBounds.setMaximum(Vector3(&q3node->bbox[3]));
-
-			if (_BSP_FLAGS(wr_node) & 0x01) {
-				// leaf node. Nothing to do...
-				// node->setIsLeaf(true);
-				// node->setSceneNode(mCellNodes[wr_node->front]);
-				// Debugging cell number
-				// mCellNodes[wr_node->front]->setCellNum(wr_node->front);
+				mSceneMgr->createBspNode(i, wr_node.front);
 			} else {
-				// find the BspNode for this index
-				std::map<int, int>::const_iterator it = nonLeafMap.find(i);
-
-				assert(it != nonLeafMap.end());
-
-				BspNode* node = &mNonLeafNodes[it->second];
-
-				node->setOwner(mSceneMgr);
-
-				// set the split plane of the non-leaf node
-				if (wr_node->cell < 0) {
-					assert(wr_node->plane < mExtraPlaneCount);
-					node->setSplitPlane(constructPlane(mExtraPlanes[wr_node->plane])); // Extra planes
-				} else {
-					assert(wr_node->cell < mNumCells);
-					node->setSplitPlane(mCells[wr_node->cell]->getPlane(wr_node->plane));
-				}
-
-				// node->mCellNum = i;
-
-				BspNode* front = NULL;
-				BspNode* back = NULL;
-
-				// Set back pointer (and front pointer)
-				if (wr_node->back != 0xFFFFFF) {
-					assert(wr_node->back < BspRows);
-
-					// If I do not find the index in the nonLeafMap,
-					// it is a leaf and will be in the leafMap
-
-					std::map<int, int>::const_iterator it = nonLeafMap.find(wr_node->back);
-
-					if (it != nonLeafMap.end()) {
-						back = &mNonLeafNodes[it->second];
-					} else { // search in the leafMap
-						std::map<int, int>::const_iterator it = leafMap.find(wr_node->back);
-
-						if (it != leafMap.end()) {
-							assert(it->second < mNumCells);
-							back = mCells[it->second]->getBspNode();
-						} else {
-							OPDE_EXCEPT("Row index not found in leaf or non-leaf", "WorldRepService::createBSP");
-						}
-					}
-				}
-
-				// set front pointer
-				if (wr_node->front != 0xFFFFFF) {
-					assert(wr_node->front < BspRows);
-
-					std::map<int, int>::const_iterator it = nonLeafMap.find(wr_node->front);
-
-					if (it != nonLeafMap.end()) {
-						front = &mNonLeafNodes[it->second];
-					} else { // search in the leafMap
-						std::map<int, int>::const_iterator it = leafMap.find(wr_node->front);
-
-						if (it != leafMap.end()) {
-							front = mCells[it->second]->getBspNode();
-						} else {
-							OPDE_EXCEPT("Row index not found in leaf or non-leaf", "WorldRepService::createBSP");
-						}
-					}
-				}
-
-
-				// 0x4 flag means inverted plane normal (I can't invert the plane, because this leads to errors)
-				if (_BSP_FLAGS(wr_node) & 0x04) { // inverted plane normal, swap front n' back child
-					node->setBackChild(front);
-					node->setFrontChild(back);
-				} else {
-					node->setBackChild(back);
-					node->setFrontChild(front);
-				}
+				// split node
+				mSceneMgr->createBspNode(i);
 			}
 		}
+		
+		// Second Pass. Set front, back pointers on the tree split nodes
+		for (unsigned int i = 0; i < BspRows; i++) {
+			const wr_BSP_node_t& wr_node = tree[i];
+			
+			// If this is a leaf node, go to next row
+			if (_BSP_FLAGS(wr_node) & 0x01) 
+				continue;
+			
+			int front = -1;
+			int back = -1;
+			
+			if (wr_node.front != 0xFFFFFF)
+				front = wr_node.front;
+				
+			if (wr_node.back != 0xFFFFFF)
+				back = wr_node.back;
+				
+			// get the represented (pre-created) node
+			BspNode* node = mSceneMgr->getBspNode(i);
+			
+			// Set the split plane	
+			if (wr_node.cell < 0) {
+				assert(wr_node.plane < mExtraPlaneCount);
+				node->setSplitPlane(constructPlane(mExtraPlanes[wr_node.plane])); // Extra planes
+			} else {
+				assert(wr_node.cell < mNumCells);
+				node->setSplitPlane(mCells[wr_node.cell]->getPlane(wr_node.plane));
+			}	
 
+			// if swap flag set, swap front and back
+			if (_BSP_FLAGS(wr_node) & 0x04) { // inverted plane normal, swap front n' back child
+				if (front >= 0)
+					node->setBackChild(mSceneMgr->getBspNode(front));
+					
+				if (back >= 0)
+					node->setFrontChild(mSceneMgr->getBspNode(back));
+			} else {
+				if (front >= 0)
+					node->setFrontChild(mSceneMgr->getBspNode(front));
+					
+				if (back >= 0)
+					node->setBackChild(mSceneMgr->getBspNode(back));
+			}
+		}
+		
+		mSceneMgr->setRootBspNode(0);
+		// DONE!
+		
 		LOG_DEBUG("Worldrep: Finished the BSP build");
-
-		((mSceneMgr))->setBspTree(mNonLeafNodes, mNonLeafNodes, mLeafNodes, nonleafs, leafs);
-		LOG_DEBUG("Worldrep: SceneManager's BSP set");
 	}
 
 	//-----------------------------------------------------------------------
@@ -724,14 +546,20 @@ namespace Opde {
 
 		// Construct a material out of this texture. We'll just clone the material upstairs to enable lmap-txture combinations
 		MaterialPtr shadMat = MaterialManager::getSingleton().create(matName, resourceGroup);
-
+		
+		shadMat->setReceiveShadows(true);
+		
 		Pass *shadPass = shadMat->getTechnique(0)->getPass(0);
+
+		shadPass->setAmbient(0.5, 0.5, 0.5);
+		shadPass->setDiffuse(1, 1, 1, 1);
+		shadPass->setSpecular(1, 1, 1, 1);
 
 		// Texture unit state for the main texture...
 		TextureUnitState* tus = shadPass->createTextureUnitState(textureName);
 
 		// Set replace on all first layer textures for now
-		tus->setColourOperation(LBO_REPLACE);
+		// tus->setColourOperation(LBO_REPLACE);
 		tus->setTextureAddressingMode(TextureUnitState::TAM_WRAP);
 		tus->setTextureCoordSet(0);
 		tus->setTextureFiltering(TFO_BILINEAR);
@@ -741,15 +569,14 @@ namespace Opde {
 		// tus->setTextureFiltering(TFO_NONE);
 
 		// Set culling mode to none
-		shadMat->setCullingMode(CULL_ANTICLOCKWISE);
+		// shadMat->setCullingMode(CULL_ANTICLOCKWISE);
 
 		// No dynamic lighting
 		shadMat->setLightingEnabled(false);
-
 		
-
-
+		// DYNL:
 		shadMat->load();
+
 
 		addWorldMaterial(shadMat);
 	}
