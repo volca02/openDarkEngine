@@ -1026,9 +1026,19 @@ namespace Ogre {
 
         // We'll create a material given the mat and matext structures
         MaterialPtr omat = MaterialManager::getSingleton().create(matname, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-
+        
+        omat->setShadingMode(SO_GOURAUD);
+        omat->setLightingEnabled(true);
+		omat->setReceiveShadows(false);
+		
         // fill it with the values given
         Pass *pass = omat->getTechnique(0)->getPass(0);
+        
+        // Defaults:
+        // Ambient is one. It is controlled by mission ambient setting...
+        pass->setAmbient(1,1,1);
+        pass->setDiffuse(1,1,1,1);
+        pass->setSpecular(0,0,0,0);
 
         if (mat.type == MD_MAT_TMAP) {
 
@@ -1048,7 +1058,7 @@ namespace Ogre {
                 }
 
 			// TODO: This is bad. Should be fixed. Looks awful. See ss2 model loading...
-			pass->setAlphaRejectSettings(CMPF_EQUAL, 255); // Alpha rejection. 
+			// pass->setAlphaRejectSettings(CMPF_EQUAL, 255); // Alpha rejection. 
 			
 			// Some basic lightning settings
             tus = pass->createTextureUnitState(txtname);
@@ -1056,8 +1066,9 @@ namespace Ogre {
             tus->setTextureAddressingMode(TextureUnitState::TAM_WRAP);
             tus->setTextureCoordSet(0);
             tus->setTextureFiltering(TFO_TRILINEAR);
-            tus->setColourOperation(LBO_REPLACE);
-
+			
+			// Set replace on all first layer textures for now (Transparency will change this)
+            //tus->setColourOperation(LBO_ADD);
 
             // If the transparency is used
             if (( mHdr.mat_flags & MD_MAT_TRANS) && (matext.trans > 0)) {
@@ -1065,22 +1076,17 @@ namespace Ogre {
                 tus->setColourOperation(LBO_ALPHA_BLEND);
                 tus->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, 1 - matext.trans);
                 pass->setDepthWriteEnabled(false);
-            } else {
-                // Set replace on all first layer textures for now
-                tus->setColourOperation(LBO_REPLACE);
             }
-            
+                
             // Illumination of the material. Converted to ambient lightning here
-            if (( mHdr.mat_flags & MD_MAT_ILLUM) && (matext.illum > 0)) {
+            if (( mHdr.mat_flags & MD_MAT_ILLUM)) { //  && (matext.illum > 0)
                 // set the illumination (converted to ambient lightning)
-                pass->setAmbient(matext.illum, matext.illum, matext.illum);
+                // pass->setAmbient(matext.illum, matext.illum, matext.illum);
+                pass->setAmbient(1.0, 1.0, 1.0); // Set full ambient, illum seems to always be zero
             }
 
             omat->setCullingMode(CULL_ANTICLOCKWISE);
-            
-            omat->setLightingEnabled(true);
-            
-            
+          
         } else if (mat.type == MD_MAT_COLOR) {
             // Fill in a color-only material
             TextureUnitState* tus = pass->createTextureUnitState();
@@ -1096,13 +1102,13 @@ namespace Ogre {
             }
             
             // Illumination of a color based material. Hmm. Dunno if this is right, but i simply multiply the color with the illumination
-            if (( mHdr.mat_flags & MD_MAT_ILLUM) && (matext.illum > 0)) {
+            if (( mHdr.mat_flags & MD_MAT_ILLUM)) { //  && (matext.illum > 0)
                 // set the illumination (converted to diffuse lightning)
                 pass->setAmbient(matcolor.r * matext.illum, matcolor.g * matext.illum, matcolor.b * matext.illum);
             }
             
             omat->setCullingMode(CULL_ANTICLOCKWISE);
-			omat->setLightingEnabled(true);
+
         } else
             OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Invalid material type : ") + StringConverter::toString(mat.type), "ObjectMeshLoader::prepareMaterial");
 
