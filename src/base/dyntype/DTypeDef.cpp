@@ -651,6 +651,11 @@ namespace Opde {
 			// Maybe we should support some kind of additional storage
 			Ogre::Real x,y,z;
 			
+			/* Order of HPB application is cruical. It was detected that Dark orders HPB in this order:
+			1. Bank is applied
+			2. Pitch is applied
+			3. Heading is applied
+			*/
 			int16_t* rot = reinterpret_cast<int16_t*>(ptr);
 
 			x = ((float)(rot[0]) / 32768) * Math::PI; // heading - y
@@ -660,7 +665,7 @@ namespace Opde {
 			Matrix3 m;
 		
 			// Still not there, but close
-			m.FromEulerAnglesYXZ(Radian(y), Radian(x), Radian(z));
+			m.FromEulerAnglesZYX(Radian(z), Radian(y), Radian(x));
 			Quaternion q;
 			q.FromRotationMatrix(m);
 			
@@ -803,7 +808,7 @@ namespace Opde {
 			Radian x,y,z;
 			
 			// Still not there, but close
-			m.ToEulerAnglesYXZ(x, y, z);
+			m.ToEulerAnglesZYX(z, y, x);
 		
 			int16_t rot = *reinterpret_cast<int16_t*>(ptr);
 
