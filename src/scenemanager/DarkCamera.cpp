@@ -59,7 +59,7 @@ namespace Ogre {
 	
 	// ----------------------------------------------------------------------
 	void DarkCamera::_notifyMoved(void) {
-		//DarkCamera::_notifyMoved();
+		Camera::_notifyMoved();
 		
 		updateVisibleCellList();
 	}
