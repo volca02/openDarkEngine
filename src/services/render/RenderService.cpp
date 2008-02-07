@@ -33,10 +33,11 @@
 #include <OgreRoot.h>
 #include <OgreStringConverter.h>
 #include <OgreMeshManager.h>
+#include <OgreMaterialManager.h>
 #include <OgreRenderWindow.h>
 #include <OgreBone.h>
 #include <OgreNode.h>
-
+#include <OgreStringConverter.h>
 #include <OgreAnimation.h>
 #include <OgreWindowEventUtilities.h>
 
@@ -79,6 +80,12 @@ namespace Opde {
 
 		if (!mPropModelName.isNull())
 		    mPropModelName->unregisterListener(mPropModelNameListenerID);
+		    
+		if (!mPropLight.isNull())
+		    mPropLight->unregisterListener(mPropLightListenerID);
+		    
+		if (!mPropSpotlight.isNull())
+		    mPropSpotlight->unregisterListener(mPropSpotlightListenerID);
 
 		if (mRenderWindow)
 			mRenderWindow->removeAllViewports();
@@ -117,9 +124,17 @@ namespace Opde {
 		Root::getSingleton().addSceneManagerFactory(mDarkSMFactory);
 
 		mSceneMgr = mRoot->createSceneManager(ST_INTERIOR, "DarkSceneManager");
-
+		
+		// mSceneMgr->setShadowTechnique(SHADOWTYPE_TEXTURE_MODULATIVE);
+		mSceneMgr->setShadowTechnique(SHADOWTYPE_NONE);
+        		
+		// TODO: Set this in Database listener using Render Params chunk
+		mSceneMgr->setAmbientLight(ColourValue(0.08, 0.08, 0.08));
+		
 		// Next step. We create a default camera in the mRenderWindow
 		mDefaultCamera = mSceneMgr->createCamera( "MainCamera" );
+		
+		mDefaultCamera->setCastShadows(true);
 
 		mRenderWindow->addViewport( mDefaultCamera );
 
@@ -154,13 +169,11 @@ namespace Opde {
     	assert(mDefaultCamera);
     	return mDefaultCamera->getViewport();
     }
-            
+           
     // --------------------------------------------------------------------------
     Ogre::Camera* RenderService::getDefaultCamera() {
 		return mDefaultCamera;
     }
-    
-
 
 	// --------------------------------------------------------------------------
 	void RenderService::setScreenSize(bool fullScreen, unsigned int width, unsigned int height) {
@@ -199,6 +212,12 @@ namespace Opde {
 
 		PropertyGroup::ListenerPtr cmodelc =
 			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropModelNameMsg);
+			
+		PropertyGroup::ListenerPtr clightc =
+			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropLightMsg);
+		
+		PropertyGroup::ListenerPtr cspotlightc =
+			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropSpotlightMsg);
 
 
 		// Get the PropertyService, then the group Position
@@ -208,12 +227,32 @@ namespace Opde {
 
 		mPropertyService = ServiceManager::getSingleton().getService("PropertyService").as<PropertyService>();
 
-		mPropModelName = mPropertyService->getPropertyGroup("ModelName"); // TODO: hardcoded, maybe not a problem after all
+		// TODO: hardcoded property name, but that's hopefully not a problem after all
+		
+		// --- Model name listener
+		mPropModelName = mPropertyService->getPropertyGroup("ModelName"); 
 
 		if (mPropModelName.isNull())
-            OPDE_EXCEPT("Could not get ModelName property group. Not defined. Fatal", "RenderService::bootstrapFinished");
+            OPDE_EXCEPT("Could not get ModelName property group. Not defined. (Did you forget to load .pldef the scripts?)", "RenderService::bootstrapFinished");
 
 		mPropModelNameListenerID = mPropModelName->registerListener(cmodelc);
+		
+		// --- Light property listener
+		mPropLight = mPropertyService->getPropertyGroup("Light"); 
+
+		if (mPropLight.isNull())
+            OPDE_EXCEPT("Could not get Light property group. Not defined. (Did you forget to load .pldef the scripts?)", "RenderService::bootstrapFinished");
+
+		mPropLightListenerID = mPropLight->registerListener(clightc);
+		
+		// --- SpotLight property listener
+		mPropSpotlight = mPropertyService->getPropertyGroup("Spotlight"); 
+
+		if (mPropSpotlight.isNull())
+            OPDE_EXCEPT("Could not get Spotlight property group. Not defined. (Did you forget to load .pldef the scripts?)", "RenderService::bootstrapFinished");
+
+		mPropSpotlightListenerID = mPropSpotlight->registerListener(cspotlightc);
+
 		
 		mObjectService = ServiceManager::getSingleton().getService("ObjectService").as<ObjectService>();
 
@@ -231,8 +270,8 @@ namespace Opde {
 	void RenderService::onPropModelNameMsg(const PropertyChangeMsg& msg) {
 		// Update the Model (mesh) for the object
 		if (msg.change == PROP_GROUP_CLEARED) {
-                clear();
-                return;
+            clear();
+			return;
 		}
 
 		if (msg.objectID <= 0) // no action for archetypes
@@ -270,6 +309,8 @@ namespace Opde {
                         node->attachObject(ent);
 
                         ent->_initialise(true);
+                        
+                        ent->setCastShadows(true);
 
                         // Update the bones to be manual
                         if (ent->hasSkeleton()) {
@@ -299,6 +340,171 @@ namespace Opde {
 		}
 	}
 
+	// --------------------------------------------------------------------------
+	void RenderService::onPropLightMsg(const PropertyChangeMsg& msg) {
+		// Management of the light
+		if (msg.change == PROP_GROUP_CLEARED) {
+            clear();
+			return;
+		}
+
+		if (msg.objectID <= 0) // no action for archetypes
+            return;
+
+        LOG_INFO("RenderService: Adding Light for object %d", msg.objectID);
+
+        // As a test, I'm loading cube.mesh
+        switch (msg.change) {
+			case PROP_CHANGED:
+				// Will update the light's parameters
+				// updateLight(msg.objectID, msg.data);
+				updateLight(mLightInfoMap[msg.objectID], msg.data);
+				break;
+		
+			case PROP_ADDED: {
+				// let's add the light, then update it
+				LightInfo& li = createLight(msg.objectID);
+				updateLight(li, msg.data);
+				
+				// TODO: when adding the light, also check if the spotlight prop isn't present
+				if (mPropSpotlight->has(msg.objectID))
+					updateSpotLight(li, mPropSpotlight->getData(msg.objectID));
+				break;
+			}
+				
+				
+			case PROP_REMOVED:
+				removeLight(msg.objectID);
+        }
+	}
+
+	
+	// --------------------------------------------------------------------------
+	void RenderService::onPropSpotlightMsg(const PropertyChangeMsg& msg) {
+		if (msg.change == PROP_GROUP_CLEARED) {
+            clear();
+			return;
+		}
+
+		if (msg.objectID <= 0) // no action for archetypes
+            return;
+            
+		LOG_INFO("RenderService: Adding Spotlight for object %d", msg.objectID);
+
+		switch(msg.change) {
+			case PROP_CHANGED: 
+			case PROP_ADDED: {
+				// have to be careful here. The propery creation order is not guaranteed
+				LightInfoMap::iterator it = mLightInfoMap.find(msg.objectID);
+				
+				if (it != mLightInfoMap.end()) {
+					updateSpotLight(it->second, msg.data);
+				}
+				break;
+			}
+				
+			case PROP_REMOVED:
+				removeLight(msg.objectID);
+		}
+	}
+	
+	// --------------------------------------------------------------------------
+	RenderService::LightInfo& RenderService::createLight(int objID) {
+		Light* l = mSceneMgr->createLight("Light" + StringConverter::toString(objID));
+		
+		// default to point light (spot will be indicated by a different property)
+		l->setType(Light::LT_POINT);
+		
+		// attach the light to a newly created scenenode (child of the object's sn)
+		SceneNode* on = mObjectService->getSceneNode(objID);
+		
+		Quaternion q;
+
+		// TODO: Just a test. After finding the right orientation, replace with a constant quaternion value
+		Matrix3 m;
+		
+		m.FromEulerAnglesZYX(Radian(0), Radian(Math::PI), Radian(0));
+		q.FromRotationMatrix(m);
+
+		SceneNode* n = on->createChildSceneNode(Vector3::ZERO, q);
+		
+		n->attachObject(l);
+		
+		LightInfo li;
+		
+		li.light = l;
+		li.node = n;
+		
+		return (mLightInfoMap[objID] = li);
+	}
+
+	// --------------------------------------------------------------------------
+	void RenderService::updateLight(LightInfo& li, const PropertyDataPtr& propLightData) {
+		// The node will be a child of the Object's
+		// Set the light's parameters
+		// brightness, offset, radius
+		Real brightness = propLightData->get("brightness").toFloat();
+		Real radius = propLightData->get("radius").toFloat();
+		
+		// Hardcoded to absolutely, lineary attenuate over the range
+		// 0.0, 1.0, 0.0
+		li.light->setAttenuation(radius, 1.0, 0.0, 0.0);
+		
+		// BW only now...
+		// I suppose 100.0 is the effective maximum, but I just don't know... hmm.
+		// brightness /= 100.0;
+		
+		li.light->setDiffuseColour(brightness, brightness, brightness);
+		li.light->setSpecularColour(brightness, brightness, brightness);
+		
+		li.node->setPosition(propLightData->get("offset").toVector());
+
+		static_cast<DarkSceneManager*>(mSceneMgr)->queueLightForUpdate(li.light);
+	}
+	
+	// --------------------------------------------------------------------------
+	void RenderService::removeLight(int id) {
+		LightInfoMap::iterator it = mLightInfoMap.find(id);
+		
+		if (it != mLightInfoMap.end()) {
+			// remove light, then scenenode
+			it->second.node->detachAllObjects();
+			
+			mSceneMgr->destroyLight(it->second.light);
+			mSceneMgr->destroySceneNode(it->second.node->getName());
+		}
+	}
+		
+	// --------------------------------------------------------------------------
+	void RenderService::updateSpotLight(LightInfo& li, const PropertyDataPtr& propSpotData) {
+		// look at the results
+		// TODO: Conversion (angle in degrees or what?)
+		Degree inner(propSpotData->get("inner").toFloat());
+		Degree outer(propSpotData->get("outer").toFloat());
+		
+		// The angle is in degrees!
+		// The third parameter may mean distance from object... hmm.
+		
+		li.light->setType(Light::LT_SPOTLIGHT);
+		
+		li.light->setSpotlightInnerAngle(inner);
+		li.light->setSpotlightOuterAngle(outer);
+		
+		static_cast<DarkSceneManager*>(mSceneMgr)->queueLightForUpdate(li.light);
+	}
+	
+	// --------------------------------------------------------------------------
+	void RenderService::removeSpotLight(int id) {
+		LightInfoMap::iterator it = mLightInfoMap.find(id);
+				
+		if (it != mLightInfoMap.end()) {
+			it->second.light->setType(Light::LT_POINT);
+		
+			static_cast<DarkSceneManager*>(mSceneMgr)->queueLightForUpdate(it->second.light);
+		}
+	}
+
+	
     // --------------------------------------------------------------------------
     void RenderService::prepareMesh(const Ogre::String& name) {
         String fname = name + ".mesh";
@@ -306,6 +512,7 @@ namespace Opde {
         try {
             // First, try to load the mesh directly as a mesh file
             Ogre::MeshPtr mesh1 = Ogre::MeshManager::getSingleton().load(fname, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+            mesh1->prepareForShadowVolume(); 
         } catch (FileNotFoundException &e) {
             // Undefine in advance, so there will be no clash
             Ogre::MeshManager::getSingleton().remove(fname);
@@ -316,6 +523,8 @@ namespace Opde {
             try {
                 Ogre::MeshPtr mesh1 = Ogre::MeshManager::getSingleton().create(fname, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                    true, mManualBinFileLoader);
+                   
+				mesh1->prepareForShadowVolume(); 
             } catch (FileNotFoundException &e) {
                 LOG_ERROR("RenderService::prepareMesh: Could not find the requested model %s", name.c_str());
             } catch (Opde::FileException &e) {

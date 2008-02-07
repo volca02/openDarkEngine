@@ -32,12 +32,13 @@
 #include "PropertyService.h"
 #include "SharedPtr.h"
 #include "ManualBinFileLoader.h"
-#include "OgreDarkSceneManager.h"
+#include "DarkSceneManager.h"
 #include "MessageSource.h"
 #include "LoopService.h"
 #include "ObjectService.h"
 
 #include <OgreEntity.h>
+#include <OgreLight.h>
 #include <OgreSceneNode.h>
 
 namespace Opde {
@@ -67,7 +68,6 @@ namespace Opde {
 		
 		RenderWindowSize size;
 	} RenderServiceMsg;
-
 
 	/** @brief Render service - service managing in-game object rendering
 	* Some preliminary notes: VHot will probably be converted to TagPoints somehow
@@ -111,17 +111,38 @@ namespace Opde {
 			virtual void loopStep(float deltaTime);
 
             void onPropModelNameMsg(const PropertyChangeMsg& msg);
-
-            void createSceneNode(const PropertyChangeMsg& msg);
-            void setSceneNodePosition(const PropertyChangeMsg& msg);
-            void removeSceneNode(const PropertyChangeMsg& msg);
+            void onPropLightMsg(const PropertyChangeMsg& msg);
+            void onPropSpotlightMsg(const PropertyChangeMsg& msg);
 
             void prepareMesh(const Ogre::String& name);
 
 			/// Removes entity from the given object (meaning it will not have a visible representation)
 			void removeObjectEntity(int id);
-
+			
             void clear();
+            
+            
+   			// A package of a light and it's scene node
+			struct LightInfo {
+				Ogre::Light* light;
+				Ogre::SceneNode* node;
+			};
+
+            /// Creates a new light with next to no initialization
+            LightInfo& createLight(int objID);
+            
+            /// Updates a light based on the data of property LIGHT
+			void updateLight(LightInfo& li, const PropertyDataPtr& propLightData);
+			
+			/// removes a light
+   			void removeLight(int id);
+   			
+   			/// Updates a light to be a spotlight, updates it's params
+   			void updateSpotLight(LightInfo& li, const PropertyDataPtr& propSpotData);
+   			
+   			/// removes spotlight quality from a light (leaves the light as a point light)
+   			void removeSpotLight(int id);
+
 
 			/// Map of objectID -> Entity
 			typedef std::map<int, Ogre::Entity*> ObjectEntityMap;
@@ -129,8 +150,18 @@ namespace Opde {
 			ObjectEntityMap mEntityMap;
 
 			// Listener structs for property messages
+			
+			// ModelName listener related
 			PropertyGroup::ListenerID mPropModelNameListenerID;
 			PropertyGroupPtr mPropModelName;
+			
+			// Light Property related
+			PropertyGroup::ListenerID mPropLightListenerID;
+			PropertyGroupPtr mPropLight;
+			
+			// SpotLight Propert related
+			PropertyGroup::ListenerID mPropSpotlightListenerID;
+			PropertyGroupPtr mPropSpotlight;
 
 			/// Shared pointer to the property service
 			PropertyServicePtr mPropertyService;
@@ -138,12 +169,16 @@ namespace Opde {
             // --- RENDERING INSTANCES ---
             /// Ogre root handle
             Ogre::Root* mRoot;
+            
             /// Scene manager handle
 			Ogre::SceneManager* mSceneMgr;
+			
 			/// Render window handle
 			Ogre::RenderWindow* mRenderWindow;
+			
 			/// Factory instance for the DarkSceneManager
 			Ogre::DarkSceneManagerFactory* mDarkSMFactory;
+			
 			/// Default camera. Used solely for game mode
 			Ogre::Camera* mDefaultCamera;
 
@@ -155,6 +190,16 @@ namespace Opde {
 			
 			/// Shared ptr to object service (for scene nodes)
 			ObjectServicePtr mObjectService;
+			
+			
+			typedef std::map<int, LightInfo> LightInfoMap;
+			
+			LightInfoMap mLightInfoMap;
+			
+			// Database listener handle related (For render params chunk)
+			// DatabaseServicePtr mDatabaseService;
+			// BinaryServicePtr mBinaryService;
+			
 	};
 
 	/// Shared pointer to Link service
