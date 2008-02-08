@@ -54,7 +54,7 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	PropertyDataPtr PropertyGroup::getData(int obj_id) {
-		PropertyStore::const_iterator it = mPropertyStore.find(obj_id);
+		PropertyStore::const_iterator it = mPropertyStore.find(_getEffectiveObject(obj_id));
 
 		if (it != mPropertyStore.end())
 			return it->second;

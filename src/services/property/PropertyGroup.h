@@ -177,7 +177,7 @@ namespace Opde {
 			* @note Will silently fail when id is non-valid. Check error log for this happening
 			*/
 			DVariant get(int id, std::string field) {
-				PropertyStore::const_iterator it = mPropertyStore.find(id);
+				PropertyStore::const_iterator it = mPropertyStore.find(_getEffectiveObject(id));
 
 				if (it != mPropertyStore.end()) {
 					return it->second->get(field);
