@@ -1,165 +1,139 @@
-This is a TODO plan for openDarkEngine
+This is a TODO for openDarkEngine
+---------------------------------
 
-Each minor version has it's own plan piece, which can change as requirements will
+Pre-0.3 release:
+    
+    * Code cleanup
+    * cleanup of WorldRep service. New style of struct reading using the signatures should be used
+    * new main.cpp - preferably only a small wrapper for python scripts to be executed with
+    * propper Big/Little endian handling for DType/DTypeDef classes (and OPDE in general). This (together with some other fixes) should enable the code to run on non-intel macs and other architectures
+    * Finalization of the core services bindings, coupled with Doc strings to make coder's life easier
+    * installation scripts / win32 installer - should also prepare opde's config files to be ready to rock after install
+    * better handling of missing data
+    * ogre's (and others) resource system management. How to organize resource unloading? How to classify loaded data? Those need to be answered
+    * small clarifications of the methods working with property/link data - what the data flow will be? getData can return archetype's data, so changes should be disallowed on that returned object
+    * Testing: for example how to correctly (and legally) transfer python's lib together with opde, bug fixes for opde if it does not find data it needs
+    * Example scripts to the SVN - resources.cfg, opde.cfg, plugins.cfg, etc should be placed in SVN to ease the pain for people trying to build from source
+    * Other example scripts/documentation, including FAQ - How do I create a custom material replacement? How do I create a mesh replacement? (...New movements for AI?...)
+    * optional: Optimization. The new SM for example does not perform so well one could be satisfied with it.
+    * Built-in properties: To stop the opde from failing fatally if the core sripts are corrupted, the core properties (ideally all those which have some hooked code around them)
+	should be created in code (including the DTypeDef format descriptor).
+    * DTypeDef cleanup: It now seems we can safely swap endianness of DTypeDef supported data. This means we can do all the byte mumbo-jumbo whilst loading, and have a cleaner get/set code.
+	- need to be 100% sure here - there are some unions present
+    
 
-(* marks todo, + marks a thing already implemented)
-
-0.2.0 - 0.3.0:
-	+ implement a file handling base classes 
-	+ implement a dynamic data containers - (sortof - DTypeDef)
-	- implement a templating service for binary data templates/instances handling (e.g. a library of binary templates)
-	* implement a base of the object service (Property, Link and Object)
-	* implement a LGMD .bin loader (online, resource manager?) that constructs a SceneNode tree and some specs of limits + rotating/sliding info
-	* test all the previous by loading the game objects in-game
-	* if considered a good idea, implement a base scripting bindings
-	* Write a custom gui service, based on ogre's overlays. Or find one that fits (BetaGUI?)
-	+ get rid of the temporary source code. That includes OpdeMission ad the ExampleApplication
-
-0.3.0 - 0.4.0: (Just a sketch for now, will likely change)
-	* AI object loading implementation (LGMM), including the movement database. Some tricks could be needed for the translation part of the movement
-	* Physics service implementation
-	* Particle service implementation
+0.3 - 0.4:
+    * Object Scripts. The whole infrastructure - Script Service, script message struct. Need more info/ideas here.
+    * in parallel to that (to test the system on something): 
+    	- Room service (probably the easiest, so should be the first)
+	- A/R system
+	- Physics
+    * Sound system - need a propper resource system for this one, lots of data will travel because of this one
 
 
+----------------------------------
+- Some random side-project ideas -
+----------------------------------
 
-Detailed plan
+Documentation
 -------------
-The overall idea is to reproduce the DarkEngine system :)
-
-The base is Services, each handling a different kind of engine function. On opde executable start, a configuration file is loaded, which should contain the specification of a bootstraping script to use (The main control script), resource configuration to use, files to use, etc. The result is that the core services are properly set-up, and bootstraping script is executed. This script then creates/duplicates the original game look and feel - gui's are set-up and displayed, movies are played.
-
-Upon the game itself is started, another set of services is instantinated. The main script only handles game logic outside the gameplay - e.g. menu system, mission to mission sequence / zone loading in ss2. Also map/objectives are handled here (Simulation is paused while executing the bootstraping script).
-
-The core game system should probably be two threads. One, stepped on 1 ms, simulation thread, handles script messages and timed messages - e.g. the game logic, another thread handles the renderer loop. This way, multi core systems get some bonus and, after all, this how the original system probably worked.
-
-0.2.0:
-
-The plan is to implement object system services. 
-
-After that, a service that handles mesh object loading and display, which will be hooked as a notification client to the property notification system.
-
-Configuration service
----------------------
-A central register for configuration storage. Should have categories, each containing a set of key/value pairs
-Abilities:
-* Load a configuration from a given file/files.
-* Uses Ogre::ConfigFile
-
-Binary service
---------------
-Should handle loading of structure definitions from a xml file, and organising them in groups. The service should have methods to get a certain structure definition. Should be based on the DTypeDef class. Based on telliamed's XML files, which will be modified to fit the binary service.
-
-Property service
-----------------
-Should handle loading properties from the Mission definition, GAM system and savegames. The loader has to be prepared to understand the properties from
-either Thief 1/Thief Gold/Thief 2 and System Shock 2. It should use Binary service as a source of data format descriptions. There should be a file containing the definitions of properties, their names, stored names, inheritance types. Configuration service should contain the path to the description file.
-
-The property service should have these abilities:
-* Notification of property - ADDITION, REMOVAL, CHANGE (call a list of methods registered to listen to the event). Per property type. This notification is fired even if the property addition/chage comes indirectly thanks to inheritance.
-* Cacheing of property inheritance - Listening to the inheritance service notifications, it should remap the visibility and value source of given property (Priority based, as in MetaProperty link's data - priority)
-* Inheritance definitions for each property type - as far as I know, there are these inheritance mechanims:
-	- Normal inheritance - Property get's inherited every time
-	- Archetype-only inheritance - Inheritance works only on archetypes. The property does not inherit into an object instance (ID>0). Dromed copies this property if instantinating an archetype. In-game, it should be ignored on metaproperty change.
-* loading / writing of archetype, non-archetype and both to a given FileGroup
-* Iterator on object self-properties (those not inherited). For editor use
-
-Link service
-------------
-Responsible for link management. Uses binary service for link/link data loading. Link data are stored in binary for all the time. Links are remapped to more optimal structures.
-
-Abilities:
-* Link organisation in per-type storages.
-* Link indexing - link name to link type ID, link type ID to link names
-* Link manipulation - addition, removal, change of link and link data
-* Link change notification - Addition, Removal, change of link or link data. Per link type
-* Link queries - Different kinds of link queries - for example - get all mp links to pointing to the object ID X
-* Link data manipulation - queries on link data values, data value changes
-* Later on, link broadcasts (message distribution) - probably 0.3.0 task
-* Link loaders/writers, and a central load/save. Both archetype-only, archetype-less and all links should be implemented. Storing to FileGroup.
-
-Object service
---------------
-Service responsible for object management.
-
-Abilities:
-* Object instantination, removal, slay. Upon instantination
-     some object have to be given new instances of the archetype's linked objects (ParticleAttachment, weapon for creatures). 
-     This should be probably done via Notifications to services responsible for that.
-* Notification of object changes - Creation, Death, Pre-Death
-* Object cloning - fabricate by example (copy object and links to it)
-* OBJVEC (name?) handling - bitmap of available object ID's. Rescale upon filling to avoid DE's types of problems. Protected methods getFreeArchetypeID, getFreeObjectID.
-
-- Copying of the links is somewhat special. Each link type knows if it has to be copied or not. Copying of properties is simmilar. Prop. service will have inheritance type on each property.
+We have the doxy system running (needs updating the comments though). Texinfo file with data flow descriptions, coding style descriptions, how-to guide, etc
+should be written.
 
 
-Inheritance Service (name this Trait Service?)
+Documentation generator for Properties, links and chunk formats
+---------------------------------------------------------------
+
+Preferably generating texinfo files. Should run game's core without any graphics, collect data on properties/links/chunks
+A detail holding text file should be possible to load, so there could be more than just the basic look of property or link described.
+
+Example of such doc extension format (formal format specification needed):
+
+Prop.ModelName {
+    Holds the name of object's model. Implemented in RenderService. 
+    
+    Changing this property will result in object's model change.
+    
+    ... etc ...
+}
+
+
+The documentation generator should then produce a texinfo file that could be compiled into info, html and other formats.
+Up to three different structure descriptions would be introduced, one for each different game type (or a collored diff).
+
+
+Preprocessor for .pldef and .dtype script files
+-----------------------------------------------
+
+A preprocessor with a C style syntax (simple is sufficient) could be introduced to help with merging of the 3 different versions of property, link and data
+description scripts. It would be feeded with a preprepared set of variables (integer variables should be enough). Should handle simple condition evaluation.
+File processing would then be done using a stack based machine, that would evaluate #if, #else, #endif lines. 
+
+VERSION variable should be introduced, that would be the base for the preprocessor. #define statement could be used to create new variables for the preprocessor,
+#ifdef, #ifndef statements the same as in C could also be used if needed.
+
+VERSION variable should be based on the internal (not in existance so far) config variable that should change the behavior of the whole engine. Values:
+
+VERSION - MEANING
+1         TDP/TG
+2         TMA
+3         SS2
+
+
+The whole idea is to create a single set of scripts with the differences wrapped up in the #if, #endif conditions:
+
+#if VERSION>=2
+
+// include some stuff that is only
+#else
+#endif
+
+Other statements could be also introduced, but I believe these will be more than sufficient:
+#if CONDITION
+ - tests for condition (allowed are: rounded braces, variables, spaces, logical expressions - &&,||, numerical >,<,>=,<=)
+#else
+ - else part for the condition
+#endif
+ - ends the conditionally included code
+#define VAR VAL
+ - will set a value VAL to a variable VAR, creating it if it did not exist (no macro style replacement will be allowed - too complex to do I believe)
+#ifdef VAR
+ - same as if, only test for variable's existance itself
+#ifndef VAR
+ - same as if, only test for variable's inexistance itself
+#undef
+ - undefines a variable
+ 
+ 
+Editor side-Project
 -------------------
-High level service working with inheritance and archetype tree
 
-Abilities:
-* Metaproperty addition and removal
-* Inheritance queries
-* Archetype addition, removal, move in the tree
-* Notification of inheritance changes
-* Holds Normal/Metaproperty priorities for all objects. Adding metaprop will always give a new biggest number of priority for the new link. This means it would be wise to use InheritanceService, not link service directly for MP management.
+An editor (codename CamelEd ;) ) could be created. The basic operations should not be a problem to implement, as there already is the whole object system
+roughly prepared for that. Basing it on WxPython could be a good idea. 
 
-- Property Service is hooked on the events of this service. Upon inheritance change, property service refreshes the current value for all affected properties of all affected objects. Usually, in-game, this will be limited to metaproperty addition/removal.
+TO BE SPECIFIED
 
-Renderer service(?)
-* hooked on renderer properties, handle object display and mesh loading - the question here is if LGMD should be loaded as a SceneNode tree or a skeleton
-based single mesh. Each has some positives and negatives.
+some ideas:
+*   Logger could get a brother - error reporter. Slightly more complex, conditionally compiled code present in whole OPDE would enable an existence of Error
+    console, which could be even used for finding what went wrong in game mode - Message broadcasts, etc. Let it be 64 different data sources, and create a 
+    filter for the messages, so user could choose which messages are interesting.
+*   Custom BSP builder and lighter should enable us to introduce better graphics. Some brushes could be marked as detail brushes for example - meaning those 
+    would not be used for occlusion
+*   World geometry import - a special kind of brush maybe?
+*   Custom WRRGB variant to implement this all
 
+Need inspiration for other ideas. These listed are just some random dumb ideas that I came with. DromEd users should know better what they need 
+(if they need a DromEd replacement, that is)
 
-0.3.0 and further
+OPDE as a python extension
+--------------------------
 
-Scripting handlers - ScriptLanguage class, which handles script loading, execution, in-script class instance wrappers, service bindings
-Implementation of ScriptLanguage for the chosen language. Then implementation of the bootstrapper code.
-Message system.
-Implementation of other services - physics, tweq, ai, etc.
+Ok, the 0.3 version release should include a python script using opde python module to implement the particular game. The principle is to use python's
+library with our binary. We could also (and it would be a good idea) introduce the whole OPDE as a python Extension, meaning it would install into the 
+pythons extensions, and an ordinary python editor/debugger could then be used to work on OPDE. 
 
-Some unsorted todos:
---------------------
-Sky - has to be rendered prior to static world geometry. Should be possible through renderSingleObject. This is waiting for T2-type sky to be written.
-Collision system will have to be implemented ourselves
-Tweq system - this will cause some problems - some tweqs only get updated if visible.
-AI vision - do the vision cones work on WorldRep geometry or on room database? My bet is rooms.
-Dynamic lights - as switchable lightmaps cover the lightning of unmovable lights, some approach has to be thinked up on dynamic lights, those are the only lightning world geometry too - shaders?
-
-
-
-Some remarks:
--------------
-
-GameService
------------
-The bootstrap script should control GameService. GameService would be a service doing the global engine functions. 
-* Load/Save of savegames
-* Mission loading
-* Mission order (which mission is next)
-* Game State Machine control (Which State would be next Movie1, Movie2, Main Menu...)
-* Per frame updates? The order is cruical - physics, collisions, tweq, particle, AI.... This has to be determined, and fixed. Maybe some FrameUpdated class with order - int.
-* Persistency of some values
-* The state machine should be able to cooperate with script object(s)
-* State registrations - register named GameState instances to be referenced by state changing calls
-
-
-ScriptService
--------------
-* Event dispatcher for in-game scripts
-* Instance manager for script classes wrapped in C++ classes
-* Instantinator/Registrator for such classes
-* Uses ScriptLanguage instance to accomplish it's tasks.
-
-The ScriptLanguage class, or simmilar named, would handle:
-* script loading and execution
-* static methods doing inter-language registration of types and classes (Services, etc.)
-* Wrap the script's instances to a C++ instances for some classes - Script as a main example, also GameState and GUIManagedGameState (event callbacks)
-
-GUIManagedState:
-* Handles mouse cursor. Exposes method setupGUI instead of start(). setupGUI will be filled with gui building code and event bindings.
-
-ScriptManagedState:
-* A wrapper around script's instance. Gives the ability to manage the game state in some scripting language.
-
-ScriptGUIManagedState:
-* As ScriptManagedState, but including the GUIManagedState functions. Callbacks directly to the scripting level.
+Should not be so much work:
+ * completely give the initialization of OPDE to the Python's side (meaning all the resource paths, etc would be configured by python script, including the 
+    call to bootstrapFinished). This even means the whole OPDE could be initialized and shutted down numerous times per one script execution.
+ * wrap it all up as a python extension compiled as a shared library
+ * custom compiler flags remain an unknown here - as well as cmake as an alternative to setup.py ordinary extension build tool - INFO NEEDED here
