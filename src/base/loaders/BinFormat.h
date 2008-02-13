@@ -262,4 +262,26 @@ typedef struct      ObjPolygon {
 } ObjPolygon;
 
 
+const int ObjLight_Size = 8;
+
+typedef struct ObjLight {
+	// Material reference
+	uint16_t material;
+	// Point on object reference
+	uint16_t point;
+
+	// Packed normal vector (10 bits per axis, signed)
+	uint32_t packed_normal;
+} ObjLight;
+
+
+/* TODO: Lights. Dunno what those are, but this is what I know so far:
+
+1. This is the rough structure:
+
+1. Short - material
+2. Short - point
+3. 4 bytes - related to normal. Does not make great sense (two shorts as space direction without rotation?)
+*/
+
 #endif

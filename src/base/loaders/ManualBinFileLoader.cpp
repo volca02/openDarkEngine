@@ -48,7 +48,7 @@ namespace Ogre {
     /** Helper SubMesh filler class. Receives a pointer to the UV and Vertex arrays, and is filled with triangles */
     class SubMeshFiller {
         public:
-            SubMeshFiller(SubMesh* sm, size_t nvert, Vertex* vertices, size_t nnorms, Vertex* normals, size_t nuvs, UVMap* uvs, bool useuvmap) :
+            SubMeshFiller(SubMesh* sm, size_t nvert, Vertex* vertices, size_t nnorms, Vertex* normals, size_t nlights, ObjLight* lights, size_t nuvs, UVMap* uvs, bool useuvmap) :
                     mSubMesh(sm),
                     mVertices(vertices),
                     mNormals(normals),
@@ -56,6 +56,8 @@ namespace Ogre {
                     mUseUV(useuvmap),
                     mBuilt(false),
                     mNumVerts(nvert),
+                    mNumLights(nlights),
+                    mLights(lights),
                     mNumNorms(nnorms),
                     mNumUVs(nuvs) {
             };
@@ -74,12 +76,16 @@ namespace Ogre {
             typedef struct VertexDefinition {
                 uint16_t vertex;
                 uint16_t normal;
+                uint16_t light;
                 uint16_t uvidx; // Left zero if the UV's are not used
                 int bone;
             };
 
         protected:
-            uint16_t getIndex(int bone, uint16_t vert, uint16_t norm, uint16_t uv);
+            uint16_t getIndex(int bone, uint16_t vert, uint16_t norm, uint16_t light, uint16_t uv);
+
+			/// Unpacks the 30 bit normal from light struct (at index idx)
+			Vector3 getUnpackedNormal(uint16_t idx);
 
             /// Global vertex data pointer
             Vertex* mVertices;
@@ -98,7 +104,10 @@ namespace Ogre {
             /// Skeleton pointer used to transform initial vertex positions and normals (Has to be non-null prior to build operation)
             SkeletonPtr mSkeleton;
 
-            size_t mNumVerts, mNumNorms, mNumUVs;
+			// Lights
+			ObjLight* mLights;
+
+            size_t mNumVerts, mNumNorms, mNumLights, mNumUVs;
 
             typedef std::vector< uint16_t > IndexList;
             IndexList mIndexList;
@@ -109,7 +118,7 @@ namespace Ogre {
     };
 
     bool operator==(const SubMeshFiller::VertexDefinition &a, const SubMeshFiller::VertexDefinition& b) {
-        return ((a.vertex == b.vertex) && (a.normal == b.normal) && (a.uvidx == b.uvidx) && (a.bone == b.bone));
+        return ((a.vertex == b.vertex) && (a.normal == b.normal) && (a.uvidx == b.uvidx) && (a.bone == b.bone) && (a.light == b.light));
     }
 
     void SubMeshFiller::addPolygon(int bone, size_t numverts, uint16_t normal, uint16_t* vidx, uint16_t* lightidx, uint16_t* uvidx) {
@@ -120,40 +129,30 @@ namespace Ogre {
         uint16_t max_index;
 
         if (mUseUV) {
-            /* TODO: Lights!
-            last_index = getIndex(vidx[0], lightidx[0], uvidx[0]);
-            max_index = getIndex(vidx[numverts-1], lightidx[numverts-1], uvidx[numverts-1]);
-            */
-            last_index = getIndex(bone, vidx[0], normal, uvidx[0]);
-            max_index = getIndex(bone, vidx[numverts-1], normal, uvidx[numverts-1]);
+            last_index = getIndex(bone, vidx[0], normal, lightidx[0], uvidx[0]);
+            max_index = getIndex(bone, vidx[numverts-1], normal, lightidx[numverts-1], uvidx[numverts-1]);
         } else {
-            /* see up
-            last_index = getIndex(vidx[0], lightidx[0], 0);
-            max_index = getIndex(vidx[numverts-1], lightidx[numverts-1], 0);
-            */
-            last_index = getIndex(bone, vidx[0], normal, 0);
-            max_index = getIndex(bone, vidx[numverts-1], normal, 0);
+            last_index = getIndex(bone, vidx[0], normal, lightidx[0], 0);
+            max_index = getIndex(bone, vidx[numverts-1], lightidx[numverts-1], normal, 0);
         }
 
         for (size_t i = 1; i < (numverts-1); i++) {
             uint16_t index;
 
             if (mUseUV)
-                // index = getIndex(vidx[i], lightidx[i], uvidx[i]);
-                index = getIndex(bone, vidx[i], normal, uvidx[i]);
+                index = getIndex(bone, vidx[i], normal, lightidx[i], uvidx[i]);
             else
-                // lights. etc.
-                index = getIndex(bone, vidx[i], normal, 0);
+                index = getIndex(bone, vidx[i], normal, lightidx[i], 0);
 
             mIndexList.push_back(max_index);
-            mIndexList.push_back(last_index);
             mIndexList.push_back(index);
-
-            last_index = index;
+            mIndexList.push_back(last_index);
+            
+			last_index = index;
         }
     }
 
-    uint16_t SubMeshFiller::getIndex(int bone, uint16_t vert, uint16_t norm, uint16_t uv) {
+    uint16_t SubMeshFiller::getIndex(int bone, uint16_t vert, uint16_t norm, uint16_t light, uint16_t uv) {
         // Find the record with the same parameters
         // As I'm a bit lazy, I do this by iterating the whole vector
         // Check the limits!
@@ -161,6 +160,8 @@ namespace Ogre {
             OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Vertex Index out of range!", "SubMeshFiller::getIndex");
         if (mNumNorms <= norm)
             OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Normal Index out of range!", "SubMeshFiller::getIndex");
+		if (mNumLights <= light)
+            OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Light Index out of range!", "SubMeshFiller::getIndex");
         if (mNumUVs <= uv && mUseUV)
             OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "UV Index out of range!", "SubMeshFiller::getIndex");
 
@@ -170,6 +171,7 @@ namespace Ogre {
         VertexDefinition vdef;
         vdef.vertex = vert;
         vdef.normal = norm;
+        vdef.light = light;
         vdef.uvidx = uv;
         vdef.bone = bone;
 
@@ -185,6 +187,32 @@ namespace Ogre {
         // Push the vertex bone binding as well
         return index;
     }
+
+	Vector3 SubMeshFiller::getUnpackedNormal(uint16_t idx) {
+		// get the ref to light struct at idx
+		if (mNumLights <= idx)
+            OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Light Index out of range!", "SubMeshFiller::getUnpackedNormal");
+            
+		Vector3 res;
+		
+		uint32_t src = mLights[idx].packed_normal;
+		
+		/* The Vector is organized as follows
+		
+		bit 32 -> bit 0
+		
+		XXXX XXXX | XXYY YYYY || YYYY ZZZZ | ZZZZ ZZ00
+		
+		each of those are fixed point signed numbers (10 bit)
+		*/
+		
+		res.z = (int16_t)((int16_t)(src & 0x0FFFC) << 4) / 16384.0f;
+		res.y = (int16_t)((src >> 6) & 0x0FFC0) / 16384.0f;
+		res.x = (int16_t)((src >> 16) & 0x0FFC0) / 16384.0f;
+		
+		return res;
+	}
+	
 
     void SubMeshFiller::build() {
         if (mBuilt)
@@ -230,7 +258,8 @@ namespace Ogre {
         for (; it != mVertexList.end(); ++it, ++vidx) {
             // Transform the vertex position and normal, then put into the buffer
             Vector3 pos(mVertices[it->vertex].x, mVertices[it->vertex].y, mVertices[it->vertex].z);
-            Vector3 norm(mNormals[it->normal].x, mNormals[it->normal].y, mNormals[it->normal].z);
+            // Vector3 norm(mNormals[it->normal].x, mNormals[it->normal].y, mNormals[it->normal].z);
+            Vector3 norm = getUnpackedNormal(it->light);
 
             Vector3 npos, nnorm;
 
@@ -393,7 +422,11 @@ namespace Ogre {
                         mVHots(NULL),
                         mVertices(NULL),
                         mUVs(NULL),
-                        mSubObjects(NULL) {
+                        mSubObjects(NULL),
+                        mLights(NULL),
+                        mNumNorms(0),
+                        mNumUVs(0),
+                        mNumLights(0) {
 
                 if ((mVersion != 3) && (mVersion != 4))
                     OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Unsupported object mesh version : " + StringConverter::toString(mVersion),"ObjectMeshLoader::ObjectMeshLoader");
@@ -408,6 +441,7 @@ namespace Ogre {
                 delete[] mUVs;
                 delete[] mSubObjects;
                 delete[] mNormals;
+                delete[] mLights;
 
                 FillerMap::iterator it = mFillers.begin();
 
@@ -431,6 +465,7 @@ namespace Ogre {
             void readUVs();
             void readVertices();
             void readNormals();
+            void readLights();
 
             Matrix3 convertRotation(const float m[9]);
 
@@ -454,11 +489,14 @@ namespace Ogre {
             VHotObj* mVHots;
             Vertex* mVertices;
             Vertex* mNormals;
+			ObjLight* mLights;
+			
             UVMap* mUVs;
             SubObjectHeader* mSubObjects;
 
-            int mNumUVs;
+			int mNumUVs;
             int mNumNorms;
+            int mNumLights;
 
 
             std::map<int, int> mSlotToMatNum; // only v3 uses this. v4 is filled 1:1
@@ -481,6 +519,7 @@ namespace Ogre {
         // progress with loading. Calculate the count of the UV records
         mNumUVs = (mHdr.offset_vhots - mHdr.offset_uv) / (sizeof(float) * 2);
         mNumNorms = (mHdr.offset_pgons - mHdr.offset_norms) / (sizeof(float) * 3);
+        mNumLights = (mHdr.offset_norms - mHdr.offset_light) / ObjLight_Size;
 
         // Read the materials
         readMaterials();
@@ -493,6 +532,9 @@ namespace Ogre {
 
         // Read the vertices
         readVertices();
+		
+		// Read the light vectors
+		readLights();
 
         // Read the normals
         readNormals();
@@ -912,6 +954,23 @@ namespace Ogre {
         } else
             OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR,"Number of normals is zero!", "ObjectMeshLoader::readVertices");
     }
+    
+    //-------------------------------------------------------------------
+    void ObjectMeshLoader::readLights() {
+        if (mNumLights > 0) {
+            mLights = new ObjLight[mNumLights];
+
+            mFile->seek(mHdr.offset_light);
+
+			for (int n = 0; n < mNumLights; n++) {
+				mFile->readElem(&mLights[n].material, 2);
+				mFile->readElem(&mLights[n].point, 2);
+				mFile->readElem(&mLights[n].packed_normal, 4);
+			}
+
+        } else
+            OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR,"Number of normals is zero!", "ObjectMeshLoader::readVertices");
+    }
 
     //-------------------------------------------------------------------
     Matrix3 ObjectMeshLoader::convertRotation(const float m[9]) {
@@ -992,7 +1051,7 @@ namespace Ogre {
         if (it == mFillers.end()) {
             SubMesh* sm = mMesh->createSubMesh("SubMesh" + StringConverter::toString(fillerIdx));
 
-            SubMeshFiller* f = new SubMeshFiller(sm, mHdr.num_verts, mVertices, mNumNorms, mNormals, mNumUVs, mUVs, use_uvs);
+            SubMeshFiller* f = new SubMeshFiller(sm, mHdr.num_verts, mVertices, mNumNorms, mNormals, mNumLights, mLights, mNumUVs, mUVs, use_uvs);
 
             // Set the material for the submesh
             f->setMaterialName(matName);
@@ -1027,7 +1086,6 @@ namespace Ogre {
         // We'll create a material given the mat and matext structures
         MaterialPtr omat = MaterialManager::getSingleton().create(matname, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
         
-        omat->setShadingMode(SO_GOURAUD);
         omat->setLightingEnabled(true);
 		omat->setReceiveShadows(false);
 		
@@ -1085,7 +1143,7 @@ namespace Ogre {
                 pass->setAmbient(1.0, 1.0, 1.0); // Set full ambient, illum seems to always be zero
             }
 
-            omat->setCullingMode(CULL_ANTICLOCKWISE);
+            // omat->setCullingMode(CULL_ANTICLOCKWISE);
           
         } else if (mat.type == MD_MAT_COLOR) {
             // Fill in a color-only material
@@ -1107,11 +1165,12 @@ namespace Ogre {
                 pass->setAmbient(matcolor.r * matext.illum, matcolor.g * matext.illum, matcolor.b * matext.illum);
             }
             
-            omat->setCullingMode(CULL_ANTICLOCKWISE);
+            // omat->setCullingMode(CULL_ANTICLOCKWISE);
 
         } else
             OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Invalid material type : ") + StringConverter::toString(mat.type), "ObjectMeshLoader::prepareMaterial");
 
+        omat->setShadingMode(SO_GOURAUD);
 		omat->load();
 
 		return omat;
