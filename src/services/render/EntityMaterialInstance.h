@@ -1,6 +1,9 @@
-// Copied from the Ogre3d wiki: Article "Per renderable transparency"
-// Edited to fit the usage in open dark engine
 /*
+ Copied from the Ogre3d wiki: Article "Per renderable transparency"
+ Edited to fit the usage in open dark engine
+
+$Id$
+
 TODO: This is here to let us support:
     * Per object transparency (Property RenderAlpha)
     * Self light objects - needs more work (per material, etc)

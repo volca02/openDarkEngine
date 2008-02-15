@@ -1,5 +1,10 @@
-// Copied from the Ogre3d wiki: Article "Per renderable transparency"
-// Edited to fit the usage in open dark engine
+/*
+Copied from the Ogre3d wiki: Article "Per renderable transparency"
+Edited to fit the usage in open dark engine
+
+$Id$
+
+*/
 
 #ifndef __MATERIALINSTANCE_H__
 #define __MATERIALINSTANCE_H__
