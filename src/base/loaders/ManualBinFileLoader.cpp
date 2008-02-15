@@ -158,8 +158,8 @@ namespace Ogre {
         // Check the limits!
         if (mNumVerts <= vert)
             OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Vertex Index out of range!", "SubMeshFiller::getIndex");
-        if (mNumNorms <= norm)
-            OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Normal Index out of range!", "SubMeshFiller::getIndex");
+        /*if (mNumNorms <= norm)
+            OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Normal Index out of range!", "SubMeshFiller::getIndex");*/
 		if (mNumLights <= light)
             OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Light Index out of range!", "SubMeshFiller::getIndex");
         if (mNumUVs <= uv && mUseUV)
@@ -170,7 +170,7 @@ namespace Ogre {
 
         VertexDefinition vdef;
         vdef.vertex = vert;
-        vdef.normal = norm;
+        vdef.normal = 0; // ignoring normal for now
         vdef.light = light;
         vdef.uvidx = uv;
         vdef.bone = bone;
