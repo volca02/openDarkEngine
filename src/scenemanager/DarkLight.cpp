@@ -195,10 +195,10 @@ namespace Ogre {
 				if ((*pit)->getDistanceFrom(getDerivedPosition()) > radius)
 					continue;
 
-				// TODO: check if the distance is in radius limit
-
 				bool didc = false;
-				
+
+				// TODO: The frustum could be constructable directly from frustum and portal
+				// This would mean no additional needed steps besides constructing a new frustum
 				Portal* cut = frust.clipPortal(*pit, didc);
 				
 				if (cut != NULL) {
