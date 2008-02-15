@@ -458,7 +458,9 @@ namespace Opde {
 			// I wonder how the original dark handles these
 			// It would be optimal to create a test scene in with D2 and R,G,B lights
 			// To reveal how this one works (which is exactly what I'm gonna do)
-			radius = 30;
+			
+			// TODO: Putting in 0 for now, because something rotten is in _traversePortalTree (recursion does not end)
+			radius = 0;
 			
 			// make the radius sane using a limit
 			/* if (radius > 20)
