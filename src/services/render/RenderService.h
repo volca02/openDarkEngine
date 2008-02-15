@@ -36,6 +36,7 @@
 #include "MessageSource.h"
 #include "LoopService.h"
 #include "ObjectService.h"
+#include "EntityMaterialInstance.h"
 
 #include <OgreEntity.h>
 #include <OgreLight.h>
@@ -121,11 +122,16 @@ namespace Opde {
 			
             void clear();
             
-            
    			// A package of a light and it's scene node
 			struct LightInfo {
 				Ogre::Light* light;
 				Ogre::SceneNode* node;
+			};
+			
+			// A package of an entity and a EntityMaterialInstance
+			struct EntityInfo {
+				Ogre::Entity* entity;
+				EntityMaterialInstance* emi;
 			};
 
             /// Creates a new light with next to no initialization
@@ -145,7 +151,7 @@ namespace Opde {
 
 
 			/// Map of objectID -> Entity
-			typedef std::map<int, Ogre::Entity*> ObjectEntityMap;
+			typedef std::map<int, EntityInfo> ObjectEntityMap;
 
 			ObjectEntityMap mEntityMap;
 

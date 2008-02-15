@@ -326,7 +326,12 @@ namespace Opde {
 							ent->getSkeleton()->setBindingPose();
                         }
                         
-                        mEntityMap.insert(make_pair(msg.objectID, ent));
+                        EntityInfo ei;
+                        
+                        ei.entity = ent;
+                        ei.emi = new EntityMaterialInstance(ent);
+                        
+                        mEntityMap.insert(make_pair(msg.objectID, ei));
 
                     } catch (FileNotFoundException &e) {
                         LOG_ERROR("RenderService: Could not find the requested model %s (exception encountered)", name.c_str());
@@ -369,6 +374,7 @@ namespace Opde {
 				// TODO: when adding the light, also check if the spotlight prop isn't present
 				if (mPropSpotlight->has(msg.objectID))
 					updateSpotLight(li, mPropSpotlight->getData(msg.objectID));
+					
 				break;
 			}
 				
@@ -445,13 +451,28 @@ namespace Opde {
 		// brightness, offset, radius
 		Real brightness = propLightData->get("brightness").toFloat();
 		Real radius = propLightData->get("radius").toFloat();
-		
-		// Hardcoded to absolutely, lineary attenuate over the range
-		// 0.0, 1.0, 0.0
-		li.light->setAttenuation(radius, 1.0, 0.0, 0.0);
-		
-		// BW only now...
-		brightness /= 255.0;
+
+		// For lights with zero radius, use linear attenuation
+		if (radius <= 0) {
+			// TODO: This needs experiments to be validated
+			// I wonder how the original dark handles these
+			// It would be optimal to create a test scene in with D2 and R,G,B lights
+			// To reveal how this one works (which is exactly what I'm gonna do)
+			radius = 30;
+			
+			// make the radius sane using a limit
+			/* if (radius > 20)
+				radius = 20; */
+				
+			// linear attenuation for zero range lights
+			li.light->setAttenuation(radius, 0.0, 1.0, 0.0);
+		} else {
+			// Hardcoded to have no attenuation over the radius
+			li.light->setAttenuation(radius, 1.0, 0.0, 0.0);
+		}
+
+		// BW lights only now...
+		brightness /= 100.0;
 		
 		li.light->setDiffuseColour(brightness, brightness, brightness);
 		li.light->setSpecularColour(brightness, brightness, brightness);
@@ -480,14 +501,17 @@ namespace Opde {
 		// TODO: Conversion (angle in degrees or what?)
 		Degree inner(propSpotData->get("inner").toFloat());
 		Degree outer(propSpotData->get("outer").toFloat());
+		Real dist(propSpotData->get("distance").toFloat());
 		
 		// The angle is in degrees!
 		// The third parameter may mean distance from object... hmm.
+		// I'll bet the third parameter is falloff. Let's use it as that for now
 		
 		li.light->setType(Light::LT_SPOTLIGHT);
 		
 		li.light->setSpotlightInnerAngle(inner);
 		li.light->setSpotlightOuterAngle(outer);
+		li.light->setSpotlightFalloff(dist);
 		
 		static_cast<DarkSceneManager*>(mSceneMgr)->queueLightForUpdate(li.light);
 	}
@@ -542,13 +566,16 @@ namespace Opde {
 			try {
 				SceneNode* node = mObjectService->getSceneNode(id);
 				
-				node->detachObject(it->second);
+				node->detachObject(it->second.entity);
 				
 			} catch (BasicException& e) {
 				LOG_ERROR("RenderService: Could not get the sceneNode for object %d! Not detaching entity from scene node!", id);
 			}
+
+			// destroy the emi
+			delete it->second.emi;
 				
-			mSceneMgr->destroyEntity(it->second);
+			mSceneMgr->destroyEntity(it->second.entity);
 			
 			mEntityMap.erase(it);
 		}
