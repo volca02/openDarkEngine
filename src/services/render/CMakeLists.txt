@@ -16,7 +16,16 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 
-add_library (OpdeRenderService RenderService.cpp RenderService.h)
+add_library (OpdeRenderService 
+    RenderService.cpp
+    RenderService.h
+    MaterialInstance.cpp   
+    MaterialInstance.h
+    SubEntityMaterialInstance.cpp   
+    SubEntityMaterialInstance.h
+    EntityMaterialInstance.cpp   
+    EntityMaterialInstance.h
+)
 
 # Hmm. Probably not needed, is it. Linking will happen whilst building the whole opde up. Oh well...
 target_link_libraries(OpdeRenderService
