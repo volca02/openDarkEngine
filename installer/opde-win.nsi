@@ -1,4 +1,4 @@
-; The script to gracefully install OpenDarkEngine under Microsoft Windows.
+; The script to gracefully install openDarkEngine under Microsoft Windows.
 ; 
 ; This file is part of openDarkEngine project
 ; Copyright (C) 2005-2006 openDarkEngine team
@@ -20,42 +20,42 @@
 ; $Id$
 ;--------------------------------
 
+!include nsDialogs.nsh
+
 ShowInstDetails show
 ShowUninstDetails show
 XPStyle on
 SetCompressor /SOLID /FINAL lzma
 
-; The name of the installer
 Name "opde"
-Caption "OpenDarkEngine"
-BrandingText "OpenDarkEngine Team"
+Caption "openDarkEngine"
+BrandingText "openDarkEngine Team"
 
-; The file to write
 OutFile "opdeSetup.exe"
 
-; The default installation directory
-InstallDir C:\Games\OpenDarkEngine
+Var OgrePath
+Var PythonPath
 
-; Registry key to check for directory (so if you install again, it will 
-; overwrite the old one automatically)
+InstallDir C:\Games\openDarkEngine
+
 InstallDirRegKey HKLM "Software\NSIS_opde" "Install_Dir"
 
 LoadLanguageFile "${NSISDIR}\Contrib\Language files\English.nlf"
-;--------------------------------
-;Version Information
-
-  VIProductVersion "0.2.1.0"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "OpenDarkEngine"
-  ;VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" ""
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "OpenDarkEngine Team"
-  ;VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalTrademarks" ""
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "© OpenDarkEngine Team"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "OpenDarkEngine"
-  VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "0.2.1"
 
 ;--------------------------------
-; Pages
 
+VIProductVersion "0.2.1.0"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "openDarkEngine"
+;VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" ""
+VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "openDarkEngine Team"
+;VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalTrademarks" ""
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "© openDarkEngine Team"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "openDarkEngine"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "0.2.1"
+
+;--------------------------------
+
+Page Custom ShowWelcome LeaveWelcome
 Page components
 Page directory
 Page instfiles
@@ -65,37 +65,83 @@ UninstPage instfiles
 
 ;--------------------------------
 
-; The stuff to install
-Section "OpenDarkEngine (required)"
+Function .onInit
+	System::Call 'kernel32::CreateMutexA(i 0, i 0, t "myMutex") i .r1 ?e'
+	    Pop $R0
+    
+    StrCmp $R0 0 +3
+    	MessageBox MB_OK|MB_ICONEXCLAMATION "The openDarkEngine installer is already running."
+    	Abort
+FunctionEnd
 
-  SectionIn RO
-  
-  SetOutPath $INSTDIR
-  File opde.exe
-  File *.cfg
-  SetOutPath $INSTDIR\Scripts
-  File /r /x .svn ..\Scripts\*.*
-  
-  ; Write the installation path into the registry
-  WriteRegStr HKLM SOFTWARE\NSIS_opde "Install_Dir" "$INSTDIR"
-  
-  ; Write the uninstall keys for Windows
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\opde" "DisplayName" "NSIS opde"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\opde" "UninstallString" '"$INSTDIR\uninstall.exe"'
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\opde" "NoModify" 1
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\opde" "NoRepair" 1
-  WriteUninstaller "uninstall.exe"
+Function un.onInit
+   	System::Call 'kernel32::CreateMutexA(i 0, i 0, t "myMutex") i .r1 ?e'
+   		Pop $R0
+    
+    StrCmp $R0 0 +3
+    	MessageBox MB_OK|MB_ICONEXCLAMATION "The openDarkEngine uninstaller is already running."
+    	Abort
+FunctionEnd
+
+Function CheckOgre
+    ReadEnvStr $OgrePath OGRE_HOME
+    StrCmp $OgrePath "" 0 +3
+		MessageBox MB_OK|MB_ICONSTOP "Ogre3D SDK not found. Please make sure Ogre3D SDK (http://www.ogre3d.org) is installed."
+		Abort
+FunctionEnd	
+
+Function CheckPython
+    ReadRegStr $PythonPath HKLM SOFTWARE\Python\PythonCore\2.5\InstallPath ""
+    StrCmp $PythonPath "" 0 +3
+		MessageBox MB_OK|MB_ICONSTOP "Python not found. Please make sure Python (http://www.python.org) is installed."
+		Abort
+FunctionEnd	
+
+Function ShowWelcome
+		nsDialogs::Create /NOUNLOAD 1018
+		Pop $0
+	
+		${NSD_CreateLabel} 10 10u 100% 80u "Welcome to openDarkEngine installation. Please make sure you have already installed the following components:$\n$\n    - Ogre3D SDK (http://www.ogre3d.org)$\n    - Python (http://www.python.org)"
+		Pop $0
+	
+		nsDialogs::Show
+FunctionEnd
+
+Function LeaveWelcome
+    Call CheckOgre
+    Call CheckPython
+FunctionEnd
+
+;--------------------------------
+
+Section "openDarkEngine (required)"	
+
+	SectionIn RO
+
+	SetOutPath $INSTDIR
+	File opde.exe
+	File *.cfg
+	SetOutPath $INSTDIR\Scripts
+	File /r /x .svn ..\Scripts\*.*
+
+	WriteRegStr HKLM SOFTWARE\NSIS_opde "Install_Dir" "$INSTDIR"
+
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\opde" "DisplayName" "NSIS opde"
+	WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\opde" "UninstallString" '"$INSTDIR\uninstall.exe"'
+	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\opde" "NoModify" 1
+	WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\opde" "NoRepair" 1
+	WriteUninstaller "uninstall.exe"
   
 SectionEnd
 
-; Optional section (can be disabled by the user)
 Section "Start Menu Shortcuts"
 
-  CreateDirectory "$SMPROGRAMS\OpenDarkEngine"
-  CreateShortCut "$SMPROGRAMS\OpenDarkEngine\OpenDarkEngine (TDP, TG).lnk" "$INSTDIR\opde.exe" "-TG" "$INSTDIR\opde.exe" 0
-  CreateShortCut "$SMPROGRAMS\OpenDarkEngine\OpenDarkEngine (TMA).lnk" "$INSTDIR\opde.exe" "-TMA" "$INSTDIR\opde.exe" 0
-  CreateShortCut "$SMPROGRAMS\OpenDarkEngine\OpenDarkEngine (SS2).lnk" "$INSTDIR\opde.exe" "-SS2" "$INSTDIR\opde.exe" 0
-  CreateShortCut "$SMPROGRAMS\OpenDarkEngine\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
+	SetOutPath $INSTDIR
+	CreateDirectory "$SMPROGRAMS\openDarkEngine"
+	CreateShortCut "$SMPROGRAMS\openDarkEngine\openDarkEngine (TDP, TG).lnk" "$INSTDIR\opde.exe" "-TG" "$INSTDIR\opde.exe" 0
+	CreateShortCut "$SMPROGRAMS\openDarkEngine\openDarkEngine (TMA).lnk" "$INSTDIR\opde.exe" "-TMA" "$INSTDIR\opde.exe" 0
+	CreateShortCut "$SMPROGRAMS\openDarkEngine\openDarkEngine (SS2).lnk" "$INSTDIR\opde.exe" "-SS2" "$INSTDIR\opde.exe" 0
+	CreateShortCut "$SMPROGRAMS\openDarkEngine\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
   
 SectionEnd
 
@@ -105,22 +151,23 @@ SectionEnd
 
 Section "Uninstall"
   
-  ; Remove registry keys
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\opde"
-  DeleteRegKey HKLM SOFTWARE\NSIS_opde
+	; Remove registry keys
+	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\opde"
+	DeleteRegKey HKLM SOFTWARE\NSIS_opde
 
-  ; Remove files and uninstaller
-  Delete $INSTDIR\opde.exe
-  Delete $INSTDIR\*.cfg
-  Delete $INSTDIR\uninstall.exe
+	; Remove files and uninstaller
+	Delete $INSTDIR\opde.exe
+	Delete $INSTDIR\*.cfg
+	Delete $INSTDIR\*.log
+	Delete $INSTDIR\uninstall.exe
 
-  ; Remove shortcuts, if any
-  Delete "$SMPROGRAMS\OpenDarkEngine\*.*"
+	; Remove shortcuts, if any
+	Delete "$SMPROGRAMS\openDarkEngine\*.*"
 
-  ; Remove directories used
-  RMDir "$SMPROGRAMS\OpenDarkEngine"
-  RMDir /r "$INSTDIR\Scripts\"
-  RMDir "$INSTDIR"
-  
+	; Remove directories used
+	RMDir "$SMPROGRAMS\openDarkEngine"
+	RMDir /r "$INSTDIR\Scripts\"
+	RMDir "$INSTDIR"
+
 
 SectionEnd
