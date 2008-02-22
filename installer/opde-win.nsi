@@ -30,15 +30,18 @@ SetCompressor /SOLID /FINAL lzma
 Name "opde"
 Caption "openDarkEngine"
 BrandingText "openDarkEngine Team"
+LicenseData ..\copying
+LicenseForceSelection checkbox "I accept the terms in the license agreement"
+
 
 OutFile "opdeSetup.exe"
-
-Var OgrePath
-Var PythonPath
 
 InstallDir C:\Games\openDarkEngine
 
 InstallDirRegKey HKLM "Software\NSIS_opde" "Install_Dir"
+
+;Request application privileges for Windows Vista
+RequestExecutionLevel admin
 
 LoadLanguageFile "${NSISDIR}\Contrib\Language files\English.nlf"
 
@@ -55,7 +58,8 @@ VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "0.2.1"
 
 ;--------------------------------
 
-Page Custom ShowWelcome LeaveWelcome
+Page Custom ShowWelcome
+Page license
 Page components
 Page directory
 Page instfiles
@@ -83,33 +87,14 @@ Function un.onInit
     	Abort
 FunctionEnd
 
-Function CheckOgre
-    ReadEnvStr $OgrePath OGRE_HOME
-    StrCmp $OgrePath "" 0 +3
-		MessageBox MB_OK|MB_ICONSTOP "Ogre3D SDK not found. Please make sure Ogre3D SDK (http://www.ogre3d.org) is installed."
-		Abort
-FunctionEnd	
-
-Function CheckPython
-    ReadRegStr $PythonPath HKLM SOFTWARE\Python\PythonCore\2.5\InstallPath ""
-    StrCmp $PythonPath "" 0 +3
-		MessageBox MB_OK|MB_ICONSTOP "Python not found. Please make sure Python (http://www.python.org) is installed."
-		Abort
-FunctionEnd	
-
 Function ShowWelcome
 		nsDialogs::Create /NOUNLOAD 1018
 		Pop $0
 	
-		${NSD_CreateLabel} 10 10u 100% 80u "Welcome to openDarkEngine installation. Please make sure you have already installed the following components:$\n$\n    - Ogre3D SDK (http://www.ogre3d.org)$\n    - Python (http://www.python.org)"
+		${NSD_CreateLabel} 10 10u 100% 80u "Welcome to openDarkEngine installation."
 		Pop $0
 	
 		nsDialogs::Show
-FunctionEnd
-
-Function LeaveWelcome
-    Call CheckOgre
-    Call CheckPython
 FunctionEnd
 
 ;--------------------------------
@@ -121,8 +106,12 @@ Section "openDarkEngine (required)"
 	SetOutPath $INSTDIR
 	File opde.exe
 	File *.cfg
+	File $%OGRE_HOME%\bin\release\*.dll	
+	File $%OGRE_HOME%\bin\release\Plugins.cfg
+	
 	SetOutPath $INSTDIR\Scripts
-	File /r /x .svn ..\Scripts\*.*
+	File /r /x .svn ..\Scripts\*.*	
+	
 
 	WriteRegStr HKLM SOFTWARE\NSIS_opde "Install_Dir" "$INSTDIR"
 
@@ -159,6 +148,7 @@ Section "Uninstall"
 	Delete $INSTDIR\opde.exe
 	Delete $INSTDIR\*.cfg
 	Delete $INSTDIR\*.log
+	Delete $INSTDIR\*.dll
 	Delete $INSTDIR\uninstall.exe
 
 	; Remove shortcuts, if any
