@@ -22,10 +22,11 @@
 
 !include nsDialogs.nsh
 
+SetCompressor /SOLID /FINAL lzma
 ShowInstDetails show
 ShowUninstDetails show
 XPStyle on
-SetCompressor /SOLID /FINAL lzma
+AddBrandingImage left 129
 
 Name "opde"
 Caption "openDarkEngine"
@@ -71,11 +72,15 @@ UninstPage instfiles
 
 Function .onInit
 	System::Call 'kernel32::CreateMutexA(i 0, i 0, t "myMutex") i .r1 ?e'
-	    Pop $R0
-    
-    StrCmp $R0 0 +3
-    	MessageBox MB_OK|MB_ICONEXCLAMATION "The openDarkEngine installer is already running."
-    	Abort
+		Pop $R0
+
+	StrCmp $R0 0 +3
+		MessageBox MB_OK|MB_ICONEXCLAMATION "The openDarkEngine installer is already running."
+		Abort
+FunctionEnd
+
+Function .onGUIInit
+	SetBrandingImage /RESIZETOFIT installer.bmp
 FunctionEnd
 
 Function un.onInit
@@ -88,13 +93,13 @@ Function un.onInit
 FunctionEnd
 
 Function ShowWelcome
-		nsDialogs::Create /NOUNLOAD 1018
-		Pop $0
-	
-		${NSD_CreateLabel} 10 10u 100% 80u "Welcome to openDarkEngine installation."
-		Pop $0
-	
-		nsDialogs::Show
+	nsDialogs::Create /NOUNLOAD 1018
+	Pop $0
+
+	${NSD_CreateLabel} 10 10u 100% 80u "Welcome to openDarkEngine installation."
+	Pop $0
+
+	nsDialogs::Show
 FunctionEnd
 
 ;--------------------------------
@@ -106,8 +111,9 @@ Section "openDarkEngine (required)"
 	SetOutPath $INSTDIR
 	File opde.exe
 	File *.cfg
-	File $%OGRE_HOME%\bin\release\*.dll	
-	File $%OGRE_HOME%\bin\release\Plugins.cfg
+	File installer.bmp
+	File "$%OGRE_HOME%\bin\release\*.dll"	
+	File "$%OGRE_HOME%\bin\release\Plugins.cfg"
 	
 	SetOutPath $INSTDIR\Scripts
 	File /r /x .svn ..\Scripts\*.*	
