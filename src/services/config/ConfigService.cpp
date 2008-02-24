@@ -22,6 +22,7 @@
 #include "ConfigService.h"
 #include "OpdeException.h"
 #include "logger.h"
+#include "ServiceCommon.h"
 
 #include <OgreConfigFile.h>
 #include <OgreException.h>
@@ -43,24 +44,6 @@ namespace Opde {
 
     //------------------------------------------------------
     bool ConfigService::init() {
-        DVariant acfg;
-
-        // Reinitialize to the config_file parameter, if such is found
-        if (false) { // TODO: Get a commandline parameter specifying the config file, or do the loading of this file externally while bootstrapping, as the first thing
-            mConfigFileName = acfg;
-
-            if (!loadParams(mConfigFileName)) {
-                LOG_INFO("Did not find the alternate config file, defaulting to opde.cfg");
-                mConfigFileName = "opde.cfg";
-            }  else {
-                return true;
-            }
-        }
-
-        if (!loadParams(mConfigFileName)) {
-            LOG_FATAL("Did not find the opde.cfg file. Can be fatal!");
-            return false;
-        }
 		return true;
     }
 
@@ -146,6 +129,10 @@ namespace Opde {
 
 	const std::string& ConfigServiceFactory::getName() {
 		return mName;
+	}
+
+	const uint ConfigServiceFactory::getMask() {
+		return SERVICE_CORE;
 	}
 
 	Service* ConfigServiceFactory::createInstance(ServiceManager* manager) {

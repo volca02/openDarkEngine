@@ -22,6 +22,7 @@
 
 #include "GameService.h"
 #include "OpdeException.h"
+#include "ServiceCommon.h"			
 
 using namespace std;
 
@@ -57,6 +58,10 @@ namespace Opde {
 
 	const std::string& GameServiceFactory::getName() {
 		return mName;
+	}
+
+	const uint GameServiceFactory::getMask() {
+		return SERVICE_ENGINE;
 	}
 
 	Service* GameServiceFactory::createInstance(ServiceManager* manager) {

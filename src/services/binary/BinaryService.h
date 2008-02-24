@@ -125,7 +125,8 @@ namespace Opde {
 			Service* createInstance(ServiceManager* manager);
 
 			virtual const std::string& getName();
-
+			
+			virtual const uint getMask(); 
 		private:
 			static std::string mName;
 	};

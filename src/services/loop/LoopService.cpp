@@ -308,6 +308,10 @@ namespace Opde {
 		return mName;
     }
 
+	const uint LoopServiceFactory::getMask() {
+		return SERVICE_ENGINE;
+	}
+	
     Service* LoopServiceFactory::createInstance(ServiceManager* manager) {
 	return new LoopService(manager, mName);
     }

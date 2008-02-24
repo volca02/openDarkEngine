@@ -815,6 +815,10 @@ namespace Opde {
 		return mName;
     }
 
+	const uint InputServiceFactory::getMask() {
+		return SERVICE_ENGINE;
+	}
+
     Service* InputServiceFactory::createInstance(ServiceManager* manager) {
 	return new InputService(manager, mName);
     }

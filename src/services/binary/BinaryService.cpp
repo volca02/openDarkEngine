@@ -27,6 +27,7 @@
 #include "OpdeException.h"
 #include "logger.h"
 #include "ConsoleBackend.h"
+#include "ServiceCommon.h"
 
 using namespace std;
 
@@ -195,6 +196,10 @@ namespace Opde {
 
 	const std::string& BinaryServiceFactory::getName() {
 		return mName;
+	}
+	
+	const uint BinaryServiceFactory::getMask() {
+		return SERVICE_CORE;
 	}
 
 	Service* BinaryServiceFactory::createInstance(ServiceManager* manager) {

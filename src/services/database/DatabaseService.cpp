@@ -189,6 +189,10 @@ namespace Opde {
 		return mName;
 	}
 
+	const uint DatabaseServiceFactory::getMask() {
+		return SERVICE_CORE;
+	}
+
 	Service* DatabaseServiceFactory::createInstance(ServiceManager* manager) {
 		return new DatabaseService(manager, mName);
 	}
