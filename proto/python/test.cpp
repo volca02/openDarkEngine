@@ -119,7 +119,7 @@ int main(void) {
 	ConsoleBackend* cbackend = new ConsoleBackend();
 
 	/// Initializes all service factories and service manager itself
-	ServiceManager* serviceMgr = new ServiceManager();
+	ServiceManager* serviceMgr = new ServiceManager(SERVICE_ALL);
 
 	createServiceFactories();
 
