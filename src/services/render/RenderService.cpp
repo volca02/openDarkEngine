@@ -458,13 +458,11 @@ namespace Opde {
 			// I wonder how the original dark handles these
 			// It would be optimal to create a test scene in with D2 and R,G,B lights
 			// To reveal how this one works (which is exactly what I'm gonna do)
-			
-			// TODO: Putting in 0 for now, because something rotten is in _traversePortalTree (recursion does not end)
-			radius = 0;
+			radius = brightness; 
 			
 			// make the radius sane using a limit
-			/* if (radius > 20)
-				radius = 20; */
+			if (radius > 100)
+				radius = 100;
 				
 			// linear attenuation for zero range lights
 			li.light->setAttenuation(radius, 0.0, 1.0, 0.0);
