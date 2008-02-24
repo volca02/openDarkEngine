@@ -35,8 +35,11 @@ namespace Opde {
 
 	template<> ServiceManager* Singleton<ServiceManager>::ms_Singleton = 0;
 
-	ServiceManager::ServiceManager() : mServiceFactories(), mServiceInstances(), mBootstrapFinished(false) {
-
+	ServiceManager::ServiceManager(uint serviceMask) : 
+		mServiceFactories(), 
+		mServiceInstances(), 
+		mBootstrapFinished(false),
+		mGlobalServiceMask(serviceMask) { 
 	}
 
 	ServiceManager::~ServiceManager() {
@@ -115,8 +118,7 @@ namespace Opde {
 		if (service_it != mServiceInstances.end()) {
 			return service_it->second;
 		} else {
-			ServicePtr n(NULL);
-			return n;
+			return NULL;
 		}
 	}
 
@@ -126,6 +128,9 @@ namespace Opde {
         LOG_DEBUG("ServiceManager: Creating service %s", name.c_str());
 
 		if (factory != NULL) { // Found a factory for the Service name
+			if (!(factory->getMask() && mGlobalServiceMask))
+			    OPDE_EXCEPT("Initialization of service " + factory->getName() + " was not permitted by mask. Please consult OPDE log for details", "ServiceManager::createInstance");
+		
 			ServicePtr ns = factory->createInstance(this);
 			mServiceInstances.insert(make_pair(factory->getName(), ns));
 
@@ -158,7 +163,8 @@ namespace Opde {
 
 		for (; factory_it != mServiceFactories.end(); ++factory_it) {
 
-			if (factory_it->second->getMask() & mask) { // if the mask fits
+			// if the mask fits and the service is permitted by global service mask
+			if ((factory_it->second->getMask() & mask) && (factory_it->second->getMask() && mGlobalServiceMask)) { 
 			    ServicePtr service = getService(factory_it->second->getName());
 			}
 		}

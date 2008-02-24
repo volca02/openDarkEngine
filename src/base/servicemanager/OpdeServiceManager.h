@@ -50,8 +50,10 @@ namespace Opde {
 			ServiceFactory* findFactory(const std::string& name);
 			ServicePtr findService(const std::string& name);
 			ServicePtr createInstance(const std::string& name);
+			
+			const uint mGlobalServiceMask;
 		public:
-			ServiceManager();
+			ServiceManager(uint serviceMask);
 
 			/// Destructor. Deletes all registered factories
 			~ServiceManager();
