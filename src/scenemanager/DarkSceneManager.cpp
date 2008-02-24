@@ -30,6 +30,7 @@
 #include "DarkSceneNode.h"
 
 #include <OgreRoot.h>
+#include <OgreEntity.h>
 
 namespace Ogre {
 	
@@ -407,6 +408,8 @@ namespace Ogre {
 
 			// notify light dirty, so all movable objects will re-populate
 			// their light list next time
+			
+			// TODO: This takes too much time per frame!
 			_notifyLightsDirty();
 		}
 	}
@@ -418,6 +421,9 @@ namespace Ogre {
 		
 		The root of the problem is that many classes base on MovableObject, and that one queries with pos and radius already,
 		so we would have to create our own versions of Entity, BillBoardChain, etc. just to override one method (queryLights)
+		
+		As a solution, this scenemanager uses MovableObject::Listener on BspTree, and as the BspTree caches light lists for cells, 
+		it returns the light list for object immediately
 		*/
 		
 		if (!mBspTree)
@@ -488,6 +494,15 @@ namespace Ogre {
         } else {
                 std::stable_sort(destList.begin(), destList.end(), lightLess());
         }
+	}
+	
+	//-----------------------------------------------------------------------
+	Entity *DarkSceneManager::createEntity(const String &entityName, const String &meshName) {
+		Entity* e = SceneManager::createEntity(entityName, meshName);
+		
+		e->setListener(mBspTree);
+		
+		return e;
 	}
 	
 	//-----------------------------------------------------------------------

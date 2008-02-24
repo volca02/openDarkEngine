@@ -135,7 +135,10 @@ namespace Ogre {
 			
 			/** Populates a light list by looking into the BSP tree and getting all the lights from leaf nodes the MovableObject is in 
 			 (customized to get use of caching of BSPTree) */
-			virtual void 	_populateLightList(const Vector3 &position, Real radius, LightList &destList);
+			virtual void _populateLightList(const Vector3 &position, Real radius, LightList &destList);
+			
+			/** Overrided entity creation. Sets BspTree as the entity listener - this accelerates the population of the light lists */
+			virtual Entity *createEntity(const String &entityName, const String &meshName);
 		
 		protected:
 			/// BSP Tree getter
