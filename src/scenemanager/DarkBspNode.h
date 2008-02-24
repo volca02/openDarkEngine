@@ -61,6 +61,7 @@ namespace Ogre {
 		friend class DarkCamera;
 		friend class BspRaySceneQuery;
 		friend class BspIntersectionSceneQuery;
+		friend class BspTree;
 			
 	public:
 		BspNode(SceneManager* owner, int id, bool isLeaf);
@@ -77,19 +78,19 @@ namespace Ogre {
 		    virtual methods / run-time type identification would have a performance hit, and it would not make the
 		    code much (any?) simpler anyway. I think this is a fair trade-off in this case.
 		*/
-		bool isLeaf(void) const;
+		inline bool isLeaf(void) const { return mIsLeaf; };
 	
 		/** Returns a pointer to a BspNode containing the subspace on the positive side of the splitting plane.
 		    This method should only be called on a splitting node, i.e. where isLeaf() returns false. Calling this
 		    method on a leaf node will throw an exception.
 		*/
-		BspNode* getFront(void) const;
+		inline BspNode* getFront(void) const { assert(!mIsLeaf); return mFront; };
 	
 		/** Returns a pointer to a BspNode containing the subspace on the negative side of the splitting plane.
 		    This method should only be called on a splitting node, i.e. where isLeaf() returns false. Calling this
 		    method on a leaf node will throw an exception.
 		*/
-		BspNode* getBack(void) const;
+		BspNode* getBack(void) const { assert(!mIsLeaf); return mBack; };
 	
 		/** Determines which side of the splitting plane a worldspace point is.
 		    This method should only be called on a splitting node, i.e. where isLeaf() returns false. Calling this

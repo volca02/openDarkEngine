@@ -73,32 +73,6 @@ namespace Ogre {
     }
 
     //-----------------------------------------------------------------------
-    bool BspNode::isLeaf(void) const
-    {
-        return mIsLeaf;
-    }
-
-    //-----------------------------------------------------------------------
-    BspNode* BspNode::getFront(void) const
-    {
-        if (mIsLeaf)
-            throw Exception(Exception::ERR_INVALIDPARAMS,
-                "This method is not valid on a leaf node.",
-                "BspNode::getFront");
-        return mFront;
-    }
-
-    //-----------------------------------------------------------------------
-    BspNode* BspNode::getBack(void) const
-    {
-        if (mIsLeaf)
-            throw Exception(Exception::ERR_INVALIDPARAMS,
-                "This method is not valid on a leaf node.",
-                "BspNode::getBack");
-        return mBack;
-    }
-
-    //-----------------------------------------------------------------------
     const Plane& BspNode::getSplitPlane(void) const
     {
         if (mIsLeaf)
