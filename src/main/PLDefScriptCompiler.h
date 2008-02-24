@@ -53,7 +53,7 @@ namespace Opde {
 			*/
 			virtual const Ogre::String& getClientGrammerName(void) const { static const Ogre::String grammerName("PLDef Script"); return grammerName; }
 			
-			/** Parses the script and fills the BinaryService */
+			/** Parses the script and fills the Property and Link Services */
 			void parseScript(Ogre::DataStreamPtr& stream, const Ogre::String& groupName) {
 				Compiler2Pass::compile(stream->getAsString(),  stream->getName());
 			}
