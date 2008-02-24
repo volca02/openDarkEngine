@@ -27,6 +27,9 @@
 This file contains some global definitions common to all services
 */
 
+// TODO: Redo these constants to const int ....,
+
+
 // --------------------------------------
 // ---  Bitmasks for service masking  ---
 // --------------------------------------
@@ -35,9 +38,22 @@ This file contains some global definitions common to all services
 To be used by service factories getMask() if the service want's to be a listener of particular service.
 This does not do the registration of the listener itself, but will guarantee the service is constructed prior to data manipulations.
 ServiceManager::createByMask() is used to create all the services given the mask before data manipulation takes place (typically in service's constructor).
+
+The lower word of this 32bit unsigned integer is targetted at listener masking. The upper word is used for service ranges (core services, rendering services, game engine services)
+
+
+I just hope we won't run out of mask bits! :D
 */
 
-// I just hope we won't run out of mask bits! :D
+// All services constant
+#define SERVICE_ALL 0x0FFFFFFFF
+
+// Core services, fundamental
+#define SERVICE_CORE 0x00010000
+// Services related to rendering (dropping out these will cause no graphics to be displayed, no renderer window displayed)
+#define SERVICE_RENDERER 0x00020000
+// Services related to engine work (dropping these will cause that the engine will do nothing)
+#define SERVICE_ENGINE 0x00040000
 
 /// Link listener mask
 #define SERVICE_LINK_LISTENER 0x0001
