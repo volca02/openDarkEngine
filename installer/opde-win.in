@@ -48,14 +48,14 @@ LoadLanguageFile "${NSISDIR}\Contrib\Language files\English.nlf"
 
 ;--------------------------------
 
-VIProductVersion "0.2.1.0"
+VIProductVersion "@OPDE_VER_MAJOR@.@OPDE_VER_MINOR@.@OPDE_VER_PATCH@.0"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "openDarkEngine"
-;VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" ""
+VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "El Motor Oscuro"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "openDarkEngine Team"
-;VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalTrademarks" ""
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalTrademarks" "GPL"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "© openDarkEngine Team"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "openDarkEngine"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "0.2.1"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "@OPDE_VER_MAJOR@.@OPDE_VER_MINOR@.@OPDE_VER_PATCH@"
 
 ;--------------------------------
 
