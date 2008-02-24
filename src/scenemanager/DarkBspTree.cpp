@@ -110,6 +110,12 @@ namespace Ogre {
 			i->second.clear();
 		}
 
+		// Clear the light list cache for object
+		flushLightCacheForMovable(mov);
+		
+		// There is no need to immediately repopulate the light list cache for that movable
+		// It may happen that the movable is moved somewhere without being actually seen
+
 		tagNodesWithMovable(mRootNode, mov, pos);
 	}
     
@@ -285,6 +291,95 @@ namespace Ogre {
 				// Do front
 				if (front != NULL)
 					findLeafsForSphereFromNode(front, destList, pos, radius);
+			}
+		}
+	}
+	
+	
+	//-----------------------------------------------------------------------
+	const LightList* BspTree::objectQueryLights(const MovableObject *movable) {
+		// we have to store an additional one lightlist for movable object. A pity, but then again there is noone to
+		// dealloc the list for us
+		
+		// look if we have the object in the cache
+		MovableLightListCache::iterator it = mMovableLightsCache.find(movable);
+		
+		if (it != mMovableLightsCache.end()) {
+			return &(it->second);
+		} else {
+			// no entry found. Build the list of lights, cache
+			std::pair<MovableLightListCache::iterator, bool> r = mMovableLightsCache.insert(std::make_pair(movable, LightList()));
+			
+			// repopulate the list of lights
+			populateLightListForMovable(movable, r.first->second);
+			
+			return &(r.first->second); 
+		}
+	}
+
+
+	//-----------------------------------------------------------------------
+	void BspTree::objectDestroyed(MovableObject *movable) {
+		flushLightCacheForMovable(movable);
+	}
+
+	//-----------------------------------------------------------------------
+	void BspTree::flushLightCacheForMovable(const MovableObject *movable) {
+		mMovableLightsCache.erase(movable);
+	}
+	
+	//-----------------------------------------------------------------------
+	void BspTree::populateLightListForMovable(const MovableObject *movable, LightList& destList) {
+		Vector3 position = movable->getParentNode()->getPosition();
+		Real radius = movable->getBoundingRadius();
+		
+		// iterate through the leafs, build the light list
+		MovableToNodeMap::iterator i = mMovableToNodeMap.find(movable);
+		if (i != mMovableToNodeMap.end())
+		{
+			std::list<BspNode*>::iterator nodeit, nodeitend;
+		
+		
+			destList.clear();
+			
+			// to keep the list of lights contain only one copy of each item
+			std::set<DarkLight*> resLights;
+			
+			nodeitend = i->second.end();
+			for (nodeit = i->second.begin(); nodeit != nodeitend; ++nodeit) {
+				BspNode* node = *nodeit;
+				
+				BspNode::AffectingLights::const_iterator lit = node->mAffectingLights.begin();
+				BspNode::AffectingLights::const_iterator lend = node->mAffectingLights.end();
+				
+				// Fill the light list by querying if the light's radius is touching the movable
+				while (lit != lend) {
+					DarkLight* lt = *(lit++);
+					
+					// If it has not been considered yet, reconsider this light 
+					// (no need to consider light twice)
+					if (resLights.find(lt) == resLights.end()) {
+						resLights.insert(lt);
+
+						if (lt->getType() == Light::LT_DIRECTIONAL)	{
+							// No distance
+							lt->tempSquareDist = 0.0f;
+							destList.push_back(lt);
+						} else	{
+							// Calc squared distance
+							lt->tempSquareDist = (lt->getDerivedPosition() - position).squaredLength();
+							
+							// only add in-range lights
+							Real range = lt->getAttenuationRange();
+							
+							Real maxDist = range + radius;
+							
+							if (lt->tempSquareDist <= Math::Sqr(maxDist)) {
+								destList.push_back(lt);
+							}
+						}
+					}
+				}
 			}
 		}
 	}

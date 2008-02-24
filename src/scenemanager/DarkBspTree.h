@@ -40,7 +40,7 @@ $Id$
 namespace Ogre {
 
 	/** BspTree handling class */
-	class BspTree {
+	class BspTree : public Ogre::MovableObject::Listener {
 		friend class DarkSceneManager;
 	public:
 		/** Constructor. */
@@ -90,9 +90,19 @@ namespace Ogre {
 		/** finds leaf nodes the given sphere touches */
 		void findLeafsForSphere(BspNodeList& destList, const Vector3& pos, Real radius);
 		
+		/** Listener's callback that returns light list of the movable object */
+		virtual const LightList* objectQueryLights(const MovableObject *movable);
+		
+		/** Listener's callback - flushes light list */
+		virtual void objectDestroyed(MovableObject *movable);
+		
 	protected:
 	
 		void findLeafsForSphereFromNode(BspNode* node, BspNodeList& destList, const Vector3& pos, Real radius);
+		
+		void flushLightCacheForMovable(const MovableObject *movable);
+		
+		void populateLightListForMovable(const MovableObject *movable, LightList& destList);
 		
 		/** Root Bsp Node
 		*/
@@ -111,8 +121,15 @@ namespace Ogre {
 			
 		typedef std::map<const MovableObject*, std::list<BspNode*> > MovableToNodeMap;
 		
+		// A cache of light lists for object. The entry is removed upon a change to a movable
+		// the list is flushed upon a light change (could be made more inteligent later on)
+		typedef std::map<const MovableObject*, LightList > MovableLightListCache;
+		
 		/// Map for locating the nodes a movable is currently a member of
 		MovableToNodeMap mMovableToNodeMap;
+		
+		/// Map of lights that affect movables (repopulated as needed)
+		MovableLightListCache mMovableLightsCache;
 
 		void tagNodesWithMovable(BspNode* node, const MovableObject* mov, const Vector3& pos);
 	};
