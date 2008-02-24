@@ -48,9 +48,10 @@ namespace Opde {
 			virtual const std::string& getName() = 0;
 			
 			/** Get the mask of the service.
-			* Masks are freely chosen bitmaps that describe what the requirements/capabilities of the service are 
-			* @returns 0 in this case, to be overriden by the factory implemetation */
-			virtual const uint getMask() { return 0; };
+			* Masks are freely chosen bitmaps that describe what the requirements/capabilities of the service are.
+			* Bitmasks are used to automatically initialize listeners and filter the used services.
+			* @returns The bitmask of the service */
+			virtual const uint getMask() = 0;
 			
 	};
 }
