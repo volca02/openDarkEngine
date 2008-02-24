@@ -173,12 +173,15 @@ namespace Opde {
 		mConsoleBackend->putMessage("==Console Starting==");
 
 		// Create the service manager
-		mServiceMgr = new ServiceManager();
+		mServiceMgr = new ServiceManager(SERVICE_ALL);
 
 		// Register the worldrep service factory
 		registerServiceFactories();
 
 		mConfigService = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
+		
+		mConfigService->loadParams("opde.cfg");
+		
 		RenderServicePtr rends;
 
 		rends = ServiceManager::getSingleton().getService("RenderService").as<RenderService>();
@@ -188,6 +191,7 @@ namespace Opde {
 
 		// Initialise resources
 		ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+
 
         if (!mConfigService->hasParam("mission")) // Failback
             mConfigService->setParam("mission", "miss1.mis");
