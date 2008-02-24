@@ -57,6 +57,9 @@ namespace Ogre {
 			planes.push_back(plane);
 			previous = it;
 		}
+		
+		// add the poly's self plane as well (near plane, sort of)
+		planes.push_back(poly->getPlane());
 	}
 
 	/*---------------------------------------------------------*/
