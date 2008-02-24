@@ -86,6 +86,8 @@ namespace Opde {
 
 		// Portal stats overlay
 		mPortalOverlay = OverlayManager::getSingleton().getByName("Opde/OpdeDebugOverlay");
+		
+		mShadows = true;
 	}
 
     GamePlayState::~GamePlayState() {
@@ -160,6 +162,38 @@ namespace Opde {
 		mWindow->resetStatistics();
 
         mToLoadScreen = false;
+        
+// Set up a debug panel to display the shadow
+		MaterialPtr debugMat = MaterialManager::getSingleton().create(
+				"Ogre/DebugShadowMap0", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+		debugMat->getTechnique(0)->getPass(0)->setLightingEnabled(false);
+		TexturePtr shadowTex = mSceneMgr->getShadowTexture(0);
+		TextureUnitState *t = debugMat->getTechnique(0)->getPass(0)->createTextureUnitState(shadowTex->getName());
+		t->setTextureAddressingMode(TextureUnitState::TAM_CLAMP);
+
+/*		debugMat = MaterialManager::getSingleton().create(
+				"Ogre/DebugShadowMap1", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+		debugMat->getTechnique(0)->getPass(0)->setLightingEnabled(false);
+		shadowTex = mSceneMgr->getShadowTexture(1);
+		t = debugMat->getTechnique(0)->getPass(0)->createTextureUnitState(shadowTex->getName());
+		t->setTextureAddressingMode(TextureUnitState::TAM_CLAMP);
+*/
+		// Uncomment this to display the shadow textures
+		OverlayContainer* debugPanel = (OverlayContainer*)
+				(OverlayManager::getSingleton().createOverlayElement("Panel", "Ogre/DebugShadowPanel0"));
+		debugPanel->_setPosition(0.8, 0);
+		debugPanel->_setDimensions(0.2, 0.2);
+		debugPanel->setMaterialName("Ogre/DebugShadowMap0");
+		Overlay* debugOverlay = OverlayManager::getSingleton().getByName("Opde/DebugOverlay");
+		debugOverlay->add2D(debugPanel);
+
+/*		debugPanel = (OverlayContainer*)
+				(OverlayManager::getSingleton().createOverlayElement("Panel", "Ogre/DebugShadowPanel1"));
+		debugPanel->_setPosition(0.8, 0.2);
+		debugPanel->_setDimensions(0.2, 0.2);
+		debugPanel->setMaterialName("Ogre/DebugShadowMap1");
+		debugOverlay->add2D(debugPanel);
+*/
 
 		LOG_INFO("GamePlayState: Started");
 	}
@@ -252,6 +286,26 @@ namespace Opde {
             w->writeContentsToFile(tmp);
 
 		    mScreenShot = false;
+		}
+		
+		if (mSMWriteToFile) {
+			// write Ogre/DebugShadowMap0 to file
+			TexturePtr TextureToSave =  mSceneMgr->getShadowTexture(0);
+			
+			HardwarePixelBufferSharedPtr readbuffer;
+			readbuffer = TextureToSave->getBuffer(0, 0);
+			readbuffer->lock(HardwareBuffer::HBL_NORMAL );
+			const PixelBox &readrefpb = readbuffer->getCurrentLock();	
+			uchar *readrefdata = static_cast<uchar*>(readrefpb.data);		
+
+			Image img;
+			img = img.loadDynamicImage (readrefdata, TextureToSave->getWidth(),
+				TextureToSave->getHeight(), TextureToSave->getFormat());	
+			img.save("smdebug.png");
+    
+			readbuffer->unlock();
+			
+			mSMWriteToFile = false;
 		}
 
 		mConsole->update(timePassed);
@@ -353,6 +407,9 @@ namespace Opde {
 			} else if (e.key == KC_SYSRQ) {
 				mScreenShot = true;
 				return true;
+			} else if (e.key == KC_SCROLL) {
+				mSMWriteToFile = true;
+				return true;
 			} else if (e.key == KC_O) {
 				mSceneDisplay = true;
 				return true;
@@ -382,7 +439,16 @@ namespace Opde {
 			} else	if( e.key == KC_ESCAPE ) {
         			requestTermination();
 				return true;
-			} else return true;
+			} else  if (e.key == KC_I) {
+				mShadows != mShadows;
+				
+				if (mShadows)
+					mSceneMgr->setShadowTechnique(SHADOWTYPE_TEXTURE_MODULATIVE);
+				else 
+					mSceneMgr->setShadowTechnique(SHADOWTYPE_NONE);
+			}
+			
+			return true;
     } else return true;
 	}
 
