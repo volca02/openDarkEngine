@@ -60,11 +60,18 @@ add_executable (opde WIN32
     PLDefScriptLoader.h
 )
 
+add_library (OpdeRoot
+    Root.cpp
+    Root.h
+    DTypeScriptCompiler.cpp
+    DTypeScriptCompiler.h
+    PLDefScriptCompiler.cpp
+    PLDefScriptCompiler.h
+)
 
 
 target_link_libraries( opde
     ${OGRE_LIBRARIES}
-    ${CEGUI_LIBRARIES}
     ${OIS_LIBRARIES}
     ${LIB_ADDITION_CUSTOM_IMAGE}
     OpdeFile
@@ -75,3 +82,14 @@ target_link_libraries( opde
     OpdeBase
 )
 
+target_link_libraries( OpdeRoot
+    ${OGRE_LIBRARIES}
+    ${OIS_LIBRARIES}
+    ${LIB_ADDITION_CUSTOM_IMAGE}
+    OpdeFile
+    OpdeLogger
+    OpdeConsole
+    DarkSceneManager
+    ${OPDE_SERVICE_LIBRARIES}
+    OpdeBase
+)
