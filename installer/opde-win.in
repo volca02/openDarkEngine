@@ -28,7 +28,7 @@ ShowUninstDetails show
 XPStyle on
 AddBrandingImage left 129
 
-Name "opde"
+Name "openDarkEngine"
 Caption "openDarkEngine"
 BrandingText "openDarkEngine Team"
 LicenseData ..\copying
@@ -92,6 +92,10 @@ Function un.onInit
     	Abort
 FunctionEnd
 
+Function un.onGUIInit
+	SetBrandingImage /RESIZETOFIT $INSTDIR\installer.bmp
+FunctionEnd
+
 Function ShowWelcome
 	nsDialogs::Create /NOUNLOAD 1018
 	Pop $0
@@ -109,14 +113,14 @@ Section "openDarkEngine (required)"
 	SectionIn RO
 
 	SetOutPath $INSTDIR
-	File opde.exe
-	File *.cfg
+	File @PROJECT_BINARY_DIR@\src\main\release\opde.exe
+	File /oname=opde.cfg opde-sample.cfg
 	File installer.bmp
 	File "$%OGRE_HOME%\bin\release\*.dll"	
 	File "$%OGRE_HOME%\bin\release\Plugins.cfg"
 	
 	SetOutPath $INSTDIR\Scripts
-	File /r /x .svn ..\Scripts\*.*	
+	File /r /x .svn @CMAKE_CURRENT_SOURCE_DIR@\Scripts\*.*	
 	
 
 	WriteRegStr HKLM SOFTWARE\NSIS_opde "Install_Dir" "$INSTDIR"
@@ -155,6 +159,7 @@ Section "Uninstall"
 	Delete $INSTDIR\*.cfg
 	Delete $INSTDIR\*.log
 	Delete $INSTDIR\*.dll
+	Delete $INSTDIR\*.bmp
 	Delete $INSTDIR\uninstall.exe
 
 	; Remove shortcuts, if any
