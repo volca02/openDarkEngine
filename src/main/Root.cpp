@@ -29,6 +29,21 @@
 #include "CustomImageCodec.h"
 #endif
 
+#include "ConfigService.h"
+#include <OgreConfigFile.h>
+
+
+// Services
+#include "WorldRepService.h"
+#include "GameService.h"
+#include "RenderService.h"
+#include "InputService.h"
+#include "LoopService.h"
+#include "ObjectService.h"
+#include "LinkService.h"
+#include "PropertyService.h"
+#include "DatabaseService.h"
+
 namespace Opde {
 	// -------------------------------------------------------
 	Root::Root(uint serviceMask) : 
@@ -137,13 +152,13 @@ namespace Opde {
 	}
 	
 	// -------------------------------------------------------
-	void Root::addResourceLocation(const std::string& archName, const std::string& typeName, const std::string& secName, bool recursive = false) {
-		Ogre::ResourceGroupManager::getSingleton().addResourceLocation(archName, typeName, secName, recursive);
+	void Root::addResourceLocation(const std::string& name, const std::string& typeName, const std::string& secName, bool recursive) {
+		Ogre::ResourceGroupManager::getSingleton().addResourceLocation(name, typeName, secName, recursive);
 	}
 	
 	// -------------------------------------------------------
-	void Root::removeResourceLocation(const std::string& archName, const std::string& typeName, const std::string& secName) {
-		Ogre::ResourceGroupManager::getSingleton().removeResourceLocation(archName, typeName, secName);
+	void Root::removeResourceLocation(const std::string& name, const std::string& secName) {
+		Ogre::ResourceGroupManager::getSingleton().removeResourceLocation(name, secName);
 	}
 	
 	// -------------------------------------------------------

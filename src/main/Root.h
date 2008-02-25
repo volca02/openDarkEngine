@@ -66,10 +66,10 @@ namespace Opde {
 			void loadConfigFile(const std::string& fileName);
 
 			/// Only a wrapper around the Ogre::ResourceGroupManager::addResourceLocation
-			void addResourceLocation(const std::string& archName, const std::string& typeName, const std::string& secName, bool recursive = false);
+			void addResourceLocation(const std::string& name, const std::string& typeName, const std::string& secName, bool recursive = false);
 
 			/// Only a wrapper around the Ogre::ResourceGroupManager::removeResourceLocation
-			void removeResourceLocation(const std::string& archName, const std::string& typeName, const std::string& secName);
+			void removeResourceLocation(const std::string& name, const std::string& secName);
 
 
 			/** To be called when bootstrapping process was finished */
