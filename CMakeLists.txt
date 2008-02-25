@@ -57,6 +57,11 @@ OPTION(GENERATE_DOC
     "Build the doxy documentation"
     OFF)
 
+# Option to create Windows installer script
+OPTION(GENERATE_NSIS
+    "Creates Windows installer script"
+    ON)
+    
 # Option to build in the debugging code
 OPTION(PROFILING 
     "Build the sources with profiling support (Only Debug build type)"
@@ -193,6 +198,12 @@ IF (GENERATE_DOC)
     MESSAGE(STATUS "Doxyfile was generated in ${CMAKE_BINARY_DIR}.")
     # You can run doxygen on that file to generate documentation...
 ENDIF (GENERATE_DOC)
+
+IF (GENERATE_NSIS)
+	CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/installer/opde-win.in
+                      ${CMAKE_CURRENT_SOURCE_DIR}/installer/opde-win.nsi @ONLY)
+        MESSAGE(STATUS "Installer script was generated in ${CMAKE_CURRENT_SOURCE_DIR}/installer.")
+ENDIF (GENERATE_NSIS)        
 
 MESSAGE(STATUS "Your configuration seems to be OK!")
 
