@@ -85,7 +85,9 @@ namespace Ogre {
 		planes.clear();
 		
 		// should we check whether the normal is faced to the center of the poly?
-		PortalPoints::const_iterator previous = pnts.end()--;
+		PortalPoints::const_iterator previous = pnts.end();
+
+		--previous;
 		
 		PortalPoints::const_iterator it = pnts.begin();
 		PortalPoints::const_iterator pend = pnts.end();
