@@ -20,9 +20,11 @@
 ; $Id$
 ;--------------------------------
 
-!include nsDialogs.nsh
-
 SetCompressor /SOLID /FINAL lzma
+
+!include nsDialogs.nsh
+!insertmacro NSD_FUNCTION_INIFILE
+
 ShowInstDetails show
 ShowUninstDetails show
 XPStyle on
@@ -63,6 +65,7 @@ Page Custom ShowWelcome
 Page license
 Page components
 Page directory
+Page Custom SelectGames UpdateINIState
 Page instfiles
 
 UninstPage uninstConfirm
@@ -104,6 +107,15 @@ Function ShowWelcome
 	Pop $0
 
 	nsDialogs::Show
+FunctionEnd
+
+Function SelectGames
+	InitPluginsDir
+	File /oname=$PLUGINSDIR\installer.ini "installer.ini"
+
+	StrCpy $0 "$PLUGINSDIR\installer.ini"
+
+	Call CreateDialogFromINI
 FunctionEnd
 
 ;--------------------------------
