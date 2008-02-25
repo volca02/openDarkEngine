@@ -294,6 +294,10 @@ namespace Opde {
 		return mName;
     }
 
+        const uint GUIServiceFactory::getMask() {
+                return SERVICE_RENDERER;
+        }
+
     Service* GUIServiceFactory::createInstance(ServiceManager* manager) {
 		return new GUIService(manager, mName);
     }

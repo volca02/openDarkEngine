@@ -718,7 +718,7 @@ namespace Opde {
 	}
 
 	const uint ObjectServiceFactory::getMask() {
-	    return SERVICE_DATABASE_LISTENER;
+	    return SERVICE_DATABASE_LISTENER | SERVICE_CORE;
 	}
 
 }

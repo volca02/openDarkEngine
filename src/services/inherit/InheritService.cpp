@@ -435,7 +435,7 @@ namespace Opde {
 	}
 
 	const uint InheritServiceFactory::getMask() {
-		return SERVICE_LINK_LISTENER;
+		return SERVICE_LINK_LISTENER | SERVICE_CORE;
 	}
 
 	Service* InheritServiceFactory::createInstance(ServiceManager* manager) {

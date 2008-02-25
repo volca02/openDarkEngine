@@ -22,7 +22,7 @@
  *
  *****************************************************************************/
 
-
+#include "ServiceCommon.h"
 #include "ScriptService.h"
 #include "OpdeException.h"
 #include "logger.h"
@@ -122,5 +122,10 @@ namespace Opde {
 	Service* ScriptServiceFactory::createInstance(ServiceManager* manager) {
 		return new ScriptService(manager, mName);
 	}
+
+
+        const uint ScriptServiceFactory::getMask() {
+            return SERVICE_ENGINE;
+        }
 
 }

@@ -222,7 +222,7 @@ namespace Opde {
 
 			virtual const std::string& getName();
 
-			virtual const unsigned int getMask() { return SERVICE_PROPERTY_LISTENER; };
+			virtual const unsigned int getMask() { return SERVICE_PROPERTY_LISTENER | SERVICE_RENDERER; };
 
 		private:
 			static std::string mName;

@@ -183,6 +183,6 @@ namespace Opde {
 	}
 
 	const uint PropertyServiceFactory::getMask() {
-	    return SERVICE_DATABASE_LISTENER;
+	    return SERVICE_DATABASE_LISTENER | SERVICE_CORE;
 	}
 }

@@ -733,6 +733,6 @@ namespace Opde {
 	}
 
 	const uint WorldRepServiceFactory::getMask() {
-	    return SERVICE_DATABASE_LISTENER;
+	    return SERVICE_DATABASE_LISTENER | SERVICE_RENDERER | SERVICE_ENGINE;
 	}
 }
