@@ -18,6 +18,7 @@
 ; Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
 ;
 ; $Id$
+;
 ;--------------------------------
 
 SetCompressor /SOLID /FINAL lzma
@@ -130,9 +131,11 @@ Section "openDarkEngine (required)"
 	File installer.bmp
 	File "$%OGRE_HOME%\bin\release\*.dll"	
 	File "$%OGRE_HOME%\bin\release\Plugins.cfg"
+	File "@FREEIMAGE_PATH@\Dist\FreeImage.dll"
+	FILE /x py*_d.dll "$%WinDir%\System32\Py*.dll"
 	
 	SetOutPath $INSTDIR\Scripts
-	File /r /x .svn @CMAKE_CURRENT_SOURCE_DIR@\Scripts\*.*	
+	File /r /x .svn "@CMAKE_CURRENT_SOURCE_DIR@\Scripts\*.*"
 	
 
 	WriteRegStr HKLM SOFTWARE\NSIS_opde "Install_Dir" "$INSTDIR"
