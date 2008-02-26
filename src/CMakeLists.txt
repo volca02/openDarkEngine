@@ -7,6 +7,4 @@ add_subdirectory(main)
 # Must find a way to add headers only...
 # add_subdirectory(compat)
 
-if(PYTHON_SUPPORT)
-    add_subdirectory(bindings)
-endif(PYTHON_SUPPORT)
+add_subdirectory(bindings)

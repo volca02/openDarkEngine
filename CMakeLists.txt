@@ -41,17 +41,6 @@ OPTION(__STATIC_GEOMETRY
     "Rendering using static geometry (no dynamic IB handling)"
     OFF)
 
-# Option to build using our PCX/GIF image loading hooks (for transparency)
-OPTION(CUSTOM_IMAGE_HOOKS 
-    "Build the support for palletized image transparecy (requires freeimage)"
-    OFF)
-
-# Python support option (will become mandatory later, probably)
-OPTION(PYTHON_SUPPORT
-    "Build in a support for python scripting"
-    OFF)
-
-
 # Option to build the documentation
 OPTION(GENERATE_DOC
     "Build the doxy documentation"
@@ -122,37 +111,33 @@ SET(FREEIMAGE_DIR ${CMAKE_MODULE_PATH})
 FIND_PACKAGE(OIS REQUIRED)
 FIND_PACKAGE(OGRE REQUIRED)
 
-# Custom image hooks was selected
-IF(CUSTOM_IMAGE_HOOKS)
-    FIND_PACKAGE(FREEIMAGE REQUIRED)
-    
-    IF(FREEIMAGE_FOUND)
+# Custom image hooks
+FIND_PACKAGE(FREEIMAGE REQUIRED)
+
+IF(FREEIMAGE_FOUND)
 	MESSAGE(STATUS "FreeImage Found OK")
-        MESSAGE(STATUS " - FreeImage includes ${FREEIMAGE_INCLUDE_DIR}")
+	MESSAGE(STATUS " - FreeImage includes ${FREEIMAGE_INCLUDE_DIR}")
 	MESSAGE(STATUS " - FreeImage libs ${FREEIMAGE_LIBRARIES}")
-    ELSE(FREEIMAGE_FOUND)
+ELSE(FREEIMAGE_FOUND)
 	MESSAGE(FATAL_ERROR "FreeImage not found and selected in options!")
-    ENDIF(FREEIMAGE_FOUND)
-ENDIF(CUSTOM_IMAGE_HOOKS)
+ENDIF(FREEIMAGE_FOUND)
 
-IF(PYTHON_SUPPORT)
-    FIND_PACKAGE(PythonLibs REQUIRED)
+
+FIND_PACKAGE(PythonLibs REQUIRED)
     
-    # Aditional libraries - deps of the python lib
-	IF(UNIX)
-		INCLUDE(PythonDeps.cmake)
-		FIND_PYTHON_DEPS(PYTHON_LIBRARIES)
-	ENDIF(UNIX)
-    
-    IF(PYTHON_LIBRARIES)
+# Aditional libraries - deps of the python lib
+IF(UNIX)
+	INCLUDE(PythonDeps.cmake)
+	FIND_PYTHON_DEPS(PYTHON_LIBRARIES)
+ENDIF(UNIX)
+
+IF(PYTHON_LIBRARIES)
 	MESSAGE(STATUS "Python Found OK")
-        MESSAGE(STATUS " - Python includes ${PYTHON_INCLUDE_PATH}")
+	MESSAGE(STATUS " - Python includes ${PYTHON_INCLUDE_PATH}")
 	MESSAGE(STATUS " - Python libs ${PYTHON_LIBRARIES}")
-    ELSE(PYTHON_LIBRARIES)
+ELSE(PYTHON_LIBRARIES)
 	MESSAGE(FATAL_ERROR "Python not found and selected in options!")
-    ENDIF(PYTHON_LIBRARIES)
-ENDIF(PYTHON_SUPPORT)
-
+ENDIF(PYTHON_LIBRARIES)
 
 
 # Only visual check enabling verbose output, and package found info
