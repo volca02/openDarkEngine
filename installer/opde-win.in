@@ -37,6 +37,9 @@ BrandingText "openDarkEngine Team"
 LicenseData ..\copying
 LicenseForceSelection checkbox "I accept the terms in the license agreement"
 
+Var Thief1Dir
+Var Thief2Dir
+Var Shock2Dir
 
 OutFile "opdeSetup.exe"
 
@@ -66,8 +69,8 @@ Page Custom ShowWelcome
 Page license
 Page components
 Page directory
-Page Custom SelectGames UpdateINIState
 Page instfiles
+Page Custom SelectGames CreateResourceCfg
 
 UninstPage uninstConfirm
 UninstPage instfiles
@@ -117,6 +120,66 @@ Function SelectGames
 	StrCpy $0 "$PLUGINSDIR\installer.ini"
 
 	Call CreateDialogFromINI
+FunctionEnd
+
+Function CreateResourceCfg
+	Call UpdateINIState
+	
+	ReadINIStr $Thief1Dir "$PLUGINSDIR\installer.ini" "Field 3" "State"
+	ReadINIStr $Thief2Dir "$PLUGINSDIR\installer.ini" "Field 5" "State"
+	ReadINIStr $Shock2Dir "$PLUGINSDIR\installer.ini" "Field 7" "State"
+  
+	FileOpen $0 $INSTDIR\resources.cfg w
+		
+	FileWrite $0 "[General]$\r$\nFileSystem=.\$\r$\nFileSystem=.\scripts\$\r$\n"
+	Call SetupThief1
+	Call SetupThief2
+	Call SetupShock2
+	
+	FileClose $0
+
+FunctionEnd
+
+Function SetupThief1
+	FileWrite $0 "$\r$\n[Thief1]$\r$\nFileSystem=.\scripts\Thief1$\r$\nFileSystem=$Thief1Dir$\r$\n"
+	
+	FindFirst $2 $1 "$Thief1Dir\crfs\*.crf"
+	loop:
+	  StrCmp $1 "" done
+	  FileWrite $0 "Zip=$Thief1Dir\crfs\$1$\r$\n"
+	  FindNext $2 $1
+	  Goto loop
+	done:
+	FindClose $2 
+
+FunctionEnd
+
+Function SetupThief2
+	FileWrite $0 "$\r$\n[Thief2]$\r$\nFileSystem=.\scripts\Thief2$\r$\nFileSystem=$Thief2Dir$\r$\n"
+	
+	FindFirst $2 $1 "$Thief2Dir\crfs\*.crf"
+	loop:
+	  StrCmp $1 "" done
+	  FileWrite $0 "Zip=$Thief2Dir\crfs\$1$\r$\n"
+	  FindNext $2 $1
+	  Goto loop
+	done:
+	FindClose $2 
+
+FunctionEnd
+
+Function SetupShock2
+	FileWrite $0 "$\r$\n[Shock2]$\r$\nFileSystem=.\scripts\Shock2$\r$\nFileSystem=$Shock2Dir$\r$\n"
+	
+	FindFirst $2 $1 "$Shock2Dir\*.crf"
+	loop:
+	  StrCmp $1 "" done
+	  FileWrite $0 "Zip=$Shock2Dir\$1$\r$\n"
+	  FindNext $2 $1
+	  Goto loop
+	done:
+	FindClose $2 
+
 FunctionEnd
 
 ;--------------------------------
