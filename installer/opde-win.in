@@ -157,10 +157,10 @@ FunctionEnd
 Function SetupThief2
 	FileWrite $0 "$\r$\n[Thief2]$\r$\nFileSystem=.\scripts\Thief2$\r$\nFileSystem=$Thief2Dir$\r$\n"
 	
-	FindFirst $2 $1 "$Thief2Dir\crfs\*.crf"
+	FindFirst $2 $1 "$Thief2Dir\res\*.crf"
 	loop:
 	  StrCmp $1 "" done
-	  FileWrite $0 "Zip=$Thief2Dir\crfs\$1$\r$\n"
+	  FileWrite $0 "Zip=$Thief2Dir\res\$1$\r$\n"
 	  FindNext $2 $1
 	  Goto loop
 	done:
