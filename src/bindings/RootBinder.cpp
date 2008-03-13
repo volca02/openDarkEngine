@@ -71,8 +71,7 @@ namespace Opde {
 			0,						  /* descrsetfunc tp_descr_set; */
 			0,						  /* long tp_dictoffset; */
 			0,						  /* initproc tp_init; */
-			0,						  /* allocfunc tp_alloc; */
-			newobj					  /* newfunc tp_new; */
+			0						  /* allocfunc tp_alloc; */
 		};
 
 		// ------------------------------------------
@@ -348,25 +347,6 @@ namespace Opde {
 			return (PyObject *)object;
 		}
 		
-		
-		// ------------------------------------------
-		PyObject* RootBinder::newobj(PyTypeObject* type, PyObject *args, PyObject *keywords) {
-			// args: Module mask - unsigned long long
-			PyObject *result = NULL;
-			unsigned long mask;
-
-			if (PyArg_ParseTuple(args, "l", &mask)) {
-				// Create new root, wrap, return
-				Root* root = new Opde::Root(mask);
-				
-                result = create(root);
-				return result;
-			} else {
-				// Invalid parameters
-				PyErr_SetString(PyExc_TypeError, "Expected one integer argument!");
-				return NULL;
-			}
-		}
 		
 		// ------------------------------------------
 		void RootBinder::init(PyObject* module) {

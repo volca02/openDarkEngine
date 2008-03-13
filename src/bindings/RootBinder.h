@@ -43,9 +43,6 @@ namespace Opde {
 				/// creates a python object representation of the Opde::Root object
 				static PyObject* create(Root* root);
 				
-				/// Constructs a new Opde::Root, returns it's python representation
-				static PyObject* newobj(PyTypeObject* type, PyObject *args, PyObject *keywords);
-				
 				/// Initializes the Opde.Root object (type)
 				static void init(PyObject* module);
 

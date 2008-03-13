@@ -26,8 +26,11 @@
 #include "ServiceBinder.h"
 #include "logger.h"
 #include "RootBinder.h"
+#include "Root.h"
 
 namespace Opde {
+	Opde::Root* Opde::PythonLanguage::msRoot = NULL;
+	
 	namespace Python {
 
 		PyObject* DVariantToPyObject(const DVariant& inst) {
@@ -132,6 +135,8 @@ namespace Opde {
 		PyObject* Py_Log_Verbose(PyObject *self, PyObject* args) {
 			return Py_Log(self, Logger::LOG_LEVEL_VERBOSE, args);
 		}
+		
+		
 	} // namespace Python
 
 	PyMethodDef sOpdeMethods[] = {
@@ -140,12 +145,18 @@ namespace Opde {
 		{"log_info", Python::Py_Log_Info, METH_VARARGS},
 		{"log_debug", Python::Py_Log_Debug, METH_VARARGS},
 		{"log_verbose", Python::Py_Log_Verbose, METH_VARARGS},
+		{"createRoot", PythonLanguage::createRoot, METH_VARARGS},
+		{"getRoot", PythonLanguage::getRoot, METH_NOARGS},
 		{NULL, NULL},
 	};
+
+//	Ogre::Root* PythonLanguage::msRoot = NULL;
 
 	void PythonLanguage::init() {
 		Py_Initialize();
 
+		msRoot = NULL;
+		
 		// Create an Opde module
 		PyObject* module = Py_InitModule("Opde", sOpdeMethods);
 
@@ -163,6 +174,10 @@ namespace Opde {
 
 	void PythonLanguage::term() {
 		Py_Finalize();
+		
+		// If we constructed the root, destroy it now...
+		if (msRoot)
+			delete msRoot;
 	}
 
 	void PythonLanguage::runScriptPtr(const char* ptr) {
@@ -188,6 +203,41 @@ namespace Opde {
 			PyErr_Print();
 			PyErr_Clear();
 		}
+	}
+	
+	PyObject* PythonLanguage::createRoot(PyObject *self, PyObject* args) {
+		// args: Module mask - unsigned long long
+		PyObject *result = NULL;
+		unsigned long mask;
+
+		if (PyArg_ParseTuple(args, "l", &mask)) {
+			// Create new root, wrap, return
+			msRoot = new Opde::Root(mask);
+			
+			// Todo: We could also share a single object instance here PyObject - mPyRoot PyIncRef on it, return
+			result = Python::RootBinder::create(msRoot);
+			return result;
+		} else {
+			// Invalid parameters
+			PyErr_SetString(PyExc_TypeError, "Expected one integer argument!");
+			return NULL;
+		}
+	}
+	
+	PyObject* PythonLanguage::getRoot(PyObject *self, PyObject* args) {
+		// args: Module mask - unsigned long long
+		PyObject *result = NULL;
+		unsigned long mask;
+		
+		if (msRoot = NULL) {
+			// Invalid parameters
+			// TODO: Choose a propper exception type
+			PyErr_SetString(PyExc_TypeError, "Root was not yet created!");
+			return NULL;
+		}
+
+		result = Python::RootBinder::create(msRoot);
+		return result;
 	}
 
 } // namespace Opde

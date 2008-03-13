@@ -26,6 +26,7 @@
 #define __BINDINGS_H
 
 #include "DVariant.h"
+#include "Root.h"
 
 #include <Python.h>
 #include <OgreVector3.h>
@@ -215,6 +216,9 @@ namespace Opde {
 
     /** Central class for python bindings. Call PythonLanguage::Init() to prepare python environment */
     class PythonLanguage {
+    	protected:
+			static Opde::Root* msRoot;
+			
     	public:
 			/** Initializes python lang and all the bindings */
 			static void init();
@@ -227,6 +231,12 @@ namespace Opde {
 			
 			/** Runs a script from a file */
 			static void runScript(const char* fname);
+			
+			/// Python side Root singleton handler
+			static PyObject* createRoot(PyObject *self, PyObject* args);
+
+			/// Python side Root singleton handler
+			static PyObject* getRoot(PyObject *self, PyObject* args);
     };
 }
 
