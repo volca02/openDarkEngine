@@ -32,6 +32,7 @@
 #include "OgreOpdeLogConnector.h"
 #include "OpdeServiceManager.h"
 #include "ServiceCommon.h"
+#include "ConsoleBackend.h"
 
 #include <OgreRoot.h>
 #include <OgreLogManager.h>
@@ -75,12 +76,23 @@ namespace Opde {
 			/** To be called when bootstrapping process was finished */
 			void bootstrapFinished();
 			
+			/** @returns a pointer to the logger used */
 			Logger* getLogger() { return mLogger; };
+			
+			/** @returns a pointer to the service manager */
 			ServiceManager* getServiceManager() { return mServiceMgr; };
 			
+			/** Creates a new logger instance that logs to a file (Logger will be automatically destroyed on termination) */
+			void logToFile(const std::string& fname);
+			
+			/** A shortcut to set loglevel. Valid values are 0-4 */
+			void setLogLevel(int level);
+			
 		protected:
+			/// Registers all the service factories to the Service Manger
 			void registerServiceFactories();
-
+			/// Creates all the loop modes
+			void setupLoopModes();
 
 			Logger* mLogger;
 			ServiceManager* mServiceMgr;
@@ -88,8 +100,16 @@ namespace Opde {
 			Ogre::LogManager* mOgreLogManager;
 			OgreOpdeLogConnector* mOgreOpdeLogConnector;
 			
+			/// @deprecated
+			ConsoleBackend* mConsoleBackend;
+			
 			DTypeScriptCompiler* mDTypeScriptCompiler;
 			PLDefScriptCompiler* mPLDefScriptCompiler;
+			
+			typedef std::list< LogListener* > LogListenerList;
+			
+			
+			LogListenerList mLogListeners;
 			
 			const unsigned int mServiceMask;		
 	};

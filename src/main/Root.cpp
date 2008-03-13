@@ -32,6 +32,7 @@
 #include "ConfigService.h"
 #include <OgreConfigFile.h>
 
+#include "filelog.h"
 
 // Services
 #include "WorldRepService.h"
@@ -46,6 +47,10 @@
 
 namespace Opde {
 	// -------------------------------------------------------
+	// singleton related
+	template<> Root* Singleton<Root>::ms_Singleton = 0;
+	
+	// -------------------------------------------------------
 	Root::Root(uint serviceMask) : 
 			mLogger(NULL), 
 			mServiceMgr(NULL), 
@@ -53,6 +58,7 @@ namespace Opde {
 			mOgreLogManager(NULL), 
 			mDTypeScriptCompiler(NULL),
 			mPLDefScriptCompiler(NULL),
+			mConsoleBackend(NULL),
 			mServiceMask(serviceMask) {
 		
 		mLogger = new Logger();
@@ -76,11 +82,15 @@ namespace Opde {
 #ifdef CUSTOM_IMAGE_HOOKS
 		Ogre::CustomImageCodec::startup();
 #endif
+
+		mConsoleBackend = new ConsoleBackend();
 		// Now we need to register all the service factories
 		registerServiceFactories();
-		
+
 		mDTypeScriptCompiler = new DTypeScriptCompiler();
 		mPLDefScriptCompiler = new PLDefScriptCompiler();
+		
+		setupLoopModes();
 	}
 	
 	// -------------------------------------------------------
@@ -90,10 +100,20 @@ namespace Opde {
 
 		delete mServiceMgr;
 		
+		delete mConsoleBackend;
+		
 #ifdef CUSTOM_IMAGE_HOOKS
 		Ogre::CustomImageCodec::shutdown();
 #endif
 		delete mOgreRoot;
+		
+		LogListenerList::iterator it = mLogListeners.begin();
+		
+		for (;it != mLogListeners.end(); ++it) {
+			mLogger->unregisterLogListener(*it);
+			delete *it;
+		}
+		mLogListeners.clear();
 		
 		// As the last thing - release the logger
 		delete mLogger;
@@ -185,5 +205,44 @@ namespace Opde {
 		new InputServiceFactory();
 		new LoopServiceFactory();
 		new ObjectServiceFactory();
+	}
+	
+	// -------------------------------------------------------
+	void Root::setupLoopModes() {
+		// Loop modes are only setup if not masked by global service mask
+		if (mServiceMask & SERVICE_ENGINE) {
+			// Loop modes are hardcoded
+			LoopServicePtr ls = ServiceManager::getSingleton().getService("LoopService").as<LoopService>();
+			// Create all the required loop services
+			LoopModeDefinition def;
+			
+			// Loop mode that does no engine processing at all
+			def.id = 1;
+			def.name = "GUIOnlyLoopMode";
+			def.mask = LOOPMODE_INPUT | LOOPMODE_RENDER;
+			
+			ls->createLoopMode(def);
+			
+			// Loop mode that runs all the loop clients
+			def.id = 0xFF;
+			def.name = "AllClientsLoopMode";
+			def.mask = LOOPMODE_MASK_ALL_CLIENTS;
+			
+			ls->createLoopMode(def);
+		}
+	}
+	
+	// -------------------------------------------------------
+	void Root::logToFile(const std::string& fname) {
+		LogListener* flog = new FileLog(fname);
+		
+		mLogger->registerLogListener(flog);
+		mLogListeners.push_back(flog);
+	}
+	
+	// -------------------------------------------------------
+	void Root::setLogLevel(int level) {
+		// Call mLogger to setup the log level
+		mLogger->setLogLevel(level);
 	}
 }
