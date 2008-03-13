@@ -359,7 +359,7 @@ namespace Ogre {
 
         size_t ibufCount = mIndexList.size();
 
-        mSubMesh->vertexData->reorganiseBuffers(decl->getAutoOrganisedDeclaration(true, false));
+        mSubMesh->vertexData->reorganiseBuffers(decl->getAutoOrganisedDeclaration(true, true));
 
         // Build the index buffer
         // We have that done already, just copy the indices
@@ -557,10 +557,15 @@ namespace Ogre {
         // Spherical radius
         mMesh->_setBoundingSphereRadius(mHdr.sphere_rad);
 
+
+        mMesh->prepareForShadowVolume();
+        mMesh->buildEdgeList();
+        
         mMesh->load();
 
         // DONE!
         mMesh->_updateCompiledBoneAssignments();
+        
     }
 
 
@@ -1097,6 +1102,9 @@ namespace Ogre {
         pass->setAmbient(1,1,1);
         pass->setDiffuse(1,1,1,1);
         pass->setSpecular(0,0,0,0);
+        
+        // Z Fighting of the bilboardy meshes
+        pass->setDepthBias(0.1, 0.1);
 
         if (mat.type == MD_MAT_TMAP) {
 
@@ -1116,7 +1124,10 @@ namespace Ogre {
                 }
 
 			// TODO: This is bad. Should be fixed. Looks awful. See ss2 model loading...
+			pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
 			// pass->setAlphaRejectSettings(CMPF_EQUAL, 255); // Alpha rejection. 
+			// tus->setColourOperation(LBO_ALPHA_BLEND);
+
 			
 			// Some basic lightning settings
             tus = pass->createTextureUnitState(txtname);
