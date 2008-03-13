@@ -128,7 +128,7 @@ namespace Opde {
         LOG_DEBUG("ServiceManager: Creating service %s", name.c_str());
 
 		if (factory != NULL) { // Found a factory for the Service name
-			if (!(factory->getMask() && mGlobalServiceMask))
+			if (!(factory->getMask() & mGlobalServiceMask))
 			    OPDE_EXCEPT("Initialization of service " + factory->getName() + " was not permitted by mask. Please consult OPDE log for details", "ServiceManager::createInstance");
 		
 			ServicePtr ns = factory->createInstance(this);
@@ -164,7 +164,7 @@ namespace Opde {
 		for (; factory_it != mServiceFactories.end(); ++factory_it) {
 
 			// if the mask fits and the service is permitted by global service mask
-			if ((factory_it->second->getMask() & mask) && (factory_it->second->getMask() && mGlobalServiceMask)) { 
+			if ((factory_it->second->getMask() & mask) && (factory_it->second->getMask() & mGlobalServiceMask)) { 
 			    ServicePtr service = getService(factory_it->second->getName());
 			}
 		}
