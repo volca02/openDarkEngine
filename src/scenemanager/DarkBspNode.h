@@ -186,7 +186,7 @@ namespace Ogre {
 		void setPlaneList(CellPlaneList& planes, PlanePortalMap& portalmap);
 		
     
-		void refreshScreenRect(int frameNum, const Camera* cam, const Matrix4& toScreen, const PortalFrustum& frust);
+		void refreshScreenRect(const Camera* cam, const Matrix4& toScreen, const PortalFrustum& frust);
 		
 		typedef PortalList::iterator PortalIterator;
 		
@@ -194,7 +194,7 @@ namespace Ogre {
 		PortalIterator outPortalEnd() { return mDstPortals.end(); };
 		
 		// Invalidates the screen projection info (so refreshScreenRect will pass)
-		void invalidateScreenRect(int frameNum) { mInitialized = false; mFrameNum = frameNum; };
+		void invalidateScreenRect(int frameNum) { mInitialized = false; mFrameNum = frameNum; mViewRect = PortalRect::EMPTY; };
 		
 		
 	protected:
@@ -264,7 +264,7 @@ namespace Ogre {
 		SceneQuery::WorldFragment mCellFragment;
 		
 		/** Enlarge the view rect to the cell to accompany the given view rect */
-		inline bool updateViewRect(const PortalRect& tgt) {
+		inline bool updateScreenRect(const PortalRect& tgt) {
 			bool changed = false;
 				
 			if (tgt.left < mViewRect.left) {

@@ -85,8 +85,10 @@ namespace Ogre {
 
 		PortalFrustum cameraFrustum = PortalFrustum(this);
 
+		root->invalidateScreenRect(frameNum);
+
 		// Root cell gets whole screen visibility
-		root->refreshScreenRect(frameNum, this, toScreen, cameraFrustum);
+		root->refreshScreenRect(this, toScreen, cameraFrustum);
 
 		// the view rect is set to fill the screen
 		root->mViewRect.setToScreen();
@@ -95,19 +97,16 @@ namespace Ogre {
 		BspNodeQueue q;
 		
 		q.push_back(root);
-		
+
 		int currentPos = 0;
 		
 		while (currentPos < q.size()) {
 		    BspNode* cell = q[currentPos++];
-		    // TODO: !!! This routine seems to loop endlessly rarely - fix !!!
-
-		    if (cell == NULL) { // current position is invalidated
-				continue;
-		    }
 		    
-		    // If the cell has old frame num, refresh it now! (will only refresh if frameNum differs)
-		    cell->refreshScreenRect(frameNum, this, toScreen, cameraFrustum);
+		    if (cell == NULL) // current position was invalidated
+				continue;
+		        
+		    assert(cell->mInitialized && cell->mFrameNum == frameNum);
 		    
 		    // (Re-)evaluate the vision through all portals. If some of those changed, add the cells to the queue (or move those to top if already present)
 		    BspNode::PortalIterator pi = cell->outPortalBegin();
@@ -125,16 +124,14 @@ namespace Ogre {
 				
 				BspNode* target_cell = p->mTarget;	
 				
+				// Cell was not considered yet this frame, so invalidate the view inside
+				if (target_cell->mFrameNum != frameNum)
+					target_cell->invalidateScreenRect(frameNum);
+				
 				if (p->intersectByRect(cell->mViewRect, tgt)) { // Portal visible throught the cell's in-view
 					if (p->unionActualWithRect(tgt)) { // A change in the view happened
-						if (target_cell->mFrameNum != frameNum) {
-							// Cell was not considered yet this frame, so the view changed for sure
-							target_cell->mViewRect = tgt; // assign a new view rect to the cell
-							changed = true; // and inform that the portal caused a visibility change for the target cell
-						} else {
-							// only report change if the updated view changed from previous
-							changed = target_cell->updateViewRect(tgt);
-						}
+						// only report change if the updated view changed
+						changed = target_cell->updateScreenRect(tgt);
 					}
 				}
 			
@@ -146,11 +143,13 @@ namespace Ogre {
 				// or, in case the cell was in queue already, but moved, the queue position is then > current, and nothing is done
 				if (changed) {
 					// Update the queue
-					if (target_cell->mFrameNum != frameNum) {
+					if (!target_cell->mInitialized) {
 						// insert to the top
 						// Was not yet initialized
-						target_cell->invalidateScreenRect(frameNum);
-						
+						// target_cell->invalidateScreenRect(frameNum);
+					    // If the cell has old frame num, refresh it now! (will only refresh if frameNum differs)
+						target_cell->refreshScreenRect(this, toScreen, cameraFrustum);
+
 						// insert to the top
 						q.push_back(target_cell);
 						target_cell->mListPosition = q.size() - 1;

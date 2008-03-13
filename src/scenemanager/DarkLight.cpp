@@ -134,7 +134,7 @@ namespace Ogre {
 							// aproximated cone and the portal
 							PortalFrustum f = PortalFrustum(getDerivedPosition(), cut);
 					
-							_traversePortalTree(f, cut, rad);
+							_traversePortalTree(f, cut, rootNode);
 					
 							if (didc)
 								delete cut;
@@ -144,7 +144,7 @@ namespace Ogre {
 					    // For POINT light, it covers the whole portal
 					    PortalFrustum f = PortalFrustum(mPosition, *pit);
 					
-					    _traversePortalTree(f, *pit, rad);
+					    _traversePortalTree(f, *pit, rootNode);
 					}
 				}
 				
@@ -178,8 +178,10 @@ namespace Ogre {
 	}
 	
 	// -----------------------------------------------------------
-	void DarkLight::_traversePortalTree(PortalFrustum& frust, Portal* p, Real radius) {
+	void DarkLight::_traversePortalTree(PortalFrustum& frust, Portal* p, BspNode* srcCell) {
 		BspNode* tgt = p->getTarget();
+		Vector3 pos = getDerivedPosition();
+		Real radius = getAttenuationRange();
 		
 		if (tgt != NULL) {
 			mAffectedCells.insert(tgt);
@@ -189,10 +191,15 @@ namespace Ogre {
 			
 			for (; pit != pend; ++pit) {
 				// If facing towards the light
-				if ((*pit)->isBackfaceCulledFor(getDerivedPosition()))
+				if ((*pit)->isBackfaceCulledFor(pos))
 					continue;
 					
-				if ((*pit)->getDistanceFrom(getDerivedPosition()) > radius)
+				// and not too far to reach
+				if ((*pit)->getDistanceFrom(pos) > radius)
+					continue;
+
+				// and not going back to the source cell (X->n->X traversal)
+				if (srcCell == (*pit)->getTarget())
 					continue;
 
 				bool didc = false;
@@ -203,9 +210,9 @@ namespace Ogre {
 				
 				if (cut != NULL) {
 					// create a portalFrustum to traverse with
-					PortalFrustum f = PortalFrustum(getDerivedPosition(), cut);
+					PortalFrustum f = PortalFrustum(pos, cut);
 					
-					_traversePortalTree(f, *pit, radius);
+					_traversePortalTree(f, *pit, tgt);
 					
 					if (didc)
 						delete cut;

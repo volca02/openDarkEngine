@@ -273,10 +273,9 @@ namespace Ogre {
 	}
 	
 	//-------------------------------------------------------------------------
-	void BspNode::refreshScreenRect(int frameNum, const Camera* cam, const Matrix4& toScreen, const PortalFrustum& frust) {
-	    if (frameNum = mFrameNum && mInitialized)
-			return;
-		
+	void BspNode::refreshScreenRect(const Camera* cam, const Matrix4& toScreen, const PortalFrustum& frust) {
+		mInitialized = true;
+
 	    // Iterate all portals and refresh the view rect of those
 	    PortalListConstIterator outPortal_it = mDstPortals.begin();
 		PortalListConstIterator end = mDstPortals.end();
@@ -285,9 +284,6 @@ namespace Ogre {
 			Portal *out_portal = (*outPortal_it);
 
 			out_portal->refreshScreenRect(cam, toScreen, frust);
-
-			mInitialized = true;
-			mFrameNum = frameNum;
 		}
 	}
 	

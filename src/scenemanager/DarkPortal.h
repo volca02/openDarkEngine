@@ -87,7 +87,7 @@ namespace Ogre {
 	* visibility determination is done using a to-screen projected portal vertices bounding rectangles PortalRects
 	* @note Please note that the direction of the plane's normal has to comply with the 
 	* portals vertex order derived normal. Also note that no check that the points actualy lie on the plane is done. */
-	class Portal : public ConvexPolygon, public SimpleRenderable {
+	class Portal : public ConvexPolygon { // , public SimpleRenderable 
 		friend class DarkCamera;
 		friend class PortalFrustum;
 			

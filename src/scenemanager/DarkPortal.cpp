@@ -66,13 +66,13 @@ namespace Ogre {
 		// Setup the render op. for portal debug display.
 		// This should be conditional to the DEBUG builds to stop eating precious memory
 		// (10-30000 portals * few 100 bytes of class data is not as much though)
-		mRenderOp.vertexData = NULL;
+		// mRenderOp.vertexData = NULL;
 	}	
 		
 	// ---------------------------------------------------------------------------------
 	Portal::~Portal() {
-		if (mRenderOp.vertexData)
-			delete mRenderOp.vertexData;
+		/*if (mRenderOp.vertexData)
+			delete mRenderOp.vertexData;*/
 			
 		detach();
 	}
@@ -96,7 +96,7 @@ namespace Ogre {
 	// ---------------------------------------------------------------------------------
 	void Portal::refreshPortalRenderable() {
 		// delete the previous
-		if (mRenderOp.vertexData)
+/*		if (mRenderOp.vertexData)
 			delete mRenderOp.vertexData;
 		
 		mRenderOp.vertexData = new VertexData();
@@ -136,6 +136,7 @@ namespace Ogre {
 		}
 		
 		vbuf->unlock();
+		*/
 	}
 	
 	
