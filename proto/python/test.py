@@ -1,8 +1,29 @@
 from Opde import *
 
+# TODO: We need to export service mask constants!
+opderoot = createRoot(0x0FFFFFFFF)
+
+opderoot.logToFile("opde.log")
+opderoot.setLogLevel(1)
+
+# Setup resources
+opderoot.loadResourceConfig("resources.cfg")
+opderoot.loadConfigFile("opde.cfg")
+
+# Load the dype scripts (this should vary depending on the game type)
+opderoot.loadDTypeScript("common.dtype", "General")
+opderoot.loadDTypeScript("t1-types.dtype", "General")
+opderoot.loadPLDefScript("t1-links.pldef", "General")
+opderoot.loadPLDefScript("t1-props.pldef", "General")
+
+
+# Bootstrapping finished. We can progress wit the actual engine run
+opderoot.bootstrapFinished();
+
 # Service globals
 lsrv = Services.LoopService()
 isrv = Services.InputService()
+# osrv = Services.ObjectService()
 
 # ------------- State management -------------
 # To sim menu switcher
@@ -82,6 +103,13 @@ isrv.command("bind 1 debug_frame")
 dbsrv = Services.DatabaseService()
 dbsrv.setProgressListener(databaseProgressUpdate)
 # dbsrv.load("miss1.mis")
+
+# a test link query
+linksrv = Services.LinkService()
+mprel = linksrv.getRelation("MetaProp")
+
+for l in mprel.getAllLinks(1,0):
+    print "Link from 1: " + str(l.id) + " from " + str(l.src) + " to " + str(l.dst) + " flav " + str(l.flavor)
 
 # Loop setup and execution
 if (not lsrv.requestLoopMode("GUIOnlyLoopMode")):
