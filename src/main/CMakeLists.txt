@@ -1,21 +1,10 @@
 INCLUDE( ${OPDE_SOURCE_DIR}/src/services/Services.cmake )
 INCLUDE( ${OPDE_SOURCE_DIR}/src/base/Base.cmake )
 
-SET(LIB_ADDITION_CUSTOM_IMAGE)
-SET(INCLUDE_ADDITION_CUSTOM_IMAGE)
-# If custom image hooks was selected
-if(CUSTOM_IMAGE_HOOKS)
-    add_library(OpdeCustomImageCodec CustomImageCodec.cpp CustomImageCodec.h)
-    
-    SET(LIB_ADDITION_CUSTOM_IMAGE OpdeCustomImageCodec ${FREEIMAGE_LIBRARIES})
-    SET(INCLUDE_ADDITION_CUSTOM_IMAGE OpdeCustomImageCodec ${FREEIMAGE_INCLUDE_DIR})
-endif(CUSTOM_IMAGE_HOOKS)
-
 include_directories(
     ${OGRE_INCLUDE_DIR}
     ${OIS_INCLUDE_DIR}
     ${OPDE_BINARY_DIR}
-    ${INCLUDE_ADDITION_CUSTOM_IMAGE}
     ${OPDE_BASE_INCLUDES}
     ${OPDE_SOURCE_DIR}/src/compat
     ${OPDE_SOURCE_DIR}/src/base/Dark
@@ -23,6 +12,7 @@ include_directories(
     ${OPDE_SOURCE_DIR}/src/main
     ${OPDE_SOURCE_DIR}/src/widgets
     ${OPDE_SERVICE_INCLUDES}
+    ${FREEIMAGE_INCLUDE_DIR}
 )
 
 
@@ -58,6 +48,8 @@ add_executable (opde WIN32
     DTypeScriptLoader.h
     PLDefScriptCompiler.h
     PLDefScriptLoader.h
+    CustomImageCodec.cpp
+    CustomImageCodec.h
 )
 
 add_library (OpdeRoot
@@ -67,13 +59,14 @@ add_library (OpdeRoot
     DTypeScriptCompiler.h
     PLDefScriptCompiler.cpp
     PLDefScriptCompiler.h
+    CustomImageCodec.cpp
+    CustomImageCodec.h
 )
 
 
 target_link_libraries( opde
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}
-    ${LIB_ADDITION_CUSTOM_IMAGE}
     OpdeFile
     OpdeLogger
     OpdeConsole
@@ -85,7 +78,7 @@ target_link_libraries( opde
 target_link_libraries( OpdeRoot
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}
-    ${LIB_ADDITION_CUSTOM_IMAGE}
+    ${FREEIMAGE_LIBRARIES}
     OpdeFile
     OpdeLogger
     OpdeConsole
