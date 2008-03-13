@@ -328,7 +328,12 @@ namespace Opde {
 				if (shadPass->getNumTextureUnitStates() > 0) {
 					TextureUnitState* tus = shadPass->getTextureUnitState(0);
 					
-					dimensions = tus->getTextureDimensions();
+					try {
+						dimensions = tus->getTextureDimensions();
+					} catch (Ogre::Exception &e) {
+						// Nothing, just log it could not be done
+						LOG_ERROR("Error getting texture dimensions : %s", e.getFullDescription().c_str());
+					}
 					
 					tscale = mOwner->getTextureScale(txtName.str());
 					
