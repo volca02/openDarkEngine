@@ -40,7 +40,7 @@ namespace Opde {
 
 	Logger::Logger() {
 		listeners.clear();
-		loggingLevel = LOG_VERBOSE;
+		loggingLevel = LOG_LEVEL_INFO;
 	}
 
 	Logger::~Logger() {
@@ -88,11 +88,15 @@ namespace Opde {
 		listeners.insert(listener);
 	}
 
+	void Logger::unregisterLogListener(LogListener* listener) {
+		listeners.erase(listener);
+	}
+
 	const std::string Logger::getLogLevelStr(LogLevel level) const {
 	    if (level < 0)
             return "<????";
 
-        if (level > LOG_VERBOSE)
+        if (level > LOG_LEVEL_VERBOSE)
             return ">????";
 
         return LOG_LEVEL_STRINGS[level];
@@ -105,7 +109,7 @@ namespace Opde {
 
 		str << t;
 
-		log(LOG_INFO,"%s",str.str().c_str());
+		log(LOG_LEVEL_INFO,"%s",str.str().c_str());
 		return *this;
 	}
 
@@ -113,4 +117,16 @@ namespace Opde {
 		loggingLevel = level;
 	}
 
+	void Logger::setLogLevel(int level) {
+		switch (level) {
+			case 0: setLogLevel(LOG_LEVEL_FATAL); break;
+			case 1: setLogLevel(LOG_LEVEL_ERROR); break;
+			case 2: setLogLevel(LOG_LEVEL_INFO); break;
+			case 3: setLogLevel(LOG_LEVEL_DEBUG); break;
+			case 4: setLogLevel(LOG_LEVEL_VERBOSE); break;
+			default:
+				setLogLevel(LOG_LEVEL_DEBUG);
+				log(LOG_LEVEL_DEBUG, "Invalid logging level specified (%d), setting debug", level);
+		}
+	}
 }

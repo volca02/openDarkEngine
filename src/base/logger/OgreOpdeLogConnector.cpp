@@ -23,17 +23,18 @@
  *****************************************************************************/
  
 #include "OgreOpdeLogConnector.h"
+#include "logger.h"
 
 namespace Opde {
 	
-	OgreOpdeLogConnector(Logger* opdeLogger) : mOpdeLogger(opdeLogger) {
+	OgreOpdeLogConnector::OgreOpdeLogConnector(Logger* opdeLogger) : mOpdeLogger(opdeLogger) {
 	}
 	
 	OgreOpdeLogConnector::~OgreOpdeLogConnector() {
 	}
 	
-	void messageLogged(const Ogre::String &message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String &logName) {
-		mOpdeLogger->log(LOG_INFO, "OGRE_LOG: ", message.c_str());
+	void OgreOpdeLogConnector::messageLogged(const Ogre::String &message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String &logName) {
+		mOpdeLogger->log(Logger::LOG_LEVEL_INFO, "OGRE_LOG: %s", message.c_str());
 	}
 	
 } // namespace

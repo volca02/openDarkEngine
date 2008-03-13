@@ -37,7 +37,7 @@ namespace Opde {
 	class Logger : public Singleton<Logger> {
 		public:
 			/// Logging level
-			typedef enum {LOG_FATAL=0, LOG_ERROR, LOG_INFO, LOG_DEBUG, LOG_VERBOSE} LogLevel;
+			typedef enum {LOG_LEVEL_FATAL=0, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_VERBOSE} LogLevel;
 			
 		private:
 			/** A set of listener classes */
@@ -62,6 +62,9 @@ namespace Opde {
 			/** Register a new listener instance. The instance will receive all logging messages. */
 			void registerLogListener(LogListener* listener);
 
+			/** Unregister a listener instance */
+			void unregisterLogListener(LogListener* listener);
+
             /** Translates the log level into something readable */
 			const std::string getLogLevelStr(LogLevel level) const;
 
@@ -70,6 +73,9 @@ namespace Opde {
 
 			/** Logging level setter. */
 			void setLogLevel(LogLevel level);
+			
+			/** Logging level setter - integer version */
+			void setLogLevel(int level);
 
 			// Singleton related stuff
 			static Logger& getSingleton(void);
@@ -90,14 +96,14 @@ namespace Opde {
 
 
 	// Printf-like logging helping defines
-	#define LOG_FATAL(...) Logger::getSingleton().log(Logger::LOG_FATAL, __VA_ARGS__)
-	#define LOG_ERROR(...) Logger::getSingleton().log(Logger::LOG_ERROR, __VA_ARGS__)
-	#define LOG_INFO(...) Logger::getSingleton().log(Logger::LOG_INFO, __VA_ARGS__)
+	#define LOG_FATAL(...) Logger::getSingleton().log(Logger::LOG_LEVEL_FATAL, __VA_ARGS__)
+	#define LOG_ERROR(...) Logger::getSingleton().log(Logger::LOG_LEVEL_ERROR, __VA_ARGS__)
+	#define LOG_INFO(...) Logger::getSingleton().log(Logger::LOG_LEVEL_INFO, __VA_ARGS__)
 
 	// the debug+verbose loggers are conditionaly built in when the DEBUG flag is defined
 	#ifdef OPDE_DEBUG
-		#define LOG_DEBUG(...) Logger::getSingleton().log(Logger::LOG_DEBUG, __VA_ARGS__)
-		#define LOG_VERBOSE(...) Logger::getSingleton().log(Logger::LOG_VERBOSE, __VA_ARGS__)
+		#define LOG_DEBUG(...) Logger::getSingleton().log(Logger::LOG_LEVEL_DEBUG, __VA_ARGS__)
+		#define LOG_VERBOSE(...) Logger::getSingleton().log(Logger::LOG_LEVEL_VERBOSE, __VA_ARGS__)
 	#else
 		#define LOG_DEBUG(...)
 		#define LOG_VERBOSE(...)

@@ -26,7 +26,8 @@
 #define __OGREOPDELOGCONNECTOR_H
 
 #include "logger.h"
-#include "OgreLog.h"
+
+#include <OgreLog.h>
   
 namespace Opde {
 
