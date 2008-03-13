@@ -13,6 +13,7 @@ include_directories(
     ${OPDE_SERVICE_INCLUDES}
     ${PYTHON_INCLUDE_PATH}
     ${OPDE_SOURCE_DIR}/src/scenemanager
+    ${OPDE_SOURCE_DIR}/src/main
     ${OPDE_SOURCE_DIR}/thirdparty/QuickGUI/include
 )
 
@@ -45,6 +46,8 @@ add_library(OpdePythonBindings
     QuickGUIBindings.cpp
     QuickGUIBindings.h
     PythonStruct.h
+    RootBinder.cpp
+    RootBinder.h
 )
 
 target_link_libraries(OpdePythonBindings
@@ -52,4 +55,5 @@ target_link_libraries(OpdePythonBindings
     ${OPDE_BASE_LIBRARIES}
     ${PYTHON_LIBRARIES}
     ${OPDE_SERVICE_LIBRARIES}
+    OpdeRoot
 )

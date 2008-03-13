@@ -25,6 +25,7 @@
 #include "bindings.h"
 #include "ServiceBinder.h"
 #include "logger.h"
+#include "RootBinder.h"
 
 namespace Opde {
 	namespace Python {
@@ -113,23 +114,23 @@ namespace Opde {
 		}
 
 		PyObject* Py_Log_Fatal(PyObject *self, PyObject* args) {
-			return Py_Log(self, Logger::LOG_FATAL, args);
+			return Py_Log(self, Logger::LOG_LEVEL_FATAL, args);
 		}
 
 		PyObject* Py_Log_Error(PyObject *self, PyObject* args) {
-			return Py_Log(self, Logger::LOG_ERROR, args);
+			return Py_Log(self, Logger::LOG_LEVEL_ERROR, args);
 		}
 
 		PyObject* Py_Log_Info(PyObject *self, PyObject* args) {
-			return Py_Log(self, Logger::LOG_INFO, args);
+			return Py_Log(self, Logger::LOG_LEVEL_INFO, args);
 		}
 
 		PyObject* Py_Log_Debug(PyObject *self, PyObject* args) {
-			return Py_Log(self, Logger::LOG_DEBUG, args);
+			return Py_Log(self, Logger::LOG_LEVEL_DEBUG, args);
 		}
 
 		PyObject* Py_Log_Verbose(PyObject *self, PyObject* args) {
-			return Py_Log(self, Logger::LOG_VERBOSE, args);
+			return Py_Log(self, Logger::LOG_LEVEL_VERBOSE, args);
 		}
 	} // namespace Python
 
@@ -150,6 +151,7 @@ namespace Opde {
 
 		// Call all the binders here. The result is initialized Python VM
 		PyObject *servicemod = Python::ServiceBinder::init(module);
+		Python::RootBinder::init(module);
 
 		if (PyErr_Occurred()) {
 			// TODO: Do something useful here, or forget it
@@ -168,6 +170,19 @@ namespace Opde {
         PyRun_SimpleString(ptr);
         
         if (PyErr_Occurred()) {
+			// TODO: Do something useful here, or forget it
+			// TODO: PythonException(BasicException) with the PyErr string probably. Same in the init
+			PyErr_Print();
+			PyErr_Clear();
+		}
+	}
+	
+	void PythonLanguage::runScript(const char* fname) {
+		FILE *fp = fopen (fname, "r+");
+		PyRun_SimpleFile(fp, fname);
+		fclose(fp);
+		
+		if (PyErr_Occurred()) {
 			// TODO: Do something useful here, or forget it
 			// TODO: PythonException(BasicException) with the PyErr string probably. Same in the init
 			PyErr_Print();

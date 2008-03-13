@@ -224,6 +224,9 @@ namespace Opde {
 
 			/** Runs a script loaded in memory on a given address */
 			static void runScriptPtr(const char* ptr);
+			
+			/** Runs a script from a file */
+			static void runScript(const char* fname);
     };
 }
 

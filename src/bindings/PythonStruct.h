@@ -37,8 +37,10 @@ namespace Opde
 	namespace Python {
 		
 		
-		// Templatized struct binder (no field writing supported). Exposes Type T as a python object with attributes. 
-		// @note Every descendant needs to do at least two things: Initialize the msName and fill the msNameToAttr using method field
+		/** Templatized struct binder (no field writing supported). Exposes Type T as a python object with attributes. 
+		* @note Every descendant needs to do at least three things: Initialize the msName and fill the msNameToAttr using method field,
+		* and call the static init method created for the filling operation from somewhere.
+		*/
 		template<typename T> class PythonStruct {
 			public:
 				static PyObject* create(const T& t) {
