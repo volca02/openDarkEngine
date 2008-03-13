@@ -307,8 +307,7 @@ namespace Opde {
 		if (m.dbtype == DBT_MISSION || m.dbtype == DBT_SAVEGAME)
 			loadMask = 0x02;
 		
-		_load(m.db, loadMask);
-		
+			_load(m.db, loadMask);
 	    } else if (m.change == DBC_SAVING) {
 			// Write the object allocation bitmap, whole (as original dark does it)
 			uint savemask = 0x03; // whole system (archetypes and concretes)
@@ -444,8 +443,17 @@ namespace Opde {
 		}
 		
 		// Now, inform link service and property service (let them load)
-		mLinkService->load(db);
-		mPropertyService->load(db);
+		try {
+			mLinkService->load(db);
+		} catch (BasicException& e) {
+			LOG_FATAL("Exception while loading links from mission database : %s", e.getDetails().c_str());
+		}
+		
+		try {
+			mPropertyService->load(db);
+		} catch (BasicException& e) {
+			LOG_FATAL("Exception while loading properties from mission database : %s", e.getDetails().c_str());
+		}
 		
 		
 		// Free all id's that are not in use for reuse

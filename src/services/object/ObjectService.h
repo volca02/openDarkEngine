@@ -59,6 +59,15 @@ namespace Opde {
 	};
 
 	/** @brief Object service - service managing in-game objects. Holder of the object's scene nodes
+	* @todo Move the scenenode management back to RenderService (so we can use opde without renderer)
+	* @todo Archetype object creation
+	* @todo DonorType property management (together with Inherit service)
+	* @todo Object queries - getAllConcrete, getAllArchetype, getMetapropertiesOf, etc. ObjectQuery class introduced
+	* @todo FindClosestObjectNamed (Based on archetype name!), RenderedThisFrame (based on entity listener. This one should be implemented in RenderService)
+	* @todo Transient objects - are those needed? If so, implement (This one will be implemented on demand, as I currently can't see a reason to do those)
+	* @todo inheritsFrom - good to have query. Should only search archetypes, not metaprops
+	* @todo OBJECT_CREATE_STARTED message type for those services needing a preparation for object creation
+		(for example render service will create a SceneNode at that time, so it can update it's position and orientation when loading Position properties)
 	*/
 	class ObjectService : public Service, public MessageSource<ObjectServiceMsg> {
 		public:
