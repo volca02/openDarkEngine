@@ -11,6 +11,7 @@ include_directories (
     ${OPDE_BASE_INCLUDES}
     ${PYTHON_INCLUDE_PATH}
     ${OPDE_SOURCE_DIR}/src/bindings
+    ${OPDE_SOURCE_DIR}/src/main
 )
 
 link_directories ( 
@@ -22,4 +23,5 @@ add_library (OpdeScriptService ScriptService.cpp ScriptService.h)
 target_link_libraries(OpdeScriptService
     OpdeBase
     OpdeServiceManager
+    OpdeRoot
 )

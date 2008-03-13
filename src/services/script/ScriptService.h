@@ -80,6 +80,19 @@ namespace Opde {
 	* @note PythonLanguage::init is called in the init method, PythonLanguage::term is called in the shutdown method
 	* The initialization of object script module is based on python's report of such modules, but the mapping 1:1 with filename
 	* is needed for the system to be able to know which script file contains which modules (that means gen.py should contain "gen" object script module).
+	* @todo Listeners - database and property object messages (Have to be written first) - here, we again reveal the need to only modify concrete throughout the game run.
+	* @todo per object script hierarchy. At the point of the loading (through DB service), the prop and link data are valid, so iteration on
+	* object scripts should be enough (until don't inherit is found).
+	* @todo mapper: ObjectScriptModulePtr getModuleForScriptName(std::string& name), mapModuleScriptName(ObjectScriptModulePtr module, std::string& name) etc.
+	* Here's the chellenge: When adding a metaproperty, all the scripts the object holds itself should be removed and the new ones instantinated.
+	* (ignoring the ones that should stay there because the scripts should not hold any data themselves anyway).
+	* Thus we need a way to say which effective object ID the given script comes from.
+	* Another note: How shall we work with duplicities? IMHO any object should only hold one instance of the given script type, all duplicities should be ignored.
+	* Another question: Are scripts comming from archetype still mapped on every concrete object? This seems likely.
+	* We thus have creator id and holder id (creator is the archetype, holder the concrete obj)
+	* In which order do the scripts receive an event? Does it come bottom to top (archetype to concrete) or in reverse?
+	* @todo A small todo: Script data service could be exposed nicely to python. A small cooperation, using getters and setters could let us do things like data['something'] = 1, etc.
+	* With automatic mapping of object ID, internally calling ScriptDataService::get(id, name)... etc.
 	*/
 	class ScriptService : public Service {
 		public:
@@ -107,20 +120,6 @@ namespace Opde {
             ScriptNameToModule mScriptNameMap;
 
             void mapModuleScriptName(ObjectScriptModulePtr mod, std::string name);
-
-            // TODO: Listeners - database and property object messages (Have to be written first) - here, we again reveal the need to only modify concrete throughout the game run.
-            // TODO: per object script hierarchy. At the point of the loading (through DB service), the prop and link data are valid, so iteration on
-            // object scripts should be enough (until don't inherit is found).
-            // TODO: mapper: ObjectScriptModulePtr getModuleForScriptName(std::string& name), mapModuleScriptName(ObjectScriptModulePtr module, std::string& name) etc.
-            // Here's the chellenge: When adding a metaproperty, all the scripts the object holds itself should be removed and the new ones instantinated.
-            // (ignoring the ones that should stay there because the scripts should not hold any data themselves anyway).
-            // Thus we need a way to say which effective object ID the given script comes from.
-            // Another note: How shall we work with duplicities? IMHO any object should only hold one instance of the given script type, all duplicities should be ignored.
-            // Another question: Are scripts comming from archetype still mapped on every concrete object? This seems likely.
-            // We thus have creator id and holder id (creator is the archetype, holder the concrete obj)
-            // In which order do the scripts receive an event? Does it come bottom to top (archetype to concrete) or in reverse?
-            // A small todo: Script data service could be exposed nicely to python. A small cooperation, using getters and setters could let us do things like data['something'] = 1, etc.
-            // With automatic mapping of object ID, internally calling ScriptDataService::get(id, name)... etc.
 	};
 
 	/// Shared pointer to script service

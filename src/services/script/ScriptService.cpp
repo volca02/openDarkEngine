@@ -28,6 +28,7 @@
 #include "logger.h"
 #include "ConsoleBackend.h"
 #include "bindings.h"
+#include "Root.h"
 
 #include <OgreDataStream.h>
 #include <OgreResourceGroupManager.h>
