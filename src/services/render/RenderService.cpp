@@ -535,7 +535,7 @@ namespace Opde {
         try {
             // First, try to load the mesh directly as a mesh file
             Ogre::MeshPtr mesh1 = Ogre::MeshManager::getSingleton().load(fname, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-            mesh1->prepareForShadowVolume(); 
+
         } catch (FileNotFoundException &e) {
             // Undefine in advance, so there will be no clash
             Ogre::MeshManager::getSingleton().remove(fname);
@@ -546,8 +546,6 @@ namespace Opde {
             try {
                 Ogre::MeshPtr mesh1 = Ogre::MeshManager::getSingleton().create(fname, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                    true, mManualBinFileLoader);
-                   
-				mesh1->prepareForShadowVolume(); 
             } catch (FileNotFoundException &e) {
                 LOG_ERROR("RenderService::prepareMesh: Could not find the requested model %s", name.c_str());
             } catch (Opde::FileException &e) {
