@@ -248,7 +248,7 @@ namespace Opde {
 			mDebugOneFrame = false;
 			
 			if (debugFrame) {
-				LOG_DEBUG("---- LoopService one frame timings ----");
+				LOG_FATAL("---- LoopService one frame timings ----");
 				mActiveMode->debugOneFrame();
 			}
 			
@@ -275,7 +275,7 @@ namespace Opde {
 			}
 			
 			if (debugFrame) {
-				LOG_DEBUG("---- One frame timings end. Total frame time: %d ms ----", getCurrentTime() - mLastFrameTime);
+				LOG_FATAL("---- One frame timings end. Total frame time: %d ms ----", getCurrentTime() - mLastFrameTime);
 			}
 			mLastFrameTime = lFrameStart;
 		}
