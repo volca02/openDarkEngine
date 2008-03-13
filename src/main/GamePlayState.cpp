@@ -51,6 +51,8 @@ namespace Opde {
 		mMoveSpeed = 50;
 		mRotateYFactor = 1;
 
+		mShadows = false;
+
         // Try to remap the parameters with those listed in the configuration
 		mConfigService = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
         GameStateManager* gsm = GameStateManager::getSingletonPtr();
