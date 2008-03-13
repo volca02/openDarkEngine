@@ -23,6 +23,8 @@
  *****************************************************************************/
 
 #include "filelog.h"
+#include "OpdeException.h"
+
 #include <stdio.h>
 #include <string>
 
@@ -32,20 +34,18 @@
 
 namespace Opde {
 
-	FileLog::FileLog() {
-      LogFile = fopen("opde.log", "w");
-   };
+	FileLog::FileLog(const std::string& fname) : ofile(fname.c_str(), std::ios::out) {
+		if (!ofile.is_open())
+			OPDE_EXCEPT("Could not create output log file", "FileLog::FileLog");
+	};
 
 	FileLog::~FileLog() {
-      fclose(LogFile);
-   };
+		ofile.close();
+	};
 
 	void FileLog::logMessage(Logger::LogLevel level, char *message) {
-	   // Put in the severity/log level too
-	   fprintf(LogFile, "LOG [%s] : ", Logger::getSingleton().getLogLevelStr(level).c_str());
-	   fputs(message, LogFile);
-	   fputs("\n", LogFile);
-	   fflush (LogFile);
-      //LogFile << "LOG [" << level << "] : " << message << std::endl;
+		// Put in the severity/log level too
+		ofile <<  "LOG [" << Logger::getSingleton().getLogLevelStr(level) << "] : " << message << std::endl;
+		ofile.flush();
 	}
 }

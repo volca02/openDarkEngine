@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *		$Id:$
+ *		$Id$
  * 
  *****************************************************************************/
  
@@ -26,14 +26,18 @@
 #define __FILELOG_H
 
 #include "logger.h"
+
+#include <fstream>
   
 namespace Opde {
 
-	/** Log listener, writing the logging messsages to std::cerr */
+	/** Log listener, writing the logging messsages to a file */
 	class FileLog : public LogListener {
-      FILE *LogFile;
+		protected:
+			std::ofstream ofile;
+			
 		public:
-			FileLog();
+			FileLog(const std::string& fname);
 			virtual ~FileLog();
 			virtual void logMessage(Logger::LogLevel level, char *message);
 	};
