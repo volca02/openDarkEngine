@@ -20,6 +20,16 @@ Pre-0.3 release:
 	should be created in code (including the DTypeDef format descriptor).
     * DTypeDef cleanup: It now seems we can safely swap endianness of DTypeDef supported data. This means we can do all the byte mumbo-jumbo whilst loading, and have a cleaner get/set code.
 	- need to be 100% sure here - there are some unions present
+    * Cleanup in the error handling - how to report errors, how to handle exceptions to Python
+    * Object construction has some pending changes: Link definition should get clone/instantinate style attribute (clone target as well, clone link/leave archetype target id, discard link)
+	- see the Thief1 (2?) Torch. In fact any archetype with particleAttachment. Then see T2's Flinderize link. Both have non-standard object instantination behavior.
+    * SceneNode should be moved to RenderSystem again. The current position in the object service was too much a shortcut.
+	* Here are some thoughts: both Position property setting and call to the ObjectService::setPosition/Orientation should end up calling position listeners(only once)!
+	* some internal caching of the object->position and object->orientation can be done in object service, but not needed (too much data duplication)
+	* Physics service has the ability to stop controling certain parts of the object's orientation/position. Need more info here - what does setPosition in obj. service do with it
+	* AND how the physics service should update the position of the object (in fact any service)?
+	    - seems the best way is that phys. service is a listener to the position/orientation of the object. when needing to set the position/orientation, it will call ObjService::setPos/Ori
+	
     
 
 0.3 - 0.4:
