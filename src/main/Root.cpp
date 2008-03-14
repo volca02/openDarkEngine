@@ -31,6 +31,7 @@
 
 #include "ConfigService.h"
 #include <OgreConfigFile.h>
+#include <OgreResourceGroupManager.h>
 
 #include "filelog.h"
 
@@ -124,6 +125,9 @@ namespace Opde {
 
 	// -------------------------------------------------------
 	void Root::bootstrapFinished() {
+		// Initialise all resources
+		Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+		// report the boostrap finished to all services
 		mServiceMgr->bootstrapFinished();
 	}
 
