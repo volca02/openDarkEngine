@@ -150,7 +150,7 @@ namespace Opde {
 		mLogger = new Logger();
 
 		mStdLog = new StdLog();
-        mFileLog = new FileLog();
+        mFileLog = new FileLog("opde.log");
 
 		mLogger->registerLogListener(mFileLog);
 
