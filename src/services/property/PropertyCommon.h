@@ -86,9 +86,6 @@ namespace Opde {
 		
 		/// An ID of the object that changed
 		int objectID;
-		
-		/// Property data that are now in use for object, or NULL if removal happened
-		PropertyDataPtr data;
 	};
 	
 }

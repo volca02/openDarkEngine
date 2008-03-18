@@ -157,7 +157,6 @@ namespace Opde {
 
 		msg.change = PROP_GROUP_CLEARED;
 		msg.objectID = 0;
-		msg.data = PropertyDataPtr(); // NULL that means
 
 		broadcastMessage(msg);
 
@@ -239,17 +238,14 @@ namespace Opde {
                 case INH_VAL_ADDED: // Property was added to an object
                     pmsg.change = PROP_ADDED;
                     pmsg.objectID = msg.objectID;
-                    pmsg.data = getData(msg.srcID);
                     break;
                 case INH_VAL_CHANGED:
                     pmsg.change = PROP_CHANGED;
                     pmsg.objectID = msg.objectID;
-                    pmsg.data = getData(msg.srcID);
                     break;
                 case INH_VAL_REMOVED:
                     pmsg.change = PROP_REMOVED;
                     pmsg.objectID = msg.objectID;
-                    pmsg.data = NULL;
                 default:
                     return;
             }

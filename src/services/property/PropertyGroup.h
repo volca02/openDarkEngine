@@ -55,14 +55,6 @@ namespace Opde {
 			/// Name getter. Returns the name of property this group manages
 			const std::string& getName() { return mName; };
 
-
-			/** Property data getter. Used for more massive property changes.
-			* @param obj_id Object ID of the property to fetch
-			* @note call dataChangeFinished(obj_id), otherwise listeners will not receive broadcasts about the data modification
-			* @return PropertyDataPtr, which will be null if the property was not found
-			*/
-			PropertyDataPtr getData(int obj_id);
-
 			/** Determines whether an object with id obj_id stores or inherits property of this type
 			* @param obj_id The object id of the object
 			* @return true if the object has the given property
@@ -135,21 +127,6 @@ namespace Opde {
 			bool cloneProperty(int obj_id, int src_id);
 
 			// ----------------- Data manipulation related methods --------------------
-			/** Manual broadcaster of data change. To be used as the last call in a block of property manipulation calls using the PropertyDataPtr from getData call.
-			* @see getData
-			* @param data The new data (will not replace the old, used for objectID and data fields in the broadcast)
-			*
-			*/
-			void dataChangeFinished(PropertyDataPtr data) {
-				// TODO: Create a broadcast message, and send
-				PropertyChangeMsg msg;
-				msg.change = PROP_CHANGED;
-				msg.objectID = data->id();
-				msg.data = data;
-
-				broadcastMessage(msg);
-			}
-
 			/** Direct data setter.
 			* @param id object id
 			* @param field the field name
@@ -200,6 +177,13 @@ namespace Opde {
 			bool getCacheData() { return mUseDataCache; };
 
 		protected:
+			/** Property data getter. Internal use only.
+			* @param obj_id Object ID of the property to fetch
+			* @note call dataChangeFinished(obj_id), otherwise listeners will not receive broadcasts about the data modification
+			* @return PropertyDataPtr, which will be null if the property was not found
+			*/
+			PropertyDataPtr getData(int obj_id);
+
 			/** Inserts the property into the group, notifies inheritors and broadcasts the change
 			* @param propd The property to add
 			*/
