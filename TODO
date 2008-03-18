@@ -16,10 +16,15 @@ Pre-0.3 release:
     * Example scripts to the SVN - resources.cfg, opde.cfg, plugins.cfg, etc should be placed in SVN to ease the pain for people trying to build from source
     * Other example scripts/documentation, including FAQ - How do I create a custom material replacement? How do I create a mesh replacement? (...New movements for AI?...)
     * optional: Optimization. The new SM for example does not perform so well one could be satisfied with it.
-    * Built-in properties: To stop the opde from failing fatally if the core sripts are corrupted, the core properties (ideally all those which have some hooked code around them)
-	should be created in code (including the DTypeDef format descriptor).
+    * Built-in properties: To stop the opde from failing fatally if the core sripts are corrupted/missing, the property/link/binary data specifications could be created in code (including the DTypeDef 
+	format descriptor).  This can be accomplished for example with a header file generator that would convert the .pldef and .dtype scripts	into included routines. 
+	Not terribly hard to do, and would simply mean one preprocessing step - (1) compile the converter, (2) convert the files (somewhat simmilar to GUI code generators) 
+	generating .h or .cpp files, then compiled in as libGAMEData where GAME is one of the games (Thief1,Thief2,Shock2). Result: Routines accessible to the python
+	code or bootstrap code, setting up the binary definitions/properties/links.
+	
     * DTypeDef cleanup: It now seems we can safely swap endianness of DTypeDef supported data. This means we can do all the byte mumbo-jumbo whilst loading, and have a cleaner get/set code.
 	- need to be 100% sure here - there are some unions present
+	(Also an option: Getting rid of the DType structures altogether, using linear array of field lists with type. Bit more work, result would be much more simmilar to Dark's original impl.)
     * Cleanup in the error handling - how to report errors, how to handle exceptions to Python
     * Object construction has some pending changes: Link definition should get clone/instantinate style attribute (clone target as well, clone link/leave archetype target id, discard link)
 	- see the Thief1 (2?) Torch. In fact any archetype with particleAttachment. Then see T2's Flinderize link. Both have non-standard object instantination behavior.
