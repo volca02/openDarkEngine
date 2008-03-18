@@ -40,12 +40,15 @@
 #include <stack>
 
 namespace Opde {
+	/// Object system broadcasted message types
 	typedef enum {
-		// Object was created (Including all links and properties)
-		OBJ_CREATED = 1,
-		// Object was destroyed (Including all links and properties)
+		/// Object is starting to be created (only basic initialization happened). Used to initialize depending services
+		OBJ_CREATE_STARTED = 1,
+		/// Object was created (Including all links and properties)
+		OBJ_CREATED,
+		/// Object was destroyed (Including all links and properties)
 		OBJ_DESTROYED,
-		// All objects were destroyed
+		/// All objects were destroyed
 		OBJ_SYSTEM_CLEARED
 		
 	} ObjectServiceMessageType;
@@ -55,7 +58,7 @@ namespace Opde {
 		// Type of the message that happened
 		ObjectServiceMessageType type;
 		// Object id that the message is informing about (not valid for OBJ_SYSTEM_CLEARED)
-		int id;
+		int objectID;
 	};
 
 	/** @brief Object service - service managing in-game objects. Holder of the object's scene nodes
@@ -93,12 +96,6 @@ namespace Opde {
 			
 			/// @returns Object's orientation or Quaternion::IDENTITY if the object has no orientation
 			Quaternion orientation(int objID);
-			
-			/** Getter for SceneNodes of objects. Those only exist for concrete objects.
-			@returns The scene node of the object id (only for concrete objects)
-			@throws BasicException if the method is used on archetypes or on invalid object id (unused id)
-			*/
-			Ogre::SceneNode* getSceneNode(int objID);
 			
 			/** Gets the object's symbolic name 
 			@param objID the object id to get the name of
@@ -151,9 +148,6 @@ namespace Opde {
 			/** Database change callback */
 			void onDBChange(const DatabaseChangeMsg& m);
 			
-			/// Position property changed callback
-			void onPropPositionMsg(const PropertyChangeMsg& msg);
-			
 			/// SymbolicName property changed callback
 			void onPropSymNameMsg(const PropertyChangeMsg& msg);
 
@@ -198,15 +192,12 @@ namespace Opde {
 			
 			/// Name to object map
 			typedef std::map<std::string, int> NameToObject;
-			
-			/// Object id to scene node (only concrete objects)
-			typedef std::map<int, Ogre::SceneNode*> ObjectToNode;
-			
+
 			/// A set of allocated objects
 			ObjectAllocation mAllocatedObjects;
 			
-			/// Mapping of object id to scenenode
-			ObjectToNode mObjectToNode;
+			/// Position property (to set/get position/orientation of objects)
+			PropertyGroupPtr mPropPosition;
 			
 			/// Map's symbolic name to object ID
 			NameToObject mNameToID;
@@ -240,9 +231,6 @@ namespace Opde {
 			
 			/// A shared ptr to property service
 			PropertyServicePtr mPropertyService;
-			
-			PropertyGroup::ListenerID mPropPositionListenerID;
-			PropertyGroupPtr mPropPosition;
 			
 			PropertyGroup::ListenerID mPropSymNameListenerID;
 			PropertyGroupPtr mPropSymName;

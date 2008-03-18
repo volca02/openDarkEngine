@@ -634,7 +634,8 @@ namespace Opde {
 		// Our resource group
 		String resourceGroup = ResourceGroupManager::getSingleton().getWorldResourceGroupName();
 
-		createSkyHack(resourceGroup);
+		createSkyHackMaterial(resourceGroup);
+		createJorgeMaterial(resourceGroup);
 
 		// ------------- Following code loads the standard materials -------------------
 
@@ -680,7 +681,7 @@ namespace Opde {
 	}
 
 	// ---------------------------------------------------------------------
-	void WorldRepService::createSkyHack(Ogre::String resourceGroup) {
+	void WorldRepService::createSkyHackMaterial(const Ogre::String& resourceGroup) {
 		// First, we'll create the sky materials, named SkyShader and WaterShader
 		// The sky material does basically only write the Z value (no color write), and should be rendered prior to any other material
 		// This is because we render sky(box/sphere/dome/plane) first, and we want it to be visible through the faces textured by this material
@@ -701,6 +702,39 @@ namespace Opde {
 			// No dynamic lighting (Sky!)
 			shadPass->setLightingEnabled(false);
 			// ---- End of skyhack ----
+		}
+	}
+	
+	// ---------------------------------------------------------------------
+	void WorldRepService::createJorgeMaterial(const Ogre::String& resourceGroup) {
+		std::string shaderName("@template0");
+
+		if (!MaterialManager::getSingleton().resourceExists(shaderName)) {
+			MaterialPtr shadMat = MaterialManager::getSingleton().create(shaderName, resourceGroup);
+			shadMat->setReceiveShadows(true);
+		
+			Pass *shadPass = shadMat->getTechnique(0)->getPass(0);
+
+			shadPass->setAmbient(0.5, 0.5, 0.5);
+			shadPass->setDiffuse(1, 1, 1, 1);
+			shadPass->setSpecular(1, 1, 1, 1);
+
+			// Texture unit state for the main texture...
+			TextureUnitState* tus = shadPass->createTextureUnitState("jorge.png");
+
+			// Set replace on all first layer textures for now
+			tus->setTextureAddressingMode(TextureUnitState::TAM_WRAP);
+			tus->setTextureCoordSet(0);
+			tus->setTextureFiltering(TFO_BILINEAR);
+
+			tus->setTextureUScale(1.0f);
+			tus->setTextureVScale(1.0f);
+
+			// No dynamic lighting
+			shadMat->setLightingEnabled(false);
+			
+			shadMat->load();
+			addWorldMaterial(shadMat);
 		}
 	}
 

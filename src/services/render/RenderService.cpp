@@ -41,10 +41,15 @@
 #include <OgreAnimation.h>
 #include <OgreWindowEventUtilities.h>
 
+// Jorge texture png
+#include "jorge.h"
+
 using namespace std;
 using namespace Ogre;
 
 namespace Opde {
+	const char* DEFAULT_RAMP_OBJECT_NAME = "DefaultRamp";
+	
 
 	/*--------------------------------------------------------*/
 	/*--------------------- RenderService --------------------*/
@@ -77,6 +82,8 @@ namespace Opde {
 		// one thanks to the shared_ptr. This means using the scene manager/whatever
 		// is safe outside this class as long as it is done in a service which has 
 		// a member pointer to render service
+		if (!mPropPosition.isNull())
+		    mPropPosition->unregisterListener(mPropPositionListenerID);
 
 		if (!mPropModelName.isNull())
 		    mPropModelName->unregisterListener(mPropModelNameListenerID);
@@ -98,6 +105,9 @@ namespace Opde {
 			delete mDarkSMFactory;
 			mDarkSMFactory = NULL;
 		}
+		
+		delete mManualBinFileLoader;
+		mManualBinFileLoader = NULL;
 		
 		if (!mLoopService.isNull())
 			mLoopService->removeLoopClient(this);
@@ -141,6 +151,9 @@ namespace Opde {
 		// Last step: Get the loop service and register as a listener
 		mLoopService = ServiceManager::getSingleton().getService("LoopService").as<LoopService>();
 		mLoopService->addLoopClient(this);
+		
+		// prepare the default models and textures
+		prepareHardcodedMedia();
 
 		return true;
     }
@@ -253,8 +266,26 @@ namespace Opde {
 
 		mPropSpotlightListenerID = mPropSpotlight->registerListener(cspotlightc);
 
+		// --- Position property listener
+		mPropPosition = mPropertyService->getPropertyGroup("Position");
+
+		if (mPropPosition.isNull())
+            OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "RenderService::bootstrapFinished");
+
+		// listener to the position property to control the scenenode
+		PropertyGroup::ListenerPtr cposc =
+			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropPositionMsg);
+
+		mPropPositionListenerID = mPropPosition->registerListener(cposc);
+
 		
 		mObjectService = ServiceManager::getSingleton().getService("ObjectService").as<ObjectService>();
+		
+		// Listener to object messages
+		ObjectService::ListenerPtr objlist =
+			new ClassCallback<ObjectServiceMsg, RenderService>(this, &RenderService::onObjectMsg);
+		
+		mObjSystemListenerID = mObjectService->registerListener(objlist);
 
 		LOG_INFO("RenderService::bootstrapFinished() - done");
 	}
@@ -277,70 +308,19 @@ namespace Opde {
 		if (msg.objectID <= 0) // no action for archetypes
             return;
 
-        LOG_INFO("RenderService: Adding model for object %d", msg.objectID);
-
-        Ogre::String name = msg.data->get("label"); // the model name
+        Ogre::String name = mPropModelName->get(msg.objectID, "label"); // the model name
 
         // As a test, I'm loading cube.mesh
         switch (msg.change) {
 			case PROP_CHANGED:
-				removeObjectEntity(msg.objectID);
-				
-
-			case PROP_ADDED: {
-                    try {
-                        prepareMesh(name);
-                        
-                        // TODO: Create a MeshService. Then Entity* ent = meshService->createObjectEntity(name);
-                        // That will react to DatabaseSevice notifications, and unload the meshes as needed when changing mission
-                        Entity *ent = mSceneMgr->createEntity( "Object" + StringConverter::toString(msg.objectID), name + ".mesh" );
-
-                        // bind the ent to the node of the obj.
-                        SceneNode* node = NULL;
-                        
-                        try {
-							node = mObjectService->getSceneNode(msg.objectID);
-						} catch (BasicException& e) {
-							LOG_ERROR("RenderService: Could not get the sceneNode for object %d! Not attaching object model!", msg.objectID);
-							mSceneMgr->destroyEntity(ent);
-							return;
-						}
-						
-                        node->attachObject(ent);
-
-                        ent->_initialise(true);
-                        
-                        ent->setCastShadows(true);
-
-                        // Update the bones to be manual
-                        if (ent->hasSkeleton()) {
-							
-							Skeleton::BoneIterator bi = ent->getSkeleton()->getBoneIterator();
-
-							while (bi.hasMoreElements()) {
-								Bone* n = bi.getNext();
-
-								n->setManuallyControlled(true);
-							}
-
-							ent->getSkeleton()->setBindingPose();
-                        }
-                        
-                        EntityInfo ei;
-                        
-                        ei.entity = ent;
-                        ei.emi = new EntityMaterialInstance(ent);
-                        
-                        mEntityMap.insert(make_pair(msg.objectID, ei));
-
-                    } catch (FileNotFoundException &e) {
-                        LOG_ERROR("RenderService: Could not find the requested model %s (exception encountered)", name.c_str());
-                    }
-
-                    break;
-                }
+			case PROP_ADDED:
+				// TODO: This can consume time even when the new model name == old model name
+				prepareMesh(name);
+				setObjectModel(msg.objectID, name + ".mesh");
+				break;
+                    
             case PROP_REMOVED:
-                removeObjectEntity(msg.objectID);
+				setObjectModel(msg.objectID, DEFAULT_RAMP_OBJECT_NAME);
                 break;
 		}
 	}
@@ -363,18 +343,17 @@ namespace Opde {
 			case PROP_CHANGED:
 				// Will update the light's parameters
 				// updateLight(msg.objectID, msg.data);
-				updateLight(mLightInfoMap[msg.objectID], msg.data);
+				updateLight(mLightInfoMap[msg.objectID], msg.objectID);
 				break;
 		
 			case PROP_ADDED: {
 				// let's add the light, then update it
 				LightInfo& li = createLight(msg.objectID);
-				updateLight(li, msg.data);
+				updateLight(li, msg.objectID);
 				
 				// TODO: when adding the light, also check if the spotlight prop isn't present
 				if (mPropSpotlight->has(msg.objectID))
-					updateSpotLight(li, mPropSpotlight->getData(msg.objectID));
-					
+					updateSpotLight(li, msg.objectID);
 				break;
 			}
 				
@@ -404,7 +383,7 @@ namespace Opde {
 				LightInfoMap::iterator it = mLightInfoMap.find(msg.objectID);
 				
 				if (it != mLightInfoMap.end()) {
-					updateSpotLight(it->second, msg.data);
+					updateSpotLight(it->second, msg.objectID);
 				}
 				break;
 			}
@@ -422,7 +401,7 @@ namespace Opde {
 		l->setType(Light::LT_POINT);
 		
 		// attach the light to a newly created scenenode (child of the object's sn)
-		SceneNode* on = mObjectService->getSceneNode(objID);
+		SceneNode* on = getSceneNode(objID);
 		
 		Quaternion q;
 
@@ -445,12 +424,12 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	void RenderService::updateLight(LightInfo& li, const PropertyDataPtr& propLightData) {
+	void RenderService::updateLight(LightInfo& li, int objectID) {
 		// The node will be a child of the Object's
 		// Set the light's parameters
 		// brightness, offset, radius
-		Real brightness = propLightData->get("brightness").toFloat();
-		Real radius = propLightData->get("radius").toFloat();
+		Real brightness = mPropLight->get(objectID, "brightness").toFloat();
+		Real radius = mPropLight->get(objectID, "radius").toFloat();
 
 		// For lights with zero radius, use linear attenuation
 		if (radius <= 0) {
@@ -477,7 +456,7 @@ namespace Opde {
 		li.light->setDiffuseColour(brightness, brightness, brightness);
 		li.light->setSpecularColour(brightness, brightness, brightness);
 		
-		li.node->setPosition(propLightData->get("offset").toVector());
+		li.node->setPosition(mPropLight->get(objectID, "offset").toVector());
 
 		static_cast<DarkSceneManager*>(mSceneMgr)->queueLightForUpdate(li.light);
 	}
@@ -496,12 +475,12 @@ namespace Opde {
 	}
 		
 	// --------------------------------------------------------------------------
-	void RenderService::updateSpotLight(LightInfo& li, const PropertyDataPtr& propSpotData) {
+	void RenderService::updateSpotLight(LightInfo& li, int objectID) {
 		// look at the results
 		// TODO: Conversion (angle in degrees or what?)
-		Degree inner(propSpotData->get("inner").toFloat());
-		Degree outer(propSpotData->get("outer").toFloat());
-		Real dist(propSpotData->get("distance").toFloat());
+		Degree inner(mPropSpotlight->get(objectID, "inner").toFloat());
+		Degree outer(mPropSpotlight->get(objectID, "outer").toFloat());
+		Real dist(mPropSpotlight->get(objectID, "distance").toFloat());
 		
 		// The angle is in degrees!
 		// The third parameter may mean distance from object... hmm.
@@ -561,28 +540,299 @@ namespace Opde {
 		ObjectEntityMap::iterator it = mEntityMap.find(id);
 		
 		if (it != mEntityMap.end()) {
-			try {
-				SceneNode* node = mObjectService->getSceneNode(id);
+			SceneNode* node = it->second.node;
 				
-				node->detachObject(it->second.entity);
-				
-			} catch (BasicException& e) {
-				LOG_ERROR("RenderService: Could not get the sceneNode for object %d! Not detaching entity from scene node!", id);
-			}
+			node->detachObject(it->second.entity);
 
 			// destroy the emi
 			delete it->second.emi;
 				
+			// destroy the detached entity
 			mSceneMgr->destroyEntity(it->second.entity);
 			
+			// destroy the scenenode of the entity
+			mSceneMgr->destroySceneNode(node->getName());
+			
+			// erase the record itself
 			mEntityMap.erase(it);
 		}
     }
+
+	// --------------------------------------------------------------------------
+	void RenderService::setObjectModel(int id, const std::string& name) {
+		// remove the object's previous model to make sure we're clean
+		removeObjectEntity(id);
+		
+		try {
+			Ogre::String idstr = StringConverter::toString(id);
+			
+			// TODO: Create a MeshService. Then Entity* ent = meshService->createObjectEntity(name);
+			// That will react to DatabaseSevice notifications, and unload the meshes as needed when changing mission
+			Entity *ent = mSceneMgr->createEntity( "Object" + idstr, name);
+
+			// bind the ent to the node of the obj.
+			SceneNode* node = NULL;
+			
+			try {
+				node = getSceneNode(id);
+			} catch (BasicException& e) {
+				LOG_ERROR("RenderService: Could not get the sceneNode for object %d! Not attaching object model!", id);
+				mSceneMgr->destroyEntity(ent);
+				return;
+			}
+			
+			assert(node != NULL);
+			
+			SceneNode* enode = mSceneMgr->createSceneNode("ObjEntity" + idstr);
+			enode->setPosition(Vector3::ZERO);
+			enode->setOrientation(Quaternion::IDENTITY);
+			node->addChild(enode);
+			
+			enode->attachObject(ent);
+
+			ent->_initialise(true);
+			
+			ent->setCastShadows(true);
+
+			// Update the bones to be manual
+			// TODO: This should only apply for non-ai meshes!
+			if (ent->hasSkeleton()) {
+				
+				Skeleton::BoneIterator bi = ent->getSkeleton()->getBoneIterator();
+
+				while (bi.hasMoreElements()) {
+					Bone* n = bi.getNext();
+
+					n->setManuallyControlled(true);
+				}
+
+				ent->getSkeleton()->setBindingPose();
+			}
+			
+			EntityInfo ei;
+			
+			ei.entity = ent;
+			ei.node = enode;
+			ei.emi = new EntityMaterialInstance(ent);
+			
+			mEntityMap.insert(make_pair(id, ei));
+
+		} catch (FileNotFoundException &e) {
+			LOG_ERROR("RenderService: Could not find the requested model %s (exception encountered)", name.c_str());
+		}
+	}
 
     // --------------------------------------------------------------------------
     void RenderService::clear() {
         mEntityMap.clear();
     }
+
+
+	// --------------------------------------------------------------------------
+	// ---- Scene Node handling routines ----------------------------------------
+	// --------------------------------------------------------------------------
+	Ogre::SceneNode* RenderService::getSceneNode(int objID) {
+		if (objID > 0) {
+			ObjectToNode::iterator snit = mObjectToNode.find(objID);
+			
+			if (snit != mObjectToNode.end()) {
+				return snit->second;
+			}
+		}
+		
+		OPDE_EXCEPT("Could not find scenenode for object. Does object exist?", "ObjectService::getSceneNodeForObject");
+	}
+	
+	// --------------------------------------------------------------------------
+	void RenderService::onPropPositionMsg(const PropertyChangeMsg& msg) {
+		// Update the scene node's position and orientation
+		if (msg.objectID <= 0) // no action for archetypes
+            return;
+
+		switch (msg.change) {
+			case PROP_ADDED   :
+			case PROP_CHANGED : {
+				try {
+					// Find the scene node by it's object id, and update the position and orientation
+					Ogre::SceneNode* node = getSceneNode(msg.objectID);
+					
+					node->setPosition(mPropPosition->get(msg.objectID, "position").toVector());
+					node->setOrientation(mPropPosition->get(msg.objectID, "facing").toQuaternion());
+				
+				} catch (BasicException& e) {
+					LOG_ERROR("ObjectService: Exception while setting position of object: %s", e.getDetails().c_str());
+				}
+				
+				break;
+			}
+		}
+	}
+	
+	// --------------------------------------------------------------------------
+	void RenderService::onObjectMsg(const ObjectServiceMsg& msg) {
+		if (msg.objectID <= 0) // no action for archetypes
+            return;
+
+		switch (msg.type) {
+			case OBJ_CREATE_STARTED   : {
+				// create scenenode, return
+				std::string nodeName("Object");
+			
+				nodeName += Ogre::StringConverter::toString(msg.objectID);
+				
+				// Use render service to create a scene node for the object
+				Ogre::SceneNode* snode = mSceneMgr->createSceneNode(nodeName);
+				
+				assert(snode != NULL);
+				
+				// Attach the node to the root SN of the scene
+				mSceneMgr->getRootSceneNode()->addChild(snode);
+				
+				mObjectToNode.insert(std::make_pair(msg.objectID, snode));
+				
+				// set the default model - default ramp
+				setObjectModel(msg.objectID, DEFAULT_RAMP_OBJECT_NAME);
+				
+				return;
+			}
+			
+			case OBJ_DESTROYED : {
+				// destroy all the entities/lights attached, then the scenenode
+				// Light and spotlight are removed because of property removal, 
+				// TODO: no modelName -> default model (mesh) for the object
+				// in original dark
+				// if not present, so after we construct the same behavior, 
+				// destroy the entity here
+				
+				removeObjectEntity(msg.objectID);
+				
+				// find the SN, destroy if found
+				ObjectToNode::iterator oit = mObjectToNode.find(msg.objectID);
+				
+				if (oit!=mObjectToNode.end()) {
+					std::string nodeName("Object");
+					nodeName += Ogre::StringConverter::toString(msg.objectID);
+					mSceneMgr->destroySceneNode(oit->second->getName());
+				}
+			
+				return;
+			}
+		}
+	}
+
+	void RenderService::prepareHardcodedMedia() {
+		// 1. The default texture - Jorge (recreated to be nearly the same visually)
+		TexturePtr jorgeTex = TextureManager::getSingleton().getByName("jorge.png");
+			
+		if (jorgeTex.isNull()) {
+			DataStreamPtr stream(new MemoryDataStream(JORGE_TEXTURE_PNG, JORGE_TEXTURE_PNG_SIZE, false));
+			
+			Image img;
+			img.load(stream, "png");
+			jorgeTex = TextureManager::getSingleton().loadImage(
+							"jorge.png", ResourceGroupManager::INTERNAL_RESOURCE_GROUP_NAME,
+							img, TEX_TYPE_2D);
+		}
+		
+		// 2. The default geometric shape - White Ramp
+		/* I don't have the exact sizes of this thing. */
+		createRampMesh();
+	}
+	
+	void RenderService::createRampMesh() {
+		// Code copied from Ogre3D wiki, and modified (Thanks to the original author or saving my time!)
+		/// Create the mesh via the MeshManager
+		Ogre::MeshPtr msh = MeshManager::getSingleton().createManual(DEFAULT_RAMP_OBJECT_NAME, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
+		/// Create one submesh
+		SubMesh* sub = msh->createSubMesh("BaseWhite");
+
+		// Not exactly accurate for 1:1:2 side size ratio, but well...
+		const float sqrt13 = 0.577350269f; /* sqrt(1/3) */
+
+		const size_t nVertices = 6;
+		const size_t vbufCount = 3*2*nVertices;
+		
+		float vertices[vbufCount] = {
+			-2.0,-1.0,-1.0,	//0 position
+			-sqrt13,-sqrt13,-sqrt13,
+			-2.0, 1.0,-1.0, //1 position
+			-sqrt13,sqrt13,-sqrt13,
+			-2.0, 1.0, 1.0, //2 position
+			-sqrt13,sqrt13,sqrt13,
+			-2.0,-1.0, 1.0, //3 position
+			-sqrt13,-sqrt13,sqrt13,
+			2.0, 1.0, -0.3,  //4 position
+			sqrt13,sqrt13,-sqrt13,
+			2.0,-1.0, -0.3,  //5 position
+			sqrt13,-sqrt13,-sqrt13
+		};
+		
+		const size_t ibufCount = 24;
+		unsigned short faces[ibufCount] = {
+				0,1,2,
+				0,2,3,
+				5,1,0,
+				5,4,1,
+				5,3,2,
+				5,2,4,
+				1,4,2,
+				5,0,3
+		};
+			
+
+		/// Create vertex data structure for 8 vertices shared between submeshes
+		msh->sharedVertexData = new VertexData();
+		msh->sharedVertexData->vertexCount = nVertices;
+
+		/// Create declaration (memory format) of vertex data
+		VertexDeclaration* decl = msh->sharedVertexData->vertexDeclaration;
+		size_t offset = 0;
+		// 1st buffer
+		decl->addElement(0, offset, VET_FLOAT3, VES_POSITION);
+		offset += VertexElement::getTypeSize(VET_FLOAT3);
+		decl->addElement(0, offset, VET_FLOAT3, VES_NORMAL);
+		offset += VertexElement::getTypeSize(VET_FLOAT3);
+		
+		/// Allocate vertex buffer of the requested number of vertices (vertexCount) 
+		/// and bytes per vertex (offset)
+		HardwareVertexBufferSharedPtr vbuf = 
+			HardwareBufferManager::getSingleton().createVertexBuffer(
+			offset, msh->sharedVertexData->vertexCount, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+		
+		/// Upload the vertex data to the card
+		vbuf->writeData(0, vbuf->getSizeInBytes(), vertices, true);
+
+		/// Set vertex buffer binding so buffer 0 is bound to our vertex buffer
+		VertexBufferBinding* bind = msh->sharedVertexData->vertexBufferBinding; 
+		bind->setBinding(0, vbuf);
+
+		/// Allocate index buffer of the requested number of vertices (ibufCount) 
+		HardwareIndexBufferSharedPtr ibuf = HardwareBufferManager::getSingleton().
+			createIndexBuffer(
+			HardwareIndexBuffer::IT_16BIT, 
+			ibufCount, 
+			HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+
+		/// Upload the index data to the card
+		ibuf->writeData(0, ibuf->getSizeInBytes(), faces, true);
+
+		/// Set parameters of the submesh
+		sub->useSharedVertices = true;
+		sub->indexData->indexBuffer = ibuf;
+		sub->indexData->indexCount = ibufCount;
+		sub->indexData->indexStart = 0;
+
+		/// Set bounding information (for culling)
+		msh->_setBounds(AxisAlignedBox(-2,-1,-1,2,1,1));
+		msh->_setBoundingSphereRadius(Math::Sqrt(6));
+
+		/// Notify Mesh object that it has been loaded
+		msh->load();
+		
+		prepareMesh(DEFAULT_RAMP_OBJECT_NAME);
+	}
+
 
 	//-------------------------- Factory implementation
 	std::string RenderServiceFactory::mName = "RenderService";

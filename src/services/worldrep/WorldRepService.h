@@ -115,7 +115,10 @@ namespace Opde {
 			Ogre::Plane constructPlane(wr_plane_t plane);
 
 			/** Internal method. Creates skyhack material */
-			void createSkyHack(Ogre::String resourceGroup);
+			void createSkyHackMaterial(const Ogre::String& resourceGroup);
+			
+			/** Internal method. Creates Jorge material (template0) from internal jorge.png */
+			void createJorgeMaterial(const Ogre::String& resourceGroup);
 
 			// TODO: Move this away... RenderService->getRoot?
 			Ogre::Root *mRoot;

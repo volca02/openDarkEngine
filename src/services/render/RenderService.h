@@ -105,22 +105,51 @@ namespace Opde {
 			*/
 			void setWorldVisible(bool visible);
 			
+			/** Getter for SceneNodes of objects. Those only exist for concrete objects.
+			@returns The scene node of the object id (only for concrete objects)
+			@throws BasicException if the method is used on archetypes or on invalid object id (unused id)
+			*/
+			Ogre::SceneNode* getSceneNode(int objID);
+			
 		protected:
             virtual bool init();
             virtual void bootstrapFinished();
             
 			virtual void loopStep(float deltaTime);
 
+			/** Model name property callback
+			* @todo Default to the same model as dark (see if T1/T2/SS2 use the same model for concretes not having this property specified)
+			*/
             void onPropModelNameMsg(const PropertyChangeMsg& msg);
+            
+            /// Property Light change callback
             void onPropLightMsg(const PropertyChangeMsg& msg);
+            
+            /// Property Spotlight change callback
             void onPropSpotlightMsg(const PropertyChangeMsg& msg);
-
+            
+   			/// Position property change callback
+			void onPropPositionMsg(const PropertyChangeMsg& msg);
+			
+			/// Object creation/destruction callback
+			void onObjectMsg(const ObjectServiceMsg& msg);
+			
+			/// Prepares mesh named "name" for usage on entity (if it was not prepared already)
             void prepareMesh(const Ogre::String& name);
 
 			/// Removes entity from the given object (meaning it will not have a visible representation)
 			void removeObjectEntity(int id);
 			
+			/// Sets the model for the given object
+			void setObjectModel(int id, const std::string& name);
+			
             void clear();
+            
+            /// prepares some hardcoded media (included in the executable)
+            void prepareHardcodedMedia();
+            
+            /// Cretes a ramp mesh, that is used as a default mesh when not specified otherwise
+            void createRampMesh();
             
    			// A package of a light and it's scene node
 			struct LightInfo {
@@ -131,6 +160,7 @@ namespace Opde {
 			// A package of an entity and a EntityMaterialInstance
 			struct EntityInfo {
 				Ogre::Entity* entity;
+				Ogre::SceneNode* node;
 				EntityMaterialInstance* emi;
 			};
 
@@ -138,13 +168,13 @@ namespace Opde {
             LightInfo& createLight(int objID);
             
             /// Updates a light based on the data of property LIGHT
-			void updateLight(LightInfo& li, const PropertyDataPtr& propLightData);
+			void updateLight(LightInfo& li, int objectID);
 			
 			/// removes a light
    			void removeLight(int id);
    			
    			/// Updates a light to be a spotlight, updates it's params
-   			void updateSpotLight(LightInfo& li, const PropertyDataPtr& propSpotData);
+   			void updateSpotLight(LightInfo& li, int objectID);
    			
    			/// removes spotlight quality from a light (leaves the light as a point light)
    			void removeSpotLight(int id);
@@ -165,9 +195,15 @@ namespace Opde {
 			PropertyGroup::ListenerID mPropLightListenerID;
 			PropertyGroupPtr mPropLight;
 			
-			// SpotLight Propert related
+			// SpotLight Property related
 			PropertyGroup::ListenerID mPropSpotlightListenerID;
 			PropertyGroupPtr mPropSpotlight;
+			
+			// "Position" Property related
+			PropertyGroup::ListenerID mPropPositionListenerID;
+			PropertyGroupPtr mPropPosition;
+			
+
 
 			/// Shared pointer to the property service
 			PropertyServicePtr mPropertyService;
@@ -196,6 +232,7 @@ namespace Opde {
 			
 			/// Shared ptr to object service (for scene nodes)
 			ObjectServicePtr mObjectService;
+			ObjectService::ListenerID mObjSystemListenerID;
 			
 			
 			typedef std::map<int, LightInfo> LightInfoMap;
@@ -206,6 +243,12 @@ namespace Opde {
 			// DatabaseServicePtr mDatabaseService;
 			// BinaryServicePtr mBinaryService;
 			
+			
+			/// Object id to scene node (only concrete objects)
+			typedef std::map<int, Ogre::SceneNode*> ObjectToNode;
+			
+			/// Mapping of object id to scenenode
+			ObjectToNode mObjectToNode;
 	};
 
 	/// Shared pointer to Link service

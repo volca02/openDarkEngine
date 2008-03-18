@@ -52,9 +52,6 @@ namespace Opde {
 	ObjectService::~ObjectService() {
 		if (!mDatabaseService.isNull())
 	        mDatabaseService->unregisterListener(mDbCallback);
-	        
-		if (!mPropPosition.isNull())
-		    mPropPosition->unregisterListener(mPropPositionListenerID);
 	}
 
 
@@ -93,9 +90,7 @@ namespace Opde {
 	//------------------------------------------------------
 	Vector3 ObjectService::position(int objID) {
 		try {
-			Ogre::SceneNode* sn = getSceneNode(objID);
-			
-			return sn->getWorldPosition();
+			return mPropPosition->get(objID, "position").toVector();
 		} catch(BasicException &e)  {
 			return Vector3::ZERO;
 		}
@@ -104,25 +99,10 @@ namespace Opde {
 	//------------------------------------------------------
 	Quaternion ObjectService::orientation(int objID) {
 		try {
-			Ogre::SceneNode* sn = getSceneNode(objID);
-			
-			return sn->getWorldOrientation();
+			return mPropPosition->get(objID, "orientation").toQuaternion();
 		} catch(BasicException &e)  {
 			return Quaternion::IDENTITY;
 		}
-	}
-
-	//------------------------------------------------------
-	Ogre::SceneNode* ObjectService::getSceneNode(int objID) {
-		if (objID > 0) {
-			ObjectToNode::iterator snit = mObjectToNode.find(objID);
-			
-			if (snit != mObjectToNode.end()) {
-				return snit->second;
-			}
-		}
-		
-		OPDE_EXCEPT("Could not find scenenode for object. Does object exist?", "ObjectService::getSceneNodeForObject");
 	}
 
 	//------------------------------------------------------
@@ -157,18 +137,13 @@ namespace Opde {
 	void ObjectService::teleport(int id, Vector3 pos, Quaternion ori, bool relative) {
 		// First look if we exist
 		if (relative) {
-			PropertyDataPtr dta = mPropPosition->getData(id);
-			Vector3 _pos = dta->get("position").toVector() + pos;
-			Quaternion _ori = dta->get("facing").toQuaternion() + ori;
-			dta->set("position", _pos);
-			dta->set("facing", _ori);
-			mPropPosition->dataChangeFinished(dta);
+			Vector3 _pos = mPropPosition->get(id, "position").toVector() + pos;
+			Quaternion _ori = mPropPosition->get(id, "facing").toQuaternion() + ori;
+			mPropPosition->set(id, "position", _pos);
+			mPropPosition->set(id, "facing", _ori);
 		} else {
-			// We do this at once to save broadcasts
-			PropertyDataPtr dta = mPropPosition->getData(id);
-			dta->set("position", pos);
-			dta->set("facing", ori);
-			mPropPosition->dataChangeFinished(dta);
+			mPropPosition->set(id, "position", pos);
+			mPropPosition->set(id, "facing", ori);
 		}
 	}
 
@@ -250,23 +225,11 @@ namespace Opde {
 		mPropertyService = ServiceManager::getSingleton().getService("PropertyService").as<PropertyService>();
 		
 		// For SceneNodes
-		RenderServicePtr renderService = ServiceManager::getSingleton().getService("RenderService").as<RenderService>();
-		
-		mSceneMgr = renderService->getSceneManager();
-
-		// listener to the position property to control the scenenode
-		PropertyGroup::ListenerPtr cposc =
-			new ClassCallback<PropertyChangeMsg, ObjectService>(this, &ObjectService::onPropPositionMsg);
-
-
 		mPropPosition = mPropertyService->getPropertyGroup("Position");
 
 		if (mPropPosition.isNull())
             OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "RenderService::bootstrapFinished");
 
-		mPropPositionListenerID = mPropPosition->registerListener(cposc);
-		
-		
 		// listener to the symbolic name property
 		PropertyGroup::ListenerPtr cnamec =
 			new ClassCallback<PropertyChangeMsg, ObjectService>(this, &ObjectService::onPropSymNameMsg);
@@ -323,36 +286,11 @@ namespace Opde {
 	}
 	
 	// --------------------------------------------------------------------------
-	void ObjectService::onPropPositionMsg(const PropertyChangeMsg& msg) {
-		// Update the scene node's position and orientation
-		if (msg.objectID <= 0) // no action for archetypes
-            return;
-
-		switch (msg.change) {
-			case PROP_ADDED   :
-			case PROP_CHANGED : {
-				try {
-					// Find the scene node by it's object id, and update the position and orientation
-					Ogre::SceneNode* node = getSceneNode(msg.objectID);
-					
-					node->setPosition(msg.data->get("position").toVector());
-					node->setOrientation(msg.data->get("facing").toQuaternion());
-				
-				} catch (BasicException& e) {
-					LOG_ERROR("ObjectService: Exception while setting position of object: %s", e.getDetails().c_str());
-				}
-				
-				break;
-			}
-		}
-	}
-	
-	// --------------------------------------------------------------------------
 	void ObjectService::onPropSymNameMsg(const PropertyChangeMsg& msg) {
 		switch (msg.change) {
 			case PROP_ADDED   :
 			case PROP_CHANGED : {
-				mNameToID[msg.data->get("").toString()] = msg.objectID;
+				mNameToID[mPropSymName->get(msg.objectID, "").toString()] = msg.objectID;
 				return;
 			}
 		}
@@ -571,7 +509,7 @@ namespace Opde {
 		// Use inherit service to set archetype for the new object
 		mInheritService->setArchetype(objID, archetypeID);
 		
-		// TODO: Copy the uninheritable properties
+		// TODO: Copy the uninheritable properties (i.e. ask each special property to do it's work)
 	}
 	
 	//------------------------------------------------------
@@ -583,7 +521,7 @@ namespace Opde {
 		ObjectServiceMsg m;
 		
 		m.type = OBJ_CREATED;
-		m.id = objID;
+		m.objectID = objID;
 		
 		// Broadcast the change
 		broadcastMessage(m);
@@ -596,18 +534,6 @@ namespace Opde {
 		
 		if (it != mAllocatedObjects.end()) {
 			// Destroy the scene node of the object
-			
-			if (objID > 0) {
-				ObjectToNode::iterator snit = mObjectToNode.find(objID);
-				
-				if (snit != mObjectToNode.end()) {
-					mSceneMgr->destroySceneNode(snit->second->getName());
-					mObjectToNode.erase(snit);
-				} else {
-					LOG_FATAL("Expected to find a SceneNode for object (%d), but wasn't there!", objID);
-				}
-			}
-			
 			NameToObject::iterator snit = mNameToID.find(getName(objID));
 			
 			if (snit != mNameToID.end())
@@ -630,7 +556,7 @@ namespace Opde {
 			ObjectServiceMsg m;
 			
 			m.type = OBJ_DESTROYED;
-			m.id = objID;
+			m.objectID = objID;
 			
 			// Broadcast the change
 			broadcastMessage(m);
@@ -639,21 +565,15 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	void ObjectService::_prepareForObject(int objID) {
-		if (objID > 0) {
-			std::string nodeName("Object");
-			
-			nodeName += Ogre::StringConverter::toString(objID);
-			
-			// Use render service to create a scene node for the object
-			Ogre::SceneNode* snode = mSceneMgr->createSceneNode(nodeName);
-			
-			assert(snode != NULL);
-			
-			// Attach the node to the root SN of the scene
-			mSceneMgr->getRootSceneNode()->addChild(snode);
-			
-			mObjectToNode.insert(std::make_pair(objID, snode));
-		}
+		// Broadcast ObjectBeginCreate message - let handlers initialize data...
+		// Prepare the message
+		ObjectServiceMsg m;
+		
+		m.type = OBJ_CREATE_STARTED;
+		m.objectID = objID;
+		
+		// Broadcast the change
+		broadcastMessage(m);
 	}
 	
 	//------------------------------------------------------
