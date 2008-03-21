@@ -35,13 +35,16 @@ namespace Opde {
 	/// Just an empty result of a query
     class EmptyInheritQueryResult : public InheritQueryResult {
 	    public:
-            EmptyInheritQueryResult() : InheritQueryResult() {  };
+            EmptyInheritQueryResult() : InheritQueryResult(), mNullPtr(NULL) {  };
 
-            virtual const InheritLinkPtr next() { return NULL; };
+            virtual const InheritLinkPtr& next() { return mNullPtr; };
 
             virtual bool end() const {
                 return true;
             };
+		
+		protected:
+			InheritLinkPtr mNullPtr;
 	};
 
 	class SimpleInheritQueryResult : public InheritQueryResult {
@@ -50,16 +53,14 @@ namespace Opde {
                 mIter = mLinkMap.begin();
             }
 
-            virtual const InheritLinkPtr next() {
-                if (!end()) {
-                    InheritLinkPtr l = mIter->second;
+            virtual const InheritLinkPtr& next() {
+				assert(!end());
+				
+				const InheritLinkPtr& l = mIter->second;
 
-                    ++mIter;
+				++mIter;
 
-                    return l;
-                } else {
-                    return NULL;
-                }
+				return l;
             }
 
             virtual bool end() const {
