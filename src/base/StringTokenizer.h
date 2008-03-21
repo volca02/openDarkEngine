@@ -45,7 +45,7 @@ namespace Opde {
 
 	/** An universal string tokenizer. Splits the text using given IsChar instance
 	*/
-	class StringTokenizer : public Iterator<std::string> {
+	class StringTokenizer {
 		public:
 			/** Constructor
 			* @param src the string to tokenize
@@ -103,7 +103,7 @@ namespace Opde {
 
 
 	/** @brief Whitespace String tokenizer - splits given string on whitespaces, optionally watching for double quotes */
-	class WhitespaceStringTokenizer : public Iterator<std::string> {
+	class WhitespaceStringTokenizer {
 		protected:
 			/// char classifier (is Space)
 			struct IsSpace : public std::unary_function<char, bool> {

@@ -27,7 +27,7 @@ namespace Opde {
     /** An java-like iterator approach */
     template <typename T> class Iterator {
 	public:
-	    virtual T next() = 0;
+	    virtual T& next() = 0;
 	    virtual bool end() const = 0;
     };
 
@@ -35,7 +35,7 @@ namespace Opde {
     /** A const, java-like iterator approach */
     template <typename T> class ConstIterator {
 	public:
-	    virtual const T next() = 0;
+	    virtual const T& next() = 0;
 	    virtual bool end() const = 0;
     };
 }
