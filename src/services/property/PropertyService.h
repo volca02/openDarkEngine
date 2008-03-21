@@ -32,6 +32,12 @@
 #include "MessageSource.h"
 
 namespace Opde {
+	/// Class representing a property name iterator
+	typedef ConstIterator< std::string > StringIterator;
+
+	/// Shared pointer instance to property group iterator
+	typedef shared_ptr< StringIterator > StringIteratorPtr;
+	
 	/** @brief Property service - service managing in-game object properties
 	*/
 	class PropertyService : public Service {
@@ -96,6 +102,12 @@ namespace Opde {
 
 			/** Clears out all the PropertyGroups (effectively wiping out all properties) */
 			void clear();
+			
+			/** @returns a property name iterator usable to iterate over all property types */
+			StringIteratorPtr getAllPropertyNames();
+
+			/// maps property groups to their names
+			typedef std::map< std::string, PropertyGroupPtr > PropertyGroupMap;
 
 		protected:
             /// service initialization
@@ -103,9 +115,6 @@ namespace Opde {
 
             /// service initialization
             void bootstrapFinished();
-
-			/// maps property groups to their names
-			typedef std::map< std::string, PropertyGroupPtr > PropertyGroupMap;
 
 			/// maps the properties by their names
 			PropertyGroupMap mPropertyGroupMap;

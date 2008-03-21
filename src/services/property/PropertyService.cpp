@@ -28,7 +28,34 @@
 using namespace std;
 
 namespace Opde {
+	/// helper string iterator over map keys
+	class PropertyGroupMapKeyIterator : public StringIterator {
+		public:
+			PropertyGroupMapKeyIterator(PropertyService::PropertyGroupMap& pGroupMap) :
+                            mPGroupMap(pGroupMap) {
+				mIter = mPGroupMap.begin();
+				mEnd = mPGroupMap.end();
+            }
 
+            virtual const std::string& next() {
+				assert(!end());
+				
+				const std::string& s = mIter->first;
+
+				++mIter;
+
+				return s;
+            }
+
+            virtual bool end() const {
+                return (mIter == mEnd);
+            }
+
+        protected:
+			PropertyService::PropertyGroupMap::iterator mIter, mEnd;
+            PropertyService::PropertyGroupMap& mPGroupMap;
+	};
+	
 	/*--------------------------------------------------------*/
 	/*--------------------- PropertyService ------------------*/
 	/*--------------------------------------------------------*/
@@ -101,6 +128,11 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
+	StringIteratorPtr PropertyService::getAllPropertyNames() {
+		return new PropertyGroupMapKeyIterator(mPropertyGroupMap);
+	}
+	
+	// --------------------------------------------------------------------------
 	PropertyGroupPtr PropertyService::getPropertyGroup(const std::string& name) {
 	    PropertyGroupMap::iterator it = mPropertyGroupMap.find(name);
 
@@ -127,7 +159,7 @@ namespace Opde {
 		PropertyGroupPtr prop = getPropertyGroup(propName);
 		
 		if (!prop.isNull()) {
-			return prop->has(obj_id);
+			return prop->owns(obj_id);
 		}
 		
 		return false;
