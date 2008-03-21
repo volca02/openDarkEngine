@@ -34,6 +34,8 @@ namespace Opde {
 		/// GUI service python binder
 		class GUIServiceBinder : public shared_ptr_binder<GUIServicePtr> {
 			public:
+				static void init(PyObject* module);
+				
 				// --- Python type related methods ---
 				static PyObject* getattr(PyObject *self, char *name);
 

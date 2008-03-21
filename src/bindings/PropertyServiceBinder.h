@@ -36,6 +36,8 @@ namespace Opde
 		/// Property service python binder
 		class PropertyServiceBinder : public shared_ptr_binder<PropertyServicePtr> {
 			public:
+				static void init(PyObject* module);
+			
 				// --- Python type related methods ---
 				static PyObject* getattr(PyObject *self, char *name);
 
@@ -47,7 +49,8 @@ namespace Opde
 				static PyObject* owns(PyObject* self, PyObject* args);
 				static PyObject* set(PyObject* self, PyObject* args);
 				static PyObject* get(PyObject* self, PyObject* args);
-				
+				static PyObject* getAllPropertyNames(PyObject* self, PyObject* args);
+								
 			protected:
 				/// Static type definition for PropertyService
 				static PyTypeObject msType;

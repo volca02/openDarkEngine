@@ -24,6 +24,7 @@
 
 #include "bindings.h"
 #include "PropertyServiceBinder.h"
+#include "StringIteratorBinder.h"
 
 namespace Opde 
 {
@@ -77,6 +78,7 @@ namespace Opde
 			{"owns", owns, METH_VARARGS},
 			{"set",  set, METH_VARARGS},
 			{"get",  get, METH_VARARGS},
+			{"getAllPropertyNames", getAllPropertyNames, METH_NOARGS},
 			{NULL, NULL},
 		};
 
@@ -163,6 +165,17 @@ namespace Opde
 				return NULL;
 			}
 		}
+		
+		// ------------------------------------------
+		PyObject* PropertyServiceBinder::getAllPropertyNames(PyObject* self, PyObject* args) 
+		{
+			Object* o = python_cast<Object*>(self, &msType);
+			
+			// wrap the returned StringIterator into StringIteratorBinder, return
+			StringIteratorPtr res = o->mInstance->getAllPropertyNames();
+				
+			return StringIteratorBinder::create(res);
+		}
 
 		// ------------------------------------------
 		PyObject* PropertyServiceBinder::getattr(PyObject *self, char *name) 
@@ -170,6 +183,14 @@ namespace Opde
 			return Py_FindMethod(msMethods, self, name);
 		}
 
+		// ------------------------------------------
+		void PropertyServiceBinder::init(PyObject* module) 
+		{
+			publishType(module, &msType, msName);
+			
+			StringIteratorBinder::init(module);
+		}
+		
 		// ------------------------------------------
 		PyObject* PropertyServiceBinder::create() 
 		{

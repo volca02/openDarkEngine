@@ -36,6 +36,8 @@ namespace Opde
 		/// Property service python binder
 		class LoopServiceBinder : public shared_ptr_binder<LoopServicePtr> {
 			public:
+				static void init(PyObject* module);
+			
 				// --- Python type related methods ---
 				static PyObject* getattr(PyObject *self, char *name);
 

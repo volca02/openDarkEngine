@@ -23,29 +23,28 @@
  *****************************************************************************/
 
 #include "bindings.h"
-#include "GUIServiceBinder.h"
-#include "RelationBinder.h"
+#include "StringIteratorBinder.h"
 
 namespace Opde {
 
 	namespace Python {
 
-		// -------------------- GUI Service --------------------
-		char* GUIServiceBinder::msName = "GUIService";
+		// -------------------- String iterator --------------------
+		char* StringIteratorBinder::msName = "StringIterator";
 
 		// ------------------------------------------
-		PyTypeObject GUIServiceBinder::msType = {
+		PyTypeObject StringIteratorBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
 			msName,                   /* char *tp_name; */
-			sizeof(GUIServiceBinder::Object),      /* int tp_basicsize; */
+			sizeof(StringIteratorBinder::Object),      /* int tp_basicsize; */
 			0,                        /* int tp_itemsize;       /* not used much */
-			GUIServiceBinder::dealloc,   /* destructor tp_dealloc; */
+			StringIteratorBinder::dealloc,   /* destructor tp_dealloc; */
 			0,			              /* printfunc  tp_print;   */
-			GUIServiceBinder::getattr,  /* getattrfunc  tp_getattr; /* __getattr__ */
+			StringIteratorBinder::getattr,  /* getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  /* setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          /* cmpfunc  tp_compare;  /* __cmp__ */
-			0,			              /* reprfunc  tp_repr;    /* __repr__ */
+			repr,			          /* reprfunc  tp_repr;    /* __repr__ */
 			0,				          /* PyNumberMethods *tp_as_number; */
 			0,                        /* PySequenceMethods *tp_as_sequence; */
 			0,                        /* PyMappingMethods *tp_as_mapping; */
@@ -55,118 +54,74 @@ namespace Opde {
 			0,			              /* getattrofunc tp_getattro; */
 			0,			              /* setattrofunc tp_setattro; */
 			0,			              /* PyBufferProcs *tp_as_buffer; */
-			0,			              /* long tp_flags; */
+			Py_TPFLAGS_DEFAULT,       /* long tp_flags; */
 			0,			              /* char *tp_doc;  */
 			0,			              /* traverseproc tp_traverse; */
 			0,			              /* inquiry tp_clear; */
 			0,			              /* richcmpfunc tp_richcompare; */
 			0,			              /* long tp_weaklistoffset; */
-			0,			              /* getiterfunc tp_iter; */
-			0,			              /* iternextfunc tp_iternext; */
+			getIterObject,            /* getiterfunc tp_iter; */
+			getNext,	              /* iternextfunc tp_iternext; */
 			msMethods,	              /* struct PyMethodDef *tp_methods; */
 			0,			              /* struct memberlist *tp_members; */
 			0,			              /* struct getsetlist *tp_getset; */
 		};
 
 		// ------------------------------------------
-		PyMethodDef GUIServiceBinder::msMethods[] = {
-			{"setActive", setActive, METH_VARARGS},
-			{"setVisible", setVisible, METH_VARARGS},
-			{"getActiveSheet", getActiveSheet, METH_VARARGS},
-			{"setActiveSheet", setActiveSheet, METH_VARARGS},
-			{"createSheet", createSheet, METH_VARARGS},
-			{"destroySheet", destroySheet, METH_VARARGS},
+		PyMethodDef StringIteratorBinder::msMethods[] = {
 			{NULL, NULL},
 		};
-
-
+		
+		
 		// ------------------------------------------
-		PyObject* GUIServiceBinder::setActive(PyObject* self, PyObject* args) {
-			PyObject *result = NULL;
+		PyObject* StringIteratorBinder::getIterObject(PyObject* self) {
+			Py_INCREF(self);
+			return self;
+		}
+		
+		// ------------------------------------------
+		PyObject* StringIteratorBinder::getNext(PyObject* self) {
 			Object* o = python_cast<Object*>(self, &msType);
 			
-			PyObject* active;
+			// Get returnable object, advance to next.
+			PyObject* next = NULL;
 			
-			if (PyArg_ParseTuple(args, "O", &active)) {
-				o->mInstance->setActive(PyObject_IsTrue(active)  == 1);
+			if ((!o->mInstance.isNull()) && !o->mInstance->end()) {
+				const std::string& s = o->mInstance->next();
 				
-				result = Py_None;
-				Py_INCREF(result);
-			} else {
-				PyErr_SetString(PyExc_TypeError, "Expected a bool parameter!");
+				next = PyString_FromString(s.c_str());
 			}
 			
-			return result;
+			return next;
 		}
 		
 		// ------------------------------------------
-		PyObject* GUIServiceBinder::setVisible(PyObject* self, PyObject* args) {
-			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
-			
-			PyObject* visible;
-			
-			if (PyArg_ParseTuple(args, "O", &visible)) {
-				o->mInstance->setVisible(PyObject_IsTrue(visible)  == 1);
-				
-				result = Py_None;
-				Py_INCREF(result);
-			} else {
-				PyErr_SetString(PyExc_TypeError, "Expected a bool parameter!");
-			}
-			
-			return result;
+		PyObject* StringIteratorBinder::repr(PyObject *self) {
+			return PyString_FromFormat("<StringIterator at %p>", self);
 		}
 		
-		// ------------------------------------------
-		PyObject* GUIServiceBinder::getActiveSheet(PyObject* self, PyObject* args) {
-			// TODO: Code
-			PyErr_SetString(PyExc_TypeError, "NOT IMPLEMENTED YET");
-			return NULL;
-		}
 		
 		// ------------------------------------------
-		PyObject* GUIServiceBinder::setActiveSheet(PyObject* self, PyObject* args) {
-			// TODO: Code
-			PyErr_SetString(PyExc_TypeError, "NOT IMPLEMENTED YET");
-			return NULL;
-		}
-		
-		// ------------------------------------------
-		PyObject* GUIServiceBinder::createSheet(PyObject* self, PyObject* args) {
-			// TODO: Code
-			PyErr_SetString(PyExc_TypeError, "NOT IMPLEMENTED YET");
-			return NULL;
-		}
-		
-		// ------------------------------------------
-		PyObject* GUIServiceBinder::destroySheet(PyObject* self, PyObject* args) {
-			// TODO: Code
-			PyErr_SetString(PyExc_TypeError, "NOT IMPLEMENTED YET");
-			return NULL;
-		}
-		
-		// ------------------------------------------
-		PyObject* GUIServiceBinder::getattr(PyObject *self, char *name) {
+		PyObject* StringIteratorBinder::getattr(PyObject *self, char *name) {
 			return Py_FindMethod(msMethods, self, name);
 		}
-
+		
 		// ------------------------------------------
-		PyObject* GUIServiceBinder::create() {
+		PyObject* StringIteratorBinder::create(StringIteratorPtr& strit) {
 			Object* object = construct(&msType);
 
 			if (object != NULL) {
-				object->mInstance = ServiceManager::getSingleton().getService(msName).as<GUIService>();
+				object->mInstance = strit;
 			}
 
 			return (PyObject *)object;
 		}
 		
-		
 		// ------------------------------------------
-		void GUIServiceBinder::init(PyObject* module) {
+		void StringIteratorBinder::init(PyObject* module) {
 			publishType(module, &msType, msName);
 		}
+
 	}
 
 } // namespace Opde

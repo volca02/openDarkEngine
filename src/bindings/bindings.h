@@ -178,6 +178,17 @@ namespace Opde {
 					// Finally delete the object
 					PyObject_Del(self);
 				}
+				
+				/** Publishes the type as a member of a specified module
+					@param module The module to publish the type in
+					@param type The python type object to publish
+					@param name The name of the type to use
+				*/
+				static void publishType(PyObject* module, PyTypeObject* type, const char* name) {
+					PyType_Ready(type);
+					
+					PyDict_SetItemString(PyModule_GetDict(module), name, (PyObject*)type);
+				}
 		};
 		
 		/// A template that binds a pointer to class (simmilar to shared_ptr_binder, but no special handling is used)

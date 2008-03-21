@@ -33,7 +33,7 @@ namespace Opde {
 		
 		class PythonDatabaseProgressMessage : public PythonStruct<DatabaseProgressMsg> {
 			public:
-				static void Init() {
+				static void init() {
 					field("completed", &DatabaseProgressMsg::completed);
 					field("totalCoarse", &DatabaseProgressMsg::totalCoarse);
 					field("currentCoarse", &DatabaseProgressMsg::currentCoarse);
@@ -195,11 +195,14 @@ namespace Opde {
 
 			return (PyObject *)object;
 		}
-		
+
 		// ------------------------------------------
-		void DatabaseServiceBinder::Init() {
-            PythonDatabaseProgressMessage::Init();
+		void DatabaseServiceBinder::init(PyObject* module) {
+			PythonDatabaseProgressMessage::init();
+			
+			publishType(module, &msType, msName);
 		}
+
 	}
 
 } // namespace Opde

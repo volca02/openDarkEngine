@@ -34,6 +34,8 @@ namespace Opde {
 		/// Config service python binder
 		class ConfigServiceBinder : public shared_ptr_binder<ConfigServicePtr> {
 			public:
+				static void init(PyObject* module);
+				
 				// --- Python type related methods ---
 				static PyObject* getattr(PyObject *self, char *name);
 

@@ -30,7 +30,7 @@ namespace Opde {
 
 	namespace Python {
 
-		// -------------------- Link Service --------------------
+		// -------------------- Link Query result --------------------
 		char* LinkQueryResultBinder::msName = "LinkQueryResult";
 
 		// ------------------------------------------
@@ -116,6 +116,12 @@ namespace Opde {
 
 			return (PyObject *)object;
 		}
+		
+		// ------------------------------------------
+		void LinkQueryResultBinder::init(PyObject* module) {
+			publishType(module, &msType, msName);
+		}
+
 	}
 
 } // namespace Opde

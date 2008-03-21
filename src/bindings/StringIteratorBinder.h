@@ -33,8 +33,8 @@ namespace Opde {
 
 	namespace Python {
 
-		/// Link query result python binder. Iterable
-		class LinkQueryResultBinder : public shared_ptr_binder<LinkQueryResultPtr> {
+		/// String iterator python binder. Iterable
+		class StringIteratorBinder : public shared_ptr_binder<StringIteratorPtr> {
 			public:
 				static void init(PyObject* module);
 			
@@ -44,16 +44,17 @@ namespace Opde {
 				/// to string - reprfunc conversion
 				static PyObject* repr(PyObject *self);
 
-				/// creates a python object representation of the link query result
-				static PyObject* create(LinkQueryResultPtr result);
+				/// creates a python object representation of the string iterator
+				static PyObject* create(StringIteratorPtr& strit);
 
 			protected:
 				/// Return self as iterator with a increased ref count.
 				static PyObject* getIterObject(PyObject* self);
+				
 				/// Returns current object, advances to next object (or returns NULL if at end)
 				static PyObject* getNext(PyObject* self);
 			
-				/// Static type definition for LinkQueryResult
+				/// Static type definition for String Iterator
 				static PyTypeObject msType;
 
 				/// Name of the python type

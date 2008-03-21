@@ -155,6 +155,11 @@ namespace Opde
 			}
 			return (PyObject *)object;
 		}
+		
+		// ------------------------------------------
+		void LoopServiceBinder::init(PyObject* module) {
+			publishType(module, &msType, msName);
+		}
 	}
 
 } // namespace Opde

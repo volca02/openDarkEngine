@@ -39,13 +39,13 @@ namespace Opde {
 		char* ServiceBinder::msName = "Opde.Services";
 		
 		PyMethodDef ServiceBinder::msMethods[] = {
-			{"ConfigService", getConfigService, METH_NOARGS},
-			{"LinkService", getLinkService, METH_NOARGS},
-			{"PropertyService", getPropertyService, METH_NOARGS},
-			{"LoopService", getLoopService, METH_NOARGS},
-			{"InputService", getInputService, METH_NOARGS},
-			{"GUIService", getGUIService, METH_NOARGS},
-			{"DatabaseService", getDatabaseService, METH_NOARGS},
+			{"getConfigService", getConfigService, METH_NOARGS},
+			{"getLinkService", getLinkService, METH_NOARGS},
+			{"getPropertyService", getPropertyService, METH_NOARGS},
+			{"getLoopService", getLoopService, METH_NOARGS},
+			{"getInputService", getInputService, METH_NOARGS},
+			{"getGUIService", getGUIService, METH_NOARGS},
+			{"getDatabaseService", getDatabaseService, METH_NOARGS},
 			{NULL, NULL},
 		};
 		
@@ -117,15 +117,29 @@ namespace Opde {
 			
 			assert(module);
 			
-			// init the services which need it
-			DatabaseServiceBinder::Init();
-			InputServiceBinder::Init();
-			
 			// Register itself as a member of the container we got
 			PyObject *dir = PyModule_GetDict(container);
 			PyDict_SetItemString(dir, "Services", module);
 			
-				
+			// init the services (we init all, they register into the module, enabling pydoc usage on them)
+			PropertyServiceBinder::init(module);
+			DatabaseServiceBinder::init(module);
+			InputServiceBinder::init(module);
+			GUIServiceBinder::init(module);
+			LinkServiceBinder::init(module);
+			LoopServiceBinder::init(module);
+			
+			// Publish some service constants
+			PyModule_AddIntConstant(module, "SERVICE_ALL", SERVICE_ALL);
+			PyModule_AddIntConstant(module, "SERVICE_CORE", SERVICE_CORE);
+			PyModule_AddIntConstant(module, "SERVICE_RENDERER", SERVICE_RENDERER);
+			PyModule_AddIntConstant(module, "SERVICE_ENGINE", SERVICE_ENGINE);
+			PyModule_AddIntConstant(module, "SERVICE_LINK_LISTENER", SERVICE_LINK_LISTENER);
+			PyModule_AddIntConstant(module, "SERVICE_PROPERTY_LISTENER", SERVICE_PROPERTY_LISTENER);
+			PyModule_AddIntConstant(module, "SERVICE_OBJECT_LISTENER", SERVICE_OBJECT_LISTENER);
+			PyModule_AddIntConstant(module, "SERVICE_DATABASE_LISTENER", SERVICE_DATABASE_LISTENER);
+			PyModule_AddIntConstant(module, "SERVICE_INPUT_LISTENER", SERVICE_INPUT_LISTENER);
+			
 			return module;
 		}
 		

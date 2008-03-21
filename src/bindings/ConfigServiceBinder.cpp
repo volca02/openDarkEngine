@@ -164,11 +164,10 @@ namespace Opde {
 			return result;
 		}
 
-		PyMethodDef sOpdeMethods[] = {
-			{NULL, NULL},
-		};
-
-
+		// ------------------------------------------
+		void ConfigServiceBinder::init(PyObject* module) {
+			publishType(module, &msType, msName);
+		}
 
 		// ------------------------------------------
 		PyObject* ConfigServiceBinder::repr(PyObject* self) {

@@ -37,6 +37,8 @@ namespace Opde {
 		/// Link relation python binder
 		class RelationBinder : public shared_ptr_binder<RelationPtr> {
 			public:
+				static void init(PyObject* module);
+				
 				// --- Python type related methods ---
 				static PyObject* getattr(PyObject *self, char *name);
 				

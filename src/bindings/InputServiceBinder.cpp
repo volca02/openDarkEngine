@@ -47,7 +47,7 @@ namespace Opde
 	    
 		class PythonInputMessage : public PythonStruct<InputEventMsg> {
 			public:
-				static void Init() {
+				static void init() {
 					field("event", &InputEventMsg::event);
 					field("command", &InputEventMsg::command);
 					field("params", &InputEventMsg::params);
@@ -253,8 +253,10 @@ namespace Opde
 		}
 		
 		// ------------------------------------------
-		void InputServiceBinder::Init() {
-			PythonInputMessage::Init();
+		void InputServiceBinder::init(PyObject* module) {
+			PythonInputMessage::init();
+			
+			publishType(module, &msType, msName);
 		}
 	}
 

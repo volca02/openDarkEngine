@@ -259,6 +259,11 @@ namespace Opde {
 
 			return (PyObject *)object;
 		}
+		
+		// ------------------------------------------
+		void RelationBinder::init(PyObject* module) {
+			publishType(module, &msType, msName);
+		}
 	}
 
 } // namespace Opde

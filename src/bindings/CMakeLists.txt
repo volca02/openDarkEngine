@@ -48,6 +48,8 @@ add_library(OpdePythonBindings
     PythonStruct.h
     RootBinder.cpp
     RootBinder.h
+    StringIteratorBinder.cpp
+    StringIteratorBinder.h
 )
 
 target_link_libraries(OpdePythonBindings

@@ -34,13 +34,13 @@ namespace Opde {
 		/// Database python binder
 		class DatabaseServiceBinder : public shared_ptr_binder<DatabaseServicePtr> {
 			public:
+				static void init(PyObject* module);
+				
 				// --- Python type related methods ---
 				static PyObject* getattr(PyObject *self, char *name);
 
 				static PyObject* create();
 				
-				static void Init();
-
 				// --- Methods ---
 				static PyObject* load(PyObject* self, PyObject* args);
 				static PyObject* unload(PyObject* self, PyObject* args);

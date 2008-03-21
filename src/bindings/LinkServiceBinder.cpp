@@ -25,6 +25,7 @@
 #include "bindings.h"
 #include "LinkServiceBinder.h"
 #include "RelationBinder.h"
+#include "LinkQueryResultBinder.h"
 
 namespace Opde {
 
@@ -191,6 +192,16 @@ namespace Opde {
 			return (PyObject *)object;
 		}
 	
+		// ------------------------------------------
+		void LinkServiceBinder::init(PyObject* module) {
+			publishType(module, &msType, msName);
+			
+			LinkBinder::init(module);
+			LinkQueryResultBinder::init(module);
+			RelationBinder::init(module);
+		}
+
+	
         // -------------------- Link --------------------
 		char* LinkBinder::msName = "Link";
 
@@ -248,6 +259,11 @@ namespace Opde {
 
 			return (PyObject *)object;
 		}
-   	} // namespace Python
+		
+		// ------------------------------------------
+		void LinkBinder::init(PyObject* module) {
+			publishType(module, &msType, msName);
+		}
+  	} // namespace Python
 } // namespace Opde
 
