@@ -38,13 +38,16 @@ namespace Opde {
 	/// Just an empty result of a query
     class EmptyLinkQueryResult : public LinkQueryResult {
 	    public:
-            EmptyLinkQueryResult() : LinkQueryResult() {  };
+            EmptyLinkQueryResult() : LinkQueryResult(), mNullPtr(NULL) {};
 
-            virtual const LinkPtr next() { return NULL; };
+            virtual const LinkPtr& next() { return mNullPtr; };
 
             virtual bool end() const {
                 return true;
             };
+		
+		protected:
+			LinkPtr mNullPtr;
 	};
 
     /// Single source link query (multiple targets), or in reverse
@@ -61,7 +64,7 @@ namespace Opde {
                 mIter = mBegin;
             }
 
-            virtual const LinkPtr next() {
+            virtual const LinkPtr& next() {
                 if (!end()) {
                     const LinkPtr l = mIter->second;
 
