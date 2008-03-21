@@ -70,7 +70,7 @@ namespace Opde {
 		// To supress logging of OGRE (we'll use a plugin for our logger for Ogre logs)
 		// we need to create a Ogre::LogManager here on our own
 		mOgreLogManager = new Ogre::LogManager();
-		mOgreLogManager->createLog("Ogre.log", true, true, true);
+		mOgreLogManager->createLog("Ogre.log", true, false, true);
 		
 		mOgreOpdeLogConnector = new OgreOpdeLogConnector(mLogger);
 		
