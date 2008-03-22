@@ -154,6 +154,7 @@ property CameraObj {
 property SymName {
 	label "SymbolicName"
 	p_ver 2.17
+	inherit never
 }
 
 property Spotlight {
@@ -1118,6 +1119,7 @@ property AI_InfDly {
 
 property DonorType {
 	label "DonorType"
+	inherit never
 }
 
 property AI_SeesPr {
