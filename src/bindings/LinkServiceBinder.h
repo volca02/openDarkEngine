@@ -49,7 +49,8 @@ namespace Opde {
 				static PyObject* nameToFlavor(PyObject* self, PyObject* args);
 				static PyObject* flavorToName(PyObject* self, PyObject* args);
 				static PyObject* getRelation(PyObject* self, PyObject* args);
-				
+				static PyObject* getAllLinks(PyObject* self, PyObject* args);
+				static PyObject* getOneLink(PyObject* self, PyObject* args);
 			protected:
 				/// Static type definition for LinkService
 				static PyTypeObject msType;
