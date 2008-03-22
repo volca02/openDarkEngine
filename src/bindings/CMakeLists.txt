@@ -50,6 +50,8 @@ add_library(OpdePythonBindings
     RootBinder.h
     StringIteratorBinder.cpp
     StringIteratorBinder.h
+    ObjectServiceBinder.cpp
+    ObjectServiceBinder.h
 )
 
 target_link_libraries(OpdePythonBindings
