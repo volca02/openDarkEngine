@@ -231,6 +231,50 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
+	LinkQueryResultPtr LinkService::getAllLinks(int flavor, int src, int dst) const {
+		// find the relation with the specified flavor. 
+		//If none such found, return empty iterator
+		RelationIDMap::const_iterator it = mRelationIDMap.find(flavor);
+		
+		if (it != mRelationIDMap.end()) {
+			// dedicate to the given relation
+			return it->second->getAllLinks(src, dst);
+		} else {
+			return new EmptyLinkQueryResult();
+		}
+	}
+
+	//------------------------------------------------------
+	LinkPtr LinkService::getOneLink(int flavor, int src, int dst) const {
+		// find the relation with the specified flavor. 
+		//If none such found, return NULL link
+		RelationIDMap::const_iterator it = mRelationIDMap.find(flavor);
+		
+		if (it != mRelationIDMap.end()) {
+			// dedicate to the given relation
+			return it->second->getOneLink(src, dst);
+		} else {
+			return NULL;
+		}
+	}
+
+	//------------------------------------------------------
+	LinkPtr LinkService::getLink(link_id_t id) const {
+		// get relation flavor from link id
+		int flavor = LINK_ID_FLAVOR(id);
+		
+		// find relation
+		RelationIDMap::const_iterator it = mRelationIDMap.find(flavor);
+		
+		if (it != mRelationIDMap.end()) {
+			// dedicate to the given relation
+			return it->second->getLink(id);
+		} else {
+			return NULL;
+		}
+	}
+
+	//------------------------------------------------------
 	bool LinkService::requestRelationFlavorMap(int id, const std::string& name, RelationPtr rel) {
 		std::pair<FlavorToName::iterator, bool> res1 = mFlavorToName.insert(make_pair(id, name));
 

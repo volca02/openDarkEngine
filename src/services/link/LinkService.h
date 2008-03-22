@@ -92,6 +92,27 @@ namespace Opde {
 
 			/** Clears all the data and the relation mappings */
 			void clear();
+			
+			// --- link queries ---
+			/** @see Relation::getAllLinks
+			@param flavor The link flavor (relation type). 
+			@param src The source object ID
+			@param dst The destination object ID
+			@return LinkQueryResultPtr Link iterator for resulting links
+			@throw If invalid flavor is specified, this method will return an empty iterator */
+			LinkQueryResultPtr getAllLinks(int flavor, int src, int dst) const;
+
+			/** @see Relation::getOneLink 
+			@param flavor The link flavor (relation type). 
+			@param src The source object ID
+			@param dst The destination object ID
+			@return LinkPtr Link structure for the resulting link (or NULL if none found)
+			@throw If invalid flavor is specified, this method will return a NULL link (invalid) */
+			LinkPtr getOneLink(int flavor, int src, int dst) const;
+
+            /** @see Relation::getLink */
+			LinkPtr getLink(link_id_t id) const;
+			
 
 		protected:
             bool init();
