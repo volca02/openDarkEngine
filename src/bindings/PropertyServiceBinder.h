@@ -41,7 +41,7 @@ namespace Opde
 				// --- Python type related methods ---
 				static PyObject* getattr(PyObject *self, char *name);
 
-				/// creates a python object representation of the relation
+				/// creates a python object representation of the property service
 				static PyObject* create();
 
 				// --- Methods ---

@@ -62,7 +62,6 @@ namespace Opde {
 	};
 
 	/** @brief Object service - service managing in-game objects. Holder of the object's scene nodes
-	* @todo Move the scenenode management back to RenderService (so we can use opde without renderer)
 	* @todo Archetype object creation
 	* @todo DonorType property management (together with Inherit service)
 	* @todo Object queries - getAllConcrete, getAllArchetype, getMetapropertiesOf, etc. ObjectQuery class introduced
@@ -78,7 +77,10 @@ namespace Opde {
 
 			virtual ~ObjectService();
 			
-			/// Creates a new concrete object, inheriting from archetype archetype, and returns it's id
+			/** Creates a new concrete object, inheriting from archetype archetype, and returns it's id
+			@param archetype The archetype object ID
+			@return int the new object's id
+			*/
 			int create(int archetype);
 			
 			/// Begins creating a new object, but does not broadcast yet. 

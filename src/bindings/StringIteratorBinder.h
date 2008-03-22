@@ -22,12 +22,8 @@
  *
  *****************************************************************************/
 
-#ifndef __LINKQUERYRESULYBINDER_H
-#define __LINKQUERYRESULYBINDER_H
-
-#include  "DTypeDef.h"
-#include  "BinaryService.h"
-#include  "LinkService.h"
+#ifndef __STRINGITERATORBINDER_H
+#define __STRINGITERATORBINDER_H
 
 namespace Opde {
 

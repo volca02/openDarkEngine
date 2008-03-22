@@ -33,7 +33,7 @@ namespace Opde
 	namespace Python 
 	{
 
-		/// Property service python binder
+		/// Input service python binder
 		class InputServiceBinder : public shared_ptr_binder<InputServicePtr> {
 			public:
 				static void init(PyObject* module);
@@ -41,7 +41,7 @@ namespace Opde
 				// --- Python type related methods ---
 				static PyObject* getattr(PyObject *self, char *name);
 
-				/// creates a python object representation of the relation
+				/// creates a python object representation of the input service
 				static PyObject* create();
 				
 				// --- Methods ---

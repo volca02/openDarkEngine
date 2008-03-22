@@ -69,7 +69,7 @@ namespace Opde
 		typedef PythonCallback<InputEventMsg, PythonInputMessageConverter> PythonInputCallback;
 		typedef shared_ptr<PythonInputCallback> PythonInputCallbackPtr;
 
-		// -------------------- Property Service --------------------
+		// -------------------- Input Service --------------------
 		char* InputServiceBinder::msName = "InputService";
 
 		// ------------------------------------------
