@@ -35,21 +35,6 @@ namespace Opde {
     /*-----------------------------------------------------*/
 	/*--------------------- LinkQueries -------------------*/
 	/*-----------------------------------------------------*/
-	/// Just an empty result of a query
-    class EmptyLinkQueryResult : public LinkQueryResult {
-	    public:
-            EmptyLinkQueryResult() : LinkQueryResult(), mNullPtr(NULL) {};
-
-            virtual const LinkPtr& next() { return mNullPtr; };
-
-            virtual bool end() const {
-                return true;
-            };
-		
-		protected:
-			LinkPtr mNullPtr;
-	};
-
     /// Single source link query (multiple targets), or in reverse
 	class Relation::MultiTargetLinkQueryResult : public LinkQueryResult {
 	    public:
@@ -65,17 +50,13 @@ namespace Opde {
             }
 
             virtual const LinkPtr& next() {
-                if (!end()) {
-                    const LinkPtr l = mIter->second;
+                assert(!end());
 
-                    ++mIter;
+				const LinkPtr& l = mIter->second;
 
-                    return l;
+				++mIter;
 
-                } else {
-
-                    return NULL;
-                }
+				return l;
             }
 
             virtual bool end() const {

@@ -115,6 +115,21 @@ namespace Opde {
 	typedef shared_ptr< LinkQueryResult > LinkQueryResultPtr;
 
 
+	/// Just an empty result of a query
+    class EmptyLinkQueryResult : public LinkQueryResult {
+	    public:
+            EmptyLinkQueryResult() : LinkQueryResult(), mNullPtr(NULL) {};
+
+            virtual const LinkPtr& next() { return mNullPtr; };
+
+            virtual bool end() const {
+                return true;
+            };
+		
+		protected:
+			LinkPtr mNullPtr;
+	};
+
 	/// Link change types
 	typedef enum {
 		/// Link was added (Sent after the addition)
