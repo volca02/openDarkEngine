@@ -32,12 +32,6 @@
 #include "MessageSource.h"
 
 namespace Opde {
-	/// Class representing a property name iterator
-	typedef ConstIterator< std::string > StringIterator;
-
-	/// Shared pointer instance to property group iterator
-	typedef shared_ptr< StringIterator > StringIteratorPtr;
-	
 	/** @brief Property service - service managing in-game object properties
 	*/
 	class PropertyService : public Service {

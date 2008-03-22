@@ -24,7 +24,7 @@
 
 namespace Opde {
 
-    /** An java-like iterator approach */
+    /** A java-like iterator approach */
     template <typename T> class Iterator {
 	public:
 	    virtual T& next() = 0;
@@ -38,6 +38,14 @@ namespace Opde {
 	    virtual const T& next() = 0;
 	    virtual bool end() const = 0;
     };
+    
+  	/// Class representing a const string iterator
+	typedef ConstIterator< std::string > StringIterator;
+
+	/// Shared pointer instance to const string iterator
+	typedef shared_ptr< StringIterator > StringIteratorPtr;
+	
+
 }
 
 #endif
