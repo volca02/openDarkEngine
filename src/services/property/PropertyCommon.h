@@ -50,6 +50,11 @@ namespace Opde {
 			* @param data The Data instance to copy the data from */
 			PropertyData(int id, DTypePtr data, bool useCache = false) : mID(id), DType(*data, useCache) { };
 			
+			/** PropertyData cloning constructor
+			* @param id The object ID
+			* @param data The Data instance to copy the data from */
+			PropertyData(int id, PropertyData data, bool useCache = false) : mID(id), DType(data, useCache) { };
+			
 			/** Destructor */
 			~PropertyData() { };
 		
@@ -87,7 +92,6 @@ namespace Opde {
 		/// An ID of the object that changed
 		int objectID;
 	};
-	
 }
  
 #endif

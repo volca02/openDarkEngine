@@ -39,10 +39,19 @@ namespace Opde {
 			PropertyService(ServiceManager *manager, const std::string& name);
 			virtual ~PropertyService();
 
-			/** Creates a property group - a family of properties of the same type.
+			/** Creates a structured property group - property holder using a structure definition in DTypeDef
 			* @see PropertyGroup::PropertyGroup
 			*/
-			PropertyGroupPtr createPropertyGroup(const std::string& name, const std::string& chunk_name, DTypeDefPtr type, uint ver_maj, uint ver_min, std::string inheritorName);
+			PropertyGroupPtr createStructuredPropertyGroup(const std::string& name, const std::string& chunk_name, const DTypeDefPtr& type, std::string inheritorName);
+			
+			/** Creates a string holding property group - property holder containing a variable length string
+			* @see PropertyGroup::PropertyGroup
+			*/
+			PropertyGroupPtr createStringPropertyGroup(const std::string& name, const std::string& chunk_name, std::string inheritorName);
+
+			/** Creates a string type property group - a family of properties containing a single, variable length string
+			* @see PropertyGroup::PropertyGroup
+			*/
 
             /** Retrieves the property group given it's name, or NULL if not found
             * @param name The name of the property to retrieve the group for
@@ -70,14 +79,14 @@ namespace Opde {
             * @param propField The field path to set
             * @param value The new value
             */
-            void set(int obj_id, const std::string& propName, const std::string& propField, const DVariant& value);
+            bool set(int obj_id, const std::string& propName, const std::string& propField, const DVariant& value);
             
             /** Property getter. Gets a value of a property field
             * @param obj_id The object id
             * @param propName The name of the property group
             * @param propField The field path to get
             */
-            DVariant get(int obj_id, const std::string& propName, const std::string& propField);
+            bool get(int obj_id, const std::string& propName, const std::string& propField, DVariant& target);
 
 			/** A notification that object was destroyed (removes all properties of the obj. ID)
 			* @param id The object id that was removed

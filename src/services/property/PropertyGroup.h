@@ -32,9 +32,12 @@
 #include "OpdeException.h"
 #include "logger.h"
 #include "InheritService.h"
+#include "PropertyStorage.h"
 
 namespace Opde {
-
+	// forward decl.
+	class PropertyService;
+	
 	/** @brief Property group - a group of properties of the same kind (name, type).
 	* Property group holds all the properties of the same kind for all the objects.
 	*/
@@ -43,14 +46,28 @@ namespace Opde {
 			/** PropertyGroup Constructor
 			* @param name The property name
 			* @param chunk_name The name of the chunk (without the P$)
-			* @param type The type definition for the property data
+			* @param storage The property storage created to hold the data
+			* @param deleteStorageOnDestroy delete the property storage on destroy of this prop. group?
 			* @param ver_maj The major version of the chunk that stores this property
 			* @param ver_min The minor version of the chunk that stores this property
 			*/
-			PropertyGroup(const std::string& name, const std::string& chunk_name, DTypeDefPtr type, uint ver_maj, uint ver_min, std::string inheritorName);
+			PropertyGroup(PropertyService* owner, const std::string& name, const std::string& chunk_name, PropertyStorage* storage, std::string inheritorName, bool deleteStorageOnDestroy);
+
+			/** Setter for the property chunk version */
+			inline void setChunkVersions(uint verMaj, uint verMin) {
+				mVerMaj = verMaj;
+				mVerMin = verMin;
+			};
 
 			/** Destructor */
 			virtual ~PropertyGroup();
+			
+			/** Property storage setter
+			* @param propStorage The new storage for properties
+			* @warning This should not be used when the property group holds some data
+			*/
+			virtual void setPropertyStorage(PropertyStorage* newStorage, bool deleteOnDestroy = false);
+			
 
 			/// Name getter. Returns the name of property this group manages
 			const std::string& getName() { return mName; };
@@ -76,12 +93,7 @@ namespace Opde {
 			* @note Will return false if the object only inherits the property, but does not own it (use has for that)
 			*/
 			bool owns(int obj_id) const {
-				PropertyStore::const_iterator it = mPropertyStore.find(obj_id);
-
-				if (it != mPropertyStore.end())
-					return true;
-				else
-					return false;
+				return mPropertyStorage->hasProp(obj_id);
 			}
 
 			/** Loads properties from a file group
@@ -106,14 +118,6 @@ namespace Opde {
 			* @note Notifies inheritor about the change */
 			bool createProperty(int obj_id);
 
-			/** Creates a property for given object ID, using specified values for the property fields
-			* @param obj_id The id of the object to create the property for
-			* @param data The property data to use ()
-			* @return true if the property was created, false if the object ID already holds the given property
-			* @note Broadcasts a PROP_ADDED on success
-			* @note Notifies inheritor about the change */
-			bool createProperty(int obj_id, DTypePtr data);
-
 			/** Creates a property for given object ID
 			* @param obj_id The id of the object to create the property for
 			* @return true if the property was removed, false if the object ID didn't hold the property
@@ -121,7 +125,7 @@ namespace Opde {
 			* @note Notifies inheritor about the change */
 			bool removeProperty(int obj_id);
 
-			/** Creates a new property by cloning a given property on object ID
+			/** Creates a new property, or replaces all the values on the current, by cloning a given property on object ID
 			* @param obj_id Target object ID (id to create)
 			* @param src_id The id of the object to clone property from */
 			bool cloneProperty(int obj_id, int src_id);
@@ -134,42 +138,23 @@ namespace Opde {
 			* @return true if the change was sucessful
 			* @see owns
 			* @note Will log error when object id does not own the property to be changed */
-			bool set(int id, std::string field, const DVariant& value) {
-				PropertyStore::const_iterator it = mPropertyStore.find(id);
-
-				if (it != mPropertyStore.end()) {
-					it->second->set(field, value);
-					return true;
-				}
-
-				LOG_ERROR("PropertyGroup::set : Property for object ID %d was not found in group %s", id, mName.c_str());
-				return false;
-			}
+			bool set(int id, const std::string& field, const DVariant& value);
 
 			/** Direct data getter
 			* @param id object id
 			* @param field the field name
-			* @return The value from the field indicated, or empty DVariant if the object id does not own the property
+			* @param target The target value holder to be filled from the field indicated, or untouched if field invalid
 			* @see owns
-			* @note Will silently fail when id is non-valid. Check error log for this happening
+			* @return false if field name was invalid, true if value was set in target
 			*/
-			DVariant get(int id, std::string field) {
-				PropertyStore::const_iterator it = mPropertyStore.find(_getEffectiveObject(id));
-
-				if (it != mPropertyStore.end()) {
-					return it->second->get(field);
-				}
-
-				LOG_ERROR("PropertyGroup::get : Property for object ID %d was not found in group %s", id, mName.c_str());
-				return DVariant();
-			}
+			bool get(int id, const std::string& field, DVariant& target);
 			
 			/** Notification that an object was destroyed. @see PropertyService::objectDestroyed */
 			void objectDestroyed(int id);
 			
-			
 			/** Sets the property group to cache data (caches fields so no direct to/from data will be used on loading) 
 			* @param cache if true, writes will set a the value in a cache as well, and reads will search cache first
+			* @todo Reflect this into property storage
 			*/
 			void setCacheData(bool cache) { mUseDataCache = cache; };
 			
@@ -177,17 +162,10 @@ namespace Opde {
 			bool getCacheData() { return mUseDataCache; };
 
 		protected:
-			/** Property data getter. Internal use only.
-			* @param obj_id Object ID of the property to fetch
-			* @note call dataChangeFinished(obj_id), otherwise listeners will not receive broadcasts about the data modification
-			* @return PropertyDataPtr, which will be null if the property was not found
+			/** Does the internal handling related to the creation of a property for object
+			* @param objID The object id to which a property was added
 			*/
-			PropertyDataPtr getData(int obj_id);
-
-			/** Inserts the property into the group, notifies inheritors and broadcasts the change
-			* @param propd The property to add
-			*/
-			bool _addProperty(PropertyDataPtr propd);
+			void _addProperty(int objID);
 
             /// The listener to the inheritance messages
             void onInheritChange(const InheritValueChangeMsg& msg);
@@ -201,12 +179,6 @@ namespace Opde {
 				return mInheritor->getEffectiveID(obj_id);
 			}
 
-			/// Stores objectID -> Property
-			typedef std::map< int, PropertyDataPtr > PropertyStore;
-
-			/// Property store instance
-			PropertyStore mPropertyStore;
-
 			/// The name of the property
 			std::string mName;
 
@@ -218,9 +190,6 @@ namespace Opde {
 			/// chunk version - minor
 			uint mVerMin;
 
-			/// Type definition for the property data
-			DTypeDefPtr mType;
-
             /// Inheritor used to determine property inheritance
 			InheritorPtr mInheritor;
 
@@ -229,6 +198,15 @@ namespace Opde {
 			
 			/// If true, data caching will be used
 			bool mUseDataCache;
+			
+			/// Property storage used to store data for the property
+			PropertyStorage* mPropertyStorage;
+			
+			/// True if the property storage should be deleted upon property group destruction
+			bool mDeletePropStorageOnDestroy;
+			
+			/// Owner service
+			PropertyService* mOwner;
 	};
 
 	/// Shared pointer to property group

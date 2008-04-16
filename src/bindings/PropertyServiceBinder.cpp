@@ -134,7 +134,7 @@ namespace Opde
 			{
 				value = PyObjectToDVariant(Object);
 				o->mInstance->set(obj_id, propName, propField, value);
-
+				// TODO: should indicate by Py_True/Py_False here
 				result = Py_None;
 				Py_INCREF(result);
 				return result;
@@ -156,10 +156,18 @@ namespace Opde
 			const char* propName;
 			const char* propField;
 
-			if (PyArg_ParseTuple(args, "iss", &obj_id, &propName, &propField)) 
-				return DVariantToPyObject(o->mInstance->get(obj_id, propName, propField));
-			else 
-			{
+			if (PyArg_ParseTuple(args, "iss", &obj_id, &propName, &propField)) {
+				DVariant ret;
+				
+				if (o->mInstance->get(obj_id, propName, propField, ret)) {
+					return DVariantToPyObject(ret);
+				} else {
+					PyObject* result = Py_None;
+					Py_INCREF(result);
+					return result;
+				}
+				
+			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected an integer and two strings!");
 				return NULL;

@@ -27,12 +27,17 @@ using namespace std;
 namespace Opde {
 
 	// --------------------------------------------------------------------------
-	PropertyGroup::PropertyGroup(const std::string& name, const std::string& chunk_name, DTypeDefPtr type, uint ver_maj, uint ver_min, string inheritorName) :
+	// PropertyGroup::PropertyGroup(PropertyService* owner, const std::string& name, const std::string& chunk_name, const std::string& ptype, DTypeDefPtr type, string inheritorName) :
+	PropertyGroup::PropertyGroup(PropertyService* owner, const std::string& name, const std::string& chunk_name, 
+								 PropertyStorage* storage, std::string inheritorName, bool deleteStorageOnDestroy) :
+			mOwner(owner),
 			mName(name),
 			mChunkName(chunk_name),
-			mType(type),
-			mVerMaj(ver_maj),
-			mVerMin(ver_min) {
+			mVerMaj(1),
+			mVerMin(1),
+			mUseDataCache(false),
+			mPropertyStorage(NULL),
+			mDeletePropStorageOnDestroy(deleteStorageOnDestroy) {
 
 		// Find the inheritor by the name, and assign too
 		InheritServicePtr inhs = ServiceManager::getSingleton().getService("InheritService").as<InheritService>();
@@ -42,6 +47,9 @@ namespace Opde {
 		Inheritor::ListenerPtr cil = new ClassCallback<InheritValueChangeMsg, PropertyGroup>(this, &PropertyGroup::onInheritChange);
 
         mInheritorListenerID = mInheritor->registerListener(cil);
+        
+        // create the property storage for this PropertyGroup
+        mPropertyStorage = storage;
 	}
 
 	// --------------------------------------------------------------------------
@@ -50,19 +58,29 @@ namespace Opde {
 
 		if (! mInheritor.isNull())
 			mInheritor->unregisterListener(mInheritorListenerID);
+			
+		if (mDeletePropStorageOnDestroy)
+			delete mPropertyStorage;
 	}
-
+	
 	// --------------------------------------------------------------------------
-	PropertyDataPtr PropertyGroup::getData(int obj_id) {
-		PropertyStore::const_iterator it = mPropertyStore.find(_getEffectiveObject(obj_id));
-
-		if (it != mPropertyStore.end())
-			return it->second;
-		else
-			LOG_ERROR("PropertyGroup::getData : Property for object ID %d was not found in group %s", obj_id, mName.c_str());
-			return NULL;
+	void PropertyGroup::setPropertyStorage(PropertyStorage* newStorage, bool deleteOnDestroy) {
+		// see if we had any data in the current
+		if (!mPropertyStorage->isEmpty()) {
+			LOG_ERROR("Property storage replacement for %s: Previous property storage had some data. This could mean something bad could happen...", mName.c_str());
+		}
+		
+		
+		if (mDeletePropStorageOnDestroy) {
+			if (mPropertyStorage != newStorage)
+				delete mPropertyStorage;
+		}
+		
+		
+		mPropertyStorage = newStorage;
+		mDeletePropStorageOnDestroy = deleteOnDestroy;
 	}
-
+	
 	// --------------------------------------------------------------------------
 	void PropertyGroup::load(FileGroupPtr db) {
 		// Open the chunk specified by "P$" + mChunkName
@@ -85,18 +103,13 @@ namespace Opde {
 		while (!fprop->eof()) {
 			// load the id
 			fprop->readElem(&id, sizeof(uint32_t));
-			// Load the size
-			fprop->readElem(&size, sizeof(uint32_t));
-
-			if (id == 0)
-				LOG_ERROR("PropertyGroup: P$%s : Obj ID == 0", mChunkName.c_str());
-
-			LOG_VERBOSE("PropertyGroup: P$%s : Loading property %s for obj %d (Sizes: real %d, type %d)", mChunkName.c_str(), mName.c_str(), id, size, mType->size());
-			// create the property
-			PropertyDataPtr prop = new PropertyData(id, mType, fprop, size, mUseDataCache);
-
-			if (!_addProperty(prop))
-				LOG_ERROR("PropertyGroup: P$%s : Cannot add property for obj %d (already there)", mChunkName.c_str(), id);
+			
+			// Use property storage to load the property
+			if (mPropertyStorage->readFromFile(fprop, id)) {
+				_addProperty(id);
+			} else {
+				LOG_ERROR("There was an error loading property %s for object %d. Property was not loaded", mName.c_str(), id);
+			}
 		}
 	}
 
@@ -117,14 +130,10 @@ namespace Opde {
 
 		// Can't calculate the count of the properties, as they can have any size
 		// load. Each record has: OID, size (32 bit uint's)
-		int id;
-		uint32_t size;
+		IntIteratorPtr idit = mPropertyStorage->getAllStoredObjects();
 
-		PropertyStore::const_iterator it = mPropertyStore.begin();
-
-		for (; it != mPropertyStore.end() ; ++it) {
-
-			id = it->second->id();
+		while (!idit->end()) {
+			int id = idit->next();
 
 			// Determine if the prop should be included, based on it's mask
 			uint objmask = 0;
@@ -138,16 +147,8 @@ namespace Opde {
 			if (!(saveMask & objmask))
 				continue;
 
-			size= it->second->size();
-			// load the id
-			fprop->writeElem(&id, sizeof(uint32_t));
-			// Load the size
-			fprop->writeElem(&size, sizeof(uint32_t));
-
-			LOG_DEBUG("PropertyGroup: P$%s : Writing property %s for obj %d", mChunkName.c_str(), mName.c_str(), id, size, mType->size());
-
-			it->second->serialize(fprop);
-
+			if (!mPropertyStorage->writeToFile(fprop, id))
+				LOG_ERROR("There was an error writing property %s for object %d. Property was not loaded", mName.c_str(), id);
 		}
 	}
 
@@ -160,68 +161,69 @@ namespace Opde {
 
 		broadcastMessage(msg);
 
-		mPropertyStore.clear();
+		mPropertyStorage->clear();
 		mInheritor->clear();
 	}
 
 	// --------------------------------------------------------------------------
 	bool PropertyGroup::createProperty(int obj_id) {
-		PropertyDataPtr propd = new PropertyData(obj_id, mType, mUseDataCache);
-
-		return _addProperty(propd);
-	}
-
-	// --------------------------------------------------------------------------
-	bool PropertyGroup::createProperty(int obj_id, DTypePtr data) {
-		// simply compare the type pointers...
-		if (data->type() != mType)
-			OPDE_EXCEPT("Incompatible types when creating property data", "PropertyGroup::createProperty");
-
-		PropertyDataPtr propd = new PropertyData(obj_id, data, mUseDataCache);
-
-		return _addProperty(propd);
+		if (mPropertyStorage->createProp(obj_id)) {
+			_addProperty(obj_id);
+			
+			return true;
+		}
+		
+		return false;
 	}
 
 	// --------------------------------------------------------------------------
 	bool PropertyGroup::removeProperty(int obj_id) {
-		size_t erased = mPropertyStore.erase(obj_id);
-
-		if (erased) {
+		if (mPropertyStorage->destroyProp(obj_id)) {
 			mInheritor->setImplements(obj_id, false);
-
+			
 			return true;
-		} else {
-			return false;
 		}
+		
+		return false;
+		
 	}
 
 	// --------------------------------------------------------------------------
 	bool PropertyGroup::cloneProperty(int obj_id, int src_id) {
-		PropertyDataPtr pd = getData(src_id);
-
-		if (!pd.isNull()) {
-		    // TODO: clone the data!
-		    // FIX: Implement this method
-		    OPDE_EXCEPT("Property cloning is not yet implemented!", "PropertyGroup::cloneProperty");
-			/*PropertyDataPtr propd = new PropertyData(obj_id, *pd);
-
-			return _addProperty(propd);*/
+		bool had = false;
+		
+		if (mPropertyStorage->hasProp(obj_id)) {
+			// delete first
+			mPropertyStorage->destroyProp(obj_id);
+			had = true;
 		}
-		return false;
-	}
-
-
-	// --------------------------------------------------------------------------
-	bool PropertyGroup::_addProperty(PropertyDataPtr propd) {
-		pair<PropertyStore::iterator, bool> res = mPropertyStore.insert(make_pair(propd->id(), propd));
-
-		if (res.second) {
-            mInheritor->setImplements(propd->id(), true);
-
+		
+		
+		if (mPropertyStorage->cloneProp(src_id, obj_id))  {
+			// went ok, the target now includes the property didn't previously
+			if (!had)
+				_addProperty(obj_id);
+				
 			return true;
 		} else {
 			return false;
 		}
+	}
+	
+	// --------------------------------------------------------------------------
+	bool PropertyGroup::set(int id, const std::string& field, const DVariant& value) {
+		return mPropertyStorage->setPropField(id, field, value);
+	}
+
+	// --------------------------------------------------------------------------
+	bool PropertyGroup::get(int id, const std::string& field, DVariant& target) {
+		int effID = _getEffectiveObject(id);
+		return mPropertyStorage->getPropField(effID, field, target);
+	}
+
+	// --------------------------------------------------------------------------
+	void PropertyGroup::_addProperty(int objID) {
+        mInheritor->setImplements(objID, true);
 	}
 
     // --------------------------------------------------------------------------
