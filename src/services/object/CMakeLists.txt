@@ -18,5 +18,7 @@ link_directories (
 add_library (OpdeObjectService
     ObjectService.cpp
     ObjectService.h
+    SymNamePropertyStorage.cpp
+    SymNamePropertyStorage.h
 )
 
