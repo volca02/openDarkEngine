@@ -186,24 +186,32 @@ namespace Opde {
 			}
 			
 			/** Base shared type for DVariant */
-			class SharedBase : public RefCounted {
+			class SharedBase {
 				public:
-					SharedBase() : RefCounted() {};
+					SharedBase() {};
 					virtual ~SharedBase() {};
+					
+					virtual SharedBase * clone() = 0;
 			};
 			
 			/** Templated shared type for DVariant. Holds values for the shared types (string,vector) */
 			template <typename T> class Shared : public SharedBase {
 				public:
-					Shared(T *_data) : SharedBase(), data(_data) {
-					}
+					/// Constructor
+					Shared(const T& _data) : SharedBase(), data(_data) {};
 					
-					virtual ~Shared() {
-						if (data)
-							delete data;
-					}
+					/// Copy constructor from same-typed shared
+					Shared(const Shared<T>& src) : SharedBase(), data(src.data) {};
 					
-					T* data;
+					virtual ~Shared() {}
+					
+					virtual SharedBase * clone() { 
+						SharedBase* copy = new Shared<T>(data);
+						
+						return copy;
+					};
+					
+					T data;
 			};
 			
 			/** Private data holder. Holds either shared or non-shared value */

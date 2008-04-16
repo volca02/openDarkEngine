@@ -57,17 +57,17 @@ namespace Opde {
 				break;
 
 			case DV_STRING :
-				mPrivate.data.shared = new Shared<string>(new string(*static_cast<string *>(val)));
+				mPrivate.data.shared = new Shared<string>(*static_cast<string *>(val));
 				mPrivate.isShared = 1;
 				break;
 
 			case DV_VECTOR :
-				mPrivate.data.shared = new Shared<Vector3>(new Vector3(*static_cast<Vector3 *>(val)));
+				mPrivate.data.shared = new Shared<Vector3>(*static_cast<Vector3 *>(val));
 				mPrivate.isShared = 1;
 				break;
 				
 			case DV_QUATERNION :
-				mPrivate.data.shared = new Shared<Quaternion>(new Quaternion(*static_cast<Quaternion *>(val)));
+				mPrivate.data.shared = new Shared<Quaternion>(*static_cast<Quaternion *>(val));
 				mPrivate.isShared = 1;
 				break;
 
@@ -99,18 +99,18 @@ namespace Opde {
 				break;
 
 			case DV_STRING :
-				mPrivate.data.shared = new Shared<string>(new string(txtval));
-				mPrivate.isShared = 1;
+				mPrivate.data.shared = new Shared<string>(txtval);
+				mPrivate.isShared = true;
 				break;
 
 			case DV_VECTOR :
-				mPrivate.data.shared = new Shared<Vector3>(new Vector3(StringToVector(txtval)));
-				mPrivate.isShared = 1;
+				mPrivate.data.shared = new Shared<Vector3>(StringToVector(txtval));
+				mPrivate.isShared = true;
 				break;
 				
 			case DV_QUATERNION :
-				mPrivate.data.shared = new Shared<Quaternion>(new Quaternion(StringToQuaternion(txtval)));
-				mPrivate.isShared = 1;
+				mPrivate.data.shared = new Shared<Quaternion>(StringToQuaternion(txtval));
+				mPrivate.isShared = true;
 				break;
 
 			default :
@@ -120,10 +120,13 @@ namespace Opde {
 
 	//------------------------------------
 	DVariant::DVariant(const DVariant& b) {
-		if (b.mPrivate.isShared)
-			b.mPrivate.data.shared->addRef();
-
-		mPrivate = b.mPrivate;
+		if (b.mPrivate.isShared) {
+			mPrivate.isShared = true;
+			mPrivate.type = b.mPrivate.type;
+			mPrivate.data.shared = b.mPrivate.data.shared->clone();
+		} else {
+			mPrivate = b.mPrivate;
+		}
 	}
 
 	//------------------------------------
@@ -159,9 +162,9 @@ namespace Opde {
 		mPrivate.type = DV_STRING;
 
 		if (length > 0) { // if length is present... (I could probably see what the default length param is, but it could differ)
-			mPrivate.data.shared = new Shared<string>(new string(text, length));
+			mPrivate.data.shared = new Shared<string>(string(text, length));
 		} else {
-			mPrivate.data.shared = new Shared<string>(new string(text));
+			mPrivate.data.shared = new Shared<string>(text);
 		}
 
 		mPrivate.isShared = true;
@@ -170,35 +173,35 @@ namespace Opde {
 	//------------------------------------
 	DVariant::DVariant(const std::string& text) {
 		mPrivate.type = DV_STRING;
-		mPrivate.data.shared = new Shared<string>(new string(text));
+		mPrivate.data.shared = new Shared<string>(text);
 		mPrivate.isShared = true;
 	}
 
 	//------------------------------------
 	DVariant::DVariant(const Vector3& vec) {
 		mPrivate.type = DV_VECTOR;
-		mPrivate.data.shared = new Shared<Vector3>(new Vector3(vec));
+		mPrivate.data.shared = new Shared<Vector3>(vec);
 		mPrivate.isShared = true;
 	}
 	
 	//------------------------------------
 	DVariant::DVariant(const Quaternion& ori) {
 		mPrivate.type = DV_QUATERNION;
-		mPrivate.data.shared = new Shared<Quaternion>(new Quaternion(ori));
+		mPrivate.data.shared = new Shared<Quaternion>(ori);
 		mPrivate.isShared = true;
 	}
 
 	//------------------------------------
 	DVariant::DVariant(float x, float y, float z) {
 		mPrivate.type = DV_VECTOR;
-		mPrivate.data.shared = new Shared<Vector3>(new Vector3(x, y, z));
+		mPrivate.data.shared = new Shared<Vector3>(Vector3(x, y, z));
 		mPrivate.isShared = true;
 	}
 
 	//------------------------------------
-	DVariant::~DVariant() {
+	DVariant::~DVariant() {	
 		if (mPrivate.isShared)
-			mPrivate.data.shared->release();
+			delete mPrivate.data.shared;
 	}
 
 	//------------------------------------
@@ -226,8 +229,6 @@ namespace Opde {
 	//------------------------------------
 	DVariant::operator std::string() const {
 		std::ostringstream o;
-		Vector3* vecd;
-		Quaternion* qd;
 
 		switch (mPrivate.type) {
 			case DV_BOOL :
@@ -242,17 +243,23 @@ namespace Opde {
 				o << mPrivate.data.duint;
 				return o.str();
 			case DV_STRING :
-				return *((static_cast<Shared<string>*>(mPrivate.data.shared))->data);
-			case DV_VECTOR :
-				vecd = (static_cast<Shared<Vector3>*>(mPrivate.data.shared))->data;
-				o << vecd->x << ", " << vecd->y << ", " << vecd->z;
+				assert(mPrivate.isShared);
+				return (static_cast<Shared<string>*>(mPrivate.data.shared))->data;
+			case DV_VECTOR : {
+				const Vector3& vecd = (static_cast<Shared<Vector3>*>(mPrivate.data.shared))->data;
+				o << vecd.x << ", " << vecd.y << ", " << vecd.z;
 				return o.str();
-			case DV_QUATERNION :
-				qd = (static_cast<Shared<Quaternion>*>(mPrivate.data.shared))->data;
-				o << qd->w << ", " << qd->x << ", " << qd->y << ", " << qd->z;
+			}
+			case DV_QUATERNION : {
+				const Quaternion& qd = (static_cast<Shared<Quaternion>*>(mPrivate.data.shared))->data;
+				o << qd.w << ", " << qd.x << ", " << qd.y << ", " << qd.z;
 				return o.str();
+			}
 			default:
-				throw runtime_error("DVariant::string() - invalid type");
+				// TODO: We need a good replacement for exceptions here (and everywhere else as well)
+				// I assert false for now...
+				assert(false);
+				return "<INVALID_TYPE>";
 		}
 	}
 
@@ -275,7 +282,7 @@ namespace Opde {
 			case DV_UINT :
 				return mPrivate.data.duint;
 			case DV_STRING : // Convert the contained value to string
-				return StringToInt((*((static_cast<Shared<string>*>(mPrivate.data.shared))->data)));
+				return StringToInt(((static_cast<Shared<string>*>(mPrivate.data.shared))->data));
 			case DV_VECTOR :
 				throw runtime_error("DVariant::toInt() - vector cannot be converted to int");
 			case DV_QUATERNION :
@@ -299,7 +306,7 @@ namespace Opde {
 			case DV_UINT :
 				return mPrivate.data.duint;
 			case DV_STRING :
-				return StringToInt((*((static_cast<Shared<string>*>(mPrivate.data.shared))->data)));
+				return StringToInt(((static_cast<Shared<string>*>(mPrivate.data.shared))->data));
 			case DV_VECTOR :
 				throw runtime_error("DVariant::toUInt() - vector cannot be converted to uint");
 			case DV_QUATERNION :
@@ -323,7 +330,7 @@ namespace Opde {
 			case DV_UINT :
 				return mPrivate.data.duint;
 			case DV_STRING :
-				return StringToFloat(*((static_cast<Shared<string>*>(mPrivate.data.shared))->data));
+				return StringToFloat((static_cast<Shared<string>*>(mPrivate.data.shared))->data);
 			case DV_VECTOR :
 				throw runtime_error("DVariant::toFloat() - vector cannot be converted to int");
 			case DV_QUATERNION :
@@ -345,7 +352,7 @@ namespace Opde {
 			case DV_UINT :
 				return mPrivate.data.duint != 0;
 			case DV_STRING :
-				return StringToBool(*((static_cast<Shared<string>*>(mPrivate.data.shared))->data));
+				return StringToBool((static_cast<Shared<string>*>(mPrivate.data.shared))->data);
 			case DV_VECTOR :
 				throw runtime_error("DVariant::toBool() - vector cannot be converted to bool");
 			case DV_QUATERNION :
@@ -359,9 +366,9 @@ namespace Opde {
 	Vector3 DVariant::toVector() const {
 		if (mPrivate.type == DV_VECTOR) {
 			// simply return the value
-			return *((static_cast<Shared<Vector3>*>(mPrivate.data.shared))->data);
+			return ((static_cast<Shared<Vector3>*>(mPrivate.data.shared))->data);
 		} else if (mPrivate.type == DV_STRING) {
-			return StringToVector(*((static_cast<Shared<string>*>(mPrivate.data.shared))->data));
+			return StringToVector((static_cast<Shared<string>*>(mPrivate.data.shared))->data);
 		} else {
 			throw runtime_error("DVariant::toVector - Incompatible source type");
 		}
@@ -371,9 +378,9 @@ namespace Opde {
 	Quaternion DVariant::toQuaternion() const {
 		if (mPrivate.type == DV_QUATERNION) {
 			// simply return the value
-			return *((static_cast<Shared<Quaternion>*>(mPrivate.data.shared))->data);
+			return ((static_cast<Shared<Quaternion>*>(mPrivate.data.shared))->data);
 		} else if (mPrivate.type == DV_STRING) {
-			return StringToQuaternion(*((static_cast<Shared<string>*>(mPrivate.data.shared))->data));
+			return StringToQuaternion((static_cast<Shared<string>*>(mPrivate.data.shared))->data);
 		} else {
 			throw runtime_error("DVariant::toQuaternion - Incompatible source type");
 		}
@@ -381,13 +388,30 @@ namespace Opde {
 
 	//------------------------------------
 	const DVariant& DVariant::operator =(const DVariant& b) {
-		if (b.mPrivate.isShared)
-			b.mPrivate.data.shared->addRef();
+		// The rather unreadable ugly code is here to handle to self-asignment
+		if (b.mPrivate.isShared) {
 
-		if (mPrivate.isShared)
-			mPrivate.data.shared->release();
+			if ((mPrivate.isShared)) {
+				// we have shared data as well
+			    if ((mPrivate.data.shared != b.mPrivate.data.shared)) {
+			    	// only copy data if not the same pointer
+					delete mPrivate.data.shared;
+					mPrivate.data.shared = b.mPrivate.data.shared->clone();
+				}
+			} else // we did not have shared data, clone no matter what
+				mPrivate.data.shared = b.mPrivate.data.shared->clone();
+				
+				
+			mPrivate.isShared = true;
+			mPrivate.type = b.mPrivate.type;
 
-		mPrivate = b.mPrivate;
+		} else {
+			// if was shared, release
+			if (mPrivate.isShared)
+				delete mPrivate.data.shared;
+			
+			mPrivate = b.mPrivate;
+		}
 
 		return *this;
 	}
@@ -395,7 +419,7 @@ namespace Opde {
 	//------------------------------------
 	const DVariant& DVariant::operator =(bool b) {
 		if (mPrivate.isShared)
-			mPrivate.data.shared->release();
+			delete mPrivate.data.shared;
 
 		mPrivate.isShared = false;
 		mPrivate.data.dbool = b;
@@ -407,7 +431,7 @@ namespace Opde {
 	//------------------------------------
 	const DVariant& DVariant::operator =(int i)  {
 		if (mPrivate.isShared)
-			mPrivate.data.shared->release();
+			delete mPrivate.data.shared;
 
 		mPrivate.type = DV_INT;
 		mPrivate.isShared = false;
@@ -419,7 +443,7 @@ namespace Opde {
 	//------------------------------------
 	const DVariant& DVariant::operator =(uint u)  {
 		if (mPrivate.isShared)
-			mPrivate.data.shared->release();
+			delete mPrivate.data.shared;
 
 		mPrivate.type = DV_UINT;
 		mPrivate.isShared = false;
@@ -431,7 +455,7 @@ namespace Opde {
 	//------------------------------------
 	const DVariant& DVariant::operator =(float f)  {
 		if (mPrivate.isShared)
-			mPrivate.data.shared->release();
+			delete mPrivate.data.shared;
 
 		mPrivate.type = DV_FLOAT;
 		mPrivate.isShared = false;
@@ -443,11 +467,11 @@ namespace Opde {
 	//------------------------------------
 	const DVariant& DVariant::operator =(char* s) {
 		if (mPrivate.isShared)
-			mPrivate.data.shared->release();
+			delete mPrivate.data.shared;
 
 		mPrivate.isShared = true;
 		mPrivate.type = DV_STRING;
-		mPrivate.data.shared = new Shared<string>(new string(s));
+		mPrivate.data.shared = new Shared<string>(string(s));
 
 		return *this;
 	}
@@ -455,11 +479,11 @@ namespace Opde {
 	//------------------------------------
 	const DVariant& DVariant::operator =(const std::string& s) {
 		if (mPrivate.isShared)
-			mPrivate.data.shared->release();
+			delete mPrivate.data.shared;
 
 		mPrivate.isShared = true;
 		mPrivate.type = DV_STRING;
-		mPrivate.data.shared = new Shared<string>(new string(s));
+		mPrivate.data.shared = new Shared<string>(s);
 
 		return *this;
 	}
@@ -467,11 +491,11 @@ namespace Opde {
 	//------------------------------------
 	const DVariant& DVariant::operator =(const Vector3& v) {
 		if (mPrivate.isShared)
-			mPrivate.data.shared->release();
+			delete mPrivate.data.shared;
 
 		mPrivate.isShared = true;
 		mPrivate.type = DV_VECTOR;
-		mPrivate.data.shared = new Shared<Vector3>(new Vector3(v));
+		mPrivate.data.shared = new Shared<Vector3>(v);
 
 		return *this;
 	}
@@ -479,11 +503,11 @@ namespace Opde {
 	//------------------------------------
 	const DVariant& DVariant::operator =(const Quaternion& q) {
 		if (mPrivate.isShared)
-			mPrivate.data.shared->release();
+			delete mPrivate.data.shared;
 
 		mPrivate.isShared = true;
 		mPrivate.type = DV_QUATERNION;
-		mPrivate.data.shared = new Shared<Quaternion>(new Quaternion(q));
+		mPrivate.data.shared = new Shared<Quaternion>(q);
 
 		return *this;
 	}
@@ -494,7 +518,7 @@ namespace Opde {
 	}
 
 	//------------------------------------
-	// Returns a reference to a shared date, dynamically cast to the requested type, if possible
+	// Returns a reference to a shared data, statically cast to the requested type, if possible
 	template <typename T> T& DVariant::shared_cast() const {
 		if (mPrivate.isShared == false)
 			throw(runtime_error("Invalid shared_cast - cast on non-shared data"));
@@ -502,7 +526,7 @@ namespace Opde {
 		Shared<T> *ct = static_cast<Shared<T>*>(mPrivate.data.shared);
 
 		if (ct != NULL)
-			return *(ct->data);
+			return (ct->data);
 		else
 			throw(runtime_error("Invalid shared_cast - cast on different type or NULL"));
 
