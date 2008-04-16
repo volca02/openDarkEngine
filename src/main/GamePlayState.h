@@ -56,7 +56,7 @@ namespace Opde {
 			virtual void commandExecuted(std::string command, std::string parameters);
 
 			virtual void bootstrapFinished();
-			void onPropSymNameMsg(const LinkChangeMsg& msg);
+			void onLinkPlayerFactoryMsg(const LinkChangeMsg& msg);
 
 		protected:
 			Ogre::Root *mRoot;

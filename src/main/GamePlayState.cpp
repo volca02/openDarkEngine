@@ -108,7 +108,8 @@ namespace Opde {
 		
 		LOG_DEBUG("Starting Point object id : %d", StartingPointObjID);	
 		
-		DVariant spoint = PropertyGroup->get(StartingPointObjID, "position");
+		DVariant spoint;
+		PropertyGroup->get(StartingPointObjID, "position", spoint);
 		
 		Vector3 StartingPoint(0,0,0);
 		
@@ -488,7 +489,7 @@ namespace Opde {
 	    }
 	}
 
-	void GamePlayState::onPropSymNameMsg(const LinkChangeMsg& msg) {
+	void GamePlayState::onLinkPlayerFactoryMsg(const LinkChangeMsg& msg) {
 		switch (msg.change) {
 			case PROP_ADDED   : {
 				LOG_INFO("GamePlayState: Found StartingPoint");
