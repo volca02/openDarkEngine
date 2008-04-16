@@ -55,6 +55,8 @@ namespace Opde {
 		"<LinkHidden> ::= 'hidden' \n"
 		
 		"<DataCache> ::= 'cached' \n"
+		
+		"<DataType> ::= 'type' <Label> \n"
 
 		"<DChunkVersion> ::= 'd_ver' <Version> \n"
 		"<LChunkVersion> ::= 'l_ver' <Version> \n"
@@ -64,7 +66,7 @@ namespace Opde {
 		// Property definition part
 		"<PropertyDefinition> ::= 'property' <Label> '{' {<PropertyParams>} '}' \n"
 
-		"<PropertyParams> ::= <DTypeName> | <PropLabel> | <PChunkVersion> | <PInheritor> | <DataCache>\n"
+		"<PropertyParams> ::= <DTypeName> | <PropLabel> | <PChunkVersion> | <PInheritor> | <DataCache> | <DataType>\n"
 
 		"<PropLabel> ::= 'label' <Quoted_Label> \n"
 
@@ -128,6 +130,8 @@ namespace Opde {
 		addLexemeTokenAction("inherit", ID_INHERIT, &PLDefScriptCompiler::parseInherit);
 		
 		addLexemeTokenAction("cache", ID_CACHED, &PLDefScriptCompiler::parseCached);
+		
+		addLexemeTokenAction("type", ID_TYPE, &PLDefScriptCompiler::parseType);
 	}
 
 	//-----------------------------------------------------------------------
@@ -202,15 +206,25 @@ namespace Opde {
 			if (mCurrentState.label == "") // default to property chunk name silently
 				mCurrentState.label = mCurrentState.name;
 
-			PropertyGroupPtr rel = mPropertyService->createPropertyGroup(
+			PropertyGroupPtr pg;
+			
+			if (mCurrentState.ptype == "varstr") {
+				pg = mPropertyService->createStringPropertyGroup(
+                mCurrentState.label,
+                mCurrentState.name,
+                mCurrentState.inherit);
+			} else { 
+				// for now, any other string will lead us here:
+				// We could in theory templatize the string property group to all primitive types later...
+				pg = mPropertyService->createStructuredPropertyGroup(
                 mCurrentState.label,
                 mCurrentState.name,
                 dt,
-                mCurrentState.pmajor,
-                mCurrentState.pminor,
                 mCurrentState.inherit);
-                
-			rel->setCacheData(mCurrentState.cached);
+			}
+
+			pg->setChunkVersions(mCurrentState.pmajor, mCurrentState.pminor);
+			pg->setCacheData(mCurrentState.cached);
 		} else {
 			logParseError("Closing an unknown state!");
 		}
@@ -262,6 +276,7 @@ namespace Opde {
 		mCurrentState.state = CS_PROPERTY;
 		mCurrentState.name = getNextTokenLabel();
 		mCurrentState.label = "";
+		mCurrentState.ptype = "";
 		mCurrentState.dtypename = mCurrentState.name; // default
 		mCurrentState.inherit = "always";
 		mCurrentState.pmajor = mDefaultPMajor; // fill in the default versions
@@ -313,6 +328,12 @@ namespace Opde {
 	void PLDefScriptCompiler::parseCached(void) {
 		mCurrentState.cached = true;
 	}
+	
+	//-----------------------------------------------------------------------
+	void PLDefScriptCompiler::parseType(void) {
+		mCurrentState.ptype = getNextTokenLabel();
+	}
+
 
 	//-----------------------------------------------------------------------
 	void PLDefScriptCompiler::parseVersion(void) {
