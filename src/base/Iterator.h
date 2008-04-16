@@ -45,7 +45,37 @@ namespace Opde {
 	/// Shared pointer instance to const string iterator
 	typedef shared_ptr< StringIterator > StringIteratorPtr;
 	
+	/// Class representing a const int iterator
+	typedef ConstIterator< int > IntIterator;
 
+	/// Shared pointer instance to const int iterator
+	typedef shared_ptr< IntIterator > IntIteratorPtr;
+	
+	/// Map key iterator
+	template<class C, typename T> class MapKeyIterator : public ConstIterator<T> {
+		public:
+			MapKeyIterator(const C& map) : mMap(map) {
+				mIter = mMap.begin();
+			}
+			
+			const T& next() {
+				assert(!end());
+				
+				const int& val = mIter->first;
+				
+				++mIter;
+				
+				return val;
+			};
+			
+			bool end() const {
+				return mIter == mMap.end();
+			};
+			
+		protected:
+			const C& mMap;
+			typename C::const_iterator mIter;
+	};
 }
 
 #endif
