@@ -106,11 +106,9 @@ namespace Opde {
 		int16_t u; // LMAP U shift probably (if, then the same approach as in the wr_face_info_t)
 		int16_t v; // LMAP V shift probably
 	
-		uint8_t  s_u; // ly duplicated?
-		uint8_t  s_v; // zero
-	
+		uint16_t  lx; // this is the dimension X
 		uint8_t  ly; // this is the dimension Y
-		uint8_t  lx; // this is the dimension X
+		uint8_t  unk; 
 	
 		uint32_t	handle;   // internal handle we can ignore [TNH]
 		uint32_t zero;    // Always zero?
