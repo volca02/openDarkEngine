@@ -35,6 +35,8 @@
 #include "InheritService.h"
 #include "PropertyService.h"
 
+#include "SymNamePropertyStorage.h"
+
 #include <OgreSceneManager.h>
 
 #include <stack>
@@ -101,7 +103,7 @@ namespace Opde {
 			
 			/** Gets the object's symbolic name 
 			@param objID the object id to get the name of
-			@return the name of the object
+			@return the name of the object, or empty string if object id is invalid
 			*/
 			std::string getName(int objID);
 			
@@ -122,7 +124,7 @@ namespace Opde {
 			* @param ori the new orientation
 			* @param relative If true, the position and orientation are taken as differences rather than absolute positions 
 			*/
-			void teleport(int id, Vector3 pos, Quaternion ori, bool relative);
+			void teleport(int id, const Vector3& pos, const Quaternion& ori, bool relative);
 			
 			/** Assigns a metaproperty to an object 
 			* @param id The object id to assign the metaproperty to
@@ -150,9 +152,6 @@ namespace Opde {
 			/** Database change callback */
 			void onDBChange(const DatabaseChangeMsg& m);
 			
-			/// SymbolicName property changed callback
-			void onPropSymNameMsg(const PropertyChangeMsg& msg);
-
 			/** load links from a single database */
 			void _load(FileGroupPtr db, uint clearMask);
 
@@ -192,9 +191,6 @@ namespace Opde {
 			/// A stack of id's
 			typedef std::stack<int> ObjectIDStack;
 			
-			/// Name to object map
-			typedef std::map<std::string, int> NameToObject;
-
 			/// A set of allocated objects
 			ObjectAllocation mAllocatedObjects;
 			
@@ -202,7 +198,6 @@ namespace Opde {
 			PropertyGroupPtr mPropPosition;
 			
 			/// Map's symbolic name to object ID
-			NameToObject mNameToID;
 			
 			/// Database callback
 			DatabaseService::ListenerPtr mDbCallback;
@@ -234,11 +229,14 @@ namespace Opde {
 			/// A shared ptr to property service
 			PropertyServicePtr mPropertyService;
 			
-			PropertyGroup::ListenerID mPropSymNameListenerID;
+			/// Symbolic name property pointer
 			PropertyGroupPtr mPropSymName;
 			
 			/// Scene manager pointer
 			Ogre::SceneManager* mSceneMgr;
+			
+			/// Our specialized property storage for symbolic names
+			SymNamePropertyStorage* mSymNameStorage;
 	};
 
 	/// Shared pointer to the service

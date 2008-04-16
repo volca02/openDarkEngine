@@ -206,7 +206,7 @@ namespace Opde
 			int objid;
 			
 			if (PyArg_ParseTuple(args, "i", &objid)) {
-			    const std::string& name = o->mInstance->getName(objid);
+			    std::string name = o->mInstance->getName(objid);
 			    
 				return PyString_FromString(name.c_str());
 			} else {

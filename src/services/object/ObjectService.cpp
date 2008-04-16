@@ -37,7 +37,6 @@ using namespace std;
 using namespace Ogre;
 
 namespace Opde {
-
 	/*------------------------------------------------------*/
 	/*-------------------- ObjectService -------------------*/
 	/*------------------------------------------------------*/
@@ -45,7 +44,11 @@ namespace Opde {
 			mDatabaseService(NULL),
 			mObjVecVerMaj(0), // Seems to be the same for all versions
 			mObjVecVerMin(2),
-			mSceneMgr(NULL) {
+			mSceneMgr(NULL),
+			mMinID(-6144),
+			mMaxID(2048),
+			mSymNameStorage(NULL) {
+
 	}
 
 	//------------------------------------------------------
@@ -89,25 +92,33 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	Vector3 ObjectService::position(int objID) {
-		try {
-			return mPropPosition->get(objID, "position").toVector();
-		} catch(BasicException &e)  {
+		DVariant res;
+
+		if (mPropPosition->get(objID, "position", res)) {
+			return res.toVector();
+		} else
 			return Vector3::ZERO;
-		}
 	}
 	
 	//------------------------------------------------------
 	Quaternion ObjectService::orientation(int objID) {
-		try {
-			return mPropPosition->get(objID, "orientation").toQuaternion();
-		} catch(BasicException &e)  {
+		DVariant res;
+		
+		if (mPropPosition->get(objID, "orientation", res)) {
+			return res.toQuaternion();
+		} else
 			return Quaternion::IDENTITY;
-		}
+		
 	}
 
 	//------------------------------------------------------
 	std::string ObjectService::getName(int objID) {
-		return mPropSymName->get(objID, "");
+		DVariant res;
+		
+		if (mPropSymName->get(objID, "", res)) {
+			return res.toString();
+		} else
+			return "";
 	}
 	
 	//------------------------------------------------------
@@ -115,7 +126,7 @@ namespace Opde {
 		// First look if the name is used
 		int prevusage = named(name); 
 		
-		if (prevusage != 0 && prevusage != objID) {
+		if (mSymNameStorage->nameUsed(name) != 0 && prevusage != objID) {
 			LOG_ERROR("Tried to set name '%s' to object %d which was alredy used by object %d", name.c_str(), objID, prevusage);
 			return;
 		}
@@ -125,20 +136,15 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	int ObjectService::named(const std::string& name) {
-		NameToObject::iterator it = mNameToID.find(name);
-		
-		if (it != mNameToID.end()) {
-			return it->second;
-		} else
-			return 0;
+		return mSymNameStorage->objectNamed(name);
 	}
 
 	//------------------------------------------------------
-	void ObjectService::teleport(int id, Vector3 pos, Quaternion ori, bool relative) {
+	void ObjectService::teleport(int id, const Vector3& pos, const Quaternion& ori, bool relative) {
 		// First look if we exist
 		if (relative) {
-			Vector3 _pos = mPropPosition->get(id, "position").toVector() + pos;
-			Quaternion _ori = mPropPosition->get(id, "facing").toQuaternion() + ori;
+			Vector3 _pos = position(id) + pos;
+			Quaternion _ori = orientation(id) + ori;
 			mPropPosition->set(id, "position", _pos);
 			mPropPosition->set(id, "facing", _ori);
 		} else {
@@ -230,24 +236,21 @@ namespace Opde {
 		if (mPropPosition.isNull())
             OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "RenderService::bootstrapFinished");
 
-		// listener to the symbolic name property
-		PropertyGroup::ListenerPtr cnamec =
-			new ClassCallback<PropertyChangeMsg, ObjectService>(this, &ObjectService::onPropSymNameMsg);
-
-
 		mPropSymName = mPropertyService->getPropertyGroup("SymbolicName");
-
-		if (mPropPosition.isNull())
+		
+		if (mPropSymName.isNull())
             OPDE_EXCEPT("Could not get SymbolicName property group. Not defined. Fatal", "RenderService::bootstrapFinished");
-
-		mPropSymNameListenerID = mPropSymName->registerListener(cnamec);
+            
+		mSymNameStorage = new SymNamePropertyStorage();
+		// takes over the ownership of this Prop. storage
+		mPropSymName->setPropertyStorage(mSymNameStorage, true);
 	}
 	
 	//------------------------------------------------------
 	void ObjectService::onDBChange(const DatabaseChangeMsg& m) {
 	    if (m.change == DBC_DROPPING) {
-		// TODO: Clear the object mapping, broadcast the 'object are being released' change
-		_clear(0x03);
+			// TODO: Clear the object mapping, broadcast the 'object are being released' change
+			_clear(0x03);
 	    } else if (m.change == DBC_LOADING) {
 		// TODO: Load the object mapping bitmap (16 categories, although just 0 abstract, 1 concrete are in use)
 		// NOTE: Just the given range is used (based on the bitmap of the file - bit 0 abstract objs, bit 1 concrete objs)
@@ -285,17 +288,7 @@ namespace Opde {
 	    }
 	}
 	
-	// --------------------------------------------------------------------------
-	void ObjectService::onPropSymNameMsg(const PropertyChangeMsg& msg) {
-		switch (msg.change) {
-			case PROP_ADDED   :
-			case PROP_CHANGED : {
-				mNameToID[mPropSymName->get(msg.objectID, "").toString()] = msg.objectID;
-				return;
-			}
-		}
-	}
-	
+
 	//------------------------------------------------------
 	void ObjectService::_load(FileGroupPtr db, uint loadMask) {
 		// Load min, max obj id, then the rest of the FilePtr as a bitmap data. Those then are unpacked to ease the use
@@ -318,10 +311,10 @@ namespace Opde {
 			
 		if (loadMask & 0x02)
 			mMaxID = maxID;
-		
+			
 		// Load and unpack bitmap
 		// Calculate the objvec bitmap size
-		size_t bsize = (mMaxID - mMinID);
+		size_t bsize = (maxID - minID);
 		
 		if ((bsize & 0x07) != 0) {// alignment of size needed
 			bsize += (8 - (bsize & 0x07));
@@ -533,15 +526,6 @@ namespace Opde {
 		ObjectAllocation::iterator it = mAllocatedObjects.find(objID);
 		
 		if (it != mAllocatedObjects.end()) {
-			// Destroy the scene node of the object
-			NameToObject::iterator snit = mNameToID.find(getName(objID));
-			
-			if (snit != mNameToID.end())
-				if (snit->second == objID)
-					mNameToID.erase(snit);
-				else
-					LOG_FATAL("Object ID (%d) mismatch for reverse name lookup!", objID);
-			
 			// Inform LinkService and PropertyService (those are somewhat slaves of ours. Other services need to listen)
 			mLinkService->objectDestroyed(objID);
 			mPropertyService->objectDestroyed(objID);
