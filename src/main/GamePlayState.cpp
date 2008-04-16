@@ -504,7 +504,7 @@ namespace Opde {
 	void GamePlayState::bootstrapFinished() {
 		mLinkService = ServiceManager::getSingleton().getService("LinkService").as<LinkService>();
 		Relation::ListenerPtr metaPropCallback =
-			new ClassCallback<LinkChangeMsg, GamePlayState>(this, &GamePlayState::onPropSymNameMsg);
+			new ClassCallback<LinkChangeMsg, GamePlayState>(this, &GamePlayState::onLinkPlayerFactoryMsg);
 
 		mPlayerFactoryRelation = mLinkService->getRelation("PlayerFactory");
 
