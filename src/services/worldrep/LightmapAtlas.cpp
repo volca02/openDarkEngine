@@ -104,12 +104,12 @@ namespace Opde {
 
 		// calculate some important UV conversion data
 		// +0.5? to display only the inner transition of lmap texture, the outer goes to black color
-		lmap->mUV.x = ((float)area->x + 0.5 ) / ATLAS_WIDTH;
-		lmap->mUV.y = ((float)area->y + 0.5 ) / ATLAS_HEIGHT;
+		lmap->mUV.x = ((float)area->x) / ATLAS_WIDTH;
+		lmap->mUV.y = ((float)area->y) / ATLAS_HEIGHT;
 
 		// size conversion to atlas coords
-		lmap->mSizeUV.x = ((float)dim.first - 1)/ATLAS_WIDTH;
-		lmap->mSizeUV.y = ((float)dim.second - 1)/ATLAS_HEIGHT;
+		lmap->mSizeUV.x = ((float)dim.first)/ATLAS_WIDTH;
+		lmap->mSizeUV.y = ((float)dim.second)/ATLAS_HEIGHT;
 
 		// finally increment the count of stored lightmaps
 		mCount++;
@@ -439,7 +439,7 @@ namespace Opde {
 
 	void LightMap::AddSwitchableLightmap(int id, lmpixel *data) {
 		mSwitchableLmaps.insert(std::make_pair(id, data));
-		mIntensities[id] = 0.0f;
+		mIntensities[id] = 1.0f;
 	}
 
 	void LightMap::setLightIntensity(int id, float intensity) {
