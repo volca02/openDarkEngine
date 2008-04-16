@@ -110,6 +110,7 @@ property SymName {
 	label "SymbolicName"
 	p_ver 2.17
 	inherit never
+	type varstr
 }
 
 property Spotlight {
