@@ -174,7 +174,7 @@ namespace Opde {
 		DEnumPtr getEnum(const std::string& name);
 		
 		/** Dispatches the type definition according to the current state */
-		void dispatchType(DTypeDefPtr def);
+		void dispatchType(DTypeDefPtr& def);
 
 		/** Expects, and reads the number of elements in the [] parenthesis. Returns the parsed number */
 		int parseBoxBrace();

@@ -266,7 +266,7 @@ namespace Opde {
 			if (mCurrentState.state == CS_ENUM)
 				logParseError("Struct inside enum error.");
 
-			DTypeDef *nt = new DTypeDef(was.name, was.types, was.unioned);
+			DTypeDefPtr nt = new DTypeDef(was.name, was.types, was.unioned);
 
 			// if specified an array, wrap it up so
 			if (was.arraylen > 1) {
@@ -370,7 +370,7 @@ namespace Opde {
 	}
 
 	//-----------------------------------------------------------------------
-	void DTypeScriptCompiler::dispatchType(DTypeDefPtr def) {
+	void DTypeScriptCompiler::dispatchType(DTypeDefPtr& def) {
 		if (mCurrentState.state == CS_STRUCT) {
 			// insert the alias into the queue of the struct's members
 			mCurrentState.types.push_back(def); // will get released on closing brace
@@ -446,8 +446,8 @@ namespace Opde {
 		const String type = getNextTokenLabel();
 		const String newname = getNextTokenLabel();
 
-		DTypeDefPtr typ = getTypeDef(type);
-		DTypeDefPtr newt = typ->alias(newname);
+		DTypeDefPtr dtype = getTypeDef(type);
+		DTypeDefPtr newt = dtype->alias(newname);
 
 		if (testNextTokenID(ID_OPENBOX)) {
 			int len = parseBoxBrace();
@@ -592,7 +592,7 @@ namespace Opde {
 			}
 		}
 
-		DTypeDef* ndef = NULL;
+		DTypeDefPtr ndef = NULL;
 
 		if (hasDefault)
 			try {
@@ -610,7 +610,7 @@ namespace Opde {
 		if (array_len <= 1) {
 			dispatchType(ndef);
 		} else {
-			DTypeDef* arr = new DTypeDef(ndef, array_len);
+			DTypeDefPtr arr = new DTypeDef(ndef, array_len);
 
 			dispatchType(arr);
 		}
