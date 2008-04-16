@@ -308,7 +308,10 @@ namespace Opde {
 		if (msg.objectID <= 0) // no action for archetypes
             return;
 
-        Ogre::String name = mPropModelName->get(msg.objectID, "label"); // the model name
+		DVariant res = "";
+        mPropModelName->get(msg.objectID, "label", res); // the model name
+        
+        std::string name = res.toString();
 
         // As a test, I'm loading cube.mesh
         switch (msg.change) {
@@ -428,9 +431,23 @@ namespace Opde {
 		// The node will be a child of the Object's
 		// Set the light's parameters
 		// brightness, offset, radius
-		Real brightness = mPropLight->get(objectID, "brightness").toFloat();
-		Real radius = mPropLight->get(objectID, "radius").toFloat();
+		DVariant dbrightness, dradius;
+		
+		if (!mPropLight->get(objectID, "brightness", dbrightness)) {
+			LOG_FATAL("Could not get brightness field of light property!");
+			return;
+		}
+		
+		if (!mPropLight->get(objectID, "radius", dradius)) {
+			LOG_FATAL("Could not get radius field of light property!");
+			return;
+		}
 
+		Real brightness, radius;
+		
+		brightness = dbrightness.toFloat();
+		radius = dradius.toFloat();
+	
 		// For lights with zero radius, use linear attenuation
 		if (radius <= 0) {
 			// TODO: This needs experiments to be validated
@@ -456,7 +473,11 @@ namespace Opde {
 		li.light->setDiffuseColour(brightness, brightness, brightness);
 		li.light->setSpecularColour(brightness, brightness, brightness);
 		
-		li.node->setPosition(mPropLight->get(objectID, "offset").toVector());
+		DVariant offs;
+		
+		mPropLight->get(objectID, "offset", offs);
+		
+		li.node->setPosition(offs.toVector());
 
 		static_cast<DarkSceneManager*>(mSceneMgr)->queueLightForUpdate(li.light);
 	}
@@ -478,9 +499,18 @@ namespace Opde {
 	void RenderService::updateSpotLight(LightInfo& li, int objectID) {
 		// look at the results
 		// TODO: Conversion (angle in degrees or what?)
-		Degree inner(mPropSpotlight->get(objectID, "inner").toFloat());
-		Degree outer(mPropSpotlight->get(objectID, "outer").toFloat());
-		Real dist(mPropSpotlight->get(objectID, "distance").toFloat());
+		DVariant res;
+		
+		mPropSpotlight->get(objectID, "inner", res);
+		Degree inner(res.toFloat());
+		
+		res = DVariant(); // so that toFloat will be errorneous if field name mismatches
+		mPropSpotlight->get(objectID, "outer", res);
+		Degree outer(res.toFloat());
+		
+		res = DVariant();
+		mPropSpotlight->get(objectID, "distance", res);
+		Real dist(res.toFloat());
 		
 		// The angle is in degrees!
 		// The third parameter may mean distance from object... hmm.
@@ -629,6 +659,23 @@ namespace Opde {
 
 
 	// --------------------------------------------------------------------------
+	void RenderService::attachCameraToObject(int objID) {
+		SceneNode* sn = getSceneNode(objID);
+		
+		if (sn) {
+			sn->attachObject(mDefaultCamera);
+		}
+	}
+	
+	// --------------------------------------------------------------------------
+	void RenderService::detachCamera() {
+		if (mDefaultCamera->isAttached()) {
+			SceneNode* sn = mDefaultCamera->getParentSceneNode();
+			sn->detachObject(mDefaultCamera);
+		}
+	}
+
+	// --------------------------------------------------------------------------
 	// ---- Scene Node handling routines ----------------------------------------
 	// --------------------------------------------------------------------------
 	Ogre::SceneNode* RenderService::getSceneNode(int objID) {
@@ -656,8 +703,13 @@ namespace Opde {
 					// Find the scene node by it's object id, and update the position and orientation
 					Ogre::SceneNode* node = getSceneNode(msg.objectID);
 					
-					node->setPosition(mPropPosition->get(msg.objectID, "position").toVector());
-					node->setOrientation(mPropPosition->get(msg.objectID, "facing").toQuaternion());
+					DVariant pos; 
+					mPropPosition->get(msg.objectID, "position", pos);
+					DVariant ori;
+					mPropPosition->get(msg.objectID, "facing", ori);
+					
+					node->setPosition(pos.toVector());
+					node->setOrientation(ori.toQuaternion());
 				
 				} catch (BasicException& e) {
 					LOG_ERROR("ObjectService: Exception while setting position of object: %s", e.getDetails().c_str());
@@ -740,7 +792,7 @@ namespace Opde {
 	}
 	
 	void RenderService::createRampMesh() {
-		// Code copied from Ogre3D wiki, and modified (Thanks to the original author or saving my time!)
+		// Code copied from Ogre3D wiki, and modified (Thanks to the original author for saving my time!)
 		/// Create the mesh via the MeshManager
 		Ogre::MeshPtr msh = MeshManager::getSingleton().createManual(DEFAULT_RAMP_OBJECT_NAME, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 

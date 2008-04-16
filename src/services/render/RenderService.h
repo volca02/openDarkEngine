@@ -111,6 +111,13 @@ namespace Opde {
 			*/
 			Ogre::SceneNode* getSceneNode(int objID);
 			
+			/** Attaches the default camera to a defined object
+			* @todo Framework to work with cameras, rendertargets, etc. Should a service be made for this, move this inside such 
+			* @todo This one needs special handling if placed on Player object (leaning scene node(s)) - could be solved by placing a child SN "anywhen" attached */
+			void attachCameraToObject(int objID);
+			
+			/** Camera is detached from the specified object */
+			void detachCamera();
 		protected:
             virtual bool init();
             virtual void bootstrapFinished();
