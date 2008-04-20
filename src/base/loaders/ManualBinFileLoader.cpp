@@ -876,8 +876,8 @@ namespace Ogre {
 
         for (int n = 0; n < mHdr.num_mats; n++) {
             if ( mHdr.mat_flags & MD_MAT_TRANS || mHdr.mat_flags & MD_MAT_ILLUM ) {
-                mFile->readElem(&mMaterialsExtra[n].illum, 4);
                 mFile->readElem(&mMaterialsExtra[n].trans, 4);
+                mFile->readElem(&mMaterialsExtra[n].illum, 4);
             } else {
                 mMaterialsExtra[n].illum = 0;
                 mMaterialsExtra[n].trans = 0;
@@ -1148,10 +1148,9 @@ namespace Ogre {
             }
                 
             // Illumination of the material. Converted to ambient lightning here
-            if (( mHdr.mat_flags & MD_MAT_ILLUM)) { //  && (matext.illum > 0)
-                // set the illumination (converted to ambient lightning)
-                // pass->setAmbient(matext.illum, matext.illum, matext.illum);
-                pass->setAmbient(1.0, 1.0, 1.0); // Set full ambient, illum seems to always be zero
+            if (( mHdr.mat_flags & MD_MAT_ILLUM) && (matext.illum > 0)) {
+                // set the illumination
+                pass->setSelfIllumination(matext.illum, matext.illum, matext.illum);
             }
 
             // omat->setCullingMode(CULL_ANTICLOCKWISE);
