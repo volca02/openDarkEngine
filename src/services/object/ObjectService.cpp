@@ -234,12 +234,12 @@ namespace Opde {
 		mPropPosition = mPropertyService->getPropertyGroup("Position");
 
 		if (mPropPosition.isNull())
-            OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "RenderService::bootstrapFinished");
+            OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "ObjectService::bootstrapFinished");
 
 		mPropSymName = mPropertyService->getPropertyGroup("SymbolicName");
 		
 		if (mPropSymName.isNull())
-            OPDE_EXCEPT("Could not get SymbolicName property group. Not defined. Fatal", "RenderService::bootstrapFinished");
+            OPDE_EXCEPT("Could not get SymbolicName property group. Not defined. Fatal", "ObjectService::bootstrapFinished");
             
 		mSymNameStorage = new SymNamePropertyStorage();
 		// takes over the ownership of this Prop. storage

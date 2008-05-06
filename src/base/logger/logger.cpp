@@ -40,7 +40,7 @@ namespace Opde {
 
 	Logger::Logger() {
 		listeners.clear();
-		loggingLevel = LOG_LEVEL_INFO;
+		loggingLevel = LOG_LEVEL_VERBOSE;
 	}
 
 	Logger::~Logger() {

@@ -128,6 +128,7 @@ namespace Opde {
 		mRenderWindow = mRoot->initialise( true, "openDarkEngine" );
 
         // Dark scene manager factory
+        LOG_DEBUG("RenderService::init(): new DarkSceneManagerFactory()");
 		mDarkSMFactory = new DarkSceneManagerFactory();
 
 		// Register
