@@ -55,12 +55,14 @@ namespace Opde {
 				protected:
                     /** Sets new cached effective ID for the given object
                   * @param srcID the object to set effective ID for
-                  * @param the new effective ID */
+                  * @param the new effective ID
+                  * @return True if a change happened */
 					virtual bool setEffectiveID(int srcID, int effID);
 
 					/** Erases the effective ID record altogether, meaning that object has no effective value
                     * @param srcID the object to set effective ID for
-                    * @param the new effective ID */
+                    * @param the new effective ID
+                    * @return True if a change happened */
 					virtual bool unsetEffectiveID(int srcID);
 
                     /** Propagates new Effective source, recursively, on all inheritor targets.
@@ -69,14 +71,14 @@ namespace Opde {
 					* @li A vote for new effective object is done (highest priority), querying parent objects for thei're effective ID's.
 					* That ID is then recursively propagated, but only if a change happened to the effective ID of the Object.
 					*
-					* @param srcID the source of the propagation (a parent object ID)
+					* @param objID the source of the propagation (a parent object ID)
 					*
 					* @note The propagation stops (won't recurse) when:
 					* @li The propagated effective ID encounters an object where the srcID propagation is masked ineffective
 					* @li No targets are found to propagate to
 					* @li No change hapened to the object's effective ID
 					*/
-					virtual bool refresh(int srcID);
+					virtual bool refresh(int objID);
 
 					/// InheritService reference
 					InheritService* mInheritService;

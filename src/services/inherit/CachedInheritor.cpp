@@ -96,20 +96,20 @@ namespace Opde {
 
     //------------------------------------------------------
     bool CachedInheritor::setEffectiveID(int srcID, int effID) {
-        EffectiveObjectMap::iterator it = mEffObjMap.find(srcID);
-        bool changed = false;
-
-        if (it != mEffObjMap.end()) {
-            if (it->second != effID) {
-                it->second = effID;
-                changed = true;
-            }
-        } else {
-            mEffObjMap.insert(make_pair(srcID, effID));
-            changed = true; // there was no record yet
-        }
-
-        return changed;
+		std::pair<EffectiveObjectMap::iterator, bool> result = mEffObjMap.insert(make_pair(srcID, effID));    	
+		
+		if (result.second) {
+			// did insert, was not already there
+			return true;
+		} else {
+			// did not insert, already was there.
+			if (result.first->second != effID) {
+				result.first->second = effID;
+				return true;
+			}
+			
+			return false;
+		}
     }
 
     //------------------------------------------------------
@@ -126,12 +126,12 @@ namespace Opde {
     }
 
     //------------------------------------------------------
-    bool CachedInheritor::refresh(int srcID) {
+    bool CachedInheritor::refresh(int objID) {
         // First, get the old effective ID
-        int oldEffID = getEffectiveID(srcID);
+        int oldEffID = getEffectiveID(objID);
 
         // Let' vote for a new effective object ID
-        InheritQueryResultPtr sources = mInheritService->getSources(srcID);
+        InheritQueryResultPtr sources = mInheritService->getSources(objID);
 
         int maxPrio = -1; // no inheritance indicator itself
         int newEffID = 0; // Detected new effective ID
@@ -161,17 +161,17 @@ namespace Opde {
 
 
         // If self-implements
-        if (getImplements(srcID)) {
+        if (getImplements(objID)) {
 
             // If there is no source supply, set self. Respect priority>0 as metaprop
             if (effective.isNull() || maxPrio <= 0) {
-                newEffID = srcID; // self, because we mask 0 prio inh. or no source was found
+                newEffID = objID; // self, because we mask 0 prio inh. or no source was found
             }
 
         }
 
         if (newEffID != 0)  {
-            if (setEffectiveID(srcID, newEffID)) {
+            if (setEffectiveID(objID, newEffID)) {
                 // Broadcast the change to a new ID
                 InheritValueChangeMsg msg;
 
@@ -182,27 +182,30 @@ namespace Opde {
                 }
 
 
-                msg.objectID = srcID;
+                msg.objectID = objID;
                 msg.srcID = newEffID;
 
+				LOG_VERBOSE("Inheritance change happened on %d (new src %d, old src %d)", objID, newEffID, oldEffID);
                 broadcastMessage(msg);
             }
         }
         else
-            if (unsetEffectiveID(srcID)) {
+            if (unsetEffectiveID(objID)) {
                 InheritValueChangeMsg msg;
 
                 msg.change = INH_VAL_REMOVED;
 
-                msg.objectID = srcID;
+                msg.objectID = objID;
                 msg.srcID = 0;
 
+
+				LOG_VERBOSE("Inheritance removal happened on %d (old src %d)", objID, oldEffID);
                 broadcastMessage(msg);
             }
 
         // If there was a change, propagate
         if (newEffID != oldEffID) {
-            InheritQueryResultPtr targets = mInheritService->getTargets(srcID);
+            InheritQueryResultPtr targets = mInheritService->getTargets(objID);
 
             while (!targets->end()) {
                 InheritLinkPtr il = targets->next();
