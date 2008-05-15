@@ -31,16 +31,6 @@ typedef Ogre::VectorIterator<std::vector<SubEntityMaterialInstance *> > SubEntit
  * @author Kencho
  */
 class EntityMaterialInstance {
-// Attributes =================================================================================
-  public:
-  protected:
-    /** List of SubEntities' material instances.
-     */
-    std::vector<SubEntityMaterialInstance *> mSEMIs;
-    /** Keeps the current transparency value.
-     * @see SubEntityMaterialInstance::mCurrentTransparency.
-     */
-    Ogre::Real mCurrentTransparency;
 // Methods ====================================================================================
   public:
     /** Constructor. 
@@ -53,27 +43,44 @@ class EntityMaterialInstance {
      * Destroys all the underlying SubEntityMaterialInstances.
      */
     ~EntityMaterialInstance ();
-    /** Assigns this material to all the SubEntities through their respective 
-     * SubEntityMaterialInstances.
-     * @param name Name of the new material for this entity (all of its SubEntities).
-     * @see SubEntityMaterialInstance::setMaterialName().
-     */
-    void setMaterialName (Ogre::String name);
+
     /** Sets the scene blending method for all the SubEntities.
      * @param sbt The desired SceneBlendType.
      * @see SubEntityMaterialInstance::setSceneBlending().
      */
     void setSceneBlending (Ogre::SceneBlendType sbt);
+
     /** Changes the whole Entity transparency, through all the underlying SubEntityMaterialInstances.
      * @param transparency New transparency.
      * @see SubEntityMaterialInstance::setTransparency().
      */
     void setTransparency (Ogre::Real transparency);
+
     /** Returns an iterator to traverse all the underlying MaterialInstances.
      * @return The SubEntityMaterialInstances iterator.
      */
     SubEntityMaterialInstancesIterator getSubEntityMaterialInstancesIterator ();
+    
+    /** Sets a new entity to handle by this class, preserving the previous values
+    */
+	void setEntity(Ogre::Entity *e);
+  
   protected:
+	void prepareSEMIs();
+	void destroySEMIs();
+
+// Attributes =================================================================================
+	Ogre::Entity* mEntity;
+	
+    /** List of SubEntities' material instances.
+     */
+    std::vector<SubEntityMaterialInstance *> mSEMIs;
+    /** Keeps the current transparency value.
+     * @see SubEntityMaterialInstance::mCurrentTransparency.
+     */
+    Ogre::Real mCurrentTransparency;
+  
+	Ogre::SceneBlendType mSceneBlendType;
 };
 
 #endif // __ENTITYMATERIALINSTANCE_H__

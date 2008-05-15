@@ -74,6 +74,8 @@ void MaterialInstance::setTransparency (Real transparency) {
             break;
         }
         passIt.peekNext ()->setDiffuse (dc);
+        passIt.peekNext ()->setAlphaRejectFunction(CMPF_ALWAYS_PASS);
+        
         passIt.moveNext ();
             
         ++j;
