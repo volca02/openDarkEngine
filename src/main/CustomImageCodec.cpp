@@ -193,14 +193,17 @@ namespace Ogre {
 				for (size_t x = 0; x < imgData->width; ++x) {
 					uchar pidx = pSrc[x];
 						
-					*(pDstRow++) = pal[pidx].rgbBlue;
-					*(pDstRow++) = pal[pidx].rgbGreen;
-					*(pDstRow++) = pal[pidx].rgbRed;
-					
-					if (pidx == _TRANSPARENT_PAL_INDEX) 
+					if (pidx == _TRANSPARENT_PAL_INDEX)  {
+						*(pDstRow++) = 0; // Absolutely transparent black
+						*(pDstRow++) = 0; // This is to avoid pink edges
 						*(pDstRow++) = 0;
-					else
+						*(pDstRow++) = 0;
+					} else {
+						*(pDstRow++) = pal[pidx].rgbBlue;
+						*(pDstRow++) = pal[pidx].rgbGreen;
+						*(pDstRow++) = pal[pidx].rgbRed;
 						*(pDstRow++) = 255;
+					}
 				}
 
 				pDst += dstPitch;
