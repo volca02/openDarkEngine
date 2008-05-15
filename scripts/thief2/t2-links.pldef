@@ -112,7 +112,7 @@ relation WHBlock {
 }
 
 relation Lock {
-
+    no_data
 }
 
 relation FlowContact {
