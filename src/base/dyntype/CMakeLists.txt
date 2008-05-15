@@ -13,13 +13,13 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base
 )
 
-file(GLOB OPDE_DYNTYPE_HEADERS *.h)
-
 # Various types of file access classes.
 add_library (OpdeDynType 
     DVariant.cpp 
+    DVariant.h
     DTypeDef.cpp
-    ${OPDE_DYNTYPE_HEADERS}
+    DTypeDef.h
+    DTHelpers.h
 )
 
 target_link_libraries( OpdeDynType

@@ -37,6 +37,7 @@
 
 #include "integers.h"
 #include "OpdeException.h"
+#include "DTHelpers.h"
 
 #include <OgreMath.h>
 #include <OgreMatrix3.h>
@@ -575,7 +576,7 @@ namespace Opde {
 	}
 
 	//------------------------------------
-	DVariant DTypeDef::_get(char* ptr) {  // TODO: Big-endian
+	DVariant DTypeDef::_get(char* ptr) {  
 		// Based on the type of the data and size, construct the Variant and return
 		int sz = mPriv->size();
 		// TODO: Big/Little endian fixes
@@ -584,9 +585,9 @@ namespace Opde {
 			bool bl;
 
 			switch (mPriv->size()) {
-				case 1: bl = *reinterpret_cast<uint8_t*>(ptr) != 0; break;
-				case 2: bl = *reinterpret_cast<uint16_t*>(ptr) != 0; break;
-				case 4: bl = *reinterpret_cast<uint32_t*>(ptr) != 0; break;
+				case 1: bl = readLE<uint8_t>(ptr) != 0; break;
+				case 2: bl = readLE<uint16_t>(ptr) != 0; break;
+				case 4: bl = readLE<uint32_t>(ptr) != 0; break;
 				default:
 					OPDE_EXCEPT("Unsupported bool size", "DTypeDef::_get");
 			}
@@ -594,26 +595,26 @@ namespace Opde {
 
 		} else if(mPriv->type() == DVariant::DV_FLOAT) {
 			switch (mPriv->size()) {
-				case 4: return DVariant(*reinterpret_cast<float*>(ptr));
-				case 8: return DVariant((float)*reinterpret_cast<double*>(ptr));
+				case 4: return DVariant(readLE<float>(ptr));
+				case 8: return DVariant((float)readLE<double>(ptr));
 				default:
 					OPDE_EXCEPT("Unsupported float size", "DTypeDef::_get");
 			}
 
 		} else if(mPriv->type() == DVariant::DV_INT) {
 			switch (mPriv->size()) {
-				case 1: return DVariant(*reinterpret_cast<int8_t*>(ptr));
-				case 2: return DVariant(*reinterpret_cast<int16_t*>(ptr));
-				case 4: return DVariant(*reinterpret_cast<int32_t*>(ptr));
+				case 1: return DVariant(readLE<int8_t>(ptr));
+				case 2: return DVariant(readLE<int16_t>(ptr));
+				case 4: return DVariant(readLE<int32_t>(ptr));
 				default:
 					OPDE_EXCEPT("Unsupported int size", "DTypeDef::_get");
 			}
 
 		} else if(mPriv->type() == DVariant::DV_UINT) {
 			switch (mPriv->size()) {
-				case 1: return DVariant(*reinterpret_cast<uint8_t*>(ptr));
-				case 2: return DVariant(*reinterpret_cast<uint16_t*>(ptr));
-				case 4: return DVariant(*reinterpret_cast<uint32_t*>(ptr));
+				case 1: return DVariant(readLE<uint8_t>(ptr));
+				case 2: return DVariant(readLE<uint16_t>(ptr));
+				case 4: return DVariant(readLE<uint32_t>(ptr));
 				default:
 					OPDE_EXCEPT("Unsupported int size", "DTypeDef::_get");
 			}
@@ -624,23 +625,21 @@ namespace Opde {
 			if (mPriv->size() == -1) {// Variable length string
 				// First 4 bytes size uint, then data
 				uint32_t* uptr = reinterpret_cast<uint32_t*>(ptr);
+				uint32_t len = readLE<uint32_t>(ptr);
 
-				return DVariant(reinterpret_cast<char*>(uptr + 1), *uptr);
+				return DVariant(reinterpret_cast<char*>(uptr + 1), len);
 			} else {
 				// compose a string out of the buffer (max len is mSize, can be less)
 				int len = strlen(reinterpret_cast<char*>(ptr));
 				return DVariant(reinterpret_cast<char*>(ptr), std::min(mPriv->size(), len));
 			}
-
-			OPDE_EXCEPT("String not supported now", "DTypeDef::_get");
-
 		} else if(mPriv->type() == DVariant::DV_VECTOR) {
 			float x, y, z;
 			float* fptr = (float*)ptr;
 
-			x = *fptr; // TODO: Compile-time float size check (has to be 4 to let this work)
-			y = *(fptr+1);
-			z = *(fptr+2);
+			x = readLE<float>(fptr); // TODO: Compile-time float size check (has to be 4 to let this work)
+			y = readLE<float>(fptr+1);
+			z = readLE<float>(fptr+2);
 
 			return DVariant(Vector3(x, y, z));
 		} else if(mPriv->type() == DVariant::DV_QUATERNION) {
@@ -658,9 +657,9 @@ namespace Opde {
 			*/
 			int16_t* rot = reinterpret_cast<int16_t*>(ptr);
 
-			x = ((float)(rot[0]) / 32768) * Math::PI; // heading - y
-			y = ((float)(rot[1]) / 32768) * Math::PI; // pitch - x
-			z = ((float)(rot[2]) / 32768) * Math::PI; // bank - z
+			x = ((float)(readLE<int16_t>(rot)) / 32768) * Math::PI; // heading - y
+			y = ((float)(readLE<int16_t>(rot+1)) / 32768) * Math::PI; // pitch - x
+			z = ((float)(readLE<int16_t>(rot+2)) / 32768) * Math::PI; // bank - z
 
 			Matrix3 m;
 		
@@ -682,15 +681,16 @@ namespace Opde {
 		if (mPriv->type() == DVariant::DV_BOOL) {
 			switch (mPriv->size()) {
 				case 1:
-					*reinterpret_cast<uint8_t*>(ptr) = val.toBool();
+					// *reinterpret_cast<uint8_t*>(ptr) = val.toBool();
+					writeLE<uint8_t>(ptr, val.toBool());
 					return ptr;
 
 				case 2:
-					*reinterpret_cast<uint16_t*>(ptr) = val.toBool();
+					writeLE<uint16_t>(ptr, val.toBool());
 					return ptr;
 
 				case 4:
-					*reinterpret_cast<uint32_t*>(ptr) = val.toBool();
+					writeLE<uint32_t>(ptr, val.toBool());
 					return ptr;
 
 				default:
@@ -700,11 +700,11 @@ namespace Opde {
 		} else if(mPriv->type() == DVariant::DV_FLOAT) {
 			switch (mPriv->size()) {
 				case 4:
-					*reinterpret_cast<float*>(ptr) = val.toFloat();
+					writeLE<float>(ptr, val.toFloat());
 					return ptr;
 
 				case 8:
-					*reinterpret_cast<double*>(ptr) = val.toFloat();
+					writeLE<double>(ptr, val.toFloat());
 					return ptr;
 
 				default:
@@ -714,14 +714,14 @@ namespace Opde {
 		} else if(mPriv->type() == DVariant::DV_INT) {
 			switch (mPriv->size()) {
 				case 1:
-					*reinterpret_cast<int8_t*>(ptr)  = val.toInt();
+					writeLE<int8_t>(ptr, val.toInt());
 					return ptr;
 				case 2:
-					*reinterpret_cast<int16_t*>(ptr) = val.toInt();
+					writeLE<int16_t>(ptr, val.toInt());
 					return ptr;
 
 				case 4:
-					*reinterpret_cast<int32_t*>(ptr) = val.toInt();
+					writeLE<int32_t>(ptr, val.toInt());
 					return ptr;
 
 				default:
@@ -731,15 +731,15 @@ namespace Opde {
 		} else if(mPriv->type() == DVariant::DV_UINT) {
 			switch (mPriv->size()) {
 				case 1:
-					*reinterpret_cast<uint8_t*>(ptr)  = val.toUInt();
+					writeLE<uint8_t>(ptr, val.toUInt());
 					return ptr;
 
 				case 2:
-					*reinterpret_cast<uint16_t*>(ptr) = val.toUInt();
+					writeLE<uint16_t>(ptr, val.toUInt());
 					return ptr;
 
 				case 4:
-					*reinterpret_cast<uint32_t*>(ptr) = val.toUInt();
+					writeLE<uint32_t>(ptr, val.toUInt());
 					return ptr;
 
 				default:
@@ -760,9 +760,7 @@ namespace Opde {
 					char* newptr = new char[size + sizeof(uint32_t)];
 
 					// First 4 bytes size uint, then data
-					uint32_t* uptr = reinterpret_cast<uint32_t*>(newptr);  // TODO: Big-endian
-
-					*uptr = size; // write the size into the first 32 bits
+					writeLE<uint32_t>(newptr, size);
 
 					// now copy the string
 					s.copy(&newptr[sizeof(uint32_t)], size - 1);
@@ -791,9 +789,9 @@ namespace Opde {
 
 				Vector3 v = val.toVector();
 
-				*fptr = v.x;
-				*(fptr+1) = v.y;
-				*(fptr+2) = v.z;
+				writeLE<float>(fptr, v.x);
+				writeLE<float>(fptr+1, v.y);
+				writeLE<float>(fptr+2, v.z);
 
 				return ptr;
 		} else if(mPriv->type() == DVariant::DV_QUATERNION) {
@@ -812,9 +810,10 @@ namespace Opde {
 		
 			int16_t rot = *reinterpret_cast<int16_t*>(ptr);
 
-			vptr[0] = static_cast<int16_t>(x.valueRadians() * 32768 / Math::PI);
-			vptr[1] = static_cast<int16_t>(y.valueRadians() * 32768 / Math::PI);
-			vptr[2] = static_cast<int16_t>(z.valueRadians() * 32768 / Math::PI);
+			writeLE<int16_t>(vptr    , static_cast<int16_t>(x.valueRadians() * 32768 / Math::PI));
+			writeLE<int16_t>(vptr + 1, static_cast<int16_t>(y.valueRadians() * 32768 / Math::PI));
+			writeLE<int16_t>(vptr + 2, static_cast<int16_t>(z.valueRadians() * 32768 / Math::PI));
+
 			return ptr;
 		} else {
 			OPDE_EXCEPT("Unsupported _set type", "DTypeDef::_set");

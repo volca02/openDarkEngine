@@ -17,6 +17,9 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *
+ *		$Id$
+ *
  *****************************************************************************/
  
 #ifndef __DTYPEDEF_H
@@ -355,32 +358,7 @@ namespace Opde {
 			* @param size The size of the data expected
 			* @note for dynamic size types (variable length strings), the size should be the overall length of the data (32bits size + the data itself) */
 			DType(DTypeDefPtr type, FilePtr file, uint _size, bool useCache = false) : mType(type), mUseCache(useCache) {
-				/*// create enough room to hold the loaded data
-				if (mType->size() < 0) { // dyn. size. we have to use the size
-					// Size always has to be at least 4 bytes
-					assert(_size >= sizeof(uint32_t));
-					
-					mData = new char[_size];
-					
-					uint32_t size = 0;
-					
-					// Read the size
-					file->readElem(mData, sizeof(uint32_t));
-					
-					size = *(reinterpret_cast<uint32_t*>(mData));
-					
-					// inconsistency smells badly
-					assert(size == (_size - sizeof(uint32_t)));
-					
-					// Read the rest
-					file->read(&mData[sizeof(uint32_t)], size);
-				} else {
-					assert(size() == _size);
-					mData = mType->create();
-					file->read(mData, _size);
-				}*/
 				mData = 0;
-				
 				read(file, _size);
 			}
 			
