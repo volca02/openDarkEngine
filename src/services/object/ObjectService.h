@@ -37,6 +37,8 @@
 
 #include "SymNamePropertyStorage.h"
 
+#include "BitArray.h"
+
 #include <OgreSceneManager.h>
 
 #include <stack>
@@ -170,7 +172,7 @@ namespace Opde {
 			/// Destroys object, frees accompanying links and properties, broadcasts the change
 			void _destroyObject(int objID);
 			
-			/// Prepares for object. Does necessary steps to fully accept the object (f.e. creates SceneNode for concrete objects)
+			/// Prepares for object. Does necessary steps to fully accept the object. informs all the listeners that object creation starts (f.e. creates SceneNode for concrete objects)
 			void _prepareForObject(int objID);
 			
 			/// Returns a new free archetype ID. Modifies the mMinID/mMaxID as appropriate, removes the ID from the free id's
@@ -182,17 +184,17 @@ namespace Opde {
 			/// Resets the min and max id's to some sane values (uses config service values obj_min and obj_max if found)
 			void resetMinMaxID();
 			
+			/// Creates built-in resources - DonorType property, SymbolicName property
+			void createBuiltinResources();
+			
 			/// Converts the properties orientation to quaternion
             static Ogre::Quaternion toOrientation(PropertyDataPtr posdata);
 
-			/** A database of used ID's */
-			typedef std::set<int> ObjectAllocation;
-			
 			/// A stack of id's
 			typedef std::stack<int> ObjectIDStack;
 			
 			/// A set of allocated objects
-			ObjectAllocation mAllocatedObjects;
+			BitArray mAllocatedObjects;
 			
 			/// Position property (to set/get position/orientation of objects)
 			PropertyGroupPtr mPropPosition;
@@ -204,12 +206,6 @@ namespace Opde {
 
 			/// Database service
 			DatabaseServicePtr mDatabaseService;
-			
-			// Maximal and minimal used ID's (as read from config service, or from DB's ObjVec)
-			/// Minimal ID used for game objects (lower limit, flexible)
-			int mMinID, 
-			/// Maximal ID used for game objects (upper limit, flexible)
-				mMaxID;
 			
 			/// Chunk versions. TODO: Config Service values
 			uint mObjVecVerMaj, mObjVecVerMin;

@@ -45,9 +45,8 @@ namespace Opde {
 			mObjVecVerMaj(0), // Seems to be the same for all versions
 			mObjVecVerMin(2),
 			mSceneMgr(NULL),
-			mMinID(-6144),
-			mMaxID(2048),
-			mSymNameStorage(NULL) {
+			mSymNameStorage(NULL),
+			mAllocatedObjects(-6144, 2048) {
 
 	}
 
@@ -84,9 +83,7 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	bool ObjectService::exists(int objID) {
-		ObjectAllocation::iterator it = mAllocatedObjects.find(objID);
-		
-		return (it != mAllocatedObjects.end());
+		return mAllocatedObjects.get(objID);
 	}
 	
 	
@@ -212,9 +209,22 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	bool ObjectService::init() {
+		// Builtin properties are constructed: 
+		createBuiltinResources();
+		
 	    return true;
 	}
 
+
+	//------------------------------------------------------
+	void ObjectService::createBuiltinResources() {
+		mPropertyService = ServiceManager::getSingleton().getService("PropertyService").as<PropertyService>();
+		
+		// DonorType property (single integer property):
+		// mPropertyService->createPropertyGroup();
+
+	}
+	
 	//------------------------------------------------------
 	void ObjectService::bootstrapFinished() {
 		// Ensure link listeners are created
@@ -304,107 +314,74 @@ namespace Opde {
 		f->readElem(&maxID, 4);
 		
 		LOG_DEBUG("ObjectService: ObjVec MinID %d, MaxID %d", minID, maxID);
+
+		if ((minID & 0x07) != 0) {
+			// compensate the start bits. not aligned to byte
+			LOG_INFO("ObjectService: ObjVec is not aligned!");
+		}
 		
-		// set the min and max values. Only set min id if loading archetype, and reverse
-		if (loadMask & 0x01)
-			mMinID = minID;
-			
-		if (loadMask & 0x02)
-			mMaxID = maxID;
-			
 		// Load and unpack bitmap
 		// Calculate the objvec bitmap size
-		size_t bsize = (maxID - minID);
+		size_t bsize = f->size() - 2 * sizeof(int32_t);
 		
-		if ((bsize & 0x07) != 0) {// alignment of size needed
-			bsize += (8 - (bsize & 0x07));
-		}
-
-		bsize /= 8;
-
-		if ((bsize + 8) > f->size()) {
-			LOG_ERROR("Expected ObjVec size is greater than file size (truncating)!");
-			bsize = f->size() - 8;
-		}
-
 		unsigned char* bitmap = new unsigned char[bsize];
 	
 		f->read(bitmap, bsize);
 		
-		// actual position in the bitmap
-		int id = minID;
+		// bit array going to be used to merge the objects (from file, and those in mem)
+		BitArray fileObjs(bitmap, bsize, minID, maxID);
 		
-		if (loadMask == 0x02) { // only concrete
-			// recalc the s to start on obj. id. 0
-			id = 0;
-			
-			if ((minID & 0x07) != 0) {
-				// compensate the start bits. not aligned to byte
-				LOG_INFO("ObjectService: ObjVec is not aligned!");
-			}
-		}
+		// grow the allocated objects to have enough room for new object flags
+		mAllocatedObjects.grow(minID, maxID);
+		
+		delete[] bitmap; // not needed anymore, was copied into the fileObjs
+		
+		// current position in the bitmap
+		int id;
 		
 		int lastID = 0;
 		
-		std::vector<int> objectQueue;
-		
 		// Processes one byte a time
-		while (id < maxID) {
-			unsigned char b = bitmap[(id - minID) >> 3];
-			
-			if (id >= 0 && archetypeOnly)
-				break;
-			
-			int i = id;
-			
-			while (b) {
-				if (b & 1) {
-					_prepareForObject(i);
-					objectQueue.push_back(i);
-					lastID = i;
-					LOG_VERBOSE("Found object ID %d", i);
-				}
+		for(id = minID; id < maxID ; ++id) {
+			if (fileObjs.get(id)) {
+				LOG_VERBOSE("Found object ID %d", id);
 				
-				b >>= 1;
+				// object should not exist before
+				assert(!mAllocatedObjects.get(id));
 				
-				i++;
+				_prepareForObject(id);
+				mAllocatedObjects.set(id, true);
+				lastID = id;
 			}
-			
-			id += 8;
 		}
 		
 		// Now, inform link service and property service (let them load)
-		try {
-			mLinkService->load(db);
-		} catch (BasicException& e) {
-			LOG_FATAL("Exception while loading links from mission database : %s", e.getDetails().c_str());
-		}
-		
 		try {
 			mPropertyService->load(db);
 		} catch (BasicException& e) {
 			LOG_FATAL("Exception while loading properties from mission database : %s", e.getDetails().c_str());
 		}
 		
+		try {
+			mLinkService->load(db);
+		} catch (BasicException& e) {
+			LOG_FATAL("Exception while loading links from mission database : %s", e.getDetails().c_str());
+		}
 		
 		// Free all id's that are not in use for reuse
 		for (int i = 0; i < lastID; i++) {
 			// if the bitmaps is zeroed on the position, free the ID for reuse
-			if ((bitmap[(i - minID) >> 3] & (1 << (i & 0x07))) == 0)
+			if (!fileObjs.get(i))
 				freeID(i);
 			// TODO: Check if the ID isn't used in properties/links!
 			// TNH's purge bad object's that is
 		}
 		
-		std::vector<int>::iterator oit = objectQueue.begin();
-		
-		// Realise the end of creation of the object
-		for ( ; oit != objectQueue.end(); ++oit)
-			_endCreateObject(*oit);
-		
-		
-		// Done loading the allocation, dealloc the bitmap
-		delete[] bitmap;
+			
+		for(id = minID; id < maxID ; ++id) {
+			if (fileObjs.get(id))
+				_endCreateObject(id);
+		}
 	}
 
 	//------------------------------------------------------
@@ -414,13 +391,18 @@ namespace Opde {
 		bool clearConcretes = (clearMask & 0x02) || clearArchetypes;
 
 		if (clearMask != 0x03) { // not cleaning up the whole objsys
-			ObjectAllocation::iterator it = mAllocatedObjects.begin();
+			int idx = mAllocatedObjects.getMinIndex();
+			int max = mAllocatedObjects.getMaxIndex();
 			
-			while (it != mAllocatedObjects.end()) {
-				ObjectAllocation::iterator cur = it++;
-				
-				if ((*cur < 0 && clearArchetypes) || (*cur > 0 && clearConcretes))
-					_destroyObject(*cur); // Will remove properties and links fine
+			if (!clearArchetypes)
+				idx = 0;
+			
+			if (!clearConcretes)
+				max = 0;				
+			
+			for (; idx < max; ++idx) {
+				if (mAllocatedObjects.get(idx))
+					_destroyObject(idx); // Will remove properties and links fine
 			}
 		} else { // Total cleanup
 			mLinkService->clear();
@@ -446,46 +428,37 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	void ObjectService::_save(FileGroupPtr db, uint saveMask) {
-		// If the min or max values are not aligned, then align them (min should get lower, max higher!)
-		// By aligning, I mean that 0 will get to bit index 0 of some byte (so the low 3 bits of the min value should be 0)
-		// Dark always saves the full bitmap, it seems. Let's do it the same
-		int err = mMinID & 0x07;
+		// only some values should be saved -
+		// concrete objects or archetypes
+		BitArray objmask(mAllocatedObjects.getMinIndex(), mAllocatedObjects.getMaxIndex());
 		
-		if (err != 0) {
+		for (int id = mAllocatedObjects.getMinIndex(); id < mAllocatedObjects.getMaxIndex(); ++id) {
+			DVariant v;
 			
-			mMinID -= 8 - err;
+			if (mAllocatedObjects.get(id)) {
+				if (!mPropertyService->has(id, "DonorType")) {
+					if (saveMask & 0x01) // has donortype, was archetype requested?
+						objmask.set(id, true); // yep, so include this object
+				} else {
+					if (saveMask & 0x02) // has no donortype, was concrete requested?
+						objmask.set(id, true); // yep, include this obj
+				}
+			}
 		}
 
-		size_t bsize = mMaxID - mMinID;
-		
-		if ((bsize & 0x07) != 0) {// alignment of size needed
-			bsize += (8 - (bsize & 0x07));
-		}
-		
-		unsigned char* bitmap = new unsigned char[bsize];
-		memset(bitmap, 0, bsize);
-		
-		ObjectAllocation::const_iterator it = mAllocatedObjects.begin();
-		
-		while (it != mAllocatedObjects.end()) {
-			// set the appropriate bit
-			int id = *it - mMinID;
-			
-			bitmap[id >> 3] |= 1 << (id & 0x07);
-		}
-		
-		// create the ObjVec in the db
 		FilePtr ovf = db->createFile("ObjVec", mObjVecVerMaj, mObjVecVerMin);
+			
+		int32_t minid = objmask.getMinIndex();
+		int32_t maxid = objmask.getMaxIndex();
+		size_t siz = objmask.getRawBufSize();
 		
-		ovf->writeElem(&mMinID, 4);
-		ovf->writeElem(&mMaxID, 4);
-		ovf->write(bitmap, bsize);
-		
-		delete[] bitmap;
+		ovf->writeElem(&minid, 4);
+		ovf->writeElem(&maxid, 4);
+		ovf->write(objmask.getRawBuf(), siz);
 		
 		// serialize the properties and links
 		mLinkService->save(db, saveMask);
-		mPropertyService->save(db, saveMask);
+		mPropertyService->save(db, objmask);
 	}
 	
 	//------------------------------------------------------
@@ -508,7 +481,7 @@ namespace Opde {
 	//------------------------------------------------------
 	void ObjectService::_endCreateObject(int objID) {
 		// allocate the ID
-		mAllocatedObjects.insert(objID);
+		mAllocatedObjects.set(objID, true);
 		
 		// Prepare the message
 		ObjectServiceMsg m;
@@ -522,16 +495,13 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	void ObjectService::_destroyObject(int objID) {
-		// remove from set
-		ObjectAllocation::iterator it = mAllocatedObjects.find(objID);
-		
-		if (it != mAllocatedObjects.end()) {
+		if (mAllocatedObjects.get(objID)) {
 			// Inform LinkService and PropertyService (those are somewhat slaves of ours. Other services need to listen)
 			mLinkService->objectDestroyed(objID);
 			mPropertyService->objectDestroyed(objID);
 			
 			// Insert the id into free id's
-			mAllocatedObjects.erase(it);
+			mAllocatedObjects.set(objID, false);
 			
 			// Insert into free id's
 			freeID(objID);
@@ -570,7 +540,11 @@ namespace Opde {
 				
 				return id;
 			} else {
-				return --mMinID; // New minimal ID objects
+				int idx = mAllocatedObjects.getMinIndex() - 1; // New max ID object
+				// wanted a new id, let's grow for them!
+				mAllocatedObjects.setMinIndex(idx - 256, false);
+				LOG_INFO("Beware: Grew archetype id's by 256 to %d", mAllocatedObjects.getMinIndex());
+				return idx;
 			}
 		} else {
 			if (mFreeConcreteIDs.size() > 0) {
@@ -579,7 +553,11 @@ namespace Opde {
 				
 				return id;
 			} else {
-				return ++mMaxID; // New minimal ID objects
+				int idx = mAllocatedObjects.getMaxIndex() + 1; // New max ID object
+				// wanted a new id, let's grow for them!
+				mAllocatedObjects.setMaxIndex(idx + 256, false);
+				LOG_INFO("Beware: Grew concrete id's by 256 to %d", mAllocatedObjects.getMinIndex());
+				return idx;
 			}
 		}
 	}
@@ -600,18 +578,22 @@ namespace Opde {
 		DVariant val;
 		// Config Values: obj_min, obj_max
 		
-		if (cfp->getParam("obj_min", val)) {
-			mMinID = val.toInt();
-		} else {
-			// a sane default (?)
-			mMinID = -6144;
-		}
+		int minID, maxID;
 		
 		if (cfp->getParam("obj_min", val)) {
-			mMinID = val.toInt();
+			minID = val.toInt();
 		} else {
-			mMaxID = 2048;
+			// a sane default (?)
+			minID = -6144;
 		}
+		
+		if (cfp->getParam("obj_max", val)) {
+			maxID = val.toInt();
+		} else {
+			maxID = 2048;
+		}
+		
+		mAllocatedObjects.reset(minID, maxID);
 	}
 	
 	//-------------------------- Factory implementation
