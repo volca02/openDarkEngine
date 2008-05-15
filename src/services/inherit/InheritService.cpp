@@ -17,6 +17,9 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *
+ *		$Id$
+ *
  *****************************************************************************/
 
 #include "ServiceCommon.h"
@@ -191,10 +194,12 @@ namespace Opde {
             smsg.change = INH_CHANGED;
             broadcastMessage(smsg);
 		} else if (msg.change == LNK_REMOVED) {
-		    broadcastMessage(smsg); // Remove will broadcast prior to the removal
-		    _removeLink(l);
-		    // Remove the link
             smsg.change = INH_REMOVED;
+		    broadcastMessage(smsg); // Remove will broadcast prior to the removal
+
+   			// Remove the link
+			_removeLink(l);
+		    
 		}
 	}
 
