@@ -551,8 +551,10 @@ namespace Ogre {
         }
 
         // Cubic bounds
-        mMesh->_setBounds(AxisAlignedBox(mHdr.bbox_min[0], mHdr.bbox_min[1], mHdr.bbox_min[2],
-                mHdr.bbox_max[0],mHdr.bbox_max[1],mHdr.bbox_max[2]));
+        
+        /* TODO: some meshes violate the rules min<max, so temporarily commented
+         mMesh->_setBounds(AxisAlignedBox(mHdr.bbox_min[0], mHdr.bbox_min[1], mHdr.bbox_min[2],
+                mHdr.bbox_max[0],mHdr.bbox_max[1],mHdr.bbox_max[2]));*/
 
         // Spherical radius
         mMesh->_setBoundingSphereRadius(mHdr.sphere_rad);
@@ -1123,28 +1125,24 @@ namespace Ogre {
                     txtname = String("txt/") + String(mat.name);
                 }
 
-			// TODO: This is bad. Should be fixed. Looks awful. See ss2 model loading...
 			pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-			// pass->setAlphaRejectSettings(CMPF_EQUAL, 255); // Alpha rejection. 
-			// tus->setColourOperation(LBO_ALPHA_BLEND);
-
+			pass->setAlphaRejectSettings(CMPF_GREATER, 128); // Alpha rejection. 
 			
 			// Some basic lightning settings
             tus = pass->createTextureUnitState(txtname);
 
             tus->setTextureAddressingMode(TextureUnitState::TAM_WRAP);
             tus->setTextureCoordSet(0);
-            tus->setTextureFiltering(TFO_TRILINEAR);
+            tus->setTextureFiltering(TFO_BILINEAR);
 			
-			// Set replace on all first layer textures for now (Transparency will change this)
-            //tus->setColourOperation(LBO_ADD);
-
             // If the transparency is used
             if (( mHdr.mat_flags & MD_MAT_TRANS) && (matext.trans > 0)) {
                 // set at least the transparency value for the material
-                tus->setColourOperation(LBO_ALPHA_BLEND);
-                tus->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, 1 - matext.trans);
+                pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
                 pass->setDepthWriteEnabled(false);
+                tus->setColourOperation(LBO_ALPHA_BLEND);
+                pass->setAlphaRejectFunction(CMPF_ALWAYS_PASS); // Alpha rejection reset. Does not live good with the following:
+                tus->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, 1 - matext.trans);
             }
                 
             // Illumination of the material. Converted to ambient lightning here
@@ -1162,7 +1160,8 @@ namespace Ogre {
 			ColourValue matcolor(mat.colour[2] / 255.0, mat.colour[1] / 255.0, mat.colour[0] / 255.0);
 			
             // set the material color
-            tus->setColourOperationEx(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, matcolor);
+            // tus->setColourOperationEx(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, matcolor);
+			pass->setDiffuse(matcolor);
 
             if (( mHdr.mat_flags & MD_MAT_TRANS ) && (matext.trans > 0)) {
                 // tus->setColourOperation(LBO_ALPHA_BLEND);
@@ -1170,9 +1169,9 @@ namespace Ogre {
             }
             
             // Illumination of a color based material. Hmm. Dunno if this is right, but i simply multiply the color with the illumination
-            if (( mHdr.mat_flags & MD_MAT_ILLUM)) { //  && (matext.illum > 0)
-                // set the illumination (converted to diffuse lightning)
-                pass->setAmbient(matcolor.r * matext.illum, matcolor.g * matext.illum, matcolor.b * matext.illum);
+            if (( mHdr.mat_flags & MD_MAT_ILLUM) && (matext.illum > 0)) {
+                // set the illumination
+                pass->setSelfIllumination(matcolor.r * matext.illum, matcolor.g * matext.illum, matcolor.b * matext.illum);
             }
             
             // omat->setCullingMode(CULL_ANTICLOCKWISE);
