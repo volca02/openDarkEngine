@@ -17,7 +17,7 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
-  *	  $Id$
+ *	  $Id$
  *
  *****************************************************************************/
 
@@ -33,6 +33,7 @@
 #include "logger.h"
 #include "InheritService.h"
 #include "PropertyStorage.h"
+#include "BitArray.h"
 
 namespace Opde {
 	// forward decl.
@@ -61,6 +62,12 @@ namespace Opde {
 
 			/** Destructor */
 			virtual ~PropertyGroup();
+			
+			/// Sets this property group's flag mBuiltIn to true, meaning this PropertyGroup was created by code as a core property
+			inline void setBuiltin() { mBuiltin = true; };
+			
+			/// Gets the builtin flag
+			inline bool getBuiltin() { return mBuiltin; };
 			
 			/** Property storage setter
 			* @param propStorage The new storage for properties
@@ -102,9 +109,9 @@ namespace Opde {
 
 			/** Saves properties to a file group
 			* @param db The database to save to
-			* @param saveMask The mask to use while saving (1 - archetypes, 2 - instances, 3 - both)
+			* @param objMask The BitArray of objects to be saved
 			*/
-			void save(FileGroupPtr db, uint saveMask);
+			void save(FileGroupPtr db, const BitArray& objMask);
 
 			/** Clears the whole property group.
 			* Clears out all the properties, and broadcasts PROP_GROUP_CLEARED
@@ -207,6 +214,9 @@ namespace Opde {
 			
 			/// Owner service
 			PropertyService* mOwner;
+			
+			/// Builtin flag - property groups created in code as builtin have true here
+			bool mBuiltin;
 	};
 
 	/// Shared pointer to property group

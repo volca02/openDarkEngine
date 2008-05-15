@@ -17,6 +17,9 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *
+ *		$Id$
+ *
  *****************************************************************************/
 
 #include "PropertyGroup.h"
@@ -37,7 +40,8 @@ namespace Opde {
 			mVerMin(1),
 			mUseDataCache(false),
 			mPropertyStorage(NULL),
-			mDeletePropStorageOnDestroy(deleteStorageOnDestroy) {
+			mDeletePropStorageOnDestroy(deleteStorageOnDestroy),
+			mBuiltin(false) {
 
 		// Find the inheritor by the name, and assign too
 		InheritServicePtr inhs = ServiceManager::getSingleton().getService("InheritService").as<InheritService>();
@@ -90,6 +94,13 @@ namespace Opde {
 
 		try {
 			fprop = db->getFile(pchn);
+			
+			const DarkDBChunkHeader &hdr = db->getFileHeader(pchn);
+			
+			// compare the versions, log differences
+			if (hdr.version_high != mVerMaj || hdr.version_low != mVerMin) {
+				LOG_ERROR("Property group %s version mismatch : %d.%d expected, %d.%d encountered", pchn.c_str(), mVerMaj, mVerMin, hdr.version_high, hdr.version_low);
+			}
 		} catch (BasicException& e) {
 			LOG_FATAL("PropertyGroup::load : Could not find the property chunk %s", pchn.c_str());
 			return;
@@ -99,10 +110,12 @@ namespace Opde {
 		// load. Each record has: OID, size (32 bit uint's)
 		int id = 0xDEADBABE;
 		uint32_t size;
-
+		
 		while (!fprop->eof()) {
 			// load the id
 			fprop->readElem(&id, sizeof(uint32_t));
+			
+			size = fprop->tell();
 			
 			// Use property storage to load the property
 			if (mPropertyStorage->readFromFile(fprop, id)) {
@@ -115,7 +128,7 @@ namespace Opde {
 
 
 	// --------------------------------------------------------------------------
-	void PropertyGroup::save(FileGroupPtr db, uint saveMask) {
+	void PropertyGroup::save(FileGroupPtr db, const BitArray& objMask) {
 		// Open the chunk specified by "P$" + mChunkName
 		FilePtr fprop;
 
@@ -135,16 +148,7 @@ namespace Opde {
 		while (!idit->end()) {
 			int id = idit->next();
 
-			// Determine if the prop should be included, based on it's mask
-			uint objmask = 0;
-
-			if (id < 0)
-				objmask = 1;
-
-			if (id > 0)
-				objmask = 2;
-
-			if (!(saveMask & objmask))
+			if (!objMask.get(id))
 				continue;
 
 			if (!mPropertyStorage->writeToFile(fprop, id))
@@ -235,19 +239,18 @@ namespace Opde {
             */
 
             PropertyChangeMsg pmsg;
+            pmsg.objectID = msg.objectID;
 
             switch (msg.change) {
                 case INH_VAL_ADDED: // Property was added to an object
                     pmsg.change = PROP_ADDED;
-                    pmsg.objectID = msg.objectID;
                     break;
-                case INH_VAL_CHANGED:
+                case INH_VAL_CHANGED: // property changed inherit src or value
                     pmsg.change = PROP_CHANGED;
-                    pmsg.objectID = msg.objectID;
                     break;
-                case INH_VAL_REMOVED:
+                case INH_VAL_REMOVED: // property does not exist any more on the object (and not inherited)
                     pmsg.change = PROP_REMOVED;
-                    pmsg.objectID = msg.objectID;
+                    break;
                 default:
                     return;
             }
