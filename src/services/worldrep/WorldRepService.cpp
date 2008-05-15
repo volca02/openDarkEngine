@@ -322,8 +322,8 @@ namespace Opde {
 			Ogre::SceneNode* node = mCells[idx]->createSceneNode(mSceneMgr);
 			
 			// Non - sg rendering - slower
-			mSceneMgr->getRootSceneNode()->addChild(node);
-			// sg->addSceneNode(node);
+			// mSceneMgr->getRootSceneNode()->addChild(node);
+			sg->addSceneNode(node);
 			
 			// mSceneMgr->destroySceneNode(node->getName());
 			nodesToDestroy.push_back(node->getName());
@@ -331,14 +331,17 @@ namespace Opde {
 
 		LOG_DEBUG("Worldrep: Building static geometry...");
 		
-		/*sg->setCastShadows(false);
+		sg->setCastShadows(false);
 
 		sg->build();
 
 		std::vector<std::string>::iterator it = nodesToDestroy.begin();
 
 		for(; it != nodesToDestroy.end(); it++)
-			mSceneMgr->destroySceneNode(*it);*/
+			mSceneMgr->destroySceneNode(*it);
+			
+		// render SG before everything else
+		sg->setRenderQueueGroup(RENDER_QUEUE_MAIN - 1);
 
 		// --------------------------------------------------------------------------------
 		// We have done all we could, bringing the level data to the SceneManager. Now delete the used data
