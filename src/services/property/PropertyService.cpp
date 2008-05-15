@@ -17,6 +17,9 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *
+ *		$Id$
+ *
  *****************************************************************************/
 
 
@@ -159,12 +162,12 @@ namespace Opde {
 	}
 	
 	// --------------------------------------------------------------------------
-	void PropertyService::save(FileGroupPtr db, uint saveMask) {
+	void PropertyService::save(FileGroupPtr db, const BitArray& objMask) {
 		// We just give the db to all registered groups
 		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
 
 		for (; it != mPropertyGroupMap.end(); ++it) {
-			it->second->save(db, saveMask);
+			it->second->save(db, objMask);
 		}
 	}
 

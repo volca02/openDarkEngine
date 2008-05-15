@@ -44,15 +44,19 @@ namespace Opde {
 			*/
 			PropertyGroupPtr createStructuredPropertyGroup(const std::string& name, const std::string& chunk_name, const DTypeDefPtr& type, std::string inheritorName);
 			
+			/** Creates a single field holding property group - property holder containing a single field of a specified type
+			* @see PropertyGroup::PropertyGroup
+			*/
+			PropertyGroupPtr createSimplePropertyGroup(const std::string& name, const std::string& chunk_name, DVariant::Type type,  std::string inheritorName);
+
+			
 			/** Creates a string holding property group - property holder containing a variable length string
 			* @see PropertyGroup::PropertyGroup
 			*/
 			PropertyGroupPtr createStringPropertyGroup(const std::string& name, const std::string& chunk_name, std::string inheritorName);
 
-			/** Creates a string type property group - a family of properties containing a single, variable length string
-			* @see PropertyGroup::PropertyGroup
-			*/
 
+			
             /** Retrieves the property group given it's name, or NULL if not found
             * @param name The name of the property to retrieve the group for
             * @return PropertyGroupPtr of the PropertyGroup named name if found, isNull()==true otherwise */
@@ -100,8 +104,8 @@ namespace Opde {
 
 			/** Saves the properties according to the saveMask
 			* @param db The database file group to save to
-			* @param saveMask The save mask (1 - Archetypes, 2 - Instances, 3 - both) */
-			void save(FileGroupPtr db, uint saveMask);
+			* @param objMask the BitArray of objects to be written */
+			void save(FileGroupPtr db, const BitArray& objMask);
 
 			/** Clears out all the PropertyGroups (effectively wiping out all properties) */
 			void clear();
