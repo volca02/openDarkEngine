@@ -2214,9 +2214,7 @@ namespace properties {
 	
 	// Label: ModelScale
 	struct Scale {
-		float x
-		float y
-		float z
+	    vector scale
 	}
 
 	
