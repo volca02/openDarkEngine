@@ -40,15 +40,24 @@
 #include <OgreStringConverter.h>
 #include <OgreAnimation.h>
 #include <OgreWindowEventUtilities.h>
+#include <OgreException.h>
 
 // Jorge texture png
 #include "jorge.h"
+
+// Internal rendertype constants
+// Using #define to be able to Switch on them
+#define RENDER_TYPE_NORMAL 0
+#define RENDER_TYPE_NOT_RENDERED 1
+#define RENDER_TYPE_NO_LIGHTMAP 2
+#define RENDER_TYPE_EDITOR_ONLY 3
 
 using namespace std;
 using namespace Ogre;
 
 namespace Opde {
 	const char* DEFAULT_RAMP_OBJECT_NAME = "DefaultRamp";
+
 	
 
 	/*--------------------------------------------------------*/
@@ -60,7 +69,8 @@ namespace Opde {
 			mDarkSMFactory(NULL), 
 			mRenderWindow(NULL),
 			mLoopService(NULL),
-			mDefaultCamera(NULL) {
+			mDefaultCamera(NULL),
+			mEditorMode(false) {
 	    // TODO: This is just plain wrong. This service should be the maintainer of the used scene manager, if any other service needs the direct handle, etc.
 	    // The fact is this service is probably game only, and should be the initialiser of graphics as the whole. This will be the
 	    // modification that should be done soon in order to let the code look and be nice
@@ -93,6 +103,12 @@ namespace Opde {
 		    
 		if (!mPropSpotlight.isNull())
 		    mPropSpotlight->unregisterListener(mPropSpotlightListenerID);
+		    
+		if (!mPropRenderType.isNull())
+		    mPropRenderType->unregisterListener(mPropRenderTypeListenerID);
+		    
+		if (!mPropScale.isNull())
+		    mPropScale->unregisterListener(mPropScaleListenerID);
 
 		if (mRenderWindow)
 			mRenderWindow->removeAllViewports();
@@ -278,8 +294,41 @@ namespace Opde {
 			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropPositionMsg);
 
 		mPropPositionListenerID = mPropPosition->registerListener(cposc);
-
 		
+		// --- Scale property listener
+		mPropScale = mPropertyService->getPropertyGroup("ModelScale");
+
+		if (mPropScale.isNull())
+            OPDE_EXCEPT("Could not get Scale property group. Not defined. Fatal", "RenderService::bootstrapFinished");
+
+		PropertyGroup::ListenerPtr cscalec =
+			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropScaleMsg);
+
+		mPropScaleListenerID = mPropScale->registerListener(cscalec);
+
+		// --- Render type property listener
+		mPropRenderType = mPropertyService->getPropertyGroup("RenderType");
+
+		if (mPropRenderType.isNull())
+            OPDE_EXCEPT("Could not get RenderType property group. Not defined. Fatal", "RenderService::bootstrapFinished");
+
+		PropertyGroup::ListenerPtr crtc =
+			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropRenderTypeMsg);
+
+		mPropRenderTypeListenerID = mPropRenderType->registerListener(crtc);
+		
+		// --- Render alpha property listener
+		mPropRenderAlpha = mPropertyService->getPropertyGroup("RenderAlpha");
+
+		if (mPropRenderAlpha.isNull())
+            OPDE_EXCEPT("Could not get RenderAlpha property group. Not defined. Fatal", "RenderService::bootstrapFinished");
+
+		PropertyGroup::ListenerPtr crac =
+			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropRenderAlphaMsg);
+
+		mPropRenderAlphaListenerID = mPropRenderAlpha->registerListener(crac);
+
+		// ===== OBJECT SERVICE LISTENER =====
 		mObjectService = ServiceManager::getSingleton().getService("ObjectService").as<ObjectService>();
 		
 		// Listener to object messages
@@ -313,6 +362,8 @@ namespace Opde {
         mPropModelName->get(msg.objectID, "label", res); // the model name
         
         std::string name = res.toString();
+        
+   		LOG_VERBOSE("A ModelName change happened : %s is new for %d", name.c_str(), msg.objectID);
 
         // As a test, I'm loading cube.mesh
         switch (msg.change) {
@@ -398,6 +449,108 @@ namespace Opde {
 	}
 	
 	// --------------------------------------------------------------------------
+	void RenderService::onPropScaleMsg(const PropertyChangeMsg& msg) {
+		if (msg.objectID <= 0) // no action for archetypes
+            return;
+            
+		LOG_VERBOSE("RenderService: Scale prop for obj. %d changed", msg.objectID);
+
+		switch(msg.change) {
+			case PROP_CHANGED: 
+			case PROP_ADDED: {
+				Ogre::SceneNode* node = getSceneNode(msg.objectID);
+					
+				if (node == NULL)
+					return;
+					
+				DVariant scale; 
+
+				mPropScale->get(msg.objectID, "scale", scale);
+				
+				Vector3 vscale = scale.toVector(); 
+				
+				LOG_VERBOSE("New object %d scale : %f, %f, %f", msg.objectID, vscale.x, vscale.y, vscale.z);
+				
+				node->setScale(vscale);
+				break;
+			}
+				
+			case PROP_REMOVED:
+				// TODO: reset to scale 1, 1, 1?
+				break;
+		}
+	}
+	
+	// --------------------------------------------------------------------------
+	void RenderService::onPropRenderTypeMsg(const PropertyChangeMsg& msg) {
+		if (msg.objectID <= 0) // no action for archetypes
+            return;
+        
+        
+		LOG_VERBOSE("RenderService: non-archetype RenderType prop for obj. %d changed [%d]", msg.objectID, (int)(msg.change));
+		
+        // Rendertype property only affects the model (entity) not the lightning properties.    
+		
+		switch(msg.change) {
+			case PROP_CHANGED: 
+			case PROP_ADDED: {
+				// TODO: Get the scenenode of the rendered objects instead...
+				Ogre::SceneNode* node = getSceneNode(msg.objectID);
+				
+				if (node == NULL)
+					return;
+				
+				DVariant mode; 
+				mPropRenderType->get(msg.objectID, "mode", mode);
+				
+				LOG_VERBOSE("RenderService: RenderType prop for obj. %d changed to %d", msg.objectID, mode.toUInt());
+				
+				switch(mode.toUInt()) {
+					case RENDER_TYPE_NORMAL: node->setVisible(true, true); break;
+					case RENDER_TYPE_NOT_RENDERED: node->setVisible(false, true); break;
+					case RENDER_TYPE_NO_LIGHTMAP: node->setVisible(true, true); break;// Not sure. Seems to indicate shadow should not be cast on lmaps?
+					case RENDER_TYPE_EDITOR_ONLY: node->setVisible(mEditorMode, true); break;
+				}
+				
+				return;
+			}
+				
+			case PROP_REMOVED:
+				// Default is visible
+				Ogre::SceneNode* node = getSceneNode(msg.objectID);
+				node->setVisible(true);
+				break;
+		}
+	}
+	
+	// --------------------------------------------------------------------------
+	void RenderService::onPropRenderAlphaMsg(const PropertyChangeMsg& msg) {
+		if (msg.objectID <= 0) // no action for archetypes
+            return;
+            
+		ObjectEntityMap::iterator it = mEntityMap.find(msg.objectID);
+				
+		if (it == mEntityMap.end())
+			return;
+            
+		switch(msg.change) {
+			case PROP_CHANGED: 
+			case PROP_ADDED: {
+				DVariant alpha; 
+				mPropRenderAlpha->get(msg.objectID, "alpha", alpha);
+				
+				LOG_DEBUG("RenderService: RenderAlpha prop for obj. %d changed to %f", msg.objectID, alpha.toFloat());
+				
+				it->second.emi->setTransparency(1.0f - alpha.toFloat());
+				return;
+			} 
+			case PROP_REMOVED:
+				it->second.emi->setTransparency(0);
+				return;
+		}
+	}
+	
+	// --------------------------------------------------------------------------
 	RenderService::LightInfo& RenderService::createLight(int objID) {
 		Light* l = mSceneMgr->createLight("Light" + StringConverter::toString(objID));
 		
@@ -417,7 +570,7 @@ namespace Opde {
 
 		SceneNode* n = on->createChildSceneNode(Vector3::ZERO, q);
 		
-		n->attachObject(l);
+		on->attachObject(l);
 		
 		LightInfo li;
 		
@@ -468,8 +621,8 @@ namespace Opde {
 			li.light->setAttenuation(radius, 1.0, 0.0, 0.0);
 		}
 
-		// BW lights only now...
-		brightness /= 100.0;
+		// TODO: BW lights only now...
+		// brightness /= 100.0;
 		
 		li.light->setDiffuseColour(brightness, brightness, brightness);
 		li.light->setSpecularColour(brightness, brightness, brightness);
@@ -565,19 +718,65 @@ namespace Opde {
     }
     
     // --------------------------------------------------------------------------
-    void RenderService::removeObjectEntity(int id) {
+    void RenderService::createObjectModel(int id) {
+    	Ogre::String idstr = StringConverter::toString(id);
+			
+		Entity *ent = mSceneMgr->createEntity( "Object" + idstr, DEFAULT_RAMP_OBJECT_NAME);
+
+		// bind the ent to the node of the obj.
+		SceneNode* node = NULL;
+		
+		try {
+			node = getSceneNode(id);
+		} catch (BasicException& e) {
+			LOG_ERROR("RenderService: Could not get the sceneNode for object %d! Not attaching object model!", id);
+			mSceneMgr->destroyEntity(ent);
+			return;
+		}
+		
+		assert(node != NULL);
+		
+		SceneNode* enode = mSceneMgr->createSceneNode("ObjMesh" + idstr);
+		enode->setPosition(Vector3::ZERO);
+		enode->setOrientation(Quaternion::IDENTITY);
+		node->addChild(enode);
+		
+		enode->attachObject(ent);
+
+		prepareEntity(ent);
+		
+		EntityInfo ei;
+		
+		ei.entity = ent;
+		ei.node = enode;
+		ei.emi = new EntityMaterialInstance(ent);
+		
+		ei.emi->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+
+		
+		mEntityMap.insert(make_pair(id, ei));
+    }
+    
+    // --------------------------------------------------------------------------
+    void RenderService::removeObjectModel(int id) {
 		// Not validated in prop service to be any different
 		// just remove the entity, will add a new one
 		ObjectEntityMap::iterator it = mEntityMap.find(id);
 		
 		if (it != mEntityMap.end()) {
+			LOG_VERBOSE("Destroying the entity for %d", id);
+			
 			SceneNode* node = it->second.node;
+			// SceneNode* node = getSceneNode(id);
 				
+			assert(node != NULL);
+			
 			node->detachObject(it->second.entity);
 
 			// destroy the emi
 			delete it->second.emi;
 				
+
 			// destroy the detached entity
 			mSceneMgr->destroyEntity(it->second.entity);
 			
@@ -591,65 +790,61 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	void RenderService::setObjectModel(int id, const std::string& name) {
-		// remove the object's previous model to make sure we're clean
-		removeObjectEntity(id);
-		
-		try {
+		ObjectEntityMap::iterator it = mEntityMap.find(id);
+			
+		if (it != mEntityMap.end()) {
 			Ogre::String idstr = StringConverter::toString(id);
 			
-			// TODO: Create a MeshService. Then Entity* ent = meshService->createObjectEntity(name);
-			// That will react to DatabaseSevice notifications, and unload the meshes as needed when changing mission
-			Entity *ent = mSceneMgr->createEntity( "Object" + idstr, name);
-
-			// bind the ent to the node of the obj.
-			SceneNode* node = NULL;
-			
-			try {
-				node = getSceneNode(id);
-			} catch (BasicException& e) {
-				LOG_ERROR("RenderService: Could not get the sceneNode for object %d! Not attaching object model!", id);
-				mSceneMgr->destroyEntity(ent);
-				return;
-			}
-			
+			// destroy the prev. entity
+			SceneNode* node = it->second.node;
+				
 			assert(node != NULL);
 			
-			SceneNode* enode = mSceneMgr->createSceneNode("ObjEntity" + idstr);
-			enode->setPosition(Vector3::ZERO);
-			enode->setOrientation(Quaternion::IDENTITY);
-			node->addChild(enode);
+			node->detachObject(it->second.entity);
 			
-			enode->attachObject(ent);
-
-			ent->_initialise(true);
-			
-			ent->setCastShadows(true);
-
-			// Update the bones to be manual
-			// TODO: This should only apply for non-ai meshes!
-			if (ent->hasSkeleton()) {
-				
-				Skeleton::BoneIterator bi = ent->getSkeleton()->getBoneIterator();
-
-				while (bi.hasMoreElements()) {
-					Bone* n = bi.getNext();
-
-					n->setManuallyControlled(true);
-				}
-
-				ent->getSkeleton()->setBindingPose();
+			Entity *ent;
+			// load the new entity, set it to emi
+			try {
+				ent = mSceneMgr->createEntity( "Object" + idstr + name, name);
+			} catch (Ogre::Exception& e) {
+				// TODO: This could also be handled by not setting the new entity at all
+				LOG_ERROR("Could not load model %s for obj %d : %s", name.c_str(), id, e.getFullDescription().c_str());
+				ent = mSceneMgr->createEntity( "Object" + idstr + "Ramp", DEFAULT_RAMP_OBJECT_NAME);
 			}
 			
-			EntityInfo ei;
+			Entity *prevent = it->second.entity;
+			prepareEntity(ent);
+			it->second.entity = ent;
+			it->second.emi->setEntity(ent);
 			
-			ei.entity = ent;
-			ei.node = enode;
-			ei.emi = new EntityMaterialInstance(ent);
+			node->attachObject(ent);
 			
-			mEntityMap.insert(make_pair(id, ei));
+			// last, destroy the detached entity
+			mSceneMgr->destroyEntity(prevent);
+		} else {
+			LOG_FATAL("Entity info not found for object %d. Cannot set model!", id);
+		}
+	}
 
-		} catch (FileNotFoundException &e) {
-			LOG_ERROR("RenderService: Could not find the requested model %s (exception encountered)", name.c_str());
+    // --------------------------------------------------------------------------
+	void RenderService::prepareEntity(Ogre::Entity* e) {
+		e->_initialise(true);
+		
+		e->setCastShadows(true);
+
+		// Update the bones to be manual
+		// TODO: This should only apply for non-ai meshes!
+		if (e->hasSkeleton()) {
+			
+			Skeleton::BoneIterator bi = e->getSkeleton()->getBoneIterator();
+
+			while (bi.hasMoreElements()) {
+				Bone* n = bi.getNext();
+
+				n->setManuallyControlled(true);
+			}
+
+			e->getSkeleton()->setBindingPose();
 		}
 	}
 
@@ -688,7 +883,9 @@ namespace Opde {
 			}
 		}
 		
-		OPDE_EXCEPT("Could not find scenenode for object. Does object exist?", "ObjectService::getSceneNodeForObject");
+		// Throwing exceptions is not a good idea
+		return NULL;
+		// OPDE_EXCEPT("Could not find scenenode for object. Does object exist?", "ObjectService::getSceneNodeForObject");
 	}
 	
 	// --------------------------------------------------------------------------
@@ -704,6 +901,9 @@ namespace Opde {
 					// Find the scene node by it's object id, and update the position and orientation
 					Ogre::SceneNode* node = getSceneNode(msg.objectID);
 					
+					if (node == NULL)
+						return;
+
 					DVariant pos; 
 					mPropPosition->get(msg.objectID, "position", pos);
 					DVariant ori;
@@ -744,7 +944,7 @@ namespace Opde {
 				mObjectToNode.insert(std::make_pair(msg.objectID, snode));
 				
 				// set the default model - default ramp
-				setObjectModel(msg.objectID, DEFAULT_RAMP_OBJECT_NAME);
+				createObjectModel(msg.objectID);
 				
 				return;
 			}
@@ -757,7 +957,7 @@ namespace Opde {
 				// if not present, so after we construct the same behavior, 
 				// destroy the entity here
 				
-				removeObjectEntity(msg.objectID);
+				removeObjectModel(msg.objectID);
 				
 				// find the SN, destroy if found
 				ObjectToNode::iterator oit = mObjectToNode.find(msg.objectID);

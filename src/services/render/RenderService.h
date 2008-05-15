@@ -138,18 +138,36 @@ namespace Opde {
    			/// Position property change callback
 			void onPropPositionMsg(const PropertyChangeMsg& msg);
 			
+			/// Scale property change callback
+			void onPropScaleMsg(const PropertyChangeMsg& msg);
+			
+			/// Render type property change callback
+			void onPropRenderTypeMsg(const PropertyChangeMsg& msg);
+			
+			/// Render alpha property change callback
+			void onPropRenderAlphaMsg(const PropertyChangeMsg& msg);
+			
 			/// Object creation/destruction callback
 			void onObjectMsg(const ObjectServiceMsg& msg);
 			
 			/// Prepares mesh named "name" for usage on entity (if it was not prepared already)
             void prepareMesh(const Ogre::String& name);
 
-			/// Removes entity from the given object (meaning it will not have a visible representation)
-			void removeObjectEntity(int id);
+			/// Initializes the object's model
+			void createObjectModel(int id);
 			
-			/// Sets the model for the given object
+			/** Removes geometry from the given object (meaning it will not have a visible representation).
+			* This method is used to do a cleanup on object's destroy event.
+			*/
+			void removeObjectModel(int id);
+			
+			/// Call this to set a new model for the object. Preserves all the object's rendering settings
 			void setObjectModel(int id, const std::string& name);
 			
+			/// Prepares an entity to be used by renderer (manual bones, etc.)
+			void prepareEntity(Ogre::Entity* e);
+
+			/// Clears all the rendering data
             void clear();
             
             /// prepares some hardcoded media (included in the executable)
@@ -158,13 +176,13 @@ namespace Opde {
             /// Cretes a ramp mesh, that is used as a default mesh when not specified otherwise
             void createRampMesh();
             
-   			// A package of a light and it's scene node
+   			/// A package of a light and it's scene node
 			struct LightInfo {
 				Ogre::Light* light;
 				Ogre::SceneNode* node;
 			};
 			
-			// A package of an entity and a EntityMaterialInstance
+			/// A package of an entity and a EntityMaterialInstance
 			struct EntityInfo {
 				Ogre::Entity* entity;
 				Ogre::SceneNode* node;
@@ -210,6 +228,18 @@ namespace Opde {
 			PropertyGroup::ListenerID mPropPositionListenerID;
 			PropertyGroupPtr mPropPosition;
 			
+			// "ModelScale" Property related
+			PropertyGroup::ListenerID mPropScaleListenerID;
+			PropertyGroupPtr mPropScale;
+			
+			// "RenderType" Property related
+			PropertyGroup::ListenerID mPropRenderTypeListenerID;
+			PropertyGroupPtr mPropRenderType;
+			
+			// "RenderAlpha" Property related
+			PropertyGroup::ListenerID mPropRenderAlphaListenerID;
+			PropertyGroupPtr mPropRenderAlpha;
+			
 
 
 			/// Shared pointer to the property service
@@ -251,11 +281,20 @@ namespace Opde {
 			// BinaryServicePtr mBinaryService;
 			
 			
-			/// Object id to scene node (only concrete objects)
+			/** Object id to scene node (only concrete objects)
+			* This map stores the base scenenode for the object. Object have this sceneNode structure:
+			*
+			* Base SceneNode:
+			*	@li Child 1 - the Rendered Objects scene node
+			*	@li Child 2 - the Light object scene node
+			*/
 			typedef std::map<int, Ogre::SceneNode*> ObjectToNode;
 			
 			/// Mapping of object id to scenenode
 			ObjectToNode mObjectToNode;
+			
+			/// editor mode display
+			bool mEditorMode;
 	};
 
 	/// Shared pointer to Link service
