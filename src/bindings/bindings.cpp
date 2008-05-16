@@ -227,7 +227,6 @@ namespace Opde {
 	PyObject* PythonLanguage::getRoot(PyObject *self, PyObject* args) {
 		// args: Module mask - unsigned long long
 		PyObject *result = NULL;
-		unsigned long mask;
 		
 		if (msRoot = NULL) {
 			// Invalid parameters

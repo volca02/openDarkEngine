@@ -32,7 +32,6 @@ This file contains various dynamic datatype helpers, such as those for byte swap
 namespace Opde {
 	void swap_any(void* src, void* tgt, size_t size) {
 		char *csrc = reinterpret_cast<char*>(src);
-		int dest;
 		char *cdest = reinterpret_cast<char*>(tgt);
 		
 		size_t pos;

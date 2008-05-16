@@ -64,7 +64,7 @@ namespace Opde {
 					// transfer the id
 					size_t pos = idx - min;
 					
-					bool val = source[pos >> 3] & (1 << (pos & 0x07));
+					bool val = ((source[pos >> 3] & (1 << (pos & 0x07))) != 0);
 					set(idx, val);
 				}
 			};
@@ -86,7 +86,7 @@ namespace Opde {
 				size_t bpos = index & 0x07;
 				
 				// get the value
-				return mArray[cpos] & (1 << bpos);
+				return ((mArray[cpos] & (1 << bpos)) != 0);
 			};
 			
 			/// sets a new value for index, returns the old value
@@ -103,7 +103,7 @@ namespace Opde {
 				unsigned char bpos = index & 0x07;
 				
 				// get the value
-				bool prev = mArray[cpos] & (1 << bpos);
+				bool prev = ((mArray[cpos] & (1 << bpos)) != 0);
 				
 				// set the value
 				if (value) {
@@ -112,6 +112,8 @@ namespace Opde {
 					// unset the bit
 					mArray[cpos] &= ~(1 << bpos);
 				}
+
+				return prev;
 			};
 			
 			int getMinIndex() const { return mMinIDX; };
