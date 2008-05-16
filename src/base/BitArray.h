@@ -206,7 +206,7 @@ namespace Opde {
 						err >>= 3;
 						
 						// copy the prev values
-						mempcpy(mArray, &newbuf[err], mByteSize);
+						memcpy(mArray, &newbuf[err], mByteSize);
 						
 						// there, the old values are copied
 					}
