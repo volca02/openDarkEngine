@@ -58,7 +58,7 @@ namespace Ogre {
 			
 		protected:
 			// Traverses the portal tree taking the given portal as the starting point (root), inserts encountered cells into mAffectedCells
-			void _traversePortalTree(PortalFrustum& frust, Portal* p, BspNode* srcCell);
+			void _traversePortalTree(PortalFrustum& frust, Portal* p, BspNode* srcCell, Real dist);
 		
 			BspNodeSet mAffectedCells;
 			
