@@ -128,7 +128,7 @@ namespace Ogre {
 			* @param ilist The target ilist to hold indices
 			* @note both parameters have to be big enough to hold the vertex index data in the counts given by the getVertexCount/getIndexCount routines
 			*/
-			void build(DarkVertex* vdest, uint32_t* ilist);
+			void build(DarkVertex* vdest, uint32* ilist);
 			
 			/// Count of the held vertices
 			uint32 getVertexCount(void);

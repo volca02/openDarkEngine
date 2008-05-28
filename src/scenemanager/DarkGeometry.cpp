@@ -654,7 +654,7 @@ namespace Ogre {
 	}
 
 	// -----------------------------------------------------------------
-	void DarkFragmentBuilder::build(DarkVertex* vdest, uint32_t* ilist) {
+	void DarkFragmentBuilder::build(DarkVertex* vdest, uint32* ilist) {
 		// transfer all the indices and vertices
 		VertexDefinitionQueue::iterator vit = mVertexQueue.begin();
 		
