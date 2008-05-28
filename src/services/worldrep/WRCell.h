@@ -30,6 +30,7 @@
 #include "DarkPortal.h"
 #include "DarkBspNode.h"
 #include "DarkSceneManager.h"
+#include "DarkGeometry.h"
 
 #include <OgreMaterial.h>
 #include <OgreStaticFaceGroup.h>
@@ -137,10 +138,15 @@ namespace Opde {
 
 			/** Owner service of this cell */
 			WorldRepService* mOwner;
+			
+			/** Geometry holder to fill */
+			Ogre::DarkGeometry* mLevelGeometry;
 
 		public:
 			/** Default constructor. */
-			WRCell(WorldRepService* owner);
+			WRCell(WorldRepService* owner, Ogre::DarkGeometry* targetGeom);
+			
+			/** destructor */
 			~WRCell();
 
 			/** Load the cell data from the given chunk.
@@ -163,6 +169,9 @@ namespace Opde {
 
 			/// Creates a scene node with all non-portal geometry attached as a mesh
 			Ogre::SceneNode* createSceneNode(Ogre::SceneManager *sceneMgr);
+
+			/// creates the geometry for the cell in the DarkGeometry given in constructor
+			void createCellGeometry();
 
 			/** Return the exact vertex count needed to set-up the vertex buffer with the cell data.
 			* @note The vertex count is not a plain vertex list count, but the count of vertices which are counted as the resulting polygons

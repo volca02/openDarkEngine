@@ -177,6 +177,9 @@ namespace Opde {
             MaterialList mLoadedMaterials;
             
             TxtScaleMap mTxtScaleMap;
+            
+            /// holder of the level geometry
+            Ogre::DarkGeometry* mWorldGeometry;
 	};
 
 	/// Shared pointer to worldrep service

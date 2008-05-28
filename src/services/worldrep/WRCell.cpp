@@ -40,7 +40,7 @@ using namespace Ogre;
 namespace Opde {
 
 	//------------------------------------------------------------------------------------
-	WRCell::WRCell(WorldRepService* owner) : cellNum(-1), atlased(false), loaded(false), portalsDone(false), mOwner(owner) {
+	WRCell::WRCell(WorldRepService* owner, Ogre::DarkGeometry* targetGeom) : cellNum(-1), atlased(false), loaded(false), portalsDone(false), mOwner(owner), mLevelGeometry(targetGeom) {
 		bspNode = NULL;
 	}
 
@@ -237,8 +237,9 @@ namespace Opde {
 				tmp << txtName.str(); // directly name after the original. This will cause the material to be found
 			} else {
 				// !NLM!
-				tmp << "Shader" << texture << "#" << atlasnum;
 				// tmp << txtName.str();
+				tmp << "Shader" << texture << "#" << atlasnum;
+				
 			}
 		}
 		std::string shaderName = tmp.str();
@@ -815,7 +816,6 @@ namespace Opde {
 		StringUtil::StrStreamType modelName;
 		modelName << "cell_" << cellNum;
 
-		
 		// Attach the resulting object to the node with the center in the center vertex of the mesh...
 		SceneNode* meshNode = sceneMgr->createSceneNode(modelName.str());
 		meshNode->setPosition(nodeCenter);
@@ -912,6 +912,106 @@ namespace Opde {
 		
 		return meshNode;
 	}
+	
+	//------------------------------------------------------------------------------------
+	void WRCell::createCellGeometry() {
+		// some checks on the status. These are hard mistakes
+		assert(loaded);
+		assert(atlased);
+
+		int portalStart = header.num_polygons - header.num_portals;
+
+		// Contains material name -> polygon list
+		std::map<std::string, std::vector<int> > matToPolys;
+		// polygon index to txt Dimensions
+		std::map<int, std::pair<uint,uint> > polyToDim;
+		
+		// int faceCount = header.num_polygons - header.num_portals;
+		int faceCount = header.num_textured;
+		
+		// Cell is recentered with this
+		wr_coord_t cellCenter = header.center;
+		Vector3 nodeCenter = Vector3(cellCenter.x, cellCenter.y, cellCenter.z);
+		
+		// Now let's iterate over the materials
+		// Prepare the object's name
+		StringUtil::StrStreamType modelName;
+		modelName << "cell_" << cellNum;
+
+		// Attach the resulting object to the node with the center in the center vertex of the mesh...
+		if (faceCount <= 0) {
+			LOG_INFO("A geometry - less cell encountered, skipping the mesh generation");
+			return;
+		}
+		
+		// Step one. Map materials and polygons to iterate over
+		for (int polyNum = 0; polyNum < faceCount; polyNum++) {
+			std::pair< Ogre::uint, Ogre::uint > dimensions;
+			
+			std::string matname = getMaterialName(face_infos[polyNum].txt, lightMaps[polyNum]->getAtlasIndex(), dimensions, face_maps[polyNum].flags);
+			
+			// insert the poly index into the list of that material
+			std::pair< std::map<std::string, std::vector<int> >::iterator, bool > res = matToPolys.insert(make_pair(matname, std::vector<int>()));
+			res.first->second.push_back(polyNum);
+			
+			// Could be rather per material. But well. just for test anyway
+			polyToDim.insert(make_pair(polyNum, dimensions));
+		}
+		
+
+		std::map<std::string, std::vector<int> >::iterator it = matToPolys.begin();
+		
+		for (; it != matToPolys.end(); it++) {
+			DarkFragment* frag = mLevelGeometry->createFragment(cellNum, MaterialManager::getSingleton().getByName(it->first));
+
+			std::vector<int>::iterator pi = it->second.begin();
+			
+			// each of those polygons
+			for (; pi != it->second.end(); pi++) {
+				// Iterate through the faces, and add all the triangles we can construct using the polygons defined
+				std::pair< Ogre::uint, Ogre::uint > dimensions;
+				
+				int polyNum = *pi;
+				
+				std::map<int, std::pair<uint, uint> >::iterator dimi = polyToDim.find(polyNum);
+				
+				if (dimi == polyToDim.end())
+					OPDE_EXCEPT("Missing polygon texture dimensions!", "WrCell::constructCellMesh");
+				
+				dimensions = dimi->second;
+
+				Vector2 displacement = calcLightmapDisplacement(polyNum);
+
+				// for each vertex, insert into the model
+				uint32_t *idxmap = new uint32_t[face_maps[polyNum].count];
+				
+				for (int vert = 0; vert < face_maps[polyNum].count; vert++)  {
+					wr_coord_t vrelative = vertices[ poly_indices[polyNum][vert] ];
+
+					// insertTexturedVertex(manual, polyNum, vrelative, displacement, dimensions, nodeCenter);
+					BspVertex vtx;
+					constructBspVertex(polyNum, vrelative, displacement, dimensions, &vtx);
+					
+					idxmap[vert] = frag->vertex(
+						Vector3(vtx.position[0], vtx.position[1], vtx.position[2]),
+						Vector3(vtx.normal[0], vtx.normal[0], vtx.normal[0]),
+						Vector2(vtx.texcoords[0], vtx.texcoords[1]),
+						Vector2(vtx.lightmap[0], vtx.lightmap[1]) );
+				}
+
+				// now feed the indexes
+				for (int t = 1; t < face_maps[polyNum].count - 1; t++) {
+					// push back the indexes
+					frag->index(idxmap[0]);
+					frag->index(idxmap[t + 1]);
+					frag->index(idxmap[t]);
+				}
+				
+				delete[] idxmap;
+			}
+		}
+	}
+
 
 	//------------------------------------------------------------------------------------
 	void WRCell::setBspNode(Ogre::BspNode* tgtNode) {

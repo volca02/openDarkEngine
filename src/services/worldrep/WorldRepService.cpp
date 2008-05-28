@@ -43,6 +43,7 @@
 
 using namespace Ogre;
 
+#define __SG
 
 namespace Opde {
 	// Implementation of the WorldRep service
@@ -163,6 +164,7 @@ namespace Opde {
 
 	void WorldRepService::unload() {
 	    mIndexes.setNull();
+	    
 	    mSceneMgr->clearScene();
 	    
 		mTxtScaleMap.clear();
@@ -234,8 +236,10 @@ namespace Opde {
 
 		mCells = new WRCell*[header.num_cells];
 
+		mWorldGeometry = mSceneMgr->createGeometry("LEVEL_GEOMETRY"); // will be deleted on clear_scene
+
 		for (uint32_t i = 0; i<header.num_cells; i++) {
-            mCells[i] = new WRCell(this);
+            mCells[i] = new WRCell(this, mWorldGeometry);
 		}
 
 		unsigned int idx;
@@ -295,6 +299,7 @@ namespace Opde {
 
 		// --------------------------------------------------------------------------------
 		// Now construct the static geometry
+#ifdef __SG
 		Ogre::StaticGeometry* sg = mSceneMgr->createStaticGeometry("MISSION_GEOMETRY");
 		
 		// 100 units per sg region
@@ -313,22 +318,28 @@ namespace Opde {
 		sg->setOrigin(Vector3(0, 0, 0));
 		
 		std::vector< std::string > nodesToDestroy;
+#endif
 		
 		//TODO: Portal meshes need to be constructed. This will guarantee the other meshes can be attached if this one works ok
 		// Hmm. Actually, it renders quite a lot of the meshes that should not be seen.
 		for (idx=0; idx < header.num_cells; idx++) {
 			mCells[idx]->constructPortalMeshes(mSceneMgr);
 			
+			
+#ifdef __SG
 			Ogre::SceneNode* node = mCells[idx]->createSceneNode(mSceneMgr);
 			
 			// Non - sg rendering - slower
-			// mSceneMgr->getRootSceneNode()->addChild(node);
 			sg->addSceneNode(node);
-			
 			// mSceneMgr->destroySceneNode(node->getName());
 			nodesToDestroy.push_back(node->getName());
+#else
+			// mSceneMgr->getRootSceneNode()->addChild(node);
+			mCells[idx]->createCellGeometry();
+#endif			
 		}
 
+#ifdef __SG
 		LOG_DEBUG("Worldrep: Building static geometry...");
 		
 		sg->setCastShadows(false);
@@ -342,6 +353,11 @@ namespace Opde {
 			
 		// render SG before everything else
 		sg->setRenderQueueGroup(RENDER_QUEUE_MAIN - 1);
+#else
+		mWorldGeometry->build();
+		mSceneMgr->setActiveGeometry(mWorldGeometry);
+#endif
+
 
 		// --------------------------------------------------------------------------------
 		// We have done all we could, bringing the level data to the SceneManager. Now delete the used data
