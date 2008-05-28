@@ -33,6 +33,7 @@ namespace Ogre {
 	// ----------------------------------------------------------------------
 	DarkCamera::DarkCamera(const String& name, SceneManager* sm) : Camera(name, sm) {
 		mBspTree = static_cast<DarkSceneManager*>(mSceneMgr)->getBspTree();
+		mLastFrameNum = -1;
 	}
 	
 	// ----------------------------------------------------------------------		
@@ -65,11 +66,17 @@ namespace Ogre {
 	}
 	
 	// ----------------------------------------------------------------------
+	const BspNodeList& DarkCamera::_getVisibleNodes(void) const {
+		return mVisibleCells;
+	}
+	
+	// ----------------------------------------------------------------------
 	void DarkCamera::updateVisibleCellList() const {
 		// Clear the cache of visible cells
-		mVisibleCells.clear();
-		
 		int frameNum = static_cast<DarkSceneManager*>(mSceneMgr)->mFrameNum;
+		
+		if (frameNum == mLastFrameNum) // nothing to do...
+			return;
 		
 		// Look for our root cell
 		BspNode* root = mBspTree->findLeaf(getDerivedPosition());
@@ -167,15 +174,19 @@ namespace Ogre {
 		}
 		
 		// Visibility data refreshed. Fill the visible cell set (transfer the non-null items)
+		
+		mVisibleCells.clear();
+		
 		BspNodeQueue::iterator i = q.begin();
 		
 		while (i != q.end()) {
 		    BspNode* c = *(i++);
 
-		    if (c != NULL)
+		    if (c != NULL) 
 		    	mVisibleCells.push_back(c);
 		}
 		
+		mLastFrameNum = frameNum;
 		// All done!
 	}
 	

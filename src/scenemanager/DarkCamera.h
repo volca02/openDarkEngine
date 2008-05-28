@@ -44,6 +44,9 @@ namespace Ogre {
 			
 			virtual void _notifyMoved(void);
 			
+			/// internal method used to retrieve the visible node list
+			const BspNodeList& _getVisibleNodes(void) const;
+			
 		protected:
 			/// The camera's position has changed and need's a recalc (overriden from Frustum::updateFrustumImpl)
 			virtual void updateFrustumImpl(void) const;
@@ -57,6 +60,8 @@ namespace Ogre {
 			BspTree* mBspTree;
 			
 			mutable BspNodeList mVisibleCells;
+			
+			mutable int mLastFrameNum;
 	};
 	
 };
