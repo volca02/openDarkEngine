@@ -83,7 +83,7 @@ namespace Opde {
 					
 				// remap the id
 				size_t cpos = (index - mMinIDX) >> 3;
-				size_t bpos = index & 0x07;
+				size_t bpos = (index - mMinIDX) & 0x07;
 				
 				// get the value
 				return ((mArray[cpos] & (1 << bpos)) != 0);
@@ -100,7 +100,7 @@ namespace Opde {
 					
 				// remap the id
 				size_t cpos = (index - mMinIDX) >> 3;
-				unsigned char bpos = index & 0x07;
+				unsigned char bpos = (index - mMinIDX) & 0x07;
 				
 				// get the value
 				bool prev = ((mArray[cpos] & (1 << bpos)) != 0);
