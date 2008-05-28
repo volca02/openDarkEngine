@@ -64,7 +64,7 @@ namespace Ogre {
 		friend class BspTree;
 			
 	public:
-		BspNode(SceneManager* owner, int id, bool isLeaf);
+		BspNode(SceneManager* owner, int id, int leafID, bool isLeaf);
 
 		BspNode();
 		~BspNode();
@@ -196,9 +196,12 @@ namespace Ogre {
 		// Invalidates the screen projection info (so refreshScreenRect will pass)
 		void invalidateScreenRect(int frameNum) { mInitialized = false; mFrameNum = frameNum; mViewRect = PortalRect::EMPTY; };
 		
-		
+		int getLeafID(void) const { return mLeafID; };
 	protected:
+		/// ID of the BSP row (order)
 		int mID;
+		/// ID of the leaf (cell id)
+		int mLeafID;
 	
 		SceneManager* mOwner; // Back-reference to SceneManager which owns this Node
 		bool mIsLeaf;

@@ -36,7 +36,7 @@ $Id$
 namespace Ogre {
 
     //-----------------------------------------------------------------------
-    BspNode::BspNode(SceneManager* owner, int id, bool isLeaf) : mViewRect(PortalRect::EMPTY), mID(id) {
+    BspNode::BspNode(SceneManager* owner, int id, int leafID, bool isLeaf) : mViewRect(PortalRect::EMPTY), mID(id), mLeafID(leafID) {
         
         mOwner = owner;
         mIsLeaf = isLeaf;

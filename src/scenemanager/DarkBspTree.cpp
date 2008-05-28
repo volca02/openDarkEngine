@@ -200,7 +200,7 @@ namespace Ogre {
                 "BspTree::createNode");
                 
                 
-		BspNode* newNode = new BspNode(mOwner, id, leafID >= 0);
+		BspNode* newNode = new BspNode(mOwner, id, leafID, leafID >= 0);
 		
 		mBspNodeMap.insert(std::make_pair(id, newNode));
 		
