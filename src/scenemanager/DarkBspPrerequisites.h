@@ -28,8 +28,8 @@ $Id$
 
 */
 
-#ifndef __BspPrerequisites_H__
-#define __BspPrerequisites_H__
+#ifndef __DarkBspPrerequisites_H__
+#define __DarkBspPrerequisites_H__
 
 #include <OgrePrerequisites.h>
 
@@ -49,6 +49,7 @@ namespace Ogre {
 	class DarkCamera;
 	class DarkLight;
 	class DarkLightFactory;
+	class DarkGeometry;
 }
 
 #endif
