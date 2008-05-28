@@ -28,6 +28,7 @@
 #include "DarkCamera.h"
 #include "DarkPortal.h"
 #include "DarkSceneNode.h"
+#include "DarkGeometry.h"
 
 #include <OgreRoot.h>
 #include <OgreEntity.h>
@@ -35,7 +36,7 @@
 namespace Ogre {
 	
 	// ----------------------------------------------------------------------
-	DarkSceneManager::DarkSceneManager(const String& instanceName) : SceneManager(instanceName), mFrameNum(1) {
+	DarkSceneManager::DarkSceneManager(const String& instanceName) : SceneManager(instanceName), mFrameNum(1), mActiveGeometry(NULL) {
 		mBspTree = new BspTree(this);
 		mDarkLightFactory = new DarkLightFactory();
 		
@@ -75,6 +76,9 @@ namespace Ogre {
 		
 		// clear the BSP tree
 		mBspTree->clear();
+		
+		// clear all the geometries
+		destroyAllGeometries();
 
 		SceneManager::clearScene();		
 	}
@@ -255,6 +259,11 @@ namespace Ogre {
 				}   
 			}
 		}
+		
+		if (mActiveGeometry) {
+			mActiveGeometry->updateFromCamera(static_cast<DarkCamera*>(cam));
+			mActiveGeometry->queueForRendering(mRenderQueue);
+		}
 	}
 	
 	//-----------------------------------------------------------------------
@@ -299,6 +308,20 @@ namespace Ogre {
 	//-----------------------------------------------------------------------
 	void DarkSceneManager::_queueLightForUpdate(Light* l) {
 		mLightsForUpdate.insert(static_cast<DarkLight*>(l));
+	}
+	
+	//-----------------------------------------------------------------------
+	void DarkSceneManager::destroyAllGeometries(void) {
+		DarkGeometryMap::iterator it = mDarkGeometryMap.begin();
+		
+		while (it != mDarkGeometryMap.end()) {
+			DarkGeometryMap::iterator it2 = it++;
+			
+			DarkGeometry* g = it2->second;
+			mDarkGeometryMap.erase(it2);
+			
+			delete g;
+		}
 	}
 
 	
@@ -503,6 +526,55 @@ namespace Ogre {
 		e->setListener(mBspTree);
 		
 		return e;
+	}
+	
+	//-----------------------------------------------------------------------
+	DarkGeometry *DarkSceneManager::createGeometry(const String& geomName) {
+		DarkGeometryMap::iterator it = mDarkGeometryMap.find(geomName);
+		
+		if (it != mDarkGeometryMap.end()) {
+			return it->second;
+		}
+		
+		DarkGeometry* geom = new DarkGeometry(geomName, RENDER_QUEUE_WORLD_GEOMETRY_1);
+		
+		mDarkGeometryMap.insert(make_pair(geomName, geom));
+		
+		return geom;
+	}
+			
+	//-----------------------------------------------------------------------
+	void DarkSceneManager::destroyGeometry(const String& name) {
+		DarkGeometryMap::iterator it = mDarkGeometryMap.find(name);
+		
+		if (it != mDarkGeometryMap.end()) {
+			DarkGeometry* g = it->second;
+			mDarkGeometryMap.erase(it);
+			delete g;
+		}
+	}
+	
+		
+	//-----------------------------------------------------------------------
+	DarkGeometry *DarkSceneManager::getGeometry(const String& name) {
+		DarkGeometryMap::iterator it = mDarkGeometryMap.find(name);
+		
+		if (it != mDarkGeometryMap.end()) {
+			return it->second;
+		}
+		
+		// TODO: The damned NULL/Exception throw dilema all over again
+		return NULL;
+	}
+		
+	//-----------------------------------------------------------------------
+	void DarkSceneManager::setActiveGeometry(const String& name) {
+		mActiveGeometry = getGeometry(name);
+	}
+	
+	//-----------------------------------------------------------------------
+	void DarkSceneManager::setActiveGeometry(DarkGeometry* geom) {
+		mActiveGeometry = geom;
 	}
 	
 	//-----------------------------------------------------------------------

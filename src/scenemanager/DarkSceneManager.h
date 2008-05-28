@@ -139,6 +139,22 @@ namespace Ogre {
 			
 			/** Overrided entity creation. Sets BspTree as the entity listener - this accelerates the population of the light lists */
 			virtual Entity *createEntity(const String &entityName, const String &meshName);
+			
+			// TODO: The DarkGeometry should probably have a factory
+			/** Creates an instance of static geometry */
+			DarkGeometry *createGeometry(const String& geomName);
+			
+			/** destroys an instance of static geometry */
+			void destroyGeometry(const String& name);
+			
+			/** retrieves a pointer to existing static geometry */
+			DarkGeometry *getGeometry(const String& name);
+			
+			/** sets a geometry that will be active and rendered */
+			void setActiveGeometry(const String& name);
+			
+			/** sets the active geometry (NULL means no geom) */
+			void setActiveGeometry(DarkGeometry* g);
 		
 		protected:
 			/// BSP Tree getter
@@ -149,6 +165,9 @@ namespace Ogre {
 			
 			/// Internal method, which really queues the light
 			void _queueLightForUpdate(Light* l);
+			
+			/// destroys all static geometries
+			void destroyAllGeometries(void);
 			
 			/// The BSP tree currently used
 			BspTree* mBspTree;
@@ -172,6 +191,13 @@ namespace Ogre {
             
             /** Factory for DarkLight objects */
             DarkLightFactory *mDarkLightFactory;
+            
+            /** Map of dark geometry objects */
+            typedef std::map<String, DarkGeometry*> DarkGeometryMap;
+            
+            DarkGeometryMap mDarkGeometryMap;
+            
+            DarkGeometry* mActiveGeometry;
 	};
 
 	/// Factory for DarkSceneManager
