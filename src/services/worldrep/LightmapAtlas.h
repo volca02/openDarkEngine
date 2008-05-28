@@ -83,7 +83,28 @@ namespace Opde {
 			int	w;
 			int	h;
 			
-			
+			/* TODO Construct a 2x bigger FreeSpaceInfo, holding the given one as a child
+			FreeSpaceInfo(FreeSpaceInfo* orig) {
+				x = 0;
+				y = 0;
+				
+				w = 2 * orig->w;
+				h = 2 * orig->h;
+				
+				// rest
+				// below our original
+				mChild[0] = new FreeSpaceInfo(orig->w, 0, orig->w, h);
+				
+				mChild[0]->mIsLeaf = false;
+				
+				mChild[0]->mChild[0] = orig;
+				// square one, bottom of the original
+				mChild[0]->mChild[1] = new FreeSpaceInfo(0, orig->h, orig->w, orig->h); 
+				
+				// next to our original, rectangular
+				mChild[1] = new FreeSpaceInfo(orig->w, 0, orig->w, h);
+			}
+			*/
 
 			FreeSpaceInfo(int x, int y, int w, int h) {
 				this->x = x;
@@ -268,15 +289,15 @@ namespace Opde {
 			/** Size of the lmap in the atlas*/
 			Ogre::Vector2 mSizeUV;
 			
+			/** Lightmap's tag value */
+			int mTag;
+			
 		public:
 			/** Constructor - takes the targetting freespaceinfo, size of the lightmap and initializes our buffer with the static lightmap.
 			* This class will manage the unallocation of the lighymap as needed, just pass the pointer, it will deallocate the lmap in the destructor 
 			* @note The static_lightmap will be delete[]'d in destructor, together with any switchable lightmaps present */
-			LightMap(unsigned int sx, unsigned int sy, lmpixel *static_lightmap) {
+			LightMap(unsigned int sx, unsigned int sy, lmpixel *static_lightmap, int tag = 0) : mSizeX(sx), mSizeY(sy), mTag(tag) {
 				mStaticLmap = static_lightmap;
-				
-				mSizeX = sx;
-				mSizeY = sy;
 				
 				mPosition = NULL;
 			}
@@ -328,6 +349,8 @@ namespace Opde {
 			
 			/** Returns the atlas index */
 			int getAtlasIndex();
+			
+			int getTag() {return mTag; };
 	};
 
 	/** Class holding one set of light maps. Uses a HardwarePixelBufferSharedPtr class for texture storage.
@@ -364,9 +387,11 @@ namespace Opde {
 
 			/** return an origin - XY coords for the next free space (for a lightmap sized w*h) */
 			std::pair<FreeSpaceInfo, bool> getOrigin(int w, int h);
-		
+			
+			/** Tag value of this atlas */
+			int mTag;
 		public:
-			LightAtlas(int idx);
+			LightAtlas(int idx, int tag = 0);
 			
 			~LightAtlas();
 			
@@ -397,6 +422,9 @@ namespace Opde {
 			
 			/** Returns the pixel count of unmapped area of this atlas */
 			int getUnusedArea();
+			
+			/** returns the tag number of this atlas */
+			int getTag() {return mTag;};
 	};
 
 

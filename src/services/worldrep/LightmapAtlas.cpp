@@ -43,7 +43,7 @@ namespace Opde {
 	/*
 		A single texture, containing many lightmaps. used in the texturelist construction
 	*/
-	LightAtlas::LightAtlas(int idx) {
+	LightAtlas::LightAtlas(int idx, int tag) : mTag(tag) {
 		mName << "@lightmap" << idx; // so we can find the atlas by number in the returned AtlasInfo
 
 		this->mIdx = idx;
@@ -57,7 +57,7 @@ namespace Opde {
 		mTex = TextureManager::getSingleton().createManual(
 			mName.str(), TEMPTEXTURE_RESOURCE_GROUP,
 			TEX_TYPE_2D, ATLAS_WIDTH, ATLAS_HEIGHT, 0, PF_X8R8G8B8,
-			TU_DYNAMIC_WRITE_ONLY);
+			TU_STATIC_WRITE_ONLY);
 
 		mAtlas = mTex->getBuffer(0, 0);
 
@@ -96,11 +96,37 @@ namespace Opde {
 	bool LightAtlas::addLightMap(LightMap *lmap) {
 		std::pair<int, int> dim = lmap->getDimensions();
 
-		// get the origin for our lmap
 		FreeSpaceInfo* area = mFreeSpace->allocate(dim.first, dim.second);
 
-		if (area == NULL) // didn't fit
+		if (area == NULL)
 			return false;
+		
+		/* // TODO: Dynamic allocation of lmap atlas size...
+		bool doStep = true;
+
+		// try the fit/enlarge combo till we can
+		while (doStep) {
+			// get the origin for our lmap
+			FreeSpaceInfo* area = mFreeSpace->allocate(dim.first, dim.second);
+
+			if (area == NULL) {// didn't fit
+				// would we fit in a bottom/right of a 2x bigger lmap?
+				// and is it legal to construct such?
+				
+				// always rectangular...
+				if (mFreeSpace->w < ATLAS_MAX_WIDTH) {
+					// construct a 2x bigger lmap atlas info
+					// TODO: If our freespace is a child and free, don't wrap!
+					mFreeSpace = new FreeSpaceInfo(mFreeSpace);
+				} else {
+				  return false;
+				}
+			} else {
+				// ok, we're in!
+				doStep = false;
+			}
+		}
+		*/
 
 		// calculate some important UV conversion data
 		// +0.5? to display only the inner transition of lmap texture, the outer goes to black color
@@ -237,12 +263,15 @@ namespace Opde {
 
 		// iterate through existing Atlases, and see if any of them accepts our lightmap
 		for (int i = 0; i < last; i++) {
-				if (mList.at(i)->addLightMap(lmap))
-					return false;
+			if (mList.at(i)->getTag() != lmap->getTag())
+				continue;
+			
+			if (mList.at(i)->addLightMap(lmap))
+				return false;
 		}
 
 		// add new atlas to list if none of them accepted the lmap
-		LightAtlas* la = new LightAtlas(last);
+		LightAtlas* la = new LightAtlas(last, lmap->getTag());
 		mList.push_back(la);
 
 		la->addLightMap(lmap);
@@ -255,7 +284,7 @@ namespace Opde {
 		lmpixel *cdata = LightMap::convert(buf, w, h, ver);
 
 		// construct the lmap
-		LightMap* lmap = new LightMap(w, h, cdata);
+		LightMap* lmap = new LightMap(w, h, cdata, texture);
 
 		// Try to insert, will find existing if already there
 		std::pair<TextureLightMapQueue::iterator, bool> lmm;
@@ -307,6 +336,23 @@ namespace Opde {
 			if (!(*it)->render())
 				OPDE_EXCEPT("Could not render the lightmaps!","LightAtlasList::render()");
 
+
+		// iterate through existing Atlases, and see if any of them accepts our lightmap
+		int unused_pixels = 0, total_pixels = 0;
+
+		int last = mList.size();
+
+		for (int i = 0; i < last; i++) {
+			unused_pixels += mList.at(i)->getUnusedArea();
+			total_pixels += ATLAS_WIDTH * ATLAS_HEIGHT;
+		}
+
+		float percentage = 0;
+
+		if (total_pixels > 0)
+			percentage = 100.0f * unused_pixels / total_pixels;
+
+		LOG_INFO("Light Map Atlas: Total unused light map atlasses pixels: %d of %d (%f%%). %d atlases total used. Total splits: %d", unused_pixels, total_pixels, percentage, last, mSplitCount);
 
 		return true;
 	}
