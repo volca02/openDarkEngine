@@ -26,4 +26,6 @@ add_library (DarkSceneManager
 		DarkSceneManager.h
 		DarkLight.cpp
 		DarkLight.h
+		DarkGeometry.cpp
+		DarkGeometry.h
 	)
