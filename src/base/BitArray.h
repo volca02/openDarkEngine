@@ -244,6 +244,7 @@ namespace Opde {
 				
 				// to the byte world
 				byteSize >>= 3;
+				byteSize++; // safety first
 				
 				unsigned char *array = new unsigned char[byteSize];
 				
