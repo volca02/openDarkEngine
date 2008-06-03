@@ -28,6 +28,7 @@
 #include "logger.h"
 #include "integers.h"
 
+#include "DarkCamera.h"
 
 #include <OgreRenderWindow.h>
 #include <OgreOverlayElement.h>
@@ -367,21 +368,27 @@ namespace Opde {
                 static String sep = "Evaluated portals: ";
                 static String src = "Rendered cells: ";
                 static String stt = "Traversal Time: ";
-                static String ssr = "Static Render Time: ";
+                static String ssr = "Static Build Time: ";
 
                 uint bculls, eports, rendc, travtm, statrt;
 
+				unsigned long statbt;
+
                 mSceneMgr->getOption("BackfaceCulls", &bculls);
-                mSceneMgr->getOption("CellsRendered", &rendc);
+                
+                // mSceneMgr->getOption("CellsRendered", &rendc);
                 mSceneMgr->getOption("EvaluatedPortals", &eports);
-                mSceneMgr->getOption("TraversalTime", &travtm);
-                mSceneMgr->getOption("StaticRenderTime", &statrt);
+                // mSceneMgr->getOption("TraversalTime", &travtm);
+                mSceneMgr->getOption("StaticBuildTime", &statbt);
+                
+                travtm = static_cast<DarkCamera*>(mCamera)->getTraversalTime();
+                rendc = static_cast<DarkCamera*>(mCamera)->getVisibleCellCount();
 
                 guibc->setCaption(sbc + StringConverter::toString(bculls));
                 guiep->setCaption(sep + StringConverter::toString(eports));
                 guirc->setCaption(src + StringConverter::toString(rendc));
                 guitt->setCaption(stt + StringConverter::toString(travtm) + " ms");
-                guisr->setCaption(ssr + StringConverter::toString(statrt) + " ms");
+                guisr->setCaption(ssr + StringConverter::toString(statbt) + " ms");
             }
             catch(...)
             {
