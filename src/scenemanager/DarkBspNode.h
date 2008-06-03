@@ -185,8 +185,8 @@ namespace Ogre {
 		/** sets the plane list for scene queries */
 		void setPlaneList(CellPlaneList& planes, PlanePortalMap& portalmap);
 		
-    
 		void refreshScreenRect(const Camera* cam, const Matrix4& toScreen, const PortalFrustum& frust);
+		void refreshScreenRect(const Camera* cam, const Matrix4& toScreen, const Plane& cutp);
 		
 		typedef PortalList::iterator PortalIterator;
 		
@@ -197,13 +197,17 @@ namespace Ogre {
 		void invalidateScreenRect(int frameNum) { mInitialized = false; mFrameNum = frameNum; mViewRect = PortalRect::EMPTY; };
 		
 		int getLeafID(void) const { return mLeafID; };
+		
 	protected:
 		/// ID of the BSP row (order)
 		int mID;
 		/// ID of the leaf (cell id)
 		int mLeafID;
 	
-		SceneManager* mOwner; // Back-reference to SceneManager which owns this Node
+		/// Owner Scene Manager - Back-reference to SceneManager which owns this Node
+		SceneManager* mOwner; 
+		
+		/// Leaf indicator - true on non-split cell-containing nodes
 		bool mIsLeaf;
 	    
 		/** Pointer to the scene node which is represented by the leaf */
@@ -230,6 +234,7 @@ namespace Ogre {
 		/** The set of movables that could be visible in this BSP node, and thus have to be rendered when this node is visible */
 		IntersectingObjectSet mMovables;
 		
+		/// set of affecting lights for this cell (leaf only)
 		typedef std::set< DarkLight* > AffectingLights;
 		
 		AffectingLights mAffectingLights;
@@ -238,10 +243,11 @@ namespace Ogre {
 		
 		/** A vector of portals leading into this cell */
 		PortalList mSrcPortals;
+		
 		/** A vector of portals leading out of this cell */
 		PortalList mDstPortals;
 	
-		/* the last frame number this SceneNode was rendered. */
+		/** the last frame number this (leaf) node was rendered. */
 		unsigned int mFrameNum;
 	
 		/** Indicates the state of the cell. if the mFrameNum is not actual, the value of this boolean is not valid */
@@ -268,34 +274,20 @@ namespace Ogre {
 		
 		/** Enlarge the view rect to the cell to accompany the given view rect */
 		inline bool updateScreenRect(const PortalRect& tgt) {
-			bool changed = false;
-				
-			if (tgt.left < mViewRect.left) {
-				mViewRect.left = tgt.left;
-				changed = true;
+			// merge the view rect to accompany the new rect
+			if (mViewRect.merge(tgt)) {
+				// if a view changed, reconsider the minimal distance
+				mViewRect.distance = std::min(mViewRect.distance, tgt.distance);
+				return true;
 			}
 			
-			if (tgt.right > mViewRect.right) {
-				mViewRect.right = tgt.right;
-				changed = true;
-			}
-			
-			if (tgt.bottom < mViewRect.bottom) {
-				mViewRect.bottom = tgt.bottom;
-				changed = true;
-			}
-			
-			if (tgt.top > mViewRect.top) {
-				mViewRect.top = tgt.top;
-				changed = true;
-			}
-			
-			return changed;
+			return false;
 		};
 		
 		public:
 			const IntersectingObjectSet& getObjects(void) const { return mMovables; }
 			const CellPlaneList& getPlaneList() const { return mPlaneList; }
+			float getScreenDist(void) const { return mViewRect.distance; };
     };
 
 }

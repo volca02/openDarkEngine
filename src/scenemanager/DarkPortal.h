@@ -39,9 +39,6 @@
 #define MAX(a,b) ((a>b)?a:b)
 #define MIN(a,b) ((a<b)?a:b)
 
-// Helping 'infinity' value for PortalRect coords
-#define INF 100000
-
 namespace Ogre {
 	/** @brief An int-type based portal rectangle struct 
 	*
@@ -49,22 +46,33 @@ namespace Ogre {
 	* It is ment as a Ogre::Rect replacement, because that one uses Real as a base type, which is slower to use
 	*/
 	struct PortalRect {
+			/// Static screen width size half
+			static int sScreenWidth2;
+			/// Static screen height size half
+			static int sScreenHeight2;
+		
 			int left, right, bottom, top;
+			
+			// indicates a distance. is set to a minimal one on any operation
+			float distance;
+			
 			static const PortalRect EMPTY;
 			static const PortalRect SCREEN;
 			
-			PortalRect(int l, int r, int b, int t) {
+			PortalRect(int l, int r, int b, int t, float dist = 0) {
 				left = l;
 				right = r;
 				bottom = b;
 				top = t;
+				distance = dist;
 			}
 			
 			PortalRect() {
-				left = INF;
-				right = -INF;
-				bottom = INF;
-				top = -INF;
+				left = EMPTY.left;
+				right = EMPTY.right;
+				bottom = EMPTY.bottom;
+				top = EMPTY.top;
+				distance = EMPTY.distance;
 			}
 			
 			void setToScreen(void) {
@@ -72,6 +80,67 @@ namespace Ogre {
 			    right = SCREEN.right;
 			    top = SCREEN.top;
 			    bottom = SCREEN.bottom;
+			    distance = 0;
+			}
+			
+			/// merges the portal rects to contain both this and given rect
+			bool merge(const PortalRect& b) {
+				bool changed = false;
+					
+				if (b.left < left) {
+					left = b.left;
+					changed = true;
+				}
+				
+				if (b.right > right) {
+					right = b.right;
+					changed = true;
+				}
+				
+				if (b.bottom < bottom) {
+					bottom = b.bottom;
+					changed = true;
+				}
+				
+				if (b.top > top) {
+					top = b.top;
+					changed = true;
+				}
+				
+				return changed;
+			}
+			
+			/// intersects this and b rects, and returns true if intersection produced non-empty rect
+			bool intersect(const PortalRect& b, PortalRect& result) const {
+				result.top = MIN(b.top, top);
+				result.bottom = MAX(b.bottom, bottom);
+				result.left = MAX(b.left, left);
+				result.right = MIN(b.right, right);
+				// result.distance = MIN(b.distance, distance);
+				// distance has to stay ours, otherwise the dist would propagate zero everywhere
+				result.distance = distance;
+				
+				if (result.top < result.bottom)
+					return false;
+			
+				if (result.right < result.left)
+					return false;
+				
+				return true;
+			}
+			
+			/// enlarges the rect to contain the given (screen projected) point
+			void enlargeToContain(const Vector3 pnt) {
+				// TODO: Parametrise the Screen width/height
+				// NOTE: The X coord is flipped. This is because of the transform matrix, but it is not a problem for us
+				int x = ((int)(pnt.x * sScreenWidth2) + sScreenWidth2); 
+				int y = ((int)(pnt.y * sScreenHeight2) + sScreenHeight2); 
+				
+				top    = std::max(top, y);
+				bottom = std::min(bottom, y);
+				right  = std::max(right, x);
+				left   = std::min(left, x);
+				distance = std::min(distance, pnt.z);
 			}
 	};
 	
@@ -92,19 +161,14 @@ namespace Ogre {
 		friend class PortalFrustum;
 			
 		protected:
-			/// Static screen width size half
-			static int mScreenWidth2;
-			/// Static screen height size half
-			static int mScreenHeight2;
-			
-        		/* The SimpleRenderable methods override. */
+       		/* The SimpleRenderable methods override. */
 			void getWorldTransforms( Matrix4* xform ) const;
         		const Quaternion& getWorldOrientation(void) const;
         		const Vector3& getWorldPosition(void) const;
 	
 			void refreshPortalRenderable();
 			/** Screen - space bounding rectangle of the portal */
-			PortalRect	screenRect;  
+			PortalRect	mScreenRect;  
 		
 			/** On-demand (lazy) generated movable object for debug rendering */
 			ManualObject* mMovableObject;
@@ -175,14 +239,23 @@ namespace Ogre {
 			* Refreshes screen projection bounding Rectangle
 			* @param cam Camera which is used by the projection
 			* @param toScreen A precomputed Projection*View matrix matrix4 which is used to project the vertices to screen
+			* @param cutp Plane to be used to cut the portal (cameras near plane, or better camera's view plane)
+			* @return true if the result is non-empty
+			*/
+			bool refreshScreenRect(const Camera *cam, const Matrix4& toScreen, const Plane &cutp);
+			
+			/**
+			* Refreshes screen projection bounding Rectangle
+			* @param cam Camera which is used by the projection
+			* @param toScreen A precomputed Projection*View matrix matrix4 which is used to project the vertices to screen
 			* @param frust PortalFrustum used to cut away non visible parts of the portal
 			*/
 			void refreshScreenRect(const Camera *cam, const Matrix4& toScreen, const PortalFrustum &frust) {
 				// inverse coords to let the min/max initialize
-				screenRect = PortalRect::EMPTY;
+				mScreenRect = PortalRect::EMPTY;
 				
 				// Erase the actual rect
-				mActualRect = screenRect;
+				mActualRect = mScreenRect;
 				
 				// Backface cull. The portal won't be culled if a vector camera-vertex dotproduct normal will be greater than 0
 				Vector3 camToV0 = mPoints[0] - cam->getDerivedPosition(); 
@@ -218,15 +291,7 @@ namespace Ogre {
 						// This is one time-consuming line... I wonder how big eater this line is.
 						Vector3 hcsPosition = toScreen * (*it);
 						
-						// TODO: Parametrise the Screen width/height
-						// NOTE: The X coord is flipped. This is because of the transform matrix, but it is not a problem for us
-						x = ((int)(hcsPosition.x * mScreenWidth2) + mScreenWidth2); 
-						y = ((int)(hcsPosition.y * mScreenHeight2) + mScreenHeight2); 
-						
-						screenRect.top    = MAX(screenRect.top, y);
-						screenRect.bottom = MIN(screenRect.bottom, y);
-						screenRect.right  = MAX(screenRect.right, x);
-						screenRect.left   = MIN(screenRect.left, x);
+						mScreenRect.enlargeToContain(hcsPosition);
 					}
 			
 					// release only if clip produced a new poly
@@ -241,47 +306,14 @@ namespace Ogre {
 			* Intersects the Portals bounding rectangle by the given rectangle, and writes the result to the target parameter
 			*/
 			bool intersectByRect(PortalRect &boundry, PortalRect &target)  {
-				target.top = MIN(screenRect.top, boundry.top);
-				target.bottom = MAX(screenRect.bottom, boundry.bottom);
-				target.left = MAX(screenRect.left, boundry.left);
-				target.right = MIN(screenRect.right, boundry.right);
-				
-				if (target.top < target.bottom)
-					return false;
-			
-				if (target.right < target.left)
-					return false;
-				
-				return true;
+				return mScreenRect.intersect(boundry, target);
 			}
 			
 			/**
 			* Union the actual view rectangle with addition rectangle. Returns true on a view change.
 			*/
 			bool unionActualWithRect(PortalRect &addition) {
-				bool changed = false;
-				
-				if (addition.left < mActualRect.left) {
-					mActualRect.left = addition.left;
-					changed = true;
-				}
-				
-				if (addition.right > mActualRect.right) {
-					mActualRect.right = addition.right;
-					changed = true;
-				}
-				
-				if (addition.bottom < mActualRect.bottom) {
-					mActualRect.bottom = addition.bottom;
-					changed = true;
-				}
-				
-				if (addition.top > mActualRect.top) {
-					mActualRect.top = addition.top;
-					changed = true;
-				}
-				
-				return changed;
+				return mActualRect.merge(addition);
 			}
 
 			/**

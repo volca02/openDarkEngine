@@ -155,6 +155,10 @@ namespace Ogre {
 			
 			/** sets the active geometry (NULL means no geom) */
 			void setActiveGeometry(DarkGeometry* g);
+			
+			/** gets an option from this scenemanager 
+			* @param strKey the option name (valid options: StaticBuildTime - unsigned long) */
+			virtual bool getOption(const String &strKey, void *pDestValue);
 		
 		protected:
 			/// BSP Tree getter
@@ -182,6 +186,9 @@ namespace Ogre {
 			
 			/// Current frame number
 			int mFrameNum; 
+			
+			/// Time it took to build the static geometry
+			unsigned long mStaticBuildTime;
 
 			/** movables found to be visible */
 			typedef std::set<const MovableObject*> MovablesForRendering;

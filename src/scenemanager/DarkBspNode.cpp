@@ -288,6 +288,21 @@ namespace Ogre {
 	}
 	
 	//-------------------------------------------------------------------------
+	void BspNode::refreshScreenRect(const Camera* cam, const Matrix4& toScreen, const Plane& cutp) {
+		mInitialized = true;
+
+	    // Iterate all portals and refresh the view rect of those
+	    PortalListConstIterator outPortal_it = mDstPortals.begin();
+		PortalListConstIterator end = mDstPortals.end();
+
+		for (; outPortal_it != end; outPortal_it++) {
+			Portal *out_portal = (*outPortal_it);
+
+			out_portal->refreshScreenRect(cam, toScreen, cutp);
+		}
+	}
+	
+	//-------------------------------------------------------------------------
 	void BspNode::addAffectingLight(DarkLight* light) {
 		mAffectingLights.insert(light);
 	}

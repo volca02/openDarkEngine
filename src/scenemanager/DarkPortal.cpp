@@ -31,13 +31,22 @@
 #include "DarkSceneManager.h"
 #include "DarkBspNode.h"
 
+// Helping 'infinity' value for PortalRect coords
+#define INF 100000
+#define F_INF 1E50
+
 namespace Ogre {
 	#define POSITION_BINDING 0
 	
-	const PortalRect PortalRect::EMPTY = PortalRect(INF, -INF, INF, -INF);
+	const PortalRect PortalRect::EMPTY = PortalRect(INF, -INF, INF, -INF, F_INF);
 
 	// Some default values for screen
 	const PortalRect PortalRect::SCREEN = PortalRect(0, 1024, 0, 768);
+
+	// The static window resolution
+	int PortalRect::sScreenWidth2 = 512;
+	int PortalRect::sScreenHeight2 = 384;
+
 	
 	// ---------------------------------------------------------------------------------
 	std::ostream& operator<< (std::ostream& o, PortalRect& r) {
@@ -49,9 +58,6 @@ namespace Ogre {
 	// ----------------- Portal Class implementation -----------------------------------
 	// ---------------------------------------------------------------------------------
 	
-	// The static window resolution
-	int Portal::mScreenWidth2 = 512;
-	int Portal::mScreenHeight2 = 384;
 	
 	// ---------------------------------------------------------------------------------	
 	Portal::Portal(BspNode* source, BspNode* target, Plane plane) : ConvexPolygon(plane) {
@@ -219,5 +225,99 @@ namespace Ogre {
 	// ---------------------------------------------------------------------------------
 	Real Portal::getBoundingRadius(void) const {
 		return mRadius;
+	}
+	
+	// ---------------------------------------------------------------------------------
+	bool Portal::refreshScreenRect(const Camera *cam, const Matrix4& toScreen, const Plane &cutp) {
+		// modified version of the ConvexPolygon::clipByPlane which does two things at once:
+		// cuts by the specified plane, and projects the result to screen (then, updates the rect to contain this point)
+		
+		mScreenRect = PortalRect::EMPTY;
+		mActualRect = PortalRect::EMPTY;
+		
+		// Backface cull. The portal won't be culled if a vector camera-vertex dotproduct normal will be greater than 0
+		Vector3 camToV0 = mPoints[0] - cam->getDerivedPosition(); 
+				
+		float dotp = camToV0.dotProduct(mPlane.normal);
+		
+		mPortalCull = (dotp > 0);
+		
+		// skip these expensive operations if we encounter a backface cull
+		if (mPortalCull)
+			return false;
+
+		// portal points plane cutting and to-screen proj.
+		int positive = 0;
+		int negative = 0;
+		
+		unsigned int pointcount = mPoints.size();
+		
+		if (pointcount == 0)
+		    return 0;
+		
+		//first we mark the vertices
+		Plane::Side *sides = new Plane::Side[pointcount];
+		
+		unsigned int idx;
+		
+		PolygonPoints::const_iterator it = mPoints.begin();
+		PolygonPoints::const_iterator end = mPoints.end();
+		
+		for (idx = 0; it != end; ++it, ++idx) {
+			Plane::Side side = cutp.getSide(*it);
+			sides[idx] = side; // push the side of the vertex into the side buffer...
+			
+			switch (side) {
+				case Plane::POSITIVE_SIDE : positive++; break;
+				case Plane::NEGATIVE_SIDE : negative++; break;
+				default: ;
+			}
+		}
+		
+		// Now that we have the poly's side classified, we can process it...
+		if (positive == 0) { 
+			// we clipped away the whole portal. No need to cut
+			delete[] sides;
+			return false;
+		}
+		
+		// some vertices were on one side, some on the other
+		long prev = pointcount - 1; // the last one
+		
+		for (idx = 0; idx < pointcount; idx++) {
+			const Plane::Side side = sides[idx];
+			
+			if (side == Plane::POSITIVE_SIDE) { 
+				if (sides[prev] == Plane::POSITIVE_SIDE) { 
+					mScreenRect.enlargeToContain(toScreen * mPoints.at(idx));
+				} else {
+					// calculate a new boundry positioned vertex
+					const Vector3& v1 = mPoints.at(prev);
+					const Vector3& v2 = mPoints.at(idx);
+					Vector3 dv = v2 - v1; // vector pointing from v2 to v1 (v1+dv*0=v2 *1=v1)
+					
+					// the dot product is there for a reason! (As I have a tendency to overlook the difference)
+					float t = cutp.getDistance(v2) / (cutp.normal.dotProduct(dv));
+					
+					mScreenRect.enlargeToContain(toScreen * (v2 - (dv * t))); // a new, boundry placed vertex is inserted
+					mScreenRect.enlargeToContain(toScreen * v2);
+				}
+			} else { 
+				if (sides[prev] == Plane::POSITIVE_SIDE) { // if we're going outside
+					// calculate a new boundry positioned vertex
+					const Vector3 v1 = mPoints[idx];
+					const Vector3 v2 = mPoints[prev];
+					const Vector3 dv = v2 - v1;
+					
+					float t = cutp.getDistance(v2) / (cutp.normal.dotProduct(dv));
+					
+					mScreenRect.enlargeToContain(toScreen * (v2 - (dv * t))); // a new, boundry placed vertex is inserted
+				}
+			}
+			
+			prev = idx;
+		}
+		
+		return true;
 	}
 } // namespace Ogre

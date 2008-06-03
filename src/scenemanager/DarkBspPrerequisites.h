@@ -38,7 +38,7 @@ namespace Ogre {
 	class BspNode;
 	
 	typedef std::set<BspNode*> BspNodeSet;
-	typedef std::deque<BspNode*> BspNodeQueue;
+	typedef std::vector<BspNode*> BspNodeQueue;
 	typedef std::list<BspNode*> BspNodeList;
 	
 	class BspTree;

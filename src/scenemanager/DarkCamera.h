@@ -47,6 +47,8 @@ namespace Ogre {
 			/// internal method used to retrieve the visible node list
 			const BspNodeList& _getVisibleNodes(void) const;
 			
+			unsigned long getTraversalTime(void) const { return mTraversalTime; };
+			unsigned long getVisibleCellCount(void) const { return mCellCount; };
 		protected:
 			/// The camera's position has changed and need's a recalc (overriden from Frustum::updateFrustumImpl)
 			virtual void updateFrustumImpl(void) const;
@@ -62,6 +64,9 @@ namespace Ogre {
 			mutable BspNodeList mVisibleCells;
 			
 			mutable int mLastFrameNum;
+			
+			mutable unsigned long mTraversalTime;
+			mutable unsigned int mCellCount;
 	};
 	
 };

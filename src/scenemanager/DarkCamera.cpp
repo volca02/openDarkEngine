@@ -22,7 +22,8 @@
  *
  *****************************************************************************/
  
-
+#include "OgreRoot.h"
+#include "OgreTimer.h"
 #include "DarkCamera.h"
 #include "DarkBspNode.h"
 #include "DarkBspTree.h"
@@ -72,6 +73,8 @@ namespace Ogre {
 	
 	// ----------------------------------------------------------------------
 	void DarkCamera::updateVisibleCellList() const {
+		unsigned long startTime = Root::getSingleton().getTimer()->getMilliseconds();
+		
 		// Clear the cache of visible cells
 		int frameNum = static_cast<DarkSceneManager*>(mSceneMgr)->mFrameNum;
 		
@@ -87,8 +90,10 @@ namespace Ogre {
 		const Matrix4& viewM = getViewMatrix();
 		const Matrix4& projM = getProjectionMatrix();
 
-        
 		Matrix4 toScreen = projM * viewM;
+		
+		// cut plane, with a small correction to avoid projection singularities
+		Plane cutPlane(getRealDirection(), getRealPosition() + getRealDirection() * 0.01f);
 
 		PortalFrustum cameraFrustum = PortalFrustum(this);
 
@@ -101,16 +106,51 @@ namespace Ogre {
 		root->mViewRect.setToScreen();
 
 		// Root exists. traverse the portal tree
-		BspNodeQueue q;
+		BspNodeQueue cell_queue;
 		
-		q.push_back(root);
+		cell_queue.push_back(root);
 
-		int currentPos = 0;
+		unsigned int currentPos = 0;
+		unsigned int finishedCells = 0;
 		
-		while (currentPos < q.size()) {
-		    BspNode* cell = q[currentPos++];
+		mVisibleCells.clear();
+		mVisibleCells.push_back(root);
+		
+		while (finishedCells < cell_queue.size()) {
+		    BspNode* cell = NULL;
 		    
-		    if (cell == NULL) // current position was invalidated
+		    /*
+		    float dist = 1e50;
+		    
+		    // select the cell with the least available distance from camera (to avoid cell re-evaluations)
+		    for(unsigned int cell_idx = finishedCells; cell_idx < cell_queue.size(); ++cell_idx) {
+				BspNode* c = cell_queue[cell_idx];
+				
+				if (c == NULL)
+					continue;
+				
+				if (c->getScreenDist() < dist) {
+					dist = c->getScreenDist();
+					currentPos = cell_idx;
+					cell = c;
+				}
+		    }
+		    
+		    // No matter which cell we'll process, the cell in the current finished position should be processed too
+		    BspNode* s = cell_queue[finishedCells];
+			cell_queue[currentPos] = s;
+			cell_queue[finishedCells] = cell;
+			finishedCells++;
+			
+		    if (cell == NULL) 
+				break; // no more cells to process
+				
+		    /**/
+
+		    cell = cell_queue[finishedCells++];
+		    currentPos = finishedCells;
+		    
+		    if (cell == NULL)
 				continue;
 		        
 		    assert(cell->mInitialized && cell->mFrameNum == frameNum);
@@ -119,7 +159,7 @@ namespace Ogre {
 		    BspNode::PortalIterator pi = cell->outPortalBegin();
 		    BspNode::PortalIterator pend = cell->outPortalEnd();
 		    
-		    while (pi != pend) {
+		    while (pi != pend) { // for all portals
 				Portal* p = *(pi++);
 				
 				// Backface cull
@@ -151,43 +191,31 @@ namespace Ogre {
 				if (changed) {
 					// Update the queue
 					if (!target_cell->mInitialized) {
-						// insert to the top
-						// Was not yet initialized
-						// target_cell->invalidateScreenRect(frameNum);
-					    // If the cell has old frame num, refresh it now! (will only refresh if frameNum differs)
-						target_cell->refreshScreenRect(this, toScreen, cameraFrustum);
+						target_cell->refreshScreenRect(this, toScreen, cutPlane);
 
 						// insert to the top
-						q.push_back(target_cell);
-						target_cell->mListPosition = q.size() - 1;
+						cell_queue.push_back(target_cell);
+						target_cell->mListPosition = cell_queue.size() - 1;
+						
+						mVisibleCells.push_back(target_cell);
 					} else { 
 					// move to the top if below current position
-						if (currentPos > target_cell->mListPosition) {
+						if (finishedCells > target_cell->mListPosition) {
 							// invalidate the current position, move to the new one
-							q.push_back(target_cell);
-							q[target_cell->mListPosition] = NULL; // NULL means a moved item (so we need not reorganize)
-							target_cell->mListPosition = q.size() - 1;
+							cell_queue.push_back(target_cell);
+							cell_queue[target_cell->mListPosition] = NULL; // NULL means a moved item (so we need not reorganize)
+							target_cell->mListPosition = cell_queue.size() - 1;
 						}
 					}
 				} // if changed
-		    }
-		}
-		
-		// Visibility data refreshed. Fill the visible cell set (transfer the non-null items)
-		
-		mVisibleCells.clear();
-		
-		BspNodeQueue::iterator i = q.begin();
-		
-		while (i != q.end()) {
-		    BspNode* c = *(i++);
-
-		    if (c != NULL) 
-		    	mVisibleCells.push_back(c);
+		    } // for all portals
 		}
 		
 		mLastFrameNum = frameNum;
+		mCellCount = mVisibleCells.size();
+
 		// All done!
+		mTraversalTime = Root::getSingleton().getTimer()->getMilliseconds() - startTime;
 	}
 	
 };

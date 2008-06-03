@@ -32,6 +32,7 @@
 
 #include <OgreRoot.h>
 #include <OgreEntity.h>
+#include <OgreTimer.h>
 
 namespace Ogre {
 	
@@ -261,8 +262,12 @@ namespace Ogre {
 		}
 		
 		if (mActiveGeometry) {
+			unsigned long startt = Root::getSingleton().getTimer()->getMilliseconds();
+			
 			mActiveGeometry->updateFromCamera(static_cast<DarkCamera*>(cam));
 			mActiveGeometry->queueForRendering(mRenderQueue);
+			
+			mStaticBuildTime = Root::getSingleton().getTimer()->getMilliseconds() - startt;
 		}
 	}
 	
@@ -575,6 +580,16 @@ namespace Ogre {
 	//-----------------------------------------------------------------------
 	void DarkSceneManager::setActiveGeometry(DarkGeometry* geom) {
 		mActiveGeometry = geom;
+	}
+	
+	//-----------------------------------------------------------------------
+	bool DarkSceneManager::getOption(const String &strKey, void *pDestValue) {
+		if (strKey == "StaticBuildTime") {
+			*(static_cast<unsigned long*>(pDestValue)) = mStaticBuildTime;
+			return true;
+		}
+		
+		return SceneManager::getOption(strKey, pDestValue);
 	}
 	
 	//-----------------------------------------------------------------------
