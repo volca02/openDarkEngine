@@ -74,9 +74,6 @@ namespace Opde {
 			// Screenshot requested
 			bool mScreenShot;
 
-			// ShadowMap to file writing requested
-			bool mSMWriteToFile;
-			
 			// Shadows toggle
 			bool mShadows;
 
