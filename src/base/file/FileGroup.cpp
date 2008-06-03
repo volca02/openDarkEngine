@@ -168,7 +168,7 @@ namespace Opde {
 		
 		if (it != mFiles.end()) {
 			it->second.file->seek(0);
-			return it->second.file;
+			return FilePtr(it->second.file);
 		} else
 			OPDE_FILEEXCEPT(FILE_OP_FAILED, string("File named ") + sname + " was not found in this FileGroup", "DarkFileGroup::getFile");
 	}

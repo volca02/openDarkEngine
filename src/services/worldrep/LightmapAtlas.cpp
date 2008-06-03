@@ -57,7 +57,7 @@ namespace Opde {
 		mTex = TextureManager::getSingleton().createManual(
 			mName.str(), TEMPTEXTURE_RESOURCE_GROUP,
 			TEX_TYPE_2D, ATLAS_WIDTH, ATLAS_HEIGHT, 0, PF_X8R8G8B8,
-			TU_STATIC_WRITE_ONLY);
+			TU_DYNAMIC_WRITE_ONLY);
 
 		mAtlas = mTex->getBuffer(0, 0);
 

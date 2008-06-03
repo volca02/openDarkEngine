@@ -65,6 +65,7 @@ namespace Opde {
 			mConsoleBackend(NULL),
 			mServiceMgr(NULL),
 			mDTypeScriptLdr(NULL),
+			mPLDefScriptLdr(NULL),
 			mConfigService(NULL) {
 	}
 
@@ -209,11 +210,14 @@ namespace Opde {
 
 		// Run the game loop
 		// Main while-loop
+		unsigned long lTimeCurrentFrame = 0;
+
 		while( !mTerminate ) {
 			// Calculate time since last frame and remember current time for next frame
-			unsigned long lTimeCurrentFrame = mRoot->getTimer()->getMilliseconds();
-			unsigned long lTimeSinceLastFrame = lTimeCurrentFrame - mTimeLastFrame;
 			mTimeLastFrame = lTimeCurrentFrame;
+			lTimeCurrentFrame = mRoot->getTimer()->getMilliseconds();
+			
+			unsigned long lTimeSinceLastFrame = lTimeCurrentFrame - mTimeLastFrame;
 
             // Update current state
 			mStateStack.top()->update( lTimeSinceLastFrame );
