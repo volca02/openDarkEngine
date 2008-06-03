@@ -269,8 +269,15 @@ namespace Opde {
 
 		// Load resource paths from config file
 		ConfigFile cf;
-		cf.load("resources.cfg");
-
+		
+		// If resources config param exists, load resources according to it, otherwise failback to resources.cfg
+		DVariant d;
+		if (mConfigService->getParam("resources", d)) {
+            cf.load(d.toString());
+		} else {
+			cf.load("resources.cfg");
+		}
+		
 		// Go through all sections & settings in the file
 		ConfigFile::SectionIterator seci = cf.getSectionIterator();
 
