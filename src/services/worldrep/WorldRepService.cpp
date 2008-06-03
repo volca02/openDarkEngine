@@ -43,7 +43,7 @@
 
 using namespace Ogre;
 
-#define __SG
+// #define __SG
 
 namespace Opde {
 	// Implementation of the WorldRep service
