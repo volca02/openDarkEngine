@@ -286,8 +286,6 @@ namespace Ogre {
 					PortalPoints::const_iterator pend = scr_points.end();
 					// project all the vertices to screen space
 					for (; it != pend; it++) {
-						int x, y;
-						
 						// This is one time-consuming line... I wonder how big eater this line is.
 						Vector3 hcsPosition = toScreen * (*it);
 						
