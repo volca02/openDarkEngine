@@ -57,6 +57,7 @@ using namespace Ogre;
 
 namespace Opde {
 	const char* DEFAULT_RAMP_OBJECT_NAME = "DefaultRamp";
+	const char* FX_PARTICLE_OBJECT_NAME =	"FX_PARTICLE";
 
 	
 
@@ -363,16 +364,28 @@ namespace Opde {
         
         std::string name = res.toString();
         
-   		LOG_VERBOSE("A ModelName change happened : %s is new for %d", name.c_str(), msg.objectID);
+   		LOG_VERBOSE("RenderService: A ModelName change happened : %s is new for %d", name.c_str(), msg.objectID);
 
         // As a test, I'm loading cube.mesh
         switch (msg.change) {
 			case PROP_CHANGED:
-			case PROP_ADDED:
-				// TODO: This can consume time even when the new model name == old model name
-				prepareMesh(name);
-				setObjectModel(msg.objectID, name + ".mesh");
+			case PROP_ADDED: {
+				std::string upper = name;
+				Ogre::StringUtil::toUpperCase(upper);
+
+				// FX_Particle is a keyword! If found, it means that the model will be invisible, and a particle effect will be done instead
+				if (upper == FX_PARTICLE_OBJECT_NAME) {
+					// empty param means no entity
+					LOG_VERBOSE("RenderService: FX_Particle for %d", msg.objectID);
+					setObjectModel(msg.objectID, "");
+				} else {
+					// TODO: This can consume time even when the new model name == old model name
+					prepareMesh(name);
+					setObjectModel(msg.objectID, name + ".mesh");
+				}
+				
 				break;
+			}
                     
             case PROP_REMOVED:
 				setObjectModel(msg.objectID, DEFAULT_RAMP_OBJECT_NAME);
@@ -469,7 +482,7 @@ namespace Opde {
 				
 				Vector3 vscale = scale.toVector(); 
 				
-				LOG_VERBOSE("New object %d scale : %f, %f, %f", msg.objectID, vscale.x, vscale.y, vscale.z);
+				LOG_VERBOSE("RenderService: New object %d scale : %f, %f, %f", msg.objectID, vscale.x, vscale.y, vscale.z);
 				
 				node->setScale(vscale);
 				break;
@@ -494,31 +507,37 @@ namespace Opde {
 		switch(msg.change) {
 			case PROP_CHANGED: 
 			case PROP_ADDED: {
-				// TODO: Get the scenenode of the rendered objects instead...
-				Ogre::SceneNode* node = getSceneNode(msg.objectID);
+				// It seems this property !only! affects models
+				ObjectEntityMap::iterator it = mEntityMap.find(msg.objectID);
+			
+				if (it != mEntityMap.end()) {
+					SceneNode* node = it->second.node;
 				
-				if (node == NULL)
-					return;
+					assert(node != NULL);
 				
-				DVariant mode; 
-				mPropRenderType->get(msg.objectID, "mode", mode);
-				
-				LOG_VERBOSE("RenderService: RenderType prop for obj. %d changed to %d", msg.objectID, mode.toUInt());
-				
-				switch(mode.toUInt()) {
-					case RENDER_TYPE_NORMAL: node->setVisible(true, true); break;
-					case RENDER_TYPE_NOT_RENDERED: node->setVisible(false, true); break;
-					case RENDER_TYPE_NO_LIGHTMAP: node->setVisible(true, true); break;// Not sure. Seems to indicate shadow should not be cast on lmaps?
-					case RENDER_TYPE_EDITOR_ONLY: node->setVisible(mEditorMode, true); break;
+					DVariant mode; 
+					mPropRenderType->get(msg.objectID, "mode", mode);
+					
+					LOG_VERBOSE("RenderService: RenderType prop for obj. %d changed to %d", msg.objectID, mode.toUInt());
+					
+					it->second.renderType = mode.toUInt();
+					
+					setNodeRenderType(node, it->second);
+				} else {
+					LOG_ERROR("RenderService: Could not find an entity info for object %d, could not propagate RenderType", msg.objectID);
 				}
+				
 				
 				return;
 			}
 				
 			case PROP_REMOVED:
-				// Default is visible
-				Ogre::SceneNode* node = getSceneNode(msg.objectID);
-				node->setVisible(true);
+				// Default is visible (?)
+				ObjectEntityMap::iterator it = mEntityMap.find(msg.objectID);
+			
+				if (it != mEntityMap.end()) {
+					it->second.node->setVisible(true);
+				}
 				break;
 		}
 	}
@@ -588,12 +607,12 @@ namespace Opde {
 		DVariant dbrightness, dradius;
 		
 		if (!mPropLight->get(objectID, "brightness", dbrightness)) {
-			LOG_FATAL("Could not get brightness field of light property!");
+			LOG_FATAL("RenderService: Could not get brightness field of light property!");
 			return;
 		}
 		
 		if (!mPropLight->get(objectID, "radius", dradius)) {
-			LOG_FATAL("Could not get radius field of light property!");
+			LOG_FATAL("RenderService: Could not get radius field of light property!");
 			return;
 		}
 
@@ -690,7 +709,22 @@ namespace Opde {
 		}
 	}
 
-	
+
+    // --------------------------------------------------------------------------
+	void RenderService::setNodeRenderType(Ogre::SceneNode* node, const EntityInfo& ei) {
+		// skip flag or hasRefs false will mean no rendering regardless of the renderType value
+		if (ei.skip || !ei.hasRefs) {
+			node->setVisible(false, true);
+		} else {
+			switch(ei.renderType) {
+				case RENDER_TYPE_NORMAL: node->setVisible(true, true); break;
+				case RENDER_TYPE_NOT_RENDERED: node->setVisible(false, true); break;
+				case RENDER_TYPE_NO_LIGHTMAP: node->setVisible(true, true); break;// Not sure. Seems to indicate shadow should not be cast on lmaps?
+				case RENDER_TYPE_EDITOR_ONLY: node->setVisible(mEditorMode, true); break;
+			}
+		}
+	}
+
     // --------------------------------------------------------------------------
     void RenderService::prepareMesh(const Ogre::String& name) {
         String fname = name + ".mesh";
@@ -751,6 +785,11 @@ namespace Opde {
 		ei.node = enode;
 		ei.emi = new EntityMaterialInstance(ent);
 		
+		ei.renderType = RENDER_TYPE_NORMAL; // seems to be the default. Affects Models, Particle effects (DynamicLights?)
+		ei.hasRefs = true;
+		ei.skip = false;
+		setNodeRenderType(node, ei);
+		
 		ei.emi->setSceneBlending(SBT_TRANSPARENT_ALPHA);
 
 		
@@ -764,7 +803,7 @@ namespace Opde {
 		ObjectEntityMap::iterator it = mEntityMap.find(id);
 		
 		if (it != mEntityMap.end()) {
-			LOG_VERBOSE("Destroying the entity for %d", id);
+			LOG_VERBOSE("RenderService: Destroying the entity for %d", id);
 			
 			SceneNode* node = it->second.node;
 			// SceneNode* node = getSceneNode(id);
@@ -802,27 +841,38 @@ namespace Opde {
 			
 			node->detachObject(it->second.entity);
 			
-			Entity *ent;
-			// load the new entity, set it to emi
-			try {
-				ent = mSceneMgr->createEntity( "Object" + idstr + name, name);
-			} catch (Ogre::Exception& e) {
-				// TODO: This could also be handled by not setting the new entity at all
-				LOG_ERROR("Could not load model %s for obj %d : %s", name.c_str(), id, e.getFullDescription().c_str());
-				ent = mSceneMgr->createEntity( "Object" + idstr + "Ramp", DEFAULT_RAMP_OBJECT_NAME);
+			if (name == "") { // emty model name means no render
+				// leave in the previous entity, set hidden flag
+				it->second.skip = true;
+				setNodeRenderType(node, it->second);
+				LOG_VERBOSE("RenderService: Mesh rendering for %d disabled", id);
+			} else {
+				Entity *ent;
+				// load the new entity, set it to emi
+				try {
+					ent = mSceneMgr->createEntity( "Object" + idstr + name, name);
+				} catch (Ogre::Exception& e) {
+					// TODO: This could also be handled by not setting the new entity at all
+					LOG_ERROR("RenderService: Could not load model %s for obj %d : %s", name.c_str(), id, e.getFullDescription().c_str());
+					ent = mSceneMgr->createEntity( "Object" + idstr + "Ramp", DEFAULT_RAMP_OBJECT_NAME);
+				}
+				
+				it->second.skip = false;
+				Entity *prevent = it->second.entity;
+				prepareEntity(ent);
+				it->second.entity = ent;
+				it->second.emi->setEntity(ent);
+				
+				node->attachObject(ent);
+				
+				// set the visibility again, node does not propagate to new members!
+				setNodeRenderType(node, it->second);
+				
+				// last, destroy the detached entity
+				mSceneMgr->destroyEntity(prevent);
 			}
-			
-			Entity *prevent = it->second.entity;
-			prepareEntity(ent);
-			it->second.entity = ent;
-			it->second.emi->setEntity(ent);
-			
-			node->attachObject(ent);
-			
-			// last, destroy the detached entity
-			mSceneMgr->destroyEntity(prevent);
 		} else {
-			LOG_FATAL("Entity info not found for object %d. Cannot set model!", id);
+			LOG_FATAL("RenderService: Entity info not found for object %d. Cannot set model!", id);
 		}
 	}
 
@@ -913,7 +963,7 @@ namespace Opde {
 					node->setOrientation(ori.toQuaternion());
 				
 				} catch (BasicException& e) {
-					LOG_ERROR("ObjectService: Exception while setting position of object: %s", e.getDetails().c_str());
+					LOG_ERROR("RenderService: Exception while setting position of object: %s", e.getDetails().c_str());
 				}
 				
 				break;

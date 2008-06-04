@@ -161,7 +161,9 @@ namespace Opde {
 			*/
 			void removeObjectModel(int id);
 			
-			/// Call this to set a new model for the object. Preserves all the object's rendering settings
+			/** Call this to set a new model for the object. Preserves all the object's rendering settings
+			* @note setting empty model name means the model won't be rendered. This is used for FX_Particle for example
+			*/
 			void setObjectModel(int id, const std::string& name);
 			
 			/// Prepares an entity to be used by renderer (manual bones, etc.)
@@ -184,6 +186,12 @@ namespace Opde {
 			
 			/// A package of an entity and a EntityMaterialInstance
 			struct EntityInfo {
+				unsigned int renderType;
+				bool hasRefs;
+
+				/// Used by FX_Particle and such. Hides without interfering with the previous two
+				bool skip;
+
 				Ogre::Entity* entity;
 				Ogre::SceneNode* node;
 				EntityMaterialInstance* emi;
@@ -204,6 +212,8 @@ namespace Opde {
    			/// removes spotlight quality from a light (leaves the light as a point light)
    			void removeSpotLight(int id);
 
+			/// set's the node's visibility based on the rendertype property value
+			void setNodeRenderType(Ogre::SceneNode* node, const EntityInfo& ei);
 
 			/// Map of objectID -> Entity
 			typedef std::map<int, EntityInfo> ObjectEntityMap;
