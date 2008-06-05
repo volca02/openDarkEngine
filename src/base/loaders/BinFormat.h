@@ -21,6 +21,7 @@
 
 /*
 thanks go to shadowspawn for his great contribution (and Ryan Nunn for his work on this thing too, as well as maybe other, which I do not know about)
+Parts of this file are exact copies or free-style rewrites of the contributed code
 */
 
 #ifndef __BINFORMAT_H
@@ -136,15 +137,14 @@ typedef struct BinHeader {
 #define SIZE_BIN_HDR_V4 (sizeof(BinHeader))
 #define SIZE_BIN_HDR_V3 (SIZE_BIN_HDR_V4 - 12)
 
-// the ?skeleton? joint definitions(?)
-typedef struct      VHotObj
-{
+// the attachment joint definition (arbitary attachment "slot")
+typedef struct      VHotObj {
     uint32_t        index;
     Vertex          point;
 } VHotObj;
 
 // Material definitions
-struct MeshMaterial {
+typedef struct {
 	char		name[16];
 	uint8_t	type;		// MD_MAT_COLOR or MD_MAT_TMAP
 	uint8_t	slot_num;
@@ -162,13 +162,13 @@ struct MeshMaterial {
 			uint32_t	ipal_index;	// Couldn't care less
 		};
 	};
-};
+} MeshMaterial;
 
 // Optional
-struct MeshMaterialExtra {
+typedef struct {
 	float		trans;
 	float		illum;
-};
+} MeshMaterialExtra;
 
 typedef struct {
     int32_t	    parent; // A numbered parent identification (Parent sub-object index) or -1 if no parent exists.
@@ -264,9 +264,11 @@ typedef struct      ObjPolygon {
 
 const int ObjLight_Size = 8;
 
+/// Notmal specifier (per vertex)
 typedef struct ObjLight {
 	// Material reference
 	uint16_t material;
+	
 	// Point on object reference
 	uint16_t point;
 
@@ -283,5 +285,135 @@ typedef struct ObjLight {
 2. Short - point
 3. 4 bytes - related to normal. Does not make great sense (two shorts as space direction without rotation?)
 */
+
+//----- These are related to the CAL files: -----
+
+/// The header struct of the .CAL file
+typedef struct {
+    int32_t     Version; // We only know version 1
+    int32_t     num_torsos; 
+    int32_t     num_limbs;
+} CalHdr;
+
+//  Torso array (array of TorsoV1) follows header
+/// Torso definition (next to header, int the num_torsos count) 
+typedef struct {
+    uint32_t            root; // Root - the root joint index of this torso. Init to 0,0,0 for parent == -1 to get zero - positioned skeleton
+    int32_t            parent; // -1 - the torso's parent (-1 for root torso)
+    int32_t            fixed_count; // count of joints of this torso (maxed to 16)
+    uint32_t            fixed_joints[16]; // index remap of the joints (could be checked for uniqueness for sanity checks)
+    Vertex          fixed_joint_diff_coord[16]; // the relative position of the torso's joint to the root joint
+} CalTorso;
+
+/// Limb definition - Limbs follow the Torsos in the file
+typedef struct {
+    int32_t		torso_index; // index of the torso we attach to
+    int32_t		junk1; // What's this?
+    int32_t		num_segments;  // count of joints in this limb
+    uint16_t		attachment_joint; // joint to which the limb attaches
+    uint16_t		segments[16]; // indices of the joints of this limb
+    Vertex			segment_diff_coord[16]; // relative to the previous limb's joint!
+    float			lengths[16];             // Lengths of the segment
+} CalLimb;
+
+//----- The Structures used in the LGMM AI .BIN mesh file -----
+/// the main header of the LGMM
+typedef struct {
+	uint32_t            zeroes[3];      // Always seems to be 0
+    char            num_what1;         // '0'
+    char            num_mappers;         // Count for U2 (*20)
+    char            num_mats;       // Number of materials
+    char            num_joints;     // Number of joints?
+    int16_t           num_polys;        // Polygon count (Count for U4 * 16)
+    int16_t           num_vertices;       // Total Vertex count
+    uint32_t            num_stretchy;       // Stretchy Vertexes + x_count == p_count?
+    uint32_t            offset_joint_remap;      // Joint map?, num_joints elements
+    uint32_t            offset_mappers;      // joint mapping definitions
+    uint32_t            offset_mats;    // looks likes material offset, see object header
+    uint32_t            offset_joints;  // Per-Joint Polygon info. The joints mentioned here are not the same joints as in .CAL
+    uint32_t            offset_poly;    // (U5-U4) = polygons
+    uint32_t            offset_norm;    // (U6-U5) = Normals
+    uint32_t            offset_vert;    // (U7-U6) = Vertexes (munged) - num_vertices
+    uint32_t            offset_uvmap;   // (U8-U7) = UV maps. Z is junk (count - the same as vertex count)
+    uint32_t            offset_blends;  // Floats (num_stretchy). Blending factors. All in the range 0-1
+    uint32_t            offset_U9;      // Zero. All the time it seems
+} AIMeshHeader;
+
+// then, there are the joint remapping structs (2x num_joints of bytes)
+
+// This structure seems to map the AI mesh joints to the Cal joints.
+typedef struct {
+    long            unk1;
+    char            joint; // in the joint info (joint->poly lists) this stuct is referenced, and this attr is seeked
+    char            en1; // 0/1 I guess these enable the usage of the blending for the particular joint
+    char            jother; // maybe stretchy vertex reference, or whatever. Need more info here
+    char            en2; // 0/1 Maybe this is enabling the referencing of stretchy vertices
+    float           rotation[3]; // I just guess this can be rotation for the bone
+} AIMapper;
+
+// We handle revision 1 and 2 AI meshes. These have different material structure. commented are the versions for the ver-dependent fields
+/// Material definition struct
+typedef struct {
+	char name[16];
+	
+	// Only in rev. 2 mesh: (This part is skipped for rev. 1 meshes)
+	uint32_t	ext_flags; // 2 only - indicate which of the params is used (trans, illum, etc). Bitmask
+	float trans; // 2 only
+	float illum; // 2 only
+	float unknown; // 2 only
+	
+	// back to both rev. fields:
+	uint32_t unk1;
+	uint32_t unk2;
+	unsigned char type; // Textured, color-only, etc....
+	unsigned char slot_num; // material's slot. We know this one from the Object meshes, don't we?
+	
+	// some other data, not identified yet
+	// I'd bet we'll see 8 bytes of info here, the same as in MeshMaterial - color and ipal_index, OR, handle and uv-scale
+	uint16_t   s_unk1; // 2
+    uint16_t   s_unk2; // 4
+    uint16_t   s_unk3; // 6
+    uint16_t   s_unk4; // 8 
+    uint16_t   s_unk5; // What would this be?
+    uint32_t   l_unk3; // and this?
+	
+} AIMaterial;
+
+
+/// Joint -> polygons mapping
+typedef struct JointInfo {
+    short           num_polys;            // Number of polygons
+    short           start_poly;            // Start poly
+    short           num_vertices;            // Number of vertices
+    short           start_vertex;            // Start vertex
+    float           jflt;		// I suppose this is a blending factor for the bone
+    short           sh6;            // Flag (?) - there are few places for TG this is not zero, but either 1,2 or 3
+    short           mapper_id;            // id of the mapper struct
+} AIJointInfo;
+
+/// Triangle in ai mesh def.
+typedef struct {
+    short           a; // vertex indices
+    short           b;
+    short           c;
+    short           mat; // material
+    float           f_unk; // some float? Hmm what could've this be?
+    short           index; // index of this 
+    unsigned short  flag; // stretch or not? This would seem to be a good place to inform about it
+} AITriangle;
+
+/* 
+The sh6 <> 0 files for T1G:
+BADTRAY.BIN
+bowempt9.bin
+BOWSITE.BIN
+carry5.bin
+exphamk4.bin
+expservt.bin
+expzom.bin
+MAGSWGU.BIN
+servtest.bin
+*/
+
 
 #endif
