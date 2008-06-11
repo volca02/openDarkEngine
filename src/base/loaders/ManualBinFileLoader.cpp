@@ -189,7 +189,7 @@ namespace Ogre {
 			
 		mTorsos = new CalTorso[mHeader.num_torsos];	
 		
-		for (unsigned int i = 0; i < mHeader.num_torsos; ++i) {
+		for (int32_t i = 0; i < mHeader.num_torsos; ++i) {
 			mFile->readElem(&mTorsos[i].root, sizeof(uint32_t));
 			mFile->readElem(&mTorsos[i].parent, sizeof(int32_t));
 			mFile->readElem(&mTorsos[i].fixed_count, sizeof(int32_t));
@@ -204,7 +204,7 @@ namespace Ogre {
 			
 		mLimbs = new CalLimb[mHeader.num_limbs];	
 		
-		for (unsigned int i = 0; i < mHeader.num_limbs; ++i) {
+		for (int32_t i = 0; i < mHeader.num_limbs; ++i) {
 			mFile->readElem(&mLimbs[i].torso_index, sizeof(int32_t));
 			mFile->readElem(&mLimbs[i].junk1, sizeof(int32_t));
 			mFile->readElem(&mLimbs[i].num_segments, sizeof(int32_t));
@@ -327,8 +327,6 @@ namespace Ogre {
     }
 
     void SubMeshFiller::addTriangle(uint16_t a, uint16_t bone_a, uint16_t b, uint16_t bone_b, uint16_t c, uint16_t bone_c) {
-    	uint16_t last_index;
-        uint16_t max_index;
         
         uint16_t idxa = getIndex(bone_a, a, a, 0, a);
         uint16_t idxb = getIndex(bone_b, b, b, 0, b);
@@ -1609,11 +1607,11 @@ namespace Ogre {
         // pass 1 of joint mappings. Build vertex -> .CAL joint mapping info
         mVertexJointMap = new uint8_t[mHeader.num_vertices];
         
-        for (size_t j = 0; j < mHeader.num_vertices; ++j)
+        for (int16_t j = 0; j < mHeader.num_vertices; ++j)
 			mVertexJointMap[j] = 0;
         
         
-        for (size_t j = 0; j < mHeader.num_joints; ++j) {
+        for (char j = 0; j < mHeader.num_joints; ++j) {
         	// for every joint
 			// get the real joint id
 			unsigned int mapper = mJoints[j].mapper_id;
@@ -1622,7 +1620,7 @@ namespace Ogre {
 			
 			unsigned int joint = mMappers[mapper].joint;
 			
-			for (size_t v = 0; v < mJoints[j].num_vertices; ++v) {
+			for (short v = 0; v < mJoints[j].num_vertices; ++v) {
 				uint16_t vtx = mJoints[j].start_vertex + v;
 				
 				mVertexJointMap[vtx] = joint;
@@ -1630,7 +1628,7 @@ namespace Ogre {
         }
         
         // pass 2 of joint mappings. Fill the submesh builders with vertices
-        for (size_t j = 0; j < mHeader.num_joints; ++j) {
+        for (char j = 0; j < mHeader.num_joints; ++j) {
         	// for every joint
 			// get the real joint id
 			unsigned int mapper = mJoints[j].mapper_id;
@@ -1639,7 +1637,7 @@ namespace Ogre {
 			
 			unsigned int joint = mMappers[mapper].joint;
 			
-			for (size_t v = 0; v < mJoints[j].num_polys; ++v) {
+			for (short v = 0; v < mJoints[j].num_polys; ++v) {
 				AITriangle& tri = mTriangles[mJoints[j].start_poly + v];
 				
 				SubMeshFiller* f = getFillerForSlot(tri.mat); // maybe slots are not used after all
@@ -1693,7 +1691,7 @@ namespace Ogre {
 
 	void AIMeshLoader::readMaterials() {
 		// repeat for all materials
-		unsigned int i;
+		char i;
 		
 		if (mHeader.num_mats < 1) // TODO: This could be fatal
 			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("File contains no materials ")  + mMesh->getName(), "AIMeshLoader::readMaterials");
@@ -1749,7 +1747,7 @@ namespace Ogre {
 			
 		mMappers = new AIMapper[mHeader.num_mappers];
 		
-		for (unsigned int i = 0 ; i < mHeader.num_mappers; ++i) {
+		for (char i = 0 ; i < mHeader.num_mappers; ++i) {
 			mFile->readElem(&mMappers[i].unk1, 4);
 			
 			mFile->read(&mMappers[i].joint, 1);
@@ -1769,7 +1767,7 @@ namespace Ogre {
 			
 		mJoints = new AIJointInfo[mHeader.num_joints];
 		
-		for (unsigned int i = 0 ; i < mHeader.num_joints; ++i) {
+		for (char i = 0 ; i < mHeader.num_joints; ++i) {
 			mFile->readElem(&mJoints[i].num_polys, 2);
 			mFile->readElem(&mJoints[i].start_poly, 2);
 			mFile->readElem(&mJoints[i].num_vertices, 2);
@@ -1790,7 +1788,7 @@ namespace Ogre {
 		
 		mTriangles = new AITriangle[mHeader.num_polys];
 			
-		for (size_t i = 0; i < mHeader.num_polys; ++i) {
+		for (int16_t i = 0; i < mHeader.num_polys; ++i) {
 			mFile->readElem(&mTriangles[i].a, 2);
 			mFile->readElem(&mTriangles[i].b, 2);
 			mFile->readElem(&mTriangles[i].c, 2);
@@ -1836,7 +1834,7 @@ namespace Ogre {
 		
 		float bogus_z;
 		
-		for (size_t i = 0; i < mHeader.num_vertices; ++i) {
+		for (int16_t i = 0; i < mHeader.num_vertices; ++i) {
 			mFile->readElem(&mUVs[i].u, 4);
 			mFile->readElem(&mUVs[i].v, 4);
 			mFile->readElem(&bogus_z, 4); // we simply ignore Z... till we find we can't ;)
