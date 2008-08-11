@@ -80,19 +80,43 @@ typedef struct {
 
 
 /* PHYS. OBJECT FLAGS */
-#define PHYS_OBJ_ROPE      0x0001000
-#define PHYS_OBJ_MTERRAIN  0x0100000
+#define PHYS_OBJ_INACTIVE   0x0000004
+#define PHYS_OBJ_SLEEPING   0x0000080
+#define PHYS_OBJ_ROPE       0x0001000
+#define PHYS_OBJ_DEPLOYED_ROPE 0x0004000
+#define PHYS_OBJ_MTERRAIN   0x0100000
+#define PHYS_OBJ_DOOR	    0x0200000
+#define PHYS_AI_COLLIDE     0x0400000 // Originally pPhysAICollideProp?
+#define PHYS_OBJ_PROJECTILE 0x0800000  
 
 const char hchr[]="0123456789ABCDEF";
 ////////////////// HELPERS //////////////////
 void printPhysObjFlags(uint32 flags) {
 	printf("\tFlags         : ");
 	
+	if (flags & PHYS_OBJ_INACTIVE)
+		printf("INACTIVE ");
+
+	if (flags & PHYS_OBJ_SLEEPING)
+		printf("SLEEPING ");
+	
 	if (flags & PHYS_OBJ_ROPE)
 		printf("ROPE ");
+		
+	if (flags & PHYS_OBJ_DEPLOYED_ROPE)
+		printf("DEPLOYED_ROPE ");
 	
 	if (flags & PHYS_OBJ_MTERRAIN)
 		printf("MOVING-TERRAIN ");
+		
+	if (flags & PHYS_OBJ_DOOR)
+		printf("DOOR ");
+
+	if (flags & PHYS_AI_COLLIDE)
+		printf("AI_COLLIDES_WITH ");
+		
+	if (flags & PHYS_OBJ_PROJECTILE)
+		printf("PROJECTILE ");
 	
 	printf("\n");
 }
@@ -447,17 +471,18 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	
 	
 	// This looks rope related
-	printf("\t Float List for sub-objects (%d) : \n", num_subobjs);
+	// Spring tension, spring damping that is
+	printf("\t Spring connection of sub-objects (%d) : \n", num_subobjs);
 	for (int n = 0; n < num_subobjs; n++) {
 		printf("\t\t %d : ", n);
 		//
 		float x;
 		
 		fread(&x,1,4,f);
-		printf("%8.2g ", x);
+		printf("[Spring Tension] %8.2g ", x);
 		
 		fread(&x,1,4,f);
-		printf("%8.2g ", x);
+		printf("[Spring Damping] %8.2g ", x);
 		
 		// 
 		printf("\n");
@@ -551,8 +576,8 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	fread(&elasticity, 1,4,f);
 	
 	printf("\tMass     : %8.4g\n", mass);
-	printf("\tDensity  : %8.4g\n", density);
-	printf("\tElast.   : %8.4g\n", elasticity);
+	printf("\tElast.   : %8.4g\n", density);
+	printf("\tDensity  : %8.4g\n", elasticity);
 	
 	
 	
