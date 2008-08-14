@@ -12,10 +12,12 @@
 #define sint8 int8_t
 #define uint16 uint16_t
 #define sint16 int16_t
-#define sint32 uint32_t
-#define uint32 int32_t
+#define sint32 int32_t
+#define uint32 uint32_t
 
 #define PI 3.14159265358979323846
+
+bool skipfpos = false;
 
 #pragma pack(push,1)
 typedef struct { // SIZE: 8
@@ -255,7 +257,10 @@ bool p_BVolType(sint32 bv) {
 }
 
 void fpos(FILE *f) {
-	printf("------------- FPOS %lXh -----------\n",ftell(f));
+	if (!skipfpos)
+		printf("------------- FPOS %lXh -----------\n",ftell(f));
+	else
+		printf("-----------------------------------\n");
 }
 
 void readMatrixLong(FILE *f, int width, int height, char *prefix) {
@@ -465,7 +470,7 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	// This looks like some other physical value, dunno which
 	float unknown;
 	fread(&unknown,1,4,f);
-	printf("\tUnknown       : %f\n", unknown);
+	printf("\tMedia State?  : %f\n", unknown);
 
 	fpos(f);
 	
@@ -489,7 +494,7 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	}
 	
 	fpos(f);
-	printf("\tUnknown    : "); readStruct("LLLL", f);printf("\n");
+	printf("\tObjatt. rel? : "); readStruct("LFLL", f);printf("\n"); // attachment related?
 
 	/* 
 	Rotation axises flags: X - 1, Y - 2, Z - 4 ? (Sphere - all = 7, box = 4 - X only?)
@@ -503,7 +508,17 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	printRestAxes(rest_flags);
 	
 
-	printf("\tUnknown    : "); readStruct("LLL", f);printf("\n");
+	printf("\tObject attachment :\n"); 
+	
+	int32_t tgt_obj;
+	uint32 unk;
+	float funk;
+	fread(&tgt_obj,1,4,f);
+	fread(&unk,1,4,f);
+	fread(&funk,1,4,f);
+	printf("\t\tAttachment target : %d\n", tgt_obj);
+	printf("\t\tUnknown           : %d\n", unk);
+	printf("\t\tUnknown float     : %f\n", funk); // Distance? Connection strenght?
 	
 	// THIEF 2 has one more long here
 	if (version >= 32) {
@@ -786,6 +801,11 @@ int main(int argc, char *argv[]) {
 	if (argc<2) {
 		fprintf(stderr,"Please specify a valid filename as argument.\n");
 		return 1;
+	}
+	
+	if (argc>2) {
+		if (strcmp(argv[2], "-f") == 0)
+			skipfpos = true;
 	}
 	
 	f = fopen(argv[1],"rb");
