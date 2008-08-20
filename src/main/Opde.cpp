@@ -36,7 +36,10 @@ INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT )
 #else
 int main(int argc, char**argv)
 {
-	std::string GameType(argv[0]);
+	std::string GameType = "";
+	
+	if (argc >= 2)
+	    GameType = argv[1];
 #endif
 
     // Create application object
