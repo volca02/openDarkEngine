@@ -17,6 +17,8 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *	  $Id$
+ *
  *****************************************************************************/
 
 #include "GameStateManager.h"
@@ -190,7 +192,12 @@ namespace Opde {
 
 
         if (!mConfigService->hasParam("mission")) // Failback
-            mConfigService->setParam("mission", "miss1.mis");
+		{
+			if((mGameType == "SS2") || (mGameType == "ss2"))
+				mConfigService->setParam("mission", "earth.mis");
+			else
+				mConfigService->setParam("mission", "miss1.mis");
+		}
 
         // TODO: Remove this temporary nonsense. In fact. Remove the whole class this method is in!
         GamePlayState* ps = new GamePlayState();
