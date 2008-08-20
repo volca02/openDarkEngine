@@ -337,13 +337,21 @@ namespace Opde {
 		mInputSystem = OIS::InputManager::createInputSystem( paramList );
 
 		// If possible create a buffered keyboard
+#if OIS_VERSION>=66048
+		if( mInputSystem->getNumberOfDevices(OIS::OISKeyboard) > 0 ) {
+#else
 		if( mInputSystem->numKeyboards() > 0 ) {
+#endif
 			mKeyboard = static_cast<OIS::Keyboard*>( mInputSystem->createInputObject( OIS::OISKeyboard, true ) );
 			mKeyboard->setEventCallback( this );
 		}
 
 		// If possible create a buffered mouse
+#if OIS_VERSION>=66048
+		if( mInputSystem->getNumberOfDevices(OIS::OISMouse) > 0 ) {
+#else
 		if( mInputSystem->numMice() > 0 ) {
+#endif
 			mMouse = static_cast<OIS::Mouse*>( mInputSystem->createInputObject( OIS::OISMouse, true ) );
 			mMouse->setEventCallback( this );
 
@@ -663,7 +671,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------	
-	void InputService::registerCommandTrap(const std::string& command, ListenerPtr listener) {
+	void InputService::registerCommandTrap(const std::string& command, const ListenerPtr& listener) {
 		if (mCommandTraps.find(command) != mCommandTraps.end()) {
 			// Already registered command. LOG an error
 			LOG_ERROR("The command %s already has a registered trap. Not registering", command.c_str());
@@ -674,7 +682,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------	
-	void InputService::unregisterCommandTrap(ListenerPtr listener) {
+	void InputService::unregisterCommandTrap(const ListenerPtr& listener) {
 		// Iterate through the trappers, find the ones with this listener ptr, remove
 		ListenerMap::iterator it = mCommandTraps.begin();
 		

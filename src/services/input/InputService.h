@@ -155,10 +155,10 @@ namespace Opde {
 			typedef shared_ptr< Listener > ListenerPtr;
 
 			/// Registers a command listener
-			void registerCommandTrap(const std::string& command, ListenerPtr listener);
+			void registerCommandTrap(const std::string& command, const ListenerPtr& listener);
 
 			/// Unregisters a command listener
-			void unregisterCommandTrap(ListenerPtr listener);
+			void unregisterCommandTrap(const ListenerPtr& listener);
 			
 			/// Unregisters a command listener by it's name
 			void unregisterCommandTrap(const std::string& command);
