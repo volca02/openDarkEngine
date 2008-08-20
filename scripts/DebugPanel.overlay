@@ -20,7 +20,7 @@ Opde/DebugOverlay
 			top 5
 			width 90
 			height 30
-			font_name BlueHighway
+			font_name DebugFont
 			char_height 19
 			caption Current FPS:
 			colour_top 1 1 0.7
@@ -33,7 +33,7 @@ Opde/DebugOverlay
 			top 25
 			width 90
 			height 30
-			font_name BlueHighway
+			font_name DebugFont
 			char_height 16
 			caption AVERAGE FPS:
 			colour_top 0.5 0.7 0.5
@@ -46,7 +46,7 @@ Opde/DebugOverlay
 			top 40
 			width 90
 			height 30
-			font_name BlueHighway
+			font_name DebugFont
 			char_height 16
 			caption WORST FPS:
 			colour_top 0.5 0.7 0.5
@@ -59,7 +59,7 @@ Opde/DebugOverlay
 			top 55
 			width 90
 			height 30
-			font_name BlueHighway
+			font_name DebugFont
 			char_height 16
 			caption BEST FPS:
 			colour_top 0.5 0.7 0.5
@@ -72,7 +72,7 @@ Opde/DebugOverlay
 			top 70
 			width 90
 			height 30
-			font_name BlueHighway
+			font_name DebugFont
 			char_height 16
 			caption Triangle Count:
 			colour_top 0.5 0.7 0.5
@@ -85,7 +85,7 @@ Opde/DebugOverlay
 			top 85
 			width 90
 			height 30
-			font_name BlueHighway
+			font_name DebugFont
 			char_height 16
 			caption Batch Count:
 			colour_top 0.5 0.7 0.5
@@ -98,7 +98,7 @@ Opde/DebugOverlay
 			top 70
 			width 200
 			height 30
-			font_name BlueHighway
+			font_name DebugFont
 			char_height 16
 			colour_top 0.5 0.7 0.5
 			colour_bottom 0.3 0.5 0.3

@@ -17,8 +17,8 @@ Opde/Console
 			metrics_mode pixels
 			left 0
 			top 0
-			font_name BlueHighway
-			char_height 12
+			font_name DebugFont
+			char_height 16
 			caption --Console--
 			colour_top 1 1 1
 			colour_bottom 1 1 1
@@ -29,12 +29,12 @@ Opde/Console
 			metrics_mode pixels
 			vert_align bottom
 			left 0
-			top -20
+			top 150
 			width 0
 			height 30
-			font_name BlueHighway
-			char_height 14
-			caption >
+			font_name DebugFont
+			char_height 19
+			caption >>
 			colour_top 0.2 0.7 0.5
 			colour_bottom 0.2 0.7 0.5
 		}

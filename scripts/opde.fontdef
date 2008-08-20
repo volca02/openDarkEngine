@@ -1,0 +1,15 @@
+Thief
+{
+	type 		truetype
+	source 		thief.ttf
+	size 		32
+	resolution 	96
+}
+
+DebugFont
+{
+	type 		truetype
+	source 		carleton.ttf
+	size 		8
+	resolution 	96
+}

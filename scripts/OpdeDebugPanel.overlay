@@ -20,7 +20,7 @@ Opde/OpdeDebugOverlay
 			top 5
 			width 90
 			height 30
-			font_name BlueHighway
+			font_name DebugFont
 			char_height 19
 			caption Portal Statistics
 			colour_top 1 1 0.7
@@ -34,7 +34,7 @@ Opde/OpdeDebugOverlay
 			top 25
 			width 90
 			height 30
-			font_name BlueHighway
+			font_name DebugFont
 			char_height 16
 			caption Backface culls:
 			colour_top 0.5 0.7 0.5
@@ -47,7 +47,7 @@ Opde/OpdeDebugOverlay
 			top 40
 			width 90
 			height 30
-			font_name BlueHighway
+			font_name DebugFont
 			char_height 16
 			caption Evaluated Portals:
 			colour_top 0.5 0.7 0.5
@@ -60,7 +60,7 @@ Opde/OpdeDebugOverlay
 			top 55
 			width 90
 			height 30
-			font_name BlueHighway
+			font_name DebugFont
 			char_height 16
 			caption Rendered Cells:
 			colour_top 0.5 0.7 0.5
@@ -74,7 +74,7 @@ Opde/OpdeDebugOverlay
 			top 70
 			width 90
 			height 30
-			font_name BlueHighway
+			font_name DebugFont
 			char_height 16
 			caption Traversal Time:
 			colour_top 0.5 0.7 0.5
@@ -88,7 +88,7 @@ Opde/OpdeDebugOverlay
 			top 85
 			width 90
 			height 30
-			font_name BlueHighway
+			font_name DebugFont
 			char_height 16
 			caption Static Render Time:
 			colour_top 0.5 0.7 0.5
