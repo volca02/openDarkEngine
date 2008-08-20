@@ -55,6 +55,12 @@ namespace Opde {
 			}
 
 		public:
+			/// conversion ctor
+			template<class U> shared_ptr(shared_ptr<U> const & a) : mPtr(a.mPtr), mReferences(a.mReferences) {
+				if (mReferences)
+					++(*mReferences);
+			}
+		
 			/// NULL ctor
 			shared_ptr() : mReferences(NULL), mPtr(NULL) { };
 
