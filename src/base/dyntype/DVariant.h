@@ -116,7 +116,10 @@ namespace Opde {
 			virtual ~DVariant();
 			
 			/** returns a char* containing the type name */
-			const char* typeToString() const;
+			const char* typeString() const;
+			
+			/** returns a char* containing the type name for the specified type */
+			static const char* typeToString(Type t);
 			
 			/** converts the inner value to string, if possible.
 			* @throw runtime_error if not convertible */

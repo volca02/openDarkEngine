@@ -205,21 +205,26 @@ namespace Opde {
 	}
 
 	//------------------------------------
-	const char* DVariant::typeToString() const {
-		switch (mPrivate.type) {
-			case DV_BOOL :
+	const char* DVariant::typeString() const {
+	    return typeToString(mPrivate.type);
+	}
+	
+    //------------------------------------
+	const char* DVariant::typeToString(DVariant::Type t) {
+        switch (t) {
+			case DVariant::DV_BOOL :
 				return "Bool";
-			case DV_FLOAT :
+			case DVariant::DV_FLOAT :
 				return "Float";
-			case DV_INT :
+			case DVariant::DV_INT :
 				return "Int";
-			case DV_UINT :
+			case DVariant::DV_UINT :
 				return "UInt";
-			case DV_STRING :
+			case DVariant::DV_STRING :
 				return "String";
-			case DV_VECTOR :
+			case DVariant::DV_VECTOR :
 				return "Vector";
-			case DV_QUATERNION :
+			case DVariant::DV_QUATERNION :
 				return "Quaternion";
 			default:
                 return "Invalid"; // Be gentle. Do not throw
