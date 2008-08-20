@@ -56,7 +56,7 @@ namespace Opde {
 	// The instance owner
 	template<> GameStateManager* Singleton<GameStateManager>::ms_Singleton = 0;
 
-	GameStateManager::GameStateManager() :
+	GameStateManager::GameStateManager(std::string GameType) :
 			mStateStack(),
 			mTerminate(false),
 			mRoot(NULL),
@@ -67,6 +67,7 @@ namespace Opde {
 			mDTypeScriptLdr(NULL),
 			mPLDefScriptLdr(NULL),
 			mConfigService(NULL) {
+				mGameType = GameType;
 	}
 
 	GameStateManager::~GameStateManager() {
@@ -274,13 +275,15 @@ namespace Opde {
 		// Load resource paths from config file
 		ConfigFile cf;
 		
-		// If resources config param exists, load resources according to it, otherwise failback to resources.cfg
-		DVariant d;
-		if (mConfigService->getParam("resources", d)) {
-            cf.load(d.toString());
-		} else {
+		//Load the resources according to the game type, if game type not specified, load the default
+		if((mGameType == "T1") || (mGameType == "t1"))
+			cf.load("thief1.cfg");
+		else if((mGameType == "T2") || (mGameType == "t2"))
+			cf.load("thief2.cfg");
+		else if((mGameType == "SS2") || (mGameType == "ss2"))
+			cf.load("shock2.cfg");
+		else
 			cf.load("resources.cfg");
-		}
 		
 		// Go through all sections & settings in the file
 		ConfigFile::SectionIterator seci = cf.getSectionIterator();

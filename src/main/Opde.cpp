@@ -31,12 +31,16 @@ using namespace Opde;
 #include "windows.h"
 
 INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT )
+{
+	std::string GameType(strCmdLine);
 #else
 int main(int argc, char**argv)
-#endif
 {
+	std::string GameType(argv[0]);
+#endif
+
     // Create application object
-    GameStateManager* man = new GameStateManager();
+    GameStateManager* man = new GameStateManager(GameType);
 
     try {
 		man->run();

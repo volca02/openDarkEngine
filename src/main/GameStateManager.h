@@ -59,7 +59,7 @@ namespace Opde {
 	*/
 	class GameStateManager : public Singleton<GameStateManager>, public DirectInputListener {
         public:
-            GameStateManager();
+            GameStateManager(std::string GameType);
             ~GameStateManager();
 
             // Singleton related
@@ -135,6 +135,8 @@ namespace Opde {
 			ConfigServicePtr mConfigService;
 
 			InputServicePtr mInputService;
+
+			std::string mGameType;
 	};
 
 }
