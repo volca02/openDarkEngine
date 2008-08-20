@@ -225,7 +225,7 @@ namespace Opde {
 			
 			/** sets a new loop mode
 			*/
-			void setLoopMode(LoopModePtr newMode);
+			void setLoopMode(const LoopModePtr& newMode);
 			
 			/// Termination was requested
 			bool mTerminationRequested;

@@ -74,16 +74,16 @@ namespace Opde {
 
 		public:
 			/// Constructor - Creates empty data defined by default values in type
-			LinkData(link_id_t id, DTypeDefPtr type, bool useCache = false) : mID(id), DType(type, useCache) { };
+			LinkData(link_id_t id, const DTypeDefPtr& type, bool useCache = false) : mID(id), DType(type, useCache) { };
 
 			/// Constructor - Loads data from FilePtr
-			LinkData(link_id_t id, DTypeDefPtr type, FilePtr file, int _size, bool useCache = false) : mID(id), DType(type,file,_size, useCache) { };
+			LinkData(link_id_t id, const DTypeDefPtr& type, FilePtr file, int _size, bool useCache = false) : mID(id), DType(type,file,_size, useCache) { };
 
 			/// Constructor - copies the data from another DType instance
 			LinkData(link_id_t id, const DType& type, bool useCache = false) : mID(id), DType(type, useCache) {};
 
 			/// Constructor - copies the data from DTypePtr instance
-			LinkData(link_id_t id, const DTypePtr type, bool useCache = false) : mID(id), DType(*type, useCache) {};
+			LinkData(link_id_t id, const DTypePtr& type, bool useCache = false) : mID(id), DType(*type, useCache) {};
 
 			/// Destructor - Deletes the data
 			~LinkData() {  };
@@ -145,7 +145,7 @@ namespace Opde {
 	/// Link chage message
 	typedef struct LinkChangeMsg {
 		LinkChangeMsg() : link(NULL) {};
-		LinkChangeMsg(LinkPtr lnk) : link(lnk) {};
+		LinkChangeMsg(const LinkPtr& lnk) : link(lnk) {};
 		
 		/// A change that happened
 		LinkChangeType change;

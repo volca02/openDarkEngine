@@ -29,13 +29,14 @@
 
 namespace Opde {
 	/** @brief Property data holder
+	* @deprecated We now have common data storage for both link and data, and extra layer of abstraction using DataStorage class
 	*/
 	class PropertyData : public DType {
 		friend class PropertyGroup;
 		
 		public:
 			/** Constructor. Constructs new data buffer, filled with zeros */
-			PropertyData(int id, DTypeDefPtr type, bool useCache = false) : mID(id), DType(type, useCache) {	};
+			PropertyData(int id, const DTypeDefPtr& type, bool useCache = false) : mID(id), DType(type, useCache) {	};
 			
 			/** Constructor - loads data from FilePtr 
 			* @param id The object ID
@@ -43,17 +44,17 @@ namespace Opde {
 			* @param file The File pointer (FilePtr) to load data from
 			* @param _size the size of the data to be loaded
 			* */
-			PropertyData(int id, DTypeDefPtr type, FilePtr file, int _size, bool useCache = false) : mID(id), DType(type, file, _size, useCache) { };
+			PropertyData(int id, const DTypeDefPtr& type, FilePtr file, int _size, bool useCache = false) : mID(id), DType(type, file, _size, useCache) { };
 			
 			/** Constructor - takes object id and data instance 
 			* @param id The object ID
 			* @param data The Data instance to copy the data from */
-			PropertyData(int id, DTypePtr data, bool useCache = false) : mID(id), DType(*data, useCache) { };
+			PropertyData(int id, const DTypePtr& data, bool useCache = false) : mID(id), DType(*data, useCache) { };
 			
 			/** PropertyData cloning constructor
 			* @param id The object ID
 			* @param data The Data instance to copy the data from */
-			PropertyData(int id, PropertyData data, bool useCache = false) : mID(id), DType(data, useCache) { };
+			PropertyData(int id, const PropertyData& data, bool useCache = false) : mID(id), DType(data, useCache) { };
 			
 			/** Destructor */
 			~PropertyData() { };
@@ -84,7 +85,7 @@ namespace Opde {
 		PROP_GROUP_CLEARED
 	} PropertyChangeType;
 	
-	/// Link chage message
+	/// Property chage message
 	typedef struct PropertyChangeMsg {
 		/// A change that happened
 		PropertyChangeType change;

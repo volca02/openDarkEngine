@@ -71,7 +71,7 @@ namespace Opde {
 	/*-----------------------------------------------------*/
 	/*----------------------- Relation --------------------*/
 	/*-----------------------------------------------------*/
-	Relation::Relation(const std::string& name, DTypeDefPtr type, bool isInverse, bool hidden) :
+	Relation::Relation(const std::string& name, const DTypeDefPtr& type, bool isInverse, bool hidden) :
 			mID(-1),
 			mName(name),
 			mType(type),
@@ -107,7 +107,7 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	void Relation::load(FileGroupPtr db) {
+	void Relation::load(const FileGroupPtr& db) {
 		assert(!mIsInverse);
 		
 		// load the links and thei're data
@@ -250,7 +250,7 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	void Relation::save(FileGroupPtr db, uint saveMask) {
+	void Relation::save(const FileGroupPtr& db, uint saveMask) {
 		assert(!mIsInverse);
 		
 		LOG_DEBUG("Relation::save Saving relation %s", mName.c_str());
@@ -399,7 +399,7 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	link_id_t Relation::create(int from, int to, DTypePtr data) {
+	link_id_t Relation::create(int from, int to, const DTypePtr& data) {
 		// Request an id. First let's see what concreteness we have
 		unsigned int cidx = 0;
 
@@ -575,8 +575,7 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	// --------------------------------------------------------------------------
-	void Relation::_addLink(LinkPtr link) {
+	void Relation::_addLink(const LinkPtr& link) {
 		// Insert, and detect the presence of such link already inserted (same ID)
 		std::pair<LinkMap::iterator, bool> ires = mLinkMap.insert(make_pair(link->mID, link));
 
@@ -671,7 +670,7 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	void Relation::_assignLinkData(link_id_t id, LinkDataPtr data) {
+	void Relation::_assignLinkData(link_id_t id, const LinkDataPtr& data) {
 		std::pair<LinkDataMap::iterator, bool> ires = mLinkDataMap.insert(make_pair(id, data));
 
 		if (!ires.second) {
@@ -724,7 +723,7 @@ namespace Opde {
 	}
 	
 	// --------------------------------------------------------------------------
-	LinkPtr Relation::createInverseLink(LinkPtr src) {
+	LinkPtr Relation::createInverseLink(const LinkPtr& src) {
 		LinkPtr inv = new Link(
 			src->id(),
 			src->dst(),

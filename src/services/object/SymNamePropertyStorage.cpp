@@ -29,19 +29,19 @@ namespace Opde {
 	
 	
 	// --------------------------------------------------------------------------
-	SymNamePropertyStorage::SymNamePropertyStorage() : StringPropertyStorage() {};
+	SymNamePropertyStorage::SymNamePropertyStorage() : StringDataStorage() {};
 	
 	
 	// --------------------------------------------------------------------------
 	SymNamePropertyStorage::~SymNamePropertyStorage() {};
 	
 	// --------------------------------------------------------------------------
-	bool SymNamePropertyStorage::destroyProp(int objID) {
+	bool SymNamePropertyStorage::destroy(int objID) {
 		// Find the object name before destroying
 		DVariant res;
 
-		if (getPropField(objID, "", res)) {
-			bool eraseok = StringPropertyStorage::destroyProp(objID);
+		if (getField(objID, "", res)) {
+			bool eraseok = StringDataStorage::destroy(objID);
 			
 			assert(eraseok);
 			
@@ -61,7 +61,7 @@ namespace Opde {
 	
 	
 	// --------------------------------------------------------------------------
-	bool SymNamePropertyStorage::setPropField(int objID, const std::string& field, const DVariant& value) {
+	bool SymNamePropertyStorage::setField(int objID, const std::string& field, const DVariant& value) {
 		// if the parent's set field passes, update ourselves as well.
 		// but first, look if we can proceed (name duplicity check)
 		
@@ -74,16 +74,16 @@ namespace Opde {
 			return true;
 		}
 		
-		if (!hasProp(objID))
+		if (!has(objID))
 			return false;
 		
 		// get the previous name of the object, free that record
-		StringPropertyMap::const_iterator sit = mStringPropMap.find(objID);
+		StringDataMap::const_iterator sit = mStringPropMap.find(objID);
 		
 		assert(sit != mStringPropMap.end());
 		
 		// name not in use yet, we can assign it
-		if (StringPropertyStorage::setPropField(objID, field, value)) {
+		if (StringDataStorage::setField(objID, field, value)) {
 			ReverseNameMap::iterator rit = mReverseMap.find(sit->second);
 			mReverseMap.erase(rit);
 			
@@ -98,11 +98,11 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	bool SymNamePropertyStorage::_createProp(int objID, const std::string& text) {
+	bool SymNamePropertyStorage::_create(int objID, const std::string& text) {
 		std::pair<ReverseNameMap::iterator, bool> res = mReverseMap.insert(std::make_pair(text, objID));
 		
 		if (res.second) {
-			if (StringPropertyStorage::_createProp(objID, text)) {
+			if (StringDataStorage::_create(objID, text)) {
 				return true;
 			}
 		}
@@ -130,7 +130,7 @@ namespace Opde {
 	
 	// --------------------------------------------------------------------------
 	void SymNamePropertyStorage::clear() {
-		StringPropertyStorage::clear();
+		StringDataStorage::clear();
 		mReverseMap.clear();
 	}
 };

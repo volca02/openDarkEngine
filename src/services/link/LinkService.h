@@ -62,7 +62,7 @@ namespace Opde {
 			* @param name The relation name
 			* @param type The type defining the data format for link data
 			* @param hidden The hidden relations (true) will not show up on public link list places */
-			RelationPtr createRelation(const std::string& name, DTypeDefPtr type, bool hidden);
+			RelationPtr createRelation(const std::string& name, const DTypeDefPtr& type, bool hidden);
 
 			/** Get relation given it's name
 			* @param name The relation's name
@@ -85,10 +85,10 @@ namespace Opde {
 			void objectDestroyed(int id);
 			
 			/** load links from a single database */
-			void load(FileGroupPtr db);
+			void load(const FileGroupPtr& db);
 
 			/** Saves the links and link data according to the saveMask */
-			void save(FileGroupPtr db, uint saveMask);
+			void save(const FileGroupPtr& db, uint saveMask);
 
 			/** Clears all the data and the relation mappings */
 			void clear();
@@ -112,7 +112,12 @@ namespace Opde {
 
             /** @see Relation::getLink */
 			LinkPtr getLink(link_id_t id) const;
-			
+
+			/// Name to Relation instance. The primary storage of Relation instances.
+			typedef std::map<std::string, RelationPtr> RelationNameMap;
+
+			/** @returns a link name iterator over all link type names (both inverse and normal ones) */
+			StringIteratorPtr getAllLinkNames();
 
 		protected:
             bool init();
@@ -124,13 +129,10 @@ namespace Opde {
 			* @param rel The relation instance to associate with that id
 			* @return false if conflict happened, true if all went ok, and new mapping is inserted (or already was registered)
 			*/
-			bool requestRelationFlavorMap(int id, const std::string& name, RelationPtr rel);
+			bool requestRelationFlavorMap(int id, const std::string& name, RelationPtr& rel);
 
 			typedef std::map<int, std::string> FlavorToName;
 			typedef std::map<std::string, int> NameToFlavor;
-
-			/// Name to Relation instance. The primary storage of Relation instances.
-			typedef std::map<std::string, RelationPtr> RelationNameMap;
 
 			/// ID to Relation instance. Secondary storage of Relation instances, mapped per request when loading
 			typedef std::map<int, RelationPtr> RelationIDMap;

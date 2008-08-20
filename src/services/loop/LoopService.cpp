@@ -288,7 +288,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void LoopService::setLoopMode(LoopModePtr newMode) {
+	void LoopService::setLoopMode(const LoopModePtr& newMode) {
 		mActiveMode = mNewLoopMode;
 	}
 	

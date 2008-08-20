@@ -53,7 +53,7 @@ namespace Opde {
 	}
 
 	//------------------------------------
-	void BinaryService::addType(const std::string& group, DTypeDefPtr def) {
+	void BinaryService::addType(const std::string& group, const DTypeDefPtr& def) {
 		LOG_DEBUG("BinaryService: Inserting type %s/%s", group.c_str(), def->name().c_str());
 
 		std::pair<TypeGroups::iterator, bool> grp = mTypeGroups.insert(TypeGroups::value_type(group, TypeMap()));
@@ -62,7 +62,7 @@ namespace Opde {
 	}
 
 	//------------------------------------
-	void BinaryService::addEnum(const std::string& group, const std::string& name, DEnumPtr enm) {
+	void BinaryService::addEnum(const std::string& group, const std::string& name, const DEnumPtr& enm) {
 		LOG_DEBUG("BinaryService: Inserting enum %s/%s", group.c_str(), name.c_str());
 
 		std::pair<EnumGroups::iterator, bool> grp = mEnumGroups.insert(EnumGroups::value_type(group, EnumMap()));

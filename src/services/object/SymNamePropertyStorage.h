@@ -30,7 +30,7 @@
 namespace Opde {
 	
 	/** A Bi-Directional unique string Symbolic name storage for symbolic names. Overrides the StringPropertyStorage. */
-	class SymNamePropertyStorage : public StringPropertyStorage {
+	class SymNamePropertyStorage : public StringDataStorage {
 		protected:
 			typedef std::map<std::string, int> ReverseNameMap;
 			
@@ -40,11 +40,11 @@ namespace Opde {
 			SymNamePropertyStorage();
 			virtual ~SymNamePropertyStorage();
 			
-			virtual bool destroyProp(int objID);
+			virtual bool destroy(int objID);
 			
-			virtual bool setPropField(int objID, const std::string& field, const DVariant& value);
+			virtual bool setField(int objID, const std::string& field, const DVariant& value);
 			
-			virtual bool _createProp(int objID, const std::string& text);
+			virtual bool _create(int objID, const std::string& text);
 			
 			virtual void clear();
 			
@@ -53,8 +53,9 @@ namespace Opde {
 			
 			/// Tester for name usage
 			bool nameUsed(const std::string& name);
-
 	};
+
+	typedef shared_ptr<SymNamePropertyStorage> SymNamePropertyStoragePtr;
 };
 
 #endif

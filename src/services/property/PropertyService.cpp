@@ -83,71 +83,30 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	PropertyGroupPtr PropertyService::createStructuredPropertyGroup(const std::string& name, const std::string& chunk_name, const DTypeDefPtr& type, std::string inheritorName) {
-		// create a property holder
-		PropertyStorage* storage;
-		
+	PropertyGroup* PropertyService::createPropertyGroup(const std::string& name, const std::string& chunkName, std::string inheritorName, const DataStoragePtr& storage, bool takeover) {
+		PropertyGroup* nr;
 		try {
-			storage = new StructuredPropertyStorage(type, false);
+			nr = new PropertyGroup(this, name, chunkName, storage, inheritorName);
 		} catch (...) {
-			OPDE_EXCEPT("Failed to create property storage for " + name,  "PropertyService::createPropertyGroup");
-		}
-		
-		// create the propert group
-		PropertyGroupPtr nr;
-		try {
-			nr = new PropertyGroup(this, name, chunk_name, storage, inheritorName, true);
-		} catch (...) {
-			delete storage;
-			
 			OPDE_EXCEPT("Failed to create property group for " + name,  "PropertyService::createPropertyGroup");
 		}
 		
 		std::pair<PropertyGroupMap::iterator, bool> res = mPropertyGroupMap.insert(make_pair(name, nr));
 
-		if (!res.second)
+		if (!res.second) {
+			delete nr;
+			
 			OPDE_EXCEPT("Failed to insert new instance of PropertyGroup, name already allocated : " + name,
 				    "PropertyService::createPropertyGroup");
-
-		LOG_INFO("PropertyService::createPropertyGroup: Created a property group %s (With chunk name %s)", name.c_str(), chunk_name.c_str());
+		}
+		
+		LOG_INFO("PropertyService::createPropertyGroup: Created a property group %s (With chunk name %s)", name.c_str(), chunkName.c_str());
 
 		return nr;
 	}
 	
 	// --------------------------------------------------------------------------
-	PropertyGroupPtr PropertyService::createStringPropertyGroup(const std::string& name, const std::string& chunk_name, std::string inheritorName) {
-		// create a property holder
-		PropertyStorage* storage;
-		
-		try {
-			storage = new StringPropertyStorage();
-		} catch (...) {
-			OPDE_EXCEPT("Failed to create property storage for " + name,  "PropertyService::createPropertyGroup");
-		}
-		
-		// create the propert group
-		PropertyGroupPtr nr;
-		try {
-			nr = new PropertyGroup(this, name, chunk_name, storage, inheritorName, true);
-		} catch (...) {
-			delete storage;
-			
-			OPDE_EXCEPT("Failed to create property group for " + name,  "PropertyService::createPropertyGroup");
-		}
-		
-		std::pair<PropertyGroupMap::iterator, bool> res = mPropertyGroupMap.insert(make_pair(name, nr));
-
-		if (!res.second)
-			OPDE_EXCEPT("Failed to insert new instance of PropertyGroup, name already allocated : " + name,
-				    "PropertyService::createPropertyGroup");
-
-		LOG_INFO("PropertyService::createPropertyGroup: Created a property group %s (With chunk name %s)", name.c_str(), chunk_name.c_str());
-
-		return nr;
-	}
-
-	// --------------------------------------------------------------------------
-	void PropertyService::load(FileGroupPtr db) {
+	void PropertyService::load(const FileGroupPtr& db) {
 		// We just give the db to all registered groups
 		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
 
@@ -162,7 +121,7 @@ namespace Opde {
 	}
 	
 	// --------------------------------------------------------------------------
-	void PropertyService::save(FileGroupPtr db, const BitArray& objMask) {
+	void PropertyService::save(const FileGroupPtr& db, const BitArray& objMask) {
 		// We just give the db to all registered groups
 		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
 
@@ -186,7 +145,7 @@ namespace Opde {
 	}
 	
 	// --------------------------------------------------------------------------
-	PropertyGroupPtr PropertyService::getPropertyGroup(const std::string& name) {
+	PropertyGroup* PropertyService::getPropertyGroup(const std::string& name) {
 	    PropertyGroupMap::iterator it = mPropertyGroupMap.find(name);
 
 		if (it != mPropertyGroupMap.end()) {
@@ -198,9 +157,9 @@ namespace Opde {
 	
 	// --------------------------------------------------------------------------
 	bool PropertyService::has(int obj_id, const std::string& propName) {
-		PropertyGroupPtr prop = getPropertyGroup(propName);
+		PropertyGroup* prop = getPropertyGroup(propName);
 		
-		if (!prop.isNull()) {
+		if (prop != NULL) {
 			return prop->has(obj_id);
 		}
 		
@@ -209,9 +168,9 @@ namespace Opde {
     
 	// --------------------------------------------------------------------------
     bool PropertyService::owns(int obj_id, const std::string& propName) {
-		PropertyGroupPtr prop = getPropertyGroup(propName);
+		PropertyGroup* prop = getPropertyGroup(propName);
 		
-		if (!prop.isNull()) {
+		if (prop != NULL) {
 			return prop->owns(obj_id);
 		}
 		
@@ -220,9 +179,9 @@ namespace Opde {
     
 	// --------------------------------------------------------------------------
     bool PropertyService::set(int obj_id, const std::string& propName, const std::string& propField, const DVariant& value) {
-		PropertyGroupPtr prop = getPropertyGroup(propName);
+		PropertyGroup* prop = getPropertyGroup(propName);
 		
-		if (!prop.isNull()) {
+		if (prop != NULL) {
 			return prop->set(obj_id, propField, value);
 		}
 		
@@ -232,9 +191,9 @@ namespace Opde {
 	
 	// --------------------------------------------------------------------------
 	bool PropertyService::get(int obj_id, const std::string& propName, const std::string& propField, DVariant& target) {
-		PropertyGroupPtr prop = getPropertyGroup(propName);
+		PropertyGroup* prop = getPropertyGroup(propName);
 		
-		if (!prop.isNull()) {
+		if (prop != NULL) {
 			return prop->get(obj_id, propField, target);
 		}
 		

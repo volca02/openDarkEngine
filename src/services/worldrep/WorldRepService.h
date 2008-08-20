@@ -71,7 +71,7 @@ namespace Opde {
 			* @note name is formed from FAMILY and NAME like this: FAMILY/NAME or NAME (for no-family textures) */
 			Ogre::String getMaterialName(int mat_index);
 
-            void addWorldMaterial(const Ogre::MaterialPtr material);
+            void addWorldMaterial(const Ogre::MaterialPtr& material);
             
             // Texture scale getter (for custom texture overrides)
             std::pair<float, float> getTextureScale(const std::string& txtName);
@@ -95,18 +95,18 @@ namespace Opde {
 			void loadFromChunk(FilePtr& wrChunk, int lightSize);
 
 			/** Sets sky box according to the SKYMODE chunk contents. Does not do NewSky */
-			void setSkyBox(FileGroupPtr db);
+			void setSkyBox(const FileGroupPtr& db);
 
 			/** A failback method, which construct a default-valued material, if a material script for a certain family/texture was not found */
 			void createStandardMaterial(std::string matName, std::string textureName, std::string resourceGroup);
 
 			/** Called by loadMaterials. Load the FLOW_TEX and initializes \@templateXXXX according to IN and OUT texture numbers and names. Needs material definitions
 			* named water/AAAA_in and water/AAAA_out where AAAA is the expected flow texture name (usualy bl, gr, l2, l3, l4) */
-			void loadFlowTextures(FileGroupPtr db);
+			void loadFlowTextures(const FileGroupPtr& db);
 
 			/** Internal method which loads the textures from the dark database definitions. Families, textures and flowgroups
 			* Texture preparation - prepares materials in the form of \@templateXXXX where XXXX is the texture number */
-			void loadMaterials(FileGroupPtr db);
+			void loadMaterials(const FileGroupPtr& db);
 
 			/** Internal method. Creates a BspNode instance tree, and supplies it to the sceneManager */
 			void createBSP(unsigned int BspRows, wr_BSP_node_t *tree);

@@ -106,7 +106,7 @@ namespace Opde {
 	}
 
 
-    void WorldRepService::addWorldMaterial(const MaterialPtr material) {
+    void WorldRepService::addWorldMaterial(const MaterialPtr& material) {
         mLoadedMaterials.push_back(material);
     }
 
@@ -144,7 +144,7 @@ namespace Opde {
 	}
 
 
-	void WorldRepService::setSkyBox(FileGroupPtr db) {
+	void WorldRepService::setSkyBox(const FileGroupPtr& db) {
 		FilePtr skyChunk = db->getFile("SKYMODE");
 
 		if (!skyChunk.isNull()) { // Thief1 sky. Thief2 has NewSky. Will need to make a custom scene node for this.
@@ -447,7 +447,7 @@ namespace Opde {
 
 	//-----------------------------------------------------------------------
 	// TODO: Move this into texture/flow service
-	void WorldRepService::loadFlowTextures(FileGroupPtr db) {
+	void WorldRepService::loadFlowTextures(const FileGroupPtr& db) {
 		// Load the TXLIST chunk from the resource mission file.
 		Opde::FilePtr flow_tex;
 		try {
@@ -603,7 +603,7 @@ namespace Opde {
 	}
 
 	// ---------------------------------------------------------------------
-	void WorldRepService::loadMaterials(FileGroupPtr db) {
+	void WorldRepService::loadMaterials(const FileGroupPtr& db) {
 		if (!db->hasFile("TXLIST"))
 			throw Exception(Exception::ERR_ITEM_NOT_FOUND,
 				"Mission file does not contain Texture list chunk (TXLIST)",

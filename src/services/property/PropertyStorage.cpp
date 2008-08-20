@@ -29,44 +29,88 @@ using namespace std;
 
 namespace Opde {
 	// --------------------------------------------------------------------------
-	// --------------- Default Property Storage ---------------------------------
+	// --------------- Various utility classes ----------------------------------
+	// --------------------------------------------------------------------------
+	DTypeDefFieldDesc::DTypeDefFieldDesc(const DTypeDefPtr& type) {
+		// prepare the list
+		DTypeDef::const_iterator it = type->begin();
+		
+		while (it != type->end()) {
+			const DTypeDef::FieldDef& fd = *(it++);
+			
+			DataFieldDesc dfd;
+			dfd.name = fd.name;
+			dfd.size = fd.type->size();
+			dfd.type = fd.type->getDataType();
+			dfd.enumerator = fd.type->getEnum().ptr();
+			
+			mDataFieldDescList.push_back(dfd);
+		}
+	}
+	
+	DataFieldDescIteratorPtr DTypeDefFieldDesc::getIterator() {
+		return new DataFieldDescListIterator(mDataFieldDescList);
+	}
+	
+	/// iterator over a single DataFieldDesc element. Useful for single-fielded properties, such as varstr properties
+	class SingleFieldDescIterator : public DataFieldDescIterator {
+	    public:
+            SingleFieldDescIterator(const DataFieldDesc& desc) : mDesc(desc), mEnd(false) {};
+            
+            virtual const DataFieldDesc& next() { assert(!mEnd); mEnd = true; return mDesc; };
+            
+            virtual bool end() const { std::cerr << "SFDI " << this << " " << mEnd << std::endl; return mEnd; };
+            
+        protected:
+            const DataFieldDesc& mDesc;
+            bool mEnd;
+	};
+	
+	// --------------------------------------------------------------------------
+	// --------------- Structured Data Storage (DType based) --------------------
 	// --------------------------------------------------------------------------
 
-	StructuredPropertyStorage::StructuredPropertyStorage(const DTypeDefPtr& type, bool useDataCache) : 
+	StructuredDataStorage::StructuredDataStorage(const DTypeDefPtr& type, bool useDataCache) : 
 		mTypeDef(type), 
-		mUseDataCache(useDataCache) {
+		mUseDataCache(useDataCache),
+		mFieldDesc(type) {
+			
+		
 	}
 	
 	// --------------------------------------------------------------------------
-	bool StructuredPropertyStorage::isEmpty() {
-		return mPropertyMap.empty();
+	bool StructuredDataStorage::isEmpty() {
+		return mDataMap.empty();
 	}
 
 	// --------------------------------------------------------------------------
-	void StructuredPropertyStorage::clear() {
-		mPropertyMap.clear();
+	void StructuredDataStorage::clear() {
+		mDataMap.clear();
 	}
 
 	// --------------------------------------------------------------------------
-	bool StructuredPropertyStorage::readFromFile(FilePtr& file, int objID) {
-		PropertyDataPtr pd = getPropForObject(objID);
+	bool StructuredDataStorage::readFromFile(FilePtr& file, int objID, bool sizeStored) {
+		DTypePtr pd = getDataForObject(objID);
 		
 		if (pd.isNull()) {
 			uint32_t size;
 			
 			// Read the size
-			file->readElem(&size, sizeof(uint32_t));
+			if (sizeStored)
+				file->readElem(&size, sizeof(uint32_t));
+			else
+				size = mTypeDef->size();
 			
 			// compare sizes
 			if (size != mTypeDef->size())
-				LOG_ERROR("Property size mismatch: %d definition, %d file source", mTypeDef->size(), size);
+				LOG_ERROR("Data size mismatch: %d definition, %d file source", mTypeDef->size(), size);
 			
-			// create a new property data
-			pd = _createProp(objID);
+			// create a new data
+			pd = _create(objID);
 
 			pd->read(file, size);
 			
-			mPropertyMap.insert(std::make_pair(objID, pd));
+			mDataMap.insert(std::make_pair(objID, pd));
 			
 			return true;
 		} else {
@@ -78,21 +122,22 @@ namespace Opde {
 			
 			file->seek(size, File::FSEEK_CUR);
 			
-			LOG_ERROR("Property already defined for object %d", objID);
+			LOG_ERROR("Data already defined for object %d", objID);
 		}
 		
 		return false;
 	}
 
 	// --------------------------------------------------------------------------
-	bool StructuredPropertyStorage::writeToFile(FilePtr& file, int objID)	{
-		PropertyDataPtr pd = getPropForObject(objID);
+	bool StructuredDataStorage::writeToFile(FilePtr& file, int objID, bool sizeStored)	{
+		DTypePtr pd = getDataForObject(objID);
 		
 		if (!pd.isNull()) {
 			uint32_t size = pd->size();
 			
 			// Write the size
-			file->writeElem(&size, sizeof(uint32_t));
+			if (sizeStored)
+				file->writeElem(&size, sizeof(uint32_t));
 			
 			// write the data itself
 			pd->serialize(file);
@@ -104,8 +149,8 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	bool StructuredPropertyStorage::setPropField(int objID, const std::string& field, const DVariant& value) {
-		PropertyDataPtr pd = getPropForObject(objID);
+	bool StructuredDataStorage::setField(int objID, const std::string& field, const DVariant& value) {
+		DTypePtr pd = getDataForObject(objID);
 		
 		if (!pd.isNull()) {
 			// delegate to pd to set the field
@@ -118,8 +163,8 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	bool StructuredPropertyStorage::getPropField(int objID, const std::string& field, DVariant& target) {
-		PropertyDataPtr pd = getPropForObject(objID);
+	bool StructuredDataStorage::getField(int objID, const std::string& field, DVariant& target) {
+		DTypePtr pd = getDataForObject(objID);
 		
 		if (!pd.isNull()) {
 			// delegate to pd to get the field val.
@@ -133,34 +178,34 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------	
-	bool StructuredPropertyStorage::hasProp(int objID) {
-		PropertyMap::iterator it = mPropertyMap.find(objID);
+	bool StructuredDataStorage::has(int objID) {
+		DataMap::iterator it = mDataMap.find(objID);
 		
-		return (it != mPropertyMap.end());
+		return (it != mDataMap.end());
 	}
 	
 	// --------------------------------------------------------------------------	
-	bool StructuredPropertyStorage::cloneProp(int srcID, int dstID) {
+	bool StructuredDataStorage::clone(int srcID, int dstID) {
 		// clone prop data
-		if (!hasProp(srcID) || hasProp(dstID))
+		if (!has(srcID) || has(dstID))
 			return false;
 			
-		PropertyDataPtr pd = getPropForObject(srcID);
+		DTypePtr pd = getDataForObject(srcID);
 		
-		PropertyDataPtr nd = new PropertyData(dstID, *pd, mUseDataCache);
+		DTypePtr nd = new DType(*pd, mUseDataCache);
 		
 		// insert into map for the new object
-		std::pair<PropertyMap::iterator, bool> res  = mPropertyMap.insert(std::make_pair(dstID, nd));
+		std::pair<DataMap::iterator, bool> res  = mDataMap.insert(std::make_pair(dstID, nd));
 			
 		return res.second;
 	}
 
 	// --------------------------------------------------------------------------
-	bool StructuredPropertyStorage::destroyProp(int objID) {
-		PropertyMap::iterator it = mPropertyMap.find(objID);
+	bool StructuredDataStorage::destroy(int objID) {
+		DataMap::iterator it = mDataMap.find(objID);
 		
-		if (it != mPropertyMap.end()) {
-			mPropertyMap.erase(it);
+		if (it != mDataMap.end()) {
+			mDataMap.erase(it);
 			return true;
 		}
 		
@@ -168,18 +213,18 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	bool StructuredPropertyStorage::createProp(int objID) {
-		return !(_createProp(objID).isNull());
+	bool StructuredDataStorage::create(int objID) {
+		return !(_create(objID).isNull());
 	}
 	
 	// --------------------------------------------------------------------------
-	PropertyDataPtr StructuredPropertyStorage::_createProp(int objID) {
-		PropertyMap::iterator it = mPropertyMap.find(objID);
+	DTypePtr StructuredDataStorage::_create(int objID) {
+		DataMap::iterator it = mDataMap.find(objID);
 		
-		if (it == mPropertyMap.end()) {
-			PropertyDataPtr propd = new PropertyData(objID, mTypeDef, mUseDataCache);
+		if (it == mDataMap.end()) {
+			DTypePtr propd = new DType(mTypeDef, mUseDataCache);
 			
-			mPropertyMap.insert(std::make_pair(objID, propd));
+			mDataMap.insert(std::make_pair(objID, propd));
 			
 			return propd;
 		}
@@ -188,15 +233,15 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------	
-	IntIteratorPtr StructuredPropertyStorage::getAllStoredObjects() {
-		return new PropertyDataKeyIterator(mPropertyMap);
+	IntIteratorPtr StructuredDataStorage::getAllStoredObjects() {
+		return new DataKeyIterator(mDataMap);
 	}
 	
 	// --------------------------------------------------------------------------
-	PropertyDataPtr StructuredPropertyStorage::getPropForObject(int objID) {
-		PropertyMap::iterator it = mPropertyMap.find(objID);
+	DTypePtr StructuredDataStorage::getDataForObject(int objID) {
+		DataMap::iterator it = mDataMap.find(objID);
 		
-		if (it != mPropertyMap.end()) {
+		if (it != mDataMap.end()) {
 			return it->second;
 		} else {
 			return NULL;
@@ -204,19 +249,29 @@ namespace Opde {
 	}
 	
 	// --------------------------------------------------------------------------
-	// --------------- String Property Storage ----------------------------------
-	// --------------------------------------------------------------------------
-	StringPropertyStorage::StringPropertyStorage() {
-	}
-
-	// --------------------------------------------------------------------------
-	bool StringPropertyStorage::createProp(int objID) {
-		return _createProp(objID, "");
+	DataFieldDescIteratorPtr StructuredDataStorage::getFieldDescIterator(void) {
+		// return our pre-prepared field desc iterator
+		return mFieldDesc.getIterator();
 	}
 	
 	// --------------------------------------------------------------------------
-	bool StringPropertyStorage::destroyProp(int objID) {
-		StringPropertyMap::iterator it = mStringPropMap.find(objID);
+	// --------------- String Data Storage --------------------------------------
+	// --------------------------------------------------------------------------
+	StringDataStorage::StringDataStorage() {
+	    mFieldDesc.enumerator = NULL;
+	    mFieldDesc.name = "";
+	    mFieldDesc.size = -1;
+	    mFieldDesc.type = DVariant::DV_STRING;
+	}
+
+	// --------------------------------------------------------------------------
+	bool StringDataStorage::create(int objID) {
+		return _create(objID, "");
+	}
+	
+	// --------------------------------------------------------------------------
+	bool StringDataStorage::destroy(int objID) {
+		StringDataMap::iterator it = mStringPropMap.find(objID);
 		
 		if (it != mStringPropMap.end()) {
 			mStringPropMap.erase(it);
@@ -229,18 +284,18 @@ namespace Opde {
 	}
 	
 	// --------------------------------------------------------------------------
-	bool StringPropertyStorage::hasProp(int objID) {
-		StringPropertyMap::iterator it = mStringPropMap.find(objID);
+	bool StringDataStorage::has(int objID) {
+		StringDataMap::iterator it = mStringPropMap.find(objID);
 		
 		return (it != mStringPropMap.end());
 	}
 	
 	// --------------------------------------------------------------------------
-	bool StringPropertyStorage::cloneProp(int srcID, int dstID) {
-		StringPropertyMap::iterator it = mStringPropMap.find(srcID);
+	bool StringDataStorage::clone(int srcID, int dstID) {
+		StringDataMap::iterator it = mStringPropMap.find(srcID);
 		
 		if (it != mStringPropMap.end()) {
-			std::pair<StringPropertyMap::iterator, bool> res = mStringPropMap.insert(std::make_pair(dstID, it->second));
+			std::pair<StringDataMap::iterator, bool> res = mStringPropMap.insert(std::make_pair(dstID, it->second));
 			
 			return res.second;
 		}
@@ -249,10 +304,10 @@ namespace Opde {
 	}
 	
 	// --------------------------------------------------------------------------
-	bool StringPropertyStorage::getPropField(int objID, const std::string& field, DVariant& target) {
+	bool StringDataStorage::getField(int objID, const std::string& field, DVariant& target) {
 		assert(field=="");
 		
-		StringPropertyMap::iterator it = mStringPropMap.find(objID);
+		StringDataMap::iterator it = mStringPropMap.find(objID);
 		
 		if (it != mStringPropMap.end()) {
 			target = it->second;
@@ -264,10 +319,10 @@ namespace Opde {
 	}
 	
 	// --------------------------------------------------------------------------
-	bool StringPropertyStorage::setPropField(int objID, const std::string& field, const DVariant& value) {
+	bool StringDataStorage::setField(int objID, const std::string& field, const DVariant& value) {
 		assert(field=="");
 		
-		StringPropertyMap::iterator it = mStringPropMap.find(objID);
+		StringDataMap::iterator it = mStringPropMap.find(objID);
 		
 		if (it != mStringPropMap.end()) {
 			it->second = value.toString();
@@ -279,8 +334,8 @@ namespace Opde {
 	}
 	
 	// --------------------------------------------------------------------------
-	bool StringPropertyStorage::writeToFile(FilePtr& file, int objID) {
-		StringPropertyMap::iterator it = mStringPropMap.find(objID);
+	bool StringDataStorage::writeToFile(FilePtr& file, int objID, bool sizeStored) {
+		StringDataMap::iterator it = mStringPropMap.find(objID);
 		
 		if (it != mStringPropMap.end()) {
 			const std::string& str = it->second;
@@ -289,7 +344,8 @@ namespace Opde {
 			uint32_t outer_size = size + sizeof(uint32_t);
 			
 			// Write the size (first size is the size of the string + 4 bytes of the internal size)
-			file->writeElem(&outer_size, sizeof(uint32_t));
+			if (sizeStored)
+				file->writeElem(&outer_size, sizeof(uint32_t));
 			
 			file->writeElem(&size, sizeof(uint32_t));
 			
@@ -303,15 +359,20 @@ namespace Opde {
 	}
 	
 	// --------------------------------------------------------------------------
-	bool StringPropertyStorage::readFromFile(FilePtr& file, int objID) {
-		StringPropertyMap::iterator it = mStringPropMap.find(objID);
+	bool StringDataStorage::readFromFile(FilePtr& file, int objID, bool sizeStored) {
+		StringDataMap::iterator it = mStringPropMap.find(objID);
 		
 		if (it == mStringPropMap.end()) {
 			uint32_t outer_size, size;
 			
-			file->readElem(&outer_size, sizeof(uint32_t));
+			if (sizeStored)
+				file->readElem(&outer_size, sizeof(uint32_t));
+			
 			file->readElem(&size, sizeof(uint32_t));
 			
+			if (!sizeStored)
+				outer_size = size - sizeof(uint32_t);
+				
 			assert(outer_size == (size + sizeof(uint32_t)));
 			
 			// prepare the string temp buffer
@@ -323,7 +384,7 @@ namespace Opde {
 			
 			std::string sobj(str);
 			
-			_createProp(objID, sobj);
+			_create(objID, sobj);
 			
 			delete[] str;
 			
@@ -335,32 +396,41 @@ namespace Opde {
 			file->readElem(&size, sizeof(uint32_t));
 			file->seek(size, File::FSEEK_CUR);
 			
-			LOG_ERROR("Property (str) already defined for object %d", objID);
+			LOG_ERROR("Data (str) already defined for object %d", objID);
 		}
 		
 		return false;
 	}
 
 	// --------------------------------------------------------------------------
-	bool StringPropertyStorage::_createProp(int objID, const std::string& text) {
-		std::pair<StringPropertyMap::iterator, bool> res = mStringPropMap.insert(std::make_pair(objID, text));
+	bool StringDataStorage::_create(int objID, const std::string& text) {
+		std::pair<StringDataMap::iterator, bool> res = mStringPropMap.insert(std::make_pair(objID, text));
 		
 		return res.second;
 	}
 	
 	// --------------------------------------------------------------------------
-	void StringPropertyStorage::clear() {
+	void StringDataStorage::clear() {
 		mStringPropMap.clear();
 	}
 	
 	// --------------------------------------------------------------------------
-	bool StringPropertyStorage::isEmpty() {
+	bool StringDataStorage::isEmpty() {
 		return mStringPropMap.empty();
 	}
 	
 	// --------------------------------------------------------------------------
-	IntIteratorPtr StringPropertyStorage::getAllStoredObjects() {
-		return new StringPropertyMapKeyIterator(mStringPropMap);
+	IntIteratorPtr StringDataStorage::getAllStoredObjects() {
+		return new StringDataMapKeyIterator(mStringPropMap);
 	}
 
+    // --------------------------------------------------------------------------
+    DataFieldDescIteratorPtr StringDataStorage::getFieldDescIterator(void) {
+        return new SingleFieldDescIterator(mFieldDesc);
+    }
+
+	// --------------------------------------------------------------------------
+	// --------------- Bool Data Storage ----------------------------------------
+	// --------------------------------------------------------------------------
+	
 }

@@ -93,22 +93,22 @@ namespace Opde {
 		// one thanks to the shared_ptr. This means using the scene manager/whatever
 		// is safe outside this class as long as it is done in a service which has 
 		// a member pointer to render service
-		if (!mPropPosition.isNull())
+		if (mPropPosition != NULL)
 		    mPropPosition->unregisterListener(mPropPositionListenerID);
 
-		if (!mPropModelName.isNull())
+		if (mPropModelName != NULL)
 		    mPropModelName->unregisterListener(mPropModelNameListenerID);
 		    
-		if (!mPropLight.isNull())
+		if (mPropLight != NULL)
 		    mPropLight->unregisterListener(mPropLightListenerID);
 		    
-		if (!mPropSpotlight.isNull())
+		if (mPropSpotlight != NULL)
 		    mPropSpotlight->unregisterListener(mPropSpotlightListenerID);
 		    
-		if (!mPropRenderType.isNull())
+		if (mPropRenderType != NULL)
 		    mPropRenderType->unregisterListener(mPropRenderTypeListenerID);
 		    
-		if (!mPropScale.isNull())
+		if (mPropScale != NULL)
 		    mPropScale->unregisterListener(mPropScaleListenerID);
 
 		if (mRenderWindow)
@@ -263,7 +263,7 @@ namespace Opde {
 		// --- Model name listener
 		mPropModelName = mPropertyService->getPropertyGroup("ModelName"); 
 
-		if (mPropModelName.isNull())
+		if (mPropModelName == NULL)
             OPDE_EXCEPT("Could not get ModelName property group. Not defined. (Did you forget to load .pldef the scripts?)", "RenderService::bootstrapFinished");
 
 		mPropModelNameListenerID = mPropModelName->registerListener(cmodelc);
@@ -271,7 +271,7 @@ namespace Opde {
 		// --- Light property listener
 		mPropLight = mPropertyService->getPropertyGroup("Light"); 
 
-		if (mPropLight.isNull())
+		if (mPropLight == NULL)
             OPDE_EXCEPT("Could not get Light property group. Not defined. (Did you forget to load .pldef the scripts?)", "RenderService::bootstrapFinished");
 
 		mPropLightListenerID = mPropLight->registerListener(clightc);
@@ -279,7 +279,7 @@ namespace Opde {
 		// --- SpotLight property listener
 		mPropSpotlight = mPropertyService->getPropertyGroup("Spotlight"); 
 
-		if (mPropSpotlight.isNull())
+		if (mPropSpotlight == NULL)
             OPDE_EXCEPT("Could not get Spotlight property group. Not defined. (Did you forget to load .pldef the scripts?)", "RenderService::bootstrapFinished");
 
 		mPropSpotlightListenerID = mPropSpotlight->registerListener(cspotlightc);
@@ -287,7 +287,7 @@ namespace Opde {
 		// --- Position property listener
 		mPropPosition = mPropertyService->getPropertyGroup("Position");
 
-		if (mPropPosition.isNull())
+		if (mPropPosition == NULL)
             OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "RenderService::bootstrapFinished");
 
 		// listener to the position property to control the scenenode
@@ -299,7 +299,7 @@ namespace Opde {
 		// --- Scale property listener
 		mPropScale = mPropertyService->getPropertyGroup("ModelScale");
 
-		if (mPropScale.isNull())
+		if (mPropScale == NULL)
             OPDE_EXCEPT("Could not get Scale property group. Not defined. Fatal", "RenderService::bootstrapFinished");
 
 		PropertyGroup::ListenerPtr cscalec =
@@ -310,7 +310,7 @@ namespace Opde {
 		// --- Render type property listener
 		mPropRenderType = mPropertyService->getPropertyGroup("RenderType");
 
-		if (mPropRenderType.isNull())
+		if (mPropRenderType == NULL)
             OPDE_EXCEPT("Could not get RenderType property group. Not defined. Fatal", "RenderService::bootstrapFinished");
 
 		PropertyGroup::ListenerPtr crtc =
@@ -321,13 +321,16 @@ namespace Opde {
 		// --- Render alpha property listener
 		mPropRenderAlpha = mPropertyService->getPropertyGroup("RenderAlpha");
 
-		if (mPropRenderAlpha.isNull())
+		if (mPropRenderAlpha == NULL)
             OPDE_EXCEPT("Could not get RenderAlpha property group. Not defined. Fatal", "RenderService::bootstrapFinished");
 
 		PropertyGroup::ListenerPtr crac =
 			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropRenderAlphaMsg);
 
 		mPropRenderAlphaListenerID = mPropRenderAlpha->registerListener(crac);
+
+		// TODO: The hardcoded z-bias is doing problems, unsurprisingly
+		// to fix this, we should create a handler for that property
 
 		// ===== OBJECT SERVICE LISTENER =====
 		mObjectService = ServiceManager::getSingleton().getService("ObjectService").as<ObjectService>();
@@ -791,6 +794,7 @@ namespace Opde {
 		setNodeRenderType(node, ei);
 		
 		ei.emi->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+		// ei.emi->setSceneBlending(SBT_MODULATE);
 
 		
 		mEntityMap.insert(make_pair(id, ei));

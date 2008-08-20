@@ -51,19 +51,19 @@ namespace Opde {
 			* @param def The type definition to insert (the used name is taken from it)
 			* @note Do release() the def if you do not intend to further use it once registered here
 			*/
-			void addType(const std::string& group, DTypeDefPtr def);
+			void addType(const std::string& group, const DTypeDefPtr& def);
 
 			/** Add a enumeration definition to a certain group (or global, if group=="") */
-			void addEnum(const std::string& group, const std::string& name, DEnumPtr enm);
+			void addEnum(const std::string& group, const std::string& name, const DEnumPtr& enm);
 
 			/** Add a type definition to the global definitions
 			* @param def The type definition to insert (the used name is taken from it)
 			* @see addType(const std::string&,DTypeDef)
 			*/
-			inline void addType(DTypeDefPtr def) { addType("", def); };
+			inline void addType(const DTypeDefPtr& def) { addType("", def); };
 
 			/** Add a type definition to the global definitions */
-			inline void addEnum(const std::string& name, DEnumPtr enm) { addEnum("", name, enm); };
+			inline void addEnum(const std::string& name, const DEnumPtr& enm) { addEnum("", name, enm); };
 
 			/** get the type definition of a type.
 			* @param name The type name, in form "Name" or "Group/Name"

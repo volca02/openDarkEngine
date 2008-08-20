@@ -101,10 +101,12 @@ namespace Opde {
 	    // It may so happen that the init() was not called...
 	    if (!mMetaPropRelation.isNull())
             mMetaPropRelation->unregisterListener(mMetaPropListenerID);
+            
+		mInheritors.clear(); // sufficient - the smart_ptrs will delete
 	}
 
     //------------------------------------------------------
-    void InheritService::addInheritorFactory(InheritorFactoryPtr factory) {
+    void InheritService::addInheritorFactory(const InheritorFactoryPtr& factory) {
         mInheritorFactoryMap.insert(make_pair(factory->getName(), factory));
     }
 
@@ -347,7 +349,7 @@ namespace Opde {
 	}
 	
     //------------------------------------------------------
-    void InheritService::_addLink(LinkPtr link, unsigned int priority) {
+    void InheritService::_addLink(const LinkPtr& link, unsigned int priority) {
         // It works like this. link.src() is the target for inheritance, link.dst() is the source for inheritance
         InheritLinkPtr ilp = new InheritLink;
 
@@ -375,7 +377,7 @@ namespace Opde {
     }
 
     //------------------------------------------------------
-    void InheritService::_changeLink(LinkPtr link, unsigned int priority) {
+    void InheritService::_changeLink(const LinkPtr& link, unsigned int priority) {
         // Modify priority of the link
         InheritMap::iterator it = mInheritSources.find(link->dst());
 
@@ -389,7 +391,7 @@ namespace Opde {
     }
 
     //------------------------------------------------------
-    void InheritService::_removeLink(LinkPtr link) {
+    void InheritService::_removeLink(const LinkPtr& link) {
         InheritMap::iterator it = mInheritSources.find(link->dst());
 
         if (it != mInheritSources.end()) {

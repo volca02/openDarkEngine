@@ -52,13 +52,19 @@ namespace Opde {
 			* @param ver_maj The major version of the chunk that stores this property
 			* @param ver_min The minor version of the chunk that stores this property
 			*/
-			PropertyGroup(PropertyService* owner, const std::string& name, const std::string& chunk_name, PropertyStorage* storage, std::string inheritorName, bool deleteStorageOnDestroy);
+			PropertyGroup(PropertyService* owner, const std::string& name, const std::string& chunk_name, const DataStoragePtr& storage, std::string inheritorName);
 
 			/** Setter for the property chunk version */
 			inline void setChunkVersions(uint verMaj, uint verMin) {
 				mVerMaj = verMaj;
 				mVerMin = verMin;
 			};
+			
+			/** gets the major version of the chunk */
+			inline uint getChunkVersionMajor(void) { return mVerMaj; };
+			
+			/** gets the minor version of the chunk */
+			inline uint getChunkVersionMinor(void) { return mVerMin; };
 
 			/** Destructor */
 			virtual ~PropertyGroup();
@@ -73,7 +79,7 @@ namespace Opde {
 			* @param propStorage The new storage for properties
 			* @warning This should not be used when the property group holds some data
 			*/
-			virtual void setPropertyStorage(PropertyStorage* newStorage, bool deleteOnDestroy = false);
+			virtual void setPropertyStorage(const DataStoragePtr& newStorage);
 			
 
 			/// Name getter. Returns the name of property this group manages
@@ -100,18 +106,18 @@ namespace Opde {
 			* @note Will return false if the object only inherits the property, but does not own it (use has for that)
 			*/
 			bool owns(int obj_id) const {
-				return mPropertyStorage->hasProp(obj_id);
+				return mPropertyStorage->has(obj_id);
 			}
 
 			/** Loads properties from a file group
 			* @param db The database to load from */
-			void load(FileGroupPtr db);
+			void load(const FileGroupPtr& db);
 
 			/** Saves properties to a file group
 			* @param db The database to save to
 			* @param objMask The BitArray of objects to be saved
 			*/
-			void save(FileGroupPtr db, const BitArray& objMask);
+			void save(const FileGroupPtr& db, const BitArray& objMask);
 
 			/** Clears the whole property group.
 			* Clears out all the properties, and broadcasts PROP_GROUP_CLEARED
@@ -158,15 +164,12 @@ namespace Opde {
 			
 			/** Notification that an object was destroyed. @see PropertyService::objectDestroyed */
 			void objectDestroyed(int id);
-			
-			/** Sets the property group to cache data (caches fields so no direct to/from data will be used on loading) 
-			* @param cache if true, writes will set a the value in a cache as well, and reads will search cache first
-			* @todo Reflect this into property storage
+
+			/** @return A reference to const DataFieldDesc iterator, usable for data description, automatic gui composition, etc.
+			* Internally, this is just a wrapper around getFieldDescIterator call to PropertyStorage.
+			* @todo It should be decided if it is guaranteed to have this iterator in a storable quality - if it could be used to load/save data.
 			*/
-			void setCacheData(bool cache) { mUseDataCache = cache; };
-			
-			/** @return true if cache for data is used, false otherwise */
-			bool getCacheData() { return mUseDataCache; };
+			DataFieldDescIteratorPtr getFieldDescIterator(void);
 
 		protected:
 			/** Does the internal handling related to the creation of a property for object
@@ -203,14 +206,8 @@ namespace Opde {
 			/// Inheritor value changes listener
 			Inheritor::ListenerID mInheritorListenerID;
 			
-			/// If true, data caching will be used
-			bool mUseDataCache;
-			
 			/// Property storage used to store data for the property
-			PropertyStorage* mPropertyStorage;
-			
-			/// True if the property storage should be deleted upon property group destruction
-			bool mDeletePropStorageOnDestroy;
+			DataStoragePtr mPropertyStorage;
 			
 			/// Owner service
 			PropertyService* mOwner;
@@ -220,7 +217,7 @@ namespace Opde {
 	};
 
 	/// Shared pointer to property group
-	typedef shared_ptr<PropertyGroup> PropertyGroupPtr;
+	// typedef shared_ptr<PropertyGroup> PropertyGroupPtr;
 
 }
 

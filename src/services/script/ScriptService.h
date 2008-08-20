@@ -63,7 +63,9 @@ namespace Opde {
             /// Creates a new object script for object id object_id
             virtual ObjectScriptPtr createScript(int object_id, const std::string& name);
 
-            /// Returns a std::set of script types that are handled by this module
+            /** Returns a std::set of script types that are handled by this module
+            * @todo this should rather return a StringIteratorPtr
+            */
             virtual std::set<std::string> getScriptNames();
 
             /// Returns script module name. Should be the same as the filename
@@ -106,7 +108,7 @@ namespace Opde {
             void runScript(const std::string& filename);
 
             /// registers a new object script module. Will live registered until an event does unload of database data
-            void addObjectScriptModule(ObjectScriptModulePtr module);
+            void addObjectScriptModule(const ObjectScriptModulePtr& module);
 
 		protected:
             bool init();
@@ -119,7 +121,7 @@ namespace Opde {
             ScriptModuleList mScriptModules;
             ScriptNameToModule mScriptNameMap;
 
-            void mapModuleScriptName(ObjectScriptModulePtr mod, std::string name);
+            void mapModuleScriptName(const ObjectScriptModulePtr& mod, const std::string& name);
 	};
 
 	/// Shared pointer to script service

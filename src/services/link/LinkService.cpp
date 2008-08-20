@@ -28,6 +28,33 @@
 using namespace std;
 
 namespace Opde {
+	/// helper string iterator over map keys
+	class RelationNameMapKeyIterator : public StringIterator {
+		public:
+			RelationNameMapKeyIterator(LinkService::RelationNameMap& relationMap) :
+                            mRelationMap(relationMap) {
+				mIter = mRelationMap.begin();
+				mEnd = mRelationMap.end();
+            }
+
+            virtual const std::string& next() {
+				assert(!end());
+				
+				const std::string& s = mIter->first;
+
+				++mIter;
+
+				return s;
+            }
+
+            virtual bool end() const {
+                return (mIter == mEnd);
+            }
+
+        protected:
+			LinkService::RelationNameMap::iterator mIter, mEnd;
+            LinkService::RelationNameMap& mRelationMap;
+	};
 
 	/*----------------------------------------------------*/
 	/*-------------------- LinkService -------------------*/
@@ -57,7 +84,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void LinkService::load(FileGroupPtr db) {
+	void LinkService::load(const FileGroupPtr& db) {
 		LOG_INFO("LinkService: Loading link definitions from file group '%s'", db->getName().c_str());
 
 		// First, try to build the Relation Name -> flavor and reverse records
@@ -129,7 +156,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void LinkService::save(FileGroupPtr db, uint saveMask) {
+	void LinkService::save(const FileGroupPtr& db, uint saveMask) {
 		// Iterates through all the relations. Writes the name into the Relations file, and writes the relation's data using relation->save(db, saveMask) call
 
 		// I do not want to have gaps in the relations indexing, which is implicit given the record order
@@ -184,7 +211,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	RelationPtr LinkService::createRelation(const std::string& name, DTypeDefPtr type, bool hidden) {
+	RelationPtr LinkService::createRelation(const std::string& name, const DTypeDefPtr& type, bool hidden) {
 		if (name.substr(0,1) == "~")
 			OPDE_EXCEPT("Name conflict: Relation can't use ~ character as the first one, it's reserved for inverse relations. Conflicting name: " + name, "LinkService::createRelation");
 		
@@ -274,8 +301,14 @@ namespace Opde {
 		}
 	}
 
+
+	// --------------------------------------------------------------------------
+	StringIteratorPtr LinkService::getAllLinkNames() {
+		return new RelationNameMapKeyIterator(mRelationNameMap);
+	}
+
 	//------------------------------------------------------
-	bool LinkService::requestRelationFlavorMap(int id, const std::string& name, RelationPtr rel) {
+	bool LinkService::requestRelationFlavorMap(int id, const std::string& name, RelationPtr& rel) {
 		std::pair<FlavorToName::iterator, bool> res1 = mFlavorToName.insert(make_pair(id, name));
 
 		if (!res1.second) {

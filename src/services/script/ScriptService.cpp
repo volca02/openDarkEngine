@@ -67,7 +67,7 @@ namespace Opde {
     }
 
     //------------------------------------
-    void ScriptService::addObjectScriptModule(ObjectScriptModulePtr module) {
+    void ScriptService::addObjectScriptModule(const ObjectScriptModulePtr& module) {
         // List of modules to be released
         mScriptModules.push_back(module);
 
@@ -85,7 +85,7 @@ namespace Opde {
     }
 
     //------------------------------------
-    void ScriptService::mapModuleScriptName(ObjectScriptModulePtr mod, std::string name) {
+    void ScriptService::mapModuleScriptName(const ObjectScriptModulePtr& mod, const std::string& name) {
         // rewrite any previous mapping, but warn if exists
         ScriptNameToModule::const_iterator it = mScriptNameMap.find(name);
 

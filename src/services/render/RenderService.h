@@ -224,31 +224,31 @@ namespace Opde {
 			
 			// ModelName listener related
 			PropertyGroup::ListenerID mPropModelNameListenerID;
-			PropertyGroupPtr mPropModelName;
+			PropertyGroup* mPropModelName;
 			
 			// Light Property related
 			PropertyGroup::ListenerID mPropLightListenerID;
-			PropertyGroupPtr mPropLight;
+			PropertyGroup* mPropLight;
 			
 			// SpotLight Property related
 			PropertyGroup::ListenerID mPropSpotlightListenerID;
-			PropertyGroupPtr mPropSpotlight;
+			PropertyGroup* mPropSpotlight;
 			
 			// "Position" Property related
 			PropertyGroup::ListenerID mPropPositionListenerID;
-			PropertyGroupPtr mPropPosition;
+			PropertyGroup* mPropPosition;
 			
 			// "ModelScale" Property related
 			PropertyGroup::ListenerID mPropScaleListenerID;
-			PropertyGroupPtr mPropScale;
+			PropertyGroup* mPropScale;
 			
 			// "RenderType" Property related
 			PropertyGroup::ListenerID mPropRenderTypeListenerID;
-			PropertyGroupPtr mPropRenderType;
+			PropertyGroup* mPropRenderType;
 			
 			// "RenderAlpha" Property related
 			PropertyGroup::ListenerID mPropRenderAlphaListenerID;
-			PropertyGroupPtr mPropRenderAlpha;
+			PropertyGroup* mPropRenderAlpha;
 			
 
 

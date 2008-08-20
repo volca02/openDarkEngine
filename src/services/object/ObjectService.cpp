@@ -243,17 +243,17 @@ namespace Opde {
 		// For SceneNodes
 		mPropPosition = mPropertyService->getPropertyGroup("Position");
 
-		if (mPropPosition.isNull())
+		if (mPropPosition == NULL)
             OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "ObjectService::bootstrapFinished");
 
 		mPropSymName = mPropertyService->getPropertyGroup("SymbolicName");
 		
-		if (mPropSymName.isNull())
+		if (mPropSymName == NULL)
             OPDE_EXCEPT("Could not get SymbolicName property group. Not defined. Fatal", "ObjectService::bootstrapFinished");
             
 		mSymNameStorage = new SymNamePropertyStorage();
-		// takes over the ownership of this Prop. storage
-		mPropSymName->setPropertyStorage(mSymNameStorage, true);
+
+		mPropSymName->setPropertyStorage(mSymNameStorage);
 	}
 	
 	//------------------------------------------------------
@@ -300,7 +300,7 @@ namespace Opde {
 	
 
 	//------------------------------------------------------
-	void ObjectService::_load(FileGroupPtr db, uint loadMask) {
+	void ObjectService::_load(const FileGroupPtr& db, uint loadMask) {
 		// Load min, max obj id, then the rest of the FilePtr as a bitmap data. Those then are unpacked to ease the use
 		
 		int32_t minID, maxID;
@@ -427,7 +427,7 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
-	void ObjectService::_save(FileGroupPtr db, uint saveMask) {
+	void ObjectService::_save(const FileGroupPtr& db, uint saveMask) {
 		// only some values should be saved -
 		// concrete objects or archetypes
 		BitArray objmask(mAllocatedObjects.getMinIndex(), mAllocatedObjects.getMaxIndex());

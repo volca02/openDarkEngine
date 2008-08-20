@@ -53,16 +53,20 @@ namespace Opde {
 		/// Object was destroyed (Including all links and properties)
 		OBJ_DESTROYED,
 		/// All objects were destroyed
-		OBJ_SYSTEM_CLEARED
+		OBJ_SYSTEM_CLEARED,
+		/// New min/max range for object ID's was supplied
+		OBJ_ID_RANGE_CHANGED
 		
 	} ObjectServiceMessageType;
 	
 	/// Message from object service - object was created/destroyed, etc
 	struct ObjectServiceMsg {
-		// Type of the message that happened
+		/// Type of the message that happened
 		ObjectServiceMessageType type;
-		// Object id that the message is informing about (not valid for OBJ_SYSTEM_CLEARED)
+		/// Object id that the message is informing about (not valid for OBJ_SYSTEM_CLEARED). Minimal object id for OBJ_ID_RANGE_CHANGED
 		int objectID;
+		/// The Maximal id to hold. Only for OBJ_ID_RANGE_CHANGED event, otherwise undefined
+		int maxObjID;
 	};
 
 	/** @brief Object service - service managing in-game objects. Holder of the object's scene nodes
@@ -155,10 +159,10 @@ namespace Opde {
 			void onDBChange(const DatabaseChangeMsg& m);
 			
 			/** load links from a single database */
-			void _load(FileGroupPtr db, uint clearMask);
+			void _load(const FileGroupPtr& db, uint clearMask);
 
 			/** Saves the links and link data according to the saveMask */
-			void _save(FileGroupPtr db, uint saveMask);
+			void _save(const FileGroupPtr& db, uint saveMask);
 
 			/** Clears all the data and the relation mappings */
 			void _clear(uint clearMask);
@@ -188,7 +192,7 @@ namespace Opde {
 			void createBuiltinResources();
 			
 			/// Converts the properties orientation to quaternion
-            static Ogre::Quaternion toOrientation(PropertyDataPtr posdata);
+            static Ogre::Quaternion toOrientation(PropertyDataPtr& posdata);
 
 			/// A stack of id's
 			typedef std::stack<int> ObjectIDStack;
@@ -197,7 +201,7 @@ namespace Opde {
 			BitArray mAllocatedObjects;
 			
 			/// Position property (to set/get position/orientation of objects)
-			PropertyGroupPtr mPropPosition;
+			PropertyGroup* mPropPosition;
 			
 			/// Map's symbolic name to object ID
 			
@@ -226,13 +230,13 @@ namespace Opde {
 			PropertyServicePtr mPropertyService;
 			
 			/// Symbolic name property pointer
-			PropertyGroupPtr mPropSymName;
+			PropertyGroup* mPropSymName;
 			
 			/// Scene manager pointer
 			Ogre::SceneManager* mSceneMgr;
 			
 			/// Our specialized property storage for symbolic names
-			SymNamePropertyStorage* mSymNameStorage;
+			SymNamePropertyStoragePtr mSymNameStorage;
 	};
 
 	/// Shared pointer to the service

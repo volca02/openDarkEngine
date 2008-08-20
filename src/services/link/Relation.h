@@ -35,15 +35,15 @@ namespace Opde {
 	*/
 	class Relation : public NonCopyable, public MessageSource<LinkChangeMsg> {
 		public:
-			Relation(const std::string& name, DTypeDefPtr type, bool isInverse, bool hidden = false);
+			Relation(const std::string& name, const DTypeDefPtr& type, bool isInverse, bool hidden = false);
 			virtual ~Relation();
 
 			/** Loads the relation data from the given FileGroup */
-			void load(FileGroupPtr db);
+			void load(const FileGroupPtr& db);
 
 			/** Saves the relation data to the fiven file group
 			* @todo Save Mask implementation */
-			void save(FileGroupPtr db, uint saveMask);
+			void save(const FileGroupPtr& db, uint saveMask);
 
 			/// @returns the Data Type describing the link data
 			DTypeDefPtr getDataType() { return mType; };
@@ -99,7 +99,7 @@ namespace Opde {
 			* @note this version does create the link including the data, so a time and plenty of broadcasts is saved.
 			* @note to create and fill the data, use DTypeDef::create to obtain a valid buffer to fill, then use DTypeDef::set to fill the fields. Once ready, supply the final buffer to the createLink
 			*/
-			link_id_t create(int from, int to, DTypePtr data);
+			link_id_t create(int from, int to, const DTypePtr& data);
 
 			/** getter for the DTypeDef this relation uses.
 			* @note The returned object is better be tested by doing DTypeDefPtr::isNull() to determine if the object is usable. Relations with no data will just return null DTypeDefPtr */
@@ -175,7 +175,7 @@ namespace Opde {
 			* @note Always use this method to internally insert new links, if not in a situation when the standard sequence of link addition is needed (notification, query database refresh)
 			* @note The link data have to be assigned prior to calling this method
 			*/
-			void _addLink(LinkPtr newlnk);
+			void _addLink(const LinkPtr& newlnk);
 
 			/** Internal method for link removal handling. Notifies the listeners, refreshes query databases.
 			* @param id The id of the link to be removed
@@ -194,7 +194,7 @@ namespace Opde {
 			* @param id Link id to assign the data to
 			* @param data The link data to be assigned
 			*/
-			void _assignLinkData(link_id_t id, LinkDataPtr data);
+			void _assignLinkData(link_id_t id, const LinkDataPtr& data);
 
 			/** Removes link data for a link ID
 			* @param id the ID of the link for which data should be removed
@@ -217,7 +217,7 @@ namespace Opde {
 			* @param src The source link
 			* @return LinkPtr of the new inverse link
 			*/
-			LinkPtr createInverseLink(LinkPtr src);
+			LinkPtr createInverseLink(const LinkPtr& src);
 			
 			/** internal object destruction handler. @see objectDestroyed */
 			void _objectDestroyed(int id);

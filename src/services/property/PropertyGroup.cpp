@@ -30,17 +30,14 @@ using namespace std;
 namespace Opde {
 
 	// --------------------------------------------------------------------------
-	// PropertyGroup::PropertyGroup(PropertyService* owner, const std::string& name, const std::string& chunk_name, const std::string& ptype, DTypeDefPtr type, string inheritorName) :
 	PropertyGroup::PropertyGroup(PropertyService* owner, const std::string& name, const std::string& chunk_name, 
-								 PropertyStorage* storage, std::string inheritorName, bool deleteStorageOnDestroy) :
+								 const DataStoragePtr& storage, std::string inheritorName) :
 			mOwner(owner),
 			mName(name),
 			mChunkName(chunk_name),
 			mVerMaj(1),
 			mVerMin(1),
-			mUseDataCache(false),
 			mPropertyStorage(NULL),
-			mDeletePropStorageOnDestroy(deleteStorageOnDestroy),
 			mBuiltin(false) {
 
 		// Find the inheritor by the name, and assign too
@@ -62,31 +59,20 @@ namespace Opde {
 
 		if (! mInheritor.isNull())
 			mInheritor->unregisterListener(mInheritorListenerID);
-			
-		if (mDeletePropStorageOnDestroy)
-			delete mPropertyStorage;
 	}
 	
 	// --------------------------------------------------------------------------
-	void PropertyGroup::setPropertyStorage(PropertyStorage* newStorage, bool deleteOnDestroy) {
+	void PropertyGroup::setPropertyStorage(const DataStoragePtr& newStorage) {
 		// see if we had any data in the current
 		if (!mPropertyStorage->isEmpty()) {
 			LOG_ERROR("Property storage replacement for %s: Previous property storage had some data. This could mean something bad could happen...", mName.c_str());
 		}
 		
-		
-		if (mDeletePropStorageOnDestroy) {
-			if (mPropertyStorage != newStorage)
-				delete mPropertyStorage;
-		}
-		
-		
 		mPropertyStorage = newStorage;
-		mDeletePropStorageOnDestroy = deleteOnDestroy;
 	}
 	
 	// --------------------------------------------------------------------------
-	void PropertyGroup::load(FileGroupPtr db) {
+	void PropertyGroup::load(const FileGroupPtr& db) {
 		// Open the chunk specified by "P$" + mChunkName
 		FilePtr fprop;
 
@@ -118,7 +104,7 @@ namespace Opde {
 			size = fprop->tell();
 			
 			// Use property storage to load the property
-			if (mPropertyStorage->readFromFile(fprop, id)) {
+			if (mPropertyStorage->readFromFile(fprop, id, true)) {
 				_addProperty(id);
 			} else {
 				LOG_ERROR("There was an error loading property %s for object %d. Property was not loaded", mName.c_str(), id);
@@ -128,7 +114,7 @@ namespace Opde {
 
 
 	// --------------------------------------------------------------------------
-	void PropertyGroup::save(FileGroupPtr db, const BitArray& objMask) {
+	void PropertyGroup::save(const FileGroupPtr& db, const BitArray& objMask) {
 		// Open the chunk specified by "P$" + mChunkName
 		FilePtr fprop;
 
@@ -151,7 +137,7 @@ namespace Opde {
 			if (!objMask.get(id))
 				continue;
 
-			if (!mPropertyStorage->writeToFile(fprop, id))
+			if (!mPropertyStorage->writeToFile(fprop, id, true))
 				LOG_ERROR("There was an error writing property %s for object %d. Property was not loaded", mName.c_str(), id);
 		}
 	}
@@ -171,7 +157,7 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	bool PropertyGroup::createProperty(int obj_id) {
-		if (mPropertyStorage->createProp(obj_id)) {
+		if (mPropertyStorage->create(obj_id)) {
 			_addProperty(obj_id);
 			
 			return true;
@@ -182,7 +168,7 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	bool PropertyGroup::removeProperty(int obj_id) {
-		if (mPropertyStorage->destroyProp(obj_id)) {
+		if (mPropertyStorage->destroy(obj_id)) {
 			mInheritor->setImplements(obj_id, false);
 			
 			return true;
@@ -196,14 +182,14 @@ namespace Opde {
 	bool PropertyGroup::cloneProperty(int obj_id, int src_id) {
 		bool had = false;
 		
-		if (mPropertyStorage->hasProp(obj_id)) {
+		if (mPropertyStorage->has(obj_id)) {
 			// delete first
-			mPropertyStorage->destroyProp(obj_id);
+			mPropertyStorage->destroy(obj_id);
 			had = true;
 		}
 		
 		
-		if (mPropertyStorage->cloneProp(src_id, obj_id))  {
+		if (mPropertyStorage->clone(src_id, obj_id))  {
 			// went ok, the target now includes the property didn't previously
 			if (!had)
 				_addProperty(obj_id);
@@ -216,13 +202,13 @@ namespace Opde {
 	
 	// --------------------------------------------------------------------------
 	bool PropertyGroup::set(int id, const std::string& field, const DVariant& value) {
-		return mPropertyStorage->setPropField(id, field, value);
+		return mPropertyStorage->setField(id, field, value);
 	}
 
 	// --------------------------------------------------------------------------
 	bool PropertyGroup::get(int id, const std::string& field, DVariant& target) {
 		int effID = _getEffectiveObject(id);
-		return mPropertyStorage->getPropField(effID, field, target);
+		return mPropertyStorage->getField(effID, field, target);
 	}
 
 	// --------------------------------------------------------------------------
@@ -263,5 +249,9 @@ namespace Opde {
     	removeProperty(id);
     }
 
+	// --------------------------------------------------------------------------
+	DataFieldDescIteratorPtr PropertyGroup::getFieldDescIterator(void) {
+		return mPropertyStorage->getFieldDescIterator();
+	}
 }
 

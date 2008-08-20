@@ -134,10 +134,10 @@ namespace Opde {
 			FileGroupPtr getDBFileNamed(const std::string& filename);
 
 			/// Load and assign a mission database to the db (has to be a SaveGame), then loads the gamesys for the loaded miss file
-			void _loadMissionDB(FileGroupPtr db);
+			void _loadMissionDB(const FileGroupPtr& db);
 
 			/// Load and assign a gamesys database to the db (has to be a mission or savegame)
-			void _loadGameSysDB(FileGroupPtr db);
+			void _loadGameSysDB(const FileGroupPtr& db);
 
             /// Overriden broadcast to support progress reports
             virtual void broadcastMessage(const DatabaseChangeMsg& msg);

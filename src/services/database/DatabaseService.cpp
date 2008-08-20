@@ -114,7 +114,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void DatabaseService::_loadMissionDB(FileGroupPtr db) {
+	void DatabaseService::_loadMissionDB(const FileGroupPtr& db) {
 	    LOG_DEBUG("DatabaseService::_loadMissionDB");
 
 		_loadGameSysDB(db);
@@ -132,7 +132,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void DatabaseService::_loadGameSysDB(FileGroupPtr db) {
+	void DatabaseService::_loadGameSysDB(const FileGroupPtr& db) {
 	    LOG_DEBUG("DatabaseService::_loadGameSysDB");
 
 		// GAM_FILE

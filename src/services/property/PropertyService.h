@@ -38,29 +38,22 @@ namespace Opde {
 		public:
 			PropertyService(ServiceManager *manager, const std::string& name);
 			virtual ~PropertyService();
-
-			/** Creates a structured property group - property holder using a structure definition in DTypeDef
-			* @see PropertyGroup::PropertyGroup
-			*/
-			PropertyGroupPtr createStructuredPropertyGroup(const std::string& name, const std::string& chunk_name, const DTypeDefPtr& type, std::string inheritorName);
 			
-			/** Creates a single field holding property group - property holder containing a single field of a specified type
+			/** Creates a property group using the specified property storage
+			* @param name The name of the property group
+			* @param chunkName The name of the chunk the property is stored in
+			* @param inheritorName The name of the iheritor to use for the property (the published name of the inheritor factory)
+			* @param storage The property storage to be used for the property data. Caller is responsible for the storage destruction, unless takeover is set to true
+			* @param takeover If true, the storage's ownership will be taken over, meaning the storage will be destroyed upon destruction of the property group (or when construction fails)
 			* @see PropertyGroup::PropertyGroup
 			*/
-			PropertyGroupPtr createSimplePropertyGroup(const std::string& name, const std::string& chunk_name, DVariant::Type type,  std::string inheritorName);
-
-			
-			/** Creates a string holding property group - property holder containing a variable length string
-			* @see PropertyGroup::PropertyGroup
-			*/
-			PropertyGroupPtr createStringPropertyGroup(const std::string& name, const std::string& chunk_name, std::string inheritorName);
-
+			PropertyGroup* createPropertyGroup(const std::string& name, const std::string& chunkName, std::string inheritorName, const DataStoragePtr& storage, bool takeover = false);
 
 			
             /** Retrieves the property group given it's name, or NULL if not found
             * @param name The name of the property to retrieve the group for
-            * @return PropertyGroupPtr of the PropertyGroup named name if found, isNull()==true otherwise */
-            PropertyGroupPtr getPropertyGroup(const std::string& name);
+            * @return PropertyGroup* of the PropertyGroup named name if found, isNull()==true otherwise */
+            PropertyGroup* getPropertyGroup(const std::string& name);
             
             /** Determines if the given object has a property mapped (either itself, or by inheritance through MetaProperty link)
             * @param obj_id The object id to query
@@ -75,7 +68,6 @@ namespace Opde {
             * @return true if the object owns the specified property, false if not
             */
             bool owns(int obj_id, const std::string& propName);
-            
             
             /** Property setter. Sets a value of a property field
             * @param obj_id The object id
@@ -100,12 +92,12 @@ namespace Opde {
 
             /** Load the properties from the database
 			* @param db The database file group to use */
-			void load(FileGroupPtr db);
+			void load(const FileGroupPtr& db);
 
 			/** Saves the properties according to the saveMask
 			* @param db The database file group to save to
 			* @param objMask the BitArray of objects to be written */
-			void save(FileGroupPtr db, const BitArray& objMask);
+			void save(const FileGroupPtr& db, const BitArray& objMask);
 
 			/** Clears out all the PropertyGroups (effectively wiping out all properties) */
 			void clear();
@@ -114,7 +106,7 @@ namespace Opde {
 			StringIteratorPtr getAllPropertyNames();
 
 			/// maps property groups to their names
-			typedef std::map< std::string, PropertyGroupPtr > PropertyGroupMap;
+			typedef std::map< std::string, PropertyGroup* > PropertyGroupMap;
 
 		protected:
             /// service initialization
