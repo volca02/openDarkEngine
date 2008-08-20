@@ -107,7 +107,7 @@ namespace Opde {
 		}
 		
 		// ------------------------------------------
-		PyObject* LinkQueryResultBinder::create(LinkQueryResultPtr result) {
+		PyObject* LinkQueryResultBinder::create(const LinkQueryResultPtr& result) {
 			Object* object = construct(&msType);
 
 			if (object != NULL) {

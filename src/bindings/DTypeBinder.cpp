@@ -140,7 +140,7 @@ namespace Opde {
 		}
 
 		// ------------------------------------------
-		PyObject* DTypeBinder::create(DTypePtr type) {
+		PyObject* DTypeBinder::create(const DTypePtr& type) {
 			Object* object = construct(&msType);
 
 			if (object != NULL) {

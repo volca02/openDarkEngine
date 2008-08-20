@@ -250,7 +250,7 @@ namespace Opde {
 		}
 
 		// ------------------------------------------
-		PyObject* RelationBinder::create(RelationPtr relation) {
+		PyObject* RelationBinder::create(const RelationPtr& relation) {
 			Object* object = construct(&msType);
 
 			if (object != NULL) {

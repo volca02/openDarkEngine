@@ -45,7 +45,7 @@ namespace Opde {
 				static PyObject* repr(PyObject *self);
 
 				/// creates a python object representation of the link query result
-				static PyObject* create(LinkQueryResultPtr result);
+				static PyObject* create(const LinkQueryResultPtr& result);
 
 			protected:
 				/// Return self as iterator with a increased ref count.

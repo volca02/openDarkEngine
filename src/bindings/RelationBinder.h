@@ -46,7 +46,7 @@ namespace Opde {
 				static PyObject* repr(PyObject *self);
 
 				/// creates a python object representation of the relation
-				static PyObject* create(RelationPtr relation);
+				static PyObject* create(const RelationPtr& relation);
 
 				// --- Methods ---
 				static PyObject* getID(PyObject* self, PyObject* args);
