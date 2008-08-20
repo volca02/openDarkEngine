@@ -60,7 +60,9 @@ namespace Opde {
 			mDTypeScriptCompiler(NULL),
 			mPLDefScriptCompiler(NULL),
 			mConsoleBackend(NULL),
-			mServiceMask(serviceMask) {
+			mServiceMask(serviceMask),
+			mDTypeScriptLdr(NULL),
+			mPLDefScriptLdr(NULL) {
 		
 		mLogger = new Logger();
 		
@@ -96,6 +98,10 @@ namespace Opde {
 	
 	// -------------------------------------------------------
 	Root::~Root() {
+		// if those are used, delete them
+		delete mDTypeScriptLdr;
+		delete mPLDefScriptLdr;
+		
 		delete mDTypeScriptCompiler;
 		delete mPLDefScriptCompiler;
 
@@ -120,8 +126,22 @@ namespace Opde {
 		delete mLogger;
 		
 		delete mOgreOpdeLogConnector;
+		
+		delete mOgreLogManager;
 	}
 
+
+	// -------------------------------------------------------
+	void Root::registerCustomScriptLoaders() {
+		// TODO: bindings
+		
+		// the classes register themselves to ogre
+		if (!mDTypeScriptLdr)
+			mDTypeScriptLdr = new DTypeScriptLoader();
+			
+		if (!mPLDefScriptLdr)			
+			mPLDefScriptLdr = new PLDefScriptLoader();
+	}
 
 	// -------------------------------------------------------
 	void Root::bootstrapFinished() {

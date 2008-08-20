@@ -41,6 +41,10 @@
 #include "DTypeScriptCompiler.h"
 #include "PLDefScriptCompiler.h"
 
+// script loaders
+#include "DTypeScriptLoader.h"
+#include "PLDefScriptLoader.h"
+
 namespace Opde {
 	
 	/** OPDE core class. Used to initialize the whole engine. Singleton */
@@ -88,6 +92,9 @@ namespace Opde {
 			/** A shortcut to set loglevel. Valid values are 0-4 */
 			void setLogLevel(int level);
 			
+			/// registers custom script loaders with ogre, meaning the custom scripts will get loaded automatically
+			void registerCustomScriptLoaders();
+			
 		protected:
 			/// Registers all the service factories to the Service Manger
 			void registerServiceFactories();
@@ -112,6 +119,12 @@ namespace Opde {
 			LogListenerList mLogListeners;
 			
 			const unsigned int mServiceMask;		
+			
+			/// Loader for the DType scripts. Only used if 
+			DTypeScriptLoader* mDTypeScriptLdr;
+
+			/// Loader for the PLDef scripts
+			PLDefScriptLoader* mPLDefScriptLdr;
 	};
 	
 } // namespace Opde
