@@ -34,7 +34,7 @@ AddBrandingImage left 129
 Name "openDarkEngine"
 Caption "openDarkEngine"
 BrandingText "openDarkEngine Team"
-LicenseData ..\copying
+LicenseData @CMAKE_CURRENT_SOURCE_DIR@\copying
 LicenseForceSelection checkbox "I accept the terms in the license agreement"
 
 Var Thief1Dir
@@ -87,7 +87,9 @@ Function .onInit
 FunctionEnd
 
 Function .onGUIInit
-	SetBrandingImage /RESIZETOFIT installer.bmp
+	InitPluginsDir
+	File /oname=$PLUGINSDIR\installer.bmp @CMAKE_CURRENT_SOURCE_DIR@\installer\installer.bmp
+	SetBrandingImage /RESIZETOFIT $PLUGINSDIR\installer.bmp
 FunctionEnd
 
 Function un.onInit
@@ -100,7 +102,9 @@ Function un.onInit
 FunctionEnd
 
 Function un.onGUIInit
-	SetBrandingImage /RESIZETOFIT $INSTDIR\installer.bmp
+	InitPluginsDir
+	File /oname=$PLUGINSDIR\installer.bmp @CMAKE_CURRENT_SOURCE_DIR@\installer\installer.bmp
+	SetBrandingImage /RESIZETOFIT $PLUGINSDIR\installer.bmp
 FunctionEnd
 
 Function ShowWelcome
@@ -113,9 +117,8 @@ Function ShowWelcome
 	nsDialogs::Show
 FunctionEnd
 
-Function SelectGames
-	InitPluginsDir
-	File /oname=$PLUGINSDIR\installer.ini "installer.ini"
+Function SelectGames	
+	File /oname=$PLUGINSDIR\installer.ini "@CMAKE_CURRENT_SOURCE_DIR@\installer\installer.ini"
 
 	StrCpy $0 "$PLUGINSDIR\installer.ini"
 
@@ -190,8 +193,7 @@ Section "openDarkEngine (required)"
 
 	SetOutPath $INSTDIR
 	File @PROJECT_BINARY_DIR@\src\main\release\opde.exe
-	File /oname=opde.cfg opde-sample.cfg
-	File installer.bmp
+	File /oname=opde.cfg @CMAKE_CURRENT_SOURCE_DIR@\installer\opde-sample.cfg
 	File "$%OGRE_HOME%\bin\release\*.dll"	
 	File "$%OGRE_HOME%\bin\release\Plugins.cfg"
 	File "@FREEIMAGE_PATH@\Dist\FreeImage.dll"
