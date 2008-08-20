@@ -13,38 +13,47 @@ $Id$
 using namespace Ogre;
 
 SubEntityMaterialInstance::SubEntityMaterialInstance (SubEntity *se) : MaterialInstance () {
-  mSubEntity = se;
+	mSubEntity = se;
       
-  initOriginalMaterial ();
+	initOriginalMaterial ();
 }
 
 SubEntityMaterialInstance::~SubEntityMaterialInstance () {
-  // Reset to the original material
-  mSubEntity->setMaterialName (mOriginalMat->getName ());
+	// Reset to the original material
+	mSubEntity->setMaterialName (mOriginalMat->getName ());
 }
 
 void SubEntityMaterialInstance::setMaterialName (String name) {
-  clearCopyMaterial ();
+	clearCopyMaterial ();
       
-  mSubEntity->setMaterialName (name);
-      
-  initOriginalMaterial ();
-      
-  setTransparency (mCurrentTransparency);
+	mSubEntity->setMaterialName (name);
+	  
+	initOriginalMaterial ();
+	  
+	setTransparency (mCurrentTransparency);
 }
 
 void SubEntityMaterialInstance::setTransparency (Real transparency) {
-  MaterialInstance::setTransparency (transparency);
-        
-  if (mCurrentTransparency > 0.0f) {
-    mSubEntity->setMaterialName (mCopyMat->getName ());
-  }
-  else {
-    mSubEntity->setMaterialName (mOriginalMat->getName ());
-  }
+	MaterialInstance::setTransparency (transparency);
+
+	if (hasOverrides()) {
+		mSubEntity->setMaterialName (mCopyMat->getName ());
+	} else {
+		mSubEntity->setMaterialName (mOriginalMat->getName ());
+	}
+}
+
+void SubEntityMaterialInstance::setZBias (Ogre::Real zbias) {
+	MaterialInstance::setZBias (zbias);
+
+	if (hasOverrides()) {
+		mSubEntity->setMaterialName (mCopyMat->getName ());
+	} else {
+		mSubEntity->setMaterialName (mOriginalMat->getName ());
+	}
 }
 
 void SubEntityMaterialInstance::initOriginalMaterial () {
-  mOriginalMat = MaterialManager::getSingleton ().getByName (mSubEntity->getMaterialName ());
+	mOriginalMat = MaterialManager::getSingleton ().getByName (mSubEntity->getMaterialName ());
 }
 

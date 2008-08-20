@@ -50,11 +50,19 @@ class SubEntityMaterialInstance : public MaterialInstance {
      * @see MaterialInstance::setTransparency().
      */
     void setTransparency (Ogre::Real transparency);
+    
+    /** Changes this instance's z-bias setting.
+    */
+    void setZBias (Ogre::Real zbias);
+    
+    
   protected:
     /** Initialises the reference to the original material from the SubEntity's.
      * @see MaterialInstance::initOriginalMaterial().
      */
     void initOriginalMaterial ();
+    
+    
 };
 
 #endif // __SUBENTITYMATERIALINSTANCE_H__
