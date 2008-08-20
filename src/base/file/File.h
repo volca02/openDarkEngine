@@ -236,7 +236,7 @@ namespace Opde {
 			Ogre::DataStreamPtr mStream;
 		public:
 			/** Constructor. Takes ogre's DataStream as source. Read only. */
-			OgreFile(Ogre::DataStreamPtr stream);
+			OgreFile(const Ogre::DataStreamPtr& stream);
 
 			/** @copydoc File::size() */
 			virtual const file_size_t size();

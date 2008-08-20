@@ -63,7 +63,7 @@ namespace Opde {
 			* @param listener A pointer to L
 			* @note The same pointer has to be supplied to the unregisterListener in order to succeed with unregistration
 			*/
-			void registerListener(ListenerPtr listener, Priority priority) {
+			void registerListener(const ListenerPtr& listener, Priority priority) {
 				mListeners.insert(std::make_pair(priority, listener));
 			}
 
@@ -71,7 +71,7 @@ namespace Opde {
 			* @param listener ID returned by the registerListener call
 			* @note The pointer has to be the same as the one supplied to the registerListener
 			*/
-			void unregisterListener(ListenerPtr listener) {
+			void unregisterListener(const ListenerPtr& listener) {
 			    // If priority was a member of Callback, then this would be find(prio);
 			    typename Listeners::iterator it = mListeners.begin();
 

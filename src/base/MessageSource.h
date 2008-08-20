@@ -61,16 +61,15 @@ namespace Opde {
 
 			/** Registers a listener.
 			* @param listener A pointer to L
-			* @note The same pointer has to be supplied to the unregisterListener in order to succeed with unregistration
+			* @return ID of the listener to be used for unregisterListener call
 			*/
-			ListenerID registerListener(ListenerPtr listener) {
+			ListenerID registerListener(const ListenerPtr& listener) {
 				mListeners.insert(std::make_pair(mCurrent, listener));
 				return mCurrent++;
 			}
 
 			/** Unregisters a listener.
 			* @param listener ID returned by the registerListener call
-			* @note The pointer has to be the same as the one supplied to the registerListener (not a big deal, just supply a pointer to a member variable)
 			*/
 			void unregisterListener(ListenerID id) {
 				typename Listeners::iterator it = mListeners.find(id);

@@ -344,7 +344,7 @@ namespace Opde {
 	/*------------------------------------------------------*/
 	/*--------------------- OgreFile -----------------------*/
 	/*------------------------------------------------------*/
-	OgreFile::OgreFile(Ogre::DataStreamPtr stream) : File(stream->getName(), File::FILE_R), mStream(stream) {
+	OgreFile::OgreFile(const Ogre::DataStreamPtr& stream) : File(stream->getName(), File::FILE_R), mStream(stream) {
 		mAccessMode = FILE_R;
 	}
 

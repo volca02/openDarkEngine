@@ -243,7 +243,7 @@ namespace Ogre {
             /// For AI meshes. All 3 coords index vert, norm and uv at once
             void addTriangle(uint16_t a, uint16_t bone_a, uint16_t b, uint16_t bone_b, uint16_t c, uint16_t bone_c);
 
-            void setSkeleton(SkeletonPtr skel) { mSkeleton = skel; };
+            void setSkeleton(const SkeletonPtr& skel) { mSkeleton = skel; };
 
             void build();
 
@@ -614,7 +614,7 @@ namespace Ogre {
 	/// Abstract parent for bin file loaders. Handles the common parts of model loading
 	class DarkBINFileLoader {
 		public:
-			DarkBINFileLoader(Mesh* mesh, Opde::FilePtr file, unsigned int version) :
+			DarkBINFileLoader(Mesh* mesh, const Opde::FilePtr& file, unsigned int version) :
 						mMesh(mesh),
                         mFile(file),
                         mVersion(version) {};
@@ -632,7 +632,7 @@ namespace Ogre {
     * This class fills the supplied mesh with a Ogre's version of the Mesh. */
     class ObjectMeshLoader : public DarkBINFileLoader {
         public:
-            ObjectMeshLoader(Mesh* mesh, Opde::FilePtr file, unsigned int version) : DarkBINFileLoader(mesh, file, version),
+            ObjectMeshLoader(Mesh* mesh, const Opde::FilePtr& file, unsigned int version) : DarkBINFileLoader(mesh, file, version),
                         mMaterials(NULL),
                         mMaterialsExtra(NULL),
                         mVHots(NULL),
@@ -722,7 +722,7 @@ namespace Ogre {
 
 	class AIMeshLoader: public DarkBINFileLoader {
 		public:
-			AIMeshLoader(Mesh* mesh, Opde::FilePtr file, unsigned int version);
+			AIMeshLoader(Mesh* mesh, const Opde::FilePtr& file, unsigned int version);
 			~AIMeshLoader();
 			
 			void load();
@@ -1393,9 +1393,8 @@ namespace Ogre {
             String txtname = String("txt16/") + String(mat.name);
             // First, let's look into txt16 dir, then into the txt dir. I try to
              try {
-
-                    TextureManager::getSingleton().load(txtname,
-                                                ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_2D);
+                TextureManager::getSingleton().load(txtname,
+                    ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_2D);
              } catch (Exception &e) {
                     // Error loading from txt16...
                     txtname = String("txt/") + String(mat.name);
@@ -1437,10 +1436,12 @@ namespace Ogre {
 			
             // set the material color
             // tus->setColourOperationEx(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, matcolor);
+            pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+            pass->setAmbient(matcolor);
 			pass->setDiffuse(matcolor);
 
             if (( mHdr.mat_flags & MD_MAT_TRANS ) && (matext.trans > 0)) {
-                // tus->setColourOperation(LBO_ALPHA_BLEND);
+                tus->setColourOperation(LBO_ALPHA_BLEND);
                 tus->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, 1 - matext.trans);
             }
             
@@ -1498,7 +1499,7 @@ namespace Ogre {
     /*-----------------------------------------------------------------*/
 	/*--------------------- AIMeshLoader        -----------------------*/
 	/*-----------------------------------------------------------------*/
-	AIMeshLoader::AIMeshLoader(Mesh* mesh, Opde::FilePtr file, unsigned int version) : 
+	AIMeshLoader::AIMeshLoader(Mesh* mesh, const Opde::FilePtr& file, unsigned int version) : 
 		DarkBINFileLoader(mesh, file, version),
 		mJointsIn(NULL),
 		mJointsOut(NULL),
