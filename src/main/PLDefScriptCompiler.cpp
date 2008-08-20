@@ -206,25 +206,23 @@ namespace Opde {
 			if (mCurrentState.label == "") // default to property chunk name silently
 				mCurrentState.label = mCurrentState.name;
 
-			PropertyGroupPtr pg;
+			PropertyGroup* pg;
+			DataStoragePtr stor;
 			
 			if (mCurrentState.ptype == "varstr") {
-				pg = mPropertyService->createStringPropertyGroup(
-                mCurrentState.label,
-                mCurrentState.name,
-                mCurrentState.inherit);
-			} else { 
-				// for now, any other string will lead us here:
-				// We could in theory templatize the string property group to all primitive types later...
-				pg = mPropertyService->createStructuredPropertyGroup(
-                mCurrentState.label,
-                mCurrentState.name,
-                dt,
-                mCurrentState.inherit);
+				stor = new StringDataStorage();
+			} else {
+				stor = new StructuredDataStorage(dt, mCurrentState.cached); 
 			}
+			
+			pg = mPropertyService->createPropertyGroup(
+				mCurrentState.label,
+				mCurrentState.name,
+				mCurrentState.inherit,
+				stor
+			);
 
 			pg->setChunkVersions(mCurrentState.pmajor, mCurrentState.pminor);
-			pg->setCacheData(mCurrentState.cached);
 		} else {
 			logParseError("Closing an unknown state!");
 		}
@@ -351,7 +349,7 @@ namespace Opde {
 		uint maj = StringConverter::parseLong(svmaj);
 		uint min = StringConverter::parseLong(svmin);
 
-		if (mCurrentState.state == CS_RELATION) {
+		if (mCurrentState.state == CS_RELATION || mCurrentState.state == CS_PROPERTY) {
 			// fill the current state only
 			if (vid == ID_D_VER) {
 				mCurrentState.dmajor = maj;
@@ -378,7 +376,7 @@ namespace Opde {
 				mLinkService->setChunkVersion(maj, min);
 			} else if (vid == ID_P_VER) {
 				mDefaultPMajor = maj;
-				mDefaultPMinor = maj;
+				mDefaultPMinor = min;
 			}
 		}
 	}

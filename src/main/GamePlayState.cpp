@@ -77,10 +77,14 @@ namespace Opde {
 		mBackward = false;
 		mLeft = false;
 		mRight = false;
+		
 		mScreenShot = false;
+		mSceneDisplay = false;
+		mPortalDisplay = false;
+		mDebug = false;
 
 		mSceneDetailIndex = 0;
-		mNumScreenShots = 1;
+		mNumScreenShots = 0;
 
 		mRoot = Root::getSingletonPtr();
 		mOverlayMgr = OverlayManager::getSingletonPtr();
@@ -102,16 +106,16 @@ namespace Opde {
 
 	void GamePlayState::start() {
     LOG_INFO("GamePlayState: Starting");
-		PropertyGroupPtr PropertyGroup = ServiceManager::getSingleton().getService("PropertyService").
-				as<PropertyService>()->getPropertyGroup("Position");
+		PropertyGroup* posPG = ServiceManager::getSingleton().getService("PropertyService").
+			as<PropertyService>()->getPropertyGroup("Position");
 		
-		if (PropertyGroup.isNull())
+		if (posPG == NULL)
 			OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "GamePlayState::start");
 		
 		LOG_DEBUG("Starting Point object id : %d", StartingPointObjID);	
 		
 		DVariant spoint;
-		PropertyGroup->get(StartingPointObjID, "position", spoint);
+		posPG->get(StartingPointObjID, "position", spoint);
 		
 		Vector3 StartingPoint(0,0,0);
 		
@@ -365,7 +369,7 @@ namespace Opde {
 			} else if(e.key == KC_D) {
 				mRight = true;
 				return true;
-			} else if (e.key == KC_SYSRQ) {
+			} else if (e.key == KC_SYSRQ || e.key == KC_F5) {
 				mScreenShot = true;
 				return true;
 			} else if (e.key == KC_O) {

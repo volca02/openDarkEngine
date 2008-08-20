@@ -412,10 +412,10 @@ namespace Opde {
 
 			mCurrentState.enumvaltype = ntype;
 
-			mCurrentState.enumeration = new DEnum(ntype, false);
+			mCurrentState.enumeration = new DEnum(mCurrentState.name, ntype, false);
 		} else {
 			mCurrentState.enumvaltype = DVariant::DV_UINT;
-			mCurrentState.enumeration = new DEnum(DVariant::DV_UINT, true);
+			mCurrentState.enumeration = new DEnum(mCurrentState.name, DVariant::DV_UINT, true);
 		}
 	}
 
