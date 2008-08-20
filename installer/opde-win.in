@@ -130,25 +130,21 @@ Function CreateResourceCfg
 	
 	ReadINIStr $Thief1Dir "$PLUGINSDIR\installer.ini" "Field 3" "State"
 	ReadINIStr $Thief2Dir "$PLUGINSDIR\installer.ini" "Field 5" "State"
-	ReadINIStr $Shock2Dir "$PLUGINSDIR\installer.ini" "Field 7" "State"
-  
-	FileOpen $0 $INSTDIR\resources.cfg w
-		
-	FileWrite $0 "[General]$\r$\nFileSystem=.\$\r$\nFileSystem=.\scripts\$\r$\n"
+	ReadINIStr $Shock2Dir "$PLUGINSDIR\installer.ini" "Field 7" "State"  
+	
 	Call SetupThief1
 	Call SetupThief2
-	Call SetupShock2
-	
-	FileClose $0
+	Call SetupShock2	
 
 FunctionEnd
 
 Function SetupThief1
+	FileOpen $0 $INSTDIR\thief1.cfg w			
+	FileWrite $0 "[General]$\r$\nFileSystem=.\$\r$\nFileSystem=.\scripts\$\r$\n"	
 	FileWrite $0 "$\r$\n[Thief1]$\r$\n"
-	
-	StrCmp $Thief1Dir "" empty
 	FileWrite $0 "FileSystem=.\scripts\Thief1$\r$\nFileSystem=$Thief1Dir$\r$\n"
 	
+	StrCmp $Thief1Dir "" empty	
 	FindFirst $2 $1 "$Thief1Dir\crfs\*.crf"
 	loop:
 	  StrCmp $1 "" done
@@ -158,15 +154,17 @@ Function SetupThief1
 	done:
 	FindClose $2
 	empty:
+	FileClose $0
 
 FunctionEnd
 
 Function SetupThief2
+	FileOpen $0 $INSTDIR\thief2.cfg w			
+	FileWrite $0 "[General]$\r$\nFileSystem=.\$\r$\nFileSystem=.\scripts\$\r$\n"
 	FileWrite $0 "$\r$\n[Thief2]$\r$\n"
-	
-	StrCmp $Thief2Dir "" empty
 	FileWrite $0 "FileSystem=.\scripts\Thief2$\r$\nFileSystem=$Thief2Dir$\r$\n"
 	
+	StrCmp $Thief2Dir "" empty	
 	FindFirst $2 $1 "$Thief2Dir\res\*.crf"
 	loop:
 	  StrCmp $1 "" done
@@ -176,15 +174,17 @@ Function SetupThief2
 	done:
 	FindClose $2
 	empty:
+	FileClose $0
 
 FunctionEnd
 
 Function SetupShock2
+	FileOpen $0 $INSTDIR\shock2.cfg w			
+	FileWrite $0 "[General]$\r$\nFileSystem=.\$\r$\nFileSystem=.\scripts\$\r$\n"
 	FileWrite $0 "$\r$\n[Shock2]$\r$\n"
-	
-	StrCmp $Shock2Dir "" empty
 	FileWrite $0 "FileSystem=.\scripts\Shock2$\r$\nFileSystem=$Shock2Dir$\r$\n"
 	
+	StrCmp $Shock2Dir "" empty	
 	FindFirst $2 $1 "$Shock2Dir\*.crf"
 	loop:
 	  StrCmp $1 "" done
@@ -194,6 +194,7 @@ Function SetupShock2
 	done:
 	FindClose $2
 	empty:
+	FileClose $0
 
 FunctionEnd
 
@@ -229,9 +230,9 @@ Section "Start Menu Shortcuts"
 
 	SetOutPath $INSTDIR
 	CreateDirectory "$SMPROGRAMS\openDarkEngine"
-	CreateShortCut "$SMPROGRAMS\openDarkEngine\openDarkEngine (TDP, TG).lnk" "$INSTDIR\opde.exe" "-TG" "$INSTDIR\opde.exe" 0
-	CreateShortCut "$SMPROGRAMS\openDarkEngine\openDarkEngine (TMA).lnk" "$INSTDIR\opde.exe" "-TMA" "$INSTDIR\opde.exe" 0
-	CreateShortCut "$SMPROGRAMS\openDarkEngine\openDarkEngine (SS2).lnk" "$INSTDIR\opde.exe" "-SS2" "$INSTDIR\opde.exe" 0
+	CreateShortCut "$SMPROGRAMS\openDarkEngine\openDarkEngine (TDP, TG).lnk" "$INSTDIR\opde.exe" "T1" "$INSTDIR\opde.exe" 0
+	CreateShortCut "$SMPROGRAMS\openDarkEngine\openDarkEngine (TMA).lnk" "$INSTDIR\opde.exe" "T2" "$INSTDIR\opde.exe" 0
+	CreateShortCut "$SMPROGRAMS\openDarkEngine\openDarkEngine (SS2).lnk" "$INSTDIR\opde.exe" "SS2" "$INSTDIR\opde.exe" 0
 	CreateShortCut "$SMPROGRAMS\openDarkEngine\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
   
 SectionEnd
