@@ -226,14 +226,14 @@ namespace Opde {
 				assert(min < max);
 				
 				// allocate and clear the mem
-				byteSize = max - min;
+				byteSize = max - min + 1; // +1 to accompany the max index as well
 					
 				// align the new minimum
 				int err = byteSize & 0x07;
 				
 				if (err != 0) {
 					min -= (8 - err);
-					byteSize = max - min;
+					byteSize = max - min + 1;
 				}
 					
 
