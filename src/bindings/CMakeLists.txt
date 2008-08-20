@@ -55,9 +55,5 @@ add_library(OpdePythonBindings
 )
 
 target_link_libraries(OpdePythonBindings
-    ${OGRE_LIBRARIES}
-    ${OPDE_BASE_LIBRARIES}
-    ${PYTHON_LIBRARIES}
-    ${OPDE_SERVICE_LIBRARIES}
-    OpdeRoot
+    OpdeLib
 )

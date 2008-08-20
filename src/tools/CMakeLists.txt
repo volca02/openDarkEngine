@@ -8,9 +8,9 @@ include_directories (
 
 add_executable ( meshconvert meshconvert.cpp )
 
-add_executable (chunk chunk.cpp)
+add_executable ( chunk chunk.cpp )
 
-add_executable (DarkFontConverter DarkFontConverter.cpp)
+add_executable ( DarkFontConverter DarkFontConverter.cpp )
 
 target_link_libraries( chunk
         ${OGRE_LIBRARIES}

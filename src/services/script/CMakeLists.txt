@@ -20,8 +20,6 @@ link_directories (
 
 add_library (OpdeScriptService ScriptService.cpp ScriptService.h)
 
-target_link_libraries(OpdeScriptService
-    OpdeBase
-    OpdeServiceManager
-    OpdeRoot
-)
+#target_link_libraries(OpdeScriptService
+#    OpdeLib
+#)
