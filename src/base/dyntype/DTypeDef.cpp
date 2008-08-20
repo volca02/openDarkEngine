@@ -55,7 +55,7 @@ namespace Opde {
 	/*------------------------------------------------------*/
 	/*------------------- DEnum ----------------------------*/
 	/*------------------------------------------------------*/
-	DEnum::DEnum(DVariant::Type enumType, bool bitfield) : mValMap() {
+	DEnum::DEnum(const std::string& name, DVariant::Type enumType, bool bitfield) : mValMap(), mName(name) {
 		mEnumType = enumType;
 		mBitField = bitfield;
 
@@ -150,7 +150,7 @@ namespace Opde {
 
 		public:
 			/// Constructor
-			DTPrivateSimple(const DVariant::Type& type, size_t size, DEnumPtr _enum) : DTPrivateBase(NT_SIMPLE),
+			DTPrivateSimple(const DVariant::Type& type, size_t size, const DEnumPtr& _enum) : DTPrivateBase(NT_SIMPLE),
 				mType(type), mEnum(_enum), mSize(size) {
 			};
 
@@ -191,7 +191,7 @@ namespace Opde {
 			bool mUnioned;
 
 			/// Array type constructor. Constructs an array type
-			DTPrivateStructured(DTypeDefPtr type, size_t size) : DTPrivateBase(NT_ARRAY), mArraySize(size), mSubTypes(), mUnioned(false) {
+			DTPrivateStructured(const DTypeDefPtr& type, size_t size) : DTPrivateBase(NT_ARRAY), mArraySize(size), mSubTypes(), mUnioned(false) {
 				mSubTypes.push_back(type);
 			}
 
@@ -252,7 +252,7 @@ namespace Opde {
 
 	//------------------------------------
 	// Field constructor
-	DTypeDef::DTypeDef(const std::string& name, const DVariant& templ, int size, DEnumPtr _enum) : mTypeName(name), mDefVal(templ) {
+	DTypeDef::DTypeDef(const std::string& name, const DVariant& templ, int size, const DEnumPtr& _enum) : mTypeName(name), mDefVal(templ) {
 		// Check for constraints
 
 		// zero size is meaningles
@@ -289,7 +289,7 @@ namespace Opde {
 
 	//------------------------------------
 	// Field constructor, no default value
-	DTypeDef::DTypeDef(const std::string& name, const DVariant::Type type, int size, DEnumPtr _enum) : mTypeName(name), mDefVal() {
+	DTypeDef::DTypeDef(const std::string& name, const DVariant::Type type, int size, const DEnumPtr& _enum) : mTypeName(name), mDefVal() {
 		// Check for constraints
 
 		// zero size is meaningles
@@ -327,7 +327,7 @@ namespace Opde {
 
 	//------------------------------------
 	// Array constructor
-	DTypeDef::DTypeDef(DTypeDefPtr member, int size) : mTypeName(member->name()), mDefVal() {
+	DTypeDef::DTypeDef(const DTypeDefPtr& member, int size) : mTypeName(member->name()), mDefVal() {
 		// Check the member for being a dynamic length string (prohibited)
 		if (member->size() <= 0)
 			OPDE_EXCEPT("Dynamic sized type is not supported as a field", "DTypeDef::DTypeDef");
@@ -545,6 +545,14 @@ namespace Opde {
 
 		mDefVal = val;
 		mDefaultUsed = true;
+	}
+
+	//------------------------------------
+	DVariant::Type DTypeDef::getDataType() {
+		if (!isField())
+			return DVariant::DV_INVALID;
+			
+		return mPriv->type();
 	}
 
 	//------------------------------------
@@ -844,4 +852,21 @@ namespace Opde {
 				OPDE_EXCEPT(string("Attempt to insert a non-unique member name (already present) : ") + fd.name, "DTypeDef::_makeFieldMap");
 		}
 	}
+	
+	
+	//------------------------------------
+	DataFieldDescListIterator::DataFieldDescListIterator(const DataFieldDescList& src) : mList(src) {
+		mIt = mList.begin();
+	}
+	
+	//------------------------------------
+	const DataFieldDesc& DataFieldDescListIterator::next() {
+		return *(mIt++);
+	}
+	
+	//------------------------------------
+	bool DataFieldDescListIterator::end() const {
+		return mIt == mList.end();
+	}
+
 }

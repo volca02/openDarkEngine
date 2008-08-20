@@ -33,12 +33,14 @@
 #include <cstdlib>
 #include <typeinfo>
 #include <sstream>
+
 #include "vector3.h"
 #include "integers.h"
 #include "SharedPtr.h"
 #include "DVariant.h"
 #include "File.h"
 #include "NonCopyable.h"
+#include "Iterator.h"
 
 namespace Opde {
 	/** Type aware variant based enumeration definition. Used for enumeration and bitfields. 
@@ -53,8 +55,11 @@ namespace Opde {
 			DVariant::Type mEnumType;
 			
 			bool mBitField;
+			
+			std::string mName;
+			
 		public:
-			DEnum(DVariant::Type enumType, bool bitfield);
+			DEnum(const std::string& name, DVariant::Type enumType, bool bitfield);
 			
 			/** Insert a field definition inside the Enum 
 			* @note It is not adviced to modify enumerations on other times than creation as this could confuse other pieces of code */
@@ -87,6 +92,9 @@ namespace Opde {
 			
 			/** Returns true if the Enumeration is a bitfield */
 			inline bool isBitfield() const { return mBitField; };
+			
+			/** Returns the name of this enumeration */
+			const std::string& getName(void) { return mName; };
 	};
 	
 	/// Shared pointer to DEnum
@@ -158,15 +166,15 @@ namespace Opde {
 			DTypeDef(const std::string& name, const DTypeDef& src);
 					
 			/// Constucts a possibly enumerated (if _enum member is not NULL) type with default value and type taken from templ
-			DTypeDef(const std::string& name, const DVariant& templ, int size, DEnumPtr _enum = NULL);
+			DTypeDef(const std::string& name, const DVariant& templ, int size, const DEnumPtr& _enum);
 			
 			/// Constucts a possibly enumerated (if _enum is not NULL) type with type taken from templ
-			DTypeDef(const std::string& name, DVariant::Type type, int size, DEnumPtr _enum = NULL);
+			DTypeDef(const std::string& name, DVariant::Type type, int size, const DEnumPtr& _enum);
 			
 			/** Construct an array type, with the type defined by member, and default value of the fields defined by member, sized size
 			* @note The base name is taken from the member
 			*/
-			DTypeDef(DTypeDefPtr member, int size);
+			DTypeDef(const DTypeDefPtr& member, int size);
 			
 			/// Construct a Structure with members defined by the list. If unioned is true, all the fields share the same start offset (0)
 			DTypeDef(const std::string& name, DTypeDefVector members, bool unioned = false);
@@ -263,6 +271,8 @@ namespace Opde {
 		
 			/// Field list. Order is sequential (increasing offset), with one exception - unions
 			typedef std::vector<FieldDef> Fields;
+			
+			/// const iterator for fields of this type definition
 			typedef Fields::const_iterator const_iterator;
 					
 			/// The direct field access cache. This has to be refreshed manually after definition is complete
@@ -280,6 +290,8 @@ namespace Opde {
 			inline const std::string& name() {
 				return mTypeName;
 			}
+			
+			DVariant::Type getDataType();
 			
 		protected:
 			/** Internal field getter */
@@ -327,7 +339,7 @@ namespace Opde {
 			DTypeDef& operator =(const DTypeDef &b) {};
 	};
 	
-	/** DTypeDef 'variable'. */
+	/** DTypeDef 'variable'. Ugly and a bit outdated concept that should be got rid off soon. */
 	class DType {
 		public:
 			/** Copy constructor. Copies the data and the type definition from another DType instance */
@@ -347,7 +359,7 @@ namespace Opde {
 			}
 			
 			/** Empty constructor. Constructs a new type instance using the default values. */
-			DType(DTypeDefPtr type, bool useCache = false) : mType(type), mUseCache(useCache) {
+			DType(const DTypeDefPtr& type, bool useCache = false) : mType(type), mUseCache(useCache) {
 				assert(!mType.isNull()); // no type def, no meaning!
 				
 				mData = mType->create();
@@ -357,10 +369,15 @@ namespace Opde {
 			* @param file The file used as data source 
 			* @param size The size of the data expected
 			* @note for dynamic size types (variable length strings), the size should be the overall length of the data (32bits size + the data itself) */
-			DType(DTypeDefPtr type, FilePtr file, uint _size, bool useCache = false) : mType(type), mUseCache(useCache) {
+			DType(const DTypeDefPtr& type, FilePtr& file, uint _size, bool useCache = false) : mType(type), mUseCache(useCache) {
 				mData = 0;
 				read(file, _size);
 			}
+			
+			~DType() {
+				delete mData;
+				mData = NULL;
+			};
 			
 			/** Value setter. 
 			* @see DTypeDef.set */
@@ -424,13 +441,13 @@ namespace Opde {
 			
 			/** Serializer. Writes the type data into a FilePtr
 			* @param file The file pointer to write into */
-			void serialize(FilePtr file) const {
+			void serialize(FilePtr& file) const {
 				file->write(mData, size());
 			}
 			
 			/** Deserializer. Reads the type data into this instance
 			* @param file The file pointer to read from */
-			void read(FilePtr file, size_t _size) {
+			void read(FilePtr& file, size_t _size) {
 				delete[] mData;
 				
 				if (mType->size() < 0) { // dyn. size. we have to use the size
@@ -476,6 +493,41 @@ namespace Opde {
 	};
 	
 	typedef shared_ptr< DType > DTypePtr;
+	
+	/// A unified unstructured field list description structure
+	typedef struct {
+		/// Name of the field
+		std::string name;
+		/// Size of the field. -1 for variable-sized fields (strings)
+		int size;
+		/// Type of the field
+		DVariant::Type type;
+		/// Enumerator of the allowed values (either enum or bitfield type). NULL means this field is not enumerated
+		DEnum* enumerator;
+	} DataFieldDesc;
+	
+	/// Data field const iterator. The const is ommited to leave the type's name in reasonable length
+	typedef ConstIterator< DataFieldDesc > DataFieldDescIterator;
+	
+	typedef shared_ptr< DataFieldDescIterator > DataFieldDescIteratorPtr;
+	
+	/// std::list of DataFieldDesc records
+	typedef std::list<DataFieldDesc> DataFieldDescList;
+	
+	/// Iterator wrapper over field description list.
+	class DataFieldDescListIterator : public DataFieldDescIterator {
+		public:
+			DataFieldDescListIterator(const DataFieldDescList& src);
+			
+			virtual const DataFieldDesc& next();
+			virtual bool end() const;
+		
+		protected:
+			const DataFieldDescList& mList;
+			DataFieldDescList::const_iterator mIt;
+		
+	};
+	
 } // namespace Opde
 
 #endif
