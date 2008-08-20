@@ -1,0 +1,50 @@
+/* Century Schoolbook font is very similar to Computer Modern Math: cmmi */
+.MATH    { font-family: "Century Schoolbook", serif; }
+.MATH I  { font-family: "Century Schoolbook", serif; font-style: italic }
+.BOLDMATH { font-family: "Century Schoolbook", serif; font-weight: bold }
+
+BODY { font-family: "Verdana"; background-color: #e0e0FF; };
+
+TABLE {
+	border: 1px solid #404080;
+	border-collapse: collapse;
+	border-spacing: 0px 0px;
+	cell-padding: 0px;
+	cell-spacing: 0px;
+	margin: 0px;
+	padding:0px;
+	cellpadding: 0px;
+	cellspacing: 0px;
+}
+
+TR { border-bottom: 1px solid #404080; padding: 0px; margin: 0px;}
+/* TD { border-bottom: 1px solid #404080; } */
+TD { border-bottom: 1px solid #404080; background: #d0d0ee; padding:1px; margin: 0px; }
+
+TH { border-bottom: 1px solid #404080; }
+
+/* implement both fixed-size and relative sizes */
+SMALL.XTINY		{ font-size : xx-small }
+SMALL.TINY		{ font-size : x-small  }
+SMALL.SCRIPTSIZE	{ font-size : smaller  }
+SMALL.FOOTNOTESIZE	{ font-size : small    }
+SMALL.SMALL		{  }
+BIG.LARGE		{  }
+BIG.XLARGE		{ font-size : large    }
+BIG.XXLARGE		{ font-size : x-large  }
+BIG.HUGE		{ font-size : larger   }
+BIG.XHUGE		{ font-size : xx-large }
+
+/* heading styles */
+H1		{  }
+H2		{  }
+H3		{  }
+H4		{  }
+H5		{  }
+
+/* mathematics styles */
+DIV.displaymath		{ }	/* math displays */
+TD.eqno			{ }	/* equation-number cells */
+
+
+/* document-specific styles come next */
