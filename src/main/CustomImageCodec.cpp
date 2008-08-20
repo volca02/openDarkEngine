@@ -99,7 +99,8 @@ namespace Ogre {
 		
 		// Loop no. 1 : Replace the codecs back to thei're originals
 		for (CodecList::iterator it = msReplacedCodecs.begin(); it != msReplacedCodecs.end(); ++it) {
-			Codec::registerCodec(it->second);
+			if (it->second) // only re-register if there was an original in the first place
+                Codec::registerCodec(it->second);
 		}
 
 		
@@ -193,7 +194,7 @@ namespace Ogre {
 				for (size_t x = 0; x < imgData->width; ++x) {
 					uchar pidx = pSrc[x];
 						
-					if (pidx == _TRANSPARENT_PAL_INDEX)  {
+					if (pidx == _TRANSPARENT_PAL_INDEX) {
 						*(pDstRow++) = 0; // Absolutely transparent black
 						*(pDstRow++) = 0; // This is to avoid pink edges
 						*(pDstRow++) = 0;
@@ -228,7 +229,7 @@ namespace Ogre {
 			
 			CodecList::iterator it = msReplacedCodecs.find(getType());
 			
-			if (it != msReplacedCodecs.end()) {
+			if (it != msReplacedCodecs.end() && (it->second)) {
 				return it->second->decode(input);
 			} else {
 				OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "CustomImageCodec does not support other formats than FIT_BITMAP, and no underlying Codec found for type " 
