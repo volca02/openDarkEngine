@@ -9,3 +9,8 @@ MARK_AS_ADVANCED(HAVE_INTTYPES_H)
 INCLUDE(TestBigEndian)
 TEST_BIG_ENDIAN(BIG_ENDIAN)
 MARK_AS_ADVANCED(BIG_ENDIAN)
+
+# TODO:
+# Check for int/float size (should be both 4 bytes)
+# Check for inttypes in more detail
+# presence of standard headers
