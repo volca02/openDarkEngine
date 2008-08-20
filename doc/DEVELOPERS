@@ -10,6 +10,8 @@ OPDE needs:
 * OGRE3D library, 1.4 series and FreeImage library (an ogre requirement, should be a part of SDK under windows).
 * OIS (The part of Ogre SDK under windows, do not install separately)
 * CMake
+* Python
+* FreeImage
 
 Building
 --------
