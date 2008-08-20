@@ -139,12 +139,13 @@ Function CreateResourceCfg
 FunctionEnd
 
 Function SetupThief1
+	StrCmp $Thief1Dir "" empty	
+	
 	FileOpen $0 $INSTDIR\thief1.cfg w			
 	FileWrite $0 "[General]$\r$\nFileSystem=.\$\r$\nFileSystem=.\scripts\$\r$\n"	
 	FileWrite $0 "$\r$\n[Thief1]$\r$\n"
-	FileWrite $0 "FileSystem=.\scripts\Thief1$\r$\nFileSystem=$Thief1Dir$\r$\n"
+	FileWrite $0 "FileSystem=.\scripts\Thief1$\r$\nFileSystem=$Thief1Dir$\r$\n"	
 	
-	StrCmp $Thief1Dir "" empty	
 	FindFirst $2 $1 "$Thief1Dir\crfs\*.crf"
 	loop:
 	  StrCmp $1 "" done
@@ -153,18 +154,21 @@ Function SetupThief1
 	  Goto loop
 	done:
 	FindClose $2
+	CreateShortCut "$SMPROGRAMS\openDarkEngine\openDarkEngine (TDP, TG).lnk" "$INSTDIR\opde.exe" "T1" "$Thief1Dir\Thief.exe" 0	
+	CreateShortCut "$INSTDIR\opde (Thief 1).lnk" "$INSTDIR\opde.exe" "T1" "$Thief1Dir\Thief.exe" 0	
 	empty:
 	FileClose $0
 
 FunctionEnd
 
 Function SetupThief2
+	StrCmp $Thief2Dir "" empty
+	
 	FileOpen $0 $INSTDIR\thief2.cfg w			
 	FileWrite $0 "[General]$\r$\nFileSystem=.\$\r$\nFileSystem=.\scripts\$\r$\n"
 	FileWrite $0 "$\r$\n[Thief2]$\r$\n"
-	FileWrite $0 "FileSystem=.\scripts\Thief2$\r$\nFileSystem=$Thief2Dir$\r$\n"
-	
-	StrCmp $Thief2Dir "" empty	
+	FileWrite $0 "FileSystem=.\scripts\Thief2$\r$\nFileSystem=$Thief2Dir$\r$\n"	
+		
 	FindFirst $2 $1 "$Thief2Dir\res\*.crf"
 	loop:
 	  StrCmp $1 "" done
@@ -173,18 +177,21 @@ Function SetupThief2
 	  Goto loop
 	done:
 	FindClose $2
+	CreateShortCut "$SMPROGRAMS\openDarkEngine\openDarkEngine (TMA).lnk" "$INSTDIR\opde.exe" "T2" "$Thief2Dir\thief2.exe" 0
+	CreateShortCut "$INSTDIR\opde (Thief 2).lnk" "$INSTDIR\opde.exe" "T2" "$Thief2Dir\thief2.exe" 0	
 	empty:
 	FileClose $0
 
 FunctionEnd
 
 Function SetupShock2
+	StrCmp $Shock2Dir "" empty
+	
 	FileOpen $0 $INSTDIR\shock2.cfg w			
 	FileWrite $0 "[General]$\r$\nFileSystem=.\$\r$\nFileSystem=.\scripts\$\r$\n"
 	FileWrite $0 "$\r$\n[Shock2]$\r$\n"
-	FileWrite $0 "FileSystem=.\scripts\Shock2$\r$\nFileSystem=$Shock2Dir$\r$\n"
-	
-	StrCmp $Shock2Dir "" empty	
+	FileWrite $0 "FileSystem=.\scripts\Shock2$\r$\nFileSystem=$Shock2Dir$\r$\n"	
+		
 	FindFirst $2 $1 "$Shock2Dir\*.crf"
 	loop:
 	  StrCmp $1 "" done
@@ -193,6 +200,8 @@ Function SetupShock2
 	  Goto loop
 	done:
 	FindClose $2
+	CreateShortCut "$SMPROGRAMS\openDarkEngine\openDarkEngine (SS2).lnk" "$INSTDIR\opde.exe" "SS2" "$Shock2Dir\Shock2.exe" 0
+	CreateShortCut "$INSTDIR\opde (Shock 2).lnk" "$INSTDIR\opde.exe" "SS2" "$Shock2Dir\Shock2.exe" 0
 	empty:
 	FileClose $0
 
@@ -229,10 +238,7 @@ SectionEnd
 Section "Start Menu Shortcuts"
 
 	SetOutPath $INSTDIR
-	CreateDirectory "$SMPROGRAMS\openDarkEngine"
-	CreateShortCut "$SMPROGRAMS\openDarkEngine\openDarkEngine (TDP, TG).lnk" "$INSTDIR\opde.exe" "T1" "$INSTDIR\opde.exe" 0
-	CreateShortCut "$SMPROGRAMS\openDarkEngine\openDarkEngine (TMA).lnk" "$INSTDIR\opde.exe" "T2" "$INSTDIR\opde.exe" 0
-	CreateShortCut "$SMPROGRAMS\openDarkEngine\openDarkEngine (SS2).lnk" "$INSTDIR\opde.exe" "SS2" "$INSTDIR\opde.exe" 0
+	CreateDirectory "$SMPROGRAMS\openDarkEngine"			
 	CreateShortCut "$SMPROGRAMS\openDarkEngine\Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
   
 SectionEnd
@@ -253,6 +259,7 @@ Section "Uninstall"
 	Delete $INSTDIR\*.log
 	Delete $INSTDIR\*.dll
 	Delete $INSTDIR\*.bmp
+	Delete $INSTDIR\*.lnk
 	Delete $INSTDIR\uninstall.exe
 
 	; Remove shortcuts, if any
