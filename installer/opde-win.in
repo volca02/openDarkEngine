@@ -144,7 +144,10 @@ Function CreateResourceCfg
 FunctionEnd
 
 Function SetupThief1
-	FileWrite $0 "$\r$\n[Thief1]$\r$\nFileSystem=.\scripts\Thief1$\r$\nFileSystem=$Thief1Dir$\r$\n"
+	FileWrite $0 "$\r$\n[Thief1]$\r$\n"
+	
+	StrCmp $Thief1Dir "" empty
+	FileWrite $0 "FileSystem=.\scripts\Thief1$\r$\nFileSystem=$Thief1Dir$\r$\n"
 	
 	FindFirst $2 $1 "$Thief1Dir\crfs\*.crf"
 	loop:
@@ -153,12 +156,16 @@ Function SetupThief1
 	  FindNext $2 $1
 	  Goto loop
 	done:
-	FindClose $2 
+	FindClose $2
+	empty:
 
 FunctionEnd
 
 Function SetupThief2
-	FileWrite $0 "$\r$\n[Thief2]$\r$\nFileSystem=.\scripts\Thief2$\r$\nFileSystem=$Thief2Dir$\r$\n"
+	FileWrite $0 "$\r$\n[Thief2]$\r$\n"
+	
+	StrCmp $Thief2Dir "" empty
+	FileWrite $0 "FileSystem=.\scripts\Thief2$\r$\nFileSystem=$Thief2Dir$\r$\n"
 	
 	FindFirst $2 $1 "$Thief2Dir\res\*.crf"
 	loop:
@@ -167,12 +174,16 @@ Function SetupThief2
 	  FindNext $2 $1
 	  Goto loop
 	done:
-	FindClose $2 
+	FindClose $2
+	empty:
 
 FunctionEnd
 
 Function SetupShock2
-	FileWrite $0 "$\r$\n[Shock2]$\r$\nFileSystem=.\scripts\Shock2$\r$\nFileSystem=$Shock2Dir$\r$\n"
+	FileWrite $0 "$\r$\n[Shock2]$\r$\n"
+	
+	StrCmp $Shock2Dir "" empty
+	FileWrite $0 "FileSystem=.\scripts\Shock2$\r$\nFileSystem=$Shock2Dir$\r$\n"
 	
 	FindFirst $2 $1 "$Shock2Dir\*.crf"
 	loop:
@@ -181,7 +192,8 @@ Function SetupShock2
 	  FindNext $2 $1
 	  Goto loop
 	done:
-	FindClose $2 
+	FindClose $2
+	empty:
 
 FunctionEnd
 
