@@ -30,6 +30,12 @@ link_directories(
     ${OPDE_SOURCE_DIR}/src/services/worldrep
 )
 
+# Doc generator for opde - property and link types info generator
+add_executable (opdeDocGen WIN32 
+    OpdeDocGen.cpp
+)
+
+# Main executable
 add_executable (opde WIN32 
     Opde.cpp 
     GameStateManager.cpp
@@ -59,10 +65,13 @@ add_library (OpdeRoot
     DTypeScriptCompiler.h
     PLDefScriptCompiler.cpp
     PLDefScriptCompiler.h
+    DTypeScriptLoader.cpp
+    DTypeScriptLoader.h
+    PLDefScriptLoader.cpp
+    PLDefScriptLoader.h
     CustomImageCodec.cpp
     CustomImageCodec.h
 )
-
 
 target_link_libraries( opde
     ${OGRE_LIBRARIES}
@@ -71,6 +80,15 @@ target_link_libraries( opde
     OpdeLogger
     OpdeConsole
     DarkSceneManager
+    ${OPDE_SERVICE_LIBRARIES}
+    OpdeBase
+)
+
+target_link_libraries( opdeDocGen
+    ${OGRE_LIBRARIES}
+    OpdeFile
+    OpdeLogger
+    OpdeConsole
     ${OPDE_SERVICE_LIBRARIES}
     OpdeBase
 )
