@@ -65,6 +65,10 @@ class EntityMaterialInstance {
     */
 	void setEntity(Ogre::Entity *e);
   
+	/** Z-Bias override. Used for SS2 billboards the most, but present in T2 as well
+	*/
+	void setZBias(Ogre::Real zbias);
+	
   protected:
 	void prepareSEMIs();
 	void destroySEMIs();
@@ -79,6 +83,10 @@ class EntityMaterialInstance {
      * @see SubEntityMaterialInstance::mCurrentTransparency.
      */
     Ogre::Real mCurrentTransparency;
+    
+    /** Keeps the current ZBias value.
+   */
+    Ogre::Real mZBias;
   
 	Ogre::SceneBlendType mSceneBlendType;
 };

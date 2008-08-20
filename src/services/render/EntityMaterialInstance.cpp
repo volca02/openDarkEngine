@@ -13,6 +13,8 @@ EntityMaterialInstance::EntityMaterialInstance (Entity *e) {
 	mEntity = e;
 	mSceneBlendType = SBT_MODULATE;
 	mCurrentTransparency = 0.0f;
+	mZBias = 0.0f;
+	
 	prepareSEMIs();
 }
 
@@ -65,6 +67,9 @@ void EntityMaterialInstance::setEntity(Ogre::Entity *e) {
 	// set all the parameters
 	if (mCurrentTransparency > 0.0f) 
 		setTransparency(mCurrentTransparency);
+		
+	if (mZBias != 0.0f) 
+		setZBias(mZBias);		
 }
 
 void EntityMaterialInstance::prepareSEMIs() {
@@ -85,4 +90,14 @@ void EntityMaterialInstance::destroySEMIs() {
 	}
 	
 	mSEMIs.clear();
+}
+
+void EntityMaterialInstance::setZBias(Ogre::Real zbias) {
+	mZBias = zbias;
+	
+	std::vector<SubEntityMaterialInstance *>::iterator it, iend;
+	iend = mSEMIs.end ();
+	for (it = mSEMIs.begin (); it != iend; ++it) {
+		(*it)->setZBias (mZBias);
+	}
 }
