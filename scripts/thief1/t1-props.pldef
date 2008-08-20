@@ -255,6 +255,7 @@ property Automap {
 property Book {
 	label "BookText"
 	p_ver 2.17
+	type varstr
 }
 
 property BaseWpnDm {
