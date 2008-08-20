@@ -29,10 +29,10 @@ The main code resides in the 'src' subdirectory. The 'proto' directory contains 
 In the src directory, you can find:
     compat - Compiler compatibility headers
     base - base classes for the engine - logging, console backend, etc.
+    bindings - python bindings code
     scenemanager - the DarkSceneManager code, used to render BSP/Portal type of scenes
     services - The engine services, which will make up the engine itself
     tools - various tools - only meshconvert utility for now (LGMD -> .mesh xml converter)
-    widgets - a widget implementations (GUI) - only console for now
 
 
 Thanks
