@@ -33,12 +33,18 @@ class MaterialInstance {
     /** Reference to the original material.
      */
     Ogre::MaterialPtr mOriginalMat;
+    
     /** Reference to the copy material.
      */
     Ogre::MaterialPtr mCopyMat;
+    
     /** Keeps the current transparency value.
      */
     Ogre::Real mCurrentTransparency;
+    
+    /** Keeps the current z-bias value
+    */
+    Ogre::Real mCurrentZBias;
     /** Current blending method.
      */
     Ogre::SceneBlendType mSBT;
@@ -64,20 +70,32 @@ class MaterialInstance {
      *       (the copy is mandatory transparent, and thus might be slower than the original).
      */
     void setTransparency (Ogre::Real transparency);
+
+	/** Sets the new z-bias value for this material instance
+	*/
+    void setZBias(Ogre::Real zbias);
+    
     /** Retrieves a shared pointer to its cloned material.
      * @return A MaterialPtr of the cloned material.
      */
     Ogre::MaterialPtr getCopyMaterial ();
+    
   protected:
     /** Initialises the reference to the original material.
      */
     virtual void initOriginalMaterial () = 0;
+    
     /** Clones the original material.
      */
     void createCopyMaterial ();
+    
     /** If exists, removes the copy material, and clears the reference to it.
      */
     void clearCopyMaterial ();
+    
+    /** Returns true if this material instance has any settings different from default
+    */
+    bool hasOverrides(void);
 };
 
 #endif // __MATERIALINSTANCE_H__

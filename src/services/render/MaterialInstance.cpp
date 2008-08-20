@@ -12,11 +12,12 @@ $Id$
 using namespace Ogre;
 
 MaterialInstance::MaterialInstance () {
-  mCurrentTransparency = 0.0f;
-
-  mCopyMat.setNull ();
-      
-  mSBT = SBT_TRANSPARENT_ALPHA;
+	mCurrentTransparency = 0.0f;
+	mCurrentZBias = 0.0f;
+	
+	mCopyMat.setNull ();
+    
+	mSBT = SBT_TRANSPARENT_ALPHA;
 }
 
 MaterialInstance::~MaterialInstance () {
@@ -89,6 +90,24 @@ void MaterialInstance::setTransparency (Real transparency) {
   }
 }
 
+void MaterialInstance::setZBias(Ogre::Real zbias) {
+	mCurrentZBias = zbias;
+	
+	Material::TechniqueIterator techniqueIt = mCopyMat->getTechniqueIterator ();
+
+    while (techniqueIt.hasMoreElements ()) {
+		Technique *t = techniqueIt.getNext ();
+		
+		Technique::PassIterator passIt = t->getPassIterator ();
+		while (passIt.hasMoreElements ()) {
+			Pass* p = passIt.getNext();
+			
+			// change the depth bias
+			p->setDepthBias(mCurrentZBias);
+		}
+    }
+}
+
 MaterialPtr MaterialInstance::getCopyMaterial () {
   return mCopyMat;
 }
@@ -119,4 +138,8 @@ void MaterialInstance::clearCopyMaterial () {
     MaterialManager::getSingleton ().remove (mCopyMat->getName ());
        
   mCopyMat.setNull ();
+}
+
+bool MaterialInstance::hasOverrides(void) {
+	return (mCurrentTransparency != 0.0f) || (mCurrentZBias != 0.0f);
 }
