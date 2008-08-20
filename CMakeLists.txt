@@ -17,7 +17,7 @@
 #
 #    $Id$
 
-# TODO: My cmake build needs this: cmake_minimum_required(VERSION 2.4)
+cmake_minimum_required(VERSION 2.4)
 
 project (OPDE)
 
@@ -187,7 +187,7 @@ ENDIF (GENERATE_DOC)
 
 IF (GENERATE_NSIS)
 	CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/installer/opde-win.in
-                      ${CMAKE_CURRENT_SOURCE_DIR}/installer/opde-win.nsi @ONLY)
+                      ${CMAKE_BINARY_DIR}/installer/opde-win.nsi @ONLY)
         MESSAGE(STATUS "Installer script was generated in ${CMAKE_CURRENT_SOURCE_DIR}/installer.")
 ENDIF (GENERATE_NSIS)        
 
