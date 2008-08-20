@@ -30,6 +30,33 @@ link_directories(
     ${OPDE_SOURCE_DIR}/src/services/worldrep
 )
 
+add_library (OpdeLib SHARED
+    Root.cpp
+    Root.h
+    DTypeScriptCompiler.cpp
+    DTypeScriptCompiler.h
+    PLDefScriptCompiler.cpp
+    PLDefScriptCompiler.h
+    DTypeScriptLoader.cpp
+    DTypeScriptLoader.h
+    PLDefScriptLoader.cpp
+    PLDefScriptLoader.h
+    CustomImageCodec.cpp
+    CustomImageCodec.h
+)
+
+target_link_libraries( OpdeLib
+    ${OGRE_LIBRARIES}
+    ${OIS_LIBRARIES}
+    ${FREEIMAGE_LIBRARIES}
+    OpdeFile
+    OpdeLogger
+    OpdeConsole
+    DarkSceneManager
+    ${OPDE_SERVICE_LIBRARIES}
+    OpdeBase
+)
+
 # Doc generator for opde - property and link types info generator
 add_executable (opdeDocGen WIN32 
     OpdeDocGen.cpp
@@ -58,49 +85,13 @@ add_executable (opde WIN32
     CustomImageCodec.h
 )
 
-add_library (OpdeRoot
-    Root.cpp
-    Root.h
-    DTypeScriptCompiler.cpp
-    DTypeScriptCompiler.h
-    PLDefScriptCompiler.cpp
-    PLDefScriptCompiler.h
-    DTypeScriptLoader.cpp
-    DTypeScriptLoader.h
-    PLDefScriptLoader.cpp
-    PLDefScriptLoader.h
-    CustomImageCodec.cpp
-    CustomImageCodec.h
-)
+
 
 target_link_libraries( opde
-    ${OGRE_LIBRARIES}
-    ${OIS_LIBRARIES}
-    OpdeFile
-    OpdeLogger
-    OpdeConsole
-    DarkSceneManager
-    ${OPDE_SERVICE_LIBRARIES}
-    OpdeBase
+    OpdeLib
 )
 
 target_link_libraries( opdeDocGen
-    ${OGRE_LIBRARIES}
-    OpdeFile
-    OpdeLogger
-    OpdeConsole
-    ${OPDE_SERVICE_LIBRARIES}
-    OpdeBase
+    OpdeLib
 )
 
-target_link_libraries( OpdeRoot
-    ${OGRE_LIBRARIES}
-    ${OIS_LIBRARIES}
-    ${FREEIMAGE_LIBRARIES}
-    OpdeFile
-    OpdeLogger
-    OpdeConsole
-    DarkSceneManager
-    ${OPDE_SERVICE_LIBRARIES}
-    OpdeBase
-)
