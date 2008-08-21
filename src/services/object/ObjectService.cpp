@@ -41,12 +41,12 @@ namespace Opde {
 	/*-------------------- ObjectService -------------------*/
 	/*------------------------------------------------------*/
 	ObjectService::ObjectService(ServiceManager *manager, const std::string& name) : Service(manager, name), 
+			mAllocatedObjects(-6144, 2048),
 			mDatabaseService(NULL),
 			mObjVecVerMaj(0), // Seems to be the same for all versions
 			mObjVecVerMin(2),
 			mSceneMgr(NULL),
-			mSymNameStorage(NULL),
-			mAllocatedObjects(-6144, 2048) {
+			mSymNameStorage(NULL) {
 
 	}
 
@@ -305,8 +305,6 @@ namespace Opde {
 		
 		int32_t minID, maxID;
 		
-		bool archetypeOnly = (loadMask==0x01);
-			
 		FilePtr f = db->getFile("ObjVec");
 		
 		// Load min and max

@@ -32,12 +32,12 @@ namespace Opde {
 	// --------------------------------------------------------------------------
 	PropertyGroup::PropertyGroup(PropertyService* owner, const std::string& name, const std::string& chunk_name, 
 								 const DataStoragePtr& storage, std::string inheritorName) :
-			mOwner(owner),
 			mName(name),
 			mChunkName(chunk_name),
 			mVerMaj(1),
 			mVerMin(1),
 			mPropertyStorage(NULL),
+			mOwner(owner),
 			mBuiltin(false) {
 
 		// Find the inheritor by the name, and assign too

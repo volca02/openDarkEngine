@@ -150,7 +150,7 @@ namespace Opde {
 
 		// if the chunk LD exists, and contains at least the data size, load the data size, and set to load data as well
 		bool load_data = false;
-		size_t dsize = 0;
+		int dsize = 0;
 
 		if (fldata->size() > sizeof(uint32_t)) {
 			fldata->readElem(&dsize, sizeof(uint32_t));

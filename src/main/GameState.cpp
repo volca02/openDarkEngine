@@ -28,6 +28,9 @@ namespace Opde {
 		
 	}
 	
+	GameState::~GameState() {
+	}
+	
 	void GameState::pushState(GameState* state) {
 		GameStateManager::getSingleton().pushState(state);
 	}

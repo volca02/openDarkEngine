@@ -52,7 +52,7 @@ inline uint64 make_ll(uint32 h, uint32 l)
 #endif
 
 // Till we get rid of the headers - Stop warnings about the zero sized arrays
-#pragma warning (disable : 4200)
+// Dark headers are not used anymore - // #pragma warning (disable : 4200)
 
 }
 

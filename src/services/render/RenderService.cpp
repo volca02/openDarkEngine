@@ -67,8 +67,8 @@ namespace Opde {
 	RenderService::RenderService(ServiceManager *manager, const std::string& name) : Service(manager, name), 
 			mSceneMgr(NULL), 
 			mRoot(NULL), 
-			mDarkSMFactory(NULL), 
 			mRenderWindow(NULL),
+			mDarkSMFactory(NULL), 
 			mLoopService(NULL),
 			mDefaultCamera(NULL),
 			mEditorMode(false) {
@@ -431,6 +431,7 @@ namespace Opde {
 				
 			case PROP_REMOVED:
 				removeLight(msg.objectID);
+			
         }
 	}
 

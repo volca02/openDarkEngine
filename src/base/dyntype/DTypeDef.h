@@ -328,22 +328,13 @@ namespace Opde {
 			
 			Fields mFields;
 			FieldMap mFieldMap;
-		
-		private:
-			// Hidden copy constructor
-			DTypeDef(const DTypeDef &b) : mDefVal(0) {};
-			
-			// Hidden default constructor
-			DTypeDef()  : mDefVal(0) {};
-			
-			DTypeDef& operator =(const DTypeDef &b) {};
 	};
 	
 	/** DTypeDef 'variable'. Ugly and a bit outdated concept that should be got rid off soon. */
 	class DType {
 		public:
 			/** Copy constructor. Copies the data and the type definition from another DType instance */
-			DType(const DType& b, bool useCache = false) : mCache(), mUseCache(useCache) {
+			DType(const DType& b, bool useCache = false) : mUseCache(useCache), mCache() {
 				char* odata = mData;
 				
 				int sz = b.size();
@@ -447,12 +438,12 @@ namespace Opde {
 			
 			/** Deserializer. Reads the type data into this instance
 			* @param file The file pointer to read from */
-			void read(FilePtr& file, size_t _size) {
+			void read(FilePtr& file, int _size) {
 				delete[] mData;
 				
 				if (mType->size() < 0) { // dyn. size. we have to use the size
 					// Size always has to be at least 4 bytes
-					assert(_size >= sizeof(uint32_t));
+					assert(_size >= 4);
 					
 					mData = new char[_size];
 					

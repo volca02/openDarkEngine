@@ -90,6 +90,9 @@ namespace Opde {
 		protected:
 			friend class LoopService;
 			friend class LoopMode;
+                    
+            /// default destructor
+			virtual ~LoopClient();
 			
 			/** Loop mode started event. Called on the start of the frame, if a loop mode changed and 
 			* this client is a listener of the new loop mode

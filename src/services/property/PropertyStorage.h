@@ -38,6 +38,8 @@ namespace Opde {
 	*/
 	class DataStorage {
 		public:
+            virtual ~DataStorage() {};
+		
 			/** Creates a default-value data for object numbered objID
 			* @param objID The object ID
 			* @return true if creation wen't ok, false if something went wrong (object already has the data attached)

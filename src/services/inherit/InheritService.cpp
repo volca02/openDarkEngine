@@ -52,7 +52,7 @@ namespace Opde {
 
 	class SimpleInheritQueryResult : public InheritQueryResult {
 	    public:
-            SimpleInheritQueryResult(const InheritService::InheritLinkMap& linkmap) : mLinkMap(linkmap), InheritQueryResult() {
+            SimpleInheritQueryResult(const InheritService::InheritLinkMap& linkmap) : InheritQueryResult(), mLinkMap(linkmap) {
                 mIter = mLinkMap.begin();
             }
 
@@ -172,7 +172,7 @@ namespace Opde {
 		// Read the link source, destination and priority
 
 		// Get the priority of the link
-        unsigned int priority;
+        unsigned int priority = 0;
 
         if (msg.change != LNK_REMOVED) // Do not waste time if the link is removed
             priority = mMetaPropRelation->getLinkField(msg.linkID, "priority").toUInt(); // Hardcoded! Could be parametrized
@@ -201,7 +201,6 @@ namespace Opde {
 
    			// Remove the link
 			_removeLink(l);
-		    
 		}
 	}
 

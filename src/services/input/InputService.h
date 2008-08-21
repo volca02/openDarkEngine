@@ -94,6 +94,8 @@ namespace Opde {
 	/// Listener for the direct - unfiltered events. Typically one per application (GUIService for example)
 	class DirectInputListener {
 		public:
+			virtual ~DirectInputListener() {};
+		
 			virtual bool keyPressed( const OIS::KeyEvent &e ) = 0;
 			virtual bool keyReleased( const OIS::KeyEvent &e ) = 0;
 

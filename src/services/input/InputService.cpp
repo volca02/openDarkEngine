@@ -42,9 +42,9 @@ namespace Opde {
     /*-----------------------------------------------------*/
     InputService::InputService(ServiceManager *manager, const std::string& name) : 
 			Service(manager, name), 
+			mDirectListener(NULL),
 			mMouse(NULL),
 			mKeyboard(NULL),
-			mDirectListener(NULL),
 			mInputMode(IM_MAPPED) {
 		
     	// Loop client definition

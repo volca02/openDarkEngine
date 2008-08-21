@@ -36,7 +36,7 @@ namespace Opde {
 		
 		public:
 			/** Constructor. Constructs new data buffer, filled with zeros */
-			PropertyData(int id, const DTypeDefPtr& type, bool useCache = false) : mID(id), DType(type, useCache) {	};
+			PropertyData(int id, const DTypeDefPtr& type, bool useCache = false) : DType(type, useCache), mID(id) {};
 			
 			/** Constructor - loads data from FilePtr 
 			* @param id The object ID
@@ -44,17 +44,17 @@ namespace Opde {
 			* @param file The File pointer (FilePtr) to load data from
 			* @param _size the size of the data to be loaded
 			* */
-			PropertyData(int id, const DTypeDefPtr& type, FilePtr file, int _size, bool useCache = false) : mID(id), DType(type, file, _size, useCache) { };
+			PropertyData(int id, const DTypeDefPtr& type, FilePtr file, int _size, bool useCache = false) : DType(type, file, _size, useCache), mID(id) { };
 			
 			/** Constructor - takes object id and data instance 
 			* @param id The object ID
 			* @param data The Data instance to copy the data from */
-			PropertyData(int id, const DTypePtr& data, bool useCache = false) : mID(id), DType(*data, useCache) { };
+			PropertyData(int id, const DTypePtr& data, bool useCache = false) : DType(*data, useCache), mID(id) { };
 			
 			/** PropertyData cloning constructor
 			* @param id The object ID
 			* @param data The Data instance to copy the data from */
-			PropertyData(int id, const PropertyData& data, bool useCache = false) : mID(id), DType(data, useCache) { };
+			PropertyData(int id, const PropertyData& data, bool useCache = false) : DType(data, useCache), mID(id) { };
 			
 			/** Destructor */
 			~PropertyData() { };

@@ -145,7 +145,7 @@ namespace Ogre {
 		    if (cell == NULL) 
 				break; // no more cells to process
 				
-		    /**/
+		    */
 
 		    cell = cell_queue[finishedCells++];
 		    currentPos = finishedCells;

@@ -72,7 +72,11 @@ namespace Opde {
 		mSrcFile->seek(0);
 		
 		// read the header
-		mSrcFile->readStruct(&mHeader, DarkDBHeader_Format, sizeof(DarkDBHeader));
+		mSrcFile->readElem(&mHeader.inv_offset, 4);
+		mSrcFile->readElem(&mHeader.zero, 4);
+		mSrcFile->readElem(&mHeader.one, 4);
+		mSrcFile->read(&mHeader.zeros, 256);
+		mSrcFile->readElem(&mHeader.dead_beef, 4);
 		
 		// Sanity check
 		if (mHeader.dead_beef != 0x0EFBEADDE) // Little endian encoded. would be 0xDEADBEEF on big-endian, etc.
@@ -240,7 +244,11 @@ namespace Opde {
 		mHeader.dead_beef = 0x0EFBEADDE;
 		
 		// --- Let's write the header
-		dest->writeStruct(&mHeader, DarkDBHeader_Format, sizeof(DarkDBHeader));
+		mSrcFile->writeElem(&mHeader.inv_offset, 4);
+		mSrcFile->writeElem(&mHeader.zero, 4);
+		mSrcFile->writeElem(&mHeader.one, 4);
+		mSrcFile->write(&mHeader.zeros, 256);
+		mSrcFile->writeElem(&mHeader.dead_beef, 4);
 		
 		
 		it = mFiles.begin();

@@ -84,6 +84,10 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
 	SET(CMAKE_CXX_FLAGS_DEBUG "-g -O3 ${PROFILER}")
 	SET(CMAKE_CXX_FLAGS_DISTRIBUTION "-O3")
 	SET(CMAKE_C_FLAGS_DISTRIBUTION "-O3")
+	
+	# extra warnings, but no unused params (too common)
+	ADD_DEFINITIONS(-Wall)
+	#  -Wextra -Wno-unused-parameter
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 # -fPIC for 64bit IA (x86_64 that is)

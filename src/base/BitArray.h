@@ -40,7 +40,7 @@ namespace Opde {
 	class BitArray {
 		public:
 			/// constructs a new empty bitarray
-			BitArray() : mArray(NULL), mMinIDX(0), mMaxIDX(-1), mByteSize(0) {};
+			BitArray() : mArray(NULL), mByteSize(0), mMinIDX(0), mMaxIDX(-1) {};
 			
 			/// constructs a new bitarray with a specified min and max boundaries (all values false)
 			BitArray(int min, int max) : mMinIDX(min), mMaxIDX(max) {

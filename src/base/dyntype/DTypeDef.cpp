@@ -100,7 +100,7 @@ namespace Opde {
 
 	//------------------------------------
 	DEnum::EnumFieldList DEnum::getFieldList(const DVariant& val) const {
-		uint uval;
+		uint uval = 0;
 
 		if (mBitField) {
 			// is it convertible to the uint? If not, this will throw an exception, so it's alright
@@ -151,7 +151,7 @@ namespace Opde {
 		public:
 			/// Constructor
 			DTPrivateSimple(const DVariant::Type& type, size_t size, const DEnumPtr& _enum) : DTPrivateBase(NT_SIMPLE),
-				mType(type), mEnum(_enum), mSize(size) {
+				mType(type), mSize(size), mEnum(_enum) {
 			};
 
 			/// Destructor
@@ -191,13 +191,15 @@ namespace Opde {
 			bool mUnioned;
 
 			/// Array type constructor. Constructs an array type
-			DTPrivateStructured(const DTypeDefPtr& type, size_t size) : DTPrivateBase(NT_ARRAY), mArraySize(size), mSubTypes(), mUnioned(false) {
+			DTPrivateStructured(const DTypeDefPtr& type, size_t size) : DTPrivateBase(NT_ARRAY), mSubTypes(), mArraySize(size), mUnioned(false) {
 				mSubTypes.push_back(type);
 			}
 
 			/// Struct/Union constructor
-			DTPrivateStructured(const DTypeDefVector& types, bool unioned) : DTPrivateBase(NT_STRUCT), mArraySize(0),
-					mSubTypes(types), mUnioned(unioned) {
+			DTPrivateStructured(const DTypeDefVector& types, bool unioned) : DTPrivateBase(NT_STRUCT), 
+					mSubTypes(types),
+					mArraySize(0),
+					mUnioned(unioned) {
 			}
 
 			/// Destructor
@@ -586,7 +588,6 @@ namespace Opde {
 	//------------------------------------
 	DVariant DTypeDef::_get(char* ptr) {  
 		// Based on the type of the data and size, construct the Variant and return
-		int sz = mPriv->size();
 		// TODO: Big/Little endian fixes
 
 		if (mPriv->type() == DVariant::DV_BOOL) {
@@ -816,8 +817,6 @@ namespace Opde {
 			// Still not there, but close
 			m.ToEulerAnglesZYX(z, y, x);
 		
-			int16_t rot = *reinterpret_cast<int16_t*>(ptr);
-
 			writeLE<int16_t>(vptr    , static_cast<int16_t>(x.valueRadians() * 32768 / Math::PI));
 			writeLE<int16_t>(vptr + 1, static_cast<int16_t>(y.valueRadians() * 32768 / Math::PI));
 			writeLE<int16_t>(vptr + 2, static_cast<int16_t>(z.valueRadians() * 32768 / Math::PI));

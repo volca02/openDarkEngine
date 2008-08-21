@@ -74,8 +74,6 @@ namespace Opde {
 		mTypeDef(type), 
 		mUseDataCache(useDataCache),
 		mFieldDesc(type) {
-			
-		
 	}
 	
 	// --------------------------------------------------------------------------

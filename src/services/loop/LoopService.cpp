@@ -104,6 +104,9 @@ namespace Opde {
     /*---------------------------------------------------*/
     /*-------------------- LoopClient -------------------*/
     /*---------------------------------------------------*/
+    LoopClient::~LoopClient() {
+    }
+    
 	void LoopClient::loopModeStarted(const LoopModeDefinition& loopMode) {
 	}
 	

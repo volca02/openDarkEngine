@@ -160,7 +160,7 @@ namespace Ogre {
 	// --------------------------------------------------------------------------
 	// ------------------------- DarkSubGeometry --------------------------------
 	// --------------------------------------------------------------------------
-	DarkSubGeometry::DarkSubGeometry(const MaterialPtr& material, uint8 renderQueueID) : mMaterial(material), mRenderQueueID(renderQueueID), mBuilt(false), m16BitIndices(false) {
+	DarkSubGeometry::DarkSubGeometry(const MaterialPtr& material, uint8 renderQueueID) : m16BitIndices(false), mMaterial(material), mRenderQueueID(renderQueueID), mBuilt(false) {
 		// Vertex data. For now, those are per-subgeom. Can be changed later (I'm trying to get 16-bit indices if possible)
 		mRenderOp.vertexData = new VertexData();
 
@@ -507,7 +507,7 @@ namespace Ogre {
 	// -----------------------------------------------------------------------
 	// ------------------------- DarkFragment --------------------------------
 	// -----------------------------------------------------------------------
-	DarkFragment::DarkFragment(DarkSubGeometry* owner) : mOwner(owner), mCurrent(NULL), mBuilt(false), mIndexList(NULL), mIdxCount(0) {
+	DarkFragment::DarkFragment(DarkSubGeometry* owner) : mOwner(owner), mCurrent(NULL), mBuilt(false), mIdxCount(0), mIndexList(NULL)  {
 		mBuilder = new DarkFragmentBuilder();
 	}
 

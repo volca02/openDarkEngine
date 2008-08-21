@@ -56,6 +56,8 @@ namespace Opde {
     class ObjectScriptModule {
         public:
             ObjectScriptModule(std::string& name);
+            
+            virtual ~ObjectScriptModule();
 
             /// Returns true if this module handles a certain script type named name
             virtual bool handlesScript(std::string& name);

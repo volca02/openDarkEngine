@@ -57,7 +57,7 @@ class MaterialInstance {
     /** Destructor.
      * @note Destroys the copy material if needed.
      */
-    ~MaterialInstance ();
+    virtual ~MaterialInstance ();
     /** Sets the blending method to use to adjust transparency.
      * @param sbt The SceneBlendType desired.
      */

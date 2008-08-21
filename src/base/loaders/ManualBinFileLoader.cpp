@@ -59,11 +59,11 @@ namespace Ogre {
 			CalSkeletonLoader(const std::string& name, const std::string& group, Resource* resource) : 
 				mFileName(name), 
 				mGroup(group), 
-				mTorsos(NULL), 
-				mLimbs(NULL), 
+                mResource(resource),
 				mFile(NULL), 
-				mSkeleton(NULL),
-				mResource(resource) {};
+				mTorsos(NULL), 
+                mLimbs(NULL), 
+				mSkeleton(NULL) {};
 			
 			~CalSkeletonLoader() {
 				delete[] mTorsos;
@@ -220,16 +220,17 @@ namespace Ogre {
     class SubMeshFiller {
         public:
             SubMeshFiller(SubMesh* sm, size_t nvert, Vertex* vertices, size_t nnorms, Vertex* normals, size_t nlights, ObjLight* lights, size_t nuvs, UVMap* uvs, bool useuvmap) :
-                    mSubMesh(sm),
                     mVertices(vertices),
                     mNormals(normals),
                     mUVs(uvs),
                     mUseUV(useuvmap),
                     mBuilt(false),
-                    mNumVerts(nvert),
-                    mNumLights(nlights),
+                    mSubMesh(sm),
+                    mSkeleton(NULL),
                     mLights(lights),
+                    mNumVerts(nvert),
                     mNumNorms(nnorms),
+                    mNumLights(nlights),
                     mNumUVs(nuvs) {
             };
 
@@ -615,9 +616,10 @@ namespace Ogre {
 	class DarkBINFileLoader {
 		public:
 			DarkBINFileLoader(Mesh* mesh, const Opde::FilePtr& file, unsigned int version) :
+						mVersion(version),
 						mMesh(mesh),
-                        mFile(file),
-                        mVersion(version) {};
+                        mFile(file) {
+            };
 		
 		protected:
             unsigned int mVersion;
@@ -637,11 +639,11 @@ namespace Ogre {
                         mMaterialsExtra(NULL),
                         mVHots(NULL),
                         mVertices(NULL),
+                        mLights(NULL),
                         mUVs(NULL),
                         mSubObjects(NULL),
-                        mLights(NULL),
-                        mNumNorms(0),
                         mNumUVs(0),
+                        mNumNorms(0),
                         mNumLights(0) {
 
                 if ((mVersion != 3) && (mVersion != 4))
@@ -1509,8 +1511,8 @@ namespace Ogre {
 		mVertices(NULL),
 		mNormals(NULL),
 		mUVs(NULL),
-		mCalLoader(NULL),
 		mTriangles(NULL),
+        mCalLoader(NULL),
 		mVertexJointMap(NULL) {
 		
 		if (mVersion > 2 || mVersion < 1)

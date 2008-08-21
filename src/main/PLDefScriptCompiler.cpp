@@ -336,7 +336,6 @@ namespace Opde {
 	//-----------------------------------------------------------------------
 	void PLDefScriptCompiler::parseVersion(void) {
 		int vid = getCurrentTokenID();
-		 ID_D_VER ? true : false;
 
 		// now read next two tokens, and set the resulting version numbers
 		String svmaj = getNextTokenLabel();

@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *		$Id:$
+ *		$Id$
  *
  *****************************************************************************/
 
@@ -32,7 +32,7 @@ namespace Opde {
 
 	template<> ConsoleBackend* Singleton<ConsoleBackend>::ms_Singleton = 0;
 
-	ConsoleBackend::ConsoleBackend(unsigned int text_history) : mTextHistory(text_history), mCommandMap(), mCompletionMap() {
+	ConsoleBackend::ConsoleBackend(unsigned int text_history) : mCommandMap(), mCompletionMap(), mTextHistory(text_history) {
 		mCommandMap.clear();
 		mCompletionMap.clear();
 		mMessages.clear();
@@ -132,7 +132,7 @@ namespace Opde {
 	}
 
 	void ConsoleBackend::messageLogged( const String& message, LogMessageLevel lml, bool maskDebug, const String &logName ) {
-		if (lml = LML_CRITICAL)
+		if (lml == LML_CRITICAL)
 			addText("OgreLog: (" + logName + ") : " + message);
 	}
 

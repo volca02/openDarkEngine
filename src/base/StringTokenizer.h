@@ -120,7 +120,7 @@ namespace Opde {
 			};
 
 		public:
-			WhitespaceStringTokenizer(const std::string& src, bool ignoreQuotes = true) : mStr(src), mIgnoreQuotes(ignoreQuotes) {
+			WhitespaceStringTokenizer(const std::string& src, bool ignoreQuotes = true) : mIgnoreQuotes(ignoreQuotes), mStr(src) {
 				mCurPos = mStr.begin();
 			};
 

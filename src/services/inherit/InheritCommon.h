@@ -61,6 +61,9 @@ namespace Opde {
 	 * This means that all the objects that are changed by the inheritance modification can be notified through the listener */
 	class Inheritor : public MessageSource<InheritValueChangeMsg> {
 		public:
+            /// default destructor
+			virtual ~Inheritor() {};
+		
 			/** Returns true if the objID has true 'implements' record */
 			virtual bool getImplements(int objID) const = 0;
 
@@ -132,6 +135,8 @@ namespace Opde {
 	class InheritorFactory {
 		public:
 			InheritorFactory() {};
+			
+			virtual ~InheritorFactory() {};
 
 			virtual std::string getName() const = 0;
 

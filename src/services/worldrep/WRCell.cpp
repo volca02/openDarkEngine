@@ -798,10 +798,9 @@ namespace Opde {
 		assert(loaded);
 		assert(atlased);
 
-		int portalStart = header.num_polygons - header.num_portals;
-
 		// Contains material name -> polygon list
 		std::map<std::string, std::vector<int> > matToPolys;
+
 		// polygon index to txt Dimensions
 		std::map<int, std::pair<uint,uint> > polyToDim;
 		
@@ -918,8 +917,6 @@ namespace Opde {
 		// some checks on the status. These are hard mistakes
 		assert(loaded);
 		assert(atlased);
-
-		int portalStart = header.num_polygons - header.num_portals;
 
 		// Contains material name -> polygon list
 		std::map<std::string, std::vector<int> > matToPolys;

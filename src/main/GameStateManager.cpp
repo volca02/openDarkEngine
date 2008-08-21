@@ -61,8 +61,8 @@ namespace Opde {
 	GameStateManager::GameStateManager(std::string GameType) :
 			mStateStack(),
 			mTerminate(false),
-			mRoot(NULL),
 			mLogger(NULL),
+			mRoot(NULL),
 			mStdLog(NULL),
 			mConsoleBackend(NULL),
 			mServiceMgr(NULL),

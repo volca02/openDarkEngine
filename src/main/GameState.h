@@ -40,6 +40,9 @@ namespace Opde {
 			/** Constructor */
 			GameState();
 			
+			/** Destructor */
+			virtual ~GameState();
+			
 			//---------- Events from StateManager for particular events
 			/** Do a state startup. Called if the state becomes the new active game state (added to the state stack) */
 			virtual void start() = 0;

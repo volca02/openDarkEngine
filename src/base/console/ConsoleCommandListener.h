@@ -32,6 +32,8 @@ class ConsoleCommandListener {
 		/** Please override with a method that will handle the command */
 		virtual void commandExecuted(std::string command, std::string parameters) = 0;
 		
+		virtual ~ConsoleCommandListener(void) {};
+		
 		// Just a thought: Would be possible to put "command?" and execute, and if the consoleBackend would detect a '?' at the end of command, would call this method instead of the commandExecuted
 		// And should result in a small explanation...
     		//	void helpWanted(std::string command) = 0; 

@@ -396,7 +396,7 @@ namespace Opde {
 	/*--------------------- MemoryFile ---------------------*/
 	/*------------------------------------------------------*/
 	MemoryFile::MemoryFile(const std::string& name, AccessMode mode) : File(name, mode), mPages(),
-	 		mSize(0), mEof(true), mFilePos(0) {
+	 		mSize(0), mFilePos(0), mEof(true) {
 	}
 
 	//------------------------------------

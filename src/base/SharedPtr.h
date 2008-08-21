@@ -35,9 +35,9 @@ namespace Opde {
 		template < typename U > friend class shared_ptr;
 
 		protected:
-			unsigned int* mReferences;
 			T* mPtr;
-
+			unsigned int* mReferences;
+			
 			void release() {
 				if (mReferences) {
 					if (--(*mReferences) == 0) {
@@ -62,7 +62,7 @@ namespace Opde {
 			}
 		
 			/// NULL ctor
-			shared_ptr() : mReferences(NULL), mPtr(NULL) { };
+			shared_ptr() : mPtr(NULL), mReferences(NULL) { };
 
 			/// Copy constructor
 			shared_ptr(const shared_ptr& b) : mPtr(b.mPtr), mReferences(b.mReferences) {

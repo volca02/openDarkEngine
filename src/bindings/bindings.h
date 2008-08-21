@@ -40,8 +40,8 @@ namespace Opde {
 		};
 		
 		template<typename T> struct TypeInfo : public TypeInfoBase {
-			VariableType type;
 			char* typeName;
+			VariableType type;
 			
 			TypeInfo() : typeName("invalid"), type(VT_INVALID) {};
 			
@@ -53,8 +53,8 @@ namespace Opde {
 		
 		
 		template<> struct TypeInfo<bool> {
-			VariableType type;
 			char* typeName;
+			VariableType type;
 			
 			TypeInfo() : typeName("bool"), type(VT_BOOL) {};
 			
@@ -68,8 +68,8 @@ namespace Opde {
 		};
 		
 		template<> struct TypeInfo<int> {
-			VariableType type;
 			char* typeName;
+            VariableType type;
 			
 			TypeInfo() : typeName("int"), type(VT_INT) {};
 			
@@ -79,8 +79,8 @@ namespace Opde {
 		};
 		
 		template<> struct TypeInfo<long> {
-			VariableType type;
 			char* typeName;
+			VariableType type;
 			
 			TypeInfo() : typeName("long"), type(VT_LONG) {};
 			
@@ -91,8 +91,8 @@ namespace Opde {
 				
 		
 		template<> struct TypeInfo<float> {
-			VariableType type;
 			char* typeName;
+			VariableType type;
 			
 			TypeInfo() : typeName("float"), type(VT_FLOAT) {};
 			
@@ -102,9 +102,9 @@ namespace Opde {
 		};
 
 		template<> struct TypeInfo<std::string> {
-			VariableType type;
 			char* typeName;
-			
+			VariableType type;
+						
 			TypeInfo() : typeName("std::string"), type(VT_STRING) {};
 			
 			PyObject* toPyObject(const std::string& val) const {
@@ -118,8 +118,8 @@ namespace Opde {
 		
 		// DVariant type info
 		template<> struct TypeInfo<DVariant> {
-			VariableType type;
 			char* typeName;
+			VariableType type;
 			
 			TypeInfo() : typeName("DVariant"), type(VT_CUSTOM_TYPE) {};
 			

@@ -225,8 +225,6 @@ namespace Opde {
 		wr_hdr_t header;
 		wrChunk->read(&header, sizeof(wr_hdr_t));
 
-		SceneNode *rootSceneNode = mSceneMgr->getRootSceneNode();
-
 		// If there is some scene already, clear it
 		// clearData();
 

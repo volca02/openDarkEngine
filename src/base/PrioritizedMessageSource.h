@@ -33,6 +33,8 @@ namespace Opde {
     */
     template <typename M> class PrioritizedMessageSource {
 		public:
+            virtual ~PrioritizedMessageSource() {};
+		
 			typedef int Priority;
 
 			typedef Callback< M > Listener;
