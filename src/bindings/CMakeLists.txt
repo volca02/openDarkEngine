@@ -18,7 +18,7 @@ include_directories(
 )
 
 
-add_library(OpdePythonBindings 
+add_library(OpdePyLib SHARED
     bindings.cpp 
     bindings.h
     ServiceBinder.cpp
@@ -54,6 +54,7 @@ add_library(OpdePythonBindings
     ObjectServiceBinder.h
 )
 
-target_link_libraries(OpdePythonBindings
+target_link_libraries(OpdePyLib
+    ${PYTHON_LIBRARIES}
     OpdeLib
 )
