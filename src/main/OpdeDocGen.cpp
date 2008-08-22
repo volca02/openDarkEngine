@@ -17,6 +17,8 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *    $Id$
+ *
  *****************************************************************************/
 
 #include "GameStateManager.h"
@@ -74,7 +76,7 @@ namespace Opde {
 				return true;
 			}
 			
-			bool initialize(void) {
+			void initialize(void) {
 				// parse the config file. Load the dtype scripts
 				// this is done automatically by adding the resource locations
 				// then bootstrapping

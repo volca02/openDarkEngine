@@ -17,6 +17,8 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *	  $Id$
+ *
  *****************************************************************************/
 
 #ifndef __PRIORITIZEDMESSAGESOURCE_H
@@ -29,11 +31,11 @@
 namespace Opde {
 
     /** Prioritized Message Source - a message source doing callbacks in a deterministic order
-    * M stands for the message type sended
+    * M stands for the message type sent
     */
     template <typename M> class PrioritizedMessageSource {
 		public:
-            virtual ~PrioritizedMessageSource() {};
+            //virtual ~PrioritizedMessageSource() {};
 		
 			typedef int Priority;
 

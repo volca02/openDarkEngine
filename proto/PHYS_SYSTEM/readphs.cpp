@@ -350,7 +350,7 @@ void readBoundingDefinition(FILE *f, uint32 btype, uint32 version, uint32 submod
 		case 2:
 		case 4:
 			// The radiuses are repeated for all the sub-objects
-			for (int n = 0; n < submodel_count; n++) {
+			for (unsigned int n = 0; n < submodel_count; n++) {
 				float radius;
 				fread(&radius,4,1,f);
 				printf("\tSphere %d - Radius %8.2g\n", n, radius);
@@ -453,10 +453,10 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	int total_subobjdata = 0;
 	
 	printf("\tSubobj Counts : ");
-	for (int n = 0; n < num_subobjs; n++) {
+	for (unsigned int n = 0; n < num_subobjs; n++) {
 		printf("%d", subobj_counts[n]);
 		total_subobjdata += subobj_counts[n];
-		if (n < num_subobjs-1)
+		if (n < num_subobjs - 1)
 			printf(", ");
 	}
 	printf("\n");
@@ -478,15 +478,15 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	// This looks rope related
 	// Spring tension, spring damping that is
 	printf("\t Spring connection of sub-objects (%d) : \n", num_subobjs);
-	for (int n = 0; n < num_subobjs; n++) {
+	for (unsigned int n = 0; n < num_subobjs; n++) {
 		printf("\t\t %d : ", n);
 		//
 		float x;
 		
-		fread(&x,1,4,f);
+		fread(&x, 1, 4, f);
 		printf("[Spring Tension] %8.2g ", x);
 		
-		fread(&x,1,4,f);
+		fread(&x, 1, 4, f);
 		printf("[Spring Damping] %8.2g ", x);
 		
 		// 
@@ -536,10 +536,10 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	/*
 	The last sub-object is set to the center of the Collision Volume.
 	*/
-	for (int n = 0; n < num_subobjs + 1; n++) {
+	for (unsigned int n = 0; n < num_subobjs + 1; n++) {
 		// printf("\t SUBOBJ[%4d] : ",n); readStruct("FFFLFFFFXFFFFFLFXX", f);printf("\n");
 		// printf("\t SUBOBJ[%4d] : ",n); readStruct("FFFXXXFFXXXFFFXXXX", f);printf("\n");
-		printf("\t SUBOBJ[%4d] :\n",n); readSubObject(f);
+		printf("\t SUBOBJ[%4d] :\n", n); readSubObject(f);
 	}
 	
 	
@@ -548,14 +548,14 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	
 	// Sub Object direction Vectors (translations from the center)
 	fpos(f);
-	for (int n = 0; n < num_subobjs; n++) {
+	for (unsigned int n = 0; n < num_subobjs; n++) {
 		printf("\tSubObj Translation vec. [%6d] : ", n); readVector3(f);
 	}
 	fpos(f);
 	
 	// Count of the velocity descriptions... I have to look for the right place to cut the following structures. Velocity for example is defined twice...
 	uint32 vel_counts;
-	fread(&vel_counts,1,4,f);
+	fread(&vel_counts, 1, 4, f);
 	printf("\tVel. counts : %d\n", vel_counts); 
 	fpos(f);
 	
@@ -612,7 +612,7 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	// Dunno if this condition is right. count_submodels > 1 didn't work well
 	if (vel_counts >= 2) {
 		// should be while sub model number >0 maybe
-		for (int a = 0; a < count_submodels; a++) {
+		for (unsigned int a = 0; a < count_submodels; a++) {
 			fpos(f);
 			
 			// Something like a signature (54 18 BE 01)
@@ -620,7 +620,7 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 			
 			// Subobject index
 			uint32 subobj_idx;
-			fread(&subobj_idx,1,4,f);
+			fread(&subobj_idx, 1, 4, f);
 			printf("\tSubobject index : %d\n", subobj_idx);
 			
 			// Now follow 108 bytes (27 longs)
@@ -828,9 +828,9 @@ int main(int argc, char *argv[]) {
 		fread(&obj_count,sizeof(obj_count),1,f);
 		printf("Group %d object count : %d\n", group, obj_count);
 		
-		for (int n = 0; n < obj_count; n++) {
+		for (unsigned int n = 0; n < obj_count; n++) {
 			if (!readObjectPhys(f, n, hdr.phys_version))  {
-				fprintf(stderr,"Error encountered, ending readout\n");
+				fprintf(stderr, "Error encountered, ending readout\n");
 				break;
 			}
 		}
@@ -841,7 +841,7 @@ int main(int argc, char *argv[]) {
 	
 	// something here I think. Can be the 4. list of objects, or something else.... dunno.
 	uint32 len;
-	fread(&len,sizeof(len),1,f);
+	fread(&len, sizeof(len), 1, f);
 	printf("Extra data count : %d\n", len);
 	fpos(f);
 	
