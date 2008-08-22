@@ -71,6 +71,7 @@ Page components
 Page directory
 Page instfiles
 Page Custom SelectGames CreateResourceCfg
+Page Custom ShowDone
 
 UninstPage uninstConfirm
 UninstPage instfiles
@@ -117,6 +118,16 @@ Function ShowWelcome
 	nsDialogs::Show
 FunctionEnd
 
+Function ShowDone
+	nsDialogs::Create /NOUNLOAD 1018
+	Pop $0
+
+	${NSD_CreateLabel} 10 10u 100% 80u "openDarkEngine has been successfully installed on your machine."
+	Pop $0
+
+	nsDialogs::Show
+FunctionEnd
+
 Function SelectGames	
 	File /oname=$PLUGINSDIR\installer.ini "@CMAKE_CURRENT_SOURCE_DIR@\installer\installer.ini"
 
@@ -132,6 +143,34 @@ Function CreateResourceCfg
 	ReadINIStr $Thief2Dir "$PLUGINSDIR\installer.ini" "Field 5" "State"
 	ReadINIStr $Shock2Dir "$PLUGINSDIR\installer.ini" "Field 7" "State"  
 	
+	StrCmp $Thief1Dir "" 0 DataProvided
+	StrCmp $Thief2Dir "" 0 DataProvided
+	StrCmp $Shock2Dir "" 0 DataProvided
+	MessageBox MB_OK|MB_ICONEXCLAMATION "Please set up at least one directory."
+		Abort
+	
+	DataProvided:
+	StrCmp $Thief1Dir "" CheckT2 0	
+	FindFirst $2 $1 "$Thief1Dir\crfs\*.crf"
+	StrCmp $1 "" 0 CheckT2
+	MessageBox MB_OK|MB_ICONEXCLAMATION "Thief1 path is invalid."
+		Abort
+	
+	CheckT2:
+	StrCmp $Thief2Dir "" CheckSS2 0
+	FindFirst $2 $1 "$Thief2Dir\res\*.crf"
+	StrCmp $1 "" 0 CheckSS2
+	MessageBox MB_OK|MB_ICONEXCLAMATION "Thief2 path is invalid."
+		Abort
+		
+	CheckSS2:
+	StrCmp $Shock2Dir "" AllChecked 0
+	FindFirst $2 $1 "$Shock2Dir\*.crf"
+	StrCmp $1 "" 0 CheckSS2
+	MessageBox MB_OK|MB_ICONEXCLAMATION "Shock2 path is invalid."
+		Abort
+	
+	AllChecked:
 	Call SetupThief1
 	Call SetupThief2
 	Call SetupShock2	
