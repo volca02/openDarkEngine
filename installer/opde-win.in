@@ -166,7 +166,7 @@ Function CreateResourceCfg
 	CheckSS2:
 	StrCmp $Shock2Dir "" AllChecked 0
 	FindFirst $2 $1 "$Shock2Dir\*.crf"
-	StrCmp $1 "" 0 CheckSS2
+	StrCmp $1 "" 0 AllChecked
 	MessageBox MB_OK|MB_ICONEXCLAMATION "Shock2 path is invalid."
 		Abort
 	
@@ -254,6 +254,7 @@ Section "openDarkEngine (required)"
 
 	SetOutPath $INSTDIR
 	File @PROJECT_BINARY_DIR@\src\main\release\opde.exe
+	File @PROJECT_BINARY_DIR@\src\main\release\opdeLib.dll
 	File /oname=opde.cfg @CMAKE_CURRENT_SOURCE_DIR@\installer\opde-sample.cfg
 	File "$%OGRE_HOME%\bin\release\*.dll"	
 	File "$%OGRE_HOME%\bin\release\Plugins.cfg"
