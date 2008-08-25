@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *		$Id$
+ *	  $Id$
  *
  *****************************************************************************/
 
@@ -151,12 +151,12 @@ namespace Opde {
 		return false;
 	}
 
-	void ConsoleBackend::pullMessages(std::vector<Ogre::String>& target, int pos, unsigned int lines) {
+	void ConsoleBackend::pullMessages(std::vector<Ogre::String>& target, unsigned int pos, unsigned int lines) {
 		// add the lines from the mMessages backwards
 
 		std::deque < Ogre::String >::iterator it;
 
-		int size = mMessages.size();
+		unsigned int size = mMessages.size();
 
 		if (pos >= size) {
 			pos = size - 1;

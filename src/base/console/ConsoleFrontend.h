@@ -17,6 +17,8 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *	  $Id$
+ *
  *****************************************************************************/
 
 #ifndef __CONSOLEFRONTEND_H
@@ -63,7 +65,7 @@ namespace Opde {
 
 			Ogre::String mCommand;
 
-			int mPosition;
+			unsigned int mPosition;
 
 			ConsoleBackend* mConsoleBackend;
 	};

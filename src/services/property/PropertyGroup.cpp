@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *		$Id$
+ *	  $Id$
  *
  *****************************************************************************/
 
@@ -87,7 +87,7 @@ namespace Opde {
 			if (hdr.version_high != mVerMaj || hdr.version_low != mVerMin) {
 				LOG_ERROR("Property group %s version mismatch : %d.%d expected, %d.%d encountered", pchn.c_str(), mVerMaj, mVerMin, hdr.version_high, hdr.version_low);
 			}
-		} catch (BasicException& e) {
+		} catch (BasicException) {
 			LOG_FATAL("PropertyGroup::load : Could not find the property chunk %s", pchn.c_str());
 			return;
 		}
@@ -122,7 +122,7 @@ namespace Opde {
 
 		try {
 			fprop = db->createFile(pchn, mVerMaj, mVerMin);
-		} catch (BasicException& e) {
+		} catch (BasicException) {
 			LOG_FATAL("PropertyGroup::save : Could not create property chunk %s", pchn.c_str());
 			return;
 		}

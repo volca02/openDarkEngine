@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *		$Id$
+ *	  $Id$
  *
  *****************************************************************************/
 
@@ -1397,7 +1397,7 @@ namespace Ogre {
              try {
                 TextureManager::getSingleton().load(txtname,
                     ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_2D);
-             } catch (Exception &e) {
+             } catch (Exception) {
                     // Error loading from txt16...
                     txtname = String("txt/") + String(mat.name);
                 }
@@ -1885,7 +1885,7 @@ namespace Ogre {
 
                     TextureManager::getSingleton().load(txtname,
                                                 ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_2D);
-             } catch (Exception &e) {
+             } catch (Exception) {
                     // Error loading from txt16...
                     txtname = String("txt/") + String(mat.name);
                 }

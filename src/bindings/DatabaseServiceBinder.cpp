@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *	   $Id$
+ *	  $Id$
  *
  *****************************************************************************/
 
@@ -157,7 +157,7 @@ namespace Opde {
 					result = Py_None;
 					Py_INCREF(result);
 					return result;
-				} catch (BasicException& ex) {
+				} catch (BasicException) {
 					PyErr_SetString(PyExc_TypeError, "Error setting a callback, is the given argument a callable?");
 					return NULL;
 				}

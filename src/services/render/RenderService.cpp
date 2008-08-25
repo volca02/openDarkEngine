@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *		$Id$
+ *	  $Id$
  *
  *****************************************************************************/
 
@@ -737,7 +737,7 @@ namespace Opde {
             // First, try to load the mesh directly as a mesh file
             Ogre::MeshPtr mesh1 = Ogre::MeshManager::getSingleton().load(fname, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
-        } catch (FileNotFoundException &e) {
+        } catch (FileNotFoundException) {
             // Undefine in advance, so there will be no clash
             Ogre::MeshManager::getSingleton().remove(fname);
             // If it is not found
@@ -747,9 +747,9 @@ namespace Opde {
             try {
                 Ogre::MeshPtr mesh1 = Ogre::MeshManager::getSingleton().create(fname, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                    true, mManualBinFileLoader);
-            } catch (FileNotFoundException &e) {
+            } catch (FileNotFoundException) {
                 LOG_ERROR("RenderService::prepareMesh: Could not find the requested model %s", name.c_str());
-            } catch (Opde::FileException &e) {
+            } catch (Opde::FileException) {
                 LOG_ERROR("RenderService::prepareMesh: Could not load the requested model %s", name.c_str());
             }
         }
@@ -766,7 +766,7 @@ namespace Opde {
 		
 		try {
 			node = getSceneNode(id);
-		} catch (BasicException& e) {
+		} catch (BasicException) {
 			LOG_ERROR("RenderService: Could not get the sceneNode for object %d! Not attaching object model!", id);
 			mSceneMgr->destroyEntity(ent);
 			return;

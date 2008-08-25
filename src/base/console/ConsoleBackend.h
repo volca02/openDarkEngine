@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *		$Id:$
+ *	  $Id$
  * 
  *****************************************************************************/
 
@@ -102,7 +102,7 @@ namespace Opde {
 			@param linenum The start line to load. -1 means we will pull up to #lines from end of the vector
 			@param lines the maximal count of lines to load
 			*/
-			void pullMessages(std::vector<Ogre::String>& target, int pos, unsigned int lines);
+			void pullMessages(std::vector<Ogre::String>& target, unsigned int pos, unsigned int lines);
 
 			// Singleton stuff
 			static ConsoleBackend& getSingleton(void);

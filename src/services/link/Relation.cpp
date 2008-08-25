@@ -17,6 +17,8 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *	  $Id$
+ *
  *****************************************************************************/
 
 
@@ -123,7 +125,7 @@ namespace Opde {
 		// let's open the L$NAME and LD$NAME files in the db
 		try {
 			flink = db->getFile(lchn);
-		} catch (BasicException& e) {
+		} catch (BasicException) {
 			LOG_FATAL("Relation::load : Could not find the Link chunk %s", lchn.c_str());
 			return;
 		}

@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *	$Id$
+ *	  $Id$
  *
  *****************************************************************************/
 
@@ -171,7 +171,7 @@ namespace Opde {
 
 			try {
 				type = getType(parameters);
-			} catch (BasicException &e) {
+			} catch (BasicException) {
 				LOG_ERROR("Type not found : %s", parameters.c_str());
 				return;
 			}

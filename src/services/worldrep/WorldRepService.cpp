@@ -450,7 +450,7 @@ namespace Opde {
 		Opde::FilePtr flow_tex;
 		try {
 			flow_tex = db->getFile("FLOW_TEX");
-		} catch (FileException &e) {
+		} catch (FileException) {
 			LOG_INFO("Flow chunk does not exist. Water materials may not be correctly displayed", "WorldRepService::loadFlowTextures");
 			return;
 		}
@@ -554,7 +554,7 @@ namespace Opde {
 				loaded = true;
 
 				break; // we got it!
-			} catch (Ogre::Exception& e) {
+			} catch (Ogre::Exception) {
 				// Nothing. We are trying more extensions
 			}
 		}

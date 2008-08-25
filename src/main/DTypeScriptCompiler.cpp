@@ -335,7 +335,7 @@ namespace Opde {
 	DTypeDefPtr DTypeScriptCompiler::getTypeDef(const std::string& name) {
 		try {
 			return mBinaryService->getType(mGroupName, name);
-		} catch (BasicException& ex) {
+		} catch (BasicException) {
 			try {
 				if (mGroupName != "") {
 					return mBinaryService->getType("", name);
@@ -343,7 +343,7 @@ namespace Opde {
 					logParseError("Type definition not found : " + name);
 					return NULL;
 				}
-			} catch (BasicException& ex) {
+			} catch (BasicException) {
 				logParseError("Type definition not found : " + name);
 				return NULL;
 			}
@@ -354,7 +354,7 @@ namespace Opde {
 	DEnumPtr DTypeScriptCompiler::getEnum(const std::string& name) {
 		try {
 			return mBinaryService->getEnum(mGroupName, name);
-		} catch (BasicException& ex) {
+		} catch (BasicException) {
 			try {
 				if (mGroupName != "") {
 					return mBinaryService->getEnum("", name);
@@ -362,7 +362,7 @@ namespace Opde {
 					logParseError("Enum definition not found : " + name);
 					return NULL;
 				}
-			} catch (BasicException& ex) {
+			} catch (BasicException) {
 				logParseError("Enum definition not found : " + name);
 				return NULL;
 			}
@@ -436,7 +436,7 @@ namespace Opde {
 
 			mCurrentState.enumeration->insert(keyname, val);
 
-		} catch (runtime_error &e) {
+		} catch (runtime_error) {
 			logParseError("error while constructing key value : " + value);
 		}
 	}
@@ -587,7 +587,7 @@ namespace Opde {
 				templ = DVariant(type, getNextTokenLabel());
 
 				hasDefault = true;
-			} catch (runtime_error &ex) {
+			} catch (runtime_error) {
 				logParseError("Exception while constructing the default field's '" + name + "' value");
 			}
 		}

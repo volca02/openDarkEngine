@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *	   $Id$
+ *	  $Id$
  *
  *****************************************************************************/
 
@@ -597,7 +597,7 @@ namespace Opde {
                     PyObject* handle = slot->getPythonSideObject();
 
                     return handle;
-                } catch(Opde::BasicException& e) {
+                } catch(Opde::BasicException) {
                     PyErr_SetString(PyExc_TypeError, "Given callback handle is probably invalid!");
                     return NULL;
                 }

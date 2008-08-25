@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *  $Id$
+ *    $Id$
  *
  *****************************************************************************/
 
@@ -232,7 +232,7 @@ namespace Ogre
 		{
 			Stream = Ogre::ResourceGroupManager::getSingleton().openResource(mPaletteFileName, mFontGroup, true);
 			mPaletteFile = new OgreFile(Stream);
-		} catch(Ogre::FileNotFoundException &e) {
+		} catch(Ogre::FileNotFoundException) {
 			// Could not find resource, use the default table
 			LogManager::getSingleton().logMessage("Specified palette file not found - using default palette!");
 			return (RGBQUAD*)ColorTable;

@@ -16,6 +16,9 @@
  * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
  * Place - Suite 330, Boston, MA 02111-1307, USA, or go to
  * http://www.gnu.org/copyleft/lesser.txt.
+ *
+ * $Id$
+ *
  *****************************************************************************/
 
 // Inspired by Ogre's material compiler, parts of the code were taken from the Ogre projects
@@ -236,7 +239,7 @@ namespace Opde {
 	DTypeDefPtr PLDefScriptCompiler::getTypeDef(const std::string& group, const std::string& name) {
 		try {
 			return mBinaryService->getType(group, name);
-		} catch (BasicException& ex) {
+		} catch (BasicException) {
 			try {
 				if (group != "") {
 					return mBinaryService->getType("", name);
@@ -244,7 +247,7 @@ namespace Opde {
 					logParseError("Type definition not found : '" + name + "'");
 					return NULL;
 				}
-			} catch (BasicException& ex) {
+			} catch (BasicException) {
 				logParseError("Type definition not found : '" + name +  "'");
 				return NULL;
 			}
