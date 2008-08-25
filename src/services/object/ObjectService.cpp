@@ -322,7 +322,7 @@ namespace Opde {
 		// Calculate the objvec bitmap size
 		size_t bsize = f->size() - 2 * sizeof(int32_t);
 		
-		unsigned char* bitmap = new unsigned char[bsize];
+		unsigned char* bitmap = new unsigned char[bsize + 1];
 	
 		f->read(bitmap, bsize);
 		
@@ -334,7 +334,7 @@ namespace Opde {
 		
 		delete[] bitmap; // not needed anymore, was copied into the fileObjs
 		
-		// current position in the bitmap
+		// current position in the bitmap 
 		int id;
 		
 		int lastID = 0;
