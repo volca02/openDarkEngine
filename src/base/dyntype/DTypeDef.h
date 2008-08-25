@@ -366,7 +366,7 @@ namespace Opde {
 			}
 			
 			~DType() {
-				delete mData;
+				delete[] mData;
 				mData = NULL;
 			};
 			
