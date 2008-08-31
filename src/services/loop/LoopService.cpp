@@ -233,8 +233,7 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void LoopService::run() {
-		float deltaTime = 0.0;
-		
+
 		if (mNewModeRequested) { // See if there is a loop mode pending...
 			mNewModeRequested = false;
 			setLoopMode(mNewLoopMode);

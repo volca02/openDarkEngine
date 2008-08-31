@@ -32,7 +32,7 @@ namespace Opde {
 	/*-------------------- GameService -------------------*/
 	/*----------------------------------------------------*/
 	GameService::GameService(ServiceManager *manager, const std::string& name) : Service(manager, name) {
-	    mDbService = ServiceManager::getSingleton().getService("DatabaseService").as<DatabaseService>();
+	    mDbService = static_pointer_cast<DatabaseService>(ServiceManager::getSingleton().getService("DatabaseService"));
 	}
 
     //------------------------------------------------------

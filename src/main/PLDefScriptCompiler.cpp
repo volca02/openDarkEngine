@@ -97,9 +97,9 @@ namespace Opde {
 		// default to global definition group
 		ServiceManager* svcmgr = ServiceManager::getSingletonPtr();
 
-		mLinkService = svcmgr->getService("LinkService").as<LinkService>();
-		mBinaryService = svcmgr->getService("BinaryService").as<BinaryService>();
-		mPropertyService = svcmgr->getService("PropertyService").as<PropertyService>();
+		mLinkService = static_pointer_cast<LinkService>(svcmgr->getService("LinkService"));
+		mBinaryService = static_pointer_cast<BinaryService>(svcmgr->getService("BinaryService"));
+		mPropertyService = static_pointer_cast<PropertyService>(svcmgr->getService("PropertyService"));
 
 		mCurrentState.state = CS_UNKNOWN;
 	}

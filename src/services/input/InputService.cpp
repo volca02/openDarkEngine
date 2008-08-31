@@ -300,9 +300,9 @@ namespace Opde {
 		size_t windowHnd = 0;
 		std::ostringstream windowHndStr;
 
-		mConfigService = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
-
-        mRenderService = ServiceManager::getSingleton().getService("RenderService").as<RenderService>();
+		mConfigService = static_pointer_cast<ConfigService>(ServiceManager::getSingleton().getService("ConfigService"));
+        mRenderService = static_pointer_cast<RenderService>(ServiceManager::getSingleton().getService("RenderService"));
+        
         mRenderWindow = mRenderService->getRenderWindow();
 
 		// Get window handle
@@ -368,7 +368,7 @@ namespace Opde {
 
 
 		// Last step: Get the loop service and register as a listener
-		mLoopService = ServiceManager::getSingleton().getService("LoopService").as<LoopService>();
+		mLoopService = static_pointer_cast<LoopService>(ServiceManager::getSingleton().getService("LoopService"));
 		mLoopService->addLoopClient(this);
 		
 		return true;

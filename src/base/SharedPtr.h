@@ -55,8 +55,14 @@ namespace Opde {
 			}
 
 		public:
+			/** Helper ctor for shared_ptr casting with static_pointer_cast<U>(). 
+			* @warning Do not use directly */
+			shared_ptr(T* ptr, unsigned int *refs) : mPtr(ptr), mReferences(refs) {
+				++(*mReferences);
+			}
+
 			/// conversion ctor
-			template<class U> shared_ptr(shared_ptr<U> const & a) : mPtr(a.mPtr), mReferences(a.mReferences) {
+			template<class U> shared_ptr(shared_ptr<U>& a) : mPtr(a.mPtr), mReferences(a.mReferences) {
 				if (mReferences)
 					++(*mReferences);
 			}
@@ -76,7 +82,7 @@ namespace Opde {
 					mReferences = new unsigned int(1);
 				}
 			};
-
+			
 			~shared_ptr() {
 				release();
 			}
@@ -108,19 +114,7 @@ namespace Opde {
 				return (mPtr == NULL);
 			}
 
-			/// static cast
-			template<class U> shared_ptr<U> as() {
-				// of course, Dynamic cast would be safer, then again, slower
-				U* ptr = static_cast<U*>(mPtr);
-
-				++(*mReferences);
-
-				shared_ptr<U> n = shared_ptr<U>(ptr, mReferences);
-
-				return n;
-			}
-
-			unsigned int getRefCount() {
+			unsigned int getRefCount() const {
 				return (*mReferences);
 			}
 
@@ -132,21 +126,27 @@ namespace Opde {
 
 			}
 			
-		private:
-			/** Helper ctor for shared_ptr casting with as<U>()
-			*/
-			shared_ptr(T* ptr, unsigned int *refs) : mPtr(ptr), mReferences(refs) {
+			unsigned int* getRefCountPtr(void) const {
+				return mReferences;
 			}
+			
 	};
 
 	template<class A, class B> inline bool operator==(shared_ptr<A> const& a, shared_ptr<B> const& b) {
 		return a.ptr() == b.ptr();
-        }
+	}
 
-        template<class A, class B> inline bool operator!=(shared_ptr<A> const& a, shared_ptr<B> const& b) {
-        	return a.ptr() != b.ptr();
-        }
+    template<class A, class B> inline bool operator!=(shared_ptr<A> const& a, shared_ptr<B> const& b) {
+      	return a.ptr() != b.ptr();
+    }
 
+	/// static cast of the shared_ptr
+	template<class U, class V> shared_ptr<U> static_pointer_cast(const shared_ptr<V>& src) {
+		U* ptr = static_cast<U*>(src.ptr());
+
+		return shared_ptr<U>(ptr, src.getRefCountPtr());
+	}
+	
 } // namespace Opde
 
 #endif

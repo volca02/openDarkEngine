@@ -57,9 +57,9 @@ namespace Opde {
 			mServiceMgr(NULL), 
 			mOgreRoot(NULL), 
 			mOgreLogManager(NULL), 
+			mConsoleBackend(NULL),
 			mDTypeScriptCompiler(NULL),
 			mPLDefScriptCompiler(NULL),
-			mConsoleBackend(NULL),
 			mServiceMask(serviceMask),
 			mDTypeScriptLdr(NULL),
 			mPLDefScriptLdr(NULL) {
@@ -153,7 +153,7 @@ namespace Opde {
 
 	// -------------------------------------------------------
 	void Root::loadConfigFile(const std::string& fileName) {
-		ConfigServicePtr cfp = mServiceMgr->getService("ConfigService").as<ConfigService>();
+		ConfigServicePtr cfp = static_pointer_cast<ConfigService>(mServiceMgr->getService("ConfigService"));
 		
 		cfp->loadParams(fileName);
 	}
@@ -236,7 +236,7 @@ namespace Opde {
 		// Loop modes are only setup if not masked by global service mask
 		if (mServiceMask & SERVICE_ENGINE) {
 			// Loop modes are hardcoded
-			LoopServicePtr ls = ServiceManager::getSingleton().getService("LoopService").as<LoopService>();
+			LoopServicePtr ls = static_pointer_cast<LoopService>(ServiceManager::getSingleton().getService("LoopService"));
 			// Create all the required loop services
 			LoopModeDefinition def;
 			

@@ -116,7 +116,7 @@ namespace Opde {
 		mGroupName = "";
 
 		ServiceManager* svcmgr = ServiceManager::getSingletonPtr();
-		mBinaryService = svcmgr->getService("BinaryService").as<BinaryService>();
+		mBinaryService = static_pointer_cast<BinaryService>(svcmgr->getService("BinaryService"));
 		mCurrentState.state = CS_UNKNOWN;
 	}
 

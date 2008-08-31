@@ -185,7 +185,7 @@ namespace Opde {
 		
 		// Nothing to do, we have to wait for RenderService to settle in init... Better do everything in bootstrapFinished thus
 		// One thing happens here though - loading of the mapping file based on a config file value
-		ConfigServicePtr cfp = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
+		ConfigServicePtr cfp = static_pointer_cast<ConfigService>(ServiceManager::getSingleton().getService("ConfigService"));
 		
 		// if we have a config value (and the specified file is loadable), load the mapping file
 		DVariant val;
@@ -212,8 +212,8 @@ namespace Opde {
 	
 	// -----------------------------------
 	void GUIService::bootstrapFinished() {
-		mInputSrv = ServiceManager::getSingleton().getService("InputService").as<InputService>();
-		mRenderSrv = ServiceManager::getSingleton().getService("RenderService").as<RenderService>();
+		mInputSrv = static_pointer_cast<InputService>(ServiceManager::getSingleton().getService("InputService"));
+		mRenderSrv = static_pointer_cast<RenderService>(ServiceManager::getSingleton().getService("RenderService"));
 		
 		mRoot = new QuickGUI::Root();
 		

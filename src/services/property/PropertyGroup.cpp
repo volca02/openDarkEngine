@@ -41,7 +41,7 @@ namespace Opde {
 			mBuiltin(false) {
 
 		// Find the inheritor by the name, and assign too
-		InheritServicePtr inhs = ServiceManager::getSingleton().getService("InheritService").as<InheritService>();
+		InheritServicePtr inhs = static_pointer_cast<InheritService>(ServiceManager::getSingleton().getService("InheritService"));
 		mInheritor = inhs->createInheritor(inheritorName);
 
 		// And as a final step, register as inheritor listener

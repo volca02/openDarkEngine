@@ -218,7 +218,7 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void ObjectService::createBuiltinResources() {
-		mPropertyService = ServiceManager::getSingleton().getService("PropertyService").as<PropertyService>();
+		mPropertyService = static_pointer_cast<PropertyService>(ServiceManager::getSingleton().getService("PropertyService"));
 		
 		// DonorType property (single integer property):
 		// mPropertyService->createPropertyGroup();
@@ -233,12 +233,12 @@ namespace Opde {
     		// Register as a database listener
 		mDbCallback = new ClassCallback<DatabaseChangeMsg, ObjectService>(this, &ObjectService::onDBChange);
 
-		mDatabaseService = ServiceManager::getSingleton().getService("DatabaseService").as<DatabaseService>();
+		mDatabaseService = static_pointer_cast<DatabaseService>(ServiceManager::getSingleton().getService("DatabaseService"));
 		mDatabaseService->registerListener(mDbCallback, DBP_OBJECT);
 		
-		mInheritService = ServiceManager::getSingleton().getService("InheritService").as<InheritService>();
-		mLinkService = ServiceManager::getSingleton().getService("LinkService").as<LinkService>();
-		mPropertyService = ServiceManager::getSingleton().getService("PropertyService").as<PropertyService>();
+		mInheritService = static_pointer_cast<InheritService>(ServiceManager::getSingleton().getService("InheritService"));
+		mLinkService = static_pointer_cast<LinkService>(ServiceManager::getSingleton().getService("LinkService"));
+		mPropertyService = static_pointer_cast<PropertyService>(ServiceManager::getSingleton().getService("PropertyService"));
 		
 		// For SceneNodes
 		mPropPosition = mPropertyService->getPropertyGroup("Position");
@@ -323,6 +323,9 @@ namespace Opde {
 		size_t bsize = f->size() - 2 * sizeof(int32_t);
 		
 		unsigned char* bitmap = new unsigned char[bsize + 1];
+		
+		for (size_t idx = 0; idx <= bsize; idx++) // fill the whole buf with zeros, even the padding at the end
+			bitmap[idx] = 0;
 	
 		f->read(bitmap, bsize);
 		
@@ -571,7 +574,7 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	void ObjectService::resetMinMaxID() {
-		ConfigServicePtr cfp = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
+		ConfigServicePtr cfp = static_pointer_cast<ConfigService>(ServiceManager::getSingleton().getService("ConfigService"));
 		
 		DVariant val;
 		// Config Values: obj_min, obj_max

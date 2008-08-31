@@ -80,7 +80,7 @@ namespace Opde {
 		// Ensure link listeners are created
 		mServiceManager->createByMask(SERVICE_LINK_LISTENER);
 
-		mDatabaseService = ServiceManager::getSingleton().getService("DatabaseService").as<DatabaseService>();
+		mDatabaseService = static_pointer_cast<DatabaseService>(ServiceManager::getSingleton().getService("DatabaseService"));
 	}
 
 	//------------------------------------------------------
@@ -92,7 +92,7 @@ namespace Opde {
 		The Relations chunk should be present, and the same for all File Groups
 		As we do not know if something was already initialised or not, we just request mapping and see if it goes or not
 		*/
-		BinaryServicePtr bs = ServiceManager::getSingleton().getService("BinaryService").as<BinaryService>();
+		// BinaryServicePtr bs = static_pointer_cast<DatabaseService>(ServiceManager::getSingleton().getService("BinaryService"));
 
 		FilePtr rels = db->getFile("Relations");
 

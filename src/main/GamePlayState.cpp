@@ -41,7 +41,7 @@ namespace Opde {
 
 	template<> GamePlayState* Singleton<GamePlayState>::ms_Singleton = 0;
 
-	GamePlayState::GamePlayState() : mSceneMgr(NULL), mDebugOverlay(NULL), mToLoadScreen(true) {
+	GamePlayState::GamePlayState() : mSceneMgr(NULL), mToLoadScreen(true), mDebugOverlay(NULL) {
 	    /// Register as a command listener, so we can load different levels
 	  Opde::ConsoleBackend::getSingleton().registerCommandListener("load", dynamic_cast<ConsoleCommandListener*>(this));
 		Opde::ConsoleBackend::getSingleton().setCommandHint("load", "Loads a specified mission file");
@@ -56,9 +56,7 @@ namespace Opde {
 		mSceneDisplay = false;
 
         // Try to remap the parameters with those listed in the configuration
-		mConfigService = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
-        GameStateManager* gsm = GameStateManager::getSingletonPtr();
-
+		mConfigService = static_pointer_cast<ConfigService>(ServiceManager::getSingleton().getService("ConfigService"));
 
         if (mConfigService->hasParam("move_speed"))
 					mMoveSpeed = mConfigService->getParam("move_speed").toFloat();
@@ -106,8 +104,7 @@ namespace Opde {
 
 	void GamePlayState::start() {
     LOG_INFO("GamePlayState: Starting");
-		PropertyGroup* posPG = ServiceManager::getSingleton().getService("PropertyService").
-			as<PropertyService>()->getPropertyGroup("Position");
+		PropertyGroup* posPG = static_pointer_cast<PropertyService>(ServiceManager::getSingleton().getService("PropertyService"))->getPropertyGroup("Position");
 		
 		if (posPG == NULL)
 			OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "GamePlayState::start");
@@ -126,7 +123,7 @@ namespace Opde {
 		
 //		std::string tmp = PropertyGroup->get(StartingPointObjID, "SymName").toString();
 		mSceneMgr = mRoot->getSceneManager( "DarkSceneManager" );
-		RenderServicePtr renderSrv = ServiceManager::getSingleton().getService("RenderService").as<RenderService>();
+		RenderServicePtr renderSrv = static_pointer_cast<RenderService>(ServiceManager::getSingleton().getService("RenderService"));
 		
 		mCamera = renderSrv->getDefaultCamera();
 		mViewport = renderSrv->getDefaultViewport();
@@ -459,7 +456,7 @@ namespace Opde {
 	}
 
 	void GamePlayState::bootstrapFinished() {
-		mLinkService = ServiceManager::getSingleton().getService("LinkService").as<LinkService>();
+		mLinkService = static_pointer_cast<LinkService>(ServiceManager::getSingleton().getService("LinkService"));
 		Relation::ListenerPtr metaPropCallback =
 			new ClassCallback<LinkChangeMsg, GamePlayState>(this, &GamePlayState::onLinkPlayerFactoryMsg);
 

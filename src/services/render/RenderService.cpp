@@ -65,12 +65,12 @@ namespace Opde {
 	/*--------------------- RenderService --------------------*/
 	/*--------------------------------------------------------*/
 	RenderService::RenderService(ServiceManager *manager, const std::string& name) : Service(manager, name), 
-			mSceneMgr(NULL), 
 			mRoot(NULL), 
+			mSceneMgr(NULL), 
 			mRenderWindow(NULL),
 			mDarkSMFactory(NULL), 
-			mLoopService(NULL),
 			mDefaultCamera(NULL),
+			mLoopService(NULL),
 			mEditorMode(false) {
 	    // TODO: This is just plain wrong. This service should be the maintainer of the used scene manager, if any other service needs the direct handle, etc.
 	    // The fact is this service is probably game only, and should be the initialiser of graphics as the whole. This will be the
@@ -167,7 +167,7 @@ namespace Opde {
 		mRenderWindow->addViewport( mDefaultCamera );
 
 		// Last step: Get the loop service and register as a listener
-		mLoopService = ServiceManager::getSingleton().getService("LoopService").as<LoopService>();
+		mLoopService = static_pointer_cast<LoopService>(ServiceManager::getSingleton().getService("LoopService"));
 		mLoopService->addLoopClient(this);
 		
 		// prepare the default models and textures
@@ -256,7 +256,7 @@ namespace Opde {
 		// contact the config. service, and look for the inheritance link name
 		// TODO: ConfigurationService::getKey("Core","InheritanceLinkName").toString();
 
-		mPropertyService = ServiceManager::getSingleton().getService("PropertyService").as<PropertyService>();
+		mPropertyService = static_pointer_cast<PropertyService>(ServiceManager::getSingleton().getService("PropertyService"));
 
 		// TODO: hardcoded property name, but that's hopefully not a problem after all
 		
@@ -333,7 +333,7 @@ namespace Opde {
 		// to fix this, we should create a handler for that property
 
 		// ===== OBJECT SERVICE LISTENER =====
-		mObjectService = ServiceManager::getSingleton().getService("ObjectService").as<ObjectService>();
+		mObjectService = static_pointer_cast<ObjectService>(ServiceManager::getSingleton().getService("ObjectService"));
 		
 		// Listener to object messages
 		ObjectService::ListenerPtr objlist =

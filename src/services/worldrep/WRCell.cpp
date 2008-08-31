@@ -173,7 +173,7 @@ namespace Opde {
 			for (lmap = 0; lmap < lmcount; lmap++) {
 				// 11. Read one lightmap
 				lmaps[i][lmap] =  new uint8_t[lmsize];
-				chunk->read(&(lmaps[i][lmap][0]), lmsize);
+				chunk->read(lmaps[i][lmap], lmsize);
 			}
 		}
 

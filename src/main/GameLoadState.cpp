@@ -46,7 +46,8 @@ namespace Opde {
         mRoot = Root::getSingletonPtr();
 		mOverlayMgr = OverlayManager::getSingletonPtr();
 		mServiceMgr = ServiceManager::getSingletonPtr();
-		mConfigService = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
+		
+		mConfigService = static_pointer_cast<ConfigService>(ServiceManager::getSingleton().getService("ConfigService"));
 
 		mFontTest = false;
 
@@ -101,7 +102,7 @@ namespace Opde {
 		mSceneMgr->addSpecialCaseRenderQueue(RENDER_QUEUE_OVERLAY);
 		mSceneMgr->setSpecialCaseRenderQueueMode(SceneManager::SCRQM_INCLUDE);
 
-		RenderServicePtr renderSrv = ServiceManager::getSingleton().getService("RenderService").as<RenderService>();
+		RenderServicePtr renderSrv = static_pointer_cast<RenderService>(ServiceManager::getSingleton().getService("RenderService"));
 		
 		mCamera = renderSrv->getDefaultCamera();
 		mViewport = renderSrv->getDefaultViewport();
@@ -159,9 +160,9 @@ namespace Opde {
 
 			mRoot->renderOneFrame();
 
-			GameServicePtr gsvc = mServiceMgr->getService("GameService").as<GameService>();
+			GameServicePtr gsvc = static_pointer_cast<GameService>(mServiceMgr->getService("GameService"));
 
-      std::string misFile = mConfigService->getParam("mission");
+			std::string misFile = mConfigService->getParam("mission");
 
 			gsvc->load(misFile);
 
