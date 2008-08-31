@@ -33,6 +33,8 @@
 using namespace std;
 
 namespace Opde {
+	// size of the link header (id, src, dest, flav)
+	static size_t LinkStructSize = 14;
 
     /*-----------------------------------------------------*/
 	/*--------------------- LinkQueries -------------------*/
@@ -113,8 +115,6 @@ namespace Opde {
 		assert(!mIsInverse);
 		
 		// load the links and thei're data
-		BinaryServicePtr bs = ServiceManager::getSingleton().getService("BinaryService").as<BinaryService>();
-
 		// Link chunk name
 		string lchn = "L$" + mName;
 		string ldchn = "LD$" + mName;
@@ -142,18 +142,15 @@ namespace Opde {
 			}
 		}
 
-		DTypeDefPtr linkstruct = bs->getType("links", "LINK");
-
-		size_t lsize = linkstruct->size();
-
 		// now load the data
-		size_t link_count = flink->size() / lsize;
+		size_t link_count = flink->size() / LinkStructSize;
 		size_t link_data_count = 0;
 
 		// if the chunk LD exists, and contains at least the data size, load the data size, and set to load data as well
 		bool load_data = false;
 		int dsize = 0;
 
+		// TODO: Defer this to link data dedicated class
 		if (fldata->size() > sizeof(uint32_t)) {
 			fldata->readElem(&dsize, sizeof(uint32_t));
 
@@ -209,17 +206,15 @@ namespace Opde {
 			}
 		}
 
-		char* dlink = new char[lsize];
-
 		for (unsigned int idx = 0; idx < link_count; idx++) {
-			flink->read(dlink, lsize);
+			LinkStruct slink;
+			
+			flink->readElem(&slink.id, sizeof(uint32_t));
+			flink->readElem(&slink.src, sizeof(int32_t));
+			flink->readElem(&slink.dest, sizeof(int32_t));
+			flink->readElem(&slink.flavor, sizeof(uint16_t));
 
-			LinkPtr link = LinkPtr(new Link(
-				linkstruct->get(dlink, "id").toUInt(),
-				linkstruct->get(dlink, "src").toInt(),
-				linkstruct->get(dlink, "dest").toInt(),
-				linkstruct->get(dlink, "flavor").toUInt()
-			));
+			LinkPtr link = new Link(slink);
 
 			LOG_VERBOSE("Relation (%s - %d): Read link ID %d, from %d to %d (F,C,IX: %d, %d, %d)",
 				  mName.c_str(),
@@ -244,8 +239,6 @@ namespace Opde {
 			mInverse->_addLink(ilink);
 		}
 
-		delete[] dlink;
-
 		LOG_DEBUG("Relation (%s - %d): Done!",
 				  mName.c_str(),
 				  mID);
@@ -256,9 +249,6 @@ namespace Opde {
 		assert(!mIsInverse);
 		
 		LOG_DEBUG("Relation::save Saving relation %s", mName.c_str());
-
-		// load the links and thei're data
-		BinaryServicePtr bs = ServiceManager::getSingleton().getService("BinaryService").as<BinaryService>();
 
 		// Link chunk name
 		string lchn = "L$" + mName;
@@ -278,10 +268,6 @@ namespace Opde {
 		fldt->writeElem(&mFakeSize, sizeof(uint32_t));
 
 		// No need to order those. If it shows up that it would be actually better, no problem sorting those by link_id_t
-		DTypeDefPtr linkstruct = bs->getType("links", "LINK");
-
-		char* lnkdta = linkstruct->create();
-
 		// just write the links as they go, and write the data in parallel
 		LinkMap::const_iterator it = mLinkMap.begin();
 
@@ -293,19 +279,21 @@ namespace Opde {
 			int conc = LINK_ID_CONCRETE(link->mID);
 
 			if (saveMask & (1 << conc)) { // mask says save!
-				// write according to the structure
-				linkstruct->set(lnkdta, "id", link->mID);
-				linkstruct->set(lnkdta, "src", link->mSrc);
-				linkstruct->set(lnkdta, "dest", link->mDst);
-				linkstruct->set(lnkdta, "flavor", link->mFlavor);
-
-				flnk->write(lnkdta, linkstruct->size());
+				LinkStruct slink;
+				
+				slink.id = link->mID;
+				slink.src = link->mSrc;
+				slink.dest = link->mDst;
+				slink.flavor = link->mFlavor;
+				
+				flnk->writeElem(&slink.id, sizeof(uint32_t));
+				flnk->writeElem(&slink.src, sizeof(int32_t));
+				flnk->writeElem(&slink.dest, sizeof(int32_t));
+				flnk->writeElem(&slink.flavor, sizeof(uint16_t));
 			} else {
 				LOG_DEBUG("Relation (%s): Link concreteness of link %d was out of requested : %d", mName.c_str(), link->mID, conc);
 			}
 		}
-
-		delete lnkdta;
 
 		// just write the links as they go, and write the data in parallel
 		LinkDataMap::const_iterator dit = mLinkDataMap.begin();
