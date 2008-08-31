@@ -61,7 +61,7 @@ namespace Opde {
 
         public:
 			PrioritizedMessageSource() {};
-			~PrioritizedMessageSource() { mListeners.clear(); };
+			virtual ~PrioritizedMessageSource() { mListeners.clear(); };
 
 			/** Registers a listener.
 			* @param listener A pointer to L
