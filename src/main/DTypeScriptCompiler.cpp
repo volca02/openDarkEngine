@@ -266,14 +266,15 @@ namespace Opde {
 			if (mCurrentState.state == CS_ENUM)
 				logParseError("Struct inside enum error.");
 
-			DTypeDefPtr nt = new DTypeDef(was.name, was.types, was.unioned);
-
+			DTypeDefPtr nt;
+			
 			// if specified an array, wrap it up so
 			if (was.arraylen > 1) {
 				// wrap up
-				DTypeDef *nta = new DTypeDef(nt, was.arraylen);
-
-				nt = nta;
+				DTypeDefPtr nelem = new DTypeDef(was.name, was.types, was.unioned);
+				nt = new DTypeDef(nelem, was.arraylen);
+			} else {
+				nt = new DTypeDef(was.name, was.types, was.unioned);
 			}
 
 			// create the struct according to the 'was' structure fields

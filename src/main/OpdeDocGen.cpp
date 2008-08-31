@@ -438,7 +438,7 @@ int main(int argc, char**argv) {
     } catch( BasicException& e ) {
         std::cerr << "An exception has occured: " <<
             e.getDetails().c_str() << std::endl;
-	rv = 2; // exit code 1 - opde error
+		rv = 2; // exit code 1 - opde error
     }
 
     return rv;

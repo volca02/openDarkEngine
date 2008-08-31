@@ -320,7 +320,7 @@ namespace Opde {
                 static String stt = "Traversal Time: ";
                 static String ssr = "Static Build Time: ";
 
-                uint bculls, eports, rendc, travtm;
+                uint bculls = 0, eports = 0, rendc = 0, travtm = 0;
 
 				unsigned long statbt;
 
