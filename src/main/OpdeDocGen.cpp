@@ -196,7 +196,7 @@ namespace Opde {
 			}
 			
 			void genPropDocs(fstream& fo) {
-				PropertyServicePtr ps = ServiceManager::getSingleton().getService("PropertyService").as<PropertyService>();
+				PropertyServicePtr ps = static_pointer_cast<PropertyService>(ServiceManager::getSingleton().getService("PropertyService"));
 				
 				StringIteratorPtr pn = ps->getAllPropertyNames();
 				
@@ -270,7 +270,7 @@ namespace Opde {
 			}
 			
 			void genLinkDocs(fstream& fo) {
-				LinkServicePtr ls = ServiceManager::getSingleton().getService("LinkService").as<LinkService>();
+				LinkServicePtr ls = static_pointer_cast<LinkService>(ServiceManager::getSingleton().getService("LinkService"));
 				
 				StringIteratorPtr ln = ls->getAllLinkNames();
 				
@@ -383,7 +383,7 @@ namespace Opde {
 				mRoot = new Opde::Root(SERVICE_CORE);
 				// we want script autoload
 				mRoot->registerCustomScriptLoaders();
-				mConfigSvc = ServiceManager::getSingleton().getService("ConfigService").as<ConfigService>();
+				mConfigSvc = static_pointer_cast<ConfigService>(ServiceManager::getSingleton().getService("ConfigService"));
 			}
 		
 			~DocGenerator(void) {

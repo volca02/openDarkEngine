@@ -151,7 +151,7 @@ namespace Opde
 
 			if (object != NULL) 
 			{
-				object->mInstance = ServiceManager::getSingleton().getService(msName).as<LoopService>();
+				object->mInstance = static_pointer_cast<LoopService>(ServiceManager::getSingleton().getService(msName));
 			}
 			return (PyObject *)object;
 		}

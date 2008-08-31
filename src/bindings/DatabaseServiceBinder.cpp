@@ -190,7 +190,7 @@ namespace Opde {
 			Object* object = construct(&msType);
 
 			if (object != NULL) {
-				object->mInstance = ServiceManager::getSingleton().getService(msName).as<DatabaseService>();
+				object->mInstance = static_pointer_cast<DatabaseService>(ServiceManager::getSingleton().getService(msName));
 			}
 
 			return (PyObject *)object;

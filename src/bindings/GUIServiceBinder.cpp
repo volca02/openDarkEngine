@@ -156,7 +156,7 @@ namespace Opde {
 			Object* object = construct(&msType);
 
 			if (object != NULL) {
-				object->mInstance = ServiceManager::getSingleton().getService(msName).as<GUIService>();
+				object->mInstance = static_pointer_cast<GUIService>(ServiceManager::getSingleton().getService(msName));
 			}
 
 			return (PyObject *)object;

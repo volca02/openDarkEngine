@@ -251,7 +251,7 @@ namespace Opde {
 			Object* object = construct(&msType);
 
 			if (object != NULL) {
-				object->mInstance = ServiceManager::getSingleton().getService(msName).as<LinkService>();
+				object->mInstance = static_pointer_cast<LinkService>(ServiceManager::getSingleton().getService(msName));
 			}
 
 			return (PyObject *)object;
