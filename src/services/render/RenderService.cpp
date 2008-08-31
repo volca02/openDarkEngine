@@ -65,6 +65,13 @@ namespace Opde {
 	/*--------------------- RenderService --------------------*/
 	/*--------------------------------------------------------*/
 	RenderService::RenderService(ServiceManager *manager, const std::string& name) : Service(manager, name), 
+			mPropModelName(NULL),
+			mPropLight(NULL),
+			mPropSpotlight(NULL),
+			mPropPosition(NULL),
+			mPropScale(NULL),
+			mPropRenderType(NULL),
+			mPropRenderAlpha(NULL),
 			mRoot(NULL), 
 			mSceneMgr(NULL), 
 			mRenderWindow(NULL),
