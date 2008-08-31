@@ -33,6 +33,13 @@ namespace Opde {
 	/// Link ID type. 32bit number at least...
 	typedef unsigned int link_id_t;
 
+	typedef struct LinkStruct { // sLink-like, but this one contains id as well
+		uint32_t id;
+		int32_t src;
+		int32_t dest;
+		uint16_t flavor;
+	};
+
 	/** A link container. Contains source, destination, ID, flavour and link data
 	*/
 	class Link {
@@ -51,6 +58,13 @@ namespace Opde {
 				mDst(dst),
 				mFlavor(flavor) {	};
 
+			Link(const LinkStruct& ls) :
+				mID(ls.id),
+				mSrc(ls.src),
+				mDst(ls.dest),
+				mFlavor(ls.flavor) {
+			}
+
 			/// Copy constructor
 			Link(Link& b) :
 				mID(b.mID),
@@ -65,6 +79,7 @@ namespace Opde {
 	};
 
 	/** Link data container. Holds link ID and it's data as a char array.
+	* @deprecated This construct should be removed the same way the property data struct will be. Any link access should be handled by a properly made DataStorage descendant
 	*/
 	class LinkData : public DType {
 		friend class Relation;
@@ -154,8 +169,7 @@ namespace Opde {
 		/// The link itself. Do not modify!
 		const LinkPtr link;
 	};
-
-
+	
 /// Creates a link ID from flavour, concreteness and index
 #define LINK_MAKE_ID(flavor, concrete, index) (flavor<<20 | concrete << 16 | index)
 /// Extracts Flavor ID from the link ID
