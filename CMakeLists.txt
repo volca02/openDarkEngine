@@ -86,7 +86,8 @@ IF(CMAKE_COMPILER_IS_GNUCXX)
 	SET(CMAKE_C_FLAGS_DISTRIBUTION "-O3")
 	
 	# extra warnings, but no unused params (too common)
-	ADD_DEFINITIONS(-Wall)
+	# no strict aliasing (see Py_True type punned pointer aliasing errors)
+	ADD_DEFINITIONS(-Wall -fno-strict-aliasing)
 	#  -Wextra -Wno-unused-parameter
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
