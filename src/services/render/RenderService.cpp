@@ -376,7 +376,6 @@ namespace Opde {
         
    		LOG_VERBOSE("RenderService: A ModelName change happened : %s is new for %d", name.c_str(), msg.objectID);
 
-        // As a test, I'm loading cube.mesh
         switch (msg.change) {
 			case PROP_CHANGED:
 			case PROP_ADDED: {
