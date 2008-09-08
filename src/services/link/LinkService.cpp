@@ -84,6 +84,11 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
+	void LinkService::shutdown() {
+		mDatabaseService = NULL;
+	}
+
+	//------------------------------------------------------
 	void LinkService::load(const FileGroupPtr& db) {
 		LOG_INFO("LinkService: Loading link definitions from file group '%s'", db->getName().c_str());
 

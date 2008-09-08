@@ -122,6 +122,7 @@ namespace Opde {
 		protected:
             bool init();
             void bootstrapFinished();
+            void shutdown();
 
 			/** request a mapping Name->Flavor and reverse
 			* @param id The flavor value requested
