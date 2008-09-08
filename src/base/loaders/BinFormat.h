@@ -320,12 +320,12 @@ typedef struct {
 /// the main header of the LGMM
 typedef struct {
 	uint32_t            zeroes[3];      // Always seems to be 0
-    char            num_what1;         // '0'
-    char            num_mappers;         // Count for U2 (*20)
-    char            num_mats;       // Number of materials
-    char            num_joints;     // Number of joints?
-    int16_t           num_polys;        // Polygon count (Count for U4 * 16)
-    int16_t           num_vertices;       // Total Vertex count
+    unsigned char       num_what1;         // '0'
+    unsigned char       num_mappers;         // Count for U2 (*20)
+    char                num_mats;       // Number of materials
+    char                num_joints;     // Number of joints?
+    int16_t             num_polys;        // Polygon count (Count for U4 * 16)
+    int16_t             num_vertices;       // Total Vertex count
     uint32_t            num_stretchy;       // Stretchy Vertexes + x_count == p_count?
     uint32_t            offset_joint_remap;      // Joint map?, num_joints elements
     uint32_t            offset_mappers;      // joint mapping definitions
