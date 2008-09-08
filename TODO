@@ -34,8 +34,15 @@ Pre-0.3 release:
 	* Physics service has the ability to stop controling certain parts of the object's orientation/position. Need more info here - what does setPosition in obj. service do with it
 	* AND how the physics service should update the position of the object (in fact any service)?
 	    - seems the best way is that phys. service is a listener to the position/orientation of the object. when needing to set the position/orientation, it will call ObjService::setPos/Ori
-	
-    
+    * Decoupling of data representation and access. No more should the code be based on DType and DTypeDef classes (can be, but only internally).
+    * DTypeDef should have the variable length data option removed. There is property definition parameter designed just for that, and a dedicated variable length string data storage as well
+    * Redesign and reimplementation of some core properties. Those should be marked internal and be hardcoded.
+    * Possibility of property storage and implementation to be separate (for tools). This is done partially using optionality of the renderer listeners, but blind option for property group/data storage should do it better. That means core properties can reflect the values if blind is false as well.
+    * Basic type data storages - float data storage, integer data storage, bool data storage (binary array based)
+    * Advanced - structured templated data storage - something to be easilly personalised for the use with internal properties/link data that are structured (Property position for example). 
+    * On-the-fly max/min object id resets - should be partially implemented, but binary arrays need to be reallocated/repopulated then, this has to work (at least for editor mode)
+    * Documentation - how to implement code that makes the property live. How to implement contstraints between various properties.
+
 
 0.3 - 0.4:
     * Object Scripts. The whole infrastructure - Script Service, script message struct. Need more info/ideas here.
