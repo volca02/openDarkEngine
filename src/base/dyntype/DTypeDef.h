@@ -166,15 +166,15 @@ namespace Opde {
 			DTypeDef(const std::string& name, const DTypeDef& src);
 					
 			/// Constucts a possibly enumerated (if _enum member is not NULL) type with default value and type taken from templ
-			DTypeDef(const std::string& name, const DVariant& templ, int size, const DEnumPtr& _enum);
+			DTypeDef(const std::string& name, const DVariant& templ, size_t size, const DEnumPtr& _enum);
 			
 			/// Constucts a possibly enumerated (if _enum is not NULL) type with type taken from templ
-			DTypeDef(const std::string& name, DVariant::Type type, int size, const DEnumPtr& _enum);
+			DTypeDef(const std::string& name, DVariant::Type type, size_t size, const DEnumPtr& _enum);
 			
 			/** Construct an array type, with the type defined by member, and default value of the fields defined by member, sized size
 			* @note The base name is taken from the member
 			*/
-			DTypeDef(const DTypeDefPtr& member, int size);
+			DTypeDef(const DTypeDefPtr& member, size_t size);
 			
 			/// Construct a Structure with members defined by the list. If unioned is true, all the fields share the same start offset (0)
 			DTypeDef(const std::string& name, DTypeDefVector members, bool unioned = false);
@@ -204,21 +204,11 @@ namespace Opde {
 				return DTypeDefPtr(new DTypeDef(name, *this));
 			}
 			
-			/** Create a new data instance based on the default values. Deallocation of the returned data is to be done by caller */
-			char* create();
+			/** Returns the size of this type definition */
+			size_t size();
 			
-			/** Returns the size of this type definition, or -1 if variable sized
-			* @note use size(char* data) for dynamically sized typedefs */
-			int size();
-			
-			int size(char *dataptr) {
-				int sz = size();
-				if (sz < 0) {
-					return static_cast<uint32_t>(*dataptr) + sizeof(uint32_t);
-				} else {
-					return sz;
-				}
-			}
+			/** Initializes the given data pointer (has to be allocated to the length of at least size()) */
+			void toDefaults(char* data);
 			
 			/** Get the value of the field specified by name, reading the data from the dataptr mem. location 
 			* @note The field name has to exist, and has to be a simple field (Not array/union/struct field) 
@@ -226,9 +216,10 @@ namespace Opde {
 			DVariant get(char* dataptr, const std::string& field);
 			
 			/** Sets the data of a certain field.
-			* @return New pointer if the data must have been reallocated (var-length string), otherwise NULL 
-			* @note Even if reallocation took place, the old data are NOT deleted by this method */
-			char* set(char* dataptr, const std::string& field, const DVariant& nval);
+			* @param dataptr The pointer to the data to fill
+			* @param field the field to set
+			* @param nval the new value to use */
+			void set(char* dataptr, const std::string& field, const DVariant& nval);
 			
 			/** Get the definition of a specific field from the built cache
 			* @note The field name has to exist, and has to be a simple field (Not array/union/struct field) */
@@ -256,12 +247,12 @@ namespace Opde {
 				std::string	name; // Absolute name
 				DTypeDefPtr 	type;
 				
-				inline char* set(char* dataptr, const DVariant& val) const {
-					return type->_set(reinterpret_cast<char*>(dataptr) + offset, val);
+				inline void set(char* dataptr, const DVariant& val) const {
+					type->_set(reinterpret_cast<char*>(dataptr) + offset, val);
 				}
 				
-				inline char* setDefault(char* dataptr) const {
-					return type->_set(reinterpret_cast<char*>(dataptr) + offset, type->getDefault());
+				inline void setDefault(char* dataptr) const {
+					type->_set(reinterpret_cast<char*>(dataptr) + offset, type->getDefault());
 				}
 				
 				inline DVariant get(char* dataptr) const {
@@ -299,9 +290,9 @@ namespace Opde {
 			
 			/** Internal field setter 
 			* @param ptr Direct pointer to the start of the data to be set 
-			* @return ptr if there was no reallocation needed, new pointer if reallocation was done (var length string)
+			* @param val the value to set the field to
 			*/
-			char* _set(char* ptr, const DVariant& val);
+			void _set(char* ptr, const DVariant& val);
 			
 			/** find field def by it's name (or throw an error if not found) */
 			FieldDef& getByName(const std::string& name);
@@ -337,7 +328,7 @@ namespace Opde {
 			DType(const DType& b, bool useCache = false) : mUseCache(useCache), mCache() {
 				char* odata = mData;
 				
-				int sz = b.size();
+				size_t sz = b.size();
 				mData = new char[sz];
 				
 				// copy the data
@@ -353,14 +344,15 @@ namespace Opde {
 			DType(const DTypeDefPtr& type, bool useCache = false) : mType(type), mUseCache(useCache) {
 				assert(!mType.isNull()); // no type def, no meaning!
 				
-				mData = mType->create();
+				mData = new char[mType->size()];
+				mType->toDefaults(mData);
 			}
 			
 			/** Constructor, using FilePtr to read the DType values 
 			* @param file The file used as data source 
 			* @param size The size of the data expected
 			* @note for dynamic size types (variable length strings), the size should be the overall length of the data (32bits size + the data itself) */
-			DType(const DTypeDefPtr& type, FilePtr& file, uint _size, bool useCache = false) : mType(type), mUseCache(useCache) {
+			DType(const DTypeDefPtr& type, FilePtr& file, size_t _size, bool useCache = false) : mType(type), mUseCache(useCache) {
 				mData = 0;
 				read(file, _size);
 			}
@@ -373,13 +365,7 @@ namespace Opde {
 			/** Value setter. 
 			* @see DTypeDef.set */
 			void set(const std::string& field, const DVariant& value) {
-				char* ndata = mType->set(mData, field, value);
-				
-				if (ndata != mData) {
-					char* odata = mData;
-					mData = ndata;
-					delete odata;
-				}
+				mType->set(mData, field, value);
 				
 				// cache value if so requested
 				if (mUseCache)
@@ -424,10 +410,9 @@ namespace Opde {
 				return *this;
 			}
 		
-			/** Real size of the data. 
-			@note In case of a dynamic field, returns the size of the uint32 + bytes the field is consisted of */
-			int size() const {
-				return mType->size(mData);
+			/** Real size of the data. */
+			size_t size() const {
+				return mType->size();
 			}
 			
 			/** Serializer. Writes the type data into a FilePtr
@@ -438,32 +423,13 @@ namespace Opde {
 			
 			/** Deserializer. Reads the type data into this instance
 			* @param file The file pointer to read from */
-			void read(FilePtr& file, int _size) {
+			void read(FilePtr& file, size_t _size) {
 				delete[] mData;
 				
-				if (mType->size() < 0) { // dyn. size. we have to use the size
-					// Size always has to be at least 4 bytes
-					assert(_size >= 4);
-					
-					mData = new char[_size];
-					
-					uint32_t size = 0;
-					
-					// Read the size
-					file->readElem(mData, sizeof(uint32_t));
-					
-					size = *(reinterpret_cast<uint32_t*>(mData));
-					
-					// inconsistency smells badly
-					assert(size == (_size - sizeof(uint32_t)));
-					
-					// Read the rest
-					file->read(&mData[sizeof(uint32_t)], size);
-				} else {
-					assert(size() == _size);
-					mData = mType->create();
-					file->read(mData, _size);
-				}
+				assert(size() == _size);
+				
+				mData = new char[mType->size()];
+				file->read(mData, _size);
 			}
 			
 			/** Type getter. 

@@ -244,6 +244,7 @@ namespace Opde {
 		mDefVal = src.mDefVal;
 		mTypeName = name;
 		mDefaultUsed = src.mDefaultUsed;
+		mPriv = src.mPriv;
 
 		// Build the field map from the original
 		if (!src.isField()) {
@@ -254,7 +255,7 @@ namespace Opde {
 
 	//------------------------------------
 	// Field constructor
-	DTypeDef::DTypeDef(const std::string& name, const DVariant& templ, int size, const DEnumPtr& _enum) : mTypeName(name), mDefVal(templ) {
+	DTypeDef::DTypeDef(const std::string& name, const DVariant& templ, size_t size, const DEnumPtr& _enum) : mTypeName(name), mDefVal(templ) {
 		// Check for constraints
 
 		// zero size is meaningles
@@ -291,7 +292,7 @@ namespace Opde {
 
 	//------------------------------------
 	// Field constructor, no default value
-	DTypeDef::DTypeDef(const std::string& name, const DVariant::Type type, int size, const DEnumPtr& _enum) : mTypeName(name), mDefVal() {
+	DTypeDef::DTypeDef(const std::string& name, const DVariant::Type type, size_t size, const DEnumPtr& _enum) : mTypeName(name), mDefVal() {
 		// Check for constraints
 
 		// zero size is meaningles
@@ -329,7 +330,7 @@ namespace Opde {
 
 	//------------------------------------
 	// Array constructor
-	DTypeDef::DTypeDef(const DTypeDefPtr& member, int size) : mTypeName(member->name()), mDefVal() {
+	DTypeDef::DTypeDef(const DTypeDefPtr& member, size_t size) : mTypeName(member->name()), mDefVal() {
 		// Check the member for being a dynamic length string (prohibited)
 		if (member->size() <= 0)
 			OPDE_EXCEPT("Dynamic sized type is not supported as a field", "DTypeDef::DTypeDef");
@@ -342,7 +343,7 @@ namespace Opde {
 
 		// Now build the field cache.
 		// Not as simple, as we have to insert all fields of the member inside
-		for (int i = 0; i < size; i++) {
+		for (unsigned int i = 0; i < size; i++) {
 			if (!member->isField()) {
 				const Fields& f = member->getFields();
 				Fields::const_iterator it = f.begin();
@@ -390,11 +391,6 @@ namespace Opde {
 	DTypeDef::DTypeDef(const std::string& name, DTypeDefVector members, bool unioned) :  mDefVal() {
 		// Check all the members, if any of those is variable length, throw an exception
 		DTypeDefVector::const_iterator mit = members.begin();
-
-		for (;mit != members.end(); mit++) {
-			if ((*mit)->isField() && (*mit)->size() <= 0) // Check only field types. Non-Field are checked anyway
-				OPDE_EXCEPT("Dynamic sized type is not supported as a field", "DTypeDef::DTypeDef");
-		}
 
 		mTypeName = name;
 
@@ -464,6 +460,8 @@ namespace Opde {
 
 	//------------------------------------
 	DTypeDef::~DTypeDef() {
+		mFields.clear();
+		mPriv = NULL;
 	}
 
 	//------------------------------------
@@ -490,48 +488,27 @@ namespace Opde {
 	}
 
 	//------------------------------------
-	char* DTypeDef::create() {
-		char* data = NULL;
+	void DTypeDef::toDefaults(char* data) {
+		// could've used memset but some say C++ concepts should not be mixed with C ones...
+		for (unsigned int x = 0; x < size(); ++x)
+			data[x] = '\0';
 
-		if (size() < 0) {
-			// dynamic sized can be only field. I know set on dyn field will always return a new pointer
-			if (mDefaultUsed) {
-				data = _set(data, mDefVal);
-				return data;
-			} else {
-				data = new char[sizeof(uint32_t)];
-
-				uint32_t* lenptr = (uint32_t*)(data); // TODO: Big-endian
-				*lenptr = 0;
-
-				return data;
-			}
+		if (isField()) {
+			if (mDefaultUsed)
+				_set(data, mDefVal);
 		} else {
-			char* data = new char[size()];
+			// iterate the fields. If the field has a default value, fill
+			Fields::iterator it = mFields.begin();
 
-			// memset anyone?
-			for (int x = 0; x < size(); ++x)
-				data[x] = '\0';
-
-			if (isField()) {
-				if (mDefaultUsed)
-					_set(data, mDefVal);
-			} else {
-				// iterate the fields. If the field has a default value, fill
-				Fields::iterator it = mFields.begin();
-
-				for (; it != mFields.end(); ++it) {
-					if (it->type->hasDefault()) 
-						it->set(data, it->type->getDefault());
-				}
+			for (; it != mFields.end(); ++it) {
+				if (it->type->hasDefault()) 
+					it->set(data, it->type->getDefault());
 			}
-			
-			return data;
 		}
 	}
 
 	//------------------------------------
-	int DTypeDef::size() {
+	size_t DTypeDef::size() {
 		return mPriv->size();
 	}
 
@@ -572,9 +549,11 @@ namespace Opde {
 	}
 
 	//------------------------------------
-	char* DTypeDef::set(char* dataptr, const std::string& field, const DVariant& nval) {
-		if (isField()) //  && field=="" - I do not waste time to check, I choose to believe!
-			return _set(dataptr, nval);
+	void DTypeDef::set(char* dataptr, const std::string& field, const DVariant& nval) {
+		if (isField()) { //  && field=="" - I do not waste time to check, I choose to believe!
+			_set(dataptr, nval);
+			return;
+		}
 
 		FieldDef& fld = getByName(field);
 
@@ -582,7 +561,7 @@ namespace Opde {
 			OPDE_EXCEPT("Field set resulted in non-field _set","DTypeDef::set");
 
 		// offset the data and call the getter
-		return fld.type->_set(((char *)dataptr) + fld.offset, nval);
+		fld.type->_set(((char *)dataptr) + fld.offset, nval);
 	}
 
 	//------------------------------------
@@ -629,19 +608,9 @@ namespace Opde {
 			}
 
 		} else if(mPriv->type() == DVariant::DV_STRING) {
-			// special - either zero terminated, fixed size, or length specified as a first byte.
-			// I can only support the variable length string alone, which is ok
-			if (mPriv->size() == -1) {// Variable length string
-				// First 4 bytes size uint, then data
-				uint32_t* uptr = reinterpret_cast<uint32_t*>(ptr);
-				uint32_t len = readLE<uint32_t>(ptr);
-
-				return DVariant(reinterpret_cast<char*>(uptr + 1), len);
-			} else {
-				// compose a string out of the buffer (max len is mSize, can be less)
-				int len = strlen(reinterpret_cast<char*>(ptr));
-				return DVariant(reinterpret_cast<char*>(ptr), std::min(mPriv->size(), len));
-			}
+			// compose a string out of the buffer (max len is mSize, can be less)
+			int len = strlen(reinterpret_cast<char*>(ptr));
+			return DVariant(reinterpret_cast<char*>(ptr), std::min(mPriv->size(), len));
 		} else if(mPriv->type() == DVariant::DV_VECTOR) {
 			float x, y, z;
 			float* fptr = (float*)ptr;
@@ -684,7 +653,7 @@ namespace Opde {
 	}
 
 	//------------------------------------
-	char* DTypeDef::_set(char* ptr, const DVariant& val) {
+	void DTypeDef::_set(char* ptr, const DVariant& val) {
 	    // TODO: Big/Little endian fixes
 
 		if (mPriv->type() == DVariant::DV_BOOL) {
@@ -692,15 +661,15 @@ namespace Opde {
 				case 1:
 					// *reinterpret_cast<uint8_t*>(ptr) = val.toBool();
 					writeLE<uint8_t>(ptr, val.toBool());
-					return ptr;
+					return;
 
 				case 2:
 					writeLE<uint16_t>(ptr, val.toBool());
-					return ptr;
+					return;
 
 				case 4:
 					writeLE<uint32_t>(ptr, val.toBool());
-					return ptr;
+					return;
 
 				default:
 					OPDE_EXCEPT("Unsupported bool size", "DTypeDef::_set");
@@ -710,11 +679,11 @@ namespace Opde {
 			switch (mPriv->size()) {
 				case 4:
 					writeLE<float>(ptr, val.toFloat());
-					return ptr;
+					return;
 
 				case 8:
 					writeLE<double>(ptr, val.toFloat());
-					return ptr;
+					return;
 
 				default:
 					OPDE_EXCEPT("Unsupported float size", "DTypeDef::_set");
@@ -724,14 +693,14 @@ namespace Opde {
 			switch (mPriv->size()) {
 				case 1:
 					writeLE<int8_t>(ptr, val.toInt());
-					return ptr;
+					return;
 				case 2:
 					writeLE<int16_t>(ptr, val.toInt());
-					return ptr;
+					return;
 
 				case 4:
 					writeLE<int32_t>(ptr, val.toInt());
-					return ptr;
+					return;
 
 				default:
 					OPDE_EXCEPT("Unsupported int size", "DTypeDef::_set");
@@ -741,68 +710,45 @@ namespace Opde {
 			switch (mPriv->size()) {
 				case 1:
 					writeLE<uint8_t>(ptr, val.toUInt());
-					return ptr;
+					return;
 
 				case 2:
 					writeLE<uint16_t>(ptr, val.toUInt());
-					return ptr;
+					return;
 
 				case 4:
 					writeLE<uint32_t>(ptr, val.toUInt());
-					return ptr;
+					return;
 
 				default:
 					OPDE_EXCEPT("Unsupported int size", "DTypeDef::_set");
 			}
 
 		} else if(mPriv->type() == DVariant::DV_STRING) {
-				// special - either zero terminated, fixed size, or length specified as a first byte.
-				// I can only support the variable length string alone, which is ok
-				if (mPriv->size() == -1) {// Variable length string
-					/* I would have to look at the previous size of the void, which I do not have.
-					 I simply alloc a new one and let the caller do the deallocation and stuff
-					*/
-					const std::string& s = val.toString();
+			char* cptr = reinterpret_cast<char*>(ptr);
 
-					int size = s.length() + 1;
+			const std::string& s = val.toString();
 
-					char* newptr = new char[size + sizeof(uint32_t)];
+			int len = s.length();
 
-					// First 4 bytes size uint, then data
-					writeLE<uint32_t>(newptr, size);
+			// Copy the string to the buffer. Limit by 1 to have a trailing zero at end
+			s.copy(reinterpret_cast<char*>(ptr), mPriv->size() - 1);
 
-					// now copy the string
-					s.copy(&newptr[sizeof(uint32_t)], size - 1);
+			// Terminating zero.
+			cptr[min(mPriv->size() - 1, len)] = '\0';
 
-					// terminate. the string
-					newptr[size + sizeof(uint32_t) - 1] = '\0';
-
-					return newptr;
-				} else {
-					char* cptr = reinterpret_cast<char*>(ptr);
-
-					const std::string& s = val.toString();
-
-					int len = s.length();
-
-					// Copy the string to the buffer. Limit by 1 to have a trailing zero at end
-					s.copy(reinterpret_cast<char*>(ptr), mPriv->size() - 1);
-
-					// Terminating zero.
-					cptr[min(mPriv->size() - 1, len)] = '\0';
-
-					return ptr;
-				}
+			return;
+			
 		} else if(mPriv->type() == DVariant::DV_VECTOR) {
-				float* fptr = reinterpret_cast<float*>(ptr);
+			float* fptr = reinterpret_cast<float*>(ptr);
 
-				Vector3 v = val.toVector();
+			Vector3 v = val.toVector();
 
-				writeLE<float>(fptr, v.x);
-				writeLE<float>(fptr+1, v.y);
-				writeLE<float>(fptr+2, v.z);
+			writeLE<float>(fptr, v.x);
+			writeLE<float>(fptr+1, v.y);
+			writeLE<float>(fptr+2, v.z);
 
-				return ptr;
+			return;
 		} else if(mPriv->type() == DVariant::DV_QUATERNION) {
 			int16_t* vptr = reinterpret_cast<int16_t*>(ptr);
 			
@@ -821,7 +767,7 @@ namespace Opde {
 			writeLE<int16_t>(vptr + 1, static_cast<int16_t>(y.valueRadians() * 32768 / Math::PI));
 			writeLE<int16_t>(vptr + 2, static_cast<int16_t>(z.valueRadians() * 32768 / Math::PI));
 
-			return ptr;
+			return;
 		} else {
 			OPDE_EXCEPT("Unsupported _set type", "DTypeDef::_set");
 		}
