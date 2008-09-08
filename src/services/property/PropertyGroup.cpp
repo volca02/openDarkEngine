@@ -59,6 +59,8 @@ namespace Opde {
 
 		if (! mInheritor.isNull())
 			mInheritor->unregisterListener(mInheritorListenerID);
+			
+		mInheritor = NULL;
 	}
 	
 	// --------------------------------------------------------------------------
