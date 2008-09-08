@@ -181,6 +181,9 @@ namespace Opde {
 			
 			/** @see DataStorage::getAllStoredObjects */
 			virtual IntIteratorPtr getAllStoredObjects();
+
+			/** @see DataStorage::getFieldDescIterator */
+			virtual DataFieldDescIteratorPtr getFieldDescIterator(void);
 		
 		protected: 
 			
@@ -221,9 +224,6 @@ namespace Opde {
 				protected:
 					int mZero;
 			};
-			
-			/** @see DataStorage::getFieldDescIterator */
-			virtual DataFieldDescIteratorPtr getFieldDescIterator(void);
 			
 			/// Field description pre-prepared iterator
 			DTypeDefFieldDesc mFieldDesc;
