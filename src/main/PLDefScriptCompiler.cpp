@@ -202,10 +202,6 @@ namespace Opde {
 					     	mCurrentState.dminor
 					     );
 		} else if (mCurrentState.state == CS_PROPERTY) {
-			DTypeDefPtr dt;
-
-			dt = getTypeDef("properties", mCurrentState.dtypename);
-
 			if (mCurrentState.label == "") // default to property chunk name silently
 				mCurrentState.label = mCurrentState.name;
 
@@ -215,6 +211,10 @@ namespace Opde {
 			if (mCurrentState.ptype == "varstr") {
 				stor = new StringDataStorage();
 			} else {
+				DTypeDefPtr dt;
+
+				dt = getTypeDef("properties", mCurrentState.dtypename);
+				
 				stor = new StructuredDataStorage(dt, mCurrentState.cached); 
 			}
 			
