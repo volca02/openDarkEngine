@@ -71,6 +71,13 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	PropertyService::~PropertyService() {
+		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
+		
+		for( ; it != mPropertyGroupMap.end(); ++it) {
+			delete it->second;
+		}
+		
+		mPropertyGroupMap.clear();
 	}
 
     // --------------------------------------------------------------------------
