@@ -153,7 +153,10 @@ namespace Opde {
 			
 		protected:
 			bool init();
+			
 			void bootstrapFinished();
+			
+			void shutdown();
 
 			/** Database change callback */
 			void onDBChange(const DatabaseChangeMsg& m);

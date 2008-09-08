@@ -52,8 +52,6 @@ namespace Opde {
 
 	//------------------------------------------------------
 	ObjectService::~ObjectService() {
-		if (!mDatabaseService.isNull())
-	        mDatabaseService->unregisterListener(mDbCallback);
 	}
 
 
@@ -254,6 +252,20 @@ namespace Opde {
 		mSymNameStorage = new SymNamePropertyStorage();
 
 		mPropSymName->setPropertyStorage(mSymNameStorage);
+	}
+	
+	//------------------------------------------------------
+	void ObjectService::shutdown() {
+		if (!mDatabaseService.isNull())
+	        mDatabaseService->unregisterListener(mDbCallback);
+	        
+		mPropertyService = NULL;
+		mLinkService = NULL;
+		mInheritService = NULL;
+		
+		mPropPosition = NULL;
+		mPropSymName = NULL;
+		mSymNameStorage = NULL; 
 	}
 	
 	//------------------------------------------------------
