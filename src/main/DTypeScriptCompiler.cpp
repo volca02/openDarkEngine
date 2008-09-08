@@ -84,7 +84,7 @@ namespace Opde {
 
 		"<Variant_Type> ::= 'uint' | 'int' | 'float' | 'bool' | 'string' | 'vector' \n"
 
-		"<String_Type> ::= <Fixed_String> | 'varstr' \n"
+		"<String_Type> ::= <Fixed_String> \n"
 
 		"<Fixed_String> ::= 'char' <Array_Spec> \n"
 
@@ -170,8 +170,6 @@ namespace Opde {
 		addLexemeTokenAction("shortvec", ID_SHORTVECTOR, &DTypeScriptCompiler::parseField);
 
 		addLexemeTokenAction("char", ID_CHAR, &DTypeScriptCompiler::parseField);
-
-		addLexemeTokenAction("varstr", ID_VARSTR, &DTypeScriptCompiler::parseField);
 	}
 
 	//-----------------------------------------------------------------------
@@ -499,9 +497,7 @@ namespace Opde {
 			case ID_FLOAT  : return DVariant::DV_FLOAT;
 
 			case ID_STRING :
-			case ID_CHAR:
-			case ID_VARSTR : return DVariant::DV_STRING;
-
+			case ID_CHAR: return DVariant::DV_STRING;
 
 			case ID_VECTOR : return DVariant::DV_VECTOR;
 			
@@ -534,8 +530,6 @@ namespace Opde {
 			
 			case ID_SHORTVECTOR : return 6;
 
-			case ID_VARSTR : return -1;
-
 			default :
 				logParseError("Invalid type specified or size can't be determined");
 				return 0;	//To keep MSVC happy
@@ -561,6 +555,7 @@ namespace Opde {
 		} else
 			datasize = getDataLenFromID(typei);
 
+		
 		// Look at the next token. it can either be 'use', array spec '[' or direct name of the field
 		if (testNextTokenID(ID_USE)) {
 			// use enumeration
