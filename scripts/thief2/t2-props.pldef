@@ -55,6 +55,7 @@ property AI_RngFle {
 property BloodType {
 	label "BloodType"
 	p_ver 2.17
+	type varstr	
 }
 
 property MinSpchPa {
@@ -199,6 +200,7 @@ property Z-Bias {
 property AI_SndTag {
 	label "AISoundTags"
 	p_ver 2.17
+	type varstr
 }
 
 property StTweqEmi {
@@ -316,6 +318,7 @@ property Automap {
 property Book {
 	label "BookText"
 	p_ver 2.17
+	type varstr
 }
 
 property BaseWpnDm {
@@ -331,6 +334,7 @@ property AI_AlertC {
 property OTxtRepr0 {
 	label "TextureReplace0"
 	p_ver 2.17
+	type varstr
 }
 
 property NoDrop {
@@ -473,6 +477,7 @@ property Scripts {
 property ModeChang {
 	label "ModeChangeMetaproperty"
 	p_ver 2.65553
+	type varstr
 }
 
 property CSPropert {
@@ -563,6 +568,7 @@ property WeaponDam {
 property TerrRepOn {
 	label "TerrainReplaceOn"
 	p_ver 2.17
+	type varstr
 }
 
 property Blood {
@@ -670,6 +676,7 @@ property ObjShad {
 property TrapQVar {
 	label "TrapQuestVariable"
 	p_ver 2.17
+	type varstr
 }
 
 property SchLoopPa {
@@ -798,6 +805,7 @@ property AI_Effici {
 property ParticleT {
 	label "ParticleType"
 	p_ver 2.17
+	type varstr
 }
 
 property FaceStat {
@@ -906,6 +914,7 @@ property DonorType {
 property OTxtRepr3 {
 	label "TextureReplace3"
 	p_ver 2.17
+	type varstr
 }
 
 property AI_InfFrm {
@@ -919,6 +928,7 @@ property AI_SeesPr {
 property InvCycleO {
 	label "InventoryCycleOrder"
 	p_ver 2.65553
+	type varstr
 }
 
 property AnimLight {
@@ -930,6 +940,7 @@ property AnimLight {
 property BookArt {
 	label "BookArt"
 	p_ver 2.17
+	type varstr	
 }
 
 property MaxSpchPa {
@@ -963,6 +974,7 @@ property BashParam {
 property GameName {
 	label "ObjectName"
 	p_ver 2.65553
+	type varstr
 }
 
 property CretPose {
@@ -1110,6 +1122,7 @@ property CombineTy {
 property PrjSound {
 	label "ProjectileSound"
 	p_ver 2.17
+	type varstr
 }
 
 property MAX_HP {
@@ -1119,16 +1132,19 @@ property MAX_HP {
 property ModeUnchn {
 	label "ModeUnchangeMetaproperty"
 	p_ver 2.65553
+	type varstr
 }
 
 property OTxtRepr2 {
 	label "TextureReplace2"
 	p_ver 2.17
+	type varstr
 }
 
 property StTweqDel {
 	label "TweqDeleteState"
 	p_ver 2.8
+	inherit never
 }
 
 property AI_Verbos {
@@ -1339,6 +1355,7 @@ property AI_NtcBod {
 property AI_MotTag {
 	label "AIMotionTags"
 	p_ver 2.17
+	type varstr
 }
 
 property AI_CbtRsp {
@@ -1410,11 +1427,13 @@ property KeySrc {
 property OTxtRepr1 {
 	label "TextureReplace1"
 	p_ver 2.17
+	type varstr
 }
 
 property TerrRepOf {
 	label "TerrainReplaceOff"
 	p_ver 2.17
+	type varstr
 }
 
 property TimeWarp {
@@ -1424,6 +1443,7 @@ property TimeWarp {
 property AI_StandT {
 	label "AIStandingTags"
 	p_ver 2.17
+	type varstr
 }
 
 property AI_Frustr {
@@ -1516,6 +1536,7 @@ property HTHAudioR {
 property TerrRepDe {
 	label "TerrainReplaceDestroy"
 	p_ver 2.17
+	type varstr
 }
 
 property AI_MoveZO {
@@ -1529,16 +1550,19 @@ property ScriptTim {
 property DesignNot {
 	label "DesignNote"
 	p_ver 2.17
+	type varstr
 }
 
 property GameDesc {
 	label "LongDescription"
 	p_ver 2.65553
+	type varstr
 }
 
 property StTweqLoc {
 	label "TweqLockState"
 	p_ver 2.12
+	inherit never
 }
 
 property BloodCaus {

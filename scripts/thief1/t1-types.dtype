@@ -653,12 +653,6 @@ bitfield voiceoverflags {
 //}
 
 
-// struct var-string {
-//	uint32 length
-//	varstr name
-//}
-
-
 struct pseudoscript {
 	uint32 use pscriptaction action
 	char [64] args [4]
@@ -1001,8 +995,6 @@ namespace properties {
 		uint32 use aimode mode
 	}
 
-	varstr AI_MotTag
-	
 	// Label: AIMoveSpeed
 	struct AI_MoveSp {
 		float speed
@@ -1085,7 +1077,6 @@ namespace properties {
 	}
 
 	alias aiaptitude AI_Sloth
-	varstr AI_SndTag
 	
 	// Label: AISoundType
 	struct AI_SndTyp {
@@ -1094,8 +1085,6 @@ namespace properties {
 		int32 zero
 	}
 
-	varstr AI_StandT
-	
 	// Label: AISurprise
 	struct AISuprise {
 		float zero
@@ -1321,10 +1310,6 @@ namespace properties {
 		int32 damage
 	}
 
-	varstr BloodType
-	varstr Book
-	varstr BookArt
-	
 	// Label: BreathConfig
 	struct BreathCon {
 		int32 maxair
@@ -1541,8 +1526,6 @@ namespace properties {
 		int32 value
 	}
 
-	varstr DesignNot
-	
 	// Label: DiffPermit
 	struct DiffPermi {
 		uint32 use difficultylevels levels
@@ -1643,9 +1626,6 @@ namespace properties {
 		bool32 isfungus
 	}
 
-	varstr GameDesc
-	varstr GameName
-	
 	// Label: HasBrush
 	struct HasBrush {
 		bool32 hasbrush
@@ -1719,13 +1699,10 @@ namespace properties {
 		bool32 isimmobile
 	}
 
-	varstr InvCycleO
-	
 	// Label: InventoryLimbModel
 	struct InvLimbMo {
 		char [16] name
 	}
-
 	
 	// Label: InventoryRenderType
 	struct InvRendTy {
@@ -1916,11 +1893,6 @@ namespace properties {
 		bool32 nophys
 	}
 
-	varstr OTxtRepr0
-	varstr OTxtRepr1
-	varstr OTxtRepr2
-	varstr OTxtRepr3
-	
 	// Label: Particle
 	struct Particle {
 		int32 value
@@ -1969,8 +1941,6 @@ namespace properties {
 		int32 unknown7 [11]
 	}
 
-	varstr ParticleT
-	
 	// Label: ParticleGroupLaunchInfo
 	struct PGLaunchI {
 		uint32 use particlelaunchtype type
@@ -2419,11 +2389,6 @@ namespace properties {
 		uint32 use swordactiontype mode
 	}
 
-	varstr SymName
-	varstr TerrRepOn
-	varstr TerrRepOf
-	varstr TerrRepDe
-	
 	// Label: TextureIndex
 	struct TextureID {
 		int32 index
@@ -2474,8 +2439,6 @@ namespace properties {
 		bool32 value
 	}
 
-	varstr TrapQVar
-	
 	// Label: VoiceIndex
 	struct VoiceIdx {
 		int32 voice

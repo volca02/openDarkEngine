@@ -1,4 +1,4 @@
-// ******************************************************************************
+// *****18;5~*************************************************************************
 // *
 // *    This file is part of openDarkEngine project
 // *    Copyright (C) 2005-2006 openDarkEngine team
@@ -59,6 +59,7 @@ property AI_RngFle {
 property BloodType {
 	label "BloodType"
 	p_ver 2.17
+	type varstr
 }
 
 property MinSpchPa {
@@ -219,6 +220,7 @@ property PsiState {
 property AI_SndTag {
 	label "AISoundTags"
 	p_ver 2.17
+	type varstr
 }
 
 property StTweqEmi {
@@ -363,6 +365,7 @@ property PickBias {
 property SHead2 {
 	label "GunSettingHeader2"
 	p_ver 2.17
+	type varstr
 }
 
 property CharGenRo {
@@ -383,6 +386,7 @@ property AI_AlertC {
 property OTxtRepr0 {
 	label "TextureReplace0"
 	p_ver 2.17
+	type varstr
 }
 
 property CanAttach {
@@ -402,6 +406,7 @@ property AI_WtchPn {
 property Sett2 {
 	label "GunSettingText2"
 	p_ver 2.17
+	type varstr
 }
 
 property Logs6 {
@@ -695,11 +700,13 @@ property StartLoc {
 property UseCursor {
 	label "UseCursorString"
 	p_ver 2.17
+	type varstr
 }
 
 property InvCursor {
 	label "InvCursorString"
 	p_ver 2.17
+	type varstr
 }
 
 property TargetTyp {
@@ -736,6 +743,7 @@ property AI_InfExp {
 property RsrchTxt {
 	label "ResearchText"
 	p_ver 2.17
+	type varstr
 }
 
 property AI_InvKnd {
@@ -753,6 +761,7 @@ property SelfLit {
 property Modify1 {
 	label "Modification1"
 	p_ver 2.17
+	type varstr
 }
 
 property AI_NonHst {
@@ -816,6 +825,7 @@ property ProtocolE {
 property MapText {
 	label "MapText"
 	p_ver 2.17
+	type varstr
 }
 
 property FrobHandl {
@@ -892,6 +902,7 @@ property BaseWeapo {
 property ObjLookS {
 	label "ObjectLookString"
 	p_ver 2.17
+	type varstr
 }
 
 property FailSound {
@@ -914,6 +925,7 @@ property AI_Visibi {
 property UseMsg {
 	label "UseMessage"
 	p_ver 2.17
+	type varstr
 }
 
 property AI_FleeCo {
@@ -938,6 +950,7 @@ property BaseGunDe {
 property SHead1 {
 	label "GunSettingHeader1"
 	p_ver 2.17
+	type varstr
 }
 
 property DoorTimer {
@@ -960,6 +973,7 @@ property HUDTime {
 property MetapropT {
 	label "MetapropType"
 	p_ver 2.17
+	type varstr
 }
 
 property CfgTweq2E {
@@ -1011,6 +1025,7 @@ property AI_Sloth {
 property ObjName {
 	label "ObjectName"
 	p_ver 2.131089
+	type varstr
 }
 
 property AvatarZOf {
@@ -1077,6 +1092,7 @@ property Transient {
 property Modify2 {
 	label "Modification2"
 	p_ver 2.17
+	type varstr
 }
 
 property SchLastSa {
@@ -1112,6 +1128,7 @@ property AI_UsesDo {
 property OTxtRepr3 {
 	label "TextureReplace3"
 	p_ver 2.17
+	type varstr
 }
 
 property AI_InfDly {
@@ -1223,6 +1240,7 @@ property AI_NCDmgR {
 property PlayerNam {
 	label "PlayerName"
 	p_ver 2.65553
+	type varstr
 }
 
 property Modify2Di {
@@ -1362,11 +1380,13 @@ property CombineTy {
 property HackText {
 	label "HackText"
 	p_ver 2.17
+	type varstr
 }
 
 property PrjSound {
 	label "ProjectileSound"
 	p_ver 2.17
+	type varstr
 }
 
 property MAX_HP {
@@ -1376,6 +1396,7 @@ property MAX_HP {
 property OTxtRepr2 {
 	label "TextureReplace2"
 	p_ver 2.17
+	type varstr
 }
 
 property AI_Swarm {
@@ -1556,11 +1577,13 @@ property PhysDims {
 property ObjShort {
 	label "ObjectShortName"
 	p_ver 2.17
+	type varstr
 }
 
 property ObjList {
 	label "ObjArgList"
 	p_ver 2.17
+	type varstr
 }
 
 property AI_Vision {
@@ -1570,6 +1593,7 @@ property AI_Vision {
 property Sett1 {
 	label "GunSettingText1"
 	p_ver 2.17
+	type varstr
 }
 
 property AI_VisTyp {
@@ -1661,6 +1685,7 @@ property RsrchRep {
 property AI_MotTag {
 	label "AIMotionTags"
 	p_ver 2.17
+	type varstr
 }
 
 property Creature {
@@ -1671,6 +1696,7 @@ property Creature {
 property HUDUse {
 	label "HUDUseString"
 	p_ver 2.17
+	type varstr
 }
 
 property AI_CbtRsp {
@@ -1765,6 +1791,7 @@ property DoorOpenS {
 property QBName {
 	label "QBName"
 	p_ver 2.17
+	type varstr
 }
 
 property AI_Wander {
@@ -1774,6 +1801,7 @@ property AI_Wander {
 property WorldCurs {
 	label "WorldCursorString"
 	p_ver 2.17
+	type varstr
 }
 
 property RsrchTime {
@@ -1783,6 +1811,7 @@ property RsrchTime {
 property OTxtRepr1 {
 	label "TextureReplace1"
 	p_ver 2.17
+	type varstr
 }
 
 property KeySrc {
@@ -1797,6 +1826,7 @@ property TimeWarp {
 property AI_StandT {
 	label "AIStandingTags"
 	p_ver 2.17
+	type varstr
 }
 
 property "Bump Map" {
@@ -1875,6 +1905,7 @@ property FrameAniS {
 property SignalTyp {
 	label "SignalType"
 	p_ver 2.17
+	type varstr
 }
 
 property RadAbsorb {
@@ -1969,6 +2000,7 @@ property AI_Camera {
 property ConsumeTy {
 	label "ConsumeType"
 	p_ver 2.17
+	type varstr
 }
 
 property RadRecove {
@@ -1988,6 +2020,7 @@ property ApparID {
 property LockMsg {
 	label "LockMessage"
 	p_ver 2.17
+	type varstr
 }
 
 property SwordActi {

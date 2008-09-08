@@ -1184,8 +1184,6 @@ namespace properties {
 		uint32 use aimode mode
 	}
 
-	varstr AI_MotTag
-	
 	// Label: AIMoveSpeed
 	struct AI_MoveSp {
 		float speed
@@ -1377,7 +1375,6 @@ namespace properties {
 	}
 
 	alias aiaptitude AI_Sloth
-	varstr AI_SndTag
 	
 	// Label: AISoundType
 	struct AI_SndTyp {
@@ -1386,8 +1383,6 @@ namespace properties {
 		int32 zero
 	}
 
-	varstr AI_StandT
-	
 	// Label: AISurprise
 	struct AISuprise {
 		float zero
@@ -1701,10 +1696,6 @@ namespace properties {
 		int32 damage
 	}
 
-	varstr BloodType
-	varstr Book
-	varstr BookArt
-	
 	// Label: Borrowed
 	struct Borrowed {
 		bool32 borrowed
@@ -1967,8 +1958,6 @@ namespace properties {
 		int32 value
 	}
 
-	varstr DesignNot
-	
 	// Label: DiffPermit
 	struct DiffPermi {
 		uint32 use difficultylevels levels
@@ -2108,9 +2097,6 @@ namespace properties {
 		bool32 isfungus
 	}
 
-	varstr GameDesc
-	varstr GameName
-	
 	// Label: GunState
 	struct GunState {
 		int32 ammo
@@ -2212,8 +2198,6 @@ namespace properties {
 		bool32 istaken
 	}
 
-	varstr InvCycleO
-	
 	// Label: InventoryLimbModel
 	struct InvLimbMo {
 		char [16] name
@@ -2362,15 +2346,11 @@ namespace properties {
 		int32 time
 	}
 
-	varstr ModeChang
-	
 	// Label: ModelName
 	struct ModelName {
 		char [16] label
 	}
 
-	varstr ModeUnchn
-	
 	// Label: MotionActorTags
 	struct MotActorT {
 		char [800] tags
@@ -2462,11 +2442,6 @@ namespace properties {
 		bool32 hasshadow
 	}
 
-	varstr OTxtRepr0
-	varstr OTxtRepr1
-	varstr OTxtRepr2
-	varstr OTxtRepr3
-	
 	// Label: Particle
 	struct Particle {
 		int32 value
@@ -2516,8 +2491,6 @@ namespace properties {
 		bool32 matchunrefs
 	}
 
-	varstr ParticleT
-	
 	// Label: ParticleGroupLaunchInfo
 	struct PGLaunchI {
 		uint32 use particlelaunchtype type
@@ -2697,8 +2670,6 @@ namespace properties {
 		bool32 value
 	}
 
-	varstr PrjSound
-	
 	// Label: ProjectileDescription
 	struct Projectil {
 		int32 spray
@@ -3020,11 +2991,6 @@ namespace properties {
 		uint32 use swordactiontype mode
 	}
 
-	varstr SymName
-	varstr TerrRepOn
-	varstr TerrRepOf
-	varstr TerrRepDe
-	
 	// Label: TextureIndex
 	struct TextureID {
 		int32 index
@@ -3081,8 +3047,6 @@ namespace properties {
 		uint32 use trapcontrolflags flags
 	}
 
-	varstr TrapQVar
-	
 	// Label: VoiceIndex
 	struct VoiceIdx {
 		int32 voice

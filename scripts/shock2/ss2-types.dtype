@@ -1359,8 +1359,6 @@ namespace properties {
 		uint32 use aimode mode
 	}
 
-	varstr AI_MotTag
-	
 	// Label: AIMoveSpeed
 	struct AI_MoveSp {
 		float speed
@@ -1552,7 +1550,6 @@ namespace properties {
 	}
 
 	alias aiaptitude AI_Sloth
-	varstr AI_SndTag
 	
 	// Label: AISoundType
 	struct AI_SndTyp {
@@ -1561,8 +1558,7 @@ namespace properties {
 		int32 zero
 	}
 
-	varstr AI_StandT
-	
+
 	// Label: AISurprise
 	struct AISuprise {
 		float zero
@@ -1912,8 +1908,6 @@ namespace properties {
 		int32 damage
 	}
 
-	varstr BloodType
-	
 	// Label: BookData
 	struct BookData {
 		char [16] book
@@ -2130,8 +2124,6 @@ namespace properties {
 		char [16] label
 	}
 
-	varstr ConsumeTy
-	
 	// Label: ContainerDimensions
 	struct ContainDi {
 		int32 width
@@ -2475,8 +2467,6 @@ namespace properties {
 		int32 value
 	}
 
-	varstr HackText
-	
 	// Label: HackDuration
 	struct HackTime {
 		int32 time
@@ -2596,8 +2586,6 @@ namespace properties {
 		int32 time
 	}
 
-	varstr HUDUse
-	
 	// Label: Immobile
 	struct Immobile {
 		bool32 isimmobile
@@ -2617,7 +2605,6 @@ namespace properties {
 		bool32 value
 	}
 
-	varstr InvCursor
 	alias ContainDi InvDims
 	
 	// Label: InventoryLimbModel
@@ -2692,8 +2679,6 @@ namespace properties {
 		bool32 islocked
 	}
 
-	varstr LockMsg
-	
 	// Label: LogsDeck1
 	struct Logs1 {
 		uint32 emails
@@ -2745,7 +2730,6 @@ namespace properties {
 		int32 frame
 	}
 
-	varstr MapText
 	alias ClassTag Material 
 	
 	// Label: MaxHitPoints
@@ -2787,8 +2771,6 @@ namespace properties {
 
 	}
 
-	varstr MetapropT
-	
 	// Label: MiniGames
 	struct MiniGames {
 		uint32 use minigamename games
@@ -2806,8 +2788,6 @@ namespace properties {
 		char [16] label
 	}
 
-	varstr Modify1
-	varstr Modify2
 	alias HackDiff ModifyDif
 	alias HackDiff Modify2Di
 	
@@ -2914,11 +2894,6 @@ namespace properties {
 		char [16] label
 	}
 
-	varstr ObjList
-	varstr ObjLookS
-	varstr ObjName
-	varstr ObjShort
-	
 	// Label: ObjectSound
 	struct ObjSoundN {
 		char [16] label
@@ -2929,11 +2904,6 @@ namespace properties {
 	struct ObjState {
 		uint32 use objectstate state
 	}
-
-	varstr OTxtRepr0
-	varstr OTxtRepr1
-	varstr OTxtRepr2
-	varstr OTxtRepr3
 	
 	// Label: Particle
 	struct Particle {
@@ -3124,8 +3094,6 @@ namespace properties {
 		uint32 use playerguntype type
 	}
 
-	varstr PlayerNam
-	
 	// Label: PlotCritical
 	struct PlotCriti {
 		bool32 iscritical
@@ -3146,7 +3114,6 @@ namespace properties {
 		bool32 value
 	}
 
-	varstr PrjSound
 	
 	// Label: ProjectileDescription
 	struct Projectil {
@@ -3227,8 +3194,6 @@ namespace properties {
 		int32 unknown2
 	}
 
-	varstr QBName
-	
 	// Label: QBValue
 	struct QBVal {
 		int32 value
@@ -3361,8 +3326,6 @@ namespace properties {
 		int32 time
 	}
 
-	varstr RsrchTxt
-	
 	// Label: ModelScale
 	struct Scale {
 		vector scale
@@ -3443,9 +3406,6 @@ namespace properties {
 		uint32 use servicetype service
 	}
 
-	varstr Sett1
-	varstr Sett2
-	
 	// Label: Shadow
 	struct Shadow {
 		int32 intensity
@@ -3457,9 +3417,6 @@ namespace properties {
 		int32 strength
 	}
 
-	varstr SHead1
-	varstr SHead2
-	
 	// Label: AIShockRanged
 	struct ShkAIRang {
 		int32 mindistance
@@ -3494,8 +3451,6 @@ namespace properties {
 		bool32 showhp
 	}
 
-	varstr SignalTyp
-	
 	// Label: SlayResult
 	struct SlayResul {
 		uint32 use slayresulttype mode
@@ -3654,8 +3609,6 @@ namespace properties {
 		uint32 use swordactiontype mode
 	}
 
-	varstr SymName
-	
 	// Label: TargetType
 	struct TargetTyp {
 		uint32 use targettype type
@@ -3730,9 +3683,6 @@ namespace properties {
 		uint32 use tripwireflags flags
 	}
 
-	varstr UseCursor
-	varstr UseMsg
-	
 	// Label: UseType
 	struct UseType {
 		uint32 use objectusetype type
@@ -3766,8 +3716,6 @@ namespace properties {
 		int32 type
 	}
 
-	varstr WorldCurs
-	
 	// Label: WeaponExposure
 	struct WpnExposu {
 		int32 value
