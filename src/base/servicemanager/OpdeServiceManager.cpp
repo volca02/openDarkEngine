@@ -50,7 +50,7 @@ namespace Opde {
 		
 		s_it = mServiceInstances.begin();
 
-		LOG_INFO("ServiceManager: Shutdowning all services");
+		LOG_INFO("ServiceManager: Shutting down all services");
 
 		// Shutdown loop. Resolver for some possible problems
 		for (; s_it != mServiceInstances.end(); ++s_it) {
