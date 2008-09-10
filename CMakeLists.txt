@@ -37,11 +37,6 @@ OPTION(GLOBAL_DEBUG
     "Build the debugging code"
     OFF)
 
-# Experimental rendering using static geometry
-OPTION(__STATIC_GEOMETRY
-    "Rendering using static geometry (no dynamic IB handling)"
-    OFF)
-
 # Option to build the documentation
 OPTION(GENERATE_DOC
     "Build the doxy documentation"
@@ -76,7 +71,7 @@ IF(CMAKE_COMPILER_IS_MINGW)
 ENDIF(CMAKE_COMPILER_IS_MINGW)
 
 # Warning level high (Lowered by one to supress the payload of ogre related warnings in VC)
-SET(CMAKE_CXX_WARNING_LEVEL 4)
+SET(CMAKE_CXX_WARNING_LEVEL 3)
 
 # GCC specific. Release/Debug flags (I add some debug/profiler switches there)
 IF(CMAKE_COMPILER_IS_GNUCXX)
