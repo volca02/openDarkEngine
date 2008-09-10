@@ -33,7 +33,7 @@
 
 // Helping 'infinity' value for PortalRect coords
 #define INF 100000
-#define F_INF 1E50
+#define F_INF 1E37
 
 namespace Ogre {
 	#define POSITION_BINDING 0
