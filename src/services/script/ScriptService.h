@@ -25,6 +25,8 @@
 #ifndef __SCRIPTSERVICE_H
 #define __SCRIPTSERVICE_H
 
+#include "config.h"
+
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
 #include "SharedPtr.h"
@@ -35,7 +37,7 @@
 namespace Opde {
 
     /// A single instance of object script (instanced on object ID)
-    class ObjectScript {
+    class OPDELIB_EXPORT ObjectScript {
         public:
             ObjectScript(int id);
 
@@ -53,7 +55,7 @@ namespace Opde {
     /// All that scripting lang side should do is implement the getScriptNames and createScript
     /// The scripts will be stand-alone objects inherited from some base parent class, and their
     /// destructor will Py_DECREF the callable python object, effectively removing it from the python VM
-    class ObjectScriptModule {
+    class OPDELIB_EXPORT ObjectScriptModule {
         public:
             ObjectScriptModule(std::string& name);
             
@@ -98,7 +100,7 @@ namespace Opde {
 	* @todo A small todo: Script data service could be exposed nicely to python. A small cooperation, using getters and setters could let us do things like data['something'] = 1, etc.
 	* With automatic mapping of object ID, internally calling ScriptDataService::get(id, name)... etc.
 	*/
-	class ScriptService : public Service {
+	class OPDELIB_EXPORT ScriptService : public Service {
 		public:
 			/** Initializes the Service */
 			ScriptService(ServiceManager* manager, const std::string& name);
@@ -106,31 +108,31 @@ namespace Opde {
 			/** Destructs the service instance, and unallocates the data, if any. */
 			virtual ~ScriptService();
 
-            /// Runs a script file named filename (has to be found in ogre's resources)
-            void runScript(const std::string& filename);
+			/// Runs a script file named filename (has to be found in ogre's resources)
+			void runScript(const std::string& filename);
 
-            /// registers a new object script module. Will live registered until an event does unload of database data
-            void addObjectScriptModule(const ObjectScriptModulePtr& module);
+			/// registers a new object script module. Will live registered until an event does unload of database data
+			void addObjectScriptModule(const ObjectScriptModulePtr& module);
 
 		protected:
-            bool init();
-            void bootstrapFinished();
-            void shutdown();
+			bool init();
+			void bootstrapFinished();
+			void shutdown();
 
-            typedef std::list<ObjectScriptModulePtr> ScriptModuleList;
-            typedef std::map<std::string, ObjectScriptModulePtr> ScriptNameToModule;
+			typedef std::list<ObjectScriptModulePtr> ScriptModuleList;
+			typedef std::map<std::string, ObjectScriptModulePtr> ScriptNameToModule;
 
-            ScriptModuleList mScriptModules;
-            ScriptNameToModule mScriptNameMap;
+			ScriptModuleList mScriptModules;
+			ScriptNameToModule mScriptNameMap;
 
-            void mapModuleScriptName(const ObjectScriptModulePtr& mod, const std::string& name);
+			void mapModuleScriptName(const ObjectScriptModulePtr& mod, const std::string& name);
 	};
 
 	/// Shared pointer to script service
 	typedef shared_ptr<ScriptService> ScriptServicePtr;
 
 	/// Factory for the Script service
-	class ScriptServiceFactory : public ServiceFactory {
+	class OPDELIB_EXPORT ScriptServiceFactory : public ServiceFactory {
 		public:
 			ScriptServiceFactory();
 			~ScriptServiceFactory() {};

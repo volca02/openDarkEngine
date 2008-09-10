@@ -1,14 +1,16 @@
 add_subdirectory(logger)
 add_subdirectory(console)
 add_subdirectory(servicemanager)
-# add_subdirectory(gui)
 add_subdirectory(file)
 add_subdirectory(dyntype)
-# Commented for now. In progress - not compilable
 add_subdirectory(loaders)
 
 FILE(GLOB OPDE_BASE_HEADERS *.h)
 
-add_library ( OpdeBase OpdeException.cpp RefCounted.cpp 
+include_directories(
+    ${OPDE_BINARY_DIR}
+)
+
+add_library ( OpdeBase OpdeException.cpp RefCounted.cpp
     ${OPDE_BASE_HEADERS}
 )

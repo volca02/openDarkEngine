@@ -25,6 +25,8 @@
 #ifndef __FILE_H
 #define __FILE_H
 
+#include "config.h"
+
 #include "OpdeException.h"
 #include "OgreDataStream.h"
 #include "RefCounted.h"
@@ -51,7 +53,7 @@ namespace Opde {
 	typedef std::streampos file_pos_t;
 
 	/** File access exception. */
-	class FileException : public Opde::BasicException {
+	class OPDELIB_EXPORT FileException : public Opde::BasicException {
 		protected:
 			FileError error;
 		public:
@@ -73,7 +75,7 @@ namespace Opde {
 	* The class is exception based, that means, any error happening while reading/writing will raise an exception.
 	* @todo Line read/write functionality might be useful
 	*/
-	class File {
+	class OPDELIB_EXPORT File {
 		public:
 			/** File open mode. Read/Write/Read+Write access */
 			typedef enum {
@@ -190,7 +192,7 @@ namespace Opde {
 	typedef shared_ptr<File> FilePtr;
 
 	/** File class implementation using std::fstream class as a base */
-	class StdFile : public File {
+	class OPDELIB_EXPORT StdFile : public File {
 		protected:
 			/** input/output stream, valid for output access */
 			std::fstream mStream;
@@ -233,7 +235,7 @@ namespace Opde {
 
 	/** Read only File implementation using Ogre's DataStream.
 	*/
-	class OgreFile : public File {
+	class OPDELIB_EXPORT OgreFile : public File {
 		private:
 			Ogre::DataStreamPtr mStream;
 		public:
@@ -264,7 +266,7 @@ namespace Opde {
 
 	/** Memory file. Virtual file existing in the memory. Speciality of this class is an ability to write/read the data to/from another file instance.
 	* Internally, the data are organized in buffers of maximal length of MEMORY_FILE_BUF_LEN macro. */
-	class MemoryFile : public File {
+	class OPDELIB_EXPORT MemoryFile : public File {
 		protected:
 			/** File page vector (one Page contains data with length up to MEMORY_FILE_BUF_LEN) */
 			typedef std::vector< char* > FilePages;
@@ -333,7 +335,7 @@ namespace Opde {
 
 	/** A wrapping class that publishes a part of a file as if it was a file on it's own.
 	* @note Care is taken about the underlying file. Backup/Restore of the previous position is done. This enables multiple simultaneous usage (not threaded though) */
-	class FilePart : public File {
+	class OPDELIB_EXPORT FilePart : public File {
 		public:
 			/** Constructor - Takes a file instance, an absolute position, and length */
 			FilePart(const std::string& name, AccessMode accm, FilePtr& src, file_pos_t pos, file_size_t size);

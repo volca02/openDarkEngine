@@ -21,6 +21,7 @@
  *
  *****************************************************************************/
 
+#include "config.h"
 
 #include "Root.h"
 #include "OgreResourceGroupManager.h"

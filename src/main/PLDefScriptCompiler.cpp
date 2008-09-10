@@ -22,6 +22,9 @@
  *****************************************************************************/
 
 // Inspired by Ogre's material compiler, parts of the code were taken from the Ogre projects
+
+#include "config.h"
+
 #include "PLDefScriptCompiler.h"
 #include "OpdeException.h"
 #include <OgreException.h>

@@ -26,6 +26,8 @@
 #ifndef __OPDEEXCEPTION_H
 #define __OPDEEXCEPTION_H
 
+#include "config.h"
+
 #include <stdexcept>
 #include <string>
 

@@ -26,6 +26,8 @@
 #ifndef __DARKCAMERA_H
 #define __DARKCAMERA_H
 
+#include "config.h"
+
 #include "DarkBspPrerequisites.h"
 
 #include <OgreCamera.h>
@@ -34,7 +36,7 @@
 namespace Ogre {
 
 	/** Camera specialized for BSP/Portal combination */
-	class DarkCamera : public Camera {
+	class OPDELIB_EXPORT DarkCamera : public Camera {
 			friend class DarkSceneManager;
 		
 		public:

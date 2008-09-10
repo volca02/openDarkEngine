@@ -24,6 +24,8 @@
 #ifndef __PRIORITIZEDMESSAGESOURCE_H
 #define __PRIORITIZEDMESSAGESOURCE_H
 
+#include "config.h"
+
 #include <map>
 #include "SharedPtr.h"
 #include "Callback.h"
@@ -33,7 +35,7 @@ namespace Opde {
     /** Prioritized Message Source - a message source doing callbacks in a deterministic order
     * M stands for the message type sent
     */
-    template <typename M> class PrioritizedMessageSource {
+    template <typename M> class OPDELIB_EXPORT PrioritizedMessageSource {
 		public:
             //virtual ~PrioritizedMessageSource() {};
 		

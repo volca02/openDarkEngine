@@ -17,10 +17,15 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *
+ *		$Id$
+ *
  *****************************************************************************/
 
 #ifndef __OPDESERVICE_H
 #define __OPDESERVICE_H
+
+#include "config.h"
 
 #include "NonCopyable.h"
 #include "SharedPtr.h"
@@ -33,7 +38,7 @@ namespace Opde {
 	class ServiceManager;
 
 	/** Interface used for all services. Those must implement the here mentioned methods. */
-	class Service : public NonCopyable {
+	class OPDELIB_EXPORT Service : public NonCopyable {
 			protected:
 				friend class ServiceManager;
 				

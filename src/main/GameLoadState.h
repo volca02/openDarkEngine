@@ -23,6 +23,8 @@
 #ifndef __GAMELOADSTATE_H
 #define __GAMELOADSTATE_H
 
+#include "config.h"
+
 #include "GameState.h"
 #include "OpdeSingleton.h"
 #include "FileGroup.h"
@@ -56,6 +58,8 @@ namespace Opde {
 			virtual bool mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id );
 			virtual bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id );
 
+			static GameLoadState& getSingleton();
+			static GameLoadState* getSingletonPtr();
 		protected:
 			void createTestFontOverlays();
 		

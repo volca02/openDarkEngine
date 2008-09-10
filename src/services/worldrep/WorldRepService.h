@@ -25,6 +25,8 @@
 #ifndef __WORLDREPSERVICE_H
 #define __WORLDREPSERVICE_H
 
+#include "config.h"
+
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
 #include "Ogre.h"
@@ -43,13 +45,10 @@
 #include <vector>
 
 #include "FileGroup.h"
-#include "DarkDBDefs.h"
 #include "SharedPtr.h"
 
 // The name of the group that stores the built textures and materials
 #define TEMPTEXTURE_RESOURCE_GROUP "WrTextures"
-
-using namespace Dark;
 
 namespace Opde {
 
@@ -57,7 +56,7 @@ namespace Opde {
 	*
 	* This service is responsible for the level geometry initialization.
 	* @note Should handle world-geometry related methods later on. For example - Light switching */
-	class WorldRepService : public Service {
+	class OPDELIB_EXPORT WorldRepService : public Service {
 		public:
 			/** Initializes the Service */
 			WorldRepService(ServiceManager* manager, const std::string& name);
@@ -71,21 +70,21 @@ namespace Opde {
 			* @note name is formed from FAMILY and NAME like this: FAMILY/NAME or NAME (for no-family textures) */
 			Ogre::String getMaterialName(int mat_index);
 
-            void addWorldMaterial(const Ogre::MaterialPtr& material);
-            
-            // Texture scale getter (for custom texture overrides)
-            std::pair<float, float> getTextureScale(const std::string& txtName);
-            
-            // Texture scale setter (for custom texture overrides)
-            void setTextureScale(const std::string& txtName, std::pair<float, float> scale);
+			void addWorldMaterial(const Ogre::MaterialPtr& material);
+			
+			// Texture scale getter (for custom texture overrides)
+			std::pair<float, float> getTextureScale(const std::string& txtName);
+			
+			// Texture scale setter (for custom texture overrides)
+			void setTextureScale(const std::string& txtName, std::pair<float, float> scale);
 		protected:
-            virtual bool init();
-            virtual void bootstrapFinished();
+			virtual bool init();
+			virtual void bootstrapFinished();
 
 			/// Database change callback
 			void onDBChange(const DatabaseChangeMsg& m);
 
-            /** Internal method. Clears all the used data and scene */
+			/** Internal method. Clears all the used data and scene */
 			void clearData();
 
 			/** Unloads the worldrep. Clears the scene */
@@ -158,35 +157,35 @@ namespace Opde {
 			/// Material TXLIST header
 			DarkDBChunkTXLIST mTxlistHeader;
 
-            /// Database callback
-            DatabaseService::ListenerPtr mDbCallback;
+			/// Database callback
+			DatabaseService::ListenerPtr mDbCallback;
 
-            /// Database service
-            DatabaseServicePtr mDatabaseService;
+			/// Database service
+			DatabaseServicePtr mDatabaseService;
 
-            /// Render service
-            RenderServicePtr mRenderService;
+			/// Render service
+			RenderServicePtr mRenderService;
 
 
-            /// Set of loaded materials
-            typedef std::vector< Ogre::MaterialPtr > MaterialList;
-            
-            typedef std::map<std::string, std::pair <float, float> > TxtScaleMap;
+			/// Set of loaded materials
+			typedef std::vector< Ogre::MaterialPtr > MaterialList;
+			
+			typedef std::map<std::string, std::pair <float, float> > TxtScaleMap;
 
-            /// Gets filled with all the materials loaded (for unloading)
-            MaterialList mLoadedMaterials;
-            
-            TxtScaleMap mTxtScaleMap;
-            
-            /// holder of the level geometry
-            Ogre::DarkGeometry* mWorldGeometry;
+			/// Gets filled with all the materials loaded (for unloading)
+			MaterialList mLoadedMaterials;
+			
+			TxtScaleMap mTxtScaleMap;
+			
+			/// holder of the level geometry
+			Ogre::DarkGeometry* mWorldGeometry;
 	};
 
 	/// Shared pointer to worldrep service
 	typedef shared_ptr<WorldRepService> WorldRepServicePtr;
 
 	/// Factory for the WorldRep service
-	class WorldRepServiceFactory : public ServiceFactory {
+	class OPDELIB_EXPORT WorldRepServiceFactory : public ServiceFactory {
 		public:
 			WorldRepServiceFactory();
 			~WorldRepServiceFactory() {};
@@ -196,7 +195,7 @@ namespace Opde {
 
 			const std::string& getName();
 
-            virtual const uint getMask();
+			virtual const uint getMask();
 
 		private:
 			static std::string mName;

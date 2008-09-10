@@ -25,6 +25,8 @@
 #ifndef __FILELOG_H
 #define __FILELOG_H
 
+#include "config.h"
+
 #include "logger.h"
 
 #include <fstream>
@@ -32,7 +34,7 @@
 namespace Opde {
 
 	/** Log listener, writing the logging messsages to a file */
-	class FileLog : public LogListener {
+	class OPDELIB_EXPORT FileLog : public LogListener {
 		protected:
 			std::ofstream ofile;
 			

@@ -24,6 +24,8 @@
 #ifndef __OPDESERVICEMANAGER_H
 #define __OPDESERVICEMANAGER_H
 
+#include "config.h"
+
 #include "OpdeServiceFactory.h"
 #include "OpdeService.h"
 #include "OpdeSingleton.h"
@@ -37,7 +39,7 @@ namespace Opde {
 	* @note Two phases exist in the service manager. Bootstrap and normal run. Bootstrap phase is used to initialize services without any dependencies
 	* @note Services are guaranteed to receive calls in this order: Constructor, init(), bootstrapFinished()
 	*/
-	class ServiceManager : public Singleton<ServiceManager>, public NonCopyable {
+	class OPDELIB_EXPORT ServiceManager : public Singleton<ServiceManager>, public NonCopyable {
 		private:
 			typedef std::map< std::string, ServiceFactory* > ServiceFactoryMap;
 			typedef std::map< std::string, ServicePtr > ServiceInstanceMap;
@@ -56,7 +58,7 @@ namespace Opde {
 			ServiceManager(uint serviceMask);
 
 			/// Destructor. Deletes all registered factories
-			~ServiceManager();
+			~ServiceManager(void);
 
 			// Singleton related
 			static ServiceManager& getSingleton(void);

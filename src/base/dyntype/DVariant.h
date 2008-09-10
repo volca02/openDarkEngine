@@ -17,10 +17,15 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *
+ *		$Id$
+ *
  *****************************************************************************/
  
 #ifndef __DVARIANT_H
 #define __DVARIANT_H
+
+#include "config.h"
 
 #include <stdexcept>
 #include "vector3.h"
@@ -33,7 +38,7 @@ using Ogre::Quaternion;
 
 namespace Opde {
 	/** a variant class. This is a class that stores a value of a certain type. */
-	class DVariant {
+	class OPDELIB_EXPORT DVariant {
 		public:
 			/** Type specifier */
 			typedef enum {

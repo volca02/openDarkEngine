@@ -21,6 +21,8 @@
  *
  *****************************************************************************/
 
+#include "config.h"
+
 #include "OIS.h"
 #include "GameStateManager.h"
 #include "GamePlayState.h"
@@ -210,8 +212,8 @@ namespace Opde {
 			mMoveScale = 0.1f;
 			mRotScale = 0.1f;
 		} else {
-			mMoveScale = mMoveSpeed * timePassed / 1000;
-			mRotScale = mRotateSpeed * timePassed / 1000;
+			mMoveScale = mMoveSpeed * timePassed / 1000.0f;
+			mRotScale = mRotateSpeed * timePassed / 1000.0f;
 		}
 
 		// Quick hack. Let the camera move:
@@ -467,6 +469,14 @@ namespace Opde {
 
 		mPlayerFactoryListenerID = mPlayerFactoryRelation->registerListener(metaPropCallback);
     LOG_INFO("GamePlayState::bootstrapFinished() - done");
+	}
+
+	GamePlayState& GamePlayState::getSingleton() {
+		assert(ms_Singleton); return *ms_Singleton;
+	}
+
+	GamePlayState* GamePlayState::getSingletonPtr() {
+		return ms_Singleton;
 	}
 
 }

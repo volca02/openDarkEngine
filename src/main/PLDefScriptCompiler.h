@@ -16,10 +16,16 @@
  * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
  * Place - Suite 330, Boston, MA 02111-1307, USA, or go to
  * http://www.gnu.org/copyleft/lesser.txt.
+ *
+ *
+ *		$Id$
+ *
  *****************************************************************************/
  
 #ifndef __PLDEFSCRIPTCOMPILER_H
 #define __PLDEFSCRIPTCOMPILER_H
+
+#include "config.h"
 
 #include <OgreCompiler2Pass.h>
 #include <OgreDataStream.h>
@@ -37,7 +43,7 @@ namespace Opde {
 	* Compiles link (Relation) and property definition scripts, and registers the property and relation definitions to the appropriate classes.
 	* These scripts define various aspects of Link/Property behaviour
 	*/
-	class PLDefScriptCompiler : public Ogre::Compiler2Pass {
+	class OPDELIB_EXPORT PLDefScriptCompiler : public Ogre::Compiler2Pass {
 		public:
 			/** Compiler */
 			PLDefScriptCompiler(void);

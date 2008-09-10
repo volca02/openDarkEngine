@@ -26,6 +26,8 @@
 #ifndef __OBJECTSERVICE_H
 #define __OBJECTSERVICE_H
 
+#include "config.h"
+
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
 #include "DatabaseService.h"
@@ -79,7 +81,7 @@ namespace Opde {
 	* @todo OBJECT_CREATE_STARTED message type for those services needing a preparation for object creation
 		(for example render service will create a SceneNode at that time, so it can update it's position and orientation when loading Position properties)
 	*/
-	class ObjectService : public Service, public MessageSource<ObjectServiceMsg> {
+	class OPDELIB_EXPORT ObjectService : public Service, public MessageSource<ObjectServiceMsg> {
 		public:
 			ObjectService(ServiceManager *manager, const std::string& name);
 
@@ -195,7 +197,7 @@ namespace Opde {
 			void createBuiltinResources();
 			
 			/// Converts the properties orientation to quaternion
-            static Ogre::Quaternion toOrientation(PropertyDataPtr& posdata);
+			static Ogre::Quaternion toOrientation(PropertyDataPtr& posdata);
 
 			/// A stack of id's
 			typedef std::stack<int> ObjectIDStack;

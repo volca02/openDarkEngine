@@ -25,6 +25,8 @@
 #ifndef __DARKPORTALFRUSTUM_H
 #define __DARKPORTALFRUSTUM_H
 
+#include "config.h"
+
 #include "DarkBspPrerequisites.h"
 
 #include <OgrePlane.h>
@@ -39,7 +41,7 @@ namespace Ogre {
 	
 	/** A Multiple-planed frustum. Defined by either a camera, or a camera and a polygon defining the boundaries of the frustum. 
 	* @deprecated This class should be deprecated. DarkCamera class should be able to handle all the visibility updates alone */
-	class PortalFrustum {
+	class OPDELIB_EXPORT PortalFrustum {
 		private:
 			FrustumPlanes planes;
 		

@@ -17,10 +17,15 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *
+ *		$Id$
+ *
  *****************************************************************************/
  
 #ifndef __DTYPESCRIPTLOADER_H
 #define __DTYPESCRIPTLOADER_H
+
+#include "config.h"
 
 #include <OgreDataStream.h>
 #include <OgreScriptLoader.h>
@@ -31,7 +36,7 @@
 namespace Opde {
 
 	/** Loader for .dtype files. Registers itself as a ScriptLoader in the ResourceGroupManager. Automatically parses all encountered *.dtype files. */
-	class DTypeScriptLoader : public Ogre::ScriptLoader {
+	class OPDELIB_EXPORT DTypeScriptLoader : public Ogre::ScriptLoader {
 		public:
 			/** Constructor. Registers itself as a ScriptLoader to ResourceGroupManager */
 			DTypeScriptLoader();

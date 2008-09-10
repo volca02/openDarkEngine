@@ -26,6 +26,8 @@
 #ifndef __DARKSCENEMANAGER_H
 #define __DARKSCENEMANAGER_H
 
+#include "config.h"
+
 #include <OgreSceneManager.h>
 
 #include "DarkBspPrerequisites.h"
@@ -36,7 +38,7 @@ namespace Ogre {
 	/** Portal + BSP based SceneManager targetted at DE based levels. 
 	* This SceneManager is targetted at scenes composed of great amount of convex cells connected with portals.
 	* Each cell has to be a leaf node of the supplied Bsp node tree. Portals are created */
-	class DarkSceneManager : public SceneManager {
+	class OPDELIB_EXPORT DarkSceneManager : public SceneManager {
 			// So we don't need to expose getBspTree() method to public
 			friend class DarkCamera;
 			friend class DarkLight;
@@ -208,7 +210,7 @@ namespace Ogre {
 	};
 
 	/// Factory for DarkSceneManager
-	class DarkSceneManagerFactory : public SceneManagerFactory {
+	class OPDELIB_EXPORT DarkSceneManagerFactory : public SceneManagerFactory {
 		protected:
 			void initMetaData(void) const;
 		public:

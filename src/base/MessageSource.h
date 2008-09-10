@@ -22,6 +22,8 @@
 #ifndef __MESSAGESOURCE_H
 #define __MESSAGESOURCE_H
 
+#include "config.h"
+
 #include "SharedPtr.h"
 #include "Callback.h"
 

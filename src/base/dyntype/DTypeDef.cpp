@@ -65,6 +65,10 @@ namespace Opde {
 	}
 
 	//------------------------------------
+	DEnum::~DEnum() {
+	}
+
+	//------------------------------------
 	void DEnum::insert(const std::string& key, const DVariant& value) {
 		// Type check
 		if (mEnumType != value.type())

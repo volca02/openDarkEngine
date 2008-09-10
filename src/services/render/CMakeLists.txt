@@ -28,8 +28,8 @@ add_library (OpdeRenderService
 )
 
 # Hmm. Probably not needed, is it. Linking will happen whilst building the whole opde up. Oh well...
-target_link_libraries(OpdeRenderService
-    OpdeBase
-    OpdeServiceManager
-    OpdeManualLoaders
-)
+#target_link_libraries(OpdeRenderService
+#    OpdeBase
+#    OpdeServiceManager
+#    OpdeManualLoaders
+#)

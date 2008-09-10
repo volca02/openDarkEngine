@@ -21,6 +21,8 @@
  *
  *****************************************************************************/
 
+#include "config.h"
+
 #include "GameStateManager.h"
 #include "OpdeException.h"
 
@@ -34,6 +36,12 @@ using namespace Opde;
 
 INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT )
 {
+	#if (OPDE_EXE_TARGET)
+        std::cout << "MY_SYMBOL was defined." << std::endl;
+    #else
+        std::cout << "MY_SYMBOL was NOT defined." << std::endl;
+    #endif
+
 	std::string GameType(strCmdLine);
 #else
 int main(int argc, char**argv)

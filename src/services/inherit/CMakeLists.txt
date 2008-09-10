@@ -32,7 +32,7 @@ add_library (OpdeInheritService
     InheritCommon.h
 )
 
-target_link_libraries(OpdeInheritService
-    OpdeBase
-    OpdeServiceManager
-)
+#target_link_libraries(OpdeInheritService
+#    OpdeBase
+#    OpdeServiceManager
+#)

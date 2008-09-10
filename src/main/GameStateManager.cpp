@@ -21,6 +21,8 @@
  *
  *****************************************************************************/
 
+#include "config.h"
+
 #include "GameStateManager.h"
 #include "OpdeException.h"
 #include "logger.h"
@@ -172,6 +174,10 @@ namespace Opde {
 
 		// Create the service manager
 		mServiceMgr = new ServiceManager(SERVICE_ALL);
+		assert(ServiceManager::getSingletonPtr() != 0);
+
+		if (ServiceManager::getSingletonPtr() == 0)
+			LOG_FATAL("Rotten tomatoes!");
 
 		// Register the worldrep service factory
 		registerServiceFactories();

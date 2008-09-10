@@ -22,6 +22,8 @@
  *
  *****************************************************************************/
 
+#include "config.h"
+
 #include "ConsoleBackend.h"
 
 namespace Opde {
@@ -41,6 +43,12 @@ namespace Opde {
 		// Register as an ogre logger
 		//LogManager::getSingleton().getDefaultLog()->addListener(this);
 	}
+
+	ConsoleBackend::~ConsoleBackend() {
+		mCommandMap.clear();
+		mCompletionMap.clear();
+		mMessages.clear();
+	};
 
 	void ConsoleBackend::addText(std::string text) {
 		// split the text on newlines, to aid line counting

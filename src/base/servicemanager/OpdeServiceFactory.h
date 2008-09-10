@@ -17,10 +17,15 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *
+ *		$Id$
+ *
  *****************************************************************************/
  
 #ifndef __OPDESERVICEFACTORY_H
 #define __OPDESERVICEFACTORY_H
+
+#include "config.h"
 
 #include "compat.h"
 #include <string>
@@ -35,7 +40,7 @@ namespace Opde {
 	class Service;
 		
 	/** Code base for the service factories. Implement the methods with the Service Factory you're implementing. */
-	class ServiceFactory {
+	class OPDELIB_EXPORT ServiceFactory {
 		public:
 			ServiceFactory() {  };
 			virtual ~ServiceFactory() {	};

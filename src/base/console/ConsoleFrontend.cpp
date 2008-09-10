@@ -21,6 +21,7 @@
  *
  *****************************************************************************/
 
+#include "config.h"
 
 #include "ConsoleBackend.h"
 #include "ConsoleFrontend.h"

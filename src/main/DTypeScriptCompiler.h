@@ -16,10 +16,16 @@
  * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
  * Place - Suite 330, Boston, MA 02111-1307, USA, or go to
  * http://www.gnu.org/copyleft/lesser.txt.
+ *
+ *
+ *		$Id$
+ *
  *****************************************************************************/
  
 #ifndef __DTYPESCRIPTCOMPILER_H
 #define __DTYPESCRIPTCOMPILER_H
+
+#include "config.h"
 
 #include <OgreCompiler2Pass.h>
 #include <OgreDataStream.h>
@@ -67,7 +73,7 @@ namespace Opde {
 	<B>varstr (variable length string) cannot be contained in a struct/union/array</B>
 	</code>
 	*/
-	class DTypeScriptCompiler : public Ogre::Compiler2Pass {
+	class OPDELIB_EXPORT DTypeScriptCompiler : public Ogre::Compiler2Pass {
 		public:
 			/** Compiler */
 			DTypeScriptCompiler(void);

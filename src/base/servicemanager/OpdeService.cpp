@@ -22,6 +22,8 @@
  *
  *****************************************************************************/
 
+#include "config.h"
+
 #include "OpdeService.h"
 #include "logger.h"
 

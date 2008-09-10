@@ -23,6 +23,8 @@
 #ifndef __LINKSERVICE_H
 #define __LINKSERVICE_H
 
+#include "config.h"
+
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
 #include "DatabaseService.h"
@@ -35,7 +37,7 @@ namespace Opde {
 
 	/** @brief Link service - service managing in-game object links
 	*/
-	class LinkService : public Service {
+	class OPDELIB_EXPORT LinkService : public Service {
 		public:
 			LinkService(ServiceManager *manager, const std::string& name);
 
@@ -120,9 +122,9 @@ namespace Opde {
 			StringIteratorPtr getAllLinkNames();
 
 		protected:
-            bool init();
-            void bootstrapFinished();
-            void shutdown();
+			bool init();
+			void bootstrapFinished();
+			void shutdown();
 
 			/** request a mapping Name->Flavor and reverse
 			* @param id The flavor value requested
@@ -146,15 +148,15 @@ namespace Opde {
 			/// Relations chunk versions
 			uint mRelVMaj, mRelVMin;
 
-            /// Database service
-            DatabaseServicePtr mDatabaseService;
+			/// Database service
+			DatabaseServicePtr mDatabaseService;
 	};
 
 	/// Shared pointer to Link service
 	typedef shared_ptr<LinkService> LinkServicePtr;
 
 	/// Factory for the LinkService objects
-	class LinkServiceFactory : public ServiceFactory {
+	class OPDELIB_EXPORT LinkServiceFactory : public ServiceFactory {
 		public:
 			LinkServiceFactory();
 			~LinkServiceFactory() {};

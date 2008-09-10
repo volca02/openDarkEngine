@@ -31,6 +31,8 @@ $Id$
 #ifndef __DARKSCENENODE_H
 #define __DARKSCENENODE_H
 
+#include "config.h"
+
 #include "DarkBspPrerequisites.h"
 
 #include <OgreSceneNode.h>
@@ -50,7 +52,7 @@ namespace Ogre {
 	the boundaries of more than one leaf, that it is possible that an object attached
 	to one DarkSceneNode may actually be associated with more than one BspNode.
 	*/
-	class DarkSceneNode : public SceneNode {
+	class OPDELIB_EXPORT DarkSceneNode : public SceneNode {
 		protected:
 			/// Overridden from SceneNode
 			void setInSceneGraph(bool inGraph);

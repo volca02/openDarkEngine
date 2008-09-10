@@ -17,10 +17,15 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *
+ *		$Id$
+ *
  *****************************************************************************/
  
 #ifndef __PLDEFSCRIPTLOADER_H
 #define __PLDEFSCRIPTLOADER_H
+
+#include "config.h"
 
 #include <OgreDataStream.h>
 #include <OgreScriptLoader.h>
@@ -31,7 +36,7 @@
 namespace Opde {
 
 	/** Loader for .pldef files. Registers itself as a ScriptLoader in the ResourceGroupManager. Automatically parses all encountered *.pldef files. */
-	class PLDefScriptLoader : public Ogre::ScriptLoader {
+	class OPDELIB_EXPORT PLDefScriptLoader : public Ogre::ScriptLoader {
 		public:
 			/** Constructor. Registers itself as a ScriptLoader to ResourceGroupManager */
 			PLDefScriptLoader();

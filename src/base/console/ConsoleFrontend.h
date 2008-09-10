@@ -24,6 +24,8 @@
 #ifndef __CONSOLEFRONTEND_H
 #define __CONSOLEFRONTEND_H
 
+#include "config.h"
+
 #include <OgreRoot.h>
 #include <OgreOverlayManager.h>
 #include <OgreOverlayElement.h>
@@ -36,9 +38,9 @@
 
 namespace Opde {
 
-	class ConsoleFrontend {
-                public:
-                        ConsoleFrontend();
+	class OPDELIB_EXPORT ConsoleFrontend {
+		public:
+			ConsoleFrontend();
 			~ConsoleFrontend();
 
 			/** Injects an ois keyboard event into the console

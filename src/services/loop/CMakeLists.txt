@@ -17,7 +17,7 @@ link_directories (
 
 add_library (OpdeLoopService LoopService.cpp LoopService.h)
 
-target_link_libraries (OpdeLoopService
-    OpdeServiceManager
-    OpdeBase
-)
+#target_link_libraries (OpdeLoopService
+#    OpdeServiceManager
+#    OpdeBase
+#)

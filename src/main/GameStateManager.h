@@ -25,6 +25,8 @@
 #ifndef __GAMESTATEMANAGER_H
 #define __GAMESTATEMANAGER_H
 
+#include "config.h"
+
 #include <OISMouse.h>
 #include <OISKeyboard.h>
 #include <OISInputManager.h>

@@ -23,8 +23,8 @@ add_library (OpdeGUIService
     GUIService.h
 )
 
-target_link_libraries (OpdeGUIService
-    OpdeServiceManager
-    OpdeBase
-    QuickGUI
-)
+#target_link_libraries (OpdeGUIService
+#    OpdeServiceManager
+#    OpdeBase
+#    QuickGUI
+#)

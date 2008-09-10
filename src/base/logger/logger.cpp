@@ -39,8 +39,8 @@ namespace Opde {
 	template<> Logger* Singleton<Logger>::ms_Singleton = 0;
 
 	Logger::Logger() {
-		listeners.clear();
-		loggingLevel = LOG_LEVEL_VERBOSE;
+		mListeners.clear();
+		mLoggingLevel = LOG_LEVEL_VERBOSE;
 	}
 
 	Logger::~Logger() {
@@ -56,9 +56,9 @@ namespace Opde {
 	}
 
 	void Logger::dispatchLogMessage(LogLevel level, char *message) {
-		std::set<LogListener*>::iterator it = listeners.begin();
+		LogListenerSet::iterator it = mListeners.begin();
 
-		for (; it != listeners.end(); it++) {
+		for (; it != mListeners.end(); it++) {
 			LogListener* listener = *it;
 
 			listener->logMessage(level, message);
@@ -67,7 +67,7 @@ namespace Opde {
 
 	void Logger::log(LogLevel level, char *fmt, ...) {
 		// Ignore the message if the level is too high
-		if (loggingLevel < level)
+		if (mLoggingLevel < level)
 			return;
 
 		va_list argptr;
@@ -85,11 +85,11 @@ namespace Opde {
 
 
 	void Logger::registerLogListener(LogListener* listener) {
-		listeners.insert(listener);
+		mListeners.insert(listener);
 	}
 
 	void Logger::unregisterLogListener(LogListener* listener) {
-		listeners.erase(listener);
+		mListeners.erase(listener);
 	}
 
 	const std::string Logger::getLogLevelStr(LogLevel level) const {
@@ -114,7 +114,7 @@ namespace Opde {
 	}
 
 	void Logger::setLogLevel(LogLevel level) {
-		loggingLevel = level;
+		mLoggingLevel = level;
 	}
 
 	void Logger::setLogLevel(int level) {
@@ -128,5 +128,11 @@ namespace Opde {
 				setLogLevel(LOG_LEVEL_DEBUG);
 				log(LOG_LEVEL_DEBUG, "Invalid logging level specified (%d), setting debug", level);
 		}
+	}
+
+	LogListener::LogListener() {
+	}
+
+	LogListener::~LogListener() {
 	}
 }

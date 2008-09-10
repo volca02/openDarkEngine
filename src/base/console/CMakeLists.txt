@@ -8,6 +8,11 @@ include_directories (
 
 link_directories ( ${OGRE_LIB_DIR} )
 
-file(GLOB OPDE_CONSOLE_HEADERS *.h)
-
-add_library (OpdeConsole ConsoleBackend.cpp ConsoleFrontend.cpp ${OPDE_CONSOLE_HEADERS})
+add_library (OpdeConsole
+    ConsoleBackend.cpp
+    ConsoleBackend.h
+    ConsoleFrontend.cpp
+    ConsoleFrontend.h
+    ConsoleCommandListener.cpp
+    ConsoleCommandListener.h
+)

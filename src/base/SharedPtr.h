@@ -25,6 +25,8 @@
 #ifndef __SHAREDPTR_H
 #define __SHAREDPTR_H
 
+#include "config.h"
+
 #include <stdio.h>
 
 namespace Opde {

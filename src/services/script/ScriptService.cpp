@@ -26,9 +26,7 @@
 #include "ScriptService.h"
 #include "OpdeException.h"
 #include "logger.h"
-#include "ConsoleBackend.h"
 #include "bindings.h"
-#include "Root.h"
 
 #include <OgreDataStream.h>
 #include <OgreResourceGroupManager.h>
@@ -46,66 +44,66 @@ namespace Opde {
 
 	//------------------------------------
 	ScriptService::~ScriptService() {
-	    // Release all scripts and script modules
+		// Release all scripts and script modules
 	};
 
 
-    //------------------------------------
-    void ScriptService::runScript(const std::string& filename) {
-        // Get the script as a memory pointer first, using the Ogre's resource system
-        // Then use python to run the script. If it communicates with opde any way,
-        // Py_INCREF will guarantee consistency on those interacting pieces.
+	//------------------------------------
+	void ScriptService::runScript(const std::string& filename) {
+		// Get the script as a memory pointer first, using the Ogre's resource system
+		// Then use python to run the script. If it communicates with opde any way,
+		// Py_INCREF will guarantee consistency on those interacting pieces.
 
-        // TODO: Compiled code v.s. code to compile (.py / .pyc)
+		// TODO: Compiled code v.s. code to compile (.py / .pyc)
 
-        // TODO: Group name for scripts! (Using default for now)
-        Ogre::DataStreamPtr fdata = Ogre::ResourceGroupManager::getSingleton().openResource(filename, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
-        const Ogre::String& text = fdata->getAsString();
+		// TODO: Group name for scripts! (Using default for now)
+		Ogre::DataStreamPtr fdata = Ogre::ResourceGroupManager::getSingleton().openResource(filename, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
+		const Ogre::String& text = fdata->getAsString();
 
-        // Now run the script using python
-        PythonLanguage::runScriptPtr(text.c_str());
-    }
+		// Now run the script using python
+		PythonLanguage::runScriptPtr(text.c_str());
+	}
 
-    //------------------------------------
-    void ScriptService::addObjectScriptModule(const ObjectScriptModulePtr& module) {
-        // List of modules to be released
-        mScriptModules.push_back(module);
+	//------------------------------------
+	void ScriptService::addObjectScriptModule(const ObjectScriptModulePtr& module) {
+		// List of modules to be released
+		mScriptModules.push_back(module);
 
-        // Association of module's scripts.
-        const std::set<std::string>& modnames = module->getScriptNames();
+		// Association of module's scripts.
+		const std::set<std::string>& modnames = module->getScriptNames();
 
-        // map the names
-        std::set<std::string>::const_iterator it = modnames.begin();
-        std::set<std::string>::const_iterator end = modnames.end();
+		// map the names
+		std::set<std::string>::const_iterator it = modnames.begin();
+		std::set<std::string>::const_iterator end = modnames.end();
 
 
-        for (; it != end; ++it) {
-            mapModuleScriptName(module, *it);
-        }
-    }
+		for (; it != end; ++it) {
+			mapModuleScriptName(module, *it);
+		}
+	}
 
-    //------------------------------------
-    void ScriptService::mapModuleScriptName(const ObjectScriptModulePtr& mod, const std::string& name) {
-        // rewrite any previous mapping, but warn if exists
-        ScriptNameToModule::const_iterator it = mScriptNameMap.find(name);
+	//------------------------------------
+	void ScriptService::mapModuleScriptName(const ObjectScriptModulePtr& mod, const std::string& name) {
+		// rewrite any previous mapping, but warn if exists
+		ScriptNameToModule::const_iterator it = mScriptNameMap.find(name);
 
-        if (it != mScriptNameMap.end())
-            LOG_ERROR("ScriptService: Warning: Script named %s alread mapped to module %s", name.c_str(), mod->getName().c_str());
+		if (it != mScriptNameMap.end())
+			LOG_ERROR("ScriptService: Warning: Script named %s alread mapped to module %s", name.c_str(), mod->getName().c_str());
 
-        mScriptNameMap[name] = mod;
-    }
+		mScriptNameMap[name] = mod;
+	}
 
 	//------------------------------------
 	bool ScriptService::init() {
 	    return true;
 	}
 
-    //------------------------------------
+	//------------------------------------
 	void ScriptService::bootstrapFinished() {
 	}
 
 
-    //------------------------------------
+	//------------------------------------
 	void ScriptService::shutdown() {
 	}
 
@@ -125,8 +123,8 @@ namespace Opde {
 	}
 
 
-        const uint ScriptServiceFactory::getMask() {
-            return SERVICE_ENGINE;
-        }
+	const uint ScriptServiceFactory::getMask() {
+			return SERVICE_ENGINE;
+	}
 
 }

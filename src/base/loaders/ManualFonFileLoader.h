@@ -25,6 +25,8 @@
 #ifndef __MANUALFONFILELOADER_H
 #define __MANUALFONFILELOADER_H
 
+#include "config.h"
+
 #include <OgreResourceManager.h>
 #include <OgreFont.h>
 #include "File.h"
@@ -35,7 +37,7 @@ using namespace Opde; // For the Opde::File
 namespace Ogre {
 	
 	/// ManualResourceLoader for FON files.
-    class ManualFonFileLoader : public ManualResourceLoader 
+    class OPDELIB_EXPORT ManualFonFileLoader : public ManualResourceLoader 
 	{		
         public:
 			/// Palette type specifier

@@ -31,6 +31,8 @@ $Id$
 #ifndef __BSPTREE_H
 #define __BSPTREE_H
 
+#include "config.h"
+
 #include "DarkBspPrerequisites.h"
 #include "DarkBspNode.h"
 
@@ -40,7 +42,7 @@ $Id$
 namespace Ogre {
 
 	/** BspTree handling class */
-	class BspTree : public Ogre::MovableObject::Listener {
+	class OPDELIB_EXPORT BspTree : public Ogre::MovableObject::Listener {
 		friend class DarkSceneManager;
 	public:
 		/** Constructor. */

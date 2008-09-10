@@ -15,21 +15,6 @@ include_directories(
     ${FREEIMAGE_INCLUDE_DIR}
 )
 
-
-link_directories(
-    ${OPDE_SOURCE_DIR}/src/base/logger
-    ${OPDE_SOURCE_DIR}/src/base/gui
-    ${OPDE_SOURCE_DIR}/src/base/console
-    ${OPDE_SOURCE_DIR}/src/base/servicemanager
-    ${OPDE_SOURCE_DIR}/src/scenemanager
-    ${OPDE_SOURCE_DIR}/src/base/Dark
-    ${OPDE_SOURCE_DIR}/src/base
-    ${OPDE_SOURCE_DIR}/src/main
-    ${OPDE_SOURCE_DIR}/src/widgets
-    ${OPDE_SOURCE_DIR}/src/services/database
-    ${OPDE_SOURCE_DIR}/src/services/worldrep
-)
-
 add_library (OpdeLib SHARED
     Root.cpp
     Root.h
@@ -49,18 +34,32 @@ target_link_libraries( OpdeLib
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}
     ${FREEIMAGE_LIBRARIES}
-    OpdeFile
-    OpdeLogger
-    OpdeConsole
+    ${OPDE_BASE_LIBRARIES}
     DarkSceneManager
     ${OPDE_SERVICE_LIBRARIES}
-    OpdeBase
+    QuickGUI
 )
 
-# Doc generator for opde - property and link types info generator
-add_executable (opdeDocGen WIN32 
-    OpdeDocGen.cpp
+# Build flags for the .DLL __declspec things, etc.
+SET_TARGET_PROPERTIES(OpdeLib PROPERTIES
+  DEFINE_SYMBOL "OPDELIB_DLL_TARGET"
 )
+
+if (NOT WIN32)
+    # Currently there is no need to build this on windows (and also it fails) - is there latex2html for windows anyway?
+    # Doc generator for opde - property and link types info generator
+    add_executable (opdeDocGen WIN32 
+        OpdeDocGen.cpp
+    )
+
+    target_link_libraries( opdeDocGen
+        OpdeLib
+    )
+
+    SET_TARGET_PROPERTIES(opdeDocGen PROPERTIES
+      DEFINE_SYMBOL "OPDE_EXE_TARGET"
+    )
+endif(NOT WIN32)
 
 # Main executable
 add_executable (opde WIN32 
@@ -69,29 +68,16 @@ add_executable (opde WIN32
     GameState.cpp
     GamePlayState.cpp
     GameLoadState.cpp
-    DTypeScriptCompiler.cpp
-    DTypeScriptLoader.cpp
-    PLDefScriptCompiler.cpp
-    PLDefScriptLoader.cpp
     GameStateManager.h
     GameState.h
     GamePlayState.h
     GameLoadState.h
-    DTypeScriptCompiler.h
-    DTypeScriptLoader.h
-    PLDefScriptCompiler.h
-    PLDefScriptLoader.h
-    CustomImageCodec.cpp
-    CustomImageCodec.h
 )
 
-
+SET_TARGET_PROPERTIES(opde PROPERTIES
+  DEFINE_SYMBOL "OPDE_EXE_TARGET"
+)
 
 target_link_libraries( opde
     OpdeLib
 )
-
-target_link_libraries( opdeDocGen
-    OpdeLib
-)
-

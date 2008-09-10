@@ -19,31 +19,18 @@
  *
  *
  *		$Id$
- * 
+ *
  *****************************************************************************/
  
-#ifndef __OGREOPDELOGCONNECTOR_H
-#define __OGREOPDELOGCONNECTOR_H
+#include "ConsoleCommandListener.h"
 
-#include "config.h"
+#include <string>
 
-#include "logger.h"
-
-#include <OgreLog.h>
-  
 namespace Opde {
-
-	/** Ogre<->Opde log connector. Logs messages from ogre as a special kind of opde log messages */
-	class OPDELIB_EXPORT OgreOpdeLogConnector : public Ogre::LogListener {
-		protected:
-			Logger* mOpdeLogger;
-			
-		public:
-			OgreOpdeLogConnector(Logger* opdeLogger);
-			virtual ~OgreOpdeLogConnector();
-			
-			virtual void messageLogged(const Ogre::String &message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String &logName);
-	};
+	
+ConsoleCommandListener::~ConsoleCommandListener(void) {
 }
 
-#endif
+};
+
+

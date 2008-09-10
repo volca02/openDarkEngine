@@ -26,25 +26,28 @@
 #define __LOGGER_H
 
 #include "config.h"
+
 #include "OpdeSingleton.h"
 #include <set>
 
 namespace Opde {
 	// Forward declaration
-	class LogListener;
+	class OPDELIB_EXPORT LogListener;
 
 	/** Main logger class. This class is intended for logging purposes. Logging listeners, registered using registerLogListener method recieve logging messages formated by vsnprintf function */
-	class Logger : public Singleton<Logger> {
+	class OPDELIB_EXPORT Logger : public Singleton<Logger> {
 		public:
 			/// Logging level
 			typedef enum {LOG_LEVEL_FATAL=0, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_VERBOSE} LogLevel;
 			
 		private:
+			typedef std::set<LogListener*> LogListenerSet;
+		
 			/** A set of listener classes */
-			std::set<LogListener*> listeners;
+			LogListenerSet mListeners;
 
 			/** A global log level. Set by setLogLevel. All messages having higher log level are ignored */
-			LogLevel loggingLevel;
+			LogLevel mLoggingLevel;
 
 			/** Message dispatching method. Sends the logging message to all log listeners */
 			void dispatchLogMessage(LogLevel level, char *msg);
@@ -86,10 +89,10 @@ namespace Opde {
 	* Also, the instance needs to be registered to the logging singleton Logger for the log listener to work.
 	* Basicaly, this should implement a log writer to some target (File, Console, etc.).
 	* @see Logger */
-	class LogListener {
+	class OPDELIB_EXPORT LogListener {
 		public:
-			LogListener() {};
-			virtual ~LogListener() {};
+			LogListener();
+			virtual ~LogListener();
 			virtual void logMessage(Logger::LogLevel level, char *message) = 0;
 	};
 

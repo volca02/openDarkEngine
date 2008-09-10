@@ -25,6 +25,8 @@
 #ifndef __CALLBACK_H
 #define __CALLBACK_H
 
+#include "config.h"
+
 namespace Opde {
 
 	/** An abstract callback functor definition. */

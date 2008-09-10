@@ -23,7 +23,7 @@ add_library (OpdeInputService
     InputEventMapper.h
 )
 
-target_link_libraries (OpdeInputService
-    OpdeServiceManager
-    OpdeBase
-)
+#target_link_libraries (OpdeInputService
+#    OpdeServiceManager
+#    OpdeBase
+#)

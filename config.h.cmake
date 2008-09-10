@@ -14,4 +14,23 @@
 
 #cmakedefine __OPDE_BIG_ENDIAN ${BIG_ENDIAN}
 
+// DLL export/import stuff for OpdeLib
+// If the build target is OpdeLib, the OpdeLib_EXPORTS is defined,
+// otherwise it is not. Trouble is we need it unset for all library targets,
+// so that all the static libs build and can be linked together.
+// We also want OPDELIB_EXPORT to be dllimport for executables
+// Thus, we define our own macros in the CMakeLists.txt files that define the
+// contents of the OPDELIB_EXPORT
+#if defined (_WIN32) // It is said that mingw also tolerates __declspec
+  #if defined(OPDELIB_DLL_TARGET)
+    #define OPDELIB_EXPORT __declspec(dllexport)
+  #elif defined(OPDE_EXE_TARGET)
+    #define OPDELIB_EXPORT __declspec(dllimport)
+  #else
+    #define OPDELIB_EXPORT
+  #endif /* OpdeLib_EXPORTS */
+#else /* defined (_WIN32) */
+ #define OPDELIB_EXPORT
+#endif
+
 #endif

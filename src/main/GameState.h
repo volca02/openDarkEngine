@@ -25,6 +25,8 @@
 #ifndef __GAMESTATE_H
 #define __GAMESTATE_H
 
+#include "config.h"
+
 #include "RefCounted.h"
 #include <OIS.h>
 

@@ -17,11 +17,16 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *
+ *		$Id$
+ *
  *****************************************************************************/
 
 
 #ifndef __FILEGROUP_H
 #define __FILEGROUP_H
+
+#include "config.h"
 
 #include "OpdeException.h"
 #include "File.h"
@@ -33,7 +38,7 @@ namespace Opde {
 	/** File group stored inside a single file. This is an abstract class for file group manipulation. For implementation see DarkFileGroup.
 	* The loaded file group does not modify the source file in any way. That means all operations are safe and do not destroy/modify original
 	file. */
-	class FileGroup : public RefCounted {
+	class OPDELIB_EXPORT FileGroup : public RefCounted {
 		public:
 			/** File source FileGroup constructor. Loads the chunk list from a given file. */
 			FileGroup(FilePtr& source);
@@ -103,7 +108,7 @@ namespace Opde {
 	* This class exposes the chunks of that format as separate files, which can be replaced, deleted or added. The new database
 	of chunks can be written to a new file. This allows modifications to be done on a database, leaving the chunks in an original form
 	if not touched. The order of the chunks is not guaranteed to stay equal. This is not a problem for DarkEngine. */
-	class DarkFileGroup : public FileGroup {
+	class OPDELIB_EXPORT DarkFileGroup : public FileGroup {
 		public:
 			/** @copydoc FileGroup::FileGroup(FilePtr&) */
 			DarkFileGroup(FilePtr& source);

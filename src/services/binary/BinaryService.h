@@ -22,9 +22,10 @@
  *
  *****************************************************************************/
 
-
 #ifndef __BINARYSERVICE_H
 #define __BINARYSERVICE_H
+
+#include "config.h"
 
 #include "ConsoleCommandListener.h"
 #include "OpdeServiceManager.h"
@@ -39,7 +40,7 @@ namespace Opde {
 	*
 	* This service is responsible for storing the definitions of the dynamic binary templates.
 	*/
-	class BinaryService : public Service, public ConsoleCommandListener {
+	class OPDELIB_EXPORT BinaryService : public Service, public ConsoleCommandListener {
 		public:
 			/** Initializes the Service */
 			BinaryService(ServiceManager* manager, const std::string& name);

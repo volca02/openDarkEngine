@@ -134,6 +134,50 @@ namespace Opde {
 	#define _BSP_NODENUM(a) (a.ndn_fl & 0x00FFFFFF)
 	#define _BSP_FLAGS(a) (a.ndn_fl  >> 24)
 #pragma pack(pop)
+
+	// --- Following are family and txlist chunk structures shamelessly ripped from Telliamed's code. 
+	// To be replaced by a competent reader/writer - we should have a handling class for this anyway 
+	struct DarkDBChunkFAMILY {
+		uint32_t	size;	// size of each entry: 0x18
+		uint32_t	count;	// number of entries: 0x12
+		char	fam[18][24];
+		// The first two entries are reserved for water families
+  };
+	
+	struct DarkDBChunkTXLIST
+	{
+		uint32_t	length;		// length of TXLIST
+		uint32_t	txt_count;		// number of individual textures
+		uint32_t	fam_count;	// number of families
+		// array of family names; first entry is "fam"
+		// array of DarkDBTXLIST_texture; first entry is "null"
+	};
+
+	struct DarkDBTXLIST_fam
+	{
+		char	name[16];
+	};
+
+	struct DarkDBTXLIST_texture
+	{
+		uint8_t	one;		// 0x01 (except on "null" texture)
+		uint8_t	fam;		// number of family (one-based count, 0 for no fam)
+		uint16_t	zero;		// 0x00
+		char	name[16];	// texture name
+	};
+	
+	/*
+ * FLOW_TEX [MIS] [*]
+ * Association of flow textures to flow colors.
+ */
+	struct DarkDBChunkFLOW_TEX	{
+		struct {
+			int16_t	in_texture;		// index in texture palette
+			int16_t	out_texture;	// index in texture palette
+			char	name[28];
+		} flow[256];
+};
+	
 } // end of Opde namespace
 
 #endif

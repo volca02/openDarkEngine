@@ -21,9 +21,10 @@
  *
  *****************************************************************************/
 
-
 #ifndef __ROOT_H
 #define __ROOT_H
+
+#include "config.h"
 
 #include "compat.h"
 #include "integers.h"
@@ -33,6 +34,7 @@
 #include "OpdeServiceManager.h"
 #include "ServiceCommon.h"
 #include "ConsoleBackend.h"
+#include "ConsoleFrontend.h"
 
 #include <OgreRoot.h>
 #include <OgreLogManager.h>
@@ -48,7 +50,7 @@
 namespace Opde {
 	
 	/** OPDE core class. Used to initialize the whole engine. Singleton */
-	class Root : public Singleton<Root> {
+	class OPDELIB_EXPORT Root : public Singleton<Root> {
 		public:
 			/** Initializes the opde core
 			* @param serviceMask the mask of the services which should be used (others will be ignored and unreachable) */

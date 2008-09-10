@@ -22,9 +22,9 @@ add_library (OpdeLinkService
     LinkCommon.h
 )
 
-target_link_libraries(OpdeLinkService
-    OpdeBase
-    OpdeServiceManager
-    ${OPDE_BASE_LIBRARIES}
-    ${OPDE_SERVICE_LIBRARIES}
-)
+#target_link_libraries(OpdeLinkService
+#    OpdeBase
+#    OpdeServiceManager
+#    ${OPDE_BASE_LIBRARIES}
+#    ${OPDE_SERVICE_LIBRARIES}
+#)

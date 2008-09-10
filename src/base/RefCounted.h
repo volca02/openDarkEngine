@@ -17,10 +17,15 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *
+ *		$Id$
+ *
  *****************************************************************************/
  
 #ifndef __REFCOUNTED_H
 #define __REFCOUNTED_H
+
+#include "config.h"
 
 namespace Opde {
 		
@@ -40,7 +45,8 @@ namespace Opde {
 	*  // and release after being finished<br>
 	*<br>
 	*  test->release();<br>
-	* </code>*/
+	* </code>
+	* @deprecated */
 	class RefCounted {
 		protected:
 			int mReferences;

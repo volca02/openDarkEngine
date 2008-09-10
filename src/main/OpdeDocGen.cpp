@@ -21,6 +21,8 @@
  *
  *****************************************************************************/
 
+#include "config.h"
+
 #include "GameStateManager.h"
 #include "OpdeException.h"
 #include "Root.h"

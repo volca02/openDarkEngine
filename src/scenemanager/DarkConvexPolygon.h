@@ -25,6 +25,8 @@
 #ifndef __DARKPOLYGON_H
 #define __DARKPOLYGON_H
 
+#include "config.h"
+
 #include "OgreVector3.h"
 #include "OgrePlane.h"
 #include <iostream>
@@ -36,7 +38,7 @@ namespace Ogre {
 	
 	/** @brief A Polygon class used as a base for the Portal class as well as other things
 	*/
-	class ConvexPolygon {
+	class OPDELIB_EXPORT ConvexPolygon {
 		friend class DarkSceneManager;
 			
 		protected:

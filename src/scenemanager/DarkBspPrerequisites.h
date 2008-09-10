@@ -31,6 +31,8 @@ $Id$
 #ifndef __DarkBspPrerequisites_H__
 #define __DarkBspPrerequisites_H__
 
+#include "config.h"
+
 #include <OgrePrerequisites.h>
 
 namespace Ogre {

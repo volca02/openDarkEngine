@@ -20,8 +20,10 @@
  *****************************************************************************/
 
 
-#ifndef __wrcell_h
-#define __wrcell_h
+#ifndef __WRCELL_H
+#define __WRCELL_H
+
+#include "config.h"
 
 #include "WRTypes.h"
 #include "FileGroup.h"
@@ -37,7 +39,7 @@
 #include <OgreSceneNode.h>
 
 namespace Opde {
-    class WorldRepService;
+	class WorldRepService;
 
 	const unsigned short int SKY_TEXTURE = 249;
 
@@ -57,7 +59,7 @@ namespace Opde {
 
 
 	/** Encapsulates the reading and interpreting of one Cell in the chunk. Has methods for ogre Mesh generation. And data access */
-	class WRCell {
+	class OPDELIB_EXPORT WRCell {
 		private:
 			/** The cell number this cell represents */
 			int cellNum;

@@ -27,6 +27,8 @@
 #ifndef __LOOPSERVICE_H
 #define __LOOPSERVICE_H
 
+#include "config.h"
+
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
 #include "SharedPtr.h"
@@ -86,7 +88,7 @@ namespace Opde {
 
 	
 	/// Loop Client. Abstract class. Receives the loop messages
-	class LoopClient {
+	class OPDELIB_EXPORT LoopClient {
 		protected:
 			friend class LoopService;
 			friend class LoopMode;
@@ -129,7 +131,7 @@ namespace Opde {
 	typedef std::multimap< LoopClientPriority, LoopClient* > LoopClientMap;
 
 	/** The loop mode definition. */
-	class LoopMode {
+	class OPDELIB_EXPORT LoopMode {
 		public:
 			LoopMode(const LoopModeDefinition& def, LoopService* owner);
 		
@@ -170,7 +172,7 @@ namespace Opde {
 	typedef shared_ptr< LoopMode > LoopModePtr;
 	
 	/** @brief Loop Service - service which handles game loop (per-frame loop) */
-	class LoopService : public Service {
+	class OPDELIB_EXPORT LoopService : public Service {
 		public:
 			/** Constructor
 			* @param manager The ServiceManager that created this service
@@ -270,7 +272,7 @@ namespace Opde {
 
 
 	/// Factory for the LoopService objects
-	class LoopServiceFactory : public ServiceFactory {
+	class OPDELIB_EXPORT LoopServiceFactory : public ServiceFactory {
 		public:
 			LoopServiceFactory();
 			~LoopServiceFactory() {};

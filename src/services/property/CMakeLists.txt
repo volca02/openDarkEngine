@@ -31,7 +31,7 @@ add_library (OpdePropertyService
     PropertyStorage.h
 )
 
-target_link_libraries(OpdePropertyService
-    OpdeBase
-    OpdeServiceManager
-)
+#target_link_libraries(OpdePropertyService
+#    OpdeBase
+#    OpdeServiceManager
+#)

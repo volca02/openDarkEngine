@@ -26,6 +26,8 @@
 #ifndef __CONFIGSERVICE_H
 #define __CONFIGSERVICE_H
 
+#include "config.h"
+
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
 #include "DatabaseService.h"
@@ -37,7 +39,7 @@ namespace Opde {
 
 	/** @brief config service
 	*/
-	class ConfigService : public Service {
+	class OPDELIB_EXPORT ConfigService : public Service {
 		public:
 			ConfigService(ServiceManager *manager, const std::string& name);
 			virtual ~ConfigService();

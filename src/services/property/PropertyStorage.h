@@ -25,6 +25,8 @@
 #ifndef __DATASTORAGE_H
 #define __DATASTORAGE_H
 
+#include "config.h"
+
 #include "DTypeDef.h"
 #include "DVariant.h"
 #include "File.h"
@@ -36,7 +38,7 @@ namespace Opde {
 	* @note This class does no inheritance resolving itself (in case of properties). Only stores data.
 	* @note The objID, object id referenced here has the meaning of a ID of any kind appropriate - game object id for Properties, Link id for links.
 	*/
-	class DataStorage {
+	class OPDELIB_EXPORT DataStorage {
 		public:
             virtual ~DataStorage() {};
 		
@@ -134,7 +136,7 @@ namespace Opde {
 	typedef shared_ptr<DataStorage> DataStoragePtr;
 	
 	/// Internal: Implementation of field desc. for iterator over DTypeDef
-	class DTypeDefFieldDesc {
+	class OPDELIB_EXPORT DTypeDefFieldDesc {
 		public:
 			DTypeDefFieldDesc(const DTypeDefPtr& type);
 			
@@ -145,7 +147,7 @@ namespace Opde {
 	};
 	
 	/** Structured data implementation of the DataStorage. */
-	class StructuredDataStorage : public DataStorage {
+	class OPDELIB_EXPORT StructuredDataStorage : public DataStorage {
 		public:
 			StructuredDataStorage(const DTypeDefPtr& type, bool useDataCache);
 			
@@ -231,7 +233,7 @@ namespace Opde {
 	
 	
 	/** Data storage targetted at storing variable length strings (One per id). */
-	class StringDataStorage : public DataStorage {
+	class OPDELIB_EXPORT StringDataStorage : public DataStorage {
 		public:
 			StringDataStorage();
 			

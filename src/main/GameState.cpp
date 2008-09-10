@@ -19,6 +19,8 @@
  *
  *****************************************************************************/
 
+#include "config.h"
+
 #include "GameState.h"
 #include "GameStateManager.h"
 

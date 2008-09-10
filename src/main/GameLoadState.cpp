@@ -23,6 +23,8 @@
  *
  *****************************************************************************/
 
+#include "config.h"
+
 #include "OIS.h"
 #include "GameStateManager.h"
 #include "GameLoadState.h"
@@ -281,7 +283,14 @@ namespace Opde {
 
 		// Show the overlay
 		mLoadingOverlay->show();
+	}
 
+	GameLoadState& GameLoadState::getSingleton() {
+		assert(ms_Singleton); return *ms_Singleton;
+	}
+
+	GameLoadState* GameLoadState::getSingletonPtr() {
+		return ms_Singleton;
 	}
 }
 

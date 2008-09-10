@@ -26,13 +26,15 @@
 #ifndef __DARKLIGHT_H
 #define __DARKLIGHT_H
 
+#include "config.h"
+
 #include "DarkBspPrerequisites.h"
 #include <OgreLight.h>
 
 namespace Ogre {
 
 	/** Specialized version of Ogre::Light that caches cells it affects */
-	class DarkLight : public Light {
+	class OPDELIB_EXPORT DarkLight : public Light {
 		public:
 			DarkLight();
 			
@@ -66,7 +68,7 @@ namespace Ogre {
 	};
 	
 	
-	class DarkLightFactory : public MovableObjectFactory {
+	class OPDELIB_EXPORT DarkLightFactory : public MovableObjectFactory {
 		protected:
 			MovableObject* createInstanceImpl( const String& name, const NameValuePairList* params);
 

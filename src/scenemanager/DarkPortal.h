@@ -25,6 +25,8 @@
 #ifndef __DARKPORTAL_H
 #define __DARKPORTAL_H
 
+#include "config.h"
+
 #include <OgreCamera.h>
 #include <OgreSimpleRenderable.h>
 #include <OgreVector3.h>
@@ -45,7 +47,7 @@ namespace Ogre {
 	* This structure is used by Portal class when calculating the on-screen bounding rectangle.
 	* It is ment as a Ogre::Rect replacement, because that one uses Real as a base type, which is slower to use
 	*/
-	struct PortalRect {
+	struct OPDELIB_EXPORT PortalRect {
 			/// Static screen width size half
 			static int sScreenWidth2;
 			/// Static screen height size half
@@ -156,7 +158,7 @@ namespace Ogre {
 	* visibility determination is done using a to-screen projected portal vertices bounding rectangles PortalRects
 	* @note Please note that the direction of the plane's normal has to comply with the 
 	* portals vertex order derived normal. Also note that no check that the points actualy lie on the plane is done. */
-	class Portal : public ConvexPolygon { // , public SimpleRenderable 
+	class OPDELIB_EXPORT Portal : public ConvexPolygon { // , public SimpleRenderable 
 		friend class DarkCamera;
 		friend class PortalFrustum;
 			

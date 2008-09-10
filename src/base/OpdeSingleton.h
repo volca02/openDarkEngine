@@ -23,12 +23,14 @@
 #ifndef __OPDESINGLETON_H
 #define __OPDESINGLETON_H
 
+#include "config.h"
+
 #include <cassert>
 
 namespace Opde {
 	
 	// Just a copy of Ogre's singleton impl, before writing something on our own. Thanks OGRE people!
-        template <typename T> class Singleton  {
+    template <typename T> class Singleton {
 	    protected:
 	        static T* ms_Singleton;
 
@@ -38,16 +40,26 @@ namespace Opde {
     		#if defined( _MSC_VER ) && _MSC_VER < 1200
 	            int offset = (int)(T*)1 - (int)(Singleton <T>*)(T*)1;
 	            ms_Singleton = (T*)((int)this + offset);
-		#else
+			#else
 	            ms_Singleton = static_cast< T* >( this );
-		#endif
+			#endif
         	}
-            ~Singleton( void )
-		{  assert( ms_Singleton );  ms_Singleton = 0;  }
-    	    static T& getSingleton( void )
-                {       assert( ms_Singleton );  return ( *ms_Singleton ); }
-    	    static T* getSingletonPtr( void )
-                { return ms_Singleton; }
+
+            ~Singleton( void ) {
+				assert( ms_Singleton );
+				ms_Singleton = 0;
+			}
+
+			/* Let the ancestor implement these methods. They are dangerous here because of the DLL boundaries
+			static T& getSingleton( void ) {
+				assert( ms_Singleton );  
+				return ( *ms_Singleton );
+			}
+
+			static T* getSingletonPtr( void ) {
+				return ms_Singleton;
+			}
+			*/
     };
 
 }

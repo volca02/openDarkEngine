@@ -25,6 +25,8 @@
 #ifndef __DTYPEDEF_H
 #define __DTYPEDEF_H
 
+#include "config.h"
+
 #include <stdexcept>
 #include <list>
 #include <vector>
@@ -46,7 +48,7 @@ namespace Opde {
 	/** Type aware variant based enumeration definition. Used for enumeration and bitfields. 
 	@note For bitfields, the base type must be DV_UINT
 	@note No check on multiple keys with the same values is made */
-	class DEnum {
+	class OPDELIB_EXPORT DEnum {
 		private:
 			typedef std::map<std::string, DVariant> StrValMap;
 			
@@ -61,6 +63,8 @@ namespace Opde {
 		public:
 			DEnum(const std::string& name, DVariant::Type enumType, bool bitfield);
 			
+			~DEnum();
+
 			/** Insert a field definition inside the Enum 
 			* @note It is not adviced to modify enumerations on other times than creation as this could confuse other pieces of code */
 			void insert(const std::string& key, const DVariant& value);
@@ -109,7 +113,7 @@ namespace Opde {
 	typedef std::vector<DTypeDefPtr> DTypeDefVector;
 	
 	/// Base definition of the DTypes dat storage
-	class DTPrivateBase {
+	class OPDELIB_EXPORT DTPrivateBase {
 		public:
 			/** DTypeDef private node type */
 			typedef enum NodeType {
@@ -160,7 +164,7 @@ namespace Opde {
 	*
 	* 
 	*/
-	class DTypeDef : public NonCopyable {
+	class OPDELIB_EXPORT DTypeDef : public NonCopyable {
 		public:
 			/// Construct as a copy of other DTypeDef, with different name
 			DTypeDef(const std::string& name, const DTypeDef& src);
@@ -321,8 +325,9 @@ namespace Opde {
 			FieldMap mFieldMap;
 	};
 	
-	/** DTypeDef 'variable'. Ugly and a bit outdated concept that should be got rid off soon. */
-	class DType {
+	/** DTypeDef 'variable'. Ugly and a bit outdated concept that should be got rid off soon. 
+	* @deprecated */
+	class OPDELIB_EXPORT DType {
 		public:
 			/** Copy constructor. Copies the data and the type definition from another DType instance */
 			DType(const DType& b, bool useCache = false) : mUseCache(useCache), mCache() {
@@ -472,7 +477,7 @@ namespace Opde {
 	typedef std::list<DataFieldDesc> DataFieldDescList;
 	
 	/// Iterator wrapper over field description list.
-	class DataFieldDescListIterator : public DataFieldDescIterator {
+	class OPDELIB_EXPORT DataFieldDescListIterator : public DataFieldDescIterator {
 		public:
 			DataFieldDescListIterator(const DataFieldDescList& src);
 			

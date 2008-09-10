@@ -25,6 +25,8 @@
 #ifndef __PROPERTYGROUP_H
 #define __PROPERTYGROUP_H
 
+#include "config.h"
+
 #include "PropertyCommon.h"
 #include "NonCopyable.h"
 #include "DTypeDef.h"
@@ -42,7 +44,7 @@ namespace Opde {
 	/** @brief Property group - a group of properties of the same kind (name, type).
 	* Property group holds all the properties of the same kind for all the objects.
 	*/
-	class PropertyGroup : public NonCopyable, public MessageSource<PropertyChangeMsg> {
+	class OPDELIB_EXPORT PropertyGroup : public NonCopyable, public MessageSource<PropertyChangeMsg> {
 		public:
 			/** PropertyGroup Constructor
 			* @param name The property name

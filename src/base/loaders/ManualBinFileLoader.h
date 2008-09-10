@@ -18,12 +18,14 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *		$Id:$
+ *		$Id$
  *
  *****************************************************************************/
 
 #ifndef __BINMESHTFILEMANAGER_H
 #define __BINMESHTFILEMANAGER_H
+
+#include "config.h"
 
 #include <OgreResourceManager.h>
 #include "OgreMesh.h"
@@ -31,7 +33,7 @@
 namespace Ogre {
 
     /** ManualResourceLoader for BIN meshes. Used to load BIN meshes as Ogre::Mesh instances */
-    class ManualBinFileLoader : public ManualResourceLoader {
+    class OPDELIB_EXPORT ManualBinFileLoader : public ManualResourceLoader {
         public:
             ManualBinFileLoader();
             virtual ~ManualBinFileLoader();

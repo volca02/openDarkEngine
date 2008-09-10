@@ -26,6 +26,8 @@
 #ifndef __GUISERVICE_H
 #define __GUISERVICE_H
 
+#include "config.h"
+
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
 #include "InputService.h"
@@ -34,7 +36,7 @@
 namespace Opde {
 
 	/** @brief GUI service - service which handles user interfaces */
-	class GUIService : public Service, public DirectInputListener {
+	class OPDELIB_EXPORT GUIService : public Service, public DirectInputListener {
 		public:
 			GUIService(ServiceManager *manager, const std::string& name);
 			virtual ~GUIService();
@@ -108,7 +110,7 @@ namespace Opde {
 	typedef shared_ptr<GUIService> GUIServicePtr;
 
 	/// Factory for the GUIService objects
-	class GUIServiceFactory : public ServiceFactory {
+	class OPDELIB_EXPORT GUIServiceFactory : public ServiceFactory {
 		public:
 			GUIServiceFactory();
 			~GUIServiceFactory() {};

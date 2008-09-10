@@ -26,6 +26,8 @@
 #ifndef __consolebackend_h
 #define __consolebackend_h
 
+#include "config.h"
+
 #include <string>
 #include <map>
 
@@ -40,7 +42,7 @@ namespace Opde {
 
 	/** Backend class, used for commands processing, and console text memmory
 	* A singleton class, used to insert texts to console and to call Command Listeners */
-	class ConsoleBackend : public Singleton<ConsoleBackend>, public Ogre::LogListener, public Opde::LogListener {
+	class OPDELIB_EXPORT ConsoleBackend : public Singleton<ConsoleBackend>, public Ogre::LogListener, public Opde::LogListener {
 		private:
 			/** Map of the string to the Listeners which handle them */
 			std::map<std::string, ConsoleCommandListener *> mCommandMap;
@@ -64,6 +66,9 @@ namespace Opde {
 		public:
 			/** constructor */
 			ConsoleBackend(unsigned int text_history = 1000);
+
+			/** destructor */
+			~ConsoleBackend();
 
 			/** Will register the command Command with the ConsoleCommandListener listener
 			* @note When the command is already registered, the listener will be reregistered, allowing this to be called in the constructors */

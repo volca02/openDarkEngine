@@ -26,6 +26,8 @@
 #ifndef __RENDERSERVICE_H
 #define __RENDERSERVICE_H
 
+#include "config.h"
+
 #include "ServiceCommon.h"
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
@@ -74,7 +76,7 @@ namespace Opde {
 	* Some preliminary notes: VHot will probably be converted to TagPoints somehow
 	* The 0,0,0 bug will reveal itself here too, maybe. This is caused by default object coordinates being 0,0,0 and we have to wait for Position prop message to come in order to move the node
 	*/
-	class RenderService : public Service, public MessageSource< RenderServiceMsg >, public LoopClient {
+	class OPDELIB_EXPORT RenderService : public Service, public MessageSource< RenderServiceMsg >, public LoopClient {
 		public:
 			RenderService(ServiceManager *manager, const std::string& name);
 			virtual ~RenderService();
@@ -127,15 +129,15 @@ namespace Opde {
 			/** Model name property callback
 			* @todo Default to the same model as dark (see if T1/T2/SS2 use the same model for concretes not having this property specified)
 			*/
-            void onPropModelNameMsg(const PropertyChangeMsg& msg);
+			void onPropModelNameMsg(const PropertyChangeMsg& msg);
             
-            /// Property Light change callback
-            void onPropLightMsg(const PropertyChangeMsg& msg);
+			/// Property Light change callback
+			void onPropLightMsg(const PropertyChangeMsg& msg);
             
-            /// Property Spotlight change callback
-            void onPropSpotlightMsg(const PropertyChangeMsg& msg);
+			/// Property Spotlight change callback
+			void onPropSpotlightMsg(const PropertyChangeMsg& msg);
             
-   			/// Position property change callback
+			/// Position property change callback
 			void onPropPositionMsg(const PropertyChangeMsg& msg);
 			
 			/// Scale property change callback
@@ -151,7 +153,7 @@ namespace Opde {
 			void onObjectMsg(const ObjectServiceMsg& msg);
 			
 			/// Prepares mesh named "name" for usage on entity (if it was not prepared already)
-            void prepareMesh(const Ogre::String& name);
+			void prepareMesh(const Ogre::String& name);
 
 			/// Initializes the object's model
 			void createObjectModel(int id);
@@ -170,14 +172,14 @@ namespace Opde {
 			void prepareEntity(Ogre::Entity* e);
 
 			/// Clears all the rendering data
-            void clear();
-            
-            /// prepares some hardcoded media (included in the executable)
-            void prepareHardcodedMedia();
-            
-            /// Cretes a ramp mesh, that is used as a default mesh when not specified otherwise
-            void createRampMesh();
-            
+			void clear();
+			
+			/// prepares some hardcoded media (included in the executable)
+			void prepareHardcodedMedia();
+			
+			/// Cretes a ramp mesh, that is used as a default mesh when not specified otherwise
+			void createRampMesh();
+			
    			/// A package of a light and it's scene node
 			struct LightInfo {
 				Ogre::Light* light;
@@ -197,20 +199,20 @@ namespace Opde {
 				EntityMaterialInstance* emi;
 			};
 
-            /// Creates a new light with next to no initialization
-            LightInfo& createLight(int objID);
-            
-            /// Updates a light based on the data of property LIGHT
+			/// Creates a new light with next to no initialization
+			LightInfo& createLight(int objID);
+			
+			/// Updates a light based on the data of property LIGHT
 			void updateLight(LightInfo& li, int objectID);
 			
 			/// removes a light
-   			void removeLight(int id);
-   			
-   			/// Updates a light to be a spotlight, updates it's params
-   			void updateSpotLight(LightInfo& li, int objectID);
-   			
-   			/// removes spotlight quality from a light (leaves the light as a point light)
-   			void removeSpotLight(int id);
+			void removeLight(int id);
+			
+			/// Updates a light to be a spotlight, updates it's params
+			void updateSpotLight(LightInfo& li, int objectID);
+			
+			/// removes spotlight quality from a light (leaves the light as a point light)
+			void removeSpotLight(int id);
 
 			/// set's the node's visibility based on the rendertype property value
 			void setNodeRenderType(Ogre::SceneNode* node, const EntityInfo& ei);
@@ -255,11 +257,11 @@ namespace Opde {
 			/// Shared pointer to the property service
 			PropertyServicePtr mPropertyService;
 
-            // --- RENDERING INSTANCES ---
-            /// Ogre root handle
-            Ogre::Root* mRoot;
-            
-            /// Scene manager handle
+			// --- RENDERING INSTANCES ---
+			/// Ogre root handle
+			Ogre::Root* mRoot;
+			
+			/// Scene manager handle
 			Ogre::SceneManager* mSceneMgr;
 			
 			/// Render window handle
@@ -311,7 +313,7 @@ namespace Opde {
 	typedef shared_ptr<RenderService> RenderServicePtr;
 
 	/// Factory for the LinkService objects
-	class RenderServiceFactory : public ServiceFactory {
+	class OPDELIB_EXPORT RenderServiceFactory : public ServiceFactory {
 		public:
 			RenderServiceFactory();
 			~RenderServiceFactory() {};

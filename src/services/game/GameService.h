@@ -23,6 +23,8 @@
 #ifndef __GAMESERVICE_H
 #define __GAMESERVICE_H
 
+#include "config.h"
+
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
 #include "DatabaseService.h"
@@ -33,7 +35,7 @@ namespace Opde {
 
 	/** @brief Game service - service defining game states (Temporary code. Will be filled with a high level state management - screens)
 	*/
-	class GameService : public Service {
+	class OPDELIB_EXPORT GameService : public Service {
 		public:
 			GameService(ServiceManager *manager, const std::string& name);
 			virtual ~GameService();
@@ -42,7 +44,7 @@ namespace Opde {
 			void load(const std::string& filename);
 
 		protected:
-            bool init();
+			bool init();
 
 			DatabaseServicePtr mDbService;
 	};
@@ -52,7 +54,7 @@ namespace Opde {
 
 
 	/// Factory for the GameService objects
-	class GameServiceFactory : public ServiceFactory {
+	class OPDELIB_EXPORT GameServiceFactory : public ServiceFactory {
 		public:
 			GameServiceFactory();
 			~GameServiceFactory() {};

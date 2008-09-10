@@ -27,6 +27,8 @@
 #ifndef __CUSTOMIMAGECODEC_H
 #define __CUSTOMIMAGECODEC_H
 
+#include "config.h"
+
 #include<OgreCodec.h>
 #include<OgreImageCodec.h>
 
@@ -35,13 +37,13 @@ namespace Ogre {
 	// Interface cloned from Ogre::FreeImageCodec
 	
 	/// Custom image codec providing transparency for pallete index 0 on 8bit palletized images of .PCX and .GIF formats
-	class CustomImageCodec : public ImageCodec {
+	class OPDELIB_EXPORT CustomImageCodec : public ImageCodec {
 		private:
 			String mType;
 			unsigned int mFreeImageType;
 
-            typedef std::list<ImageCodec*> RegisteredCodecList;
-            static RegisteredCodecList msCodecList;
+			typedef std::list<ImageCodec*> RegisteredCodecList;
+			static RegisteredCodecList msCodecList;
 
 			// Hooks. These are the previous codecs registered for the given extensions
 			static CodecList msReplacedCodecs;
@@ -65,11 +67,11 @@ namespace Ogre {
 			/// Type getter
 			virtual String getType() const;
 
-            /// Static method to startup FreeImage and register the FreeImage codecs
-            static void startup(void);
+			/// Static method to startup FreeImage and register the FreeImage codecs
+			static void startup(void);
             
-            /// Static method to shutdown FreeImage and unregister the FreeImage codecs
-            static void shutdown(void);
+			/// Static method to shutdown FreeImage and unregister the FreeImage codecs
+			static void shutdown(void);
 	};
 
 

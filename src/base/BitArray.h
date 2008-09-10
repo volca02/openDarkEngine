@@ -25,6 +25,8 @@
 #ifndef __BITARRAY_H
 #define __BITARRAY_H
 
+#include "config.h"
+
 #include "OpdeException.h"
 
 namespace Opde {

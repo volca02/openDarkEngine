@@ -25,6 +25,8 @@
 #ifndef __DARKGEOMETRY_H
 #define __DARKGEOMETRY_H
 
+#include "config.h"
+
 #include "DarkBspPrerequisites.h"
 #include "OgreRenderable.h"
 
@@ -34,7 +36,7 @@ namespace Ogre {
 	class DarkFragment;
 	
 	/// Class that tries to optimally store level geometry of Dark for rendering
-	class DarkGeometry {
+	class OPDELIB_EXPORT DarkGeometry {
 		public:
 			/// Constructor
 			DarkGeometry(const String& name, uint8 defaultRenderQueueID);
@@ -107,7 +109,7 @@ namespace Ogre {
 	} DarkVertex;
 	
 	/// Geometry builder for a fragment. Is used temporarily to build geometry from vertex definitions
-	class DarkFragmentBuilder {
+	class OPDELIB_EXPORT DarkFragmentBuilder {
 		public:
 			/// defines a vertex. Returns index to the vertex list holding the definition of this vertex
 			size_t vertex(const Vector3& pos, const Vector3& norm, const Vector2& txt0, const Vector2& txt1);
@@ -178,7 +180,7 @@ namespace Ogre {
 	};
 	
 	/// A fragment of a world's geometry. Contains info about one distinct material of one cell
-	class DarkFragment {
+	class OPDELIB_EXPORT DarkFragment {
 			friend class DarkSubGeometry;
 		
 		public:
@@ -233,7 +235,7 @@ namespace Ogre {
 	};
 	
 	/// A geometry container for a single material
-	class DarkSubGeometry : public Renderable {
+	class OPDELIB_EXPORT DarkSubGeometry : public Renderable {
 			friend class DarkGeometry;
 			friend class DarkFragment;
 			

@@ -26,6 +26,8 @@
 #ifndef __STRINGTOKENIZER_H
 #define __STRINGTOKENIZER_H
 
+#include "config.h"
+
 #include "Iterator.h"
 #include <functional>
 #include <string>

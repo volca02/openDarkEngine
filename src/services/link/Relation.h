@@ -23,6 +23,8 @@
 #ifndef __RELATION_H
 #define __RELATION_H
 
+#include "config.h"
+
 #include <string>
 #include "NonCopyable.h"
 #include "DTypeDef.h"
@@ -33,7 +35,7 @@
 namespace Opde {
 	/** @brief Relation. A store of a group of links of the same flavor.
 	*/
-	class Relation : public NonCopyable, public MessageSource<LinkChangeMsg> {
+	class OPDELIB_EXPORT Relation : public NonCopyable, public MessageSource<LinkChangeMsg> {
 		public:
 			Relation(const std::string& name, const DTypeDefPtr& type, bool isInverse, bool hidden = false);
 			virtual ~Relation();

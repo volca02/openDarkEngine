@@ -25,6 +25,8 @@
 #ifndef __DATABASESERVICE_H
 #define __DATABASESERVICE_H
 
+#include "config.h"
+
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
 #include "FileGroup.h"
@@ -35,63 +37,63 @@ namespace Opde {
 
 	/// Database event types
 	typedef enum {
-	    /// Loading a new database
-	    DBC_LOADING = 1,
-	    /// Saving a database
-	    DBC_SAVING,
-	    /// Dropping a database
-	    DBC_DROPPING
+		/// Loading a new database
+		DBC_LOADING = 1,
+		/// Saving a database
+		DBC_SAVING,
+		/// Dropping a database
+		DBC_DROPPING
 	} DatabaseChangeType;
 
 	/// Database types
 	typedef enum {
-	    /// Game system database
-	    DBT_GAMESYS = 1,
-	    /// Mission file database
-	    DBT_MISSION,
-	    /// Savegame database
-	    DBT_SAVEGAME,
-	    /// A complete - full database (e.g. VBR, also means all for DB_DROPPING)
-	    DBT_COMPLETE
+		/// Game system database
+		DBT_GAMESYS = 1,
+		/// Mission file database
+		DBT_MISSION,
+		/// Savegame database
+		DBT_SAVEGAME,
+		/// A complete - full database (e.g. VBR, also means all for DB_DROPPING)
+		DBT_COMPLETE
 	} DatabaseType;
 
 	/// The database change message
 	struct DatabaseChangeMsg {
-	    /// A change requested to happen
-	    DatabaseChangeType change;
-	    /// Type of the database distributed by this event
-	    DatabaseType dbtype;
-	    /// Type of the target database - valid options are DB_MISSION, DB_SAVEGAME and DB_COMPLETE
-	    DatabaseType dbtarget;
-	    /// The pointer to the database file to be used
-	    FileGroupPtr db;
+		/// A change requested to happen
+		DatabaseChangeType change;
+		/// Type of the database distributed by this event
+		DatabaseType dbtype;
+		/// Type of the target database - valid options are DB_MISSION, DB_SAVEGAME and DB_COMPLETE
+		DatabaseType dbtarget;
+		/// The pointer to the database file to be used
+		FileGroupPtr db;
 	};
 	
 	
 	/// Progress report of database loading. This is what the Progress Listener get's every now and then to update the display
-	struct  DatabaseProgressMsg {
-	    /// Completion status - 0.0-1.0
-	    float completed; // Only the coarse steps are included here. The fine steps are not
-	    /// Total coarse step count
-	    int totalCoarse; 
-	    /// Current count of the coarse steps
-	    int currentCoarse;
-	    /// Overall count of the fine steps
-	    int overallFine; // Increased on every DatabaseService::fineStep (not cleared). Means the overall step count that happened
-	    
-	    /// Recalculates the completed
-	    void recalc() {
-	        if (totalCoarse > 0) {
-                completed = static_cast<float>(currentCoarse) / static_cast<float>(totalCoarse);
-	        }
-	    }
-	    
-	    void reset() {
-	        completed = 0;
-	        totalCoarse = 0;
-	        currentCoarse = 0;
-	        overallFine = 0;
-	    }
+	struct DatabaseProgressMsg {
+		/// Completion status - 0.0-1.0
+		float completed; // Only the coarse steps are included here. The fine steps are not
+		/// Total coarse step count
+		int totalCoarse; 
+		/// Current count of the coarse steps
+		int currentCoarse;
+		/// Overall count of the fine steps
+		int overallFine; // Increased on every DatabaseService::fineStep (not cleared). Means the overall step count that happened
+		
+		/// Recalculates the completed
+		void recalc() {
+			if (totalCoarse > 0) {
+				completed = static_cast<float>(currentCoarse) / static_cast<float>(totalCoarse);
+			}
+		}
+		
+		void reset() {
+			completed = 0;
+			totalCoarse = 0;
+			currentCoarse = 0;
+			overallFine = 0;
+		}
 	};
 
 	/** @brief Database service - service which handles dark database loading and saving
@@ -100,7 +102,7 @@ namespace Opde {
 	* @li Mission loading will drop with DB_COMPLETE
 	* @li Savegame loading will have DB_SAVEGAME as dbtarget (so the services handling savegame related chunks will not process the mission's chunks)
 	*/
-	class DatabaseService : public Service, public PrioritizedMessageSource<DatabaseChangeMsg> {
+	class OPDELIB_EXPORT DatabaseService : public Service, public PrioritizedMessageSource<DatabaseChangeMsg> {
 		public:
 			DatabaseService(ServiceManager *manager, const std::string& name);
 			virtual ~DatabaseService();
@@ -111,24 +113,24 @@ namespace Opde {
 			/// Unload the game data. Release all the data that are connected to a game's mission in progress
 			void unload();
 	
-            /// Listener that receives events every now and then while loading
+			/// Listener that receives events every now and then while loading
 			typedef Callback<DatabaseProgressMsg> ProgressListener;
 			
 			/// Progress Listener shared_ptr
 			typedef shared_ptr<ProgressListener> ProgressListenerPtr;
 			
 			/// Setter for the progress listener.
-            void setProgressListener(const ProgressListenerPtr& listener) { mProgressListener = listener; };
+			void setProgressListener(const ProgressListenerPtr& listener) { mProgressListener = listener; };
             
-            /// Clears (unsets) the progress listener (disabling it)
-            void unsetProgressListener() { mProgressListener = NULL; };
+			/// Clears (unsets) the progress listener (disabling it)
+			void unsetProgressListener() { mProgressListener = NULL; };
 	
-            /// A free to use fine step function that calls the Progress Listener to reflect the loading progress
-            /// Use this especially in some long-to load services
-            void fineStep(int count);
-					
+			/// A free to use fine step function that calls the Progress Listener to reflect the loading progress
+			/// Use this especially in some long-to load services
+			void fineStep(int count);
+			
 		protected:
-            virtual bool init();
+			virtual bool init();
 
 			/// Retrieve a readonly database file by it's name
 			FileGroupPtr getDBFileNamed(const std::string& filename);
@@ -139,15 +141,15 @@ namespace Opde {
 			/// Load and assign a gamesys database to the db (has to be a mission or savegame)
 			void _loadGameSysDB(const FileGroupPtr& db);
 
-            /// Overriden broadcast to support progress reports
-            virtual void broadcastMessage(const DatabaseChangeMsg& msg);
+			/// Overriden broadcast to support progress reports
+			virtual void broadcastMessage(const DatabaseChangeMsg& msg);
 
 			FileGroupPtr mCurDB;
 			
 			/// Used to report to the Progress Listener
 			DatabaseProgressMsg mLoadingStatus;
 			
-            ProgressListenerPtr mProgressListener;
+			ProgressListenerPtr mProgressListener;
 	};
 
 	/// Shared pointer to game service
@@ -155,7 +157,7 @@ namespace Opde {
 
 
 	/// Factory for the DatabaseService objects
-	class DatabaseServiceFactory : public ServiceFactory {
+	class OPDELIB_EXPORT DatabaseServiceFactory : public ServiceFactory {
 		public:
 			DatabaseServiceFactory();
 			~DatabaseServiceFactory() {};

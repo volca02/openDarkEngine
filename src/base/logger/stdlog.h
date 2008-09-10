@@ -18,19 +18,21 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *		$Id:$
+ *		$Id$
  *
  *****************************************************************************/
  
 #ifndef __STDLOG_H
 #define __STDLOG_H
 
+#include "config.h"
+
 #include "logger.h"
   
 namespace Opde {
 
 	/** Log listener, writing the logging messsages to std::cerr */
-	class StdLog : public LogListener {
+	class OPDELIB_EXPORT StdLog : public LogListener {
 		public:
 			StdLog();
 			virtual ~StdLog();

@@ -26,6 +26,8 @@
 #ifndef __INHERITSERVICE_H
 #define __INHERITSERVICE_H
 
+#include "config.h"
+
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
 #include "SharedPtr.h"
@@ -58,7 +60,7 @@ namespace Opde {
 	*  An example usage of Inheritor is property inheritance. Properties internally use the inheritors to transparently return values not directly assigned to the object ID, but rather inherited from the Effective object.
 	* Effective object is the carrier of the effective value - the value that has the maximal priority.
 	* */
-	class InheritService : public Service, public MessageSource<InheritChangeMsg> {
+	class OPDELIB_EXPORT InheritService : public Service, public MessageSource<InheritChangeMsg> {
 		public:
 			/// Constructor
 			InheritService(ServiceManager *manager, const std::string& name);
@@ -120,11 +122,11 @@ namespace Opde {
 			*/
 			bool inheritsFrom(int objID, int srcID) const;
 
-            /// Clears out the inheritance map (leaves the other things intact)
-            void clear();
+			/// Clears out the inheritance map (leaves the other things intact)
+			void clear();
 
-            /// Map of object (src/dst) to inherit link
-            typedef std::map< int, InheritLinkPtr > InheritLinkMap;
+			/// Map of object (src/dst) to inherit link
+			typedef std::map< int, InheritLinkPtr > InheritLinkMap;
 
 			/// Map of the effective object ID's
 			typedef std::map< int, InheritLinkMap > InheritMap;
@@ -136,18 +138,18 @@ namespace Opde {
 			/// Service bootstraping ended - @see Service::bootstrapFinished()
 			virtual void bootstrapFinished();
 
-            /** Adds an inheritance link.
-            * @param link The link to be added as InheritLink
-            * @param priority The priority of the link to be added */
-            void _addLink(const LinkPtr& link, unsigned int priority);
+			/** Adds an inheritance link.
+			* @param link The link to be added as InheritLink
+			* @param priority The priority of the link to be added */
+			void _addLink(const LinkPtr& link, unsigned int priority);
 
-            /** Modifies the inheritance link priority
-            * @param link The link to be modified
-            * @param priority The priority of the link to be modified to */
-            void _changeLink(const LinkPtr& link, unsigned int priority);
+			/** Modifies the inheritance link priority
+			* @param link The link to be modified
+			* @param priority The priority of the link to be modified to */
+			void _changeLink(const LinkPtr& link, unsigned int priority);
 
-            /** Removes the given inheritance link */
-            void _removeLink(const LinkPtr& link);
+			/** Removes the given inheritance link */
+			void _removeLink(const LinkPtr& link);
 
 			/// Listener for the metaprop
 			void onMetaPropMsg(const LinkChangeMsg& msg);
@@ -187,7 +189,7 @@ namespace Opde {
 	typedef shared_ptr< InheritService > InheritServicePtr;
 
 	/// Factory for the LinkService objects
-	class InheritServiceFactory : public ServiceFactory {
+	class OPDELIB_EXPORT InheritServiceFactory : public ServiceFactory {
 		public:
 			InheritServiceFactory();
 			~InheritServiceFactory() {};

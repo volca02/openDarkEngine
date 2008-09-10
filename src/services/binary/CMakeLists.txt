@@ -17,9 +17,8 @@ link_directories (
 
 add_library (OpdeBinaryService BinaryService.cpp BinaryService.h)
 
-target_link_libraries(OpdeBinaryService
-    OpdeBase
-    OpdeServiceManager
-    OpdeDynType
-    OpdeConsole
-)
+#target_link_libraries(OpdeBinaryService
+#    OpdeBase
+#    OpdeServiceManager
+#    OpdeDynType
+#)

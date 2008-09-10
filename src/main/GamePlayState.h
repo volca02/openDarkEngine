@@ -23,6 +23,8 @@
 #ifndef __GAMEPLAYSTATE_H
 #define __GAMEPLAYSTATE_H
 
+#include "config.h"
+
 #include "GameState.h"
 #include "OpdeSingleton.h"
 #include "ConsoleFrontend.h"
@@ -58,6 +60,8 @@ namespace Opde {
 			virtual void bootstrapFinished();
 			void onLinkPlayerFactoryMsg(const LinkChangeMsg& msg);
 
+			static GamePlayState& getSingleton();
+			static GamePlayState* getSingletonPtr();
 		protected:
 			Ogre::Root *mRoot;
 			Ogre::SceneManager *mSceneMgr;
