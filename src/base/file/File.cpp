@@ -446,7 +446,7 @@ namespace Opde {
 				OPDE_FILEEXCEPT(FILE_OTHER_ERROR, "Unknown seek position modifier", "MemoryFile.seek()");
 		}
 
-		if (npos > mSize)
+		if ((npos < 0) || (static_cast<file_size_t>(npos) > mSize))
 			OPDE_FILEEXCEPT(FILE_OP_FAILED, "Resulting position not within the file size", "MemoryFile::seek()");
 
 		mFilePos = npos;
@@ -662,14 +662,13 @@ namespace Opde {
 				OPDE_FILEEXCEPT(FILE_OTHER_ERROR, "Unknown seek position modifier", "MemoryFile.seek()");
 		}
 
-		if (npos > mSize)
+		if ((npos < 0) || (static_cast<file_size_t>(npos) > mSize))
 			OPDE_FILEEXCEPT(FILE_OP_FAILED, "Resulting position not within the file size", "MemoryFile::seek()");
 
 		mFilePos = npos;
 
 		mEof = (mFilePos >= mSize);
 	}
-
 
 	//------------------------------------
 	void FilePart::seek(file_pos_t pos) {
