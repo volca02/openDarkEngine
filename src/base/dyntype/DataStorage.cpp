@@ -22,7 +22,7 @@
  *
  *****************************************************************************/
 
-#include "PropertyStorage.h"
+#include "DataStorage.h"
 #include "logger.h"
 
 using namespace std;

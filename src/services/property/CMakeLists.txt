@@ -27,8 +27,6 @@ add_library (OpdePropertyService
     PropertyService.h
     PropertyGroup.h
     PropertyCommon.h
-    PropertyStorage.cpp
-    PropertyStorage.h
 )
 
 #target_link_libraries(OpdePropertyService

@@ -34,7 +34,7 @@
 #include "OpdeException.h"
 #include "logger.h"
 #include "InheritService.h"
-#include "PropertyStorage.h"
+#include "DataStorage.h"
 #include "BitArray.h"
 
 namespace Opde {
