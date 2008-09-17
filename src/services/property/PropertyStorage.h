@@ -33,7 +33,7 @@
 #include "Iterator.h"
 
 namespace Opde {
-	/** @brief Storage for data (Interface).
+	/** @brief Storage for data (Interface). This class is used as a backend for either property or link storage, and provides data these classes.
 	* This storage can be overriden to suit better for particular data handling to be managed in effective/different manner for example. 
 	* @note This class does no inheritance resolving itself (in case of properties). Only stores data.
 	* @note The objID, object id referenced here has the meaning of a ID of any kind appropriate - game object id for Properties, Link id for links.
