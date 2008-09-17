@@ -25,7 +25,7 @@
 #ifndef __SYMNAMEPROPERTYSTORAGE_H
 #define __SYMNAMEPROPERTYSTORAGE_H
 
-#include "PropertyStorage.h"
+#include "DataStorage.h"
 
 namespace Opde {
 	
