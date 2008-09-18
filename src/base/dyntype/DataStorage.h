@@ -146,27 +146,27 @@ namespace Opde {
 			DataFieldDescList mDataFieldDescList;
 	};
 	
-	/** Structured data implementation of the DataStorage. */
+	/** Structured data implementation of the DataStorage. Should only be used as a temporary solution or as a storage for properties for custom tools  */
 	class OPDELIB_EXPORT StructuredDataStorage : public DataStorage {
 		public:
 			StructuredDataStorage(const DTypeDefPtr& type, bool useDataCache);
 			
-			/** @see DataStorage::createProp */
+			/** @see DataStorage::create */
 			virtual bool create(int objID);
 			
-			/** @see DataStorage::destroyProp */
+			/** @see DataStorage::destroy */
 			virtual bool destroy(int objID);
 			
-			/** @see DataStorage::hasProp */
+			/** @see DataStorage::has */
 			virtual bool has(int objID);
 			
-			/** @see DataStorage::cloneProp */
+			/** @see DataStorage::clone */
 			virtual bool clone(int srcID, int dstID);
 			
-			/** @see DataStorage::getPropField */
+			/** @see DataStorage::getField */
 			virtual bool getField(int objID, const std::string& field, DVariant& target);
 			
-			/** @see DataStorage::setPropField */
+			/** @see DataStorage::setField */
 			virtual bool setField(int objID, const std::string& field, const DVariant& value);
 			
 			/** @see DataStorage::writeToFile */
@@ -230,116 +230,6 @@ namespace Opde {
 			/// Field description pre-prepared iterator
 			DTypeDefFieldDesc mFieldDesc;
 	};
-	
-	
-	/** Data storage targetted at storing variable length strings (One per id). */
-	class OPDELIB_EXPORT StringDataStorage : public DataStorage {
-		public:
-			StringDataStorage();
-			
-		protected:
-			/** @see DataStorage::createProp */
-			virtual bool create(int objID);
-			
-			/** @see DataStorage::destroyProp */
-			virtual bool destroy(int objID);
-			
-			/** @see DataStorage::hasProp */
-			virtual bool has(int objID);
-			
-			/** @see DataStorage::cloneProp */
-			virtual bool clone(int srcID, int dstID);
-			
-			/** @see DataStorage::getPropField */
-			virtual bool getField(int objID, const std::string& field, DVariant& target);
-			
-			/** @see DataStorage::setPropField */
-			virtual bool setField(int objID, const std::string& field, const DVariant& value);
-			
-			/** @see DataStorage::writeToFile */
-			virtual bool writeToFile(FilePtr& file, int objID, bool sizeStored);
-			
-			/** @see DataStorage::readFromFile */
-			virtual bool readFromFile(FilePtr& file, int objID, bool sizeStored);
-			
-			/** @see DataStorage::clear */
-			virtual void clear();
-			
-			/** @see DataStorage::isEmpty */
-			virtual bool isEmpty();
-			
-			/** @see DataStorage::getAllStoredObjects */
-			virtual IntIteratorPtr getAllStoredObjects();
-			
-			/** Core Data creation routine */
-			virtual bool _create(int objID, const std::string& text);
-			
-			/** @see DataStorage::getFieldDescIterator */
-			virtual DataFieldDescIteratorPtr getFieldDescIterator(void);
-			
-			/// String Data map
-			typedef std::map<int, std::string> StringDataMap;
-			
-			/// Holder of data (string) values
-			StringDataMap mStringPropMap;
-			
-			/// String prop. storage is a single-field construct. This is the field desc for the field
-			DataFieldDesc mFieldDesc;
-			
-			typedef MapKeyIterator<StringDataMap, int> StringDataMapKeyIterator;
-	};
-	
-//
-//	/// Bool property store. Stores 1 bool per object id in a packed array
-//	class BoolPropertyStorage : public PropertyStorage {
-//		public:
-//			BoolPropertyStorage();
-//			~BoolPropertyStorage();
-//			
-//		protected:
-//			/** @see PropertyStorage::createProp */
-//			virtual bool createProp(int objID);
-//			
-//			/** @see PropertyStorage::destroyProp */
-//			virtual bool destroyProp(int objID);
-//			
-//			/** @see PropertyStorage::hasProp */
-//			virtual bool hasProp(int objID);
-//			
-//			/** @see PropertyStorage::cloneProp */
-//			virtual bool cloneProp(int srcID, int dstID);
-//			
-//			/** @see PropertyStorage::getPropField */
-//			virtual bool getPropField(int objID, const std::string& field, DVariant& target);
-//			
-//			/** @see PropertyStorage::setPropField */
-//			virtual bool setPropField(int objID, const std::string& field, const DVariant& value);
-//			
-//			/** @see PropertyStorage::writeToFile */
-//			virtual bool writeToFile(FilePtr& file, int objID);
-//			
-//			/** @see PropertyStorage::readFromFile */
-//			virtual bool readFromFile(FilePtr& file, int objID);
-//			
-//			/** @see PropertyStorage::clear */
-//			virtual void clear();
-//			
-//			/** @see PropertyStorage::isEmpty */
-//			virtual bool isEmpty();
-//			
-//			/** @see PropertyStorage::getAllStoredObjects */
-//			virtual BitArrayIteratorPtr getAllStoredObjects();
-//			
-//			/// Handles the growth of the object ID range on the bitarrays
-//			virtual void setIDRange(int minID, int MaxID);
-//			
-//			/// mask of stored objects
-//			BitArray mMask;
-//			
-//			/// True/False storage for the objects
-//			BitArray mValues;
-//	}
-	
 }
 
 #endif // __PROPERTYSTORAGE_H

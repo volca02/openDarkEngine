@@ -31,6 +31,7 @@
 #include <OgreStringConverter.h>
 #include "OpdeServiceManager.h"
 #include "logger.h"
+#include "SingleFieldDataStorage.h"
 
 using namespace std;
 using namespace Ogre;

@@ -78,9 +78,9 @@ namespace Opde {
 			return false;
 		
 		// get the previous name of the object, free that record
-		StringDataMap::const_iterator sit = mStringPropMap.find(objID);
+		DataMap::const_iterator sit = mDataMap.find(objID);
 		
-		assert(sit != mStringPropMap.end());
+		assert(sit != mDataMap.end());
 		
 		// name not in use yet, we can assign it
 		if (StringDataStorage::setField(objID, field, value)) {

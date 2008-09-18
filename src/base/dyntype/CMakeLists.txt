@@ -23,6 +23,7 @@ add_library (OpdeDynType
     DTHelpers.h
     DataStorage.cpp
     DataStorage.h
+    SingleFieldDataStorage.h
 )
 
 target_link_libraries( OpdeDynType

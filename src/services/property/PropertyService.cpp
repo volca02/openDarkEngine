@@ -71,12 +71,13 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	PropertyService::~PropertyService() {
-		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
+		PropertyList::iterator it = mPropertiesToDelete.begin();
 		
-		for( ; it != mPropertyGroupMap.end(); ++it) {
-			delete it->second;
+		for( ; it != mPropertiesToDelete.end(); ++it) {
+			delete *it;
 		}
-		
+
+		mPropertiesToDelete.clear();
 		mPropertyGroupMap.clear();
 	}
 
@@ -99,7 +100,7 @@ namespace Opde {
 		}
 		
 		std::pair<PropertyGroupMap::iterator, bool> res = mPropertyGroupMap.insert(make_pair(name, nr));
-
+		
 		if (!res.second) {
 			delete nr;
 			
@@ -107,9 +108,29 @@ namespace Opde {
 				    "PropertyService::createPropertyGroup");
 		}
 		
+		// insert the pointer into the to be freed list
+		mPropertiesToDelete.push_back(nr);
+		
 		LOG_INFO("PropertyService::createPropertyGroup: Created a property group %s (With chunk name %s)", name.c_str(), chunkName.c_str());
 
 		return nr;
+	}
+	
+	// --------------------------------------------------------------------------
+	void PropertyService::registerPropertyGroup(PropertyGroup* group) {
+		mPropertyGroupMap.insert(make_pair(group->getName(), group));
+	}
+	
+	// --------------------------------------------------------------------------		
+	void PropertyService::unregisterPropertyGroup(PropertyGroup* group) {
+		// try to find it by name, remove
+		assert(group);
+		
+		PropertyGroupMap::iterator it = mPropertyGroupMap.find(group->getName());
+		
+		if (it != mPropertyGroupMap.end()) {
+			mPropertyGroupMap.erase(it);
+		}
 	}
 	
 	// --------------------------------------------------------------------------
