@@ -26,6 +26,9 @@
 #ifndef __INPUTSERVICE_H
 #define __INPUTSERVICE_H
 
+#include "config.h"
+#include "ServiceCommon.h"
+
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
 #include "SharedPtr.h"
@@ -106,7 +109,7 @@ namespace Opde {
 
 
 	/** @brief Input service - service which handles user input, and user input mapping */
-	class InputService : public Service, public OIS::KeyListener, public OIS::MouseListener, public LoopClient {
+	class OPDELIB_EXPORT InputService : public Service, public OIS::KeyListener, public OIS::MouseListener, public LoopClient {
 		public:
 			InputService(ServiceManager *manager, const std::string& name);
 			virtual ~InputService();
@@ -286,7 +289,7 @@ namespace Opde {
 	typedef shared_ptr<InputService> InputServicePtr;
 
 	/// Factory for the InputService objects
-	class InputServiceFactory : public ServiceFactory {
+	class OPDELIB_EXPORT InputServiceFactory : public ServiceFactory {
 		public:
 			InputServiceFactory();
 			~InputServiceFactory() {};

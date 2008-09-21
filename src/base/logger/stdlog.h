@@ -26,7 +26,6 @@
 #define __STDLOG_H
 
 #include "config.h"
-
 #include "logger.h"
   
 namespace Opde {

@@ -30,6 +30,8 @@ add_library (OpdeLib SHARED
     CustomImageCodec.h
 )
 
+set_property(TARGET OpdeLib PROPERTY LINK_INTERFACE_LIBRARIES "")
+
 target_link_libraries( OpdeLib
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}
@@ -43,6 +45,7 @@ target_link_libraries( OpdeLib
 # Build flags for the .DLL __declspec things, etc.
 SET_TARGET_PROPERTIES(OpdeLib PROPERTIES
   DEFINE_SYMBOL "OPDELIB_DLL_TARGET"
+  LINK_INTERFACE_LIBRARIES ""
 )
 
 if (NOT WIN32)
@@ -62,8 +65,8 @@ if (NOT WIN32)
 endif(NOT WIN32)
 
 # Main executable
-add_executable (opde WIN32 
-    Opde.cpp 
+add_executable (opdemain WIN32 
+    Opde.cpp
     GameStateManager.cpp
     GameState.cpp
     GamePlayState.cpp
@@ -74,10 +77,13 @@ add_executable (opde WIN32
     GameLoadState.h
 )
 
-SET_TARGET_PROPERTIES(opde PROPERTIES
-  DEFINE_SYMBOL "OPDE_EXE_TARGET"
+target_link_libraries( opdemain
+    OpdeLib
+    ${OGRE_LIBRARIES}
+    ${OIS_LIBRARIES}
+    ${FREEIMAGE_LIBRARIES}
 )
 
-target_link_libraries( opde
-    OpdeLib
+SET_TARGET_PROPERTIES( opdemain PROPERTIES
+  COMPILE_DEFINITIONS "OPDE_EXE_TARGET"
 )

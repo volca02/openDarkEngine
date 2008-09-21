@@ -11,20 +11,11 @@ include_directories (
     ${OPDE_SOURCE_DIR}/thirdparty/QuickGUI/include
 )
 
-link_directories ( 
-    ${OGRE_LIB_DIR}
-    ${OIS_LIB_DIR}
-
-    ${OPDE_SOURCE_DIR}/src/base/servicemanager
-)
-
 add_library (OpdeGUIService 
     GUIService.cpp
     GUIService.h
 )
 
-#target_link_libraries (OpdeGUIService
-#    OpdeServiceManager
-#    OpdeBase
-#    QuickGUI
-#)
+SET_TARGET_PROPERTIES(OpdeGUIService PROPERTIES
+  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+)

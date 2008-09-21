@@ -27,7 +27,6 @@ link_directories (
 
 add_library (OpdeGameService GameService.cpp GameService.h)
 
-#target_link_libraries(OpdeGameService
-#    OpdeBase
-#    OpdeServiceManager
-#)
+SET_TARGET_PROPERTIES(OpdeGameService PROPERTIES
+  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+)

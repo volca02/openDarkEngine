@@ -35,7 +35,7 @@ namespace Opde {
     /** Prioritized Message Source - a message source doing callbacks in a deterministic order
     * M stands for the message type sent
     */
-    template <typename M> class OPDELIB_EXPORT PrioritizedMessageSource {
+    template <typename M> class PrioritizedMessageSource {
 		public:
             //virtual ~PrioritizedMessageSource() {};
 		

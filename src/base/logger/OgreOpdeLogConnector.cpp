@@ -21,7 +21,9 @@
  *		$Id$
  * 
  *****************************************************************************/
- 
+
+#include "config.h"
+
 #include "OgreOpdeLogConnector.h"
 #include "logger.h"
 

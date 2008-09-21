@@ -117,7 +117,7 @@ namespace Opde {
 	typedef shared_ptr<BinaryService> BinaryServicePtr;
 
 	/// Factory for the binary service
-	class BinaryServiceFactory : public ServiceFactory {
+	class OPDELIB_EXPORT BinaryServiceFactory : public ServiceFactory {
 		public:
 			BinaryServiceFactory();
 			~BinaryServiceFactory() {};

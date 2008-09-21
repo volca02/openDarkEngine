@@ -80,7 +80,7 @@ namespace Opde {
 
 
 	/// Factory for the GameService objects
-	class ConfigServiceFactory : public ServiceFactory {
+	class OPDELIB_EXPORT ConfigServiceFactory : public ServiceFactory {
 		public:
 			ConfigServiceFactory();
 			~ConfigServiceFactory() {};

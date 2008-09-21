@@ -22,6 +22,8 @@
  *
  *****************************************************************************/
 
+#include "config.h"
+
 #include "ManualBinFileLoader.h"
 #include "File.h"
 #include "BinFormat.h"

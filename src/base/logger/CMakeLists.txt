@@ -7,9 +7,13 @@ include_directories (
 file(GLOB OPDE_LOGGER_HEADERS *.h)
 
 add_library(OpdeLogger 
-    logger.cpp 
+    logger.cpp
     stdlog.cpp 
     filelog.cpp 
     OgreOpdeLogConnector.cpp
     ${OPDE_LOGGER_HEADERS}
+)
+
+SET_TARGET_PROPERTIES(OpdeLogger PROPERTIES
+  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
 )

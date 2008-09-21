@@ -27,6 +27,7 @@
 #ifndef __FONFORMAT_H
 #define __FONFORMAT_H
 
+#include "config.h"
 #include "integers.h"
 
 namespace Ogre 

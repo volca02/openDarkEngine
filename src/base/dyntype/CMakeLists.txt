@@ -11,7 +11,6 @@ include_directories (
 
 link_directories (
     ${OGRE_LIB_DIR}
-    ${OPDE_SOURCE_DIR}/src/base
 )
 
 # Various types of file access classes.
@@ -29,4 +28,8 @@ add_library (OpdeDynType
 target_link_libraries( OpdeDynType
 	${OGRE_LIBRARIES}
 	OpdeBase
+)
+
+SET_TARGET_PROPERTIES(OpdeDynType PROPERTIES
+  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
 )

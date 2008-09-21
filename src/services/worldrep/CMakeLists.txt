@@ -26,8 +26,6 @@ add_library (OpdeWorldRepService
     WRCommon.h
 )
 
-#target_link_libraries(OpdeWorldRepService
-#    OpdeServiceManager
-#    OpdeFile
-#    DarkSceneManager
-#)
+SET_TARGET_PROPERTIES(OpdeWorldRepService PROPERTIES
+  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+)

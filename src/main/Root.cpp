@@ -26,9 +26,7 @@
 #include "Root.h"
 #include "OgreResourceGroupManager.h"
 
-#ifdef CUSTOM_IMAGE_HOOKS
 #include "CustomImageCodec.h"
-#endif
 
 #include "ConfigService.h"
 #include <OgreConfigFile.h>
@@ -36,6 +34,7 @@
 
 #include "filelog.h"
 
+#include "OpdeServiceManager.h"
 // Services
 #include "WorldRepService.h"
 #include "GameService.h"
@@ -46,6 +45,12 @@
 #include "LinkService.h"
 #include "PropertyService.h"
 #include "DatabaseService.h"
+
+// base
+#include "ManualBinFileLoader.h"
+#include "ManualFonFileLoader.h"
+#include "logger.h"
+#include "OpdeException.h"
 
 namespace Opde {
 	// -------------------------------------------------------

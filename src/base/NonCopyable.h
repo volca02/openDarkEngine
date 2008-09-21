@@ -32,13 +32,13 @@
 namespace Opde {
 	
 	/// Non copyable class. Inherit to make class not copyable
-        class NonCopyable {
-			public:
-				NonCopyable() {};
-		
-	    	private:
-				NonCopyable(const NonCopyable& b);
-				void operator =(const NonCopyable& b);
+	class OPDELIB_EXPORT NonCopyable {
+		public:
+			NonCopyable() {};
+			
+		private:
+			NonCopyable(const NonCopyable& b);
+			void operator =(const NonCopyable& b);
 	};
 
 }

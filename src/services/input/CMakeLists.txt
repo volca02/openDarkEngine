@@ -23,7 +23,6 @@ add_library (OpdeInputService
     InputEventMapper.h
 )
 
-#target_link_libraries (OpdeInputService
-#    OpdeServiceManager
-#    OpdeBase
-#)
+SET_TARGET_PROPERTIES(OpdeInputService PROPERTIES
+  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+)

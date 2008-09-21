@@ -40,9 +40,9 @@ namespace Opde {
 			/// Logging level
 			typedef enum {LOG_LEVEL_FATAL=0, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_VERBOSE} LogLevel;
 			
-		private:
 			typedef std::set<LogListener*> LogListenerSet;
-		
+
+		private:
 			/** A set of listener classes */
 			LogListenerSet mListeners;
 

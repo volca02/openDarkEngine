@@ -13,6 +13,7 @@ include_directories (
     ${PYTHON_INCLUDE_PATH}
     ${OPDE_SOURCE_DIR}/src/bindings
     ${OPDE_SOURCE_DIR}/src/main
+    ${OPDE_SOURCE_DIR}/src/scenemanager
 )
 
 link_directories ( 
@@ -21,6 +22,7 @@ link_directories (
 
 add_library (OpdeScriptService ScriptService.cpp ScriptService.h)
 
-#target_link_libraries(OpdeScriptService
-#    OpdeLib
-#)
+SET_TARGET_PROPERTIES(OpdeScriptService PROPERTIES
+  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+)
+

@@ -27,6 +27,8 @@ Parts of this file are exact copies or free-style rewrites of the contributed co
 #ifndef __BINFORMAT_H
 #define __BINFORMAT_H
 
+#include "config.h"
+
 // Material flags (known)
 #define MD_MAT_TRANS		1
 #define MD_MAT_ILLUM		2

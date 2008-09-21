@@ -23,6 +23,9 @@
 #ifndef __SERVICECOMMON_H
 #define __SERVICECOMMON_H
 
+// just to be sure we load it
+#include "config.h"
+
 /*
 This file contains some global definitions common to all services
 */

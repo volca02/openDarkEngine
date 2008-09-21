@@ -1,3 +1,5 @@
+INCLUDE(${OPDE_SOURCE_DIR}/src/base/Base.cmake)
+
 add_subdirectory(logger)
 add_subdirectory(console)
 add_subdirectory(servicemanager)
@@ -13,4 +15,12 @@ include_directories(
 
 add_library ( OpdeBase OpdeException.cpp RefCounted.cpp
     ${OPDE_BASE_HEADERS}
+)
+
+SET_TARGET_PROPERTIES(OpdeBase PROPERTIES
+  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+)
+
+target_link_libraries( OpdeBase
+    ${OPDE_BASE_LIBRARIES}
 )

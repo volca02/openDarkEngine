@@ -13,3 +13,7 @@ add_library ( OpdeServiceManager
     OpdeService.h
     OpdeServiceFactory.h
 )
+
+SET_TARGET_PROPERTIES(OpdeServiceManager PROPERTIES
+  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+)

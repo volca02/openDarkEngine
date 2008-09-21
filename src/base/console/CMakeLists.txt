@@ -16,3 +16,7 @@ add_library (OpdeConsole
     ConsoleCommandListener.cpp
     ConsoleCommandListener.h
 )
+
+SET_TARGET_PROPERTIES(OpdeConsole PROPERTIES
+  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+)

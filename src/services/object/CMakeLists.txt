@@ -22,3 +22,6 @@ add_library (OpdeObjectService
     SymNamePropertyStorage.h
 )
 
+SET_TARGET_PROPERTIES(OpdeObjectService PROPERTIES
+  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+)

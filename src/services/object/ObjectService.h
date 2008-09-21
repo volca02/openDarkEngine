@@ -1,4 +1,4 @@
- /******************************************************************************
+/******************************************************************************
  *
  *    This file is part of openDarkEngine project
  *    Copyright (C) 2005-2006 openDarkEngine team
@@ -248,7 +248,7 @@ namespace Opde {
 	typedef shared_ptr<ObjectService> ObjectServicePtr;
 
 	/// Factory for the ObjectService objects
-	class ObjectServiceFactory : public ServiceFactory {
+	class OPDELIB_EXPORT ObjectServiceFactory : public ServiceFactory {
 		public:
 			ObjectServiceFactory();
 			~ObjectServiceFactory() {};

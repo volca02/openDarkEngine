@@ -29,7 +29,6 @@ add_library (OpdePropertyService
     PropertyCommon.h
 )
 
-#target_link_libraries(OpdePropertyService
-#    OpdeBase
-#    OpdeServiceManager
-#)
+SET_TARGET_PROPERTIES(OpdePropertyService PROPERTIES
+  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+)

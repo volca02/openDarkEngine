@@ -54,6 +54,7 @@ namespace Opde {
 			ServicePtr createInstance(const std::string& name);
 			
 			const uint mGlobalServiceMask;
+		
 		public:
 			ServiceManager(uint serviceMask);
 

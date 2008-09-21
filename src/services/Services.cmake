@@ -21,7 +21,6 @@ SET(OPDE_SERVICE_INCLUDES
 
 # All the resulting libraries in a nice package as well
 SET(OPDE_SERVICE_LIBRARIES
-    OpdeServiceManager
     OpdeWorldRepService
     OpdeBinaryService
     OpdeGameService

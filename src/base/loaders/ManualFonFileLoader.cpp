@@ -23,6 +23,7 @@
  *****************************************************************************/
 
 //---------------------------- El cargador de las fuentes para El Motor Oscuro --------------------
+#include "config.h"
 #include "ManualFonFileLoader.h"
 
 #include <OgreLogManager.h>

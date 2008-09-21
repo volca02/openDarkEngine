@@ -28,6 +28,11 @@
 
 #include <OgreException.h>
 
+#ifndef OPDE_EXE_TARGET
+#error Opde exe target not defined!
+#endif
+
+
 using namespace Opde;
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32

@@ -27,8 +27,6 @@ link_directories (
 
 add_library (OpdeConfigService ConfigService.cpp ConfigService.h)
 
-#target_link_libraries(OpdeConfigService
-#    OpdeBase
-#    OpdeLogger
-#    OpdeServiceManager
-#)
+SET_TARGET_PROPERTIES(OpdeConfigService PROPERTIES
+  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+)

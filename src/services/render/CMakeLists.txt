@@ -27,9 +27,7 @@ add_library (OpdeRenderService
     EntityMaterialInstance.h
 )
 
-# Hmm. Probably not needed, is it. Linking will happen whilst building the whole opde up. Oh well...
-#target_link_libraries(OpdeRenderService
-#    OpdeBase
-#    OpdeServiceManager
-#    OpdeManualLoaders
-#)
+SET_TARGET_PROPERTIES(OpdeRenderService PROPERTIES
+  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+)
+

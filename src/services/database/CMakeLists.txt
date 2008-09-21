@@ -21,7 +21,6 @@ link_directories (
 
 add_library (OpdeDatabaseService DatabaseService.cpp DatabaseService.h)
 
-#target_link_libraries(OpdeDatabaseService
-#    OpdeBase
-#    OpdeServiceManager
-#)
+SET_TARGET_PROPERTIES(OpdeDatabaseService PROPERTIES
+  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+)

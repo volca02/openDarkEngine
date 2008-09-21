@@ -32,7 +32,6 @@ add_library (OpdeInheritService
     InheritCommon.h
 )
 
-#target_link_libraries(OpdeInheritService
-#    OpdeBase
-#    OpdeServiceManager
-#)
+SET_TARGET_PROPERTIES(OpdeInheritService PROPERTIES
+  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+)

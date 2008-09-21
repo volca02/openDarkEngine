@@ -17,8 +17,6 @@ link_directories (
 
 add_library (OpdeBinaryService BinaryService.cpp BinaryService.h)
 
-#target_link_libraries(OpdeBinaryService
-#    OpdeBase
-#    OpdeServiceManager
-#    OpdeDynType
-#)
+SET_TARGET_PROPERTIES(OpdeBinaryService PROPERTIES
+  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+)
