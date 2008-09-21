@@ -4,14 +4,15 @@ include_directories (
     ${OPDE_SOURCE_DIR}/src/base
 )
 
-file(GLOB OPDE_LOGGER_HEADERS *.h)
-
 add_library(OpdeLogger 
     logger.cpp
-    stdlog.cpp 
-    filelog.cpp 
+    logger.h
+    stdlog.cpp
+    stdlog.h
+    filelog.cpp
+    filelog.h
     OgreOpdeLogConnector.cpp
-    ${OPDE_LOGGER_HEADERS}
+    OgreOpdeLogConnector.h
 )
 
 SET_TARGET_PROPERTIES(OpdeLogger PROPERTIES

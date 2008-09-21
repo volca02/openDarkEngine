@@ -32,7 +32,7 @@
 
 namespace Opde {
 	// Forward declaration
-	class OPDELIB_EXPORT LogListener;
+	class LogListener;
 
 	/** Main logger class. This class is intended for logging purposes. Logging listeners, registered using registerLogListener method recieve logging messages formated by vsnprintf function */
 	class OPDELIB_EXPORT Logger : public Singleton<Logger> {

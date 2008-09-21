@@ -22,9 +22,9 @@
  *****************************************************************************/
 
 #include "config.h"
-
-#include "ConsoleBackend.h"
 #include "ConsoleFrontend.h"
+#include "ConsoleBackend.h"
+
 #include "OpdeException.h"
 
 #include <OIS.h>

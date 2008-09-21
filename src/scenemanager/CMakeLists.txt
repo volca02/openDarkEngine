@@ -28,4 +28,8 @@ add_library (DarkSceneManager
 		DarkLight.h
 		DarkGeometry.cpp
 		DarkGeometry.h
-	)
+)
+
+SET_TARGET_PROPERTIES(DarkSceneManager PROPERTIES
+  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+)

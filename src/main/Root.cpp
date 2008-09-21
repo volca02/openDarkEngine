@@ -51,6 +51,8 @@
 #include "ManualFonFileLoader.h"
 #include "logger.h"
 #include "OpdeException.h"
+#include "ConsoleFrontend.h"
+#include "stdlog.h"
 
 namespace Opde {
 	// -------------------------------------------------------
