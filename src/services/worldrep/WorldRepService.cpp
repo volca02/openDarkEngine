@@ -404,10 +404,11 @@ namespace Opde {
 			
 			// Set the split plane	
 			if (wr_node.cell < 0) {
-				assert(wr_node.plane < mExtraPlaneCount);
+				assert(wr_node.plane >= 0);
+				assert((unsigned int)(wr_node.plane) < mExtraPlaneCount);
 				node->setSplitPlane(constructPlane(mExtraPlanes[wr_node.plane])); // Extra planes
 			} else {
-				assert(wr_node.cell < mNumCells);
+				assert((unsigned int)(wr_node.cell) < mNumCells);
 				node->setSplitPlane(mCells[wr_node.cell]->getPlane(wr_node.plane));
 			}	
 
