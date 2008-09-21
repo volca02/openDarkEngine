@@ -14,6 +14,11 @@
 
 #cmakedefine __OPDE_BIG_ENDIAN ${BIG_ENDIAN}
 
+// disable the class needs to have a dll-interface...
+#pragma warning(disable:4251)
+// No suitable definition for explicit template spec warning disable
+#pragma warning(disable:4661)
+
 // DLL export/import stuff for OpdeLib
 // If the build target is OpdeLib, the OpdeLib_EXPORTS is defined,
 // otherwise it is not. Trouble is we need it unset for all library targets,
