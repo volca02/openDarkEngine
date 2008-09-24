@@ -30,7 +30,6 @@
 #include <stdexcept>
 #include "vector3.h"
 #include "integers.h"
-#include "RefCounted.h"
 
 #include <OgreQuaternion.h>
 

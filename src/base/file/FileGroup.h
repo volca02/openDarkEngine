@@ -38,7 +38,7 @@ namespace Opde {
 	/** File group stored inside a single file. This is an abstract class for file group manipulation. For implementation see DarkFileGroup.
 	* The loaded file group does not modify the source file in any way. That means all operations are safe and do not destroy/modify original
 	file. */
-	class OPDELIB_EXPORT FileGroup : public RefCounted {
+	class OPDELIB_EXPORT FileGroup {
 		public:
 			/** File source FileGroup constructor. Loads the chunk list from a given file. */
 			FileGroup(FilePtr& source);
