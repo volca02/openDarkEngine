@@ -14,5 +14,5 @@ add_executable ( DarkFontConverter DarkFontConverter.cpp )
 
 target_link_libraries( chunk
         ${OGRE_LIBRARIES}
-        OpdeBase
+        OpdeLib
 )

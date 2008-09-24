@@ -52,6 +52,12 @@ OPTION(PROFILING
     "Build the sources with profiling support (Only Debug build type)"
     OFF)
 
+# Option to build all the libs as static
+OPTION(STATIC_LIBS
+    "Build the libs as static"
+    OFF)
+
+
 # Compiler profiling flags
 IF (PROFILING)
     IF(CMAKE_COMPILER_IS_GNUCXX)

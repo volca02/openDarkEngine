@@ -17,44 +17,45 @@ include_directories(
     ${OPDE_SOURCE_DIR}/thirdparty/QuickGUI/include
 )
 
+IF(STATIC_LIBS)
+    add_library(OpdePyLib SHARED
+        bindings.cpp 
+        bindings.h
+        ServiceBinder.cpp
+        ServiceBinder.h
+        ConfigServiceBinder.cpp
+        ConfigServiceBinder.h
+        LinkServiceBinder.cpp
+        LinkServiceBinder.h
+        RelationBinder.cpp
+        RelationBinder.h
+        LinkQueryResultBinder.cpp
+        LinkQueryResultBinder.h
+        PropertyServiceBinder.cpp
+        PropertyServiceBinder.h
+        DTypeBinder.cpp
+        DTypeBinder.h
+        LoopServiceBinder.cpp
+        LoopServiceBinder.h
+        InputServiceBinder.cpp
+        InputServiceBinder.h
+        GUIServiceBinder.cpp
+        GUIServiceBinder.h
+        DatabaseServiceBinder.cpp
+        DatabaseServiceBinder.h
+        QuickGUIBindings.cpp
+        QuickGUIBindings.h
+        PythonStruct.h
+        RootBinder.cpp
+        RootBinder.h
+        StringIteratorBinder.cpp
+        StringIteratorBinder.h
+        ObjectServiceBinder.cpp
+        ObjectServiceBinder.h
+    )
 
-add_library(OpdePyLib SHARED
-    bindings.cpp 
-    bindings.h
-    ServiceBinder.cpp
-    ServiceBinder.h
-    ConfigServiceBinder.cpp
-    ConfigServiceBinder.h
-    LinkServiceBinder.cpp
-    LinkServiceBinder.h
-    RelationBinder.cpp
-    RelationBinder.h
-    LinkQueryResultBinder.cpp
-    LinkQueryResultBinder.h
-    PropertyServiceBinder.cpp
-    PropertyServiceBinder.h
-    DTypeBinder.cpp
-    DTypeBinder.h
-    LoopServiceBinder.cpp
-    LoopServiceBinder.h
-    InputServiceBinder.cpp
-    InputServiceBinder.h
-    GUIServiceBinder.cpp
-    GUIServiceBinder.h
-    DatabaseServiceBinder.cpp
-    DatabaseServiceBinder.h
-    QuickGUIBindings.cpp
-    QuickGUIBindings.h
-    PythonStruct.h
-    RootBinder.cpp
-    RootBinder.h
-    StringIteratorBinder.cpp
-    StringIteratorBinder.h
-    ObjectServiceBinder.cpp
-    ObjectServiceBinder.h
-)
-
-target_link_libraries(OpdePyLib
-    ${PYTHON_LIBRARIES}
-    OpdeLib
-)
+    target_link_libraries(OpdePyLib
+        ${PYTHON_LIBRARIES}
+        OpdeLib
+    )
+ENDIF(STATIC_LIBS)

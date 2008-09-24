@@ -107,6 +107,26 @@ namespace Opde {
 	void ScriptService::shutdown() {
 	}
 
+	/*-----------------------------------------------------*/
+	/*-------------------- ObjectScript -------------------*/
+	/*-----------------------------------------------------*/
+	ObjectScript::ObjectScript(int id) : mID(id) {
+	}
+
+	//------------------------------------
+	ObjectScript::~ObjectScript() {
+	}
+
+	/*-----------------------------------------------------*/
+	/*----------------- ObjectScriptModule ----------------*/
+	/*-----------------------------------------------------*/
+	ObjectScriptModule::ObjectScriptModule(std::string& name) {
+	}
+            
+	//------------------------------------
+	ObjectScriptModule::~ObjectScriptModule() {
+	}
+
 	//-------------------------- Factory implementation
 	std::string ScriptServiceFactory::mName = "ScriptService";
 

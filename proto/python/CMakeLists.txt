@@ -49,5 +49,4 @@ add_executable(pytest
 
 target_link_libraries(pytest 
     OpdeLib
-    OpdePyLib
 )

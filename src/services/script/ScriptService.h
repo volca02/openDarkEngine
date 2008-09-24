@@ -62,18 +62,18 @@ namespace Opde {
             virtual ~ObjectScriptModule();
 
             /// Returns true if this module handles a certain script type named name
-            virtual bool handlesScript(std::string& name);
+            virtual bool handlesScript(std::string& name) = 0;
 
             /// Creates a new object script for object id object_id
-            virtual ObjectScriptPtr createScript(int object_id, const std::string& name);
+            virtual ObjectScriptPtr createScript(int object_id, const std::string& name) = 0;
 
             /** Returns a std::set of script types that are handled by this module
             * @todo this should rather return a StringIteratorPtr
             */
-            virtual std::set<std::string> getScriptNames();
+            virtual std::set<std::string> getScriptNames() = 0;
 
             /// Returns script module name. Should be the same as the filename
-            virtual std::string getName();
+            virtual std::string getName() = 0;
 
         protected:
             // typedef std::map<int, ObjectScriptPtr> ObjectIDToScript;

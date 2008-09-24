@@ -12,7 +12,8 @@ include_directories(
     ${OPDE_BINARY_DIR}
 )
 
-add_library ( OpdeBase STATIC
-    ${OPDE_BASE_FILES} # As in the Base.cmake
-)
-
+IF(STATIC_LIBS)
+    add_library ( OpdeBase STATIC
+        ${OPDE_BASE_FILES} # As in the Base.cmake
+    )
+ENDIF(STATIC_LIBS)
