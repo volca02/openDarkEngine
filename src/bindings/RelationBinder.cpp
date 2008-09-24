@@ -123,20 +123,11 @@ namespace Opde {
 			Object* o = python_cast<Object*>(self, &msType);
 			
 			int from, to;
-			PyObject* object = NULL;
 
-			if (PyArg_ParseTuple(args, "ii|O", &from, &to, &object)) {
+			if (PyArg_ParseTuple(args, "ii", &from, &to)) {
 				link_id_t id;
 				
-				if (object == NULL) // No data create
-				{
-					id = o->mInstance->create(from, to);
-				} else {
-					// Wrap the DType, call with it
-					DTypePtr t = DTypeBinder::extractDType(object);
-					
-					id = o->mInstance->create(from, to, t);
-				}
+				id = o->mInstance->create(from, to);
 				
 				return PyLong_FromUnsignedLong(id);
 			} else {
