@@ -28,6 +28,7 @@
 #include <string>
 #include "NonCopyable.h"
 #include "DTypeDef.h"
+#include "DataStorage.h"
 #include "LinkCommon.h"
 #include "FileGroup.h"
 #include "MessageSource.h"
@@ -37,7 +38,7 @@ namespace Opde {
 	*/
 	class OPDELIB_EXPORT Relation : public NonCopyable, public MessageSource<LinkChangeMsg> {
 		public:
-			Relation(const std::string& name, const DTypeDefPtr& type, bool isInverse, bool hidden = false);
+			Relation(const std::string& name, const DataStoragePtr& stor, bool isInverse, bool hidden = false);
 			virtual ~Relation();
 
 			/** Loads the relation data from the given FileGroup */
@@ -47,9 +48,7 @@ namespace Opde {
 			* @todo Save Mask implementation */
 			void save(const FileGroupPtr& db, uint saveMask);
 
-			/// @returns the Data Type describing the link data
-			DTypeDefPtr getDataType() { return mType; };
-
+			/// Sets the versions of the chunks this relation uses for storage
 			void setChunkVersions(uint lmajor, uint lminor, uint dmajor, uint dminor) {
 				mLCVMaj = lmajor;
 				mLCVMin = lminor;
@@ -96,24 +95,13 @@ namespace Opde {
 			*/
 			link_id_t create(int from, int to);
 
-			/** Creates a new link, returning it's ID
-			* @see createLink(int, int)
-			* @note this version does create the link including the data, so a time and plenty of broadcasts is saved.
-			* @note to create and fill the data, use DTypeDef::create to obtain a valid buffer to fill, then use DTypeDef::set to fill the fields. Once ready, supply the final buffer to the createLink
-			*/
-			link_id_t create(int from, int to, const DTypePtr& data);
-
-			/** getter for the DTypeDef this relation uses.
-			* @note The returned object is better be tested by doing DTypeDefPtr::isNull() to determine if the object is usable. Relations with no data will just return null DTypeDefPtr */
-			inline DTypeDefPtr getTypeDef() { return mType; };
-
 			/** Sets the link data field
 			* @param id The link id
 			* @param field The name of the field the modification is requested on
 			* @param DVariant The new value of the field
-			* @todo If DTypeDef will implement indexing, create a version with index int as a first parameter
+			* @return true if successful, false otherwise
 			*/
-			void setLinkField(link_id_t id, const std::string& field, const DVariant& value);
+			bool setLinkField(link_id_t id, const std::string& field, const DVariant& value);
 
 			/** Gets the link data field value
 			* @param id The link id
@@ -121,18 +109,6 @@ namespace Opde {
 			*/
 			DVariant getLinkField(link_id_t id, const std::string& field);
 
-			/** Swaps the link data for new data. Deletes the old data
-			For more massive data overwriting.
-			* @param id The link id
-			* @param data The new data pointer
-			* @note deallocates the original data. All the references to the original data are then invalid and potentially harmful
-			*/
-			void setLinkData(link_id_t id, char* data);
-
-			/** Returns link data for the given link ID
-			* @param id The link id
-			*/
-			LinkDataPtr getLinkData(link_id_t id);
 
 			// ----------------- Link query methods --------------------
 			/** Gets all links that come from source to destination
@@ -192,17 +168,6 @@ namespace Opde {
 			*/
 			link_id_t getFreeLinkID(uint cidx);
 
-			/** Assigns the link data to a link ID
-			* @param id Link id to assign the data to
-			* @param data The link data to be assigned
-			*/
-			void _assignLinkData(link_id_t id, const LinkDataPtr& data);
-
-			/** Removes link data for a link ID
-			* @param id the ID of the link for which data should be removed
-			*/
-			void _removeLinkData(link_id_t id);
-
 			/** Allocates the link ID, meaning it wont be given as free now.
 			* @param id The link that was allocated
 			* @note This now only increments the maximal index for the concreteness of the link if it is bigger than that
@@ -227,9 +192,6 @@ namespace Opde {
 			/// Map of links. Indexed by whole link id, contains the link class (LinkPtr)
 			typedef std::map< link_id_t, LinkPtr > LinkMap;
 
-			/// Map of link data. Indexed by whole link id, contains the link data (LinkDataPtr)
-			typedef std::map< link_id_t, LinkDataPtr > LinkDataMap;
-
 			/// Map of all links that have an object ID in either target or source
 			typedef std::multimap< int,  LinkPtr > ObjectIDToLinks;
 
@@ -248,17 +210,14 @@ namespace Opde {
 			/// Name of this relation
 			std::string mName;
 
-			/// Typedef pointer used by this relation (or null if no data are used)
-			DTypeDefPtr mType;
+			/// Data storage for the link data
+			DataStoragePtr mStorage;
 
 			/// Hidden relations are those which should not be mentioned by editor as a normal links (metaproperty and such)
 			bool mHidden;
 
 			/// The map of ID->LinkPtr (Stores link info per link ID)
 			LinkMap mLinkMap;
-
-			/// The map of ID->LinkDataPtr (Stores link data per link ID)
-			LinkDataMap mLinkDataMap;
 
 			/// fake size. This size is written as the data size into the LD$ chunks
 			uint32_t mFakeSize;

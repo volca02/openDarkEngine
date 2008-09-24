@@ -78,48 +78,11 @@ namespace Opde {
 			inline int flavor() { return mFlavor; };
 	};
 
-	/** Link data container. Holds link ID and it's data as a char array.
-	* @deprecated This construct should be removed the same way the property data struct will be. Any link access should be handled by a properly made DataStorage descendant
-	*/
-	class LinkData : public DType {
-		friend class Relation;
-
-		protected:
-			link_id_t mID;
-
-		public:
-			/// Constructor - Creates empty data defined by default values in type
-			LinkData(link_id_t id, const DTypeDefPtr& type, bool useCache = false) : DType(type, useCache), mID(id) { };
-
-			/// Constructor - Loads data from FilePtr
-			LinkData(link_id_t id, const DTypeDefPtr& type, FilePtr file, int _size, bool useCache = false) : DType(type,file,_size, useCache), mID(id) { };
-
-			/// Constructor - copies the data from another DType instance
-			LinkData(link_id_t id, const DType& type, bool useCache = false) : DType(type, useCache), mID(id) {};
-
-			/// Constructor - copies the data from DTypePtr instance
-			LinkData(link_id_t id, const DTypePtr& type, bool useCache = false) : DType(*type, useCache), mID(id) {};
-
-			/// Destructor - Deletes the data
-			~LinkData() {  };
-
-			/// ID getter. @return The id of the link this data belong to
-			inline link_id_t id() { return mID; };
-	};
-
 	/// Shared pointer to Link
 	typedef shared_ptr< Link > LinkPtr;
 
-	/// Shared pointer to Link Data
-	typedef shared_ptr< LinkData > LinkDataPtr;
-
 	/// Supportive Link comparison operator for sets and maps
 	inline bool operator<(const LinkPtr& a, const LinkPtr& b) {
-		return a->id() < b->id();
-	}
-
-	/// Supportive LinkData comparison operator for sets and maps
-	inline bool operator<(const LinkDataPtr& a, const LinkDataPtr& b) {
 		return a->id() < b->id();
 	}
 

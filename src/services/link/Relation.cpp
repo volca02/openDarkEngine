@@ -75,14 +75,13 @@ namespace Opde {
 	/*-----------------------------------------------------*/
 	/*----------------------- Relation --------------------*/
 	/*-----------------------------------------------------*/
-	Relation::Relation(const std::string& name, const DTypeDefPtr& type, bool isInverse, bool hidden) :
+	Relation::Relation(const std::string& name, const DataStoragePtr& stor, bool isInverse, bool hidden) :
 			mID(-1),
 			mName(name),
-			mType(type),
+			mStorage(stor),
 			mHidden(hidden),
 			mLinkMap(),
 			mSrcDstLinkMap(),
-			mLinkDataMap(),
 			mInverse(NULL),
 			mIsInverse(isInverse) {
 
@@ -91,10 +90,10 @@ namespace Opde {
 			mMaxID[i] = 0;
 		}
 
-		if (mType.isNull())
+		if (stor.isNull())
 				mFakeSize = 0;
 			else
-				mFakeSize = mType->size();
+				mFakeSize = mStorage->getDataSize();
 
 		// Some default version values
 		mLCVMaj = 2;
@@ -134,7 +133,7 @@ namespace Opde {
 		try {
 			fldata = db->getFile(ldchn);
 		} catch (BasicException& e) {
-			if (mType.isNull()) {
+			if (mStorage.isNull()) {
 				LOG_INFO("Relation::load : Link data chunk %s not found (It's ok since data type not registered either)", ldchn.c_str());
 			} else {
 				LOG_FATAL("Relation::load : Could not find the Link data chunk %s with : %s", ldchn.c_str(), e.getDetails().c_str());
@@ -143,7 +142,11 @@ namespace Opde {
 		}
 
 		// now load the data
-		size_t link_count = flink->size() / LinkStructSize;
+		size_t link_count = 0;
+		
+		if (!mStorage.isNull())
+			link_count = flink->size() / sizeof(LinkStruct);
+		
 		size_t link_data_count = 0;
 
 		// if the chunk LD exists, and contains at least the data size, load the data size, and set to load data as well
@@ -154,28 +157,28 @@ namespace Opde {
 		if (fldata->size() > sizeof(uint32_t)) {
 			fldata->readElem(&dsize, sizeof(uint32_t));
 
-			if (mType.isNull())
+			if (mStorage.isNull())
 				LOG_FATAL("Relation (%s): Data exist, but dyntype not set", mName.c_str()); // Maybe I just should stop with exception
 			else {
 				load_data = true;
 
 				// check for data len
-				if (dsize != mType->size()) {
+				if (dsize != mStorage->getDataSize()) {
 					// This just happens. Some links have the size totally different the real
 					
 					// Only if we have the fake size wrong as well
 					if (dsize != mFakeSize)
-						LOG_FATAL("Relation (%s): Data sizes differ : Type: %d, Fake %d, Chunk: %d", mName.c_str(), mType->size(), mFakeSize, dsize);
+						LOG_FATAL("Relation (%s): Data sizes differ : Type: %d, Fake %d, Chunk: %d", mName.c_str(), mStorage->getDataSize(), mFakeSize, dsize);
 					
 					// we respect our data size
-					dsize = mType->size();
+					dsize = mStorage->getDataSize();
 				}
 
 				// as the last thing, count the data entries
 				link_data_count = (fldata->size() - sizeof(uint32_t)) / dsize;
 			}
 		} else {
-			if (!mType.isNull())
+			if (!mStorage.isNull())
 				LOG_FATAL("Relation (%s): Link data not present in file, but type defined", mName.c_str());
 		}
 
@@ -186,23 +189,14 @@ namespace Opde {
 			// The count of data and links should be the same
 			// assert(link_count == link_data_count);
 
-			for (unsigned int idx = 0; idx < link_count; idx++) {
+			for (unsigned int idx = 0; idx < link_count; ++idx) {
 				// Will get deleted automatically once the LinkPtr is released...
-				// link->mData = new char[dsize];
-
 				// Link ID goes first, then the data
 				link_id_t id;
 				fldata->readElem(&id, 4);
-
-				LinkDataPtr ldta = new LinkData(id, mType, fldata, dsize, mUseDataCache);
+				mStorage->readFromFile(fldata, id, false); // false - links don't store len
 
 				LOG_VERBOSE("Relation (%s): Loaded link data for link id %d", mName.c_str(), id);
-				
-				// Link data are inserted silently
-				_assignLinkData(id, ldta);
-				
-				// And to the inverse relation as well
-				mInverse->_assignLinkData(id, ldta);
 			}
 		}
 
@@ -259,8 +253,8 @@ namespace Opde {
 
 		uint32_t dtsz = 0;
 
-		if (!mType.isNull()) {
-			dtsz = mType->size();
+		if (!mStorage.isNull()) {
+			dtsz = mStorage->getDataSize();
 			assert(dtsz > 0);
 		}
 
@@ -294,25 +288,24 @@ namespace Opde {
 				LOG_DEBUG("Relation (%s): Link concreteness of link %d was out of requested : %d", mName.c_str(), link->mID, conc);
 			}
 		}
+		
+		// if data are used, store
+		if (!mStorage.isNull()) {
+			IntIteratorPtr idit = mStorage->getAllStoredObjects();
 
-		// just write the links as they go, and write the data in parallel
-		LinkDataMap::const_iterator dit = mLinkDataMap.begin();
-
-		// Write the link data if exists
-		if (!mType.isNull()) { // write the data into the data chunk
-			for (; dit != mLinkDataMap.end(); ++dit) {
-				LinkDataPtr ldt = dit->second;
+			while (!idit->end()) {
+				int32_t id = idit->next();
 
 				// Test against the link write mask
-				int conc = LINK_ID_CONCRETE(ldt->mID);
+				int conc = LINK_ID_CONCRETE(id);
 
 				if (saveMask & (1 << conc)) { // mask says save!
 					// TODO: What exactly is the rule that one should follow selecting what to write into GAM/MIS?
 					// I mean: there is MP link from 1 to some -X in GAM file. Hmmmm. (I guess this does not matter for in-game)
-
-					fldt->writeElem(&ldt->mID, sizeof(link_id_t));
-
-					ldt->serialize(fldt);
+					fldt->writeElem(&id, sizeof(link_id_t));
+					
+					if (!mStorage->writeToFile(fldt, id, false))
+						LOG_ERROR("There was an error writing link data %s for object %d. Property was not loaded", mName.c_str(), id);
 				}
 			}
 		}
@@ -346,8 +339,10 @@ namespace Opde {
 		broadcastMessage(m);
 
 		mLinkMap.clear();
-		mLinkDataMap.clear();
 		mSrcDstLinkMap.clear();
+		
+		if (!mStorage.isNull())
+			mStorage->clear();
 
 
 		// clear maximal link id's
@@ -371,12 +366,7 @@ namespace Opde {
 
 		LinkPtr newl = new Link(id, from, to, mID);
 
-		LinkDataPtr newd = new LinkData(id, mType, mUseDataCache);
-
-		// assign link data in advance, as it would fail on _addLink otherwise
-		_assignLinkData(id, newd);
-
-		mInverse->_assignLinkData(id, newd);
+		mStorage->create(id);
 
 		// Last, insert the link to the database and notify
 		_addLink(newl);
@@ -384,40 +374,6 @@ namespace Opde {
 		LinkPtr ilink = createInverseLink(newl);
 		
 		mInverse->_addLink(ilink);
-
-		return id;
-	}
-
-	// --------------------------------------------------------------------------
-	link_id_t Relation::create(int from, int to, const DTypePtr& data) {
-		// Request an id. First let's see what concreteness we have
-		unsigned int cidx = 0;
-
-		// simply compare the type pointers...
-		if (data->type() != mType)
-			OPDE_EXCEPT("Incompatible types when creating link data", "Relation::create");
-
-		if (from >= 0 || to >= 0)
-			cidx = 1;
-
-		link_id_t id = getFreeLinkID(cidx);
-
-		LinkPtr newl = new Link(id, from, to, mID);
-
-		LinkDataPtr newd = new LinkData(id, data, mUseDataCache);
-
-		// assign link data in advance, as it would fail on _addLink otherwise
-		_assignLinkData(id, newd);
-		
-		mInverse->_assignLinkData(id, newd);
-
-		// Last, insert the link to the database and notify
-		_addLink(newl);
-		
-		LinkPtr ilink = createInverseLink(newl);
-		
-		mInverse->_addLink(ilink);
-
 
 		return id;
 	}
@@ -431,12 +387,8 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	void Relation::setLinkField(link_id_t id, const std::string& field, const DVariant& value) {
-		LinkDataMap::iterator it = mLinkDataMap.find(id);
-
-		if (it != mLinkDataMap.end()) {
-			mType->set(it->second->mData, field, value);
-
+	bool Relation::setLinkField(link_id_t id, const std::string& field, const DVariant& value) {
+		if (mStorage->setField(id, field, value)) {
 			LinkChangeMsg m;
 
 			m.change = LNK_CHANGED;
@@ -444,54 +396,23 @@ namespace Opde {
 
 			// Inform the listeners about the change of data
 			broadcastMessage(m);
+			
+			return true;
 		} else {
 			LOG_ERROR("Relation::setLinkField : Link %d was not found in relation %d", id, mID);
+			return false;
 		}
 	}
 
 	// --------------------------------------------------------------------------
 	DVariant Relation::getLinkField(link_id_t id, const std::string& field) {
-		LinkDataMap::const_iterator it = mLinkDataMap.find(id);
-
-		if (it != mLinkDataMap.end()) {
-			return mType->get(it->second->mData, field);
+		DVariant value;
+		
+		if (mStorage->getField(id, field, value)) {
+			return value;
 		} else {
 			LOG_ERROR("Relation::getLinkField : Link %d was not found in relation %d", id, mID);
 			return DVariant();
-		}
-	}
-
-	// --------------------------------------------------------------------------
-	void Relation::setLinkData(link_id_t id, char* data) {
-		LinkDataMap::iterator it = mLinkDataMap.find(id);
-
-		if (it != mLinkDataMap.end()) {
-			// swap the data
-			char* odl = it->second->mData;
-			it->second->mData = data;
-			delete odl;
-
-			LinkChangeMsg m;
-
-			m.change = LNK_CHANGED;
-			m.linkID = id;
-
-			// Inform the listeners about the change of data
-			broadcastMessage(m);
-		} else {
-			LOG_ERROR("Relation::setLinkData : Link data %d was not found in relation %d", id, mID);
-		}
-	}
-
-	// --------------------------------------------------------------------------
-	LinkDataPtr Relation::getLinkData(link_id_t id) {
-		LinkDataMap::iterator it = mLinkDataMap.find(id);
-
-		if (it != mLinkDataMap.end()) {
-			return it->second;
-		} else {
-			LOG_ERROR("Relation::getLinkData : Link data %d was not found in relation %d", id, mID);
-			return NULL;
 		}
 	}
 
@@ -573,9 +494,7 @@ namespace Opde {
 			LOG_ERROR("Relation: Found link with conflicting ID in relation %d (%s): ID: %d (stored %d) - link already existed", mID, mName.c_str(), link->mID, ires.first->second->mID );
 		} else {
             // Verify link data exist
-			LinkDataMap::iterator dit = mLinkDataMap.find(link->mID);
-
-			if (dit == mLinkDataMap.end() && !mType.isNull())
+			if (!mStorage.isNull() && !mStorage->has(link->mID))
 				OPDE_EXCEPT("Relation (" + mName + "): Link Data not defined prior to link insertion", "Relation::_addLink"); // for link id " + link->mID
 
 			// Update the free link info
@@ -653,27 +572,10 @@ namespace Opde {
 			// last, erase the link
 			mLinkMap.erase(it);
 
-			_removeLinkData(id);
+			mStorage->destroy(id);
 		} else {
 			LOG_ERROR("Relation %d: Link requested for removal was not found :ID: %d", mID, id);
 		}
-	}
-
-	// --------------------------------------------------------------------------
-	void Relation::_assignLinkData(link_id_t id, const LinkDataPtr& data) {
-		std::pair<LinkDataMap::iterator, bool> ires = mLinkDataMap.insert(make_pair(id, data));
-
-		if (!ires.second) {
-			// data already present
-			ires.first->second = data;
-		}
-
-		// Done.
-	}
-
-	// --------------------------------------------------------------------------
-	void Relation::_removeLinkData(link_id_t id) {
-		mLinkDataMap.erase(id);
 	}
 
 	// --------------------------------------------------------------------------

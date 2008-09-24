@@ -216,14 +216,14 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	RelationPtr LinkService::createRelation(const std::string& name, const DTypeDefPtr& type, bool hidden) {
+	RelationPtr LinkService::createRelation(const std::string& name, const DataStoragePtr& stor, bool hidden) {
 		if (name.substr(0,1) == "~")
 			OPDE_EXCEPT("Name conflict: Relation can't use ~ character as the first one, it's reserved for inverse relations. Conflicting name: " + name, "LinkService::createRelation");
 		
 		std::string inverse = "~" + name;
 		
-		RelationPtr nr = new Relation(name, type, false, hidden);
-		RelationPtr nrinv = new Relation(inverse, type, true, hidden);
+		RelationPtr nr = new Relation(name, stor, false, hidden);
+		RelationPtr nrinv = new Relation(inverse, stor, true, hidden);
 
 		// Assign inverse relations...
 		nr->setInverseRelation(nrinv.ptr());
@@ -233,7 +233,7 @@ namespace Opde {
 		std::pair<RelationNameMap::iterator, bool> res = mRelationNameMap.insert(make_pair(name, nr));
 
 		if (!res.second)
-			OPDE_EXCEPT("Failed to insert new instance of Relation", "LinkService::createRelation");
+			OPDE_EXCEPT("Failed to insert new instance of Relation named " + name, "LinkService::createRelation");
 			
 		// Inverse relation now
 		res = mRelationNameMap.insert(make_pair(inverse, nrinv));

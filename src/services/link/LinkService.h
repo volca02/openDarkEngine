@@ -64,7 +64,7 @@ namespace Opde {
 			* @param name The relation name
 			* @param type The type defining the data format for link data
 			* @param hidden The hidden relations (true) will not show up on public link list places */
-			RelationPtr createRelation(const std::string& name, const DTypeDefPtr& type, bool hidden);
+			RelationPtr createRelation(const std::string& name, const DataStoragePtr& stor, bool hidden);
 
 			/** Get relation given it's name
 			* @param name The relation's name
