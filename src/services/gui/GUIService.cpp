@@ -40,8 +40,8 @@ namespace Opde {
 			mGUIManager(NULL),
 			mActive(false),
 			mVisible(false),
-			mRenderServiceListenerID(0),
 			mSkinName("opde"),
+			mRenderServiceListenerID(0),
 			mSkinSet(NULL),
 			mGUIMap("") {
     }
