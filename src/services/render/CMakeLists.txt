@@ -16,18 +16,20 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 
-add_library (OpdeRenderService 
-    RenderService.cpp
-    RenderService.h
-    MaterialInstance.cpp   
-    MaterialInstance.h
-    SubEntityMaterialInstance.cpp   
-    SubEntityMaterialInstance.h
-    EntityMaterialInstance.cpp   
-    EntityMaterialInstance.h
-)
+IF(STATIC_LIBS)
+    add_library (OpdeRenderService 
+	RenderService.cpp
+        RenderService.h
+        MaterialInstance.cpp   
+        MaterialInstance.h
+        SubEntityMaterialInstance.cpp   
+        SubEntityMaterialInstance.h
+        EntityMaterialInstance.cpp   
+        EntityMaterialInstance.h
+    )
 
-SET_TARGET_PROPERTIES(OpdeRenderService PROPERTIES
-  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
-)
+    SET_TARGET_PROPERTIES(OpdeRenderService PROPERTIES
+	COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+    )
+ENDIF(STATIC_LIBS)
 

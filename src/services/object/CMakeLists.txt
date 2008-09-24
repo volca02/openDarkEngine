@@ -15,13 +15,16 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 
-add_library (OpdeObjectService
-    ObjectService.cpp
-    ObjectService.h
-    SymNamePropertyStorage.cpp
-    SymNamePropertyStorage.h
-)
 
-SET_TARGET_PROPERTIES(OpdeObjectService PROPERTIES
-  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
-)
+IF(STATIC_LIBS)
+    add_library (OpdeObjectService
+        ObjectService.cpp
+        ObjectService.h
+        SymNamePropertyStorage.cpp
+        SymNamePropertyStorage.h
+    )
+
+    SET_TARGET_PROPERTIES(OpdeObjectService PROPERTIES
+	COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+    )
+ENDIF(STATIC_LIBS)

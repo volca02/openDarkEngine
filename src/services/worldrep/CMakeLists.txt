@@ -15,17 +15,19 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 
-add_library (OpdeWorldRepService 
-    WorldRepService.cpp 
-    WRCell.cpp 
-    LightmapAtlas.cpp
-    WorldRepService.h
-    WRCell.h
-    LightmapAtlas.h
-    WRTypes.h
-    WRCommon.h
-)
+IF(STATIC_LIBS)
+    add_library (OpdeWorldRepService 
+        WorldRepService.cpp 
+	WRCell.cpp 
+        LightmapAtlas.cpp
+        WorldRepService.h
+        WRCell.h
+        LightmapAtlas.h
+        WRTypes.h
+        WRCommon.h
+    )
 
-SET_TARGET_PROPERTIES(OpdeWorldRepService PROPERTIES
-  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
-)
+    SET_TARGET_PROPERTIES(OpdeWorldRepService PROPERTIES
+      COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+    )
+ENDIF(STATIC_LIBS)

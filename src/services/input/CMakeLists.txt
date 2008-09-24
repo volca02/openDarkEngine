@@ -16,13 +16,15 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 
-add_library (OpdeInputService 
-    InputService.cpp
-    InputEventMapper.cpp
-    InputService.h
-    InputEventMapper.h
-)
+IF(STATIC_LIBS)
+    add_library (OpdeInputService 
+	InputService.cpp
+        InputEventMapper.cpp
+        InputService.h
+        InputEventMapper.h
+    )
 
-SET_TARGET_PROPERTIES(OpdeInputService PROPERTIES
-  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
-)
+    SET_TARGET_PROPERTIES(OpdeInputService PROPERTIES
+	COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+    )
+ENDIF(STATIC_LIBS)

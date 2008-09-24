@@ -19,8 +19,10 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 
-add_library (OpdeDatabaseService DatabaseService.cpp DatabaseService.h)
+IF(STATIC_LIBS)
+    add_library (OpdeDatabaseService DatabaseService.cpp DatabaseService.h)
 
-SET_TARGET_PROPERTIES(OpdeDatabaseService PROPERTIES
-  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
-)
+    SET_TARGET_PROPERTIES(OpdeDatabaseService PROPERTIES
+	COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+    )
+ENDIF(STATIC_LIBS)

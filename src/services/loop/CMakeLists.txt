@@ -15,8 +15,10 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 
-add_library (OpdeLoopService LoopService.cpp LoopService.h)
+IF(STATIC_LIBS)
+    add_library (OpdeLoopService LoopService.cpp LoopService.h)
 
-SET_TARGET_PROPERTIES(OpdeLoopService PROPERTIES
-  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
-)
+    SET_TARGET_PROPERTIES(OpdeLoopService PROPERTIES
+	COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+    )
+ENDIF(STATIC_LIBS)

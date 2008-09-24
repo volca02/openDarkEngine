@@ -14,14 +14,16 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 
-add_library (OpdeLinkService
-    LinkService.cpp
-    Relation.cpp
-    LinkService.h
-    Relation.h
-    LinkCommon.h
-)
+IF(STATIC_LIBS)
+    add_library (OpdeLinkService
+	LinkService.cpp
+        Relation.cpp
+        LinkService.h
+        Relation.h
+        LinkCommon.h
+    )
 
-SET_TARGET_PROPERTIES(OpdeLinkService PROPERTIES
-  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
-)
+    SET_TARGET_PROPERTIES(OpdeLinkService PROPERTIES
+	COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+    )
+ENDIF(STATIC_LIBS)

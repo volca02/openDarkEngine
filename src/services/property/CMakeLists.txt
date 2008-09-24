@@ -21,14 +21,16 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 
-add_library (OpdePropertyService
-    PropertyService.cpp
-    PropertyGroup.cpp
-    PropertyService.h
-    PropertyGroup.h
-    PropertyCommon.h
-)
+IF(STATIC_LIBS)
+    add_library (OpdePropertyService
+	PropertyService.cpp
+        PropertyGroup.cpp
+        PropertyService.h
+        PropertyGroup.h
+        PropertyCommon.h
+    )
 
-SET_TARGET_PROPERTIES(OpdePropertyService PROPERTIES
-  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
-)
+    SET_TARGET_PROPERTIES(OpdePropertyService PROPERTIES
+	COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+    )
+ENDIF(STATIC_LIBS)

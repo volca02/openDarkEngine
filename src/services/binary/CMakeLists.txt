@@ -15,8 +15,10 @@ link_directories (
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 
-add_library (OpdeBinaryService BinaryService.cpp BinaryService.h)
+IF(STATIC_LIBS)
+    add_library (OpdeBinaryService BinaryService.cpp BinaryService.h)
 
-SET_TARGET_PROPERTIES(OpdeBinaryService PROPERTIES
-  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
-)
+    SET_TARGET_PROPERTIES(OpdeBinaryService PROPERTIES
+	COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+    )
+ENDIF(STATIC_LIBS)

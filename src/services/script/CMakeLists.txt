@@ -20,9 +20,11 @@ link_directories (
     ${OGRE_LIB_DIR}
 )
 
-add_library (OpdeScriptService ScriptService.cpp ScriptService.h)
+IF(STATIC_LIBS)
+    add_library (OpdeScriptService ScriptService.cpp ScriptService.h)
 
-SET_TARGET_PROPERTIES(OpdeScriptService PROPERTIES
-  COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
-)
+    SET_TARGET_PROPERTIES(OpdeScriptService PROPERTIES
+      COMPILE_DEFINITIONS "OPDELIB_DLL_TARGET"
+    )
+ENDIF(STATIC_LIBS)
 
