@@ -41,9 +41,10 @@ relation CulpableFor {
 	no_data
 }
 
-relation MetaProp {
-	hidden
-}
+// Builtin now
+//relation MetaProp {
+//	hidden
+//}
 
 relation Contains {
 	

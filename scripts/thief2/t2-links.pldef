@@ -29,9 +29,10 @@ l_ver 2.0
 d_ver 2.0
 
 
-relation MetaProp {
-	hidden
-}
+// Builtin now
+//relation MetaProp {
+//	hidden
+//}
 
 relation Contains {
 
