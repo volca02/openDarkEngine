@@ -23,10 +23,10 @@
 
 #include "config.h"
 
-#include "GameStateManager.h"
 #include "OpdeException.h"
 #include "Root.h"
 #include "StringTokenizer.h"
+#include "ConfigService.h"
 
 #include <OgreException.h>
 

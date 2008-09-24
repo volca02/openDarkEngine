@@ -27,7 +27,6 @@
 
 #include "config.h"
 
-#include "RefCounted.h"
 #include <OIS.h>
 
 namespace Opde {

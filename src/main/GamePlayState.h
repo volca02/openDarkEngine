@@ -28,6 +28,10 @@
 #include "GameState.h"
 #include "OpdeSingleton.h"
 #include "ConsoleFrontend.h"
+#include "ConsoleCommandListener.h"
+#include "LinkCommon.h"
+#include "ConfigService.h"
+#include "LinkService.h"
 
 #include <OgreMath.h>
 #include <OgreRoot.h>

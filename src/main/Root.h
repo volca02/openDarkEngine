@@ -100,6 +100,7 @@ namespace Opde {
 		protected:
 			/// Registers all the service factories to the Service Manger
 			void registerServiceFactories();
+
 			/// Creates all the loop modes
 			void setupLoopModes();
 

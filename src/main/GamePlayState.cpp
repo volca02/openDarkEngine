@@ -23,9 +23,10 @@
 
 #include "config.h"
 
+#include "GamePlayState.h"
 #include "OIS.h"
 #include "GameStateManager.h"
-#include "GamePlayState.h"
+
 #include "GameLoadState.h"
 #include "logger.h"
 #include "integers.h"
@@ -44,8 +45,8 @@ namespace Opde {
 	template<> GamePlayState* Singleton<GamePlayState>::ms_Singleton = 0;
 
 	GamePlayState::GamePlayState() : mSceneMgr(NULL), mToLoadScreen(true), mDebugOverlay(NULL) {
-	    /// Register as a command listener, so we can load different levels
-	  Opde::ConsoleBackend::getSingleton().registerCommandListener("load", dynamic_cast<ConsoleCommandListener*>(this));
+		/// Register as a command listener, so we can load different levels
+		Opde::ConsoleBackend::getSingleton().registerCommandListener("load", dynamic_cast<ConsoleCommandListener*>(this));
 		Opde::ConsoleBackend::getSingleton().setCommandHint("load", "Loads a specified mission file");
 		Opde::ConsoleBackend::getSingleton().registerCommandListener("fps", dynamic_cast<ConsoleCommandListener*>(this));
 		Opde::ConsoleBackend::getSingleton().setCommandHint("fps", "Dump FPS stats");
@@ -57,17 +58,17 @@ namespace Opde {
 		mShadows = false;
 		mSceneDisplay = false;
 
-        // Try to remap the parameters with those listed in the configuration
+		// Try to remap the parameters with those listed in the configuration
 		mConfigService = static_pointer_cast<ConfigService>(ServiceManager::getSingleton().getService("ConfigService"));
 
-        if (mConfigService->hasParam("move_speed"))
-					mMoveSpeed = mConfigService->getParam("move_speed").toFloat();
+		if (mConfigService->hasParam("move_speed"))
+			mMoveSpeed = mConfigService->getParam("move_speed").toFloat();
 
-        if (mConfigService->hasParam("mouse_speed"))
-          mRotateSpeed = mConfigService->getParam("mouse_speed").toFloat();
+		if (mConfigService->hasParam("mouse_speed"))
+			mRotateSpeed = mConfigService->getParam("mouse_speed").toFloat();
 
-        if (mConfigService->hasParam("mouse_invert"))
-          mRotateYFactor = mConfigService->getParam("mouse_invert").toFloat();
+		if (mConfigService->hasParam("mouse_invert"))
+			mRotateYFactor = mConfigService->getParam("mouse_invert").toFloat();
 
 		mTranslateVector = Vector3::ZERO;
 		mRotX = 0;
@@ -90,7 +91,7 @@ namespace Opde {
 		mOverlayMgr = OverlayManager::getSingletonPtr();
 
 		mConsole = new ConsoleFrontend();
-        mConsole->setActive(false);
+		mConsole->setActive(false);
 
 		mDebugOverlay = OverlayManager::getSingleton().getByName("Opde/DebugOverlay");
 
@@ -100,12 +101,12 @@ namespace Opde {
 		mShadows = true;
 	}
 
-    GamePlayState::~GamePlayState() {
-        delete mConsole;
-    }
+	GamePlayState::~GamePlayState() {
+		delete mConsole;
+	}
 
 	void GamePlayState::start() {
-    LOG_INFO("GamePlayState: Starting");
+		LOG_INFO("GamePlayState: Starting");
 		PropertyGroup* posPG = static_pointer_cast<PropertyService>(ServiceManager::getSingleton().getService("PropertyService"))->getPropertyGroup("Position");
 		
 		if (posPG == NULL)
@@ -154,32 +155,32 @@ namespace Opde {
 		// Thiefy FOV
 		mCamera->setFOVy(Degree(70));
 
-        if (mConfigService->hasParam("debug")) {
-            if (mConfigService->getParam("debug") == true) {
-                // debug overlay
-                mDebugOverlay->show();
+		if (mConfigService->hasParam("debug")) {
+			if (mConfigService->getParam("debug") == true) {
+				// debug overlay
+				mDebugOverlay->show();
 
-                // Portal stats overlay
-                mPortalOverlay->show();
+				// Portal stats overlay
+				mPortalOverlay->show();
 
-                mDebug = true;
-            }
-        }
+				mDebug = true;
+			}
+		}
 
-        // hidden as default
+		// hidden as default
 		mConsole->setActive(false);
 
 		mWindow->resetStatistics();
 
-        mToLoadScreen = false;
-        
+		mToLoadScreen = false;
+		
 		LOG_INFO("GamePlayState: Started");
 	}
 
 	void GamePlayState::exit() {
-	    LOG_INFO("GamePlayState: Exiting");
+		LOG_INFO("GamePlayState: Exiting");
 
-	    // mConsole->setActive(false);
+		// mConsole->setActive(false);
 
 		// clear the scene
 		mSceneMgr->clearScene();
@@ -190,20 +191,20 @@ namespace Opde {
 		mConsole->update(1); // to hide the console while exiting
 
 		if (mToLoadScreen) {
-            pushState(GameLoadState::getSingletonPtr());
-            mToLoadScreen = false;
-        }
+			pushState(GameLoadState::getSingletonPtr());
+			mToLoadScreen = false;
+		}
 
 		LOG_INFO("GamePlayState: Exited");
 	}
 
 	void GamePlayState::suspend() {
-	    LOG_INFO("GamePlayState: Suspend?!");
-	    mToLoadScreen = false;
+		LOG_INFO("GamePlayState: Suspend?!");
+		mToLoadScreen = false;
 	}
 
 	void GamePlayState::resume() {
-	    LOG_INFO("GamePlayState: Resume?!");
+		LOG_INFO("GamePlayState: Resume?!");
    		mToLoadScreen = false;
 	}
 
@@ -257,13 +258,13 @@ namespace Opde {
 		}
 
 		if (mScreenShot) {
-            char tmp[20];
-            sprintf(tmp, "screenshot_%d.png", ++mNumScreenShots);
-            RenderWindow* w = Ogre::Root::getSingleton().getAutoCreatedWindow();
+			char tmp[20];
+			sprintf(tmp, "screenshot_%d.png", ++mNumScreenShots);
+			RenderWindow* w = Ogre::Root::getSingleton().getAutoCreatedWindow();
 
-            w->writeContentsToFile(tmp);
+			w->writeContentsToFile(tmp);
 
-		    mScreenShot = false;
+			mScreenShot = false;
 		}
 		
 		mConsole->update(timePassed);
@@ -276,77 +277,77 @@ namespace Opde {
 		static String tris = "Triangle Count: ";
 		static String batches = "Batch Count: ";
 
-        if (mDebug) {
-            // update stats when necessary
-            try {
-                OverlayElement* guiAvg = OverlayManager::getSingleton().getOverlayElement("Opde/AverageFps");
-                OverlayElement* guiCurr = OverlayManager::getSingleton().getOverlayElement("Opde/CurrFps");
-                OverlayElement* guiBest = OverlayManager::getSingleton().getOverlayElement("Opde/BestFps");
-                OverlayElement* guiWorst = OverlayManager::getSingleton().getOverlayElement("Opde/WorstFps");
+		if (mDebug) {
+			// update stats when necessary
+			try {
+				OverlayElement* guiAvg = OverlayManager::getSingleton().getOverlayElement("Opde/AverageFps");
+				OverlayElement* guiCurr = OverlayManager::getSingleton().getOverlayElement("Opde/CurrFps");
+				OverlayElement* guiBest = OverlayManager::getSingleton().getOverlayElement("Opde/BestFps");
+				OverlayElement* guiWorst = OverlayManager::getSingleton().getOverlayElement("Opde/WorstFps");
 
-                const RenderTarget::FrameStats& stats = mWindow->getStatistics();
+				const RenderTarget::FrameStats& stats = mWindow->getStatistics();
 
-                guiAvg->setCaption(avgFps + StringConverter::toString(stats.avgFPS));
-                guiCurr->setCaption(currFps + StringConverter::toString(stats.lastFPS));
-                guiBest->setCaption(bestFps + StringConverter::toString(stats.bestFPS)
-                +" "+StringConverter::toString(stats.bestFrameTime)+" ms");
-                guiWorst->setCaption(worstFps + StringConverter::toString(stats.worstFPS)
-                +" "+StringConverter::toString(stats.worstFrameTime)+" ms");
+				guiAvg->setCaption(avgFps + StringConverter::toString(stats.avgFPS));
+				guiCurr->setCaption(currFps + StringConverter::toString(stats.lastFPS));
+				guiBest->setCaption(bestFps + StringConverter::toString(stats.bestFPS)
+				+" "+StringConverter::toString(stats.bestFrameTime)+" ms");
+				guiWorst->setCaption(worstFps + StringConverter::toString(stats.worstFPS)
+				+" "+StringConverter::toString(stats.worstFrameTime)+" ms");
 
-                OverlayElement* guiTris = OverlayManager::getSingleton().getOverlayElement("Opde/NumTris");
-                guiTris->setCaption(tris + StringConverter::toString(stats.triangleCount));
+				OverlayElement* guiTris = OverlayManager::getSingleton().getOverlayElement("Opde/NumTris");
+				guiTris->setCaption(tris + StringConverter::toString(stats.triangleCount));
 
-                OverlayElement* guiBatches = OverlayManager::getSingleton().getOverlayElement("Opde/NumBatches");
-                guiBatches->setCaption(batches + StringConverter::toString(stats.batchCount));
+				OverlayElement* guiBatches = OverlayManager::getSingleton().getOverlayElement("Opde/NumBatches");
+				guiBatches->setCaption(batches + StringConverter::toString(stats.batchCount));
 
-                // OverlayElement* guiDbg = OverlayManager::getSingleton().getOverlayElement("Core/DebugText");
-            }
-            catch(...)
-            {
-                // ignore
-            }
+				// OverlayElement* guiDbg = OverlayManager::getSingleton().getOverlayElement("Core/DebugText");
+			}
+			catch(...)
+			{
+				// ignore
+			}
 
-            // update the portal statistics
-            try {
-                // Volca: I've disabled the timing reports, they need a patch of SM to work
-                OverlayElement* guibc = OverlayManager::getSingleton().getOverlayElement("Opde/BackCulls");
-                OverlayElement* guiep = OverlayManager::getSingleton().getOverlayElement("Opde/EvalPorts");
-                OverlayElement* guirc = OverlayManager::getSingleton().getOverlayElement("Opde/RendCells");
-                OverlayElement* guitt = OverlayManager::getSingleton().getOverlayElement("Opde/TravTime");
-                OverlayElement* guisr = OverlayManager::getSingleton().getOverlayElement("Opde/StaticRenderTime");
+			// update the portal statistics
+			try {
+				// Volca: I've disabled the timing reports, they need a patch of SM to work
+				OverlayElement* guibc = OverlayManager::getSingleton().getOverlayElement("Opde/BackCulls");
+				OverlayElement* guiep = OverlayManager::getSingleton().getOverlayElement("Opde/EvalPorts");
+				OverlayElement* guirc = OverlayManager::getSingleton().getOverlayElement("Opde/RendCells");
+				OverlayElement* guitt = OverlayManager::getSingleton().getOverlayElement("Opde/TravTime");
+				OverlayElement* guisr = OverlayManager::getSingleton().getOverlayElement("Opde/StaticRenderTime");
 
-                // Temporary: Debug Overlay
-                static String sbc = "Backface culls: ";
-                static String sep = "Evaluated portals: ";
-                static String src = "Rendered cells: ";
-                static String stt = "Traversal Time: ";
-                static String ssr = "Static Build Time: ";
+				// Temporary: Debug Overlay
+				static String sbc = "Backface culls: ";
+				static String sep = "Evaluated portals: ";
+				static String src = "Rendered cells: ";
+				static String stt = "Traversal Time: ";
+				static String ssr = "Static Build Time: ";
 
-                uint bculls = 0, eports = 0, rendc = 0, travtm = 0;
+				uint bculls = 0, eports = 0, rendc = 0, travtm = 0;
 
-				unsigned long statbt;
+					unsigned long statbt;
 
-                mSceneMgr->getOption("BackfaceCulls", &bculls);
-                
-                // mSceneMgr->getOption("CellsRendered", &rendc);
-                mSceneMgr->getOption("EvaluatedPortals", &eports);
-                // mSceneMgr->getOption("TraversalTime", &travtm);
-                mSceneMgr->getOption("StaticBuildTime", &statbt);
-                
-                travtm = static_cast<DarkCamera*>(mCamera)->getTraversalTime();
-                rendc = static_cast<DarkCamera*>(mCamera)->getVisibleCellCount();
+				mSceneMgr->getOption("BackfaceCulls", &bculls);
+				
+				// mSceneMgr->getOption("CellsRendered", &rendc);
+				mSceneMgr->getOption("EvaluatedPortals", &eports);
+				// mSceneMgr->getOption("TraversalTime", &travtm);
+				mSceneMgr->getOption("StaticBuildTime", &statbt);
+				
+				travtm = static_cast<DarkCamera*>(mCamera)->getTraversalTime();
+				rendc = static_cast<DarkCamera*>(mCamera)->getVisibleCellCount();
 
-                guibc->setCaption(sbc + StringConverter::toString(bculls));
-                guiep->setCaption(sep + StringConverter::toString(eports));
-                guirc->setCaption(src + StringConverter::toString(rendc));
-                guitt->setCaption(stt + StringConverter::toString(travtm) + " ms");
-                guisr->setCaption(ssr + StringConverter::toString(statbt) + " ms");
-            }
-            catch(...)
-            {
-                // ignore
-            }
-        }
+				guibc->setCaption(sbc + StringConverter::toString(bculls));
+				guiep->setCaption(sep + StringConverter::toString(eports));
+				guirc->setCaption(src + StringConverter::toString(rendc));
+				guitt->setCaption(stt + StringConverter::toString(travtm) + " ms");
+				guisr->setCaption(ssr + StringConverter::toString(statbt) + " ms");
+			}
+			catch(...)
+			{
+				// ignore
+			}
+		}
 	}
 
 	bool GamePlayState::keyPressed( const OIS::KeyEvent &e ) {
@@ -355,7 +356,7 @@ namespace Opde {
 			return true;
 		}
 
-    if (!mConsole->injectKeyPress(e)) {
+		if (!mConsole->injectKeyPress(e)) {
 			if(e.key == KC_W) {
 				mForward = true;
 				return true;
@@ -410,7 +411,7 @@ namespace Opde {
 			}
 			
 			return true;
-    } else return true;
+		} else return true;
 	}
 
 	bool GamePlayState::mouseMoved( const OIS::MouseEvent &e ) {
@@ -429,28 +430,28 @@ namespace Opde {
 	}
 
 	void GamePlayState::commandExecuted(std::string command, std::string parameters) {
-	    std::cerr << "command " << command  << " " << parameters << std::endl;
+		std::cerr << "command " << command  << " " << parameters << std::endl;
 
-	    if (command == "load") {
-	        // specify the mission file to load by the load state, then switch to the load state
-	        mConfigService->setParam("mission", parameters);
-            mToLoadScreen = true;
-            popState();
-	    } else if (command == "fps") {
-	            const RenderTarget::FrameStats& stats = mWindow->getStatistics();
+		if (command == "load") {
+			// specify the mission file to load by the load state, then switch to the load state
+			mConfigService->setParam("mission", parameters);
+			mToLoadScreen = true;
+			popState();
+		} else if (command == "fps") {
+			const RenderTarget::FrameStats& stats = mWindow->getStatistics();
 
-                LOG_INFO("Average FPS : %10.2f", stats.avgFPS);
-                LOG_INFO("Last FPS    : %10.2f", stats.lastFPS);
-                LOG_INFO("Worst FPS   : %10.2f", stats.worstFPS);
-	    }
+			LOG_INFO("Average FPS : %10.2f", stats.avgFPS);
+			LOG_INFO("Last FPS    : %10.2f", stats.lastFPS);
+			LOG_INFO("Worst FPS   : %10.2f", stats.worstFPS);
+		}
 	}
 
 	void GamePlayState::onLinkPlayerFactoryMsg(const LinkChangeMsg& msg) {
 		switch (msg.change) {
 			case PROP_ADDED   : {
 				LOG_INFO("GamePlayState: Found StartingPoint");
-        // get the Link ref.
-        LinkPtr l = mPlayerFactoryRelation->getLink(msg.linkID);
+				// get the Link ref.
+				LinkPtr l = mPlayerFactoryRelation->getLink(msg.linkID);
 				StartingPointObjID = l->src();
 				break;
 			}
@@ -465,10 +466,10 @@ namespace Opde {
 		mPlayerFactoryRelation = mLinkService->getRelation("PlayerFactory");
 
 		if (mPlayerFactoryRelation.isNull())
-		    OPDE_EXCEPT("MetaProp relation not found. Fatal.", "InheritService::init");
+			OPDE_EXCEPT("MetaProp relation not found. Fatal.", "InheritService::init");
 
 		mPlayerFactoryListenerID = mPlayerFactoryRelation->registerListener(metaPropCallback);
-    LOG_INFO("GamePlayState::bootstrapFinished() - done");
+		LOG_INFO("GamePlayState::bootstrapFinished() - done");
 	}
 
 	GamePlayState& GamePlayState::getSingleton() {
