@@ -14,12 +14,17 @@ SET(OPDE_BASE_INCLUDES
 # All the resulting libraries in a nice package as well
 SET(OPDE_BASE_LIBRARIES
     OpdeBase
-    OpdeConsole
-    OpdeDynType
-    OpdeFile
-    OpdeManualLoaders
-    OpdeLogger
-    OpdeServiceManager
+#    OpdeConsole
+#    OpdeDynType
+#    OpdeFile
+#    OpdeManualLoaders
+#    OpdeLogger
+#    OpdeServiceManager
 )
+
+# For the dynamically built lib. We just glob all the subdirs.
+FILE(GLOB_RECURSE OPDE_BASE_SOURCES ${OPDE_SOURCE_DIR}/src/base/*.h)
+FILE(GLOB_RECURSE OPDE_BASE_HEADERS ${OPDE_SOURCE_DIR}/src/base/*.cpp)
+SET(OPDE_BASE_FILES ${OPDE_BASE_HEADERS} ${OPDE_BASE_SOURCES})
 
 # To use this, just do INCLUDE(${OPDE_SOURCE_DIR}/src/base/Base.cmake)
