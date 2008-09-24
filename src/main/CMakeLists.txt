@@ -1,5 +1,7 @@
 INCLUDE( ${OPDE_SOURCE_DIR}/src/services/Services.cmake )
 INCLUDE( ${OPDE_SOURCE_DIR}/src/base/Base.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/bindings/Bindings.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/scenemanager/DarkSceneManager.cmake )
 
 include_directories(
     ${OGRE_INCLUDE_DIR}
@@ -10,9 +12,11 @@ include_directories(
     ${OPDE_SOURCE_DIR}/src/base/Dark
     ${OPDE_SOURCE_DIR}/src/scenemanager
     ${OPDE_SOURCE_DIR}/src/main
-    ${OPDE_SOURCE_DIR}/src/widgets
+    ${OPDE_SOURCE_DIR}/src/bindings
+    ${OPDE_SOURCE_DIR}/thirdparty/QuickGUI/include
     ${OPDE_SERVICE_INCLUDES}
     ${FREEIMAGE_INCLUDE_DIR}
+    ${PYTHON_INCLUDE_PATH}
 )
 
 add_library (OpdeLib SHARED
@@ -28,19 +32,31 @@ add_library (OpdeLib SHARED
     PLDefScriptLoader.h
     CustomImageCodec.cpp
     CustomImageCodec.h
+    # and the base lib files
+    ${OPDE_BASE_FILES}
+    # and service files as well
+    ${OPDE_SERVICE_FILES}
+    # and the python bindings
+    ${OPDE_BINDING_FILES}
+    # and the scene manager
+    ${OPDE_SCENEMANAGER_FILES}
 )
 
-set_property(TARGET OpdeLib PROPERTY LINK_INTERFACE_LIBRARIES "")
+link_directories(
+    ${OPDE_BASE_INCLUDES}
+    ${OPDE_SOURCE_DIR}/src/scenemanager
+)
 
+# We don't link any our own files here, as CMake does not support convenience libraries
 target_link_libraries( OpdeLib
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}
     ${FREEIMAGE_LIBRARIES}
-    ${OPDE_BASE_LIBRARIES}
-    DarkSceneManager
-    ${OPDE_SERVICE_LIBRARIES}
+    ${PYTHON_LIBRARIES}
     QuickGUI
 )
+
+set_property(TARGET OpdeLib PROPERTY LINK_INTERFACE_LIBRARIES "")
 
 # Build flags for the .DLL __declspec things, etc.
 SET_TARGET_PROPERTIES(OpdeLib PROPERTIES
@@ -60,7 +76,7 @@ if (NOT WIN32)
     )
 
     SET_TARGET_PROPERTIES(opdeDocGen PROPERTIES
-      DEFINE_SYMBOL "OPDE_EXE_TARGET"
+      COMPILE_DEFINITIONS "OPDE_EXE_TARGET"
     )
 endif(NOT WIN32)
 
@@ -87,3 +103,4 @@ target_link_libraries( opdemain
 SET_TARGET_PROPERTIES( opdemain PROPERTIES
   COMPILE_DEFINITIONS "OPDE_EXE_TARGET"
 )
+

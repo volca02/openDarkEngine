@@ -8,7 +8,7 @@ include_directories (
 
 link_directories ( ${OGRE_LIB_DIR} )
 
-add_library (OpdeConsole
+add_library (OpdeConsole STATIC
     ConsoleBackend.cpp
     ConsoleBackend.h
     ConsoleFrontend.cpp

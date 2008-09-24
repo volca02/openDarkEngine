@@ -7,7 +7,7 @@ link_directories (
     ${OGRE_LIB_DIR}
 )
 
-add_library (DarkSceneManager 
+add_library (DarkSceneManager STATIC
 		DarkBspNode.cpp 
 		DarkBspNode.h
 		DarkBspTree.cpp 

@@ -25,9 +25,6 @@ SET(OPDE_VER_MAJOR "0")
 SET(OPDE_VER_MINOR "2")
 SET(OPDE_VER_PATCH "1")
 
-# To stop importing libs where we don't want them
-set_property(GLOBAL PROPERTY LINK_INTERFACE_LIBRARIES "")
-
 # Build type selection. Use ccmake for selection of this (or the commandline switches)
 # Default build type
 IF (NOT CMAKE_BUILD_TYPE)
