@@ -148,7 +148,7 @@ namespace Opde {
 				typename DataMap::iterator it = mDataMap.find(objID);
 		
 				if (it == mDataMap.end()) {
-					uint32_t size;
+					uint32_t size = sizeof(T);
 					
 					if (sizeStored)
 						file->readElem(&size, sizeof(uint32_t));
@@ -199,6 +199,11 @@ namespace Opde {
 			/** @see DataStorage::getFieldDescIterator */
 			virtual DataFieldDescIteratorPtr getFieldDescIterator(void) {
 				return new SingleFieldDescIterator(mFieldDesc);
+			}
+			
+			/** @see DataStorage::getDataSize */
+			virtual size_t getDataSize(void) {
+				return sizeof(T);
 			}
 			
 		protected:
@@ -361,6 +366,11 @@ namespace Opde {
 				}
 				
 				return false;
+			}
+			
+			/** @see DataStorage::getDataSize */
+			virtual size_t getDataSize(void) {
+				OPDE_EXCEPT("StringDataStorage::getDataSize", "Invalid call - string lenght is variable");
 			}
 	};
 }

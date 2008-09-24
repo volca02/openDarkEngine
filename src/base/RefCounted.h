@@ -47,7 +47,7 @@ namespace Opde {
 	*  test->release();<br>
 	* </code>
 	* @deprecated */
-	class RefCounted {
+	class OPDELIB_EXPORT RefCounted {
 		protected:
 			int mReferences;
 		public:
