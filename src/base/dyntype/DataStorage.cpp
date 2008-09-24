@@ -237,4 +237,9 @@ namespace Opde {
 		// return our pre-prepared field desc iterator
 		return mFieldDesc.getIterator();
 	}
+	
+	// --------------------------------------------------------------------------
+	size_t StructuredDataStorage::getDataSize(void) {
+		return mTypeDef->size();
+	}
 }

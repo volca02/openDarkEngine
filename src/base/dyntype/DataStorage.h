@@ -130,6 +130,10 @@ namespace Opde {
 			* @return The data fields description iterator, preferably in the order sored
 			*/
 			virtual DataFieldDescIteratorPtr getFieldDescIterator(void) = 0;
+			
+			/** Data size getter
+			* @return Data size, if available. 0 otherwise */
+			virtual size_t getDataSize(void) { return 0; };
 	};
 	
 	/// Shared pointer to data storage
@@ -186,6 +190,9 @@ namespace Opde {
 
 			/** @see DataStorage::getFieldDescIterator */
 			virtual DataFieldDescIteratorPtr getFieldDescIterator(void);
+			
+			/** @see DataStorage::getDataSize */
+			virtual size_t getDataSize(void);
 		
 		protected: 
 			
