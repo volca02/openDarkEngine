@@ -81,7 +81,7 @@ if (NOT WIN32)
 endif(NOT WIN32)
 
 # Main executable
-add_executable (opdemain WIN32 
+add_executable (opde WIN32 
     Opde.cpp
     GameStateManager.cpp
     GameState.cpp
@@ -93,14 +93,14 @@ add_executable (opdemain WIN32
     GameLoadState.h
 )
 
-target_link_libraries( opdemain
+target_link_libraries( opde
     OpdeLib
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}
     ${FREEIMAGE_LIBRARIES}
 )
 
-SET_TARGET_PROPERTIES( opdemain PROPERTIES
+SET_TARGET_PROPERTIES( opde PROPERTIES
   COMPILE_DEFINITIONS "OPDE_EXE_TARGET"
 )
 
