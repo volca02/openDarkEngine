@@ -376,7 +376,7 @@ namespace Opde {
 		}
 		
 		try {
-			mLinkService->load(db);
+			mLinkService->load(db); // will load MP links if those exist, causing inherited properties to emerge
 		} catch (BasicException& e) {
 			LOG_FATAL("Exception while loading links from mission database : %s", e.getDetails().c_str());
 		}

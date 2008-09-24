@@ -28,6 +28,7 @@
 #include "CachedInheritor.h"
 #include "NeverInheritor.h"
 #include "ArchetypeInheritor.h"
+#include "SingleFieldDataStorage.h"
 
 using namespace std;
 
@@ -148,9 +149,9 @@ namespace Opde {
 		// Get the LinkService, then the relation metaprop
 
         // contact the config. service, and look for the inheritance link name
-		// TODO: ConfigurationService::getKey("Core","InheritanceLinkName").toString();
-
-		mMetaPropRelation = mLinkService->getRelation("MetaProp");
+		// create the builtin metaprop storage...
+		DataStoragePtr stor = new UIntDataStorage();
+		mMetaPropRelation = mLinkService->createRelation("MetaProp", stor, true);
 
 		if (mMetaPropRelation.isNull())
 		    OPDE_EXCEPT("MetaProp relation not found. Fatal.", "InheritService::init");
@@ -175,7 +176,7 @@ namespace Opde {
         unsigned int priority = 0;
 
         if (msg.change != LNK_REMOVED) // Do not waste time if the link is removed
-            priority = mMetaPropRelation->getLinkField(msg.linkID, "priority").toUInt(); // Hardcoded! Could be parametrized
+            priority = mMetaPropRelation->getLinkField(msg.linkID, "").toUInt(); // Hardcoded! Could be parametrized
 
         // get the Link ref.
         LinkPtr l = mMetaPropRelation->getLink(msg.linkID);
@@ -420,14 +421,10 @@ namespace Opde {
 
     //------------------------------------------------------
 	void InheritService::_createMPLink(int objID, int srcID, int priority) {
-		// Modify priority of the link
-		DTypeDefPtr type = mMetaPropRelation->getDataType();
-		DTypePtr ndata = new DType(type);
-		
-		ndata->set("priority", priority);
-		
 		// Create a new link, that will do all the work...
-		mMetaPropRelation->create(objID, srcID, ndata);
+		// TODO: This should be made possible in a single go
+		link_id_t lid = mMetaPropRelation->create(objID, srcID);
+		mMetaPropRelation->setLinkField(lid, "", priority);
 	}
 
 	//-------------------------- Factory implementation
