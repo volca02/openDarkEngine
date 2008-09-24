@@ -195,7 +195,12 @@ namespace Opde {
 			if (!mCurrentState.no_data) // if data definition is requested
 				dt = getTypeDef("links", mCurrentState.dtypename); // TODO: Hardcoded. A problem?
 
-			RelationPtr rel = mLinkService->createRelation(mCurrentState.name, dt, mCurrentState.hidden);
+			DataStoragePtr stor;
+			
+			if (!dt.isNull())
+				stor = new StructuredDataStorage(dt, false);
+			
+			RelationPtr rel = mLinkService->createRelation(mCurrentState.name, stor, mCurrentState.hidden);
 
 			if (mCurrentState.fake_size >= 0)
 				rel->setFakeSize(mCurrentState.fake_size);
