@@ -41,7 +41,7 @@ namespace Opde {
 			PropertyService(ServiceManager *manager, const std::string& name);
 			virtual ~PropertyService();
 			
-			/** Creates a standard (data-holding onlu) property group using the specified property storage. This method should only be used for data processing applications.
+			/** Creates a standard (data-holding only) property group using the specified property storage. This method should only be used for data processing applications.
 			* @param name The name of the property group
 			* @param chunkName The name of the chunk the property is stored in
 			* @param inheritorName The name of the iheritor to use for the property (the published name of the inheritor factory)
@@ -49,7 +49,7 @@ namespace Opde {
 			* @param takeover If true, the storage's ownership will be taken over, meaning the storage will be destroyed upon destruction of the property group (or when construction fails)
 			* @see PropertyGroup::PropertyGroup
 			*/
-			PropertyGroup* createPropertyGroup(const std::string& name, const std::string& chunkName, std::string inheritorName, const DataStoragePtr& storage, bool takeover = false);
+			PropertyGroup* createPropertyGroup(const std::string& name, const std::string& chunkName, std::string inheritorName, const DataStoragePtr& storage);
 
 			/** Registers a custom property group to the property service. These properties are not destroyed at the end of the lifetime of this service.
 			*/
@@ -130,7 +130,7 @@ namespace Opde {
 			PropertyGroupMap mPropertyGroupMap;
 			
 			/// List of properties that will be freed upon service termination
-			PropertyList mPropertiesToDelete;
+			PropertyList mOwnedProperties;
 
 			/// Database service
 			DatabaseServicePtr mDatabaseService;

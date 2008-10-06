@@ -37,27 +37,27 @@ namespace Opde {
 	/*--------------------- InheritQueries -------------------*/
 	/*--------------------------------------------------------*/
 	/// Just an empty result of a query
-    class EmptyInheritQueryResult : public InheritQueryResult {
-	    public:
-            EmptyInheritQueryResult() : InheritQueryResult(), mNullPtr(NULL) {  };
+	class EmptyInheritQueryResult : public InheritQueryResult {
+		public:
+			EmptyInheritQueryResult() : InheritQueryResult(), mNullPtr(NULL) {  };
 
-            virtual const InheritLinkPtr& next() { return mNullPtr; };
+			virtual const InheritLinkPtr& next() { return mNullPtr; };
 
-            virtual bool end() const {
-                return true;
-            };
+			virtual bool end() const {
+				return true;
+			};
 		
 		protected:
 			InheritLinkPtr mNullPtr;
 	};
 
 	class SimpleInheritQueryResult : public InheritQueryResult {
-	    public:
-            SimpleInheritQueryResult(const InheritService::InheritLinkMap& linkmap) : InheritQueryResult(), mLinkMap(linkmap) {
-                mIter = mLinkMap.begin();
-            }
+		public:
+			SimpleInheritQueryResult(const InheritService::InheritLinkMap& linkmap) : InheritQueryResult(), mLinkMap(linkmap) {
+				mIter = mLinkMap.begin();
+			}
 
-            virtual const InheritLinkPtr& next() {
+			virtual const InheritLinkPtr& next() {
 				assert(!end());
 				
 				const InheritLinkPtr& l = mIter->second;
@@ -65,15 +65,15 @@ namespace Opde {
 				++mIter;
 
 				return l;
-            }
+			}
 
-            virtual bool end() const {
-                return (mIter == mLinkMap.end());
-            }
+			virtual bool end() const {
+				return (mIter == mLinkMap.end());
+			}
 
-        protected:
-            const InheritService::InheritLinkMap& mLinkMap;
-            InheritService::InheritLinkMap::const_iterator mIter;
+		protected:
+			const InheritService::InheritLinkMap& mLinkMap;
+			InheritService::InheritLinkMap::const_iterator mIter;
 	};
 
 
@@ -85,47 +85,47 @@ namespace Opde {
 			Service(manager, name),
 			mMetaPropListenerID(0),
 			mMetaPropRelation() {
-        // Register some common factories.
-        // If a special factory would be needed, it has to be registered prior to it's usage, okay?
-        InheritorFactoryPtr if_cached = new CachedInheritorFactory();
-        addInheritorFactory(if_cached);
+		// Register some common factories.
+		// If a special factory would be needed, it has to be registered prior to it's usage, okay?
+		InheritorFactoryPtr if_cached = new CachedInheritorFactory();
+		addInheritorFactory(if_cached);
 
-        InheritorFactoryPtr if_never = new NeverInheritorFactory();
-        addInheritorFactory(if_never);
+		InheritorFactoryPtr if_never = new NeverInheritorFactory();
+		addInheritorFactory(if_never);
 
-        InheritorFactoryPtr if_arch = new ArchetypeInheritorFactory();
-        addInheritorFactory(if_arch);
+		InheritorFactoryPtr if_arch = new ArchetypeInheritorFactory();
+		addInheritorFactory(if_arch);
 	}
 
 	//------------------------------------------------------
 	InheritService::~InheritService() {
-	    // It may so happen that the init() was not called...
-	    if (!mMetaPropRelation.isNull())
-            mMetaPropRelation->unregisterListener(mMetaPropListenerID);
-            
+		// It may so happen that the init() was not called...
+		if (!mMetaPropRelation.isNull())
+			mMetaPropRelation->unregisterListener(mMetaPropListenerID);
+			
 		mInheritors.clear(); // sufficient - the smart_ptrs will delete
 	}
 
-    //------------------------------------------------------
-    void InheritService::addInheritorFactory(const InheritorFactoryPtr& factory) {
-        mInheritorFactoryMap.insert(make_pair(factory->getName(), factory));
-    }
+	//------------------------------------------------------
+	void InheritService::addInheritorFactory(const InheritorFactoryPtr& factory) {
+		mInheritorFactoryMap.insert(make_pair(factory->getName(), factory));
+	}
 
-    //------------------------------------------------------
-    InheritorPtr InheritService::createInheritor(const std::string& name) {
-        InheritorFactoryMap::iterator it = mInheritorFactoryMap.find(name);
+	//------------------------------------------------------
+	InheritorPtr InheritService::createInheritor(const std::string& name) {
+		InheritorFactoryMap::iterator it = mInheritorFactoryMap.find(name);
 
-        if (it != mInheritorFactoryMap.end()) {
-            InheritorPtr inh = it->second->createInstance(this);
-            mInheritors.push_back(inh); // no need map by name
-            return inh;
-        } else
-            OPDE_EXCEPT(string("No inheritor factory found for name : ") + name, "InheritService::createInheritor");
-    }
+		if (it != mInheritorFactoryMap.end()) {
+			InheritorPtr inh = it->second->createInstance(this);
+			mInheritors.push_back(inh); // no need map by name
+			return inh;
+		} else
+			OPDE_EXCEPT(string("No inheritor factory found for name : ") + name, "InheritService::createInheritor");
+	}
 
 	//------------------------------------------------------
 	bool InheritService::init() {
-   		// Link Service should have created us automatically through service masks.
+		// Link Service should have created us automatically through service masks.
 		// So we can register as a link service listener
 		mLinkService = static_pointer_cast<LinkService>(ServiceManager::getSingleton().getService("LinkService"));
 
@@ -133,117 +133,117 @@ namespace Opde {
 		    LOG_FATAL("InheritService::init: LinkService does not exist?");
 		    return false;
 		}
+		
+		// create the builtin metaprop relation and it's storage...
+		DataStoragePtr stor = new UIntDataStorage();
+		mMetaPropRelation = mLinkService->createRelation("MetaProp", stor, true);
+
+		// Could not be created?
+		if (mMetaPropRelation.isNull())
+			OPDE_EXCEPT("MetaProp relation could not be created. Fatal.", "InheritService::init");
 
 		return true;
 	}
 
-    //------------------------------------------------------
-    void InheritService::bootstrapFinished() {
-       	// Link Service should have created us automatically through service masks.
+	//------------------------------------------------------
+	void InheritService::bootstrapFinished() {
+		// Link Service should have created us automatically through service masks.
 		// So we can register as a link service listener
-        LOG_INFO("InheritService::bootstrapFinished()");
+		LOG_INFO("InheritService::bootstrapFinished()");
 
 		Relation::ListenerPtr metaPropCallback =
 			new ClassCallback<LinkChangeMsg, InheritService>(this, &InheritService::onMetaPropMsg);
 
 		// Get the LinkService, then the relation metaprop
 
-        // contact the config. service, and look for the inheritance link name
-		// create the builtin metaprop storage...
-		DataStoragePtr stor = new UIntDataStorage();
-		mMetaPropRelation = mLinkService->createRelation("MetaProp", stor, true);
-
-		if (mMetaPropRelation.isNull())
-		    OPDE_EXCEPT("MetaProp relation not found. Fatal.", "InheritService::init");
-
 		mMetaPropListenerID = mMetaPropRelation->registerListener(metaPropCallback);
 
 
-        LOG_INFO("InheritService::bootstrapFinished() - done");
-    }
+		LOG_INFO("InheritService::bootstrapFinished() - done");
+	}
 
 	//------------------------------------------------------
 	void InheritService::onMetaPropMsg(const LinkChangeMsg& msg) {
-	    // If the message indicates reset of the database
-	    if (msg.change == LNK_RELATION_CLEARED) {
-	        clear(); // Will itself broadcast
-	        return;
-	    }
+		// If the message indicates reset of the database
+		if (msg.change == LNK_RELATION_CLEARED) {
+			clear(); // Will itself broadcast
+			return;
+		}
 
 		// Read the link source, destination and priority
 
 		// Get the priority of the link
-        unsigned int priority = 0;
+		unsigned int priority = 0;
 
-        if (msg.change != LNK_REMOVED) // Do not waste time if the link is removed
-            priority = mMetaPropRelation->getLinkField(msg.linkID, "").toUInt(); // Hardcoded! Could be parametrized
+		if (msg.change != LNK_REMOVED) // Do not waste time if the link is removed
+			priority = mMetaPropRelation->getLinkField(msg.linkID, "").toUInt(); // Hardcoded! Could be parametrized
 
-        // get the Link ref.
-        LinkPtr l = mMetaPropRelation->getLink(msg.linkID);
+		// get the Link ref.
+		LinkPtr l = mMetaPropRelation->getLink(msg.linkID);
 
-        InheritChangeMsg smsg;
-        smsg.srcID = l->dst(); // common
-        smsg.dstID = l->src();
+		InheritChangeMsg smsg;
+		smsg.srcID = l->dst(); // common
+		smsg.dstID = l->src();
 
 		if (msg.change == LNK_ADDED) {
-		    _addLink(l, priority);
-            // Insert into the maps
-            smsg.change = INH_ADDED;
+			_addLink(l, priority);
+			// Insert into the maps
+			smsg.change = INH_ADDED;
 
-            broadcastMessage(smsg);
+			broadcastMessage(smsg);
 		} else if (msg.change == LNK_CHANGED) {
-		    _changeLink(l, priority);
-		    // Priority change happened - update
-            smsg.change = INH_CHANGED;
-            broadcastMessage(smsg);
+			_changeLink(l, priority);
+			// Priority change happened - update
+			smsg.change = INH_CHANGED;
+			broadcastMessage(smsg);
 		} else if (msg.change == LNK_REMOVED) {
-            smsg.change = INH_REMOVED;
-		    broadcastMessage(smsg); // Remove will broadcast prior to the removal
+			smsg.change = INH_REMOVED;
+			broadcastMessage(smsg); // Remove will broadcast prior to the removal
 
-   			// Remove the link
+			// Remove the link
 			_removeLink(l);
 		}
 	}
 
-    //------------------------------------------------------
-    void InheritService::clear() {
-        // Step two. Broadcast the inheritance change
-        InheritChangeMsg smsg;
-        smsg.change = INH_CLEARED_ALL;
-        smsg.srcID = 0; // Some dummy values
-        smsg.dstID = 0;
-        broadcastMessage(smsg);
+	//------------------------------------------------------
+	void InheritService::clear() {
+		// Step two. Broadcast the inheritance change
+		InheritChangeMsg smsg;
+		smsg.change = INH_CLEARED_ALL;
+		smsg.srcID = 0; // Some dummy values
+		smsg.dstID = 0;
+		broadcastMessage(smsg);
 
-        // Now clear
-        mInheritSources.clear();
-        mInheritTargets.clear();
-    }
+		// Now clear
+		mInheritSources.clear();
+		mInheritTargets.clear();
+	}
 
-    //------------------------------------------------------
-    InheritQueryResultPtr InheritService::getSources(int objID) const {
-        InheritMap::const_iterator it = mInheritSources.find(objID);
+	//------------------------------------------------------
+	InheritQueryResultPtr InheritService::getSources(int objID) const {
+		InheritMap::const_iterator it = mInheritSources.find(objID);
 
-        if (it != mInheritSources.end()) {
-            InheritQueryResultPtr res = new SimpleInheritQueryResult(it->second);
-            return res;
-        } else {
-            InheritQueryResultPtr res = new EmptyInheritQueryResult();
-            return res;
-        }
+		if (it != mInheritSources.end()) {
+			InheritQueryResultPtr res = new SimpleInheritQueryResult(it->second);
+			return res;
+		} else {
+			InheritQueryResultPtr res = new EmptyInheritQueryResult();
+			return res;
+		}
 
-    }
+	}
 
-    //------------------------------------------------------
+	//------------------------------------------------------
 	InheritQueryResultPtr InheritService::getTargets(int objID) const {
-	    InheritMap::const_iterator it = mInheritTargets.find(objID);
+		InheritMap::const_iterator it = mInheritTargets.find(objID);
 
-        if (it != mInheritTargets.end()) {
-            InheritQueryResultPtr res = new SimpleInheritQueryResult(it->second);
-            return res;
-        } else {
-            InheritQueryResultPtr res = new EmptyInheritQueryResult();
-            return res;
-        }
+		if (it != mInheritTargets.end()) {
+			InheritQueryResultPtr res = new SimpleInheritQueryResult(it->second);
+			return res;
+		} else {
+			InheritQueryResultPtr res = new EmptyInheritQueryResult();
+			return res;
+		}
 	}
 	
 	//------------------------------------------------------
@@ -270,7 +270,7 @@ namespace Opde {
 			}
 		}
 		
-        return 0;
+		return 0;
 	}
 
 	//------------------------------------------------------
@@ -287,11 +287,11 @@ namespace Opde {
 		// see if we can have some greater one
 		InheritMap::iterator it = mInheritSources.find(objID);
 
-        if (it != mInheritSources.end()) {
-        	//  object seems to have some MP links
-        	// search for the max mp priority
-        	
-        	InheritLinkMap::iterator it2 = it->second.begin();
+		if (it != mInheritSources.end()) {
+			//  object seems to have some MP links
+			// search for the max mp priority
+			
+			InheritLinkMap::iterator it2 = it->second.begin();
 		
 			while (it2 != it->second.end()) {
 				int actPrio = it2->second->priority;
@@ -299,10 +299,10 @@ namespace Opde {
 					mpPrio = actPrio + 8; // next free. MP priorities are stepped by 8
 				}
 			}
-        }
-        
-        // whe have our priority. Let's create a new MP link!
-        _createMPLink(objID, mpID, mpPrio);
+		}
+		
+		// whe have our priority. Let's create a new MP link!
+		_createMPLink(objID, mpID, mpPrio);
 	}
 	
 	//------------------------------------------------------
@@ -333,93 +333,93 @@ namespace Opde {
 		return inheritsFrom(objID, mpID);
 	}
 
-    //------------------------------------------------------
+	//------------------------------------------------------
 	bool InheritService::inheritsFrom(int objID, int srcID) const {
 		InheritMap::const_iterator it = mInheritSources.find(objID);
 
-        if (it != mInheritSources.end()) {
-        	//  object seems to have some links
-        	InheritLinkMap::const_iterator it2 = it->second.find(srcID);
-        	
-        	if (it2 != it->second.end())
+		if (it != mInheritSources.end()) {
+			//  object seems to have some links
+			InheritLinkMap::const_iterator it2 = it->second.find(srcID);
+			
+			if (it2 != it->second.end())
 				return true;
-        }
-        
-        return false;
+		}
+		
+		return false;
 	}
 	
-    //------------------------------------------------------
-    void InheritService::_addLink(const LinkPtr& link, unsigned int priority) {
-        // It works like this. link.src() is the target for inheritance, link.dst() is the source for inheritance
-        InheritLinkPtr ilp = new InheritLink;
+	//------------------------------------------------------
+	void InheritService::_addLink(const LinkPtr& link, unsigned int priority) {
+		// It works like this. link.src() is the target for inheritance, link.dst() is the source for inheritance
+		InheritLinkPtr ilp = new InheritLink;
 
-        // we've got the link reverse. MetaProp has src the target for inh, and dst the parent.
-        ilp->srcID = link->dst();
-        ilp->dstID = link->src();
-        ilp->priority = priority;
+		// we've got the link reverse. MetaProp has src the target for inh, and dst the parent.
+		ilp->srcID = link->dst();
+		ilp->dstID = link->src();
+		ilp->priority = priority;
 
-        pair<InheritMap::iterator, bool> r = mInheritSources.insert(make_pair(ilp->dstID, InheritLinkMap()));
+		pair<InheritMap::iterator, bool> r = mInheritSources.insert(make_pair(ilp->dstID, InheritLinkMap()));
 
-        // now insert for the link.src, with the InheritLinkPtr struct
-        pair<InheritLinkMap::iterator, bool> ri = r.first->second.insert(make_pair(ilp->srcID, ilp));
+		// now insert for the link.src, with the InheritLinkPtr struct
+		pair<InheritLinkMap::iterator, bool> ri = r.first->second.insert(make_pair(ilp->srcID, ilp));
 
-        if (!ri.second)
-            OPDE_EXCEPT("Multiple inheritance for the same src/dst pair is not allowed!", "InheritService::_addLink");
+		if (!ri.second)
+			OPDE_EXCEPT("Multiple inheritance for the same src/dst pair is not allowed!", "InheritService::_addLink");
 
-        // Repeat for the mInheritTarget's
+		// Repeat for the mInheritTarget's
 
-        r = mInheritTargets.insert(make_pair(ilp->srcID, InheritLinkMap()));
+		r = mInheritTargets.insert(make_pair(ilp->srcID, InheritLinkMap()));
 
-        ri = r.first->second.insert(make_pair(ilp->dstID, ilp));
+		ri = r.first->second.insert(make_pair(ilp->dstID, ilp));
 
-        if (!ri.second)
-            OPDE_EXCEPT("Multiple inheritance for the same src/dst pair is not allowed!", "InheritService::_addLink");
-    }
+		if (!ri.second)
+			OPDE_EXCEPT("Multiple inheritance for the same src/dst pair is not allowed!", "InheritService::_addLink");
+	}
 
-    //------------------------------------------------------
-    void InheritService::_changeLink(const LinkPtr& link, unsigned int priority) {
-        // Modify priority of the link
-        InheritMap::iterator it = mInheritSources.find(link->dst());
+	//------------------------------------------------------
+	void InheritService::_changeLink(const LinkPtr& link, unsigned int priority) {
+		// Modify priority of the link
+		InheritMap::iterator it = mInheritSources.find(link->dst());
 
-        if (it != mInheritSources.end()) {
-            // now insert for the link.src, with the InheritLinkPtr struct
-            InheritLinkMap::iterator it2 = it->second.find(link->src());
+		if (it != mInheritSources.end()) {
+			// now insert for the link.src, with the InheritLinkPtr struct
+			InheritLinkMap::iterator it2 = it->second.find(link->src());
 
-            it2->second->priority = priority;
-        } else
-            OPDE_EXCEPT("Could not find the link to change the priority for", "InheritService::_changeLink");
-    }
+			it2->second->priority = priority;
+		} else
+			OPDE_EXCEPT("Could not find the link to change the priority for", "InheritService::_changeLink");
+	}
 
-    //------------------------------------------------------
-    void InheritService::_removeLink(const LinkPtr& link) {
-        InheritMap::iterator it = mInheritSources.find(link->dst());
+	//------------------------------------------------------
+	void InheritService::_removeLink(const LinkPtr& link) {
+		InheritMap::iterator it = mInheritSources.find(link->dst());
 
-        if (it != mInheritSources.end()) {
-            // now insert for the link.src, with the InheritLinkPtr struct
-            InheritLinkMap::iterator it2 = it->second.find(link->src());
+		if (it != mInheritSources.end()) {
+			// now insert for the link.src, with the InheritLinkPtr struct
+			InheritLinkMap::iterator it2 = it->second.find(link->src());
 
-            if (it2 != it->second.end())
-                it->second.erase(it2);
-            else
-                OPDE_EXCEPT("Could not find the link to change the priority for", "InheritService::_changeLink");
-        } else
-            OPDE_EXCEPT("Could not find the link to change the priority for", "InheritService::_changeLink");
+			if (it2 != it->second.end())
+				it->second.erase(it2);
+			else
+				OPDE_EXCEPT("Could not find the link to change the priority for", "InheritService::_changeLink");
+		} else
+			OPDE_EXCEPT("Could not find the link to change the priority for", "InheritService::_changeLink");
 
-        // Same again, for the targets
-        it = mInheritTargets.find(link->src());
-        if (it != mInheritTargets.end()) {
-            // now insert for the link.src, with the InheritLinkPtr struct
-            InheritLinkMap::iterator it2 = it->second.find(link->dst());
+		// Same again, for the targets
+		it = mInheritTargets.find(link->src());
+		if (it != mInheritTargets.end()) {
+			// now insert for the link.src, with the InheritLinkPtr struct
+			InheritLinkMap::iterator it2 = it->second.find(link->dst());
 
-            if (it2 != it->second.end())
-                it->second.erase(it2);
-            else
-                OPDE_EXCEPT("Could not find the link to change the priority for", "InheritService::_changeLink");
-        } else
-            OPDE_EXCEPT("Could not find the link to change the priority for", "InheritService::_changeLink");
-    }
+			if (it2 != it->second.end())
+				it->second.erase(it2);
+			else
+				OPDE_EXCEPT("Could not find the link to change the priority for", "InheritService::_changeLink");
+		} else
+			OPDE_EXCEPT("Could not find the link to change the priority for", "InheritService::_changeLink");
+	}
 
-    //------------------------------------------------------
+	//------------------------------------------------------
 	void InheritService::_createMPLink(int objID, int srcID, int priority) {
 		// Create a new link, that will do all the work...
 		// TODO: This should be made possible in a single go

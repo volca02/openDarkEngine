@@ -220,7 +220,9 @@ namespace Opde {
 		
 		// DonorType property (single integer property):
 		// mPropertyService->createPropertyGroup();
-
+		// create the builtin DonorType property
+		DataStoragePtr stor = new IntDataStorage();
+		mPropDonorType = mPropertyService->createPropertyGroup("DonorType", "DonorType", "never", stor);
 	}
 	
 	//------------------------------------------------------
@@ -448,7 +450,7 @@ namespace Opde {
 		for (int id = mAllocatedObjects.getMinIndex(); id < mAllocatedObjects.getMaxIndex(); ++id) {
 			DVariant v;
 			
-			if (mAllocatedObjects.get(id)) {
+			if (mAllocatedObjects.get(id)) { // only gamesys object have donortype...
 				if (!mPropertyService->has(id, "DonorType")) {
 					if (saveMask & 0x01) // has donortype, was archetype requested?
 						objmask.set(id, true); // yep, so include this object

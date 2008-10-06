@@ -69,6 +69,27 @@ namespace Opde {
 
 		LOG_DEBUG("DatabaseService::load - end()");
 	}
+	
+	//------------------------------------------------------
+	void DatabaseService::loadGameSys(const std::string& filename) {
+	    LOG_DEBUG("DatabaseService::loadGameSys - Loading requested file %s", filename.c_str());
+        // if there is another database in hold
+		if (!mCurDB.isNull())
+			unload();
+
+	    // Try to find the database
+		mCurDB = getDBFileNamed(filename);
+
+        mLoadingStatus.reset();
+        
+        // TODO: Overall coarse step - calculated from TagFile Count * mListeners.size()
+        mLoadingStatus.totalCoarse = mListeners.size();
+        
+		// Currently hardcoded to mission db
+		_loadGameSysDB(mCurDB);
+
+		LOG_DEBUG("DatabaseService::loadGameSys - end()");
+	}
 
 	//------------------------------------------------------
 	FileGroupPtr DatabaseService::getDBFileNamed(const std::string& filename) {
@@ -117,7 +138,19 @@ namespace Opde {
 	void DatabaseService::_loadMissionDB(const FileGroupPtr& db) {
 	    LOG_DEBUG("DatabaseService::_loadMissionDB");
 
-		_loadGameSysDB(db);
+		// Get the gamesys, load
+		// GAM_FILE
+		FilePtr fdm = db->getFile("GAM_FILE");
+
+		char* data = new char[fdm->size()];
+
+		data[0] = 0x0;
+
+		fdm->read(data, fdm->size());
+
+		FileGroupPtr gs = getDBFileNamed(data);
+
+		_loadGameSysDB(gs);
 
 		// Load the Mission
         // Create a DB change message, and broadcast
@@ -135,24 +168,13 @@ namespace Opde {
 	void DatabaseService::_loadGameSysDB(const FileGroupPtr& db) {
 	    LOG_DEBUG("DatabaseService::_loadGameSysDB");
 
-		// GAM_FILE
-		FilePtr fdm = db->getFile("GAM_FILE");
-
-		char* data = new char[fdm->size()];
-
-		data[0] = 0x0;
-
-		fdm->read(data, fdm->size());
-
-		FileGroupPtr gs = getDBFileNamed(data);
-
         // Create a DB change message, and broadcast
         DatabaseChangeMsg m;
 
         m.change = DBC_LOADING;
         m.dbtype = DBT_GAMESYS;
         m.dbtarget = DBT_MISSION; // TODO: Hardcoded
-        m.db = gs;
+        m.db = db;
 
         broadcastMessage(m);
 	}

@@ -236,6 +236,8 @@ namespace Opde {
 			
 			/// Symbolic name property pointer
 			PropertyGroup* mPropSymName;
+			/// Donor type property pointer
+			PropertyGroup* mPropDonorType;
 			
 			/// Scene manager pointer
 			Ogre::SceneManager* mSceneMgr;

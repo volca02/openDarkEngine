@@ -42,23 +42,24 @@ namespace Opde {
 		/// Source object ID
 		int 	dstID;
 		/// The priority of this inheritance definition (It's int to help comparison with negative values)
-		int	priority;
+		int 	priority;
 	};
 
 	typedef std::vector< InheritLink > InheritLinkList;
 
-    typedef shared_ptr< InheritLink > InheritLinkPtr;
+	typedef shared_ptr< InheritLink > InheritLinkPtr;
 
-    /** Inheritance query result. Put like this for effectiveness */
-    typedef ConstIterator< InheritLinkPtr > InheritQueryResult;
+	/** Inheritance query result. Put like this for effectiveness */
+	typedef ConstIterator< InheritLinkPtr > InheritQueryResult;
 
-    /// Shared pointer to InheritQuery
-    typedef shared_ptr< InheritQueryResult > InheritQueryResultPtr;
+	/// Shared pointer to InheritQuery
+	typedef shared_ptr< InheritQueryResult > InheritQueryResultPtr;
 
 	/** Inherit Service - service managing object inheritance and metaproperties.
 	* This service is responsible for Inheritor management. Inheritors are classes that are used to track inheritance of certain qualities of an object (be it abstract or concrete).
 	*  An example usage of Inheritor is property inheritance. Properties internally use the inheritors to transparently return values not directly assigned to the object ID, but rather inherited from the Effective object.
 	* Effective object is the carrier of the effective value - the value that has the maximal priority.
+	* @note This class creates and uses the Metaproperty link, which is built-in
 	* */
 	class OPDELIB_EXPORT InheritService : public Service, public MessageSource<InheritChangeMsg> {
 		public:
@@ -178,10 +179,10 @@ namespace Opde {
 			/// Direct link to the metaprop relation
 			RelationPtr mMetaPropRelation;
 
-            /// List of instanced inheritors
+			/// List of instanced inheritors
 			typedef std::vector< InheritorPtr > InheritorList;
 
-            /// All instanced inheritors are here
+			/// All instanced inheritors are here
 			InheritorList mInheritors;
 	};
 

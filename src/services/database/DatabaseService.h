@@ -109,6 +109,9 @@ namespace Opde {
 
 			/// Loads a game database. Can be either savegame, or mission
 			void load(const std::string& filename);
+			
+			/// Loads a game system. drops all current data
+			void loadGameSys(const std::string& filename);
 
 			/// Unload the game data. Release all the data that are connected to a game's mission in progress
 			void unload();

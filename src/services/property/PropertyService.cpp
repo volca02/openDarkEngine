@@ -71,13 +71,13 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	PropertyService::~PropertyService() {
-		PropertyList::iterator it = mPropertiesToDelete.begin();
+		PropertyList::iterator it = mOwnedProperties.begin();
 		
-		for( ; it != mPropertiesToDelete.end(); ++it) {
+		for( ; it != mOwnedProperties.end(); ++it) {
 			delete *it;
 		}
 
-		mPropertiesToDelete.clear();
+		mOwnedProperties.clear();
 		mPropertyGroupMap.clear();
 	}
 
@@ -91,7 +91,7 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	PropertyGroup* PropertyService::createPropertyGroup(const std::string& name, const std::string& chunkName, std::string inheritorName, const DataStoragePtr& storage, bool takeover) {
+	PropertyGroup* PropertyService::createPropertyGroup(const std::string& name, const std::string& chunkName, std::string inheritorName, const DataStoragePtr& storage) {
 		PropertyGroup* nr;
 		try {
 			nr = new PropertyGroup(this, name, chunkName, storage, inheritorName);
@@ -109,7 +109,7 @@ namespace Opde {
 		}
 		
 		// insert the pointer into the to be freed list
-		mPropertiesToDelete.push_back(nr);
+		mOwnedProperties.push_back(nr);
 		
 		LOG_INFO("PropertyService::createPropertyGroup: Created a property group %s (With chunk name %s)", name.c_str(), chunkName.c_str());
 
