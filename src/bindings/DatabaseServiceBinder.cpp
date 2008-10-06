@@ -97,6 +97,7 @@ namespace Opde {
 		// ------------------------------------------
 		PyMethodDef DatabaseServiceBinder::msMethods[] = {
 			{"load", load, METH_VARARGS},
+			{"loadGameSys", loadGameSys, METH_VARARGS},
 			{"unload", unload, METH_NOARGS},
 			{"setProgressListener", setProgressListener, METH_VARARGS},
 			{"unsetProgressListener", unsetProgressListener, METH_NOARGS},
@@ -115,6 +116,31 @@ namespace Opde {
                     o->mInstance->load(fname);
 			    } catch (BasicException& e) {
 			        PyErr_Format(PyExc_IOError, "Exception catched while trying to load mission database : %s", e.getDetails().c_str());
+			        return NULL;
+			    }
+
+				result = Py_None;
+				Py_INCREF(result);
+				return result;
+			} else {
+				// Invalid parameters
+				PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
+				return NULL;
+			}
+		}
+		
+		// ------------------------------------------
+		PyObject* DatabaseServiceBinder::loadGameSys(PyObject* self, PyObject* args) {
+		    PyObject *result = NULL;
+			Object* o = python_cast<Object*>(self, &msType);
+			
+			const char* fname;
+
+			if (PyArg_ParseTuple(args, "s", &fname)) {
+			    try {
+                    o->mInstance->loadGameSys(fname);
+			    } catch (BasicException& e) {
+			        PyErr_Format(PyExc_IOError, "Exception catched while trying to load gamesys database : %s", e.getDetails().c_str());
 			        return NULL;
 			    }
 

@@ -22,34 +22,37 @@
  *
  *****************************************************************************/
 
-#ifndef __DATABASESERVICEBINDER_H
-#define __DATABASESERVICEBINDER_H
+#ifndef __INHERITQUERYRESULYBINDER_H
+#define __INHERITQUERYRESULYBINDER_H
 
-#include  "DatabaseService.h"
+#include  "InheritService.h"
 
 namespace Opde {
 
 	namespace Python {
 
-		/// Database python binder
-		class DatabaseServiceBinder : public shared_ptr_binder<DatabaseServicePtr> {
+		/// Inherit query result python binder. Iterable
+		/// @todo Candidate for a template - Opde::Iterator binder
+		class InheritQueryResultBinder : public shared_ptr_binder<InheritQueryResultPtr> {
 			public:
 				static void init(PyObject* module);
-				
+			
 				// --- Python type related methods ---
 				static PyObject* getattr(PyObject *self, char *name);
 
-				static PyObject* create();
-				
-				// --- Methods ---
-				static PyObject* load(PyObject* self, PyObject* args);
-				static PyObject* loadGameSys(PyObject* self, PyObject* args);
-				static PyObject* unload(PyObject* self, PyObject* args);
-				static PyObject* setProgressListener(PyObject* self, PyObject* args);
-				static PyObject* unsetProgressListener(PyObject* self, PyObject* args);
-				
+				/// to string - reprfunc conversion
+				static PyObject* repr(PyObject *self);
+
+				/// creates a python object representation of the inherit query result
+				static PyObject* create(const InheritQueryResultPtr& result);
+
 			protected:
-				/// Static type definition for DatabaseService
+				/// Return self as iterator with a increased ref count.
+				static PyObject* getIterObject(PyObject* self);
+				/// Returns current object, advances to next object (or returns NULL if at end)
+				static PyObject* getNext(PyObject* self);
+			
+				/// Static type definition for InheritQueryResult
 				static PyTypeObject msType;
 
 				/// Name of the python type

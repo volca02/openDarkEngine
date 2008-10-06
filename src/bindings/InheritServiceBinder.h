@@ -22,17 +22,17 @@
  *
  *****************************************************************************/
 
-#ifndef __DATABASESERVICEBINDER_H
-#define __DATABASESERVICEBINDER_H
+#ifndef __INHERITSERVICEBINDER_H
+#define __INHERITSERVICEBINDER_H
 
-#include  "DatabaseService.h"
+#include  "InheritService.h"
 
 namespace Opde {
 
 	namespace Python {
 
-		/// Database python binder
-		class DatabaseServiceBinder : public shared_ptr_binder<DatabaseServicePtr> {
+		/// Link service python binder
+		class InheritServiceBinder : public shared_ptr_binder<InheritServicePtr> {
 			public:
 				static void init(PyObject* module);
 				
@@ -40,16 +40,18 @@ namespace Opde {
 				static PyObject* getattr(PyObject *self, char *name);
 
 				static PyObject* create();
-				
+
 				// --- Methods ---
-				static PyObject* load(PyObject* self, PyObject* args);
-				static PyObject* loadGameSys(PyObject* self, PyObject* args);
-				static PyObject* unload(PyObject* self, PyObject* args);
-				static PyObject* setProgressListener(PyObject* self, PyObject* args);
-				static PyObject* unsetProgressListener(PyObject* self, PyObject* args);
+				static PyObject* getSources(PyObject* self, PyObject* args);
+				static PyObject* getTargets(PyObject* self, PyObject* args);
+				static PyObject* getArchetype(PyObject* self, PyObject* args);
+				static PyObject* setArchetype(PyObject* self, PyObject* args);
+				// metaprop handling is already binded in ObjectService
+				static PyObject* inheritsFrom(PyObject* self, PyObject* args);
+				
 				
 			protected:
-				/// Static type definition for DatabaseService
+				/// Static type definition for LinkService
 				static PyTypeObject msType;
 
 				/// Name of the python type
@@ -58,6 +60,26 @@ namespace Opde {
 				/// Method list
 				static PyMethodDef msMethods[];
 		};
+		
+		// -------------------------------
+		/// Inherit link struct binder. The attributes are exposed as read only to python
+		class InheritLinkBinder : public shared_ptr_binder<InheritLinkPtr> {
+			public:
+				static void init(PyObject* module);
+				
+				// --- Python type related methods ---
+				static PyObject* getattr(PyObject *self, char *name);
+
+				static PyObject* create(InheritLinkPtr& link);
+				
+			protected:
+				/// Static type definition for LinkService
+				static PyTypeObject msType;
+
+				/// Name of the python type
+				static char* msName;
+		};
+
 	}
 }
 

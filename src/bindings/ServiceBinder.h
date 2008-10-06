@@ -46,6 +46,7 @@ namespace Opde {
 				static PyObject* getGUIService(PyObject* self, PyObject* args);
 				static PyObject* getDatabaseService(PyObject* self, PyObject* args);
 				static PyObject* getObjectService(PyObject* self, PyObject* args);
+				static PyObject* getInheritService(PyObject* self, PyObject* args);
 				
 			protected:
 				static PyMethodDef msMethods[];

@@ -208,16 +208,24 @@ namespace Opde {
 			const char *name, *type, *section;
 			PyObject *recursive = Py_False;
 
-			if (PyArg_ParseTuple(args, "sss;o", &name, &type, &section, &recursive)) {
-			    try {
-                    o->mInstance->addResourceLocation(name, type, section, PyBool_Check(recursive));
-			    } catch (BasicException& e) {
-			        PyErr_Format(PyExc_IOError, "Exception catched while trying to add resource location : %s", e.getDetails().c_str());
-			        return NULL;
-			    } catch (...) {
-			    	PyErr_Format(PyExc_IOError, "Exception catched while trying to add resource location");
-			        return NULL;
-			    }
+			if (PyArg_ParseTuple(args, "sss|O", &name, &type, &section, &recursive)) {
+				try {
+					bool recb = false;
+					if (PyBool_Check(recursive)) {
+						recb = (recursive == Py_True);
+					} else {
+						PyErr_Format(PyExc_TypeError, "The optional argument is expected to be Bool");
+						return NULL;
+					}
+					
+					o->mInstance->addResourceLocation(name, type, section, recb);
+				} catch (BasicException& e) {
+					PyErr_Format(PyExc_IOError, "Exception catched while trying to add resource location : %s", e.getDetails().c_str());
+					return NULL;
+				} catch (...) {
+					PyErr_Format(PyExc_IOError, "Exception catched while trying to add resource location");
+					return NULL;
+				}
 
 				PyObject *result = Py_None;
 				Py_INCREF(result);

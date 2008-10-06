@@ -32,6 +32,7 @@
 #include "GUIServiceBinder.h"
 #include "DatabaseServiceBinder.h"
 #include "ObjectServiceBinder.h"
+#include "InheritServiceBinder.h"
 
 namespace Opde {
 	namespace Python {
@@ -48,6 +49,7 @@ namespace Opde {
 			{"getGUIService", getGUIService, METH_NOARGS},
 			{"getDatabaseService", getDatabaseService, METH_NOARGS},
 			{"getObjectService", getObjectService, METH_NOARGS},
+			{"getInheritService", getInheritService, METH_NOARGS},
 			{NULL, NULL},
 		};
 		
@@ -122,6 +124,15 @@ namespace Opde {
 			    return NULL;
 			}
 		}
+		
+		PyObject* ServiceBinder::getInheritService(PyObject* self, PyObject* args) {
+			try {
+                return InheritServiceBinder::create();
+			} catch (BasicException &e) {
+			    PyErr_Format(PyExc_EnvironmentError, "Exception happened while getting service: %s", e.getDetails().c_str());
+			    return NULL;
+			}
+		}
 
 		PyObject* ServiceBinder::init(PyObject* container) {
 			PyObject* module = Py_InitModule(msName, msMethods);
@@ -140,6 +151,7 @@ namespace Opde {
 			LinkServiceBinder::init(module);
 			LoopServiceBinder::init(module);
 			ObjectServiceBinder::init(module);
+			InheritServiceBinder::init(module);
 			
 			// Publish some service constants
 			PyModule_AddIntConstant(module, "SERVICE_ALL", SERVICE_ALL);
