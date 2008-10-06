@@ -689,10 +689,10 @@ property AI_InfDly {
 	label "AIInformDelay"
 }
 
-property DonorType {
-	label "DonorType"
-	inherit never
-}
+//property DonorType {
+//	label "DonorType"
+//	inherit never
+//}
 
 property OTxtRepr3 {
 	label "TextureReplace3"
