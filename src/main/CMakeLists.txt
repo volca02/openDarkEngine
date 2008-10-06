@@ -105,7 +105,7 @@ SET_TARGET_PROPERTIES( opde PROPERTIES
 )
 
 # Script executor executable
-add_executable (opdeScript WIN32 
+add_executable (opdeScript
     OpdeScript.cpp
 )
 
@@ -114,8 +114,10 @@ target_link_libraries( opdeScript
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}
     ${FREEIMAGE_LIBRARIES}
+    ${PYTHON_LIBRARIES}
 )
 
 SET_TARGET_PROPERTIES( opdeScript PROPERTIES
   COMPILE_DEFINITIONS "OPDE_EXE_TARGET"
 )
+

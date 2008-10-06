@@ -226,7 +226,7 @@ namespace Opde {
 	};
 
     /** Central class for python bindings. Call PythonLanguage::Init() to prepare python environment */
-    class PythonLanguage {
+    class OPDELIB_EXPORT PythonLanguage {
     	protected:
 			static Opde::Root* msRoot;
 			
