@@ -54,7 +54,7 @@ int main(int argc, char**argv)
 
     if (scriptName != "") {
         PythonLanguage::init();
-	# TODO: Need a way to supply args to the script
+		// TODO: Need a way to supply args to the script
         PythonLanguage::runScript(scriptName.c_str());
         PythonLanguage::term();
     } else {
