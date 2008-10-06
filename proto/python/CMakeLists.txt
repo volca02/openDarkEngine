@@ -35,18 +35,14 @@ include_directories(
 add_executable(pytest 
     test.cpp 
     test.h 
-    ../../src/main/DTypeScriptLoader.cpp
-    ../../src/main/DTypeScriptLoader.h
-    ../../src/main/PLDefScriptLoader.cpp
-    ../../src/main/PLDefScriptLoader.h
-    ../../src/main/DTypeScriptCompiler.cpp
-    ../../src/main/DTypeScriptCompiler.h
-    ../../src/main/PLDefScriptCompiler.cpp
-    ../../src/main/PLDefScriptCompiler.h
-
 )
 
 
 target_link_libraries(pytest 
     OpdeLib
 )
+
+SET_TARGET_PROPERTIES( pytest PROPERTIES
+  COMPILE_DEFINITIONS "OPDE_EXE_TARGET"
+)
+
