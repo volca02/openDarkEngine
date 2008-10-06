@@ -25,13 +25,14 @@
 
 #include "GameStateManager.h"
 #include "OpdeException.h"
+#include "bindings.h"
 
 #include <OgreException.h>
+
 
 #ifndef OPDE_EXE_TARGET
 #error OPDE_EXE_TARGET target not defined!
 #endif
-
 
 using namespace Opde;
 
@@ -41,39 +42,25 @@ using namespace Opde;
 
 INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT )
 {
-	std::string GameType(strCmdLine);
+	std::string scriptName(strCmdLine);
 #else
 int main(int argc, char**argv)
 {
-	std::string GameType = "";
+	std::string scriptName = "";
 	
 	if (argc >= 2)
-	    GameType = argv[1];
+	    scriptName = argv[1];
 #endif
 
-    // Create application object
-    GameStateManager* man = new GameStateManager(GameType);
-
-    try {
-		man->run();
-    } catch( Ogre::Exception& e ) {
-#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-        MessageBox( NULL, e.getFullDescription().c_str(), "An exception has occured!", MB_OK | MB_ICONERROR | MB_TASKMODAL);
-#else
-        std::cerr << "An exception has occured: " <<
-            e.getFullDescription().c_str() << std::endl;
-#endif
-
-    } catch( BasicException& e ) {
-#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-        MessageBox( NULL, e.getDetails().c_str(), "An exception has occured!", MB_OK | MB_ICONERROR | MB_TASKMODAL);
-#else
-        std::cerr << "An exception has occured: " <<
-            e.getDetails().c_str() << std::endl;
-#endif
+    if (scriptName != "") {
+        PythonLanguage::init();
+	# TODO: Need a way to supply args to the script
+        PythonLanguage::runScript(scriptName.c_str());
+        PythonLanguage::term();
+    } else {
+	std::cerr << "opdeScript: Script name epected as a parameter!" << std::endl;
+	return 1;
     }
-
-    delete man;
-
+    
     return 0;
 }
