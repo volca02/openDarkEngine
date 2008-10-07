@@ -32,6 +32,8 @@ add_library (OpdeLib SHARED
     PLDefScriptLoader.h
     CustomImageCodec.cpp
     CustomImageCodec.h
+    ProxyArchive.cpp
+    ProxyArchive.h
     # and the base lib files
     ${OPDE_BASE_FILES}
     # and service files as well

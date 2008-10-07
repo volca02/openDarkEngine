@@ -30,27 +30,14 @@
 #include <OgreException.h>
 
 
-#ifndef OPDE_EXE_TARGET
-#error OPDE_EXE_TARGET target not defined!
-#endif
-
 using namespace Opde;
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-#define WIN32_LEAN_AND_MEAN
-#include "windows.h"
-
-INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT )
-{
-	std::string scriptName(strCmdLine);
-#else
 int main(int argc, char**argv)
 {
 	std::string scriptName = "";
 	
 	if (argc >= 2)
 	    scriptName = argv[1];
-#endif
 
     if (scriptName != "") {
         PythonLanguage::init();
