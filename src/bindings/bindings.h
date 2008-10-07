@@ -232,7 +232,7 @@ namespace Opde {
 			
     	public:
 			/** Initializes python lang and all the bindings */
-			static void init();
+			static void init(int argc, char **argv);
 
 			/** Finalizes python lang */
 			static void term();

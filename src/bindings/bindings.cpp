@@ -152,7 +152,7 @@ namespace Opde {
 
 //	Ogre::Root* PythonLanguage::msRoot = NULL;
 
-	void PythonLanguage::init() {
+	void PythonLanguage::init(int argc, char **argv) {
 		Py_Initialize();
 
 		msRoot = NULL;
@@ -169,7 +169,8 @@ namespace Opde {
 			PyErr_Print();
 			PyErr_Clear();
 		}
-
+		
+		PySys_SetArgv(argc, argv);
 	}
 
 	void PythonLanguage::term() {
