@@ -44,8 +44,8 @@ int main(int argc, char**argv)
         PythonLanguage::runScript(scriptName.c_str());
         PythonLanguage::term();
     } else {
-	std::cerr << "opdeScript: Script name epected as a parameter!" << std::endl;
-	return 1;
+		std::cerr << "opdeScript: Script name epected as a parameter!" << std::endl;
+		return 1;
     }
     
     return 0;

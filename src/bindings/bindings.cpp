@@ -193,17 +193,39 @@ namespace Opde {
 		}
 	}
 	
-	void PythonLanguage::runScript(const char* fname) {
-		FILE *fp = fopen (fname, "r+");
-		PyRun_SimpleFile(fp, fname);
-		fclose(fp);
+	bool PythonLanguage::runScript(const char* fname) {
+		FILE *fp = fopen (fname, "rb");
+		
+		if (fp != NULL) {
+			/* A short explanation:
+			1. The PyRun_SimpleFile has issues with FILE* type. Results in Access Violations on Windows
+			2. The PyRun_SimpleString does not handle DOS line-endings. 
+			*/
+			
+			std::ifstream pyfile(fname);
+
+			if (!pyfile)
+				return false;
+
+			std::string ftxt, line;
+
+			while (!pyfile.eof()) {
+				getline(pyfile, line);
+				ftxt += line;
+				ftxt += '\n';
+			}
+			pyfile.close();
+	
+			PyRun_SimpleStringFlags(ftxt.c_str(), NULL);
+		}
 		
 		if (PyErr_Occurred()) {
-			// TODO: Do something useful here, or forget it
-			// TODO: PythonException(BasicException) with the PyErr string probably. Same in the init
 			PyErr_Print();
 			PyErr_Clear();
+			return false;
 		}
+
+		return true;
 	}
 	
 	PyObject* PythonLanguage::createRoot(PyObject *self, PyObject* args) {

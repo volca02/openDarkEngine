@@ -241,7 +241,7 @@ namespace Opde {
 			static void runScriptPtr(const char* ptr);
 			
 			/** Runs a script from a file */
-			static void runScript(const char* fname);
+			static bool runScript(const char* fname);
 			
 			/// Python side Root singleton handler
 			static PyObject* createRoot(PyObject *self, PyObject* args);
