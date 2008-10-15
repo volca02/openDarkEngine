@@ -22,7 +22,6 @@
  *****************************************************************************/
 
 #include "ProxyArchive.h"
-#include <fnmatch.h>
 
 #include <OgreException.h>
 #include <OgreString.h>
@@ -201,8 +200,74 @@ namespace Ogre {
 		String lpattern = pattern;
 		StringUtil::toLowerCase(lpattern);
 		
-		// match using fnmatch
-		return fnmatch(lpattern.c_str(), unt.c_str(), 0);
+		// inspired by one codeproject article (but a rewrite without using the code)
+
+		enum State {
+			PM_Match = 0,
+			PM_Any,
+			PM_AnySeq
+		};
+
+		// we don't wanna depend on some lib that does not exist for visual C anyway
+		bool match = true;
+		String::iterator pi = lpattern.begin();
+		String::iterator pnext = pi; // only used for AnySeq
+		String::iterator si = unt.begin();
+		int state = 0;
+
+		while (match && pi != lpattern.end()) {
+			// if we're at the end of the source string
+			if (si == unt.end()) {
+				// match is found if pi got to end as well
+				match = pi == lpattern.end();
+				break;
+			}
+
+			// see what we're comparing to
+			state = PM_Match;
+
+			if (*pi == '*') {
+				state = PM_AnySeq;
+				pnext = pi;
+
+				// eat all the consecutive stars
+				while (*pnext == '*')
+						++pnext;
+			} else if (*pi == '?') {
+				state = PM_Any;
+			}
+
+			switch (state) {
+				case PM_Match: 
+					match = *pi == *si;
+				case PM_Any:
+					++pi; ++si;
+					break;
+				case PM_AnySeq:
+					// matched any character
+					++si;
+					
+					// found the end of pattern? If so,
+					// then the previous comparisons decide
+					if (pnext == lpattern.end()) {
+							match = true;
+							break;
+					}
+
+					// end for string, but some pattern following?
+					if (pnext != lpattern.end() &&
+						si == unt.end()) {
+							match = false;
+							break;
+					}
+
+					// or found a match after the star?
+					if (*si == *pnext) ++pi;
+					break;
+			}
+		}
+
+		return match;
 	}
 	
 	// -------------------------------------------------------
