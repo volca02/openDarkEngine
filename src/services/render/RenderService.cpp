@@ -94,12 +94,12 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	RenderService::~RenderService() {
+	}
+
+	// --------------------------------------------------------------------------
+	void RenderService::shutdown() {
         LOG_INFO("RenderService::~RenderService()");
 
-		// Good thing about services. Render service will be released as the last 
-		// one thanks to the shared_ptr. This means using the scene manager/whatever
-		// is safe outside this class as long as it is done in a service which has 
-		// a member pointer to render service
 		if (mPropPosition != NULL)
 		    mPropPosition->unregisterListener(mPropPositionListenerID);
 

@@ -71,6 +71,9 @@ namespace Opde {
 			/** Destructor */
 			virtual ~PropertyGroup();
 			
+			/** Shutdown routine. All dependencies must be be released here */
+			virtual void shutdown();
+			
 			/// Sets this property group's flag mBuiltIn to true, meaning this PropertyGroup was created by code as a core property
 			inline void setBuiltin() { mBuiltin = true; };
 			

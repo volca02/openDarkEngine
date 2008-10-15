@@ -69,11 +69,11 @@ def objectInfo(oid):
     print "Object Info for object " + str(oid) + " named '" + name + "':"
 
     for s in psrv.getAllPropertyNames():
-	if psrv.has(oid, s):
-	    if psrv.owns(oid, s):
-		print " * Object " + str(oid) + " has property: " + s
-	    else:
-		print " * Object " + str(oid) + " inherits property: " + s
+        if psrv.has(oid, s):
+            if psrv.owns(oid, s):
+                print " * Object " + str(oid) + " has property: " + s
+            else:
+                print " * Object " + str(oid) + " inherits property: " + s
 
     # If there was a method to get all relations, we could do the same with links
 
@@ -83,8 +83,8 @@ def getObjProps(oid):
     
     # iterate over all prop names, find those that are owned by the object
     for s in psrv.getAllPropertyNames():
-	if psrv.owns(oid, s) and s not in ['DonorType','SymbolicName']: # Skip DonorType and SymbolicName, they are mandatory
-	    res.append(s) # Here, we could convert prop values to {val,} as dark does it, having all the object's props listed
+        if psrv.owns(oid, s) and s not in ['DonorType','SymbolicName']: # Skip DonorType and SymbolicName, they are mandatory
+            res.append(s) # Here, we could convert prop values to {val,} as dark does it, having all the object's props listed
 
     return " ".join(res)
 
@@ -94,8 +94,8 @@ def getObjMProps(oid):
 
     # iterate over inheritance sources, find those with nonzero priority    
     for s in inhsrv.getSources(oid):
-	if s.priority != 0:
-	    res.append(objsrv.getName(s.src))
+        if s.priority != 0:
+            res.append(objsrv.getName(s.src))
 
     return " ".join(res)
 
@@ -113,7 +113,7 @@ def otree(oid,indent):
     # some formatting
     if props != '':
         props =  ' [' + props + ']'
-	
+    
     if mprops != '':
         mprops =  ' {' + mprops + '}'
 
@@ -124,9 +124,9 @@ def otree(oid,indent):
         # get DonorType property value
         dtype = psrv.get(oid, "DonorType", "")
     
-	# if the donor type is nonzero, we encountered a MetaProperty!
-        if (dtype == 1):
-	    dtypestr = "[M] "
+    # if the donor type is nonzero, we encountered a MetaProperty!
+    if (dtype == 1):
+        dtypestr = "[M] "
     
     # print out the object info
     print indent + '-+ ' + dtypestr + name + '(' + str(oid)  + ')' + props + mprops 
@@ -136,15 +136,15 @@ def otree(oid,indent):
 
     # get inheritance targets, iterate over those
     for l in inhsrv.getTargets(oid):
-	# the inh. target is not inheriting as MP, but as archetype
-	if l.priority == 0:
-	    # so we'll format
-	    single = 0
-	    # recurse with the target property
-	    otree(l.dst, indent + ' |')
-	
+        # the inh. target is not inheriting as MP, but as archetype
+        if l.priority == 0:
+            # so we'll format
+            single = 0
+            # recurse with the target property
+            otree(l.dst, indent + ' |')
+    
     if not single:
-	print indent
+        print indent
 
 # An example Object tree list for all the archetype base objects (id can change, name hopefully not)
 for srcobj in ["Object", "MetaProperty", "Stimulus", "Flow Group", "Base Room", "Texture"]:

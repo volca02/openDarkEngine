@@ -123,7 +123,8 @@ namespace Opde {
 		protected:
             virtual bool init();
             virtual void bootstrapFinished();
-            
+            virtual void shutdown();
+
 			virtual void loopStep(float deltaTime);
 
 			/** Model name property callback

@@ -81,6 +81,15 @@ namespace Opde {
 		mPropertyGroupMap.clear();
 	}
 
+	// --------------------------------------------------------------------------
+	void PropertyService::shutdown() {
+		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
+		
+		for( ; it != mPropertyGroupMap.end(); ++it) {
+			it->second->shutdown();
+		}
+	}
+
     // --------------------------------------------------------------------------
     bool PropertyService::init() {
         return true;

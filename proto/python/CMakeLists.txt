@@ -40,6 +40,7 @@ add_executable(pytest
 
 target_link_libraries(pytest 
     OpdeLib
+    ${PYTHON_LIBRARIES}
 )
 
 SET_TARGET_PROPERTIES( pytest PROPERTIES

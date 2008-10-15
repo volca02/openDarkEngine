@@ -55,8 +55,13 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	PropertyGroup::~PropertyGroup() {
+	}
+	
+	// --------------------------------------------------------------------------
+	void PropertyGroup::shutdown() {
 		clear();
 
+		// have to unregister here to break shared_ptr dependencies (prop. groups are not shared_ptr handled)
 		if (! mInheritor.isNull())
 			mInheritor->unregisterListener(mInheritorListenerID);
 			

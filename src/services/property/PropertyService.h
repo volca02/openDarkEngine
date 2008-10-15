@@ -126,6 +126,9 @@ namespace Opde {
 			/// service initialization
 			void bootstrapFinished();
 
+			/// service deinitialization
+			void shutdown();
+
 			/// maps the properties by their names
 			PropertyGroupMap mPropertyGroupMap;
 			
