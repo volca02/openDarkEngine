@@ -32,7 +32,7 @@ XPStyle on
 AddBrandingImage left 129
 
 Name "openDarkEngine"
-Caption "openDarkEngine"
+Caption "openDarkEngine @OPDE_VER_MAJOR@.@OPDE_VER_MINOR@.@OPDE_VER_PATCH@: @REL_CODE_NAME@"
 BrandingText "openDarkEngine Team"
 LicenseData @CMAKE_CURRENT_SOURCE_DIR@\copying
 LicenseForceSelection checkbox "I accept the terms in the license agreement"
@@ -56,11 +56,11 @@ LoadLanguageFile "${NSISDIR}\Contrib\Language files\English.nlf"
 
 VIProductVersion "@OPDE_VER_MAJOR@.@OPDE_VER_MINOR@.@OPDE_VER_PATCH@.0"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "openDarkEngine"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "El Motor Oscuro"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "openDarkEngine"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "openDarkEngine Team"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalTrademarks" "GPL"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "© openDarkEngine Team"
-VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "openDarkEngine"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "openDarkEngine @OPDE_VER_MAJOR@.@OPDE_VER_MINOR@.@OPDE_VER_PATCH@: @REL_CODE_NAME@"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "@OPDE_VER_MAJOR@.@OPDE_VER_MINOR@.@OPDE_VER_PATCH@"
 
 ;--------------------------------

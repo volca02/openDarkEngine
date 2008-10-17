@@ -24,6 +24,7 @@ project (OPDE)
 SET(OPDE_VER_MAJOR "0")
 SET(OPDE_VER_MINOR "2")
 SET(OPDE_VER_PATCH "1")
+SET(REL_CODE_NAME  "Segmentation Fault")
 
 # Build type selection. Use ccmake for selection of this (or the commandline switches)
 # Default build type
