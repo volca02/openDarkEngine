@@ -65,11 +65,11 @@ namespace Opde {
 		mAtlas->lock(HardwareBuffer::HBL_DISCARD);
 		const PixelBox &pb = mAtlas->getCurrentLock();
 
-		for (int y = 0; y < ATLAS_HEIGHT; y++) {
-			uint32 *data = static_cast<uint32*>(pb.data) + y*pb.rowPitch;
-
-			for (int x = 0; x < ATLAS_WIDTH; x++)
-				data[x] = 0;
+		uint32 *data = static_cast<uint32*>(pb.data);
+		for (int y = 0; y < ATLAS_HEIGHT; y++) 
+		{	
+			memset(data, 0, ATLAS_WIDTH * sizeof(uint32));
+			data += pb.rowPitch;
 		}
 
 		mAtlas->unlock();
