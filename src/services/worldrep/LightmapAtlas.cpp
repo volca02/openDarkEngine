@@ -162,22 +162,24 @@ namespace Opde {
 	void LightAtlas::updateLightMapBuffer(FreeSpaceInfo& fsi, lmpixel* rgb) {
 		const PixelBox &pb = mAtlas->getCurrentLock();
 
-		for (int y = 0; y < fsi.h; y++) {
-			uint32 *data = static_cast<uint32*>(pb.data) + (y + fsi.y)*pb.rowPitch;
-
+		uint32 *data = static_cast<uint32*>(pb.data) + fsi.y * pb.rowPitch;
+		for (int y = 0; y < fsi.h; y++)
+		{
 			for (int x = 0; x < fsi.w; x++)
 				data[x + fsi.x] = rgb[x + y * fsi.w].ARGB(); // Write a A8R8G8B8 conversion of the lmpixel
+			data += pb.rowPitch;
 		}
 	}
 
 	void LightAtlas::updateLightMapBuffer(FreeSpaceInfo& fsi, Ogre::Vector3* rgb) {
 		const PixelBox &pb = mAtlas->getCurrentLock();
 
-		for (int y = 0; y < fsi.h; y++) {
-			uint32 *data = static_cast<uint32*>(pb.data) + (y + fsi.y)*pb.rowPitch;
-
+		uint32 *data = static_cast<uint32*>(pb.data) + fsi.y * pb.rowPitch;
+		for (int y = 0; y < fsi.h; y++) 
+		{
+			uint32 w = (y * fsi.w);
 			for (int x = 0; x < fsi.w; x++) {
-				Vector3 pixel = rgb[x + (y * fsi.w)];
+				Vector3 pixel = rgb[x + w];
 
 				uint32 R, G, B;
 
@@ -194,6 +196,7 @@ namespace Opde {
 				// Write a A8R8G8B8 conversion of the lmpixel
 				data[x + fsi.x] = ARGB;
 			}
+			data += pb.rowPitch;
 		}
 	}
 
