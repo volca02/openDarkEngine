@@ -238,6 +238,18 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
+	DataFieldDescIteratorPtr PropertyService::getFieldDescIterator(const std::string& propName) {
+		PropertyGroup* prop = getPropertyGroup(propName);
+		
+		if (prop != NULL) {
+			return prop->getFieldDescIterator();
+		}
+		
+		LOG_ERROR("Invalid or undefined property name '%s' on call to PropertyService::getFieldDescIterator", propName.c_str());
+		return 0; // NULL iterator, no fun for the caller
+	}
+
+	// --------------------------------------------------------------------------
 	void PropertyService::objectDestroyed(int id) {
 		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
 

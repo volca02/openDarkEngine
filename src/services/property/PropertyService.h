@@ -93,6 +93,13 @@ namespace Opde {
 			*/
 			bool get(int obj_id, const std::string& propName, const std::string& propField, DVariant& target);
 
+			/** A shortcut to PropertyGroup::getFieldDescIterator
+			* @param propName The name of the property
+			* @return the iterator over property field descriptions, or NULL if invalid name was specified
+			* @see PropertyGroup::getFieldDescIterator
+			*/
+			DataFieldDescIteratorPtr getFieldDescIterator(const std::string& propName);
+
 			/** A notification that object was destroyed (removes all properties of the obj. ID)
 			* @param id The object id that was removed
 			* @note Do NOT call this directly unless you know what it does
@@ -111,7 +118,7 @@ namespace Opde {
 			/** Clears out all the PropertyGroups (effectively wiping out all properties) */
 			void clear();
 			
-			/** @returns a property name iterator usable to iterate over all property types */
+			/** @return a property name iterator usable to iterate over all property types */
 			StringIteratorPtr getAllPropertyNames();
 
 			/// maps property groups to their names
