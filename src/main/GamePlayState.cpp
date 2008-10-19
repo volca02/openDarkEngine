@@ -99,6 +99,8 @@ namespace Opde {
 		mPortalOverlay = OverlayManager::getSingleton().getByName("Opde/OpdeDebugOverlay");
 		
 		mShadows = true;
+		
+		StartingPointObjID = 0;
 	}
 
 	GamePlayState::~GamePlayState() {
@@ -448,7 +450,7 @@ namespace Opde {
 
 	void GamePlayState::onLinkPlayerFactoryMsg(const LinkChangeMsg& msg) {
 		switch (msg.change) {
-			case PROP_ADDED   : {
+			case LNK_ADDED : {
 				LOG_INFO("GamePlayState: Found StartingPoint");
 				// get the Link ref.
 				LinkPtr l = mPlayerFactoryRelation->getLink(msg.linkID);
