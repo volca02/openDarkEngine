@@ -26,6 +26,13 @@ Config file:
 		containing dark.gam if such
     file is not located in the current directory.
 
+example commandline: opdeScript tree.py -d -t t2 -c tree2.cfg -g modified.gam -a
+	* Debug
+	* Thief2 game type
+	* tree2.cfg config file
+	* Dump modifed.gam gamesystem
+	* dump Links, Properties and metaproperties
+
 This script was written by Volca, and can be modified and distributed freely. 
 It is not an example of a propper python script, and should not be taken as such
 (No exception handling, code is not in main, etc.)
