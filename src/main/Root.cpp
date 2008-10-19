@@ -74,7 +74,6 @@ namespace Opde {
 		
 		mLogger = new Logger();
 		
-		// TODO: A method to create/enable logging. This setup currently does no logging at all
 		mServiceMgr = new ServiceManager(mServiceMask);
 		
 		// To supress logging of OGRE (we'll use a plugin for our logger for Ogre logs)
@@ -90,9 +89,7 @@ namespace Opde {
 		mOgreRoot = new Ogre::Root();
 
 		// if custom image hooks are to be included, setup now
-#ifdef CUSTOM_IMAGE_HOOKS
 		Ogre::CustomImageCodec::startup();
-#endif
 
 		mConsoleBackend = new ConsoleBackend();
 		// Now we need to register all the service factories
@@ -117,9 +114,7 @@ namespace Opde {
 		
 		delete mConsoleBackend;
 		
-#ifdef CUSTOM_IMAGE_HOOKS
 		Ogre::CustomImageCodec::shutdown();
-#endif
 		delete mOgreRoot;
 		
 		LogListenerList::iterator it = mLogListeners.begin();
