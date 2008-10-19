@@ -42,7 +42,7 @@ namespace Opde {
             
             virtual const DataFieldDesc& next() { assert(!mEnd); mEnd = true; return mDesc; };
             
-            virtual bool end() const { std::cerr << "SFDI " << this << " " << mEnd << std::endl; return mEnd; };
+            virtual bool end() const { return mEnd; };
             
         protected:
             const DataFieldDesc& mDesc;
