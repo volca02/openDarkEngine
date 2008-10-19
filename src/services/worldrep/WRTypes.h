@@ -54,12 +54,12 @@ namespace Opde {
 	
 		uint8_t	num_planes; // plane count
 		uint8_t	media_type; // air == 1, water == 2 [TNH]
-		uint8_t	cell_flags; // bit 6 is set in fog cells. bits 3+4 are set in doorways, probably for vision blocking [TNH]
+		uint8_t	cell_flags; // bit 6 is set in fog cells. bits 3+4 are set in doorways, probably for vision blocking  [TNH]. bit 1 - wireframe
 		uint32_t	nxn; // size of the weird struct in bytes?
 	
 		uint16_t polymap_size; // this is repeated at the start of the polygon index list. you could do a sanity-check against it [TNH]
 		uint8_t	num_anim_lights; // number of animated lights - animlm indexes length (the array before lightmap descriptors, indexing bits of animflags to light numbers)
-		uint8_t	unk6; // 0 in air, 1 in water... hrmm [TNH]
+		uint8_t	flow_group; // 0-no flow group, otherwise the flow group no.
 	
 		// cell's bounding sphere
 		wr_coord_t	center;
