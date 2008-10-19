@@ -116,7 +116,7 @@ namespace Opde {
 		registerValidKey(KC_MULTIPLY, "keypad_star"); // Keypad star?
 		registerValidKey(KC_LMENU, "alt");
 		registerValidKey(KC_SPACE, "space");
-		// registerValidKey(KC_CAPITAL, ""); // CUPS_LOCK?
+		// registerValidKey(KC_CAPITAL, ""); // CAPS_LOCK?
 		registerValidKey(KC_F1, "f1");
 		registerValidKey(KC_F2, "f2");
 		registerValidKey(KC_F3, "f3");
@@ -337,7 +337,7 @@ namespace Opde {
 		mInputSystem = OIS::InputManager::createInputSystem( paramList );
 
 		// If possible create a buffered keyboard
-#if OIS_VERSION>=66048
+#if OIS_VERSION >= 66048
 		if( mInputSystem->getNumberOfDevices(OIS::OISKeyboard) > 0 ) {
 #else
 		if( mInputSystem->numKeyboards() > 0 ) {
@@ -347,7 +347,7 @@ namespace Opde {
 		}
 
 		// If possible create a buffered mouse
-#if OIS_VERSION>=66048
+#if OIS_VERSION >= 66048
 		if( mInputSystem->getNumberOfDevices(OIS::OISMouse) > 0 ) {
 #else
 		if( mInputSystem->numMice() > 0 ) {

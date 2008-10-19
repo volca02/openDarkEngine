@@ -222,16 +222,20 @@ namespace Opde {
 					for (; it != mSubTypes.end(); ++it) {
 						size_t elemsz = (*it)->size();
 
-						if (maxsz < elemsz)
-							maxsz = elemsz;
-
-						sumsz += elemsz;
+						if (mUnioned)
+						{
+							if (maxsz < elemsz)
+								maxsz = elemsz;
+						}
+						else
+							sumsz += elemsz;
 					}
 
 					if (mUnioned)
 						return maxsz;
 
 					return sumsz;
+
 				} else { // Array
 					assert(mSubTypes.size() > 0);
 
