@@ -132,6 +132,11 @@ namespace Opde {
 
 			// Loader for the PLDef scripts
 			PLDefScriptLoader* mPLDefScriptLdr;
+			
+			
+			Ogre::ArchiveFactory* mDirArchiveFactory;
+			
+			Ogre::ArchiveFactory* mCrfArchiveFactory;
 
 			// config service
 			ConfigServicePtr mConfigService;

@@ -49,6 +49,7 @@
 // base
 #include "ManualBinFileLoader.h"
 #include "ManualFonFileLoader.h"
+#include "ProxyArchive.h"
 #include "logger.h"
 #include "OpdeException.h"
 #include "ConsoleFrontend.h"
@@ -70,7 +71,9 @@ namespace Opde {
 			mPLDefScriptCompiler(NULL),
 			mServiceMask(serviceMask),
 			mDTypeScriptLdr(NULL),
-			mPLDefScriptLdr(NULL) {
+			mPLDefScriptLdr(NULL),
+			mDirArchiveFactory(NULL),
+			mCrfArchiveFactory(NULL) {
 		
 		mLogger = new Logger();
 		
@@ -87,6 +90,14 @@ namespace Opde {
 		mOgreLogManager->getDefaultLog()->addListener(mOgreOpdeLogConnector);
 		
 		mOgreRoot = new Ogre::Root();
+		
+		// register the factories
+		mDirArchiveFactory = new Ogre::CaseLessFileSystemArchiveFactory();
+		// TODO: Decide if this should be used or not
+		// mCrfArchiveFactory = new Ogre::CrfArchiveFactory();
+
+		Ogre::ArchiveManager::getSingleton().addArchiveFactory(mDirArchiveFactory);
+		// Ogre::ArchiveManager::getSingleton().addArchiveFactory(mCrfArchiveFactory);
 
 		// if custom image hooks are to be included, setup now
 		Ogre::CustomImageCodec::startup();
@@ -110,6 +121,8 @@ namespace Opde {
 		delete mDTypeScriptCompiler;
 		delete mPLDefScriptCompiler;
 
+		// Archive manager has no way to remove the archive factories...
+		
 		delete mServiceMgr;
 		
 		delete mConsoleBackend;
@@ -125,12 +138,17 @@ namespace Opde {
 		}
 		mLogListeners.clear();
 		
+		delete mDirArchiveFactory;
+		delete mCrfArchiveFactory;
+		
 		// As the last thing - release the logger
 		delete mLogger;
 		
 		delete mOgreOpdeLogConnector;
 		
 		delete mOgreLogManager;
+		
+		
 	}
 
 

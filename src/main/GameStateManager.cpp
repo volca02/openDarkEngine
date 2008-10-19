@@ -46,6 +46,8 @@
 #include "GameLoadState.h"
 #include "GamePlayState.h"
 
+#include "ProxyArchive.h"
+
 // If custom codec is to be used
 #include "CustomImageCodec.h"
 
@@ -70,6 +72,8 @@ namespace Opde {
 			mServiceMgr(NULL),
 			mDTypeScriptLdr(NULL),
 			mPLDefScriptLdr(NULL),
+			mDirArchiveFactory(NULL),
+			mCrfArchiveFactory(NULL),
 			mConfigService(NULL) {
 				mGameType = GameType;
 	}
@@ -99,6 +103,9 @@ namespace Opde {
 		mServiceMgr = NULL;
 
 		CustomImageCodec::shutdown();
+
+		delete mDirArchiveFactory;
+		delete mCrfArchiveFactory;
 
 		delete mConsoleBackend;
 		delete mRoot;
@@ -162,6 +169,12 @@ namespace Opde {
 
 		// Create an ogre's root
 		mRoot = new Root();
+		
+		mDirArchiveFactory = new Ogre::CaseLessFileSystemArchiveFactory();
+		// TODO: mCrfArchiveFactory = new Ogre::CrfArchiveFactory();
+
+		Ogre::ArchiveManager::getSingleton().addArchiveFactory(mDirArchiveFactory);
+		// TODO: Ogre::ArchiveManager::getSingleton().addArchiveFactory(mCrfArchiveFactory);
 		
 		CustomImageCodec::startup();
 
