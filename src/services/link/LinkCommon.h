@@ -33,7 +33,7 @@ namespace Opde {
 	/// Link ID type. 32bit number at least...
 	typedef unsigned int link_id_t;
 
-	typedef struct LinkStruct { // sLink-like, but this one contains id as well
+	typedef struct LinkStruct { // sLink-like, but this one contains id as well. Size: Fixed to 14 bytes
 		uint32_t id;
 		int32_t src;
 		int32_t dest;
