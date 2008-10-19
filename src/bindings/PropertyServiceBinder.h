@@ -50,7 +50,8 @@ namespace Opde
 				static PyObject* set(PyObject* self, PyObject* args);
 				static PyObject* get(PyObject* self, PyObject* args);
 				static PyObject* getAllPropertyNames(PyObject* self, PyObject* args);
-								
+				static PyObject* getPropertyFieldsDesc(PyObject* self, PyObject* args);
+				
 			protected:
 				/// Static type definition for PropertyService
 				static PyTypeObject msType;

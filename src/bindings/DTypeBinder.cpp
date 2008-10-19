@@ -38,33 +38,33 @@ namespace Opde {
 			0,
 			msName,                   /* char *tp_name; */
 			sizeof(DTypeBinder::Object),      /* int tp_basicsize; */
-			0,                        /* int tp_itemsize;       /* not used much */
+			0,                        // int tp_itemsize;       /* not used much */
 			DTypeBinder::dealloc,   /* destructor tp_dealloc; */
 			0,			              /* printfunc  tp_print;   */
-			DTypeBinder::getattr,  /* getattrfunc  tp_getattr; /* __getattr__ */
-			0,   					  /* setattrfunc  tp_setattr;  /* __setattr__ */
-			0,				          /* cmpfunc  tp_compare;  /* __cmp__ */
-			0,			              /* reprfunc  tp_repr;    /* __repr__ */
-			0,				          /* PyNumberMethods *tp_as_number; */
-			0,                        /* PySequenceMethods *tp_as_sequence; */
-			0,                        /* PyMappingMethods *tp_as_mapping; */
-			0,			              /* hashfunc tp_hash;     /* __hash__ */
-			0,                        /* ternaryfunc tp_call;  /* __call__ */
-			0,			              /* reprfunc tp_str;      /* __str__ */
-			0,			              /* getattrofunc tp_getattro; */
-			0,			              /* setattrofunc tp_setattro; */
-			0,			              /* PyBufferProcs *tp_as_buffer; */
-			0,			              /* long tp_flags; */
-			0,			              /* char *tp_doc;  */
-			0,			              /* traverseproc tp_traverse; */
-			0,			              /* inquiry tp_clear; */
-			0,			              /* richcmpfunc tp_richcompare; */
-			0,			              /* long tp_weaklistoffset; */
-			0,			              /* getiterfunc tp_iter; */
-			0,			              /* iternextfunc tp_iternext; */
-			msMethods,	              /* struct PyMethodDef *tp_methods; */
-			0,			              /* struct memberlist *tp_members; */
-			0,			              /* struct getsetlist *tp_getset; */
+			DTypeBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
+			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
+			0,			              // reprfunc  tp_repr;    /* __repr__ */
+			0,				          // PyNumberMethods *tp_as_number; */
+			0,                        // PySequenceMethods *tp_as_sequence; */
+			0,                        // PyMappingMethods *tp_as_mapping; */
+			0,			              // hashfunc tp_hash;     /* __hash__ */
+			0,                        // ternaryfunc tp_call;  /* __call__ */
+			0,			              // reprfunc tp_str;      /* __str__ */
+			0,			              // getattrofunc tp_getattro; */
+			0,			              // setattrofunc tp_setattro; */
+			0,			              // PyBufferProcs *tp_as_buffer; */
+			0,			              // long tp_flags; */
+			0,			              // char *tp_doc;  */
+			0,			              // traverseproc tp_traverse; */
+			0,			              // inquiry tp_clear; */
+			0,			              // richcmpfunc tp_richcompare; */
+			0,			              // long tp_weaklistoffset; */
+			0,			              // getiterfunc tp_iter; */
+			0,			              // iternextfunc tp_iternext; */
+			msMethods,	              // struct PyMethodDef *tp_methods; */
+			0,			              // struct memberlist *tp_members; */
+			0,			              // struct getsetlist *tp_getset; */
 		};
 
 		// ------------------------------------------

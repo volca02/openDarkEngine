@@ -138,13 +138,13 @@ namespace Opde
 			0,
 			msName,                   /* char *tp_name; */
 			sizeof(Object),      /* int tp_basicsize; */
-			0,                        /* int tp_itemsize;       /* not used much */
+			0,                        // int tp_itemsize;       /* not used much */
 			dealloc,   /* destructor tp_dealloc; */
 			0,                                    /* printfunc  tp_print;   */
-			getattr,  /* getattrfunc  tp_getattr; /* __getattr__ */
-			0,   					  /* setattrfunc  tp_setattr;  /* __setattr__ */
-			0,				          /* cmpfunc  tp_compare;  /* __cmp__ */
-			repr,		              /* reprfunc  tp_repr;    /* __repr__ */
+			getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
+			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
+			repr,		              // reprfunc  tp_repr;    /* __repr__ */
 		};
 	}
 }

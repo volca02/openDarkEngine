@@ -23,26 +23,45 @@
  *****************************************************************************/
 
 #include "bindings.h"
-#include "InheritQueryResultBinder.h"
-#include "InheritServiceBinder.h"
+#include "DTypeDef.h"
+#include "PythonStruct.h"
+#include "DataFieldDescIteratorBinder.h"
+
 
 namespace Opde {
 
 	namespace Python {
+		class DataFieldDescBinder : public PythonStruct<DataFieldDesc> {
+				public:
+					static void init(PyObject* module) {
+						// TODO: publishType(module, &msType, msName);
+						
+						// name, label, size, type, enumerator
+						field("name", &DataFieldDesc::name);
+						field("label", &DataFieldDesc::label);
+						field("size", &DataFieldDesc::size);
+						field("type", &DataFieldDesc::type);
+						field("enumerator", &DataFieldDesc::enumerator);
+					}
+		};
 
-		// -------------------- Inherit Query result --------------------
-		char* InheritQueryResultBinder::msName = "InheritQueryResult";
+		template<> char* PythonStruct<DataFieldDesc>::msName = "DataFieldDesc";
+
+	
+
+		// -------------------- Data field desc iterator --------------------
+		char* DataFieldDescIteratorBinder::msName = "DataFieldDescIterator";
 
 		// ------------------------------------------
-		PyTypeObject InheritQueryResultBinder::msType = {
+		PyTypeObject DataFieldDescIteratorBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			msName,                   /* char *tp_name; */
-			sizeof(InheritQueryResultBinder::Object),      /* int tp_basicsize; */
+			msName,                   // char *tp_name; */
+			sizeof(DataFieldDescIteratorBinder::Object),      /* int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
-			InheritQueryResultBinder::dealloc,   /* destructor tp_dealloc; */
-			0,			              /* printfunc  tp_print;   */
-			InheritQueryResultBinder::getattr,  /* getattrfunc  tp_getattr; /* __getattr__ */
+			DataFieldDescIteratorBinder::dealloc,   // destructor tp_dealloc; */
+			0,			              // printfunc  tp_print;   */
+			DataFieldDescIteratorBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
 			repr,			          // reprfunc  tp_repr;    /* __repr__ */
@@ -69,45 +88,45 @@ namespace Opde {
 		};
 
 		// ------------------------------------------
-		PyMethodDef InheritQueryResultBinder::msMethods[] = {
+		PyMethodDef DataFieldDescIteratorBinder::msMethods[] = {
 			{NULL, NULL},
 		};
 		
 		
 		// ------------------------------------------
-		PyObject* InheritQueryResultBinder::getIterObject(PyObject* self) {
+		PyObject* DataFieldDescIteratorBinder::getIterObject(PyObject* self) {
 			Py_INCREF(self);
 			return self;
 		}
 		
 		// ------------------------------------------
-		PyObject* InheritQueryResultBinder::getNext(PyObject* self) {
+		PyObject* DataFieldDescIteratorBinder::getNext(PyObject* self) {
 			Object* o = python_cast<Object*>(self, &msType);
 			
 			// Get returnable object, advance to next.
 			PyObject* next = NULL;
 			
 			if ((!o->mInstance.isNull()) && !o->mInstance->end()) {
-				InheritLinkPtr l = o->mInstance->next();
-				next = InheritLinkBinder::create(l);
+				const DataFieldDesc& d = o->mInstance->next();
+				next = DataFieldDescBinder::create(d);
 			}
 			
 			return next;
 		}
 		
 		// ------------------------------------------
-		PyObject* InheritQueryResultBinder::repr(PyObject *self) {
-			return PyString_FromFormat("<InheritQueryResult at %p>", self);
+		PyObject* DataFieldDescIteratorBinder::repr(PyObject *self) {
+			return PyString_FromFormat("<DataFieldDescIterator at %p>", self);
 		}
 		
 		
 		// ------------------------------------------
-		PyObject* InheritQueryResultBinder::getattr(PyObject *self, char *name) {
+		PyObject* DataFieldDescIteratorBinder::getattr(PyObject *self, char *name) {
 			return Py_FindMethod(msMethods, self, name);
 		}
 		
 		// ------------------------------------------
-		PyObject* InheritQueryResultBinder::create(const InheritQueryResultPtr& result) {
+		PyObject* DataFieldDescIteratorBinder::create(const DataFieldDescIteratorPtr& result) {
 			Object* object = construct(&msType);
 
 			if (object != NULL) {
@@ -118,8 +137,9 @@ namespace Opde {
 		}
 		
 		// ------------------------------------------
-		void InheritQueryResultBinder::init(PyObject* module) {
+		void DataFieldDescIteratorBinder::init(PyObject* module) {
 			publishType(module, &msType, msName);
+			DataFieldDescBinder::init(module);
 		}
 
 	}

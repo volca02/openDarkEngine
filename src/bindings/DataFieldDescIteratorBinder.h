@@ -22,39 +22,37 @@
  *
  *****************************************************************************/
 
-#ifndef __LINKSERVICEBINDER_H
-#define __LINKSERVICEBINDER_H
+#ifndef __DATAFIELDDESCITERATORBINDER_H
+#define	__DATAFIELDDESCITERATORBINDER_H
 
-#include  "DTypeDef.h"
-#include  "BinaryService.h"
-#include  "LinkService.h"
-#include  "DTypeBinder.h"
+#include  "InheritService.h"
 
 namespace Opde {
 
 	namespace Python {
 
-		/// Link service python binder
-		class LinkServiceBinder : public shared_ptr_binder<LinkServicePtr> {
+		/// Data field description list iterator binder
+		class DataFieldDescIteratorBinder : public shared_ptr_binder<DataFieldDescIteratorPtr> {
 			public:
 				static void init(PyObject* module);
-				
+			
 				// --- Python type related methods ---
 				static PyObject* getattr(PyObject *self, char *name);
 
-				static PyObject* create();
+				/// to string - reprfunc conversion
+				static PyObject* repr(PyObject *self);
 
-				// --- Methods ---
-				static PyObject* setChunkVersion(PyObject* self, PyObject* args);
-				static PyObject* nameToFlavor(PyObject* self, PyObject* args);
-				static PyObject* flavorToName(PyObject* self, PyObject* args);
-				static PyObject* getRelation(PyObject* self, PyObject* args);
-				static PyObject* getAllLinks(PyObject* self, PyObject* args);
-				static PyObject* getOneLink(PyObject* self, PyObject* args);
-				static PyObject* getAllLinkNames(PyObject* self, PyObject* args);
-				
+				/// creates a python object representation of the inherit query result
+				static PyObject* create(const DataFieldDescIteratorPtr& result);
+
 			protected:
-				/// Static type definition for LinkService
+				/// Return self as iterator with a increased ref count.
+				static PyObject* getIterObject(PyObject* self);
+				
+				/// Returns current object, advances to next object (or returns NULL if at end)
+				static PyObject* getNext(PyObject* self);
+			
+				/// Static type definition for InheritQueryResult
 				static PyTypeObject msType;
 
 				/// Name of the python type
@@ -63,26 +61,6 @@ namespace Opde {
 				/// Method list
 				static PyMethodDef msMethods[];
 		};
-		
-		// -------------------------------
-		/// Link class binder. The methods are converted to read-only attributes
-		class LinkBinder : public shared_ptr_binder<LinkPtr> {
-		    public:
-				static void init(PyObject* module);
-		    
-				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
-
-				static PyObject* create(LinkPtr& link);
-				
-            protected:
-				/// Static type definition for LinkService
-				static PyTypeObject msType;
-
-				/// Name of the python type
-				static char* msName;
-		};
-
 	}
 }
 

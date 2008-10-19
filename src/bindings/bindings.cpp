@@ -64,6 +64,12 @@ namespace Opde {
 					const Ogre::Vector3& v = inst.toVector();
 					return Py_BuildValue("[fff]", v.x, v.y, v.z);
 				}
+				
+				case DVariant::DV_QUATERNION: {
+					// Build a touple
+					const Ogre::Quaternion& q = inst.toQuaternion();
+					return Py_BuildValue("[ffff]", q.x, q.y, q.z, q.w);
+				}
 
 				default:	//All possible paths must return a value
                     PyErr_SetString(PyExc_TypeError, "Invalid DVariant type");
