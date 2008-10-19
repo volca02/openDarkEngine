@@ -25,20 +25,20 @@
 
 #include <OgreException.h>
 #include <OgreString.h>
+#include <OgreFileSystem.h>
+#include <OgreZip.h>
 
 namespace Ogre {
-
+	// -------------------------------------------------------
+	// ----- Proxy Archive -----------------------------------
 	// -------------------------------------------------------
 	ProxyArchive::ProxyArchive(const String& name, const String& archType) : 
-		Archive(name, archType) {
-			
-		createArchive();
-		assert(mArchive);
+		Archive(name, archType),
+		mArchive(NULL) {
 	}
 
 	// -------------------------------------------------------
 	ProxyArchive::~ProxyArchive(void) {
-		destroyArchive();
 	}
 	
 	// -------------------------------------------------------
@@ -53,6 +53,7 @@ namespace Ogre {
 		while (it != lst->end()) {
 			const std::string& fn = *it++;
 			std::string tn = transformName(fn);
+			StringUtil::toLowerCase(tn);
 			// insert into the map
 			std::pair<NameTable::iterator, bool> result = 
 				mExtToIntNames.insert(std::make_pair(tn, fn));
@@ -96,14 +97,12 @@ namespace Ogre {
 
 	// -------------------------------------------------------
 	bool ProxyArchive::exists(const String& filename) {
-		// look in the map
-		NameTable::iterator it = mExtToIntNames.find(filename);
-		
-		if (it != mExtToIntNames.end()) {
-			return mArchive->exists(it->second);
+		try {
+			String un = untransformName(filename);
+			return mArchive->exists(un);
+		} catch (Ogre::Exception &e) {
+			return false;
 		}
-		
-		return false;
 	}
 
 	// -------------------------------------------------------
@@ -158,7 +157,7 @@ namespace Ogre {
 	// -------------------------------------------------------
 	StringVectorPtr ProxyArchive::list(bool recursive , bool dirs) {
 		/// have to list all infos, filter those which fit
-		StringVectorPtr lst = list(recursive, dirs);
+		StringVectorPtr lst = mArchive->list(recursive, dirs);
 		
 		StringVectorPtr res(new StringVector());
 		
@@ -182,7 +181,9 @@ namespace Ogre {
 
 	// -------------------------------------------------------
 	std::string ProxyArchive::untransformName(const String& name) const {
-		NameTable::const_iterator it = mExtToIntNames.find(name);
+		String s = name;
+		StringUtil::toLowerCase(s);
+		NameTable::const_iterator it = mExtToIntNames.find(s);
 		
 		if (it != mExtToIntNames.end()) {
 			return it->second;
@@ -270,15 +271,78 @@ namespace Ogre {
 		return match;
 	}
 	
+	
 	// -------------------------------------------------------
-	void ProxyArchive::createArchive(void) {
-		mArchive = NULL;
-	}
-			
-			
+	// ----- CaseLess Archive --------------------------------
 	// -------------------------------------------------------
-	void ProxyArchive::destroyArchive(void) {
-		// nothing
+	CaseLessFileSystemArchive::CaseLessFileSystemArchive(const String& name, 
+			const String& archType) : ProxyArchive(name, archType) {
+				
+		mArchive = new Ogre::FileSystemArchive(mName, mType);
 	}
 	
+	// -------------------------------------------------------
+	CaseLessFileSystemArchive::~CaseLessFileSystemArchive(void) {
+		delete mArchive;
+	}
+
+	// -------------------------------------------------------
+	bool CaseLessFileSystemArchive::isCaseSensitive(void) const {
+		return false;
+	}
+	
+	// -------------------------------------------------------
+	String CaseLessFileSystemArchive::transformName(const std::string& name) {
+		// simple - just lowercase the name
+		String res = name;
+		StringUtil::toLowerCase(res);
+		return res;
+	}
+	
+	// -------------------------------------------------------
+	// ----- CRF Archive -------------------------------------
+	// -------------------------------------------------------
+	CRFArchive::CRFArchive(const String& name, 
+			const String& archType) : ProxyArchive(name, archType) {
+		
+		// split, we only want the file name part
+		String ext, path;
+		StringUtil::splitFullFilename(name, mFilePart, ext, path);
+        
+        StringUtil::toLowerCase(mFilePart);
+        
+        mFilePart += '/';
+        
+        mArchive = new Ogre::ZipArchive(mName, mType);
+	}
+	
+	// -------------------------------------------------------
+	CRFArchive::~CRFArchive(void) {
+		delete mArchive;
+	}
+
+	// -------------------------------------------------------
+	bool CRFArchive::isCaseSensitive(void) const {
+		return false;
+	}
+	
+	// -------------------------------------------------------
+	String CRFArchive::transformName(const std::string& name) {
+		String res = name;
+		StringUtil::toLowerCase(res);
+		// just lowercase the name, and prefix with the mFilePart
+		return mFilePart + res;
+	}
+	
+	// -------------------------------------------------------
+	const String& CaseLessFileSystemArchiveFactory::getType(void) const {
+		static String name = "Dir";
+        return name;
+	}
+	
+	// -------------------------------------------------------
+	const String& CrfArchiveFactory::getType(void) const {
+		static String name = "Crf";
+        return name;
+	}
 }

@@ -25,7 +25,9 @@
 #define __PROXYARCHIVE_H
 
 #include "config.h"
-#include "OgreArchive.h"
+
+#include <OgreArchive.h>
+#include <OgreArchiveFactory.h>
  
 namespace Ogre {
 	
@@ -67,7 +69,7 @@ namespace Ogre {
 			
 			/// performs a pattern match find on the archive files
 			virtual StringVectorPtr find(const String& pattern, bool recursive = true,
-            bool dirs = false) = 0;
+            bool dirs = false);
             
             /// Searches for the given name, untransforming it first
             virtual bool exists(const String& filename);
@@ -93,12 +95,6 @@ namespace Ogre {
 			*/
 			virtual bool match(const String& pattern, const String& name) const;
 			
-			/// constructs the archive. called from constructor
-			virtual void createArchive(void);
-			
-			/// destructs the archive. called from destructor
-			virtual void destroyArchive(void);
-		
 			typedef std::map<std::string, std::string> NameTable;
 			
 			NameTable mExtToIntNames;
@@ -106,16 +102,61 @@ namespace Ogre {
 			Archive* mArchive;
 	};
 	
-	/*class CaseLessFileSystemArchive : public ProxyArchive<FileSystemArchive> {
+	/// Lowercase transforming file system archive
+	class CaseLessFileSystemArchive : public ProxyArchive {
+		public:
+			CaseLessFileSystemArchive(const String& name, const String& archType);
+			~CaseLessFileSystemArchive(void);
+			
+			bool isCaseSensitive(void) const;
+			
 		protected:
-			virtual std::string transformName(const std::string& name) = 0;
-	}
+			String transformName(const std::string& name);
+			
+	};
 	
-	/// factory for the various types of ProxyArchive
-	class ProxyArchiveFactory<class PA> {
-		// TODO: finish this
-	}
-	*/
+	/// Zip archive wrapper that prefixes the file names with the name without extesion (fam.crf -> fam/*)
+	class CRFArchive : public ProxyArchive {
+		public:
+			CRFArchive(const String& name, const String& archType);
+			~CRFArchive(void);
+			
+			bool isCaseSensitive(void) const;
+			
+		protected:
+			String transformName(const std::string& name);
+			
+			String mFilePart;
+	};
+	
+	// Factories, so we can actually use these
+	
+	class CaseLessFileSystemArchiveFactory : public ArchiveFactory { // what a title!
+		public:
+			virtual ~CaseLessFileSystemArchiveFactory() {}
+			
+			const String& getType(void) const;
+			
+			Archive* createInstance(const String& name) {
+				return new CaseLessFileSystemArchive(name, "Dir");
+			}
+        
+			void destroyInstance( Archive* arch) { delete arch; }
+	};
+	
+	class CrfArchiveFactory : public ArchiveFactory { 
+		public:
+			virtual ~CrfArchiveFactory() {}
+			
+			const String& getType(void) const;
+			
+			Archive* createInstance(const String& name) {
+				return new CRFArchive(name, "Crf");
+			}
+        
+			void destroyInstance( Archive* arch) { delete arch; }
+	};
+	
 }
 
 #endif
