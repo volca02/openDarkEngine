@@ -1,7 +1,7 @@
                         Notes for Developers:            -*-text-*-
                         ---------------------
 
-Last updated on 07-Feb-2008
+Last updated on 19-Oct-2008
 
 ----------------
 - Requirements -
@@ -13,6 +13,25 @@ OPDE needs:
 * Python
 * FreeImage
 
+Coding
+------
+There will be a whole coding style document later on, but for now, some simple rules:
+* Always document your code
+* Think about the way the code looks - will it be readable by others?
+* Test before commiting
+* Think twice, code once :)
+
+Be sure to update ChangeLog file sometimes. On linux, it can be updated using svn2cl script.
+
+Opde uses Major.minor.patch versioning scheme.
+
+Releases
+--------
+This has to be decided. Some remarks:
+* NEWS file has to be updated before releasing
+* Release name has to be decided and put into the main CMakeLists.txt file
+
+
 Building
 --------
 
@@ -22,7 +41,6 @@ CMake tool is used to prepare makefiles/project files for openDarkEngine. The re
 can the be used to compile the project. Before compiling, ensure that you set all the cmake variables to the desired values. The current list of those
 is:
 
-CUSTOM_IMAGE_HOOKS: (currently only tested on linux). Builds a custom image loading code, needed to interpret pallete index 0 of palletized images as transparent. 
 GENERATE_DOC: Generates a DoxyFile that can be used to create API documentation.
 GLOBAL_DEBUG: Enables DEBUG level logging.
 PROFILING: (linux only) Enables GNU Profiler usage. Opde binary will generate profiling file if this is used. Can be examined with KProf for example. 
@@ -132,9 +150,6 @@ naming the mission OPDE should load upon start.
 
 # Mission file to use
 mission=miss1.mis
-
-# The region size used when grouping cell geometry. Has great impact on performance
-region_size=100.0
 
 # Mouse and keyboard movement related
 move_speed=30
