@@ -460,6 +460,8 @@ namespace Opde {
 	typedef struct {
 		/// Name of the field
 		std::string name;
+		/// Label of the field - readable
+		std::string label;
 		/// Size of the field. -1 for variable-sized fields (strings)
 		int size;
 		/// Type of the field
