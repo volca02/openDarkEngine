@@ -141,11 +141,10 @@ namespace Opde {
 			}
 		}
 
-		// now load the data
-		size_t link_count = 0;
-		
-		if (!mStorage.isNull())
-			link_count = flink->size() / sizeof(LinkStruct);
+		// link count (calculated)
+		size_t link_count = flink->size() / 14; // sizeof(LinkStruct) - but that one is aligned!
+			
+		LOG_VERBOSE("Relation::load : %s link count %d (tag size %d)", lchn.c_str(), link_count, flink->size());
 		
 		size_t link_data_count = 0;
 
