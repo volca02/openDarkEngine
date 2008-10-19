@@ -58,7 +58,6 @@ OPTION(STATIC_LIBS
     "Build the libs as static"
     OFF)
 
-
 # Compiler profiling flags
 IF (PROFILING)
     IF(CMAKE_COMPILER_IS_GNUCXX)
@@ -132,8 +131,6 @@ SET(FREEIMAGE_DIR ${CMAKE_MODULE_PATH})
 
 FIND_PACKAGE(OIS REQUIRED)
 FIND_PACKAGE(OGRE REQUIRED)
-
-# Custom image hooks
 FIND_PACKAGE(FREEIMAGE REQUIRED)
 
 IF(FREEIMAGE_FOUND)
@@ -222,8 +219,6 @@ MESSAGE(STATUS " * Global debugging : ${GLOBAL_DEBUG}")
 MESSAGE(STATUS " * Build type       : ${CMAKE_BUILD_TYPE}")
 MESSAGE(STATUS " * Profilling       : ${PROFILING}")
 MESSAGE(STATUS " * Doxy generation  : ${GENERATE_DOC}")
-MESSAGE(STATUS " * Custom image h.  : ${CUSTOM_IMAGE_HOOKS}")
-MESSAGE(STATUS " * Static geometry  : ${__STATIC_GEOMETRY}")
 MESSAGE(STATUS " * C compiler       : ${CMAKE_C_COMPILER}")
 MESSAGE(STATUS " * C++ compiler     : ${CMAKE_CXX_COMPILER}")
 MESSAGE(STATUS " * Source directory : ${CMAKE_CURRENT_SOURCE_DIR}")
