@@ -219,10 +219,10 @@ namespace Opde {
 			}
 			
 			
-			/// Bool Data map
+			/// Data map
 			typedef typename std::map<int, T> DataMap;
 			
-			/// Holder of data (string) values
+			/// Holder of data values
 			DataMap mDataMap;
 			
 			/// Bool prop. storage is a single-field construct. This is the field desc for the field
