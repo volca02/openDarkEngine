@@ -60,6 +60,14 @@ namespace Opde {
 		
 	};
 	
+	class IndexOutOfBoundsException : public BasicException {
+		public:
+			IndexOutOfBoundsException(const std::string& txt, char* file = NULL, long line = -1)
+				: BasicException(txt, "", file, line) {};
+	};
+	
+	#define OPDE_ARRAY_EXCEPT(txt) throw( Opde::IndexOutOfBoundsException(txt, __FILE__, __LINE__) )
+	
 }
 
 #endif

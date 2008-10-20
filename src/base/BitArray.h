@@ -30,14 +30,6 @@
 #include "OpdeException.h"
 
 namespace Opde {
-	class IndexOutOfBoundsException : public BasicException {
-		public:
-			IndexOutOfBoundsException(const std::string& txt, char* file = NULL, long line = -1)
-				: BasicException(txt, "", file, line) {};
-	};
-	
-	#define OPDE_BIT_ARRAY_EXCEPT(txt) throw( Opde::IndexOutOfBoundsException(txt, __FILE__, __LINE__) )
-	
 	/** Bit array supporting negative and positive indices. Maps a single boolean value */
 	class BitArray {
 		public:
@@ -78,10 +70,10 @@ namespace Opde {
 			bool get(int index) const {
 				// look if we are in bounds
 				if (index < mMinIDX)
-					OPDE_BIT_ARRAY_EXCEPT("Index out of bounds");
+					OPDE_ARRAY_EXCEPT("Index out of bounds");
 					
 				if (index > mMaxIDX)
-					OPDE_BIT_ARRAY_EXCEPT("Index out of bounds");
+					OPDE_ARRAY_EXCEPT("Index out of bounds");
 					
 				// remap the id
 				size_t cpos = (index - mMinIDX) >> 3;
@@ -95,10 +87,10 @@ namespace Opde {
 			bool set(int index, bool value) {
 				// look if we are in bounds
 				if (index < mMinIDX)
-					OPDE_BIT_ARRAY_EXCEPT("Index out of bounds");
+					OPDE_ARRAY_EXCEPT("Index out of bounds");
 					
 				if (index > mMaxIDX)
-					OPDE_BIT_ARRAY_EXCEPT("Index out of bounds");				
+					OPDE_ARRAY_EXCEPT("Index out of bounds");
 					
 				// remap the id
 				size_t cpos = (index - mMinIDX) >> 3;
