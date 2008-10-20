@@ -131,7 +131,7 @@ namespace Ogre {
 	
 	// Factories, so we can actually use these
 	
-	class CaseLessFileSystemArchiveFactory : public ArchiveFactory { // what a title!
+	class OPDELIB_EXPORT CaseLessFileSystemArchiveFactory : public ArchiveFactory { // what a title!
 		public:
 			virtual ~CaseLessFileSystemArchiveFactory() {}
 			
