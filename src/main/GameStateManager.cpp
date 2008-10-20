@@ -104,11 +104,11 @@ namespace Opde {
 
 		CustomImageCodec::shutdown();
 
-		delete mDirArchiveFactory;
-		delete mCrfArchiveFactory;
-
 		delete mConsoleBackend;
 		delete mRoot;
+
+		delete mDirArchiveFactory;
+		delete mCrfArchiveFactory;
 
 		// Release the loggers
 		delete mLogger;
