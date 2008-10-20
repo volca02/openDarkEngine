@@ -64,7 +64,12 @@ namespace Ogre {
 		
 		mSubGeometryMap.clear();
 	}
-
+	
+	// -----------------------------------------------------------------
+	void DarkGeometry::setCellCount(size_t cellCount) {
+		mCellCount = cellCount;
+	}
+	
 	// -----------------------------------------------------------------
 	DarkSubGeometry * DarkGeometry::getSubGeometryForMaterial(const MaterialPtr& mat, bool createIfNotFound) {
 		DarkSubGeometryMap::iterator it = mSubGeometryMap.find(mat->getName());
@@ -73,7 +78,7 @@ namespace Ogre {
 			return it->second;
 		} else {
 			if (createIfNotFound) {
-				DarkSubGeometry *newg = new DarkSubGeometry(mat, mDefaultRenderQueueID);
+				DarkSubGeometry *newg = new DarkSubGeometry(mat, mCellCount, mDefaultRenderQueueID);
 				mSubGeometryMap.insert(std::make_pair(mat->getName(), newg));
 				
 				return newg;
@@ -160,23 +165,36 @@ namespace Ogre {
 	// --------------------------------------------------------------------------
 	// ------------------------- DarkSubGeometry --------------------------------
 	// --------------------------------------------------------------------------
-	DarkSubGeometry::DarkSubGeometry(const MaterialPtr& material, uint8 renderQueueID) : m16BitIndices(false), mMaterial(material), mRenderQueueID(renderQueueID), mBuilt(false) {
+	DarkSubGeometry::DarkSubGeometry(const MaterialPtr& material, size_t cellCount, uint8 renderQueueID) : 
+				m16BitIndices(false), 
+				mMaterial(material), 
+				mRenderQueueID(renderQueueID),
+				mBuilt(false),
+				mCellCount(cellCount) {
+					
+		assert(mCellCount > 0);
+		
 		// Vertex data. For now, those are per-subgeom. Can be changed later (I'm trying to get 16-bit indices if possible)
 		mRenderOp.vertexData = new VertexData();
 
-        mRenderOp.indexData = new IndexData();
-        
-        mRenderOp.indexData->indexStart = 0;
-        mRenderOp.indexData->indexCount = 0;
-        
-        // Will be filled later, by the filler
-        // mRenderOp.indexData->indexBuffer = NULL; 
+		mRenderOp.indexData = new IndexData();
+		
+		mRenderOp.indexData->indexStart = 0;
+		mRenderOp.indexData->indexCount = 0;
+		
+		// Will be filled later, by the filler
+		// mRenderOp.indexData->indexBuffer = NULL; 
 
-        mRenderOp.operationType = RenderOperation::OT_TRIANGLE_LIST;
-        mRenderOp.useIndexes = true;
-        
-        mAllocationList = NULL;
-        mAllocationEnd = NULL;
+		mRenderOp.operationType = RenderOperation::OT_TRIANGLE_LIST;
+		mRenderOp.useIndexes = true;
+		
+		mFragmentList = new DarkFragment*[mCellCount];
+		
+		// sane default
+		memset(mFragmentList, 0, mCellCount * sizeof(DarkFragment*));
+		
+		mAllocationList = NULL;
+		mAllocationEnd = NULL;
 	}
 
 	// -----------------------------------------------------------------
@@ -185,14 +203,10 @@ namespace Ogre {
 		mRenderOp.indexData = NULL;
 		
 		// delete all the fragments
-		FragmentList::iterator fit = mFragmentList.begin();
-		FragmentList::iterator fendit = mFragmentList.end();
+		for (size_t s = 0; s < mCellCount; ++s)
+			delete mFragmentList[s];
 		
-		for ( ; fit != fendit; ++fit) {
-			DarkFragment* f = fit->second;
-			delete f;
-		}
-		mFragmentList.clear();
+		delete[] mFragmentList;
 		
 		// get rid of the rest of allocations
 		DarkBufferAllocation* aloc = mAllocationList;
@@ -216,8 +230,6 @@ namespace Ogre {
 		BspNodeList::const_iterator nit = nodeList.begin();
 		BspNodeList::const_iterator endit = nodeList.end();
 		
-		FragmentList::iterator fendit = mFragmentList.end();
-		
 		uint32 indices = 0;
 		
 		// those fragments that are visible will get into the ibuf
@@ -227,10 +239,10 @@ namespace Ogre {
 			
 			for ( ; nit != endit; ++nit) {
 				uint16 size = 0;
-				FragmentList::iterator fit = mFragmentList.find((*nit)->getLeafID());
+				DarkFragment* frag = mFragmentList[(*nit)->getLeafID()];
 			
-				if (fit != fendit) {
-					size = fit->second->cacheIndices(pidx, m16BitIndices);
+				if (frag) {
+					size = frag->cacheIndices(pidx, m16BitIndices);
 					pidx += size;
 				}
 				
@@ -241,10 +253,10 @@ namespace Ogre {
 			
 			for ( ; nit != endit; ++nit) {
 				uint32 size = 0;
-				FragmentList::iterator fit = mFragmentList.find((*nit)->getLeafID());
+				DarkFragment* frag = mFragmentList[(*nit)->getLeafID()];
 			
-				if (fit != fendit) {
-					size = fit->second->cacheIndices(pidx, m16BitIndices);
+				if (frag) {
+					size = frag->cacheIndices(pidx, m16BitIndices);
 					pidx += size;
 				}
 				
@@ -269,11 +281,12 @@ namespace Ogre {
 		mVtxCount = 0;
 		mIdxCount = 0;
 		
-		FragmentList::iterator it = mFragmentList.begin();
-		
-		for ( ; it != mFragmentList.end(); ++it) {
-			mVtxCount += it->second->getVertexCount();
-			mIdxCount += it->second->getIndexCount();
+		for (size_t s = 0; s < mCellCount; ++s) {
+			DarkFragment* frag = mFragmentList[s];
+			if (frag) {
+				mVtxCount += frag->getVertexCount();
+				mIdxCount += frag->getIndexCount();
+			}
 		}
 		
 		// Build the alloc. list
@@ -335,34 +348,37 @@ namespace Ogre {
         mRenderOp.vertexData->vertexCount = mVtxCount;
         
    		// now we can proceed to build the SG's
-		it = mFragmentList.begin();
-		
-		for ( ; it != mFragmentList.end(); ++it)
-			it->second->build();
-		
+		for (size_t s = 0; s < mCellCount; ++s) {
+			DarkFragment* frag = mFragmentList[s];
+			if (frag) {
+				frag->build();
+			}
+		}
+			
 		mBuilt = true;
 	}
 
 	// -----------------------------------------------------------------
 	DarkFragment* DarkSubGeometry::createFragment(size_t cellID) {
-		if (mFragmentList.find(cellID) != mFragmentList.end())
+		if (mFragmentList[cellID] != NULL)
 			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Fragment already defined for the given cell and material combination", "DarkSubGeometry::createFragment");
-			
+		
+		if (cellID >= mCellCount)
+			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Cell id beyond the specified maximum", "DarkSubGeometry::createFragment");
+		
 		DarkFragment* frag = new DarkFragment(this);
 		
-		mFragmentList.insert(std::make_pair(cellID, frag));
+		mFragmentList[cellID] = frag;
 		
 		return frag;
 	}
 	
 	// -----------------------------------------------------------------	
 	DarkFragment* DarkSubGeometry::getFragment(size_t cellID) {
-		FragmentList::iterator it = mFragmentList.find(cellID);
+		if (cellID >= mCellCount)
+			return NULL; // let the caller cope
 		
-		if (it != mFragmentList.end())
-			return it->second;
-			
-		return NULL;
+		return mFragmentList[cellID];
 	}
 	
 	// -----------------------------------------------------------------

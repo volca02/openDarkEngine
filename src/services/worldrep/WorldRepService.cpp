@@ -235,6 +235,7 @@ namespace Opde {
 		mCells = new WRCell*[header.num_cells];
 
 		mWorldGeometry = mSceneMgr->createGeometry("LEVEL_GEOMETRY"); // will be deleted on clear_scene
+		mWorldGeometry->setCellCount(header.num_cells);
 
 		for (uint32_t i = 0; i<header.num_cells; i++) {
             mCells[i] = new WRCell(this, mWorldGeometry);

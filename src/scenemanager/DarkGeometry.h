@@ -43,6 +43,9 @@ namespace Ogre {
 			
 			/// Destructor
 			~DarkGeometry();
+			
+			/// sets the cell count. Has to be done before submitting the fragments
+			void setCellCount(size_t cellCount);
 
 			/// Notifies the DarkGeometry to update it's contents based on visible areas
 			void updateFromCamera(const DarkCamera *cam);
@@ -85,6 +88,9 @@ namespace Ogre {
 			
 			/// List of subgeometries to be queued (visible parts)
 			DarkSubGeometryList mVisibleSubGeometries;
+			
+			/// Total count of the cells the static geometry contains
+			size_t mCellCount;
 	};
 	
 	
@@ -240,7 +246,7 @@ namespace Ogre {
 			friend class DarkFragment;
 			
 		public:
-			DarkSubGeometry(const MaterialPtr& material, uint8 renderQueueID);
+			DarkSubGeometry(const MaterialPtr& material, size_t cellCount, uint8 renderQueueID);
 			~DarkSubGeometry();
 			
 			virtual const MaterialPtr& getMaterial(void) const;
@@ -334,11 +340,11 @@ namespace Ogre {
 			/// Endpoint pointer for the allocation
 			DarkBufferAllocation* mAllocationEnd;
 			
-			
 			/// Map of fragments this SubGeometry holds
-			typedef std::map<size_t, DarkFragment*> FragmentList;
+			DarkFragment** mFragmentList;
 			
-			FragmentList mFragmentList;
+			/// Total count of the cells the static geometry contains
+			size_t mCellCount;
 	};
 	
 };
