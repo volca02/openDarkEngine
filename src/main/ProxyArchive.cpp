@@ -100,7 +100,7 @@ namespace Ogre {
 		try {
 			String un = untransformName(filename);
 			return mArchive->exists(un);
-		} catch (Ogre::Exception &e) {
+		} catch (...) {
 			return false;
 		}
 	}
