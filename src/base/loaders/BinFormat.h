@@ -266,7 +266,7 @@ typedef struct      ObjPolygon {
 
 const int ObjLight_Size = 8;
 
-/// Notmal specifier (per vertex)
+/// Normal specifier (per vertex)
 typedef struct ObjLight {
 	// Material reference
 	uint16_t material;
@@ -278,15 +278,6 @@ typedef struct ObjLight {
 	uint32_t packed_normal;
 } ObjLight;
 
-
-/* TODO: Lights. Dunno what those are, but this is what I know so far:
-
-1. This is the rough structure:
-
-1. Short - material
-2. Short - point
-3. 4 bytes - related to normal. Does not make great sense (two shorts as space direction without rotation?)
-*/
 
 //----- These are related to the CAL files: -----
 
