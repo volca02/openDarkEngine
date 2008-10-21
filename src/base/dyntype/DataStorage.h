@@ -124,7 +124,7 @@ namespace Opde {
 			
 			/** Optional handler for object ID range re-sets (f.e. when growing the concretes)
 			*/
-			virtual void setIDRange(int minID, int MaxID) { };
+			virtual void grow(int minID, int MaxID) { };
 			
 			/** Data description retrieval routine. Can be used to generate GUI for data editor, etc.
 			* @return The data fields description iterator, preferably in the order sored
