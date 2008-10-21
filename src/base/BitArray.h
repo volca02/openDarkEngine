@@ -134,7 +134,7 @@ namespace Opde {
 				
 				
 				// get the value
-				return (arrayRef[cpos] & (1 << bpos));
+				return ((arrayRef[cpos] & (1 << bpos)) != 0);
 			};
 			
 			/// sets a new value for index, returns the old value
@@ -277,14 +277,14 @@ namespace Opde {
 		protected:
 			/// grows the specified buffer to accompany the new size
 			void growBuf(unsigned char**ptr, int oldIndex, int newIndex) {
-				if (newIndex < oldIndex) // if it would, we'd call placement destructor before realloc
+				if (newIndex < oldIndex) 
 					OPDE_ARRAY_EXCEPT("BitArray: Shrinking not allowed");
 				
 				size_t oldByteSize;
 				if (oldIndex < 0)
 					oldByteSize = 0;
 				else
-				   getSizeFromIndex(oldIndex);
+				   oldByteSize = getSizeFromIndex(oldIndex);
 				   
 				size_t newByteSize = getSizeFromIndex(newIndex);
 				
@@ -299,7 +299,7 @@ namespace Opde {
 				
 				*ptr = newptr;
 				
-				memset(&newptr[oldByteSize], 0, newByteSize - oldByteSize);
+				memset((*ptr) + oldByteSize, 0, newByteSize - oldByteSize);
 			}
 		
 			/// byte offset of an address getter
