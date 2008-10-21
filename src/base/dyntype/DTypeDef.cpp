@@ -217,10 +217,10 @@ namespace Opde {
 					// For struct, sum all the members. For Union, compute maximum.
 					size_t maxsz = 0, sumsz = 0;
 
-					DTypeDefVector::const_iterator it = mSubTypes.begin();
-
-					for (; it != mSubTypes.end(); ++it) {
-						size_t elemsz = (*it)->size();
+					unsigned int Size = mSubTypes.size();
+					for(unsigned int I = 0; I < Size; I++)
+					{
+						size_t elemsz = mSubTypes[I]->size();
 
 						if (mUnioned)
 						{

@@ -198,7 +198,7 @@ namespace Ogre {
 		// Invalidates the screen projection info (so refreshScreenRect will pass)
 		void invalidateScreenRect(int frameNum) { mInitialized = false; mFrameNum = frameNum; mViewRect = PortalRect::EMPTY; };
 		
-		int getLeafID(void) const { return mLeafID; };
+		inline int getLeafID(void) const { return mLeafID; };
 		
 	protected:
 		/// ID of the BSP row (order)
