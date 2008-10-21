@@ -55,7 +55,7 @@ namespace Opde {
 				
 				// allocate space
 				if (b.mNegativeArray != NULL) {
-					mNegativeArray = static_cast<T*>(malloc(-mMinIndex));
+					mNegativeArray = static_cast<T*>(malloc(-mMinIndex * sizeof(T)));
 				
 					// copy construct the elements
 					for (int i = 0; i <= -mMinIndex; ++i)
@@ -63,7 +63,7 @@ namespace Opde {
 				}
 				
 				if (b.mPositiveArray != NULL) {
-					mPositiveArray = static_cast<T*>(malloc(mMaxIndex));
+					mPositiveArray = static_cast<T*>(malloc(mMaxIndex * sizeof(T)));
 				
 					// copy construct the elements
 					for (int i = 0; i <= mMaxIndex; ++i)
@@ -141,7 +141,7 @@ namespace Opde {
 				if (newSize == oldSize)
 					return;
 					
-				T* newptr = static_cast<T*>(realloc(*ptr, newSize));
+				T* newptr = static_cast<T*>(realloc(*ptr, sizeof(T) * newSize));
 				
 				if (newptr == NULL) // realloc failed
 					OPDE_ARRAY_EXCEPT("Array: Growth failed");
