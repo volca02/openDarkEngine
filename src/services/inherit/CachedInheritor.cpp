@@ -42,87 +42,35 @@ namespace Opde {
 
     //------------------------------------------------------
 	void CachedInheritor::setImplements(int objID, bool impl) {
-	    ImplementsMap::iterator it = mImplements.find(objID);
-        bool modified = false;
-
-        if (impl) {
-
-            if (it != mImplements.end()) {
-                if (!it->second) {
-                    it->second = true; // just set the new value
-                    modified = true;
-                }
-            } else {
-               mImplements.insert(make_pair(objID, impl)); // insert if non-present
-               modified = true;
-            }
-
-        } else { // false - only remove if present
-
-            if (it != mImplements.end()) {
-                mImplements.erase(it);
-                modified = true;
-            }
-
-        }
-
+		bool oldval = mImplements.setBit(objID, impl);
+	    
         // Did we change something?
-        if (modified) {
+        if (oldval != impl) {
             refresh(objID); // refresh the object ID and all the inheritance targets
         }
 	}
 
 	//------------------------------------------------------
 	bool CachedInheritor::getImplements(int objID) const {
-	    ImplementsMap::const_iterator it = mImplements.find(objID);
-
-        if (it != mImplements.end()) {
-            return it->second;
-        } else {
-            // does not have a record, so does not implement
-            return false;
-        }
+	    return mImplements[objID];
 	}
 
     //------------------------------------------------------
     int CachedInheritor::getEffectiveID(int srcID) const {
-        EffectiveObjectMap::const_iterator it = mEffObjMap.find(srcID);
-
-        if (it != mEffObjMap.end()) {
-            return it->second;
-        } else
-            return 0; // Can't be self, as that is also recorded
+        return mEffObjMap[srcID];
     }
 
     //------------------------------------------------------
     bool CachedInheritor::setEffectiveID(int srcID, int effID) {
-		std::pair<EffectiveObjectMap::iterator, bool> result = mEffObjMap.insert(make_pair(srcID, effID));    	
+    	int prev = mEffObjMap[srcID];
+		mEffObjMap[srcID] = effID;
 		
-		if (result.second) {
-			// did insert, was not already there
-			return true;
-		} else {
-			// did not insert, already was there.
-			if (result.first->second != effID) {
-				result.first->second = effID;
-				return true;
-			}
-			
-			return false;
-		}
+		return prev != effID;
     }
 
     //------------------------------------------------------
     bool CachedInheritor::unsetEffectiveID(int srcID) {
-        EffectiveObjectMap::iterator it = mEffObjMap.find(srcID);
-        bool changed = false;
-
-        if (it != mEffObjMap.end()) {
-            changed = true;
-            mEffObjMap.erase(it);
-        }
-
-        return changed;
+        return setEffectiveID(srcID, 0);
     }
 
     //------------------------------------------------------
@@ -225,6 +173,12 @@ namespace Opde {
     void CachedInheritor::onInheritMsg(const InheritChangeMsg& msg) {
         // Received an even about inheritance change. Must refresh target object of such change
         refresh(msg.dstID);
+    }
+    
+    //------------------------------------------------------
+    void CachedInheritor::grow(int minID, int maxID) {
+    	mEffObjMap.grow(minID, maxID);
+    	mImplements.grow(minID, maxID);
     }
 
     //------------------------------------------------------

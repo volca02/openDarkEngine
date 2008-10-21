@@ -141,7 +141,7 @@ namespace Opde {
 		while (!idit->end()) {
 			int id = idit->next();
 
-			if (!objMask.get(id))
+			if (!objMask[id])
 				continue;
 
 			if (!mPropertyStorage->writeToFile(fprop, id, true))
@@ -259,6 +259,12 @@ namespace Opde {
 	// --------------------------------------------------------------------------
 	DataFieldDescIteratorPtr PropertyGroup::getFieldDescIterator(void) {
 		return mPropertyStorage->getFieldDescIterator();
+	}
+	
+	// --------------------------------------------------------------------------
+	void PropertyGroup::grow(int minID, int maxID) {
+		mPropertyStorage->grow(minID, maxID);
+		mInheritor->grow(minID, maxID);
 	}
 }
 

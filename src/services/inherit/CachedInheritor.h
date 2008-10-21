@@ -23,6 +23,8 @@
 #define __CACHEDINHERITOR_H
 
 #include "InheritService.h"
+#include "Array.h"
+#include "BitArray.h"
 
 namespace Opde {
 		/** Base class for cached inheritor implementations. Works self as "always" inheritor, inheriting in every situation.
@@ -52,6 +54,8 @@ namespace Opde {
                     virtual void clear();
 
                     void onInheritMsg(const InheritChangeMsg& msg);
+                    
+                    void grow(int minID, int maxID);
 				protected:
                     /** Sets new cached effective ID for the given object
                   * @param srcID the object to set effective ID for
@@ -87,13 +91,13 @@ namespace Opde {
 					InheritService::ListenerID mListenerID;
 
 					/// Map of effective object ID's
-					typedef std::map < int, int > EffectiveObjectMap;
+					typedef Array< int > EffectiveObjectMap;
 
 					/// Map of effective object ID's - instance
 					EffectiveObjectMap mEffObjMap;
 
 					/// Map of implementing object IDs - id->true means object implements the inherited property
-					typedef std::map <int, bool> ImplementsMap;
+					typedef BitArray ImplementsMap;
 
 					ImplementsMap mImplements;
 			};

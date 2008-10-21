@@ -81,7 +81,7 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	bool ObjectService::exists(int objID) {
-		return mAllocatedObjects.get(objID);
+		return mAllocatedObjects[objID];
 	}
 	
 	
@@ -203,6 +203,17 @@ namespace Opde {
 		
 		// realize the mp addition
 		return mInheritService->hasMetaProperty(id, mpid);
+	}
+	
+	//------------------------------------------------------
+	void ObjectService::grow(int minID, int maxID) {
+		// grow the allocated objects to have enough room for new object flags
+		mAllocatedObjects.grow(minID, maxID);
+		
+		// grow the Properties
+		mPropertyService->grow(minID, maxID);
+		
+		// TODO: grow the links
 	}
 	
 	//------------------------------------------------------
@@ -346,8 +357,8 @@ namespace Opde {
 		// bit array going to be used to merge the objects (from file, and those in mem)
 		BitArray fileObjs(bitmap, bsize, minID, maxID);
 		
-		// grow the allocated objects to have enough room for new object flags
-		mAllocatedObjects.grow(minID, maxID);
+		// grow the system to allow the stored object to flow in
+		grow(minID, maxID);
 		
 		delete[] bitmap; // not needed anymore, was copied into the fileObjs
 		
@@ -358,14 +369,14 @@ namespace Opde {
 		
 		// Processes one byte a time
 		for(id = minID; id < maxID ; ++id) {
-			if (fileObjs.get(id)) {
+			if (fileObjs[id]) {
 				LOG_VERBOSE("Found object ID %d", id);
 				
-				// object should not exist before
-				assert(!mAllocatedObjects.get(id));
+				// object should not have existed before
+				assert(!mAllocatedObjects[id]);
 				
 				_prepareForObject(id);
-				mAllocatedObjects.set(id, true);
+				mAllocatedObjects[id] = true;
 				lastID = id;
 			}
 		}
@@ -386,7 +397,7 @@ namespace Opde {
 		// Free all id's that are not in use for reuse
 		for (int i = 0; i < lastID; i++) {
 			// if the bitmaps is zeroed on the position, free the ID for reuse
-			if (!fileObjs.get(i))
+			if (!fileObjs[i])
 				freeID(i);
 			// TODO: Check if the ID isn't used in properties/links!
 			// TNH's purge bad object's that is
@@ -394,7 +405,7 @@ namespace Opde {
 		
 			
 		for(id = minID; id < maxID ; ++id) {
-			if (fileObjs.get(id))
+			if (fileObjs[id])
 				_endCreateObject(id);
 		}
 	}
@@ -416,7 +427,7 @@ namespace Opde {
 				max = 0;				
 			
 			for (; idx < max; ++idx) {
-				if (mAllocatedObjects.get(idx))
+				if (mAllocatedObjects[idx])
 					_destroyObject(idx); // Will remove properties and links fine
 			}
 		} else { // Total cleanup
@@ -450,13 +461,13 @@ namespace Opde {
 		for (int id = mAllocatedObjects.getMinIndex(); id < mAllocatedObjects.getMaxIndex(); ++id) {
 			DVariant v;
 			
-			if (mAllocatedObjects.get(id)) { // only gamesys object have donortype...
+			if (mAllocatedObjects[id]) { // only gamesys object have donortype...
 				if (!mPropertyService->has(id, "DonorType")) {
 					if (saveMask & 0x01) // has donortype, was archetype requested?
-						objmask.set(id, true); // yep, so include this object
+						objmask[id] = true; // yep, so include this object
 				} else {
 					if (saveMask & 0x02) // has no donortype, was concrete requested?
-						objmask.set(id, true); // yep, include this obj
+						objmask[id] = true; // yep, include this obj
 				}
 			}
 		}
@@ -465,11 +476,18 @@ namespace Opde {
 			
 		int32_t minid = objmask.getMinIndex();
 		int32_t maxid = objmask.getMaxIndex();
-		size_t siz = objmask.getRawBufSize();
+		
+		size_t siz = objmask.getByteSize();
+		
+		char* buf = new char[siz];
+		
+		objmask.fillBuffer(buf);
 		
 		ovf->writeElem(&minid, 4);
 		ovf->writeElem(&maxid, 4);
-		ovf->write(objmask.getRawBuf(), siz);
+		ovf->write(buf, siz);
+		
+		delete[] buf;
 		
 		// serialize the properties and links
 		mLinkService->save(db, saveMask);
@@ -496,7 +514,7 @@ namespace Opde {
 	//------------------------------------------------------
 	void ObjectService::_endCreateObject(int objID) {
 		// allocate the ID
-		mAllocatedObjects.set(objID, true);
+		mAllocatedObjects[objID] = true;
 		
 		// Prepare the message
 		ObjectServiceMsg m;
@@ -510,13 +528,13 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	void ObjectService::_destroyObject(int objID) {
-		if (mAllocatedObjects.get(objID)) {
+		if (mAllocatedObjects[objID]) {
 			// Inform LinkService and PropertyService (those are somewhat slaves of ours. Other services need to listen)
 			mLinkService->objectDestroyed(objID);
 			mPropertyService->objectDestroyed(objID);
 			
 			// Insert the id into free id's
-			mAllocatedObjects.set(objID, false);
+			mAllocatedObjects[objID] = false;
 			
 			// Insert into free id's
 			freeID(objID);
@@ -548,6 +566,7 @@ namespace Opde {
 	//------------------------------------------------------
 	int ObjectService::getFreeID(bool archetype) {
 		// first look into the stack of free id's
+		// TODO: Grow all the related structures as well!
 		if (archetype) {
 			if (mFreeArchetypeIDs.size() > 0) {
 				int id = mFreeArchetypeIDs.top();
@@ -555,9 +574,11 @@ namespace Opde {
 				
 				return id;
 			} else {
-				int idx = mAllocatedObjects.getMinIndex() - 1; // New max ID object
+				int idx = mAllocatedObjects.getMinIndex() - 1; // New min ID
+
 				// wanted a new id, let's grow for them!
-				mAllocatedObjects.setMinIndex(idx - 256, false);
+				grow(idx - 256, mAllocatedObjects.getMaxIndex());
+				
 				LOG_INFO("Beware: Grew archetype id's by 256 to %d", mAllocatedObjects.getMinIndex());
 				return idx;
 			}
@@ -568,9 +589,11 @@ namespace Opde {
 				
 				return id;
 			} else {
-				int idx = mAllocatedObjects.getMaxIndex() + 1; // New max ID object
+				int idx = mAllocatedObjects.getMaxIndex() + 1; // New max ID
+
 				// wanted a new id, let's grow for them!
-				mAllocatedObjects.setMaxIndex(idx + 256, false);
+				grow(mAllocatedObjects.getMinIndex(), idx + 256);
+
 				LOG_INFO("Beware: Grew concrete id's by 256 to %d", mAllocatedObjects.getMinIndex());
 				return idx;
 			}

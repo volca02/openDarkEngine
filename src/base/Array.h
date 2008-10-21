@@ -98,7 +98,7 @@ namespace Opde {
 			
 			/// member const reference array operator
 			const T& operator[](int index) const {
-				if (index < mMinIndex)
+				if (index <= mMinIndex)
 					OPDE_ARRAY_EXCEPT("Array: Index out of bounds");
 					
 				if (index > mMaxIndex)
@@ -109,7 +109,7 @@ namespace Opde {
 			
 			/// member reference array operator
 			T& operator[](int index) {
-				if (index < mMinIndex)
+				if (index <= mMinIndex)
 					OPDE_ARRAY_EXCEPT("Array: Index out of bounds");
 					
 				if (index > mMaxIndex)
@@ -125,6 +125,9 @@ namespace Opde {
 				
 				if (maxIdx < 0)
 					OPDE_ARRAY_EXCEPT("Array: Max index has to be greater or equal to zero");
+
+				// the only single place we have to increment - negative array does NOT store element of index zero
+				minIdx++;
 				
 				growBuf(&mNegativeArray, -mMinIndex, -minIdx);
 				mMinIndex = minIdx;

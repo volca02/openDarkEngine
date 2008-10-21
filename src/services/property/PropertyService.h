@@ -121,6 +121,11 @@ namespace Opde {
 			/** @return a property name iterator usable to iterate over all property types */
 			StringIteratorPtr getAllPropertyNames();
 
+			/** Grows all the properties to allow the storage of the given range of object ID's
+			* The id range has to be greater than the old one (no object id removal allowed)
+			*/
+			void grow(int minID, int maxID);
+
 			/// maps property groups to their names
 			typedef std::map< std::string, PropertyGroup* > PropertyGroupMap;
 			

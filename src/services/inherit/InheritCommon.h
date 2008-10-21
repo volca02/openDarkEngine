@@ -103,6 +103,9 @@ namespace Opde {
 
 			/// Used upon total cleanout of the database
 			virtual void clear() = 0;
+			
+			/// grows the internal tables of the inheritor to allow the storage of data about defined object range
+			virtual void grow(int minID, int maxID) {};
 	};
 
 	/// Shared pointer to Inheritor

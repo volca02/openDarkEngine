@@ -153,6 +153,11 @@ namespace Opde {
 			*/
 			bool hasMetaProperty(int id, const std::string& mpName);
 			
+			/** Grows the whole object system to allow the storage of the given range of object ID's
+			* The id range has to be greater than the old one (no object id removal allowed)
+			*/
+			void grow(int minID, int maxID);
+			
 		protected:
 			bool init();
 			

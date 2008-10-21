@@ -26,6 +26,7 @@
 #define __BITARRAY_H
 
 #include "config.h"
+#include <cassert>
 
 #include "OpdeException.h"
 
@@ -34,223 +35,297 @@ namespace Opde {
 	class BitArray {
 		public:
 			/// constructs a new empty bitarray
-			BitArray() : mArray(NULL), mByteSize(0), mMinIDX(0), mMaxIDX(-1) {};
+			BitArray() : mNegativeArray(NULL), mPositiveArray(NULL), mMinIndex(0), mMaxIndex(-1) {};
 			
 			/// constructs a new bitarray with a specified min and max boundaries (all values false)
-			BitArray(int min, int max) : mMinIDX(min), mMaxIDX(max) {
-				mArray = prepareBuffer(mMinIDX, mMaxIDX, mByteSize);
+			explicit BitArray(int min, int max) : mNegativeArray(NULL), mPositiveArray(NULL), mMinIndex(0), mMaxIndex(-1) {
+				grow(min, max);
+			}
+			
+			/// copy constructor
+			BitArray(const BitArray& b) {
+				// copy the bounds
+				mMinIndex = b.mMinIndex;
+				mMaxIndex = b.mMaxIndex;
+				
+				mPositiveArray = NULL;
+				mNegativeArray = NULL;
+				
+				// allocate space
+				if (b.mNegativeArray != NULL) {
+					size_t bsize = getSizeFromIndex(-mMinIndex);
+					mNegativeArray = (unsigned char*)(malloc(bsize));
+					// copy the values
+					memcpy(mNegativeArray, b.mNegativeArray, bsize);
+				}
+				
+				if (b.mPositiveArray != NULL) {
+					size_t bsize = getSizeFromIndex(mMaxIndex);
+					mPositiveArray = (unsigned char*)(malloc(bsize));
+					// copy the values
+					memcpy(mPositiveArray, b.mPositiveArray, bsize);
+				}
 			}
 			
 			/// constructs a bitarray as a copy of a source buffer of a given size
-			BitArray(unsigned char* source, int size, int min, int max) {
+			BitArray(unsigned char* source, int size, int min, int max)
+				: mNegativeArray(NULL), mPositiveArray(NULL), mMinIndex(0), mMaxIndex(-1) {
+				
 				assert(max > min);
 				
-				// the source can be non-aligned. transfer the bits
-				
-				mMinIDX = min;
-				mMaxIDX = max;
-				
+				// sanity check
 				assert((max - min) >> 3 <= size);
 
-				mArray = prepareBuffer(mMinIDX, mMaxIDX, mByteSize);
+				// prepare
+				grow(min, max);
 				
+				// as we can have a different bit alignment, do this bit by bit
 				for (int idx = min; idx <= max; ++idx) {
-					// transfer the id
+					// transfer the bits
 					size_t pos = idx - min;
 					
 					bool val = ((source[pos >> 3] & (1 << (pos & 0x07))) != 0);
-					set(idx, val);
+					setBit(idx, val);
 				}
 			};
 			
 			~BitArray() {
-				delete[] mArray;
+				clear();
 			}
-						
-			bool get(int index) const {
+				
+			/// clear method - clears the array - reinitializes it to zero element sized
+			void clear() {
+				// now get rid of the arrays
+				free(mNegativeArray);
+				free(mPositiveArray);
+				
+				mNegativeArray = NULL;
+				mPositiveArray = NULL;
+				
+				mMinIndex = 0;
+				mMaxIndex = -1;
+			}
+			
+			bool getBit(int index) const {
 				// look if we are in bounds
-				if (index < mMinIDX)
+				if (index < mMinIndex)
 					OPDE_ARRAY_EXCEPT("Index out of bounds");
 					
-				if (index > mMaxIDX)
+				if (index > mMaxIndex)
 					OPDE_ARRAY_EXCEPT("Index out of bounds");
 					
-				// remap the id
-				size_t cpos = (index - mMinIDX) >> 3;
-				size_t bpos = (index - mMinIDX) & 0x07;
+				// depending on the index sign, we either access negative
+				// or positive array
+				unsigned char* arrayRef;
+				
+				// character and bit positions
+				size_t cpos;
+				size_t bpos;
+				
+				if (index < 0) {
+					arrayRef = mNegativeArray;
+					cpos = getIndex(-index - 1);
+					bpos = getOffset(-index - 1);
+				} else {
+					arrayRef = mPositiveArray;
+					cpos = getIndex(index);
+					bpos = getOffset(index);
+				}
+				
 				
 				// get the value
-				return ((mArray[cpos] & (1 << bpos)) != 0);
+				return (arrayRef[cpos] & (1 << bpos));
 			};
 			
 			/// sets a new value for index, returns the old value
-			bool set(int index, bool value) {
+			bool setBit(int index, bool value) {
 				// look if we are in bounds
-				if (index < mMinIDX)
-					OPDE_ARRAY_EXCEPT("Index out of bounds");
+				if (index < mMinIndex)
+					OPDE_ARRAY_EXCEPT("BitArray: Index out of bounds");
 					
-				if (index > mMaxIDX)
-					OPDE_ARRAY_EXCEPT("Index out of bounds");
+				if (index > mMaxIndex)
+					OPDE_ARRAY_EXCEPT("BitArray: Index out of bounds");
 					
 				// remap the id
-				size_t cpos = (index - mMinIDX) >> 3;
-				unsigned char bpos = (index - mMinIDX) & 0x07;
+				unsigned char* arrayRef;
+				
+				// character and bit positions
+				size_t cpos;
+				size_t bpos;
+				
+				if (index < 0) {
+					arrayRef = mNegativeArray;
+					cpos = getIndex(-index - 1);
+					bpos = getOffset(-index - 1);
+				} else {
+					arrayRef = mPositiveArray;
+					cpos = getIndex(index);
+					bpos = getOffset(index);
+				}
 				
 				// get the value
-				bool prev = ((mArray[cpos] & (1 << bpos)) != 0);
+				bool prev = ((arrayRef[cpos] & (1 << bpos)) != 0);
 				
 				// set the value
 				if (value) {
-					mArray[cpos] |= (1 << bpos);
+					arrayRef[cpos] |= (1 << bpos);
 				} else {
 					// unset the bit
-					mArray[cpos] &= ~(1 << bpos);
+					arrayRef[cpos] &= ~(1 << bpos);
 				}
 
 				return prev;
 			};
 			
-			int getMinIndex() const { return mMinIDX; };
-			int getMaxIndex() const { return mMaxIDX; };
+			int getMinIndex() const { return mMinIndex; };
+			int getMaxIndex() const { return mMaxIndex; };
 
-			/** sets new min index
-			* @param newidx The new minimal index 
-			* @param clear - if true, the min index can be greater than the old one, and the bitarray is cleared as well 
-			* @note if the new minimum is greater than the old, and clear is not set, the new value is ignored
+			/// returns a byte size needed to hold the whole buffer
+			size_t getByteSize() const {
+				return getSizeFromIndex(-mMinIndex-1) + getSizeFromIndex(mMaxIndex);
+			};
+			
+			/** fills a given buffer with bits from this bit array. 
+			* The given buffer has to be allocated so it can hold up getByteSize() bytes
 			*/
-			void setMinIndex(int newidx, bool clear) {
-				if (clear) {
-					delete[] mArray;
+			void fillBuffer(char* buffer) const { 
+				// sane default
+				memset(buffer, 0, getByteSize());
+				
+				size_t bitoffset = 0;
+				for (int i = mMinIndex; i <= mMaxIndex; ++i, ++bitoffset) {
+					// each bit on it's own
+					bool val = getBit(i);
 					
-					mMinIDX = newidx;
-					
-					mArray = prepareBuffer(mMinIDX, mMaxIDX, mByteSize);
-				} else {
-					if (newidx < mMinIDX)
-						grow(newidx, mMaxIDX);
+					// i know this sucks to do on every bit, but well
+					// I Am lazy at the same time :)
+					if (val)
+						buffer[bitoffset>>3] |= (1 << (bitoffset & 0x07));
 				}
 			};
 			
-			/** sets new max index
-			* @param newidx The new maximal index 
-			* @param clear - if true, the max index can be less than the old one, and the bitarray is cleared as well 
-			* @note if the new maximum is less than the old, and clear is not set, the new value is ignored
-			*/
-			void setMaxIndex(int newidx, bool clear) {
-				if (clear) {
-					delete[] mArray;
-					
-					mMaxIDX = newidx;
-					
-					mArray = prepareBuffer(mMinIDX, mMaxIDX, mByteSize);
-				} else {
-					if (newidx > mMaxIDX)
-						grow(mMinIDX, newidx);
-				}
-			};
-
-			
-			const unsigned char* getRawBuf() const { return mArray; };
-			size_t getRawBufSize() const { return mByteSize; };
-			
-			/// clears all true values in bitarray, leaving the size intact
-			void clear() { 
-				memset(mArray, 0, mByteSize);
+			/// clears the array values, setting all bits to false
+			void clearBits() { 
+				memset(mNegativeArray, 0, getSizeFromIndex(-mMinIndex));
+				memset(mPositiveArray, 0, getSizeFromIndex(mMaxIndex));
 			};
 			
 			/// clears the array and sets new min and max boundary values
 			void reset(int min, int max) {
-				mMinIDX = min;
-				mMaxIDX = max;
+				grow(min, max);
 				
-				delete[] mArray;
-				
-				mArray = prepareBuffer(mMinIDX, mMaxIDX, mByteSize);
+				clearBits();
 			};
 			
 			/// grows the bitArray to be able to index new min->max indices, preserving the previous values
 			void grow(int min, int max) {
-				int oldMin = mMinIDX, oldMax = mMaxIDX;
-				bool changed = false;
+				growMinIndex(min);
+				growMaxIndex(max);
+			};
+			
+			/// grows the min index part only
+			void growMinIndex(int min) {
+				if (min > 0)
+					OPDE_ARRAY_EXCEPT("BitArray: Min index has to be equal to zero or less");
 				
-				// new bounds are calculated
-				if (min < mMinIDX) {
-					mMinIDX = min;
-					changed = true;
-				}
-					
-				if (max > mMaxIDX) {
-					mMaxIDX = max;
-					changed = true;
-				}
+				growBuf(&mNegativeArray, -mMinIndex, -min);
+				mMinIndex = min;
+			}
+			
+			/// grows the max index part only
+			void growMaxIndex(int max) {
+				if (max < 0)
+					OPDE_ARRAY_EXCEPT("BitArray: Max index has to be greater or equal to zero");
 				
-				if (changed) {
-					size_t size;
+				growBuf(&mPositiveArray, mMaxIndex, max);
+				mMaxIndex = max;
+			}
+			
+			/// proxy for value setting with [] operator
+			class BitProxy {
+				public:
+					BitProxy(BitArray& array, int index) : mArray(array), mIndex(index) {	};
 					
-					// prepare the new bit buffer. This'll also correct the boundaries
-					unsigned char* newbuf = prepareBuffer(mMinIDX, mMaxIDX, size);
-					
-					// transfer the values from the original...
-					if (mArray) {
-						// reusing the var err here for byte aligned min diff
-						int err = oldMin - mMinIDX; // mMinIDX < oldMin -> err > 0
-						
-						LOG_VERBOSE("BitArray growth: (%d-%d) to (%d-%d). Diff: %d (%d)", oldMin, oldMax, mMinIDX, mMaxIDX, err, err & 0x07);
-						
-						assert((err & 0x07) == 0);
-						
-						err >>= 3;
-						
-						// copy the prev values
-						memcpy(mArray, &newbuf[err], mByteSize);
-						
-						// there, the old values are copied
+					BitProxy& operator =(BitProxy& b) {
+						mArray.setBit(mIndex, b.operator bool());
+						return *this;
 					}
 					
-					mByteSize = size;
+					BitProxy& operator =(bool value) {
+						mArray.setBit(mIndex, value);
+						
+						return *this;
+					};
 					
-					delete[] mArray;
-					mArray = newbuf;
-				}
+					operator bool() const {
+						return mArray.getBit(mIndex);
+					}
+				
+				protected:
+					BitArray& mArray;
+					int mIndex;
+			};
+			
+			BitProxy operator[](int index) {
+				return BitProxy(*this, index);
+			};
+			
+			bool operator[](int index) const {
+				return getBit(index);
 			};
 			
 		protected:
-			/// prepares a new buffer with the specified min and max values, and corrects those as a side effect
-			unsigned char* prepareBuffer(int& min, int& max, size_t& byteSize) {
-				assert(min < max);
+			/// grows the specified buffer to accompany the new size
+			void growBuf(unsigned char**ptr, int oldIndex, int newIndex) {
+				if (newIndex < oldIndex) // if it would, we'd call placement destructor before realloc
+					OPDE_ARRAY_EXCEPT("BitArray: Shrinking not allowed");
 				
-				// allocate and clear the mem
-				byteSize = max - min + 1; // +1 to accompany the max index as well
+				size_t oldByteSize;
+				if (oldIndex < 0)
+					oldByteSize = 0;
+				else
+				   getSizeFromIndex(oldIndex);
+				   
+				size_t newByteSize = getSizeFromIndex(newIndex);
+				
+				if (newByteSize == oldByteSize)
+					return;
 					
-				// align the new minimum
-				int err = byteSize & 0x07;
 				
-				if (err != 0) {
-					min -= (8 - err);
-					byteSize = max - min + 1;
-				}
-					
-
-				if ((byteSize & 0x07) != 0) {
-					// alignment of size needed
-					byteSize += (8 - (byteSize & 0x07));
-				}
+				unsigned char* newptr = (unsigned char*)(realloc(*ptr, newByteSize));
 				
-				// to the byte world
-				byteSize >>= 3;
-				byteSize++; // safety first
+				if (newptr == NULL) // realloc failed
+					OPDE_ARRAY_EXCEPT("BitArray: Growth failed");
 				
-				unsigned char *array = new unsigned char[byteSize];
+				*ptr = newptr;
 				
-				memset(array, 0, byteSize);
-				
-				return array;
+				memset(&newptr[oldByteSize], 0, newByteSize - oldByteSize);
 			}
 		
-			unsigned char* mArray;
-			size_t mByteSize;
-			int mMinIDX, mMaxIDX;
+			/// byte offset of an address getter
+			inline size_t getIndex(int addr) const {
+				return size_t(addr) >> 3;
+			}
+			
+			/// Bit offset for address getter
+			inline int getOffset(int addr) const {
+				return size_t(addr) & 0x07;
+			}
+			
+			/// Helper size getter for index - needed byte size for array to hold certain index
+			inline size_t getSizeFromIndex(int index) const {
+				assert(index >= 0);
+				
+				return size_t(getIndex(index)) + 1;
+			}
+			
+			unsigned char* mNegativeArray;
+			unsigned char* mPositiveArray;
+			
+			int mMinIndex, mMaxIndex;
 	};
+	
+	
 };
 
 #endif // __BITARRAY_H

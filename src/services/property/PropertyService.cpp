@@ -181,6 +181,16 @@ namespace Opde {
 		return new PropertyGroupMapKeyIterator(mPropertyGroupMap);
 	}
 	
+	//------------------------------------------------------
+	void PropertyService::grow(int minID, int maxID) {
+		// grow all the properties
+		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
+
+		for (; it != mPropertyGroupMap.end(); ++it) {
+			it->second->grow(minID, maxID);
+		}
+	}
+	
 	// --------------------------------------------------------------------------
 	PropertyGroup* PropertyService::getPropertyGroup(const std::string& name) {
 	    PropertyGroupMap::iterator it = mPropertyGroupMap.find(name);

@@ -176,6 +176,10 @@ namespace Opde {
 			*/
 			DataFieldDescIteratorPtr getFieldDescIterator(void);
 
+			/** Grows the property group to allow the storage of minID to maxID object id's
+			*/
+			void grow(int minID, int maxID);
+
 		protected:
 			/** Does the internal handling related to the creation of a property for object
 			* @param objID The object id to which a property was added
