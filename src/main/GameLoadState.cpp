@@ -157,6 +157,8 @@ namespace Opde {
 
 	void GameLoadState::update(unsigned long timePassed) {
 		if (!mFirstTime && !mLoaded) {
+			unsigned long start_ms = Ogre::Root::getSingleton().getTimer()->getMilliseconds();
+			
 		    OverlayElement* guiLdr = OverlayManager::getSingleton().getOverlayElement("Opde/LoadPanel/Description");
 		    guiLdr->setCaption("Loading, please wait...");
 
@@ -171,6 +173,8 @@ namespace Opde {
 			mLoaded = true;
 
 			guiLdr->setCaption("Loaded, press ESC...");
+			
+			LOG_INFO("Loading took %10.2f seconds", (Ogre::Root::getSingleton().getTimer()->getMilliseconds() - start_ms) / 1000.0f);
 
 			// popState(); // Hardcoded, so no escape key is needed
 		}
