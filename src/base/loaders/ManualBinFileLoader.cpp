@@ -1544,8 +1544,6 @@ namespace Ogre {
 	}
 	
     void AIMeshLoader::load() {
-    	std::cerr << "Loading " << mMesh->getName() << std::endl;
-    	
     	// For the AI mesh to be usable, we need the cal file.
     	// The cal file has the same name as the BIN file, but .CAL extension
         String name = mMesh->getName();
@@ -1561,8 +1559,6 @@ namespace Ogre {
         }
 
         basename += ".cal";
-        
-        std::cerr << " * cal "<< basename << std::endl;
         
         // load the skeleton
         mCalLoader = new CalSkeletonLoader(basename, group, mMesh);
