@@ -144,15 +144,18 @@ namespace Opde {
 				if (newSize == oldSize)
 					return;
 					
-				T* newptr = static_cast<T*>(realloc(*ptr, sizeof(T) * newSize));
+				T* newptr = (T*)(realloc(*ptr, sizeof(T) * newSize));
 				
 				if (newptr == NULL) // realloc failed
 					OPDE_ARRAY_EXCEPT("Array: Growth failed");
 				
 				*ptr = newptr;
+
+				// the damn VC++ does not initialize the contents for primitive types it seems
+				memset((*ptr) + oldSize, 0, sizeof(T) * (newSize - oldSize));
 				
 				//placement new on the new part of array
-				::new(&((*ptr)[oldSize])) T[newSize-oldSize];
+				::new((*ptr) + oldSize) T[newSize - oldSize];
 			}
 		
 			int mMinIndex;
