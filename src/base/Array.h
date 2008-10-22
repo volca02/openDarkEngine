@@ -37,7 +37,7 @@ namespace Opde {
 	template<class T> class Array {
 		public:
 			/// Constructor. Creates an empty array
-			Array() : mMinIndex(0), mMaxIndex(-1), 
+			Array() : mMinIndex(1), mMaxIndex(-1), 
 					  mNegativeArray(NULL), mPositiveArray(NULL) {
 				// default size is zero
 				mPositiveArray = NULL;
@@ -79,7 +79,7 @@ namespace Opde {
 			/// clear method - clears the array - reinitializes it to zero element sized
 			void clear() {
 				// call placed destructor on the objects
-				for (int i = 0; i <= -mMinIndex; ++i)
+				for (int i = 0; i < -mMinIndex; ++i)
 					(&mNegativeArray[i])->~T();
 				
 				for (int i = 0; i <= mMaxIndex; ++i)
@@ -92,13 +92,13 @@ namespace Opde {
 				mNegativeArray = NULL;
 				mPositiveArray = NULL;
 				
-				mMinIndex = 0;
+				mMinIndex = 1;
 				mMaxIndex = -1;
 			}
 			
 			/// member const reference array operator
 			const T& operator[](int index) const {
-				if (index <= mMinIndex)
+				if (index+1 < mMinIndex)
 					OPDE_ARRAY_EXCEPT("Array: Index out of bounds");
 					
 				if (index > mMaxIndex)
@@ -109,7 +109,7 @@ namespace Opde {
 			
 			/// member reference array operator
 			T& operator[](int index) {
-				if (index <= mMinIndex)
+				if (index+1 < mMinIndex)
 					OPDE_ARRAY_EXCEPT("Array: Index out of bounds");
 					
 				if (index > mMaxIndex)
@@ -141,6 +141,10 @@ namespace Opde {
 				if (newSize < oldSize) // if it would, we'd call placement destructor before realloc
 					OPDE_ARRAY_EXCEPT("Array: Shrinking not allowed");
 				
+				// just to be sure
+				if (oldSize < 0)
+                    oldSize = 0;
+				
 				if (newSize == oldSize)
 					return;
 					
@@ -150,6 +154,9 @@ namespace Opde {
 					OPDE_ARRAY_EXCEPT("Array: Growth failed");
 				
 				*ptr = newptr;
+
+                assert(oldSize >= 0);
+                assert(newSize >= 0);
 
 				// the damn VC++ does not initialize the contents for primitive types it seems
 				memset((*ptr) + oldSize, 0, sizeof(T) * (newSize - oldSize));
