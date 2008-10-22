@@ -35,10 +35,10 @@ namespace Opde {
 	class BitArray {
 		public:
 			/// constructs a new empty bitarray
-			BitArray() : mNegativeArray(NULL), mPositiveArray(NULL), mMinIndex(0), mMaxIndex(-1) {};
+			BitArray() : mNegativeArray(NULL), mPositiveArray(NULL), mMinIndex(1), mMaxIndex(-1) {};
 			
 			/// constructs a new bitarray with a specified min and max boundaries (all values false)
-			explicit BitArray(int min, int max) : mNegativeArray(NULL), mPositiveArray(NULL), mMinIndex(0), mMaxIndex(-1) {
+			explicit BitArray(int min, int max) : mNegativeArray(NULL), mPositiveArray(NULL), mMinIndex(1), mMaxIndex(-1) {
 				grow(min, max);
 			}
 			
@@ -69,7 +69,7 @@ namespace Opde {
 			
 			/// constructs a bitarray as a copy of a source buffer of a given size
 			BitArray(unsigned char* source, int size, int min, int max)
-				: mNegativeArray(NULL), mPositiveArray(NULL), mMinIndex(0), mMaxIndex(-1) {
+				: mNegativeArray(NULL), mPositiveArray(NULL), mMinIndex(1), mMaxIndex(-1) {
 				
 				assert(max > min);
 				
