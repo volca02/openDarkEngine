@@ -396,11 +396,10 @@ namespace Ogre {
 				cur->free = false;
 				
 				// if there is any space left, split
-				if (cur->size > size) {
-					uint32 diff = cur->size - size;
-					
+				if (cur->size > size)
+				{
 					DarkBufferAllocation* rest = new DarkBufferAllocation;
-					rest->size = diff;
+					rest->size = cur->size - size;
 					rest->free = true;
 					rest->pos = cur->pos + size;
 					rest->last = cur;
