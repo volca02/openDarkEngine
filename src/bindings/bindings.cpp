@@ -257,7 +257,7 @@ namespace Opde {
 		// args: Module mask - unsigned long long
 		PyObject *result = NULL;
 		
-		if (msRoot = NULL) {
+		if (msRoot == NULL) {
 			// Invalid parameters
 			// TODO: Choose a propper exception type
 			PyErr_SetString(PyExc_TypeError, "Root was not yet created!");
