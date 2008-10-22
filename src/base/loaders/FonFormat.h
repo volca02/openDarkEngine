@@ -38,8 +38,6 @@ namespace Ogre
 	typedef uint16_t  WORD;
 	typedef DWORD COLORREF;
 
-	static char BLACK_INDEX =	0;
-	static char WHITE_INDEX =	1;
 
 	static const char DarkFontHeader_Format[]="w34c2w32c2i2w";
 	struct DarkFontHeader

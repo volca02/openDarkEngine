@@ -36,6 +36,9 @@ using namespace Opde; // For the Opde::File
 
 namespace Ogre {
 	
+	extern const char BLACK_INDEX;
+	extern const char WHITE_INDEX;
+	
 	/// ManualResourceLoader for FON files.
     class OPDELIB_EXPORT ManualFonFileLoader : public ManualResourceLoader 
 	{		

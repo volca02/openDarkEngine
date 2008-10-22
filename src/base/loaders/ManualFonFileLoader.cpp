@@ -40,6 +40,10 @@ using namespace Opde; //For the Opde::File
 
 namespace Ogre 
 {
+
+    const char BLACK_INDEX = 0;
+    const char WHITE_INDEX = 1;
+
     /*-----------------------------------------------------------------*/
 	/*--------------------- ManualFonFileLoader -----------------------*/
 	/*-----------------------------------------------------------------*/
