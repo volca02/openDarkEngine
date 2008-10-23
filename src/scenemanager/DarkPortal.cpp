@@ -148,25 +148,27 @@ namespace Ogre {
 	
 	// ---------------------------------------------------------------------------------
 	void Portal::refreshBoundingVolume() {
-		if (mPoints.size() == 0) {
+		
+		unsigned int pointcount = mPoints.size();
+		if (pointcount == 0) {
 			mCenter = Vector3(0,0,0);
 			mRadius = -1;
 			return;
 		}
 		// first get the center.
-		Vector3 center(0,0,0);
+		Vector3 center(0,0,0);		
 		
-		for (unsigned int x = 0; x < mPoints.size(); x++)
+		for (unsigned int x = 0; x < pointcount; x++)
 			center += mPoints[x];
 				
-		center /= mPoints.size();
+		center /= pointcount;
 		
 		mCenter = center;
 		
 		// now the maximal radius
 		float radius = 0;
 		
-		for (unsigned int x = 0; x < mPoints.size(); x++) {
+		for (unsigned int x = 0; x < pointcount; x++) {
 			Vector3 vdist = mPoints[x] - center;
 			
 			float len = vdist.squaredLength();

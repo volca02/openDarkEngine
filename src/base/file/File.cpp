@@ -482,6 +482,7 @@ namespace Opde {
 
 		std::pair<size_t, int> pgp = decomposePos(actp);
 
+		unsigned int PagesSize = mPages.size();
 		while (resSize > 0) { // read from one page in one cycle pass
 			file_size_t read = 0;
 
@@ -489,10 +490,10 @@ namespace Opde {
 
 			uint toEnd;
 
-			if (pgp.first >= mPages.size()) { // last page. or error
+			if (pgp.first >= PagesSize) { // last page. or error
 				toEnd = (mSize % MEMORY_FILE_BUF_LEN) - pgp.second;
 
-				if (toEnd == 0 || pgp.first >= mPages.size()) {
+				if (toEnd == 0 || pgp.first >= PagesSize) {
 					// if this occurs, I've read the bytes I could
 					// I also should set the important member vars prior to exception throw
 					mEof = true;
@@ -544,10 +545,11 @@ namespace Opde {
 		// actual position in the source buffer
 		std::pair<size_t, int> pgp = decomposePos(actp);
 
+		unsigned int PagesSize = mPages.size();
 		while (resSize > 0) {
 			file_size_t written = 0;
 
-			if (pgp.first >= mPages.size()) { // I've finished the already allocated pages
+			if (pgp.first >= PagesSize) { // I've finished the already allocated pages
 				char *nbuf = new char[MEMORY_FILE_BUF_LEN];
 
 				if (nbuf == NULL) // this is quite fatal. something like out of disk space

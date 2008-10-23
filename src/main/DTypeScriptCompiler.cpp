@@ -217,7 +217,7 @@ namespace Opde {
 	DTypeScriptCompiler::CompileState DTypeScriptCompiler::popState() {
     		CompileState old = mCurrentState;
 
-		if (mStateStack.size() > 0) {
+		if (!mStateStack.empty()) {
 			mCurrentState = mStateStack.top();
 			mStateStack.pop();
 

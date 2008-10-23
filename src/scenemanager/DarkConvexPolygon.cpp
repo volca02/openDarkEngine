@@ -52,9 +52,10 @@ namespace Ogre {
 	ConvexPolygon::ConvexPolygon(const ConvexPolygon& src) {
 		const PolygonPoints& pnts = src.getPoints();
 				
-		mPoints.reserve(pnts.size());
+		unsigned int size = pnts.size();
+		mPoints.reserve(size);
 		
-		for (unsigned int x = 0; x < pnts.size(); x++)
+		for (unsigned int x = 0; x < size; x++)
 			mPoints.push_back(pnts.at(x));
 
 		this->mPlane = src.getPlane();
@@ -140,7 +141,7 @@ namespace Ogre {
 		
 		if (negative == 0) {
 			delete[] sides;
-			return mPoints.size(); // all the vertices were inside
+			return pointcount; // all the vertices were inside
 		}
 		
 		didClip = true;
@@ -261,8 +262,9 @@ namespace Ogre {
 		Vector3 ip     = ray.getPoint(intersection.second);
 		Vector3 origin = ray.getOrigin();
 				
-		for (unsigned int idx = 0; idx < mPoints.size(); idx++) {
-			int iv2 = (idx + 1) % mPoints.size();
+		unsigned int pointcount = mPoints.size();
+		for (unsigned int idx = 0; idx < pointcount; idx++) {
+			int iv2 = (idx + 1) % pointcount;
 			
 			Vector3 v1 = mPoints[idx];
 			Vector3 v2 = mPoints[iv2];
@@ -288,8 +290,9 @@ namespace Ogre {
 		// intersection circle radius
 		Real irad = radius*radius - distance*distance;
 				
-		for (unsigned int idx = 0; idx < mPoints.size(); idx++) {
-			int iv2 = (idx + 1) % mPoints.size();
+		unsigned int pointcount = mPoints.size();
+		for (unsigned int idx = 0; idx < pointcount; idx++) {
+			int iv2 = (idx + 1) % pointcount;
 			
 			Vector3 v1 = mPoints[idx];
 			Vector3 v2 = mPoints[iv2];

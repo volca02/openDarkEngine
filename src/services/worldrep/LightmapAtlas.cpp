@@ -259,7 +259,7 @@ namespace Opde {
 	}
 
 	bool LightAtlasList::placeLightMap(LightMap* lmap) {
-		if (mList.size() == 0)
+		if (mList.empty())
 			mList.push_back(new LightAtlas(0));
 
 		int last = mList.size();

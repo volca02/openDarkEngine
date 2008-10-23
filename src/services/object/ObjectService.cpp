@@ -568,7 +568,7 @@ namespace Opde {
 		// first look into the stack of free id's
 		// TODO: Grow all the related structures as well!
 		if (archetype) {
-			if (mFreeArchetypeIDs.size() > 0) {
+			if (!mFreeArchetypeIDs.empty()) {
 				int id = mFreeArchetypeIDs.top();
 				mFreeArchetypeIDs.pop();
 				
@@ -583,7 +583,7 @@ namespace Opde {
 				return idx;
 			}
 		} else {
-			if (mFreeConcreteIDs.size() > 0) {
+			if (!mFreeConcreteIDs.empty()) {
 				int id = mFreeConcreteIDs.top();
 				mFreeConcreteIDs.pop();
 				
