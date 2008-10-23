@@ -39,6 +39,9 @@ It is not an example of a propper python script, and should not be taken as such
 
 Sort-of-a-Disclamer: No guarantee is made about the function of this, and also
 note it might make your PC burn if something goes wrong, or anything like that;)
+
+$Id$
+
 """
 import getopt, sys, Opde
 
@@ -94,7 +97,7 @@ for o, a in opts:
 
 
 
-# tell Opde.Root to only create CORE services (those which are sufficient for tools, no renderer, etc)
+# Tell Opde.Root to only create CORE services (those which are sufficient for tools, no renderer, etc)
 opderoot = Opde.createRoot(Opde.Services.SERVICE_CORE)
 
 # Logging - defaults to none. the line below would enable logging to opde.log in the current directory
@@ -122,7 +125,7 @@ opderoot.addResourceLocation(cfgsrv.getParam("script_path"), "Dir", "General", F
 if (cfgsrv.hasParam("script_path_extra") == True):
 	opderoot.addResourceLocation(cfgsrv.getParam("script_path_extra"), "Dir", "General", False)
 
-# Load the dype scripts (this varies depending on the game type)
+# Load the dtype scripts (this varies depending on the game type)
 opderoot.loadDTypeScript(gametype + "-types.dtype", "General")
 opderoot.loadPLDefScript(gametype + "-links.pldef", "General")
 opderoot.loadPLDefScript(gametype + "-props.pldef", "General")
@@ -138,10 +141,10 @@ objsrv = Opde.Services.getObjectService()
 psrv = Opde.Services.getPropertyService()
 
 # Load the gamesys (note: dbsrv.load("miss1.mis") would load both mission-2 and gamesys-1)
-# ogre is case sensitive on linux. Will have to resolve this
+# Ogre is case sensitive on linux. Will have to resolve this
 dbsrv.loadGameSys(gamesys)
 
-# an example (not used here): Query which properties the given object owns, and which it inherits
+# An example (not used here): Query which properties the given object owns, and which it inherits
 def objectInfo(oid):
 	name = objsrv.getName(oid)
 	print "Object Info for object " + str(oid) + " named '" + name + "':"
@@ -261,12 +264,12 @@ def otree(oid,indent):
 	dtypestr = " ";
 	dtype = 0;
 
-	# does the object have DonorType property? All gamesys object should!
+	# does the object have DonorType property? All gamesys objects should!
 	if (psrv.has(oid, "DonorType")):
 		# get DonorType property value
 		dtype = psrv.get(oid, "DonorType", "")
 
-	# if the donor type is nonzero, we encountered a MetaProperty!
+	# if the donor type is nonzero, we have encountered a MetaProperty!
 	if (dtype == 1):
 		dtypestr = "[M] "
 
