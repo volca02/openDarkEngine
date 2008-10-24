@@ -112,7 +112,7 @@ Function ShowWelcome
 	nsDialogs::Create /NOUNLOAD 1018
 	Pop $0
 
-	${NSD_CreateLabel} 10 10u 100% 80u "Welcome to openDarkEngine installation."
+	${NSD_CreateLabel} 10 10u 100% 80u "Welcome to openDarkEngine @OPDE_VER_MAJOR@.@OPDE_VER_MINOR@.@OPDE_VER_PATCH@ (@REL_CODE_NAME@)."
 	Pop $0
 
 	nsDialogs::Show
