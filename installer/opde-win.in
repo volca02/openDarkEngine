@@ -40,6 +40,7 @@ LicenseForceSelection checkbox "I accept the terms in the license agreement"
 Var Thief1Dir
 Var Thief2Dir
 Var Shock2Dir
+Var Shock2CrfDir	;Mod-ready SS2 installations have a different path for CRF files
 
 OutFile "opdeSetup.exe"
 
@@ -165,7 +166,11 @@ Function CreateResourceCfg
 		
 	CheckSS2:
 	StrCmp $Shock2Dir "" AllChecked 0
+	StrCpy $Shock2CrfDir $Shock2Dir
 	FindFirst $2 $1 "$Shock2Dir\*.crf"
+	StrCmp $1 "" 0 AllChecked
+	StrCpy $Shock2CrfDir "$Shock2Dir\res"
+	FindFirst $2 $1 "$Shock2Dir\res\*.crf"
 	StrCmp $1 "" 0 AllChecked
 	MessageBox MB_OK|MB_ICONEXCLAMATION "Shock2 path is invalid."
 		Abort
@@ -231,10 +236,10 @@ Function SetupShock2
 	FileWrite $0 "$\r$\n[Shock2]$\r$\n"
 	FileWrite $0 "FileSystem=.\scripts\Shock2$\r$\nFileSystem=$Shock2Dir$\r$\n"	
 		
-	FindFirst $2 $1 "$Shock2Dir\*.crf"
+	FindFirst $2 $1 "$Shock2CrfDir\*.crf"
 	loop:
 	  StrCmp $1 "" done
-	  FileWrite $0 "Zip=$Shock2Dir\$1$\r$\n"
+	  FileWrite $0 "Zip=$Shock2CrfDir\$1$\r$\n"
 	  FindNext $2 $1
 	  Goto loop
 	done:
