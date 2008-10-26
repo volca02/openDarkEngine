@@ -53,8 +53,10 @@ namespace Opde {
 	class OPDELIB_EXPORT Root : public Singleton<Root> {
 		public:
 			/** Initializes the opde core
-			* @param serviceMask the mask of the services which should be used (others will be ignored and unreachable) */
-			Root(uint serviceMask = SERVICE_ALL);
+			* @param serviceMask the mask of the services which should be used (others will be ignored and unreachable) 
+			* @param logFileName - optional log file name - when specified, logging to file will be initialized automatically
+			*/
+			Root(uint serviceMask = SERVICE_ALL, char* logFileName = NULL);
 			
 			/** stops the opde core, does cleanup */
 			~Root();

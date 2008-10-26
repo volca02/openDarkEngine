@@ -61,7 +61,7 @@ namespace Opde {
 	template<> Root* Singleton<Root>::ms_Singleton = 0;
 	
 	// -------------------------------------------------------
-	Root::Root(uint serviceMask) : 
+	Root::Root(uint serviceMask, char* logFileName) : 
 			mLogger(NULL), 
 			mServiceMgr(NULL), 
 			mOgreRoot(NULL), 
@@ -76,6 +76,12 @@ namespace Opde {
 			mCrfArchiveFactory(NULL) {
 		
 		mLogger = new Logger();
+		
+		if (logFileName) {
+			logToFile(logFileName);
+		}
+		
+		LOG_INFO("Starting openDarkEngine %d.%d.%d (%s)", OPDE_VER_MAJOR, OPDE_VER_MINOR, OPDE_VER_PATCH, OPDE_CODE_NAME);
 		
 		mServiceMgr = new ServiceManager(mServiceMask);
 		

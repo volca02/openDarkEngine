@@ -65,17 +65,15 @@ namespace Opde {
 	GameStateManager::GameStateManager(std::string GameType) :
 			mStateStack(),
 			mTerminate(false),
-			mLogger(NULL),
 			mRoot(NULL),
-			mStdLog(NULL),
 			mConsoleBackend(NULL),
 			mServiceMgr(NULL),
-			mDTypeScriptLdr(NULL),
-			mPLDefScriptLdr(NULL),
-			mDirArchiveFactory(NULL),
-			mCrfArchiveFactory(NULL),
+			mInputService(NULL),
 			mConfigService(NULL) {
 				mGameType = GameType;
+				
+		mRoot = new Opde::Root(SERVICE_ALL, "opde.log");
+		mRoot->registerCustomScriptLoaders();
 	}
 
 	GameStateManager::~GameStateManager() {
@@ -92,28 +90,7 @@ namespace Opde {
 			state->exit();
 		}
 
-		delete mDTypeScriptLdr; // Unregisters itself
-		mDTypeScriptLdr = NULL;
-
-		delete mPLDefScriptLdr; // Unregisters itself
-		mPLDefScriptLdr = NULL;
-
-		// Delete the service manager
-		delete mServiceMgr;
-		mServiceMgr = NULL;
-
-		CustomImageCodec::shutdown();
-
-		delete mConsoleBackend;
 		delete mRoot;
-
-		delete mDirArchiveFactory;
-		delete mCrfArchiveFactory;
-
-		// Release the loggers
-		delete mLogger;
-		delete mStdLog;
-        delete mFileLog;
 	}
 
 	GameStateManager& GameStateManager::getSingleton(void) {
@@ -160,42 +137,16 @@ namespace Opde {
 
 	bool GameStateManager::run() {
 		// Initialize opde logger and console backend
-		mLogger = new Logger();
-
-		mStdLog = new StdLog();
-        mFileLog = new FileLog("opde.log");
-
-		mLogger->registerLogListener(mFileLog);
-
-		LOG_INFO("Starting openDarkEngine %d.%d.%d (%s)\n", OPDE_VER_MAJOR, OPDE_VER_MINOR, OPDE_VER_PATCH, OPDE_CODE_NAME);
-
 		// Create an ogre's root
-		mRoot = new Root();
+		mOgreRoot = Ogre::Root::getSingletonPtr();
 		
-		mDirArchiveFactory = new Ogre::CaseLessFileSystemArchiveFactory();
-		// TODO: mCrfArchiveFactory = new Ogre::CrfArchiveFactory();
-
-		Ogre::ArchiveManager::getSingleton().addArchiveFactory(mDirArchiveFactory);
-		// TODO: Ogre::ArchiveManager::getSingleton().addArchiveFactory(mCrfArchiveFactory);
-		
-		CustomImageCodec::startup();
-
-		mConsoleBackend = new Opde::ConsoleBackend();
-
-		// So console will write the messages from the logger
-		mLogger->registerLogListener(mConsoleBackend);
-
+		mConsoleBackend = Opde::ConsoleBackend::getSingletonPtr();
 		mConsoleBackend->putMessage("==Console Starting==");
 
-		// Create the service manager
-		mServiceMgr = new ServiceManager(SERVICE_ALL);
 		assert(ServiceManager::getSingletonPtr() != 0);
 
 		if (ServiceManager::getSingletonPtr() == 0)
 			LOG_FATAL("Rotten tomatoes!");
-
-		// Register the worldrep service factory
-		registerServiceFactories();
 
 		mConfigService = static_pointer_cast<ConfigService>(ServiceManager::getSingleton().getService("ConfigService"));
 		
@@ -229,9 +180,8 @@ namespace Opde {
 
 		setupInputSystem();
 
-        // TODO: Broadcast to all services: bootstrapFinished
-        mServiceMgr->bootstrapFinished();
-
+        mRoot->bootstrapFinished();
+        
 		ps->bootstrapFinished();
 
 		// Push the initial state
@@ -244,7 +194,7 @@ namespace Opde {
 		while( !mTerminate ) {
 			// Calculate time since last frame and remember current time for next frame
 			mTimeLastFrame = lTimeCurrentFrame;
-			lTimeCurrentFrame = mRoot->getTimer()->getMilliseconds();
+			lTimeCurrentFrame = mOgreRoot->getTimer()->getMilliseconds();
 			
 			unsigned long lTimeSinceLastFrame = lTimeCurrentFrame - mTimeLastFrame;
 
@@ -255,7 +205,7 @@ namespace Opde {
 			mInputService->captureInputs();
 
 			// Render next frame
-			mRoot->renderOneFrame();
+			mOgreRoot->renderOneFrame();
 
 			// Deal with platform specific issues
 			Ogre::WindowEventUtilities::messagePump();
@@ -274,62 +224,23 @@ namespace Opde {
 		return true;
 	}
 
-	void GameStateManager::registerServiceFactories() {
-		// register the service factories
-		new WorldRepServiceFactory();
-		new BinaryServiceFactory();
-		new GameServiceFactory();
-		new ConfigServiceFactory();
-		new LinkServiceFactory();
-		new PropertyServiceFactory();
-		new InheritServiceFactory();
-		new RenderServiceFactory();
-		new DatabaseServiceFactory();
-		new InputServiceFactory();
-		new LoopServiceFactory();
-		new ObjectServiceFactory();
-	}
-
 	/// Method which will define the source of resources (other than current folder)
 	void GameStateManager::setupResources(void) {
 		// First, register the script loaders...
-
-		// Allocate and register the DType script loader. Registers itself
-		mDTypeScriptLdr = new DTypeScriptLoader();
-
-		// Allocate and register the PLDef script loader. Registers itself
-		mPLDefScriptLdr = new PLDefScriptLoader();
-
 		// Load resource paths from config file
-		ConfigFile cf;
+		String configName = "resources.cfg";
 		
 		//Load the resources according to the game type, if game type not specified, load the default
 		if((mGameType == "T1") || (mGameType == "t1"))
-			cf.load("thief1.cfg");
+			configName = "thief1.cfg";
 		else if((mGameType == "T2") || (mGameType == "t2"))
-			cf.load("thief2.cfg");
+			configName = "thief2.cfg";
 		else if((mGameType == "SS2") || (mGameType == "ss2"))
-			cf.load("shock2.cfg");
-		else
-			cf.load("resources.cfg");
+			configName = "shock2.cfg";
 		
-		// Go through all sections & settings in the file
-		ConfigFile::SectionIterator seci = cf.getSectionIterator();
-
-		String secName, typeName, archName;
-
-		while (seci.hasMoreElements()) {
-			secName = seci.peekNextKey();
-			ConfigFile::SettingsMultiMap *settings = seci.getNext();
-			ConfigFile::SettingsMultiMap::iterator i;
-
-			for (i = settings->begin(); i != settings->end(); ++i) {
-				typeName = i->first;
-				archName = i->second;
-				ResourceGroupManager::getSingleton().addResourceLocation(
-					archName, typeName, secName);
-			}
-		}
+		
+		
+		mRoot->loadResourceConfig(configName);
 	}
 
 	void GameStateManager::setupInputSystem() {

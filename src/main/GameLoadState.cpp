@@ -45,7 +45,7 @@ namespace Opde {
 	template<> GameLoadState* Singleton<GameLoadState>::ms_Singleton = 0;
 
 	GameLoadState::GameLoadState() : mSceneMgr(NULL), mOverlayMgr(NULL), mLoaded(false) {
-        mRoot = Root::getSingletonPtr();
+        mRoot = Ogre::Root::getSingletonPtr();
 		mOverlayMgr = OverlayManager::getSingletonPtr();
 		mServiceMgr = ServiceManager::getSingletonPtr();
 		

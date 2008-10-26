@@ -35,10 +35,9 @@
 
 #include <stack>
 
+#include "Root.h"
 #include "OpdeSingleton.h"
 #include "GameState.h"
-#include "stdlog.h"
-#include "filelog.h"
 #include "ConsoleBackend.h"
 #include "OpdeServiceManager.h"
 #include "ConfigService.h"
@@ -50,14 +49,8 @@
 
 namespace Opde {
 
-	/** The game state manager. A main piece of code, which controls the flow of the program. Also dispatcher for input device events.
-	* A state is a class inheriting GameState abstract class, which controls a single state of the game. GameState's instance
-	* then receives events from keyboard and other input devices, event for frame update, etc.
-	*
-	* @note This class should implements a custom game loop.
-	*
-	* @see GameState
-	* @todo add OIS::JoyStickListener
+	/** The game state manager. A temporary piece of code that enables opde testing.
+	* @warning This code is here only for testing purposes, and will go away later on
 	*/
 	class GameStateManager : public Singleton<GameStateManager>, public DirectInputListener {
         public:
@@ -85,9 +78,6 @@ namespace Opde {
 			* @return true if game should procede, false otherwise */
 			bool run();
 		protected:
-			/** Registers all the service factories */
-			void registerServiceFactories();
-
 			/** Loads the resources from the resources.cfg */
 			void setupResources(void);
 
@@ -114,36 +104,23 @@ namespace Opde {
 			unsigned long mTimeLastFrame;
 
 			///  Stderr logger
-			StdLog* mStdLog;
-			FileLog* mFileLog;
-
 			ConsoleBackend* mConsoleBackend;
 
-			Logger *mLogger;
+			/// Opde::root 
+			Opde::Root *mRoot;
+			Ogre::Root *mOgreRoot;
 
-			// --- Ogre instances
-			Ogre::Root *mRoot;
-
-			// Service manager handle
-			ServiceManager* mServiceMgr;
-
-			// Loader for the DType scripts
-			DTypeScriptLoader* mDTypeScriptLdr;
-
-			// Loader for the PLDef scripts
-			PLDefScriptLoader* mPLDefScriptLdr;
-			
-			
-			Ogre::ArchiveFactory* mDirArchiveFactory;
-			
-			Ogre::ArchiveFactory* mCrfArchiveFactory;
-
-			// config service
+			/// config service reference
 			ConfigServicePtr mConfigService;
 
+			/// input service reference
 			InputServicePtr mInputService;
 
+			/// Type of the game (t1,t2,ss2)
 			std::string mGameType;
+			
+			/// Service manager ref
+			ServiceManager* mServiceMgr;
 	};
 
 }

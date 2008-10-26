@@ -87,7 +87,7 @@ namespace Opde {
 		mSceneDetailIndex = 0;
 		mNumScreenShots = 0;
 
-		mRoot = Root::getSingletonPtr();
+		mRoot = Ogre::Root::getSingletonPtr();
 		mOverlayMgr = OverlayManager::getSingletonPtr();
 
 		mConsole = new ConsoleFrontend();
