@@ -167,6 +167,8 @@ namespace Opde {
 
 		mLogger->registerLogListener(mFileLog);
 
+		LOG_INFO("Starting openDarkEngine %d.%d.%d (%s)\n", OPDE_VER_MAJOR, OPDE_VER_MINOR, OPDE_VER_PATCH, OPDE_CODE_NAME);
+
 		// Create an ogre's root
 		mRoot = new Root();
 		
