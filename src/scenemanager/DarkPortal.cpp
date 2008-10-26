@@ -320,6 +320,7 @@ namespace Ogre {
 			prev = idx;
 		}
 		
+		delete[] sides;
 		return true;
 	}
 } // namespace Ogre

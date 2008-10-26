@@ -202,6 +202,9 @@ namespace Ogre {
 		delete mRenderOp.indexData; 
 		mRenderOp.indexData = NULL;
 		
+		delete mRenderOp.vertexData; 
+		mRenderOp.vertexData = NULL;
+		
 		// delete all the fragments
 		for (size_t s = 0; s < mCellCount; ++s)
 			delete mFragmentList[s];
