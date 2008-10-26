@@ -165,8 +165,41 @@ namespace Opde {
 		uint32 *data = static_cast<uint32*>(pb.data) + fsi.y * pb.rowPitch;
 		for (int y = 0; y < fsi.h; y++)
 		{
+			uint32 w = (y * fsi.w);
 			for (int x = 0; x < fsi.w; x++)
-				data[x + fsi.x] = rgb[x + y * fsi.w].ARGB(); // Write a A8R8G8B8 conversion of the lmpixel
+				data[x + fsi.x] = rgb[x + w].ARGB(); // Write a A8R8G8B8 conversion of the lmpixel
+			data += pb.rowPitch;
+		}
+	}
+
+	inline void LightAtlas::updateLightMapBuffer(FreeSpaceInfo& fsi, uint32 *lR, uint32 *lG, uint32 *lB)
+	{
+		const PixelBox &pb = mAtlas->getCurrentLock();
+
+		uint32 *data = static_cast<uint32*>(pb.data) + fsi.y * pb.rowPitch;
+		for (int y = 0; y < fsi.h; y++) 
+		{
+			uint32 w = (y * fsi.w);
+			for (int x = 0; x < fsi.w; x++) {
+
+				uint32 R, G, B;
+
+				R = lR[x + w] >> 8;
+				G = lG[x + w] >> 8;
+				B = lB[x + w] >> 8;
+
+				if (R > 255)
+					R = 255;
+				if (G > 255)
+					G = 255;
+				if (B > 255)
+					B = 255;
+
+				uint32 ARGB = (R << 16) | (G << 8) | B;
+
+				// Write a A8R8G8B8 conversion of the lmpixel
+				data[x + fsi.x] = ARGB;
+			}
 			data += pb.rowPitch;
 		}
 	}
@@ -418,21 +451,24 @@ namespace Opde {
 	// ------------------------------- Lightmap class
 	void LightMap::refresh() {
 		// First we calculate the new version of the lmap. Then we post it to the atlas
-		// Float version of lmap
-		// TODO: Int will be sufficient and quicker
-		Vector3* f_lmap = new Vector3[mSizeX * mSizeY];
 
-		// copy the static lmap...
-		for (unsigned int i = 0; i < mSizeX * mSizeY; i++) {
-			f_lmap[i].x = mStaticLmap[i].R;
-			f_lmap[i].y = mStaticLmap[i].G;
-			f_lmap[i].z = mStaticLmap[i].B;
+		unsigned int LightMapSize = mSizeX * mSizeY;
+		uint32 *lmapR = new uint32[LightMapSize];
+		uint32 *lmapG = new uint32[LightMapSize];
+		uint32 *lmapB = new uint32[LightMapSize];
+
+		// Copy the static lmap...
+		for (unsigned int i = 0; i < LightMapSize; i++)
+		{
+			lmapR[i] = mStaticLmap[i].R << 8;
+			lmapG[i] = mStaticLmap[i].G << 8;
+			lmapB[i] = mStaticLmap[i].B << 8;
 		}
-
 
 		ObjectToLightMap::const_iterator lmap_it = mSwitchableLmaps.begin();
 
-		for  (;lmap_it != mSwitchableLmaps.end(); ++lmap_it) {
+		for  (;lmap_it != mSwitchableLmaps.end(); ++lmap_it) 
+		{
 			lmpixel* act_lmap = lmap_it->second;
 
 			int light_id = lmap_it->first;
@@ -442,23 +478,29 @@ namespace Opde {
 			std::map<int, float>::iterator intens_it = mIntensities.find(light_id);
 
 			// Just to be sure we get the intensity
-			if (intens_it == mIntensities.end())  {
+			if (intens_it != mIntensities.end())  
+				intensity = intens_it->second;				
+			else 
 				mIntensities.insert(std::make_pair(light_id, 0.0f));
-			} else {
-				intensity = intens_it->second;
-			}
 
-			if (intensity > 0) {
-				for (unsigned int i = 0; i < mSizeX * mSizeY; i++) {
-					f_lmap[i] += intensity * act_lmap[i];
+			uint32 Intens = intensity * 256;
+			if (Intens > 0) 
+			{
+				for (unsigned int i = 0; i < LightMapSize; i++)
+				{
+					lmapR[i] = Intens * act_lmap[i].R; 
+					lmapG[i] = Intens * act_lmap[i].G; 
+					lmapB[i] = Intens * act_lmap[i].B; 
 				}
 			}
 		}
 
-		mOwner->updateLightMapBuffer(*mPosition, f_lmap);
+		mOwner->updateLightMapBuffer(*mPosition, lmapR, lmapG, lmapB);
 
-		// Get rid of the helping array
-		delete[] f_lmap;
+		// Get rid of the helping arrays
+		delete[] lmapR;
+		delete[] lmapG;
+		delete[] lmapB;
 	}
 
 	lmpixel* LightMap::convert(char *data, int sx, int sy, int ver) {

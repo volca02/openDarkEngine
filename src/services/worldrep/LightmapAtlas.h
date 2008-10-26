@@ -411,6 +411,10 @@ namespace Opde {
 			/** Updated the pixel buffer with a new version of the lightmap. This version converts the Vector3 floats to 0-255 range (checks limits) 
 			* \warning Must be called after atlas locking, otherwise the program will crash ! */
 			void updateLightMapBuffer(FreeSpaceInfo& fsi, Ogre::Vector3* rgb);
+
+			/** Updated the pixel buffer with a new version of the lightmap. This version converts the uint32 (shifted by 8) to 0-255 range (checks limits) 
+			* \warning Must be called after atlas locking, otherwise the program will crash ! */
+			inline void LightAtlas::updateLightMapBuffer(FreeSpaceInfo& fsi, unsigned int *lR, unsigned int *lG, unsigned int *lB);
 			
 			/** Register that animated light ID maps to the LightMap instance */
 			void registerAnimLight(int id, LightMap* target);
