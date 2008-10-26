@@ -221,6 +221,10 @@ namespace Ogre {
 		// Ensure the camera is updated (otherwise we'd have problems if it updated while in the upcoming loop)
 		static_cast<DarkCamera*>(cam)->updateFrustum();
 		static_cast<DarkCamera*>(cam)->updateView();
+		
+		// update the camera's internal visibility list
+		static_cast<DarkCamera*>(cam)->updateVisibleCellList();
+		
 
 		MovablesForRendering movablesForRendering; // using a tag (frameNum) would probably be faster. hmm.
 

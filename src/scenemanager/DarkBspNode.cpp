@@ -36,7 +36,11 @@ $Id$
 namespace Ogre {
 
     //-----------------------------------------------------------------------
-    BspNode::BspNode(SceneManager* owner, int id, int leafID, bool isLeaf) : mID(id), mLeafID(leafID), mViewRect(PortalRect::EMPTY) {
+    BspNode::BspNode(SceneManager* owner, int id, int leafID, bool isLeaf) : 
+			mID(id), 
+			mLeafID(leafID), 
+			mFrameNum(0x0FFFF),
+			mViewRect(PortalRect::EMPTY) {
         
         mOwner = owner;
         mIsLeaf = isLeaf;
@@ -46,7 +50,6 @@ namespace Ogre {
 		mCellFragment.fragmentType = SceneQuery::WFT_CUSTOM_GEOMETRY;
 		mCellFragment.geometry = this;
 		
-		mFrameNum = -1;
 		mInitialized = false;
 		
 		mFront = NULL;

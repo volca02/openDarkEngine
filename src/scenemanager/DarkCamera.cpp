@@ -32,7 +32,7 @@
 namespace Ogre {
 	
 	// ----------------------------------------------------------------------
-	DarkCamera::DarkCamera(const String& name, SceneManager* sm) : Camera(name, sm) {
+	DarkCamera::DarkCamera(const String& name, SceneManager* sm) : Camera(name, sm), mIsDirty(false) {
 		mBspTree = static_cast<DarkSceneManager*>(mSceneMgr)->getBspTree();
 		mLastFrameNum = -1;
 	}
@@ -47,7 +47,7 @@ namespace Ogre {
 		Camera::updateFrustumImpl();
 		
 		// If we're here, camera changed, so we need to update the cell list
-		updateVisibleCellList();
+		mIsDirty = true;
 	}
 	
 	// ----------------------------------------------------------------------
@@ -56,14 +56,14 @@ namespace Ogre {
 		Camera::updateViewImpl();
 		
 		// If we're here, camera changed, so we need to update the cell list
-		updateVisibleCellList();
+		mIsDirty = true;
 	}
 	
 	// ----------------------------------------------------------------------
 	void DarkCamera::_notifyMoved(void) {
 		Camera::_notifyMoved();
 		
-		updateVisibleCellList();
+		mIsDirty = true;
 	}
 	
 	// ----------------------------------------------------------------------
@@ -78,7 +78,7 @@ namespace Ogre {
 		// Clear the cache of visible cells
 		int frameNum = static_cast<DarkSceneManager*>(mSceneMgr)->mFrameNum;
 		
-		if (frameNum == mLastFrameNum) // nothing to do...
+		if (frameNum == mLastFrameNum && !mIsDirty) // nothing to do...
 			return;
 		
 		// Look for our root cell
@@ -212,6 +212,7 @@ namespace Ogre {
 		}
 		
 		mLastFrameNum = frameNum;
+		mIsDirty = false;
 		mCellCount = mVisibleCells.size();
 
 		// All done!

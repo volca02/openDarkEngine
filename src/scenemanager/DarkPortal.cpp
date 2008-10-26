@@ -60,7 +60,11 @@ namespace Ogre {
 	
 	
 	// ---------------------------------------------------------------------------------	
-	Portal::Portal(BspNode* source, BspNode* target, Plane plane) : ConvexPolygon(plane) {
+	Portal::Portal(BspNode* source, BspNode* target, Plane plane) : 
+			ConvexPolygon(plane), 
+			mScreenRect(PortalRect::EMPTY),
+			mActualRect(PortalRect::EMPTY) {
+				
 		mFrameNum = 0xFFFFF;
 		mMentions = 0;
 		

@@ -51,14 +51,14 @@ namespace Ogre {
 			
 			unsigned long getTraversalTime(void) const { return mTraversalTime; };
 			unsigned long getVisibleCellCount(void) const { return mCellCount; };
+			
 		protected:
 			/// The camera's position has changed and need's a recalc (overriden from Frustum::updateFrustumImpl)
 			virtual void updateFrustumImpl(void) const;
 			
 			virtual void updateViewImpl(void) const;
-			
-			void updateVisibleCellList() const;
 		
+			void updateVisibleCellList() const;
 			
 			// The BSP tree used to update the visible cells
 			BspTree* mBspTree;
@@ -69,6 +69,7 @@ namespace Ogre {
 			
 			mutable unsigned long mTraversalTime;
 			mutable unsigned int mCellCount;
+			mutable bool mIsDirty;
 	};
 	
 };
