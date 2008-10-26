@@ -488,9 +488,9 @@ namespace Opde {
 			{
 				for (unsigned int i = 0; i < LightMapSize; i++)
 				{
-					lmapR[i] = Intens * act_lmap[i].R; 
-					lmapG[i] = Intens * act_lmap[i].G; 
-					lmapB[i] = Intens * act_lmap[i].B; 
+					lmapR[i] += Intens * act_lmap[i].R; 
+					lmapG[i] += Intens * act_lmap[i].G; 
+					lmapB[i] += Intens * act_lmap[i].B; 
 				}
 			}
 		}
