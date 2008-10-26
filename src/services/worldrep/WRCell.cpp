@@ -40,7 +40,24 @@ using namespace Ogre;
 namespace Opde {
 
 	//------------------------------------------------------------------------------------
-	WRCell::WRCell(WorldRepService* owner, Ogre::DarkGeometry* targetGeom) : cellNum(-1), atlased(false), loaded(false), portalsDone(false), mOwner(owner), mLevelGeometry(targetGeom) {
+	WRCell::WRCell(WorldRepService* owner, Ogre::DarkGeometry* targetGeom) : 
+			cellNum(-1), 
+			atlased(false),
+			loaded(false),
+			portalsDone(false),
+			mOwner(owner),
+			mLevelGeometry(targetGeom),
+			vertices(NULL),
+			face_maps(NULL),
+			face_infos(NULL),
+			poly_indices(NULL),
+			planes(NULL),
+			anim_map(NULL),
+			lm_infos(NULL),
+			lmaps(NULL),
+			lmcounts(NULL),
+			obj_indices(NULL),
+			lightMaps(NULL) {
 		bspNode = NULL;
 	}
 

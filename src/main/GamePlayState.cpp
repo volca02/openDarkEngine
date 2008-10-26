@@ -184,9 +184,6 @@ namespace Opde {
 
 		// mConsole->setActive(false);
 
-		// clear the scene
-		mSceneMgr->clearScene();
-
 		mPortalOverlay->hide();
 		mDebugOverlay->hide();
 		mConsole->setActive(false);

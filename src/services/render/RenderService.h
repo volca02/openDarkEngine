@@ -181,6 +181,9 @@ namespace Opde {
 			/// Cretes a ramp mesh, that is used as a default mesh when not specified otherwise
 			void createRampMesh();
 			
+			/// prepares the object service structures used by renderer service
+			void createProperties();
+			
    			/// A package of a light and it's scene node
 			struct LightInfo {
 				Ogre::Light* light;
@@ -199,6 +202,12 @@ namespace Opde {
 				Ogre::SceneNode* node;
 				EntityMaterialInstance* emi;
 			};
+
+
+			/** Destroys all the allocated resources in the given EntityInfo struct
+			*/
+			void destroyEntityInfo(EntityInfo& ei);
+			
 
 			/// Creates a new light with next to no initialization
 			LightInfo& createLight(int objID);

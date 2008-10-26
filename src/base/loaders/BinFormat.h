@@ -319,7 +319,7 @@ typedef struct {
     char                num_joints;     // Number of joints?
     int16_t             num_polys;        // Polygon count (Count for U4 * 16)
     int16_t             num_vertices;       // Total Vertex count
-    uint32_t            num_stretchy;       // Stretchy Vertexes + x_count == p_count?
+    uint32_t            num_stretchy;       // Stretchy Vertexes - blended between two joints
     uint32_t            offset_joint_remap;      // Joint map?, num_joints elements
     uint32_t            offset_mappers;      // joint mapping definitions
     uint32_t            offset_mats;    // looks likes material offset, see object header
@@ -328,7 +328,7 @@ typedef struct {
     uint32_t            offset_norm;    // (U6-U5) = Normals
     uint32_t            offset_vert;    // (U7-U6) = Vertexes (munged) - num_vertices
     uint32_t            offset_uvmap;   // (U8-U7) = UV maps. Z is junk (count - the same as vertex count)
-    uint32_t            offset_blends;  // Floats (num_stretchy). Blending factors. All in the range 0-1
+    uint32_t            offset_blends;  // Floats (num_stretchy). Blending factors. All in the range 0-1. Probably blend factors between two joints. Count - the same as num_stretchy
     uint32_t            offset_U9;      // Zero. All the time it seems
 } AIMeshHeader;
 

@@ -94,11 +94,14 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	RenderService::~RenderService() {
+        LOG_INFO("RenderService::~RenderService()");
 	}
 
 	// --------------------------------------------------------------------------
 	void RenderService::shutdown() {
-        LOG_INFO("RenderService::~RenderService()");
+		LOG_INFO("RenderService::shutdown()");
+
+        clear();
 
 		if (mPropPosition != NULL)
 		    mPropPosition->unregisterListener(mPropPositionListenerID);
@@ -816,26 +819,29 @@ namespace Opde {
 		if (it != mEntityMap.end()) {
 			LOG_VERBOSE("RenderService: Destroying the entity for %d", id);
 			
-			SceneNode* node = it->second.node;
-			// SceneNode* node = getSceneNode(id);
-				
-			assert(node != NULL);
-			
-			node->detachObject(it->second.entity);
-
-			// destroy the emi
-			delete it->second.emi;
-				
-
-			// destroy the detached entity
-			mSceneMgr->destroyEntity(it->second.entity);
-			
-			// destroy the scenenode of the entity
-			mSceneMgr->destroySceneNode(node->getName());
+			destroyEntityInfo(it->second);
 			
 			// erase the record itself
 			mEntityMap.erase(it);
 		}
+    }
+    
+	// --------------------------------------------------------------------------
+    void RenderService::destroyEntityInfo(EntityInfo& ei) {
+    	SceneNode* node = ei.node;
+			
+		assert(node != NULL);
+		
+		node->detachObject(ei.entity);
+
+		// destroy the emi
+		delete ei.emi;
+			
+		// destroy the detached entity
+		mSceneMgr->destroyEntity(ei.entity);
+		
+		// destroy the scenenode of the entity
+		mSceneMgr->destroySceneNode(node->getName());
     }
 
 	// --------------------------------------------------------------------------
@@ -911,6 +917,14 @@ namespace Opde {
 
     // --------------------------------------------------------------------------
     void RenderService::clear() {
+    	// free the emi's
+		ObjectEntityMap::iterator it = mEntityMap.begin();
+		
+		for (;it != mEntityMap.end(); ++it) {
+			destroyEntityInfo(it->second);
+		}
+    	
+    	// then clear the map
         mEntityMap.clear();
     }
 
@@ -1034,6 +1048,7 @@ namespace Opde {
 		}
 	}
 
+	// --------------------------------------------------------------------------
 	void RenderService::prepareHardcodedMedia() {
 		// 1. The default texture - Jorge (recreated to be nearly the same visually)
 		TexturePtr jorgeTex = TextureManager::getSingleton().getByName("jorge.png");
@@ -1145,6 +1160,26 @@ namespace Opde {
 		msh->load();
 		
 		prepareMesh(DEFAULT_RAMP_OBJECT_NAME);
+	}
+	
+	// --------------------------------------------------------------------------
+	void RenderService::createProperties() {
+		// TODO: Fill this. We want all the properties used in services hardcoded in them
+		// Ok, what do we have here?
+		// Model Name. Simple fixed-length string prop
+		// Fixed on version 2.16
+		
+		
+		// RenderType property - single int property
+		
+		// RenderAlpha property - single float prop
+		
+		// HasRefs - single bool prop
+		
+		// Light - a more complex property - this should be moved to LightService
+		
+		// Spotlight - as above
+		
 	}
 
 

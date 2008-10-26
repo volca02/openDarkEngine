@@ -47,7 +47,9 @@ using namespace Ogre;
 
 namespace Opde {
 	// Implementation of the WorldRep service
-	WorldRepService::WorldRepService(ServiceManager *manager, const std::string& name) : Service(manager, name) {
+	WorldRepService::WorldRepService(ServiceManager *manager, const std::string& name) : 
+		Service(manager, name),
+		mNumCells(0) {
 	    // ResourceGroupManager::getSingleton().setWorldResourceGroupName(TEMPTEXTURE_RESOURCE_GROUP);
 
 	}
@@ -119,6 +121,9 @@ namespace Opde {
 	    }
 
 		if (m.change == DBC_LOADING && m.dbtype == DBT_MISSION) {
+			// If there is some scene already, clear it
+			clearData();
+
             // Initialize materials here:
             loadMaterials(m.db);
 
@@ -165,7 +170,7 @@ namespace Opde {
 	void WorldRepService::unload() {
 	    mIndexes.setNull();
 	    
-	    mSceneMgr->clearScene();
+	    mSceneMgr->destroyGeometry("LEVEL_GEOMETRY"); 
 	    
 		mTxtScaleMap.clear();
 
@@ -225,9 +230,6 @@ namespace Opde {
 		wr_hdr_t header;
 		wrChunk->read(&header, sizeof(wr_hdr_t));
 
-		// If there is some scene already, clear it
-		// clearData();
-
 		mNumCells = header.num_cells;
 
 		mAtlas = new LightAtlasList();
@@ -237,7 +239,7 @@ namespace Opde {
 		mWorldGeometry = mSceneMgr->createGeometry("LEVEL_GEOMETRY"); // will be deleted on clear_scene
 		mWorldGeometry->setCellCount(header.num_cells);
 
-		for (uint32_t i = 0; i<header.num_cells; i++) {
+		for (uint32_t i = 0; i < mNumCells; i++) {
             mCells[i] = new WRCell(this, mWorldGeometry);
 		}
 
@@ -362,8 +364,6 @@ namespace Opde {
 		// We have done all we could, bringing the level data to the SceneManager. Now delete the used data
 		LOG_DEBUG("Worldrep: Freeing temporary buffers");
 		
-		delete[] mCells;
-		mCells = NULL;
 		delete[] mExtraPlanes;
 		mExtraPlanes = NULL;
 		LOG_DEBUG("Worldrep: Freeing done");
