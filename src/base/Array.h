@@ -116,14 +116,22 @@ namespace Opde {
 			}
 			
 			/// member reference array operator
-			T& operator[](int index) {
-				if (index+1 < mMinIndex)
-					OPDE_ARRAY_EXCEPT("Array: Index out of bounds");
+			T& operator[](int index) 
+			{
+				if(index < 0)
+				{
+					if (index+1 < mMinIndex)
+						OPDE_ARRAY_EXCEPT("Array: Index out of bounds");
 					
-				if (index > mMaxIndex)
-					OPDE_ARRAY_EXCEPT("Array: Index out of bounds");
-					
-				return index < 0 ? (mNegativeArray[-index - 1]) : (mPositiveArray[index]);
+					return (mNegativeArray[-index - 1]);
+				}
+				else
+				{					
+					if (index > mMaxIndex)
+						OPDE_ARRAY_EXCEPT("Array: Index out of bounds");
+
+					return (mPositiveArray[index]);
+				}
 			}
 			
 			/// Grows the array. New sizes have to be greater the old - so no objects are removed
