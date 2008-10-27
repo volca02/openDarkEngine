@@ -169,7 +169,7 @@ namespace Opde {
 				mConfigService->setParam("mission", "earth.mis");
 			else
 				mConfigService->setParam("mission", "miss1.mis");
-		}
+		}		
 
         // TODO: Remove this temporary nonsense. In fact. Remove the whole class this method is in!
         GamePlayState* ps = new GamePlayState();
@@ -228,17 +228,26 @@ namespace Opde {
 	void GameStateManager::setupResources(void) {
 		// First, register the script loaders...
 		// Load resource paths from config file
-		String configName = "resources.cfg";
+		String configName = "resources.cfg", GameType = "Default";
 		
 		//Load the resources according to the game type, if game type not specified, load the default
 		if((mGameType == "T1") || (mGameType == "t1"))
+		{
 			configName = "thief1.cfg";
+			GameType = "Thief TDP/G";
+		}
 		else if((mGameType == "T2") || (mGameType == "t2"))
+		{
 			configName = "thief2.cfg";
+			GameType = "Thief II TMA";
+		}
 		else if((mGameType == "SS2") || (mGameType == "ss2"))
+		{
 			configName = "shock2.cfg";
+			GameType = "System Shock 2";
+		}
 		
-		
+		LOG_INFO("Game type: %s", GameType.c_str());
 		
 		mRoot->loadResourceConfig(configName);
 	}
