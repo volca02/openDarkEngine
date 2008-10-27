@@ -191,6 +191,8 @@ namespace Opde {
 		// Main while-loop
 		unsigned long lTimeCurrentFrame = 0;
 
+		RenderWindow * AutoCreatedWindow = mOgreRoot->getAutoCreatedWindow();
+
 		while( !mTerminate ) {
 			// Calculate time since last frame and remember current time for next frame
 			mTimeLastFrame = lTimeCurrentFrame;
@@ -209,6 +211,10 @@ namespace Opde {
 
 			// Deal with platform specific issues
 			Ogre::WindowEventUtilities::messagePump();
+
+			//Check if our window has been destroyed
+			if(AutoCreatedWindow->isClosed())
+				break;
 		}
 
         while (!mStateStack.empty()) {
