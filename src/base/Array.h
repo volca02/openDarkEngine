@@ -97,14 +97,22 @@ namespace Opde {
 			}
 			
 			/// member const reference array operator
-			const T& operator[](int index) const {
-				if (index+1 < mMinIndex)
-					OPDE_ARRAY_EXCEPT("Array: Index out of bounds");
+			const T& operator[](int index) const 
+			{
+				if(index < 0)
+				{
+					if (index+1 < mMinIndex)
+						OPDE_ARRAY_EXCEPT("Array: Index out of bounds");
 					
-				if (index > mMaxIndex)
-					OPDE_ARRAY_EXCEPT("Array: Index out of bounds");
-				
-				return index < 0 ? (mNegativeArray[-index - 1]) : (mPositiveArray[index]);
+					return (mNegativeArray[-index - 1]);
+				}
+				else
+				{					
+					if (index > mMaxIndex)
+						OPDE_ARRAY_EXCEPT("Array: Index out of bounds");
+
+					return (mPositiveArray[index]);
+				}
 			}
 			
 			/// member reference array operator
