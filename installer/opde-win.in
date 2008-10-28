@@ -259,6 +259,7 @@ Section "openDarkEngine (required)"
 
 	SetOutPath $INSTDIR
 	File @PROJECT_BINARY_DIR@\src\main\release\opde.exe
+	File @PROJECT_BINARY_DIR@\src\main\release\opdeScript.exe
 	File @PROJECT_BINARY_DIR@\src\main\release\opdeLib.dll
 	File @PROJECT_BINARY_DIR@\thirdparty\QuickGUI\src\release\QuickGUI.dll
 	File /oname=opde.cfg @CMAKE_CURRENT_SOURCE_DIR@\installer\opde-sample.cfg
@@ -301,6 +302,7 @@ Section "Uninstall"
 
 	; Remove files and uninstaller
 	Delete $INSTDIR\opde.exe
+	Delete $INSTDIR\opdeScript.exe
 	Delete $INSTDIR\*.cfg
 	Delete $INSTDIR\*.log
 	Delete $INSTDIR\*.dll
