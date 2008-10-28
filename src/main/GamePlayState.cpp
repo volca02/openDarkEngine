@@ -268,17 +268,18 @@ namespace Opde {
 		
 		mConsole->update(timePassed);
 
-		// Temporary: Debug Overlay
-		static String currFps = "Current FPS: ";
-		static String avgFps = "Average FPS: ";
-		static String bestFps = "Best FPS: ";
-		static String worstFps = "Worst FPS: ";
-		static String tris = "Triangle Count: ";
-		static String batches = "Batch Count: ";
-
 		if (mDebug) {
 			// update stats when necessary
 			try {
+
+				// Temporary: Debug Overlay
+				static String currFps = "Current FPS: ";
+				static String avgFps = "Average FPS: ";
+				static String bestFps = "Best FPS: ";
+				static String worstFps = "Worst FPS: ";
+				static String tris = "Triangle Count: ";
+				static String batches = "Batch Count: ";
+
 				OverlayElement* guiAvg = OverlayManager::getSingleton().getOverlayElement("Opde/AverageFps");
 				OverlayElement* guiCurr = OverlayManager::getSingleton().getOverlayElement("Opde/CurrFps");
 				OverlayElement* guiBest = OverlayManager::getSingleton().getOverlayElement("Opde/BestFps");

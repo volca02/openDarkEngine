@@ -191,12 +191,13 @@ namespace Opde {
 		// Main while-loop
 		unsigned long lTimeCurrentFrame = 0;
 
+		Timer * CentralTimer = mOgreRoot->getTimer();
 		RenderWindow * AutoCreatedWindow = mOgreRoot->getAutoCreatedWindow();
 
 		while( !mTerminate ) {
 			// Calculate time since last frame and remember current time for next frame
 			mTimeLastFrame = lTimeCurrentFrame;
-			lTimeCurrentFrame = mOgreRoot->getTimer()->getMilliseconds();
+			lTimeCurrentFrame = CentralTimer->getMilliseconds();
 			
 			unsigned long lTimeSinceLastFrame = lTimeCurrentFrame - mTimeLastFrame;
 
