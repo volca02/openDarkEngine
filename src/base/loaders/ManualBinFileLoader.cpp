@@ -1394,15 +1394,12 @@ namespace Ogre {
             TextureUnitState* tus;
 
 			// TODO: This ugly code should be in some special service. Name it ToolsService (getObjectTextureFileName, etc) and should handle language setting!
-            String txtname = String("txt16/") + String(mat.name);
-            // First, let's look into txt16 dir, then into the txt dir. I try to
-             try {
-                TextureManager::getSingleton().load(txtname,
-                    ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, TEX_TYPE_2D);
-             } catch (Exception) {
-                    // Error loading from txt16...
-                    txtname = String("txt/") + String(mat.name);
-                }
+			String txtname = String("txt16/") + String(mat.name);
+
+			if (!ResourceGroupManager::getSingleton().resourceExists(ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, String("txt16/") + String(mat.name))) {
+               // Not in txt16, will be in txt then...
+               txtname = String("txt/") + String(mat.name);
+            }
 
 			pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
 			pass->setAlphaRejectSettings(CMPF_GREATER, 128); // Alpha rejection. 
