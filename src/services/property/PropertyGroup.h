@@ -127,7 +127,7 @@ namespace Opde {
 			/** Clears the whole property group.
 			* Clears out all the properties, and broadcasts PROP_GROUP_CLEARED
 			*/
-			void clear();
+			virtual void clear();
 
 			/** Creates a property for given object ID, using the default values for the property fields
 			* @param obj_id The id of the object to create the property for
@@ -156,7 +156,7 @@ namespace Opde {
 			* @return true if the change was sucessful
 			* @see owns
 			* @note Will log error when object id does not own the property to be changed */
-			bool set(int id, const std::string& field, const DVariant& value);
+			virtual bool set(int id, const std::string& field, const DVariant& value);
 
 			/** Direct data getter
 			* @param id object id
@@ -165,7 +165,7 @@ namespace Opde {
 			* @see owns
 			* @return false if field name was invalid, true if value was set in target
 			*/
-			bool get(int id, const std::string& field, DVariant& target);
+			virtual bool get(int id, const std::string& field, DVariant& target);
 			
 			/** Notification that an object was destroyed. @see PropertyService::objectDestroyed */
 			void objectDestroyed(int id);
@@ -181,6 +181,9 @@ namespace Opde {
 			void grow(int minID, int maxID);
 
 		protected:
+			// storage-less property constructor. Used by properties which want to construct their storage on their own
+			PropertyGroup(PropertyService* owner, const std::string& name, const std::string& chunk_name,  std::string inheritorName);
+
 			/** Does the internal handling related to the creation of a property for object
 			* @param objID The object id to which a property was added
 			*/
@@ -188,6 +191,12 @@ namespace Opde {
 
             /// The listener to the inheritance messages
             void onInheritChange(const InheritValueChangeMsg& msg);
+
+			/** A connection point usable for descendants to implement property behavior. 
+			* Called from onInheritChange. In it's default this does nothing.
+			* @see ActiveProperty
+			*/
+			virtual void onPropertyModification(const InheritValueChangeMsg& msg);
 
 			/** Returns an ID of the object which is responsible for the current property values
 			* As the properties can be inherited using both archetype links and MetaProps,
@@ -225,9 +234,46 @@ namespace Opde {
 			bool mBuiltin;
 	};
 
-	/// Shared pointer to property group
-	// typedef shared_ptr<PropertyGroup> PropertyGroupPtr;
+	/** Common ancestor to engine-implemented properties - those that handle property value in a "visible" way.
+	* Every class inheriting from this should implement all the abstract methods (sure) and also some of the 
+	* virtual ones, for example clear, which can happen to be called instead of removeProperty when unloading data.
+	* @note All the methods introduced here are only called on concrete objects!
+	*/
+	class OPDELIB_EXPORT ActiveProperty : public PropertyGroup {
+		public:
+			ActiveProperty(PropertyService* owner, const std::string& name, 
+							const std::string& chunk_name, std::string inheritorName);
+		protected:
+			/// Overriden from the ancestor, which handles the property life/value events
+			void onPropertyModification(const InheritValueChangeMsg& msg);
 
+			/** Handles the addition of the property to the object.
+			* Called when a property is effectively added to the object (regardless of it's source - inherited or direct).
+			* A function hooked here should initialise the internal structure that is used per object
+			*/
+			virtual void addProperty(int oid) = 0;
+
+			/** Removes the property from the object.
+			* Called when the property stops it's existence
+			*/
+			virtual void removeProperty(int oid) = 0;
+
+			/** Re-reads the values of the property from different source, rebuilds it's values.
+			* Called when, thanks to the inheritance/metaproperty changes, the oid object should re-set the internal values
+			* based on a different source object.
+			* @note Only properties which inherit values need this.
+			*/
+			virtual void setPropertySource(int oid, int effid) {};
+
+			/** A field of the property changed event. 
+			* Called on all objects effectively inheriting values from some source object (not specified).
+			* @note This kind of event is typically only fired when changing the property of the object itself, or in editor mode. This is thanks to the fact that no archetype changes are possible in gameplay mode
+			* @param oid The object id of the object onto which the change applies
+			* @param field the field name of the property onto which the change applies (or empty for one-valued properties)
+			* @param value the new value of the propertie's field
+			*/
+			virtual void valueChanged(int oid, const std::string& field, const DVariant& value) = 0;
+	};
 }
 
 #endif

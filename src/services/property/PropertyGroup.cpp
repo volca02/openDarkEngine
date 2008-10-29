@@ -54,6 +54,27 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
+	PropertyGroup::PropertyGroup(PropertyService* owner, const std::string& name, const std::string& chunk_name, 
+		std::string inheritorName) : 
+			mName(name),
+			mChunkName(chunk_name),
+			mVerMaj(1),
+			mVerMin(1),
+			mPropertyStorage(NULL),
+			mOwner(owner),
+			mBuiltin(false) {
+
+		// Find the inheritor by the name, and assign too
+		InheritServicePtr inhs = static_pointer_cast<InheritService>(ServiceManager::getSingleton().getService("InheritService"));
+		mInheritor = inhs->createInheritor(inheritorName);
+
+		// And as a final step, register as inheritor listener
+		Inheritor::ListenerPtr cil = new ClassCallback<InheritValueChangeMsg, PropertyGroup>(this, &PropertyGroup::onInheritChange);
+
+        mInheritorListenerID = mInheritor->registerListener(cil);
+	}
+
+	// --------------------------------------------------------------------------
 	PropertyGroup::~PropertyGroup() {
 	}
 	
@@ -209,7 +230,13 @@ namespace Opde {
 	
 	// --------------------------------------------------------------------------
 	bool PropertyGroup::set(int id, const std::string& field, const DVariant& value) {
-		return mPropertyStorage->setField(id, field, value);
+		if (mPropertyStorage->setField(id, field, value)) {
+			mInheritor->valueChanged(id, field, value);
+
+			return true;
+		}
+
+		return false;
 	}
 
 	// --------------------------------------------------------------------------
@@ -226,6 +253,7 @@ namespace Opde {
     // --------------------------------------------------------------------------
     void PropertyGroup::onInheritChange(const InheritValueChangeMsg& msg) {
             // Consult the inheritor value change, and build a property change message
+			onPropertyModification(msg);
 
             /* The broadcast of the property change is not done directly in the methods above but here.
             The reason for this is that only the inheritor knows the real character of the change, and the objects that the change inflicted
@@ -238,7 +266,7 @@ namespace Opde {
                 case INH_VAL_ADDED: // Property was added to an object
                     pmsg.change = PROP_ADDED;
                     break;
-                case INH_VAL_CHANGED: // property changed inherit src or value
+                case INH_VAL_CHANGED: // property changed inherit value
                     pmsg.change = PROP_CHANGED;
                     break;
                 case INH_VAL_REMOVED: // property does not exist any more on the object (and not inherited)
@@ -250,6 +278,11 @@ namespace Opde {
 
             broadcastMessage(pmsg);
     }
+
+	// --------------------------------------------------------------------------
+	void PropertyGroup::onPropertyModification(const InheritValueChangeMsg& msg) {
+		// nothing at all
+	}
     
     // --------------------------------------------------------------------------
     void PropertyGroup::objectDestroyed(int id) {
@@ -265,6 +298,39 @@ namespace Opde {
 	void PropertyGroup::grow(int minID, int maxID) {
 		mPropertyStorage->grow(minID, maxID);
 		mInheritor->grow(minID, maxID);
+	}
+
+	// --------------------------------------------------------------------------
+	// ----------- ActiveProperty -----------------------------------------------
+	// --------------------------------------------------------------------------
+	ActiveProperty::ActiveProperty(PropertyService* owner, const std::string& name, 
+		const std::string& chunk_name, std::string inheritorName) :
+			PropertyGroup(owner, name, chunk_name, inheritorName) {
+	};
+
+	// --------------------------------------------------------------------------
+	void ActiveProperty::onPropertyModification(const InheritValueChangeMsg& msg) {
+		// we only handle concretes here
+		if (msg.objectID <= 0)
+				return;
+
+		// dispatch based on the msg.change
+		switch (msg.change) {
+            case INH_VAL_ADDED: // Property was added to an object
+				addProperty(msg.objectID);
+                break;
+            case INH_VAL_CHANGED: // property changed inherit value
+				removeProperty(msg.objectID);
+                break;
+            case INH_VAL_REMOVED: // property does not exist any more on the object (and not inherited)
+				setPropertySource(msg.objectID, msg.srcID);
+                break;
+            case INH_VAL_FIELD_CHANGED: // property changed a value, affecting the given object
+				valueChanged(msg.objectID, msg.field, msg.value);
+                break;
+			default:
+                return;
+        }
 	}
 }
 

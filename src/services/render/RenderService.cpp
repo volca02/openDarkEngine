@@ -59,7 +59,95 @@ namespace Opde {
 	const char* DEFAULT_RAMP_OBJECT_NAME = "DefaultRamp";
 	const char* FX_PARTICLE_OBJECT_NAME =	"FX_PARTICLE";
 
-	
+	/*--------------------------------------------------------*/
+	/*--------------------- EntityInfo -----------------------*/
+	/*--------------------------------------------------------*/
+	EntityInfo::EntityInfo(Ogre::SceneManager* man, Ogre::Entity* entity, Ogre::SceneNode* node) : 
+		mSceneMgr(man),
+		mRenderType(RENDER_TYPE_NORMAL),
+		mHasRefs(true),
+		mSkip(false),
+		mAlpha(1.0f),
+		mEntity(entity), 
+		mNode(node),
+		mEmi(NULL) {
+		
+		mEmi = new EntityMaterialInstance(mEntity);
+		mEmi->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+		// mEmi->setSceneBlending(SBT_MODULATE);
+	};
+
+	// --------------------------------------------------------------------------
+	EntityInfo::~EntityInfo() {
+		// 
+		mNode->detachObject(mEntity);
+		
+		delete mEmi;
+
+		mSceneMgr->destroyEntity(mEntity);
+		
+		mSceneMgr->destroySceneNode(mNode->getName());
+	}
+
+	// --------------------------------------------------------------------------
+	void EntityInfo::setHasRefs(bool _hasRefs) {
+		mHasRefs = _hasRefs;
+		refreshVisibility();
+	};
+
+	// --------------------------------------------------------------------------
+	void EntityInfo::setRenderType(unsigned int _renderType) {
+		mRenderType = _renderType;
+		refreshVisibility();
+	};
+
+	// --------------------------------------------------------------------------
+	void EntityInfo::setSkip(bool _skip) {
+		mSkip = _skip;
+		refreshVisibility();
+	};
+
+	// --------------------------------------------------------------------------
+	void EntityInfo::setAlpha(float alpha) {
+		mAlpha = alpha;
+		mEmi->setTransparency(1.0f - mAlpha);
+	};
+
+	// --------------------------------------------------------------------------
+	void EntityInfo::setEntity(Ogre::Entity* entity) {
+		if (mEntity == entity)
+			return;
+
+		// detach the old entity
+		mNode->detachObject(mEntity);
+
+		// attach the new entity
+		mNode->attachObject(entity);
+
+		mEmi->setEntity(entity);
+		
+		// destroy the previous entity
+		mSceneMgr->destroyEntity(mEntity);
+
+		mEntity = entity;
+
+		refreshVisibility();
+	};
+
+	// --------------------------------------------------------------------------
+	void EntityInfo::refreshVisibility() {
+		// calculate the visibilities:
+		bool brType = false;
+
+		switch (mRenderType) {
+			case RENDER_TYPE_NORMAL: brType = true; break;
+			case RENDER_TYPE_NOT_RENDERED: brType = false; break;
+			case RENDER_TYPE_NO_LIGHTMAP: brType = true; break; // Not sure. Seems to indicate shadow should not be cast on lmaps?
+			case RENDER_TYPE_EDITOR_ONLY: brType = true; break; // should be already converted to normal/not_rendered
+		}
+
+		mNode->setVisible(mHasRefs && brType, true);
+	};
 
 	/*--------------------------------------------------------*/
 	/*--------------------- RenderService --------------------*/
@@ -103,23 +191,35 @@ namespace Opde {
 
         clear();
 
+		if (mHasRefsProperty) {
+			mPropertyService->unregisterPropertyGroup(mHasRefsProperty);
+			delete mHasRefsProperty;
+			mHasRefsProperty = NULL;
+		}
+
 		if (mPropPosition != NULL)
 		    mPropPosition->unregisterListener(mPropPositionListenerID);
+		mPropPosition = NULL;
 
 		if (mPropModelName != NULL)
 		    mPropModelName->unregisterListener(mPropModelNameListenerID);
-		    
+		mPropModelName = NULL;
+
 		if (mPropLight != NULL)
 		    mPropLight->unregisterListener(mPropLightListenerID);
-		    
+		mPropLight = NULL;
+
 		if (mPropSpotlight != NULL)
 		    mPropSpotlight->unregisterListener(mPropSpotlightListenerID);
-		    
+		mPropSpotlight = NULL;
+
 		if (mPropRenderType != NULL)
 		    mPropRenderType->unregisterListener(mPropRenderTypeListenerID);
+		mPropRenderType = NULL;
 		    
 		if (mPropScale != NULL)
 		    mPropScale->unregisterListener(mPropScaleListenerID);
+		mPropScale = NULL;
 
 		if (mRenderWindow)
 			mRenderWindow->removeAllViewports();
@@ -182,6 +282,9 @@ namespace Opde {
 		
 		// prepare the default models and textures
 		prepareHardcodedMedia();
+		
+		// create all the properties the render service uses
+		createProperties();
 
 		return true;
     }
@@ -416,9 +519,8 @@ namespace Opde {
 		if (msg.objectID <= 0) // no action for archetypes
             return;
 
-        LOG_INFO("RenderService: Adding Light for object %d", msg.objectID);
+        LOG_VERBOSE("RenderService: Adding Light for object %d", msg.objectID);
 
-        // As a test, I'm loading cube.mesh
         switch (msg.change) {
 			case PROP_CHANGED:
 				// Will update the light's parameters
@@ -440,7 +542,10 @@ namespace Opde {
 				
 			case PROP_REMOVED:
 				removeLight(msg.objectID);
-			
+				break;
+
+			default:
+				OPDE_EXCEPT("Invalid message type for property message", "RenderService::onPropLightMsg");
         }
 	}
 
@@ -455,7 +560,7 @@ namespace Opde {
 		if (msg.objectID <= 0) // no action for archetypes
             return;
             
-		LOG_INFO("RenderService: Adding Spotlight for object %d", msg.objectID);
+		LOG_VERBOSE("RenderService: Adding Spotlight for object %d", msg.objectID);
 
 		switch(msg.change) {
 			case PROP_CHANGED: 
@@ -520,37 +625,36 @@ namespace Opde {
 		switch(msg.change) {
 			case PROP_CHANGED: 
 			case PROP_ADDED: {
-				// It seems this property !only! affects models
-				ObjectEntityMap::iterator it = mEntityMap.find(msg.objectID);
-			
-				if (it != mEntityMap.end()) {
-					SceneNode* node = it->second.node;
-				
-					assert(node != NULL);
-				
-					DVariant mode; 
-					mPropRenderType->get(msg.objectID, "mode", mode);
-					
-					LOG_VERBOSE("RenderService: RenderType prop for obj. %d changed to %d", msg.objectID, mode.toUInt());
-					
-					it->second.renderType = mode.toUInt();
-					
-					setNodeRenderType(node, it->second);
-				} else {
-					LOG_ERROR("RenderService: Could not find an entity info for object %d, could not propagate RenderType", msg.objectID);
+				EntityInfo* ei = _getEntityInfo(msg.objectID);
+
+				// if we don't have ei for the object, it is not initialized just yet
+				// that of course is error - ObjectService should have done this already
+				// But there is a catch - DefaultRoom has id 1, is in the GAM, but has no id in bitmap
+				// an expensive, and maybe not possible, way to deal with this? DonorType...
+				if (ei == NULL) {
+					LOG_ERROR("RenderService::onPropRenderTypeMsg: No EntityInfo for object %d", msg.objectID);
+					return;
 				}
+
+				DVariant mode; 
+				mPropRenderType->get(msg.objectID, "mode", mode);
 				
+				LOG_VERBOSE("RenderService: RenderType prop for obj. %d changed to %d", msg.objectID, mode.toUInt());
+
+				unsigned int uimode = mode.toUInt();
 				
-				return;
+				if (uimode == RENDER_TYPE_EDITOR_ONLY)
+					uimode = mEditorMode ? RENDER_TYPE_NORMAL : RENDER_TYPE_NOT_RENDERED;
+
+				ei->setRenderType(uimode);
+
+				break;
 			}
 				
 			case PROP_REMOVED:
-				// Default is visible (?)
-				ObjectEntityMap::iterator it = mEntityMap.find(msg.objectID);
-			
-				if (it != mEntityMap.end()) {
-					it->second.node->setVisible(true);
-				}
+				EntityInfo* ei = _getEntityInfo(msg.objectID);
+				ei->setRenderType(RENDER_TYPE_NORMAL);
+				
 				break;
 		}
 	}
@@ -560,11 +664,6 @@ namespace Opde {
 		if (msg.objectID <= 0) // no action for archetypes
             return;
             
-		ObjectEntityMap::iterator it = mEntityMap.find(msg.objectID);
-				
-		if (it == mEntityMap.end())
-			return;
-            
 		switch(msg.change) {
 			case PROP_CHANGED: 
 			case PROP_ADDED: {
@@ -573,11 +672,13 @@ namespace Opde {
 				
 				LOG_DEBUG("RenderService: RenderAlpha prop for obj. %d changed to %f", msg.objectID, alpha.toFloat());
 				
-				it->second.emi->setTransparency(1.0f - alpha.toFloat());
+				EntityInfo* ei = _getEntityInfo(msg.objectID);
+				ei->setAlpha(alpha.toFloat());
 				return;
 			} 
 			case PROP_REMOVED:
-				it->second.emi->setTransparency(0);
+				EntityInfo* ei = _getEntityInfo(msg.objectID);
+				ei->setAlpha(1.0f);
 				return;
 		}
 	}
@@ -722,31 +823,11 @@ namespace Opde {
 		}
 	}
 
-
-    // --------------------------------------------------------------------------
-	void RenderService::setNodeRenderType(Ogre::SceneNode* node, const EntityInfo& ei) {
-		// skip flag or hasRefs false will mean no rendering regardless of the renderType value
-		if (ei.skip || !ei.hasRefs) {
-			node->setVisible(false, true);
-		} else {
-			switch(ei.renderType) {
-				case RENDER_TYPE_NORMAL: node->setVisible(true, true); break;
-				case RENDER_TYPE_NOT_RENDERED: node->setVisible(false, true); break;
-				case RENDER_TYPE_NO_LIGHTMAP: node->setVisible(true, true); break;// Not sure. Seems to indicate shadow should not be cast on lmaps?
-				case RENDER_TYPE_EDITOR_ONLY: node->setVisible(mEditorMode, true); break;
-			}
-		}
-	}
-
     // --------------------------------------------------------------------------
     void RenderService::prepareMesh(const Ogre::String& name) {
         String fname = name + ".mesh";
 
-        try {
-            // First, try to load the mesh directly as a mesh file
-            Ogre::MeshPtr mesh1 = Ogre::MeshManager::getSingleton().load(fname, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-
-        } catch (FileNotFoundException) {
+		if (!Ogre::MeshManager::getSingleton().resourceExists(fname)) {
             // Undefine in advance, so there will be no clash
             Ogre::MeshManager::getSingleton().remove(fname);
             // If it is not found
@@ -792,20 +873,8 @@ namespace Opde {
 
 		prepareEntity(ent);
 		
-		EntityInfo ei;
-		
-		ei.entity = ent;
-		ei.node = enode;
-		ei.emi = new EntityMaterialInstance(ent);
-		
-		ei.renderType = RENDER_TYPE_NORMAL; // seems to be the default. Affects Models, Particle effects (DynamicLights?)
-		ei.hasRefs = true;
-		ei.skip = false;
-		setNodeRenderType(node, ei);
-		
-		ei.emi->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-		// ei.emi->setSceneBlending(SBT_MODULATE);
-
+		EntityInfoPtr ei = new EntityInfo(mSceneMgr, ent, enode);
+		ei->refreshVisibility();
 		
 		mEntityMap.insert(make_pair(id, ei));
     }
@@ -818,79 +887,47 @@ namespace Opde {
 		
 		if (it != mEntityMap.end()) {
 			LOG_VERBOSE("RenderService: Destroying the entity for %d", id);
-			
-			destroyEntityInfo(it->second);
-			
-			// erase the record itself
+		
+			// erase the record itself - will destroy the EntityInfo
 			mEntityMap.erase(it);
 		}
     }
     
 	// --------------------------------------------------------------------------
-    void RenderService::destroyEntityInfo(EntityInfo& ei) {
-    	SceneNode* node = ei.node;
-			
-		assert(node != NULL);
-		
-		node->detachObject(ei.entity);
-
-		// destroy the emi
-		delete ei.emi;
-			
-		// destroy the detached entity
-		mSceneMgr->destroyEntity(ei.entity);
-		
-		// destroy the scenenode of the entity
-		mSceneMgr->destroySceneNode(node->getName());
-    }
-
-	// --------------------------------------------------------------------------
 	void RenderService::setObjectModel(int id, const std::string& name) {
-		ObjectEntityMap::iterator it = mEntityMap.find(id);
-			
-		if (it != mEntityMap.end()) {
-			Ogre::String idstr = StringConverter::toString(id);
-			
-			// destroy the prev. entity
-			SceneNode* node = it->second.node;
-				
-			assert(node != NULL);
-			
-			node->detachObject(it->second.entity);
-			
-			if (name == "") { // emty model name means no render
-				// leave in the previous entity, set hidden flag
-				it->second.skip = true;
-				setNodeRenderType(node, it->second);
-				LOG_VERBOSE("RenderService: Mesh rendering for %d disabled", id);
-			} else {
-				Entity *ent;
-				// load the new entity, set it to emi
-				try {
-					ent = mSceneMgr->createEntity( "Object" + idstr + name, name);
-				} catch (Ogre::Exception& e) {
-					// TODO: This could also be handled by not setting the new entity at all
-					LOG_ERROR("RenderService: Could not load model %s for obj %d : %s", name.c_str(), id, e.getFullDescription().c_str());
-					ent = mSceneMgr->createEntity( "Object" + idstr + "Ramp", DEFAULT_RAMP_OBJECT_NAME);
-				}
-				
-				it->second.skip = false;
-				Entity *prevent = it->second.entity;
-				prepareEntity(ent);
-				it->second.entity = ent;
-				it->second.emi->setEntity(ent);
-				
-				node->attachObject(ent);
-				
-				// set the visibility again, node does not propagate to new members!
-				setNodeRenderType(node, it->second);
-				
-				// last, destroy the detached entity
-				mSceneMgr->destroyEntity(prevent);
-			}
-		} else {
-			LOG_FATAL("RenderService: Entity info not found for object %d. Cannot set model!", id);
+		EntityInfo* ei = _getEntityInfo(id);
+
+		// if the new name is empty, just set skip and it's done
+		if (name == "") {		
+			LOG_VERBOSE("RenderService: Mesh rendering for %d disabled", id);
+			ei->setSkip(true);
+			return;
 		}
+
+		// name not empty. Prepare new entity, swap, destroy old
+		
+		Ogre::String idstr = StringConverter::toString(id);
+			
+		Entity *ent = NULL;
+
+		// load the new entity, set it as the current in the entity info
+		try {
+			ent = mSceneMgr->createEntity( "Object" + idstr + name, name);
+		} catch (Ogre::Exception& e) {
+			// TODO: This could also be handled by not setting the new entity at all
+			LOG_ERROR("RenderService: Could not load model %s for obj %d : %s", name.c_str(), id, e.getFullDescription().c_str());
+			ent = mSceneMgr->createEntity( "Object" + idstr + "Ramp", DEFAULT_RAMP_OBJECT_NAME);
+		}
+				
+		Entity *prevent = ei->getEntity();
+
+		prepareEntity(ent);
+
+		// will destroy the previous
+		ei->setEntity(ent);
+
+		// Last step - refresh the skip
+		ei->setSkip(false);
 	}
 
     // --------------------------------------------------------------------------
@@ -917,14 +954,7 @@ namespace Opde {
 
     // --------------------------------------------------------------------------
     void RenderService::clear() {
-    	// free the emi's
-		ObjectEntityMap::iterator it = mEntityMap.begin();
-		
-		for (;it != mEntityMap.end(); ++it) {
-			destroyEntityInfo(it->second);
-		}
-    	
-    	// then clear the map
+		// will destroy all EntityInfos
         mEntityMap.clear();
     }
 
@@ -944,6 +974,17 @@ namespace Opde {
 			SceneNode* sn = mDefaultCamera->getParentSceneNode();
 			sn->detachObject(mDefaultCamera);
 		}
+	}
+
+	// --------------------------------------------------------------------------
+	EntityInfo* RenderService::_getEntityInfo(int oid) {
+		ObjectEntityMap::iterator it = mEntityMap.find(oid);
+			
+		if (it != mEntityMap.end()) {
+			return (it->second.ptr());
+		}
+
+		return NULL;
 	}
 
 	// --------------------------------------------------------------------------
@@ -1164,17 +1205,19 @@ namespace Opde {
 	
 	// --------------------------------------------------------------------------
 	void RenderService::createProperties() {
-		// TODO: Fill this. We want all the properties used in services hardcoded in them
 		// Ok, what do we have here?
 		// Model Name. Simple fixed-length string prop
 		// Fixed on version 2.16
-		
+		//mModelNameStorage = new FixedStringDataStorage();
+		//mPropertyService->createPropertyGroup("ModelName", "ModelName", "always", mModelNameStorage);
 		
 		// RenderType property - single int property
 		
 		// RenderAlpha property - single float prop
 		
 		// HasRefs - single bool prop
+		mHasRefsProperty = new HasRefsProperty(this, mPropertyService.ptr());
+		
 		
 		// Light - a more complex property - this should be moved to LightService
 		

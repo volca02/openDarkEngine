@@ -40,6 +40,8 @@
 #include "ObjectService.h"
 #include "EntityMaterialInstance.h"
 
+#include "HasRefsProperty.h"
+
 #include <OgreEntity.h>
 #include <OgreLight.h>
 #include <OgreSceneNode.h>
@@ -71,6 +73,54 @@ namespace Opde {
 		
 		RenderWindowSize size;
 	} RenderServiceMsg;
+
+	/// A package of an entity and a EntityMaterialInstance
+	class EntityInfo {
+		public:
+			EntityInfo(Ogre::SceneManager* man, Ogre::Entity* entity, Ogre::SceneNode* node);
+
+			// destructor - destroys the 
+			~EntityInfo();
+
+			// setters:
+			void setHasRefs(bool _hasRefs);
+			void setRenderType(unsigned int _renderType);
+			void setSkip(bool _skip);
+			void setAlpha(float alpha);
+
+			void setEntity(Ogre::Entity* newEntity);
+			
+			inline Ogre::Entity* getEntity(void) { return mEntity; };
+			inline Ogre::SceneNode* getSceneNode(void) { return mNode; };
+
+			/// refreshes the visibilty of the object based on hasRefs, renderType and skip
+			void refreshVisibility();
+
+		protected:
+			Ogre::SceneManager* mSceneMgr;
+
+			unsigned int mRenderType;
+
+			bool mHasRefs;
+
+			/// Used by FX_Particle and such. Hides without interfering with the previous two
+			bool mSkip;
+
+			/// alpha transparency value of the object
+			float mAlpha;
+
+			Ogre::Entity* mEntity;
+			Ogre::SceneNode* mNode;
+			EntityMaterialInstance* mEmi;
+	};
+
+	typedef shared_ptr<EntityInfo> EntityInfoPtr;
+
+	/// Map of objectID -> Entity
+	typedef std::map<int, EntityInfoPtr> ObjectEntityMap;
+
+	// forward declaration of the
+	class RenderService;
 
 	/** @brief Render service - service managing in-game object rendering
 	* Some preliminary notes: VHot will probably be converted to TagPoints somehow
@@ -120,7 +170,12 @@ namespace Opde {
 			
 			/** Camera is detached from the specified object */
 			void detachCamera();
+
+			/** Internal method that returns entity info for a given object ID, or NULL if such does not exist */
+			EntityInfo* _getEntityInfo(int oid);
+
 		protected:
+
             virtual bool init();
             virtual void bootstrapFinished();
             virtual void shutdown();
@@ -190,25 +245,6 @@ namespace Opde {
 				Ogre::SceneNode* node;
 			};
 			
-			/// A package of an entity and a EntityMaterialInstance
-			struct EntityInfo {
-				unsigned int renderType;
-				bool hasRefs;
-
-				/// Used by FX_Particle and such. Hides without interfering with the previous two
-				bool skip;
-
-				Ogre::Entity* entity;
-				Ogre::SceneNode* node;
-				EntityMaterialInstance* emi;
-			};
-
-
-			/** Destroys all the allocated resources in the given EntityInfo struct
-			*/
-			void destroyEntityInfo(EntityInfo& ei);
-			
-
 			/// Creates a new light with next to no initialization
 			LightInfo& createLight(int objID);
 			
@@ -223,12 +259,6 @@ namespace Opde {
 			
 			/// removes spotlight quality from a light (leaves the light as a point light)
 			void removeSpotLight(int id);
-
-			/// set's the node's visibility based on the rendertype property value
-			void setNodeRenderType(Ogre::SceneNode* node, const EntityInfo& ei);
-
-			/// Map of objectID -> Entity
-			typedef std::map<int, EntityInfo> ObjectEntityMap;
 
 			ObjectEntityMap mEntityMap;
 
@@ -262,8 +292,6 @@ namespace Opde {
 			PropertyGroup::ListenerID mPropRenderAlphaListenerID;
 			PropertyGroup* mPropRenderAlpha;
 			
-
-
 			/// Shared pointer to the property service
 			PropertyServicePtr mPropertyService;
 
@@ -317,6 +345,8 @@ namespace Opde {
 			
 			/// editor mode display
 			bool mEditorMode;
+
+			HasRefsProperty* mHasRefsProperty;
 	};
 
 	/// Shared pointer to Link service

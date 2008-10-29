@@ -120,6 +120,8 @@ namespace Opde {
 	
 	// -------------------------------------------------------
 	Root::~Root() {
+		LOG_INFO("openDarkEngine is shutting down");
+
 		// if those are used, delete them
 		delete mDTypeScriptLdr;
 		delete mPLDefScriptLdr;
