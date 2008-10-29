@@ -187,6 +187,22 @@ namespace Opde {
         mImplements.clear();
     }
 
+
+	//------------------------------------------------------
+	void CachedInheritor::valueChanged(int objID, const std::string& field, const DVariant& value) {
+		// TODO: search for all inheriting objects, broadcast for each
+		InheritValueChangeMsg msg;
+
+		msg.change = INH_VAL_FIELD_CHANGED;
+
+        msg.objectID = objID;
+        msg.srcID = 0;
+		msg.field = field;
+		msg.value = value;
+
+        broadcastMessage(msg);
+	}
+
     //------------------------------------------------------- Cached Inheritor Factory:
     string CachedInheritorFactory::mName = "always";
 

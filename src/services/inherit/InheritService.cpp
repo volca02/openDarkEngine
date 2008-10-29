@@ -220,6 +220,15 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
+	void InheritService::grow(int minID, int maxID) {
+		InheritorList::iterator it = mInheritors.begin();
+
+		for (; it != mInheritors.end(); ++it) {
+				(*it)->grow(minID, maxID);
+		}
+	}
+
+	//------------------------------------------------------
 	InheritQueryResultPtr InheritService::getSources(int objID) const {
 		InheritMap::const_iterator it = mInheritSources.find(objID);
 

@@ -40,7 +40,9 @@ namespace Opde {
 		/// Inheritance of the value was canceled (object stopped implementing a value)
 		INH_VAL_REMOVED,
 		/// Object changed the inheritance source, did implement before
-		INH_VAL_CHANGED
+		INH_VAL_CHANGED,
+		/// Object changed a certain field's value (effectively - not masked by metaprops), inheritance did not change
+		INH_VAL_FIELD_CHANGED
 	} InheritValueChangeType;
 
 	/// Inheritance change message
@@ -49,8 +51,12 @@ namespace Opde {
 		InheritValueChangeType change;
 		/// An ID of the affected object
 		int objectID;
-		/// An ID of the new source, or zero if the inherited value has been removed
+		/// An ID of the new source, or zero if the inherited value has been removed (ignore for INH_VAL_FIELD_CHANGED)
 		int srcID;
+		/// A field name of the change (only valid for INH_VAL_FIELD_CHANGED)
+		std::string field;
+		/// A new value of the field (only valid for INH_VAL_FIELD_CHANGED)
+		DVariant value;
 	};
 
 	/** Inheritor interface
@@ -106,6 +112,9 @@ namespace Opde {
 			
 			/// grows the internal tables of the inheritor to allow the storage of data about defined object range
 			virtual void grow(int minID, int maxID) {};
+
+			/// on a value change, the inheritor propagates the field and the new value to all affected objects
+			virtual void valueChanged(int objID, const std::string& field, const DVariant& value) = 0;
 	};
 
 	/// Shared pointer to Inheritor

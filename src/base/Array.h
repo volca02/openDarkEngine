@@ -151,7 +151,10 @@ namespace Opde {
 				growBuf(&mPositiveArray, mMaxIndex, maxIdx);
 				mMaxIndex = maxIdx;
 			}
-			
+
+			int getMinIndex() { return mMinIndex; };
+			int getMaxIndex() { return mMaxIndex; };
+
 		protected:
 			void growBuf(T**ptr, int oldSize, int newSize) {
 				if (newSize < oldSize) // if it would, we'd call placement destructor before realloc

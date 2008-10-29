@@ -84,6 +84,9 @@ namespace Opde {
 					*/
 					virtual bool refresh(int objID);
 
+					/// @see Inheritor::valueChanged
+					void valueChanged(int objID, const std::string& field, const DVariant& value);
+
 					/// InheritService reference
 					InheritService* mInheritService;
 

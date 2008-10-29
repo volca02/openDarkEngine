@@ -43,9 +43,13 @@ namespace Opde {
 					/// @see Inheritor::getEffectiveID
 					virtual int getEffectiveID(int srcID) const;
 
-
+					/// @see Inheritor::validate
                     virtual bool validate(int srcID, int dstID, unsigned int priority) const;
 
+					/// @see Inheritor::valueChanged
+					virtual void valueChanged(int objID, const std::string& field, const DVariant& value);
+
+					/// @see Inheritor::clear
                     virtual void clear();
 
 				protected:

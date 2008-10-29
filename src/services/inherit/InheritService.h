@@ -126,6 +126,9 @@ namespace Opde {
 			/// Clears out the inheritance map (leaves the other things intact)
 			void clear();
 
+			/// grows all the inheritors to be able to contain given range of object IDs
+			void grow(int minID, int maxID);
+
 			/// Map of object (src/dst) to inherit link
 			typedef std::map< int, InheritLinkPtr > InheritLinkMap;
 

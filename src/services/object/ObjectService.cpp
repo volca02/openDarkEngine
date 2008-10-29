@@ -213,6 +213,9 @@ namespace Opde {
 		// grow the Properties
 		mPropertyService->grow(minID, maxID);
 		
+		// grow the inheritors
+		mInheritService->grow(minID, maxID);
+
 		// TODO: grow the links
 	}
 	
@@ -234,6 +237,8 @@ namespace Opde {
 		// create the builtin DonorType property
 		DataStoragePtr stor = new IntDataStorage();
 		mPropDonorType = mPropertyService->createPropertyGroup("DonorType", "DonorType", "never", stor);
+		// version of the property tag
+		mPropDonorType->setChunkVersions(2, 4);
 	}
 	
 	//------------------------------------------------------
@@ -367,6 +372,13 @@ namespace Opde {
 		
 		int lastID = 0;
 		
+		/* 
+		 - The damn GAM file only contains negative object ID's -
+
+		 * Now this would not be a problem, if there was no default room introduced, with id 1
+		 * Now I don't want to do any dirty handling of this issue, so all code has to be prepared for this
+		*/
+
 		// Processes one byte a time
 		for(id = minID; id < maxID ; ++id) {
 			if (fileObjs[id]) {

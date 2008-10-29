@@ -112,6 +112,21 @@ namespace Opde {
         return false;
     }
 
+	//------------------------------------------------------
+	void NeverInheritor::valueChanged(int objID, const std::string& field, const DVariant& value) {
+		// just for the original object here
+		InheritValueChangeMsg msg;
+
+		msg.change = INH_VAL_FIELD_CHANGED;
+
+        msg.objectID = objID;
+        msg.srcID = 0;
+		msg.field = field;
+		msg.value = value;
+
+        broadcastMessage(msg);
+	}
+
     //------------------------------------------------------- Never Inheritor Factory:
     string NeverInheritorFactory::mName = "never";
 
