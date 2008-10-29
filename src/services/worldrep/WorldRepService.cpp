@@ -544,13 +544,15 @@ namespace Opde {
 		Image tex;
 		bool loaded = false; // indicates we were succesful finding the texture
 
+		StringVectorPtr texnames = ResourceGroupManager::getSingleton().findResourceNames(resourceGroup, textureName + ".*");
+
 		// Let's try the extensions from the extensions vector
-		std::set< String >::iterator it = mTextureExtensions.begin();
+		StringVector::iterator it = texnames->begin();
 
-		for (;it != mTextureExtensions.end(); it++) { // Try loading
+		for (;it != texnames->end(); it++) { // Try loading every given
 			try {
-				tex.load(textureName + (*it), resourceGroup);
-
+				tex.load((*it), resourceGroup);
+	
 				TextureManager::getSingleton().loadImage(textureName, resourceGroup, tex, TEX_TYPE_2D, 5, 1.0f );
 
 				loaded = true;
