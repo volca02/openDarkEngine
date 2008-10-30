@@ -187,7 +187,6 @@ Function SetupThief1
 	
 	FileOpen $0 $INSTDIR\thief1.cfg w			
 	FileWrite $0 "[General]$\r$\nFileSystem=.\$\r$\nFileSystem=.\scripts\$\r$\n"	
-	FileWrite $0 "$\r$\n[Thief1]$\r$\n"
 	FileWrite $0 "FileSystem=.\scripts\Thief1$\r$\nFileSystem=$Thief1Dir$\r$\n"	
 	
 	FindFirst $2 $1 "$Thief1Dir\crfs\*.crf"
@@ -210,7 +209,6 @@ Function SetupThief2
 	
 	FileOpen $0 $INSTDIR\thief2.cfg w			
 	FileWrite $0 "[General]$\r$\nFileSystem=.\$\r$\nFileSystem=.\scripts\$\r$\n"
-	FileWrite $0 "$\r$\n[Thief2]$\r$\n"
 	FileWrite $0 "FileSystem=.\scripts\Thief2$\r$\nFileSystem=$Thief2Dir$\r$\n"	
 		
 	FindFirst $2 $1 "$Thief2Dir\res\*.crf"
@@ -233,7 +231,6 @@ Function SetupShock2
 	
 	FileOpen $0 $INSTDIR\shock2.cfg w			
 	FileWrite $0 "[General]$\r$\nFileSystem=.\$\r$\nFileSystem=.\scripts\$\r$\n"
-	FileWrite $0 "$\r$\n[Shock2]$\r$\n"
 	FileWrite $0 "FileSystem=.\scripts\Shock2$\r$\nFileSystem=$Shock2Dir$\r$\n"	
 		
 	FindFirst $2 $1 "$Shock2CrfDir\*.crf"
