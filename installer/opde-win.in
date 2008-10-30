@@ -23,6 +23,7 @@
 
 SetCompressor /SOLID /FINAL lzma
 
+!include RecFind.nsh
 !include nsDialogs.nsh
 !insertmacro NSD_FUNCTION_INIFILE
 
@@ -40,7 +41,6 @@ LicenseForceSelection checkbox "I accept the terms in the license agreement"
 Var Thief1Dir
 Var Thief2Dir
 Var Shock2Dir
-Var Shock2CrfDir	;Mod-ready SS2 installations have a different path for CRF files
 
 OutFile "opdeSetup.exe"
 
@@ -152,25 +152,21 @@ Function CreateResourceCfg
 	
 	DataProvided:
 	StrCmp $Thief1Dir "" CheckT2 0	
-	FindFirst $2 $1 "$Thief1Dir\crfs\*.crf"
+	FindFirst $2 $1 "$Thief1Dir\Thief.exe"
 	StrCmp $1 "" 0 CheckT2
 	MessageBox MB_OK|MB_ICONEXCLAMATION "Thief1 path is invalid."
 		Abort
 	
 	CheckT2:
 	StrCmp $Thief2Dir "" CheckSS2 0
-	FindFirst $2 $1 "$Thief2Dir\res\*.crf"
+	FindFirst $2 $1 "$Thief2Dir\Thief2.exe"
 	StrCmp $1 "" 0 CheckSS2
 	MessageBox MB_OK|MB_ICONEXCLAMATION "Thief2 path is invalid."
 		Abort
 		
 	CheckSS2:
 	StrCmp $Shock2Dir "" AllChecked 0
-	StrCpy $Shock2CrfDir $Shock2Dir
-	FindFirst $2 $1 "$Shock2Dir\*.crf"
-	StrCmp $1 "" 0 AllChecked
-	StrCpy $Shock2CrfDir "$Shock2Dir\res"
-	FindFirst $2 $1 "$Shock2Dir\res\*.crf"
+	FindFirst $2 $1 "$Shock2Dir\Shock2.exe"
 	StrCmp $1 "" 0 AllChecked
 	MessageBox MB_OK|MB_ICONEXCLAMATION "Shock2 path is invalid."
 		Abort
@@ -185,66 +181,66 @@ FunctionEnd
 Function SetupThief1
 	StrCmp $Thief1Dir "" empty	
 	
-	FileOpen $0 $INSTDIR\thief1.cfg w			
-	FileWrite $0 "[General]$\r$\nFileSystem=.\$\r$\nFileSystem=.\scripts\$\r$\n"	
-	FileWrite $0 "FileSystem=.\scripts\Thief1$\r$\nFileSystem=$Thief1Dir$\r$\n"	
+	FileOpen $8 $INSTDIR\thief1.cfg w			
+	FileWrite $8 "[General]$\r$\nFileSystem=.\$\r$\nFileSystem=.\scripts\$\r$\n"	
+	FileWrite $8 "FileSystem=.\scripts\Thief1$\r$\nFileSystem=$Thief1Dir$\r$\n"	
 	
-	FindFirst $2 $1 "$Thief1Dir\crfs\*.crf"
-	loop:
-	  StrCmp $1 "" done
-	  FileWrite $0 "Zip=$Thief1Dir\crfs\$1$\r$\n"
-	  FindNext $2 $1
-	  Goto loop
-	done:
-	FindClose $2
+	${RecFindOpen} "$Thief1Dir" $0 $1
+	${RecFindFirst}
+	StrCpy $2 $1 4 -4
+	StrCmp $2 ".crf" 0 NextFile
+	FileWrite $8 "Zip=$Thief1Dir$0\$1$\r$\n"
+	NextFile:
+	${RecFindNext}
+	${RecFindClose} 
 	CreateShortCut "$SMPROGRAMS\openDarkEngine\openDarkEngine (TDP, TG).lnk" "$INSTDIR\opde.exe" "T1" "$Thief1Dir\Thief.exe" 0	
 	CreateShortCut "$INSTDIR\opde (Thief 1).lnk" "$INSTDIR\opde.exe" "T1" "$Thief1Dir\Thief.exe" 0	
-	empty:
-	FileClose $0
+	FileClose $8
+	empty:	
 
 FunctionEnd
 
 Function SetupThief2
 	StrCmp $Thief2Dir "" empty
 	
-	FileOpen $0 $INSTDIR\thief2.cfg w			
-	FileWrite $0 "[General]$\r$\nFileSystem=.\$\r$\nFileSystem=.\scripts\$\r$\n"
-	FileWrite $0 "FileSystem=.\scripts\Thief2$\r$\nFileSystem=$Thief2Dir$\r$\n"	
+	FileOpen $8 $INSTDIR\thief2.cfg w			
+	FileWrite $8 "[General]$\r$\nFileSystem=.\$\r$\nFileSystem=.\scripts\$\r$\n"
+	FileWrite $8 "FileSystem=.\scripts\Thief2$\r$\nFileSystem=$Thief2Dir$\r$\n"	
 		
-	FindFirst $2 $1 "$Thief2Dir\res\*.crf"
-	loop:
-	  StrCmp $1 "" done
-	  FileWrite $0 "Zip=$Thief2Dir\res\$1$\r$\n"
-	  FindNext $2 $1
-	  Goto loop
-	done:
-	FindClose $2
+	${RecFindOpen} "$Thief2Dir" $0 $1
+	${RecFindFirst}
+	StrCpy $2 $1 4 -4
+	StrCmp $2 ".crf" 0 NextFile
+	FileWrite $8 "Zip=$Thief2Dir$0\$1$\r$\n"
+	NextFile:
+	${RecFindNext}
+	${RecFindClose} 
 	CreateShortCut "$SMPROGRAMS\openDarkEngine\openDarkEngine (TMA).lnk" "$INSTDIR\opde.exe" "T2" "$Thief2Dir\thief2.exe" 0
 	CreateShortCut "$INSTDIR\opde (Thief 2).lnk" "$INSTDIR\opde.exe" "T2" "$Thief2Dir\thief2.exe" 0	
-	empty:
-	FileClose $0
+	FileClose $8
+	empty:	
 
 FunctionEnd
 
 Function SetupShock2
 	StrCmp $Shock2Dir "" empty
 	
-	FileOpen $0 $INSTDIR\shock2.cfg w			
-	FileWrite $0 "[General]$\r$\nFileSystem=.\$\r$\nFileSystem=.\scripts\$\r$\n"
-	FileWrite $0 "FileSystem=.\scripts\Shock2$\r$\nFileSystem=$Shock2Dir$\r$\n"	
+	FileOpen $8 $INSTDIR\shock2.cfg w			
+	FileWrite $8 "[General]$\r$\nFileSystem=.\$\r$\nFileSystem=.\scripts\$\r$\n"
+	FileWrite $8 "FileSystem=.\scripts\Shock2$\r$\nFileSystem=$Shock2Dir$\r$\n"	
 		
-	FindFirst $2 $1 "$Shock2CrfDir\*.crf"
-	loop:
-	  StrCmp $1 "" done
-	  FileWrite $0 "Zip=$Shock2CrfDir\$1$\r$\n"
-	  FindNext $2 $1
-	  Goto loop
-	done:
-	FindClose $2
+	${RecFindOpen} "$Shock2Dir" $0 $1
+	${RecFindFirst}
+	StrCpy $2 $1 4 -4
+	StrCmp $2 ".crf" 0 NextFile
+	FileWrite $8 "Zip=$Shock2Dir$0\$1$\r$\n"
+	NextFile:
+	${RecFindNext}
+	${RecFindClose}
 	CreateShortCut "$SMPROGRAMS\openDarkEngine\openDarkEngine (SS2).lnk" "$INSTDIR\opde.exe" "SS2" "$Shock2Dir\Shock2.exe" 0
 	CreateShortCut "$INSTDIR\opde (Shock 2).lnk" "$INSTDIR\opde.exe" "SS2" "$Shock2Dir\Shock2.exe" 0
-	empty:
-	FileClose $0
+	FileClose $8
+	empty:	
 
 FunctionEnd
 
