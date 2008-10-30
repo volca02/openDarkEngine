@@ -34,6 +34,10 @@ namespace Opde {
 	HasRefsProperty::HasRefsProperty(RenderService* rs, PropertyService* owner) : 
 			RenderedProperty(rs, owner, "HasRefs", "HasRefs", "always") {
 		mPropertyStorage = new BoolDataStorage();
+		
+		setChunkVersions(2, 4);
+		
+		mSceneMgr = rs->getSceneManager();
 	};
 
 	// --------------------------------------------------------------------------
@@ -72,8 +76,17 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	void HasRefsProperty::setHasRefs(int oid, bool hasRefs) {
-		EntityInfo* ei = getEntityInfo(oid);
-		ei->setHasRefs(hasRefs);
+		// EntityInfo* ei = getEntityInfo(oid);
+		// ei->setHasRefs(hasRefs);
+		Ogre::SceneNode* sn = getSceneNode(oid);
+		
+		if (hasRefs) {
+		    if (!sn->getParentSceneNode())
+                mSceneMgr->getRootSceneNode()->addChild(sn);
+		} else {
+		    if (sn->getParentSceneNode())
+                mSceneMgr->getRootSceneNode()->removeChild(sn);
+		}
 	};
 };
 

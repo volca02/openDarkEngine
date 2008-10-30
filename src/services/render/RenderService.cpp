@@ -283,6 +283,8 @@ namespace Opde {
 		// prepare the default models and textures
 		prepareHardcodedMedia();
 		
+		mPropertyService = static_pointer_cast<PropertyService>(ServiceManager::getSingleton().getService("PropertyService"));
+		
 		// create all the properties the render service uses
 		createProperties();
 
@@ -368,8 +370,6 @@ namespace Opde {
 
 		// contact the config. service, and look for the inheritance link name
 		// TODO: ConfigurationService::getKey("Core","InheritanceLinkName").toString();
-
-		mPropertyService = static_pointer_cast<PropertyService>(ServiceManager::getSingleton().getService("PropertyService"));
 
 		// TODO: hardcoded property name, but that's hopefully not a problem after all
 		
@@ -1217,6 +1217,7 @@ namespace Opde {
 		
 		// HasRefs - single bool prop
 		mHasRefsProperty = new HasRefsProperty(this, mPropertyService.ptr());
+		mPropertyService->registerPropertyGroup(mHasRefsProperty);
 		
 		
 		// Light - a more complex property - this should be moved to LightService

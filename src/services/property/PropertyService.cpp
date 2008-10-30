@@ -127,7 +127,7 @@ namespace Opde {
 	
 	// --------------------------------------------------------------------------
 	void PropertyService::registerPropertyGroup(PropertyGroup* group) {
-		mPropertyGroupMap.insert(make_pair(group->getName(), group));
+		mPropertyGroupMap[group->getName()] = group; // so we'll overwrite if it exists already
 	}
 	
 	// --------------------------------------------------------------------------		

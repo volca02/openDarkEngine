@@ -57,6 +57,8 @@ namespace Opde {
 
 			/// core setter method. Called from other methods to set the hasrefs value
 			void setHasRefs(int oid, bool hasRefs);
+			
+			Ogre::SceneManager* mSceneMgr;
 	};
 };
 

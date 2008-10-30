@@ -123,13 +123,10 @@ namespace Opde {
 		// Can't calculate the count of the properties, as they can have any size
 		// load. Each record has: OID, size (32 bit uint's)
 		int id = 0xDEADBABE;
-		uint32_t size;
 		
 		while (!fprop->eof()) {
 			// load the id
 			fprop->readElem(&id, sizeof(uint32_t));
-			
-			size = fprop->tell();
 			
 			// Use property storage to load the property
 			if (mPropertyStorage->readFromFile(fprop, id, true)) {

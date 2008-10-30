@@ -40,4 +40,14 @@ namespace Opde {
 
 		return ei;
 	};
+	
+	Ogre::SceneNode* RenderedProperty::getSceneNode(int oid) {
+		Ogre::SceneNode* sn = mOwner->getSceneNode(oid);
+		assert(sn);
+
+		if (sn == NULL)
+			OPDE_EXCEPT("SceneNode not found for object", "RenderedProperty::getSceneNode");
+
+		return sn;
+	};
 };

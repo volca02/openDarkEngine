@@ -246,6 +246,62 @@ namespace Opde {
 			virtual bool fromVariant(const DVariant& v) {
 				return v.toBool();
 			}
+			
+			/** @see DataStorage::writeToFile */
+			virtual bool writeToFile(FilePtr& file, int objID, bool sizeStored) {
+				DataMap::iterator it = mDataMap.find(objID);
+		
+				if (it != mDataMap.end()) {
+					const bool& dta = it->second;
+					
+					uint32_t conv = dta ? 1 : 0;
+
+					uint32_t size = sizeof(uint32_t);
+					
+					// Write the size if requested
+					if (sizeStored)
+						file->writeElem(&size, sizeof(uint32_t));
+					
+					// write the data itself
+					file->write(&conv, size);
+					
+					return true;
+				}
+				
+				return false;
+			}
+			
+			/** @see DataStorage::readFromFile */
+			virtual bool readFromFile(FilePtr& file, int objID, bool sizeStored) {
+				DataMap::iterator it = mDataMap.find(objID);
+		
+				if (it == mDataMap.end()) {
+					uint32_t size = sizeof(uint32_t);
+					
+					if (sizeStored)
+						file->readElem(&size, sizeof(uint32_t));
+					
+					assert(size == sizeof(uint32_t));
+					
+					uint32_t srcb;
+					
+					file->read(&srcb, size);
+					
+                    bool bval = srcb != 0 ? true : false;
+
+					_create(objID, bval);
+					
+					return true;
+				} else {
+					// skip the data...
+					uint32_t size;
+					
+					file->readElem(&size, sizeof(uint32_t));
+					file->seek(size, File::FSEEK_CUR);
+				}
+				
+				return false;
+			}
 	};
 	
 	/// Float (4 byte) data storage

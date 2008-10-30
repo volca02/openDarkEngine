@@ -45,6 +45,9 @@ namespace Opde {
 
 			// shortcut getter for the entity info of a particular object
 			EntityInfo* getEntityInfo(int oid); 
+			
+			// shortcut to the scenenode of the object
+			Ogre::SceneNode* getSceneNode(int oid); 
 	};
 };
 

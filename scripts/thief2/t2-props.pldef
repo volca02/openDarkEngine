@@ -499,9 +499,9 @@ property StTweq2Em {
 	p_ver 2.8
 }
 
-property HasRefs {
-	label "HasRefs"
-}
+//property HasRefs {
+//	label "HasRefs"
+//}
 
 property AI_InfMxP {
 	label "AIInformMaxPasses"

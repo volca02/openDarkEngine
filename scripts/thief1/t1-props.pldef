@@ -394,9 +394,9 @@ property StTweq2Em {
 	inherit never
 }
 
-property HasRefs {
-	label "HasRefs"
-}
+//property HasRefs {
+//	label "HasRefs"
+//}
 
 property AI_InfMxP {
 	label "AIInformMaxPasses"
