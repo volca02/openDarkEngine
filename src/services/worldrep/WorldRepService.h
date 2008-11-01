@@ -80,6 +80,7 @@ namespace Opde {
 		protected:
 			virtual bool init();
 			virtual void bootstrapFinished();
+			void shutdown();
 
 			/// Database change callback
 			void onDBChange(const DatabaseChangeMsg& m);

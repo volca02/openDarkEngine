@@ -143,14 +143,14 @@ namespace Opde {
 	}
 	
 	// --------------------------------------------------------------------------
-	void PropertyService::load(const FileGroupPtr& db) {
+	void PropertyService::load(const FileGroupPtr& db, const BitArray& objMask) {
 		// We just give the db to all registered groups
 		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
 
 		for (; it != mPropertyGroupMap.end(); ++it) {
 			try {
 				LOG_INFO("PropertyService: Loading property group %s", it->first.c_str());
-				it->second->load(db);
+				it->second->load(db, objMask);
 			} catch (BasicException &e) {
 				LOG_FATAL("PropertyService: Caught a fatal exception while loading PropertyGroup %s : %s", it->first.c_str(), e.getDetails().c_str() );
 			}

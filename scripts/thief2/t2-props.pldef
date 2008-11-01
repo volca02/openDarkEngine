@@ -146,12 +146,12 @@ property FacePos {
 	p_ver 2.65540
 }
 
-property SymName {
-	label "SymbolicName"
-	p_ver 2.17
-	inherit never
-	type varstr
-}
+//property SymName {
+//	label "SymbolicName"
+//	p_ver 2.17
+//	inherit never
+//	type varstr
+//}
 
 property Spotlight {
 	label "Spotlight"

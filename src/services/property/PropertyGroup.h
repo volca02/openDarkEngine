@@ -115,8 +115,10 @@ namespace Opde {
 			}
 
 			/** Loads properties from a file group
-			* @param db The database to load from */
-			void load(const FileGroupPtr& db);
+			* @param db The database to load from 
+			* @param objMask The BitArray of objects to be loaded (other properties are skipped)
+			*/
+			void load(const FileGroupPtr& db, const BitArray& objMask);
 
 			/** Saves properties to a file group
 			* @param db The database to save to

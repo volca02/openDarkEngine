@@ -102,9 +102,13 @@ namespace Opde {
 
 	}
 
-	WorldRepService::~WorldRepService() {
+	void WorldRepService::shutdown() {
 		mDatabaseService->unregisterListener(mDbCallback);
+		mDatabaseService = NULL;
 		clearData();
+	}
+
+	WorldRepService::~WorldRepService() {
 	}
 
 
@@ -179,6 +183,11 @@ namespace Opde {
 
 	void WorldRepService::clearData() {
 		LOG_INFO("WorldRepService::clearData called");
+
+		// this might cause problems because of render service trying to 
+		// release all the entities later, when those are already invalid
+		// a special care must be taken
+		mSceneMgr->clearScene();
 
         if (mCells != NULL) {
             for (uint32_t i = 0; i < mNumCells; i++) {

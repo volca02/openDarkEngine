@@ -107,8 +107,10 @@ namespace Opde {
 			void objectDestroyed(int id);
 
 			/** Load the properties from the database
-			* @param db The database file group to use */
-			void load(const FileGroupPtr& db);
+			* @param db The database file group to use 
+			* @param objMask The BitArray of objects to be loaded (other properties are skipped)
+			*/
+			void load(const FileGroupPtr& db, const BitArray& objMask);
 
 			/** Saves the properties according to the saveMask
 			* @param db The database file group to save to

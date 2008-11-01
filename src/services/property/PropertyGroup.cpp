@@ -100,7 +100,7 @@ namespace Opde {
 	}
 	
 	// --------------------------------------------------------------------------
-	void PropertyGroup::load(const FileGroupPtr& db) {
+	void PropertyGroup::load(const FileGroupPtr& db, const BitArray& objMask) {
 		// Open the chunk specified by "P$" + mChunkName
 		FilePtr fprop;
 
@@ -128,6 +128,16 @@ namespace Opde {
 			// load the id
 			fprop->readElem(&id, sizeof(uint32_t));
 			
+			// if the object is not in the mask, skip the property
+			if (!objMask[id]) {
+				LOG_DEBUG("PropertyGroup::load: skipping object %d, not in bitmap", id);
+				// prop has length and data - so skip according to that
+				uint32_t size;
+				fprop->read(&size, sizeof(uint32_t));
+				fprop->seek(size, File::FSEEK_CUR);
+				continue;
+			}
+
 			// Use property storage to load the property
 			if (mPropertyStorage->readFromFile(fprop, id, true)) {
 				_addProperty(id);

@@ -152,12 +152,12 @@ property CameraObj {
 	p_ver 2.65572
 }
 
-property SymName {
-	label "SymbolicName"
-	p_ver 2.17
-	inherit never
-	type varstr
-}
+//property SymName {
+//	label "SymbolicName"
+//	p_ver 2.17
+//	inherit never
+//	type varstr
+//}
 
 property Spotlight {
 	label "Spotlight"

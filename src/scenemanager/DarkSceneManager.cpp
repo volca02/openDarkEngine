@@ -81,6 +81,12 @@ namespace Ogre {
 		// clear all the geometries
 		destroyAllGeometries();
 
+		// clear the visible cell list for all cameras
+		CameraList::iterator cit = mCameras.begin();
+		
+		for (; cit != mCameras.end(); ++cit)
+			static_cast<DarkCamera*>(cit->second)->mVisibleCells.clear();
+
 		SceneManager::clearScene();		
 	}
 

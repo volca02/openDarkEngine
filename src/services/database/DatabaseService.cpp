@@ -112,7 +112,7 @@ namespace Opde {
 
         m.db = mCurDB;
 
-        broadcastMessage(m);
+        broadcastMessageReversed(m);
 
 		/// Wipe out the files we used
 		mCurDB.setNull();
@@ -185,6 +185,26 @@ namespace Opde {
         Listeners::iterator it = mListeners.begin();
 
         for (; it != mListeners.end(); ++it) {
+            // Use the callback functor to fire the callback
+            (*it->second)(msg);
+            
+            // recalculate the status
+            mLoadingStatus.currentCoarse++;
+            
+            mLoadingStatus.recalc();
+                        
+            // call the progress listener if it is set
+            if (!mProgressListener.isNull()) {
+                (*mProgressListener)(mLoadingStatus);
+            }
+        }
+    }
+
+	//------------------------------------------------------
+    void DatabaseService::broadcastMessageReversed(const DatabaseChangeMsg& msg) {
+        Listeners::reverse_iterator it = mListeners.rbegin();
+
+        for (; it != mListeners.rend(); ++it) {
             // Use the callback functor to fire the callback
             (*it->second)(msg);
             

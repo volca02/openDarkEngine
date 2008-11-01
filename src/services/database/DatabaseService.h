@@ -147,6 +147,9 @@ namespace Opde {
 			/// Overriden broadcast to support progress reports
 			virtual void broadcastMessage(const DatabaseChangeMsg& msg);
 
+			/// a reverse order message broadcaster - this one is used in unloading
+			virtual void broadcastMessageReversed(const DatabaseChangeMsg& msg);
+
 			FileGroupPtr mCurDB;
 			
 			/// Used to report to the Progress Listener

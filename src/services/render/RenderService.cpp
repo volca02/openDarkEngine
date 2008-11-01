@@ -182,7 +182,20 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	RenderService::~RenderService() {
-        LOG_INFO("RenderService::~RenderService()");
+		if (mRenderWindow)
+			mRenderWindow->removeAllViewports();
+			
+		if (mSceneMgr)
+			mSceneMgr->destroyAllCameras();
+			
+		if (mDarkSMFactory) {
+			Root::getSingleton().removeSceneManagerFactory(mDarkSMFactory);
+			delete mDarkSMFactory;
+			mDarkSMFactory = NULL;
+		}
+		
+		delete mManualBinFileLoader;
+		mManualBinFileLoader = NULL;
 	}
 
 	// --------------------------------------------------------------------------
@@ -221,21 +234,6 @@ namespace Opde {
 		    mPropScale->unregisterListener(mPropScaleListenerID);
 		mPropScale = NULL;
 
-		if (mRenderWindow)
-			mRenderWindow->removeAllViewports();
-			
-		if (mSceneMgr)
-			mSceneMgr->destroyAllCameras();
-			
-		if (mDarkSMFactory) {
-			Root::getSingleton().removeSceneManagerFactory(mDarkSMFactory);
-			delete mDarkSMFactory;
-			mDarkSMFactory = NULL;
-		}
-		
-		delete mManualBinFileLoader;
-		mManualBinFileLoader = NULL;
-		
 		if (!mLoopService.isNull())
 			mLoopService->removeLoopClient(this);
 	}
@@ -897,6 +895,12 @@ namespace Opde {
 	void RenderService::setObjectModel(int id, const std::string& name) {
 		EntityInfo* ei = _getEntityInfo(id);
 
+		// if there was an error finding the entity info, the object does not exist
+		if (!ei) {		
+			LOG_VERBOSE("RenderService: Object model could not be set for %d, object not found", id);
+			return;
+		}
+
 		// if the new name is empty, just set skip and it's done
 		if (name == "") {		
 			LOG_VERBOSE("RenderService: Mesh rendering for %d disabled", id);
@@ -956,6 +960,10 @@ namespace Opde {
     void RenderService::clear() {
 		// will destroy all EntityInfos
         mEntityMap.clear();
+
+		mLightInfoMap.clear();
+
+		mObjectToNode.clear();
     }
 
 

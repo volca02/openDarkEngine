@@ -232,13 +232,18 @@ namespace Opde {
 	void ObjectService::createBuiltinResources() {
 		mPropertyService = static_pointer_cast<PropertyService>(ServiceManager::getSingleton().getService("PropertyService"));
 		
-		// DonorType property (single integer property):
-		// mPropertyService->createPropertyGroup();
-		// create the builtin DonorType property
+		// DonorType property (single integer property, built in):
 		DataStoragePtr stor = new IntDataStorage();
 		mPropDonorType = mPropertyService->createPropertyGroup("DonorType", "DonorType", "never", stor);
 		// version of the property tag
 		mPropDonorType->setChunkVersions(2, 4);
+
+		// symbolic name builtin property
+		mSymNameStorage = new SymNamePropertyStorage();
+		mPropSymName = mPropertyService->createPropertyGroup("SymbolicName", "SymbolicName", "never", mSymNameStorage);
+		mPropSymName->setChunkVersions(2, 17);
+
+		// TODO: Position
 	}
 	
 	//------------------------------------------------------
@@ -261,15 +266,6 @@ namespace Opde {
 
 		if (mPropPosition == NULL)
             OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "ObjectService::bootstrapFinished");
-
-		mPropSymName = mPropertyService->getPropertyGroup("SymbolicName");
-		
-		if (mPropSymName == NULL)
-            OPDE_EXCEPT("Could not get SymbolicName property group. Not defined. Fatal", "ObjectService::bootstrapFinished");
-            
-		mSymNameStorage = new SymNamePropertyStorage();
-
-		mPropSymName->setPropertyStorage(mSymNameStorage);
 	}
 	
 	//------------------------------------------------------
@@ -395,13 +391,13 @@ namespace Opde {
 		
 		// Now, inform link service and property service (let them load)
 		try {
-			mPropertyService->load(db);
+			mPropertyService->load(db, fileObjs);
 		} catch (BasicException& e) {
 			LOG_FATAL("Exception while loading properties from mission database : %s", e.getDetails().c_str());
 		}
 		
 		try {
-			mLinkService->load(db); // will load MP links if those exist, causing inherited properties to emerge
+			mLinkService->load(db); // will load MP links if those exist as well, causing inherited properties to emerge
 		} catch (BasicException& e) {
 			LOG_FATAL("Exception while loading links from mission database : %s", e.getDetails().c_str());
 		}
