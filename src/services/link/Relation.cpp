@@ -110,7 +110,7 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	void Relation::load(const FileGroupPtr& db) {
+	void Relation::load(const FileGroupPtr& db, const BitArray& objMask) {
 		assert(!mIsInverse);
 		
 		// load the links and thei're data
@@ -223,13 +223,28 @@ namespace Opde {
 			// Check if the flavor fits
 			assert(LINK_ID_FLAVOR(link->mID) == mID);
 
-			// Add link, notify listeners... Will search for data and throw if did not find them
-			_addLink(link);
-			
-			// Inverse relation will get an inverse link to use
-			LinkPtr ilink = createInverseLink(link);
-			
-			mInverse->_addLink(ilink);
+			// Look if we fit into the mask
+			if (objMask[link->mSrc] && objMask[link->mDst]) {
+				// Add link, notify listeners... Will search for data and throw if did not find them
+				_addLink(link);
+				
+				// Inverse relation will get an inverse link to use
+				LinkPtr ilink = createInverseLink(link);
+				
+				mInverse->_addLink(ilink);
+			} else {
+				// the mask says no to the link!
+				LOG_ERROR("Relation (%s - %d): Link (ID %d, %d to %d) thrown away - obj IDs invalid",
+					mName.c_str(),
+					mID,
+					link->mID,
+					link->mSrc,
+					link->mDst);
+
+				// delete the data as well...
+				if (!mStorage.isNull())
+					mStorage->destroy(link->mID);
+			}
 		}
 
 		LOG_DEBUG("Relation (%s - %d): Done!",

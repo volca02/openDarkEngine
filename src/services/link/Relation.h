@@ -32,6 +32,7 @@
 #include "LinkCommon.h"
 #include "FileGroup.h"
 #include "MessageSource.h"
+#include "BitArray.h"
 
 namespace Opde {
 	/** @brief Relation. A store of a group of links of the same flavor.
@@ -41,8 +42,11 @@ namespace Opde {
 			Relation(const std::string& name, const DataStoragePtr& stor, bool isInverse, bool hidden = false);
 			virtual ~Relation();
 
-			/** Loads the relation data from the given FileGroup */
-			void load(const FileGroupPtr& db);
+			/** Loads the relation data from the given FileGroup
+			* @param db The database that the links are read from
+			* @param objMask the mask that limits the loaded objects (invalid ones are thrown away)
+			*/
+			void load(const FileGroupPtr& db, const BitArray& objMask);
 
 			/** Saves the relation data to the fiven file group
 			* @todo Save Mask implementation */

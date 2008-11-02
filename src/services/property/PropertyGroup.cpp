@@ -116,7 +116,7 @@ namespace Opde {
 				LOG_ERROR("Property group %s version mismatch : %d.%d expected, %d.%d encountered", pchn.c_str(), mVerMaj, mVerMin, hdr.version_high, hdr.version_low);
 			}
 		} catch (BasicException) {
-			LOG_FATAL("PropertyGroup::load : Could not find the property chunk %s", pchn.c_str());
+			LOG_ERROR("PropertyGroup::load : Could not find the property chunk %s", pchn.c_str());
 			return;
 		}
 

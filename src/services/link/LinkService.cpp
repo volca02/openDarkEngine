@@ -89,7 +89,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void LinkService::load(const FileGroupPtr& db) {
+	void LinkService::load(const FileGroupPtr& db, const BitArray& objMask) {
 		LOG_INFO("LinkService: Loading link definitions from file group '%s'", db->getName().c_str());
 
 		// First, try to build the Relation Name -> flavor and reverse records
@@ -153,7 +153,7 @@ namespace Opde {
 			LOG_DEBUG("Loading relation %s", text);
 
 			try {
-				rel->load(db); // only normal relation is loaded. Inverse is mapped automatically
+				rel->load(db, objMask); // only normal relation is loaded. Inverse is mapped automatically
 			} catch (BasicException &e) {
 				LOG_FATAL("LinkService: Caught a fatal exception while loading Relation %s : %s", text, e.getDetails().c_str() );
 			}

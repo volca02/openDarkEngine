@@ -691,6 +691,9 @@ namespace Opde {
 		// attach the light to a newly created scenenode (child of the object's sn)
 		SceneNode* on = getSceneNode(objID);
 		
+		if (!on)
+			OPDE_EXCEPT("No SceneNode found for object", "RenderService::createLight");
+
 		Quaternion q;
 
 		// TODO: Just a test. After finding the right orientation, replace with a constant quaternion value

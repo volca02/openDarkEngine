@@ -32,6 +32,7 @@
 #include "LinkCommon.h"
 #include "Relation.h"
 #include "SharedPtr.h"
+#include "BitArray.h"
 
 namespace Opde {
 
@@ -86,8 +87,10 @@ namespace Opde {
 			*/
 			void objectDestroyed(int id);
 			
-			/** load links from a single database */
-			void load(const FileGroupPtr& db);
+			/** load links from a single database 
+			* @param db The database to load from
+			* @param objMask the mask of object id's to allow - both src and dst objects have to be here, otherwise link gets ignored */
+			void load(const FileGroupPtr& db, const BitArray& objMask);
 
 			/** Saves the links and link data according to the saveMask */
 			void save(const FileGroupPtr& db, uint saveMask);
