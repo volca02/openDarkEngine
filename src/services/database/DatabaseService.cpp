@@ -142,13 +142,18 @@ namespace Opde {
 		// GAM_FILE
 		FilePtr fdm = db->getFile("GAM_FILE");
 
-		char* data = new char[fdm->size()];
+		// never happened
+		size_t gft_size = fdm->size();
+		char* data = new char[gft_size + 1];
 
 		data[0] = 0x0;
+		data[gft_size] = 0x0;
 
 		fdm->read(data, fdm->size());
 
 		FileGroupPtr gs = getDBFileNamed(data);
+
+		delete[] data;
 
 		_loadGameSysDB(gs);
 
