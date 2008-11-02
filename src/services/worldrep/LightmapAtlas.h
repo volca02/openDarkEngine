@@ -39,9 +39,7 @@
 // - this means some changes to the lmap allocation have to be made too
 
 // size of lightmap atlas (both W and H)
-#define ATLAS_WIDTH 512
-#define ATLAS_HEIGHT 512
-#define ATLAS_LMSIZE (ATLAS_WIDTH*ATLAS_LMSIZE)
+#define ATLAS_MAX_SIZE 2048
 
 namespace Opde {
 
@@ -376,8 +374,10 @@ namespace Opde {
 			/** A vector containing Free Space rectangles left in the Atlas */
 			FreeSpaceInfo* mFreeSpace;
 		
+			typedef std::vector < LightMap * > LightMapVector; 
+		
 			/** Already inserted lightmaps - mainly for dealocation */
-			std::vector < LightMap * > mLightmaps;
+			LightMapVector mLightmaps;
 		
 			/** Light number to the LightMap set mapping - changing light intensity will iterate throught the set of lmaps, and regenerate */
 			std::map<int, std::set<LightMap*> > mLights;
@@ -390,15 +390,28 @@ namespace Opde {
 			
 			/** Tag value of this atlas */
 			int mTag;
+			
+			/** The dimension of the atlas (starts at 16x16 - 16 here). As the atlas is rectangular we only need one */
+			int mSize;
+			
+		protected:
+			/// grows the atlas to the newly specified dimensions
+			void growAtlas(int newSize);
+			
+			/// places the lightmap without any refreshes
+			bool placeLightMap(LightMap *lmap);
+		
 		public:
 			LightAtlas(int idx, int tag = 0);
 			
 			~LightAtlas();
 			
+			/// Builds the texture. Called once per life of the atlas, finds the appropriate dimensions of the atlas to store all the lightmaps requested
+			void build();
+			
 			/** Adds a light map to this atlas. 
 			* @param lmap Lightmap to be added 
 			*/
-			//  TODO: Deprecate destinfo
 			bool addLightMap(LightMap *lmap);
 
 			/** renders the prepared light map buffers into a texture - copies the pixel data to the 'atlas' */
@@ -426,6 +439,12 @@ namespace Opde {
 			
 			/** Returns the pixel count of unmapped area of this atlas */
 			int getUnusedArea();
+			
+			/** Returns the area in pixels that is used by lmaps */
+			int getUsedArea();
+			
+			/** Returns the size of the atlas in pixels */
+			int getPixelCount();
 			
 			/** returns the tag number of this atlas */
 			int getTag() {return mTag;};
@@ -471,9 +490,11 @@ namespace Opde {
 			/** Prepares the Light Atlases to be used as textures. 
 			* atlases all the lightmaps, in Texture, size orders (texture being major ordering rule) 
 			* Then calls the LightAtlas.render method
-			* @see Ogre::LightAtlas.render() */
+			* @see Ogre::LightAtlas.render()
+			*/
 			bool render();
-		
+
+			/// Light intensity setter - refreshes the lightmaps containing the light with the new intensity
 			void setLightIntensity(int id, float value) {
 				std::vector< LightAtlas* >::iterator atlases = mList.begin();
 				

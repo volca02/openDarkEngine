@@ -43,36 +43,19 @@ namespace Opde {
 	/*
 		A single texture, containing many lightmaps. used in the texturelist construction
 	*/
-	LightAtlas::LightAtlas(int idx, int tag) : mTag(tag) {
+	LightAtlas::LightAtlas(int idx, int tag) : 
+				mCount(0),
+				mIdx(idx),
+				mTex(NULL),
+				mAtlas(NULL),
+				mFreeSpace(NULL),
+				mTag(tag), 
+				mSize(1) {
 		mName << "@lightmap" << idx; // so we can find the atlas by number in the returned AtlasInfo
-
-		this->mIdx = idx;
+		
+		mFreeSpace = new FreeSpaceInfo(0,0,mSize,mSize); 
 
 		mCount = 0;
-
-		// initialise the free space - initially whole lmap
-		mFreeSpace = new FreeSpaceInfo(0,0,ATLAS_WIDTH,ATLAS_HEIGHT);
-
-		// I Place the lightmaps into a separate resource group for easy unloading
-		mTex = TextureManager::getSingleton().createManual(
-			mName.str(), TEMPTEXTURE_RESOURCE_GROUP,
-			TEX_TYPE_2D, ATLAS_WIDTH, ATLAS_HEIGHT, 0, PF_X8R8G8B8,
-			TU_DYNAMIC_WRITE_ONLY);
-
-		mAtlas = mTex->getBuffer(0, 0);
-
-		// Erase the lmap atlas pixel buffer
-		mAtlas->lock(HardwareBuffer::HBL_DISCARD);
-		const PixelBox &pb = mAtlas->getCurrentLock();
-
-		uint32 *data = static_cast<uint32*>(pb.data);
-		for (int y = 0; y < ATLAS_HEIGHT; y++) 
-		{	
-			memset(data, 0, ATLAS_WIDTH * sizeof(uint32));
-			data += pb.rowPitch;
-		}
-
-		mAtlas->unlock();
 	}
 
 
@@ -80,7 +63,10 @@ namespace Opde {
 		// TODO: for_each(lightmaps.begin(), lightmaps.end(), delete lmap);
 		delete mFreeSpace;
 
-        TextureManager::getSingleton().remove(mName.str());
+        if (!mTex.isNull()) {
+			TextureManager::getSingleton().remove(mName.str());
+			mTex.setNull();
+		}
 
         // delete all the lmaps.
         std::vector< LightMap* >::iterator it = mLightmaps.begin();
@@ -89,70 +75,124 @@ namespace Opde {
             delete (*it);
             ++it;
         }
-
+        
         mLightmaps.clear();
+	}
+	
+	void LightAtlas::growAtlas(int newSize) {
+		if (newSize <= mSize)
+			return;
+
+		mSize = newSize;
+		
+		// clear the lightmap placement
+		delete mFreeSpace;
+		
+		// initialise the free space - initially whole lmap
+		mFreeSpace = new FreeSpaceInfo(0,0,mSize,mSize);
+	
+		// place the lightmaps again
+		LightMapVector::iterator it = mLightmaps.begin();
+		
+		for (; it != mLightmaps.end(); ++it) {
+			// place the lmap
+			// should not fail, since the lmaps fitted to prev atlas.
+			if (!placeLightMap(*it))
+				OPDE_EXCEPT("Could not fit after growth!", "LightAtlas::growAtlas");
+		}
+	}
+
+	int LightAtlas::getUsedArea() {
+		int area = 0;
+
+		// place the lightmaps again
+		LightMapVector::iterator it = mLightmaps.begin();
+		
+		for (; it != mLightmaps.end(); ++it) {
+			std::pair<int, int> dim = (*it)->getDimensions();
+			area += dim.first * dim.second;
+		}
+		
+		return area;
 	}
 
 	bool LightAtlas::addLightMap(LightMap *lmap) {
+		// Dynamic allocation of lmap atlas size. If we didn't fit, try throwing 
+		// all the mapping away, then remap all
+		while (!placeLightMap(lmap)) {
+			if (mSize >= ATLAS_MAX_SIZE) // have some sane maximum
+				return false;
+			
+			growAtlas(2 * mSize);
+		}
+		
+		// and insert into our list
+		mLightmaps.push_back(lmap);
+		mCount++;
+		
+		return true;
+	}
+		
+		
+	bool LightAtlas::placeLightMap(LightMap *lmap) {
 		std::pair<int, int> dim = lmap->getDimensions();
 
 		FreeSpaceInfo* area = mFreeSpace->allocate(dim.first, dim.second);
 
 		if (area == NULL)
 			return false;
-		
-		/* // TODO: Dynamic allocation of lmap atlas size...
-		bool doStep = true;
-
-		// try the fit/enlarge combo till we can
-		while (doStep) {
-			// get the origin for our lmap
-			FreeSpaceInfo* area = mFreeSpace->allocate(dim.first, dim.second);
-
-			if (area == NULL) {// didn't fit
-				// would we fit in a bottom/right of a 2x bigger lmap?
-				// and is it legal to construct such?
-				
-				// always rectangular...
-				if (mFreeSpace->w < ATLAS_MAX_WIDTH) {
-					// construct a 2x bigger lmap atlas info
-					// TODO: If our freespace is a child and free, don't wrap!
-					mFreeSpace = new FreeSpaceInfo(mFreeSpace);
-				} else {
-				  return false;
-				}
-			} else {
-				// ok, we're in!
-				doStep = false;
-			}
-		}
-		*/
 
 		// calculate some important UV conversion data
 		// +0.5? to display only the inner transition of lmap texture, the outer goes to black color
-		lmap->mUV.x = ((float)area->x) / ATLAS_WIDTH;
-		lmap->mUV.y = ((float)area->y) / ATLAS_HEIGHT;
+		lmap->mUV.x = ((float)area->x) / (float)mSize;
+		lmap->mUV.y = ((float)area->y) / (float)mSize;
 
 		// size conversion to atlas coords
-		lmap->mSizeUV.x = ((float)dim.first)/ATLAS_WIDTH;
-		lmap->mSizeUV.y = ((float)dim.second)/ATLAS_HEIGHT;
-
-		// finally increment the count of stored lightmaps
-		mCount++;
-		mLightmaps.push_back(lmap);
+		lmap->mSizeUV.x = ((float)dim.first)/(float)mSize;
+		lmap->mSizeUV.y = ((float)dim.second)/(float)mSize;
 
 		lmap->setPlacement(this, area);
 
+		// finally increment the count of stored lightmaps
 		return true;
 	}
 
 	bool LightAtlas::render() {
-		mAtlas->lock(HardwareBuffer::HBL_DISCARD);
+		if (mLightmaps.size() == 0) // no lmaps, no action
+			return true;
+		
+		// (re)create the texture
+		if (!mTex.isNull()) {
+			TextureManager::getSingleton().remove(mName.str());
+			mTex.setNull();
+		}
+		
+		// We place the lightmaps into a separate resource group for easy unloading
+		mTex = TextureManager::getSingleton().createManual(
+			mName.str(), TEMPTEXTURE_RESOURCE_GROUP,
+			TEX_TYPE_2D, mSize, mSize, 0, PF_X8R8G8B8,
+			TU_DYNAMIC_WRITE_ONLY);
 
+		mAtlas = mTex->getBuffer(0, 0);
+
+		// Erase the lmap atlas pixel buffer
+		mAtlas->lock(HardwareBuffer::HBL_DISCARD);
+		
+		const PixelBox &pb = mAtlas->getCurrentLock();
+
+		uint32 *data = static_cast<uint32*>(pb.data);
+		for (int y = 0; y < mSize; y++) 
+		{	
+			memset(data, 0, mSize * sizeof(uint32));
+			data += pb.rowPitch;
+		}
+		
 		std::vector< LightMap * >::const_iterator lmaps_it = mLightmaps.begin();
 
-		for (; lmaps_it != mLightmaps.end(); ++lmaps_it)
+		for (; lmaps_it != mLightmaps.end(); ++lmaps_it) {
+			assert((*lmaps_it)->mOwner == this);
 			(*lmaps_it)->refresh();
+		}
 
 		mAtlas->unlock();
 
@@ -247,6 +287,9 @@ namespace Opde {
 	}
 
 	void LightAtlas::setLightIntensity(int id, float intensity) {
+		if (mLightmaps.size() == 0)
+			return;
+			
 		// iterate throught the map lights, and call the setLightIntensity on all registered lightmaps
 		std::map< int, std::set<LightMap*> >::iterator light_it = mLights.find(id);
 
@@ -269,6 +312,10 @@ namespace Opde {
 
 	int LightAtlas::getUnusedArea() {
 		return mFreeSpace->getLeafArea();
+	}
+	
+	int LightAtlas::getPixelCount() {
+		return mSize * mSize;
 	}
 
 	// ---------------- LightAtlasList Methods ----------------------
@@ -374,21 +421,29 @@ namespace Opde {
 
 
 		// iterate through existing Atlases, and see if any of them accepts our lightmap
-		int unused_pixels = 0, total_pixels = 0;
+		int used_pixels = 0;
+		int total_pixels = 0;
 
 		int last = mList.size();
 
 		for (int i = 0; i < last; i++) {
-			unused_pixels += mList.at(i)->getUnusedArea();
-			total_pixels += ATLAS_WIDTH * ATLAS_HEIGHT;
+			LightAtlas* a = mList.at(i);
+			
+			int totc = a->getPixelCount();
+			int used = a->getUsedArea();
+			
+			used_pixels += used;
+			total_pixels += totc;
+			
+			LOG_VERBOSE("Light Map Atlas: Atlas %d : %d of %d used (%f%%) (%d of %d so far)", a->getTag(), used, totc, 100.0f * used/totc, used_pixels, total_pixels);
 		}
 
 		float percentage = 0;
 
 		if (total_pixels > 0)
-			percentage = 100.0f * unused_pixels / total_pixels;
+			percentage = 100.0f * used_pixels / total_pixels;
 
-		LOG_INFO("Light Map Atlas: Total unused light map atlasses pixels: %d of %d (%f%%). %d atlases total used. Total splits: %d", unused_pixels, total_pixels, percentage, last, mSplitCount);
+		LOG_INFO("Light Map Atlas: Total used light map atlasses pixels: %d of %d (%f%%). %d atlases total used. Total splits: %d", used_pixels, total_pixels, percentage, last, mSplitCount);
 
 		return true;
 	}
@@ -422,8 +477,9 @@ namespace Opde {
 
 			// iterate through existing Atlases, and see if any of them accepts our lightmap
 			for (int i = 0; i < last; i++) {
-				unused_pixels += mList.at(i)->getUnusedArea();
-				total_pixels += ATLAS_WIDTH * ATLAS_HEIGHT;
+				LightAtlas *a = mList.at(i);
+				unused_pixels += a->getUnusedArea();
+				total_pixels += a->getPixelCount();
 			}
 
 			float percentage = 0;
