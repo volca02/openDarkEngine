@@ -316,9 +316,9 @@ property SchMsg {
 	p_ver 2.16
 }
 
-property RenderTyp {
-	label "RenderType"
-}
+//property RenderTyp {
+//	label "RenderType"
+//}
 
 property AI_Conver {
 	label "AIConversation"
@@ -1270,10 +1270,10 @@ property AnimPre {
 	p_ver 2.65560
 }
 
-property RenderAlp {
-	label "RenderAlpha"
-	p_ver 2.65540
-}
+//property RenderAlp {
+//	label "RenderAlpha"
+//	p_ver 2.65540
+//}
 
 property FrobInfo {
 	label "FrobInfo"

@@ -40,13 +40,17 @@
 #include "ObjectService.h"
 #include "EntityMaterialInstance.h"
 
-#include "HasRefsProperty.h"
-
 #include <OgreEntity.h>
 #include <OgreLight.h>
 #include <OgreSceneNode.h>
 
 namespace Opde {
+	// forward decls.
+	class HasRefsProperty;
+	class RenderAlphaProperty;
+	class RenderTypeProperty;
+	class ZBiasProperty;
+	
 	/// Render System message type
 	typedef enum {
 	    /// Render window changed the size
@@ -87,6 +91,7 @@ namespace Opde {
 			void setRenderType(unsigned int _renderType);
 			void setSkip(bool _skip);
 			void setAlpha(float alpha);
+			void setZBias(float bias);
 
 			void setEntity(Ogre::Entity* newEntity);
 			
@@ -108,6 +113,9 @@ namespace Opde {
 
 			/// alpha transparency value of the object
 			float mAlpha;
+			
+			/// z-bias of the object
+			float mZBias;
 
 			Ogre::Entity* mEntity;
 			Ogre::SceneNode* mNode;
@@ -199,12 +207,6 @@ namespace Opde {
 			/// Scale property change callback
 			void onPropScaleMsg(const PropertyChangeMsg& msg);
 			
-			/// Render type property change callback
-			void onPropRenderTypeMsg(const PropertyChangeMsg& msg);
-			
-			/// Render alpha property change callback
-			void onPropRenderAlphaMsg(const PropertyChangeMsg& msg);
-			
 			/// Object creation/destruction callback
 			void onObjectMsg(const ObjectServiceMsg& msg);
 			
@@ -284,14 +286,6 @@ namespace Opde {
 			PropertyGroup::ListenerID mPropScaleListenerID;
 			PropertyGroup* mPropScale;
 			
-			// "RenderType" Property related
-			PropertyGroup::ListenerID mPropRenderTypeListenerID;
-			PropertyGroup* mPropRenderType;
-			
-			// "RenderAlpha" Property related
-			PropertyGroup::ListenerID mPropRenderAlphaListenerID;
-			PropertyGroup* mPropRenderAlpha;
-			
 			/// Shared pointer to the property service
 			PropertyServicePtr mPropertyService;
 
@@ -345,8 +339,13 @@ namespace Opde {
 			
 			/// editor mode display
 			bool mEditorMode;
+			
+			ConfigServicePtr mConfigService;
 
 			HasRefsProperty* mHasRefsProperty;
+			RenderTypeProperty* mRenderTypeProperty;
+			RenderAlphaProperty* mRenderAlphaProperty;
+			ZBiasProperty* mZBiasProperty;
 	};
 
 	/// Shared pointer to Link service

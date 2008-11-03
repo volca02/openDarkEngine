@@ -45,12 +45,10 @@
 // Jorge texture png
 #include "jorge.h"
 
-// Internal rendertype constants
-// Using #define to be able to Switch on them
-#define RENDER_TYPE_NORMAL 0
-#define RENDER_TYPE_NOT_RENDERED 1
-#define RENDER_TYPE_NO_LIGHTMAP 2
-#define RENDER_TYPE_EDITOR_ONLY 3
+#include "HasRefsProperty.h"
+#include "RenderTypeProperty.h"
+#include "RenderAlphaProperty.h"
+#include "ZBiasProperty.h"
 
 using namespace std;
 using namespace Ogre;
@@ -68,6 +66,7 @@ namespace Opde {
 		mHasRefs(true),
 		mSkip(false),
 		mAlpha(1.0f),
+		mZBias(0.0f),
 		mEntity(entity), 
 		mNode(node),
 		mEmi(NULL) {
@@ -112,6 +111,12 @@ namespace Opde {
 		mAlpha = alpha;
 		mEmi->setTransparency(1.0f - mAlpha);
 	};
+	
+	// --------------------------------------------------------------------------
+	void EntityInfo::setZBias(float bias) {
+		mZBias = bias;
+		mEmi->setZBias(bias);
+	};
 
 	// --------------------------------------------------------------------------
 	void EntityInfo::setEntity(Ogre::Entity* entity) {
@@ -137,15 +142,13 @@ namespace Opde {
 	// --------------------------------------------------------------------------
 	void EntityInfo::refreshVisibility() {
 		// calculate the visibilities:
-		bool brType = false;
+		bool brType = true;
 
-		switch (mRenderType) {
-			case RENDER_TYPE_NORMAL: brType = true; break;
-			case RENDER_TYPE_NOT_RENDERED: brType = false; break;
-			case RENDER_TYPE_NO_LIGHTMAP: brType = true; break; // Not sure. Seems to indicate shadow should not be cast on lmaps?
-			case RENDER_TYPE_EDITOR_ONLY: brType = true; break; // should be already converted to normal/not_rendered
-		}
-
+		if (mRenderType == RENDER_TYPE_NOT_RENDERED)
+			brType = false;
+			
+		// todo: editor mode handling
+		
 		mNode->setVisible(mHasRefs && brType, true);
 	};
 
@@ -158,15 +161,17 @@ namespace Opde {
 			mPropSpotlight(NULL),
 			mPropPosition(NULL),
 			mPropScale(NULL),
-			mPropRenderType(NULL),
-			mPropRenderAlpha(NULL),
 			mRoot(NULL), 
 			mSceneMgr(NULL), 
 			mRenderWindow(NULL),
 			mDarkSMFactory(NULL), 
 			mDefaultCamera(NULL),
 			mLoopService(NULL),
-			mEditorMode(false) {
+			mEditorMode(false),
+			mHasRefsProperty(NULL),
+			mRenderTypeProperty(NULL),
+			mRenderAlphaProperty(NULL),
+			mZBiasProperty(NULL) {
 	    // TODO: This is just plain wrong. This service should be the maintainer of the used scene manager, if any other service needs the direct handle, etc.
 	    // The fact is this service is probably game only, and should be the initialiser of graphics as the whole. This will be the
 	    // modification that should be done soon in order to let the code look and be nice
@@ -209,6 +214,24 @@ namespace Opde {
 			delete mHasRefsProperty;
 			mHasRefsProperty = NULL;
 		}
+		
+		if (mRenderTypeProperty) {
+			mPropertyService->unregisterPropertyGroup(mRenderTypeProperty);
+			delete mRenderTypeProperty;
+			mRenderTypeProperty = NULL;
+		}
+		
+		if (mRenderAlphaProperty) {
+			mPropertyService->unregisterPropertyGroup(mRenderAlphaProperty);
+			delete mRenderAlphaProperty;
+			mRenderAlphaProperty = NULL;
+		}
+		
+		if (mZBiasProperty) {
+			mPropertyService->unregisterPropertyGroup(mZBiasProperty);
+			delete mZBiasProperty;
+			mZBiasProperty = NULL;
+		}
 
 		if (mPropPosition != NULL)
 		    mPropPosition->unregisterListener(mPropPositionListenerID);
@@ -226,10 +249,6 @@ namespace Opde {
 		    mPropSpotlight->unregisterListener(mPropSpotlightListenerID);
 		mPropSpotlight = NULL;
 
-		if (mPropRenderType != NULL)
-		    mPropRenderType->unregisterListener(mPropRenderTypeListenerID);
-		mPropRenderType = NULL;
-		    
 		if (mPropScale != NULL)
 		    mPropScale->unregisterListener(mPropScaleListenerID);
 		mPropScale = NULL;
@@ -283,9 +302,8 @@ namespace Opde {
 		
 		mPropertyService = static_pointer_cast<PropertyService>(ServiceManager::getSingleton().getService("PropertyService"));
 		
-		// create all the properties the render service uses
-		createProperties();
-
+		mConfigService = static_pointer_cast<ConfigService>(ServiceManager::getSingleton().getService("ConfigService"));
+		
 		return true;
     }
 
@@ -353,6 +371,9 @@ namespace Opde {
 		// Property Service should have created us automatically through service masks.
 		// So we can register as a link service listener
 		LOG_INFO("RenderService::bootstrapFinished()");
+		
+		// create the properties the render service uses (built-in)
+		createProperties();
 
 		PropertyGroup::ListenerPtr cmodelc =
 			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropModelNameMsg);
@@ -417,28 +438,6 @@ namespace Opde {
 			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropScaleMsg);
 
 		mPropScaleListenerID = mPropScale->registerListener(cscalec);
-
-		// --- Render type property listener
-		mPropRenderType = mPropertyService->getPropertyGroup("RenderType");
-
-		if (mPropRenderType == NULL)
-            OPDE_EXCEPT("Could not get RenderType property group. Not defined. Fatal", "RenderService::bootstrapFinished");
-
-		PropertyGroup::ListenerPtr crtc =
-			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropRenderTypeMsg);
-
-		mPropRenderTypeListenerID = mPropRenderType->registerListener(crtc);
-		
-		// --- Render alpha property listener
-		mPropRenderAlpha = mPropertyService->getPropertyGroup("RenderAlpha");
-
-		if (mPropRenderAlpha == NULL)
-            OPDE_EXCEPT("Could not get RenderAlpha property group. Not defined. Fatal", "RenderService::bootstrapFinished");
-
-		PropertyGroup::ListenerPtr crac =
-			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropRenderAlphaMsg);
-
-		mPropRenderAlphaListenerID = mPropRenderAlpha->registerListener(crac);
 
 		// TODO: The hardcoded z-bias is doing problems, unsurprisingly
 		// to fix this, we should create a handler for that property
@@ -607,77 +606,6 @@ namespace Opde {
 			case PROP_REMOVED:
 				// TODO: reset to scale 1, 1, 1?
 				break;
-		}
-	}
-	
-	// --------------------------------------------------------------------------
-	void RenderService::onPropRenderTypeMsg(const PropertyChangeMsg& msg) {
-		if (msg.objectID <= 0) // no action for archetypes
-            return;
-        
-        
-		LOG_VERBOSE("RenderService: non-archetype RenderType prop for obj. %d changed [%d]", msg.objectID, (int)(msg.change));
-		
-        // Rendertype property only affects the model (entity) not the lightning properties.    
-		
-		switch(msg.change) {
-			case PROP_CHANGED: 
-			case PROP_ADDED: {
-				EntityInfo* ei = _getEntityInfo(msg.objectID);
-
-				// if we don't have ei for the object, it is not initialized just yet
-				// that of course is error - ObjectService should have done this already
-				// But there is a catch - DefaultRoom has id 1, is in the GAM, but has no id in bitmap
-				// an expensive, and maybe not possible, way to deal with this? DonorType...
-				if (ei == NULL) {
-					LOG_ERROR("RenderService::onPropRenderTypeMsg: No EntityInfo for object %d", msg.objectID);
-					return;
-				}
-
-				DVariant mode; 
-				mPropRenderType->get(msg.objectID, "mode", mode);
-				
-				LOG_VERBOSE("RenderService: RenderType prop for obj. %d changed to %d", msg.objectID, mode.toUInt());
-
-				unsigned int uimode = mode.toUInt();
-				
-				if (uimode == RENDER_TYPE_EDITOR_ONLY)
-					uimode = mEditorMode ? RENDER_TYPE_NORMAL : RENDER_TYPE_NOT_RENDERED;
-
-				ei->setRenderType(uimode);
-
-				break;
-			}
-				
-			case PROP_REMOVED:
-				EntityInfo* ei = _getEntityInfo(msg.objectID);
-				ei->setRenderType(RENDER_TYPE_NORMAL);
-				
-				break;
-		}
-	}
-	
-	// --------------------------------------------------------------------------
-	void RenderService::onPropRenderAlphaMsg(const PropertyChangeMsg& msg) {
-		if (msg.objectID <= 0) // no action for archetypes
-            return;
-            
-		switch(msg.change) {
-			case PROP_CHANGED: 
-			case PROP_ADDED: {
-				DVariant alpha; 
-				mPropRenderAlpha->get(msg.objectID, "alpha", alpha);
-				
-				LOG_DEBUG("RenderService: RenderAlpha prop for obj. %d changed to %f", msg.objectID, alpha.toFloat());
-				
-				EntityInfo* ei = _getEntityInfo(msg.objectID);
-				ei->setAlpha(alpha.toFloat());
-				return;
-			} 
-			case PROP_REMOVED:
-				EntityInfo* ei = _getEntityInfo(msg.objectID);
-				ei->setAlpha(1.0f);
-				return;
 		}
 	}
 	
@@ -1222,14 +1150,23 @@ namespace Opde {
 		//mModelNameStorage = new FixedStringDataStorage();
 		//mPropertyService->createPropertyGroup("ModelName", "ModelName", "always", mModelNameStorage);
 		
-		// RenderType property - single int property
-		
 		// RenderAlpha property - single float prop
+		mRenderAlphaProperty = new RenderAlphaProperty(this, mPropertyService.ptr());
+		mPropertyService->registerPropertyGroup(mRenderAlphaProperty);
 		
 		// HasRefs - single bool prop
 		mHasRefsProperty = new HasRefsProperty(this, mPropertyService.ptr());
 		mPropertyService->registerPropertyGroup(mHasRefsProperty);
+
+		// RenderType property - single unsigned int property with enum
+		mRenderTypeProperty = new RenderTypeProperty(this, mPropertyService.ptr());
+		mPropertyService->registerPropertyGroup(mRenderTypeProperty);
 		
+		// ZBias - z bias for depth fighting avoidance
+		if (mConfigService->getGameType() > ConfigService::GAME_TYPE_T1) { // only t1 does not have ZBIAS
+			mZBiasProperty = new ZBiasProperty(this, mPropertyService.ptr());
+			mPropertyService->registerPropertyGroup(mZBiasProperty);
+		}
 		
 		// Light - a more complex property - this should be moved to LightService
 		
