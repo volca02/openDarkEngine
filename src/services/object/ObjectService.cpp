@@ -285,7 +285,7 @@ namespace Opde {
 	//------------------------------------------------------
 	void ObjectService::onDBChange(const DatabaseChangeMsg& m) {
 	    if (m.change == DBC_DROPPING) {
-			// TODO: Clear the object mapping, broadcast the 'object are being released' change
+			// TODO: Clear the object mapping, broadcast the 'objects are being released' change
 			_clear(0x03);
 	    } else if (m.change == DBC_LOADING) {
 		// TODO: Load the object mapping bitmap (16 categories, although just 0 abstract, 1 concrete are in use)
@@ -358,7 +358,7 @@ namespace Opde {
 		// bit array going to be used to merge the objects (from file, and those in mem)
 		BitArray fileObjs(bitmap, bsize, minID, maxID);
 		
-		// grow the system to allow the stored object to flow in
+		// grow the system to allow the stored objects to flow in
 		grow(minID, maxID);
 		
 		delete[] bitmap; // not needed anymore, was copied into the fileObjs
@@ -441,6 +441,8 @@ namespace Opde {
 		} else { // Total cleanup
 			mLinkService->clear();
 			mPropertyService->clear();
+
+			mAllocatedObjects.clear();
 
 			resetMinMaxID();
 			
