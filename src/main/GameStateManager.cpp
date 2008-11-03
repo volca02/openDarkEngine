@@ -152,6 +152,9 @@ namespace Opde {
 		
 		mConfigService->loadParams("opde.cfg");
 		
+		// override the config setting
+		mConfigService->setParam("game_type", mGameType);
+		
 		RenderServicePtr rends;
 
 		rends = static_pointer_cast<RenderService>(ServiceManager::getSingleton().getService("RenderService"));
