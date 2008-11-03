@@ -46,10 +46,10 @@ namespace Opde {
                                         Relation::ObjectIDToLinks::const_iterator begin,
                                         Relation::ObjectIDToLinks::const_iterator end) :
 
+                            LinkQueryResult(),
                             mLinkMap(linkmap),
                             mBegin(begin),
-                            mEnd(end),
-                            LinkQueryResult() {
+                            mEnd(end) {
                 mIter = mBegin;
             }
 
