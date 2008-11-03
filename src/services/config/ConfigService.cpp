@@ -120,7 +120,26 @@ namespace Opde {
             // Guess the file didn't exist
         }
     }
-//-------------------------- Factory implementation
+    
+    //------------------------------------------------------
+    ConfigService::GameType ConfigService::getGameType() {
+    	GameType gt = GAME_TYPE_INVALID;
+    	
+    	DVariant val;
+    	
+    	if (getParam("game_type", val)) {
+    		if (val.toString() == "t1") 
+				gt = GAME_TYPE_T1;
+			else if (val.toString() == "t2") 
+				gt = GAME_TYPE_T2;
+			else if (val.toString() == "ss2") 
+				gt = GAME_TYPE_SS2;
+    	}
+    	
+    	return gt;
+    }
+    
+	//-------------------------- Factory implementation
 	std::string ConfigServiceFactory::mName = "ConfigService";
 
 	ConfigServiceFactory::ConfigServiceFactory() : ServiceFactory() {

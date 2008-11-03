@@ -41,6 +41,13 @@ namespace Opde {
 	*/
 	class OPDELIB_EXPORT ConfigService : public Service {
 		public:
+			typedef enum {
+				GAME_TYPE_INVALID = 0,
+				GAME_TYPE_T1,
+				GAME_TYPE_T2,
+				GAME_TYPE_SS2
+			} GameType;
+		
 			ConfigService(ServiceManager *manager, const std::string& name);
 			virtual ~ConfigService();
 
@@ -64,6 +71,10 @@ namespace Opde {
 
 			/** Injects the settings from a ogre's cfg file */
 			bool loadParams(const std::string& cfgfile);
+			
+			/** returns the set game type. This should normally be the cam.cfg's game dark/game shock, but we also need to differentiate t1/t2 
+			* @note Uses the game_type = t1/t2/ss2 config key */
+			GameType getGameType();
 
 		protected:
             /** initializes the service. Tries to load opde.cfg */
