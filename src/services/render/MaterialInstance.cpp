@@ -93,19 +93,25 @@ void MaterialInstance::setTransparency (Real transparency) {
 void MaterialInstance::setZBias(Ogre::Real zbias) {
 	mCurrentZBias = zbias;
 	
-	Material::TechniqueIterator techniqueIt = mCopyMat->getTechniqueIterator ();
-
-    while (techniqueIt.hasMoreElements ()) {
-		Technique *t = techniqueIt.getNext ();
-		
-		Technique::PassIterator passIt = t->getPassIterator ();
-		while (passIt.hasMoreElements ()) {
-			Pass* p = passIt.getNext();
-			
-			// change the depth bias
-			p->setDepthBias(mCurrentZBias);
+	if (mCurrentZBias != 0.0f) {
+		if (mCopyMat.isNull ()) {
+			createCopyMaterial ();
 		}
-    }
+		
+		Material::TechniqueIterator techniqueIt = mCopyMat->getTechniqueIterator ();
+
+		while (techniqueIt.hasMoreElements ()) {
+			Technique *t = techniqueIt.getNext ();
+			
+			Technique::PassIterator passIt = t->getPassIterator ();
+			while (passIt.hasMoreElements ()) {
+				Pass* p = passIt.getNext();
+				
+				// change the depth bias
+				p->setDepthBias(mCurrentZBias, mCurrentZBias);
+			}
+		}
+	}
 }
 
 MaterialPtr MaterialInstance::getCopyMaterial () {
