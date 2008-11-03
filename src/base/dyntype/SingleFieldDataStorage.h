@@ -236,7 +236,7 @@ namespace Opde {
 	/// Boolean (4 byte) data storage
 	class OPDELIB_EXPORT BoolDataStorage : public SingleFieldDataStorage<bool> {
 		public:
-			BoolDataStorage() {
+			BoolDataStorage(DEnum* enm = NULL) {
 				mFieldDesc.enumerator = NULL;
 				mFieldDesc.name = "";
 				mFieldDesc.size = 4;
@@ -250,6 +250,9 @@ namespace Opde {
 			/** @see DataStorage::writeToFile */
 			virtual bool writeToFile(FilePtr& file, int objID, bool sizeStored) {
 				DataMap::iterator it = mDataMap.find(objID);
+				
+				// bool data storage has the write/read operations overriden 
+				// - the stored size is always 4 bytes, and some compilers use 1 byte bools
 		
 				if (it != mDataMap.end()) {
 					const bool& dta = it->second;
@@ -307,8 +310,8 @@ namespace Opde {
 	/// Float (4 byte) data storage
 	class OPDELIB_EXPORT FloatDataStorage : public SingleFieldDataStorage<float> {
 		public:
-			FloatDataStorage() {
-				mFieldDesc.enumerator = NULL;
+			FloatDataStorage(DEnum* enm = NULL) {
+				mFieldDesc.enumerator = enm;
 				mFieldDesc.name = "";
 				mFieldDesc.size = 4;
 				mFieldDesc.type = DVariant::DV_FLOAT;
@@ -322,8 +325,8 @@ namespace Opde {
 	/// int (4 byte) data storage
 	class OPDELIB_EXPORT IntDataStorage : public SingleFieldDataStorage<int32_t> {
 		public:
-			IntDataStorage() {
-				mFieldDesc.enumerator = NULL;
+			IntDataStorage(DEnum* enm = NULL) {
+				mFieldDesc.enumerator = enm;
 				mFieldDesc.name = "";
 				mFieldDesc.size = sizeof(int32_t);
 				mFieldDesc.type = DVariant::DV_INT;
@@ -337,8 +340,8 @@ namespace Opde {
 	/// int (4 byte) data storage
 	class OPDELIB_EXPORT UIntDataStorage : public SingleFieldDataStorage<uint32_t> {
 		public:
-			UIntDataStorage() {
-				mFieldDesc.enumerator = NULL;
+			UIntDataStorage(DEnum* enm = NULL) {
+				mFieldDesc.enumerator = enm;
 				mFieldDesc.name = "";
 				mFieldDesc.size = sizeof(uint32_t);
 				mFieldDesc.type = DVariant::DV_UINT;
@@ -352,8 +355,8 @@ namespace Opde {
 	/// Variable length string data storage
 	class OPDELIB_EXPORT StringDataStorage : public SingleFieldDataStorage<std::string> {
 		public:
-			StringDataStorage() {
-				mFieldDesc.enumerator = NULL;
+			StringDataStorage(DEnum* enm = NULL) {
+				mFieldDesc.enumerator = enm;
 				mFieldDesc.name = "";
 				mFieldDesc.size = -1;
 				mFieldDesc.type = DVariant::DV_STRING;
