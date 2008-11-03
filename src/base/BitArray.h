@@ -212,9 +212,8 @@ namespace Opde {
 			
 			/// clears the array and sets new min and max boundary values
 			void reset(int min, int max) {
+				clear();
 				grow(min, max);
-				
-				clearBits();
 			};
 			
 			/// grows the bitArray to be able to index new min->max indices, preserving the previous values
@@ -277,7 +276,7 @@ namespace Opde {
 		protected:
 			/// grows the specified buffer to accompany the new size
 			void growBuf(unsigned char**ptr, int oldIndex, int newIndex) {
-				if (newIndex < oldIndex) 
+				if (newIndex < oldIndex)
 					OPDE_ARRAY_EXCEPT("BitArray: Shrinking not allowed");
 				
 				size_t oldByteSize;
