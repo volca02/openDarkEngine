@@ -31,6 +31,12 @@
 // #define framelm
 #include "OpdeException.h"
 
+// TODO: This is dated... We should just return Width and Height for lightmaps (separate), to let the tuning be simpler
+// - this means some changes to the lmap allocation have to be made too
+
+// size of lightmap atlas (both W and H)
+#define ATLAS_MAX_SIZE 256
+
 using namespace Ogre;
 
 namespace Opde {
@@ -349,6 +355,12 @@ namespace Opde {
 			if (mList.at(i)->getTag() != lmap->getTag())
 				continue;
 			
+			if (mList.at(i)->addLightMap(lmap))
+				return false;
+		}
+		
+		// pass two - without the tag
+		for (int i = 0; i < last; i++) {
 			if (mList.at(i)->addLightMap(lmap))
 				return false;
 		}

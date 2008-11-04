@@ -35,12 +35,6 @@
 #include "OgreHardwarePixelBuffer.h"
 #include "ConsoleCommandListener.h"
 
-// TODO: This is dated... We should just return Width and Height for lightmaps (separate), to let the tuning be simpler
-// - this means some changes to the lmap allocation have to be made too
-
-// size of lightmap atlas (both W and H)
-#define ATLAS_MAX_SIZE 2048
-
 namespace Opde {
 
 	/// A struct holding info for one atlas
