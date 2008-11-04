@@ -1385,9 +1385,6 @@ namespace Ogre {
         pass->setDiffuse(1,1,1,1);
         pass->setSpecular(0,0,0,0);
         
-        // Z Fighting of the bilboardy meshes
-        pass->setDepthBias(0.1, 0.1);
-
         if (mat.type == MD_MAT_TMAP) {
 
             // Texture unit state for the main texture...

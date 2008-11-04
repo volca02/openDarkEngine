@@ -34,10 +34,9 @@ namespace Opde {
 	ZBiasProperty::ZBiasProperty(RenderService* rs, PropertyService* owner) : 
 			RenderedProperty(rs, owner, "RendererZBias", "Z-Bias", "always") {
 		
-		mPropertyStorage = new FloatDataStorage();
+		mPropertyStorage = new UIntDataStorage();
 		
-		// TODO: Check the version
-		setChunkVersions(1, 1);
+		setChunkVersions(2, 4);
 		
 		mSceneMgr = rs->getSceneManager();
 	};
@@ -53,13 +52,13 @@ namespace Opde {
 		if (!get(oid, "", val))
 			OPDE_EXCEPT("Property not defined for object.", "RenderAlphaProperty::addProperty");
 		
-		setZBias(oid, val.toFloat());
+		setZBias(oid, val.toUInt());
 	};
 
 	// --------------------------------------------------------------------------
 	void ZBiasProperty::removeProperty(int oid) {
-		// reinit to 0.0 - no bias
-		setZBias(oid, 0.0f);
+		// reinit to 0 - no bias
+		setZBias(oid, 0);
 	};
 
 	// --------------------------------------------------------------------------
@@ -71,14 +70,14 @@ namespace Opde {
 	// --------------------------------------------------------------------------
 	void ZBiasProperty::valueChanged(int oid, const std::string& field, const DVariant& value) {
 		// just call the setter
-		setZBias(oid, value.toFloat());
+		setZBias(oid, value.toUInt());
 	};
 
 	// --------------------------------------------------------------------------
-	void ZBiasProperty::setZBias(int oid, float bias) {
+	void ZBiasProperty::setZBias(int oid, uint32_t bias) {
 		EntityInfo* ei = getEntityInfo(oid);
-
-		ei->setZBias(bias);
+        // TODO: The depth bias is in bits, not a float as supposed - conversion equation needed
+		ei->setZBias(static_cast<float>(1 << bias) / 0x0100); 
 	};
 };
 
