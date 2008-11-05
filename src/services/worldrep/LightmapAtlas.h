@@ -28,6 +28,7 @@
 
 #include <vector>
 #include <map>
+#include "integers.h"
 #include "OgreImage.h"
 #include "OgreTextureManager.h"
 #include "OgreVector2.h"
