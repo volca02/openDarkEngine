@@ -348,10 +348,13 @@ namespace Opde {
 	/** Class holding one set of light maps. Uses a HardwarePixelBufferSharedPtr class for texture storage.
 	* This class is used for atlasing a light map set into one bigger lightmap texture containing the light maps.
 	* This accelerates rendering. */
-	class LightAtlas {
+	class OPDELIB_EXPORT LightAtlas {
 		private:
 			/** The count of the stored light maps */
 			int mCount;
+
+			/** The maximum atlas size */
+			static int mMaxSize;
 		
 			/** Global index of this atlas in the atlas list */
 			int mIdx;
@@ -442,6 +445,9 @@ namespace Opde {
 			
 			/** returns the tag number of this atlas */
 			int getTag() {return mTag;};
+
+			/** Sets the maximum atlas size */
+			static void setMaxSize(int Size) {mMaxSize = Size;};
 	};
 
 

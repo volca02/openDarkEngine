@@ -34,12 +34,11 @@
 // TODO: This is dated... We should just return Width and Height for lightmaps (separate), to let the tuning be simpler
 // - this means some changes to the lmap allocation have to be made too
 
-// size of lightmap atlas (both W and H)
-#define ATLAS_MAX_SIZE 256
-
 using namespace Ogre;
 
 namespace Opde {
+
+int LightAtlas::mMaxSize;
 
 	Vector3 operator*(float a, lmpixel b) {
 		return Vector3(a * b.R,a * b.G,a * b.B);
@@ -126,7 +125,7 @@ namespace Opde {
 		// Dynamic allocation of lmap atlas size. If we didn't fit, try throwing 
 		// all the mapping away, then remap all
 		while (!placeLightMap(lmap)) {
-			if (mSize >= ATLAS_MAX_SIZE) // have some sane maximum
+			if (mSize >= mMaxSize) // have some sane maximum
 				return false;
 			
 			growAtlas(2 * mSize);

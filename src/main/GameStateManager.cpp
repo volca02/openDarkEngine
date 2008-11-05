@@ -21,6 +21,8 @@
  *
  *****************************************************************************/
 
+#include <math.h>
+
 #include "config.h"
 
 #include "GameStateManager.h"
@@ -172,7 +174,18 @@ namespace Opde {
 				mConfigService->setParam("mission", "earth.mis");
 			else
 				mConfigService->setParam("mission", "miss1.mis");
-		}		
+		}
+
+		int MaxAtlasSize = 512;
+		if (mConfigService->hasParam("MaxAtlasSize"))
+		{
+            MaxAtlasSize = mConfigService->getParam("MaxAtlasSize").toInt();
+			MaxAtlasSize = 1 << (int)(log((double)MaxAtlasSize)	/ log((double) 2));	//Make sure it is a exponent of two
+			if((MaxAtlasSize < 128)  || (MaxAtlasSize > 4096))
+				MaxAtlasSize = 512;
+		}
+		LOG_INFO("Max Atlas Size : %d", MaxAtlasSize);
+		LightAtlas::setMaxSize(MaxAtlasSize);				
 
         // TODO: Remove this temporary nonsense. In fact. Remove the whole class this method is in!
         GamePlayState* ps = new GamePlayState();
