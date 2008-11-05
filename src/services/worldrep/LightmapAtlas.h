@@ -37,16 +37,16 @@
 
 namespace Opde {
 
-	/// A struct holding info for one atlas
+	/// A structure holding info for one texture in an atlas
 	typedef struct {
 		int atlasnum;
-		float u,v; // shift of the lmap in the atlas
-		float su,sv; // size of the lmap in the atlas
+		float u,v; // shift of the texture (UV) in the atlas (position)
+		float su,sv; // size of the texture (UV) in the atlas (relative to atlas size - 0-1)
 	} AtlasInfo;
 
 
 	/** Free space information storage - rectangular area in the lightmap (either used or free to use)
-	* Organized in a binary tree. 
+	* Organized in a binary tree. - A sort of a 2D texture space allocator. 
 	* thanks to this article for a tip: http://www.blackpawn.com/texts/lightmaps/default.html
 	*/
 	class FreeSpaceInfo { 
@@ -54,6 +54,7 @@ namespace Opde {
 			int 	mMaxArea;
 			bool 	mIsLeaf;
 			
+			// Children of this node, if it's a node
 			FreeSpaceInfo* mChild[2];
 			
 			FreeSpaceInfo() {
@@ -74,30 +75,8 @@ namespace Opde {
 			int	y;
 			int	w;
 			int	h;
-			
-			/* TODO Construct a 2x bigger FreeSpaceInfo, holding the given one as a child
-			FreeSpaceInfo(FreeSpaceInfo* orig) {
-				x = 0;
-				y = 0;
-				
-				w = 2 * orig->w;
-				h = 2 * orig->h;
-				
-				// rest
-				// below our original
-				mChild[0] = new FreeSpaceInfo(orig->w, 0, orig->w, h);
-				
-				mChild[0]->mIsLeaf = false;
-				
-				mChild[0]->mChild[0] = orig;
-				// square one, bottom of the original
-				mChild[0]->mChild[1] = new FreeSpaceInfo(0, orig->h, orig->w, orig->h); 
-				
-				// next to our original, rectangular
-				mChild[1] = new FreeSpaceInfo(orig->w, 0, orig->w, h);
-			}
-			*/
 
+			// Constructor with the specified dimensions and position (leaf constructor)
 			FreeSpaceInfo(int x, int y, int w, int h) {
 				this->x = x;
 				this->y = y;
@@ -111,6 +90,7 @@ namespace Opde {
 				mChild[1] = NULL;
 			}
 			
+			// destructor. Deletes the children if any.
 			~FreeSpaceInfo() {
 				if (mChild[0] != NULL)
 					delete mChild[0];
@@ -119,6 +99,7 @@ namespace Opde {
 					delete mChild[1];
 			}
 			
+			// Tests if this node has free space somewhere to store the specified sized texture.
 			bool Fits(int sw, int sh) const {
 				if ((sw<=w) && (sh<=h))
 					return true;
@@ -126,6 +107,7 @@ namespace Opde {
 				return false;
 			}
 			
+			// Returns the area this free space represents
 			int getArea() const {
 				return w*h;
 			}
@@ -136,6 +118,9 @@ namespace Opde {
 			}
 			
 			/** allocate a space in the free area. 
+			* If this is a node, it searches both it's children. If it is a leaf, it either returns NULL if it can't hold
+			* the specified dimensions, or a new pointer to a leaf that holds the allocation requested (the space that was
+			* not taken up by the alocation is put as a child of the node)
 			* @return A free space rectangle of the requested space, or null if the space could not be allocated */
 			FreeSpaceInfo* allocate(int sw, int sh) {
 				if (!mIsLeaf) { // split node.
@@ -187,7 +172,7 @@ namespace Opde {
 			}
 			
 			/** refreshes the maximal allocatable area for this node/leaf. 
-			Non-leaf nodes get the maximum as the maximum area of the children */
+			Non-leaf nodes get the maximum as the maximum of the areas of the children */
 			void refreshMaxArea() {
 				if (mIsLeaf) {
 					mMaxArea = w * h;
@@ -249,10 +234,10 @@ namespace Opde {
 		
 	/** A class representing a switchable lightmap. It holds one static lightmap, which can't be switched, and a set of lightmaps indexed by light number, 
 	* which can have their'e intensity modulated. The resulting lightmap is recalculated every time an actual chage happens. 
-	* Please use Ogre::LightAtlasList.setLightIntensity if you want to set an intensity to a certain light. Calling the method here would not refresh the lightmap texture. 
+	* Please use Opde::LightAtlasList::setLightIntensity if you want to set an intensity to a certain light. Calling the method here would not refresh the lightmap texture. 
 	* @see LightAtlasList */
 	class LightMap {
-			// So the atlasser is able to set uv && suv for us
+			// Friend of atlas, so the atlas is able to set uv && suv for us
 			friend class LightAtlas;
 				
 			/** Information about the lightmap position in the atlas */
@@ -266,8 +251,10 @@ namespace Opde {
 			/** A map of the switchable lightmaps */
 			ObjectToLightMap mSwitchableLmaps;
 			
+			typedef std::map< int, float > LightIntensityMap;
+
 			/** A map of the actual intensities */
-			std::map< int, float > mIntensities;
+			LightIntensityMap mIntensities;
 		
 			/** Lightmap's size in pixels */
 			unsigned int mSizeX, mSizeY;
@@ -294,6 +281,7 @@ namespace Opde {
 				mPosition = NULL;
 			}
 			
+			/** Destructor. Frees all allocated lightmaps */
 			~LightMap() {
 				delete[] mStaticLmap;
 				
@@ -314,40 +302,52 @@ namespace Opde {
 				return mOwner;
 			}
 			
-			/** Converts input UV coords to the Atlas coords */
+			/** Converts input UV coords to the Atlassed coords (after UV transformation) */
 			Ogre::Vector2 toAtlasCoords(Ogre::Vector2 in_uv) {
-				in_uv = in_uv * mSizeUV; // dunno why, this one does not work written in_uv *= suv;
+				in_uv = in_uv * mSizeUV; // dunno why, this one does not work written in_uv *= mSizeUV;
 				in_uv += mUV;
 				
 				return in_uv;
 			}
 			
 			/** Helping static method. Prepares an RGB version of the given buffer containing v1 or v2 lightmap 
-			* @note Returns NEW buffer that the caller is to manage! */
+			* @note Returns NEW buffer that the caller is responsible to manage! 
+			* @todo If somebody finds time, do this two stage - one return required size, two convert into supplied buffer */
 			static lmpixel* convert(char *data, int sx, int sy, int ver);
 			
 			/** Adds a switchable lightmap with identification id to the lightmap list (has to be of the same size). 
-			* \param id the ID of the light the lightmaps belongs to.
-			* \param data are the actual values converted to RGB. Unallocation is handled in destructor */
+			* @param id the ID of the light the lightmaps belongs to.
+			* @param data are the actual values converted to RGB. Unallocation is handled in destructor */
 			void AddSwitchableLightmap(int id, lmpixel *data);
 			
-			/** The main intensity setting function */
+			/** The main intensity setting function 
+			* @param id The id of the light (not object id, but internal light id)
+			* @param intensity the new intensity of the light (0.0f-1.0f)
+			*/
 			void setLightIntensity(int id, float intensity);
 			
-			/** Refreshes the texture's pixel buffer with our new settings*/
+			/** Refreshes the texture's pixel buffer with the final version of all lightmaps */
 			void refresh();
 			
+			/// @return the dimensions of this atlas in pixels
 			std::pair<int, int> getDimensions() const;
 			
-			/** Returns the atlas index */
+			/** @return the atlas index */
 			int getAtlasIndex();
 			
+			/** Returns a freely specified lightmap's tag.
+			* Tags are used to identify the texture which the lightmap modulates. 
+			* The atlas list tries to minimize the number of atlases containing the lightmaps of the same tag. 
+			/ That minimizes the batch count of the rendering, thus improving performance.
+			*/
 			int getTag() {return mTag; };
 	};
 
 	/** Class holding one set of light maps. Uses a HardwarePixelBufferSharedPtr class for texture storage.
 	* This class is used for atlasing a light map set into one bigger lightmap texture containing the light maps.
-	* This accelerates rendering. */
+	* This accelerates rendering. 
+	* This texture atlas implementation is targetted at lightmaps. Uses tag set to tell if the atlas already contains the specified tag of lightmap
+	*/
 	class OPDELIB_EXPORT LightAtlas {
 		private:
 			/** The count of the stored light maps */
@@ -373,22 +373,18 @@ namespace Opde {
 		
 			typedef std::vector < LightMap * > LightMapVector; 
 		
-			/** Already inserted lightmaps - mainly for dealocation */
+			/** Already inserted lightmaps - held for dealocation and building */
 			LightMapVector mLightmaps;
 		
-			/** Light number to the LightMap set mapping - changing light intensity will iterate throught the set of lmaps, and regenerate */
-			std::map<int, std::set<LightMap*> > mLights;
-			
-			/** A buffer which holds a copy of the image data */
-			lmpixel* mCopybuffer; // I keep the data of the lightmap here before I place them to Texture buffer.
+			typedef std::map<int, std::set<LightMap*> > LightIDMap;
 
-			/** return an origin - XY coords for the next free space (for a lightmap sized w*h) */
-			std::pair<FreeSpaceInfo, bool> getOrigin(int w, int h);
+			/** Light ID number to the LightMap set mapping - changing light intensity will iterate throught the set of lmaps, and regenerate */
+			LightIDMap mLights;
 			
 			/// set of tags this atlas contains (used to minimize the texture*atlas combinations)
 			typedef std::set<int> TagSet;
 			
-			/** Tag value of this atlas */
+			/** Tag values of this atlas */
 			TagSet mTagSet;
 			
 			/** The dimension of the atlas (starts at 16x16 - 16 here). As the atlas is rectangular we only need one */
@@ -402,11 +398,16 @@ namespace Opde {
 			bool placeLightMap(LightMap *lmap);
 		
 		public:
+			/** constructor
+			* @param idx The atlas index
+			* @param tag The initial tag this atlas will hold
+			*/
 			LightAtlas(int idx, int tag = 0);
 			
+			/// Destructor. Frees all lightmaps
 			~LightAtlas();
 			
-			/// Builds the texture. Called once per life of the atlas, finds the appropriate dimensions of the atlas to store all the lightmaps requested
+			/// Builds the texture. Called once per life of the atlas, writes the initial version of the atlas texture
 			void build();
 			
 			/** Adds a light map to this atlas. 
@@ -416,22 +417,17 @@ namespace Opde {
 
 			/** renders the prepared light map buffers into a texture - copies the pixel data to the 'atlas' */
 			bool render();
-			
-			/** Updated the pixel buffer with a new version of the lightmap. This version converts the Vector3 floats to 0-255 range (checks limits). 
-			* \warning Must be called after atlas locking, otherwise the program will crash ! */
-			void updateLightMapBuffer(FreeSpaceInfo& fsi, lmpixel* rgb);
-			
-			/** Updated the pixel buffer with a new version of the lightmap. This version converts the Vector3 floats to 0-255 range (checks limits) 
-			* \warning Must be called after atlas locking, otherwise the program will crash ! */
-			void updateLightMapBuffer(FreeSpaceInfo& fsi, Ogre::Vector3* rgb);
 
-			/** Updated the pixel buffer with a new version of the lightmap. This version converts the uint32 (shifted by 8) to 0-255 range (checks limits) 
+			/** Updates the pixel buffer with a new version of the lightmap (for example after light intensity change). 
+			* This version converts the uint32 (shifted by 8) to 0-255 range (checks limits) 
 			* \warning Must be called after atlas locking, otherwise the program will crash ! */
-			inline void updateLightMapBuffer(FreeSpaceInfo& fsi, unsigned int *lR, unsigned int *lG, unsigned int *lB);
+			inline void updateLightMapBuffer(FreeSpaceInfo& fsi, uint32_t *lR, uint32_t *lG, uint32_t *lB);
 			
 			/** Register that animated light ID maps to the LightMap instance */
 			void registerAnimLight(int id, LightMap* target);
 			
+			/** Sets the intensity of the light
+			* @see LightAtlasList::setLightIntensity */
 			void setLightIntensity(int id, float intensity);
 			
 			/** Returns the Light Map Atlas order number */
@@ -461,23 +457,26 @@ namespace Opde {
 
 
 	/** @brief A holder of a number of the light map atlases. 
-	*
+	* The main class in the family of lightmap management. Responsible for all lightmap atlases.
 	* Use this class to work with the light map storage and light switching. */
 	class LightAtlasList : public ConsoleCommandListener {
 		public:
+			/// helper operator that compares on the pixel count of lightmaps. Used to sort the lightmaps by size (helps atlassing effectivity)
 			struct lightMapLess {
 						bool operator()(const LightMap* a, const LightMap* b) const;
 				};
 			
 		private:
+			typedef std::vector<LightAtlas *> LightAtlasVector;
+
 			/** A list of the light map atlases */
-			std::vector<LightAtlas *> mList;
+			LightAtlasVector mList;
 		
 			/** Pre-render lightmap list*/
 			typedef std::map<int, std::vector<LightMap*> > TextureLightMapQueue;
-			TextureLightMapQueue mLightMapQueue;
 			
-			int mSplitCount; /// The split count of the same-texture lightmaps (e.g. the spread number. Higher number -> worse performance)
+			/// List of lightmaps that are waiting for processing
+			TextureLightMapQueue mLightMapQueue;
 			
 		protected:
 			bool placeLightMap(LightMap* lmap);
@@ -511,7 +510,8 @@ namespace Opde {
 					(*atlases)->setLightIntensity(id, value);
 				}
 			};
-			
+	
+			/// console command listener
 			virtual void commandExecuted(std::string command, std::string parameters);
 	};
 

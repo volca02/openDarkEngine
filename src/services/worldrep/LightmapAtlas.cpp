@@ -223,20 +223,7 @@ int LightAtlas::mMaxSize;
 		return true;
 	}
 
-	void LightAtlas::updateLightMapBuffer(FreeSpaceInfo& fsi, lmpixel* rgb) {
-		const PixelBox &pb = mAtlas->getCurrentLock();
-
-		uint32 *data = static_cast<uint32*>(pb.data) + fsi.y * pb.rowPitch;
-		for (int y = 0; y < fsi.h; y++)
-		{
-			uint32 w = (y * fsi.w);
-			for (int x = 0; x < fsi.w; x++)
-				data[x + fsi.x] = rgb[x + w].ARGB(); // Write a A8R8G8B8 conversion of the lmpixel
-			data += pb.rowPitch;
-		}
-	}
-
-	inline void LightAtlas::updateLightMapBuffer(FreeSpaceInfo& fsi, uint32 *lR, uint32 *lG, uint32 *lB)
+	inline void LightAtlas::updateLightMapBuffer(FreeSpaceInfo& fsi, uint32_t *lR, uint32_t *lG, uint32_t *lB)
 	{
 		const PixelBox &pb = mAtlas->getCurrentLock();
 
@@ -258,35 +245,6 @@ int LightAtlas::mMaxSize;
 					G = 255;
 				if (B > 255)
 					B = 255;
-
-				uint32 ARGB = (R << 16) | (G << 8) | B;
-
-				// Write a A8R8G8B8 conversion of the lmpixel
-				data[x + fsi.x] = ARGB;
-			}
-			data += pb.rowPitch;
-		}
-	}
-
-	void LightAtlas::updateLightMapBuffer(FreeSpaceInfo& fsi, Ogre::Vector3* rgb) {
-		const PixelBox &pb = mAtlas->getCurrentLock();
-
-		uint32 *data = static_cast<uint32*>(pb.data) + fsi.y * pb.rowPitch;
-		for (int y = 0; y < fsi.h; y++) 
-		{
-			uint32 w = (y * fsi.w);
-			for (int x = 0; x < fsi.w; x++) {
-				Vector3 pixel = rgb[x + w];
-
-				uint32 R, G, B;
-
-				R = (uint32) pixel.x;
-				G = (uint32) pixel.y;
-				B = (uint32) pixel.z;
-
-				R = (R > 255) ? 255 : ((R < 0)? 0 : R);
-				G = (G > 255) ? 255 : ((G < 0)? 0 : G);
-				B = (B > 255) ? 255 : ((B < 0)? 0 : B);
 
 				uint32 ARGB = (R << 16) | (G << 8) | B;
 
@@ -348,9 +306,6 @@ int LightAtlas::mMaxSize;
 		Opde::ConsoleBackend::getSingleton().setCommandHint(std::string("light"), "Switch a light intensity: light LIGHT_NUMBER INTENSITY(0-1)");
 		Opde::ConsoleBackend::getSingleton().registerCommandListener(std::string("lmeff"), dynamic_cast<ConsoleCommandListener*>(this));
 		Opde::ConsoleBackend::getSingleton().setCommandHint(std::string("lmeff"), "lightmap atlas efficiency calculator");
-		// TODO: short description of command could be useful (registerCommandListener(command, desc, classptr))
-
-		mSplitCount = 0;
 	}
 
 	LightAtlasList::~LightAtlasList() {
@@ -435,12 +390,9 @@ int LightAtlas::mMaxSize;
 			// sort the lmap vector by the area of the lmaps, and insert those all
 			std::sort(ti->second.begin(), ti->second.end(), lightMapLess());
 
-			bool first = true;
-
 			// find a nice warm place for all those little lightmaps
-			for (std::vector< LightMap *>::iterator it = ti->second.begin(); it < ti->second.end(); it++, first = false) {
-				if (placeLightMap(*it) && !first)
-					mSplitCount++;
+			for (std::vector< LightMap *>::iterator it = ti->second.begin(); it < ti->second.end(); it++) {
+				placeLightMap(*it);
 			}
 		}
 
@@ -475,7 +427,7 @@ int LightAtlas::mMaxSize;
 		if (total_pixels > 0)
 			percentage = 100.0f * used_pixels / total_pixels;
 
-		LOG_INFO("Light Map Atlas: Total used light map atlasses pixels: %d of %d (%f%%). %d atlases total used. Total splits: %d", used_pixels, total_pixels, percentage, last, mSplitCount);
+		LOG_INFO("Light Map Atlas: Total used light map atlasses pixels: %d of %d (%f%%). %d atlases total used.", used_pixels, total_pixels, percentage, last);
 
 		return true;
 	}
@@ -519,7 +471,7 @@ int LightAtlas::mMaxSize;
 			if (total_pixels > 0)
 				percentage = 100.0f * unused_pixels / total_pixels;
 
-			LOG_INFO("Total unused light map atlasses pixels: %d of %d (%f%%). %d atlases total used. Total splits: %d", unused_pixels, total_pixels, percentage, last, mSplitCount);
+			LOG_INFO("Total unused light map atlasses pixels: %d of %d (%f%%). %d atlases total used.", unused_pixels, total_pixels, percentage, last);
 
 		} else LOG_ERROR("Command %s not understood by LightAtlasList", command.c_str());
 	}

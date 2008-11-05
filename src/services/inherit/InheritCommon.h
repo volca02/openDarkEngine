@@ -19,6 +19,11 @@
  *
  *****************************************************************************/
 
+/*! 
+  \file InheritCommon.h
+  \brief Common declarations for the inherit service
+  \ingroup InheritService
+ */
 
 #ifndef __INHERITORCOMMON_H
 #define __INHERITORCOMMON_H

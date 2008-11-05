@@ -47,6 +47,7 @@
 #include "DTypeScriptLoader.h"
 #include "PLDefScriptLoader.h"
 
+/** OpenDarkEngine namespace. Holds the whole openDarkEngine project. */
 namespace Opde {
 	
 	/** OPDE core class. Used to initialize the whole engine. Singleton */
