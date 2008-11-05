@@ -54,13 +54,14 @@ int LightAtlas::mMaxSize;
 				mTex(NULL),
 				mAtlas(NULL),
 				mFreeSpace(NULL),
-				mTag(tag), 
 				mSize(1) {
 		mName << "@lightmap" << idx; // so we can find the atlas by number in the returned AtlasInfo
 		
 		mFreeSpace = new FreeSpaceInfo(0,0,mSize,mSize); 
 
 		mCount = 0;
+		
+		mTagSet.insert(tag);
 	}
 
 
@@ -82,6 +83,23 @@ int LightAtlas::mMaxSize;
         }
         
         mLightmaps.clear();
+	}
+	
+	std::string LightAtlas::getTagStr() {
+	    TagSet::iterator it = mTagSet.begin();
+	    
+	    std::stringstream sstr;
+	    
+	    while (it != mTagSet.end()) {
+	        int cur = *it++;
+	        
+	        sstr << cur;
+	        
+	        if (it != mTagSet.end()) 
+                sstr << ", ";
+	    }
+	    
+	    return sstr.str();
 	}
 	
 	void LightAtlas::growAtlas(int newSize) {
@@ -133,6 +151,7 @@ int LightAtlas::mMaxSize;
 		
 		// and insert into our list
 		mLightmaps.push_back(lmap);
+		addTag(lmap->getTag());
 		mCount++;
 		
 		return true;
@@ -351,7 +370,7 @@ int LightAtlas::mMaxSize;
 
 		// iterate through existing Atlases, and see if any of them accepts our lightmap
 		for (int i = 0; i < last; i++) {
-			if (mList.at(i)->getTag() != lmap->getTag())
+			if (!mList.at(i)->hasTag(lmap->getTag()))
 				continue;
 			
 			if (mList.at(i)->addLightMap(lmap))
@@ -360,7 +379,7 @@ int LightAtlas::mMaxSize;
 		
 		// pass two - without the tag
 		for (int i = 0; i < last; i++) {
-			if (mList.at(i)->addLightMap(lmap))
+			if (mList.at(i)->addLightMap(lmap)) // will addTag internally
 				return false;
 		}
 
@@ -446,7 +465,9 @@ int LightAtlas::mMaxSize;
 			used_pixels += used;
 			total_pixels += totc;
 			
-			LOG_VERBOSE("Light Map Atlas: Atlas %d : %d of %d used (%f%%) (%d of %d so far)", a->getTag(), used, totc, 100.0f * used/totc, used_pixels, total_pixels);
+			
+			
+			LOG_VERBOSE("Light Map Atlas: Atlas {tags %s} : %d of %d used (%f%%) (%d of %d so far)", a->getTagStr().c_str(), used, totc, 100.0f * used/totc, used_pixels, total_pixels);
 		}
 
 		float percentage = 0;

@@ -385,8 +385,11 @@ namespace Opde {
 			/** return an origin - XY coords for the next free space (for a lightmap sized w*h) */
 			std::pair<FreeSpaceInfo, bool> getOrigin(int w, int h);
 			
+			/// set of tags this atlas contains (used to minimize the texture*atlas combinations)
+			typedef std::set<int> TagSet;
+			
 			/** Tag value of this atlas */
-			int mTag;
+			TagSet mTagSet;
 			
 			/** The dimension of the atlas (starts at 16x16 - 16 here). As the atlas is rectangular we only need one */
 			int mSize;
@@ -444,7 +447,13 @@ namespace Opde {
 			int getPixelCount();
 			
 			/** returns the tag number of this atlas */
-			int getTag() {return mTag;};
+			int hasTag(int tag) { TagSet::iterator it = mTagSet.find(tag); return it != mTagSet.end(); };
+			
+			/** adds a new tag into the atlas */
+			void addTag(int tag) { mTagSet.insert(tag); };
+			
+			/// returns a comma separated string of all tags in the set
+			std::string getTagStr();
 
 			/** Sets the maximum atlas size */
 			static void setMaxSize(int Size) {mMaxSize = Size;};
