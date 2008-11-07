@@ -166,9 +166,8 @@ namespace Ogre {
 					newpnts.push_back(mPoints.at(idx));
 				} else {
 					// calculate a new boundry positioned vertex
-					const Vector3& v1 = mPoints.at(prev);
 					const Vector3& v2 = mPoints.at(idx);
-					Vector3 dv = v2 - v1; // vector pointing from v2 to v1 (v1+dv*0=v2 *1=v1)
+					Vector3 dv = v2 - mPoints.at(prev); // vector pointing from v2 to v1 (v1+dv*0=v2 *1=v1)
 					
 					// the dot product is there for a reason! (As I have a tendency to overlook the difference)
 					float t = plane.getDistance(v2) / (plane.normal.dotProduct(dv));
@@ -179,9 +178,8 @@ namespace Ogre {
 			} else { 
 				if (sides[prev] == Plane::POSITIVE_SIDE) { // if we're going outside
 					// calculate a new boundry positioned vertex
-					const Vector3 v1 = mPoints[idx];
 					const Vector3 v2 = mPoints[prev];
-					const Vector3 dv = v2 - v1;
+					const Vector3 dv = v2 - mPoints[idx];
 					
 					float t = plane.getDistance(v2) / (plane.normal.dotProduct(dv));
 					
@@ -195,7 +193,7 @@ namespace Ogre {
 		if (newpnts.size() < 3) { // a degenerate polygon as a result...
 			mPoints.clear();
 
-			delete sides;
+			delete[] sides;
 			return 0;
 		}
 		
