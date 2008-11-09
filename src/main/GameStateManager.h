@@ -54,7 +54,7 @@ namespace Opde {
 	*/
 	class GameStateManager : public Singleton<GameStateManager>, public DirectInputListener {
         public:
-            GameStateManager(std::string GameType);
+            GameStateManager(const std::string& GameType);
             ~GameStateManager();
 
             // Singleton related
@@ -77,6 +77,9 @@ namespace Opde {
 			/** Initialize the state manager, then run the loop with the given state. Initializes ogre, resources, input system, etc.
 			* @return true if game should procede, false otherwise */
 			bool run();
+			
+			inline void setDesiredMissionName(const std::string& name) { mMissionName = name; };
+			
 		protected:
 			/** Loads the resources from the resources.cfg */
 			void setupResources(void);
@@ -118,6 +121,9 @@ namespace Opde {
 
 			/// Type of the game (t1,t2,ss2)
 			std::string mGameType;
+			
+			/// requested mission file name
+			std::string mMissionName;
 			
 			/// Service manager ref
 			ServiceManager* mServiceMgr;

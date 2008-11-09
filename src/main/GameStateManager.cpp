@@ -64,7 +64,7 @@ namespace Opde {
 	// The instance owner
 	template<> GameStateManager* Singleton<GameStateManager>::ms_Singleton = 0;
 
-	GameStateManager::GameStateManager(std::string GameType) :
+	GameStateManager::GameStateManager(const std::string& GameType) :
 			mStateStack(),
 			mTerminate(false),
 			mRoot(NULL),
@@ -167,6 +167,8 @@ namespace Opde {
 		// Initialise resources
 		ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
+		if (mMissionName != "")
+			mConfigService->setParam("mission", mMissionName);
 
         if (!mConfigService->hasParam("mission")) // Failback
 		{

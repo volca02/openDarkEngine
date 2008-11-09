@@ -41,20 +41,34 @@ using namespace Opde;
 
 INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT )
 {
-	std::string GameType(strCmdLine);
+	std::string scmdline(strCmdLine);
+	
+	// split on space, find if we have two arguments or just one
+	WhitespaceStringTokenizer wst(GameType);
+
+	std::string GameType = wst.next();
+	std::string missionName = wst.next();
 #else
 int main(int argc, char**argv)
 {
 	std::string GameType = "";
+	std::string missionName = "";
 	
 	if (argc >= 2)
 	    GameType = argv[1];
+	    
+	if (argc >= 3)
+	    missionName = argv[2];
 #endif
 
     // Create application object
     GameStateManager* man = new GameStateManager(GameType);
 
     try {
+    	// if we have a mission name, supply
+    	if (missionName != "")
+			man->setDesiredMissionName(missionName);
+			
 		man->run();
     } catch( Ogre::Exception& e ) {
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
