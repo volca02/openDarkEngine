@@ -67,6 +67,7 @@ namespace Opde {
 					if (mEatEmpty) {
 						while (mIsChar(*mCurPos))
 							++mCurPos;
+
 					} else { // Or I'll end up with empty token on second
 						if (mIsChar(*mCurPos))
 							++mCurPos;
@@ -137,13 +138,13 @@ namespace Opde {
 
 					// Look if the current char is quote. if it is, split on quotes
 					if (mIsQuoteP(*mCurPos) && !mIgnoreQuotes) {
-							tok_end = std::find_if(mCurPos, mStr.end(), mIsQuoteP);
+							tok_end = std::find_if(++mCurPos, mStr.end(), mIsQuoteP);
 					} else {
 							tok_end = std::find_if(mCurPos, mStr.end(), mIsSpaceP);
 					}
 
-					if (mCurPos < tok_end) {
-						std::string toRet = std::string(mCurPos, tok_end);
+					if (tok_end != mStr.end()) {
+						std::string toRet(mCurPos, tok_end);
 						mCurPos = tok_end;
 						return toRet;
 					}

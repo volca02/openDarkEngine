@@ -42,13 +42,17 @@ using namespace Opde;
 
 INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT )
 {
-	std::string scmdline(strCmdLine);
-	
+	std::string scmd(strCmdLine);
+
 	// split on space, find if we have two arguments or just one
-	WhitespaceStringTokenizer wst(scmdline);
+	WhitespaceStringTokenizer wst(scmd, false); // false == obey the quotes
 
 	std::string GameType = wst.next();
-	std::string missionName = wst.next();
+
+	std::string missionName = "";
+
+	if (!wst.end())
+		missionName = wst.next();
 #else
 int main(int argc, char**argv)
 {

@@ -198,9 +198,38 @@ namespace Opde {
 
 		setupInputSystem();
 
+		/* a not bulletproof but possibly useful processing of the mission config parameter:
+		 * The parameter is split to path and mission file name
+		 * the path goes to the default resource group (if not already in)
+		 * the name is then loaded
+		*/ 
+		if (mConfigService->hasParam("mission")) {
+			DVariant mis = mConfigService->getParam("mission");
+
+			// process
+			String path = "", fname = mis.toString();
+
+			StringUtil::splitFilename(mis.toString(), fname, path);
+
+			LOG_INFO("GameStateManager: Adding %s resource path. Will load mission %s", path.c_str(), fname.c_str());
+
+			// now look if we need the path added into general
+			/* Commented for now, causes problems for some reason...
+			if (path != "")
+				mRoot->addResourceLocation(path, "Dir", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, false);
+			*/
+			LOG_INFO("GameStateManager: Mission name set to %s", fname.c_str());
+
+			mConfigService->setParam("mission", fname);
+		}
+
+		LOG_INFO("GameStateManager: Finishing bootstrap");
+
         mRoot->bootstrapFinished();
-        
+
 		ps->bootstrapFinished();
+
+		LOG_INFO("GameStateManager: State");
 
 		// Push the initial state
 		pushState(ls);
