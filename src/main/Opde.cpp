@@ -25,6 +25,7 @@
 
 #include "GameStateManager.h"
 #include "OpdeException.h"
+#include "StringTokenizer.h"
 
 #include <OgreException.h>
 
@@ -44,7 +45,7 @@ INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT )
 	std::string scmdline(strCmdLine);
 	
 	// split on space, find if we have two arguments or just one
-	WhitespaceStringTokenizer wst(GameType);
+	WhitespaceStringTokenizer wst(scmdline);
 
 	std::string GameType = wst.next();
 	std::string missionName = wst.next();
