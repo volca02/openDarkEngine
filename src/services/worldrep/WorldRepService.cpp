@@ -150,12 +150,14 @@ namespace Opde {
             loadFromChunk(wrChunk, lightSize);
 
             // --- Finally, set sky according to the SKY chunk
-            setSkyBox(m.db);
+            // TODO: A good sky implementation
+			// setSkyBox(m.db);
 		}
 	}
 
 
 	void WorldRepService::setSkyBox(const FileGroupPtr& db) {
+		return;
 		FilePtr skyChunk = db->getFile("SKYMODE");
 
 		if (!skyChunk.isNull()) { // Thief1 sky. Thief2 has NewSky. Will need to make a custom scene node for this.

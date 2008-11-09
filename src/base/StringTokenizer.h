@@ -131,19 +131,24 @@ namespace Opde {
 			std::string next() {
 				// We tokenize a hardcoded way - all spaces, except those which are in quotes, are splitters
 				std::string::const_iterator tok_end;
+				std::string::const_iterator strend = mStr.end();
+	
+				bool canEnd = false;
 
-				if (mCurPos != mStr.end()) {
+				if (mCurPos != strend) {
 					while (mIsSpaceP(*mCurPos)) // eat all the spaces
 						++mCurPos;
 
 					// Look if the current char is quote. if it is, split on quotes
 					if (mIsQuoteP(*mCurPos) && !mIgnoreQuotes) {
-							tok_end = std::find_if(++mCurPos, mStr.end(), mIsQuoteP);
+							tok_end = std::find_if(++mCurPos, strend, mIsQuoteP);
 					} else {
-							tok_end = std::find_if(mCurPos, mStr.end(), mIsSpaceP);
+							tok_end = std::find_if(mCurPos, strend, mIsSpaceP);
+							// we can tolerate end here
+							canEnd = true;
 					}
 
-					if (tok_end != mStr.end()) {
+					if (tok_end != strend || canEnd) {
 						std::string toRet(mCurPos, tok_end);
 						mCurPos = tok_end;
 						return toRet;

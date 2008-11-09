@@ -24,6 +24,8 @@
 #include "OpdeException.h"
 #include "logger.h"
 
+#include <OgreRoot.h>
+#include <OgreTimer.h>
 #include <OgreResourceGroupManager.h>
 
 using namespace std;
@@ -188,10 +190,15 @@ namespace Opde {
     //------------------------------------------------------
     void DatabaseService::broadcastMessage(const DatabaseChangeMsg& msg) {
         Listeners::iterator it = mListeners.begin();
+		
 
         for (; it != mListeners.end(); ++it) {
+			unsigned long sttime = Ogre::Root::getSingleton().getTimer()->getMilliseconds();
             // Use the callback functor to fire the callback
             (*it->second)(msg);
+			unsigned long now = Ogre::Root::getSingleton().getTimer()->getMilliseconds();
+			
+			LOG_INFO("DatabaseService: Operation took %f seconds", (float)(now-sttime) / 1000);
             
             // recalculate the status
             mLoadingStatus.currentCoarse++;
