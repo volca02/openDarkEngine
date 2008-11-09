@@ -253,8 +253,13 @@ namespace Opde {
 		    mPropScale->unregisterListener(mPropScaleListenerID);
 		mPropScale = NULL;
 
-		if (!mLoopService.isNull())
+		if (!mLoopService.isNull()) {
 			mLoopService->removeLoopClient(this);
+			mLoopService = NULL;
+		}
+
+		mConfigService = NULL;
+		mPropertyService = NULL;
 	}
 
     // --------------------------------------------------------------------------

@@ -221,7 +221,8 @@ namespace Opde {
 			uint mVerMin;
 
             /// Inheritor used to determine property inheritance
-			InheritorPtr mInheritor;
+			Inheritor* mInheritor;
+			InheritServicePtr mInheritService;
 
 			/// Inheritor value changes listener
 			Inheritor::ListenerID mInheritorListenerID;

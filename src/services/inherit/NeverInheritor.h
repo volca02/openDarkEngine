@@ -29,7 +29,7 @@ namespace Opde {
 		class NeverInheritor : public Inheritor {
 				public:
 					/// Constructor
-					NeverInheritor(InheritService* is);
+					NeverInheritor(const InheritorFactory* fac, InheritService* is);
 
 					/// Destructor
 					~NeverInheritor();
@@ -71,7 +71,7 @@ namespace Opde {
 
 					virtual std::string getName() const;
 
-					InheritorPtr createInstance(InheritService* is) const;
+					Inheritor* createInstance(InheritService* is) const;
 
                 protected:
                     static std::string mName;

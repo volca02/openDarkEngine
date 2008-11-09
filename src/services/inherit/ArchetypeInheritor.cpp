@@ -28,7 +28,7 @@ namespace Opde {
     /*--------------------------------------------------------*/
     /*--------------------- NeverInheritor -------------------*/
 	/*--------------------------------------------------------*/
-    ArchetypeInheritor::ArchetypeInheritor(InheritService* is) : CachedInheritor(is) {
+    ArchetypeInheritor::ArchetypeInheritor(const InheritorFactory* fac, InheritService* is) : CachedInheritor(fac, is) {
     };
 
     //------------------------------------------------------
@@ -54,8 +54,8 @@ namespace Opde {
 	    return mName;
 	}
 
-	InheritorPtr ArchetypeInheritorFactory::createInstance(InheritService* is) const {
-	    return new ArchetypeInheritor(is);
+	Inheritor* ArchetypeInheritorFactory::createInstance(InheritService* is) const {
+	    return new ArchetypeInheritor(this, is);
 	}
 }
 

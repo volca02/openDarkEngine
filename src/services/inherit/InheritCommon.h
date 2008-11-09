@@ -64,6 +64,9 @@ namespace Opde {
 		DVariant value;
 	};
 
+	// forward decl.
+	class InheritorFactory;
+
 	/** Inheritor interface
 	 * Inheritors are used to query effective object id
 	 * (the id of an object holding effective value)
@@ -72,6 +75,9 @@ namespace Opde {
 	 * This means that all the objects that are changed by the inheritance modification can be notified through the listener */
 	class Inheritor : public MessageSource<InheritValueChangeMsg> {
 		public:
+			// constructor
+			Inheritor(const InheritorFactory* fac) : mFactory(fac) {};
+
             /// default destructor
 			virtual ~Inheritor() {};
 		
@@ -120,10 +126,13 @@ namespace Opde {
 
 			/// on a value change, the inheritor propagates the field and the new value to all affected objects
 			virtual void valueChanged(int objID, const std::string& field, const DVariant& value) = 0;
-	};
 
-	/// Shared pointer to Inheritor
-	typedef shared_ptr< Inheritor > InheritorPtr;
+			/// returns a pointer to the factory instance which constructed this inheritor
+			inline const InheritorFactory* getFactory() { return mFactory; };
+
+		protected:
+			const InheritorFactory* mFactory;
+	};
 
 	/// Inheritance change types
 	typedef enum {
@@ -157,7 +166,9 @@ namespace Opde {
 
 			virtual std::string getName() const = 0;
 
-			virtual InheritorPtr createInstance(InheritService* is) const = 0;
+			virtual Inheritor* createInstance(InheritService* is) const = 0;
+
+			virtual void destroyInstance(Inheritor* i) const { delete i; };
 	};
 
 	typedef shared_ptr< InheritorFactory > InheritorFactoryPtr;

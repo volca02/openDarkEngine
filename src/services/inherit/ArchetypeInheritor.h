@@ -33,7 +33,7 @@ namespace Opde {
 		class ArchetypeInheritor : public CachedInheritor {
 				public:
 					/// Constructor
-					ArchetypeInheritor(InheritService* is);
+					ArchetypeInheritor(const InheritorFactory* fac, InheritService* is);
 
 					/// Destructor
 					~ArchetypeInheritor();
@@ -50,7 +50,7 @@ namespace Opde {
 
 					virtual std::string getName() const;
 
-					InheritorPtr createInstance(InheritService* is) const;
+					Inheritor* createInstance(InheritService* is) const;
 
                 protected:
                     static std::string mName;

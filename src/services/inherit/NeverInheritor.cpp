@@ -28,7 +28,7 @@ namespace Opde {
     /*--------------------------------------------------------*/
     /*--------------------- NeverInheritor -------------------*/
 	/*--------------------------------------------------------*/
-    NeverInheritor::NeverInheritor(InheritService* is) : mInheritService(is) {
+    NeverInheritor::NeverInheritor(const InheritorFactory* fac, InheritService* is) : Inheritor(fac), mInheritService(is) {
     };
 
     //------------------------------------------------------
@@ -137,8 +137,8 @@ namespace Opde {
 	    return mName;
 	}
 
-	InheritorPtr NeverInheritorFactory::createInstance(InheritService* is) const {
-	    return new NeverInheritor(is);
+	Inheritor* NeverInheritorFactory::createInstance(InheritService* is) const {
+	    return new NeverInheritor(this, is);
 	}
 }
 

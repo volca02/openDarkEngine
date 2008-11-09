@@ -28,7 +28,7 @@ namespace Opde {
     /*---------------------------------------------------------*/
     /*--------------------- CachedInheritor -------------------*/
 	/*---------------------------------------------------------*/
-    CachedInheritor::CachedInheritor(InheritService* is) : mInheritService(is) {
+    CachedInheritor::CachedInheritor(const InheritorFactory* fac, InheritService* is) : Inheritor(fac), mInheritService(is) {
 		InheritService::ListenerPtr callback = new
 			ClassCallback<InheritChangeMsg, CachedInheritor>(this, &CachedInheritor::onInheritMsg);
 
@@ -87,36 +87,34 @@ namespace Opde {
         int niter = 0;
         InheritLinkPtr effective(NULL);
 
-        // now for each of the sources, find the one with the max. priority that still implements.
-        // Some logic to accept the self assigned is also present
-        while (!sources->end()) {
-            InheritLinkPtr il = sources->next();
-            ++niter;
-
-            int effID = getEffectiveID(il->srcID); // look for the effective ID of the source
-
-            /*
-            validate and compare to the maximal. If priority is greater,
-            we have a new winner (but only if it validates and the source has some effective ID)
-            */
-            // Comparing the priority to signed int...
-            if (validate(il->srcID, il->dstID, il->priority) && (il->priority > maxPrio) && (effID != 0)) {
-                effective = il;
-                maxPrio = il->priority;
-                newEffID = effID;
-            }
-        }
-
-
-        // If self-implements
+		// If self-implements
         if (getImplements(objID)) {
+			// self, because prop on object masks any inherited prop, be it mp or archetype
+			newEffID = objID; 
+		} else {
+			// does not self-implement...
+			// now for each of the sources, find the one with the max. priority that still implements.
+			// Some logic to accept the self assigned is also present
+			while (!sources->end()) {
+				InheritLinkPtr il = sources->next();
+				++niter;
 
-            // If there is no source supply, set self. Respect priority>0 as metaprop
-            if (effective.isNull() || maxPrio <= 0) {
-                newEffID = objID; // self, because we mask 0 prio inh. or no source was found
-            }
+				int effID = getEffectiveID(il->srcID); // look for the effective ID of the source
 
-        }
+				/*
+				validate and compare to the maximal. If priority is greater,
+				we have a new winner (but only if it validates and the source has some effective ID)
+				*/
+				// Comparing the priority to signed int...
+				if (validate(il->srcID, il->dstID, il->priority) && (il->priority > maxPrio) && (effID != 0)) {
+					effective = il;
+					maxPrio = il->priority;
+					newEffID = effID;
+				}
+			}
+		}
+
+        
 
         if (newEffID != 0)  {
             if (setEffectiveID(objID, newEffID)) {
@@ -213,8 +211,8 @@ namespace Opde {
 	    return mName;
 	}
 
-	InheritorPtr CachedInheritorFactory::createInstance(InheritService* is) const {
-	    return new CachedInheritor(is);
+	Inheritor* CachedInheritorFactory::createInstance(InheritService* is) const {
+	    return new CachedInheritor(this, is);
 	}
 }
 

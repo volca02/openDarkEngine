@@ -76,7 +76,11 @@ namespace Opde {
 			/** Creates an inheritor instance, given the inheritor name
 			 * @return Inheritor pointer on success
 			 * @throw BasicException if the inheritor name was not found in factories */
-			InheritorPtr createInheritor(const std::string& name);
+			Inheritor* createInheritor(const std::string& name);
+
+			/** Destroys the given inheritor (The inheritor has to be constructed via createInheritor!)
+			*/
+			void destroyInheritor(Inheritor* inh);
 
 			/** Requests all sources for inheritance for the given object ID
 			 * @param objID the object id to get the Sources for */
@@ -183,7 +187,7 @@ namespace Opde {
 			RelationPtr mMetaPropRelation;
 
 			/// List of instanced inheritors
-			typedef std::vector< InheritorPtr > InheritorList;
+			typedef std::vector< Inheritor* > InheritorList;
 
 			/// All instanced inheritors are here
 			InheritorList mInheritors;

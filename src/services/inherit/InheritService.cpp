@@ -103,6 +103,12 @@ namespace Opde {
 		if (!mMetaPropRelation.isNull())
 			mMetaPropRelation->unregisterListener(mMetaPropListenerID);
 			
+		InheritorList::iterator it = mInheritors.begin();
+
+		for (; it != mInheritors.end(); ++it) {
+				delete (*it);
+		}
+
 		mInheritors.clear(); // sufficient - the smart_ptrs will delete
 	}
 
@@ -112,15 +118,30 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	InheritorPtr InheritService::createInheritor(const std::string& name) {
+	Inheritor* InheritService::createInheritor(const std::string& name) {
 		InheritorFactoryMap::iterator it = mInheritorFactoryMap.find(name);
 
 		if (it != mInheritorFactoryMap.end()) {
-			InheritorPtr inh = it->second->createInstance(this);
+			Inheritor* inh = it->second->createInstance(this);
 			mInheritors.push_back(inh); // no need map by name
 			return inh;
 		} else
 			OPDE_EXCEPT(string("No inheritor factory found for name : ") + name, "InheritService::createInheritor");
+	}
+
+	//------------------------------------------------------
+	void InheritService::destroyInheritor(Inheritor* inh) {
+		// erase from the vector, then destroy via the factory that created it
+		inh->getFactory()->destroyInstance(inh);
+		
+		InheritorList::iterator it = mInheritors.begin();
+
+		while (it != mInheritors.end()) {
+			if (*it == inh)
+				it = mInheritors.erase(it);
+			else
+				it++;
+		}
 	}
 
 	//------------------------------------------------------

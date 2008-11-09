@@ -33,7 +33,7 @@ namespace Opde {
 		class CachedInheritor : public Inheritor {
 				public:
 					/// Constructor
-					CachedInheritor(InheritService* is);
+					CachedInheritor(const InheritorFactory* fac, InheritService* is);
 
 					/// Destructor
 					~CachedInheritor();
@@ -114,7 +114,7 @@ namespace Opde {
 
 					virtual std::string getName() const;
 
-					InheritorPtr createInstance(InheritService* is) const;
+					Inheritor* createInstance(InheritService* is) const;
 
                 protected:
                     static std::string mName;

@@ -106,6 +106,8 @@ namespace Opde {
 		mDatabaseService->unregisterListener(mDbCallback);
 		mDatabaseService = NULL;
 		clearData();
+
+		mRenderService.setNull();
 	}
 
 	WorldRepService::~WorldRepService() {

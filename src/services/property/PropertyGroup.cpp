@@ -65,8 +65,8 @@ namespace Opde {
 			mBuiltin(false) {
 
 		// Find the inheritor by the name, and assign too
-		InheritServicePtr inhs = static_pointer_cast<InheritService>(ServiceManager::getSingleton().getService("InheritService"));
-		mInheritor = inhs->createInheritor(inheritorName);
+		mInheritService = static_pointer_cast<InheritService>(ServiceManager::getSingleton().getService("InheritService"));
+		mInheritor = mInheritService->createInheritor(inheritorName);
 
 		// And as a final step, register as inheritor listener
 		Inheritor::ListenerPtr cil = new ClassCallback<InheritValueChangeMsg, PropertyGroup>(this, &PropertyGroup::onInheritChange);
@@ -83,10 +83,12 @@ namespace Opde {
 		clear();
 
 		// have to unregister here to break shared_ptr dependencies (prop. groups are not shared_ptr handled)
-		if (! mInheritor.isNull())
+		if (!mInheritor) {
 			mInheritor->unregisterListener(mInheritorListenerID);
-			
-		mInheritor = NULL;
+			mInheritService->destroyInheritor(mInheritor);
+			mInheritor = NULL;
+			mInheritService = NULL; // releases the reference
+		}
 	}
 	
 	// --------------------------------------------------------------------------
