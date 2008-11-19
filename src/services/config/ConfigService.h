@@ -47,7 +47,7 @@ namespace Opde {
 				GAME_TYPE_T2,
 				GAME_TYPE_SS2
 			} GameType;
-		
+
 			ConfigService(ServiceManager *manager, const std::string& name);
 			virtual ~ConfigService();
 
@@ -71,10 +71,23 @@ namespace Opde {
 
 			/** Injects the settings from a ogre's cfg file */
 			bool loadParams(const std::string& cfgfile);
-			
-			/** returns the set game type. This should normally be the cam.cfg's game dark/game shock, but we also need to differentiate t1/t2 
+
+			/** returns the set game type. This should normally be the cam.cfg's game dark/game shock, but we also need to differentiate t1/t2
 			* @note Uses the game_type = t1/t2/ss2 config key */
 			GameType getGameType();
+
+			/** Language, as parsed from the install.cfg file
+			 * @todo Parse the install.cfg - now we read it from opde.cfg
+			 * */
+			std::string getLanguage();
+
+			/** Prepares a localized resource path out of given path.
+			 * What it does is that it takes the language setting, splits the origPath
+			 * into path and filename, and concatenates the language to the path
+			 * @param origPath The original path to process
+			 * @return The modified path with language string added to the path's end
+			 */
+			std::string getLocalisedResourcePath(const std::string& origPath);
 
 		protected:
             /** initializes the service. Tries to load opde.cfg */
@@ -101,7 +114,7 @@ namespace Opde {
 
 			virtual const std::string& getName();
 
-			virtual const uint getMask(); 
+			virtual const uint getMask();
 		private:
 			static std::string mName;
 	};

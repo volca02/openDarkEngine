@@ -120,25 +120,46 @@ namespace Opde {
             // Guess the file didn't exist
         }
     }
-    
+
     //------------------------------------------------------
     ConfigService::GameType ConfigService::getGameType() {
     	GameType gt = GAME_TYPE_INVALID;
-    	
+
     	DVariant val;
-    	
+
     	if (getParam("game_type", val)) {
-    		if (val.toString() == "t1") 
+    		if (val.toString() == "t1")
 				gt = GAME_TYPE_T1;
-			else if (val.toString() == "t2") 
+			else if (val.toString() == "t2")
 				gt = GAME_TYPE_T2;
-			else if (val.toString() == "ss2") 
+			else if (val.toString() == "ss2")
 				gt = GAME_TYPE_SS2;
     	}
-    	
+
     	return gt;
     }
-    
+
+    //------------------------------------------------------
+    std::string ConfigService::getLanguage() {
+    	DVariant val = "english";
+
+    	// a trick - if not found, will use the previous
+    	// otherwise it will replace.
+		getParam("language", val);
+
+		return val.toString();
+    }
+
+    //------------------------------------------------------
+	std::string ConfigService::getLocalisedResourcePath(const std::string& origPath) {
+		std::string path, fname;
+
+		StringUtil::splitFilename(origPath, fname, path);
+
+		return path + getLanguage() + '/' + fname;
+	}
+
+
 	//-------------------------- Factory implementation
 	std::string ConfigServiceFactory::mName = "ConfigService";
 
