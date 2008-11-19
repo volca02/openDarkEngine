@@ -38,6 +38,7 @@ namespace Opde {
 	* @see Service
 	* @note Two phases exist in the service manager. Bootstrap and normal run. Bootstrap phase is used to initialize services without any dependencies
 	* @note Services are guaranteed to receive calls in this order: Constructor, init(), bootstrapFinished()
+	* @todo Introduce a quicker way of getting service - use service IDs instead of Names
 	*/
 	class OPDELIB_EXPORT ServiceManager : public Singleton<ServiceManager>, public NonCopyable {
 		private:
@@ -52,9 +53,9 @@ namespace Opde {
 			ServiceFactory* findFactory(const std::string& name);
 			ServicePtr findService(const std::string& name);
 			ServicePtr createInstance(const std::string& name);
-			
+
 			const uint mGlobalServiceMask;
-		
+
 		public:
 			ServiceManager(uint serviceMask);
 
@@ -83,6 +84,11 @@ namespace Opde {
             */
 			void bootstrapFinished();
 	};
+
+
+// Shortcut to service getter... Once all services are given a unique ID as well, we can redo this to getServiceByID(ID_##sname) or alike
+#define GET_SERVICE(sname) static_pointer_cast<sname>(ServiceManager::getSingleton().getService(#sname));
+
 }
 
 

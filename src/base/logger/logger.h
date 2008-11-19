@@ -28,6 +28,7 @@
 #include "config.h"
 
 #include "OpdeSingleton.h"
+#include <string>
 #include <set>
 
 namespace Opde {
@@ -39,7 +40,7 @@ namespace Opde {
 		public:
 			/// Logging level
 			typedef enum {LOG_LEVEL_FATAL=0, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_DEBUG, LOG_LEVEL_VERBOSE} LogLevel;
-			
+
 			typedef std::set<LogListener*> LogListenerSet;
 
 		private:
@@ -76,7 +77,7 @@ namespace Opde {
 
 			/** Logging level setter. */
 			void setLogLevel(LogLevel level);
-			
+
 			/** Logging level setter - integer version */
 			void setLogLevel(int level);
 

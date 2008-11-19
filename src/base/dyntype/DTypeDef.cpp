@@ -200,7 +200,7 @@ namespace Opde {
 			}
 
 			/// Struct/Union constructor
-			DTPrivateStructured(const DTypeDefVector& types, bool unioned) : DTPrivateBase(NT_STRUCT), 
+			DTPrivateStructured(const DTypeDefVector& types, bool unioned) : DTPrivateBase(NT_STRUCT),
 					mSubTypes(types),
 					mArraySize(0),
 					mUnioned(unioned) {
@@ -277,7 +277,7 @@ namespace Opde {
 		// Vector with size != 12
 		if (templ.type() == DVariant::DV_VECTOR && size != 12)
 			OPDE_EXCEPT("Only 12-byte float vectors are supported", "DTypeDef::DTypeDef");
-			
+
 		// Short Vector with size != 6 (converted to quaternion on usage)
 		if (templ.type() == DVariant::DV_QUATERNION && size != 6)
 			OPDE_EXCEPT("Only 6-byte short vectors are supported", "DTypeDef::DTypeDef");
@@ -314,7 +314,7 @@ namespace Opde {
 		// Vector with size != 12
 		if (type == DVariant::DV_VECTOR && size != 12)
 			OPDE_EXCEPT("Only 12-byte float vectors are supported", "DTypeDef::DTypeDef");
-			
+
 		// Short Vector with size != 6 (converted to quaternion on usage)
 		if (type == DVariant::DV_QUATERNION && size != 6)
 			OPDE_EXCEPT("Only 6-byte short vectors are supported", "DTypeDef::DTypeDef");
@@ -509,7 +509,7 @@ namespace Opde {
 			Fields::iterator it = mFields.begin();
 
 			for (; it != mFields.end(); ++it) {
-				if (it->type->hasDefault()) 
+				if (it->type->hasDefault())
 					it->set(data, it->type->getDefault());
 			}
 		}
@@ -538,7 +538,7 @@ namespace Opde {
 	DVariant::Type DTypeDef::getDataType() {
 		if (!isField())
 			return DVariant::DV_INVALID;
-			
+
 		return mPriv->type();
 	}
 
@@ -573,7 +573,7 @@ namespace Opde {
 	}
 
 	//------------------------------------
-	DVariant DTypeDef::_get(char* ptr) {  
+	DVariant DTypeDef::_get(char* ptr) {
 		// Based on the type of the data and size, construct the Variant and return
 		// TODO: Big/Little endian fixes
 
@@ -635,8 +635,8 @@ namespace Opde {
 			// And lastly: One loses precision when converting to and from 16 bit short vector!
 			// Maybe we should support some kind of additional storage
 			Ogre::Real x,y,z;
-			
-			/* Order of HPB application is cruical. It was detected that Dark orders HPB in this order:
+
+			/* Order of HPB application is crucial. It was detected that Dark orders HPB in this order:
 			1. Bank is applied
 			2. Pitch is applied
 			3. Heading is applied
@@ -648,12 +648,12 @@ namespace Opde {
 			z = ((float)(readLE<int16_t>(rot+2)) / 32768) * Math::PI; // bank - z
 
 			Matrix3 m;
-		
+
 			// Still not there, but close
 			m.FromEulerAnglesZYX(Radian(z), Radian(y), Radian(x));
 			Quaternion q;
 			q.FromRotationMatrix(m);
-			
+
 			return DVariant(q);
 		} else {
 			OPDE_EXCEPT("Unsupported type", "DTypeDef::_get");
@@ -746,7 +746,7 @@ namespace Opde {
 			cptr[min(mPriv->size() - 1, len)] = '\0';
 
 			return;
-			
+
 		} else if(mPriv->type() == DVariant::DV_VECTOR) {
 			float* fptr = reinterpret_cast<float*>(ptr);
 
@@ -759,18 +759,18 @@ namespace Opde {
 			return;
 		} else if(mPriv->type() == DVariant::DV_QUATERNION) {
 			int16_t* vptr = reinterpret_cast<int16_t*>(ptr);
-			
+
 			Quaternion q = val.toQuaternion();
-			
+
 			Matrix3 m;
-			
+
 			q.ToRotationMatrix(m);
-			
+
 			Radian x,y,z;
-			
+
 			// Still not there, but close
 			m.ToEulerAnglesZYX(z, y, x);
-		
+
 			writeLE<int16_t>(vptr    , static_cast<int16_t>(x.valueRadians() * 32768 / Math::PI));
 			writeLE<int16_t>(vptr + 1, static_cast<int16_t>(y.valueRadians() * 32768 / Math::PI));
 			writeLE<int16_t>(vptr + 2, static_cast<int16_t>(z.valueRadians() * 32768 / Math::PI));
@@ -805,18 +805,18 @@ namespace Opde {
 				OPDE_EXCEPT(string("Attempt to insert a non-unique member name (already present) : ") + fd.name, "DTypeDef::_makeFieldMap");
 		}
 	}
-	
-	
+
+
 	//------------------------------------
 	DataFieldDescListIterator::DataFieldDescListIterator(const DataFieldDescList& src) : mList(src) {
 		mIt = mList.begin();
 	}
-	
+
 	//------------------------------------
 	const DataFieldDesc& DataFieldDescListIterator::next() {
 		return *(mIt++);
 	}
-	
+
 	//------------------------------------
 	bool DataFieldDescListIterator::end() const {
 		return mIt == mList.end();
