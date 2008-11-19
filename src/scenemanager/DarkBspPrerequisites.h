@@ -36,13 +36,13 @@ $Id$
 #include <OgrePrerequisites.h>
 
 namespace Ogre {
-    	// Predeclare classes
+    // Pre-declaring all the scene manager classes
 	class BspNode;
-	
+
 	typedef std::set<BspNode*> BspNodeSet;
 	typedef std::vector<BspNode*> BspNodeQueue;
 	typedef std::list<BspNode*> BspNodeList;
-	
+
 	class BspTree;
 	class PortalFrustum;
 	class ConvexPolygon;

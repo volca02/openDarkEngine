@@ -42,7 +42,7 @@ $Id$
 #include <vector>
 
 namespace Ogre {
-	
+
     /** Encapsulates a node in a BSP tree.
         A BSP tree represents space partitioned by planes . The space which is
         partitioned is either the world (in the case of the root node) or the space derived
@@ -55,7 +55,7 @@ namespace Ogre {
         of the walking algorithm. If a node is a leaf, the isLeaf() method returns true and both getFront() and
         getBack() return null pointers. If the node is a partitioning plane isLeaf() returns false and getFront()
         and getBack() will return the corresponding BspNode objects.
-	
+
 	This version of BspNode, updated to be used by DarkSceneManager, implements Portals as members. It should be considered as a 'Cell' if it is a leaf.
     */
     class OPDELIB_EXPORT BspNode {
@@ -64,7 +64,7 @@ namespace Ogre {
 		friend class BspRaySceneQuery;
 		friend class BspIntersectionSceneQuery;
 		friend class BspTree;
-			
+
 	public:
 		BspNode(SceneManager* owner, int id, int leafID, bool isLeaf);
 
@@ -81,99 +81,99 @@ namespace Ogre {
 		    code much (any?) simpler anyway. I think this is a fair trade-off in this case.
 		*/
 		inline bool isLeaf(void) const { return mIsLeaf; };
-	
+
 		/** Returns a pointer to a BspNode containing the subspace on the positive side of the splitting plane.
 		    This method should only be called on a splitting node, i.e. where isLeaf() returns false. Calling this
 		    method on a leaf node will throw an exception.
 		*/
 		inline BspNode* getFront(void) const { assert(!mIsLeaf); return mFront; };
-	
+
 		/** Returns a pointer to a BspNode containing the subspace on the negative side of the splitting plane.
 		    This method should only be called on a splitting node, i.e. where isLeaf() returns false. Calling this
 		    method on a leaf node will throw an exception.
 		*/
 		BspNode* getBack(void) const { assert(!mIsLeaf); return mBack; };
-	
+
 		/** Determines which side of the splitting plane a worldspace point is.
 		    This method should only be called on a splitting node, i.e. where isLeaf() returns false. Calling this
 		    method on a leaf node will throw an exception.
 		*/
 		Plane::Side getSide (const Vector3& point) const;
-	
+
 		/** Gets the next node down in the tree, with the intention of
 		    locating the leaf containing the given point.
 		    This method should only be called on a splitting node, i.e. where isLeaf() returns false. Calling this
 		    method on a leaf node will throw an exception.
 		*/
 		BspNode* getNextNode(const Vector3& point) const;
-	
-	
+
+
 		/** Returns details of the plane which is used to subdivide the space of his node's children.
 		    This method should only be called on a splitting node, i.e. where isLeaf() returns false. Calling this
 		    method on a leaf node will throw an exception.
 		*/
 		const Plane& getSplitPlane(void) const;
-	
+
 		/** Returns the axis-aligned box which contains this node if it is a leaf.
 		    This method should only be called on a leaf node. It returns a box which can be used in calls like
 		    Camera::isVisible to determine if the leaf node is visible in the view.
 		*/
 		const AxisAlignedBox& getBoundingBox(void) const;
-	
+
 		friend std::ostream& operator<< (std::ostream& o, BspNode& n);
-	
+
 		/// Internal method for telling the node that a movable intersects it
 		void _addMovable(const MovableObject* mov);
-	
+
 		/// Internal method for telling the node that a movable no longer intersects it
 		void _removeMovable(const MovableObject* mov);
-	
+
 		/// Gets the signed distance to the dividing plane
 		Real getDistance(const Vector3& pos) const;
-	
+
 		/** A set of MovableObjects intersecting this Node(e.g. visible in the cell) */
 		typedef std::set< const MovableObject* > IntersectingObjectSet;
-	
+
 		/** Returns a reference to the scene node representing this leaf. Throws exception on the non-leaf nodes. */
 		SceneNode* getSceneNode();
-		
+
 		/** Sets the associated scene node. That is the scene node represented by this leaf */
 		void setSceneNode(SceneNode *node);
-		
+
 		// BspNode parameter settings. As we want to construct the BspNodes Externally...
 		/** Sets the Node to be leaf or not */
 		void setIsLeaf(bool isLeaf);
-		
+
 		/** Sets the splitting plane of this node */
 		void setSplitPlane(const Plane& splitPlane);
-		
+
 		/** Sets the Front child of this node */
 		void setFrontChild(BspNode* frontChild);
-		
+
 		/** Sets the back child of this node */
 		void setBackChild(BspNode* backChild);
-		
+
 		/** Sets the owning SceneManager instance */
 		void setOwner(SceneManager *owner);
-	
+
 		/** Attaches a Portal as an outgoing portal of this BSPNode */
 		void attachOutgoingPortal(Portal *portal);
-		
+
 		/** Attaches a Portal as an incomming portal of this BSPNode */
 		void attachIncommingPortal(Portal *portal);
-		
+
 		/** Dettaches a Portal from this BSPNode	*/
 		void detachPortal(Portal *portal);
-		
+
 		/** Informs this node a light affect's it */
 		void addAffectingLight(DarkLight* light);
-		
+
 		/** Informs this node a light stopped affecting it */
 		void removeAffectingLight(DarkLight* light);
-		
+
 		/** Sets the Cell number. For debugging */
 		void setCellNum(unsigned int cellNum);
-		
+
 		/** gets the Cell number. For debugging */
 		unsigned int getCellNum() const;
 
@@ -182,98 +182,106 @@ namespace Ogre {
 
 		/** Plane portal map (index of the CellPlaneList) to the portal set */
 		typedef std::map<int, PortalList > PlanePortalMap;
-		
-		
+
+
 		/** sets the plane list for scene queries */
 		void setPlaneList(CellPlaneList& planes, PlanePortalMap& portalmap);
-		
+
 		void refreshScreenRect(const Camera* cam, const Matrix4& toScreen, const PortalFrustum& frust);
 		void refreshScreenRect(const Camera* cam, const Matrix4& toScreen, const Plane& cutp);
-		
+
 		typedef PortalList::iterator PortalIterator;
-		
+
 		PortalIterator outPortalBegin() { return mDstPortals.begin(); };
 		PortalIterator outPortalEnd() { return mDstPortals.end(); };
-		
+
 		// Invalidates the screen projection info (so refreshScreenRect will pass)
 		void invalidateScreenRect(int frameNum) { mInitialized = false; mFrameNum = frameNum; mViewRect = PortalRect::EMPTY; };
-		
+
 		inline int getLeafID(void) const { return mLeafID; };
-		
+
+
+		/// set of affecting lights for this cell (leaf only)
+		typedef std::set< DarkLight* > AffectingLights;
+		typedef AffectingLights::iterator LightIterator;
+
+		LightIterator lightsBegin() { return mAffectingLights.begin(); };
+		LightIterator lightsEnd() { return mAffectingLights.end(); };
+
+
 	protected:
 		/// ID of the BSP row (order)
 		int mID;
 		/// ID of the leaf (cell id)
 		int mLeafID;
-	
+
 		/// Owner Scene Manager - Back-reference to SceneManager which owns this Node
-		SceneManager* mOwner; 
-		
+		SceneManager* mOwner;
+
 		/// Leaf indicator - true on non-split cell-containing nodes
 		bool mIsLeaf;
-	    
+
 		/** Pointer to the scene node which is represented by the leaf */
 		SceneNode *mSceneNode;
-	
+
 		// Node-only members
 		/** The plane which splits space in a non-leaf node.
 		    Note that nodes do not allocate the memory for other nodes - for simplicity and bulk-allocation
 		    of memory the BspLevel is responsible for assigning enough memory for all nodes in one go.
 		*/
 		Plane mSplitPlane;
-	
+
 		/** Pointer to the node in front of this non-leaf node. */
 		BspNode* mFront;
-	
+
 		/** Pointer to the node behind this non-leaf node. */
 		BspNode* mBack;
-	
+
 		// Leaf-only members
-	
+
 		/** The axis-aligned box which bounds node if it is a leaf. */
 		AxisAlignedBox mBounds;
-		
+
 		/** The set of movables that could be visible in this BSP node, and thus have to be rendered when this node is visible */
 		IntersectingObjectSet mMovables;
-		
-		/// set of affecting lights for this cell (leaf only)
-		typedef std::set< DarkLight* > AffectingLights;
-		
+
+
+		/// lights affecting this cell
 		AffectingLights mAffectingLights;
-		
+
 		// ----------- Portal based rendering stuff - leaf only
-		
+
 		/** A vector of portals leading into this cell */
 		PortalList mSrcPortals;
-		
+
 		/** A vector of portals leading out of this cell */
 		PortalList mDstPortals;
-	
+
 		/** the last frame number this (leaf) node was rendered. */
 		unsigned int mFrameNum;
-	
+
 		/** Indicates the state of the cell. if the mFrameNum is not actual, the value of this boolean is not valid */
 		bool mInitialized;
-		
+
 		/** Indicates the actual order position of this cell in the ActiveCells list. Invalid if the mFrameNum is not actual */
 		size_t mListPosition;
-	
+
 		/** Cell ID. For Debugging purposes. */
 		unsigned int mCellNum;
-		
+
 		/** Current view rectangle to this cell */
 		PortalRect mViewRect;
-		
+
 		/** cell's plane list for Leaf nodes */
 		CellPlaneList mPlaneList;
-		
+
 		/** The Plane index to Portal set map */
 		PlanePortalMap mPortalMap;
-		
+
 		// For acceleration, we prepare a world fragment too (WFT_PLANE_BOUNDED_REGION)
 		/** World fragment if someone wants the cell as a result from the query. - a pre-prepared fragment containing the cell */
 		SceneQuery::WorldFragment mCellFragment;
-		
+
 		/** Enlarge the view rect to the cell to accompany the given view rect */
 		inline bool updateScreenRect(const PortalRect& tgt) {
 			// merge the view rect to accompany the new rect
@@ -282,10 +290,10 @@ namespace Ogre {
 				mViewRect.distance = std::min(mViewRect.distance, tgt.distance);
 				return true;
 			}
-			
+
 			return false;
 		};
-		
+
 		public:
 			const IntersectingObjectSet& getObjects(void) const { return mMovables; }
 			const CellPlaneList& getPlaneList() const { return mPlaneList; }
