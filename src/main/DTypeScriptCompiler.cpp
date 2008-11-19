@@ -116,7 +116,7 @@ namespace Opde {
 		mGroupName = "";
 
 		ServiceManager* svcmgr = ServiceManager::getSingletonPtr();
-		mBinaryService = static_pointer_cast<BinaryService>(svcmgr->getService("BinaryService"));
+		mBinaryService = GET_SERVICE(BinaryService);
 		mCurrentState.state = CS_UNKNOWN;
 	}
 
@@ -265,7 +265,7 @@ namespace Opde {
 				logParseError("Struct inside enum error.");
 
 			DTypeDefPtr nt;
-			
+
 			// if specified an array, wrap it up so
 			if (was.arraylen > 1) {
 				// wrap up
@@ -500,7 +500,7 @@ namespace Opde {
 			case ID_CHAR: return DVariant::DV_STRING;
 
 			case ID_VECTOR : return DVariant::DV_VECTOR;
-			
+
 			case ID_SHORTVECTOR : return DVariant::DV_QUATERNION;
 
 			default :
@@ -527,7 +527,7 @@ namespace Opde {
 			case ID_FLOAT  : return 4;
 
 			case ID_VECTOR : return 12;
-			
+
 			case ID_SHORTVECTOR : return 6;
 
 			default :
@@ -555,7 +555,7 @@ namespace Opde {
 		} else
 			datasize = getDataLenFromID(typei);
 
-		
+
 		// Look at the next token. it can either be 'use', array spec '[' or direct name of the field
 		if (testNextTokenID(ID_USE)) {
 			// use enumeration

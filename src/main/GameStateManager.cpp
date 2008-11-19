@@ -73,7 +73,7 @@ namespace Opde {
 			mInputService(NULL),
 			mConfigService(NULL) {
 				mGameType = GameType;
-				
+
 		mRoot = new Opde::Root(SERVICE_ALL, "opde.log");
 		mRoot->registerCustomScriptLoaders();
 	}
@@ -81,7 +81,7 @@ namespace Opde {
 	GameStateManager::~GameStateManager() {
 		if (!mInputService.isNull())
 			mInputService->unsetDirectListener();
-			
+
 		mInputService.setNull();
 		mConfigService.setNull();
 
@@ -141,7 +141,7 @@ namespace Opde {
 		// Initialize opde logger and console backend
 		// Create an ogre's root
 		mOgreRoot = Ogre::Root::getSingletonPtr();
-		
+
 		mConsoleBackend = Opde::ConsoleBackend::getSingletonPtr();
 		mConsoleBackend->putMessage("==Console Starting==");
 
@@ -150,16 +150,16 @@ namespace Opde {
 		if (ServiceManager::getSingletonPtr() == 0)
 			LOG_FATAL("Rotten tomatoes!");
 
-		mConfigService = static_pointer_cast<ConfigService>(ServiceManager::getSingleton().getService("ConfigService"));
-		
+		mConfigService = GET_SERVICE(ConfigService);
+
 		mConfigService->loadParams("opde.cfg");
-		
+
 		// override the config setting
 		mConfigService->setParam("game_type", mGameType);
-		
+
 		RenderServicePtr rends;
 
-		rends = static_pointer_cast<RenderService>(ServiceManager::getSingleton().getService("RenderService"));
+		rends = GET_SERVICE(RenderService);
 
 		// Setup resources.
 		setupResources();
@@ -187,7 +187,7 @@ namespace Opde {
 				MaxAtlasSize = 512;
 		}
 		LOG_INFO("Max Atlas Size : %d", MaxAtlasSize);
-		LightAtlas::setMaxSize(MaxAtlasSize);				
+		LightAtlas::setMaxSize(MaxAtlasSize);
 
         // TODO: Remove this temporary nonsense. In fact. Remove the whole class this method is in!
         GamePlayState* ps = new GamePlayState();
@@ -245,7 +245,7 @@ namespace Opde {
 			// Calculate time since last frame and remember current time for next frame
 			mTimeLastFrame = lTimeCurrentFrame;
 			lTimeCurrentFrame = CentralTimer->getMilliseconds();
-			
+
 			unsigned long lTimeSinceLastFrame = lTimeCurrentFrame - mTimeLastFrame;
 
             // Update current state
@@ -283,7 +283,7 @@ namespace Opde {
 		// First, register the script loaders...
 		// Load resource paths from config file
 		String configName = "resources.cfg", GameType = "Default";
-		
+
 		//Load the resources according to the game type, if game type not specified, load the default
 		if((mGameType == "T1") || (mGameType == "t1"))
 		{
@@ -300,14 +300,14 @@ namespace Opde {
 			configName = "shock2.cfg";
 			GameType = "System Shock 2";
 		}
-		
+
 		LOG_INFO("Game type: %s", GameType.c_str());
-		
+
 		mRoot->loadResourceConfig(configName);
 	}
 
 	void GameStateManager::setupInputSystem() {
-		mInputService = static_pointer_cast<InputService>(ServiceManager::getSingleton().getService("InputService"));
+		mInputService = GET_SERVICE(InputService);
 
 		mInputService->createBindContext("game");
 		mInputService->setBindContext("game");

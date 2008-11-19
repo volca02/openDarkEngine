@@ -59,7 +59,7 @@ namespace Opde {
 		mSceneDisplay = false;
 
 		// Try to remap the parameters with those listed in the configuration
-		mConfigService = static_pointer_cast<ConfigService>(ServiceManager::getSingleton().getService("ConfigService"));
+		mConfigService = GET_SERVICE(ConfigService);
 
 		if (mConfigService->hasParam("move_speed"))
 			mMoveSpeed = mConfigService->getParam("move_speed").toFloat();
@@ -78,7 +78,7 @@ namespace Opde {
 		mBackward = false;
 		mLeft = false;
 		mRight = false;
-		
+
 		mScreenShot = false;
 		mSceneDisplay = false;
 		mPortalDisplay = false;
@@ -97,9 +97,9 @@ namespace Opde {
 
 		// Portal stats overlay
 		mPortalOverlay = OverlayManager::getSingleton().getByName("Opde/OpdeDebugOverlay");
-		
+
 		mShadows = true;
-		
+
 		StartingPointObjID = 0;
 	}
 
@@ -109,27 +109,28 @@ namespace Opde {
 
 	void GamePlayState::start() {
 		LOG_INFO("GamePlayState: Starting");
-		PropertyGroup* posPG = static_pointer_cast<PropertyService>(ServiceManager::getSingleton().getService("PropertyService"))->getPropertyGroup("Position");
-		
+		PropertyServicePtr ps = GET_SERVICE(PropertyService);
+		PropertyGroup* posPG = ps->getPropertyGroup("Position");
+
 		if (posPG == NULL)
 			OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "GamePlayState::start");
-		
-		LOG_DEBUG("Starting Point object id : %d", StartingPointObjID);	
-		
+
+		LOG_DEBUG("Starting Point object id : %d", StartingPointObjID);
+
 		DVariant spoint;
 		posPG->get(StartingPointObjID, "position", spoint);
-		
+
 		Vector3 StartingPoint(0,0,0);
-		
+
 		if (spoint.type() == DVariant::DV_VECTOR)
 			StartingPoint = spoint.toVector();
-		
-		LOG_DEBUG("Starting Point position : %f %f %f", StartingPoint.x, StartingPoint.y, StartingPoint.z);	
-		
+
+		LOG_DEBUG("Starting Point position : %f %f %f", StartingPoint.x, StartingPoint.y, StartingPoint.z);
+
 //		std::string tmp = PropertyGroup->get(StartingPointObjID, "SymName").toString();
 		mSceneMgr = mRoot->getSceneManager( "DarkSceneManager" );
-		RenderServicePtr renderSrv = static_pointer_cast<RenderService>(ServiceManager::getSingleton().getService("RenderService"));
-		
+		RenderServicePtr renderSrv = GET_SERVICE(RenderService);
+
 		mCamera = renderSrv->getDefaultCamera();
 		mViewport = renderSrv->getDefaultViewport();
 		mWindow = renderSrv->getRenderWindow();
@@ -143,10 +144,10 @@ namespace Opde {
 		// Also change position, and set Quake-type orientation
 		ViewPoint vp = mSceneMgr->getSuggestedViewpoint(true);
 		mCamera->setPosition(vp.position);
-		
+
 		if (StartingPointObjID != 0)
 			mCamera->setPosition(StartingPoint);
-			
+
 		mCamera->pitch(Degree(90));
 		mCamera->rotate(vp.orientation);
 
@@ -175,7 +176,7 @@ namespace Opde {
 		mWindow->resetStatistics();
 
 		mToLoadScreen = false;
-		
+
 		LOG_INFO("GamePlayState: Started");
 	}
 
@@ -265,7 +266,7 @@ namespace Opde {
 
 			mScreenShot = false;
 		}
-		
+
 		mConsole->update(timePassed);
 
 		if (mDebug) {
@@ -328,12 +329,12 @@ namespace Opde {
 					unsigned long statbt;
 
 				mSceneMgr->getOption("BackfaceCulls", &bculls);
-				
+
 				// mSceneMgr->getOption("CellsRendered", &rendc);
 				mSceneMgr->getOption("EvaluatedPortals", &eports);
 				// mSceneMgr->getOption("TraversalTime", &travtm);
 				mSceneMgr->getOption("StaticBuildTime", &statbt);
-				
+
 				travtm = static_cast<DarkCamera*>(mCamera)->getTraversalTime();
 				rendc = static_cast<DarkCamera*>(mCamera)->getVisibleCellCount();
 
@@ -403,13 +404,13 @@ namespace Opde {
 				return true;
 			} else  if (e.key == KC_I) {
 				mShadows = !mShadows;
-				
+
 				if (mShadows)
 					mSceneMgr->setShadowTechnique(SHADOWTYPE_TEXTURE_MODULATIVE);
-				else 
+				else
 					mSceneMgr->setShadowTechnique(SHADOWTYPE_NONE);
 			}
-			
+
 			return true;
 		} else return true;
 	}
@@ -459,7 +460,7 @@ namespace Opde {
 	}
 
 	void GamePlayState::bootstrapFinished() {
-		mLinkService = static_pointer_cast<LinkService>(ServiceManager::getSingleton().getService("LinkService"));
+		mLinkService = GET_SERVICE(LinkService);
 		Relation::ListenerPtr metaPropCallback =
 			new ClassCallback<LinkChangeMsg, GamePlayState>(this, &GamePlayState::onLinkPlayerFactoryMsg);
 

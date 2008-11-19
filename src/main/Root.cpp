@@ -35,6 +35,7 @@
 #include "filelog.h"
 
 #include "OpdeServiceManager.h"
+
 // Services
 #include "WorldRepService.h"
 #include "GameService.h"
@@ -45,6 +46,8 @@
 #include "LinkService.h"
 #include "PropertyService.h"
 #include "DatabaseService.h"
+#include "MaterialService.h"
+#include "LightService.h"
 
 // base
 #include "ManualBinFileLoader.h"
@@ -55,17 +58,19 @@
 #include "ConsoleFrontend.h"
 #include "stdlog.h"
 
+
+
 namespace Opde {
 	// -------------------------------------------------------
 	// singleton related
 	template<> Root* Singleton<Root>::ms_Singleton = 0;
-	
+
 	// -------------------------------------------------------
-	Root::Root(uint serviceMask, char* logFileName) : 
-			mLogger(NULL), 
-			mServiceMgr(NULL), 
-			mOgreRoot(NULL), 
-			mOgreLogManager(NULL), 
+	Root::Root(uint serviceMask, char* logFileName) :
+			mLogger(NULL),
+			mServiceMgr(NULL),
+			mOgreRoot(NULL),
+			mOgreLogManager(NULL),
 			mConsoleBackend(NULL),
 			mDTypeScriptCompiler(NULL),
 			mPLDefScriptCompiler(NULL),
@@ -74,29 +79,29 @@ namespace Opde {
 			mPLDefScriptLdr(NULL),
 			mDirArchiveFactory(NULL),
 			mCrfArchiveFactory(NULL) {
-		
+
 		mLogger = new Logger();
-		
+
 		if (logFileName) {
 			logToFile(logFileName);
 		}
-		
+
 		LOG_INFO("Starting openDarkEngine %d.%d.%d (%s)", OPDE_VER_MAJOR, OPDE_VER_MINOR, OPDE_VER_PATCH, OPDE_CODE_NAME);
-		
+
 		mServiceMgr = new ServiceManager(mServiceMask);
-		
+
 		// To supress logging of OGRE (we'll use a plugin for our logger for Ogre logs)
 		// we need to create a Ogre::LogManager here on our own
 		mOgreLogManager = new Ogre::LogManager();
 		mOgreLogManager->createLog("Ogre.log", true, false, true);
-		
+
 		mOgreOpdeLogConnector = new OgreOpdeLogConnector(mLogger);
-		
+
 		// create our logger's ogre log listener interface. Connect together
 		mOgreLogManager->getDefaultLog()->addListener(mOgreOpdeLogConnector);
-		
+
 		mOgreRoot = new Ogre::Root();
-		
+
 		// register the factories
 		mDirArchiveFactory = new Ogre::CaseLessFileSystemArchiveFactory();
 		// TODO: Decide if this should be used or not
@@ -114,10 +119,10 @@ namespace Opde {
 
 		mDTypeScriptCompiler = new DTypeScriptCompiler();
 		mPLDefScriptCompiler = new PLDefScriptCompiler();
-		
+
 		setupLoopModes();
 	}
-	
+
 	// -------------------------------------------------------
 	Root::~Root() {
 		LOG_INFO("openDarkEngine is shutting down");
@@ -125,50 +130,50 @@ namespace Opde {
 		// if those are used, delete them
 		delete mDTypeScriptLdr;
 		delete mPLDefScriptLdr;
-		
+
 		delete mDTypeScriptCompiler;
 		delete mPLDefScriptCompiler;
 
 		// Archive manager has no way to remove the archive factories...
-		
+
 		delete mServiceMgr;
-		
+
 		delete mConsoleBackend;
-		
+
 		Ogre::CustomImageCodec::shutdown();
 		delete mOgreRoot;
-		
+
 		LogListenerList::iterator it = mLogListeners.begin();
-		
+
 		for (;it != mLogListeners.end(); ++it) {
 			mLogger->unregisterLogListener(*it);
 			delete *it;
 		}
 		mLogListeners.clear();
-		
+
 		delete mDirArchiveFactory;
 		delete mCrfArchiveFactory;
-		
+
 		// As the last thing - release the logger
 		delete mLogger;
-		
+
 		delete mOgreOpdeLogConnector;
-		
+
 		delete mOgreLogManager;
-		
-		
+
+
 	}
 
 
 	// -------------------------------------------------------
 	void Root::registerCustomScriptLoaders() {
 		// TODO: bindings
-		
+
 		// the classes register themselves to ogre
 		if (!mDTypeScriptLdr)
 			mDTypeScriptLdr = new DTypeScriptLoader();
-			
-		if (!mPLDefScriptLdr)			
+
+		if (!mPLDefScriptLdr)
 			mPLDefScriptLdr = new PLDefScriptLoader();
 	}
 
@@ -182,8 +187,8 @@ namespace Opde {
 
 	// -------------------------------------------------------
 	void Root::loadConfigFile(const std::string& fileName) {
-		ConfigServicePtr cfp = static_pointer_cast<ConfigService>(mServiceMgr->getService("ConfigService"));
-		
+		ConfigServicePtr cfp = GET_SERVICE(ConfigService);
+
 		cfp->loadParams(fileName);
 	}
 
@@ -223,29 +228,29 @@ namespace Opde {
 			}
 		}
 	}
-	
+
 	// -------------------------------------------------------
 	void Root::addResourceLocation(const std::string& name, const std::string& typeName, const std::string& secName, bool recursive) {
 		Ogre::ResourceGroupManager::getSingleton().addResourceLocation(name, typeName, secName, recursive);
 	}
-	
+
 	// -------------------------------------------------------
 	void Root::removeResourceLocation(const std::string& name, const std::string& secName) {
 		Ogre::ResourceGroupManager::getSingleton().removeResourceLocation(name, secName);
 	}
-	
+
 	// -------------------------------------------------------
 	void Root::registerServiceFactories() {
 		// register all the service factories
 		// The factories are deleted in service manager
-		
+
 		// TODO: WE ALL KNOW this is VERY WRONG way to work with memory allocation
-		
+
 		/* The right way would be for example:
 		1. ServiceFactoryPtr - shared_ptr<ServiceFactory>;
 		2. Work everywhere with the shared_ptr instead
-		*/  
-		
+		*/
+
 		new WorldRepServiceFactory();
 		new BinaryServiceFactory();
 		new GameServiceFactory();
@@ -258,41 +263,43 @@ namespace Opde {
 		new InputServiceFactory();
 		new LoopServiceFactory();
 		new ObjectServiceFactory();
+		new LightServiceFactory();
+		new MaterialServiceFactory();
 	}
-	
+
 	// -------------------------------------------------------
 	void Root::setupLoopModes() {
 		// Loop modes are only setup if not masked by global service mask
 		if (mServiceMask & SERVICE_ENGINE) {
 			// Loop modes are hardcoded
-			LoopServicePtr ls = static_pointer_cast<LoopService>(ServiceManager::getSingleton().getService("LoopService"));
+			LoopServicePtr ls = GET_SERVICE(LoopService);
 			// Create all the required loop services
 			LoopModeDefinition def;
-			
+
 			// Loop mode that does no engine processing at all
 			def.id = 1;
 			def.name = "GUIOnlyLoopMode";
 			def.mask = LOOPMODE_INPUT | LOOPMODE_RENDER;
-			
+
 			ls->createLoopMode(def);
-			
+
 			// Loop mode that runs all the loop clients
 			def.id = 0xFF;
 			def.name = "AllClientsLoopMode";
 			def.mask = LOOPMODE_MASK_ALL_CLIENTS;
-			
+
 			ls->createLoopMode(def);
 		}
 	}
-	
+
 	// -------------------------------------------------------
 	void Root::logToFile(const std::string& fname) {
 		LogListener* flog = new FileLog(fname);
-		
+
 		mLogger->registerLogListener(flog);
 		mLogListeners.push_back(flog);
 	}
-	
+
 	// -------------------------------------------------------
 	void Root::setLogLevel(int level) {
 		// Call mLogger to setup the log level

@@ -60,9 +60,9 @@ namespace Opde {
 		"<FakeSize> ::= 'fake_size' <Integer> \n" // if dark reports a different size, report that one
 
 		"<LinkHidden> ::= 'hidden' \n"
-		
+
 		"<DataCache> ::= 'cached' \n"
-		
+
 		"<DataType> ::= 'type' <Label> \n"
 
 		"<DChunkVersion> ::= 'd_ver' <Version> \n"
@@ -101,9 +101,9 @@ namespace Opde {
 		// default to global definition group
 		ServiceManager* svcmgr = ServiceManager::getSingletonPtr();
 
-		mLinkService = static_pointer_cast<LinkService>(svcmgr->getService("LinkService"));
-		mBinaryService = static_pointer_cast<BinaryService>(svcmgr->getService("BinaryService"));
-		mPropertyService = static_pointer_cast<PropertyService>(svcmgr->getService("PropertyService"));
+		mLinkService = GET_SERVICE(LinkService);
+		mBinaryService = GET_SERVICE(BinaryService);
+		mPropertyService = GET_SERVICE(PropertyService);
 
 		mCurrentState.state = CS_UNKNOWN;
 	}
@@ -135,9 +135,9 @@ namespace Opde {
 		addLexemeTokenAction("label", ID_LABEL, &PLDefScriptCompiler::parseLabel);
 
 		addLexemeTokenAction("inherit", ID_INHERIT, &PLDefScriptCompiler::parseInherit);
-		
+
 		addLexemeTokenAction("cache", ID_CACHED, &PLDefScriptCompiler::parseCached);
-		
+
 		addLexemeTokenAction("type", ID_TYPE, &PLDefScriptCompiler::parseType);
 	}
 
@@ -196,10 +196,10 @@ namespace Opde {
 				dt = getTypeDef("links", mCurrentState.dtypename); // TODO: Hardcoded. A problem?
 
 			DataStoragePtr stor;
-			
+
 			if (!dt.isNull())
 				stor = new StructuredDataStorage(dt, false);
-			
+
 			RelationPtr rel = mLinkService->createRelation(mCurrentState.name, stor, mCurrentState.hidden);
 
 			if (mCurrentState.fake_size >= 0)
@@ -216,17 +216,17 @@ namespace Opde {
 
 			PropertyGroup* pg;
 			DataStoragePtr stor;
-			
+
 			if (mCurrentState.ptype == "varstr") {
 				stor = new StringDataStorage();
 			} else {
 				DTypeDefPtr dt;
 
 				dt = getTypeDef("properties", mCurrentState.dtypename);
-				
-				stor = new StructuredDataStorage(dt, mCurrentState.cached); 
+
+				stor = new StructuredDataStorage(dt, mCurrentState.cached);
 			}
-			
+
 			pg = mPropertyService->createPropertyGroup(
 				mCurrentState.label,
 				mCurrentState.name,
@@ -338,7 +338,7 @@ namespace Opde {
 	void PLDefScriptCompiler::parseCached(void) {
 		mCurrentState.cached = true;
 	}
-	
+
 	//-----------------------------------------------------------------------
 	void PLDefScriptCompiler::parseType(void) {
 		mCurrentState.ptype = getNextTokenLabel();

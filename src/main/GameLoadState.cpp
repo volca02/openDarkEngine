@@ -48,8 +48,8 @@ namespace Opde {
         mRoot = Ogre::Root::getSingletonPtr();
 		mOverlayMgr = OverlayManager::getSingletonPtr();
 		mServiceMgr = ServiceManager::getSingletonPtr();
-		
-		mConfigService = static_pointer_cast<ConfigService>(ServiceManager::getSingleton().getService("ConfigService"));
+
+		mConfigService = GET_SERVICE(ConfigService);
 
 		mFontTest = false;
 
@@ -104,8 +104,8 @@ namespace Opde {
 		mSceneMgr->addSpecialCaseRenderQueue(RENDER_QUEUE_OVERLAY);
 		mSceneMgr->setSpecialCaseRenderQueueMode(SceneManager::SCRQM_INCLUDE);
 
-		RenderServicePtr renderSrv = static_pointer_cast<RenderService>(ServiceManager::getSingleton().getService("RenderService"));
-		
+		RenderServicePtr renderSrv = GET_SERVICE(RenderService);
+
 		mCamera = renderSrv->getDefaultCamera();
 		mViewport = renderSrv->getDefaultViewport();
 
@@ -158,13 +158,13 @@ namespace Opde {
 	void GameLoadState::update(unsigned long timePassed) {
 		if (!mFirstTime && !mLoaded) {
 			unsigned long start_ms = Ogre::Root::getSingleton().getTimer()->getMilliseconds();
-			
+
 		    OverlayElement* guiLdr = OverlayManager::getSingleton().getOverlayElement("Opde/LoadPanel/Description");
 		    guiLdr->setCaption("Loading, please wait...");
 
 			mRoot->renderOneFrame();
 
-			GameServicePtr gsvc = static_pointer_cast<GameService>(mServiceMgr->getService("GameService"));
+			GameServicePtr gsvc = GET_SERVICE(GameService);
 
 			std::string misFile = mConfigService->getParam("mission");
 
@@ -173,7 +173,7 @@ namespace Opde {
 			mLoaded = true;
 
 			guiLdr->setCaption("Loaded, press ESC...");
-			
+
 			LOG_INFO("Loading took %10.2f seconds", (Ogre::Root::getSingleton().getTimer()->getMilliseconds() - start_ms) / 1000.0f);
 
 			// popState(); // Hardcoded, so no escape key is needed
@@ -230,7 +230,7 @@ namespace Opde {
 		panel->setMetricsMode(Ogre::GMM_RELATIVE);
 		panel->setPosition(0, 0);
 		panel->setDimensions(1, 1); // Full screen
-		
+
 		// TODO: Background material?
 		panel->setMaterialName("Colour/Red");
 
@@ -246,9 +246,9 @@ namespace Opde {
 			Ogre::LogManager::getSingleton().logMessage("Loading font test " + *it);
 
 			String text = "Keepers would like this font: " + *it+ ", LOADING!";
-			
+
 			Ogre::FontPtr fnt = FontManager::getSingleton().create(*it, "General");
-			
+
 			// A test. For parch book load a custom font palette
 			if ((*it == "FONTAA36.FON") || (*it == "FONTAA29.FON")) {
 				mManualFonLoader->setPalette(ManualFonFileLoader::ePT_PCX, "BOOK.PCX");
@@ -257,8 +257,8 @@ namespace Opde {
 			} else {
 				mManualFonLoader->setPalette();
 			}
-			
-			
+
+
 			mManualFonLoader->loadResource(&(*fnt));
 
 			height = StringConverter::parseInt(fnt->getParameter("size"));
