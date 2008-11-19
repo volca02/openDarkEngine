@@ -42,7 +42,7 @@ namespace Opde {
 			0,                        // int tp_itemsize;       /* not used much */
 			InheritQueryResultBinder::dealloc,   /* destructor tp_dealloc; */
 			0,			              /* printfunc  tp_print;   */
-			InheritQueryResultBinder::getattr,  /* getattrfunc  tp_getattr; /* __getattr__ */
+			InheritQueryResultBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
 			repr,			          // reprfunc  tp_repr;    /* __repr__ */
@@ -72,40 +72,40 @@ namespace Opde {
 		PyMethodDef InheritQueryResultBinder::msMethods[] = {
 			{NULL, NULL},
 		};
-		
-		
+
+
 		// ------------------------------------------
 		PyObject* InheritQueryResultBinder::getIterObject(PyObject* self) {
 			Py_INCREF(self);
 			return self;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* InheritQueryResultBinder::getNext(PyObject* self) {
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			// Get returnable object, advance to next.
 			PyObject* next = NULL;
-			
+
 			if ((!o->mInstance.isNull()) && !o->mInstance->end()) {
 				InheritLinkPtr l = o->mInstance->next();
 				next = InheritLinkBinder::create(l);
 			}
-			
+
 			return next;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* InheritQueryResultBinder::repr(PyObject *self) {
 			return PyString_FromFormat("<InheritQueryResult at %p>", self);
 		}
-		
-		
+
+
 		// ------------------------------------------
 		PyObject* InheritQueryResultBinder::getattr(PyObject *self, char *name) {
 			return Py_FindMethod(msMethods, self, name);
 		}
-		
+
 		// ------------------------------------------
 		PyObject* InheritQueryResultBinder::create(const InheritQueryResultPtr& result) {
 			Object* object = construct(&msType);
@@ -116,7 +116,7 @@ namespace Opde {
 
 			return (PyObject *)object;
 		}
-		
+
 		// ------------------------------------------
 		void InheritQueryResultBinder::init(PyObject* module) {
 			publishType(module, &msType, msName);

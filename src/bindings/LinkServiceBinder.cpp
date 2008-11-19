@@ -86,7 +86,7 @@ namespace Opde {
 		PyObject* LinkServiceBinder::setChunkVersion(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			int major;
 			int minor;
 
@@ -107,7 +107,7 @@ namespace Opde {
 		PyObject* LinkServiceBinder::nameToFlavor(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			const char* name;
 
 			if (PyArg_ParseTuple(args, "s", &name)) {
@@ -121,12 +121,12 @@ namespace Opde {
 				return NULL;
 			}
 		}
-		
+
 		// ------------------------------------------
 		PyObject* LinkServiceBinder::flavorToName(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			int id;
 
 			if (PyArg_ParseTuple(args, "i", &id)) {
@@ -140,7 +140,7 @@ namespace Opde {
 				return NULL;
 			}
 		}
-		
+
 		// ------------------------------------------
 		PyObject* LinkServiceBinder::getRelation(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
@@ -151,7 +151,7 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected an integer or string argument!");
 				return NULL;
 			}
-			
+
 			// two possibilities here : name or flavor
 			if (PyString_Check(object)) {
 			    char* str = PyString_AsString(object);
@@ -161,7 +161,7 @@ namespace Opde {
                     PyErr_Format(PyExc_ValueError, "Relation not found by name %s", str);
                 } else
                     result = RelationBinder::create(rel);
-                    
+
 				return result;
 			} else if (PyInt_Check(object)) {
 			    long id = PyInt_AsLong(object);
@@ -171,7 +171,7 @@ namespace Opde {
                     PyErr_Format(PyExc_ValueError, "Relation not found by id %ld", id);
                 } else
                     result = RelationBinder::create(rel);
-                    
+
 				return result;
 			} else {
 				// Invalid parameters
@@ -179,18 +179,18 @@ namespace Opde {
 				return NULL;
 			}
 		}
-		
+
 		// ------------------------------------------
 		PyObject* LinkServiceBinder::getAllLinks(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			int flavor = 0, src, dst;
 			PyObject* objflav;
-			
+
 			// let the third parameter be either string or integer
 			// if it's a string, we first have to parse the string to get flavor id
-			
+
 			if (PyArg_ParseTuple(args, "Oii", &objflav, &src, &dst)) {
 				if (PyString_Check(objflav)) {
 					char* str = PyString_AsString(objflav);
@@ -201,9 +201,9 @@ namespace Opde {
 					PyErr_SetString(PyExc_TypeError, "Invalid type given for flavor: expected string or integer");
 					return NULL;
 				}
-				
+
 				LinkQueryResultPtr res = o->mInstance->getAllLinks(flavor, src, dst);
-				
+
 				return LinkQueryResultBinder::create(res);
 			} else {
 				// Invalid parameters
@@ -211,16 +211,16 @@ namespace Opde {
 				return NULL;
 			}
 		}
-		
+
 		// ------------------------------------------
 		PyObject* LinkServiceBinder::getOneLink(PyObject* self, PyObject* args) {
 			// Nearly the same as getAllLinks. Only that it returns PyObject for LinkPtr directly
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			int flavor = 0, src, dst;
 			PyObject* objflav;
-			
+
 			if (PyArg_ParseTuple(args, "Oii", &objflav, &src, &dst)) {
 				if (PyString_Check(objflav)) {
 					char* str = PyString_AsString(objflav);
@@ -231,26 +231,26 @@ namespace Opde {
 					PyErr_SetString(PyExc_TypeError, "Invalid type given for flavor: expected string or integer");
 					return NULL;
 				}
-				
+
 				LinkPtr res = o->mInstance->getOneLink(flavor, src, dst);
 				return LinkBinder::create(res);
-			} 
-			else 
+			}
+			else
 			{
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected three integer parameters: flavor, src and dst!");
 				return NULL;
 			}
 		}
-		
+
 		// ------------------------------------------
-		PyObject* LinkServiceBinder::getAllLinkNames(PyObject* self, PyObject* args) 
+		PyObject* LinkServiceBinder::getAllLinkNames(PyObject* self, PyObject* args)
 		{
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			// wrap the returned StringIterator into StringIteratorBinder, return
 			StringIteratorPtr res = o->mInstance->getAllLinkNames();
-				
+
 			return StringIteratorBinder::create(res);
 		}
 
@@ -269,17 +269,17 @@ namespace Opde {
 
 			return (PyObject *)object;
 		}
-	
+
 		// ------------------------------------------
 		void LinkServiceBinder::init(PyObject* module) {
 			publishType(module, &msType, msName);
-			
+
 			LinkBinder::init(module);
 			LinkQueryResultBinder::init(module);
 			RelationBinder::init(module);
 		}
 
-	
+
         // -------------------- Link --------------------
 		char* LinkBinder::msName = "Link";
 
@@ -287,26 +287,26 @@ namespace Opde {
 		PyTypeObject LinkBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			msName,                   /* char *tp_name; */
-			sizeof(LinkBinder::Object),      /* int tp_basicsize; */
-			0,                        /* int tp_itemsize;       /* not used much */
-			LinkBinder::dealloc,   /* destructor tp_dealloc; */
-			0,			              /* printfunc  tp_print;   */
-			LinkBinder::getattr,  /* getattrfunc  tp_getattr; /* __getattr__ */
+			msName,                   // char *tp_name; */
+			sizeof(LinkBinder::Object),      // int tp_basicsize; */
+			0,                        // int tp_itemsize;       /* not used much */
+			LinkBinder::dealloc,   // destructor tp_dealloc; */
+			0,			              // printfunc  tp_print;   */
+			LinkBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
 		};
 
-        
+
         // ------------------------------------------
 		PyObject* LinkBinder::getattr(PyObject *self, char *name) {
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			if (o->mInstance.isNull()) {
 			    // Just return PyNone
 			    PyObject* result = Py_None;
 			    Py_INCREF(result);
 			    return result;
 			}
-			
+
 			if (strcmp(name, "id") == 0) {
 			    return PyLong_FromLong(o->mInstance->id());
 			} else if (strcmp(name, "src") == 0) {
@@ -318,7 +318,7 @@ namespace Opde {
             } else {
                 PyErr_SetString(PyExc_TypeError, "Unknown attribute specified!");
             }
-            
+
             return NULL;
 		}
 
@@ -328,16 +328,16 @@ namespace Opde {
 			      PyErr_SetString(PyExc_TypeError, "Null link binding!");
 			      return NULL;
 			}
-			
+
 			Object* object = construct(&msType);
-			
+
 			if (object != NULL) {
 				object->mInstance = link;
 			}
 
 			return (PyObject *)object;
 		}
-		
+
 		// ------------------------------------------
 		void LinkBinder::init(PyObject* module) {
 			publishType(module, &msType, msName);
