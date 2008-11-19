@@ -39,7 +39,7 @@ namespace Opde {
 
             virtual const std::string& next() {
 				assert(!end());
-				
+
 				const std::string& s = mIter->first;
 
 				++mIter;
@@ -80,7 +80,7 @@ namespace Opde {
 		// Ensure link listeners are created
 		mServiceManager->createByMask(SERVICE_LINK_LISTENER);
 
-		mDatabaseService = static_pointer_cast<DatabaseService>(ServiceManager::getSingleton().getService("DatabaseService"));
+		mDatabaseService = GET_SERVICE(DatabaseService);
 	}
 
 	//------------------------------------------------------
@@ -97,7 +97,7 @@ namespace Opde {
 		The Relations chunk should be present, and the same for all File Groups
 		As we do not know if something was already initialised or not, we just request mapping and see if it goes or not
 		*/
-		// BinaryServicePtr bs = static_pointer_cast<DatabaseService>(ServiceManager::getSingleton().getService("BinaryService"));
+		// BinaryServicePtr bs = GET_SERVICE(DatabaseService);
 
 		FilePtr rels = db->getFile("Relations");
 
@@ -130,9 +130,9 @@ namespace Opde {
 				OPDE_EXCEPT(string("Could not map relation ") + text + " to flavor. Name/ID conflict", "LinkService::_load");
 
 			LOG_DEBUG("Mapped relation %s to flavor %d", text, i);
-			
+
 			std::string inverse = "~" + stxt;
-			
+
 			// --- Assign the inverse relation as well here:
 			rnit = mRelationNameMap.find(inverse);
 
@@ -202,7 +202,7 @@ namespace Opde {
 			return 0; // just return 0, so no exception will be thrown
 		}
 	}
-	
+
 	//------------------------------------------------------
 	std::string LinkService::flavorToName(int flavor) {
 		FlavorToName::const_iterator it = mFlavorToName.find(flavor);
@@ -219,9 +219,9 @@ namespace Opde {
 	RelationPtr LinkService::createRelation(const std::string& name, const DataStoragePtr& stor, bool hidden) {
 		if (name.substr(0,1) == "~")
 			OPDE_EXCEPT("Name conflict: Relation can't use ~ character as the first one, it's reserved for inverse relations. Conflicting name: " + name, "LinkService::createRelation");
-		
+
 		std::string inverse = "~" + name;
-		
+
 		RelationPtr nr = new Relation(name, stor, false, hidden);
 		RelationPtr nrinv = new Relation(inverse, stor, true, hidden);
 
@@ -234,7 +234,7 @@ namespace Opde {
 
 		if (!res.second)
 			OPDE_EXCEPT("Failed to insert new instance of Relation named " + name, "LinkService::createRelation");
-			
+
 		// Inverse relation now
 		res = mRelationNameMap.insert(make_pair(inverse, nrinv));
 
@@ -244,7 +244,7 @@ namespace Opde {
 		return nr;
 	}
 
-	
+
 
 	//------------------------------------------------------
 	void LinkService::clear() {
@@ -264,10 +264,10 @@ namespace Opde {
 
 	//------------------------------------------------------
 	LinkQueryResultPtr LinkService::getAllLinks(int flavor, int src, int dst) const {
-		// find the relation with the specified flavor. 
+		// find the relation with the specified flavor.
 		//If none such found, return empty iterator
 		RelationIDMap::const_iterator it = mRelationIDMap.find(flavor);
-		
+
 		if (it != mRelationIDMap.end()) {
 			// dedicate to the given relation
 			return it->second->getAllLinks(src, dst);
@@ -278,10 +278,10 @@ namespace Opde {
 
 	//------------------------------------------------------
 	LinkPtr LinkService::getOneLink(int flavor, int src, int dst) const {
-		// find the relation with the specified flavor. 
+		// find the relation with the specified flavor.
 		//If none such found, return NULL link
 		RelationIDMap::const_iterator it = mRelationIDMap.find(flavor);
-		
+
 		if (it != mRelationIDMap.end()) {
 			// dedicate to the given relation
 			return it->second->getOneLink(src, dst);
@@ -294,10 +294,10 @@ namespace Opde {
 	LinkPtr LinkService::getLink(link_id_t id) const {
 		// get relation flavor from link id
 		int flavor = LINK_ID_FLAVOR(id);
-		
+
 		// find relation
 		RelationIDMap::const_iterator it = mRelationIDMap.find(flavor);
-		
+
 		if (it != mRelationIDMap.end()) {
 			// dedicate to the given relation
 			return it->second->getLink(id);
@@ -359,7 +359,7 @@ namespace Opde {
 		else
 			return rnit->second;
 	}
-	
+
 	//------------------------------------------------------
 	void LinkService::objectDestroyed(int id) {
 		RelationIDMap::iterator it = mRelationIDMap.begin();
@@ -367,7 +367,7 @@ namespace Opde {
 		for (; it != mRelationIDMap.end();++it)
 			it->second->objectDestroyed(id); // Will call the opposing relation ~ as well
 	}
-	
+
 	//-------------------------- Factory implementation
 	std::string LinkServiceFactory::mName = "LinkService";
 

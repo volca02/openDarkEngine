@@ -58,64 +58,64 @@ namespace Ogre {
 	*/
 	class CalSkeletonLoader {
 		public:
-			CalSkeletonLoader(const std::string& name, const std::string& group, Resource* resource) : 
-				mFileName(name), 
-				mGroup(group), 
+			CalSkeletonLoader(const std::string& name, const std::string& group, Resource* resource) :
+				mFileName(name),
+				mGroup(group),
                 mResource(resource),
-				mFile(NULL), 
-				mTorsos(NULL), 
-                mLimbs(NULL), 
+				mFile(NULL),
+				mTorsos(NULL),
+                mLimbs(NULL),
 				mSkeleton(NULL) {};
-			
+
 			~CalSkeletonLoader() {
 				delete[] mTorsos;
 				delete[] mLimbs;
 			}
-			
+
 			/// does all the loading work, creates an Ogre::Skeleton
 			void load();
-			
+
 			/// Retuns the resulting skeleton
 			Ogre::SkeletonPtr& getSkeleton() { return mSkeleton; };
 
 		protected:
 			/// Reads the header from the .CAL file
 			void readHeader(void);
-			
+
 			/// Reads the torsos from the .CAL file
 			void readTorsos(void);
-			
+
 			/// Reads the limbs from the .CAL file
 			void readLimbs(void);
-		
+
 			/// Converts Vertex to Ogre::Vector3
 			static Vector3 toVector(const Vertex& v) { return Vector3(v.x, v.y, v.z); };
-			
+
 			/// the cal file name (incl. the .cal extension)
 			String mFileName;
-			
+
 			/// the resource group used for the generated skeleton
 			String mGroup;
-			
+
 			/// Resource we're loading the skeleton for
 			Ogre::Resource *mResource;
-			
+
 			/// the file used for reading
 			FilePtr mFile;
-			
+
 			/// header of the cal file
 			CalHdr mHeader;
-			
+
 			/// the torso array prepared for processing
 			CalTorso *mTorsos;
-			
+
 			/// the limb array prepared for processing
 			CalLimb *mLimbs;
-			
+
 			/// our target skeleton instance
 			SkeletonPtr mSkeleton;
 	};
-	
+
 	void CalSkeletonLoader::load() {
 		// quite simple, really
 		Ogre::DataStreamPtr stream = Ogre::ResourceGroupManager::getSingleton().openResource(mFileName, mGroup, true, mResource);
@@ -125,72 +125,72 @@ namespace Ogre {
 		// ok, got it open
 		// read the header
 		readHeader();
-		
+
 		if (mHeader.Version != 1)
 			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Cal file has version other than 1 : ") + mFileName, "CalSkeletonLoader::load");
-		
+
 		// read the torsos
 		readTorsos();
-		
+
 		// limbs now
 		readLimbs();
-		
+
 		// ----------- Now, we build the result
-		
+
 		// Create a new skeleton to fill
 		mSkeleton = Ogre::SkeletonManager::getSingleton().create(mFileName + "-skeleton", mGroup);
-		
+
 		// construct the Bones
 		// Torsos first
 		// the root torso we expect as first
 		if (mTorsos[0].parent != -1)
 			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Cal file expected to have torsos in order of creation : ") + mFileName, "CalSkeletonLoader::load");
-			
+
 		// the really ROOT bone
 		// TODO: Map file for named joints (bones), as an optional addition
 		Bone* root = mSkeleton->createBone(mTorsos[0].root);
-			
+
 		for (int i = 0; i < mHeader.num_torsos; ++i) {
 			// get the torso's root bone to attach to:
 			Bone* trbone = mSkeleton->getBone(mTorsos[i].root);
-			
+
 			for (int f = 0; f < mTorsos[i].fixed_count; ++f) {
 				// here we go. one bone at time
 				trbone->createChild(mTorsos[i].fixed_joints[f], toVector(mTorsos[i].fixed_joint_diff_coord[f]), Quaternion::IDENTITY);
 			}
 		}
-		
+
 		// Torsos are processed. Now limbs
 		for (int i = 0; i < mHeader.num_limbs; ++i) {
 			// get the attachment bone
 			Bone* atb = mSkeleton->getBone(mLimbs[i].attachment_joint);
-			
+
 			for (int s = 0; s < mLimbs[i].num_segments; ++s) {
 				Bone* nb = atb->createChild(mLimbs[i].segments[s], mLimbs[i].lengths[s] * toVector(mLimbs[i].segment_diff_coord[s]), Quaternion::IDENTITY);
 				atb = nb; // now, the new bone becomes the parent for the next bone
 			}
 		}
-		
+
 		// Voila, All done. I said it's quite simple
 	}
-	
+
 	void CalSkeletonLoader::readHeader(void) {
 		mFile->readElem(&mHeader.Version, 4);
 		mFile->readElem(&mHeader.num_torsos, 4);
 		mFile->readElem(&mHeader.num_limbs, 4);
 	}
-	
+
 	void CalSkeletonLoader::readTorsos(void) {
 		// sanity checks
 		if (mHeader.num_torsos < 1)
 			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Cal file has zero torsos : ") + mFileName, "CalSkeletonLoader::readTorsos");
-			
-		// hard to imagine a body with 512 torsos... a cartepillar? :) 
+
+		// hard to imagine a body with 512 torsos... a cartepillar? :)
 		if (mHeader.num_torsos > 512)
 			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Cal file has more than 128 torsos : ") + mFileName, "CalSkeletonLoader::readTorsos");
-			
-		mTorsos = new CalTorso[mHeader.num_torsos];	
-		
+
+		mTorsos = new CalTorso[mHeader.num_torsos];
+
 		for (int32_t i = 0; i < mHeader.num_torsos; ++i) {
 			mFile->readElem(&mTorsos[i].root, sizeof(uint32_t));
 			mFile->readElem(&mTorsos[i].parent, sizeof(int32_t));
@@ -199,13 +199,13 @@ namespace Ogre {
 			mFile->readElem(&mTorsos[i].fixed_joint_diff_coord, sizeof(float), 3 * 16); // 3 <-> x,y,z
 		}
 	}
-	
+
 	void CalSkeletonLoader::readLimbs(void) {
 		if (mHeader.num_limbs > 512)
 			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Cal file has more than 512 limbs : ") + mFileName, "CalSkeletonLoader::readLimbs");
-			
-		mLimbs = new CalLimb[mHeader.num_limbs];	
-		
+
+		mLimbs = new CalLimb[mHeader.num_limbs];
+
 		for (int32_t i = 0; i < mHeader.num_limbs; ++i) {
 			mFile->readElem(&mLimbs[i].torso_index, sizeof(int32_t));
 			mFile->readElem(&mLimbs[i].junk1, sizeof(int32_t));
@@ -216,7 +216,7 @@ namespace Ogre {
 			mFile->readElem(&mLimbs[i].lengths, sizeof(float), 16);
 		}
 	}
-	
+
 
     /** Helper SubMesh filler class. Receives a pointer to the UV and Vertex arrays, and is filled with triangles */
     class SubMeshFiller {
@@ -242,7 +242,7 @@ namespace Ogre {
             bool needsUV() {return mUseUV; };
 
             void addPolygon(int bone, size_t numverts, uint16_t normal, uint16_t* vidx, uint16_t* lightidx, uint16_t* uvidx);
-            
+
             /// For AI meshes. All 3 coords index vert, norm and uv at once
             void addTriangle(uint16_t a, uint16_t bone_a, uint16_t b, uint16_t bone_b, uint16_t c, uint16_t bone_c);
 
@@ -324,17 +324,17 @@ namespace Ogre {
             mIndexList.push_back(max_index);
             mIndexList.push_back(index);
             mIndexList.push_back(last_index);
-            
+
 			last_index = index;
         }
     }
 
     void SubMeshFiller::addTriangle(uint16_t a, uint16_t bone_a, uint16_t b, uint16_t bone_b, uint16_t c, uint16_t bone_c) {
-        
+
         uint16_t idxa = getIndex(bone_a, a, a, 0, a);
         uint16_t idxb = getIndex(bone_b, b, b, 0, b);
         uint16_t idxc = getIndex(bone_c, c, c, 0, c);
-        
+
         mIndexList.push_back(idxa);
         mIndexList.push_back(idxb);
         mIndexList.push_back(idxc);
@@ -353,7 +353,7 @@ namespace Ogre {
 			if (mNumLights <= light)
 				OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Light Index out of range!", "SubMeshFiller::getIndex");
 		}
-		
+
         if (mNumUVs <= uv && mUseUV)
             OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "UV Index out of range!", "SubMeshFiller::getIndex");
 
@@ -362,7 +362,7 @@ namespace Ogre {
 
         VertexDefinition vdef;
         vdef.vertex = vert;
-        
+
         if (!mLights) {
 			vdef.normal = norm;
 			vdef.light = 0;
@@ -370,7 +370,7 @@ namespace Ogre {
         	vdef.normal = 0;
 			vdef.light = light;
         }
-        
+
         vdef.uvidx = uv;
         vdef.bone = bone;
 
@@ -391,27 +391,27 @@ namespace Ogre {
 		// get the ref to light struct at idx
 		if (mNumLights <= idx)
             OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Light Index out of range!", "SubMeshFiller::getUnpackedNormal");
-            
+
 		Vector3 res;
-		
+
 		uint32_t src = mLights[idx].packed_normal;
-		
+
 		/* The Vector is organized as follows
-		
+
 		bit 32 -> bit 0
-		
+
 		XXXX XXXX | XXYY YYYY || YYYY ZZZZ | ZZZZ ZZ00
-		
+
 		each of those are fixed point signed numbers (10 bit)
 		*/
-		
+
 		res.z = (int16_t)((int16_t)(src & 0x0FFFC) << 4) / 16384.0f;
 		res.y = (int16_t)((src >> 6) & 0x0FFC0) / 16384.0f;
 		res.x = (int16_t)((src >> 16) & 0x0FFC0) / 16384.0f;
-		
+
 		return res;
 	}
-	
+
 
     void SubMeshFiller::build() {
         if (mBuilt)
@@ -458,13 +458,13 @@ namespace Ogre {
             // Transform the vertex position and normal, then put into the buffer
             Vector3 pos(mVertices[it->vertex].x, mVertices[it->vertex].y, mVertices[it->vertex].z);
             Vector3 norm;
-            
+
             if (mLights != NULL) {
             	norm = getUnpackedNormal(it->light);
             } else {
-				norm = Vector3(mNormals[it->normal].x, mNormals[it->normal].y, mNormals[it->normal].z);    
+				norm = Vector3(mNormals[it->normal].x, mNormals[it->normal].y, mNormals[it->normal].z);
             }
-            
+
             Vector3 npos, nnorm;
 
             // Get the bone!
@@ -622,12 +622,12 @@ namespace Ogre {
 						mMesh(mesh),
                         mFile(file) {
             };
-		
+
 		protected:
             unsigned int mVersion;
             Mesh* mMesh;
             Opde::FilePtr mFile;
-            
+
 			typedef std::map<int, MaterialPtr> OgreMaterials;
 			typedef std::map< int, SubMeshFiller* > FillerMap;
 	};
@@ -706,7 +706,7 @@ namespace Ogre {
             Vertex* mVertices;
             Vertex* mNormals;
 			ObjLight* mLights;
-			
+
             UVMap* mUVs;
             SubObjectHeader* mSubObjects;
 
@@ -728,9 +728,9 @@ namespace Ogre {
 		public:
 			AIMeshLoader(Mesh* mesh, const Opde::FilePtr& file, unsigned int version);
 			~AIMeshLoader();
-			
+
 			void load();
-			
+
 		protected:
 			void readHeader();
 			void readMaterials();
@@ -739,51 +739,51 @@ namespace Ogre {
 			void readTriangles();
 			void readVertices();
 			void readNormals();
-			
+
 			void readUVs();
-				
+
 			MaterialPtr prepareMaterial(String matname, AIMaterial& mat);
-				
+
 			void readVectors(Vertex* target, size_t count);
-			
+
 			SubMeshFiller* getFillerForSlot(int slot);
-			
+
 			/// LGMM header (offset 0x08 in file)
 			AIMeshHeader mHeader;
-			
+
 			/// joint remappings (?)
 			uint8_t *mJointsIn, *mJointsOut;
-			
+
 			/// source of material definitions
 			AIMaterial *mMaterials;
-			
+
 			/// remaps .BIN joints to .CAL joints (in bin, i'd call those chunks in fact, not joints)
 			AIMapper *mMappers;
-			
+
 			/// geometry chunks per mapper
-			AIJointInfo *mJoints; 
-			
+			AIJointInfo *mJoints;
+
 			/// vertices
 			Vertex* mVertices;
-			
+
 			/// normals
             Vertex* mNormals;
-            
+
             /// uv's (stored as Vertex in file, but we use the same submesh filler class)
             UVMap* mUVs;
-            
+
             /// AI triangles
             AITriangle* mTriangles;
-            
+
             /// materials per slot ID
             OgreMaterials mOgreMaterials;
-            
-            /// Fillers for polys 
+
+            /// Fillers for polys
             FillerMap mFillers;
-            
+
             /// Loader for the skeleton
-            CalSkeletonLoader* mCalLoader; 
-            
+            CalSkeletonLoader* mCalLoader;
+
             /// simple mapper for vertex->joint
             uint8_t *mVertexJointMap;
 	};
@@ -812,7 +812,7 @@ namespace Ogre {
 
         // Read the vertices
         readVertices();
-		
+
 		// Read the light vectors
 		readLights();
 
@@ -831,7 +831,7 @@ namespace Ogre {
         }
 
         // Cubic bounds
-        
+
         /* TODO: some meshes violate the rules min<max, so temporarily commented
          mMesh->_setBounds(AxisAlignedBox(mHdr.bbox_min[0], mHdr.bbox_min[1], mHdr.bbox_min[2],
                 mHdr.bbox_max[0],mHdr.bbox_max[1],mHdr.bbox_max[2]));*/
@@ -842,12 +842,12 @@ namespace Ogre {
 
         mMesh->prepareForShadowVolume();
         mMesh->buildEdgeList();
-        
+
         mMesh->load();
 
         // DONE!
         mMesh->_updateCompiledBoneAssignments();
-        
+
     }
 
 
@@ -980,7 +980,7 @@ namespace Ogre {
 
 				if (obj == ndhdr.subObjectID)
 					loadSubNode(obj, offset + NODE_HEADER_SIZE); // only skip this node's size
-					
+
                 break;
 
             case MD_NODE_SPLIT:
@@ -1241,7 +1241,7 @@ namespace Ogre {
         } else
             OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR,"Number of normals is zero!", "ObjectMeshLoader::readVertices");
     }
-    
+
     //-------------------------------------------------------------------
     void ObjectMeshLoader::readLights() {
         if (mNumLights > 0) {
@@ -1372,19 +1372,20 @@ namespace Ogre {
 
         // We'll create a material given the mat and matext structures
         MaterialPtr omat = MaterialManager::getSingleton().create(matname, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-        
+
         omat->setLightingEnabled(true);
 		omat->setReceiveShadows(false);
-		
+
         // fill it with the values given
         Pass *pass = omat->getTechnique(0)->getPass(0);
-        
+
         // Defaults:
         // Ambient is one. It is controlled by mission ambient setting...
         pass->setAmbient(1,1,1);
         pass->setDiffuse(1,1,1,1);
         pass->setSpecular(0,0,0,0);
-        
+        pass->setCullingMode(CULL_CLOCKWISE);
+
         if (mat.type == MD_MAT_TMAP) {
 
             // Texture unit state for the main texture...
@@ -1399,15 +1400,15 @@ namespace Ogre {
             }
 
 			pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-			pass->setAlphaRejectSettings(CMPF_GREATER, 128); // Alpha rejection. 
-			
+			pass->setAlphaRejectSettings(CMPF_GREATER, 128); // Alpha rejection.
+
 			// Some basic lightning settings
             tus = pass->createTextureUnitState(txtname);
 
             tus->setTextureAddressingMode(TextureUnitState::TAM_WRAP);
             tus->setTextureCoordSet(0);
             tus->setTextureFiltering(TFO_BILINEAR);
-			
+
             // If the transparency is used
             if (( mHdr.mat_flags & MD_MAT_TRANS) && (matext.trans > 0)) {
                 // set at least the transparency value for the material
@@ -1417,7 +1418,7 @@ namespace Ogre {
                 pass->setAlphaRejectFunction(CMPF_ALWAYS_PASS); // Alpha rejection reset. Does not live good with the following:
                 tus->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, 1 - matext.trans);
             }
-                
+
             // Illumination of the material. Converted to ambient lightning here
             if (( mHdr.mat_flags & MD_MAT_ILLUM) && (matext.illum > 0)) {
                 // set the illumination
@@ -1425,13 +1426,13 @@ namespace Ogre {
             }
 
             // omat->setCullingMode(CULL_ANTICLOCKWISE);
-          
+
         } else if (mat.type == MD_MAT_COLOR) {
             // Fill in a color-only material
             TextureUnitState* tus = pass->createTextureUnitState();
 
 			ColourValue matcolor(mat.colour[2] / 255.0, mat.colour[1] / 255.0, mat.colour[0] / 255.0);
-			
+
             // set the material color
             // tus->setColourOperationEx(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, matcolor);
             pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
@@ -1442,13 +1443,13 @@ namespace Ogre {
                 tus->setColourOperation(LBO_ALPHA_BLEND);
                 tus->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, 1 - matext.trans);
             }
-            
+
             // Illumination of a color based material. Hmm. Dunno if this is right, but i simply multiply the color with the illumination
             if (( mHdr.mat_flags & MD_MAT_ILLUM) && (matext.illum > 0)) {
                 // set the illumination
                 pass->setSelfIllumination(matcolor.r * matext.illum, matcolor.g * matext.illum, matcolor.b * matext.illum);
             }
-            
+
             // omat->setCullingMode(CULL_ANTICLOCKWISE);
 
         } else
@@ -1493,11 +1494,11 @@ namespace Ogre {
 
         return omat;
     }
-    
+
     /*-----------------------------------------------------------------*/
 	/*--------------------- AIMeshLoader        -----------------------*/
 	/*-----------------------------------------------------------------*/
-	AIMeshLoader::AIMeshLoader(Mesh* mesh, const Opde::FilePtr& file, unsigned int version) : 
+	AIMeshLoader::AIMeshLoader(Mesh* mesh, const Opde::FilePtr& file, unsigned int version) :
 		DarkBINFileLoader(mesh, file, version),
 		mJointsIn(NULL),
 		mJointsOut(NULL),
@@ -1510,11 +1511,11 @@ namespace Ogre {
 		mTriangles(NULL),
         mCalLoader(NULL),
 		mVertexJointMap(NULL) {
-		
+
 		if (mVersion > 2 || mVersion < 1)
 			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("File has version outside (0,1) range, and thus cannot be handled ") + mMesh->getName(), "AIMeshLoader::AIMeshLoader");
 	};
-	
+
 	AIMeshLoader::~AIMeshLoader() {
 		delete[] mJointsIn;
 		delete[] mJointsOut;
@@ -1527,16 +1528,16 @@ namespace Ogre {
 		delete[] mTriangles;
 		delete[] mVertexJointMap;
 		delete mCalLoader;
-		
+
         FillerMap::iterator it = mFillers.begin();
-        
+
         for ( ; it != mFillers.end(); ++it) {
 			delete it->second;
         }
-        
+
         mFillers.clear();
 	}
-	
+
     void AIMeshLoader::load() {
     	// For the AI mesh to be usable, we need the cal file.
     	// The cal file has the same name as the BIN file, but .CAL extension
@@ -1553,103 +1554,103 @@ namespace Ogre {
         }
 
         basename += ".cal";
-        
+
         // load the skeleton
         mCalLoader = new CalSkeletonLoader(basename, group, mMesh);
-        
+
 		// if this fails, at least we'll be clean on the mesh side
 		// because the exception won't have to be handled for cleaning
         mCalLoader->load();
-        
+
         // load
         // 1. the header
         readHeader();
-        
+
         // 2. the .BIN joint ID remapping struct (I suppose this swaps .BIN joint id's somehow)
         mFile->seek(mHeader.offset_joint_remap, File::FSEEK_BEG);
-        
+
         mJointsIn = new uint8_t[mHeader.num_joints];
         mJointsOut = new uint8_t[mHeader.num_joints];
-        
+
         mFile->read(mJointsIn, mHeader.num_joints); // no need for byteswaps here
         mFile->read(mJointsOut, mHeader.num_joints); // no need for byteswaps here
-        
+
         // 3. the Joint remap info. BIN joint to .cal joint mapping, probably other data as well
         readMappers();
-        
+
         // 4. the materials
         readMaterials();
-        
+
         // 5. Joints - triangles per .BIN joint, vertices per .BIN joint (I suppose there can be some weigting done)
         readJoints();
-        
+
         // 6. Polygons
         readTriangles();
-        
+
         // 7. Vertices
         readVertices();
-        
+
         // 8. Normals
         readNormals();
-        
+
         // 9. UV's
         readUVs();
-        
+
         // 10. Weights (tbd sometime further)
-        
-        // interpret. 
-       
+
+        // interpret.
+
         // pass 1 of joint mappings. Build vertex -> .CAL joint mapping info
         mVertexJointMap = new uint8_t[mHeader.num_vertices];
-        
+
         for (int16_t j = 0; j < mHeader.num_vertices; ++j)
 			mVertexJointMap[j] = 0;
-        
-        
+
+
         for (char j = 0; j < mHeader.num_joints; ++j) {
         	// for every joint
 			// get the real joint id
 			unsigned int mapper = mJoints[j].mapper_id;
-			
+
 			assert(mapper < mHeader.num_mappers);
-			
+
 			unsigned int joint = mMappers[mapper].joint;
-			
+
 			for (short v = 0; v < mJoints[j].num_vertices; ++v) {
 				uint16_t vtx = mJoints[j].start_vertex + v;
-				
+
 				mVertexJointMap[vtx] = joint;
 			}
         }
-        
+
         // pass 2 of joint mappings. Fill the submesh builders with vertices
         for (char j = 0; j < mHeader.num_joints; ++j) {
         	// for every joint
 			// get the real joint id
 			unsigned int mapper = mJoints[j].mapper_id;
-			
+
 			assert(mapper < mHeader.num_mappers);
-			
+
 			unsigned int joint = mMappers[mapper].joint;
-			
+
 			for (short v = 0; v < mJoints[j].num_polys; ++v) {
 				AITriangle& tri = mTriangles[mJoints[j].start_poly + v];
-				
+
 				SubMeshFiller* f = getFillerForSlot(tri.mat); // maybe slots are not used after all
-				
+
 				if (!f)
 					OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Filler not found for slot!"), "AIMeshLoader::readMaterials");
-					
+
 				f->addTriangle(tri.a, mVertexJointMap[tri.a], tri.b, mVertexJointMap[tri.b], tri.c, mVertexJointMap[tri.c]);
 			}
         }
-        
+
         FillerMap::iterator it = mFillers.begin();
 
         for (; it != mFillers.end(); ++it) {
             it->second->build();
         }
-        
+
         // DONE!
 		mMesh->load();
 
@@ -1657,20 +1658,20 @@ namespace Ogre {
         mMesh->_updateCompiledBoneAssignments();
         // cleanup?
     }
-    
+
     void AIMeshLoader::readHeader() {
     	mFile->readElem(mHeader.zeroes, sizeof(uint32), 3);
-    	
+
     	mFile->read(&mHeader.num_what1, 1);
     	mFile->read(&mHeader.num_mappers, 1);
     	mFile->read(&mHeader.num_mats, 1);
     	mFile->read(&mHeader.num_joints, 1);
-    	
+
     	mFile->readElem(&mHeader.num_polys, 2);
     	mFile->readElem(&mHeader.num_vertices, 2);
-    	
+
     	mFile->readElem(&mHeader.num_stretchy, 4);
-    	
+
     	// offsets...
     	mFile->readElem(&mHeader.offset_joint_remap, 4);
     	mFile->readElem(&mHeader.offset_mappers, 4);
@@ -1687,17 +1688,17 @@ namespace Ogre {
 	void AIMeshLoader::readMaterials() {
 		// repeat for all materials
 		char i;
-		
+
 		if (mHeader.num_mats < 1) // TODO: This could be fatal
 			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("File contains no materials ")  + mMesh->getName(), "AIMeshLoader::readMaterials");
-		
+
 		mMaterials = new AIMaterial[mHeader.num_mats];
-		
+
 		mFile->seek(mHeader.offset_mats, File::FSEEK_BEG);
-		
+
 		for (i = 0 ; i < mHeader.num_mats; ++i) {
 			mFile->read(mMaterials[i].name, 16);
-			
+
 			// version dep.
 			if (mVersion > 1) {
 				mFile->readElem(&mMaterials[i].ext_flags, 4);
@@ -1710,125 +1711,125 @@ namespace Ogre {
 				mMaterials[i].illum = 0.0f;
 				mMaterials[i].unknown = 0.0f;
 			}
-			
+
 			// back to version independent loading
 			mFile->readElem(&mMaterials[i].unk1, 4);
 			mFile->readElem(&mMaterials[i].unk2, 4);
-			
+
 			mFile->read(&mMaterials[i].type, 1);
 			mFile->read(&mMaterials[i].slot_num, 1);
-			
+
 			mFile->readElem(&mMaterials[i].s_unk1, 2);
 			mFile->readElem(&mMaterials[i].s_unk2, 2);
 			mFile->readElem(&mMaterials[i].s_unk3, 2);
 			mFile->readElem(&mMaterials[i].s_unk4, 2);
 			mFile->readElem(&mMaterials[i].s_unk5, 2);
-			
+
 			mFile->readElem(&mMaterials[i].l_unk3, 4);
-			
+
 			// prepare this as Ogre's material
 			MaterialPtr mat = prepareMaterial(mMesh->getName() + String("/") + String(mMaterials[i].name), mMaterials[i]);
-			
+
 			// mOgreMaterials.insert(make_pair(mMaterials[i].slot_num, mat));
 			mOgreMaterials.insert(make_pair(i, mat)); // mMaterials[i].slot_num
 		}
 	}
-	
+
 	void AIMeshLoader::readMappers() {
 		mFile->seek(mHeader.offset_mappers, File::FSEEK_BEG);
-		
+
 		if (mHeader.num_mappers < 1)
 			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("File contains no mappers ") + mMesh->getName(), "AIMeshLoader::readMappers");
-			
+
 		mMappers = new AIMapper[mHeader.num_mappers];
-		
+
 		for (char i = 0 ; i < mHeader.num_mappers; ++i) {
 			mFile->readElem(&mMappers[i].unk1, 4);
-			
+
 			mFile->read(&mMappers[i].joint, 1);
 			mFile->read(&mMappers[i].en1, 1);
 			mFile->read(&mMappers[i].jother, 1);
 			mFile->read(&mMappers[i].en2, 1);
-			
+
 			mFile->readElem(&mMappers[i].rotation, 4, 3);
 		}
 	}
 
 	void AIMeshLoader::readJoints() {
 		mFile->seek(mHeader.offset_joints, File::FSEEK_BEG);
-		
-		if (mHeader.num_joints < 1) 
+
+		if (mHeader.num_joints < 1)
 			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("File contains no joints ") + mMesh->getName(), "AIMeshLoader::readJoints");
-			
+
 		mJoints = new AIJointInfo[mHeader.num_joints];
-		
+
 		for (char i = 0 ; i < mHeader.num_joints; ++i) {
 			mFile->readElem(&mJoints[i].num_polys, 2);
 			mFile->readElem(&mJoints[i].start_poly, 2);
 			mFile->readElem(&mJoints[i].num_vertices, 2);
 			mFile->readElem(&mJoints[i].start_vertex, 2);
-			
+
 			mFile->readElem(&mJoints[i].jflt, 4);
-			
+
 			mFile->readElem(&mJoints[i].sh6, 2);
 			mFile->readElem(&mJoints[i].mapper_id, 2);
 		}
 	}
-	
+
 	void AIMeshLoader::readTriangles() {
 		mFile->seek(mHeader.offset_poly, File::FSEEK_BEG);
-		
-		if (mHeader.num_polys < 1) 
+
+		if (mHeader.num_polys < 1)
 			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("File contains no polygons ") + mMesh->getName(), "AIMeshLoader::readVertices");
-		
+
 		mTriangles = new AITriangle[mHeader.num_polys];
-			
+
 		for (int16_t i = 0; i < mHeader.num_polys; ++i) {
 			mFile->readElem(&mTriangles[i].a, 2);
 			mFile->readElem(&mTriangles[i].b, 2);
 			mFile->readElem(&mTriangles[i].c, 2);
 			mFile->readElem(&mTriangles[i].mat, 2);
-			
+
 			mFile->readElem(&mTriangles[i].f_unk, 4);
-			
+
 			mFile->readElem(&mTriangles[i].index, 2);
-			
+
 			mFile->readElem(&mTriangles[i].flag, 2);
 		}
 	}
 
 	void AIMeshLoader::readVertices() {
 		mFile->seek(mHeader.offset_vert, File::FSEEK_BEG);
-		
-		if (mHeader.num_vertices < 1) 
+
+		if (mHeader.num_vertices < 1)
 			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("File contains no vertices ") + mMesh->getName(), "AIMeshLoader::readVertices");
-			
+
 		mVertices = new Vertex[mHeader.num_vertices];
-		
+
 		readVectors(mVertices, mHeader.num_vertices);
 	}
-	
+
 	void AIMeshLoader::readNormals() {
 		mFile->seek(mHeader.offset_norm, File::FSEEK_BEG);
-		
+
 		if (mHeader.num_vertices < 1) // TODO: This could be fatal
 			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("File contains no normals ") + mMesh->getName(), "AIMeshLoader::readNormals");
-			
+
 		mNormals = new Vertex[mHeader.num_vertices];
-		
+
 		readVectors(mNormals, mHeader.num_vertices);
 	}
-		
+
 	void AIMeshLoader::readUVs() {
 		mFile->seek(mHeader.offset_uvmap, File::FSEEK_BEG);
-		
+
 		if (mHeader.num_vertices < 1) // TODO: This could be fatal
 			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("File contains no uv's ") + mMesh->getName(), "AIMeshLoader::readNormals");
-			
+
 		mUVs = new UVMap[mHeader.num_vertices];
-		
+
 		float bogus_z;
-		
+
 		for (int16_t i = 0; i < mHeader.num_vertices; ++i) {
 			mFile->readElem(&mUVs[i].u, 4);
 			mFile->readElem(&mUVs[i].v, 4);
@@ -1853,19 +1854,19 @@ namespace Ogre {
 
         // We'll create a material given the mat and matext structures
         MaterialPtr omat = MaterialManager::getSingleton().create(matname, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-        
+
         omat->setLightingEnabled(true);
 		omat->setReceiveShadows(false);
-		
+
         // fill it with the values given
         Pass *pass = omat->getTechnique(0)->getPass(0);
-        
+
         // Defaults:
         // Ambient is one. It is controlled by mission ambient setting...
         pass->setAmbient(1,1,1);
         pass->setDiffuse(1,1,1,1);
         pass->setSpecular(0,0,0,0);
-        
+
         if (mat.type == MD_MAT_TMAP) {
             // Texture unit state for the main texture...
             TextureUnitState* tus;
@@ -1883,15 +1884,15 @@ namespace Ogre {
                 }
 
 			pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-			pass->setAlphaRejectSettings(CMPF_GREATER, 128); // Alpha rejection. 
-			
+			pass->setAlphaRejectSettings(CMPF_GREATER, 128); // Alpha rejection.
+
 			// Some basic lightning settings
             tus = pass->createTextureUnitState(txtname);
 
             tus->setTextureAddressingMode(TextureUnitState::TAM_WRAP);
             tus->setTextureCoordSet(0);
             tus->setTextureFiltering(TFO_BILINEAR);
-			
+
             // If the transparency is used
             if (( mat.ext_flags & MD_MAT_TRANS) && (mat.trans > 0)) {
                 // set at least the transparency value for the material
@@ -1901,7 +1902,7 @@ namespace Ogre {
                 pass->setAlphaRejectFunction(CMPF_ALWAYS_PASS); // Alpha rejection reset. Does not live good with the following:
                 tus->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, 1 - mat.trans);
             }
-                
+
             // Illumination of the material. Converted to ambient lightning here
             if (( mat.ext_flags & MD_MAT_ILLUM) && (mat.illum > 0)) {
                 // set the illumination
@@ -1909,14 +1910,14 @@ namespace Ogre {
             }
 
             // omat->setCullingMode(CULL_ANTICLOCKWISE);
-          
+
         } else if (mat.type == MD_MAT_COLOR) {
             // Fill in a color-only material
             TextureUnitState* tus = pass->createTextureUnitState();
 
 			// TODO: Code. We don't know where the color is, yet!
 			ColourValue matcolor(1, 1, 1);
-			
+
             // set the material color
             // tus->setColourOperationEx(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, matcolor);
 			pass->setDiffuse(matcolor);
@@ -1925,13 +1926,13 @@ namespace Ogre {
                 // tus->setColourOperation(LBO_ALPHA_BLEND);
                 tus->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, 1 - mat.trans);
             }
-            
+
             // Illumination of a color based material. Hmm. Dunno if this is right, but i simply multiply the color with the illumination
             if (( mat.ext_flags & MD_MAT_ILLUM) && (mat.illum > 0)) {
                 // set the illumination
                 pass->setSelfIllumination(matcolor.r * mat.illum, matcolor.g * mat.illum, matcolor.b * mat.illum);
             }
-            
+
         } else
             OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Invalid material type : ") + StringConverter::toString(mat.type), "AIMeshLoader::prepareMaterial");
 
@@ -1940,16 +1941,16 @@ namespace Ogre {
 
 		return omat;
     }
-    
+
     SubMeshFiller* AIMeshLoader::getFillerForSlot(int slot) {
     	FillerMap::iterator it = mFillers.find(slot);
-    	
+
     	if (it != mFillers.end()) {
 			return it->second;
     	} else {
     		// find the material name
-			OgreMaterials::iterator mit = mOgreMaterials.find(slot);	
-			
+			OgreMaterials::iterator mit = mOgreMaterials.find(slot);
+
 			if (mit != mOgreMaterials.end()) {
 				SubMesh* sm = mMesh->createSubMesh("SubMesh" + StringConverter::toString(slot));
 
@@ -1957,11 +1958,11 @@ namespace Ogre {
 
 				// Set the material for the submesh
 				f->setMaterialName(mit->second->getName());
-				
+
 				f->setSkeleton(mCalLoader->getSkeleton());
 
 				mFillers.insert(make_pair(slot, f));
-				
+
 				return f;
 			} else {
 				OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Slot is not occupied by material ") + StringConverter::toString(slot) +  " file " + mMesh->getName(),
@@ -2027,7 +2028,7 @@ namespace Ogre {
         if (header == "LGMM") {
             // AI mesh. Not yet supported
             AIMeshLoader ldr(m, f, version);
-            
+
             try {
             	ldr.load();
             } catch (Opde::FileException &e) {

@@ -40,19 +40,19 @@ namespace Opde {
     /*-----------------------------------------------------*/
     /*-------------------- InputService -------------------*/
     /*-----------------------------------------------------*/
-    InputService::InputService(ServiceManager *manager, const std::string& name) : 
-			Service(manager, name), 
+    InputService::InputService(ServiceManager *manager, const std::string& name) :
+			Service(manager, name),
 			mDirectListener(NULL),
 			mMouse(NULL),
 			mKeyboard(NULL),
 			mInputMode(IM_MAPPED) {
-		
+
     	// Loop client definition
     	mLoopClientDef.id = LOOPCLIENT_ID_INPUT;
     	mLoopClientDef.mask = LOOPMODE_INPUT;
     	mLoopClientDef.priority = LOOPCLIENT_PRIORITY_INPUT;
     	mLoopClientDef.name = mName;
-    	
+
     	// Initialize the valid keys
 		registerValidKey(KC_ESCAPE, "esc");
 
@@ -242,7 +242,7 @@ namespace Opde {
 
 		if (!mLoopService.isNull())
 			mLoopService->removeLoopClient(this);
-			
+
 		mRenderService.setNull();
     }
 
@@ -300,9 +300,9 @@ namespace Opde {
 		size_t windowHnd = 0;
 		std::ostringstream windowHndStr;
 
-		mConfigService = static_pointer_cast<ConfigService>(ServiceManager::getSingleton().getService("ConfigService"));
-        mRenderService = static_pointer_cast<RenderService>(ServiceManager::getSingleton().getService("RenderService"));
-        
+		mConfigService = GET_SERVICE(ConfigService);
+        mRenderService = GET_SERVICE(RenderService);
+
         mRenderWindow = mRenderService->getRenderWindow();
 
 		// Get window handle
@@ -370,7 +370,7 @@ namespace Opde {
 		// Last step: Get the loop service and register as a listener
 		mLoopService = static_pointer_cast<LoopService>(ServiceManager::getSingleton().getService("LoopService"));
 		mLoopService->addLoopClient(this);
-		
+
 		return true;
     }
 
@@ -391,7 +391,7 @@ namespace Opde {
 		// TODO: For now. The code will move here for 0.3
 		captureInputs();
 	}
-	
+
 	//------------------------------------------------------
 	void InputService::setBindContext(const std::string& context) {
 		InputEventMapperPtr iemp = findMapperForContext(context);
@@ -628,21 +628,21 @@ namespace Opde {
 
 		// first cycle without mods, second with them
 		for (int it = 0; it < 2; it++) { // Just to run this two times
-			
+
 			// Try to find the key without the modifiers
 			if (mCurrentMapper->unmapEvent(key, result)) {
 				// TODO: Send the event
 				// Split the command to cmd and params parts
 				std::pair<string, string> split = splitCommand(result.command);
-				
+
 				InputEventMsg msg;
-				
+
 				msg.command = split.first;
 				msg.params = split.second;
 				msg.event = t;
-				
+
 				// If it is denoted by plus sign, we replace the param with on/off 1.0/0.0 (- does the opposite, really)
-				if (result.type == InputEventMapper::CET_PEDGE) { 
+				if (result.type == InputEventMapper::CET_PEDGE) {
 					if (t == IET_KEYBOARD_PRESS)
 						msg.params = 1.0f;
 					else
@@ -653,11 +653,11 @@ namespace Opde {
 					else
 						msg.params = 1.0f;
 				}
-				
+
 				// No key repeat for now...
 				// If it would be CET_NORMAL. We could mark the event as running, then process every frame/key repeat
 				// Don't worry. It will definatelly be implemented.
-				
+
 				// If the binding is not +/-, only progress on button press. This will be handled differently with the key repeats
 				if (t != IET_KEYBOARD_RELEASE && result.type == InputEventMapper::CET_NORMAL)
 					if (callCommandTrap(msg))
@@ -667,10 +667,10 @@ namespace Opde {
 			// no event for the key itself, try the modifiers
 			attachModifiers(key);
 		}
-		
+
 	}
 
-	//------------------------------------------------------	
+	//------------------------------------------------------
 	void InputService::registerCommandTrap(const std::string& command, const ListenerPtr& listener) {
 		if (mCommandTraps.find(command) != mCommandTraps.end()) {
 			// Already registered command. LOG an error
@@ -681,43 +681,43 @@ namespace Opde {
 		}
 	}
 
-	//------------------------------------------------------	
+	//------------------------------------------------------
 	void InputService::unregisterCommandTrap(const ListenerPtr& listener) {
 		// Iterate through the trappers, find the ones with this listener ptr, remove
 		ListenerMap::iterator it = mCommandTraps.begin();
-		
+
 		while (it != mCommandTraps.end()) {
 			ListenerMap::iterator pos = it++;
-			
+
 			if (pos->second == listener) {
 				mCommandTraps.erase(pos);
 			}
 		}
 	}
-	
-	//------------------------------------------------------	
+
+	//------------------------------------------------------
 	void InputService::unregisterCommandTrap(const std::string& command) {
 		// Iterate through the trappers, find the ones with the given command name, remove
 		ListenerMap::iterator it = mCommandTraps.begin();
-		
+
 		while (it != mCommandTraps.end()) {
 			ListenerMap::iterator pos = it++;
-			
+
 			if (pos->first == command) {
 				mCommandTraps.erase(pos);
 			}
 		}
 	}
-	
-	//------------------------------------------------------	
+
+	//------------------------------------------------------
 	bool InputService::callCommandTrap(const InputEventMsg& msg) {
 		ListenerMap::const_iterator it = mCommandTraps.find(msg.command);
-		
+
 		if (it != mCommandTraps.end()) {
 			(*it->second)(msg);
 			return true;
 		}
-		
+
 		return false;
 	}
 
@@ -726,22 +726,22 @@ namespace Opde {
 		if (mCommandTraps.find(cmd) != mCommandTraps.end()) {
 			return true;
 		}
-		
+
 		return false;
 	}
 
 	//------------------------------------------------------
 	std::pair<std::string, std::string> InputService::splitCommand(const std::string& cmd) const {
 		WhitespaceStringTokenizer stok(cmd);
-		
+
 		std::pair<std::string, std::string> res = make_pair("", "");
-		
+
 		if (!stok.end())
 			res.first = stok.next();
-		
+
 		if (!stok.end())
 			res.second = stok.rest();
-			
+
 		return res;
 	}
 

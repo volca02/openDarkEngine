@@ -106,7 +106,7 @@ namespace Opde {
 		InheritorList::iterator it = mInheritors.begin();
 
 		for (; it != mInheritors.end(); ++it) {
-				delete (*it);
+			(*it)->getFactory()->destroyInstance(*it);
 		}
 
 		mInheritors.clear(); // sufficient - the smart_ptrs will delete
@@ -148,7 +148,7 @@ namespace Opde {
 	bool InheritService::init() {
 		// Link Service should have created us automatically through service masks.
 		// So we can register as a link service listener
-		mLinkService = static_pointer_cast<LinkService>(ServiceManager::getSingleton().getService("LinkService"));
+		mLinkService = GET_SERVICE(LinkService);
 
 		if (mLinkService.isNull()) {
 		    LOG_FATAL("InheritService::init: LinkService does not exist?");

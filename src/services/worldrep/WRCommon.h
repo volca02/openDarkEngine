@@ -19,9 +19,7 @@
  *
  *****************************************************************************/
 
- 
-#ifndef __WRCOMMON_H
 
-#define TEMPTEXTURE_RESOURCE_GROUP "WrTextures"
+#ifndef __WRCOMMON_H
 
 #endif

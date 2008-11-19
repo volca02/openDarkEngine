@@ -32,7 +32,6 @@ This file contains some global definitions common to all services
 
 // TODO: Redo these constants to const int ....,
 
-
 // --------------------------------------
 // ---  Bitmasks for service masking  ---
 // --------------------------------------
@@ -83,8 +82,10 @@ The database service handles mission/gam/savegame database files (both loading a
 priorities (not necessary unique) for the database service listeners
 */
 
-// First, worldrep is loadded
-#define DBP_WORLDREP 5
+// First, materials are loaded
+#define DBP_MATERIAL 5
+// then worldrep is loaded
+#define DBP_WORLDREP 10
 // Links and Properties are loaded in object system
 // Object system loading order
 #define DBP_OBJECT 20

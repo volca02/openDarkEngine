@@ -28,17 +28,14 @@
 #include "OgreStringConverter.h"
 #include "ConsoleBackend.h"
 #include "WRCommon.h"
-// #define framelm
 #include "OpdeException.h"
-
-// TODO: This is dated... We should just return Width and Height for lightmaps (separate), to let the tuning be simpler
-// - this means some changes to the lmap allocation have to be made too
+#include "MaterialService.h"
 
 using namespace Ogre;
 
 namespace Opde {
 
-int LightAtlas::mMaxSize;
+	int LightAtlas::mMaxSize;
 
 	Vector3 operator*(float a, lmpixel b) {
 		return Vector3(a * b.R,a * b.G,a * b.B);
@@ -48,7 +45,7 @@ int LightAtlas::mMaxSize;
 	/*
 		A single texture, containing many lightmaps. used in the texturelist construction
 	*/
-	LightAtlas::LightAtlas(int idx, int tag) : 
+	LightAtlas::LightAtlas(int idx, int tag) :
 				mCount(0),
 				mIdx(idx),
 				mTex(NULL),
@@ -56,11 +53,11 @@ int LightAtlas::mMaxSize;
 				mFreeSpace(NULL),
 				mSize(1) {
 		mName << "@lightmap" << idx; // so we can find the atlas by number in the returned AtlasInfo
-		
-		mFreeSpace = new FreeSpaceInfo(0,0,mSize,mSize); 
+
+		mFreeSpace = new FreeSpaceInfo(0,0,mSize,mSize);
 
 		mCount = 0;
-		
+
 		mTagSet.insert(tag);
 	}
 
@@ -81,42 +78,42 @@ int LightAtlas::mMaxSize;
             delete (*it);
             ++it;
         }
-        
+
         mLightmaps.clear();
 	}
-	
+
 	std::string LightAtlas::getTagStr() {
 	    TagSet::iterator it = mTagSet.begin();
-	    
+
 	    std::stringstream sstr;
-	    
+
 	    while (it != mTagSet.end()) {
 	        int cur = *it++;
-	        
+
 	        sstr << cur;
-	        
-	        if (it != mTagSet.end()) 
+
+	        if (it != mTagSet.end())
                 sstr << ", ";
 	    }
-	    
+
 	    return sstr.str();
 	}
-	
+
 	void LightAtlas::growAtlas(int newSize) {
 		if (newSize <= mSize)
 			return;
 
 		mSize = newSize;
-		
+
 		// clear the lightmap placement
 		delete mFreeSpace;
-		
+
 		// initialise the free space - initially whole lmap
 		mFreeSpace = new FreeSpaceInfo(0,0,mSize,mSize);
-	
+
 		// place the lightmaps again
 		LightMapVector::iterator it = mLightmaps.begin();
-		
+
 		for (; it != mLightmaps.end(); ++it) {
 			// place the lmap
 			// should not fail, since the lmaps fitted to prev atlas.
@@ -130,34 +127,34 @@ int LightAtlas::mMaxSize;
 
 		// place the lightmaps again
 		LightMapVector::iterator it = mLightmaps.begin();
-		
+
 		for (; it != mLightmaps.end(); ++it) {
 			std::pair<int, int> dim = (*it)->getDimensions();
 			area += dim.first * dim.second;
 		}
-		
+
 		return area;
 	}
 
 	bool LightAtlas::addLightMap(LightMap *lmap) {
-		// Dynamic allocation of lmap atlas size. If we didn't fit, try throwing 
+		// Dynamic allocation of lmap atlas size. If we didn't fit, try throwing
 		// all the mapping away, then remap all
 		while (!placeLightMap(lmap)) {
 			if (mSize >= mMaxSize) // have some sane maximum
 				return false;
-			
+
 			growAtlas(2 * mSize);
 		}
-		
+
 		// and insert into our list
 		mLightmaps.push_back(lmap);
 		addTag(lmap->getTag());
 		mCount++;
-		
+
 		return true;
 	}
-		
-		
+
+
 	bool LightAtlas::placeLightMap(LightMap *lmap) {
 		std::pair<int, int> dim = lmap->getDimensions();
 
@@ -184,16 +181,16 @@ int LightAtlas::mMaxSize;
 	bool LightAtlas::render() {
 		if (mLightmaps.size() == 0) // no lmaps, no action
 			return true;
-		
+
 		// (re)create the texture
 		if (!mTex.isNull()) {
 			TextureManager::getSingleton().remove(mName.str());
 			mTex.setNull();
 		}
-		
+
 		// We place the lightmaps into a separate resource group for easy unloading
 		mTex = TextureManager::getSingleton().createManual(
-			mName.str(), TEMPTEXTURE_RESOURCE_GROUP,
+			mName.str(), MaterialService::TEMPTEXTURE_RESOURCE_GROUP,
 			TEX_TYPE_2D, mSize, mSize, 0, PF_X8R8G8B8,
 			TU_DYNAMIC_WRITE_ONLY);
 
@@ -201,16 +198,16 @@ int LightAtlas::mMaxSize;
 
 		// Erase the lmap atlas pixel buffer
 		mAtlas->lock(HardwareBuffer::HBL_DISCARD);
-		
+
 		const PixelBox &pb = mAtlas->getCurrentLock();
 
 		uint32 *data = static_cast<uint32*>(pb.data);
-		for (int y = 0; y < mSize; y++) 
-		{	
+		for (int y = 0; y < mSize; y++)
+		{
 			memset(data, 0, mSize * sizeof(uint32));
 			data += pb.rowPitch;
 		}
-		
+
 		std::vector< LightMap * >::const_iterator lmaps_it = mLightmaps.begin();
 
 		for (; lmaps_it != mLightmaps.end(); ++lmaps_it) {
@@ -228,7 +225,7 @@ int LightAtlas::mMaxSize;
 		const PixelBox &pb = mAtlas->getCurrentLock();
 
 		uint32 *data = static_cast<uint32*>(pb.data) + fsi.y * pb.rowPitch;
-		for (int y = 0; y < fsi.h; y++) 
+		for (int y = 0; y < fsi.h; y++)
 		{
 			uint32 w = (y * fsi.w);
 			for (int x = 0; x < fsi.w; x++) {
@@ -271,7 +268,7 @@ int LightAtlas::mMaxSize;
 	void LightAtlas::setLightIntensity(int id, float intensity) {
 		if (mLightmaps.size() == 0)
 			return;
-			
+
 		// iterate throught the map lights, and call the setLightIntensity on all registered lightmaps
 		std::map< int, std::set<LightMap*> >::iterator light_it = mLights.find(id);
 
@@ -295,7 +292,7 @@ int LightAtlas::mMaxSize;
 	int LightAtlas::getUnusedArea() {
 		return mFreeSpace->getLeafArea();
 	}
-	
+
 	int LightAtlas::getPixelCount() {
 		return mSize * mSize;
 	}
@@ -327,11 +324,11 @@ int LightAtlas::mMaxSize;
 		for (int i = 0; i < last; i++) {
 			if (!mList.at(i)->hasTag(lmap->getTag()))
 				continue;
-			
+
 			if (mList.at(i)->addLightMap(lmap))
 				return false;
 		}
-		
+
 		// pass two - without the tag
 		for (int i = 0; i < last; i++) {
 			if (mList.at(i)->addLightMap(lmap)) // will addTag internally
@@ -410,15 +407,15 @@ int LightAtlas::mMaxSize;
 
 		for (int i = 0; i < last; i++) {
 			LightAtlas* a = mList.at(i);
-			
+
 			int totc = a->getPixelCount();
 			int used = a->getUsedArea();
-			
+
 			used_pixels += used;
 			total_pixels += totc;
-			
-			
-			
+
+
+
 			LOG_VERBOSE("Light Map Atlas: Atlas {tags %s} : %d of %d used (%f%%) (%d of %d so far)", a->getTagStr().c_str(), used, totc, 100.0f * used/totc, used_pixels, total_pixels);
 		}
 
@@ -507,7 +504,7 @@ int LightAtlas::mMaxSize;
 
 		ObjectToLightMap::const_iterator lmap_it = mSwitchableLmaps.begin();
 
-		for  (;lmap_it != mSwitchableLmaps.end(); ++lmap_it) 
+		for  (;lmap_it != mSwitchableLmaps.end(); ++lmap_it)
 		{
 			lmpixel* act_lmap = lmap_it->second;
 
@@ -518,19 +515,19 @@ int LightAtlas::mMaxSize;
 			std::map<int, float>::iterator intens_it = mIntensities.find(light_id);
 
 			// Just to be sure we get the intensity
-			if (intens_it != mIntensities.end())  
-				intensity = intens_it->second;				
-			else 
+			if (intens_it != mIntensities.end())
+				intensity = intens_it->second;
+			else
 				mIntensities.insert(std::make_pair(light_id, 0.0f));
 
 			uint32 Intens = intensity * 256;
-			if (Intens > 0) 
+			if (Intens > 0)
 			{
 				for (unsigned int i = 0; i < LightMapSize; i++)
 				{
-					lmapR[i] += Intens * act_lmap[i].R; 
-					lmapG[i] += Intens * act_lmap[i].G; 
-					lmapB[i] += Intens * act_lmap[i].B; 
+					lmapR[i] += Intens * act_lmap[i].R;
+					lmapG[i] += Intens * act_lmap[i].G;
+					lmapB[i] += Intens * act_lmap[i].B;
 				}
 			}
 		}

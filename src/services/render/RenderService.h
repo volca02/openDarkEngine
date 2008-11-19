@@ -50,12 +50,12 @@ namespace Opde {
 	class RenderAlphaProperty;
 	class RenderTypeProperty;
 	class ZBiasProperty;
-	
+
 	/// Render System message type
 	typedef enum {
 	    /// Render window changed the size
 	    RENDER_WINDOW_SIZE_CHANGE = 1
-	} RenderMessageType;	
+	} RenderMessageType;
 
 
 	/// window size message details
@@ -74,7 +74,7 @@ namespace Opde {
 	/// Render service message (Used to signalize a change in the renderer setup)
 	typedef union {
 		RenderMessageType msg_type;
-		
+
 		RenderWindowSize size;
 	} RenderServiceMsg;
 
@@ -83,7 +83,7 @@ namespace Opde {
 		public:
 			EntityInfo(Ogre::SceneManager* man, Ogre::Entity* entity, Ogre::SceneNode* node);
 
-			// destructor - destroys the 
+			// destructor - destroys the
 			~EntityInfo();
 
 			// setters:
@@ -94,7 +94,7 @@ namespace Opde {
 			void setZBias(float bias);
 
 			void setEntity(Ogre::Entity* newEntity);
-			
+
 			inline Ogre::Entity* getEntity(void) { return mEntity; };
 			inline Ogre::SceneNode* getSceneNode(void) { return mNode; };
 
@@ -113,7 +113,7 @@ namespace Opde {
 
 			/// alpha transparency value of the object
 			float mAlpha;
-			
+
 			/// z-bias of the object
 			float mZBias;
 
@@ -142,13 +142,13 @@ namespace Opde {
             Ogre::Root* getOgreRoot();
             Ogre::SceneManager* getSceneManager();
             Ogre::RenderWindow* getRenderWindow();
-            
+
             /**
             Getter for the default viewport. Most of the time sufficient (for game)
             @returns The default viewport (Viewport of the default camera )
 			*/
             Ogre::Viewport* getDefaultViewport();
-            
+
             /**
             Getter for the default camera. Default camera is a camera named "DefaultCamera" that is autocreated and added to the autocreated window
             @returns The default camera
@@ -164,18 +164,18 @@ namespace Opde {
 				@param visible If set to true, normal rendering takes place, false causes only overlay render queue to be processed
 			*/
 			void setWorldVisible(bool visible);
-			
+
 			/** Getter for SceneNodes of objects. Those only exist for concrete objects.
 			@returns The scene node of the object id (only for concrete objects)
 			@throws BasicException if the method is used on archetypes or on invalid object id (unused id)
 			*/
 			Ogre::SceneNode* getSceneNode(int objID);
-			
+
 			/** Attaches the default camera to a defined object
-			* @todo Framework to work with cameras, rendertargets, etc. Should a service be made for this, move this inside such 
+			* @todo Framework to work with cameras, rendertargets, etc. Should a service be made for this, move this inside such
 			* @todo This one needs special handling if placed on Player object (leaning scene node(s)) - could be solved by placing a child SN "anywhen" attached */
 			void attachCameraToObject(int objID);
-			
+
 			/** Camera is detached from the specified object */
 			void detachCamera();
 
@@ -194,137 +194,97 @@ namespace Opde {
 			* @todo Default to the same model as dark (see if T1/T2/SS2 use the same model for concretes not having this property specified)
 			*/
 			void onPropModelNameMsg(const PropertyChangeMsg& msg);
-            
-			/// Property Light change callback
-			void onPropLightMsg(const PropertyChangeMsg& msg);
-            
-			/// Property Spotlight change callback
-			void onPropSpotlightMsg(const PropertyChangeMsg& msg);
-            
+
 			/// Position property change callback
 			void onPropPositionMsg(const PropertyChangeMsg& msg);
-			
+
 			/// Scale property change callback
 			void onPropScaleMsg(const PropertyChangeMsg& msg);
-			
+
 			/// Object creation/destruction callback
 			void onObjectMsg(const ObjectServiceMsg& msg);
-			
+
 			/// Prepares mesh named "name" for usage on entity (if it was not prepared already)
 			void prepareMesh(const Ogre::String& name);
 
 			/// Initializes the object's model
 			void createObjectModel(int id);
-			
+
 			/** Removes geometry from the given object (meaning it will not have a visible representation).
 			* This method is used to do a cleanup on object's destroy event.
 			*/
 			void removeObjectModel(int id);
-			
+
 			/** Call this to set a new model for the object. Preserves all the object's rendering settings
 			* @note setting empty model name means the model won't be rendered. This is used for FX_Particle for example
 			*/
 			void setObjectModel(int id, const std::string& name);
-			
+
 			/// Prepares an entity to be used by renderer (manual bones, etc.)
 			void prepareEntity(Ogre::Entity* e);
 
 			/// Clears all the rendering data
 			void clear();
-			
+
 			/// prepares some hardcoded media (included in the executable)
 			void prepareHardcodedMedia();
-			
+
 			/// Cretes a ramp mesh, that is used as a default mesh when not specified otherwise
 			void createRampMesh();
-			
+
 			/// prepares the object service structures used by renderer service
 			void createProperties();
-			
-   			/// A package of a light and it's scene node
-			struct LightInfo {
-				Ogre::Light* light;
-				Ogre::SceneNode* node;
-			};
-			
-			/// Creates a new light with next to no initialization
-			LightInfo& createLight(int objID);
-			
-			/// Updates a light based on the data of property LIGHT
-			void updateLight(LightInfo& li, int objectID);
-			
-			/// removes a light
-			void removeLight(int id);
-			
-			/// Updates a light to be a spotlight, updates it's params
-			void updateSpotLight(LightInfo& li, int objectID);
-			
-			/// removes spotlight quality from a light (leaves the light as a point light)
-			void removeSpotLight(int id);
 
 			ObjectEntityMap mEntityMap;
 
 			// Listener structs for property messages
-			
+
 			// ModelName listener related
 			PropertyGroup::ListenerID mPropModelNameListenerID;
 			PropertyGroup* mPropModelName;
-			
-			// Light Property related
-			PropertyGroup::ListenerID mPropLightListenerID;
-			PropertyGroup* mPropLight;
-			
-			// SpotLight Property related
-			PropertyGroup::ListenerID mPropSpotlightListenerID;
-			PropertyGroup* mPropSpotlight;
-			
+
 			// "Position" Property related
 			PropertyGroup::ListenerID mPropPositionListenerID;
 			PropertyGroup* mPropPosition;
-			
+
 			// "ModelScale" Property related
 			PropertyGroup::ListenerID mPropScaleListenerID;
 			PropertyGroup* mPropScale;
-			
+
 			/// Shared pointer to the property service
 			PropertyServicePtr mPropertyService;
 
 			// --- RENDERING INSTANCES ---
 			/// Ogre root handle
 			Ogre::Root* mRoot;
-			
+
 			/// Scene manager handle
 			Ogre::SceneManager* mSceneMgr;
-			
+
 			/// Render window handle
 			Ogre::RenderWindow* mRenderWindow;
-			
+
 			/// Factory instance for the DarkSceneManager
 			Ogre::DarkSceneManagerFactory* mDarkSMFactory;
-			
+
 			/// Default camera. Used solely for game mode
 			Ogre::Camera* mDefaultCamera;
 
 			/// Manual loader for bin meshes
 			Ogre::ManualBinFileLoader* mManualBinFileLoader;
-			
+
 			/// Pointer for loop service
 			LoopServicePtr mLoopService;
-			
+
 			/// Shared ptr to object service (for scene nodes)
 			ObjectServicePtr mObjectService;
 			ObjectService::ListenerID mObjSystemListenerID;
-			
-			
-			typedef std::map<int, LightInfo> LightInfoMap;
-			
-			LightInfoMap mLightInfoMap;
-			
+
 			// Database listener handle related (For render params chunk)
 			// DatabaseServicePtr mDatabaseService;
 			// BinaryServicePtr mBinaryService;
-			
-			
+
+
 			/** Object id to scene node (only concrete objects)
 			* This map stores the base scenenode for the object. Object have this sceneNode structure:
 			*
@@ -333,13 +293,13 @@ namespace Opde {
 			*	@li Child 2 - the Light object scene node
 			*/
 			typedef std::map<int, Ogre::SceneNode*> ObjectToNode;
-			
+
 			/// Mapping of object id to scenenode
 			ObjectToNode mObjectToNode;
-			
+
 			/// editor mode display
 			bool mEditorMode;
-			
+
 			ConfigServicePtr mConfigService;
 
 			HasRefsProperty* mHasRefsProperty;

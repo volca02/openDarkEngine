@@ -32,12 +32,12 @@
 #include "Ogre.h"
 #include "WRTypes.h"
 #include "WRCell.h"
-#include "LightmapAtlas.h"
 #include "integers.h"
 #include "DatabaseService.h"
 #include "RenderService.h"
 #include "Callback.h"
 #include "DarkSceneManager.h"
+#include "LightService.h"
 
 #include <OgreHardwareBufferManager.h>
 #include <OgreDefaultHardwareBufferManager.h>
@@ -66,17 +66,6 @@ namespace Opde {
 
 			Ogre::SceneManager *getSceneManager();
 
-			/** get the material name from it's index
-			* @note name is formed from FAMILY and NAME like this: FAMILY/NAME or NAME (for no-family textures) */
-			Ogre::String getMaterialName(int mat_index);
-
-			void addWorldMaterial(const Ogre::MaterialPtr& material);
-			
-			// Texture scale getter (for custom texture overrides)
-			std::pair<float, float> getTextureScale(const std::string& txtName);
-			
-			// Texture scale setter (for custom texture overrides)
-			void setTextureScale(const std::string& txtName, std::pair<float, float> scale);
 		protected:
 			virtual bool init();
 			virtual void bootstrapFinished();
@@ -92,21 +81,10 @@ namespace Opde {
 			void unload();
 
 			/** Internal method which loads the data from the found WR/WRRGB chunk, and constructs level geometry for the SceneManager */
-			void loadFromChunk(FilePtr& wrChunk, int lightSize);
+			void loadFromChunk(FilePtr& wrChunk, size_t lightSize);
 
 			/** Sets sky box according to the SKYMODE chunk contents. Does not do NewSky */
 			void setSkyBox(const FileGroupPtr& db);
-
-			/** A failback method, which construct a default-valued material, if a material script for a certain family/texture was not found */
-			void createStandardMaterial(std::string matName, std::string textureName, std::string resourceGroup);
-
-			/** Called by loadMaterials. Load the FLOW_TEX and initializes \@templateXXXX according to IN and OUT texture numbers and names. Needs material definitions
-			* named water/AAAA_in and water/AAAA_out where AAAA is the expected flow texture name (usualy bl, gr, l2, l3, l4) */
-			void loadFlowTextures(const FileGroupPtr& db);
-
-			/** Internal method which loads the textures from the dark database definitions. Families, textures and flowgroups
-			* Texture preparation - prepares materials in the form of \@templateXXXX where XXXX is the texture number */
-			void loadMaterials(const FileGroupPtr& db);
 
 			/** Internal method. Creates a BspNode instance tree, and supplies it to the sceneManager */
 			void createBSP(unsigned int BspRows, wr_BSP_node_t *tree);
@@ -114,20 +92,11 @@ namespace Opde {
 			/** Internal method. Constructs Ogre plane out of worldrep plane */
 			Ogre::Plane constructPlane(wr_plane_t plane);
 
-			/** Internal method. Creates skyhack material */
-			void createSkyHackMaterial(const Ogre::String& resourceGroup);
-			
-			/** Internal method. Creates Jorge material (template0) from internal jorge.png */
-			void createJorgeMaterial(const Ogre::String& resourceGroup);
-
 			// TODO: Move this away... RenderService->getRoot?
 			Ogre::Root *mRoot;
 
 			// TODO: Move this away... RenderService->getSceneManager
 			Ogre::DarkSceneManager *mSceneMgr;
-
-			/** Lightmap atlas list */
-			LightAtlasList *mAtlas;
 
 			/** Loaded structure of the cells */
 			WRCell** mCells;
@@ -138,8 +107,6 @@ namespace Opde {
 			/** Cell count from header */
 			uint32_t mNumCells;
 
-			std::set< Ogre::String > mTextureExtensions;
-
 			/// -- The vertex and index buffers
 			Ogre::VertexData* mVertexData;
 
@@ -148,15 +115,6 @@ namespace Opde {
 
 			/// Face groups
 			Ogre::StaticFaceGroup* mFaceGroups;
-
-			/// Material name - the family part
-			DarkDBTXLIST_fam* mFamilies;
-
-			/// Material name - the texture part
-			DarkDBTXLIST_texture* mTextures;
-
-			/// Material TXLIST header
-			DarkDBChunkTXLIST mTxlistHeader;
 
 			/// Database callback
 			DatabaseService::ListenerPtr mDbCallback;
@@ -167,17 +125,9 @@ namespace Opde {
 			/// Render service
 			RenderServicePtr mRenderService;
 
+			/// Light service
+			LightServicePtr mLightService;
 
-			/// Set of loaded materials
-			typedef std::vector< Ogre::MaterialPtr > MaterialList;
-			
-			typedef std::map<std::string, std::pair <float, float> > TxtScaleMap;
-
-			/// Gets filled with all the materials loaded (for unloading)
-			MaterialList mLoadedMaterials;
-			
-			TxtScaleMap mTxtScaleMap;
-			
 			/// holder of the level geometry
 			Ogre::DarkGeometry* mWorldGeometry;
 	};

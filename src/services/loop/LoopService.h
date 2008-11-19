@@ -267,7 +267,7 @@ namespace Opde {
 	};
 	
 
-	/// Shared pointer to game service
+	/// Shared pointer to Loop service
 	typedef shared_ptr<LoopService> LoopServicePtr;
 
 

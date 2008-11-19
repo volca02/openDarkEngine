@@ -33,6 +33,7 @@
 #include "DarkBspNode.h"
 #include "DarkSceneManager.h"
 #include "DarkGeometry.h"
+#include "MaterialService.h"
 
 #include <OgreMaterial.h>
 #include <OgreStaticFaceGroup.h>
@@ -40,8 +41,6 @@
 
 namespace Opde {
 	class WorldRepService;
-
-	const unsigned short int SKY_TEXTURE = 249;
 
 	/** Helping BSP vertex struct, used to prepare the vertex data. The VertexDeclaration has to be set up accordingly */
 	typedef struct BspVertex {
@@ -82,54 +81,23 @@ namespace Opde {
 			/** Planes forming the cell */
 			Ogre::Plane *planes;
 
-			/** animated lights map (e.g. bit to object number mapping) - count is to be found in the header */
-			int16_t		*anim_map; // index by bit num, and ya get the object number the animated lightmap belongs to
-
-			wr_light_info_t *lm_infos;
-
-			// Lightmaps:
-			// The count of lightmaps per face index
-			uint8_t* lmcounts;
-			uint8_t* **lmaps; // poly number, lmap number --> pointer to data (may be 2 bytes per pixel)
-
-			// objects that are in this leaf when loaded (we may skip this if we add it some other way in system) (Maybe it's only a light list affecting our cell)
-			uint32_t		obj_count;
-			uint16_t		*obj_indices; // the object index number
-
-			/* Array referencing the lightmaps inserted into the atlas */
-			LightMap** 	lightMaps;
-
-			/** Size of the lightmap element */
-			int mLightSize;
-
-			/** Indicates the fact that the lightmaps have already been atlased */
-			bool atlased;
-
 			/** Indicates the fact that the cell data have already been loaded */
-			bool loaded;
+			bool mLoaded;
 
 			/** Indicates the fact that the cell portals have been already attached */
-			bool portalsDone;
+			bool mPortalsDone;
 
 			Ogre::BspNode::PlanePortalMap mPortalMap;
 
 			int countBits(uint32_t src);
 
-			/** Returns a prepared material pointer for combination texture/atlasnum
-			* @note fills the dimensions parameter with the texture dimensions */
-			const Ogre::MaterialPtr getMaterial(unsigned int texture, unsigned int atlasnum, std::pair< Ogre::uint, Ogre::uint > &dimensions, unsigned int flags);
-
-			/** Returns a prepared material name for combination texture/atlasnum
-			* @note fills the dimensions parameter with the texture dimensions */
-			const Ogre::String getMaterialName(unsigned int texture, unsigned int atlasnum, std::pair< Ogre::uint, Ogre::uint > &dimensions, unsigned int flags);
-
 			/** Inserts a new vertex into the manual object. Calculates all the UV values needed
 			* @deprecated For moving towards the geometry by buffers */
-			void insertTexturedVertex(Ogre::ManualObject *manual, int faceNum, wr_coord_t pos, Ogre::Vector2 displacement, 
-				std::pair< Ogre::uint, Ogre::uint > dimensions, Ogre::Vector3 origin);
+			void insertTexturedVertex(Ogre::ManualObject *manual, int faceNum, wr_coord_t pos, const Ogre::Vector2& displacement,
+					const std::pair< Ogre::uint, Ogre::uint >& dimensions, Ogre::Vector3 origin);
 
 			/** Constructs a BSPVertex out of our data */
-			void constructBspVertex(int faceNum, wr_coord_t pos, Ogre::Vector2 displacement, std::pair< Ogre::uint, Ogre::uint > dimensions, BspVertex *vtx);
+			void constructBspVertex(int faceNum, wr_coord_t pos, const Ogre::Vector2& displacement, const std::pair< Ogre::uint, Ogre::uint >& dimensions, BspVertex *vtx);
 
 			/** Calculates the Lightmap center in texture space, using Bounding coordinates as the base. */
 			Ogre::Vector2 calcLightmapDisplacement(int polyNum);
@@ -140,14 +108,23 @@ namespace Opde {
 
 			/** Owner service of this cell */
 			WorldRepService* mOwner;
-			
+
 			/** Geometry holder to fill */
 			Ogre::DarkGeometry* mLevelGeometry;
+
+			/** Material Service - used for texture UV, atlas/material combinations */
+			MaterialServicePtr mMaterialService;
+
+			/** Light Service - used to get the poly's tag, lmap uv transforms, etc */
+			LightServicePtr mLightService;
+
+			/// Info about lmaps of the cell. Used for UV remaps, atlas mapping etc.
+			LightsForCellPtr mLights;
 
 		public:
 			/** Default constructor. */
 			WRCell(WorldRepService* owner, Ogre::DarkGeometry* targetGeom);
-			
+
 			/** destructor */
 			~WRCell();
 
@@ -168,10 +145,6 @@ namespace Opde {
 			*/
 			void constructPortalMeshes(Ogre::SceneManager *sceneMgr);
 
-
-			/// Creates a scene node with all non-portal geometry attached as a mesh
-			Ogre::SceneNode* createSceneNode(Ogre::SceneManager *sceneMgr);
-
 			/// creates the geometry for the cell in the DarkGeometry given in constructor
 			void createCellGeometry();
 
@@ -190,24 +163,6 @@ namespace Opde {
 			* @note I do one FaceGroup == One polygon here
 			*/
 			int getFaceCount();
-
-
-			/** Update the Vertex/Index buffers with polygonal data this cell contains. Also insert face information into a set of StaticFaceGroup
-			* descriptors and update the accompanying BspNode to contain start/count of those
-			* @param vertexPtr A pointer to a place which will accept the vertex data
-			* @param indexPtr A pointer to a place which will accept the index data
-			* @param facePtr A pointer to a place which will accept our face groups
-			* @param startVertex an absolute index of the first vertex this cell will produce (For index absolutization)
-			* @param startFace an absolute index of the first face this cell will produce
-			* @param startIndex an absolute index of the first tri-index this cell will produce
-			* @param node A BspNode class instance that will get happy if it receives the StaticFaceGroup index and count
-			* @return count of face groups produced
-			* @note Please note that the vertex buffers usualy need to be locked prior to writing to them
-			* @note the written index,vertex and face counts must not be greater than the getXXXXCount calls returned
-			* @note The Light maps have to be atlased before
-			*/
-			/*int buildStaticGeometry(BspVertex* vertexPtr, unsigned int* indexPtr, Ogre::StaticFaceGroup* facePtr,
-						int startVertex, int startIndex, int startFace);*/
 
 			/** Attaches all the found portals to the source and destination DarkSceneNodes
 			* @param cellList The cell list which the method uses to set source and destination BspNodes

@@ -23,6 +23,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -34,7 +35,7 @@
 #include "logging.h"
 #include "compat.h"
 
-#ifdef _MSC_VER 
+#ifdef _MSC_VER
 #pragma warning( disable : 4996 )
 #endif
 

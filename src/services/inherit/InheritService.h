@@ -97,29 +97,29 @@ namespace Opde {
 			* @note This should be only done on object creation. The method checks if the object has archetype already set and excepts if so
 			*/
 			void setArchetype(int objID, int archetypeID);
-			
+
 			/** Returns the archetype ID for the given object, or 0 if the object has no archetype */
 			int getArchetype(int objID) const;
 
 			/** Adds a new mp link that causes the object to inherit from a metaproperty object.
-			* Will use the first free priority possible. 
-			* @param objID the object id to add MP to 
+			* Will use the first free priority possible.
+			* @param objID the object id to add MP to
 			* @param mpID the ID of the metaproperty to add */
 			void addMetaProperty(int objID, int mpID);
-			
+
 			/** Removes a metaproperty from an object.
 			* @param objID the object id to remove the MP from
 			* @param mpID the ID of the metaproperty to remove */
 			void removeMetaProperty(int objID, int mpID);
-			
+
 			/** Tester for object's inclusion of certain MP.
 			* @param objID the object id to remove the MP from
 			* @param mpID the ID of the metaproperty to remove
 			* @return true if the object inherits from the given mpID with priority > 0 (==0 is Archetype inheritance!), false otherwise
 			*/
 			bool hasMetaProperty(int objID, int mpID) const;
-			
-			
+
+
 			/** A tester for object inheritance. Returns true if the given object inherits, in any way, from the given source.
 			* @param objID the object ID to look for
 			* @param srcID the source object ID to test for inheritance on the objID
@@ -161,7 +161,7 @@ namespace Opde {
 
 			/// Listener for the metaprop
 			void onMetaPropMsg(const LinkChangeMsg& msg);
-			
+
 			/// Creates a new metaproperty link with the specified priority
 			void _createMPLink(int objID, int srcID, int priority);
 

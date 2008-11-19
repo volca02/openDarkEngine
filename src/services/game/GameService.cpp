@@ -22,7 +22,7 @@
 
 #include "GameService.h"
 #include "OpdeException.h"
-#include "ServiceCommon.h"			
+#include "ServiceCommon.h"
 
 using namespace std;
 
@@ -32,7 +32,7 @@ namespace Opde {
 	/*-------------------- GameService -------------------*/
 	/*----------------------------------------------------*/
 	GameService::GameService(ServiceManager *manager, const std::string& name) : Service(manager, name) {
-	    mDbService = static_pointer_cast<DatabaseService>(ServiceManager::getSingleton().getService("DatabaseService"));
+	    mDbService = GET_SERVICE(DatabaseService);
 	}
 
     //------------------------------------------------------

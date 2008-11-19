@@ -17,6 +17,8 @@ SET(OPDE_SERVICE_INCLUDES
     ${OPDE_SOURCE_DIR}/src/services/loop
     ${OPDE_SOURCE_DIR}/src/services/gui
     ${OPDE_SOURCE_DIR}/src/services/script
+    ${OPDE_SOURCE_DIR}/src/services/material
+    ${OPDE_SOURCE_DIR}/src/services/light
 )
 
 # All the resulting libraries in a nice package as well
@@ -30,6 +32,8 @@ SET(OPDE_SERVICE_LIBRARIES
     OpdeInheritService
     OpdeObjectService
     OpdeRenderService
+    OpdeLightService
+    OpdeMaterialService
     OpdeDatabaseService
     OpdeInputService
     OpdeLoopService
