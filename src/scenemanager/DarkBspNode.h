@@ -208,6 +208,9 @@ namespace Ogre {
 		LightIterator lightsBegin() { return mAffectingLights.begin(); };
 		LightIterator lightsEnd() { return mAffectingLights.end(); };
 
+		LightIterator dynamicLightsBegin() { return mDynamicLights.begin(); };
+		LightIterator dynamicLightsEnd() { return mDynamicLights.end(); };
+
 
 	protected:
 		/// ID of the BSP row (order)
@@ -246,8 +249,11 @@ namespace Ogre {
 		IntersectingObjectSet mMovables;
 
 
-		/// lights affecting this cell
+		/// all lights affecting this cell
 		AffectingLights mAffectingLights;
+
+		/// dynamic lights affecting this cell
+		AffectingLights mDynamicLights;
 
 		// ----------- Portal based rendering stuff - leaf only
 

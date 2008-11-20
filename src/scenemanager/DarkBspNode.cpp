@@ -29,6 +29,7 @@ $Id$
 */
 
 #include "DarkBspNode.h"
+#include "DarkLight.h"
 
 #include <OgreException.h>
 #include <OgreLogManager.h>
@@ -36,22 +37,22 @@ $Id$
 namespace Ogre {
 
     //-----------------------------------------------------------------------
-    BspNode::BspNode(SceneManager* owner, int id, int leafID, bool isLeaf) : 
-			mID(id), 
-			mLeafID(leafID), 
+    BspNode::BspNode(SceneManager* owner, int id, int leafID, bool isLeaf) :
+			mID(id),
+			mLeafID(leafID),
 			mFrameNum(0x0FFFF),
 			mViewRect(PortalRect::EMPTY) {
-        
+
         mOwner = owner;
         mIsLeaf = isLeaf;
 		mSceneNode = NULL;
-	
+
 		// update the fragment as wellBspNode
 		mCellFragment.fragmentType = SceneQuery::WFT_CUSTOM_GEOMETRY;
 		mCellFragment.geometry = this;
-		
+
 		mInitialized = false;
-		
+
 		mFront = NULL;
 		mBack = NULL;
     }
@@ -61,11 +62,11 @@ namespace Ogre {
 		mOwner = NULL;
 		mIsLeaf = false;
 		mSceneNode = NULL;
-				
+
 		// update the fragment as wellBspNode
 		mCellFragment.fragmentType = SceneQuery::WFT_CUSTOM_GEOMETRY;
 		mCellFragment.geometry = this;
-				
+
 		mFront = NULL;
 		mBack = NULL;
     }
@@ -108,7 +109,7 @@ namespace Ogre {
 
         return mSplitPlane.getSide(point);
     }
-    
+
     //-----------------------------------------------------------------------
     BspNode* BspNode::getNextNode(const Vector3& point) const
     {
@@ -119,26 +120,26 @@ namespace Ogre {
                 "BspNode::getNextNode");
 
         Plane::Side sd = getSide(point);
-        
+
         if (sd == Plane::NEGATIVE_SIDE) {
             return getBack();
         } else {
             return getFront();
         }
     }
-    
+
     //-----------------------------------------------------------------------
     void BspNode::_addMovable(const MovableObject* mov)
     {
         mMovables.insert(mov);
     }
-    
+
     //-----------------------------------------------------------------------
     void BspNode::_removeMovable(const MovableObject* mov)
     {
         mMovables.erase(mov);
     }
-    
+
     //-----------------------------------------------------------------------
     Real BspNode::getDistance(const Vector3& pos) const
     {
@@ -150,7 +151,7 @@ namespace Ogre {
         return mSplitPlane.getDistance(pos);
 
     }
-    
+
     //-----------------------------------------------------------------------
     std::ostream& operator<< (std::ostream& o, BspNode& n)
     {
@@ -166,115 +167,115 @@ namespace Ogre {
         return o;
 
     }
-    
+
     //-----------------------------------------------------------------------
     SceneNode* BspNode::getSceneNode() {
 	    if (!mIsLeaf)
 			throw Exception(Exception::ERR_INVALIDPARAMS,
 				"This method is not valid on a non-leaf node.",
 				"BspNode::getSceneNode");
-	    
+
 	    return mSceneNode;
     }
-    
+
     //-----------------------------------------------------------------------
     void BspNode::setSceneNode(SceneNode *node) {
 	    if (!mIsLeaf)
 			throw Exception(Exception::ERR_INVALIDPARAMS,
 				"This method is not valid on a non-leaf node.",
 				"BspNode::setSceneNode");
-	    
+
 	    mSceneNode = node;
     }
-	
+
     //-----------------------------------------------------------------------
     void BspNode::setIsLeaf(bool isLeaf) {
 	    mIsLeaf = isLeaf;
     }
-    
+
     //-----------------------------------------------------------------------
     void BspNode::setSplitPlane(const Plane& splitPlane) {
     	if (mIsLeaf)
 			throw Exception(Exception::ERR_INVALIDPARAMS,
 				"This method only valid on a non-leaf node.",
 				"BspNode::setSplitPlane");
-				
+
 	    mSplitPlane = splitPlane;
     }
-    
+
     //-----------------------------------------------------------------------
     void BspNode::setFrontChild(BspNode* frontChild) {
     	if (mIsLeaf)
 			throw Exception(Exception::ERR_INVALIDPARAMS,
 				"This method is only valid on a non-leaf node.",
 				"BspNode::setFrontChild");
-			
+
 	    mFront = frontChild;
     }
-    
+
     //-----------------------------------------------------------------------
     void BspNode::setBackChild(BspNode* backChild) {
     	if (mIsLeaf)
 			throw Exception(Exception::ERR_INVALIDPARAMS,
 				"This method is only valid on a non-leaf node.",
 				"BspNode::setBackChild");
-			
+
 	    mBack = backChild;
     }
-    
+
     //-----------------------------------------------------------------------
     void BspNode::setOwner(SceneManager *owner) {
 	    mOwner = owner;
     }
-    
+
 	//-------------------------------------------------------------------------
 	void BspNode::attachOutgoingPortal(Portal *portal) {
 		if (!mIsLeaf)
 			throw Exception(Exception::ERR_INVALIDPARAMS,
 				"This method is not valid on a non-leaf node.",
 				"BspNode::attachOutgoingPortal");
-		
+
 		mDstPortals.insert(portal);
 	}
-			
+
 	//-------------------------------------------------------------------------
 	void BspNode::attachIncommingPortal(Portal *portal) {
 		if (!mIsLeaf)
 			throw Exception(Exception::ERR_INVALIDPARAMS,
 				"This method is not valid on a non-leaf node.",
 				"BspNode::attachIncommingPortal");
-				
+
 		mSrcPortals.insert(portal);
 	}
-	
+
 	//-------------------------------------------------------------------------
 	void BspNode::detachPortal(Portal* portal) {
 	    mSrcPortals.erase(portal);
 	    mDstPortals.erase(portal);
 	}
-    
+
     	//-------------------------------------------------------------------------
 	void BspNode::setCellNum(unsigned int cellNum) {
 		if (!mIsLeaf)
 			throw Exception(Exception::ERR_INVALIDPARAMS,
 				"This method is not valid on a non-leaf node.",
 				"BspNode::getSceneNode");
-		
+
 		mCellNum = cellNum;
 	}
-			
+
 	//-------------------------------------------------------------------------
 	unsigned int BspNode::getCellNum() const {
 		return mCellNum;
 	}
-	
+
 
 	//-------------------------------------------------------------------------
 	void BspNode::setPlaneList(BspNode::CellPlaneList& planes, BspNode::PlanePortalMap& portalmap) {
 		mPlaneList = planes;
 		mPortalMap = portalmap;
 	}
-	
+
 	//-------------------------------------------------------------------------
 	void BspNode::refreshScreenRect(const Camera* cam, const Matrix4& toScreen, const PortalFrustum& frust) {
 		mInitialized = true;
@@ -289,7 +290,7 @@ namespace Ogre {
 			out_portal->refreshScreenRect(cam, toScreen, frust);
 		}
 	}
-	
+
 	//-------------------------------------------------------------------------
 	void BspNode::refreshScreenRect(const Camera* cam, const Matrix4& toScreen, const Plane& cutp) {
 		mInitialized = true;
@@ -304,14 +305,18 @@ namespace Ogre {
 			out_portal->refreshScreenRect(cam, toScreen, cutp);
 		}
 	}
-	
+
 	//-------------------------------------------------------------------------
 	void BspNode::addAffectingLight(DarkLight* light) {
 		mAffectingLights.insert(light);
+
+		if (light->isDynamic())
+			mDynamicLights.insert(light);
 	}
-		
+
 	//-------------------------------------------------------------------------
 	void BspNode::removeAffectingLight(DarkLight* light) {
 		mAffectingLights.erase(light);
+		mDynamicLights.erase(light);
 	}
 }
