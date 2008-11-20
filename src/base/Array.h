@@ -216,7 +216,7 @@ namespace Opde {
 						mArray = static_cast<T*>(malloc(mSize * sizeof(T)));
 
 						// copy construct the elements
-						for (int i = 0; i < mSize; ++i)
+						for (size_t i = 0; i < mSize; ++i)
 							::new (&mArray[i]) T(b.mArray[i]);
 					}
 				}
@@ -229,7 +229,7 @@ namespace Opde {
 				/// clear method - clears the array - reinitializes it to zero element sized
 				void clear() {
 					// call placed destructor on the objects
-					for (int i = 0; i < mSize; ++i)
+					for (size_t i = 0; i < mSize; ++i)
 						(&mArray[i])->~T();
 
 					// now get rid of the arrays
