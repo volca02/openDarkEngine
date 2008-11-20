@@ -7,11 +7,11 @@
  * the terms of the GNU Lesser General Public License as published by the Free Software
  * Foundation; either version 2 of the License, or (at your option) any later
  * version.
- * 
+ *
  * This program is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License along with
  * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
  * Place - Suite 330, Boston, MA 02111-1307, USA, or go to
@@ -21,7 +21,7 @@
  *	$Id$
  *
  *****************************************************************************/
- 
+
 
 #include "DarkSceneManager.h"
 #include "DarkBspTree.h"
@@ -35,12 +35,12 @@
 #include <OgreTimer.h>
 
 namespace Ogre {
-	
+
 	// ----------------------------------------------------------------------
 	DarkSceneManager::DarkSceneManager(const String& instanceName) : SceneManager(instanceName), mFrameNum(1), mActiveGeometry(NULL) {
 		mBspTree = new BspTree(this);
 		mDarkLightFactory = new DarkLightFactory();
-		
+
 		Root::getSingleton().addMovableObjectFactory(mDarkLightFactory);
 	}
 
@@ -49,12 +49,12 @@ namespace Ogre {
 	DarkSceneManager::~DarkSceneManager() {
 		// Just to be sure
 		clearScene();
-		
+
 		// Delete the bsp tree
 		delete mBspTree;
-		
+
 		Root::getSingleton().removeMovableObjectFactory(mDarkLightFactory);
-		
+
 		// and the factory for darklights
 		delete mDarkLightFactory;
 	}
@@ -67,27 +67,27 @@ namespace Ogre {
 
 		// Destroy all the portals
 		PortalList::iterator it = mPortals.begin();
-		
+
 		for (; it != mPortals.end(); ++it) {
 			(*it)->detach();
 			delete *it;
 		}
-		
+
 		mPortals.clear();
-		
+
 		// clear the BSP tree
 		mBspTree->clear();
-		
+
 		// clear all the geometries
 		destroyAllGeometries();
 
 		// clear the visible cell list for all cameras
 		CameraList::iterator cit = mCameras.begin();
-		
+
 		for (; cit != mCameras.end(); ++cit)
 			static_cast<DarkCamera*>(cit->second)->mVisibleCells.clear();
 
-		SceneManager::clearScene();		
+		SceneManager::clearScene();
 	}
 
 
@@ -98,7 +98,7 @@ namespace Ogre {
 		if (it != mPortals.end()) {
 			(*it)->detach();
 			mPortals.erase(it);
-			
+
 			delete *it;
 		}
 	}
@@ -107,19 +107,19 @@ namespace Ogre {
 	// ----------------------------------------------------------------------
 	Portal * DarkSceneManager::createPortal(BspNode* src, BspNode* dst, const Plane& plane) {
 		Portal* p = new Portal(src, dst, plane);
-		
+
 		mPortals.insert(p);
-		
+
 		p->attach();
 		return p;
 	}
-	
+
 	// ----------------------------------------------------------------------
 	Portal * DarkSceneManager::createPortal(int srcLeafID, int dstLeafID, const Plane& plane) {
 		Portal* p = new Portal(getBspLeaf(srcLeafID), getBspLeaf(dstLeafID), plane);
-		
+
 		mPortals.insert(p);
-		
+
 		p->attach();
 		return p;
 	}
@@ -128,11 +128,15 @@ namespace Ogre {
 	void DarkSceneManager::_updateSceneGraph(Camera* cam) {
 		// The cam should be updated with the current cell list
 		// TODO: Specialize here. Only update the part of the world visible by the camera
+		unsigned long startt = Root::getSingleton().getTimer()->getMilliseconds();
+
 		updateDirtyLights();
-		
+
 		SceneManager::_updateSceneGraph(cam);
-		
+
 		mFrameNum++;
+
+		mSceneGraphTime = Root::getSingleton().getTimer()->getMilliseconds() - startt;
 	}
 
 
@@ -147,46 +151,46 @@ namespace Ogre {
 		}
 
         Camera * c = new DarkCamera( name, this );
-        
+
         mCameras.insert( CameraList::value_type( name, c ) );
-        
+
         // Visible objects bounds info for the camera
         mCamVisibleObjectsMap[c] = VisibleObjectsBoundsInfo();
 
 
 		return c;
 	}
-	
+
 	// ----------------------------------------------------------------------
 	BspNode* DarkSceneManager::createBspNode(int id, int leafID) {
 		BspNode* node = mBspTree->createNode(id, leafID);
-		
+
 		return node;
 	}
-	
-		
+
+
 	// ----------------------------------------------------------------------
 	BspNode* DarkSceneManager::getBspNode(int id) {
 		return mBspTree->getNode(id);
 	}
-	
+
 	// ----------------------------------------------------------------------
 	BspNode* DarkSceneManager::getBspLeaf(int leafID) {
 		return mBspTree->getLeafNode(leafID);
-	}	
-	
+	}
+
 	// ----------------------------------------------------------------------
 	void DarkSceneManager::setRootBspNode(int id) {
 		mBspTree->setRootNode(id);
 	}
-	
+
 	// ----------------------------------------------------------------------
 	SceneNode* DarkSceneManager::createSceneNode(void) {
 		DarkSceneNode * sn = new DarkSceneNode( this );
         mSceneNodes[ sn->getName() ] = sn;
 		return sn;
 	}
-	
+
 	// ----------------------------------------------------------------------
 	SceneNode* DarkSceneManager::createSceneNode(const String& name) {
 		if (mSceneNodes.find(name) != mSceneNodes.end())
@@ -196,12 +200,12 @@ namespace Ogre {
 						"A SceneNode with the name " + name + " already exists",
 						"DarkSceneManager::createSceneNode" );
 		}
-		
+
 		DarkSceneNode * sn = new DarkSceneNode( this, name );
 		mSceneNodes[ sn->getName() ] = sn;
 		return sn;
 	}
-	
+
 	// ----------------------------------------------------------------------
 	void DarkSceneManager::_notifyObjectMoved(const MovableObject* mov, const Vector3& pos) {
 			if (mBspTree != NULL) {
@@ -218,6 +222,8 @@ namespace Ogre {
 
 	//-----------------------------------------------------------------------
 	void DarkSceneManager::_findVisibleObjects(Camera* cam, VisibleObjectsBoundsInfo* visibleBounds, bool onlyShadowCasters) {
+		unsigned long startt = Root::getSingleton().getTimer()->getMilliseconds();
+
 		// Clear the render queue first
 		RenderQueue* renderQueue = getRenderQueue();
 
@@ -227,10 +233,10 @@ namespace Ogre {
 		// Ensure the camera is updated (otherwise we'd have problems if it updated while in the upcoming loop)
 		static_cast<DarkCamera*>(cam)->updateFrustum();
 		static_cast<DarkCamera*>(cam)->updateView();
-		
+
 		// update the camera's internal visibility list
 		static_cast<DarkCamera*>(cam)->updateVisibleCellList();
-		
+
 
 		MovablesForRendering movablesForRendering; // using a tag (frameNum) would probably be faster. hmm.
 
@@ -238,11 +244,11 @@ namespace Ogre {
 		DarkCamera* dcam = static_cast<DarkCamera*>(cam);
 		BspNodeList::iterator it = dcam->mVisibleCells.begin();
 		BspNodeList::iterator end = dcam->mVisibleCells.end();
-		
+
 		// Insert all movables that are visible according to the parameters
 		while (it != end) {
 			BspNode *node = *(it++);
-			
+
 			// insert the movables of this cell to the movables for rendering
 			const BspNode::IntersectingObjectSet& objects = node->getObjects();
 			BspNode::IntersectingObjectSet::const_iterator oi, oiend;
@@ -253,138 +259,143 @@ namespace Ogre {
 				{
 					// It hasn't been rendered yet
 					MovableObject *mov = const_cast<MovableObject*>(*oi); // hacky
-						
+
 					if (mov == cam)
 						continue;
-						
-					
+
+
 					if (mov->isVisible() &&
 						(!onlyShadowCasters || mov->getCastShadows())) { //  && cam->isVisible(mov->getWorldBoundingBox())
 							mov->_notifyCurrentCamera(cam);
 							mov->_updateRenderQueue( getRenderQueue() );
-							
+
 							visibleBounds->merge(mov->getBoundingBox(), mov->getWorldBoundingSphere(), cam);
-							
+
 							movablesForRendering.insert(*oi);
 					}
-				}   
+				}
 			}
 		}
-		
+
+		mFindVisibleObjectsTime = Root::getSingleton().getTimer()->getMilliseconds() - startt;
+
+
 		if (mActiveGeometry) {
-			unsigned long startt = Root::getSingleton().getTimer()->getMilliseconds();
-			
+			startt = Root::getSingleton().getTimer()->getMilliseconds();
+
 			mActiveGeometry->updateFromCamera(static_cast<DarkCamera*>(cam));
 			mActiveGeometry->queueForRendering(mRenderQueue);
-			
+
 			mStaticBuildTime = Root::getSingleton().getTimer()->getMilliseconds() - startt;
 		}
 	}
-	
+
 	//-----------------------------------------------------------------------
 	const String& DarkSceneManager::getTypeName(void) const {
 		return DarkSceneManagerFactory::FACTORY_TYPE_NAME;
 	}
-	
+
 	//-----------------------------------------------------------------------
 	Light* DarkSceneManager::createLight(const String& name) {
 		return static_cast<Light*>(createMovableObject(name, DarkLightFactory::FACTORY_TYPE_NAME));
-		
+
 	}
-	
+
 	//-----------------------------------------------------------------------
 	Light* DarkSceneManager::getLight(const String& name) {
 		return static_cast<Light*>(getMovableObject(name, DarkLightFactory::FACTORY_TYPE_NAME));
 	}
-		
+
 
 	//-----------------------------------------------------------------------
 	bool DarkSceneManager::hasLight(const String& name) {
 		return hasMovableObject(name, DarkLightFactory::FACTORY_TYPE_NAME);
 	}
-		
+
 
 	//-----------------------------------------------------------------------
 	void DarkSceneManager::destroyLight(const String& name) {
 		destroyMovableObject(name, DarkLightFactory::FACTORY_TYPE_NAME);
 	}
-		
-	
+
+
 	//-----------------------------------------------------------------------
 	void DarkSceneManager::destroyAllLights(void) {
 		destroyAllMovableObjectsByType(DarkLightFactory::FACTORY_TYPE_NAME);
 	}
-	
+
 	//-----------------------------------------------------------------------
 	void DarkSceneManager::queueLightForUpdate(Light* l) {
 		static_cast<DarkLight*>(l)->_updateNeeded(); // Adds itself into queue
 	}
-	
+
 	//-----------------------------------------------------------------------
 	void DarkSceneManager::_queueLightForUpdate(Light* l) {
 		mLightsForUpdate.insert(static_cast<DarkLight*>(l));
 	}
-	
+
 	//-----------------------------------------------------------------------
 	void DarkSceneManager::destroyAllGeometries(void) {
 		DarkGeometryMap::iterator it = mDarkGeometryMap.begin();
-		
+
 		while (it != mDarkGeometryMap.end()) {
 			DarkGeometryMap::iterator it2 = it++;
-			
+
 			DarkGeometry* g = it2->second;
 			mDarkGeometryMap.erase(it2);
-			
+
 			delete g;
 		}
 	}
 
-	
+
 	//-----------------------------------------------------------------------
 	void DarkSceneManager::updateDirtyLights() {
 		LightSet::iterator it = mLightsForUpdate.begin();
 		LightSet::iterator end = mLightsForUpdate.end();
-		
+
 		while (it != end) {
 			DarkLight* l = *(it++);
-			
+
 			l->_updateAffectedCells();
 		}
-		
+
 		mLightsForUpdate.clear();
 	}
-	
+
 	//-----------------------------------------------------------------------
 	void DarkSceneManager::findLightsAffectingFrustum(const Camera* camera) {
+		unsigned long startt = Root::getSingleton().getTimer()->getMilliseconds();
+
 		// Collect lights from visible cells
 		std::set<Light*> lightSet;
-		
+
 		const DarkCamera* dcam = static_cast<const DarkCamera*>(camera);
-		
+
 		BspNodeList::const_iterator it = dcam->mVisibleCells.begin();
 		BspNodeList::const_iterator end = dcam->mVisibleCells.end();
-		
+
 		while (it != end) {
 			BspNode* n = *(it++);
-			
+
 			lightSet.insert(n->mAffectingLights.begin(), n->mAffectingLights.end());
 		}
-		
+
 		// Transfer into mTestLightInfos
 		std::set<Light*>::iterator lit = lightSet.begin();
 		std::set<Light*>::iterator lend = lightSet.end();
-		
+
 		mTestLightInfos.clear();
 		mTestLightInfos.reserve(lightSet.size());
-		
+
 		while (lit != lend) {
 			LightInfo lightInfo;
-			
+
 			Light* light = *(lit++);
-			
+
 			lightInfo.light = light;
 			lightInfo.type = light->getType();
-			
+
 			if (lightInfo.type == Light::LT_DIRECTIONAL) {
 				lightInfo.position = Vector3::ZERO;
 				lightInfo.range = 0;
@@ -392,9 +403,9 @@ namespace Ogre {
 			} else {
 				lightInfo.range = light->getAttenuationRange();
 				lightInfo.position = light->getDerivedPosition();
-                
+
 				Sphere sphere(lightInfo.position, lightInfo.range);
-				
+
 				if (camera->isVisible(sphere)) {
 						mTestLightInfos.push_back(lightInfo);
 				}
@@ -406,29 +417,29 @@ namespace Ogre {
 		// Update lights affecting frustum if changed
 		if (mCachedLightInfos != mTestLightInfos) {
 			mLightsAffectingFrustum.resize(mTestLightInfos.size());
-			
+
 			LightInfoList::const_iterator i;
 			LightList::iterator j = mLightsAffectingFrustum.begin();
-			
+
 			for (i = mTestLightInfos.begin(); i != mTestLightInfos.end(); ++i, ++j) {
 				*j = i->light;
-				
+
 				// add cam distance for sorting if texture shadows
 				if (isShadowTechniqueTextureBased()) {
 					(*j)->tempSquareDist = (camera->getDerivedPosition() - (*j)->getDerivedPosition()).squaredLength();
 				}
 			}
-                
+
 			// Sort the lights if using texture shadows, since the first 'n' will be
 			// used to generate shadow textures and we should pick the most appropriate
 			if (isShadowTechniqueTextureBased()) {
 				// Allow a Listener to override light sorting
 				// Reverse iterate so last takes precedence
 				bool overridden = false;
-				
+
 				for (ShadowListenerList::reverse_iterator ri = mShadowListeners.rbegin();
 						ri != mShadowListeners.rend(); ++ri) {
-							
+
 						overridden = (*ri)->sortLightsAffectingFrustum(mLightsAffectingFrustum);
 						if (overridden)
 								break;
@@ -446,50 +457,54 @@ namespace Ogre {
 
 			// notify light dirty, so all movable objects will re-populate
 			// their light list next time
-			
+
 			// TODO: This takes too much time per frame!
 			_notifyLightsDirty();
 		}
+
+		mLightListTime = Root::getSingleton().getTimer()->getMilliseconds() - startt;
 	}
-	
+
 	//-----------------------------------------------------------------------
 	void DarkSceneManager::_populateLightList(const Vector3 &position, Real radius, LightList &destList) {
-		/* It's a pity we don't get a movable object here, 
+		/* It's a pity we don't get a movable object here,
 		since that would mean we'd save one BSP tree traversal per MovableObject light list population.
-		
+
 		The root of the problem is that many classes base on MovableObject, and that one queries with pos and radius already,
 		so we would have to create our own versions of Entity, BillBoardChain, etc. just to override one method (queryLights)
-		
-		As a solution, this scenemanager uses MovableObject::Listener on BspTree, and as the BspTree caches light lists for cells, 
+
+		As a solution, this scenemanager uses MovableObject::Listener on BspTree, and as the BspTree caches light lists for cells,
 		it returns the light list for object immediately
 		*/
-		
+
 		if (!mBspTree)
 			return;
-		
+
+		return;
+
 		BspNodeList leafList;
-		
+
 		mBspTree->findLeafsForSphere(leafList, position, radius);
-		
+
 		//  List of all leafs the sphere is in
 		BspNodeList::iterator it = leafList.begin();
-		
+
 		// This set ensures the resulting destination list will get unique set of lights
 		std::set<DarkLight*> resLights;
-		
+
 		destList.clear();
-		
+
 		while (it != leafList.end()) {
 			BspNode* node = *(it++);
-			
+
 			BspNode::AffectingLights::const_iterator lit = node->mAffectingLights.begin();
 			BspNode::AffectingLights::const_iterator lend = node->mAffectingLights.end();
-			
+
 			// Fill the light list by querying if the light's radius is touching the movable
 			while (lit != lend) {
 				DarkLight* lt = *(lit++);
-				
-				// If it has not been considered yet, reconsider this light 
+
+				// If it has not been considered yet, reconsider this light
 				// (no need to consider light twice)
 				if (resLights.find(lt) == resLights.end()) {
 					resLights.insert(lt);
@@ -501,12 +516,12 @@ namespace Ogre {
 					} else	{
 						// Calc squared distance
 						lt->tempSquareDist = (lt->getDerivedPosition() - position).squaredLength();
-						
+
 						// only add in-range lights
 						Real range = lt->getAttenuationRange();
-						
+
 						Real maxDist = range + radius;
-						
+
 						if (lt->tempSquareDist <= Math::Sqr(maxDist)) {
 							destList.push_back(lt);
 						}
@@ -514,10 +529,10 @@ namespace Ogre {
 				}
 			}
 		}
-		
-		
+
+
 		// the end is the same as in Ogre::SceneManager:
-		
+
 		// Sort (stable to guarantee ordering on directional lights)
         if (isShadowTechniqueTextureBased()) {
                 // Note that if we're using texture shadows, we actually want to use
@@ -533,75 +548,84 @@ namespace Ogre {
                 std::stable_sort(destList.begin(), destList.end(), lightLess());
         }
 	}
-	
+
 	//-----------------------------------------------------------------------
 	Entity *DarkSceneManager::createEntity(const String &entityName, const String &meshName) {
 		Entity* e = SceneManager::createEntity(entityName, meshName);
-		
+
 		e->setListener(mBspTree);
-		
+
 		return e;
 	}
-	
+
 	//-----------------------------------------------------------------------
 	DarkGeometry *DarkSceneManager::createGeometry(const String& geomName) {
 		DarkGeometryMap::iterator it = mDarkGeometryMap.find(geomName);
-		
+
 		if (it != mDarkGeometryMap.end()) {
 			return it->second;
 		}
-		
+
 		DarkGeometry* geom = new DarkGeometry(geomName, RENDER_QUEUE_WORLD_GEOMETRY_1);
-		
+
 		mDarkGeometryMap.insert(make_pair(geomName, geom));
-		
+
 		return geom;
 	}
-			
+
 	//-----------------------------------------------------------------------
 	void DarkSceneManager::destroyGeometry(const String& name) {
 		DarkGeometryMap::iterator it = mDarkGeometryMap.find(name);
-		
+
 		if (it != mDarkGeometryMap.end()) {
 			DarkGeometry* g = it->second;
 			mDarkGeometryMap.erase(it);
 			delete g;
 		}
 	}
-	
-		
+
+
 	//-----------------------------------------------------------------------
 	DarkGeometry *DarkSceneManager::getGeometry(const String& name) {
 		DarkGeometryMap::iterator it = mDarkGeometryMap.find(name);
-		
+
 		if (it != mDarkGeometryMap.end()) {
 			return it->second;
 		}
-		
+
 		// TODO: The damned NULL/Exception throw dilema all over again
 		return NULL;
 	}
-		
+
 	//-----------------------------------------------------------------------
 	void DarkSceneManager::setActiveGeometry(const String& name) {
 		mActiveGeometry = getGeometry(name);
 	}
-	
+
 	//-----------------------------------------------------------------------
 	void DarkSceneManager::setActiveGeometry(DarkGeometry* geom) {
 		mActiveGeometry = geom;
 	}
-	
+
 	//-----------------------------------------------------------------------
 	bool DarkSceneManager::getOption(const String &strKey, void *pDestValue) {
 		if (strKey == "StaticBuildTime") {
 			*(static_cast<unsigned long*>(pDestValue)) = mStaticBuildTime;
 			return true;
+		} else if (strKey == "FindVisibleObjectsTime") {
+			*(static_cast<unsigned long*>(pDestValue)) = mFindVisibleObjectsTime;
+			return true;
+		} else if (strKey == "LightListTime") {
+			*(static_cast<unsigned long*>(pDestValue)) = mLightListTime;
+			return true;
+		} else if (strKey == "SceneGraphTime") {
+			*(static_cast<unsigned long*>(pDestValue)) = mSceneGraphTime;
+			return true;
 		}
-		
+
 		return SceneManager::getOption(strKey, pDestValue);
 	}
-	
+
 	//-----------------------------------------------------------------------
 	//-----------------------------------------------------------------------
 	const String DarkSceneManagerFactory::FACTORY_TYPE_NAME = "DarkSceneManager";
