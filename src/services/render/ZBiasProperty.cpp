@@ -77,7 +77,7 @@ namespace Opde {
 	void ZBiasProperty::setZBias(int oid, uint32_t bias) {
 		EntityInfo* ei = getEntityInfo(oid);
         // TODO: The depth bias is in bits, not a float as supposed - conversion equation needed
-		ei->setZBias(static_cast<float>(1 << bias));
+		ei->setZBias(static_cast<float>(1 << bias) / 0x0100);
 	};
 };
 
