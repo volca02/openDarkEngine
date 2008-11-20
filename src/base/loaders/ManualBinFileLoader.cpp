@@ -47,7 +47,7 @@ using namespace Opde; // For the Opde::File
 
 namespace Ogre {
 
-	/** Class that loads a .CAL file and produces a ogre's skeleton instance 
+	/** Class that loads a .CAL file and produces a ogre's skeleton instance
 	* There are certain differences between .CAL and ogre's skeleton concept.
 	* For example the whole skeleton in the CAL file is consisted of Torsos and bones.
 	* A torso concept does not exist in ogre, but can be simulated by a set of bones from the torso's root to the attachment points.
@@ -1401,6 +1401,8 @@ namespace Ogre {
 
 			pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
 			pass->setAlphaRejectSettings(CMPF_GREATER, 128); // Alpha rejection.
+			// default depth bias
+			pass->setDepthBias(0.001, 0.001);
 
 			// Some basic lightning settings
             tus = pass->createTextureUnitState(txtname);
