@@ -326,6 +326,7 @@ namespace Opde {
 				OverlayElement* guisr = OverlayManager::getSingleton().getOverlayElement("Opde/StaticRenderTime");
 				OverlayElement* guivo = OverlayManager::getSingleton().getOverlayElement("Opde/VisibleObjectsTime");
 				OverlayElement* guill = OverlayManager::getSingleton().getOverlayElement("Opde/LightListTime");
+				OverlayElement* guilc = OverlayManager::getSingleton().getOverlayElement("Opde/LightCount");
 				OverlayElement* guisg = OverlayManager::getSingleton().getOverlayElement("Opde/SceneGraphTime");
 
 				// Temporary: Debug Overlay
@@ -336,11 +337,12 @@ namespace Opde {
 				static String ssr = "Static Build Time: ";
 				static String vot = "Visible obj. Time: ";
 				static String llt = "Light list. Time: ";
+				static String lcs = "Light count : ";
 				static String sgt = "Scene graph Time: ";
 
 				uint bculls = 0, eports = 0, rendc = 0, travtm = 0;
 
-				unsigned long statbt, fvot, lltime, sgtime;
+				unsigned long statbt, fvot, lltime, sgtime, lcnt;
 
 				mSceneMgr->getOption("BackfaceCulls", &bculls);
 
@@ -350,6 +352,7 @@ namespace Opde {
 				mSceneMgr->getOption("StaticBuildTime", &statbt);
 				mSceneMgr->getOption("FindVisibleObjectsTime", &fvot);
 				mSceneMgr->getOption("LightListTime", &lltime);
+				mSceneMgr->getOption("LightCount", &lcnt);
 				mSceneMgr->getOption("SceneGraphTime", &sgtime);
 
 				travtm = static_cast<DarkCamera*>(mCamera)->getTraversalTime();
@@ -362,6 +365,7 @@ namespace Opde {
 				guisr->setCaption(ssr + StringConverter::toString(statbt) + " ms");
 				guivo->setCaption(vot + StringConverter::toString(fvot) + " ms");
 				guill->setCaption(llt + StringConverter::toString(lltime) + " ms");
+				guilc->setCaption(lcs + StringConverter::toString(lcnt));
 				guisg->setCaption(sgt + StringConverter::toString(sgtime) + " ms");
 			}
 			catch(...)
