@@ -509,10 +509,10 @@ namespace Opde {
 					        + ".*");
 		}
 
+		String txtfile;
+
 		// Let's try the extensions from the extensions vector
 		StringVector::iterator it = texnames->begin();
-
-		StringVectorPtr mat_textures;
 
 		for (; it != texnames->end(); it++) { // Try loading every given
 			try {
@@ -520,9 +520,7 @@ namespace Opde {
 
 				TextureManager::getSingleton().loadImage(textureName, resourceGroup, tex, TEX_TYPE_2D, 5, 1.0f);
 
-				// if if was found, then we'll proceed by enumerating all the resources with the same name,
-				// but with _NUMBER
-				mat_textures = getAnimTextureNames((*it), resourceGroup);
+				txtfile = (*it);
 
 				loaded = true;
 
@@ -546,25 +544,7 @@ namespace Opde {
 		shadPass->setDiffuse(1, 1, 1, 1);
 		shadPass->setSpecular(1, 1, 1, 1);
 
-		// Texture unit state for the main texture...
-		TextureUnitState* tus = shadPass->createTextureUnitState(textureName);
-
-		// if we have anim. textures:
-		if (!mat_textures.isNull() && mat_textures->size() > 1) {
-			// convert to String* array
-			size_t size = mat_textures->size();
-
-			String* sarray = new String[size];
-
-			size_t s = 0;
-			for (StringVector::iterator it = mat_textures->begin(); s < size; ++it, ++s) {
-				sarray[s] = *it;
-			}
-
-			tus->setAnimatedTextureName(sarray, size, 0.2f * size); // TODO: Third param - default duration
-
-			delete[] sarray;
-		}
+		TextureUnitState* tus = createAnimatedTextureState(shadPass, txtfile, resourceGroup, 5);
 
 		// Set replace on all first layer textures for now
 		// tus->setColourOperation(LBO_REPLACE);
@@ -691,7 +671,7 @@ namespace Opde {
 
 
 	//------------------------------------------------------------------------------------
-	const MaterialPtr& MaterialService::getWRMaterialInstance(unsigned int texture, int tag, unsigned int flags) {
+	MaterialPtr MaterialService::getWRMaterialInstance(unsigned int texture, int tag, unsigned int flags) {
 		MaterialPtr origMat = getWorldMaterialTemplate(texture);
 
 		bool isSky = (texture == SKY_TEXTURE_ID);
@@ -734,6 +714,38 @@ namespace Opde {
 		return dimensions;
 	}
 
+	//------------------------------------------------------------------------------------
+	Ogre::TextureUnitState* MaterialService::createAnimatedTextureState(Pass* pass, const String& baseTextureName, const String& resourceGroup, float fps) {
+		//
+		// Texture unit state for the main texture...
+		TextureUnitState* tus = pass->createTextureUnitState(baseTextureName);
+
+		StringVectorPtr mat_textures;
+
+		// if if was found, then we'll proceed by enumerating all the resources with the same name,
+		// but with _NUMBER
+		mat_textures = getAnimTextureNames(baseTextureName, resourceGroup);
+
+		// if we have anim. textures:
+		if (!mat_textures.isNull() && mat_textures->size() > 1) {
+			// convert to String* array
+			size_t size = mat_textures->size();
+
+			String* sarray = new String[size];
+
+			size_t s = 0;
+			for (StringVector::iterator it = mat_textures->begin(); s < size; ++it, ++s) {
+				sarray[s] = *it;
+			}
+
+			tus->setAnimatedTextureName(sarray, size, size/fps);
+
+			delete[] sarray;
+		}
+
+		return tus;
+
+	}
 
 	//-------------------------- Factory implementation
 	std::string MaterialServiceFactory::mName = "MaterialService";

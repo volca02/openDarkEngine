@@ -91,7 +91,7 @@ namespace Opde {
 
 			/** Returns a prepared material pointer for combination texture/tag
 			*/
-			const Ogre::MaterialPtr& getWRMaterialInstance(unsigned int texture, int tag, unsigned int flags);
+			Ogre::MaterialPtr getWRMaterialInstance(unsigned int texture, int tag, unsigned int flags);
 
 			typedef std::pair<Ogre::uint, Ogre::uint> TextureDimensions2D;
 
@@ -99,6 +99,17 @@ namespace Opde {
 			 * @param texture The wr texture id
 			 */
 			TextureDimensions2D getTextureDimensions(unsigned int texture);
+
+			/** Prepares a single TextureUnitState filled with all the animation frames of the loaded image set.
+			 * Searches for all images that have the same image name, or have a _NUMBER added to the filename.
+			 * If none additional textures found, the result is a steady texture specified.
+			 *
+			 * @param skeleton The skeletal material to fill with the animation/static texture
+			 * @param baseTextureName The base name of the texture, incl. the extension
+			 * @param fps The desired FPS of the animation
+			 * @return TextureUnitState pointer which was filled with the animation/static texture
+			 * */
+			Ogre::TextureUnitState* createAnimatedTextureState(Ogre::Pass* pass, const Ogre::String& baseTextureName, const Ogre::String& resourceGroup,  float fps);
 
 			/// Creates a model material
 
