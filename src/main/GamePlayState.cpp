@@ -121,7 +121,8 @@ namespace Opde {
 		posPG->get(StartingPointObjID, "position", spoint);
 
 		// Medsci1.mis position with some damn bad performance under GL
-		// Vector3 StartingPoint(-8.41809, -163.39, 1.3465);
+		//Vector3 StartingPoint(-8.41809, -163.39, 1.3465);
+		Vector3 StartingPoint(0,0,0);
 
 		if (spoint.type() == DVariant::DV_VECTOR)
 			StartingPoint = spoint.toVector();
