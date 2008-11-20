@@ -338,6 +338,10 @@ namespace Ogre {
 
 		// iterate through the leafs, build the light list
 		MovableToNodeMap::iterator i = mMovableToNodeMap.find(movable);
+		/*// As I found out the complete light lists are a performance nightmare, I'm disabling for now -
+		  // it now works using the bsp leaf only. - This might be what dark did anyway, have to check for this
+		  // TODO: The list of lights per object should be kept at some maximal length
+
 		if (i != mMovableToNodeMap.end())
 		{
 			std::list<BspNode*>::iterator nodeit, nodeitend;
@@ -351,6 +355,16 @@ namespace Ogre {
 			nodeitend = i->second.end();
 			for (nodeit = i->second.begin(); nodeit != nodeitend; ++nodeit) {
 				BspNode* node = *nodeit;
+		 */
+				destList.clear();
+
+				// to keep the list of lights contain only one copy of each item
+				std::set<DarkLight*> resLights;
+
+				BspNode* node = findLeaf(position);
+
+				if (!node) // no leaf, no beef :)
+					return;
 
 				BspNode::AffectingLights::const_iterator lit = node->mAffectingLights.begin();
 				BspNode::AffectingLights::const_iterator lend = node->mAffectingLights.end();
@@ -383,8 +397,10 @@ namespace Ogre {
 						}
 					}
 				}
+				/*
 			}
 		}
+		*/
 	}
 }
 
