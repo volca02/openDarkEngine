@@ -120,7 +120,8 @@ namespace Opde {
 		DVariant spoint;
 		posPG->get(StartingPointObjID, "position", spoint);
 
-		Vector3 StartingPoint(0,0,0);
+		// Medsci1.mis position with some damn bad performance under GL
+		// Vector3 StartingPoint(-8.41809, -163.39, 1.3465);
 
 		if (spoint.type() == DVariant::DV_VECTOR)
 			StartingPoint = spoint.toVector();
@@ -154,6 +155,8 @@ namespace Opde {
 		// Don't yaw along variable axis, causes leaning
 		mCamera->setFixedYawAxis(true, Vector3::UNIT_Z);
 
+		// Medsci1.mis Direction with some damn bad performance (in combination with the pos above)
+		// mCamera->setDirection(-0.398078, 0.825408, -0.400297);
 
 		// Thiefy FOV
 		mCamera->setFOVy(Degree(70));
@@ -184,6 +187,10 @@ namespace Opde {
 		LOG_INFO("GamePlayState: Exiting");
 
 		// mConsole->setActive(false);
+
+		// Debugging pos/dir writes. For performance profiling
+		// std::cerr << mCamera->getPosition() << std::endl;
+		// std::cerr << mCamera->getDirection() << std::endl;
 
 		mPortalOverlay->hide();
 		mDebugOverlay->hide();
@@ -316,6 +323,9 @@ namespace Opde {
 				OverlayElement* guirc = OverlayManager::getSingleton().getOverlayElement("Opde/RendCells");
 				OverlayElement* guitt = OverlayManager::getSingleton().getOverlayElement("Opde/TravTime");
 				OverlayElement* guisr = OverlayManager::getSingleton().getOverlayElement("Opde/StaticRenderTime");
+				OverlayElement* guivo = OverlayManager::getSingleton().getOverlayElement("Opde/VisibleObjectsTime");
+				OverlayElement* guill = OverlayManager::getSingleton().getOverlayElement("Opde/LightListTime");
+				OverlayElement* guisg = OverlayManager::getSingleton().getOverlayElement("Opde/SceneGraphTime");
 
 				// Temporary: Debug Overlay
 				static String sbc = "Backface culls: ";
@@ -323,10 +333,13 @@ namespace Opde {
 				static String src = "Rendered cells: ";
 				static String stt = "Traversal Time: ";
 				static String ssr = "Static Build Time: ";
+				static String vot = "Visible obj. Time: ";
+				static String llt = "Light list. Time: ";
+				static String sgt = "Scene graph Time: ";
 
 				uint bculls = 0, eports = 0, rendc = 0, travtm = 0;
 
-					unsigned long statbt;
+				unsigned long statbt, fvot, lltime, sgtime;
 
 				mSceneMgr->getOption("BackfaceCulls", &bculls);
 
@@ -334,6 +347,9 @@ namespace Opde {
 				mSceneMgr->getOption("EvaluatedPortals", &eports);
 				// mSceneMgr->getOption("TraversalTime", &travtm);
 				mSceneMgr->getOption("StaticBuildTime", &statbt);
+				mSceneMgr->getOption("FindVisibleObjectsTime", &fvot);
+				mSceneMgr->getOption("LightListTime", &lltime);
+				mSceneMgr->getOption("SceneGraphTime", &sgtime);
 
 				travtm = static_cast<DarkCamera*>(mCamera)->getTraversalTime();
 				rendc = static_cast<DarkCamera*>(mCamera)->getVisibleCellCount();
@@ -343,6 +359,9 @@ namespace Opde {
 				guirc->setCaption(src + StringConverter::toString(rendc));
 				guitt->setCaption(stt + StringConverter::toString(travtm) + " ms");
 				guisr->setCaption(ssr + StringConverter::toString(statbt) + " ms");
+				guivo->setCaption(vot + StringConverter::toString(fvot) + " ms");
+				guill->setCaption(llt + StringConverter::toString(lltime) + " ms");
+				guisg->setCaption(sgt + StringConverter::toString(sgtime) + " ms");
 			}
 			catch(...)
 			{
