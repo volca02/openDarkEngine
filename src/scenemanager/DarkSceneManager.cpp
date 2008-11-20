@@ -462,6 +462,7 @@ namespace Ogre {
 			_notifyLightsDirty();
 		}
 
+		mLightCount = mCachedLightInfos.size();
 		mLightListTime = Root::getSingleton().getTimer()->getMilliseconds() - startt;
 	}
 
@@ -621,7 +622,11 @@ namespace Ogre {
 		} else if (strKey == "SceneGraphTime") {
 			*(static_cast<unsigned long*>(pDestValue)) = mSceneGraphTime;
 			return true;
+		} else if (strKey == "LightCount") {
+			*(static_cast<unsigned long*>(pDestValue)) = mLightCount;
+			return true;
 		}
+
 
 		return SceneManager::getOption(strKey, pDestValue);
 	}

@@ -201,6 +201,9 @@ namespace Ogre {
 			/// Time it took to update scene graph
 			unsigned long mSceneGraphTime;
 
+			/// Count of the lights found for the current frustum
+			unsigned long mLightCount;
+
 			/** movables found to be visible */
 			typedef std::set<const MovableObject*> MovablesForRendering;
 

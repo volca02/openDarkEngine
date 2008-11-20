@@ -123,11 +123,25 @@ Opde/OpdeDebugOverlay
 			colour_bottom 0.3 0.5 0.3
 		}
 
-		element TextArea(Opde/SceneGraphTime)
+		element TextArea(Opde/LightCount)
 		{
 			metrics_mode pixels
 			left 5
 			top 130
+			width 90
+			height 30
+			font_name DebugFont
+			char_height 16
+			caption Light count:
+			colour_top 0.5 0.7 0.5
+			colour_bottom 0.3 0.5 0.3
+		}
+
+		element TextArea(Opde/SceneGraphTime)
+		{
+			metrics_mode pixels
+			left 5
+			top 146
 			width 90
 			height 30
 			font_name DebugFont
