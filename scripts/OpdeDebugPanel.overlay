@@ -10,7 +10,7 @@ Opde/OpdeDebugOverlay
 		left 5 
 		top 5
 		width 180
-		height 70
+		height 160
 
 		    
 		element TextArea(Opde/Title)
@@ -94,7 +94,48 @@ Opde/OpdeDebugOverlay
 			colour_top 0.5 0.7 0.5
 			colour_bottom 0.3 0.5 0.3
 		}
+
+		element TextArea(Opde/VisibleObjectsTime)
+		{
+			metrics_mode pixels
+			left 5
+			top 100
+			width 90
+			height 30
+			font_name DebugFont
+			char_height 16
+			caption Visible obj. Time:
+			colour_top 0.5 0.7 0.5
+			colour_bottom 0.3 0.5 0.3
+		}
 		
+		element TextArea(Opde/LightListTime)
+		{
+			metrics_mode pixels
+			left 5
+			top 115
+			width 90
+			height 30
+			font_name DebugFont
+			char_height 16
+			caption Light list Time:
+			colour_top 0.5 0.7 0.5
+			colour_bottom 0.3 0.5 0.3
+		}
+
+		element TextArea(Opde/SceneGraphTime)
+		{
+			metrics_mode pixels
+			left 5
+			top 130
+			width 90
+			height 30
+			font_name DebugFont
+			char_height 16
+			caption Scene graph Time:
+			colour_top 0.5 0.7 0.5
+			colour_bottom 0.3 0.5 0.3
+		}
 
 	}
 }
