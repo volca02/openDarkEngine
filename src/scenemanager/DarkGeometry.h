@@ -91,6 +91,9 @@ namespace Ogre {
 
 			/// Total count of the cells the static geometry contains
 			size_t mCellCount;
+
+			/// central list of dynamic lights for the rendering
+			LightList mLightList;
 	};
 
 
@@ -240,13 +243,19 @@ namespace Ogre {
 			uint32* mIndexList;
 	};
 
-	/// A geometry container for a single material
+	/** A geometry container for a single material. The geometry of the level is split into these per material it is rendered with */
 	class OPDELIB_EXPORT DarkSubGeometry : public Renderable {
 			friend class DarkGeometry;
 			friend class DarkFragment;
 
 		public:
-			DarkSubGeometry(const MaterialPtr& material, size_t cellCount, uint8 renderQueueID);
+			/** Dark SubGeometry constructor
+			 * @param material The material reference that is used to render this sub-geometry
+			 * @param cellCount The specified cell count to be used (cell == BSP leaf)
+			 * @param renderQueueID The ID of the render queue this sub-geometry should be rendered in
+			 * @param centralLightList a reference to the central light list of the DarkGeometry (so that it is only build once per update for all subgeoms)
+			 */
+			DarkSubGeometry(const MaterialPtr& material, size_t cellCount, uint8 renderQueueID, LightList& centralLightList);
 			~DarkSubGeometry();
 
 			virtual const MaterialPtr& getMaterial(void) const;
@@ -305,9 +314,6 @@ namespace Ogre {
 			@todo per-vertex lightning for first 8(?) dynamic lights)
 			*/
 			virtual const LightList &getLights(void) const;
-
-			/// adds dynamic lights from the specified BSP leaf into the mLightList (for dynamic light rendering)
-			void addDynamicLights(BspNode* node);
 
 		private:
 			/// indicates that 16 bit indices are in use

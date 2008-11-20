@@ -79,7 +79,7 @@ namespace Ogre {
 			return it->second;
 		} else {
 			if (createIfNotFound) {
-				DarkSubGeometry *newg = new DarkSubGeometry(mat, mCellCount, mDefaultRenderQueueID);
+				DarkSubGeometry *newg = new DarkSubGeometry(mat, mCellCount, mDefaultRenderQueueID, mLightList);
 				mSubGeometryMap.insert(std::make_pair(mat->getName(), newg));
 
 				return newg;
@@ -107,6 +107,32 @@ namespace Ogre {
 	void DarkGeometry::updateFromCamera(const DarkCamera *cam) {
 		assert(mBuilt);
 
+		// 1. populate the list of dynamic lights
+		std::set<Light*> slights;
+
+		const BspNodeList& nodeList = cam->_getVisibleNodes();
+
+		BspNodeList::const_iterator nit = nodeList.begin();
+		BspNodeList::const_iterator endit = nodeList.end();
+
+		mLightList.clear();
+
+		for ( ; nit != endit; ++nit) {
+			BspNode* node = *nit;
+			/// add dynamic lights from the leaf to our light list
+			BspNode::LightIterator lit = node->dynamicLightsBegin();
+			BspNode::LightIterator lend = node->dynamicLightsEnd();
+
+			while (lit != lend) {
+				Light* l = *lit++;
+
+				// if it is new to the set, insert into list
+				if (slights.insert(l).second)
+					mLightList.push_back(l);
+			}
+		}
+
+		// 2. build the geometry
 		// Call all the sub geoms to update ibufs based on cam's visibility
 		DarkSubGeometryMap::iterator it = mSubGeometryMap.begin();
 		DarkSubGeometryMap::iterator end = mSubGeometryMap.end();
@@ -166,12 +192,13 @@ namespace Ogre {
 	// --------------------------------------------------------------------------
 	// ------------------------- DarkSubGeometry --------------------------------
 	// --------------------------------------------------------------------------
-	DarkSubGeometry::DarkSubGeometry(const MaterialPtr& material, size_t cellCount, uint8 renderQueueID) :
+	DarkSubGeometry::DarkSubGeometry(const MaterialPtr& material, size_t cellCount, uint8 renderQueueID, LightList& centralLightList) :
 				m16BitIndices(false),
 				mMaterial(material),
 				mRenderQueueID(renderQueueID),
 				mBuilt(false),
-				mCellCount(cellCount) {
+				mCellCount(cellCount),
+				mLightList(centralLightList) {
 
 		assert(mCellCount > 0);
 
@@ -245,9 +272,6 @@ namespace Ogre {
 			uint16 *pidx = static_cast<uint16*>(ibuf->lock(HardwareBuffer::HBL_DISCARD));
 
 			for ( ; nit != endit; ++nit) {
-				/// add dynamic lights from the leaf to our light list
-				addDynamicLights(*nit);
-
 				uint16 size = 0;
 				DarkFragment* frag = mFragmentList[(*nit)->getLeafID()];
 
@@ -262,9 +286,6 @@ namespace Ogre {
 			uint32 *pidx = static_cast<unsigned int*>(ibuf->lock(HardwareBuffer::HBL_DISCARD));
 
 			for ( ; nit != endit; ++nit) {
-				/// add dynamic lights from the leaf to our light list
-				addDynamicLights(*nit);
-
 				uint32 size = 0;
 				DarkFragment* frag = mFragmentList[(*nit)->getLeafID()];
 
@@ -530,21 +551,6 @@ namespace Ogre {
 	const MaterialPtr & DarkSubGeometry::getMaterial(void) const {
 		return mMaterial;
 	}
-
-	// -----------------------------------------------------------------
-	void DarkSubGeometry::addDynamicLights(BspNode* node) {
-		// iterate over the cell's lights, find those which are dynamic
-		BspNode::LightIterator it = node->lightsBegin();
-		BspNode::LightIterator end = node->lightsEnd();
-
-		while (it != end) {
-			DarkLight* l = *it++;
-
-			if (l->isDynamic())
-				mLightList.push_back(l);
-		}
-	}
-
 
 	// -----------------------------------------------------------------------
 	// ------------------------- DarkFragment --------------------------------
