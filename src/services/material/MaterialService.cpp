@@ -66,7 +66,7 @@ namespace Opde {
 		WorldMaterialMap::const_iterator it = mTemplateMaterials.begin();
 
 		while (it != mTemplateMaterials.end()) {
-			LOG_DEBUG("WorldRepService::clearData Removing material %s", (*it)->getName().c_str());
+			LOG_DEBUG("MaterialService::clearData Removing material %s", it->second->getName().c_str());
 			MaterialManager::getSingleton().remove(it->second->getName());
 
 			++it;
@@ -93,7 +93,7 @@ namespace Opde {
 	void MaterialService::loadMaterials(const FileGroupPtr& db) {
 		if (!db->hasFile("TXLIST"))
 			throw Exception(Exception::ERR_ITEM_NOT_FOUND, "Mission file does not contain Texture list chunk (TXLIST)",
-			        "WorldRepService::loadMaterials");
+			        "MaterialService::loadMaterials");
 
 		// Load the TXLIST chunk from the resource mission file.
 		Opde::FilePtr txtList = db->getFile("TXLIST");
@@ -398,7 +398,7 @@ namespace Opde {
 			flow_tex = db->getFile("FLOW_TEX");
 		} catch (FileException) {
 			LOG_ERROR("Flow chunk does not exist. Water materials may not be correctly displayed",
-					"WorldRepService::loadFlowTextures");
+					"MaterialService::loadFlowTextures");
 			return;
 		}
 
@@ -413,7 +413,7 @@ namespace Opde {
 		} catch (Ogre::Exception& e) {
 			// Connect the original exception to the printout:
 			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Could not load flow textures : ")
-					+ e.getFullDescription(), "WorldRepService::loadFlowTextures");
+					+ e.getFullDescription(), "MaterialService::loadFlowTextures");
 		}
 
 
