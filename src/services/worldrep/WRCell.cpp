@@ -280,8 +280,8 @@ namespace Opde {
 
 		// Shifts. These are *128 (e.g. fixed point, 6 bits represent 0-1 range) to get 0-1 shift (in pixels)
 		// Weird thing about these is that they are nonsymetrical, and signed (max value 63, min about -15 or such).
-		sh_u = (float) li.u / 128.0;
-		sh_v = (float) li.v / 128.0;
+		sh_u = li.u / 128;
+		sh_v = li.v / 128;
 
 		// rel. pos
 		// tmp -= poly_center;
