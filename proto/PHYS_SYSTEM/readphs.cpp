@@ -1,6 +1,6 @@
 //	$Id$
 
-#ifdef _MSC_VER 
+#ifdef _MSC_VER
 #pragma warning( disable : 4996 )
 #endif
 
@@ -45,31 +45,28 @@ typedef struct { // SIZE: 8
 	unsigned short z;
 } t_facing; // This will be SCord after all, as telliamed writes....
 
-// Once I'll understand what the sub-objects are, I'll work this out :
-/*
-Remarks:
-The facing1 and facing4 seem to be the same value (maybe those differ in the time of collision)
-*/
+// Per sub-object physics info
 typedef struct { // SIZE: 18 longs (72 bytes)
-	t_coord pos1;     //  
+	t_coord pos;     // Current location
 
-	sint32  unk1;     //   TODO: Often -1
-	t_facing facing1; //   Sorta Angle of this sub-object element.
-	t_facing facing2; //   Sorta Angle of this sub-object element.
-	t_facing facing3; //   Angle again - different.
-	
-	uint32 a2; // Address 
-	
-	t_facing facing4; //   Angle again - normaly = facing1
-	
-	
-	
+	uint16  flags1;
+	uint16  flags2;
+
+	t_facing facing; //   Sorta Angle of this sub-object element.
+
+	t_coord end_location; // Don't know yet - velocity maybe?
+
+	uint16 flags3;
+	uint16 flags4;
+
+	t_facing end_facing; // End rotation (facing)
+
 	// float   a2, b2;   //   Unknown (Angle related?)
 
-	t_coord pos2;     //   Seems to be copy of pos1, but matbe not 100% of the time
+	t_coord target_pos;     // Target position (if moving)
 
 	uint32 a3, b3, c3, d3;     // Unknown. - Pointers
-	
+
 } t_subObject;
 
 
@@ -89,37 +86,37 @@ typedef struct {
 #define PHYS_OBJ_MTERRAIN   0x0100000
 #define PHYS_OBJ_DOOR	    0x0200000
 #define PHYS_AI_COLLIDE     0x0400000 // Originally pPhysAICollideProp?
-#define PHYS_OBJ_PROJECTILE 0x0800000  
+#define PHYS_OBJ_PROJECTILE 0x0800000
 
 const char hchr[]="0123456789ABCDEF";
 ////////////////// HELPERS //////////////////
 void printPhysObjFlags(uint32 flags) {
 	printf("\tFlags         : ");
-	
+
 	if (flags & PHYS_OBJ_INACTIVE)
 		printf("INACTIVE ");
 
 	if (flags & PHYS_OBJ_SLEEPING)
 		printf("SLEEPING ");
-	
+
 	if (flags & PHYS_OBJ_ROPE)
 		printf("ROPE ");
-		
+
 	if (flags & PHYS_OBJ_DEPLOYED_ROPE)
 		printf("DEPLOYED_ROPE ");
-	
+
 	if (flags & PHYS_OBJ_MTERRAIN)
 		printf("MOVING-TERRAIN ");
-		
+
 	if (flags & PHYS_OBJ_DOOR)
 		printf("DOOR ");
 
 	if (flags & PHYS_AI_COLLIDE)
 		printf("AI_COLLIDES_WITH ");
-		
+
 	if (flags & PHYS_OBJ_PROJECTILE)
 		printf("PROJECTILE ");
-	
+
 	printf("\n");
 }
 
@@ -136,37 +133,39 @@ void printFacing(t_facing &facing) {
 
 void readFacing(FILE *f) {
 	t_facing fc;
-	
+
 	fread(&fc, 1, sizeof(t_facing), f);
-	
+
 	printFacing(fc);
 }
 
 void readSubObject(FILE* f) {
 	t_subObject s;
-	
+
 	fread(&s, 1, sizeof(t_subObject), f);
-	
-	printf("\t\tPOS1     : "); p_coord(s.pos1);
-	
-	printf("\t\tUNK1     : %X\n", s.unk1);
-	printf("\t\tFAC 1    : "); printFacing(s.facing1);
-	printf("\t\tFAC 2    : "); printFacing(s.facing2);
-	printf("\t\tFAC 3    : "); printFacing(s.facing3);
-	
-	printf("\t\tsa       : %X\n", s.a2);
-	
-	printf("\t\tFAC 4    : "); printFacing(s.facing4);
-	
-	printf("\t\tPOS2     : "); p_coord(s.pos2);
-	
+
+	printf("\t\tPOS      : "); p_coord(s.pos);
+
+	printf("\t\tFLAGS 1  : %X\n", s.flags1);
+	printf("\t\tFLAGS 2  : %X\n", s.flags2);
+
+	printf("\t\tFACING   : "); printFacing(s.facing);
+	printf("\t\tEND LOC  : "); p_coord(s.end_location);
+
+	printf("\t\tFLAGS 3  : %X\n", s.flags3);
+	printf("\t\tFLAGS 4  : %X\n", s.flags4);
+
+	printf("\t\tEND FAC  : "); printFacing(s.end_facing);
+
+	printf("\t\tPOS2     : "); p_coord(s.target_pos);
+
 	printf("\t\tPOINTERS      : %X %X %X %X\n", s.a3, s.b3, s.c3, s.d3);
-	
+
 }
 
 void hexdump(unsigned char *ptr,int size, FILE *target=stdout) {
 	int i;
-	
+
 	for (i=0; i<size; i++,ptr++) {
 		if (i % 4 == 0)
 		    fprintf(target," ");
@@ -183,29 +182,29 @@ void hexdump(unsigned char *ptr,int size, FILE *target=stdout) {
 void hexread(FILE *f,unsigned int size,char *prefix,int llen=16) {
 	unsigned int sz = 0;
 	if (llen>256) {
-		fprintf(stderr,"ERROR: hexread: can't handle more than 256 bytes/line ! "); 
+		fprintf(stderr,"ERROR: hexread: can't handle more than 256 bytes/line ! ");
 		return;
 	}
-	
+
 	// file size...
 	long apos = ftell(f);
 	fseek (f, 0, SEEK_END);
 	long lSize = ftell(f);
 	fseek (f, apos, SEEK_SET);
-	
+
 	while ((sz<size) && (!feof(f))) {
 			int chunk = size-sz;
 			if (chunk>llen) chunk = llen;
 
-			long remains = lSize - ftell(f); 
+			long remains = lSize - ftell(f);
 			// fprintf(stderr,"%s - Pos %8lX - Remains %ld/%ld bytes\n", prefix, ftell(f), remains, lSize);
-			
+
 			if (chunk > remains)
 				chunk = remains;
-			
+
 			if (chunk == 0)
 				break;
-			
+
 			uint8 data[256];
 			fread(&data,chunk,1,f);
 			printf("%s",prefix);
@@ -251,7 +250,7 @@ bool p_BVolType(sint32 bv) {
 			err = true;
 			break;
 	}
-	
+
 	printf("\n");
 	return err;
 }
@@ -290,7 +289,7 @@ void readMatrixFloat(FILE *f, int width, int height, char *prefix) {
 void readVector3(FILE *f) {
 	t_coord vect;
 	fread(&vect,1,sizeof(t_coord),f);
-	
+
 	printf(" X: %8.2g Y: %8.2g Z: %8.2g\n", vect.x, vect.y, vect.z);
 }
 
@@ -298,13 +297,13 @@ void readVector3(FILE *f) {
 void readVector3N(FILE *f) {
 	t_coord_norm vect;
 	fread(&vect,1,sizeof(t_coord_norm),f);
-	
+
 	printf(" X: %8.2g Y: %8.2g Z: %8.2g NORM: %8.2g\n", vect.x, vect.y, vect.z, vect.norm);
 }
 
 void readStruct(char *format, FILE *f) {
 	unsigned int x;
-	
+
 	for (x = 0; x < strlen(format); x++) {
 		switch (format[x]) {
 			case 'F':
@@ -361,7 +360,7 @@ void readBoundingDefinition(FILE *f, uint32 btype, uint32 version, uint32 submod
 			break;
 		case 3:
 			printf("\tBOX : ");
-			printf("\tBOUNDING UNKNOWN  : "); readStruct("FFF", f);printf("\n"); // Translation of the obb?	
+			printf("\tBOUNDING UNKNOWN  : "); readStruct("FFF", f);printf("\n"); // Translation of the obb?
 			printf("\tBox dimensions: "); readVector3(f);
 			printf("\tBOUNDING UNKNOWN  : "); readStruct("FF", f);printf("\n"); // Translation of the obb?
 			// THIEF 2 has more data here
@@ -373,60 +372,60 @@ void readBoundingDefinition(FILE *f, uint32 btype, uint32 version, uint32 submod
 			printf("Unknown boundry!\n");
 			break;
 	}
-	
+
 }
 
 void printRotationAxes(uint32 ax) {
 	printf("\tRotational Axes : ");
-	
+
 	if (ax & 4)
 		printf("Z ");
-	
+
 	if (ax & 2)
 		printf("Y ");
-	
+
 	if (ax & 1)
 		printf("X");
-	
+
 	printf("\n");
 }
 
 // Prints out the Rest axes. I didn't test this one but it seems to be reasonable that the bit order is the same as for Rot. Axes (Dunno about the +- things)
 void printRestAxes(uint32 rest) {
 	printf("\tRest Axes  : ");
-	
+
 	if (rest & 32)
 		printf("+Z ");
-	
+
 	if (rest & 16)
 		printf("+Y ");
-	
+
 	if (rest & 8)
 		printf("+X ");
-	
+
 	if (rest & 4)
 		printf("-Z ");
-	
+
 	if (rest & 2)
 		printf("-Y ");
-	
+
 	if (rest & 1)
 		printf("-X");
-	
+
 	printf("\n");
 }
 
 /// Read one object from the Phys syst
 bool readObjectPhys(FILE *f, int pos, int version) {
 	printf("  Object %d : \n", pos);
-	
+
 	// First uint32 is bounding type
 	sint32 bvolume;
 	fread(&bvolume,1,4,f);
 	if (p_BVolType(bvolume))
 		return false;
-	
-	// 
+
+	//
 	uint32 object_id, num_subobjs, phys_flags;
 	fread(&object_id,1,4,f);
 	fread(&num_subobjs,1,4,f);
@@ -434,24 +433,24 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	printf("\tObjectID      : %d\n",object_id);
 	printf("\tSub-Objects   : %d\n",num_subobjs);
 	printf("\tFlags         : %08X\n",phys_flags);
-	
+
 	printPhysObjFlags(phys_flags);
 	// Will have to investigate what the flags mean. It seems there are flags for doors and translational objects, rotational objects, etc
-	
+
 	float gravity;
 	fread(&gravity,1,4,f);
 	printf("\tGravity       : %f\n", gravity);
-	
+
 	if (num_subobjs > 200) {
 		fprintf(stderr, "Sub-object count too big to be true - %d - exiting\n", num_subobjs);
 		return false;
 	}
-	
+
 	uint32* subobj_counts = new uint32[num_subobjs];
 	fread(subobj_counts,4,num_subobjs,f);
-	
+
 	int total_subobjdata = 0;
-	
+
 	printf("\tSubobj Counts : ");
 	for (unsigned int n = 0; n < num_subobjs; n++) {
 		printf("%d", subobj_counts[n]);
@@ -460,21 +459,21 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 			printf(", ");
 	}
 	printf("\n");
-	
+
 	// After the subobject integers, there is a friction float
-	
+
 	float friction;
 	fread(&friction,1,4,f);
 	printf("\tBase Friction : %f\n", friction);
-	
+
 	// This looks like some other physical value, dunno which
 	float unknown;
 	fread(&unknown,1,4,f);
 	printf("\tMedia State?  : %f\n", unknown);
 
 	fpos(f);
-	
-	
+
+
 	// This looks rope related
 	// Spring tension, spring damping that is
 	printf("\t Spring connection of sub-objects (%d) : \n", num_subobjs);
@@ -482,34 +481,34 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 		printf("\t\t %d : ", n);
 		//
 		float x;
-		
+
 		fread(&x, 1, 4, f);
 		printf("[Spring Tension] %8.2g ", x);
-		
+
 		fread(&x, 1, 4, f);
 		printf("[Spring Damping] %8.2g ", x);
-		
-		// 
+
+		//
 		printf("\n");
 	}
-	
+
 	fpos(f);
 	printf("\tObjatt. rel? : "); readStruct("LFLL", f);printf("\n"); // attachment related?
 
-	/* 
+	/*
 	Rotation axises flags: X - 1, Y - 2, Z - 4 ? (Sphere - all = 7, box = 4 - X only?)
 	Rests: 63 for cube.
 	*/
-	uint32 rot_flags, rest_flags; 
+	uint32 rot_flags, rest_flags;
 	fread(&rot_flags,1,4,f);
 	fread(&rest_flags,1,4,f);
-	
+
 	printRotationAxes(rot_flags);
 	printRestAxes(rest_flags);
-	
 
-	printf("\tObject attachment :\n"); 
-	
+
+	printf("\tObject attachment :\n");
+
 	int32_t tgt_obj;
 	uint32 unk;
 	float funk;
@@ -519,20 +518,20 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	printf("\t\tAttachment target : %d\n", tgt_obj);
 	printf("\t\tUnknown           : %d\n", unk);
 	printf("\t\tUnknown float     : %f\n", funk); // Distance? Connection strenght?
-	
-	// THIEF 2 has one more long here
-	if (version >= 32) {
-		printf("\tT2 specif. : "); readStruct("L", f);printf("\n");
+
+	// THIEF 2 has one more long here (mantling state)
+	if (version >= 32) { // 0 == no mantling
+		printf("\tMantling state. : "); readStruct("L", f);printf("\n");
 	}
-	
+
 	printf("\n");
 	fpos(f);
-	
-	
+
+
 	printf("\tUnknown  : "); readStruct("FFFFL", f);printf("\n");
 	fpos(f);
-	
-	
+
+
 	/*
 	The last sub-object is set to the center of the Collision Volume.
 	*/
@@ -541,37 +540,37 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 		// printf("\t SUBOBJ[%4d] : ",n); readStruct("FFFXXXFFXXXFFFXXXX", f);printf("\n");
 		printf("\t SUBOBJ[%4d] :\n", n); readSubObject(f);
 	}
-	
-	
+
+
 	fpos(f);
 	printf("\tCOG Offset : "); readVector3(f);
-	
+
 	// Sub Object direction Vectors (translations from the center)
 	fpos(f);
 	for (unsigned int n = 0; n < num_subobjs; n++) {
 		printf("\tSubObj Translation vec. [%6d] : ", n); readVector3(f);
 	}
 	fpos(f);
-	
+
 	// Count of the velocity descriptions... I have to look for the right place to cut the following structures. Velocity for example is defined twice...
 	uint32 vel_counts;
 	fread(&vel_counts, 1, 4, f);
-	printf("\tVel. counts : %d\n", vel_counts); 
+	printf("\tVel. counts : %d\n", vel_counts);
 	fpos(f);
-	
+
 	if (vel_counts > 2) {
 		printf("Too big vel_count!\n");
 		return false;
 	}
-	
+
 	printf("\tPointers        : "); readStruct("XXXXXXX", f); printf("\n");
 
 	fpos(f);
-	
+
 	// Those are the global? Speed values
 	// Translation speed here
 	printf("\tVelocity : "); readVector3(f);
-	
+
 	// Axial vel?
 	printf("\tAxial v.?: "); readVector3(f);
 	printf("\tPointers?: "); readStruct("XXXX", f);printf("\n");
@@ -583,52 +582,52 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	fpos(f);
 	printf("\t???      : "); readStruct("LLF",f);printf("\n");
 	fpos(f);
-	
+
 	// These fit well
 	float mass, density, elasticity;
 	fread(&mass, 1,4,f);
 	fread(&density, 1,4,f);
 	fread(&elasticity, 1,4,f);
-	
+
 	printf("\tMass     : %8.4g\n", mass);
 	printf("\tElast.   : %8.4g\n", density);
 	printf("\tDensity  : %8.4g\n", elasticity);
-	
-	
-	
+
+
+
 	printf("\tPtrs?    : "); readStruct("XXX", f);printf("\n");
-	
+
 	uint32 count_submodels; // THE NUMBER of sub-models again. Realy.
 	fread(&count_submodels,1,4,f);
 	printf("\tSubmodel cnt  : %d\n", count_submodels);
-	
+
 	fpos(f);
-	
+
 	/*
 	Following structures seem like per sub-model velocities. This makes sense, As this is probably used for objects with movable parts.
 	The sub-object - sub-model mapping is probably made by order of appearence
 	*/
-	
+
 	// Dunno if this condition is right. count_submodels > 1 didn't work well
 	if (vel_counts >= 2) {
 		// should be while sub model number >0 maybe
 		for (unsigned int a = 0; a < count_submodels; a++) {
 			fpos(f);
-			
+
 			// Something like a signature (54 18 BE 01)
 			printf("\tPointer   : "); readStruct("X", f);printf("\n");
-			
+
 			// Subobject index
 			uint32 subobj_idx;
 			fread(&subobj_idx, 1, 4, f);
 			printf("\tSubobject index : %d\n", subobj_idx);
-			
+
 			// Now follow 108 bytes (27 longs)
 			// The first is very often set to 03
-			// also, there is a velocity vector inside... printf("\tVelocity : "); readVector3(f); 
-			
+			// also, there is a velocity vector inside... printf("\tVelocity : "); readVector3(f);
+
 			printf("\tUnknown  : "); readStruct("XX", f);printf("\n");
-			
+
 			// 3,3,3,4,3,3,4,2
 			printf("\tVel1 ?   : "); readVector3(f); // Probably not floats but hexadecimal (pointers?)
 			printf("\tVel2     : "); readVector3(f);
@@ -638,38 +637,38 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 			printf("\tVel6     : "); readVector3(f);
 			printf("\tVel7     : "); readVector3(f);
 			printf("\tVel8 ?   : "); readVector3(f); // Probably not floats but hexadecimal (pointers?)
-			
+
 			// not a matrix, but 25 bytes length it has. there are 3 floats on [3][4],[4][0],[4][1]  (were one usualy)
 			//readMatrixLong(f,5,5,"\tUnknown");
 		}
-		
+
 		// If we're here, a number indicating some count is present
 		printf("\tCount What? : "); readStruct("L", f);printf("\n");
 	}
-	
+
 	fpos(f);
-	
+
 	// Flags for the Controls Follow (BOX offset: 0x374, Sphere offset: 0x20c, Two-sphered object: 0x2e0, SphereHat 0x2e0, 3 sphered rope 0x3b4, 4sph. rope 0x488)
 	// Control flags have: -1 for global ones, and, if there is more than 1 sub-model, they repeat for all of them
 	/*
 	4 sub-model offsets (the index number offset):
-	-1 : 
+	-1 :
 	*/
 	int control_counts = 1;
-	
+
 	if (vel_counts >= 2)
 		control_counts = count_submodels + 1;
-	
+
 	for (int a = 0; a < control_counts; a++) {
 		fpos(f);
 		// Maybe not, but seems like a signature/pointer
 		printf("\tPointer    : "); readStruct("X", f);printf("\n");
-		
+
 		// Subobject index
 		sint32 minusone;
 		fread(&minusone,1,4,f);
 		printf("\tSubmodel index (-1 = global controls) : %d\n", minusone);
-		
+
 		/// Control flags. min
 		// Should be 0x2e0 for 2Subobj sphere (is 0x26c - 116 bytes less than should (29 Long/float values) )
 		/*
@@ -678,10 +677,10 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 		uint32 control_flags;
 		fread(&control_flags,1,4,f);
 		printf("\tControl Flags : %08X\n", control_flags);
-		
+
 		// Position?
 		printf("\tUnknown       : "); readVector3N(f);
-		
+
 		// Now the control vectors (t_coord_norm * 4?)
 		printf("\tAxis Velocity : "); readVector3N(f);
 		printf("\tVelocity      : "); readVector3N(f);
@@ -693,12 +692,12 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 			printf("\tSob-model control count : "); readStruct("L", f);printf("\n");
 		}
 	}
-	
+
 	// We should be on the right offset for the bounding volume definition readout
-	
+
 	// Hey! There are probably other data here if the sub_model count is > 1
-	
-	
+
+
 	readBoundingDefinition(f, bvolume, version, num_subobjs);
 
 
@@ -706,23 +705,23 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 
 	/*
 	Sphere has 308 Bytes less than BOX
-	
+
 	1st sphere has radius at 0x2A0 from the file start
-	
+
 	Box has 0x3c4 offset for bounding dimensions...
-	
+
 	3f0 - 3e4 = 14 Bytes more than I should
-	
+
 	- The next object begins:
 	2B0 for sphere
 	3d8 for obb
 	*/
-	
+
 	fpos(f);
-	
+
 	// release sub-obj data
 	delete subobj_counts;
-	
+
 	if (feof(f)) {
 		return false;
 	}
@@ -742,92 +741,92 @@ void readContacts(FILE *f) {
 		fpos(f);
 		t_PhysContactHeader pchdr;
 		fread(&pchdr,1,sizeof(t_PhysContactHeader),f);
-	
+
 		printPhysContactHeader(pchdr);
-		
+
 		fpos(f);
-		
+
 		switch (pchdr.contact_type) {
 			case 1:
-				printf("\tUnk     : "); readStruct("X", f); printf("\n"); 
-	
+				printf("\tUnk     : "); readStruct("X", f); printf("\n");
+
 				// A vector3
 				printf("\tUnk vec : "); readVector3(f);
-			
+
 				// Some number
-				printf("\tUnk     : "); readStruct("X", f); printf("\n"); 
-		
+				printf("\tUnk     : "); readStruct("X", f); printf("\n");
+
 				// Contact list. Normal, and distance. (I suppose these are from the object COG or center)
 				uint32 count;
 				fread(&count, sizeof(uint32), 1, f);
-	
+
 				printf("\tCount   : %d\n", count);
-						
+
 				readMatrixFloat(f,4,count,"\tContact");
-			
+
 				fread(&count, sizeof(uint32), 1, f);
-	
+
 				// Objects involved in the contact?
 				printf("\tObject links Count : %d\n", count);
-			
+
 				readMatrixLong(f,1,count,"\tUnk");
-				
-				
+
+
 				fread(&count, sizeof(uint32), 1, f);
-	
+
 				printf("\tCount   : %d\n", count);
-			
+
 				readMatrixLong(f,1,count,"\tUnk");
-				
+
 				// sorta pointer here
-				
+
 				break;
 			default:
 				printf("Unknown contact type - %d. ending readout...\n", pchdr.contact_type);
 				return;
 		}
 	}
-	
+
 }
 
 //////////////////// MAIN ////////////////////
 int main(int argc, char *argv[]) {
 	FILE	*f;
-	
+
 	phys_hdr hdr;
-	
+
 	fprintf(stderr,"===== read PHYS_SYSTEM chunk decomposer =====\n");
-	
+
 	if (argc<2) {
 		fprintf(stderr,"Please specify a valid filename as argument.\n");
 		return 1;
 	}
-	
+
 	if (argc>2) {
 		if (strcmp(argv[2], "-f") == 0)
 			skipfpos = true;
 	}
-	
+
 	f = fopen(argv[1],"rb");
-	
+
 	if (f == NULL) {
 		fprintf(stderr,"File %s could not be opened!\n",argv[1]);
 		return(1);
 	}
-	
+
 	fprintf(stderr,"Processing '%s'\n", argv[1]);
-	
+
 	// we have the file ready
 	fread(&hdr,sizeof(hdr),1,f);
 	p_HDR(hdr);
-	
+
 	fprintf(stderr, " * Phys. system version : '%d'\n", hdr.phys_version);
-	
+
 	for (int group=0; group < 3; group++) {
 		uint32 obj_count;
 		fread(&obj_count,sizeof(obj_count),1,f);
 		printf("Group %d object count : %d\n", group, obj_count);
-		
+
 		for (unsigned int n = 0; n < obj_count; n++) {
 			if (!readObjectPhys(f, n, hdr.phys_version))  {
 				fprintf(stderr, "Error encountered, ending readout\n");
@@ -835,29 +834,29 @@ int main(int argc, char *argv[]) {
 			}
 		}
 	}
-	
+
 	// Contacts: "5 3 0" for empty?
 	fpos(f);
-	
+
 	// something here I think. Can be the 4. list of objects, or something else.... dunno.
 	uint32 len;
 	fread(&len, sizeof(len), 1, f);
 	printf("Extra data count : %d\n", len);
 	fpos(f);
-	
+
 	readContacts(f);
-	
+
 	fpos(f);
-	
+
 	if (feof(f))
 		printf("EOF\n");
-	
+
 	fclose(f);
-	
+
 }
 
 /*
-There are 3 or 4 sections of physical object definitions (not sure yet). 
+There are 3 or 4 sections of physical object definitions (not sure yet).
 The first contains the active objects
 The second contains sleeping objects
 I dunno about the last 1-2 (Was/Were empty in the savegames of T2)
