@@ -493,8 +493,15 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	}
 
 	fpos(f);
-	printf("\tObjatt. rel? : "); readStruct("LFLL", f);printf("\n"); // attachment related?
-
+	printf("\tObjatt. rel? : "); readStruct("LF", f);printf("\n"); // attachment related?
+	uint32 attachments; // count of objects attached to this one (PhysAttach)
+	uint32 obj_attached; // is this object phys attached? (num of PhysAttach of this obj. to something)
+	fread(&attachments,1,4,f);
+	fread(&obj_attached,1,4,f);
+	
+	printf("\tAttached objects : %d\n", attachments);
+	printf("\tAttached to obj? : %d\n", obj_attached);
+	
 	/*
 	Rotation axises flags: X - 1, Y - 2, Z - 4 ? (Sphere - all = 7, box = 4 - X only?)
 	Rests: 63 for cube.
