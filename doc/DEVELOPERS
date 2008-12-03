@@ -37,6 +37,12 @@ Building
 
 Before building
 ---------------
+Ogre3D environment has to be properly set up. To do that, please follow the steps mentioned on ogre3d wiki here: 
+http://www.ogre3d.org/wiki/index.php/Installing_An_SDK
+
+FreeImage is unpacked-only on windows. This means CMake can't find it automatically, and the path has to be entered manually into
+the corresponding CMake variable (use cmake gui for that, or cmake's command line parameters).
+
 CMake tool is used to prepare makefiles/project files for openDarkEngine. The result of successful run of cmake is a project file or makefile, that
 can the be used to compile the project. Before compiling, ensure that you set all the cmake variables to the desired values. The current list of those
 is:
