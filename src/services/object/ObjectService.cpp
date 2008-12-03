@@ -240,7 +240,7 @@ namespace Opde {
 
 		// symbolic name builtin property
 		mSymNameStorage = new SymNamePropertyStorage();
-		mPropSymName = mPropertyService->createPropertyGroup("SymbolicName", "SymbolicName", "never", mSymNameStorage);
+		mPropSymName = mPropertyService->createPropertyGroup("SymbolicName", "SymName", "never", mSymNameStorage);
 		mPropSymName->setChunkVersions(2, 17);
 
 		// TODO: Position
