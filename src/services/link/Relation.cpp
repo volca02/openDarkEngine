@@ -112,7 +112,7 @@ namespace Opde {
 	// --------------------------------------------------------------------------
 	void Relation::load(const FileGroupPtr& db, const BitArray& objMask) {
 		assert(!mIsInverse);
-		
+
 		// load the links and thei're data
 		// Link chunk name
 		string lchn = "L$" + mName;
@@ -143,9 +143,9 @@ namespace Opde {
 
 		// link count (calculated)
 		size_t link_count = flink->size() / 14; // sizeof(LinkStruct) - but that one is aligned!
-			
+
 		LOG_VERBOSE("Relation::load : %s link count %d (tag size %d)", lchn.c_str(), link_count, flink->size());
-		
+
 		size_t link_data_count = 0;
 
 		// if the chunk LD exists, and contains at least the data size, load the data size, and set to load data as well
@@ -164,11 +164,11 @@ namespace Opde {
 				// check for data len
 				if (dsize != mStorage->getDataSize()) {
 					// This just happens. Some links have the size totally different the real
-					
+
 					// Only if we have the fake size wrong as well
 					if (dsize != mFakeSize)
 						LOG_FATAL("Relation (%s): Data sizes differ : Type: %d, Fake %d, Chunk: %d", mName.c_str(), mStorage->getDataSize(), mFakeSize, dsize);
-					
+
 					// we respect our data size
 					dsize = mStorage->getDataSize();
 				}
@@ -201,7 +201,7 @@ namespace Opde {
 
 		for (unsigned int idx = 0; idx < link_count; idx++) {
 			LinkStruct slink;
-			
+
 			flink->readElem(&slink.id, sizeof(uint32_t));
 			flink->readElem(&slink.src, sizeof(int32_t));
 			flink->readElem(&slink.dest, sizeof(int32_t));
@@ -227,10 +227,10 @@ namespace Opde {
 			if (objMask[link->mSrc] && objMask[link->mDst]) {
 				// Add link, notify listeners... Will search for data and throw if did not find them
 				_addLink(link);
-				
+
 				// Inverse relation will get an inverse link to use
 				LinkPtr ilink = createInverseLink(link);
-				
+
 				mInverse->_addLink(ilink);
 			} else {
 				// the mask says no to the link!
@@ -255,7 +255,7 @@ namespace Opde {
 	// --------------------------------------------------------------------------
 	void Relation::save(const FileGroupPtr& db, uint saveMask) {
 		assert(!mIsInverse);
-		
+
 		LOG_DEBUG("Relation::save Saving relation %s", mName.c_str());
 
 		// Link chunk name
@@ -288,12 +288,12 @@ namespace Opde {
 
 			if (saveMask & (1 << conc)) { // mask says save!
 				LinkStruct slink;
-				
+
 				slink.id = link->mID;
 				slink.src = link->mSrc;
 				slink.dest = link->mDst;
 				slink.flavor = link->mFlavor;
-				
+
 				flnk->writeElem(&slink.id, sizeof(uint32_t));
 				flnk->writeElem(&slink.src, sizeof(int32_t));
 				flnk->writeElem(&slink.dest, sizeof(int32_t));
@@ -302,7 +302,7 @@ namespace Opde {
 				LOG_DEBUG("Relation (%s): Link concreteness of link %d was out of requested : %d", mName.c_str(), link->mID, conc);
 			}
 		}
-		
+
 		// if data are used, store
 		if (!mStorage.isNull()) {
 			IntIteratorPtr idit = mStorage->getAllStoredObjects();
@@ -317,7 +317,7 @@ namespace Opde {
 					// TODO: What exactly is the rule that one should follow selecting what to write into GAM/MIS?
 					// I mean: there is MP link from 1 to some -X in GAM file. Hmmmm. (I guess this does not matter for in-game)
 					fldt->writeElem(&id, sizeof(link_id_t));
-					
+
 					if (!mStorage->writeToFile(fldt, id, false))
 						LOG_ERROR("There was an error writing link data %s for object %d. Property was not loaded", mName.c_str(), id);
 				}
@@ -326,21 +326,21 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	Relation* Relation::inverse() { 
+	Relation* Relation::inverse() {
 		assert(mInverse != NULL);
 		assert(mInverse->isInverse() == isInverse());
-		
-		return mInverse; 
+
+		return mInverse;
 	};
-	
+
 	// --------------------------------------------------------------------------
-	void Relation::setInverseRelation(Relation* rel) { 
-		assert(mInverse==NULL); 
+	void Relation::setInverseRelation(Relation* rel) {
+		assert(mInverse==NULL);
 		assert(rel->isInverse() != isInverse());
-		
-		mInverse = rel; 
+
+		mInverse = rel;
 	};
-	
+
 	// --------------------------------------------------------------------------
 	void Relation::clear() {
 		// first, broadcast that we're gonna erase
@@ -354,7 +354,7 @@ namespace Opde {
 
 		mLinkMap.clear();
 		mSrcDstLinkMap.clear();
-		
+
 		if (!mStorage.isNull())
 			mStorage->clear();
 
@@ -384,9 +384,9 @@ namespace Opde {
 
 		// Last, insert the link to the database and notify
 		_addLink(newl);
-		
+
 		LinkPtr ilink = createInverseLink(newl);
-		
+
 		mInverse->_addLink(ilink);
 
 		return id;
@@ -396,7 +396,7 @@ namespace Opde {
 	void Relation::remove(link_id_t id) {
 		// A waste I smell here. Maybe there will be a difference in Broadcasts later
 		_removeLink(id);
-		
+
 		mInverse->_removeLink(id);
 	}
 
@@ -410,7 +410,7 @@ namespace Opde {
 
 			// Inform the listeners about the change of data
 			broadcastMessage(m);
-			
+
 			return true;
 		} else {
 			LOG_ERROR("Relation::setLinkField : Link %d was not found in relation %d", id, mID);
@@ -421,7 +421,7 @@ namespace Opde {
 	// --------------------------------------------------------------------------
 	DVariant Relation::getLinkField(link_id_t id, const std::string& field) {
 		DVariant value;
-		
+
 		if (mStorage->getField(id, field, value)) {
 			return value;
 		} else {
@@ -494,9 +494,19 @@ namespace Opde {
 			return NULL;
 	}
 
+	// --------------------------------------------------------------------------
 	void Relation::objectDestroyed(int id) {
 		_objectDestroyed(id);
 		mInverse->_objectDestroyed(id);
+	}
+
+	// --------------------------------------------------------------------------
+	DataFieldDescIteratorPtr Relation::getFieldDescIterator(void) {
+		if (!mStorage.isNull()) {
+			return mStorage->getFieldDescIterator();
+		} else {
+			return new EmptyDataFieldDescListIterator();
+		}
 	}
 
 	// --------------------------------------------------------------------------
@@ -624,10 +634,10 @@ namespace Opde {
 		if (mMaxID[cidx] == lidx) {
 			mMaxID[cidx]--;
 		}
-		
+
 		// TODO: insert the link id into available for ID reuse...
 	}
-	
+
 	// --------------------------------------------------------------------------
 	LinkPtr Relation::createInverseLink(const LinkPtr& src) {
 		LinkPtr inv = new Link(
@@ -636,10 +646,10 @@ namespace Opde {
 			src->src(),
 			src->flavor()
 		);
-		
+
 		return inv;
 	}
-	
+
 	// --------------------------------------------------------------------------
 	void Relation::_objectDestroyed(int id) {
 		assert(id != 0); // has to be nonzero. Zero is a wildcard
@@ -648,7 +658,7 @@ namespace Opde {
 
 		if (r != mSrcDstLinkMap.end()) {
 			// I could just remove it, but let's be fair and broadcast
-			// This will be very stormy. Maybe we will have to 
+			// This will be very stormy. Maybe we will have to
 			LinkQueryResultPtr res;
 
 			// We have the source object. Now branch on the dest
@@ -656,7 +666,7 @@ namespace Opde {
 
 			while (!res->end()) {
 				const LinkPtr& l = res->next();
-				
+
 				_removeLink(l->id());
 				mInverse->_removeLink(l->id());
 			}

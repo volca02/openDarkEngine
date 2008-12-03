@@ -312,6 +312,19 @@ namespace Opde {
 		return new RelationNameMapKeyIterator(mRelationNameMap);
 	}
 
+	// --------------------------------------------------------------------------
+	DataFieldDescIteratorPtr LinkService::getFieldDescIterator(int flavor) {
+		// find relation
+		RelationIDMap::const_iterator it = mRelationIDMap.find(flavor);
+
+		if (it != mRelationIDMap.end()) {
+			// dedicate to the given relation
+			return it->second->getFieldDescIterator();
+		} else {
+			return NULL;
+		}
+	}
+
 	//------------------------------------------------------
 	bool LinkService::requestRelationFlavorMap(int id, const std::string& name, RelationPtr& rel) {
 		std::pair<FlavorToName::iterator, bool> res1 = mFlavorToName.insert(make_pair(id, name));

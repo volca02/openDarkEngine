@@ -27,6 +27,7 @@
 #include "RelationBinder.h"
 #include "LinkQueryResultBinder.h"
 #include "StringIteratorBinder.h"
+#include "DataFieldDescIteratorBinder.h"
 
 namespace Opde {
 
@@ -79,6 +80,7 @@ namespace Opde {
 			{"getAllLinks", getAllLinks, METH_VARARGS},
 			{"getOneLink", getOneLink, METH_VARARGS},
 			{"getAllLinkNames", getAllLinkNames, METH_NOARGS},
+			{"getFieldsDesc", getFieldsDesc, METH_VARARGS},
 			{NULL, NULL},
 		};
 
@@ -252,6 +254,34 @@ namespace Opde {
 			StringIteratorPtr res = o->mInstance->getAllLinkNames();
 
 			return StringIteratorBinder::create(res);
+		}
+
+		// ------------------------------------------
+		PyObject* LinkServiceBinder::getFieldsDesc(PyObject* self, PyObject* args) {
+			Object* o = python_cast<Object*>(self, &msType);
+
+			PyObject* objflav;
+			int flavor = 0;
+
+			if (PyArg_ParseTuple(args, "O", &objflav)) {
+				if (PyString_Check(objflav)) {
+					char* str = PyString_AsString(objflav);
+					flavor = o->mInstance->nameToFlavor(str);
+				} else if (PyInt_Check(objflav)) {
+					flavor = PyInt_AsLong(objflav);
+				} else {
+					PyErr_SetString(PyExc_TypeError, "Invalid type given for flavor: expected string or integer");
+					return NULL;
+				}
+
+				// wrap the returned StringIterator into StringIteratorBinder, return
+				DataFieldDescIteratorPtr res = o->mInstance->getFieldDescIterator(flavor);
+				return DataFieldDescIteratorBinder::create(res);
+			}
+
+			// Invalid parameters
+			PyErr_SetString(PyExc_TypeError, "Expected a string or integer argument!");
+			return NULL;
 		}
 
 		// ------------------------------------------

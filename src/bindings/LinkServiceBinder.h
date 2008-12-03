@@ -38,7 +38,7 @@ namespace Opde {
 		class LinkServiceBinder : public shared_ptr_binder<LinkServicePtr> {
 			public:
 				static void init(PyObject* module);
-				
+
 				// --- Python type related methods ---
 				static PyObject* getattr(PyObject *self, char *name);
 
@@ -52,7 +52,8 @@ namespace Opde {
 				static PyObject* getAllLinks(PyObject* self, PyObject* args);
 				static PyObject* getOneLink(PyObject* self, PyObject* args);
 				static PyObject* getAllLinkNames(PyObject* self, PyObject* args);
-				
+				static PyObject* getFieldsDesc(PyObject* self, PyObject* args);
+
 			protected:
 				/// Static type definition for LinkService
 				static PyTypeObject msType;
@@ -63,18 +64,18 @@ namespace Opde {
 				/// Method list
 				static PyMethodDef msMethods[];
 		};
-		
+
 		// -------------------------------
 		/// Link class binder. The methods are converted to read-only attributes
 		class LinkBinder : public shared_ptr_binder<LinkPtr> {
 		    public:
 				static void init(PyObject* module);
-		    
+
 				// --- Python type related methods ---
 				static PyObject* getattr(PyObject *self, char *name);
 
 				static PyObject* create(LinkPtr& link);
-				
+
             protected:
 				/// Static type definition for LinkService
 				static PyTypeObject msType;

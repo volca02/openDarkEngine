@@ -62,9 +62,9 @@ namespace Opde {
 
 			/// Inverse relation getter. Will return a relation with the links going in opposite direction
 			Relation* inverse();
-			
+
 			bool isInverse() { return mIsInverse; };
-			
+
 			/// Sets a inverse relation to this relation. Can only be done once.
 			void setInverseRelation(Relation* rel);
 
@@ -135,19 +135,27 @@ namespace Opde {
 			* @return LinkPtr link instance that fulfills the requirements, or NULL
 			*/
 			LinkPtr getLink(link_id_t id) const;
-			
+
 			/** Removes all links that connected to a given object ID
 			* @param id the object id to remove all links from
 			*/
 			void objectDestroyed(int id);
-			
-			/** Sets the relation to cache link data (caches fields so no direct to/from data will be used on loading) 
+
+			/** Sets the relation to cache link data (caches fields so no direct to/from data will be used on loading)
 			* @param cache if true, writes will set a the value in a cache as well, and reads will search cache first
+			* @deprecated
 			*/
 			void setCacheData(bool cache) { mUseDataCache = cache; };
-			
-			/** @return true if cache for data is used, false otherwise */
+
+			/** @return true if cache for data is used, false otherwise
+			* @deprecated */
 			bool getCacheData() { return mUseDataCache; };
+
+			/** @return A reference to const DataFieldDesc iterator, usable for data description, automatic gui composition, etc.
+			* Internally, this is just a wrapper around getFieldDescIterator call to DataStorage.
+			* @todo It should be decided if it is guaranteed to have this iterator in a storable quality - if it could be used to load/save data.
+			*/
+			DataFieldDescIteratorPtr getFieldDescIterator(void);
 
 		protected:
             class MultiTargetLinkQueryResult;
@@ -183,13 +191,13 @@ namespace Opde {
 			* @note This now only decrements the maximal index of the concreteness the id has, if it was the maximal id
 			*/
 			void unallocateLinkID(link_id_t id);
-			
+
 			/** Creates an inverse link for the given link. The links share the same data, but have src and dst object id's swapped
 			* @param src The source link
 			* @return LinkPtr of the new inverse link
 			*/
 			LinkPtr createInverseLink(const LinkPtr& src);
-			
+
 			/** internal object destruction handler. @see objectDestroyed */
 			void _objectDestroyed(int id);
 
@@ -225,7 +233,7 @@ namespace Opde {
 
 			/// fake size. This size is written as the data size into the LD$ chunks
 			uint32_t mFakeSize;
-			
+
 			/// The pointer to inverse relation
 			Relation* mInverse;
 
@@ -237,7 +245,7 @@ namespace Opde {
 			uint mLCVMin;
 			uint mDCVMaj;
 			uint mDCVMin;
-			
+
 			/// If true, data caching will be used
 			bool mUseDataCache;
 

@@ -175,6 +175,20 @@ def getPropStr(oid,p):
 	return "{" + (" ".join(pv)) + "}"
 
 
+def getLinkStr(lid,flav):
+	# get all prop field names
+	pd = linksrv.getFieldsDesc(flav)
+	rel = linksrv.getRelation(flav)
+	
+	lv = []
+
+	for d in pd:
+		# get value as string
+		lv.append("%s" % rel.getLinkField(lid, d.name))
+
+	return "{" + (" ".join(lv)) + "}"
+
+
 def getObjProps(oid):
 	"""Lists properties the object has"""
 	res = []
@@ -199,12 +213,14 @@ def getObjLinks(oid):
 		if ln.startswith('~'):
 			continue;
 		
+		flav = linksrv.nameToFlavor(ln)
+		
 		# Ignore metaprop
 		if ln == "MetaProp":
 			continue;
 		
 		# ask if the link has any outgoing
-		rel = linksrv.getRelation(ln)
+		rel = linksrv.getRelation(flav)
 		
 		tgt = rel.getAllLinks(oid, 0)
 		
@@ -213,6 +229,9 @@ def getObjLinks(oid):
 		
 		for l in tgt:
 			lres.append("%s" % l.dst)
+		
+			if verbose != 0:
+				lres.append(getLinkStr(l.id, flav))
 		
 		if lres != []:
 			res.append("%s [%s]" % (ln, " ".join(lres)))

@@ -50,12 +50,12 @@ namespace Opde {
 				mRelVMin = minor;
 			}
 
-			/** Convert the relation name to a flavor 
+			/** Convert the relation name to a flavor
 			  * @param name the relation name
 			  * @return int The relation id (Flavor), or zero if not found */
 			int nameToFlavor(const std::string& name);
-			
-			/** Convert the relation name to a flavor 
+
+			/** Convert the relation name to a flavor
 			  * @param name the relation name
 			  * @return int The relation id (Flavor), or empty string if not found */
 			std::string flavorToName(int flavor);
@@ -73,21 +73,21 @@ namespace Opde {
 			* @note The relation will be .isNull() if it was not found
 			*/
 			RelationPtr getRelation(const std::string& name);
-			
+
 			/** Get relation given it's flavor
 			* @param flavor The relation's flavor
 			* @return A shared_pointer to the relation, or NULL if not found
 			* @note The relation will be .isNull() if it was not found
 			*/
 			RelationPtr getRelation(int flavor);
-			
+
 			/** A notification that object was destroyed (removes all links targetted or pointed from the obj. ID)
 			* @param id The object id that was removed
 			* @note Do NOT call this directly unless you know what it does
 			*/
 			void objectDestroyed(int id);
-			
-			/** load links from a single database 
+
+			/** load links from a single database
 			* @param db The database to load from
 			* @param objMask the mask of object id's to allow - both src and dst objects have to be here, otherwise link gets ignored */
 			void load(const FileGroupPtr& db, const BitArray& objMask);
@@ -97,18 +97,18 @@ namespace Opde {
 
 			/** Clears all the data and the relation mappings */
 			void clear();
-			
+
 			// --- link queries ---
 			/** @see Relation::getAllLinks
-			@param flavor The link flavor (relation type). 
+			@param flavor The link flavor (relation type).
 			@param src The source object ID
 			@param dst The destination object ID
 			@return LinkQueryResultPtr Link iterator for resulting links
 			@throw If invalid flavor is specified, this method will return an empty iterator */
 			LinkQueryResultPtr getAllLinks(int flavor, int src, int dst) const;
 
-			/** @see Relation::getOneLink 
-			@param flavor The link flavor (relation type). 
+			/** @see Relation::getOneLink
+			@param flavor The link flavor (relation type).
 			@param src The source object ID
 			@param dst The destination object ID
 			@return LinkPtr Link structure for the resulting link (or NULL if none found)
@@ -123,6 +123,13 @@ namespace Opde {
 
 			/** @returns a link name iterator over all link type names (both inverse and normal ones) */
 			StringIteratorPtr getAllLinkNames();
+
+			/** A shortcut to Relation::getFieldDescIterator
+			* @param flavor The flavor of the relation
+			* @return the iterator over property field descriptions, or NULL if invalid name was specified
+			* @see Relation::getFieldDescIterator
+			*/
+			DataFieldDescIteratorPtr getFieldDescIterator(int flavor);
 
 		protected:
 			bool init();

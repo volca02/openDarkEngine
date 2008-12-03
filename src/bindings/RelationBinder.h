@@ -38,10 +38,10 @@ namespace Opde {
 		class RelationBinder : public shared_ptr_binder<RelationPtr> {
 			public:
 				static void init(PyObject* module);
-				
+
 				// --- Python type related methods ---
 				static PyObject* getattr(PyObject *self, char *name);
-				
+
 				/// to string - reprfunc conversion
 				static PyObject* repr(PyObject *self);
 
@@ -55,10 +55,12 @@ namespace Opde {
 				static PyObject* createLink(PyObject* self, PyObject* args);
 				static PyObject* getLinkField(PyObject* self, PyObject* args);
 				static PyObject* setLinkField(PyObject* self, PyObject* args);
-				
+
 				static PyObject* getAllLinks(PyObject* self, PyObject* args);
 				static PyObject* getOneLink(PyObject* self, PyObject* args);
-				
+
+				static PyObject* getFieldsDesc(PyObject* self, PyObject* args);
+
 			protected:
 				/// Static type definition for LinkService
 				static PyTypeObject msType;
