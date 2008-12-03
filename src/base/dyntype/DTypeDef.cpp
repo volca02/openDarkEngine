@@ -822,4 +822,18 @@ namespace Opde {
 		return mIt == mList.end();
 	}
 
+	//------------------------------------
+	EmptyDataFieldDescListIterator::EmptyDataFieldDescListIterator() : DataFieldDescListIterator(mEmptyList) {
+	}
+
+	//------------------------------------
+	const DataFieldDesc& EmptyDataFieldDescListIterator::next() {
+		OPDE_EXCEPT("Tried to get an item out of an empty list!", "DataFieldDescListIterator::next");
+	}
+
+	//------------------------------------
+	bool EmptyDataFieldDescListIterator::end() const {
+		return true;
+	}
+
 }
