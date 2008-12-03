@@ -113,23 +113,21 @@ use windows style paths on windows):
 
 resources.cfg
 -------------
-This file should point to the .crf files used in Dark Engine's games, opde scripts (found in the source tree under scripts/),
- as well as to Ogre's core zipfile (replace "some path" with the appropriate paths to your data).
+This file should point to the .crf files used in Dark Engine's games, opde scripts (found in the source tree under scripts/) 
+and game specific scripts (scripts/thief1 etc.). It is used when no game type parameter is specified on command line. 
+The structure of the file is the same for any of the file names it can be stored as (thief1.cfg, thief2.cfg, shock2.cfg).
 
 Example content:
 
 # -- begin of resources.cfg --
-[Bootstrap]
-Zip=/usr/share/doc/ogre-1.4.6/Samples/Media/packs/OgreCore.zip
-
 [General]
-# For temp files, overrides, etc.
+# For temp files, overrides, etc. Not crucial
 FileSystem=./
 
 # Opde scripts path, common scripts:
 FileSystem=/some path/opde-svn/trunk/scripts
 
-# T1:
+# Crf files:
 Zip=/some path/fam.crf
 Zip=/some path/obj.crf
 Zip=/some path/books.crf
@@ -138,7 +136,7 @@ Zip=/some path/editor.crf
 Zip=/some path/default.crf
 Zip=/some path/pal.crf
 
-# Scripts for Thief1:
+# Scripts for Thief1 (replace the path's end with the game's name):
 FileSystem=/some path/opde-svn/trunk/scripts/thief1
 
 # Missions - should point to directory containing the .gam and .mis files
@@ -154,7 +152,7 @@ naming the mission OPDE should load upon start.
 # if set to yes, the input's won't be exclusive to OPDE window. Great for debugging
 # nonexclusive=true
 
-# Mission file to use
+# Mission file to use. If none is specified, the first mission file from the game is used
 mission=miss1.mis
 
 # Mouse and keyboard movement related
@@ -162,7 +160,7 @@ move_speed=30
 mouse_speed=80
 mouse_invert=1
 
-# Debugging enabled
+# Debugging enabled - some FPS/Portal stats appear on screen if enabled
 debug=true
 # -- end of opde.cfg --
 
@@ -173,6 +171,7 @@ This file should point to Ogre plugins. Please consult ogre's docs for more info
 Example content (You'll also probably want to use RenderSystem_Direct3D7 or RenderSystem_Direct3D9 on windows):
 
 # -- begin of plugins.cfg --
+# set the path to the Ogre3D's path to plugins, or set ./ here and copy the ones that are needed next to executable
 PluginFolder=/usr/lib/OGRE
 
 Plugin=RenderSystem_GL.so
@@ -183,3 +182,16 @@ Plugin=Plugin_ParticleFX.so
 - Running -
 -----------
 There is not much to do once the application is run succesfully now. The camera is controlled with mouse nad WASD keys.
+Opde binary has one/two optional parameters - t1/t2/ss2, optionaly followed by mission file name (without path).
+
+If the first parameter is specified, the opde binary loads resource declarations from a file named:
+t1 - thief1.cfg
+t2 - thief2.cfg
+ss2 - shock2.cfg
+Instead of the default resources.cfg file.
+
+------------
+- Problems -
+------------
+* pythonXX_d.lib missing. We know - use relWithDebInfo build target for now
+* FreeImage lib not found by CMake - we'll specify some standard path to put dependencies into, for now please fill in the path into the FREEIMAGE_PATH
