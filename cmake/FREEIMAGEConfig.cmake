@@ -2,17 +2,17 @@
 # Try to find FREEIMAGE library on both Windows and Linux systems
 # 
 # The following values will get defined:
-#	OIS_FOUND - True if ogre lib was found
-#	OIS_INCLUDE_DIR - Include libraries for Ogre usage
-#	OIS_LIBRARIES - Library paths for ogre
+#	FREEIMAGE_FOUND - True if ogre lib was found
+#	FREEIMAGE_INCLUDE_DIR - Include libraries for Ogre usage
+#	FREEIMAGE_LIBRARIES - Library paths for ogre
 
 SET(FREEIMAGE_FOUND)
 MARK_AS_ADVANCED(FREEIMAGE_FOUND)
 MARK_AS_ADVANCED(FREEIMAGE_LIBRARIES)
 MARK_AS_ADVANCED(FREEIMAGE_INCLUDE_DIR)
 
-# For win32 builds. This can be filled with
-SET(FREEIMAGE_PATH "" CACHE STRING "For Win32 lib. search. Can be filled to the path of the unzipped FreeImageXXXXWin32.zip (Including FreeImage Directory)")
+# For win32 builds. This can be filled by hand. Standard path is dependencies directory next to opde binary dir (out of source build target directory)
+SET(FREEIMAGE_PATH "${OPDE_BINARY_DIR}/../dependencies/freeimage/" CACHE STRING "For Win32 lib. search. Can be filled to the path of the unzipped FreeImageXXXXWin32.zip (Including FreeImage Directory)")
 
 IF (UNIX)
     # Hide the FREEIMAGE_PATH, not needed under unix systems

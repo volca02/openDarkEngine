@@ -40,44 +40,69 @@ Before building
 Ogre3D environment has to be properly set up. To do that, please follow the steps mentioned on ogre3d wiki here: 
 http://www.ogre3d.org/wiki/index.php/Installing_An_SDK
 
-FreeImage is unpacked-only on windows. This means CMake can't find it automatically, and the path has to be entered manually into
-the corresponding CMake variable (use cmake gui for that, or cmake's command line parameters).
+FreeImage is unpacked-only on windows. This means CMake can't find it automatically (unless it's placed in a 
+specially defined directory - see below), and the path has to be entered manually into the corresponding CMake 
+variable FREEIMAGE_PATH (use cmake gui for that, or cmake's command line parameters). If you'd like to avoid the 
+need of manual setting of freeimage dependency, place it into a directory "dependencies" next to the opde build
+directory, like this (example windows directory setup follows):
 
-CMake tool is used to prepare makefiles/project files for openDarkEngine. The result of successful run of cmake is a project file or makefile, that
-can the be used to compile the project. Before compiling, ensure that you set all the cmake variables to the desired values. The current list of those
-is:
+C:\
+	Projects\
+		opde\
+			build\
+				...
+			dependencies\
+				freeimage\
+					Dist\
+					...
+				...
+			opde-svn\
+				trunk\
+					...
+
+In this setup, the "C:\Projects\opde\opde-svn\trunk\" is the source directory (OPDE_SOURCE_DIR in cmake scripts), 
+"C:\Projects\opde\build\" is the build target directory (OPDE_BINARY_DIR in cmake scripts), and the 
+"C:\Projects\opde\dependencies\" path is dedicated for all the dependencies that can't be installed/found by 
+CMake automatically.
+
+CMake tool is used to prepare makefiles/project files for openDarkEngine. The result of successful run of CMake is
+a project file or makefile, that can the be used to compile the project. Before compiling, ensure that you set all
+the cmake variables to the desired values. The current list of those is:
 
 GENERATE_DOC: Generates a DoxyFile that can be used to create API documentation.
 GLOBAL_DEBUG: Enables DEBUG level logging.
-PROFILING: (linux only) Enables GNU Profiler usage. Opde binary will generate profiling file if this is used. Can be examined with KProf for example. 
-PYTHON_SUPPORT: Will enable the compilation of Python bindings and support code. This switch will vanish after the python code stabilizes.
+PROFILING: (linux only) Enables GNU Profiler usage. Opde binary will generate profiling file if this is used. 
+	Can be examined with KProf for example. 
 
 
 Unix/Linux
 ----------
-On *nix systems, building with the following commands (replace the OPDE_DIR with the directory in which the source resides) should be sufficient:
+On *nix systems, building with the following commands (replace the OPDE_DIR with the directory in which the 
+source resides) should be sufficient:
 
 cd OPDE_DIR
 cmake .
 make
 
 For out-of-source builds (prefered method), create a separate directory that will hold the built files, 
-and run cmake with the path to the source directory (the one containing this readme) as a parameter (replace the BUILD_DIR and OPDE_DIR 
-with your paths).
+and run cmake with the path to the source directory (the one containing this readme) as a parameter (replace 
+the BUILD_DIR and OPDE_DIR with your paths).
 
 cd BUILD_DIR
 cmake OPDE_DIR
 make
 
-Note: You can also use ccmake instead of cmake, which is a GUI frontend to cmake that will let you change the variables. That means Doxygen
-building, build type, debug code building. This works on both windows and *nix platforms.
+Note: You can also use ccmake instead of cmake, which is a GUI frontend to cmake that will let you change
+the variables. That means Doxygen building, build type, debug code building. This works on both windows 
+and *nix platforms. Also note a graphical frontend exists for CMake 2.6 and later, called cmake-gui.
 
 
 Windows
 -------
 
-On windows, please ensure that the OGRE_HOME environmental variables is set (should be if the installation was done using the ogre sdk). 
-Also ensure that MinGW/Visual C++ make systems are usable. (Cmake should test this first time it is run).
+On windows, please ensure that the OGRE_HOME environmental variables is set (should be if the installation was 
+done using the ogre sdk). Also ensure that MinGW/Visual C++ make systems are usable. (Cmake should test this 
+first time it is run).
 
 Then progress with (from commandline, being in the root directory of OPDE project):
 
@@ -89,14 +114,16 @@ cmake . -G "MinGW Makefiles"
 
 For list of the generators, use "cmake --help" from commandline - you'll get a list of available generators.
 
-Note: You can also use the out of source build approach as *nix building guide notes. This makes your source directory clean. 
-	The windows version of ccmake is CMakeSetup.
+Note: You can also use the out of source build approach as *nix building guide notes. This makes your source
+	directory clean. The windows version of ccmake is CMakeSetup.
 
-Please read the output of cmake carefuly. If the makefiles/VC solution is not present, it will give you hints about what was wrong.
+Please read the output of cmake carefuly. If the makefiles/VC solution is not present, it will give you hints 
+about what was wrong.
 
 The result should be compilable by your system (VC / mingw32-make for mingw)
 
-If you have a problem making for Mingw, please ensure that "sh" executable is NOT in path. If it is, and can't be relocated, select MSYS Makefiles rather than MinGW ones.
+If you have a problem making for Mingw, please ensure that "sh" executable is NOT in path. If it is, and can't
+be relocated, select MSYS Makefiles rather than MinGW ones.
 
 Currently, Debug mode in VC is too slow for normal operation. For testing purposes, please use Release mode. 
 
@@ -108,8 +135,8 @@ Currently, Debug mode in VC is too slow for normal operation. For testing purpos
 Note: For some additional info about setting up the resources for opde, please consult the online wiki as well:
     http://opde.sourceforge.net/wiki/index.php/Main_Page
     
-You will need to initialize resources.cfg, opde.cfg and plugins.cfg for the main executable to work (examples use unix style paths,
-use windows style paths on windows):
+You will need to initialize resources.cfg, opde.cfg and plugins.cfg for the main executable to work (examples 
+use unix style paths, use windows style paths on windows):
 
 resources.cfg
 -------------
@@ -194,4 +221,5 @@ Instead of the default resources.cfg file.
 - Problems -
 ------------
 * pythonXX_d.lib missing. We know - use relWithDebInfo build target for now
-* FreeImage lib not found by CMake - we'll specify some standard path to put dependencies into, for now please fill in the path into the FREEIMAGE_PATH
+* FreeImage lib not found by CMake - we'll specify some standard path to put dependencies into, for now please fill in the 
+	path into the FREEIMAGE_PATH
