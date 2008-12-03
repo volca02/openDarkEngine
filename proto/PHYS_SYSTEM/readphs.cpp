@@ -88,6 +88,10 @@ typedef struct {
 #define PHYS_AI_COLLIDE     0x0400000 // Originally pPhysAICollideProp?
 #define PHYS_OBJ_PROJECTILE 0x0800000
 
+/* Control flags*/
+#define CF_LOC_CTRL 4
+#define CF_ROT_CTRL 8
+
 const char hchr[]="0123456789ABCDEF";
 ////////////////// HELPERS //////////////////
 void printPhysObjFlags(uint32 flags) {
@@ -390,6 +394,16 @@ void printRotationAxes(uint32 ax) {
 	printf("\n");
 }
 
+void printControlFlags(uint32 cf) {
+	if (cf & CF_ROT_CTRL)
+		printf(" ROT_CTRL");
+
+	if (cf & CF_LOC_CTRL)
+		printf(" LOC_CTRL");
+
+	printf("\n");
+}
+
 // Prints out the Rest axes. I didn't test this one but it seems to be reasonable that the bit order is the same as for Rot. Axes (Dunno about the +- things)
 void printRestAxes(uint32 rest) {
 	printf("\tRest Axes  : ");
@@ -498,10 +512,10 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	uint32 obj_attached; // is this object phys attached? (num of PhysAttach of this obj. to something)
 	fread(&attachments,1,4,f);
 	fread(&obj_attached,1,4,f);
-	
+
 	printf("\tAttached objects : %d\n", attachments);
 	printf("\tAttached to obj? : %d\n", obj_attached);
-	
+
 	/*
 	Rotation axises flags: X - 1, Y - 2, Z - 4 ? (Sphere - all = 7, box = 4 - X only?)
 	Rests: 63 for cube.
@@ -540,12 +554,17 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 
 
 	/*
-	The last sub-object is set to the center of the Collision Volume.
+	The last sub-object is set to the center of the Collision Volume - and in fact is the object's physics descr. itself.
 	*/
 	for (unsigned int n = 0; n < num_subobjs + 1; n++) {
 		// printf("\t SUBOBJ[%4d] : ",n); readStruct("FFFLFFFFXFFFFFLFXX", f);printf("\n");
 		// printf("\t SUBOBJ[%4d] : ",n); readStruct("FFFXXXFFXXXFFFXXXX", f);printf("\n");
-		printf("\t SUBOBJ[%4d] :\n", n); readSubObject(f);
+		if (n < num_subobjs)
+			printf("\t SUBOBJ[%4d]  :\n", n);
+		else
+			printf("\t OBJECT WHOLE :\n", n);
+
+		readSubObject(f);
 	}
 
 
@@ -683,7 +702,8 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 		*/
 		uint32 control_flags;
 		fread(&control_flags,1,4,f);
-		printf("\tControl Flags : %08X\n", control_flags);
+		printf("\tControl Flags : (%X) ", control_flags);
+		printControlFlags(control_flags);
 
 		// Position?
 		printf("\tUnknown       : "); readVector3N(f);
