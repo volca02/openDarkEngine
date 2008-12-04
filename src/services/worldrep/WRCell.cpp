@@ -690,6 +690,8 @@ namespace Opde {
 	void WRCell::setBspNode(Ogre::BspNode* tgtNode) {
 		bspNode = tgtNode;
 		bspNode->setIsLeaf(true);
+		
+		bspNode->_setCellFlags(header.cell_flags);
 	}
 
 

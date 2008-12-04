@@ -42,6 +42,8 @@ Pre-0.3 release:
     * Advanced - structured templated data storage - something to be easilly personalised for the use with internal properties/link data that are structured (Property position for example). 
     * On-the-fly max/min object id resets - should be partially implemented, but binary arrays need to be reallocated/repopulated then, this has to work (at least for editor mode)
     * Documentation - how to implement code that makes the property live. How to implement contstraints between various properties.
+    * Fog rendering - the one of the last rendering problems to be solved. Fog lives in the scenemanager, but we need to render our geometry twice - once the part that is fogged, once the part that is not fogged. 
+	How this works in original dark remains to be revealed - non-fogged geometry seen through a fogged area is a small example. Maybe this uses some kind of volumetric fog. The author of DDFix - TimeSlip - should know more.
 
 
 0.3 - 0.4:

@@ -34,6 +34,13 @@ $Id$
 #include <OgreException.h>
 #include <OgreLogManager.h>
 
+
+// cell flags for doorways
+#define CELL_IS_DOORWAY 16
+#define CELL_VIS_BLOCK 8
+// ... fogging is bit 6, wireframe bit 1
+
+
 namespace Ogre {
 
     //-----------------------------------------------------------------------
@@ -276,12 +283,62 @@ namespace Ogre {
 		mPortalMap = portalmap;
 	}
 
+
+	//-------------------------------------------------------------------------
+	void BspNode::blockVision(bool block) {
+		unsigned int mask;
+		unsigned int addition;
+		
+		if (!block) {
+			mask = ~0;
+			addition = CELL_VIS_BLOCK;
+		} else { // unblock
+			mask = ~CELL_VIS_BLOCK;
+			addition = 0;
+		}
+		
+		testAndSetDistributed(CELL_IS_DOORWAY, mask, addition);
+	}
+
+	//-------------------------------------------------------------------------
+	bool BspNode::isVisBlocked() {
+		return mCellFlags & CELL_VIS_BLOCK;
+	}
+
+	//-------------------------------------------------------------------------
+	void BspNode::_setCellFlags(unsigned int flags) {
+		mCellFlags = flags;
+	}
+	
+	//-------------------------------------------------------------------------	
+	void BspNode::testAndSetDistributed(unsigned int prereq, unsigned int mask, unsigned int addition) {
+		if (!(mCellFlags & prereq))
+			return;
+			
+		unsigned int prev = mCellFlags;
+		
+		mCellFlags &= mask;
+		mCellFlags |= addition;
+		
+		if (mCellFlags != prev) { // flags changed
+			PortalListConstIterator outPortal_it = mDstPortals.begin();
+			PortalListConstIterator end = mDstPortals.end();
+	
+			for (; outPortal_it != end; outPortal_it++) {
+				Portal *out_portal = (*outPortal_it);
+	
+				out_portal->getTarget()->testAndSetDistributed(prereq, mask, addition);
+			}
+		}
+	}
+
+
 	//-------------------------------------------------------------------------
 	void BspNode::refreshScreenRect(const Camera* cam, const Matrix4& toScreen, const PortalFrustum& frust) {
 		mInitialized = true;
 
-	    // Iterate all portals and refresh the view rect of those
-	    PortalListConstIterator outPortal_it = mDstPortals.begin();
+		// Iterate all portals and refresh the view rect of those
+		PortalListConstIterator outPortal_it = mDstPortals.begin();
 		PortalListConstIterator end = mDstPortals.end();
 
 		for (; outPortal_it != end; outPortal_it++) {
