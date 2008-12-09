@@ -88,7 +88,8 @@ namespace Opde {
 		int16_t		u; // txt shift u (must divide by 1024 to get float number (and I dunno why, I had to invert it too))
 		int16_t		v; // txt shift v
 
-		uint16_t		txt; // texture number (index to the texture list)
+		uint8_t		txt; // texture number (index to the texture list)
+		uint8_t		origin_vtx; // the vertex index of the origin vertex - the vertex used as a reference for texturing
 		uint8_t		unk[2];
 
 		float		scale; // scale of the texture
