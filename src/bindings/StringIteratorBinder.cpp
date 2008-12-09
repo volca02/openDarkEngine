@@ -36,7 +36,7 @@ namespace Opde {
 		PyTypeObject StringIteratorBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			msName,                   /* char *tp_name; */
+			"Opde.StringIterator",    /* char *tp_name; */
 			sizeof(StringIteratorBinder::Object),      /* int tp_basicsize; */
 			0,                        /* int tp_itemsize;       /* not used much */
 			StringIteratorBinder::dealloc,   /* destructor tp_dealloc; */
@@ -71,41 +71,41 @@ namespace Opde {
 		PyMethodDef StringIteratorBinder::msMethods[] = {
 			{NULL, NULL},
 		};
-		
-		
+
+
 		// ------------------------------------------
 		PyObject* StringIteratorBinder::getIterObject(PyObject* self) {
 			Py_INCREF(self);
 			return self;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* StringIteratorBinder::getNext(PyObject* self) {
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			// Get returnable object, advance to next.
 			PyObject* next = NULL;
-			
+
 			if ((!o->mInstance.isNull()) && !o->mInstance->end()) {
 				const std::string& s = o->mInstance->next();
-				
+
 				next = PyString_FromString(s.c_str());
 			}
-			
+
 			return next;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* StringIteratorBinder::repr(PyObject *self) {
 			return PyString_FromFormat("<StringIterator at %p>", self);
 		}
-		
-		
+
+
 		// ------------------------------------------
 		PyObject* StringIteratorBinder::getattr(PyObject *self, char *name) {
 			return Py_FindMethod(msMethods, self, name);
 		}
-		
+
 		// ------------------------------------------
 		PyObject* StringIteratorBinder::create(StringIteratorPtr& strit) {
 			Object* object = construct(&msType);
@@ -116,7 +116,7 @@ namespace Opde {
 
 			return (PyObject *)object;
 		}
-		
+
 		// ------------------------------------------
 		void StringIteratorBinder::init(PyObject* module) {
 			publishType(module, &msType, msName);

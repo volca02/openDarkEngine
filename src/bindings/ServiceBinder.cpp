@@ -21,7 +21,7 @@
  *	   $Id$
  *
  *****************************************************************************/
- 
+
 #include "ServiceBinder.h"
 
 #include "ConfigServiceBinder.h"
@@ -36,14 +36,14 @@
 
 namespace Opde {
 	namespace Python {
-		
+
 		// ---------------------- class Services --------------------
 		char* ServiceBinder::msName = "Opde.Services";
-		
+
 		PyMethodDef ServiceBinder::msMethods[] = {
 			{"getConfigService", getConfigService, METH_NOARGS},
 			{"getLinkService", getLinkService, METH_NOARGS},
-			{"getPropertyService", getPropertyService, METH_NOARGS},
+			{"getPropertyService", getPropertyService, METH_NOARGS, "getPropertyService() -> self.PropertyService\n\tReturns a reference object to the PropertyService instance"},
 			{"getLoopService", getLoopService, METH_NOARGS},
 			{"getInputService", getInputService, METH_NOARGS},
 			{"getGUIService", getGUIService, METH_NOARGS},
@@ -52,7 +52,7 @@ namespace Opde {
 			{"getInheritService", getInheritService, METH_NOARGS},
 			{NULL, NULL},
 		};
-		
+
 		PyObject* ServiceBinder::getConfigService(PyObject* self, PyObject* args) {
 			try {
                 return ConfigServiceBinder::create();
@@ -61,7 +61,7 @@ namespace Opde {
 			    return NULL;
 			}
 		}
-		
+
 		PyObject* ServiceBinder::getLinkService(PyObject* self, PyObject* args) {
 			try {
                 return LinkServiceBinder::create();
@@ -106,7 +106,7 @@ namespace Opde {
 			    return NULL;
 			}
 		}
-		
+
 		PyObject* ServiceBinder::getDatabaseService(PyObject* self, PyObject* args) {
 			try {
                 return DatabaseServiceBinder::create();
@@ -115,7 +115,7 @@ namespace Opde {
 			    return NULL;
 			}
 		}
-		
+
 		PyObject* ServiceBinder::getObjectService(PyObject* self, PyObject* args) {
 			try {
                 return ObjectServiceBinder::create();
@@ -124,7 +124,7 @@ namespace Opde {
 			    return NULL;
 			}
 		}
-		
+
 		PyObject* ServiceBinder::getInheritService(PyObject* self, PyObject* args) {
 			try {
                 return InheritServiceBinder::create();
@@ -136,13 +136,13 @@ namespace Opde {
 
 		PyObject* ServiceBinder::init(PyObject* container) {
 			PyObject* module = Py_InitModule(msName, msMethods);
-			
+
 			assert(module);
-			
+
 			// Register itself as a member of the container we got
 			PyObject *dir = PyModule_GetDict(container);
 			PyDict_SetItemString(dir, "Services", module);
-			
+
 			// init the services (we init all, they register into the module, enabling pydoc usage on them)
 			PropertyServiceBinder::init(module);
 			DatabaseServiceBinder::init(module);
@@ -152,7 +152,7 @@ namespace Opde {
 			LoopServiceBinder::init(module);
 			ObjectServiceBinder::init(module);
 			InheritServiceBinder::init(module);
-			
+
 			// Publish some service constants
 			PyModule_AddIntConstant(module, "SERVICE_ALL", SERVICE_ALL);
 			PyModule_AddIntConstant(module, "SERVICE_CORE", SERVICE_CORE);
@@ -163,9 +163,9 @@ namespace Opde {
 			PyModule_AddIntConstant(module, "SERVICE_OBJECT_LISTENER", SERVICE_OBJECT_LISTENER);
 			PyModule_AddIntConstant(module, "SERVICE_DATABASE_LISTENER", SERVICE_DATABASE_LISTENER);
 			PyModule_AddIntConstant(module, "SERVICE_INPUT_LISTENER", SERVICE_INPUT_LISTENER);
-			
+
 			return module;
 		}
-		
+
 	}
 }

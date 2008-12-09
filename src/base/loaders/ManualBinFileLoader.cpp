@@ -28,6 +28,9 @@
 #include "File.h"
 #include "BinFormat.h"
 #include "lgcolors.h"
+
+#include "MaterialService.h"
+
 #include <OgreStringConverter.h>
 #include <OgreMaterial.h>
 #include <OgreMaterialManager.h>
@@ -650,6 +653,8 @@ namespace Ogre {
 
                 if ((mVersion != 3) && (mVersion != 4))
                     OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Unsupported object mesh version : " + StringConverter::toString(mVersion),"ObjectMeshLoader::ObjectMeshLoader");
+
+                mMaterialService = GET_SERVICE(MaterialService);
             };
 
             ~ObjectMeshLoader() {
@@ -722,6 +727,8 @@ namespace Ogre {
             OgreMaterials mOgreMaterials;
 
             SkeletonPtr mSkeleton;
+
+            MaterialServicePtr mMaterialService;
     };
 
 	class AIMeshLoader: public DarkBINFileLoader {
@@ -1402,10 +1409,11 @@ namespace Ogre {
 			pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
 			pass->setAlphaRejectSettings(CMPF_GREATER, 128); // Alpha rejection.
 			// default depth bias
-			pass->setDepthBias(0.001, 0.001);
+			pass->setDepthBias(0.01, 0.01);
 
 			// Some basic lightning settings
-            tus = pass->createTextureUnitState(txtname);
+            // tus = pass->createTextureUnitState(txtname);
+			tus = mMaterialService->createAnimatedTextureState(pass, txtname, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 5);
 
             tus->setTextureAddressingMode(TextureUnitState::TAM_WRAP);
             tus->setTextureCoordSet(0);
@@ -1413,7 +1421,7 @@ namespace Ogre {
 
             // If the transparency is used
             if (( mHdr.mat_flags & MD_MAT_TRANS) && (matext.trans > 0)) {
-                // set at least the transparency value for the material
+            	// set at least the transparency value for the material
                 pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
                 pass->setDepthWriteEnabled(false);
                 tus->setColourOperation(LBO_ALPHA_BLEND);
@@ -1426,8 +1434,6 @@ namespace Ogre {
                 // set the illumination
                 pass->setSelfIllumination(matext.illum, matext.illum, matext.illum);
             }
-
-            // omat->setCullingMode(CULL_ANTICLOCKWISE);
 
         } else if (mat.type == MD_MAT_COLOR) {
             // Fill in a color-only material

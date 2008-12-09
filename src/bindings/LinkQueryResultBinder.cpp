@@ -37,7 +37,7 @@ namespace Opde {
 		PyTypeObject LinkQueryResultBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			msName,                   // char *tp_name; */
+			"Opde.Services.LinkQueryResult",   // char *tp_name; */
 			sizeof(LinkQueryResultBinder::Object),      // int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			LinkQueryResultBinder::dealloc,   // destructor tp_dealloc; */

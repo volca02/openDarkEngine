@@ -27,21 +27,23 @@
 #include "StringIteratorBinder.h"
 #include "DataFieldDescIteratorBinder.h"
 
-namespace Opde 
+namespace Opde
 {
 
-	namespace Python 
+	namespace Python
 	{
 
 		// -------------------- Property Service --------------------
 		char* PropertyServiceBinder::msName = "PropertyService";
 
+		const char* opde_PropertyService__doc__ = "PropertyService proxy. Service that manages properties of game objects";
+
 		// ------------------------------------------
-		PyTypeObject PropertyServiceBinder::msType = 
+		PyTypeObject PropertyServiceBinder::msType =
 		{
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			msName,                   // char *tp_name; */
+			"Opde.Services.PropertyService",                   // char *tp_name; */
 			sizeof(PropertyServiceBinder::Object),      /* int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			PropertyServiceBinder::dealloc,   // destructor tp_dealloc; */
@@ -60,7 +62,7 @@ namespace Opde
 			0,			              // setattrofunc tp_setattro; */
 			0,			              // PyBufferProcs *tp_as_buffer; */
 			0,			              // long tp_flags; */
-			0,			              // char *tp_doc;  */
+			opde_PropertyService__doc__,            // char *tp_doc;  */
 			0,			              // traverseproc tp_traverse; */
 			0,			              // inquiry tp_clear; */
 			0,			              // richcmpfunc tp_richcompare; */
@@ -73,28 +75,79 @@ namespace Opde
 		};
 
 		// ------------------------------------------
-		PyMethodDef PropertyServiceBinder::msMethods[] = 
+		const char* opde_PropertyService_has__doc__ = "has(id, name)\n"
+				"Detects if the given object has certain property\n"
+				"@type id: integer\n"
+				"@param id: Object ID\n"
+				"@type name: string\n"
+				"@param name: Property name\n"
+				"@rtype: bool\n"
+				"@return: True if the object has the specified property";
+
+		const char* opde_PropertyService_owns__doc__ = "owns(id, name)\n"
+				"Detects if the given object owns certain property (not through inheritance but directly)\n"
+				"@type id: integer\n"
+				"@param id: Object ID\n"
+				"@type name: string\n"
+				"@param name: Property name\n"
+				"@rtype: bool\n"
+				"@return: True if the object has the specified property";
+
+		const char* opde_PropertyService_set__doc__ = "set(id, name, field, value)\n"
+				"Sets a new value of the given objects property field\n"
+				"@type id: integer\n"
+				"@param id: Object ID\n"
+				"@type name: string\n"
+				"@param name: Property name\n"
+				"@type field: string\n"
+				"@param field: Property field name\n"
+				"@type value: object\n"
+				"@param value: New value object\n";
+
+		const char* opde_PropertyService_get__doc__ = "set(id, name, field, value)\n"
+				"Gets property field value for the specified object\n"
+				"@type id: integer\n"
+				"@param id: Object ID\n"
+				"@type name: string\n"
+				"@param name: Property name\n"
+				"@type field: string\n"
+				"@param field: Property field name\n"
+				"@rtype: object\n"
+				"@return: Property field value, or None on error\n";
+
+		const char* opde_PropertyService_getAllPropertyNames__doc__ = "getAllPropertyNames()\n"
+				"@rtype: iterable object\n"
+				"@return: Returns iterable object containing all property names as strings\n";
+
+		const char* opde_PropertyService_getPropertyFieldsDesc__doc__ = "getPropertyFieldsDesc()\n"
+				"@type name: string\n"
+				"@param name: Property name\n"
+				"@rtype: iterable object\n"
+				"@return: Returns iterable object containing all properties field names as data field description iterator\n";
+
+		// ------------------------------------------
+		PyMethodDef PropertyServiceBinder::msMethods[] =
 		{
-			{"has",  has, METH_VARARGS},
-			{"owns", owns, METH_VARARGS},
-			{"set",  set, METH_VARARGS},
-			{"get",  get, METH_VARARGS},
-			{"getAllPropertyNames", getAllPropertyNames, METH_NOARGS},
-			{"getPropertyFieldsDesc", getPropertyFieldsDesc, METH_VARARGS},
+			{"has",  has, METH_VARARGS, opde_PropertyService_has__doc__},
+			{"owns", owns, METH_VARARGS, opde_PropertyService_owns__doc__},
+			{"set",  set, METH_VARARGS, opde_PropertyService_set__doc__},
+			{"get",  get, METH_VARARGS, opde_PropertyService_get__doc__},
+			{"getAllPropertyNames", getAllPropertyNames, METH_NOARGS, opde_PropertyService_getAllPropertyNames__doc__},
+			{"getPropertyFieldsDesc", getPropertyFieldsDesc, METH_VARARGS, opde_PropertyService_getPropertyFieldsDesc__doc__},
 			{NULL, NULL},
 		};
 
 		// ------------------------------------------
-		PyObject* PropertyServiceBinder::has(PyObject* self, PyObject* args) 
+		PyObject* PropertyServiceBinder::has(PyObject* self, PyObject* args)
 		{
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			int obj_id;
 			const char* propName;
 
 			if (PyArg_ParseTuple(args, "is", &obj_id, &propName))
 				return PyBool_FromLong(o->mInstance->has(obj_id, propName));
-			else 
+			else
 			{
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected an integer and a string!");
@@ -103,16 +156,16 @@ namespace Opde
 		}
 
 		// ------------------------------------------
-		PyObject* PropertyServiceBinder::owns(PyObject* self, PyObject* args) 
+		PyObject* PropertyServiceBinder::owns(PyObject* self, PyObject* args)
 		{
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			int obj_id;
 			const char* propName;
 
 			if (PyArg_ParseTuple(args, "is", &obj_id, &propName))
 				return PyBool_FromLong(o->mInstance->owns(obj_id, propName));
-			else 
+			else
 			{
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected an integer and a string!");
@@ -121,18 +174,18 @@ namespace Opde
 		}
 
 		// ------------------------------------------
-		PyObject* PropertyServiceBinder::set(PyObject* self, PyObject* args) 
+		PyObject* PropertyServiceBinder::set(PyObject* self, PyObject* args)
 		{
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			int obj_id;
 			const char* propName;
 			const char* propField;
 			PyObject* Object;
 			DVariant value;
 
-			if (PyArg_ParseTuple(args, "issO", &obj_id, &propName, &propField, &Object)) 
+			if (PyArg_ParseTuple(args, "issO", &obj_id, &propName, &propField, &Object))
 			{
 				value = PyObjectToDVariant(Object);
 				o->mInstance->set(obj_id, propName, propField, value);
@@ -140,8 +193,8 @@ namespace Opde
 				result = Py_None;
 				Py_INCREF(result);
 				return result;
-			} 
-			else 
+			}
+			else
 			{
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected an integer, two strings and a DVariant!");
@@ -150,17 +203,17 @@ namespace Opde
 		}
 
 		// ------------------------------------------
-		PyObject* PropertyServiceBinder::get(PyObject* self, PyObject* args) 
+		PyObject* PropertyServiceBinder::get(PyObject* self, PyObject* args)
 		{
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			int obj_id;
 			const char* propName;
 			const char* propField;
 
 			if (PyArg_ParseTuple(args, "iss", &obj_id, &propName, &propField)) {
 				DVariant ret;
-				
+
 				if (o->mInstance->get(obj_id, propName, propField, ret)) {
 					return DVariantToPyObject(ret);
 				} else {
@@ -168,30 +221,30 @@ namespace Opde
 					Py_INCREF(result);
 					return result;
 				}
-				
+
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected an integer and two strings!");
 				return NULL;
 			}
 		}
-		
+
 		// ------------------------------------------
-		PyObject* PropertyServiceBinder::getAllPropertyNames(PyObject* self, PyObject* args) 
+		PyObject* PropertyServiceBinder::getAllPropertyNames(PyObject* self, PyObject* args)
 		{
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			// wrap the returned StringIterator into StringIteratorBinder, return
 			StringIteratorPtr res = o->mInstance->getAllPropertyNames();
-				
+
 			return StringIteratorBinder::create(res);
 		}
 
 		// ------------------------------------------
-		PyObject* PropertyServiceBinder::getPropertyFieldsDesc(PyObject* self, PyObject* args) 
+		PyObject* PropertyServiceBinder::getPropertyFieldsDesc(PyObject* self, PyObject* args)
 		{
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			const char* propName;
 
 			if (PyArg_ParseTuple(args, "s", &propName))
@@ -200,33 +253,32 @@ namespace Opde
 				DataFieldDescIteratorPtr res = o->mInstance->getFieldDescIterator(propName);
 				return DataFieldDescIteratorBinder::create(res);
 			}
-			
+
 			// Invalid parameters
-			PyErr_SetString(PyExc_TypeError, "Expected a strings argument!");
+			PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
 			return NULL;
 		}
 
 		// ------------------------------------------
-		PyObject* PropertyServiceBinder::getattr(PyObject *self, char *name) 
+		PyObject* PropertyServiceBinder::getattr(PyObject *self, char *name)
 		{
 			return Py_FindMethod(msMethods, self, name);
 		}
 
 		// ------------------------------------------
-		void PropertyServiceBinder::init(PyObject* module) 
+		void PropertyServiceBinder::init(PyObject* module)
 		{
 			publishType(module, &msType, msName);
-			
-			StringIteratorBinder::init(module);
+
 			DataFieldDescIteratorBinder::init(module);
 		}
-		
+
 		// ------------------------------------------
-		PyObject* PropertyServiceBinder::create() 
+		PyObject* PropertyServiceBinder::create()
 		{
 			Object* object = construct(&msType);
 
-			if (object != NULL) 
+			if (object != NULL)
 			{
 				object->mInstance = static_pointer_cast<PropertyService>(ServiceManager::getSingleton().getService(msName));
 			}

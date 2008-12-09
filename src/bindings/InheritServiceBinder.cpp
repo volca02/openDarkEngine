@@ -37,7 +37,7 @@ namespace Opde {
 		PyTypeObject InheritServiceBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			msName,                   /* char *tp_name; */
+			"Opde.Services.InheritService",                   /* char *tp_name; */
 			sizeof(InheritServiceBinder::Object),      /* int tp_basicsize; */
 			0,                        /* int tp_itemsize;       // not used much */
 			InheritServiceBinder::dealloc,   /* destructor tp_dealloc; */
@@ -82,7 +82,7 @@ namespace Opde {
 		PyObject* InheritServiceBinder::getSources(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			int objID;
 
 			if (PyArg_ParseTuple(args, "i", &objID)) {
@@ -102,7 +102,7 @@ namespace Opde {
 		PyObject* InheritServiceBinder::getTargets(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			int objID;
 
 			if (PyArg_ParseTuple(args, "i", &objID)) {
@@ -117,12 +117,12 @@ namespace Opde {
 				return NULL;
 			}
 		}
-		
+
 		// ------------------------------------------
 		PyObject* InheritServiceBinder::getArchetype(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			int id;
 
 			if (PyArg_ParseTuple(args, "i", &id)) {
@@ -136,12 +136,12 @@ namespace Opde {
 				return NULL;
 			}
 		}
-		
+
 		// ------------------------------------------
 		PyObject* InheritServiceBinder::setArchetype(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			int id, srcid;
 
 			if (PyArg_ParseTuple(args, "ii", &id, &srcid)) {
@@ -156,12 +156,12 @@ namespace Opde {
 				return NULL;
 			}
 		}
-		
+
 		// ------------------------------------------
 		PyObject* InheritServiceBinder::inheritsFrom(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			int id, srcid;
 
 			if (PyArg_ParseTuple(args, "ii", &id, &srcid)) {
@@ -176,7 +176,7 @@ namespace Opde {
 				return NULL;
 			}
 		}
-		
+
 		// ------------------------------------------
 		PyObject* InheritServiceBinder::getattr(PyObject *self, char *name) {
 			return Py_FindMethod(msMethods, self, name);
@@ -192,16 +192,16 @@ namespace Opde {
 
 			return (PyObject *)object;
 		}
-	
+
 		// ------------------------------------------
 		void InheritServiceBinder::init(PyObject* module) {
 			publishType(module, &msType, msName);
-			
+
 			InheritLinkBinder::init(module);
 			InheritQueryResultBinder::init(module);
 		}
 
-	
+
         // -------------------- Link --------------------
 		char* InheritLinkBinder::msName = "InheritLink";
 
@@ -217,18 +217,18 @@ namespace Opde {
 			InheritLinkBinder::getattr,  /* getattrfunc  tp_getattr; // __getattr__ */
 		};
 
-        
+
         // ------------------------------------------
 		PyObject* InheritLinkBinder::getattr(PyObject *self, char *name) {
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			if (o->mInstance.isNull()) {
 				// Just return PyNone
 				PyObject* result = Py_None;
 				Py_INCREF(result);
 				return result;
 			}
-			
+
 			if (strcmp(name, "src") == 0) {
 			    return PyLong_FromLong(o->mInstance->srcID);
 			} else if (strcmp(name, "dst") == 0) {
@@ -238,7 +238,7 @@ namespace Opde {
             } else {
                 PyErr_SetString(PyExc_TypeError, "Unknown attribute specified!");
             }
-            
+
             return NULL;
 		}
 
@@ -248,16 +248,16 @@ namespace Opde {
 			      PyErr_SetString(PyExc_TypeError, "Null link binding!");
 			      return NULL;
 			}
-			
+
 			Object* object = construct(&msType);
-			
+
 			if (object != NULL) {
 				object->mInstance = link;
 			}
 
 			return (PyObject *)object;
 		}
-		
+
 		// ------------------------------------------
 		void InheritLinkBinder::init(PyObject* module) {
 			publishType(module, &msType, msName);

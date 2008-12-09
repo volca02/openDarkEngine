@@ -40,7 +40,7 @@ namespace Opde {
 		PyTypeObject LinkServiceBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			msName,                   // char *tp_name; */
+			"Opde.Services.LinkService",                   // char *tp_name; */
 			sizeof(LinkServiceBinder::Object),  // int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			LinkServiceBinder::dealloc,   // destructor tp_dealloc; */

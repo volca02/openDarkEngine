@@ -25,21 +25,21 @@
 #include "bindings.h"
 #include "ObjectServiceBinder.h"
 
-namespace Opde 
+namespace Opde
 {
 
-	namespace Python 
+	namespace Python
 	{
-        
+
 		// -------------------- Object Service --------------------
 		char* ObjectServiceBinder::msName = "ObjectService";
 
 		// ------------------------------------------
-		PyTypeObject ObjectServiceBinder::msType = 
+		PyTypeObject ObjectServiceBinder::msType =
 		{
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			msName,								// char *tp_name; */
+			"Opde.Services.ObjectService",		// char *tp_name; */
 			sizeof(ObjectServiceBinder::Object), // int tp_basicsize; */
 			0,									// int tp_itemsize;       /* not used much */
 			ObjectServiceBinder::dealloc,		// destructor tp_dealloc; */
@@ -71,7 +71,7 @@ namespace Opde
 		};
 
 		// ------------------------------------------
-		PyMethodDef ObjectServiceBinder::msMethods[] = 
+		PyMethodDef ObjectServiceBinder::msMethods[] =
 		{
 			{"create", objectCreate, METH_VARARGS}, // method named differently to avoid confusion with PyObject* constructor
 			{"beginCreate", beginCreate, METH_VARARGS},
@@ -85,20 +85,20 @@ namespace Opde
 			{"teleport", teleport, METH_VARARGS},
 			{"addMetaProperty", addMetaProperty, METH_VARARGS},
 			{"removeMetaProperty", removeMetaProperty, METH_VARARGS},
-			{"hasMetaProperty", hasMetaProperty, METH_VARARGS},		    
+			{"hasMetaProperty", hasMetaProperty, METH_VARARGS},
 		    {NULL, NULL},
 		};
 
 		// ------------------------------------------
-		PyObject* ObjectServiceBinder::objectCreate(PyObject* self, PyObject* args) { 
+		PyObject* ObjectServiceBinder::objectCreate(PyObject* self, PyObject* args) {
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			// param: archetype object to inherit from
 			int archetype;
-			
+
 			if (PyArg_ParseTuple(args, "i", &archetype)) {
 				int newid;
-			    
+
 			    try {
                     newid = o->mInstance->create(archetype);
 			    } catch (BasicException& e) {
@@ -113,17 +113,17 @@ namespace Opde
 				return NULL;
 			}
 		}
-		
+
 		// ------------------------------------------
-		PyObject* ObjectServiceBinder::beginCreate(PyObject* self, PyObject* args) { 
+		PyObject* ObjectServiceBinder::beginCreate(PyObject* self, PyObject* args) {
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			// param: archetype object to inherit from
 			int archetype;
-			
+
 			if (PyArg_ParseTuple(args, "i", &archetype)) {
 				int newid;
-			    
+
 			    try {
                     newid = o->mInstance->beginCreate(archetype);
 			    } catch (BasicException& e) {
@@ -138,15 +138,15 @@ namespace Opde
 				return NULL;
 			}
 		}
-		
+
 		// ------------------------------------------
-		PyObject* ObjectServiceBinder::endCreate(PyObject* self, PyObject* args) { 
+		PyObject* ObjectServiceBinder::endCreate(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			// param: archetype object to inherit from
 			int objid;
-			
+
 			if (PyArg_ParseTuple(args, "i", &objid)) {
 			    try {
                     o->mInstance->endCreate(objid);
@@ -163,19 +163,19 @@ namespace Opde
 				PyErr_SetString(PyExc_TypeError, "Expected a integer (object id) argument!");
 				return NULL;
 			}
-		
+
 		}
-		
+
 		// ------------------------------------------
-		PyObject* ObjectServiceBinder::exists(PyObject* self, PyObject* args) { 
+		PyObject* ObjectServiceBinder::exists(PyObject* self, PyObject* args) {
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			// param: The object ID to test for existence
 			int objid;
-			
+
 			if (PyArg_ParseTuple(args, "i", &objid)) {
 			    bool res = o->mInstance->exists(objid);
-			    
+
 			    PyObject* ret = res ? Py_True : Py_False;
 				Py_INCREF(ret);
 				return ret;
@@ -185,29 +185,29 @@ namespace Opde
 				return NULL;
 			}
 		}
-		
+
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::position(PyObject* self, PyObject* args) {
 			PyErr_SetString(PyExc_NotImplementedError, "Not Implemented yet!");
 			return NULL;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::orientation(PyObject* self, PyObject* args) {
 			PyErr_SetString(PyExc_NotImplementedError, "Not Implemented yet!");
 			return NULL;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::getName(PyObject* self, PyObject* args) {
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			// param: The object ID to get name for
 			int objid;
-			
+
 			if (PyArg_ParseTuple(args, "i", &objid)) {
 			    std::string name = o->mInstance->getName(objid);
-			    
+
 				return PyString_FromString(name.c_str());
 			} else {
 				// Invalid parameters
@@ -215,19 +215,19 @@ namespace Opde
 				return NULL;
 			}
 		}
-		
+
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::setName(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			// param: The object ID to set name for
 			int objid;
 			char* name;
-			
+
 			if (PyArg_ParseTuple(args, "is", &objid, &name)) {
 			    o->mInstance->setName(objid, name);
-			    
+
 				result = Py_None;
 				Py_INCREF(result);
 				return result;
@@ -237,17 +237,17 @@ namespace Opde
 				return NULL;
 			}
 		}
-		
+
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::named(PyObject* self, PyObject* args) {
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			// param: The object ID to set name for
 			char* name;
-			
+
 			if (PyArg_ParseTuple(args, "s", &name)) {
 				int objid = o->mInstance->named(name);
-			    
+
 				return PyInt_FromLong(objid);
 			} else {
 				// Invalid parameters
@@ -255,50 +255,50 @@ namespace Opde
 				return NULL;
 			}
 		}
-		
+
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::teleport(PyObject* self, PyObject* args) {
 			PyErr_SetString(PyExc_NotImplementedError, "Not Implemented yet!");
 			return NULL;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::addMetaProperty(PyObject* self, PyObject* args) {
 			PyErr_SetString(PyExc_NotImplementedError, "Not Implemented yet!");
 			return NULL;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::removeMetaProperty(PyObject* self, PyObject* args) {
 			PyErr_SetString(PyExc_NotImplementedError, "Not Implemented yet!");
 			return NULL;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::hasMetaProperty(PyObject* self, PyObject* args) {
 			PyErr_SetString(PyExc_NotImplementedError, "Not Implemented yet!");
 			return NULL;
 		}
-		
+
 
 		// ------------------------------------------
-		PyObject* ObjectServiceBinder::getattr(PyObject *self, char *name) 
+		PyObject* ObjectServiceBinder::getattr(PyObject *self, char *name)
 		{
 			return Py_FindMethod(msMethods, self, name);
 		}
 
 		// ------------------------------------------
-		PyObject* ObjectServiceBinder::create() 
+		PyObject* ObjectServiceBinder::create()
 		{
 			Object* object = construct(&msType);
 
-			if (object != NULL) 
+			if (object != NULL)
 			{
 				object->mInstance = static_pointer_cast<ObjectService>(ServiceManager::getSingleton().getService(msName));
 			}
 			return (PyObject *)object;
 		}
-		
+
 		// ------------------------------------------
 		void ObjectServiceBinder::init(PyObject* module) {
 			publishType(module, &msType, msName);

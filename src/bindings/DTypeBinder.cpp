@@ -36,7 +36,7 @@ namespace Opde {
 		PyTypeObject DTypeBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			msName,                   /* char *tp_name; */
+			"Opde.DType",    /* char *tp_name; */
 			sizeof(DTypeBinder::Object),      /* int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			DTypeBinder::dealloc,   /* destructor tp_dealloc; */
@@ -79,11 +79,11 @@ namespace Opde {
 			// Simmilar to PropertyServiceBinder::set
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			const char* field;
 			PyObject* Object;
 
-			if (PyArg_ParseTuple(args, "sO", &field, &Object)) 
+			if (PyArg_ParseTuple(args, "sO", &field, &Object))
 			{
 				DVariant value;
 				value = PyObjectToDVariant(Object);
@@ -92,31 +92,31 @@ namespace Opde {
 				result = Py_None;
 				Py_INCREF(result);
 				return result;
-			} 
-			else 
+			}
+			else
 			{
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected a string and a DVariant!");
 				return NULL;
 			}
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DTypeBinder::get(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			const char* field;
 
-			if (PyArg_ParseTuple(args, "s", &field)) 
+			if (PyArg_ParseTuple(args, "s", &field))
 			{
 				DVariant value;
 				value = o->mInstance->get(field);
 
 				result = DVariantToPyObject(value);
 				return result;
-			} 
-			else 
+			}
+			else
 			{
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
@@ -133,7 +133,7 @@ namespace Opde {
 		DTypePtr DTypeBinder::extractDType(PyObject* object) {
 			// Get Object from PyObject, return mInstance
 			Object* o = python_cast<Object*>(object, &msType);
-			
+
 			// It is always good to remember that it is not wise to return shared_ptr directly
 			DTypePtr t = o->mInstance;
 			return t;
@@ -148,6 +148,11 @@ namespace Opde {
 			}
 
 			return (PyObject *)object;
+		}
+
+		// ------------------------------------------
+		void DTypeBinder::init(PyObject* module) {
+			publishType(module, &msType, msName);
 		}
 	}
 

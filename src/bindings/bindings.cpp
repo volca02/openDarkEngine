@@ -27,10 +27,13 @@
 #include "logger.h"
 #include "RootBinder.h"
 #include "Root.h"
+#include "StringIteratorBinder.h"
+#include "DataFieldDescIteratorBinder.h"
+#include "DTypeBinder.h"
 
 namespace Opde {
 	Opde::Root* Opde::PythonLanguage::msRoot = NULL;
-	
+
 	namespace Python {
 
 		PyObject* DVariantToPyObject(const DVariant& inst) {
@@ -64,7 +67,7 @@ namespace Opde {
 					const Ogre::Vector3& v = inst.toVector();
 					return Py_BuildValue("[fff]", v.x, v.y, v.z);
 				}
-				
+
 				case DVariant::DV_QUATERNION: {
 					// Build a touple
 					const Ogre::Quaternion& q = inst.toQuaternion();
@@ -141,18 +144,62 @@ namespace Opde {
 		PyObject* Py_Log_Verbose(PyObject *self, PyObject* args) {
 			return Py_Log(self, Logger::LOG_LEVEL_VERBOSE, args);
 		}
-		
-		
+
+
+		// ------------------------------------------------------------------------------------------------
+		void PythonPublishedType::publishType(PyObject* containter, PyTypeObject* type, const char* name) {
+			PyType_Ready(type);
+			Py_INCREF(type);
+			PyModule_AddObject(containter, name, (PyObject *)type);
+		}
 	} // namespace Python
 
+	// ---- Doc Strings ----
+	const char* opde_log_fatal__doc__ = "log_fatal(msg)\n"
+		"\tLogs a message with FATAL log level.\n"
+		"@type msg: string\n"
+		"@param msg: The logged string\n";
+
+	const char* opde_log_error__doc__ = "log_error(msg)\n"
+		"\tLogs a message with ERROR log level.\n"
+		"@type msg: string\n"
+		"@param msg: The logged string\n";;
+
+	const char* opde_log_info__doc__ = "log_info(msg)\n"
+		"\tLogs a message with INFO log level.\n"
+		"@type msg: string\n"
+		"@param msg: The logged string\n";
+
+	const char* opde_log_debug__doc__ = "log_debug(msg)\n"
+		"\tLogs a message with DEBUG log level.\n"
+		"@type msg: string\n"
+		"@param msg: The logged string\n";
+
+	const char* opde_log_verbose__doc__ = "log_verbose(msg)\n"
+		"\tLogs a message with VERBOSE (=ALL) log level.\n"
+		"@type msg: string\n"
+		"@param msg: The logged string\n";
+
+	const char* opde_createRoot__doc__ = "createRoot(mask)\n"
+		"Creates the Opde.Root object with the specified service mask (See L{Opde.Services<Opde.Services>}).\n"
+		"@type mask: number\n"
+		"@param mask: Service creation mask\n"
+		"@rtype: Root\n"
+		"@return: A new Opde.Root object reference";
+
+	const char* opde_getRoot__doc__ = "getRoot()\n"
+		"Retrieves the previously created Opde.Root object.\n"
+		"@rtype: Root\n"
+		"@return: A new Opde.Root object reference";
+
 	PyMethodDef sOpdeMethods[] = {
-		{"log_fatal", Python::Py_Log_Fatal, METH_VARARGS},
-		{"log_error", Python::Py_Log_Error, METH_VARARGS},
-		{"log_info", Python::Py_Log_Info, METH_VARARGS},
-		{"log_debug", Python::Py_Log_Debug, METH_VARARGS},
-		{"log_verbose", Python::Py_Log_Verbose, METH_VARARGS},
-		{"createRoot", PythonLanguage::createRoot, METH_VARARGS},
-		{"getRoot", PythonLanguage::getRoot, METH_NOARGS},
+		{"log_fatal", Python::Py_Log_Fatal, METH_VARARGS, opde_log_fatal__doc__},
+		{"log_error", Python::Py_Log_Error, METH_VARARGS, opde_log_error__doc__},
+		{"log_info", Python::Py_Log_Info, METH_VARARGS, opde_log_info__doc__},
+		{"log_debug", Python::Py_Log_Debug, METH_VARARGS, opde_log_debug__doc__},
+		{"log_verbose", Python::Py_Log_Verbose, METH_VARARGS, opde_log_verbose__doc__},
+		{"createRoot", PythonLanguage::createRoot, METH_VARARGS, opde_createRoot__doc__},
+		{"getRoot", PythonLanguage::getRoot, METH_NOARGS, opde_getRoot__doc__},
 		{NULL, NULL},
 	};
 
@@ -162,7 +209,7 @@ namespace Opde {
 		Py_Initialize();
 
 		msRoot = NULL;
-		
+
 		// Create an Opde module
 		PyObject* module = Py_InitModule("Opde", sOpdeMethods);
 
@@ -170,18 +217,22 @@ namespace Opde {
 		PyObject *servicemod = Python::ServiceBinder::init(module);
 		Python::RootBinder::init(module);
 
+		Python::StringIteratorBinder::init(module);
+		Python::DataFieldDescIteratorBinder::init(module);
+		Python::DTypeBinder::init(module);
+
 		if (PyErr_Occurred()) {
 			// TODO: Do something useful here, or forget it
 			PyErr_Print();
 			PyErr_Clear();
 		}
-		
+
 		PySys_SetArgv(argc, argv);
 	}
 
 	void PythonLanguage::term() {
 		Py_Finalize();
-		
+
 		// If we constructed the root, destroy it now...
 		if (msRoot)
 			delete msRoot;
@@ -190,7 +241,7 @@ namespace Opde {
 	void PythonLanguage::runScriptPtr(const char* ptr) {
 	    // Is this the right way?
         PyRun_SimpleString(ptr);
-        
+
         if (PyErr_Occurred()) {
 			// TODO: Do something useful here, or forget it
 			// TODO: PythonException(BasicException) with the PyErr string probably. Same in the init
@@ -198,16 +249,16 @@ namespace Opde {
 			PyErr_Clear();
 		}
 	}
-	
+
 	bool PythonLanguage::runScript(const char* fname) {
 		FILE *fp = fopen (fname, "rb");
-		
+
 		if (fp != NULL) {
 			/* A short explanation:
 			1. The PyRun_SimpleFile has issues with FILE* type. Results in Access Violations on Windows
-			2. The PyRun_SimpleString does not handle DOS line-endings. 
+			2. The PyRun_SimpleString does not handle DOS line-endings.
 			*/
-			
+
 			std::ifstream pyfile(fname);
 
 			if (!pyfile)
@@ -221,10 +272,10 @@ namespace Opde {
 				ftxt += '\n';
 			}
 			pyfile.close();
-	
+
 			PyRun_SimpleStringFlags(ftxt.c_str(), NULL);
 		}
-		
+
 		if (PyErr_Occurred()) {
 			PyErr_Print();
 			PyErr_Clear();
@@ -233,7 +284,7 @@ namespace Opde {
 
 		return true;
 	}
-	
+
 	PyObject* PythonLanguage::createRoot(PyObject *self, PyObject* args) {
 		// args: Module mask - unsigned long long
 		PyObject *result = NULL;
@@ -242,7 +293,7 @@ namespace Opde {
 		if (PyArg_ParseTuple(args, "l", &mask)) {
 			// Create new root, wrap, return
 			msRoot = new Opde::Root(mask);
-			
+
 			// Todo: We could also share a single object instance here PyObject - mPyRoot PyIncRef on it, return
 			result = Python::RootBinder::create(msRoot);
 			return result;
@@ -252,11 +303,11 @@ namespace Opde {
 			return NULL;
 		}
 	}
-	
+
 	PyObject* PythonLanguage::getRoot(PyObject *self, PyObject* args) {
 		// args: Module mask - unsigned long long
 		PyObject *result = NULL;
-		
+
 		if (msRoot == NULL) {
 			// Invalid parameters
 			// TODO: Choose a propper exception type

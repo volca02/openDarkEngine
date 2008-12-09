@@ -40,7 +40,7 @@ namespace Opde {
 		PyTypeObject RelationBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			msName,                   /* char *tp_name; */
+			"Opde.Services.Relation", /* char *tp_name; */
 			sizeof(RelationBinder::Object),      /* int tp_basicsize; */
 			0,                        /* int tp_itemsize;       /* not used much */
 			RelationBinder::dealloc,   /* destructor tp_dealloc; */

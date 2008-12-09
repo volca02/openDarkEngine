@@ -63,7 +63,7 @@ namespace Opde {
 		PyTypeObject DatabaseServiceBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			msName,                   // char *tp_name; */
+			"Opde.Services.DatabaseService",                   // char *tp_name; */
 			sizeof(DatabaseServiceBinder::Object),      // int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			DatabaseServiceBinder::dealloc,   // destructor tp_dealloc; */

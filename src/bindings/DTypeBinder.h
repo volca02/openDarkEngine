@@ -44,10 +44,13 @@ namespace Opde {
 
 				// --- Methods ---
 				/// setter for values
-				static PyObject* set(PyObject* self, PyObject* args); 
-				/// getter for values 
-				static PyObject* get(PyObject* self, PyObject* args); 
-				
+				static PyObject* set(PyObject* self, PyObject* args);
+				/// getter for values
+				static PyObject* get(PyObject* self, PyObject* args);
+
+				/// Initializes the type - exposes it in the module
+				static void init(PyObject* module);
+
 			protected:
 				/// Static type definition for LinkService
 				static PyTypeObject msType;

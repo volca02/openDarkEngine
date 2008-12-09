@@ -35,67 +35,67 @@ namespace Opde {
 	namespace Python {
 	    // Type converters
 	    enum VariableType { VT_INVALID, VT_BOOL, VT_INT, VT_LONG, VT_FLOAT, VT_CHARPTR, VT_STRING, VT_CUSTOM_TYPE };
-		
+
 		struct TypeInfoBase {
 		};
-		
+
 		template<typename T> struct TypeInfo : public TypeInfoBase {
 			char* typeName;
 			VariableType type;
-			
+
 			TypeInfo() : typeName("invalid"), type(VT_INVALID) {};
-			
+
 			PyObject* toPyObject(T val) const {
 				PyErr_SetString(PyExc_TypeError, "Binding error: Type has no conversion or TypeInfo specified!");
 				return NULL;
 			}
 		};
-		
-		
+
+
 		template<> struct TypeInfo<bool> {
 			char* typeName;
 			VariableType type;
-			
+
 			TypeInfo() : typeName("bool"), type(VT_BOOL) {};
-			
+
 			PyObject* toPyObject(bool val) const {
 				PyObject* res = val ? Py_True : Py_False;
-				
+
 				Py_INCREF(res);
-				
+
 				return res;
 			}
 		};
-		
+
 		template<> struct TypeInfo<int> {
 			char* typeName;
             VariableType type;
-			
+
 			TypeInfo() : typeName("int"), type(VT_INT) {};
-			
+
 			PyObject* toPyObject(int val) const {
 				return PyLong_FromLong(val);
 			}
 		};
-		
+
 		template<> struct TypeInfo<long> {
 			char* typeName;
 			VariableType type;
-			
+
 			TypeInfo() : typeName("long"), type(VT_LONG) {};
-			
+
 			PyObject* toPyObject(long val) const {
 				return PyLong_FromLong(val);
 			}
 		};
-				
-		
+
+
 		template<> struct TypeInfo<float> {
 			char* typeName;
 			VariableType type;
-			
+
 			TypeInfo() : typeName("float"), type(VT_FLOAT) {};
-			
+
 			PyObject* toPyObject(float val) const {
 				return PyFloat_FromDouble(val);
 			}
@@ -104,30 +104,30 @@ namespace Opde {
 		template<> struct TypeInfo<std::string> {
 			char* typeName;
 			VariableType type;
-						
+
 			TypeInfo() : typeName("std::string"), type(VT_STRING) {};
-			
+
 			PyObject* toPyObject(const std::string& val) const {
 				return PyString_FromString(val.c_str());
 			}
 		};
-		
+
 		// Global utilities - object conversion and such
 		PyObject* DVariantToPyObject(const DVariant& inst);
 		DVariant PyObjectToDVariant(PyObject* obj);
-		
+
 		// DVariant type info
 		template<> struct TypeInfo<DVariant> {
 			char* typeName;
 			VariableType type;
-			
+
 			TypeInfo() : typeName("DVariant"), type(VT_CUSTOM_TYPE) {};
-			
+
 			PyObject* toPyObject(const DVariant& val) const {
 				return DVariantToPyObject(val);
 			}
 		};
-		
+
 		/// Template definition of a Python instance holding a single object
 		template<typename T> struct ObjectBase {
 			PyObject_HEAD
@@ -142,8 +142,19 @@ namespace Opde {
 			return reinterpret_cast< T >(obj);
 		}
 
+		/// Common ancestor for all python published C types
+		class PythonPublishedType {
+			protected:
+				/** Publishes the type as a member of a specified module
+					@param containter The module to publish the type in
+					@param type The python type object to publish
+					@param name The name of the type to use
+				*/
+				static void publishType(PyObject* containter, PyTypeObject* type, const char* name);
+		};
+
 		/// A template that binds sharedptr typed classes
-		template <typename T> class shared_ptr_binder {
+		template <typename T> class shared_ptr_binder : public PythonPublishedType {
 			protected:
 				/// A python object type
 				typedef ObjectBase<T> Object;
@@ -178,21 +189,10 @@ namespace Opde {
 					// Finally delete the object
 					PyObject_Del(self);
 				}
-				
-				/** Publishes the type as a member of a specified module
-					@param module The module to publish the type in
-					@param type The python type object to publish
-					@param name The name of the type to use
-				*/
-				static void publishType(PyObject* module, PyTypeObject* type, const char* name) {
-					PyType_Ready(type);
-					
-					PyDict_SetItemString(PyModule_GetDict(module), name, (PyObject*)type);
-				}
 		};
-		
+
 		/// A template that binds a pointer to class (simmilar to shared_ptr_binder, but no special handling is used)
-		template <typename T> class class_ptr_binder {
+		template <typename T> class class_ptr_binder : public PythonPublishedType {
 			protected:
 				/// A python object type
 				typedef ObjectBase<T*> Object;
@@ -203,8 +203,6 @@ namespace Opde {
 
 					object = PyObject_New(Object, type);
 
-					// At this point, the shared_ptr instance in the object is invalid (I.E. Allocated, but not initialized).
-					// If we try to assign into it, we'll segfault. Because of that, we have to do placed new to initialize the object
 					if (object != NULL) {
 						// Here, tidy!
 						object->mInstance = NULL;
@@ -227,7 +225,7 @@ namespace Opde {
     class OPDELIB_EXPORT PythonLanguage {
     	protected:
 			static Opde::Root* msRoot;
-			
+
     	public:
 			/** Initializes python lang and all the bindings */
 			static void init(int argc, char **argv);
@@ -237,10 +235,10 @@ namespace Opde {
 
 			/** Runs a script loaded in memory on a given address */
 			static void runScriptPtr(const char* ptr);
-			
+
 			/** Runs a script from a file */
 			static bool runScript(const char* fname);
-			
+
 			/// Python side Root singleton handler
 			static PyObject* createRoot(PyObject *self, PyObject* args);
 

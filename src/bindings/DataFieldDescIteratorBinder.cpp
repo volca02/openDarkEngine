@@ -35,7 +35,7 @@ namespace Opde {
 				public:
 					static void init(PyObject* module) {
 						// TODO: publishType(module, &msType, msName);
-						
+
 						// name, label, size, type, enumerator
 						field("name", &DataFieldDesc::name);
 						field("label", &DataFieldDesc::label);
@@ -47,7 +47,7 @@ namespace Opde {
 
 		template<> char* PythonStruct<DataFieldDesc>::msName = "DataFieldDesc";
 
-	
+
 
 		// -------------------- Data field desc iterator --------------------
 		char* DataFieldDescIteratorBinder::msName = "DataFieldDescIterator";
@@ -56,7 +56,7 @@ namespace Opde {
 		PyTypeObject DataFieldDescIteratorBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			msName,                   // char *tp_name; */
+			"Opde.DataFieldDescIterator",  // char *tp_name; */
 			sizeof(DataFieldDescIteratorBinder::Object),      /* int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			DataFieldDescIteratorBinder::dealloc,   // destructor tp_dealloc; */
@@ -91,40 +91,40 @@ namespace Opde {
 		PyMethodDef DataFieldDescIteratorBinder::msMethods[] = {
 			{NULL, NULL},
 		};
-		
-		
+
+
 		// ------------------------------------------
 		PyObject* DataFieldDescIteratorBinder::getIterObject(PyObject* self) {
 			Py_INCREF(self);
 			return self;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DataFieldDescIteratorBinder::getNext(PyObject* self) {
 			Object* o = python_cast<Object*>(self, &msType);
-			
+
 			// Get returnable object, advance to next.
 			PyObject* next = NULL;
-			
+
 			if ((!o->mInstance.isNull()) && !o->mInstance->end()) {
 				const DataFieldDesc& d = o->mInstance->next();
 				next = DataFieldDescBinder::create(d);
 			}
-			
+
 			return next;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DataFieldDescIteratorBinder::repr(PyObject *self) {
 			return PyString_FromFormat("<DataFieldDescIterator at %p>", self);
 		}
-		
-		
+
+
 		// ------------------------------------------
 		PyObject* DataFieldDescIteratorBinder::getattr(PyObject *self, char *name) {
 			return Py_FindMethod(msMethods, self, name);
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DataFieldDescIteratorBinder::create(const DataFieldDescIteratorPtr& result) {
 			Object* object = construct(&msType);
@@ -135,7 +135,7 @@ namespace Opde {
 
 			return (PyObject *)object;
 		}
-		
+
 		// ------------------------------------------
 		void DataFieldDescIteratorBinder::init(PyObject* module) {
 			publishType(module, &msType, msName);
