@@ -1,3 +1,815 @@
+2008-12-09 20:30  volca
+
+	* src/services/worldrep/WRTypes.h: Origin vertex. The texure is
+	  only one byte long
+
+2008-12-04 09:23  volca
+
+	* TODO, src/scenemanager/CMakeLists.txt,
+	  src/scenemanager/DarkBspNode.cpp, src/scenemanager/DarkBspNode.h,
+	  src/scenemanager/DarkBspPrerequisites.h,
+	  src/scenemanager/DarkBspTree.h, src/scenemanager/DarkCamera.cpp,
+	  src/scenemanager/DarkConvexPolygon.h,
+	  src/scenemanager/DarkPortal.h,
+	  src/scenemanager/DarkPortalFrustum.h,
+	  src/scenemanager/DarkSceneManager.h,
+	  src/scenemanager/DarkSceneNode.h,
+	  src/services/worldrep/WRCell.cpp: VisBlocking (that was easy!)
+
+2008-12-03 20:26  volca
+
+	* cmake/FREEIMAGEConfig.cmake, doc/DEVELOPERS: default search path
+	  for freeimage and some formatting changes in the developers file
+
+2008-12-03 19:46  volca
+
+	* src/base/dyntype/DTypeDef.cpp, src/base/dyntype/DTypeDef.h: empty
+	  desc list for relations with no data
+
+2008-12-03 19:45  volca
+
+	* scripts/python/tree.py, src/bindings/LinkServiceBinder.cpp,
+	  src/bindings/LinkServiceBinder.h,
+	  src/bindings/RelationBinder.cpp, src/bindings/RelationBinder.h,
+	  src/services/link/LinkService.cpp,
+	  src/services/link/LinkService.h, src/services/link/Relation.cpp,
+	  src/services/link/Relation.h: Propagate the filed desc list
+	  getter of relations throughout the codebase (and to scripts as
+	  well)
+
+2008-12-03 18:12  volca
+
+	* proto/PHYS_SYSTEM/readphs.cpp: Displacer's work -> code
+
+2008-12-03 16:32  volca
+
+	* doc/DEVELOPERS: Some more dev. setup comments and fixes (a svn
+	  revision 1000, yay!)
+
+2008-12-03 16:20  volca
+
+	* doc/DEVELOPERS: Some more env. setup comments
+
+2008-12-03 11:04  volca
+
+	* src/services/object/ObjectService.cpp: Chunk name was wrong - so
+	  SymName was not loaded. Fixed
+
+2008-12-03 09:17  volca
+
+	* proto/PHYS_SYSTEM/readphs.cpp: Displacer's work -> code
+
+2008-12-01 16:34  volca
+
+	* proto/PHYS_SYSTEM/readphs.cpp: Displacer's work -> code
+
+2008-11-21 09:16  volca
+
+	* src/services/worldrep/WRCell.cpp: fix for the recently introduced
+	  lmap UV even worse than before bug
+
+2008-11-20 14:05  volca
+
+	* src/main/GamePlayState.cpp: update the light counts
+
+2008-11-20 14:04  volca
+
+	* src/services/material/MaterialService.cpp,
+	  src/services/material/MaterialService.h: Tus creator for animated
+	  sequences
+
+2008-11-20 14:03  volca
+
+	* scripts/OpdeDebugPanel.overlay,
+	  src/scenemanager/DarkSceneManager.cpp,
+	  src/scenemanager/DarkSceneManager.h: Light count added to
+	  statistics
+
+2008-11-20 14:02  volca
+
+	* src/base/Array.h: Warning fix
+
+2008-11-20 14:02  volca
+
+	* src/scenemanager/DarkBspTree.cpp: Partial fix for horrible
+	  performance drops
+
+2008-11-20 09:53  volca
+
+	* src/main/GamePlayState.cpp: oops. removed too much. fixed
+	  StartingPoint
+
+2008-11-20 09:48  volca
+
+	* src/main/GamePlayState.cpp: Extra debug timers displayed
+
+2008-11-20 09:46  volca
+
+	* scripts/OpdeDebugPanel.overlay: Extra statistics into the debug
+	  panel
+
+2008-11-20 09:46  volca
+
+	* src/scenemanager/DarkBspNode.cpp, src/scenemanager/DarkBspNode.h:
+	  Dynamic lights now have an additional separate list
+
+2008-11-20 09:45  volca
+
+	* src/scenemanager/DarkGeometry.cpp,
+	  src/scenemanager/DarkGeometry.h: Populate the dyn-light list only
+	  once, not per material
+
+2008-11-20 09:44  volca
+
+	* src/scenemanager/DarkSceneManager.cpp,
+	  src/scenemanager/DarkSceneManager.h: Some more preformance
+	  statistics
+
+2008-11-20 09:43  volca
+
+	* src/services/material/MaterialService.cpp: Some overlooked
+	  references to WR service removed
+
+2008-11-20 09:43  volca
+
+	* src/base/loaders/ManualBinFileLoader.cpp: A default depth bias,
+	  some object seem not to introduce ZBias property although they
+	  need it
+
+2008-11-20 09:39  volca
+
+	* src/services/render/ZBiasProperty.cpp: ZBias was way-out of the
+	  range. Fixing
+
+2008-11-19 13:35  volca
+
+	* src/base/loaders/ManualBinFileLoader.cpp,
+	  src/services/ServiceCommon.h, src/services/Services.cmake,
+	  src/services/game/GameService.cpp,
+	  src/services/gui/GUIService.cpp,
+	  src/services/inherit/InheritService.cpp,
+	  src/services/inherit/InheritService.h,
+	  src/services/input/InputService.cpp, src/services/light,
+	  src/services/light/CMakeLists.txt,
+	  src/services/light/LightService.cpp,
+	  src/services/light/LightService.h,
+	  src/services/link/LinkService.cpp,
+	  src/services/loop/LoopService.h, src/services/material,
+	  src/services/material/CMakeLists.txt,
+	  src/services/material/MaterialService.cpp,
+	  src/services/material/MaterialService.h,
+	  src/services/object/ObjectService.cpp,
+	  src/services/property/PropertyGroup.cpp,
+	  src/services/render/RenderService.cpp,
+	  src/services/render/RenderService.h,
+	  src/services/render/ZBiasProperty.cpp,
+	  src/services/worldrep/LightmapAtlas.cpp,
+	  src/services/worldrep/WRCell.cpp, src/services/worldrep/WRCell.h,
+	  src/services/worldrep/WRCommon.h,
+	  src/services/worldrep/WRTypes.h,
+	  src/services/worldrep/WorldRepService.cpp,
+	  src/services/worldrep/WorldRepService.h,
+	  src/tools/meshconvert.cpp: * A rewrite of how materials and
+	  lights are handled
+	  * adding material service
+	  * adding light service
+	  * Getter macro for services used
+	  * some random fixes/changes
+	  * New bugs introduced!
+
+2008-11-19 12:36  volca
+
+	* src/services/config/ConfigService.cpp,
+	  src/services/config/ConfigService.h: * language config setting
+	  added
+
+2008-11-19 12:35  volca
+
+	* src/scenemanager/DarkBspNode.h,
+	  src/scenemanager/DarkBspPrerequisites.h,
+	  src/scenemanager/DarkBspTree.cpp,
+	  src/scenemanager/DarkGeometry.cpp,
+	  src/scenemanager/DarkGeometry.h, src/scenemanager/DarkLight.cpp,
+	  src/scenemanager/DarkLight.h: * Adding the static/dynamic light
+	  concept
+	  * and some related changes
+
+2008-11-19 12:34  volca
+
+	* src/main/DTypeScriptCompiler.cpp, src/main/GameLoadState.cpp,
+	  src/main/GamePlayState.cpp, src/main/GameStateManager.cpp,
+	  src/main/OpdeDocGen.cpp, src/main/PLDefScriptCompiler.cpp,
+	  src/main/Root.cpp: * getter macro for services used
+	  * some random changes
+
+2008-11-19 12:32  volca
+
+	* src/bindings/CMakeLists.txt,
+	  src/bindings/ConfigServiceBinder.cpp,
+	  src/bindings/DatabaseServiceBinder.cpp,
+	  src/bindings/InheritQueryResultBinder.cpp,
+	  src/bindings/LinkQueryResultBinder.cpp,
+	  src/bindings/LinkServiceBinder.cpp,
+	  src/bindings/LoopServiceBinder.cpp,
+	  src/bindings/QuickGUIBindings.cpp: * some random changes to the
+	  python bindings (fixes)
+
+2008-11-19 12:31  volca
+
+	* src/base/Array.h, src/base/dyntype/DTypeDef.cpp,
+	  src/base/logger/logger.h,
+	  src/base/servicemanager/OpdeServiceManager.h: *Adding a Getter
+	  for services (shorter to write, enables changes to the service
+	  manager later)
+	  * couple of small changes
+	  * A positive index only resizeable array added (SimpleArray)
+
+2008-11-09 18:20  volca
+
+	* src/base/StringTokenizer.h,
+	  src/services/database/DatabaseService.cpp,
+	  src/services/worldrep/WorldRepService.cpp: * Switching off the
+	  skybox for now
+	  * fixing next on last token if no quote found
+	  * adding logging of time spent on particular loading operation
+
+2008-11-09 18:03  volca
+
+	* src/base/StringTokenizer.h, src/main/GameStateManager.cpp,
+	  src/main/Opde.cpp: Enabling drag-n-drop possibility on lnk files
+
+2008-11-09 15:32  volca
+
+	* src/services/inherit/ArchetypeInheritor.cpp,
+	  src/services/inherit/ArchetypeInheritor.h,
+	  src/services/inherit/CachedInheritor.cpp,
+	  src/services/inherit/CachedInheritor.h,
+	  src/services/inherit/InheritCommon.h,
+	  src/services/inherit/InheritService.cpp,
+	  src/services/inherit/InheritService.h,
+	  src/services/inherit/NeverInheritor.cpp,
+	  src/services/inherit/NeverInheritor.h,
+	  src/services/property/PropertyGroup.cpp,
+	  src/services/property/PropertyGroup.h,
+	  src/services/render/RenderService.cpp,
+	  src/services/worldrep/WorldRepService.cpp: * fixed a segv
+	  * inheritors now have a destruction mechanism, and are not
+	  distributed via shared ptr
+
+2008-11-09 15:31  volca
+
+	* src/main/Opde.cpp: Fixing the vc version of the command line
+	  parsing
+
+2008-11-09 14:04  volca
+
+	* src/bindings/QuickGUIBindings.cpp: warning fix
+
+2008-11-09 14:04  volca
+
+	* src/main/GameStateManager.cpp, src/main/GameStateManager.h,
+	  src/main/Opde.cpp: Provide a possibility to set the mission name
+	  on the command line
+
+2008-11-07 05:38  patryn
+
+	* src/scenemanager/DarkConvexPolygon.cpp: Fixed a small bug, a
+	  minor optimization.
+
+2008-11-05 22:38  patryn
+
+	* installer/opde-sample.cfg: Added the MaxAtlasSize parameter to
+	  the config file template.
+
+2008-11-05 20:45  volca
+
+	* src/services/worldrep/LightmapAtlas.h: missing include added
+
+2008-11-05 20:35  volca
+
+	* src/main/Root.h, src/services/inherit/InheritCommon.h,
+	  src/services/worldrep/LightmapAtlas.cpp,
+	  src/services/worldrep/LightmapAtlas.h: Some comments added
+
+2008-11-05 08:05  volca
+
+	* src/services/worldrep/LightmapAtlas.cpp,
+	  src/services/worldrep/LightmapAtlas.h: A more batching effective
+	  atlas selection approach
+
+2008-11-05 04:33  patryn
+
+	* src/main/GameStateManager.cpp,
+	  src/services/worldrep/LightmapAtlas.cpp,
+	  src/services/worldrep/LightmapAtlas.h: Made Max Atlas Size
+	  configurable.
+
+2008-11-04 13:20  volca
+
+	* src/base/loaders/ManualBinFileLoader.cpp,
+	  src/services/render/ZBiasProperty.cpp,
+	  src/services/render/ZBiasProperty.h: partial fix for zbias
+	  property - now relatively ok, but will need more work
+
+2008-11-04 12:55  volca
+
+	* src/services/worldrep/LightmapAtlas.cpp,
+	  src/services/worldrep/LightmapAtlas.h: Two pass lightmap
+	  placement - should improve effectivity
+
+2008-11-03 20:29  volca
+
+	* src/main/GameStateManager.cpp: set game_type from the commandline
+	  into the config service
+
+2008-11-03 20:28  volca
+
+	* scripts/shock2/ss2-props.pldef, scripts/thief1/t1-props.pldef,
+	  scripts/thief2/t2-props.pldef,
+	  src/services/render/RenderAlphaProperty.cpp,
+	  src/services/render/RenderAlphaProperty.h,
+	  src/services/render/RenderService.cpp,
+	  src/services/render/RenderService.h,
+	  src/services/render/RenderTypeProperty.cpp,
+	  src/services/render/RenderTypeProperty.h,
+	  src/services/render/ZBiasProperty.cpp,
+	  src/services/render/ZBiasProperty.h: * Some render service
+	  properties implemented as built-in
+	  * those also removed from the pldef files
+
+2008-11-03 20:25  volca
+
+	* src/services/object/ObjectService.cpp: on clear, also clear the
+	  bitmap of object existence
+
+2008-11-03 20:23  volca
+
+	* src/bindings/InputServiceBinder.cpp: fixing a warning - comment
+	  in comment
+
+2008-11-03 20:22  volca
+
+	* src/services/config/ConfigService.cpp,
+	  src/services/config/ConfigService.h: config service as a bearer
+	  of the game type
+
+2008-11-03 20:21  volca
+
+	* src/base/BitArray.h: changing the order of reset - now it even
+	  works!
+
+2008-11-03 20:19  volca
+
+	* src/services/render/MaterialInstance.cpp: only override zbias on
+	  nonzero setting
+
+2008-11-03 20:18  volca
+
+	* src/services/link/Relation.cpp: Init order change
+
+2008-11-03 20:17  volca
+
+	* src/base/dyntype/SingleFieldDataStorage.h: allow enum to be
+	  specified for the storages
+
+2008-11-02 12:45  volca
+
+	* src/services/worldrep/LightmapAtlas.cpp,
+	  src/services/worldrep/LightmapAtlas.h: Dynamic atlas size. A bit
+	  better performance as a result
+
+2008-11-02 12:44  volca
+
+	* src/services/database/DatabaseService.cpp: Just to be sure we
+	  have a trailing zero every time
+
+2008-11-02 08:45  volca
+
+	* src/services/link/LinkService.cpp,
+	  src/services/link/LinkService.h, src/services/link/Relation.cpp,
+	  src/services/link/Relation.h,
+	  src/services/object/ObjectService.cpp,
+	  src/services/property/PropertyGroup.cpp,
+	  src/services/render/RenderService.cpp: Fixing some fragility
+	  which caused problems in Christines Ponterbee medsci1.mis mission
+
+2008-11-01 16:02  volca
+
+	* scripts/shock2/ss2-props.pldef, scripts/thief1/t1-props.pldef,
+	  scripts/thief2/t2-props.pldef, src/main/GamePlayState.cpp,
+	  src/scenemanager/DarkSceneManager.cpp,
+	  src/services/database/DatabaseService.cpp,
+	  src/services/database/DatabaseService.h,
+	  src/services/object/ObjectService.cpp,
+	  src/services/property/PropertyGroup.cpp,
+	  src/services/property/PropertyGroup.h,
+	  src/services/property/PropertyService.cpp,
+	  src/services/property/PropertyService.h,
+	  src/services/render/RenderService.cpp,
+	  src/services/worldrep/WorldRepService.cpp,
+	  src/services/worldrep/WorldRepService.h: A couple of random bug
+	  fixes - load console command, clear method failures
+
+2008-10-30 15:03  volca
+
+	* scripts/shock2/ss2-props.pldef, scripts/thief1/t1-props.pldef,
+	  scripts/thief2/t2-props.pldef,
+	  src/base/dyntype/SingleFieldDataStorage.h,
+	  src/services/property/PropertyGroup.cpp,
+	  src/services/property/PropertyService.cpp,
+	  src/services/render/HasRefsProperty.cpp,
+	  src/services/render/HasRefsProperty.h,
+	  src/services/render/RenderService.cpp,
+	  src/services/render/RenderedProperty.cpp,
+	  src/services/render/RenderedProperty.h: Getting the HasRefs
+	  property to work
+
+2008-10-30 10:25  patryn
+
+	* installer/opde-win.in: Recursively search for CRF files.
+
+2008-10-30 03:26  patryn
+
+	* installer/opde-win.in: Got rid of the extra INI sections, seemed
+	  to cause problems.
+
+2008-10-29 23:14  patryn
+
+	* src/base/console/ConsoleCommandListener.cpp,
+	  src/services/render/HasRefsProperty.cpp,
+	  src/services/render/HasRefsProperty.h,
+	  src/services/render/RenderedProperty.cpp,
+	  src/services/render/RenderedProperty.h: Added the SVN keywords.
+
+2008-10-29 21:28  volca
+
+	* src/main/Root.cpp, src/services/property/PropertyGroup.cpp,
+	  src/services/property/PropertyGroup.h,
+	  src/services/render/HasRefsProperty.cpp,
+	  src/services/render/HasRefsProperty.h,
+	  src/services/render/RenderService.cpp,
+	  src/services/render/RenderService.h,
+	  src/services/render/RenderedProperty.cpp,
+	  src/services/render/RenderedProperty.h: * valueChanged callback -
+	  mostly for editor mode value propagation
+	  * ActiveProperty class added - ancestor of properties with
+	  implementation
+	  * RenderedProperty class added - targetted at all properties that
+	  modify entity visibility/look
+	  * HasRefsProperty class added - a bad (in function)
+	  implementation of a hasrefs property - take as an example before
+	  it is finished
+	  * A rewrite of some RenderService methods. Hopefully without any
+	  negative side-effects so far
+
+2008-10-29 21:22  volca
+
+	* src/base/Array.h, src/services/inherit/CachedInheritor.cpp,
+	  src/services/inherit/CachedInheritor.h,
+	  src/services/inherit/InheritCommon.h,
+	  src/services/inherit/InheritService.cpp,
+	  src/services/inherit/InheritService.h,
+	  src/services/inherit/NeverInheritor.cpp,
+	  src/services/inherit/NeverInheritor.h,
+	  src/services/object/ObjectService.cpp: * Grow inheritors as well
+	  * Array now has min/max ID getters
+	  * DonorType has 2.4 tag version, not 1.1
+
+2008-10-29 21:19  volca
+
+	* src/base/loaders/ManualBinFileLoader.cpp: Try to look if the file
+	  exists instead of blindly loading
+
+2008-10-29 21:19  volca
+
+	* src/services/worldrep/WorldRepService.cpp: be smarter in loading
+	  the images - use filesystem glob as provided by ogre
+
+2008-10-28 05:19  patryn
+
+	* src/main/GamePlayState.cpp, src/main/GameStateManager.cpp: A
+	  couple of minor optimizations.
+
+2008-10-28 02:07  patryn
+
+	* installer/opde-win.in: Added opdeScript.exe to the installer.
+
+2008-10-27 23:51  patryn
+
+	* src/main/GameStateManager.cpp: Fixed a bug where clicking on the
+	  X button in windowed mode closed OPDE window, but didn't shut the
+	  application down.
+
+2008-10-27 11:26  patryn
+
+	* src/base/Array.h: A minor optimization.
+
+2008-10-27 08:17  patryn
+
+	* src/base/Array.h: A minor optimization.
+
+2008-10-27 03:44  patryn
+
+	* src/main/GameStateManager.cpp: Added another informative message
+	  to the log file, before sending the installer to Bikerdude of
+	  TTLG.
+
+2008-10-26 17:23  volca
+
+	* src/scenemanager/DarkBspNode.cpp,
+	  src/scenemanager/DarkCamera.cpp, src/scenemanager/DarkCamera.h,
+	  src/scenemanager/DarkPortal.cpp,
+	  src/scenemanager/DarkSceneManager.cpp: This fixes the first frame
+	  rendering bug
+
+2008-10-26 16:22  volca
+
+	* src/scenemanager/DarkGeometry.cpp,
+	  src/scenemanager/DarkPortal.cpp: leak fixes
+
+2008-10-26 16:21  volca
+
+	* scripts/shock2/ss2-props.pldef, src/base/loaders/BinFormat.h,
+	  src/main/GamePlayState.cpp,
+	  src/services/render/RenderService.cpp,
+	  src/services/render/RenderService.h,
+	  src/services/worldrep/WRCell.cpp,
+	  src/services/worldrep/WorldRepService.cpp: * Leak fixes
+	  * couple of comments rewritten, improved
+
+2008-10-26 15:28  volca
+
+	* src/main/GameLoadState.cpp, src/main/GamePlayState.cpp,
+	  src/main/GameStateManager.cpp, src/main/GameStateManager.h,
+	  src/main/Root.cpp, src/main/Root.h: Migrating the testing viewer
+	  to Opde::Root
+
+2008-10-26 14:18  volca
+
+	* src/services/worldrep/LightmapAtlas.cpp,
+	  src/services/worldrep/LightmapAtlas.h: Two minor problems fixed
+
+2008-10-26 06:02  patryn
+
+	* src/main/GameStateManager.cpp: Record the OPDE version in the log
+	  file.
+
+2008-10-26 06:01  patryn
+
+	* config.h.cmake: Added the release code name to the header file.
+
+2008-10-26 06:00  patryn
+
+	* src/services/worldrep/LightmapAtlas.cpp: For some reason this
+	  file ended up with inconsistent EOL characters.
+
+2008-10-26 02:24  patryn
+
+	* src/services/worldrep/LightmapAtlas.cpp,
+	  src/services/worldrep/LightmapAtlas.h: Optimized
+	  LightMap::refresh().
+
+2008-10-24 23:11  patryn
+
+	* installer/opde-win.in: The installer now works with mod-ready SS2
+	  installations.
+
+2008-10-24 22:46  patryn
+
+	* installer/opde-win.in: Finally made up my mind on the installer
+	  welcome message.
+
+2008-10-23 22:13  patryn
+
+	* scripts/python/tree.py: Fixed a couple of typos in the comments.
+
+2008-10-23 03:54  patryn
+
+	* src/base/file/File.cpp, src/main/DTypeScriptCompiler.cpp,
+	  src/scenemanager/DarkConvexPolygon.cpp,
+	  src/scenemanager/DarkPortal.cpp,
+	  src/services/object/ObjectService.cpp,
+	  src/services/worldrep/LightmapAtlas.cpp: Reduced the calls to
+	  .size() at it is a slow function.
+
+2008-10-22 11:24  patryn
+
+	* src/scenemanager/DarkGeometry.cpp: A minor optimization. The
+	  compiler was handling EAX inefficiently.
+
+2008-10-22 06:53  volca
+
+	* src/base/Array.h: Leak/overrun fix
+
+2008-10-22 06:23  volca
+
+	* src/base/loaders/FonFormat.h,
+	  src/base/loaders/ManualFonFileLoader.cpp,
+	  src/base/loaders/ManualFonFileLoader.h: Warning fix - extern the
+	  constants
+
+2008-10-22 06:23  volca
+
+	* src/bindings/bindings.cpp: Writing in delphi makes you stupid! =
+	  -> == in C++ (:= -> =). Bad Volca, bad!
+
+2008-10-22 03:01  patryn
+
+	* src/base/BitArray.h: Fixed the bug where mNegativeArray[0] was
+	  not being initialized under VC and as a result wreaked havoc on
+	  the arrays and got OPDE's havoc wreaked.
+
+2008-10-21 19:59  volca
+
+	* src/base/BitArray.h: fixes for VC++, another set
+
+2008-10-21 19:57  volca
+
+	* src/base/Array.h: Seems to fix visual studio problems with Array
+	  template (damned VC++)
+
+2008-10-21 17:59  volca
+
+	* src/main/GameLoadState.cpp: log loading time
+
+2008-10-21 17:58  volca
+
+	* src/base/dyntype/DataStorage.h: use the same function name
+	  everywhere
+
+2008-10-21 17:57  volca
+
+	* src/base/Array.h, src/base/BitArray.h,
+	  src/services/inherit/CachedInheritor.cpp,
+	  src/services/inherit/CachedInheritor.h,
+	  src/services/inherit/InheritCommon.h,
+	  src/services/object/ObjectService.cpp,
+	  src/services/object/ObjectService.h,
+	  src/services/property/PropertyGroup.cpp,
+	  src/services/property/PropertyGroup.h,
+	  src/services/property/PropertyService.cpp,
+	  src/services/property/PropertyService.h: Transitioned the
+	  inheritors to Array<> and BitArray
+
+2008-10-21 17:56  volca
+
+	* src/base/loaders/BinFormat.h: Comment removed
+
+2008-10-21 17:55  volca
+
+	* src/base/loaders/ManualBinFileLoader.cpp: removing some debug
+	  code
+
+2008-10-21 10:06  patryn
+
+	* src/base/dyntype/DTypeDef.cpp, src/scenemanager/DarkBspNode.h:
+	  Two minor optimizations.
+
+2008-10-21 07:06  volca
+
+	* src/base/Array.h: Ooops. Sizeof was missing in the alloc
+	  statements
+
+2008-10-20 20:16  volca
+
+	* src/base/BitArray.h, src/base/OpdeException.h: Moved the array
+	  exception into the opdeException.h
+
+2008-10-20 20:15  volca
+
+	* src/base/dyntype/SingleFieldDataStorage.h: comment fix
+
+2008-10-20 19:54  volca
+
+	* src/base/Array.h: A negative index capable, fixed size, growable
+	  array
+
+2008-10-20 15:59  volca
+
+	* src/main/GameStateManager.cpp: segv fix
+
+2008-10-20 15:58  volca
+
+	* src/scenemanager/DarkGeometry.cpp,
+	  src/scenemanager/DarkGeometry.h,
+	  src/services/worldrep/WorldRepService.cpp: Use fixed-size array
+	  for the cell fragment lists. A decent speedup!
+
+2008-10-20 11:43  patryn
+
+	* src/main/ProxyArchive.h: Export CaseLessFileSystemArchiveFactory.
+
+2008-10-20 01:17  patryn
+
+	* src/main/ProxyArchive.cpp: Got rid of a warning.
+
+2008-10-20 01:10  patryn
+
+	* installer/opde-sample.cfg: Added a comment.
+
+2008-10-19 20:17  volca
+
+	* scripts/python/tree.py: A usage example
+
+2008-10-19 20:13  volca
+
+	* CMakeLists.txt: CustomImageHooks cond. build removed (now fixed)
+
+2008-10-19 20:11  volca
+
+	* src/base/dyntype/SingleFieldDataStorage.h: Forgotten std::cerr
+	  removed
+
+2008-10-19 20:10  volca
+
+	* scripts/python/tree.py: Tree app heavily improved (now usable)
+
+2008-10-19 20:09  volca
+
+	* src/base/dyntype/DTypeDef.h: Adding label
+
+2008-10-19 20:08  volca
+
+	* src/bindings/ObjectServiceBinder.cpp: Updating python bindings
+
+2008-10-19 20:08  volca
+
+	* src/bindings/DTypeBinder.cpp,
+	  src/bindings/DataFieldDescIteratorBinder.cpp,
+	  src/bindings/DataFieldDescIteratorBinder.h,
+	  src/bindings/GUIServiceBinder.cpp,
+	  src/bindings/InheritQueryResultBinder.cpp,
+	  src/bindings/LinkServiceBinder.cpp,
+	  src/bindings/LinkServiceBinder.h,
+	  src/bindings/PropertyServiceBinder.cpp,
+	  src/bindings/PropertyServiceBinder.h,
+	  src/bindings/PythonStruct.h, src/bindings/RootBinder.cpp,
+	  src/bindings/bindings.cpp, src/bindings/bindings.h: Updating
+	  python bindings
+
+2008-10-19 20:07  volca
+
+	* src/main/GameStateManager.cpp, src/main/GameStateManager.h,
+	  src/main/Root.cpp, src/main/Root.h: Use the proxyarchive
+
+2008-10-19 20:06  volca
+
+	* doc/DEVELOPERS: some doc changes
+
+2008-10-19 20:05  volca
+
+	* src/main/ProxyArchive.cpp, src/main/ProxyArchive.h: ProxyArchives
+	  implemented
+
+2008-10-19 12:31  patryn
+
+	* src/base/dyntype/DTypeDef.cpp,
+	  src/services/input/InputService.cpp: A minor optimization and got
+	  rid of a typo.
+
+2008-10-19 08:02  volca
+
+	* src/main/GamePlayState.cpp: A sane default value for the
+	  startingpoint object id
+
+2008-10-19 07:58  volca
+
+	* src/services/link/LinkCommon.h: Link size comment
+
+2008-10-19 07:55  volca
+
+	* src/services/link/Relation.cpp: A propper way to calculate how
+	  many links there are in the tag
+
+2008-10-19 06:47  volca
+
+	* src/services/property/PropertyService.cpp,
+	  src/services/property/PropertyService.h: field desc. iterator
+	  getter - we wanna see this from python, for sure
+
+2008-10-19 06:42  volca
+
+	* proto/python/CMakeLists.txt: removed the freeimage reference from
+	  pytest - it's built into the opdelib now
+
+2008-10-19 06:41  volca
+
+	* ChangeLog: Finally updated the changelog!
+
+2008-10-19 06:38  volca
+
+	* config.h.cmake: removing some outdated defines
+
+2008-10-19 06:32  volca
+
+	* src/main/Root.cpp: Custom image hooks are now built-in all the
+	  time
+
+2008-10-19 06:30  volca
+
+	* src/services/worldrep/WRTypes.h: WRCell flags and flow group
+	  [Disp discovered]
+
 2008-10-18 03:07  patryn
 
 	* src/services/worldrep/LightmapAtlas.cpp: More optimizations.
