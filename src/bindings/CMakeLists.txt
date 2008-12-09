@@ -56,6 +56,6 @@ IF(STATIC_LIBS)
 
     target_link_libraries(OpdePyLib
         ${PYTHON_LIBRARIES}
-        OpdeLib
+        OpenDark
     )
 ENDIF(STATIC_LIBS)

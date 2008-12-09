@@ -19,7 +19,7 @@ include_directories(
     ${PYTHON_INCLUDE_PATH}
 )
 
-add_library (OpdeLib SHARED
+add_library (OpenDark SHARED
     Root.cpp
     Root.h
     DTypeScriptCompiler.cpp
@@ -50,7 +50,7 @@ link_directories(
 )
 
 # We don't link any our own files here, as CMake does not support convenience libraries
-target_link_libraries( OpdeLib
+target_link_libraries( OpenDark
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}
     ${FREEIMAGE_LIBRARIES}
@@ -58,10 +58,10 @@ target_link_libraries( OpdeLib
     QuickGUI
 )
 
-set_property(TARGET OpdeLib PROPERTY LINK_INTERFACE_LIBRARIES "")
+set_property(TARGET OpenDark PROPERTY LINK_INTERFACE_LIBRARIES "")
 
 # Build flags for the .DLL __declspec things, etc.
-SET_TARGET_PROPERTIES(OpdeLib PROPERTIES
+SET_TARGET_PROPERTIES(OpenDark PROPERTIES
   DEFINE_SYMBOL "OPDELIB_DLL_TARGET"
   LINK_INTERFACE_LIBRARIES ""
 )
@@ -74,7 +74,7 @@ if (NOT WIN32)
     )
 
     target_link_libraries( opdeDocGen
-        OpdeLib
+        OpenDark
     )
 
     SET_TARGET_PROPERTIES(opdeDocGen PROPERTIES
@@ -96,7 +96,7 @@ add_executable (opde WIN32
 )
 
 target_link_libraries( opde
-    OpdeLib
+    OpenDark
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}
     ${FREEIMAGE_LIBRARIES}
@@ -112,7 +112,7 @@ add_executable (opdeScript
 )
 
 target_link_libraries( opdeScript
-    OpdeLib
+    OpenDark
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}
     ${FREEIMAGE_LIBRARIES}
