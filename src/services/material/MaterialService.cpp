@@ -371,7 +371,7 @@ namespace Opde {
 			ResourceGroupManager::getSingleton().createResourceGroup(TEMPTEXTURE_RESOURCE_GROUP);
 		} catch (Exception &e) {
 			LOG_ERROR("Cannot create temporary texture/materials resource group '%s'. Exception : %s",
-					TEMPTEXTURE_RESOURCE_GROUP, e.getDescription().c_str());
+					TEMPTEXTURE_RESOURCE_GROUP.c_str(), e.getDescription().c_str());
 		}
 
 		mTextures = NULL;
