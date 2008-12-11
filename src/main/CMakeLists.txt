@@ -55,7 +55,6 @@ target_link_libraries( OpenDark
     ${OIS_LIBRARIES}
     ${FREEIMAGE_LIBRARIES}
     ${PYTHON_LIBRARIES}
-    QuickGUI
 )
 
 set_property(TARGET OpenDark PROPERTY LINK_INTERFACE_LIBRARIES "")

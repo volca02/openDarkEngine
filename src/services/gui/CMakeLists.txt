@@ -8,7 +8,6 @@ include_directories (
     ${OPDE_BASE_INCLUDES}
     ${OPDE_SOURCE_DIR}/src/scenemanager
     ${OPDE_SERVICE_INCLUDES}
-    ${OPDE_SOURCE_DIR}/thirdparty/QuickGUI/include
 )
 
 IF(STATIC_LIBS)

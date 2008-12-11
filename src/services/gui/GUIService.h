@@ -31,7 +31,6 @@
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
 #include "InputService.h"
-#include "QuickGUI.h"
 
 namespace Opde {
 
@@ -40,8 +39,6 @@ namespace Opde {
 		public:
 			GUIService(ServiceManager *manager, const std::string& name);
 			virtual ~GUIService();
-			
-			QuickGUI::GUIManager* getGUIManager();
 			
 			/** Set's the activeness state for GUI.
 			* Either GUI gets input, or the mapped way for input is realized. @see InputService
@@ -56,21 +53,7 @@ namespace Opde {
 			*/
 			void setVisible(bool visible);
 			
-			/// @returns the active sheet
-			QuickGUI::Sheet* getActiveSheet();
-			
-			/// Set's the active sheet
-			void setActiveSheet(QuickGUI::Sheet* sheet);
-			
-			/// Creates a new sheet
-			QuickGUI::Sheet* createSheet();
-			
-			/// Destroys a sheet
-			void destroySheet(QuickGUI::Sheet* sheet);
-			
-			/// Loads a mapping file for gui widgets
-			void loadGUIMapping(const std::string& fname);
-			
+
 		protected:
 			// Service initialization related methods
 			bool init();
@@ -89,19 +72,12 @@ namespace Opde {
 		
 			InputServicePtr mInputSrv;
 			RenderServicePtr mRenderSrv;
-			QuickGUI::GUIManager* mGUIManager;
-			QuickGUI::Root* mRoot;
-			QuickGUI::SkinSet* mSkinSet;
-			
+
 			/// Activity indicator
 			bool mActive;
+
 			/// Visibility indicator
 			bool mVisible;
-			
-			/// Name of the quickgui skin (defaults to 'opde')
-			std::string mSkinName;
-			
-			std::string mGUIMap;
 			
 			RenderService::ListenerID mRenderServiceListenerID;
 	};

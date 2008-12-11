@@ -1,1 +1,1 @@
-add_subdirectory(QuickGUI)
+# add_subdirectory(QuickGUI)
