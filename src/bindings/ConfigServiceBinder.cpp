@@ -32,6 +32,8 @@ namespace Opde {
 		// -------------------- Config Service --------------------
 		char* ConfigServiceBinder::msName = "ConfigService";
 
+		const char* opde_ConfigService__doc__ = "ConfigService proxy. Service that manages engine configuration";
+
 		// ------------------------------------------
 		PyTypeObject ConfigServiceBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
@@ -55,7 +57,7 @@ namespace Opde {
 			0,			              // setattrofunc tp_setattro; */
 			0,			              // PyBufferProcs *tp_as_buffer; */
 			0,			              // long tp_flags; */
-			0,			              // char *tp_doc;  */
+			opde_ConfigService__doc__,// char *tp_doc;  */
 			0,			              // traverseproc tp_traverse; */
 			0,			              // inquiry tp_clear; */
 			0,			              // richcmpfunc tp_richcompare; */
@@ -68,11 +70,38 @@ namespace Opde {
 		};
 
 		// ------------------------------------------
+		const char* opde_ConfigService_setParam__doc__ = "setParam(key, value)\n"
+				"Sets a new configuration parameter value\n"
+				"@type key: string\n"
+				"@param key: The configuration key name\n"
+				"@type value: object\n"
+				"@param value: the new value for the configuration key\n";
+
+		const char* opde_ConfigService_getParam__doc__ = "getParam(key)\n"
+				"Gets the value associated with the given configuration key\n"
+				"@type key: string\n"
+				"@param key: The configuration key name\n"
+				"@rtype: object\n"
+				"@return: the value associated with the key\n";
+
+		const char* opde_ConfigService_hasParam__doc__ = "hasParam(key)\n"
+				"Detects if the given configuration key is defined\n"
+				"@type key: string\n"
+				"@param key: The configuration key name\n"
+				"@rtype: boolean\n"
+				"@return: true if key defined, false otherwise\n";
+
+		const char* opde_ConfigService_loadParams__doc__ = "loadParams(path)\n"
+				"Detects if the given configuration key is defined\n"
+				"@type path: string\n"
+				"@param path: The configuration file name\n";
+
+		// ------------------------------------------
 		PyMethodDef ConfigServiceBinder::msMethods[] = {
-			{"setParam", setParam, METH_VARARGS},
-			{"getParam", getParam, METH_VARARGS},
-			{"hasParam", hasParam, METH_VARARGS},
-			{"loadParams", loadParams, METH_VARARGS},
+			{"setParam", setParam, METH_VARARGS, opde_ConfigService_setParam__doc__},
+			{"getParam", getParam, METH_VARARGS, opde_ConfigService_getParam__doc__},
+			{"hasParam", hasParam, METH_VARARGS, opde_ConfigService_hasParam__doc__},
+			{"loadParams", loadParams, METH_VARARGS, opde_ConfigService_loadParams__doc__},
 			{NULL, NULL},
 		};
 

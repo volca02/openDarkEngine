@@ -144,6 +144,7 @@ namespace Opde {
 			PyDict_SetItemString(dir, "Services", module);
 
 			// init the services (we init all, they register into the module, enabling pydoc usage on them)
+			ConfigServiceBinder::init(module);
 			PropertyServiceBinder::init(module);
 			DatabaseServiceBinder::init(module);
 			InputServiceBinder::init(module);
