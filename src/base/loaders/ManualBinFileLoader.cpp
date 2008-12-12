@@ -1412,8 +1412,9 @@ namespace Ogre {
 			pass->setDepthBias(0.01, 0.01);
 
 			// Some basic lightning settings
-            // tus = pass->createTextureUnitState(txtname);
-			tus = mMaterialService->createAnimatedTextureState(pass, txtname, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 5);
+            tus = pass->createTextureUnitState(txtname);
+            // The model textures are not animated like this. They probably use a texture swapping tweq or something
+			// tus = mMaterialService->createAnimatedTextureState(pass, txtname, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 5);
 
             tus->setTextureAddressingMode(TextureUnitState::TAM_WRAP);
             tus->setTextureCoordSet(0);
