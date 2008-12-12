@@ -286,6 +286,9 @@ namespace Opde {
 
 		mDefaultCamera->setCastShadows(true);
 
+		// aspect derived from screen aspect (to avoid stretching)
+		mDefaultCamera->setAspectRatio(Real(mRenderWindow->getWidth()) / Real(mRenderWindow->getHeight()));
+
 		mRenderWindow->addViewport( mDefaultCamera );
 
 		// Last step: Get the loop service and register as a listener
