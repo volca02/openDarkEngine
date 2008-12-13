@@ -401,6 +401,8 @@ namespace Ogre {
 			}
 		}
 		*/
+
+		std::stable_sort(destList.begin(), destList.end(), SceneManager::lightLess());
 	}
 }
 
