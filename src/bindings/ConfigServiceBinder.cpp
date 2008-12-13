@@ -32,7 +32,7 @@ namespace Opde {
 		// -------------------- Config Service --------------------
 		char* ConfigServiceBinder::msName = "ConfigService";
 
-		const char* opde_ConfigService__doc__ = "ConfigService proxy. Service that manages engine configuration";
+		char* opde_ConfigService__doc__ = "ConfigService proxy. Service that manages engine configuration";
 
 		// ------------------------------------------
 		PyTypeObject ConfigServiceBinder::msType = {
@@ -70,28 +70,28 @@ namespace Opde {
 		};
 
 		// ------------------------------------------
-		const char* opde_ConfigService_setParam__doc__ = "setParam(key, value)\n"
+		char* opde_ConfigService_setParam__doc__ = "setParam(key, value)\n"
 				"Sets a new configuration parameter value\n"
 				"@type key: string\n"
 				"@param key: The configuration key name\n"
 				"@type value: object\n"
 				"@param value: the new value for the configuration key\n";
 
-		const char* opde_ConfigService_getParam__doc__ = "getParam(key)\n"
+		char* opde_ConfigService_getParam__doc__ = "getParam(key)\n"
 				"Gets the value associated with the given configuration key\n"
 				"@type key: string\n"
 				"@param key: The configuration key name\n"
 				"@rtype: object\n"
 				"@return: the value associated with the key\n";
 
-		const char* opde_ConfigService_hasParam__doc__ = "hasParam(key)\n"
+		char* opde_ConfigService_hasParam__doc__ = "hasParam(key)\n"
 				"Detects if the given configuration key is defined\n"
 				"@type key: string\n"
 				"@param key: The configuration key name\n"
 				"@rtype: boolean\n"
 				"@return: true if key defined, false otherwise\n";
 
-		const char* opde_ConfigService_loadParams__doc__ = "loadParams(path)\n"
+		char* opde_ConfigService_loadParams__doc__ = "loadParams(path)\n"
 				"Detects if the given configuration key is defined\n"
 				"@type path: string\n"
 				"@param path: The configuration file name\n";

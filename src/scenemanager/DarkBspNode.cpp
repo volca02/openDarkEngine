@@ -302,7 +302,7 @@ namespace Ogre {
 
 	//-------------------------------------------------------------------------
 	bool BspNode::isVisBlocked() {
-		return mCellFlags & CELL_VIS_BLOCK;
+		return (mCellFlags & CELL_VIS_BLOCK) != 0;
 	}
 
 	//-------------------------------------------------------------------------

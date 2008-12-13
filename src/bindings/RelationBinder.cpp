@@ -236,9 +236,6 @@ namespace Opde {
 		PyObject* RelationBinder::getFieldsDesc(PyObject* self, PyObject* args) {
 			Object* o = python_cast<Object*>(self, &msType);
 
-			PyObject* objflav;
-			int flavor = 0;
-
 			// wrap the returned StringIterator into StringIteratorBinder, return
 			DataFieldDescIteratorPtr res = o->mInstance->getFieldDescIterator();
 			return DataFieldDescIteratorBinder::create(res);

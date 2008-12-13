@@ -150,44 +150,46 @@ namespace Opde {
 		void PythonPublishedType::publishType(PyObject* containter, PyTypeObject* type, const char* name) {
 			PyType_Ready(type);
 			Py_INCREF(type);
-			PyModule_AddObject(containter, name, (PyObject *)type);
+
+			// VC does not like const to plain C calls. So we have to const_cast here
+			PyModule_AddObject(containter, const_cast<char*>(name), (PyObject *)type);
 		}
 	} // namespace Python
 
 	// ---- Doc Strings ----
-	const char* opde_log_fatal__doc__ = "log_fatal(msg)\n"
+	char* opde_log_fatal__doc__ = "log_fatal(msg)\n"
 		"\tLogs a message with FATAL log level.\n"
 		"@type msg: string\n"
 		"@param msg: The logged string\n";
 
-	const char* opde_log_error__doc__ = "log_error(msg)\n"
+	char* opde_log_error__doc__ = "log_error(msg)\n"
 		"\tLogs a message with ERROR log level.\n"
 		"@type msg: string\n"
 		"@param msg: The logged string\n";;
 
-	const char* opde_log_info__doc__ = "log_info(msg)\n"
+	char* opde_log_info__doc__ = "log_info(msg)\n"
 		"\tLogs a message with INFO log level.\n"
 		"@type msg: string\n"
 		"@param msg: The logged string\n";
 
-	const char* opde_log_debug__doc__ = "log_debug(msg)\n"
+	char* opde_log_debug__doc__ = "log_debug(msg)\n"
 		"\tLogs a message with DEBUG log level.\n"
 		"@type msg: string\n"
 		"@param msg: The logged string\n";
 
-	const char* opde_log_verbose__doc__ = "log_verbose(msg)\n"
+	char* opde_log_verbose__doc__ = "log_verbose(msg)\n"
 		"\tLogs a message with VERBOSE (=ALL) log level.\n"
 		"@type msg: string\n"
 		"@param msg: The logged string\n";
 
-	const char* opde_createRoot__doc__ = "createRoot(mask)\n"
+	char* opde_createRoot__doc__ = "createRoot(mask)\n"
 		"Creates the Opde.Root object with the specified service mask (See L{Opde.Services<Opde.Services>}).\n"
 		"@type mask: number\n"
 		"@param mask: Service creation mask\n"
 		"@rtype: Root\n"
 		"@return: A new Opde.Root object reference";
 
-	const char* opde_getRoot__doc__ = "getRoot()\n"
+	char* opde_getRoot__doc__ = "getRoot()\n"
 		"Retrieves the previously created Opde.Root object.\n"
 		"@rtype: Root\n"
 		"@return: A new Opde.Root object reference";

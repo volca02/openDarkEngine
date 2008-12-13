@@ -32,7 +32,7 @@ namespace Opde {
 		// -------------------- Link Service --------------------
 		char* RootBinder::msName = "Root";
 
-		const char* opde_Root__doc__ = "The root object of the openDarkEngine API. Exposes some common objects/methods.\n";
+		char* opde_Root__doc__ = "The root object of the openDarkEngine API. Exposes some common objects/methods.\n";
 
 		// ------------------------------------------
 		PyTypeObject RootBinder::msType = {
@@ -77,31 +77,31 @@ namespace Opde {
 		};
 
 		// ------ Doc Strings -----------------------
-		const char* opde_Root_loadResourceConfig__doc__ = "loadResourceConfig(path)\n"
+		char* opde_Root_loadResourceConfig__doc__ = "loadResourceConfig(path)\n"
 						"Loads a Ogre's resource config file (resources.cfg type) from the specified path\n"
 						"@type path: string\n"
 						"@param path: Path to the resource config file to be loaded\n";
 
-		const char* opde_Root_loadDTypeScript__doc__ = "loadDTypeScript(path, group)\n"
+		char* opde_Root_loadDTypeScript__doc__ = "loadDTypeScript(path, group)\n"
 						"Loads a DType (Dynamic type specifications) file from the specified path\n"
 						"@type path: string\n"
 						"@param path: Path to the dtype file to be loaded\n"
 						"@type group: string\n"
 						"@param group: Resource group from which to load\n";
 
-		const char* opde_Root_loadPLDefScript__doc__ = "loadPLDefScript(path)\n"
+		char* opde_Root_loadPLDefScript__doc__ = "loadPLDefScript(path)\n"
 						"Loads a PLDef (Property/Link definitions) file from the specified path\n"
 						"@type path: string\n"
 						"@param path: Path to the pldef file to be loaded\n"
 						"@type group: string\n"
 						"@param group: Resource group from which to load\n";
 
-		const char* opde_Root_loadConfigFile__doc__ = "loadConfigFile(path)\n"
+		char* opde_Root_loadConfigFile__doc__ = "loadConfigFile(path)\n"
 						"Loads a Opde's config file (opde.cfg type) from the specified path\n"
 						"@type path: string\n"
 						"@param path: Path to the Opde's config file to be loaded\n";
 
-		const char* opde_Root_addResourceLocation__doc__ = "addResourceLocation(name,type,section[,recursive])\n"
+		char* opde_Root_addResourceLocation__doc__ = "addResourceLocation(name,type,section[,recursive])\n"
 						"Adds a resource location to the specified section (group)\n"
 						"@type name: string\n"
 						"@param name: Resource location name\n"
@@ -112,22 +112,22 @@ namespace Opde {
 						"@type recursive: bool\n"
 						"@param recursive: Optional parameter specifying if subdirectories should be searched\n;";
 
-		const char* opde_Root_removeResourceLocation__doc__ = "removeResourceLocation(name,section)\n"
+		char* opde_Root_removeResourceLocation__doc__ = "removeResourceLocation(name,section)\n"
 						"Removes resource location from the specified section (group)\n"
 						"@type name: string\n"
 						"@param name: Resource location name\n"
 						"@type section: string\n"
 						"@param section: The section (resource group) to remove from\n";
 
-		const char* opde_Root_bootstrapFinished__doc__ = "bootstrapFinished()\n"
+		char* opde_Root_bootstrapFinished__doc__ = "bootstrapFinished()\n"
 						"Informs Opde that the resource setup has been done and opde can start.";
 
-		const char* opde_Root_logToFile__doc__ = "logToFile(filename)\n"
+		char* opde_Root_logToFile__doc__ = "logToFile(filename)\n"
 						"Removes resource location from the specified section (group)\n"
 						"@type filename: string\n"
 						"@param filename: Resource location name\n";
 
-		const char* opde_Root_setLogLevel__doc__ = "setLogLevel(level)\n"
+		char* opde_Root_setLogLevel__doc__ = "setLogLevel(level)\n"
 						"Removes resource location from the specified section (group)\n"
 						"@type level: integer\n"
 						"@param level: The desired log level\n";
