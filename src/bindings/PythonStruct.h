@@ -32,83 +32,97 @@
 #include "logger.h"
 #include "SharedPtr.h"
 
-namespace Opde 
+namespace Opde
 {
 	namespace Python {
-		
-		
-		/** Templatized struct binder (no field writing supported). Exposes Type T as a python object with attributes. 
+
+
+		/** Templatized struct binder (no field writing supported). Exposes Type T as a python object with attributes.
 		* @note Every descendant needs to do at least three things: Initialize the msName and fill the msNameToAttr using method field,
 		* and call the static init method created for the filling operation from somewhere.
 		*/
-		template<typename T> class PythonStruct {
+		template<typename T> class PythonStruct : PythonPublishedType {
 			public:
 				static PyObject* create(const T& t) {
 					Object* object;
 					object = PyObject_New(Object, &msType);
-					
+
 					if (object != NULL) {
 						object->mInstance = new T(t);
 					}
-					
+
 					return (PyObject *)object;
 				};
 
 			protected:
                 static void dealloc(PyObject* self) {
 					Object* o = reinterpret_cast<Object*>(self);
-					
+
 					delete o->mInstance;
-					
+
 					PyObject_Del(self);
 				}
-				
+
+                /** Has to be called after field defs from init function. Completes the type to be usable, and publishes it
+                 * @param tpDoc the doc string for the published type
+                 * @param tpName the name of the type (incl. the module - e.g. "Opde.SampleStruct")
+                 * @param module the container to put the type into (has to agree with the tpName's path)
+                 */
+                static void publish(char* tpDoc, const char* tpName, PyObject* module) {
+                	msType.tp_doc = tpDoc;
+					msType.tp_name = tpName;
+
+					// TODO: A way to expose the fields?
+					// and publish
+					publishType(module, &msType, tpName);
+                };
+
 				static PyObject* getattr(PyObject* self, char* attrname) {
 					PyObject* result = NULL;
 					Object* object = python_cast<Object*>(self, &msType);
-			
+
 					typename NameToAttr::iterator it = msNameToAttr.find(attrname);
-					
+
 					if (it != msNameToAttr.end()) {
 						result = (*it->second)(object->mInstance);
 					} else
 						PyErr_Format(PyExc_AttributeError, "Invalid attribute name encountered: %s", attrname);
-				
+
 					return result;
 				}
-			   
+
                 static PyObject* repr(PyObject *self) {
                     return PyString_FromFormat("<Struct:%s at %p>", msName, self);
                 }
-				
+
 				struct FieldDefBase {
 					virtual PyObject* operator()(const T* var) const = 0;
-					
+
 					virtual char* getType() const = 0;
-					
+
 					virtual ~FieldDefBase() {};
 				};
-				
+
 				template<typename F> struct FieldDef : public FieldDefBase {
 				    typedef F T::*MemberPointer;
    					typedef TypeInfo<F> MemberType;
-				    
+
 					MemberPointer field;
 					MemberType type;
-					
+
 					FieldDef(MemberPointer f) : field(f), type() {};
-					
+
 					virtual PyObject* operator()(const T* var) const {
 						return type.toPyObject(var->*field);
 					}
-					
+
 					virtual char* getType() const {
 					    return type.typeName;
 					}
 				};
-				
+
 				typedef shared_ptr<FieldDefBase> FieldDefBasePtr;
-				
+
 				typedef std::map< std::string, FieldDefBasePtr > NameToAttr;
 
 				static NameToAttr msNameToAttr;
@@ -116,15 +130,15 @@ namespace Opde
 				// Field definition statics:
 				template<typename FT> static void field(const char* name, FT T::* fieldPtr) {
 					FieldDefBasePtr fd = new FieldDef<FT>(fieldPtr);
-					
+
 					msNameToAttr.insert(std::make_pair(name, fd));
 				}
-				
-				// Needs to be filled prior to usage		
+
+				// Needs to be filled prior to usage
 				static char* msName;
 
 				typedef ObjectBase<T*> Object;
-				
+
 				static PyTypeObject msType;
 		};
 
@@ -132,7 +146,7 @@ namespace Opde
 
 		// Static member initialization
 		template<typename T> typename PythonStruct<T>::NameToAttr PythonStruct<T>::msNameToAttr;
-		
+
 		template<typename T> PyTypeObject PythonStruct<T>::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,

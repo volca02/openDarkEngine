@@ -31,13 +31,21 @@ namespace Opde {
 
 	namespace Python {
 
+		char* opde_PythonDatabaseProgressMessage__doc__ = "Database Progress Message structure. Structure informing about loading/saving progress.\n"
+			"@ivar completed: Overall 0.0-1.0 progress\n"
+			"@ivar totalCoarse: Coarse steps total\n"
+			"@ivar currentCoarse: Coarse steps current\n"
+			"@ivar overallFine: Current count of the fine steps\n";
+
 		class PythonDatabaseProgressMessage : public PythonStruct<DatabaseProgressMsg> {
 			public:
-				static void init() {
+				static void init(PyObject* container) {
 					field("completed", &DatabaseProgressMsg::completed);
 					field("totalCoarse", &DatabaseProgressMsg::totalCoarse);
 					field("currentCoarse", &DatabaseProgressMsg::currentCoarse);
 					field("overallFine", &DatabaseProgressMsg::overallFine);
+
+					publish(opde_PythonDatabaseProgressMessage__doc__, "Opde.Services.DatabaseProgressMsg", container);
 				}
 		};
 
@@ -58,6 +66,8 @@ namespace Opde {
 
 		// -------------------- Database Service --------------------
 		char* DatabaseServiceBinder::msName = "DatabaseService";
+
+		char* opde_DatabaseService__doc__ = "Database service. Used to load/save game state";
 
 		// ------------------------------------------
 		PyTypeObject DatabaseServiceBinder::msType = {
@@ -82,7 +92,7 @@ namespace Opde {
 			0,			              // setattrofunc tp_setattro; */
 			0,			              // PyBufferProcs *tp_as_buffer; */
 			0,			              // long tp_flags; */
-			0,			              // char *tp_doc;  */
+			opde_DatabaseService__doc__,  // char *tp_doc;  */
 			0,			              // traverseproc tp_traverse; */
 			0,			              // inquiry tp_clear; */
 			0,			              // richcmpfunc tp_richcompare; */
@@ -95,12 +105,36 @@ namespace Opde {
 		};
 
 		// ------------------------------------------
+		char* opde_DatabaseService_load__doc__ = "load(filename)\n"
+				"Loads a mission file (.mis) from the specified location. Clears all the previous loaded data\n"
+				"@type filename: string\n"
+				"@param filename: The filename of the mission file\n"
+				"@raise IOError: if something bad happened while loading";
+
+		char* opde_DatabaseService_loadGameSys__doc__ = "loadGameSys(filename)\n"
+				"Loads a game database file (.gam) from the specified location. Clears all the previous loaded data\n"
+				"@type filename: string\n"
+				"@param filename: The filename of the mission file\n"
+				"@raise IOError: if something bad happened while loading";
+
+		char* opde_DatabaseService_unload__doc__ = "unload()\n"
+				"unloads all data. Clears everything\n";
+
+		char* opde_DatabaseService_setProgressListener__doc__ = "setProgressListener(listener)\n"
+				"Registers a new database listener to be called every loading step. The callable has to have one parameter, which will receive L{DatabaseProgressMsg<Opde.Services.DatabaseProgressMsg>}\n"
+				"@type listener: callable\n"
+				"@param listener: The function to call on every DB change\n";
+
+		char* opde_DatabaseService_unsetProgressListener__doc__ = "unsetProgressListener()\n"
+				"Unsets the previously specified DB loading listner.";
+
+		// ------------------------------------------
 		PyMethodDef DatabaseServiceBinder::msMethods[] = {
-			{"load", load, METH_VARARGS},
-			{"loadGameSys", loadGameSys, METH_VARARGS},
-			{"unload", unload, METH_NOARGS},
-			{"setProgressListener", setProgressListener, METH_VARARGS},
-			{"unsetProgressListener", unsetProgressListener, METH_NOARGS},
+			{"load", load, METH_VARARGS, opde_DatabaseService_load__doc__},
+			{"loadGameSys", loadGameSys, METH_VARARGS, opde_DatabaseService_loadGameSys__doc__},
+			{"unload", unload, METH_NOARGS, opde_DatabaseService_unload__doc__},
+			{"setProgressListener", setProgressListener, METH_VARARGS, opde_DatabaseService_setProgressListener__doc__},
+			{"unsetProgressListener", unsetProgressListener, METH_NOARGS, opde_DatabaseService_unsetProgressListener__doc__},
 			{NULL, NULL},
 		};
 
@@ -224,7 +258,7 @@ namespace Opde {
 
 		// ------------------------------------------
 		void DatabaseServiceBinder::init(PyObject* module) {
-			PythonDatabaseProgressMessage::init();
+			PythonDatabaseProgressMessage::init(module);
 
 			publishType(module, &msType, msName);
 		}
