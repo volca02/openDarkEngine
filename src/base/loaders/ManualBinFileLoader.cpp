@@ -1616,7 +1616,7 @@ namespace Ogre {
 			mVertexJointMap[j] = 0;
 
 
-        for (char j = 0; j < mHeader.num_joints; ++j) {
+        for (unsigned int j = 0; j < mHeader.num_joints; ++j) {
         	// for every joint
 			// get the real joint id
 			unsigned int mapper = mJoints[j].mapper_id;
@@ -1633,7 +1633,7 @@ namespace Ogre {
         }
 
         // pass 2 of joint mappings. Fill the submesh builders with vertices
-        for (char j = 0; j < mHeader.num_joints; ++j) {
+        for (uint8_t j = 0; j < mHeader.num_joints; ++j) {
         	// for every joint
 			// get the real joint id
 			unsigned int mapper = mJoints[j].mapper_id;
@@ -1696,7 +1696,7 @@ namespace Ogre {
 
 	void AIMeshLoader::readMaterials() {
 		// repeat for all materials
-		char i;
+		uint8_t i;
 
 		if (mHeader.num_mats < 1) // TODO: This could be fatal
 			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("File contains no materials ")  + mMesh->getName(), "AIMeshLoader::readMaterials");
@@ -1752,7 +1752,7 @@ namespace Ogre {
 
 		mMappers = new AIMapper[mHeader.num_mappers];
 
-		for (char i = 0 ; i < mHeader.num_mappers; ++i) {
+		for (uint8_t i = 0 ; i < mHeader.num_mappers; ++i) {
 			mFile->readElem(&mMappers[i].unk1, 4);
 
 			mFile->read(&mMappers[i].joint, 1);
@@ -1772,7 +1772,7 @@ namespace Ogre {
 
 		mJoints = new AIJointInfo[mHeader.num_joints];
 
-		for (char i = 0 ; i < mHeader.num_joints; ++i) {
+		for (uint8_t i = 0 ; i < mHeader.num_joints; ++i) {
 			mFile->readElem(&mJoints[i].num_polys, 2);
 			mFile->readElem(&mJoints[i].start_poly, 2);
 			mFile->readElem(&mJoints[i].num_vertices, 2);

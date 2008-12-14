@@ -65,10 +65,10 @@ SET_TARGET_PROPERTIES(OpenDark PROPERTIES
   LINK_INTERFACE_LIBRARIES ""
 )
 
-if (NOT WIN32)
+if (UNIX)
     # Currently there is no need to build this on windows (and also it fails) - is there latex2html for windows anyway?
     # Doc generator for opde - property and link types info generator
-    add_executable (opdeDocGen WIN32 
+    add_executable (opdeDocGen
         OpdeDocGen.cpp
     )
 
@@ -79,7 +79,7 @@ if (NOT WIN32)
     SET_TARGET_PROPERTIES(opdeDocGen PROPERTIES
       COMPILE_DEFINITIONS "OPDE_EXE_TARGET"
     )
-endif(NOT WIN32)
+endif(UNIX)
 
 # Main executable
 add_executable (opde WIN32 

@@ -1232,12 +1232,12 @@ property AIGunDesc {
 	p_ver 2.65566
 }
 
-property Position {
-	label "Position"
-	p_ver 2.65558
-	inherit never
-	cached
-}
+//property Position {
+//	label "Position"
+//	p_ver 2.65558
+//	inherit never
+//	cached
+//}
 
 property AI_Device {
 	label "AIDevice"

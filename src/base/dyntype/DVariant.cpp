@@ -38,7 +38,7 @@ namespace Opde {
 	DVariant::DVariant(Type t, void *val) {
 		mPrivate.isShared = false;
 		mPrivate.type = t;
-		
+
 		switch (t) {
 			case DV_BOOL :
 				mPrivate.data.dbool = val ? *static_cast<bool *>(val) : false;
@@ -65,7 +65,7 @@ namespace Opde {
 				mPrivate.data.shared = new Shared<Vector3>(*static_cast<Vector3 *>(val));
 				mPrivate.isShared = 1;
 				break;
-				
+
 			case DV_QUATERNION :
 				mPrivate.data.shared = new Shared<Quaternion>(*static_cast<Quaternion *>(val));
 				mPrivate.isShared = 1;
@@ -80,7 +80,7 @@ namespace Opde {
 	DVariant::DVariant(Type t, const std::string& txtval) {
 		mPrivate.isShared = false;
 		mPrivate.type = t;
-		
+
 		switch (t) {
 			case DV_BOOL :
 				mPrivate.data.dbool = StringToBool(txtval);
@@ -107,7 +107,7 @@ namespace Opde {
 				mPrivate.data.shared = new Shared<Vector3>(StringToVector(txtval));
 				mPrivate.isShared = true;
 				break;
-				
+
 			case DV_QUATERNION :
 				mPrivate.data.shared = new Shared<Quaternion>(StringToQuaternion(txtval));
 				mPrivate.isShared = true;
@@ -183,7 +183,7 @@ namespace Opde {
 		mPrivate.data.shared = new Shared<Vector3>(vec);
 		mPrivate.isShared = true;
 	}
-	
+
 	//------------------------------------
 	DVariant::DVariant(const Quaternion& ori) {
 		mPrivate.type = DV_QUATERNION;
@@ -199,7 +199,7 @@ namespace Opde {
 	}
 
 	//------------------------------------
-	DVariant::~DVariant() {	
+	DVariant::~DVariant() {
 		if (mPrivate.isShared)
 			delete mPrivate.data.shared;
 	}
@@ -208,7 +208,7 @@ namespace Opde {
 	const char* DVariant::typeString() const {
 	    return typeToString(mPrivate.type);
 	}
-	
+
     //------------------------------------
 	const char* DVariant::typeToString(DVariant::Type t) {
         switch (t) {
@@ -405,8 +405,8 @@ namespace Opde {
 				}
 			} else // we did not have shared data, clone no matter what
 				mPrivate.data.shared = b.mPrivate.data.shared->clone();
-				
-				
+
+
 			mPrivate.isShared = true;
 			mPrivate.type = b.mPrivate.type;
 
@@ -414,7 +414,7 @@ namespace Opde {
 			// if was shared, release
 			if (mPrivate.isShared)
 				delete mPrivate.data.shared;
-			
+
 			mPrivate = b.mPrivate;
 		}
 
@@ -583,7 +583,7 @@ namespace Opde {
 
 				case DV_VECTOR :
 					return shared_cast<Vector3>() == b.toVector();
-					
+
 				case DV_QUATERNION :
 					return shared_cast<Quaternion>() == b.toQuaternion();
 
@@ -636,7 +636,7 @@ namespace Opde {
 		// make a vector3 out of the array, and return
 		return Vector3(vec[0], vec[1], vec[2]);
 	}
-	
+
 	//------------------------------------
 	Quaternion DVariant::StringToQuaternion(const std::string& str) {
 		string src(str);
@@ -753,4 +753,47 @@ namespace Opde {
 		return fReturn;
 	}
 
+	//------------------------------------
+	template<> bool DVariant::as<bool>() const {
+		return toBool();
+	}
+
+	//------------------------------------
+	template<> float DVariant::as<float>() const {
+		return toFloat();
+	}
+
+	//------------------------------------
+	template<> int DVariant::as<int>() const {
+		return toInt();
+	}
+
+	//------------------------------------
+	template<> uint DVariant::as<uint>() const {
+		return toUInt();
+	}
+
+	//------------------------------------
+	template<> std::string DVariant::as<std::string>() const {
+		return toString();
+	}
+
+	//------------------------------------
+	template<> Vector3 DVariant::as<Vector3>() const {
+		return toVector();
+	}
+
+	//------------------------------------
+	template<> Ogre::Quaternion DVariant::as<Ogre::Quaternion>() const {
+		return toQuaternion();
+	}
+
+
+	template<> DVariant::Type DVariantTypeTraits<bool>::getType() { return DVariant::DV_BOOL; };
+	template<> DVariant::Type DVariantTypeTraits<float>::getType() { return DVariant::DV_FLOAT; };
+	template<> DVariant::Type DVariantTypeTraits<int32_t>::getType() { return DVariant::DV_INT; };
+	template<> DVariant::Type DVariantTypeTraits<uint32_t>::getType() { return DVariant::DV_UINT; };
+	template<> DVariant::Type DVariantTypeTraits<std::string>::getType() { return DVariant::DV_STRING; };
+	template<> DVariant::Type DVariantTypeTraits<Vector3>::getType() { return DVariant::DV_VECTOR; };
+	template<> DVariant::Type DVariantTypeTraits<Quaternion>::getType() { return DVariant::DV_QUATERNION; };
 }

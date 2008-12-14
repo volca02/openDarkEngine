@@ -270,7 +270,7 @@ const int ObjLight_Size = 8;
 typedef struct ObjLight {
 	// Material reference
 	uint16_t material;
-	
+
 	// Point on object reference
 	uint16_t point;
 
@@ -284,12 +284,12 @@ typedef struct ObjLight {
 /// The header struct of the .CAL file
 typedef struct {
     int32_t     Version; // We only know version 1
-    int32_t     num_torsos; 
+    int32_t     num_torsos;
     int32_t     num_limbs;
 } CalHdr;
 
 //  Torso array (array of TorsoV1) follows header
-/// Torso definition (next to header, int the num_torsos count) 
+/// Torso definition (next to header, int the num_torsos count)
 typedef struct {
     uint32_t            root; // Root - the root joint index of this torso. Init to 0,0,0 for parent == -1 to get zero - positioned skeleton
     int32_t            parent; // -1 - the torso's parent (-1 for root torso)
@@ -313,10 +313,10 @@ typedef struct {
 /// the main header of the LGMM
 typedef struct {
 	uint32_t            zeroes[3];      // Always seems to be 0
-    unsigned char       num_what1;         // '0'
-    unsigned char       num_mappers;         // Count for U2 (*20)
-    char                num_mats;       // Number of materials
-    char                num_joints;     // Number of joints?
+	uint8_t             num_what1;         // '0'
+    uint8_t             num_mappers;         // Count for U2 (*20)
+    uint8_t             num_mats;       // Number of materials
+    uint8_t             num_joints;     // Number of joints?
     int16_t             num_polys;        // Polygon count (Count for U4 * 16)
     int16_t             num_vertices;       // Total Vertex count
     uint32_t            num_stretchy;       // Stretchy Vertexes - blended between two joints
@@ -348,28 +348,28 @@ typedef struct {
 /// Material definition struct
 typedef struct {
 	char name[16];
-	
+
 	// Only in rev. 2 mesh: (This part is skipped for rev. 1 meshes)
 	uint32_t	ext_flags; // 2 only - indicate which of the params is used (trans, illum, etc). Bitmask
 	float trans; // 2 only
 	float illum; // 2 only
 	float unknown; // 2 only
-	
+
 	// back to both rev. fields:
 	uint32_t unk1;
 	uint32_t unk2;
 	unsigned char type; // Textured, color-only, etc....
 	unsigned char slot_num; // material's slot. We know this one from the Object meshes, don't we?
-	
+
 	// some other data, not identified yet
 	// I'd bet we'll see 8 bytes of info here, the same as in MeshMaterial - color and ipal_index, OR, handle and uv-scale
 	uint16_t   s_unk1; // 2
     uint16_t   s_unk2; // 4
     uint16_t   s_unk3; // 6
-    uint16_t   s_unk4; // 8 
+    uint16_t   s_unk4; // 8
     uint16_t   s_unk5; // What would this be?
     uint32_t   l_unk3; // and this?
-	
+
 } AIMaterial;
 
 
@@ -391,11 +391,11 @@ typedef struct {
     short           c;
     short           mat; // material
     float           f_unk; // some float? Hmm what could've this be?
-    short           index; // index of this 
+    short           index; // index of this
     unsigned short  flag; // stretch or not? This would seem to be a good place to inform about it
 } AITriangle;
 
-/* 
+/*
 The sh6 <> 0 files for T1G:
 BADTRAY.BIN
 bowempt9.bin

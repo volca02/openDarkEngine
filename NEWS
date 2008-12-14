@@ -102,3 +102,11 @@ Changes in alpha release 0.2.1 (23-May-2007)
 * Added dependency to OIS
 * Various small fixes
 * Removed dependency on CeGUI
+
+Changes in alpha release 0.2.9 (10-Oct-2008)
+* Implemented a propper static geometry rendering class
+* Added a image loading override that supports palletized transparency
+* Implemented python bindings code, great part of Opde can now be used from python
+* Implemented vis. blocking
+* Implemented lightning
+* Built-in properties now use built-in property declaration

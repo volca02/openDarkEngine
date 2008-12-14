@@ -948,12 +948,12 @@ property StTweqBli {
 	inherit never
 }
 
-property Position {
-	label "Position"
-	p_ver 2.65558
-	inherit never
-	cached
-}
+//property Position {
+//	label "Position"
+//	p_ver 2.65558
+//	inherit never
+//	cached
+//}
 
 property AI_Device {
 	label "AIDevice"

@@ -23,7 +23,7 @@ project (OPDE)
 
 SET(OPDE_VER_MAJOR "0")
 SET(OPDE_VER_MINOR "2")
-SET(OPDE_VER_PATCH "1")
+SET(OPDE_VER_PATCH "9")
 SET(REL_CODE_NAME  "Segmentation Fault")
 
 # Build type selection. Use ccmake for selection of this (or the commandline switches)
@@ -36,11 +36,6 @@ ENDIF (NOT CMAKE_BUILD_TYPE)
 # Option to build in the debugging code
 OPTION(GLOBAL_DEBUG 
     "Build the debugging code"
-    OFF)
-
-# Option to build the documentation
-OPTION(GENERATE_DOC
-    "Build the doxy documentation"
     OFF)
 
 # Option to create Windows installer script
@@ -197,14 +192,52 @@ add_subdirectory (proto)
 add_subdirectory (thirdparty)
 
 # Generate the doxyfile if selected as an option
-IF (GENERATE_DOC)
+IF (UNIX AND PYTHON_LIBRARIES)
     # Generate the doxyfile from the template file
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
                       ${CMAKE_BINARY_DIR}/Doxyfile)
     
-    MESSAGE(STATUS "Doxyfile was generated in ${CMAKE_BINARY_DIR}.")
-    # You can run doxygen on that file to generate documentation...
-ENDIF (GENERATE_DOC)
+    # Now prepare the python doc. generator
+    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/writedoc.py.in
+                      ${CMAKE_BINARY_DIR}/writedoc.py)
+                
+    
+    FIND_PACKAGE(Doxygen REQUIRED)
+    
+    # generates the Doxygen docs.
+    ADD_CUSTOM_COMMAND(
+	OUTPUT ${CMAKE_BINARY_DIR}/doc/main/html/index.html
+	COMMAND rm -rf ${CMAKE_BINARY_DIR}/main/doc/html
+	COMMAND mkdir -p ${CMAKE_BINARY_DIR}/main/doc/html
+	COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
+    )
+    
+    # generates the Python docs.
+    ADD_CUSTOM_COMMAND(
+	OUTPUT ${CMAKE_BINARY_DIR}/doc/python/html/index.html
+	COMMAND rm -rf ${CMAKE_BINARY_DIR}/doc/python/html
+	COMMAND mkdir -p ${CMAKE_BINARY_DIR}/doc/python/html
+	COMMAND ${CMAKE_BINARY_DIR}/src/main/opdeScript ${CMAKE_BINARY_DIR}/writedoc.py
+    )
+    
+    # generates the property/link docs for all 3 versions of Dark
+    #ADD_CUSTOM_COMMAND(
+    #	OUTPUT ${CMAKE_BINARY_DIR}/doc/python/html/index.html
+    #    )
+    
+    IF (DOXYGEN_EXECUTABLE)
+	ADD_CUSTOM_TARGET(docs ALL
+	    DEPENDS
+            opdeScript
+	    opdeDocGen
+	    ${CMAKE_BINARY_DIR}/doc/html/index.html
+	    ${CMAKE_BINARY_DIR}/doc/python/html/index.html
+	    ${DOXYGEN_EXECUTABLE}
+	)
+    ELSE (DOXYGEN_EXECUTABLE)
+	MESSAGE("Warning: Doxygen not found, docs target disabled.")
+    ENDIF (DOXYGEN_EXECUTABLE)
+ENDIF (UNIX AND PYTHON_LIBRARIES)
 
 IF (GENERATE_NSIS)
 	CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/installer/opde-win.in

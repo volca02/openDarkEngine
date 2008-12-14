@@ -46,7 +46,8 @@ namespace Opde {
 			mObjVecVerMaj(0), // Seems to be the same for all versions
 			mObjVecVerMin(2),
 			mSceneMgr(NULL),
-			mSymNameStorage(NULL) {
+			mSymNameStorage(NULL),
+			mPositionStorage(NULL) {
 
 	}
 
@@ -243,7 +244,9 @@ namespace Opde {
 		mPropSymName = mPropertyService->createPropertyGroup("SymbolicName", "SymName", "never", mSymNameStorage);
 		mPropSymName->setChunkVersions(2, 17);
 
-		// TODO: Position
+		mPositionStorage = new PositionPropertyStorage();
+		mPropPosition = mPropertyService->createPropertyGroup("Position", "Position", "never", mPositionStorage);
+		mPropPosition->setChunkVersions(2, 65558);
 	}
 
 	//------------------------------------------------------
@@ -260,12 +263,6 @@ namespace Opde {
 		mInheritService = GET_SERVICE(InheritService);
 		mLinkService = GET_SERVICE(LinkService);
 		mPropertyService = GET_SERVICE(PropertyService);
-
-		// For SceneNodes
-		mPropPosition = mPropertyService->getPropertyGroup("Position");
-
-		if (mPropPosition == NULL)
-            OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "ObjectService::bootstrapFinished");
 	}
 
 	//------------------------------------------------------
