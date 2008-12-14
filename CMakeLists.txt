@@ -230,7 +230,7 @@ IF (UNIX AND PYTHON_LIBRARIES)
 	    DEPENDS
             opdeScript
 	    opdeDocGen
-	    ${CMAKE_BINARY_DIR}/doc/html/index.html
+	    ${CMAKE_BINARY_DIR}/doc/main/html/index.html
 	    ${CMAKE_BINARY_DIR}/doc/python/html/index.html
 	    ${DOXYGEN_EXECUTABLE}
 	)

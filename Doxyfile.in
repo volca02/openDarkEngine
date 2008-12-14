@@ -5,7 +5,7 @@
 #---------------------------------------------------------------------------
 PROJECT_NAME           = ${PROJECT_NAME}
 PROJECT_NUMBER         = ${OPDE_VER_MAJOR}.${OPDE_VER_MINOR}.${OPDE_VER_PATCH}
-OUTPUT_DIRECTORY       = ${CMAKE_BINARY_DIR}/doc
+OUTPUT_DIRECTORY       = ${CMAKE_BINARY_DIR}/doc/main/
 CREATE_SUBDIRS         = NO
 OUTPUT_LANGUAGE        = English
 USE_WINDOWS_ENCODING   = NO

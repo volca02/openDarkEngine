@@ -35,6 +35,7 @@
 #include "vector3.h"
 
 namespace Opde {
+	/// Data serializer - used to fill the values of data based on File contents, and the other way round
 	class Serializer : public NonCopyable {
 		public:
 			/// serializes the data into the specified fileptr
