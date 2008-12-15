@@ -209,8 +209,11 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	LightsForCell::LightsForCell(const FilePtr& file, size_t num_anim_lights, size_t num_textured, size_t light_size,
 	        wr_polygon_texturing_t* face_infos) :
-		mAtlased(false), mLightSize(light_size), mNumTextured(num_textured), mNumAnimLights(num_anim_lights),
-		        mFaceInfos(face_infos) {
+			mLightSize(light_size), 
+			mNumTextured(num_textured), 
+			mNumAnimLights(num_anim_lights),
+		        mFaceInfos(face_infos),
+			mAtlased(false) {
 
 
 		// load the light id's array

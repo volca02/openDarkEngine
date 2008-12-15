@@ -75,10 +75,10 @@ namespace Opde {
     		
     		client->loopStep(deltaTime);
     		
-    		unsigned long nowTime = mOwner->getCurrentTime();
+    		unsigned long stepTime = mOwner->getCurrentTime() - stTime;
     		
     		if (debugFrame) {
-    			LOG_DEBUG("LoopMode(%s) : Client %d (%s) : Used %ld ms", getLoopModeName().c_str(), corder, client->getLoopClientSpecification().name.c_str(), nowTime - stTime);
+    			LOG_DEBUG("LoopMode(%s) : Client %d (%s) : Used %ld ms", getLoopModeName().c_str(), corder, client->getLoopClientSpecification().name.c_str(), stepTime);
     		}
     		
     		corder++;
@@ -117,7 +117,7 @@ namespace Opde {
     /*-------------------- LoopService -------------------*/
     /*----------------------------------------------------*/
     LoopService::LoopService(ServiceManager *manager, const std::string& name) : Service(manager, name), 
-			mTerminationRequested(false), mNewLoopMode(NULL), mLastFrameTime(0), mNewModeRequested(false),
+			mTerminationRequested(false), mNewLoopMode(NULL), mNewModeRequested(false), mLastFrameTime(0),
 			mDebugOneFrame(false) {
 				
 		mActiveMode.setNull();

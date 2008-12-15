@@ -38,19 +38,19 @@ namespace Opde {
 			0,
 			"Opde.StringIterator",    /* char *tp_name; */
 			sizeof(StringIteratorBinder::Object),      /* int tp_basicsize; */
-			0,                        /* int tp_itemsize;       /* not used much */
+			0,                        // int tp_itemsize;       /* not used much */
 			StringIteratorBinder::dealloc,   /* destructor tp_dealloc; */
 			0,			              /* printfunc  tp_print;   */
-			StringIteratorBinder::getattr,  /* getattrfunc  tp_getattr; /* __getattr__ */
-			0,   					  /* setattrfunc  tp_setattr;  /* __setattr__ */
-			0,				          /* cmpfunc  tp_compare;  /* __cmp__ */
-			repr,			          /* reprfunc  tp_repr;    /* __repr__ */
+			StringIteratorBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
+			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
+			repr,			          // reprfunc  tp_repr;    /* __repr__ */
 			0,				          /* PyNumberMethods *tp_as_number; */
 			0,                        /* PySequenceMethods *tp_as_sequence; */
 			0,                        /* PyMappingMethods *tp_as_mapping; */
-			0,			              /* hashfunc tp_hash;     /* __hash__ */
-			0,                        /* ternaryfunc tp_call;  /* __call__ */
-			0,			              /* reprfunc tp_str;      /* __str__ */
+			0,			              // hashfunc tp_hash;     /* __hash__ */
+			0,                        // ternaryfunc tp_call;  /* __call__ */
+			0,			              // reprfunc tp_str;      /* __str__ */
 			0,			              /* getattrofunc tp_getattro; */
 			0,			              /* setattrofunc tp_setattro; */
 			0,			              /* PyBufferProcs *tp_as_buffer; */

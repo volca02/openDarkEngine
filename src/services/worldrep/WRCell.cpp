@@ -42,12 +42,16 @@ namespace Opde {
 
 	//------------------------------------------------------------------------------------
 	WRCell::WRCell(WorldRepService* owner, Ogre::DarkGeometry* targetGeom) :
-		cellNum(-1), mLoaded(false), mPortalsDone(false), mOwner(owner), mLevelGeometry(targetGeom),
+			cellNum(-1), 
 		        vertices(NULL),
 		        face_maps(NULL),
 		        face_infos(NULL),
 		        poly_indices(NULL),
 		        planes(NULL),
+			mLoaded(false),
+			mPortalsDone(false), 
+			mOwner(owner), 
+			mLevelGeometry(targetGeom),
 		        mLights(NULL) {
 		bspNode = NULL;
 

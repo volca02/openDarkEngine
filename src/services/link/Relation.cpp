@@ -36,10 +36,10 @@ namespace Opde {
 	// size of the link header (id, src, dest, flav)
 	static size_t LinkStructSize = 14;
 
-    /*-----------------------------------------------------*/
+	/*-----------------------------------------------------*/
 	/*--------------------- LinkQueries -------------------*/
 	/*-----------------------------------------------------*/
-    /// Single source link query (multiple targets), or in reverse
+	/// Single source link query (multiple targets), or in reverse
 	class Relation::MultiTargetLinkQueryResult : public LinkQueryResult {
 	    public:
             MultiTargetLinkQueryResult(const Relation::ObjectIDToLinks& linkmap,
@@ -76,12 +76,12 @@ namespace Opde {
 	/*----------------------- Relation --------------------*/
 	/*-----------------------------------------------------*/
 	Relation::Relation(const std::string& name, const DataStoragePtr& stor, bool isInverse, bool hidden) :
+			mSrcDstLinkMap(),
 			mID(-1),
 			mName(name),
 			mStorage(stor),
 			mHidden(hidden),
 			mLinkMap(),
-			mSrcDstLinkMap(),
 			mInverse(NULL),
 			mIsInverse(isInverse) {
 
@@ -142,7 +142,7 @@ namespace Opde {
 		}
 
 		// link count (calculated)
-		size_t link_count = flink->size() / 14; // sizeof(LinkStruct) - but that one is aligned!
+		size_t link_count = flink->size() / LinkStructSize;
 
 		LOG_VERBOSE("Relation::load : %s link count %d (tag size %d)", lchn.c_str(), link_count, flink->size());
 
@@ -150,7 +150,7 @@ namespace Opde {
 
 		// if the chunk LD exists, and contains at least the data size, load the data size, and set to load data as well
 		bool load_data = false;
-		int dsize = 0;
+		size_t dsize = 0;
 
 		// TODO: Defer this to link data dedicated class
 		if (fldata->size() > sizeof(uint32_t)) {

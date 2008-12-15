@@ -99,8 +99,6 @@ namespace Opde {
 	//-----------------------------------------------------------------------
 	PLDefScriptCompiler::PLDefScriptCompiler(void) {
 		// default to global definition group
-		ServiceManager* svcmgr = ServiceManager::getSingletonPtr();
-
 		mLinkService = GET_SERVICE(LinkService);
 		mBinaryService = GET_SERVICE(BinaryService);
 		mPropertyService = GET_SERVICE(PropertyService);

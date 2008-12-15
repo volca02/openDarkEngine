@@ -70,6 +70,8 @@ namespace Opde {
 				public:
 					TypeHelperBase(FieldGetter _getter, FieldSetter _setter) : mGetter(_getter), mSetter(_setter) {
 					};
+					
+					virtual ~TypeHelperBase() {};
 
 					/// sets the struct's field with the given value
 					virtual void toField(T& data, const DVariant& val) = 0;
@@ -334,6 +336,7 @@ namespace Opde {
 				fd.label = name;
 				fd.size = sizeof(FT);
 				fd.enumerator = enumer;
+				fd.type = traits.getType();
 
 				mFieldDescList.push_back(fd);
 

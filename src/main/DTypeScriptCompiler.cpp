@@ -115,7 +115,6 @@ namespace Opde {
 		// default to global definition group
 		mGroupName = "";
 
-		ServiceManager* svcmgr = ServiceManager::getSingletonPtr();
 		mBinaryService = GET_SERVICE(BinaryService);
 		mCurrentState.state = CS_UNKNOWN;
 	}

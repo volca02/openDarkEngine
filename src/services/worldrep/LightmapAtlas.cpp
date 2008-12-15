@@ -520,7 +520,7 @@ namespace Opde {
 			else
 				mIntensities.insert(std::make_pair(light_id, 0.0f));
 
-			uint32 Intens = intensity * 256;
+			uint32_t Intens = static_cast<uint32_t>(intensity * 256);
 			if (Intens > 0)
 			{
 				for (unsigned int i = 0; i < LightMapSize; i++)

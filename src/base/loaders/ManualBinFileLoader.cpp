@@ -151,7 +151,8 @@ namespace Ogre {
 
 		// the really ROOT bone
 		// TODO: Map file for named joints (bones), as an optional addition
-		Bone* root = mSkeleton->createBone(mTorsos[0].root);
+		// Bone* root = 
+		mSkeleton->createBone(mTorsos[0].root);
 
 		for (int i = 0; i < mHeader.num_torsos; ++i) {
 			// get the torso's root bone to attach to:
@@ -1636,11 +1637,9 @@ namespace Ogre {
         for (uint8_t j = 0; j < mHeader.num_joints; ++j) {
         	// for every joint
 			// get the real joint id
-			unsigned int mapper = mJoints[j].mapper_id;
-
-			assert(mapper < mHeader.num_mappers);
-
-			unsigned int joint = mMappers[mapper].joint;
+			// unsigned int mapper = mJoints[j].mapper_id;
+			// assert(mapper < mHeader.num_mappers);
+			// unsigned int joint = mMappers[mapper].joint;
 
 			for (short v = 0; v < mJoints[j].num_polys; ++v) {
 				AITriangle& tri = mTriangles[mJoints[j].start_poly + v];
