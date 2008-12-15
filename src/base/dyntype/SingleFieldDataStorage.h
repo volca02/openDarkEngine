@@ -54,6 +54,20 @@ namespace Opde {
 	*/
 	template<typename T> class OPDELIB_EXPORT SingleFieldDataStorage : public DataStorage {
 		public:
+			explicit SingleFieldDataStorage(DEnum* enm = NULL) {
+				mSerializer = new TypeSerializer<T>();
+				mFieldDesc.enumerator = enm;
+				mFieldDesc.name = "";
+				mFieldDesc.size = sizeof(T);
+				
+				DVariantTypeTraits<T> tt;
+				mFieldDesc.type = tt.getType();
+			};
+			
+			virtual ~SingleFieldDataStorage() {
+				delete mSerializer;
+			}
+		
 			/** @see DataStorage::create */
 			virtual bool create(int objID) {
 				// call _create to handle the creation, with the default value
@@ -208,22 +222,9 @@ namespace Opde {
 			}
 
 		protected:
-			explicit SingleFieldDataStorage() {
-				mSerializer = new TypeSerializer<T>();
-			};
-
-			explicit SingleFieldDataStorage(Serializer* ser) {
-				mSerializer = ser;
-			};
-
-
-			virtual ~SingleFieldDataStorage() {
-				delete mSerializer;
-			}
-
 			/// Converts from variant to the internal storage type. Should be overrided, or reimplemented by explicit specialization
 			virtual T fromVariant(const DVariant& v) const {
-				return T();
+				return v.as<T>();
 			}
 
 
@@ -244,80 +245,30 @@ namespace Opde {
 	// Various simple single-fielded data storages (it could be done more easily through some data definition structures):
 
 	/// Boolean (4 byte) data storage
-	class OPDELIB_EXPORT BoolDataStorage : public SingleFieldDataStorage<bool> {
-		public:
-			BoolDataStorage(DEnum* enm = NULL) : SingleFieldDataStorage<bool>() {
-				mFieldDesc.enumerator = NULL;
-				mFieldDesc.name = "";
-				mFieldDesc.size = 4;
-				mFieldDesc.type = DVariant::DV_BOOL;
-			}
-
-			virtual bool fromVariant(const DVariant& v) {
-				return v.toBool();
-			}
-	};
+	typedef SingleFieldDataStorage<bool> BoolDataStorage;
 
 	/// Float (4 byte) data storage
-	class OPDELIB_EXPORT FloatDataStorage : public SingleFieldDataStorage<float> {
-		public:
-			FloatDataStorage(DEnum* enm = NULL) : SingleFieldDataStorage<float>() {
-				mFieldDesc.enumerator = enm;
-				mFieldDesc.name = "";
-				mFieldDesc.size = 4;
-				mFieldDesc.type = DVariant::DV_FLOAT;
-			}
-
-			virtual float fromVariant(const DVariant& v) {
-				return v.toFloat();
-			}
-	};
-
+	typedef SingleFieldDataStorage<float> FloatDataStorage;
+	
 	/// int (4 byte) data storage
-	class OPDELIB_EXPORT IntDataStorage : public SingleFieldDataStorage<int32_t> {
-		public:
-			IntDataStorage(DEnum* enm = NULL) : SingleFieldDataStorage<int32_t>() {
-				mFieldDesc.enumerator = enm;
-				mFieldDesc.name = "";
-				mFieldDesc.size = sizeof(int32_t);
-				mFieldDesc.type = DVariant::DV_INT;
-			}
+	typedef SingleFieldDataStorage<int32_t> IntDataStorage;
 
-			virtual int32_t fromVariant(const DVariant& v) {
-				return v.toInt();
-			}
-	};
-
-	/// int (4 byte) data storage
-	class OPDELIB_EXPORT UIntDataStorage : public SingleFieldDataStorage<uint32_t> {
-		public:
-			UIntDataStorage(DEnum* enm = NULL) : SingleFieldDataStorage<uint32_t>() {
-				mFieldDesc.enumerator = enm;
-				mFieldDesc.name = "";
-				mFieldDesc.size = sizeof(uint32_t);
-				mFieldDesc.type = DVariant::DV_UINT;
-			}
-
-			virtual uint32_t fromVariant(const DVariant& v) {
-				return v.toUInt();
-			}
-	};
-
+	/// unsigned int (4 byte) data storage
+	typedef SingleFieldDataStorage<uint32_t> UIntDataStorage;
+	
 	/// Variable length string data storage
 	class OPDELIB_EXPORT StringDataStorage : public SingleFieldDataStorage<std::string> {
 		public:
-			StringDataStorage(DEnum* enm = NULL) : SingleFieldDataStorage<std::string>() {
-				mFieldDesc.enumerator = enm;
-				mFieldDesc.name = "";
-				mFieldDesc.size = -1;
-				mFieldDesc.type = DVariant::DV_STRING;
+			StringDataStorage(DEnum* enm = NULL) : SingleFieldDataStorage<std::string>(enm) {
+				mFieldDesc.size = -1; // override needed
 			}
 
 			/** @see DataStorage::getDataSize */
 			virtual size_t getDataSize(void) {
-				OPDE_EXCEPT("StringDataStorage::getDataSize", "Invalid call - string lenght is variable");
+				OPDE_EXCEPT("StringDataStorage::getDataSize", "Invalid call - string length is variable");
 			}
 	};
+	
 }
 
 #endif // __PROPERTYSTORAGE_H
