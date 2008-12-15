@@ -49,6 +49,7 @@
 #include "RenderTypeProperty.h"
 #include "RenderAlphaProperty.h"
 #include "ZBiasProperty.h"
+#include "ModelScaleProperty.h"
 
 using namespace std;
 using namespace Ogre;
@@ -116,6 +117,11 @@ namespace Opde {
 	void EntityInfo::setZBias(float bias) {
 		mZBias = bias;
 		mEmi->setZBias(bias);
+	};
+
+	// --------------------------------------------------------------------------
+	void EntityInfo::setScale(const Vector3& scale) {
+		mNode->setScale(scale);
 	};
 
 	// --------------------------------------------------------------------------
@@ -239,9 +245,12 @@ namespace Opde {
 		    mPropModelName->unregisterListener(mPropModelNameListenerID);
 		mPropModelName = NULL;
 
-		if (mPropScale != NULL)
-		    mPropScale->unregisterListener(mPropScaleListenerID);
-		mPropScale = NULL;
+		if (mPropScale != NULL) {
+		    mPropertyService->unregisterPropertyGroup(mPropScale);
+			delete mPropScale;
+			mPropScale = NULL;
+		}
+		
 
 		if (!mLoopService.isNull()) {
 			mLoopService->removeLoopClient(this);
@@ -402,20 +411,6 @@ namespace Opde {
 			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropPositionMsg);
 
 		mPropPositionListenerID = mPropPosition->registerListener(cposc);
-
-		// --- Scale property listener
-		mPropScale = mPropertyService->getPropertyGroup("ModelScale");
-
-		if (mPropScale == NULL)
-            OPDE_EXCEPT("Could not get Scale property group. Not defined. Fatal", "RenderService::bootstrapFinished");
-
-		PropertyGroup::ListenerPtr cscalec =
-			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropScaleMsg);
-
-		mPropScaleListenerID = mPropScale->registerListener(cscalec);
-
-		// TODO: The hardcoded z-bias is doing problems, unsurprisingly
-		// to fix this, we should create a handler for that property
 
 		// ===== OBJECT SERVICE LISTENER =====
 		mObjectService = GET_SERVICE(ObjectService);
@@ -938,6 +933,9 @@ namespace Opde {
 			mZBiasProperty = new ZBiasProperty(this, mPropertyService.ptr());
 			mPropertyService->registerPropertyGroup(mZBiasProperty);
 		}
+
+		mPropScale = new ModelScaleProperty(this, mPropertyService.ptr());
+		mPropertyService->registerPropertyGroup(mPropScale);
 
 		// Light - a more complex property - this should be moved to LightService
 

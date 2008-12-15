@@ -36,7 +36,7 @@
 
 namespace Opde {
 	/// Data serializer - used to fill the values of data based on File contents, and the other way round
-	class Serializer : public NonCopyable {
+	class OPDELIB_EXPORT Serializer : public NonCopyable {
 		public:
 			// destructor
 			virtual ~Serializer() {};
@@ -52,7 +52,7 @@ namespace Opde {
 	};
 
 	/// Default template implementation of the serializer
-	template<typename T> class TypeSerializer : public Serializer {
+	template<typename T> class OPDELIB_EXPORT TypeSerializer : public Serializer {
 		public:
 			virtual void serialize(FilePtr& dest, const void* valuePtr) {
 				dest->writeElem(valuePtr, sizeof(T));

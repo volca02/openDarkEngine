@@ -293,7 +293,7 @@ namespace Opde {
 	template<> Ogre::Quaternion DVariant::as<Ogre::Quaternion>() const;
 
 	/// Type traits for template to DVariant conversions and various interactions (serialization, etc.)
-	template<typename T> struct DVariantTypeTraits {
+	template<typename T> struct OPDELIB_EXPORT DVariantTypeTraits {
 		DVariant::Type getType() {
 			return DVariant::DV_INVALID;
 		};

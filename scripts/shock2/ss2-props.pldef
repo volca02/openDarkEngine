@@ -1936,10 +1936,10 @@ property BloodMaxD {
 	label "BloodMaxDamage"
 }
 
-property Scale {
-	label "ModelScale"
-	p_ver 2.12
-}
+//property Scale {
+//	label "ModelScale"
+//	p_ver 2.12
+//}
 
 property PGLaunchI {
 	label "ParticleGroupLaunchInfo"

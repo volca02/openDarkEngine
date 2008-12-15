@@ -92,6 +92,7 @@ namespace Opde {
 			void setSkip(bool _skip);
 			void setAlpha(float alpha);
 			void setZBias(float bias);
+			void setScale(const Vector3& scale);
 
 			void setEntity(Ogre::Entity* newEntity);
 
@@ -248,7 +249,6 @@ namespace Opde {
 			PropertyGroup* mPropPosition;
 
 			// "ModelScale" Property related
-			PropertyGroup::ListenerID mPropScaleListenerID;
 			PropertyGroup* mPropScale;
 
 			/// Shared pointer to the property service

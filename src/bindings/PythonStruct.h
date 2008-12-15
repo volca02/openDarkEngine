@@ -70,7 +70,7 @@ namespace Opde
                  */
                 static void publish(char* tpDoc, const char* tpName, PyObject* module) {
                 	msType.tp_doc = tpDoc;
-					msType.tp_name = tpName;
+					msType.tp_name = const_cast<char*>(tpName);
 
 					// TODO: A way to expose the fields?
 					// and publish

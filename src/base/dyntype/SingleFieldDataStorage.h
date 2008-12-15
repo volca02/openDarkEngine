@@ -256,6 +256,9 @@ namespace Opde {
 	/// unsigned int (4 byte) data storage
 	typedef SingleFieldDataStorage<uint32_t> UIntDataStorage;
 	
+	/// Vector3 data storage
+	typedef SingleFieldDataStorage<Vector3> Vector3DataStorage;
+	
 	/// Variable length string data storage
 	class OPDELIB_EXPORT StringDataStorage : public SingleFieldDataStorage<std::string> {
 		public:
