@@ -199,9 +199,6 @@ namespace Opde {
 			/// Position property change callback
 			void onPropPositionMsg(const PropertyChangeMsg& msg);
 
-			/// Scale property change callback
-			void onPropScaleMsg(const PropertyChangeMsg& msg);
-
 			/// Object creation/destruction callback
 			void onObjectMsg(const ObjectServiceMsg& msg);
 

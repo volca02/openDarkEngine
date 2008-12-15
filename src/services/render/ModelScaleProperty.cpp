@@ -77,6 +77,12 @@ namespace Opde {
 	// --------------------------------------------------------------------------
 	void ModelScaleProperty::setScale(int oid, const Vector3& scale) {
 		EntityInfo* ei = getEntityInfo(oid);
+
+		// Bugfix for zero sized scale. Dunno why those appear, but anyway
+		// this helps...
+		if ( (scale.x == 0) || (scale.y == 0) || (scale.z == 0))
+			return;
+
 		ei->setScale(scale);
 	};
 };

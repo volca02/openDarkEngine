@@ -475,51 +475,6 @@ namespace Opde {
 		}
 	}
 
-
-	// --------------------------------------------------------------------------
-	void RenderService::onPropScaleMsg(const PropertyChangeMsg& msg) {
-		if (msg.objectID <= 0) // no action for archetypes
-            return;
-
-		LOG_VERBOSE("RenderService: Scale prop for obj. %d changed", msg.objectID);
-
-		switch(msg.change) {
-			case PROP_CHANGED:
-			case PROP_ADDED: {
-				Ogre::SceneNode* node = getSceneNode(msg.objectID);
-
-				if (node == NULL)
-					return;
-
-				DVariant scale;
-
-				mPropScale->get(msg.objectID, "scale", scale);
-
-				Vector3 vscale = scale.toVector();
-
-				// And here it comes: There are some missions with a flawed scale values
-				// those really cause trouble when rendering
-				// I'm now disabling scale if one of the values is zero
-				// See t1/miss3.mis (Gold) - strange flicker present everywhere - that's caused by this
-				if (vscale.x == 0 || vscale.y == 0 || vscale.z == 0) {
-					LOG_DEBUG("RenderService: One scale component was zero, not scaling object %d", msg.objectID);
-					return;
-				}
-
-				LOG_VERBOSE("RenderService: New object %d scale : %f, %f, %f", msg.objectID, vscale.x, vscale.y, vscale.z);
-
-				node->setScale(vscale);
-				break;
-			}
-
-			case PROP_REMOVED:
-				// TODO: reset to scale 1, 1, 1?
-				break;
-		}
-	}
-
-
-
     // --------------------------------------------------------------------------
     void RenderService::prepareMesh(const Ogre::String& name) {
         String fname = name + ".mesh";
