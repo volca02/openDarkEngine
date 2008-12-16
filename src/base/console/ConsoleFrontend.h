@@ -67,7 +67,7 @@ namespace Opde {
 
 			Ogre::String mCommand;
 
-			unsigned int mPosition;
+			int mPosition;
 
 			ConsoleBackend* mConsoleBackend;
 	};

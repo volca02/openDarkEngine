@@ -76,7 +76,7 @@ namespace Ogre {
 		unsigned long startTime = Root::getSingleton().getTimer()->getMilliseconds();
 		
 		// Clear the cache of visible cells
-		int frameNum = static_cast<DarkSceneManager*>(mSceneMgr)->mFrameNum;
+		unsigned int frameNum = static_cast<DarkSceneManager*>(mSceneMgr)->mFrameNum;
 		
 		if (frameNum == mLastFrameNum && !mIsDirty) // nothing to do...
 			return;

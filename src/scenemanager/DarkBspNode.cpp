@@ -290,10 +290,10 @@ namespace Ogre {
 		unsigned int addition;
 		
 		if (!block) {
-			mask = ~0;
+			mask = (unsigned int) ~0;
 			addition = CELL_VIS_BLOCK;
 		} else { // unblock
-			mask = ~CELL_VIS_BLOCK;
+			mask = (unsigned int) ~CELL_VIS_BLOCK;
 			addition = 0;
 		}
 		

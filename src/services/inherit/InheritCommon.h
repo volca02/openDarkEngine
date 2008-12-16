@@ -122,7 +122,7 @@ namespace Opde {
 			virtual void clear() = 0;
 			
 			/// grows the internal tables of the inheritor to allow the storage of data about defined object range
-			virtual void grow(int minID, int maxID) {};
+			virtual void grow(int minID, int maxID) {minID; maxID;};
 
 			/// on a value change, the inheritor propagates the field and the new value to all affected objects
 			virtual void valueChanged(int objID, const std::string& field, const DVariant& value) = 0;

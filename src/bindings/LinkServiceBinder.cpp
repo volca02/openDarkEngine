@@ -184,7 +184,6 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* LinkServiceBinder::getAllLinks(PyObject* self, PyObject* args) {
-			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
 
 			int flavor = 0, src, dst;
@@ -217,7 +216,6 @@ namespace Opde {
 		// ------------------------------------------
 		PyObject* LinkServiceBinder::getOneLink(PyObject* self, PyObject* args) {
 			// Nearly the same as getAllLinks. Only that it returns PyObject for LinkPtr directly
-			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
 
 			int flavor = 0, src, dst;

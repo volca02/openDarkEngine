@@ -192,7 +192,6 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* RelationBinder::getAllLinks(PyObject* self, PyObject* args) {
-			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
 
 			int src, dst;
@@ -214,7 +213,6 @@ namespace Opde {
 		// ------------------------------------------
 		PyObject* RelationBinder::getOneLink(PyObject* self, PyObject* args) {
 			// Nearly the same as getAllLinks. Only that it returns PyObject for LinkPtr directly
-			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
 
 			int src, dst;
