@@ -38,9 +38,9 @@ namespace Opde {
 	/// Data serializer - used to fill the values of data based on File contents, and the other way round
 	class OPDELIB_EXPORT Serializer : public NonCopyable {
 		public:
-			// destructor
+			/// destructor
 			virtual ~Serializer() {};
-			
+
 			/// serializes the data into the specified fileptr
 			virtual void serialize(FilePtr& dest, const void* valuePtr) = 0;
 
@@ -65,6 +65,51 @@ namespace Opde {
 			virtual size_t getStoredSize(const void* valuePtr) {
 				return sizeof(T);
 			};
+	};
+
+	/// Fixed size string serializer - serializes first N characters of given string pointer
+	class OPDELIB_EXPORT FixedStringSerializer : public NonCopyable {
+		public:
+			// contructor
+			FixedStringSerializer(size_t strLen) : mStrLen(strLen) {};
+
+			/// destructor
+			virtual ~FixedStringSerializer() {};
+
+			/// serializes the data into the specified fileptr
+			virtual void serialize(FilePtr& dest, const void* valuePtr) {
+				// prepare a fixed char array for the write
+				char copyStr[mStrLen];
+
+				const std::string* str = static_cast<const std::string*>(valuePtr);
+				size_t strsz = str->length();
+
+				if (strsz > mStrLen)
+					strsz = mStrLen;
+
+				str->copy(copyStr, strsz);
+				copyStr[std::min(strsz, mStrLen - 1)] = '\0';
+
+				dest->write(copyStr, mStrLen);
+			};
+
+			/// deserializes the data from the specified fileptr
+			virtual void deserialize(FilePtr& src, void* valuePtr) {
+				// read the buf, fill the dest str with it
+				char copyStr[mStrLen];
+
+				src->read(copyStr, mStrLen);
+
+				*static_cast<std::string*>(valuePtr) = copyStr;
+			}
+
+			/// Returns the stored size of the type
+			virtual size_t getStoredSize(const void* valuePtr) {
+				return mStrLen;
+			}
+
+		protected:
+			size_t mStrLen;
 	};
 
 	// specializations for various special types

@@ -31,14 +31,14 @@ namespace Opde {
 	/*--------------------------------------------------------*/
 	/*-------------------- ModelScaleProperty ----------------*/
 	/*--------------------------------------------------------*/
-	ModelScaleProperty::ModelScaleProperty(RenderService* rs, PropertyService* owner) : 
+	ModelScaleProperty::ModelScaleProperty(RenderService* rs, PropertyService* owner) :
 			RenderedProperty(rs, owner, "ModelScale", "Scale", "always") {
-		
-		mPropertyStorage = new Vector3DataStorage();
-		
+
+		mPropertyStorage = new Vector3DataStorage(NULL);
+
 		// TODO: Check the version
 		setChunkVersions(2, 12);
-		
+
 		mSceneMgr = rs->getSceneManager();
 	};
 
@@ -52,7 +52,7 @@ namespace Opde {
 
 		if (!get(oid, "", val))
 			OPDE_EXCEPT("Property not defined for object.", "ModelScaleProperty::addProperty");
-		
+
 		setScale(oid, val.toVector());
 	};
 

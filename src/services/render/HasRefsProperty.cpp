@@ -31,12 +31,12 @@ namespace Opde {
 	/*--------------------------------------------------------*/
 	/*--------------------- HasRefsProperty ------------------*/
 	/*--------------------------------------------------------*/
-	HasRefsProperty::HasRefsProperty(RenderService* rs, PropertyService* owner) : 
+	HasRefsProperty::HasRefsProperty(RenderService* rs, PropertyService* owner) :
 			RenderedProperty(rs, owner, "HasRefs", "HasRefs", "always") {
-		mPropertyStorage = new BoolDataStorage();
-		
+		mPropertyStorage = new BoolDataStorage(NULL);
+
 		setChunkVersions(2, 4);
-		
+
 		mSceneMgr = rs->getSceneManager();
 	};
 
@@ -52,7 +52,7 @@ namespace Opde {
 
 		if (!get(oid, "", val))
 			OPDE_EXCEPT("Property not defined for object.", "HasRefsProperty::addProperty");
-		
+
 		setHasRefs(oid, val.toBool());
 	};
 
@@ -79,7 +79,7 @@ namespace Opde {
 		// EntityInfo* ei = getEntityInfo(oid);
 		// ei->setHasRefs(hasRefs);
 		Ogre::SceneNode* sn = getSceneNode(oid);
-		
+
 		if (hasRefs) {
 		    if (!sn->getParentSceneNode())
                 mSceneMgr->getRootSceneNode()->addChild(sn);

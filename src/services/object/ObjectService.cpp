@@ -234,7 +234,7 @@ namespace Opde {
 		mPropertyService = GET_SERVICE(PropertyService);
 
 		// DonorType property (single integer property, built in):
-		DataStoragePtr stor = new IntDataStorage();
+		DataStoragePtr stor = new IntDataStorage(NULL);
 		mPropDonorType = mPropertyService->createPropertyGroup("DonorType", "DonorType", "never", stor);
 		// version of the property tag
 		mPropDonorType->setChunkVersions(2, 4);

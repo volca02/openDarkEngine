@@ -54,20 +54,20 @@ namespace Opde {
 	*/
 	template<typename T> class OPDELIB_EXPORT SingleFieldDataStorage : public DataStorage {
 		public:
-			explicit SingleFieldDataStorage(DEnum* enm = NULL) {
+			explicit SingleFieldDataStorage(DEnum* enm) {
 				mSerializer = new TypeSerializer<T>();
 				mFieldDesc.enumerator = enm;
 				mFieldDesc.name = "";
 				mFieldDesc.size = sizeof(T);
-				
+
 				DVariantTypeTraits<T> tt;
 				mFieldDesc.type = tt.getType();
 			};
-			
+
 			virtual ~SingleFieldDataStorage() {
 				delete mSerializer;
 			}
-		
+
 			/** @see DataStorage::create */
 			virtual bool create(int objID) {
 				// call _create to handle the creation, with the default value
@@ -222,6 +222,11 @@ namespace Opde {
 			}
 
 		protected:
+			/// Empty constructor - for special case overrides
+			explicit SingleFieldDataStorage() {
+			};
+
+
 			/// Converts from variant to the internal storage type. Should be overrided, or reimplemented by explicit specialization
 			virtual T fromVariant(const DVariant& v) const {
 				return v.as<T>();
@@ -249,16 +254,16 @@ namespace Opde {
 
 	/// Float (4 byte) data storage
 	typedef SingleFieldDataStorage<float> FloatDataStorage;
-	
+
 	/// int (4 byte) data storage
 	typedef SingleFieldDataStorage<int32_t> IntDataStorage;
 
 	/// unsigned int (4 byte) data storage
 	typedef SingleFieldDataStorage<uint32_t> UIntDataStorage;
-	
+
 	/// Vector3 data storage
 	typedef SingleFieldDataStorage<Vector3> Vector3DataStorage;
-	
+
 	/// Variable length string data storage
 	class OPDELIB_EXPORT StringDataStorage : public SingleFieldDataStorage<std::string> {
 		public:
@@ -271,7 +276,23 @@ namespace Opde {
 				OPDE_EXCEPT("StringDataStorage::getDataSize", "Invalid call - string length is variable");
 			}
 	};
-	
+
+	/// Fixed size string data storage template.
+	template<int Len> class FixedStringDataStorage : public SingleFieldDataStorage<std::string> {
+		public:
+			FixedStringDataStorage(DEnum* enm = NULL) : SingleFieldDataStorage<std::string>(enm) {
+				mSerializer = new FixedStringSerializer(Len);
+
+				mFieldDesc.enumerator = enm;
+				mFieldDesc.name = "";
+				mFieldDesc.size = Len;
+
+				DVariantTypeTraits<std::string> tt;
+				mFieldDesc.type = tt.getType();
+			}
+
+	};
+
 }
 
 #endif // __PROPERTYSTORAGE_H

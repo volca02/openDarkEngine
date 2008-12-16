@@ -31,14 +31,14 @@ namespace Opde {
 	/*--------------------------------------------------------*/
 	/*-------------------- RenderAlphaProperty ----------------*/
 	/*--------------------------------------------------------*/
-	RenderAlphaProperty::RenderAlphaProperty(RenderService* rs, PropertyService* owner) : 
+	RenderAlphaProperty::RenderAlphaProperty(RenderService* rs, PropertyService* owner) :
 			RenderedProperty(rs, owner, "RenderAlpha", "RenderAlp", "always") {
-		
-		mPropertyStorage = new FloatDataStorage();
-		
+
+		mPropertyStorage = new FloatDataStorage(NULL);
+
 		// TODO: Check the version
 		setChunkVersions(2, 65540);
-		
+
 		mSceneMgr = rs->getSceneManager();
 	};
 
@@ -52,7 +52,7 @@ namespace Opde {
 
 		if (!get(oid, "", val))
 			OPDE_EXCEPT("Property not defined for object.", "RenderAlphaProperty::addProperty");
-		
+
 		setAlpha(oid, val.toFloat());
 	};
 
@@ -80,10 +80,10 @@ namespace Opde {
 		// clamp to 0-1
 		if (alpha < 0.0f)
 			alpha = 0.0f;
-		
+
 		if (alpha > 1.0f)
 			alpha = 1.0f;
-		
+
 		// and set the alpha on the entity
 		ei->setAlpha(alpha);
 	};

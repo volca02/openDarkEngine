@@ -46,7 +46,7 @@ namespace Opde {
 			virtual bool end() const {
 				return true;
 			};
-		
+
 		protected:
 			InheritLinkPtr mNullPtr;
 	};
@@ -59,7 +59,7 @@ namespace Opde {
 
 			virtual const InheritLinkPtr& next() {
 				assert(!end());
-				
+
 				const InheritLinkPtr& l = mIter->second;
 
 				++mIter;
@@ -102,7 +102,7 @@ namespace Opde {
 		// It may so happen that the init() was not called...
 		if (!mMetaPropRelation.isNull())
 			mMetaPropRelation->unregisterListener(mMetaPropListenerID);
-			
+
 		InheritorList::iterator it = mInheritors.begin();
 
 		for (; it != mInheritors.end(); ++it) {
@@ -133,7 +133,7 @@ namespace Opde {
 	void InheritService::destroyInheritor(Inheritor* inh) {
 		// erase from the vector, then destroy via the factory that created it
 		inh->getFactory()->destroyInstance(inh);
-		
+
 		InheritorList::iterator it = mInheritors.begin();
 
 		while (it != mInheritors.end()) {
@@ -154,9 +154,9 @@ namespace Opde {
 		    LOG_FATAL("InheritService::init: LinkService does not exist?");
 		    return false;
 		}
-		
+
 		// create the builtin metaprop relation and it's storage...
-		DataStoragePtr stor = new UIntDataStorage();
+		DataStoragePtr stor = new UIntDataStorage(NULL);
 		mMetaPropRelation = mLinkService->createRelation("MetaProp", stor, true);
 
 		// Could not be created?
@@ -275,16 +275,16 @@ namespace Opde {
 			return res;
 		}
 	}
-	
+
 	//------------------------------------------------------
 	void InheritService::setArchetype(int objID, int archetypeID) {
 		if (getArchetype(objID) != 0) {
 			OPDE_EXCEPT("Given object already has an archetype set","InheritService::setArchetype");
 		}
-		
+
 		_createMPLink(objID, archetypeID, 0);
 	}
-	
+
 	//------------------------------------------------------
 	int InheritService::getArchetype(int objID) const {
 		InheritMap::const_iterator it = mInheritSources.find(objID);
@@ -292,14 +292,14 @@ namespace Opde {
 		if (it != mInheritSources.end()) {
 			// The 'it' is a pointer to a map (dstID, LinkDataPtr)
 			InheritLinkMap::const_iterator it2 = it->second.begin();
-			
+
 			while (it2 != it->second.end()) {
 				if (it2->second->priority == 0) {
 					return it2->second->srcID;
 				}
 			}
 		}
-		
+
 		return 0;
 	}
 
@@ -309,20 +309,20 @@ namespace Opde {
 		// if so, we simply return
 		if (inheritsFrom(objID, mpID))
 			return;
-			
+
 		// does not inherit from the mpID, we can proceed.
-		
+
 		int mpPrio = 1024;
-		
+
 		// see if we can have some greater one
 		InheritMap::iterator it = mInheritSources.find(objID);
 
 		if (it != mInheritSources.end()) {
 			//  object seems to have some MP links
 			// search for the max mp priority
-			
+
 			InheritLinkMap::iterator it2 = it->second.begin();
-		
+
 			while (it2 != it->second.end()) {
 				int actPrio = it2->second->priority;
 				if (actPrio > mpPrio) {
@@ -330,35 +330,35 @@ namespace Opde {
 				}
 			}
 		}
-		
+
 		// whe have our priority. Let's create a new MP link!
 		_createMPLink(objID, mpID, mpPrio);
 	}
-	
+
 	//------------------------------------------------------
 	void InheritService::removeMetaProperty(int objID, int mpID) {
 		if (getArchetype(objID) == mpID) {
 			LOG_ERROR("Trying to remove MP(%d) from object (%d) which archetype-inherits from it!", objID, mpID);
 			return;
 		}
-		
+
 		if (!inheritsFrom(objID, mpID))
 			return;
-			
-		
+
+
 		// we inherit some mp from the obj. Remove
 		// We simply query mp relation for links that come from objID to mpID, then remove them
 		LinkPtr res = mMetaPropRelation->getOneLink(objID, mpID);
-		
+
 		mMetaPropRelation->remove(res->id());
 		// done!
 	}
-	
+
 	//------------------------------------------------------
 	bool InheritService::hasMetaProperty(int objID, int mpID) const {
 		if (getArchetype(objID) == mpID)
 			return false;
-			
+
 		// The object does not archetype-inherit, so if it inherits at all, it is by MP
 		return inheritsFrom(objID, mpID);
 	}
@@ -370,14 +370,14 @@ namespace Opde {
 		if (it != mInheritSources.end()) {
 			//  object seems to have some links
 			InheritLinkMap::const_iterator it2 = it->second.find(srcID);
-			
+
 			if (it2 != it->second.end())
 				return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	//------------------------------------------------------
 	void InheritService::_addLink(const LinkPtr& link, unsigned int priority) {
 		// It works like this. link.src() is the target for inheritance, link.dst() is the source for inheritance
