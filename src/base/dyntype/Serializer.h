@@ -71,7 +71,7 @@ namespace Opde {
 	class OPDELIB_EXPORT FixedStringSerializer : public Serializer {
 		public:
 			// contructor
-			FixedStringSerializer(size_t strLen) : mStrLen(strLen) {};
+			FixedStringSerializer(size_t strLen) : mStrLen(strLen) { assert(strLen <= 1024); };
 
 			/// destructor
 			virtual ~FixedStringSerializer() {};
@@ -79,7 +79,7 @@ namespace Opde {
 			/// serializes the data into the specified fileptr
 			virtual void serialize(FilePtr& dest, const void* valuePtr) {
 				// prepare a fixed char array for the write
-				char copyStr[mStrLen];
+				char copyStr[1024];
 
 				const std::string* str = static_cast<const std::string*>(valuePtr);
 				size_t strsz = str->length();
@@ -96,7 +96,7 @@ namespace Opde {
 			/// deserializes the data from the specified fileptr
 			virtual void deserialize(FilePtr& src, void* valuePtr) {
 				// read the buf, fill the dest str with it
-				char copyStr[mStrLen];
+				char copyStr[1024];
 
 				src->read(copyStr, mStrLen);
 
