@@ -136,6 +136,7 @@ namespace Opde {
 	* The 0,0,0 bug will reveal itself here too, maybe. This is caused by default object coordinates being 0,0,0 and we have to wait for Position prop message to come in order to move the node
 	*/
 	class OPDELIB_EXPORT RenderService : public Service, public MessageSource< RenderServiceMsg >, public LoopClient {
+		friend class ModelNameProperty; // so it can set object model name
 		public:
 			RenderService(ServiceManager *manager, const std::string& name);
 			virtual ~RenderService();
@@ -237,8 +238,7 @@ namespace Opde {
 
 			// Listener structs for property messages
 
-			// ModelName listener related
-			PropertyGroup::ListenerID mPropModelNameListenerID;
+			// ModelName property
 			PropertyGroup* mPropModelName;
 
 			// "Position" Property related

@@ -168,7 +168,7 @@ namespace Opde {
 					if (sizeStored)
 						file->readElem(&size, sizeof(uint32_t));
 
-					assert(size == sizeof(T));
+					// assert(size == sizeof(T));
 
 					T dta;
 

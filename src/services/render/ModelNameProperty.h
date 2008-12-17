@@ -18,29 +18,29 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *		$Id$
+ *	$Id$
  *
  *****************************************************************************/
 
 
-#ifndef __RENDERALPHAPROPERTY_H
-#define __RENDERALPHAPROPERTY_H
+#ifndef __MODELNAMEPROPERTY_H
+#define __MODELNAMEPROPERTY_H
 
 #include "RenderedProperty.h"
 
 namespace Opde {
 
-	/** a RenderAlpha property implementation using rendered property handler.
-	* Controls the transparency of the object
-	* Uses simple unsigned float data storage. Defaults to 1.0 - No transparency. Inherits always.
+	/** a ModelName property implementation.
+	* Controls the object's model (Mesh).
+	* Uses Fixed String. Defaults to built in Ramp mesh. Inherits always.
 	*/
-	class RenderAlphaProperty : public RenderedProperty {
+	class ModelNameProperty : public RenderedProperty {
 		public:
 			/// constructor
-			RenderAlphaProperty(RenderService* rs, PropertyService* owner);
+			ModelNameProperty(RenderService* rs, PropertyService* owner);
 
 			/// destructor
-			virtual ~RenderAlphaProperty(void);
+			virtual ~ModelNameProperty(void);
 			
 		protected:
 			/// @see ActiveProperty::addProperty
@@ -55,8 +55,8 @@ namespace Opde {
 			/// @see ActiveProperty::valueChanged
 			void valueChanged(int oid, const std::string& field, const DVariant& value);
 
-			/// core setter method. Called from other methods to set the render alpha value
-			void setAlpha(int oid, float alpha);
+			/// core setter method. Called from other methods to set the model name value
+			void setModel(int oid, const std::string& name);
 			
 			Ogre::SceneManager* mSceneMgr;
 	};

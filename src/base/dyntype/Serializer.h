@@ -68,7 +68,7 @@ namespace Opde {
 	};
 
 	/// Fixed size string serializer - serializes first N characters of given string pointer
-	class OPDELIB_EXPORT FixedStringSerializer : public NonCopyable {
+	class OPDELIB_EXPORT FixedStringSerializer : public Serializer {
 		public:
 			// contructor
 			FixedStringSerializer(size_t strLen) : mStrLen(strLen) {};

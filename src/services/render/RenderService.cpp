@@ -50,6 +50,7 @@
 #include "RenderAlphaProperty.h"
 #include "ZBiasProperty.h"
 #include "ModelScaleProperty.h"
+#include "ModelNameProperty.h"
 
 using namespace std;
 using namespace Ogre;
@@ -241,9 +242,11 @@ namespace Opde {
 		    mPropPosition->unregisterListener(mPropPositionListenerID);
 		mPropPosition = NULL;
 
-		if (mPropModelName != NULL)
-		    mPropModelName->unregisterListener(mPropModelNameListenerID);
-		mPropModelName = NULL;
+		if (mPropModelName != NULL) {
+		    mPropertyService->unregisterPropertyGroup(mPropModelName);
+			delete mPropModelName;
+			mPropModelName = NULL;
+		}
 
 		if (mPropScale != NULL) {
 		    mPropertyService->unregisterPropertyGroup(mPropScale);
@@ -391,14 +394,6 @@ namespace Opde {
 		// TODO: ConfigurationService::getKey("Core","InheritanceLinkName").toString();
 
 		// TODO: hardcoded property name, but that's hopefully not a problem after all
-
-		// --- Model name listener
-		mPropModelName = mPropertyService->getPropertyGroup("ModelName");
-
-		if (mPropModelName == NULL)
-            OPDE_EXCEPT("Could not get ModelName property group. Not defined. (Did you forget to load .pldef the scripts?)", "RenderService::bootstrapFinished");
-
-		mPropModelNameListenerID = mPropModelName->registerListener(cmodelc);
 
 		// --- Position property listener
 		mPropPosition = mPropertyService->getPropertyGroup("Position");
@@ -555,8 +550,8 @@ namespace Opde {
 			return;
 		}
 
-		// if the new name is empty, just set skip and it's done
-		if (name == "") {
+		// if the new name is particle, just set skip and it's done
+		if (name == FX_PARTICLE_OBJECT_NAME) {
 			LOG_VERBOSE("RenderService: Mesh rendering for %d disabled", id);
 			ei->setSkip(true);
 			return;
@@ -577,7 +572,7 @@ namespace Opde {
 			ent = mSceneMgr->createEntity( "Object" + idstr + "Ramp", DEFAULT_RAMP_OBJECT_NAME);
 		}
 
-		Entity *prevent = ei->getEntity();
+		// Entity *prevent = ei->getEntity();
 
 		prepareEntity(ent);
 
@@ -868,8 +863,7 @@ namespace Opde {
 		// Ok, what do we have here?
 		// Model Name. Simple fixed-length string prop
 		// Fixed on version 2.16
-		//mModelNameStorage = new FixedStringDataStorage();
-		//mPropertyService->createPropertyGroup("ModelName", "ModelName", "always", mModelNameStorage);
+		mPropModelName = new ModelNameProperty(this, mPropertyService.ptr());
 
 		// RenderAlpha property - single float prop
 		mRenderAlphaProperty = new RenderAlphaProperty(this, mPropertyService.ptr());
@@ -889,13 +883,9 @@ namespace Opde {
 			mPropertyService->registerPropertyGroup(mZBiasProperty);
 		}
 
+		// Scale property
 		mPropScale = new ModelScaleProperty(this, mPropertyService.ptr());
 		mPropertyService->registerPropertyGroup(mPropScale);
-
-		// Light - a more complex property - this should be moved to LightService
-
-		// Spotlight - as above
-
 	}
 
 
@@ -914,3 +904,4 @@ namespace Opde {
 		return new RenderService(manager, mName);
 	}
 }
+

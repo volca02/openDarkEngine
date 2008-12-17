@@ -55,7 +55,7 @@ namespace Opde {
 			/// @see ActiveProperty::valueChanged
 			void valueChanged(int oid, const std::string& field, const DVariant& value);
 
-			/// core setter method. Called from other methods to set the hasrefs value
+			/// core setter method. Called from other methods to set the scale value
 			void setScale(int oid, const Vector3& scale);
 			
 			Ogre::SceneManager* mSceneMgr;
