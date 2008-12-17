@@ -146,6 +146,7 @@ namespace Opde {
 
 	//------------------------------------------------------
 	bool InheritService::init() {
+		LOG_DEBUG("InheritService::init()");
 		// Link Service should have created us automatically through service masks.
 		// So we can register as a link service listener
 		mLinkService = GET_SERVICE(LinkService);
@@ -163,6 +164,7 @@ namespace Opde {
 		if (mMetaPropRelation.isNull())
 			OPDE_EXCEPT("MetaProp relation could not be created. Fatal.", "InheritService::init");
 
+		LOG_DEBUG("InheritService::init() - done!");
 		return true;
 	}
 

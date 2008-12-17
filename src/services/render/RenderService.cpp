@@ -253,7 +253,7 @@ namespace Opde {
 			delete mPropScale;
 			mPropScale = NULL;
 		}
-		
+
 
 		if (!mLoopService.isNull()) {
 			mLoopService->removeLoopClient(this);
@@ -385,16 +385,7 @@ namespace Opde {
 		// create the properties the render service uses (built-in)
 		createProperties();
 
-		PropertyGroup::ListenerPtr cmodelc =
-			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropModelNameMsg);
-
 		// Get the PropertyService, then the group Position
-
-		// contact the config. service, and look for the inheritance link name
-		// TODO: ConfigurationService::getKey("Core","InheritanceLinkName").toString();
-
-		// TODO: hardcoded property name, but that's hopefully not a problem after all
-
 		// --- Position property listener
 		mPropPosition = mPropertyService->getPropertyGroup("Position");
 
@@ -424,50 +415,6 @@ namespace Opde {
 		// Rendering step...
 		mRoot->renderOneFrame();
 		Ogre::WindowEventUtilities::messagePump();
-	}
-
-	// --------------------------------------------------------------------------
-	void RenderService::onPropModelNameMsg(const PropertyChangeMsg& msg) {
-		// Update the Model (mesh) for the object
-		if (msg.change == PROP_GROUP_CLEARED) {
-            clear();
-			return;
-		}
-
-		if (msg.objectID <= 0) // no action for archetypes
-            return;
-
-		DVariant res = "";
-        mPropModelName->get(msg.objectID, "label", res); // the model name
-
-        std::string name = res.toString();
-
-   		LOG_VERBOSE("RenderService: A ModelName change happened : %s is new for %d", name.c_str(), msg.objectID);
-
-        switch (msg.change) {
-			case PROP_CHANGED:
-			case PROP_ADDED: {
-				std::string upper = name;
-				Ogre::StringUtil::toUpperCase(upper);
-
-				// FX_Particle is a keyword! If found, it means that the model will be invisible, and a particle effect will be done instead
-				if (upper == FX_PARTICLE_OBJECT_NAME) {
-					// empty param means no entity
-					LOG_VERBOSE("RenderService: FX_Particle for %d", msg.objectID);
-					setObjectModel(msg.objectID, "");
-				} else {
-					// TODO: This can consume time even when the new model name == old model name
-					prepareMesh(name);
-					setObjectModel(msg.objectID, name + ".mesh");
-				}
-
-				break;
-			}
-
-            case PROP_REMOVED:
-				setObjectModel(msg.objectID, DEFAULT_RAMP_OBJECT_NAME);
-                break;
-		}
 	}
 
     // --------------------------------------------------------------------------
@@ -544,6 +491,10 @@ namespace Opde {
 	void RenderService::setObjectModel(int id, const std::string& name) {
 		EntityInfo* ei = _getEntityInfo(id);
 
+		LOG_VERBOSE("RenderService::setObjectModel: Object model for %d - setting to %s", id, name.c_str());
+
+		prepareMesh(name);
+
 		// if there was an error finding the entity info, the object does not exist
 		if (!ei) {
 			LOG_VERBOSE("RenderService: Object model could not be set for %d, object not found", id);
@@ -565,14 +516,12 @@ namespace Opde {
 
 		// load the new entity, set it as the current in the entity info
 		try {
-			ent = mSceneMgr->createEntity( "Object" + idstr + name, name);
+			ent = mSceneMgr->createEntity( "Object" + idstr + name, name + ".mesh");
 		} catch (Ogre::Exception& e) {
 			// TODO: This could also be handled by not setting the new entity at all
 			LOG_ERROR("RenderService: Could not load model %s for obj %d : %s", name.c_str(), id, e.getFullDescription().c_str());
 			ent = mSceneMgr->createEntity( "Object" + idstr + "Ramp", DEFAULT_RAMP_OBJECT_NAME);
 		}
-
-		// Entity *prevent = ei->getEntity();
 
 		prepareEntity(ent);
 
@@ -780,17 +729,17 @@ namespace Opde {
 
 		float vertices[vbufCount] = {
 			-2.0,-1.0,-1.0,	//0 position
-			-sqrt13,-sqrt13,-sqrt13,
+			sqrt13,sqrt13,sqrt13,
 			-2.0, 1.0,-1.0, //1 position
-			-sqrt13,sqrt13,-sqrt13,
+			sqrt13,-sqrt13,sqrt13,
 			-2.0, 1.0, 1.0, //2 position
-			-sqrt13,sqrt13,sqrt13,
+			sqrt13,-sqrt13,-sqrt13,
 			-2.0,-1.0, 1.0, //3 position
-			-sqrt13,-sqrt13,sqrt13,
-			2.0, 1.0, -0.3,  //4 position
 			sqrt13,sqrt13,-sqrt13,
+			2.0, 1.0, -0.3,  //4 position
+			-sqrt13,-sqrt13,sqrt13,
 			2.0,-1.0, -0.3,  //5 position
-			sqrt13,-sqrt13,-sqrt13
+			-sqrt13,sqrt13,sqrt13
 		};
 
 		const size_t ibufCount = 24;
@@ -864,6 +813,7 @@ namespace Opde {
 		// Model Name. Simple fixed-length string prop
 		// Fixed on version 2.16
 		mPropModelName = new ModelNameProperty(this, mPropertyService.ptr());
+		mPropertyService->registerPropertyGroup(mPropModelName);
 
 		// RenderAlpha property - single float prop
 		mRenderAlphaProperty = new RenderAlphaProperty(this, mPropertyService.ptr());

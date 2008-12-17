@@ -491,7 +491,7 @@ namespace Opde {
 		mPlayerFactoryRelation = mLinkService->getRelation("PlayerFactory");
 
 		if (mPlayerFactoryRelation.isNull())
-			OPDE_EXCEPT("MetaProp relation not found. Fatal.", "InheritService::init");
+			OPDE_EXCEPT("PlayerFactory relation not found. Fatal.", "GamePlayState::bootstrapFinished");
 
 		mPlayerFactoryListenerID = mPlayerFactoryRelation->registerListener(metaPropCallback);
 		LOG_INFO("GamePlayState::bootstrapFinished() - done");
