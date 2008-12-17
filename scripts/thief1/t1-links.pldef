@@ -82,9 +82,9 @@ relation arSrcDesc {
 }
 
 
-relation PlayerFactory {
-    no_data
-}
+//relation PlayerFactory {
+//    no_data
+//}
 
 
 relation Firer {

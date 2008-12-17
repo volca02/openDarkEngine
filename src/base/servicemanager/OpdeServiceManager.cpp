@@ -25,6 +25,7 @@
 #include "config.h"
 
 #include <iostream>
+#include <vector>
 
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
@@ -37,11 +38,11 @@ namespace Opde {
 
 	template<> ServiceManager* Singleton<ServiceManager>::ms_Singleton = 0;
 
-	ServiceManager::ServiceManager(uint serviceMask) : 
-		mServiceFactories(), 
-		mServiceInstances(), 
+	ServiceManager::ServiceManager(uint serviceMask) :
+		mServiceFactories(),
+		mServiceInstances(),
 		mBootstrapFinished(false),
-		mGlobalServiceMask(serviceMask) { 
+		mGlobalServiceMask(serviceMask) {
 	}
 
 	ServiceManager::~ServiceManager() {
@@ -49,7 +50,7 @@ namespace Opde {
 		LOG_DEBUG("ServiceManager: Releasing all services");
 
 		ServiceInstanceMap::iterator s_it;
-		
+
 		s_it = mServiceInstances.begin();
 
 		LOG_INFO("ServiceManager: Shutting down all services");
@@ -59,16 +60,16 @@ namespace Opde {
 			LOG_INFO(" * Shutting down service '%s'", s_it->first.c_str());
 			s_it->second->shutdown();
 		}
-		
+
 		s_it = mServiceInstances.begin();
 		LOG_INFO("ServiceManager: Releasing all services");
 
 		for (; s_it != mServiceInstances.end(); ++s_it) {
 			LOG_INFO(" * Releasing service %s (ref. count %d)", s_it->first.c_str(), s_it->second.getRefCount());
-			
+
 			/*if (s_it->second.getRefCount() > 0)
 				LOG_FATAL(" * Service '%s' has reference count > 1. It won't probably be released immediately!", s_it->first.c_str());*/
-			
+
 			s_it->second.setNull();
 		}
 
@@ -132,7 +133,7 @@ namespace Opde {
 		if (factory != NULL) { // Found a factory for the Service name
 			if (!(factory->getMask() & mGlobalServiceMask))
 			    OPDE_EXCEPT("Initialization of service " + factory->getName() + " was not permitted by mask. Please consult OPDE log for details", "ServiceManager::createInstance");
-		
+
 			ServicePtr ns = factory->createInstance(this);
 			mServiceInstances.insert(make_pair(factory->getName(), ns));
 
@@ -166,7 +167,7 @@ namespace Opde {
 		for (; factory_it != mServiceFactories.end(); ++factory_it) {
 
 			// if the mask fits and the service is permitted by global service mask
-			if ((factory_it->second->getMask() & mask) && (factory_it->second->getMask() & mGlobalServiceMask)) { 
+			if ((factory_it->second->getMask() & mask) && (factory_it->second->getMask() & mGlobalServiceMask)) {
 			    ServicePtr service = getService(factory_it->second->getName());
 			}
 		}
@@ -176,15 +177,28 @@ namespace Opde {
 	    if (mBootstrapFinished) // just do this once
             return;
 
-        ServiceInstanceMap::iterator it = mServiceInstances.begin();
+	    // Here's a catch: The services can create other services while bootstrapping
+	    // process is performed. That means the service map can be modified,
+	    // and so it's not guaranteed that the bootstrap will be called on those.
+	    // For a fix, we set the mBootstrapFinished flag in advance, which means
+	    // createInstance will also bootstrap
 
-        for (; it != mServiceInstances.end() ; ++it ) {
-            LOG_DEBUG("ServiceManager: Bootstrap finished: informing %s", it->first.c_str());
+	    std::vector<ServicePtr> toBootstrap;
 
-            it->second->bootstrapFinished();
+	    ServiceInstanceMap::iterator it = mServiceInstances.begin();
+
+	    for (; it != mServiceInstances.end() ; ++it )
+	    	toBootstrap.push_back(it->second);
+
+	    mBootstrapFinished = true;
+
+	    std::vector<ServicePtr>::iterator tit = toBootstrap.begin();
+
+        for (; tit != toBootstrap.end() ; ++tit ) {
+            LOG_DEBUG("ServiceManager: Bootstrap finished: informing %s", (*tit)->getName().c_str());
+
+            (*tit)->bootstrapFinished();
         };
-
-        mBootstrapFinished = true;
 	}
 
 }

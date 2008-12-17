@@ -1001,10 +1001,10 @@ property RotDoor {
 	p_ver 2.66537
 }
 
-property ModelName {
-	label "ModelName"
-	p_ver 2.16
-}
+//property ModelName {
+//	label "ModelName"
+//	p_ver 2.16
+//}
 
 property StTweq4Em {
 	label "TweqEmitter4State"

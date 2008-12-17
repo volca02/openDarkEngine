@@ -32,7 +32,7 @@ namespace Ogre {
 	// -------------------------------------------------------
 	// ----- Proxy Archive -----------------------------------
 	// -------------------------------------------------------
-	ProxyArchive::ProxyArchive(const String& name, const String& archType) : 
+	ProxyArchive::ProxyArchive(const String& name, const String& archType) :
 		Archive(name, archType),
 		mArchive(NULL) {
 	}
@@ -40,24 +40,24 @@ namespace Ogre {
 	// -------------------------------------------------------
 	ProxyArchive::~ProxyArchive(void) {
 	}
-	
+
 	// -------------------------------------------------------
 	void ProxyArchive::load(void) {
 		// load, build map
 		mArchive->load();
-		
+
 		StringVectorPtr lst = mArchive->list(true, false);
-		
+
 		StringVector::iterator it = lst->begin();
-		
+
 		while (it != lst->end()) {
 			const std::string& fn = *it++;
 			std::string tn = transformName(fn);
 			StringUtil::toLowerCase(tn);
 			// insert into the map
-			std::pair<NameTable::iterator, bool> result = 
+			std::pair<NameTable::iterator, bool> result =
 				mExtToIntNames.insert(std::make_pair(tn, fn));
-			
+
 			// see if the result is ok, except if not
 			if (!result.second)
 				OGRE_EXCEPT(Exception::ERR_DUPLICATE_ITEM,
@@ -65,25 +65,25 @@ namespace Ogre {
 					"ProxyArchive::load");
 		}
 	}
-			
-			
+
+
 	// -------------------------------------------------------
 	void ProxyArchive::unload(void) {
 		mArchive->unload();
-		
+
 		mExtToIntNames.clear();
 	}
-	
+
 	// -------------------------------------------------------
 	FileInfoListPtr ProxyArchive::findFileInfo(const String& pattern, bool recursive , bool dirs) {
 		/// have to list all infos, filter those which fit
 		FileInfoListPtr lst = listFileInfo(recursive, dirs);
-		
+
 		FileInfoListPtr res(new FileInfoList());
-		
+
 		/// now iterate, the list, match using the name, return
 		FileInfoList::iterator it = lst->begin();
-		
+
 		while (it != lst->end()) {
 			const FileInfo& fi = *it++;
 			// match?
@@ -91,30 +91,30 @@ namespace Ogre {
 				res->push_back(fi);
 			}
 		}
-		
+
 		return res;
 	}
 
 	// -------------------------------------------------------
 	bool ProxyArchive::exists(const String& filename) {
-		try {
-			String un = untransformName(filename);
+		String un;
+
+		if (untransformName(filename, un))
 			return mArchive->exists(un);
-		} catch (...) {
+		else
 			return false;
-		}
 	}
 
 	// -------------------------------------------------------
 	StringVectorPtr ProxyArchive::find(const String& pattern, bool recursive , bool dirs) {
 		/// have to list all infos, filter those which fit
 		StringVectorPtr lst = list(recursive, dirs);
-		
+
 		StringVectorPtr res(new StringVector());
-		
+
 		/// now iterate, the list, match using the name, return
 		StringVector::iterator it = lst->begin();
-		
+
 		while (it != lst->end()) {
 			const String& fn = *it++;
 			// match?
@@ -122,35 +122,35 @@ namespace Ogre {
 				res->push_back(fn);
 			}
 		}
-		
+
 		return res;
 	}
 
 	// -------------------------------------------------------
 	FileInfoListPtr ProxyArchive::listFileInfo(bool recursive , bool dirs) {
 		FileInfoListPtr list = mArchive->listFileInfo(recursive, dirs);
-		
+
 		FileInfoListPtr res(new FileInfoList());
-		
+
 		/// now iterate, the list, match using the name, return
 		FileInfoList::iterator it = list->begin();
-		
+
 		while (it != list->end()) {
 			const FileInfo& fi = *it++;
-		
+
 			FileInfo fin;
-			
+
 			fin.archive = this;
 			fin.filename = transformName(fi.filename);
 			fin.path = transformName(fi.path);
 			fin.basename = transformName(fi.basename);
-			
+
 			fin.compressedSize = fi.compressedSize;
 			fin.uncompressedSize = fi.uncompressedSize;
-			
+
 			res->push_back(fin);
 		}
-		
+
 		return res;
 	}
 
@@ -158,49 +158,56 @@ namespace Ogre {
 	StringVectorPtr ProxyArchive::list(bool recursive , bool dirs) {
 		/// have to list all infos, filter those which fit
 		StringVectorPtr lst = mArchive->list(recursive, dirs);
-		
+
 		StringVectorPtr res(new StringVector());
-		
+
 		/// now iterate, the list, match using the name, return
 		StringVector::iterator it = lst->begin();
-		
+
 		while (it != lst->end()) {
 			const String& fn = *it++;
-			
+
 			res->push_back(transformName(fn));
 		}
-		
+
 		return res;
 	}
 
 	// -------------------------------------------------------
 	DataStreamPtr ProxyArchive::open(const String& filename) const {
-		String utfn = untransformName(filename);
-		return mArchive->open(utfn);
+		String un;
+
+		if (untransformName(filename, un))
+			return mArchive->open(un);
+		else
+			return DataStreamPtr();
 	}
 
 	// -------------------------------------------------------
-	std::string ProxyArchive::untransformName(const String& name) const {
+	bool ProxyArchive::untransformName(const String& name, String& unt) const {
 		String s = name;
 		StringUtil::toLowerCase(s);
 		NameTable::const_iterator it = mExtToIntNames.find(s);
-		
+
 		if (it != mExtToIntNames.end()) {
-			return it->second;
+			unt = it->second;
+			return true;
 		} else {
-			OGRE_EXCEPT(Exception::ERR_FILE_NOT_FOUND,
-					"Archive '" + mName + "' does not contain file : " + name,
-					"ProxyArchive::untransformName");
+			return false;
 		}
 	}
-	
+
 	// -------------------------------------------------------
 	bool ProxyArchive::match(const String& pattern, const String& name) const {
-		String unt = untransformName(name);
+		String unt;
+
+		if (!untransformName(name, unt))
+			return false;
+
 		StringUtil::toLowerCase(unt);
 		String lpattern = pattern;
 		StringUtil::toLowerCase(lpattern);
-		
+
 		// inspired by one codeproject article (but a rewrite without using the code)
 
 		enum State {
@@ -239,7 +246,7 @@ namespace Ogre {
 			}
 
 			switch (state) {
-				case PM_Match: 
+				case PM_Match:
 					match = *pi == *si;
 				case PM_Any:
 					++pi; ++si;
@@ -247,7 +254,7 @@ namespace Ogre {
 				case PM_AnySeq:
 					// matched any character
 					++si;
-					
+
 					// found the end of pattern? If so,
 					// then the previous comparisons decide
 					if (pnext == lpattern.end()) {
@@ -270,17 +277,17 @@ namespace Ogre {
 
 		return match;
 	}
-	
-	
+
+
 	// -------------------------------------------------------
 	// ----- CaseLess Archive --------------------------------
 	// -------------------------------------------------------
-	CaseLessFileSystemArchive::CaseLessFileSystemArchive(const String& name, 
+	CaseLessFileSystemArchive::CaseLessFileSystemArchive(const String& name,
 			const String& archType) : ProxyArchive(name, archType) {
-				
+
 		mArchive = new Ogre::FileSystemArchive(mName, mType);
 	}
-	
+
 	// -------------------------------------------------------
 	CaseLessFileSystemArchive::~CaseLessFileSystemArchive(void) {
 		delete mArchive;
@@ -290,7 +297,7 @@ namespace Ogre {
 	bool CaseLessFileSystemArchive::isCaseSensitive(void) const {
 		return false;
 	}
-	
+
 	// -------------------------------------------------------
 	String CaseLessFileSystemArchive::transformName(const std::string& name) {
 		// simple - just lowercase the name
@@ -298,24 +305,24 @@ namespace Ogre {
 		StringUtil::toLowerCase(res);
 		return res;
 	}
-	
+
 	// -------------------------------------------------------
 	// ----- CRF Archive -------------------------------------
 	// -------------------------------------------------------
-	CRFArchive::CRFArchive(const String& name, 
+	CRFArchive::CRFArchive(const String& name,
 			const String& archType) : ProxyArchive(name, archType) {
-		
+
 		// split, we only want the file name part
 		String ext, path;
 		StringUtil::splitFullFilename(name, mFilePart, ext, path);
-        
+
         StringUtil::toLowerCase(mFilePart);
-        
+
         mFilePart += '/';
-        
+
         mArchive = new Ogre::ZipArchive(mName, mType);
 	}
-	
+
 	// -------------------------------------------------------
 	CRFArchive::~CRFArchive(void) {
 		delete mArchive;
@@ -325,7 +332,7 @@ namespace Ogre {
 	bool CRFArchive::isCaseSensitive(void) const {
 		return false;
 	}
-	
+
 	// -------------------------------------------------------
 	String CRFArchive::transformName(const std::string& name) {
 		String res = name;
@@ -333,13 +340,13 @@ namespace Ogre {
 		// just lowercase the name, and prefix with the mFilePart
 		return mFilePart + res;
 	}
-	
+
 	// -------------------------------------------------------
 	const String& CaseLessFileSystemArchiveFactory::getType(void) const {
 		static String name = "Dir";
         return name;
 	}
-	
+
 	// -------------------------------------------------------
 	const String& CrfArchiveFactory::getType(void) const {
 		static String name = "Crf";

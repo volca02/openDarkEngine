@@ -501,8 +501,12 @@ namespace Opde {
 			return;
 		}
 
+		// upper, to compare without case
+		std::string iname = name;
+		StringUtil::toUpperCase(iname);
+
 		// if the new name is particle, just set skip and it's done
-		if (name == FX_PARTICLE_OBJECT_NAME) {
+		if (iname == FX_PARTICLE_OBJECT_NAME) {
 			LOG_VERBOSE("RenderService: Mesh rendering for %d disabled", id);
 			ei->setSkip(true);
 			return;

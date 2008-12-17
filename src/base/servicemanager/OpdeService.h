@@ -41,7 +41,7 @@ namespace Opde {
 	class OPDELIB_EXPORT Service : public NonCopyable {
 			protected:
 				friend class ServiceManager;
-				
+
 				ServiceManager* mServiceManager;
 				std::string mName;
 
@@ -52,6 +52,9 @@ namespace Opde {
                 /** Destructor. When using service dependencies, be aware that if an error happened, the fields can be non-initialized.
                 */
 				virtual ~Service();
+
+				/// Service name getter
+				inline const std::string& getName() const { return mName; };
 
 			protected:
 				/** Intialization of the service. Guaranteed to be called after construction (If constructor was sucessful).

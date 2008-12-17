@@ -157,9 +157,15 @@ namespace Opde {
 		// override the config setting
 		mConfigService->setParam("game_type", mGameType);
 
-		RenderServicePtr rends;
 
-		rends = GET_SERVICE(RenderService);
+		// To be sure it exists, and because this is just a testing code
+		// and to remove the need to parse scripts,
+		// we create the data-less Relation PlayerFactory here
+		LinkServicePtr linksvc = GET_SERVICE(LinkService);
+		linksvc->createRelation("PlayerFactory", NULL, false);
+		linksvc.setNull();
+
+		RenderServicePtr rends = GET_SERVICE(RenderService);
 
 		// Setup resources.
 		setupResources();
@@ -202,7 +208,7 @@ namespace Opde {
 		 * The parameter is split to path and mission file name
 		 * the path goes to the default resource group (if not already in)
 		 * the name is then loaded
-		*/ 
+		*/
 		if (mConfigService->hasParam("mission")) {
 			DVariant mis = mConfigService->getParam("mission");
 

@@ -20,7 +20,7 @@
  *	  $Id$
  *
  *****************************************************************************/
- 
+
 #ifndef __PROXYARCHIVE_H
 #define __PROXYARCHIVE_H
 
@@ -28,9 +28,9 @@
 
 #include <OgreArchive.h>
 #include <OgreArchiveFactory.h>
- 
+
 namespace Ogre {
-	
+
 	/** Proxy archive, which performs name transforms and delegates to underlying archive instance.
 	* There are couple different possible usages for this archive class:
 	* 1. A case insensitive filesystem archive on *nix systems
@@ -42,121 +42,121 @@ namespace Ogre {
 	* make ogre's file system archive case insensitive on *nix systems.
 	*
 	* @todo The final piece of puzzle will be a class that autoloads crf files as resources \
-	*	for the predefined group, and a resource listener that allows duplicate resource names in some way 
+	*	for the predefined group, and a resource listener that allows duplicate resource names in some way
 	*/
 	class OPDELIB_EXPORT ProxyArchive : public Archive {
 		public:
 			/// constructor
 			ProxyArchive(const String& name, const String& archType);
-			
+
 			/// destructor
 			virtual ~ProxyArchive(void);
-			
+
 			/// performs the archive load. Scans the archive for filenames, builds the reverse transform table
 			virtual void load(void);
-			
+
 			/// Unloads the archive, clears the transform map
 			virtual void unload(void);
-			
+
 			/// opens a resource stream, unmapping the name first
 			virtual DataStreamPtr open(const String& filename) const;
-			
+
 			/// lists the contents of the archive. transformed.
 			virtual StringVectorPtr list(bool recursive = true, bool dirs = false);
-			
+
 			/// lists the contents of the archive. transformed, in the FileInfo structures.
 			virtual FileInfoListPtr listFileInfo(bool recursive = true, bool dirs = false);
-			
+
 			/// performs a pattern match find on the archive files
 			virtual StringVectorPtr find(const String& pattern, bool recursive = true,
             bool dirs = false);
-            
+
             /// Searches for the given name, untransforming it first
             virtual bool exists(const String& filename);
-            
+
             /** Searches for files that match the given pattern
             * @see find
 			*/
-			virtual FileInfoListPtr findFileInfo(const String& pattern, 
+			virtual FileInfoListPtr findFileInfo(const String& pattern,
 				bool recursive = true, bool dirs = false);
-			
+
 			/// reports case sensitiveness of this proxy archive
 			virtual bool isCaseSensitive(void) const = 0;
-			
+
 		protected:
 			/// performs the forward transform on a single name
 			virtual String transformName(const String& name) = 0;
-			
+
 			/// performs an inverse transform on a single name, turning internal name from the external one
-			virtual String untransformName(const String& name) const;
-			
+			virtual bool untransformName(const String& name, String& unt) const;
+
 			/** compares if the given filename matches the pattern
 			* By default, this does case insensitive filename match on the untransformed name
 			*/
 			virtual bool match(const String& pattern, const String& name) const;
-			
+
 			typedef std::map<std::string, std::string> NameTable;
-			
+
 			NameTable mExtToIntNames;
-			
+
 			Archive* mArchive;
 	};
-	
+
 	/// Lowercase transforming file system archive
 	class CaseLessFileSystemArchive : public ProxyArchive {
 		public:
 			CaseLessFileSystemArchive(const String& name, const String& archType);
 			~CaseLessFileSystemArchive(void);
-			
+
 			bool isCaseSensitive(void) const;
-			
+
 		protected:
 			String transformName(const std::string& name);
-			
+
 	};
-	
+
 	/// Zip archive wrapper that prefixes the file names with the name without extesion (fam.crf -> fam/*)
 	class CRFArchive : public ProxyArchive {
 		public:
 			CRFArchive(const String& name, const String& archType);
 			~CRFArchive(void);
-			
+
 			bool isCaseSensitive(void) const;
-			
+
 		protected:
 			String transformName(const std::string& name);
-			
+
 			String mFilePart;
 	};
-	
+
 	// Factories, so we can actually use these
-	
+
 	class OPDELIB_EXPORT CaseLessFileSystemArchiveFactory : public ArchiveFactory { // what a title!
 		public:
 			virtual ~CaseLessFileSystemArchiveFactory() {}
-			
+
 			const String& getType(void) const;
-			
+
 			Archive* createInstance(const String& name) {
 				return new CaseLessFileSystemArchive(name, "Dir");
 			}
-        
+
 			void destroyInstance( Archive* arch) { delete arch; }
 	};
-	
-	class CrfArchiveFactory : public ArchiveFactory { 
+
+	class CrfArchiveFactory : public ArchiveFactory {
 		public:
 			virtual ~CrfArchiveFactory() {}
-			
+
 			const String& getType(void) const;
-			
+
 			Archive* createInstance(const String& name) {
 				return new CRFArchive(name, "Crf");
 			}
-        
+
 			void destroyInstance( Archive* arch) { delete arch; }
 	};
-	
+
 }
 
 #endif

@@ -120,8 +120,10 @@ namespace Opde {
 			// TODO: Look for the relation name. Have to find it.
 			RelationNameMap::iterator rnit = mRelationNameMap.find(text);
 
-			if (rnit == mRelationNameMap.end())
-				OPDE_EXCEPT(string("Could not find relation ") + text + " predefined. Could not continue", "LinkService::_load");
+			if (rnit == mRelationNameMap.end()) {
+				LOG_ERROR("LinkService::_load: Could not find relation %s predefined. Skipping", text);
+				continue;
+			}
 
 			RelationPtr rel = rnit->second;
 
@@ -240,6 +242,8 @@ namespace Opde {
 
 		if (!res.second)
 			OPDE_EXCEPT("Failed to insert new instance of Relation", "LinkService::createRelation");
+
+		LOG_VERBOSE("LinkService::createRelation: Succesfully created Relation pair '%s'", name.c_str());
 
 		return nr;
 	}

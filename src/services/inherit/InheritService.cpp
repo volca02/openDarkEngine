@@ -156,7 +156,7 @@ namespace Opde {
 		    return false;
 		}
 
-		// create the builtin metaprop relation and it's storage...
+		// create the built-in meta property relation and it's storage...
 		DataStoragePtr stor = new UIntDataStorage(NULL);
 		mMetaPropRelation = mLinkService->createRelation("MetaProp", stor, true);
 
