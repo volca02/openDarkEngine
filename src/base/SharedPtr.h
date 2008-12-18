@@ -32,7 +32,7 @@
 namespace Opde {
 
 	/** A simple shared pointer implementation
-	* @TODO To be made thread-safe, and/or replaced by boosts shared_ptr (which does not have downcasting) */
+	* @todo To be made thread-safe, and/or replaced by boosts shared_ptr (which does not have downcasting) */
 	template<class T> class shared_ptr {
 		template < typename U > friend class shared_ptr;
 

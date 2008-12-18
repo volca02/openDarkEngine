@@ -207,8 +207,8 @@ IF (UNIX AND PYTHON_LIBRARIES)
     # generates the Doxygen docs.
     ADD_CUSTOM_COMMAND(
 	OUTPUT ${CMAKE_BINARY_DIR}/doc/main/html/index.html
-	COMMAND rm -rf ${CMAKE_BINARY_DIR}/main/doc/html
-	COMMAND mkdir -p ${CMAKE_BINARY_DIR}/main/doc/html
+	COMMAND rm -rf ${CMAKE_BINARY_DIR}/doc/main/html
+	COMMAND mkdir -p ${CMAKE_BINARY_DIR}/doc/main/html
 	COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
     )
     

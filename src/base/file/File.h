@@ -179,7 +179,7 @@ namespace Opde {
 
 		protected:
 			/** swaps the endianness of the given buffer
-			* @param buf the buffer to swap endianness on
+			* @param ptr the buffer to swap endianness on
 			* @param size the element size
 			* @param count the count of swapped elements */
 			static void swapEndian(void* ptr, file_size_t size, uint count);

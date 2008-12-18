@@ -40,7 +40,7 @@ namespace Opde {
 		uint16_t flavor;
 	};
 
-	/** A link container. Contains source, destination, ID, flavour and link data
+	/** A link container. Contains source, destination, ID, flavor and link data
 	*/
 	class Link {
 		friend class Relation;
@@ -133,7 +133,7 @@ namespace Opde {
 		const LinkPtr link;
 	};
 	
-/// Creates a link ID from flavour, concreteness and index
+/// Creates a link ID from flavor, concreteness and index
 #define LINK_MAKE_ID(flavor, concrete, index) (flavor<<20 | concrete << 16 | index)
 /// Extracts Flavor ID from the link ID
 #define LINK_ID_FLAVOR(id) (id >> 20)

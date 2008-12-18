@@ -64,8 +64,8 @@ namespace Ogre {
 			Portal* createPortal(BspNode* src, BspNode* dst, const Plane& plane);
 
 			/** Creates a new portal from src to dst on a plane 'plane'.
-			* @param src the source cell (leaf) ID to attach to
-			* @param dst the destination cell (leaf) ID to attach to
+			* @param srcLeafID the source cell (leaf) ID to attach to
+			* @param dstLeafID the destination cell (leaf) ID to attach to
 			* @param plane the plane on which the portal should be placed
 			* @return new portal instance (to be destroyed with destroyPortal call)
 			* @note the returned portal has to be filled with points to be usable */

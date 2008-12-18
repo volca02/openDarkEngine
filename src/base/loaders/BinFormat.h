@@ -64,6 +64,7 @@ Parts of this file are exact copies or free-style rewrites of the contributed co
 #define MD_NODE_CALL        2
 #define MD_NODE_HDR         4
 
+/// A single vertex (3D vector).
 struct Vertex {
 	float x;
 	float y;
@@ -94,13 +95,13 @@ struct UVMap {
     float           v;
 };
 
-// Main header
+/// The main header of all .BIN files. Describes the contents of the file and it's version.
 struct BinHeadType {
-    char            ID[4];          // 'LGMD', 'LGMM'
-    uint32_t        version;        // 3, 4 - 1
+    char            ID[4];          /// 'LGMD', 'LGMM' - either model or AI mesh
+    uint32_t        version;        // Versions - 3, 4 for LGMD, 1 for LGMM are supported
 };
 
-// the object file type headers:
+/// the main header of LGMD .BIN file:
 typedef struct BinHeader {
 	char            ObjName[8];
 	float	        sphere_rad;
@@ -139,13 +140,13 @@ typedef struct BinHeader {
 #define SIZE_BIN_HDR_V4 (sizeof(BinHeader))
 #define SIZE_BIN_HDR_V3 (SIZE_BIN_HDR_V4 - 12)
 
-// the attachment joint definition (arbitary attachment "slot")
+/// the attachment joint definition (arbitary attachment "slot")
 typedef struct      VHotObj {
     uint32_t        index;
     Vertex          point;
 } VHotObj;
 
-// Material definitions
+/// Material definition struct for LGMD type .BIN file
 typedef struct {
 	char		name[16];
 	uint8_t	type;		// MD_MAT_COLOR or MD_MAT_TMAP
@@ -166,21 +167,23 @@ typedef struct {
 	};
 } MeshMaterial;
 
-// Optional
+/// Optional additional .BIN file material parameters (stored separately)
 typedef struct {
 	float		trans;
 	float		illum;
 } MeshMaterialExtra;
 
+/// Transformation structure that describes how the model part is attached to it's parent (.BIN LGMD uses a transform tree, similar to skeleton for AI meshes)
 typedef struct {
-    int32_t	    parent; // A numbered parent identification (Parent sub-object index) or -1 if no parent exists.
+    int32_t	    parent; /// A numbered parent identification (Parent sub-object index) or -1 if no parent exists.
     // Comment: I expect this to rather be an SubObject index.
-    float           min_range;   // minimal angle/translation ?
-    float           max_range;   // maximal angle/translation ?
-    float           rot[9]; // Transformation matrix. Rotation and translation comparing the parent object (not used for parent imho)
-    Vertex           AxlePoint;   // Position of this sub-object
+    float           min_range;   /// minimal angle/translation ?
+    float           max_range;   /// maximal angle/translation ?
+    float           rot[9]; /// Transformation matrix. Rotation and translation comparing the parent object (not used for parent imho)
+    Vertex           AxlePoint;   /// Position of this sub-object
 } SubObjTransform;
 
+/// Header of the subobject. Describes the stored geometry for the .BIN LGMD subobject.
 typedef struct {
 	char	name[8];
 
@@ -202,7 +205,7 @@ typedef struct {
 	short           sub_num_nodes;
 } SubObjectHeader;
 
-// geometry nodes definitions
+/// BSP node header - header for .BIN LGMD geometry nodes definitions
 typedef struct      NodeHeader
 {
     uint8_t            subObjectID; // So I can skip those sub-objs that don't match
@@ -214,7 +217,7 @@ typedef struct      NodeHeader
 } NodeHeader;
 
 #define NODE_HEADER_SIZE 3
-
+/// BSP split node header - secondary header for .BIN LGMD BSP node split plane definition
 typedef struct      NodeSplit
 {
     Vertex           sphere_center;
@@ -228,7 +231,7 @@ typedef struct      NodeSplit
 } NodeSplit;
 
 #define NODE_SPLIT_SIZE 26
-
+/// BSP call node header - secondary header for .BIN LGMD BSP node indirection definition
 typedef struct      NodeCall
 {
     Vertex          sphere_center;
@@ -240,6 +243,7 @@ typedef struct      NodeCall
 
 #define NODE_CALL_SIZE 22
 
+/// BSP RAW node header - secondary header for .BIN LGMD BSP node raw data definition
 typedef struct      NodeRaw // Simple Node. No splitting
 {
     Vertex          sphere_center;
@@ -254,27 +258,28 @@ typedef struct      NodeRaw // Simple Node. No splitting
 //
 // In any version, if type is MD_PGON_SOLID_COLOR_PAL data is the palette index
 
+// Polygon definition for .BIN LGMD. Defines one polygon of the model.
 typedef struct      ObjPolygon {
-    uint16_t  index;              // Index of the Polygon
+    uint16_t  index;              /// Index of the Polygon
     int8_t    data;               // ?
-    uint8_t   type;               // MD_PGON Type
-    uint8_t   num_verts;          // Number of verts in polygon
-    uint16_t  norm;               // Polygon normal number
+    uint8_t   type;               /// MD_PGON Type
+    uint8_t   num_verts;          /// Number of verts in polygon
+    uint16_t  norm;               /// Polygon normal number
     float     d;                  // ?
 } ObjPolygon;
 
 
 const int ObjLight_Size = 8;
 
-/// Normal specifier (per vertex)
+/// Normal specifier (per vertex) for .BIN LGMD
 typedef struct ObjLight {
-	// Material reference
+	/// Material reference
 	uint16_t material;
 
-	// Point on object reference
+	/// Point on object reference
 	uint16_t point;
 
-	// Packed normal vector (10 bits per axis, signed)
+	/// Packed normal vector (10 bits per axis, signed)
 	uint32_t packed_normal;
 } ObjLight;
 
@@ -289,7 +294,7 @@ typedef struct {
 } CalHdr;
 
 //  Torso array (array of TorsoV1) follows header
-/// Torso definition (next to header, int the num_torsos count)
+/// .CAL file torso definition (next to header, int the num_torsos count)
 typedef struct {
     uint32_t            root; // Root - the root joint index of this torso. Init to 0,0,0 for parent == -1 to get zero - positioned skeleton
     int32_t            parent; // -1 - the torso's parent (-1 for root torso)
@@ -298,54 +303,54 @@ typedef struct {
     Vertex          fixed_joint_diff_coord[16]; // the relative position of the torso's joint to the root joint
 } CalTorso;
 
-/// Limb definition - Limbs follow the Torsos in the file
+/// .CAL file limb definition - Limbs follow the Torsos in the .CAL file
 typedef struct {
-    int32_t		torso_index; // index of the torso we attach to
-    int32_t		junk1; // What's this?
-    int32_t		num_segments;  // count of joints in this limb
-    uint16_t		attachment_joint; // joint to which the limb attaches
-    uint16_t		segments[16]; // indices of the joints of this limb
-    Vertex			segment_diff_coord[16]; // relative to the previous limb's joint!
-    float			lengths[16];             // Lengths of the segment
+    int32_t		torso_index; /// index of the torso we attach to
+    int32_t		junk1; /// What's this?
+    int32_t		num_segments;  /// count of joints in this limb
+    uint16_t		attachment_joint; /// joint to which the limb attaches
+    uint16_t		segments[16]; /// indices of the joints of this limb
+    Vertex			segment_diff_coord[16]; /// relative to the previous limb's joint!
+    float			lengths[16];             /// Lengths of the segment
 } CalLimb;
 
 //----- The Structures used in the LGMM AI .BIN mesh file -----
-/// the main header of the LGMM
+/// the main header of the .BIN LGMM model. This is the primary header of AI meshes (.BIN files starting LGMM)
 typedef struct {
-	uint32_t            zeroes[3];      // Always seems to be 0
-	uint8_t             num_what1;         // '0'
-    uint8_t             num_mappers;         // Count for U2 (*20)
-    uint8_t             num_mats;       // Number of materials
-    uint8_t             num_joints;     // Number of joints?
-    int16_t             num_polys;        // Polygon count (Count for U4 * 16)
-    int16_t             num_vertices;       // Total Vertex count
-    uint32_t            num_stretchy;       // Stretchy Vertexes - blended between two joints
-    uint32_t            offset_joint_remap;      // Joint map?, num_joints elements
-    uint32_t            offset_mappers;      // joint mapping definitions
-    uint32_t            offset_mats;    // looks likes material offset, see object header
-    uint32_t            offset_joints;  // Per-Joint Polygon info. The joints mentioned here are not the same joints as in .CAL
-    uint32_t            offset_poly;    // (U5-U4) = polygons
-    uint32_t            offset_norm;    // (U6-U5) = Normals
-    uint32_t            offset_vert;    // (U7-U6) = Vertexes (munged) - num_vertices
-    uint32_t            offset_uvmap;   // (U8-U7) = UV maps. Z is junk (count - the same as vertex count)
-    uint32_t            offset_blends;  // Floats (num_stretchy). Blending factors. All in the range 0-1. Probably blend factors between two joints. Count - the same as num_stretchy
-    uint32_t            offset_U9;      // Zero. All the time it seems
+	uint32_t            zeroes[3];      /// Always seems to be 0
+	uint8_t             num_what1;         /// '0'
+    uint8_t             num_mappers;         /// Count for U2 (*20)
+    uint8_t             num_mats;       /// Number of materials
+    uint8_t             num_joints;     /// Number of joints?
+    int16_t             num_polys;        /// Polygon count (Count for U4 * 16)
+    int16_t             num_vertices;       /// Total Vertex count
+    uint32_t            num_stretchy;       /// Stretchy Vertexes - blended between two joints
+    uint32_t            offset_joint_remap;      /// Joint map?, num_joints elements
+    uint32_t            offset_mappers;      /// joint mapping definitions
+    uint32_t            offset_mats;    /// looks likes material offset, see object header
+    uint32_t            offset_joints;  /// Per-Joint Polygon info. The joints mentioned here are not the same joints as in .CAL
+    uint32_t            offset_poly;    /// (U5-U4) = polygons
+    uint32_t            offset_norm;    /// (U6-U5) = Normals
+    uint32_t            offset_vert;    /// (U7-U6) = Vertexes (munged) - num_vertices
+    uint32_t            offset_uvmap;   /// (U8-U7) = UV maps. Z is junk (count - the same as vertex count)
+    uint32_t            offset_blends;  /// Floats (num_stretchy). Blending factors. All in the range 0-1. Probably blend factors between two joints. Count - the same as num_stretchy
+    uint32_t            offset_U9;      /// Zero. All the time it seems
 } AIMeshHeader;
 
 // then, there are the joint remapping structs (2x num_joints of bytes)
 
-// This structure seems to map the AI mesh joints to the Cal joints.
+/// This structure seems to map the AI mesh joints to the Cal joints.
 typedef struct {
     long            unk1;
-    char            joint; // in the joint info (joint->poly lists) this stuct is referenced, and this attr is seeked
-    char            en1; // 0/1 I guess these enable the usage of the blending for the particular joint
-    char            jother; // maybe stretchy vertex reference, or whatever. Need more info here
-    char            en2; // 0/1 Maybe this is enabling the referencing of stretchy vertices
-    float           rotation[3]; // I just guess this can be rotation for the bone
+    char            joint; /// in the joint info (joint->poly lists) this stuct is referenced, and this attr is seeked
+    char            en1; /// 0/1 I guess these enable the usage of the blending for the particular joint
+    char            jother; /// maybe stretchy vertex reference, or whatever. Need more info here
+    char            en2; /// 0/1 Maybe this is enabling the referencing of stretchy vertices
+    float           rotation[3]; /// I just guess this can be rotation for the bone
 } AIMapper;
 
 // We handle revision 1 and 2 AI meshes. These have different material structure. commented are the versions for the ver-dependent fields
-/// Material definition struct
+/// Material definition structure for AI type meshes (LGMM). Describes the material used on AI meshes.
 typedef struct {
 	char name[16];
 
@@ -373,40 +378,27 @@ typedef struct {
 } AIMaterial;
 
 
-/// Joint -> polygons mapping
+/// Joint -> polygons mapping struct for AI meshes.
 typedef struct JointInfo {
-    short           num_polys;            // Number of polygons
-    short           start_poly;            // Start poly
-    short           num_vertices;            // Number of vertices
-    short           start_vertex;            // Start vertex
-    float           jflt;		// I suppose this is a blending factor for the bone
-    short           sh6;            // Flag (?) - there are few places for TG this is not zero, but either 1,2 or 3
-    short           mapper_id;            // id of the mapper struct
+    short           num_polys;            /// Number of polygons
+    short           start_poly;            /// Start poly
+    short           num_vertices;            /// Number of vertices
+    short           start_vertex;            /// Start vertex
+    float           jflt;		/// I suppose this is a blending factor for the bone
+    short           sh6;            /// Flag (?) - there are few places for TG this is not zero, but either 1,2 or 3
+    short           mapper_id;            /// ID of the mapper struct
 } AIJointInfo;
 
-/// Triangle in ai mesh def.
+/// Triangle in AI mesh definition. Defines one triangle using indices to the vertex table, references material and exposes various flags.
 typedef struct {
-    short           a; // vertex indices
-    short           b;
-    short           c;
-    short           mat; // material
-    float           f_unk; // some float? Hmm what could've this be?
-    short           index; // index of this
-    unsigned short  flag; // stretch or not? This would seem to be a good place to inform about it
+    short           a; /// vertex indicex
+    short           b; /// vertex indicex
+    short           c; /// vertex indicex
+    short           mat; /// material ID
+    float           f_unk; /// some float? Hmm what could've this be?
+    short           index; /// index of this
+    unsigned short  flag; /// stretch or not? This would seem to be a good place to inform about it
 } AITriangle;
-
-/*
-The sh6 <> 0 files for T1G:
-BADTRAY.BIN
-bowempt9.bin
-BOWSITE.BIN
-carry5.bin
-exphamk4.bin
-expservt.bin
-expzom.bin
-MAGSWGU.BIN
-servtest.bin
-*/
 
 
 #endif

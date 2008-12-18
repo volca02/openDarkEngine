@@ -2034,7 +2034,7 @@ namespace Ogre {
         String header(_hdr);
 
         if (header == "LGMM") {
-            // AI mesh. Not yet supported
+            // AI mesh
             AIMeshLoader ldr(m, f, version);
 
             try {
@@ -2043,7 +2043,7 @@ namespace Ogre {
                 LogManager::getSingleton().logMessage("An exception happened while loading the mesh " + basename + " : " + e.getDetails());
             }
         } else if (header == "LGMD") {
-            // model. Supported for good. Load!
+            // Object model mesh
             ObjectMeshLoader ldr(m, f, version);
             try {
                 ldr.load(); // that's all. Will do what's needed
