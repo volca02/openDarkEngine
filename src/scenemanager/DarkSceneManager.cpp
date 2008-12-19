@@ -437,8 +437,8 @@ namespace Ogre {
 				// Reverse iterate so last takes precedence
 				bool overridden = false;
 
-				for (ShadowListenerList::reverse_iterator ri = mShadowListeners.rbegin();
-						ri != mShadowListeners.rend(); ++ri) {
+				for (ListenerList::reverse_iterator ri = mListeners.rbegin();
+						ri != mListeners.rend(); ++ri) {
 
 						overridden = (*ri)->sortLightsAffectingFrustum(mLightsAffectingFrustum);
 						if (overridden)
