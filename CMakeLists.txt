@@ -220,11 +220,22 @@ IF (UNIX AND PYTHON_LIBRARIES)
 	COMMAND ${CMAKE_BINARY_DIR}/src/main/opdeScript ${CMAKE_BINARY_DIR}/writedoc.py
     )
     
-    # generates the property/link docs for all 3 versions of Dark
-    #ADD_CUSTOM_COMMAND(
-    #	OUTPUT ${CMAKE_BINARY_DIR}/doc/python/html/index.html
-    #    )
+    # generates the Developers manual
+    ADD_CUSTOM_COMMAND(
+	OUTPUT ${CMAKE_BINARY_DIR}/doc/manual/index.html
+	COMMAND rm -rf ${CMAKE_BINARY_DIR}/doc/manual
+	COMMAND mkdir -p ${CMAKE_BINARY_DIR}/doc/manual
+	COMMAND texi2html  ${CMAKE_CURRENT_SOURCE_DIR}/doc/src/manual.texi -subdir=${CMAKE_BINARY_DIR}/doc/manual/ -split=section -top_file=index.html -init_file ${CMAKE_CURRENT_SOURCE_DIR}/doc/src/opdetexi2html.init
+    )
     
+    # Copies various common files
+    ADD_CUSTOM_COMMAND(
+	OUTPUT ${CMAKE_BINARY_DIR}/doc/style.css
+	COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/style.css ${CMAKE_BINARY_DIR}/doc/style.css
+    )
+    
+    # TODO: property/link docs (maybe part of the writedoc.py?)
+ 
     IF (DOXYGEN_EXECUTABLE)
 	ADD_CUSTOM_TARGET(docs ALL
 	    DEPENDS
@@ -232,6 +243,8 @@ IF (UNIX AND PYTHON_LIBRARIES)
 	    opdeDocGen
 	    ${CMAKE_BINARY_DIR}/doc/main/html/index.html
 	    ${CMAKE_BINARY_DIR}/doc/python/html/index.html
+	    ${CMAKE_BINARY_DIR}/doc/manual/index.html
+	    ${CMAKE_BINARY_DIR}/doc/style.css
 	    ${DOXYGEN_EXECUTABLE}
 	)
     ELSE (DOXYGEN_EXECUTABLE)

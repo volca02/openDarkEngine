@@ -1,0 +1,20 @@
+body {  font-family: Verdana; font-size: 10pt; color: black }
+hr { height: 1px; }
+
+H1 {
+	background-color: #B0B0B0;
+}
+
+H2 {
+	background-color: #C0C0C0;
+}
+
+H3 {
+	background-color: #D0D0D0;
+}
+
+a:link { font-weight: bold; text-decoration: none; color: gray }
+a:hover { font-weight: bold; text-decoration: none; color: blue }
+a:visited { font-weight: bold; text-decoration: none; color: gray }
+
+dt { color: #D03030; font-weight: bold }
