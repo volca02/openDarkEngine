@@ -72,6 +72,8 @@ namespace Ogre {
             
 			/// Static method to shutdown FreeImage and unregister the FreeImage codecs
 			static void shutdown(void);
+
+			String magicNumberToFileExt(const char *magicNumberPtr, size_t maxbytes) const {return "";};
 	};
 
 

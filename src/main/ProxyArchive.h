@@ -83,6 +83,8 @@ namespace Ogre {
 			/// reports case sensitiveness of this proxy archive
 			virtual bool isCaseSensitive(void) const = 0;
 
+			time_t getModifiedTime(const String& filename) {return 0;};
+
 		protected:
 			/// performs the forward transform on a single name
 			virtual String transformName(const String& name) = 0;
