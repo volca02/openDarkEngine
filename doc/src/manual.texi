@@ -54,11 +54,13 @@ This is the main developer's manual for OpenDarkEngine
 @c --------------------------------------------------------------------
 @node Introduction
 @chapter Introduction
+@cindex Introduction
 
 You have just started reading the developers manual for OpenDarkEngine project. The aim of this document is
 to give you some insight about the project's architecture, enable you to quickly orient in the project's source
 code.
 
+@cindex Used technologies
 @section Used technologies
 The core of OpenDarkEngine written in C++, various other parts are planned or already written in python. Build system
 used is CMake. Libraries currently used are OGRE, FreeImage.
@@ -66,15 +68,23 @@ used is CMake. Libraries currently used are OGRE, FreeImage.
 @c --------------------------------------------------------------------
 @node Core architecture
 @chapter Core architecture
+@cindex Core architecture
 
 Whole engine exists in the Opde namespace. That means that every class definition, as well as typedef or enumeration,
 all these things are defined within the Opde namespace, and either prefixed with 'Opde::', or imported via using keyword
 when referenced from outside of this namespace.
 
+@cindex shared_ptr
 Throughout the source code, some of the instances are held in memory - their lifetime is controled - by shared_ptr class.
 This class is very simmilar to the Boost's shared_ptr. The instances held by this smart pointer wrapper are easily identified
 thanks to the typedefs used to distribute them - all those types are postfixed with 'Ptr' string (e.g. 'ServicePtr').
 
+@cindex Callbacks
+Also worth mentioning is extensive use of the listener approach and factory approach. Classes can expose different message types, 
+which other register to, and then receive the message whenever the source class has something to tell. See the MessageSource.h and 
+Callback.h files in src/base directory.
+
+@cindex Core classes
 @heading Core classes
 
 These are the core classes used:
@@ -87,16 +97,19 @@ These are the core classes used:
 	Subclasses of which fulfil various purposes (Graphics, AI, Sound, Physics, Object System, etc.)
 @end table
 
+@cindex Opde::Root
 @heading Root object
 Is a bed for the whole engine. Exposes various initialization methods, logging methods. Whole engine is constructed
 and initialized using this class.
 
+@cindex Opde::ServiceManager
 @heading ServiceManager
 As the name of it suggests, this class is used to hold services and manage them. Each subclass of the Service class has a
 Factory class instance registered here (Opde::Root object does this).
 
 Service manager also manages the bootstrap/main lifetime stages of the engine existence.
 
+@cindex Opde::Service
 @heading Service
 The whole engine is built around a modular concept of Services. Services are autonomous classes that serve different 
 purposes. All service instances are managed using a ServiceManager object. Each of the service's instance exists only 
@@ -112,6 +125,8 @@ All services are constructed using Service Factories, which are registered by ei
 within the bootstrapping phase of the engine.
 
 There are three stages of service's life time:
+
+@cindex Service lifetime phases
 @table @asis
 @item Bootstrap phase
 	Which is used to setup resources for the services and initialize service's dependencies. 
@@ -127,33 +142,152 @@ All services are guaranteed to be bootstrapped and shut down under the condition
 @c --------------------------------------------------------------------
 @node Services
 @chapter Services
+@cindex Services
 
 This is the current list of available engines services:
 
 @table @asis
-@item Binary
+@item @ref{Binary Service}
 	Is a helper service that holds dynamically defined types and enumerations, as specified by, for example the dtdef scripts.
-@item Database
+@item @ref{Database Service}
 	Is a game database loading/saving service. Manages the loading/saving of .GAM/.MIS/.SAV files. All the services which store some
 	data inside these files listen to the events that this service generates and act accordingly.
-@item Object
+@item @ref{Object Service}
 	Is the main service for the engines object system. Manages game object's lifetime.
-@item Link
+@item @ref{Link Service}
 	Is the link management service. Stores Relation objects. Each relation object stores all links of particular flavor.
-@item Property
+@item @ref{Property Service}
 	Is the property manager. Properties are named "types" that object can carry. Each of the property types has one PropertyGroup instance held by this service.
-@item Inherit
+@item @ref{Inherit Service}
 	This service manages object trait inheritance. Currently is used to cache and propagate inherited properties for objects.
-@item WorldRep
+@item WorldRep Service
 	This service is responsible for loading and preparing the World Rep, which is a different name for the level geometry. It loads and prepares it for display.
-@item Light
+@item Light Service
 	This service manages lights in the world
-@item Material
+@item Material Service
 	Helper service that helps with game object materials (textures, etc).
-@item Render
+@item Render Service
 	This service manages the display of the engine.
+@item Input Service
+	Service that manages keyboard and mouse inputs and their translation to commands.
+@item Script Service
+	Script interfacing service. Manages loading/unloading of script modules, script instantization and event translation.
 @end table
 
+@c --------------------------------------------------------------------
+@node Binary Service
+@section Binary Service
+@cindex Binary Service
+
+This service stores dynamically defined structures and enumerations. These are defined via .dtype scripts, which have a simple, C-like syntax:
+
+@cindex dtype script
+@verbatim
+// a comment
+
+// Bitfield - maps bits of a unsigned, 32 bit integer to string names. A special case of enumeration
+bitfield bitf {
+	key "bit one" 0x01
+	key "bit two" 0x02
+}
+
+// Enumeration - much like the C enumerations. Maps different unique values of the specified type to string name
+enum enumeration : uint {
+	key "Option A" 0x00
+	key "Option B" 0x01
+}
+
+// A sample, nested struct 
+struct str {
+	uint32 use bitf uint_with_bitfield
+	int16 array [3]
+	
+	// an array of four structs
+	struct test [4] {
+		float x
+		char [4] name
+	}
+}
+
+// an alias - like C++ typedef
+alias str str2
+
+// a namespace. Can't be nested, default namespace is ""
+namespace Test {
+}
+@end verbatim
+
+These scripts are parsed using the DTypeScriptCompiler class and compiled into DType objects, then registered in the binary service.
+As a result, the binary service registers all the dynamically defined data types, which can then be used to load data that are not
+yet handled effectively using some other approaches.
+
+@c --------------------------------------------------------------------
+@node Database Service
+@section Database Service
+@cindex Database Service
+
+This service is responsible for game state handling. It can load and unload mission files, gamesys files, savegames, etc. and also save 
+them. It also exposes two types of messages, one is used to load or save data, the other is used to display loading/saving status.
+
+The service is currently a placeholder for a more propper implementation, but works well for the loading part.
+
+@c --------------------------------------------------------------------
+@node Object Service
+@section Object Service
+@cindex Object Service
+
+@cindex Object System
+@heading Object System
+The core of the engine is the object system. Object system in Dark Engine is quite different from what one would probably expect. There is no 
+object instance for objects one sees/uses, the game objects are just integer IDs that represent them. Everything the objects are consisted of 
+is stored as Property or link with the particular integer ID.
+
+@cindex Object types
+@cindex Archetype objects
+@cindex Concrete objects
+@subheading Object types
+There are two object types. Concrete objects and Archetype Objects. The Archetype objects (also called archetypes) are not live objects,
+but more template objects that serve as default value holders for properties and links. The concrete objects are instances of the archetype objects,
+optionally. It is quite common for concrete objects to inherit from an archetype. 
+
+There are a few archetype object types. Archetypes also inherit from each other, so there is what one could imagine as a set of trees with a root 
+object for every archetype type. Metaproperty archetype object tree needs a special attention. All the objects in that tree bear a different
+DonorType property value than the other archetypes, and when inherited, bear a different (non-zero) MetaProperty link priority value.
+The inheritance mechanisms are more explained later in the @ref{Inherit Service} section.
+
+@cindex property
+@cindex Properties
+@subheading Properties
+Properties are values or sets of values, that can be assigned to objects. Each object either holds a certain property type or doesn't.
+Properties come in different types, and serve different purposes. Each of those types has a different name which identifies it. What happens 
+inside the engine when the property has a new value assigned is explained in the @ref{Property Service} section.
+
+Some properties are inherited (Others, like DonorType, are not). That means that if a given object does not own a value of the certain property, it still can have some inherited
+from an archetype object (Object types). If object owns the property, any inherited values are typically masked,
+the priority of owned property is greater than the inherited one.
+
+@cindex Links
+@subheading Links
+
+Links are connections between objects. They have different types (called flavors). Each of the link flavors is managed in a different, separate Relation class.
+
+@c --------------------------------------------------------------------
+@node Link Service
+@section Link Service
+@cindex Link Service
+
+@cindex Relation
+@heading Relation
+
+@c --------------------------------------------------------------------
+@node Property Service
+@section Property Service
+@cindex Property Service
+
+@c --------------------------------------------------------------------
+@node Inherit Service
+@section Inherit Service
+@cindex Inherit Service
 
 @c --------------------------------------------------------------------
 @node Index
