@@ -18,3 +18,8 @@ a:hover { font-weight: bold; text-decoration: none; color: blue }
 a:visited { font-weight: bold; text-decoration: none; color: gray }
 
 dt { color: #D03030; font-weight: bold }
+
+.verbatim {
+	background-color: #E5E5E5;
+	border: 1px solid black;
+}
