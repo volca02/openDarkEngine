@@ -1,0 +1,96 @@
+digraph G {
+	fontname = "Bitstream Vera Sans"
+	fontsize = 8
+	
+	node [
+		fontname = "Bitstream Vera Sans"
+		fontsize = 7
+		shape = "record"	
+	]
+	
+	edge [
+		fontname = "Bitstream Vera Sans"
+		fontsize = 7
+	]
+	
+		
+	Root [
+		label = "{Root}"
+	]
+		
+	ServiceManager [
+		label = "{ServiceManager |\l+bootstrapFinished() : void\l}"
+	]
+		
+	Service [
+		label = "{Service ||\l+init() : bool\l+bootstrapFinished() : void\l+shutdown() : void\l}"
+	]	
+	
+	DarkSceneManager [
+		label = "{DarkSceneManager\l||}"
+	]
+		
+	subgraph clusterObjSys {
+		label = "Object System"
+		
+		ObjectService [
+			label = "{ObjectService\l||}"
+		]
+		
+		PropertyService [
+			label = "{PropertyService\l||}"
+		]
+		
+		LinkService [
+			label = "{LinkService\l||}"
+		]
+		
+		InheritService [
+			label = "{InheritService\l||}"
+		]
+	}
+	
+	subgraph clusterRender {
+		label = "Rendering"
+		
+		RenderService [
+			label = "{RenderService\l||}"
+		]
+		
+		WorldRepService [
+			label = "{WorldrepService\l||}"
+		]
+		
+		LightService [
+			label = "{LightService\l||}"
+		]
+		
+		MaterialService [
+			label = "{MaterialService\l||}"
+		]
+	}
+	
+	subgraph clusterIO {
+		label = "Input/Output"
+		
+		DatabaseService [
+			label = "{DatabaseService\l||}"
+		]
+		
+		InputService [
+			label = "{InputService\l||}"
+		]
+	}
+	
+		
+	edge [
+		arrowhead = "empty"
+	]
+	
+	ServiceManager -> Service
+	Root -> ServiceManager
+	
+	InheritService -> LinkService
+	
+	RenderService -> PropertyService
+}
