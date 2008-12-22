@@ -1,0 +1,27 @@
+digraph G {
+	fontname = "Bitstream Vera Sans"
+	fontsize = 8
+	
+	node [
+		fontname = "Bitstream Vera Sans"
+		fontsize = 7
+		shape = "record"	
+	]
+	
+	edge [
+		fontname = "Bitstream Vera Sans"
+		fontsize = 7
+	]
+	
+	ServiceManager [
+		label = "{ServiceManager||+getService(name) : ServicePtr\l+bootstrapFinished() : void\l+addServiceFactory(factory) : void\l+createByMask(mask) : void\l}"
+	]
+		
+	Service [
+		label = "{Service||+init() : bool\l+bootstrapFinished() : void\l+shutdown() : void\l}"
+	]	
+	
+	ServiceFactory [
+		label = "{ServiceFactory||+createInstance() : ServicePtr\l+getName() : string\l+getMask() : unsigned int\l}"
+	]
+}

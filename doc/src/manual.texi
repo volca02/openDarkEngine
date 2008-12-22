@@ -111,15 +111,49 @@ These are the core classes used:
 Is a bed for the whole engine. Exposes various initialization methods, logging methods. Whole engine is constructed
 and initialized using this class.
 
-@cindex Opde::ServiceManager
+@cindex ServiceManager
 @heading ServiceManager
+
+@image{img/service}
+
 As the name of it suggests, this class is used to hold services and manage them. Each subclass of the Service class has a
 Factory class instance registered here (Opde::Root object does this). ServiceManager is a singleton class, meaning it only
 ever has one instance per application.
 
 Service manager also manages the bootstrap/main lifetime stages of the engine existence.
 
-@cindex Opde::Service
+For convenience, a GET_SERVICE(ClassName) macro exists, which gets the service instance and casts it to shared_ptr of the specified
+type. Example:
+
+@verbatim
+RenderServicePtr rs = GET_SERVICE(RenderService);
+@end verbatim
+
+Services, thanks to the shared_ptr, get destroyed once no reference points to them. One of the references is stored in the ServiceManager. 
+Normally, it is not needed to take special care about the Service reference count, but in some special cases, if the Service reference
+needs to be disposed to release the service (for example circular references between Services, or external usage of the Service), setting
+NULL to the service's shared_ptr is needed:
+
+@verbatim
+// prev. allocation
+RenderServicePtr rs = GET_SERVICE(RenderService);
+// some code
+rs->someMethod();
+// release the service 
+rs->setNull();
+// or rs = NULL;
+@end verbatim
+
+This operation is needed in the following situations:
+
+@itemize @bullet
+@item
+Circular reference between services - then the reference has to be released in the shutdown method of at least one of the services.
+@item
+External usage of the service - in this situation the service's reference has to be released before the ServiceManager (or Root object) is destroyed.
+@end itemize
+
+@cindex Service
 @heading Service
 The whole engine is built around a modular concept of Services. Services are autonomous classes (or sets of classes) that serve different 
 purposes. All service instances are managed using a ServiceManager object. Each of the service's instance exists only 
@@ -148,6 +182,17 @@ There are three stages of service's life time:
 @end table
 
 All services are guaranteed to be bootstrapped and shut down under the condition of a normal application flow.
+
+@cindex Service masks
+@heading Service Masks
+Now you might wonder what the service masks are, and what are they used for? It's quite easy. Every registered Service Factory there
+is exposes a method to get the service mask for the given service. The service mask is freely used unsigned integer, which is compared
+with the specified mask that the service manager was constructed/initialized with. Nonzero bitwise and product will mean the service
+should be constructed and used.
+What's that good for? The engine can be told to be initialized and exist only with a subgroup of the available services. With SERVICE_CORE
+flags for example, the engine only initializes the services which are cruical to the engine - database and object services (together with some
+other core services - as for example the Config service).
+To learn more, look inside the src/services/serviceCommon.h file.
 
 @c --------------------------------------------------------------------
 @node Services
@@ -241,10 +286,19 @@ them. It also exposes two types of messages, one is used to load or save data, t
 
 The service is currently a placeholder for a more propper implementation, but works well for the loading part.
 
+@cindex Tag File Database
+@heading Tag File Database
+This service handles the Tag File Databases (also known as Dark Database). Those are files that contain tag files (also sometimes called chunks).
+Each of them has a name (much like a file name) and a version. The positions and lengths of those chunks is stored at the end of the file. 
+See FileGroup.h/.cpp for more info.
+The tag file databases have typically extensions .mis, .gam or .sav (among others).
+
 @c --------------------------------------------------------------------
 @node Object Service
 @section Object Service
 @cindex Object Service
+
+@image{img/objsvc}
 
 @cindex Object System
 @heading Object System
@@ -265,6 +319,42 @@ object for every archetype type. Metaproperty archetype object tree needs a spec
 DonorType property value than the other archetypes, and when inherited, bear a different (non-zero) MetaProperty link priority value.
 The inheritance mechanisms are more explained later in the @ref{Inherit Service} section.
 
+@c --------------------------------------------------------------------
+@node Link Service
+@section Link Service
+@cindex Link Service
+
+@image{img/linksvc}
+
+@cindex Link
+@cindex Links
+@subheading Links
+
+Links are connections between objects. They have different types (called flavors). Each of the link flavors has different (if any - it's optional) data format attached and is managed
+with a different, separate Relation class. Relation instances come in pairs. This is meant to allow the usage of LinkFlavor, ~LinkFlavor pairs.
+
+Relations and Properies both utilise DataStorage class as a data storage backend (every object or link id can have data stored inside).
+
+
+@cindex Flavor
+@heading Link Flavor
+Link flavor is a unique link type identifier. It comes as string (MetaProp, Contains, etc.) and ID (1, 5, -1, -5). The integer id of the flavor is determined as the index of the flavor name in the 
+table stored in the Tag File Database, named "Relations". This mapping happens dynamically upon gamesys or mission load. 
+
+@cindex Relation
+@heading Relation
+Relation class is the heart of the link service. It stores all links of a particular link type. It is capable of disk loading/saving, queries, etc. Relations are indexed by flavor name and 
+flavor ID. Relation names starting with '~' sign are inverse relations. Those have negative flavor id and contain links in the opposite direction (compared to normal relation of the same flavor).
+
+Links have source object ID, destination object ID, flavor and link ID. Link ID is composed of three parts - Concreteness, Flavor and serial ID.
+
+@c --------------------------------------------------------------------
+@node Property Service
+@section Property Service
+@cindex Property Service
+
+@image{img/propsvc}
+
 @cindex property
 @cindex Properties
 @subheading Properties
@@ -276,28 +366,36 @@ Some properties are inherited (Others, like DonorType, are not). That means that
 from an archetype object (Object types). If object owns the property, any inherited values are typically masked,
 the priority of owned property is greater than the inherited one.
 
-@cindex Links
-@subheading Links
+Property service manages all object properties. Each of the property types has it's own PropertyGroup instance, or is constructed via code of the particular service which handles the
+property. Thus, we have SymbolicName and DonorType properties statically created in ObjectService, RenderType or RenderAlpha in RenderSystem, etc.
+Properties can be implemented effectively, without the use of the DataStorage instance, or with it.
 
-Links are connections between objects. They have different types (called flavors). Each of the link flavors is managed in a different, separate Relation class.
+@cindex effective object ID
+PropertyGroup instances typically use a Inheritor instance - it is used to determine effective object ID. This id is the id of the bearer of the effective (active) property for the object ID.
+Example:
 
-@c --------------------------------------------------------------------
-@node Link Service
-@section Link Service
-@cindex Link Service
+@image{img/propinh}
 
-@cindex Relation
-@heading Relation
 
-@c --------------------------------------------------------------------
-@node Property Service
-@section Property Service
-@cindex Property Service
-
+In this a rather unrealistic and dull example, the SomeProperty has a value '2' on "A Chair" object, as it is inherited from the archetype object "Chair" (object ID -125). Property OtherProperty masks the value from
+object Furniture, and thus the "A Chair" has OtherProperty = 4.
 @c --------------------------------------------------------------------
 @node Inherit Service
 @section Inherit Service
 @cindex Inherit Service
+
+@image{img/inheritsvc}
+
+@cindex trait
+This service handles the MetaProp link. Contains named factories for different trait (some kind of object's quality - for example property ownership) inheritance schemes. Current list is:
+@itemize @bullet
+@item
+	Always - Always inherits traits from archetypes
+@item
+	Archetype - Only inherits values on archetypes, so instances of objects need to gain a copy of the property value (used for properties that need a special care - physics, anim lights for example)
+@item
+	Never - This inheritor never inherits - it is used for things which are unique to both archetypes and concretes (Symbolic Name, donor type).
+@end itemize
 
 @c --------------------------------------------------------------------
 @node Index

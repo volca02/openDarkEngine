@@ -1,0 +1,80 @@
+digraph G {
+	fontname = "Bitstream Vera Sans"
+	fontsize = 8
+	
+	node [
+		fontname = "Bitstream Vera Sans"
+		fontsize = 7
+		shape = "record"	
+	]
+	
+	edge [
+		fontname = "Bitstream Vera Sans"
+		fontsize = 7
+	]
+	
+	
+	subgraph  clusterBase {
+		label = "Base classes"
+	
+		Service [
+			label = "{Service||}"
+		]
+	
+		DataStorage [
+			label = "{DataStorage||}"
+		]
+	}
+		
+	subgraph  clusterLinkSvc {
+		label = "Link Service"
+		
+		LinkService [
+			label = "{LinkService||}"
+		]
+	
+		Relation [
+			label = "{Relation||}"
+		]
+	}	
+
+	subgraph  clusterInhSvc {
+		label = "Inherit Service"
+		
+		InheritService [
+			label = "{InheritService||}"
+		]
+	
+		Inheritor [
+			label = "{Inheritor||}"
+		]
+		
+		NeverInheritor [
+			label = "{NeverInheritor||}"
+		]
+		
+	 	CachedInheritor [
+			label = "{CachedInheritor||}"
+		]
+		
+	 	ArchetypeInheritor [
+			label = "{ArchetypeInheritor||}"
+		]
+
+	}	
+
+	ArchetypeInheritor -> CachedInheritor
+	CachedInheritor -> Inheritor
+	
+	Service -> InheritService
+	Service -> LinkService
+	
+	edge [
+		arrowhead = "none"
+
+                headlabel = "1"
+                taillabel = "1"
+	]
+	
+	InheritService -> Relation
+}
