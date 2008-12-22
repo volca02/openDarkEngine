@@ -84,6 +84,15 @@ Also worth mentioning is extensive use of the listener approach and factory appr
 which other register to, and then receive the message whenever the source class has something to tell. See the MessageSource.h and 
 Callback.h files in src/base directory.
 
+@cindex Architectural Overview
+@heading Architectural Overview
+
+@image{img/overview}
+
+This is the great overview of the planned structure of OpenDarkEngine. Some services might be missing in the diagram,
+and the diagram will probably develop as the project gets further. Still this gives a rough view of what the engine will be build
+of, and which categories of services exist. Each service in this picture is a standalone unit that targets a different task.
+
 @cindex Core classes
 @heading Core classes
 
@@ -105,13 +114,14 @@ and initialized using this class.
 @cindex Opde::ServiceManager
 @heading ServiceManager
 As the name of it suggests, this class is used to hold services and manage them. Each subclass of the Service class has a
-Factory class instance registered here (Opde::Root object does this).
+Factory class instance registered here (Opde::Root object does this). ServiceManager is a singleton class, meaning it only
+ever has one instance per application.
 
 Service manager also manages the bootstrap/main lifetime stages of the engine existence.
 
 @cindex Opde::Service
 @heading Service
-The whole engine is built around a modular concept of Services. Services are autonomous classes that serve different 
+The whole engine is built around a modular concept of Services. Services are autonomous classes (or sets of classes) that serve different 
 purposes. All service instances are managed using a ServiceManager object. Each of the service's instance exists only 
 once within ServiceManager's ownership. Services reference, use each other. For this to work well, shared pointers are
 used to reference services. 

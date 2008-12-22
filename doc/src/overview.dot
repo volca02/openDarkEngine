@@ -5,7 +5,7 @@ digraph G {
 	node [
 		fontname = "Bitstream Vera Sans"
 		fontsize = 7
-		shape = "record"	
+		shape = "component"	
 	]
 	
 	edge [
@@ -13,84 +13,137 @@ digraph G {
 		fontsize = 7
 	]
 	
-		
 	Root [
-		label = "{Root}"
+		label = "Root"
 	]
 		
 	ServiceManager [
-		label = "{ServiceManager |\l+bootstrapFinished() : void\l}"
+		label = "ServiceManager"
 	]
 		
 	Service [
-		label = "{Service ||\l+init() : bool\l+bootstrapFinished() : void\l+shutdown() : void\l}"
+		label = "Service"
 	]	
 	
-	DarkSceneManager [
-		label = "{DarkSceneManager\l||}"
-	]
 		
 	subgraph clusterObjSys {
 		label = "Object System"
 		
-		ObjectService [
-			label = "{ObjectService\l||}"
-		]
-		
-		PropertyService [
-			label = "{PropertyService\l||}"
-		]
-		
-		LinkService [
-			label = "{LinkService\l||}"
-		]
-		
-		InheritService [
-			label = "{InheritService\l||}"
-		]
+		ObjectService 
+		PropertyService
+		LinkService
+		InheritService
 	}
 	
 	subgraph clusterRender {
 		label = "Rendering"
 		
-		RenderService [
-			label = "{RenderService\l||}"
-		]
-		
-		WorldRepService [
-			label = "{WorldrepService\l||}"
-		]
-		
-		LightService [
-			label = "{LightService\l||}"
-		]
-		
-		MaterialService [
-			label = "{MaterialService\l||}"
-		]
+		RenderService
+		WorldRepService
+		LightService
+		MaterialService
+		DarkSceneManager
+		GUIService
+		DrawService
 	}
 	
 	subgraph clusterIO {
 		label = "Input/Output"
 		
-		DatabaseService [
-			label = "{DatabaseService\l||}"
-		]
-		
-		InputService [
-			label = "{InputService\l||}"
-		]
+		DatabaseService
+		InputService
 	}
 	
+	subgraph clusterSim {
+		label = "Simulation"
 		
+		PhysicsService
+		TweqService
+		PuppetService
+		AIService
+		ContainerService
+		PlayerService
+		SimService
+	}
+
+	subgraph clusterScripting {
+		label = "Scripting"
+		
+		ScriptService
+		PythonBindings
+		Scripts [
+			label = "Scripts"
+			shape = "folder"
+		]
+		
+	}
+	
+	subgraph clusterVarious {
+		label = "Various"
+	
+		LoopService
+		ConfigService
+		BinaryService
+	}
+	
+	Root -> ServiceManager
+	ServiceManager -> Service
+
 	edge [
-		arrowhead = "empty"
+		color = "gray"
+	]
+
+
+	WorldRepService -> DarkSceneManager
+	
+	TweqService -> RenderService
+	TweqService -> LightService
+	
+	GUIService -> DrawService
+	
+	WorldRepService -> LightService
+
+	edge [
+		color = "red"
 	]
 	
-	ServiceManager -> Service
-	Root -> ServiceManager
-	
-	InheritService -> LinkService
-	
+	SimService -> LoopService
+	PuppetService -> SimService
+	TweqService -> SimService
+	PhysicsService -> SimService
+	RenderService -> LoopService
+	InputService -> LoopService
+	AIService -> PuppetService
+
+	edge [
+		color = "green"
+	]
+
 	RenderService -> PropertyService
+	RenderService -> ObjectService
+	PhysicsService -> ObjectService
+	ObjectService -> PropertyService
+	ObjectService -> LinkService
+	InheritService -> LinkService
+	PropertyService -> InheritService
+
+	edge [
+		color = "blue"
+	]
+	
+	ObjectService -> DatabaseService
+	WorldRepService -> DatabaseService
+	LightService -> DatabaseService
+	MaterialService -> DatabaseService
+	GUIService -> InputService
+	
+	edge [
+		color = "brown"
+	]
+	
+	ScriptService -> Scripts
+	ScriptService -> PhysicsService 
+	ScriptService -> TweqService
+	ScriptService -> AIService
+	ScriptService -> DatabaseService
 }

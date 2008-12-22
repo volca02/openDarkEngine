@@ -225,7 +225,7 @@ IF (UNIX AND PYTHON_LIBRARIES)
 	OUTPUT ${CMAKE_BINARY_DIR}/doc/manual/index.html
 	COMMAND rm -rf ${CMAKE_BINARY_DIR}/doc/manual
 	COMMAND mkdir -p ${CMAKE_BINARY_DIR}/doc/manual
-	COMMAND texi2html  ${CMAKE_CURRENT_SOURCE_DIR}/doc/src/manual.texi -subdir=${CMAKE_BINARY_DIR}/doc/manual/ -split=section -top_file=index.html -init_file ${CMAKE_CURRENT_SOURCE_DIR}/doc/src/opdetexi2html.init
+	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/doc/src/buildmanual.sh ${CMAKE_CURRENT_SOURCE_DIR}/doc/src/ ${CMAKE_BINARY_DIR}/doc/manual/
     )
     
     # Copies various common files
