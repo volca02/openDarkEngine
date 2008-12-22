@@ -65,6 +65,7 @@ digraph G {
 
 	ArchetypeInheritor -> CachedInheritor
 	CachedInheritor -> Inheritor
+	NeverInheritor -> Inheritor
 	
 	Service -> InheritService
 	Service -> LinkService
@@ -77,4 +78,14 @@ digraph G {
 	]
 	
 	InheritService -> Relation
+	
+	edge [
+		arrowhead = "none"
+
+                headlabel = "N"
+                taillabel = "1"
+	]
+	
+	InheritService -> Inheritor
+
 }

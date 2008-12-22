@@ -122,7 +122,7 @@ ever has one instance per application.
 
 Service manager also manages the bootstrap/main lifetime stages of the engine existence.
 
-For convenience, a GET_SERVICE(ClassName) macro exists, which gets the service instance and casts it to shared_ptr of the specified
+For convenience, a @i{GET_SERVICE(ClassName)} macro exists, which gets the service instance and casts it to shared_ptr of the specified
 type. Example:
 
 @verbatim
@@ -214,7 +214,7 @@ This is the current list of available engines services:
 @item @ref{Property Service}
 	Is the property manager. Properties are named "types" that object can carry. Each of the property types has one PropertyGroup instance held by this service.
 @item @ref{Inherit Service}
-	This service manages object trait inheritance. Currently is used to cache and propagate inherited properties for objects.
+	This service manages object @i{trait} inheritance. Currently is used to cache and propagate inherited properties for objects.
 @item WorldRep Service
 	This service is responsible for loading and preparing the World Rep, which is a different name for the level geometry. It loads and prepares it for display.
 @item Light Service
@@ -233,6 +233,8 @@ This is the current list of available engines services:
 @node Binary Service
 @section Binary Service
 @cindex Binary Service
+
+@image{img/binarysvc}
 
 This service stores dynamically defined structures and enumerations. These are defined via .dtype scripts, which have a simple, C-like syntax:
 
@@ -281,6 +283,8 @@ yet handled effectively using some other approaches.
 @section Database Service
 @cindex Database Service
 
+@image{img/databasesvc}
+
 This service is responsible for game state handling. It can load and unload mission files, gamesys files, savegames, etc. and also save 
 them. It also exposes two types of messages, one is used to load or save data, the other is used to display loading/saving status.
 
@@ -319,6 +323,8 @@ object for every archetype type. Metaproperty archetype object tree needs a spec
 DonorType property value than the other archetypes, and when inherited, bear a different (non-zero) MetaProperty link priority value.
 The inheritance mechanisms are more explained later in the @ref{Inherit Service} section.
 
+Relations and Properies both utilise DataStorage class as a data storage backend (every object or link id can have data stored inside).
+
 @c --------------------------------------------------------------------
 @node Link Service
 @section Link Service
@@ -333,8 +339,7 @@ The inheritance mechanisms are more explained later in the @ref{Inherit Service}
 Links are connections between objects. They have different types (called flavors). Each of the link flavors has different (if any - it's optional) data format attached and is managed
 with a different, separate Relation class. Relation instances come in pairs. This is meant to allow the usage of LinkFlavor, ~LinkFlavor pairs.
 
-Relations and Properies both utilise DataStorage class as a data storage backend (every object or link id can have data stored inside).
-
+Links have source object ID, destination object ID, flavor and link ID. Link ID is composed of three parts - Concreteness, Flavor and serial ID.
 
 @cindex Flavor
 @heading Link Flavor
@@ -345,8 +350,6 @@ table stored in the Tag File Database, named "Relations". This mapping happens d
 @heading Relation
 Relation class is the heart of the link service. It stores all links of a particular link type. It is capable of disk loading/saving, queries, etc. Relations are indexed by flavor name and 
 flavor ID. Relation names starting with '~' sign are inverse relations. Those have negative flavor id and contain links in the opposite direction (compared to normal relation of the same flavor).
-
-Links have source object ID, destination object ID, flavor and link ID. Link ID is composed of three parts - Concreteness, Flavor and serial ID.
 
 @c --------------------------------------------------------------------
 @node Property Service
@@ -359,8 +362,7 @@ Links have source object ID, destination object ID, flavor and link ID. Link ID 
 @cindex Properties
 @subheading Properties
 Properties are values or sets of values, that can be assigned to objects. Each object either holds a certain property type or doesn't.
-Properties come in different types, and serve different purposes. Each of those types has a different name which identifies it. What happens 
-inside the engine when the property has a new value assigned is explained in the @ref{Property Service} section.
+Properties come in different types, and serve different purposes. Each of those types has a different name which identifies it.
 
 Some properties are inherited (Others, like DonorType, are not). That means that if a given object does not own a value of the certain property, it still can have some inherited
 from an archetype object (Object types). If object owns the property, any inherited values are typically masked,
@@ -387,7 +389,7 @@ object Furniture, and thus the "A Chair" has OtherProperty = 4.
 @image{img/inheritsvc}
 
 @cindex trait
-This service handles the MetaProp link. Contains named factories for different trait (some kind of object's quality - for example property ownership) inheritance schemes. Current list is:
+This service handles the MetaProp link. Contains named factories for different @i{trait} (some kind of object's quality - for example property ownership) inheritance schemes. Current list is:
 @itemize @bullet
 @item
 	Always - Always inherits traits from archetypes
