@@ -160,7 +160,7 @@ namespace Opde {
 		// mCamera->setDirection(-0.398078, 0.825408, -0.400297);
 
 		// Thiefy FOV
-		mCamera->setFOVy(Degree(60) * mCamera->getAspectRatio());
+		mCamera->setFOVy(Degree(60)); //  * mCamera->getAspectRatio()
 
 		if (mConfigService->hasParam("debug")) {
 			if (mConfigService->getParam("debug") == true) {
