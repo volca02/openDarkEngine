@@ -291,7 +291,7 @@ them. It also exposes two types of messages, one is used to load or save data, t
 The service is currently a placeholder for a more propper implementation, but works well for the loading part.
 
 @cindex Tag File Database
-@heading Tag File Database
+@subheading Tag File Database
 This service handles the Tag File Databases (also known as Dark Database). Those are files that contain tag files (also sometimes called chunks).
 Each of them has a name (much like a file name) and a version. The positions and lengths of those chunks is stored at the end of the file. 
 See FileGroup.h/.cpp for more info.
@@ -315,8 +315,8 @@ is stored as Property or link with the particular integer ID.
 @cindex Concrete objects
 @subheading Object types
 There are two object types. Concrete objects and Archetype Objects. The Archetype objects (also called archetypes) are not live objects,
-but more template objects that serve as default value holders for properties and links. The concrete objects are instances of the archetype objects,
-optionally. It is quite common for concrete objects to inherit from an archetype. 
+but more template objects that serve as default value holders for properties and links. Archetypes typically have ID less than zero, and always bear DonorType property.
+The concrete objects are instances of the archetype objects, optionally. It is very common for concrete objects to inherit from an archetype. 
 
 There are a few archetype object types. Archetypes also inherit from each other, so there is what one could imagine as a set of trees with a root 
 object for every archetype type. Metaproperty archetype object tree needs a special attention. All the objects in that tree bear a different
@@ -324,6 +324,19 @@ DonorType property value than the other archetypes, and when inherited, bear a d
 The inheritance mechanisms are more explained later in the @ref{Inherit Service} section.
 
 Relations and Properies both utilise DataStorage class as a data storage backend (every object or link id can have data stored inside).
+
+@cindex DonorType
+@subheading DonorType Property
+DonorType is a property that is only owned by archetype objects. It indicates if the object is an archetype or metaproperty.
+
+@cindex SymbolicName
+@subheading SymbolicName Property
+SymbolicName is a property that is never inherited and contains object-system wide unique string name of the object.
+
+@cindex Position
+@subheading Position Property
+Position property contains position in space, orientation in space and some other useful position-related fields. Is only valid for concrete objects, has
+no meaning on archetypes.
 
 @c --------------------------------------------------------------------
 @node Link Service
@@ -342,12 +355,12 @@ with a different, separate Relation class. Relation instances come in pairs. Thi
 Links have source object ID, destination object ID, flavor and link ID. Link ID is composed of three parts - Concreteness, Flavor and serial ID.
 
 @cindex Flavor
-@heading Link Flavor
+@subheading Link Flavor
 Link flavor is a unique link type identifier. It comes as string (MetaProp, Contains, etc.) and ID (1, 5, -1, -5). The integer id of the flavor is determined as the index of the flavor name in the 
 table stored in the Tag File Database, named "Relations". This mapping happens dynamically upon gamesys or mission load. 
 
 @cindex Relation
-@heading Relation
+@subheading Relation
 Relation class is the heart of the link service. It stores all links of a particular link type. It is capable of disk loading/saving, queries, etc. Relations are indexed by flavor name and 
 flavor ID. Relation names starting with '~' sign are inverse relations. Those have negative flavor id and contain links in the opposite direction (compared to normal relation of the same flavor).
 
@@ -389,7 +402,7 @@ object Furniture, and thus the "A Chair" has OtherProperty = 4.
 @image{img/inheritsvc}
 
 @cindex trait
-This service handles the MetaProp link. Contains named factories for different @i{trait} (some kind of object's quality - for example property ownership) inheritance schemes. Current list is:
+This service handles the MetaProp link. Contains named factories for different @i{trait} (some kind of object's quality - for example property ownership) inheritance schemes. Current list is (Inheritor factory names):
 @itemize @bullet
 @item
 	Always - Always inherits traits from archetypes
@@ -398,6 +411,14 @@ This service handles the MetaProp link. Contains named factories for different @
 @item
 	Never - This inheritor never inherits - it is used for things which are unique to both archetypes and concretes (Symbolic Name, donor type).
 @end itemize
+
+@cindex MetaProperty
+@subheading MetaProperty
+MetaProp link carries one unsigned integer as data (priority). If the value of it is zero, the link implements archetype inheritance. Nonzero links are MetaProperty links, and each of them has different priority. 
+The property, if not carried by the inheriting object itself, is inherited from the metaproperty source with the highest priority that offers it. Only one link of each priority value is allowed per object.
+Metaproperty object links have priority 1024 or higher. 
+
+Metaproperty objects bear different DonorType property value than other archetype objects.
 
 @c --------------------------------------------------------------------
 @node Index

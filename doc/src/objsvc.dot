@@ -52,13 +52,32 @@ digraph G {
 		DonorTypeProperty [
 			label = "{DonorType Property}"
 		]
+		
+		SymNameProperty [
+			label = "{SymbolicName Property}"
+		]
+		
+		PositionProperty [
+			label = "{Position Property}"
+		]
 	}
 	
 	DataStorage -> SymNamePropStorage
 	DataStorage -> PositionPropStorage
 	PropertyGroup -> DonorTypeProperty
+	PropertyGroup -> SymNameProperty
+	PropertyGroup -> PositionProperty
 	
 	Service -> ObjectSvc
 	
+	edge [
+		arrowhead = "none"
 
+		headlabel = "1"
+		taillabel = "1"
+	]
+	
+	SymNameProperty -> SymNamePropStorage
+	PositionProperty -> PositionPropStorage
+	DonorTypeProperty -> DataStorage
 }
