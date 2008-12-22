@@ -15,7 +15,7 @@ digraph G {
 	]
 	
 	Object [
-		label = "{Furniture|ID -1}"
+		label = "{Object|ID -1}"
 	]
 	
 	Furniture [

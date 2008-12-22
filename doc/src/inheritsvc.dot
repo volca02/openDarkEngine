@@ -14,7 +14,7 @@ digraph G {
 	]
 	
 	
-	subgraph  clusterBase {
+	subgraph clusterBase {
 		label = "Base classes"
 	
 		Service [
@@ -26,7 +26,7 @@ digraph G {
 		]
 	}
 		
-	subgraph  clusterLinkSvc {
+	subgraph clusterLinkSvc {
 		label = "Link Service"
 		
 		LinkService [
@@ -38,7 +38,7 @@ digraph G {
 		]
 	}	
 
-	subgraph  clusterInhSvc {
+	subgraph clusterInhSvc {
 		label = "Inherit Service"
 		
 		InheritService [
