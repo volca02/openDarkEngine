@@ -225,7 +225,7 @@ IF (UNIX AND PYTHON_LIBRARIES)
 	OUTPUT ${CMAKE_BINARY_DIR}/doc/manual/index.html
 	COMMAND rm -rf ${CMAKE_BINARY_DIR}/doc/manual
 	COMMAND mkdir -p ${CMAKE_BINARY_DIR}/doc/manual
-	COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/doc/src/buildmanual.sh ${CMAKE_CURRENT_SOURCE_DIR}/doc/src/ ${CMAKE_BINARY_DIR}/doc/manual/
+	COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/doc/src/buildmanual.sh ${CMAKE_CURRENT_SOURCE_DIR}/doc/src/ ${CMAKE_BINARY_DIR}/doc/manual/
     )
     
     # Copies various common files

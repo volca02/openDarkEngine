@@ -1,6 +1,7 @@
 digraph G {
 	fontname = "Bitstream Vera Sans"
 	fontsize = 8
+	size = "13,13"
 	
 	node [
 		fontname = "Bitstream Vera Sans"

@@ -71,7 +71,7 @@ namespace Opde {
 			}
 
 			/** Unregisters a listener.
-			* @param listener ID returned by the registerListener call
+			* @param id ID returned by the registerListener call
 			*/
 			void unregisterListener(ListenerID id) {
 				typename Listeners::iterator it = mListeners.find(id);

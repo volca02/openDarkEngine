@@ -215,11 +215,11 @@ This is the current list of available engines services:
 	Is the property manager. Properties are named "types" that object can carry. Each of the property types has one PropertyGroup instance held by this service.
 @item @ref{Inherit Service}
 	This service manages object @i{trait} inheritance. Currently is used to cache and propagate inherited properties for objects.
-@item WorldRep Service
+@item @ref{WorldRep Service}
 	This service is responsible for loading and preparing the World Rep, which is a different name for the level geometry. It loads and prepares it for display.
-@item Light Service
+@item @ref{Light Service}
 	This service manages lights in the world
-@item Material Service
+@item @ref{Material Service}
 	Helper service that helps with game object materials (textures, etc).
 @item Render Service
 	This service manages the display of the engine.
@@ -392,7 +392,7 @@ Example:
 @image{img/propinh}
 
 
-In this a rather unrealistic and dull example, the SomeProperty has a value '2' on "A Chair" object, as it is inherited from the archetype object "Chair" (object ID -125). Property OtherProperty masks the value from
+In this rather unrealistic and dull example, the SomeProperty has a value '2' on "A Chair" object, as it is inherited from the archetype object "Chair" (object ID -125). Property OtherProperty masks the value from
 object Furniture, and thus the "A Chair" has OtherProperty = 4.
 @c --------------------------------------------------------------------
 @node Inherit Service
@@ -419,6 +419,68 @@ The property, if not carried by the inheriting object itself, is inherited from 
 Metaproperty object links have priority 1024 or higher. 
 
 Metaproperty objects bear different DonorType property value than other archetype objects.
+
+@c --------------------------------------------------------------------
+@node WorldRep Service
+@section WorldRep Service
+@cindex WorldRep Service
+
+This service is responsible for loading WR/WRRGB tag files. These contain the static level geometry, which is traditionally called terrain. It does this in cooperation with 
+@ref{Light Service}, @ref{Material Service} and DarkSceneManager.
+
+@cindex WR
+@cindex WRRGB
+@heading WR/WRRGB - a short introduction
+
+@subheading Some facts
+In the times the Dark Engine was written, the pixels were expensive. WorldRep format is thus designed with that in mind. First, a few characteristic points about it:
+@itemize @bullet
+@item
+	Uses BSP tree - and it did so for two reasons: sorting rendered geometry and BSP traversal for point in cell searches
+@item
+	Contains Cells - these are convex, irregular polyhedra, with some faces textured. Others are just portals to other cells (can be either face, portal, or both in case of water)
+@item
+	Uses Portals - the old kind of those - these are polygons that connect two cells. Portals in WR are unidirectional
+@item
+	Uses Light Maps - the idea Quake 1 came with - pre-computed textures that modulate the intensity of textures applied on faces. The software version of Dark Engine renderer used surface cache
+@item
+	Does not contain precomputed PVS (Potential visibility sets). Visible cells are computed dynamically as needed.
+@end itemize
+
+@cindex PVS
+@subheading Visibility Determination (Dynamic PVS)
+Visibility determination is a process that determines the visible cell set from the given point and direction in space. As the portal counts in typical scenes go up to thousands,
+frustum culling is not usable for visibility determination. Instead, the portal (which is a polygon) is projected to screen space, vertex after vertex. The resulting screen coordinates
+define bounding box which is then clipped against previous bounding boxes. The result is see-through screen space rectangle that determines the maximal visible area the portal gives in 
+the defined circumstances. Thanks to the fact there can be more than one cell-portal path to see a given portal, the particular rectangles for the given polygon are unioned (well, in fact, 
+this is done per cell, not per polygon, but that is rather minor difference).
+The traversal is done in breadth-first manner, so the retraversals that are caused by visibility re-evaluations are minimised.
+
+@cindex Rendering
+@subheading Our current rendering approach
+As the technology advanced, the pixels become cheap, but the draw calls became expensive. Thus, we introduce a few optimizations, not necesarilly the best and most clever ones,
+that allow rendering the WR geometry on modern hardware using modern approaches.
+
+@itemize @bullet
+@item
+	VBO usage - we dynamically fill the index buffers of VBO object according to the cell lists. The mapping cell -> index set and rendering is done in the DarkGeometry class
+@item
+	Texture atlas usage - we use texture atlasses for lightmaps. They are built as the level is loaded, and use BSP tree to place the lightmap. This minimizes the batch counts
+@end itemize
+
+@c --------------------------------------------------------------------
+@node Light Service
+@section Light Service
+@cindex Light Service
+
+Dark Engine introduces a pre-baked list of lights (built upon portalisation) in the WR tag file, right after the end of the BSP tree. This service handles the lights.
+
+@c --------------------------------------------------------------------
+@node Material Service
+@section Material Service
+@cindex Material Service
+
+Manages all the materials for static geometry, models and AI.
 
 @c --------------------------------------------------------------------
 @node Index
