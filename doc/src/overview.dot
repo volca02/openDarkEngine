@@ -1,7 +1,8 @@
 digraph G {
 	fontname = "Bitstream Vera Sans"
 	fontsize = 8
-	size = "13,13"
+	compound = true
+	
 	
 	node [
 		fontname = "Bitstream Vera Sans"
@@ -90,8 +91,13 @@ digraph G {
 	Root -> ServiceManager
 	ServiceManager -> Service
 	
-	clusterRender -- clusterObjSys
-	clusterObjSys -- clusterIO
-	clusterSim -- LoopService
-	clusterScripting -- clusterIO
+	RenderService -> ObjectService [ ltail=clusterRender lhead=clusterObjSys ]
+	RenderService -> LoopService [ ltail=clusterRender lhead=clusterVarious ]
+	ObjectService -> DatabaseService [ ltail=clusterObjSys lhead=clusterIO ]
+	SimService -> LoopService [ ltail=clusterSim lhead=clusterVarious ]
+	SimService -> ObjectService [ ltail=clusterSim lhead=clusterObjSys ]
+	SimService -> ScriptService [ ltail=clusterSim lhead=clusterScripting ]
+	PuppetService -> RenderService [ ltail=clusterSim lhead=clusterRender ]
+	ScriptService -> DatabaseService [ ltail=clusterScripting lhead=clusterIO ]
+	ScriptService -> ObjectService [ ltail=clusterScripting lhead=clusterObjSys ]
 }
