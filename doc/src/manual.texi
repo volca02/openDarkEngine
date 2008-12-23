@@ -208,7 +208,7 @@ This is the current list of available engines services:
 	Is a game database loading/saving service. Manages the loading/saving of .GAM/.MIS/.SAV files. All the services which store some
 	data inside these files listen to the events that this service generates and act accordingly.
 @item @ref{Object Service}
-	Is the main service for the engines object system. Manages game object's lifetime.
+	Is the main service for the engine's object system. Manages game object's lifetime.
 @item @ref{Link Service}
 	Is the link management service. Stores Relation objects. Each relation object stores all links of particular flavor.
 @item @ref{Property Service}
@@ -221,7 +221,7 @@ This is the current list of available engines services:
 	This service manages lights in the world
 @item @ref{Material Service}
 	Helper service that helps with game object materials (textures, etc).
-@item Render Service
+@item @ref{Render Service}
 	This service manages the display of the engine.
 @item Input Service
 	Service that manages keyboard and mouse inputs and their translation to commands.
@@ -356,8 +356,8 @@ Links have source object ID, destination object ID, flavor and link ID. Link ID 
 
 @cindex Flavor
 @subheading Link Flavor
-Link flavor is a unique link type identifier. It comes as string (MetaProp, Contains, etc.) and ID (1, 5, -1, -5). The integer id of the flavor is determined as the index of the flavor name in the 
-table stored in the Tag File Database, named "Relations". This mapping happens dynamically upon gamesys or mission load. 
+Link flavor is a unique link type identifier. It comes as string (MetaProp, Contains, etc.) and ID (1/-1, 5/-5). The integer ID of the flavor is determined as the index of the flavor name in the 
+table stored in a chunk named "Relations". This mapping happens dynamically upon gamesys or mission load. 
 
 @cindex Relation
 @subheading Relation
@@ -378,11 +378,10 @@ Properties are values or sets of values, that can be assigned to objects. Each o
 Properties come in different types, and serve different purposes. Each of those types has a different name which identifies it.
 
 Some properties are inherited (Others, like DonorType, are not). That means that if a given object does not own a value of the certain property, it still can have some inherited
-from an archetype object (Object types). If object owns the property, any inherited values are typically masked,
-the priority of owned property is greater than the inherited one.
+from an archetype object (Object types). If object owns the property, any inherited values are typically masked, the priority of owned property is greater than the inherited one.
 
 Property service manages all object properties. Each of the property types has it's own PropertyGroup instance, or is constructed via code of the particular service which handles the
-property. Thus, we have SymbolicName and DonorType properties statically created in ObjectService, RenderType or RenderAlpha in RenderSystem, etc.
+property. Thus, we have SymbolicName and DonorType properties statically created in @ref{Object Service}, RenderType or RenderAlpha (and others) in @ref{Render Service}, etc.
 Properties can be implemented effectively, without the use of the DataStorage instance, or with it.
 
 @cindex effective object ID
@@ -494,6 +493,13 @@ are the only ones which influence the lighting of the static geometry in realtim
 @image{img/materialsvc}
 
 Manages all the materials for static geometry, models and AI. Later it will also manage material properties and material overrides.
+
+@c --------------------------------------------------------------------
+@node Render Service
+@section Render Service
+@cindex Render Service
+
+This service is a connection point between Ogre and Opde. It manages display (resolution etc) and model rendering.
 
 @c --------------------------------------------------------------------
 @node Index

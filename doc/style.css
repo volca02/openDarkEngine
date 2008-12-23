@@ -13,9 +13,9 @@ H3 {
 	background-color: #D0D0D0;
 }
 
-a:link { font-weight: bold; text-decoration: none; color: gray }
-a:hover { font-weight: bold; text-decoration: none; color: blue }
-a:visited { font-weight: bold; text-decoration: none; color: gray }
+a:link { font-weight: bold; text-decoration: none; color: #B06060; }
+a:visited { font-weight: bold; text-decoration: none; color: #B06060; }
+a:hover { font-weight: bold; text-decoration: underline; color: #B06060; }
 
 dt { color: #D03030; font-weight: bold }
 
