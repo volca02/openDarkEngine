@@ -1,0 +1,65 @@
+digraph G {
+	fontname = "Bitstream Vera Sans"
+	fontsize = 8
+	
+	node [
+		fontname = "Bitstream Vera Sans"
+		fontsize = 7
+		shape = "record"	
+	]
+	
+	edge [
+		fontname = "Bitstream Vera Sans"
+		fontsize = 7
+	]
+	
+	
+	subgraph clusterBase {
+		label = "Base classes"
+	
+		Service [
+			label = "{Service||}"
+		]
+	}
+	
+	subgraph clusterOgre {
+		label = "Ogre Namespace"
+		
+		DarkSceneManager [
+			label = "{DarkSceneManager||}"
+		]
+		
+		DarkLight [
+			label = "{DarkLight||}"
+		]
+	}
+		
+	subgraph clusterLightSvc {
+		label = "Light Service"
+		
+		LightService [
+			label = "{LightService||}"
+		]
+	}	
+	
+	Service -> LightService
+	
+	edge [
+		arrowhead = "none"
+
+                headlabel = "N"
+                taillabel = "1"
+	]
+	
+	LightService -> DarkLight
+	
+	edge [
+		arrowhead = "none"
+
+                headlabel = "1"
+                taillabel = "1"
+	]
+	
+	DarkSceneManager -> LightService
+
+}

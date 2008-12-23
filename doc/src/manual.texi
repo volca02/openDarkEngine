@@ -425,6 +425,8 @@ Metaproperty objects bear different DonorType property value than other archetyp
 @section WorldRep Service
 @cindex WorldRep Service
 
+@image{img/worldrepsvc}
+
 This service is responsible for loading WR/WRRGB tag files. These contain the static level geometry, which is traditionally called terrain. It does this in cooperation with 
 @ref{Light Service}, @ref{Material Service} and DarkSceneManager.
 
@@ -466,6 +468,9 @@ that allow rendering the WR geometry on modern hardware using modern approaches.
 	VBO usage - we dynamically fill the index buffers of VBO object according to the cell lists. The mapping cell -> index set and rendering is done in the DarkGeometry class
 @item
 	Texture atlas usage - we use texture atlasses for lightmaps. They are built as the level is loaded, and use BSP tree to place the lightmap. This minimizes the batch counts
+@item
+	Conversion of dynamic lights to standard lights - we will need to do this. Original Dark Engine computes low-resolution lightmaps for all affected surfaces of dynamic lights. 
+	We will use standard lights instead for the purpose of dynamic lighting.
 @end itemize
 
 @c --------------------------------------------------------------------
@@ -473,14 +478,22 @@ that allow rendering the WR geometry on modern hardware using modern approaches.
 @section Light Service
 @cindex Light Service
 
+@image{img/lightsvc}
+
 Dark Engine introduces a pre-baked list of lights (built upon portalisation) in the WR tag file, right after the end of the BSP tree. This service handles the lights.
+The loading of the light list is invoked by WorldRep service when loading WorldRep. This service also handles lightmaps using atlases, and is capable of individual light
+modulation.
+Later, this service will also be capable of light related tweqs in cooperation with Tweq service and anim light handling, and dynamic light handling (dynamic lights
+are the only ones which influence the lighting of the static geometry in realtime).
 
 @c --------------------------------------------------------------------
 @node Material Service
 @section Material Service
 @cindex Material Service
 
-Manages all the materials for static geometry, models and AI.
+@image{img/materialsvc}
+
+Manages all the materials for static geometry, models and AI. Later it will also manage material properties and material overrides.
 
 @c --------------------------------------------------------------------
 @node Index

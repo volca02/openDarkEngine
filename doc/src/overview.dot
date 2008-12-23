@@ -89,62 +89,9 @@ digraph G {
 	
 	Root -> ServiceManager
 	ServiceManager -> Service
-
-	edge [
-		color = "gray"
-	]
-
-
-	WorldRepService -> DarkSceneManager
 	
-	TweqService -> RenderService
-	TweqService -> LightService
-	
-	GUIService -> DrawService
-	
-	WorldRepService -> LightService
-
-	edge [
-		color = "red"
-	]
-	
-	SimService -> LoopService
-	PuppetService -> SimService
-	TweqService -> SimService
-	PhysicsService -> SimService
-	RenderService -> LoopService
-	InputService -> LoopService
-	AIService -> PuppetService
-
-	edge [
-		color = "green"
-	]
-
-	RenderService -> PropertyService
-	RenderService -> ObjectService
-	PhysicsService -> ObjectService
-	ObjectService -> PropertyService
-	ObjectService -> LinkService
-	InheritService -> LinkService
-	PropertyService -> InheritService
-
-	edge [
-		color = "blue"
-	]
-	
-	ObjectService -> DatabaseService
-	WorldRepService -> DatabaseService
-	LightService -> DatabaseService
-	MaterialService -> DatabaseService
-	GUIService -> InputService
-	
-	edge [
-		color = "brown"
-	]
-	
-	ScriptService -> Scripts
-	ScriptService -> PhysicsService 
-	ScriptService -> TweqService
-	ScriptService -> AIService
-	ScriptService -> DatabaseService
+	clusterRender -- clusterObjSys
+	clusterObjSys -- clusterIO
+	clusterSim -- LoopService
+	clusterScripting -- clusterIO
 }

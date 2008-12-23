@@ -1,0 +1,102 @@
+digraph G {
+	fontname = "Bitstream Vera Sans"
+	fontsize = 8
+	
+	node [
+		fontname = "Bitstream Vera Sans"
+		fontsize = 7
+		shape = "record"	
+	]
+	
+	edge [
+		fontname = "Bitstream Vera Sans"
+		fontsize = 7
+	]
+	
+	
+	subgraph clusterBase {
+		label = "Base classes"
+	
+		Service [
+			label = "{Service||}"
+		]
+	
+	
+	}
+	
+	subgraph clusterOgre {
+		label = "Ogre namespace"
+	
+		DarkSceneManager [
+			label = "{DarkSceneManager||}"
+		]
+		
+		DarkGeometry [
+			label = "{DarkGeometry||}"
+		]
+		
+		DarkSubGeometry [
+			label = "{DarkSubGeometry||}"
+		]
+		
+		BSPTree [
+			label = "{BSPTree||}"
+		]
+		
+		BSPNode [
+			label = "{BSPNode||}"
+		]
+		
+		ConvexPolygon [
+			label = "{ConvexPolygon||}"
+		]
+		
+		DarkPortal [
+			label = "{DarkPortal||}"
+		]
+		
+		DarkCamera [
+			label = "{DarkCamera||}"
+		]
+	}
+		
+	subgraph clusterWRSvc {
+		label = "WorldRep Service"
+		
+		WorldRepService [
+			label = "{WorldRepService||}"
+		]
+	
+		WRCell [
+			label = "{WRCell||}"
+		]
+	}	
+	
+	Service -> WorldRepService
+	ConvexPolygon -> DarkPortal
+	
+	edge [
+		arrowhead = "none"
+
+                headlabel = "1"
+                taillabel = "1"
+	]
+	
+	WorldRepService -> DarkGeometry
+	WorldRepService -> DarkSceneManager	
+	WorldRepService -> BSPTree		
+	DarkSceneManager -> BSPTree
+	
+	edge [
+		arrowhead = "none"
+
+                headlabel = "1"
+                taillabel = "N"
+	]
+	
+	WRCell -> WorldRepService
+	BSPNode -> BSPTree
+	DarkCamera -> DarkSceneManager
+	DarkPortal -> DarkSceneManager
+	DarkSubGeometry -> DarkGeometry
+}
