@@ -258,6 +258,7 @@ Section "openDarkEngine (required)"
 	File "$%OGRE_HOME%\bin\release\*.dll"	
 	File "$%OGRE_HOME%\bin\release\Plugins.cfg"
 	File "@FREEIMAGE_PATH@\Dist\FreeImage.dll"
+	File "@ODE_PATH@\lib\ReleaseSingleDLL\ode_single.dll"
 	FILE /x py*_d.dll "$%WinDir%\System32\Py*.dll"
 	
 	SetOutPath $INSTDIR\Scripts
