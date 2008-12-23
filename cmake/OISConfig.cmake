@@ -2,9 +2,9 @@
 # Try to find OIS library on both Windows and Linux systems
 # 
 # The following values will get defined:
-#	OIS_FOUND - True if ogre lib was found
-#	OIS_INCLUDE_DIR - Include libraries for Ogre usage
-#	OIS_LIBRARIES - Library paths for ogre
+#	OIS_FOUND - True if OIS lib was found
+#	OIS_INCLUDE_DIR - Include libraries for OIS usage
+#	OIS_LIBRARIES - Library paths for OIS
 
 SET(OIS_FOUND)
 MARK_AS_ADVANCED(OIS_FOUND)

@@ -2,9 +2,9 @@
 # Try to find FREEIMAGE library on both Windows and Linux systems
 # 
 # The following values will get defined:
-#	FREEIMAGE_FOUND - True if ogre lib was found
-#	FREEIMAGE_INCLUDE_DIR - Include libraries for Ogre usage
-#	FREEIMAGE_LIBRARIES - Library paths for ogre
+#	FREEIMAGE_FOUND - True if FreeImage lib was found
+#	FREEIMAGE_INCLUDE_DIR - Include libraries for FreeImage usage
+#	FREEIMAGE_LIBRARIES - Library paths for FreeImage
 
 SET(FREEIMAGE_FOUND)
 MARK_AS_ADVANCED(FREEIMAGE_FOUND)
