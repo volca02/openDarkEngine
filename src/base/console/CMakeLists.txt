@@ -1,6 +1,9 @@
+# $Id$
+
 include_directories ( 
     ${OGRE_INCLUDE_DIR}
     ${OIS_INCLUDE_DIR}
+    ${ODE_INCLUDE_DIR}
     ${OPDE_BINARY_DIR}
     ${OPDE_SOURCE_DIR}/src/base
     ${OPDE_SOURCE_DIR}/src/base/logger

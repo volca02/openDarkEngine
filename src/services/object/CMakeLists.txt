@@ -1,8 +1,11 @@
+# $Id$
+
 INCLUDE( ${OPDE_SOURCE_DIR}/src/services/Services.cmake )
 INCLUDE( ${OPDE_SOURCE_DIR}/src/base/Base.cmake )
 
 include_directories ( 
     ${OGRE_INCLUDE_DIR} 
+    ${ODE_INCLUDE_DIR}
     ${OPDE_BINARY_DIR}
     ${OPDE_BASE_INCLUDES}
     ${OPDE_SOURCE_DIR}/src/scenemanager/
