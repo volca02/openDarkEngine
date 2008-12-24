@@ -99,17 +99,17 @@ namespace Opde {
             Parameters mParameters;
 	};
 
-	/// Shared pointer to game service
+	/// Shared pointer to Config service
 	typedef shared_ptr<ConfigService> ConfigServicePtr;
 
 
-	/// Factory for the GameService objects
+	/// Factory for the ConfigService objects
 	class OPDELIB_EXPORT ConfigServiceFactory : public ServiceFactory {
 		public:
 			ConfigServiceFactory();
 			~ConfigServiceFactory() {};
 
-			/** Creates a GameService instance */
+			/** Creates a ConfigService instance */
 			Service* createInstance(ServiceManager* manager);
 
 			virtual const std::string& getName();

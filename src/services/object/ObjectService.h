@@ -255,7 +255,7 @@ namespace Opde {
 			PositionPropertyStoragePtr mPositionStorage;
 	};
 
-	/// Shared pointer to the service
+	/// Shared pointer to the Object service
 	typedef shared_ptr<ObjectService> ObjectServicePtr;
 
 	/// Factory for the ObjectService objects
@@ -264,7 +264,7 @@ namespace Opde {
 			ObjectServiceFactory();
 			~ObjectServiceFactory() {};
 
-			/** Creates a LinkService instance */
+			/** Creates a ObjectService instance */
 			Service* createInstance(ServiceManager* manager);
 
 			virtual const std::string& getName();

@@ -31,7 +31,7 @@ namespace Opde {
 
 	namespace Python {
 
-		/// Link service python binder
+		/// Inherit service python binder
 		class InheritServiceBinder : public shared_ptr_binder<InheritServicePtr> {
 			public:
 				static void init(PyObject* module);

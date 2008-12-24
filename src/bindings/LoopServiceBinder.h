@@ -33,7 +33,7 @@ namespace Opde
 	namespace Python 
 	{
 
-		/// Property service python binder
+		/// Loop service python binder
 		class LoopServiceBinder : public shared_ptr_binder<LoopServicePtr> {
 			public:
 				static void init(PyObject* module);

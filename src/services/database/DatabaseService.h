@@ -158,7 +158,7 @@ namespace Opde {
 			ProgressListenerPtr mProgressListener;
 	};
 
-	/// Shared pointer to game service
+	/// Shared pointer to Database service
 	typedef shared_ptr<DatabaseService> DatabaseServicePtr;
 
 

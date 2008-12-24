@@ -226,11 +226,11 @@ namespace Opde {
 	};
 
 
-	/// Shared pointer to light service
+	/// Shared pointer to Material service
 	typedef shared_ptr<MaterialService> MaterialServicePtr;
 
 
-	/// Factory for the LightService objects
+	/// Factory for the MaterialService objects
 	class OPDELIB_EXPORT MaterialServiceFactory: public ServiceFactory {
 		public:
 			MaterialServiceFactory();
@@ -238,7 +238,7 @@ namespace Opde {
 			}
 			;
 
-			/** Creates a GameService instance */
+			/** Creates a MaterialService instance */
 			Service* createInstance(ServiceManager* manager);
 
 			virtual const std::string& getName();

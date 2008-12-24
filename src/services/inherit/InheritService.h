@@ -193,16 +193,16 @@ namespace Opde {
 			InheritorList mInheritors;
 	};
 
-	/// Shared pointer to Link service
+	/// Shared pointer to Inherit service
 	typedef shared_ptr< InheritService > InheritServicePtr;
 
-	/// Factory for the LinkService objects
+	/// Factory for the InheritService objects
 	class OPDELIB_EXPORT InheritServiceFactory : public ServiceFactory {
 		public:
 			InheritServiceFactory();
 			~InheritServiceFactory() {};
 
-			/** Creates a LinkService instance */
+			/** Creates a InheritService instance */
 			Service* createInstance(ServiceManager* manager);
 
 			virtual const std::string& getName();

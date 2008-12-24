@@ -279,7 +279,7 @@ namespace Opde {
 			LoopServiceFactory();
 			~LoopServiceFactory() {};
 
-			/** Creates a GameService instance */
+			/** Creates a LoopService instance */
 			Service* createInstance(ServiceManager* manager);
 
 			virtual const std::string& getName();

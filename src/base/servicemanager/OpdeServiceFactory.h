@@ -33,7 +33,7 @@
 
 namespace Opde {
 
-	// Volca: I like the Ogre's approach on factories. This is quite simmilar
+	// Volca: I like the Ogre's approach to factories. This is quite simmilar
 	
 	// forward declaration
 	class ServiceManager;
