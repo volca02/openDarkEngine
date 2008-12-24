@@ -31,7 +31,7 @@ namespace Opde
 	namespace Python
 	{
 
-		// -------------------- Property Service --------------------
+		// -------------------- Loop Service --------------------
 		char* LoopServiceBinder::msName = "LoopService";
 
 		// ------------------------------------------

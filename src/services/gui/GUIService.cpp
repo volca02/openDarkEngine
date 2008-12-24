@@ -32,7 +32,7 @@ using namespace OIS;
 namespace Opde {
 
     /*-----------------------------------------------------*/
-    /*-------------------- InputService -------------------*/
+    /*-------------------- GUIService ---------------------*/
     /*-----------------------------------------------------*/
     GUIService::GUIService(ServiceManager *manager, const std::string& name) : Service(manager, name),
 			mInputSrv(NULL),

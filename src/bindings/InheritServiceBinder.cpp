@@ -30,7 +30,7 @@ namespace Opde {
 
 	namespace Python {
 
-		// -------------------- Link Service --------------------
+		// -------------------- Inherit Service --------------------
 		char* InheritServiceBinder::msName = "InheritService";
 
 		// ------------------------------------------
