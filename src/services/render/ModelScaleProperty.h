@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *		$Id: RenderAlphaProperty.h 959 2008-11-03 20:28:27Z volca $
+ *		$Id$
  *
  *****************************************************************************/
 

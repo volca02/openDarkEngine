@@ -16,6 +16,9 @@
  * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
  * Place - Suite 330, Boston, MA 02111-1307, USA, or go to
  * http://www.gnu.org/copyleft/lesser.txt.
+ *
+ *	  $Id$
+ *
  *****************************************************************************/
  
 #include "OpdeException.h"

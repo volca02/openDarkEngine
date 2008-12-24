@@ -17,10 +17,12 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+ *	  $Id$
+ *
  *****************************************************************************/
 
 /*
-thanks go to shadowspawn for his great contribution (and Ryan Nunn for his work on this thing too, as well as maybe other, which I do not know about)
+thanks go to shadowspawn for his great contribution (and Ryan Nunn for his work on this thing too, as well as maybe others, whom I do not know about)
 Parts of this file are exact copies or free-style rewrites of the contributed code
 */
 

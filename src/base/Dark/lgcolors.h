@@ -1,3 +1,5 @@
+//	  $Id$
+
 #ifndef __LGCOLORS_H
 #define __LGCOLORS_H
 
