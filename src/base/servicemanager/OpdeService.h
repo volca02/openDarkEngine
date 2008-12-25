@@ -46,10 +46,10 @@ namespace Opde {
 				std::string mName;
 
 			public:
-                /** Constructor. Do not implement inheritance resolving here! (Can cycle if you'll do so)*/
+                /** Constructor. Do not implement inheritance resolving here! (Can cycle if you do so)*/
 				Service(ServiceManager* manager, const std::string& name);
 
-                /** Destructor. When using service dependencies, be aware that if an error happened, the fields can be non-initialized.
+                /** Destructor. When using service dependencies, be aware that if an error happened, the fields can be un-initialized.
                 */
 				virtual ~Service();
 

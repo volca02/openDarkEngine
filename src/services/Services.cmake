@@ -5,6 +5,7 @@ SET(OPDE_SERVICE_INCLUDES
     ${OPDE_SOURCE_DIR}/src/services/
     ${OPDE_SOURCE_DIR}/src/services/binary
     ${OPDE_SOURCE_DIR}/src/services/game
+	${OPDE_SOURCE_DIR}/src/services/physics
     ${OPDE_SOURCE_DIR}/src/services/config
     ${OPDE_SOURCE_DIR}/src/services/worldrep
     ${OPDE_SOURCE_DIR}/src/services/link

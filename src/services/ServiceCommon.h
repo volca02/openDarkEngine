@@ -56,7 +56,7 @@ I just hope we won't run out of mask bits! :D
 #define SERVICE_CORE 0x00010000
 // Services related to rendering (dropping out these will cause no graphics to be displayed, no renderer window displayed)
 #define SERVICE_RENDERER 0x00020000
-// Services related to engine work (dropping these will cause that the engine will do nothing)
+// Services related to engine work (dropping these will result in the engine doing nothing)
 #define SERVICE_ENGINE 0x00040000
 
 /// Link listener mask

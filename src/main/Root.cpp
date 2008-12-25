@@ -39,6 +39,7 @@
 // Services
 #include "WorldRepService.h"
 #include "GameService.h"
+#include "PhysicsService.h"
 #include "RenderService.h"
 #include "InputService.h"
 #include "LoopService.h"
@@ -254,6 +255,7 @@ namespace Opde {
 		new WorldRepServiceFactory();
 		new BinaryServiceFactory();
 		new GameServiceFactory();
+		new PhysicsServiceFactory();
 		new ConfigServiceFactory();
 		new LinkServiceFactory();
 		new PropertyServiceFactory();

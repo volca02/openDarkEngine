@@ -35,6 +35,9 @@ add_subdirectory(worldrep)
 # Game service, handling the high game states
 add_subdirectory(game)
 
+# Physics service, handling the physics
+add_subdirectory(physics)
+
 # Dark Database handling service
 add_subdirectory(database)
 
