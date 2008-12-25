@@ -16,32 +16,36 @@ SET(ODE_PATH "${OPDE_BINARY_DIR}/../dependencies/ode/" CACHE STRING "For Win32 i
 
 IF (UNIX)
     # Let's look for ODE
-    SET(ODEE_INC_SEARCH_PATH
+    SET(ODE_INC_SEARCH_PATH
         /usr/include/
         /usr/local/include/
      )
 
     # The search begins
-    FIND_PATH(ODE_INCLUDE_DIR ode.h ${ODE_INC_SEARCH_PATH})
+    FIND_PATH(ODE_INCLUDE_DIR ode/ode.h ${ODE_INC_SEARCH_PATH})
 
     IF(NOT ODE_INCLUDE_DIR)
-        MESSAGE("Warning: ode.h not found under ${ODE_INC_SEARCH_PATH}")
+        MESSAGE("Warning: ode/ode.h not found under ${ODE_INC_SEARCH_PATH}")
         SET(ODE_FOUND 0)
     ENDIF(NOT ODE_INCLUDE_DIR)
+    
+    # 
     
 ENDIF(UNIX)
 
 IF(WIN32)
+    # TODO: Ogre SDK also includes ODE, and it might actually suffice
+    
     SET(ODE_INC_SEARCH_PATH
-        $ENV{ODE_PATH}/include/ode
-	${ODE_PATH}/include/ode
+        $ENV{ODE_PATH}/include
+	${ODE_PATH}/include
     )
     
     # The search begins
-    FIND_PATH(ODE_INCLUDE_DIR ode.h ${ODE_INC_SEARCH_PATH})
+    FIND_PATH(ODE_INCLUDE_DIR ode/ode.h ${ODE_INC_SEARCH_PATH})
 
     IF(NOT ODE_INCLUDE_DIR)
-        MESSAGE("Warning: ode.h not found under ${ODE_INC_SEARCH_PATH}")
+        MESSAGE("Warning: ode/ode.h not found under ${ODE_INC_SEARCH_PATH}")
         SET(ODE_FOUND 0)
     ENDIF(NOT ODE_INCLUDE_DIR)
     
