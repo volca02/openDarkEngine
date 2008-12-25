@@ -1,0 +1,34 @@
+digraph G {
+	fontname = "Bitstream Vera Sans"
+	fontsize = 8
+	
+	node [
+		fontname = "Bitstream Vera Sans"
+		fontsize = 7
+		shape = "record"	
+	]
+	
+	edge [
+		fontname = "Bitstream Vera Sans"
+		fontsize = 7
+	]
+	
+	
+	subgraph clusterBase {
+		label = "Base classes"
+	
+		Service [
+			label = "{Service||}"
+		]
+	}
+		
+	subgraph clusterConfig {
+		label = "Config Service"
+		
+		ConfigService [
+			label = "{ConfigService||}"
+		]
+	}	
+	
+	Service -> ConfigService
+}

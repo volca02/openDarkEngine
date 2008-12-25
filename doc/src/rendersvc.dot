@@ -1,0 +1,122 @@
+digraph G {
+	fontname = "Bitstream Vera Sans"
+	fontsize = 8
+	size = "13,13"
+	
+	node [
+		fontname = "Bitstream Vera Sans"
+		fontsize = 7
+		shape = "record"	
+	]
+	
+	edge [
+		fontname = "Bitstream Vera Sans"
+		fontsize = 7
+	]
+	
+	
+	subgraph clusterBase {
+		label = "Base classes"
+	
+		Service [
+			label = "{Service||}"
+		]
+	}
+	
+	subgraph clusterOgre {
+		label = "Ogre namespace"
+	
+		DarkSceneManager [
+			label = "{DarkSceneManager||}"
+		]
+		
+		DarkCamera [
+			label = "{DarkCamera||}"
+		]
+		
+		Material [
+			label = "{Material||}"
+		]
+	
+		Entity [
+			label = "{Entity||}"
+		]
+	}
+	
+	subgraph clusterPropertySvc {
+		label = "Property Service"
+
+		PropertyGroup [ label = "{PropertyGroup||}" ]
+		ActiveProperty [ label = "{ActiveProperty||}" ]
+	}
+	
+	subgraph clusterObjectSvc {
+		label = "Object Service"
+
+		PositionProperty [ label = "{PositionProperty||}" ]
+		ObjectService [ label = "{ObjectService||}" ]
+	}
+	
+	subgraph clusterRenderSvc {
+		label = "Render Service"
+		
+		RenderService [
+			label = "{RenderService||}"
+		]
+	
+		EntityMaterialInstance [ label = "{EntityMaterialInstance||}" ]
+		MaterialInstance [ label = "{MaterialInstance||}" ]
+		SubEntityMaterialInstance [ label = "{SubEntityMaterialInstance||}" ]
+		
+		HasRefsProperty [ label = "{HasRefsProperty||}" ]
+		ModelNameProperty [ label = "{ModelNameProperty||}" ]
+		ModelScaleProperty [ label = "{ModelScaleProperty||}" ]
+		RenderAlphaProperty [ label = "{RenderAlphaProperty||}" ]
+		RenderTypeProperty [ label = "{RenderTypeProperty||}" ]
+		ZBiasProperty [ label = "{ZBiasProperty||}" ]
+		
+		RenderedProperty [ label = "{RenderedProperty||}" ]
+		
+		EntityInfo [ label = "{EntityInfo||}" ]
+	}	
+	
+	MaterialInstance -> SubEntityMaterialInstance
+	Service -> RenderService
+	Service -> ObjectService
+	PropertyGroup -> ActiveProperty
+	
+	ActiveProperty -> RenderedProperty
+	
+	RenderedProperty -> HasRefsProperty
+	RenderedProperty -> ModelNameProperty
+	RenderedProperty -> ModelScaleProperty
+	RenderedProperty -> RenderAlphaProperty
+	RenderedProperty -> RenderTypeProperty
+	RenderedProperty -> ZBiasProperty
+	
+	edge [
+		arrowhead = "none"
+
+                headlabel = "1"
+                taillabel = "1"
+	]
+	
+	RenderService -> DarkSceneManager
+	RenderService -> PositionProperty
+	RenderService -> ObjectService
+	ObjectService -> PositionProperty
+	RenderedProperty -> EntityInfo
+
+	SubEntityMaterialInstance -> Material
+	EntityMaterialInstance -> Entity
+
+	edge [
+		arrowhead = "none"
+
+                headlabel = "1"
+                taillabel = "N"
+	]
+	
+	SubEntityMaterialInstance -> EntityMaterialInstance
+	DarkCamera -> RenderService
+}

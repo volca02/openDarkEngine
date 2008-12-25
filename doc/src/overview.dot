@@ -2,7 +2,7 @@ digraph G {
 	fontname = "Bitstream Vera Sans"
 	fontsize = 8
 	compound = true
-	
+	size = "13,13"
 	
 	node [
 		fontname = "Bitstream Vera Sans"
@@ -66,6 +66,9 @@ digraph G {
 		ContainerService
 		PlayerService
 		SimService
+		ParticleService
+		SoundService
+		StimService
 	}
 
 	subgraph clusterScripting {

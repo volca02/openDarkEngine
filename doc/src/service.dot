@@ -24,4 +24,14 @@ digraph G {
 	ServiceFactory [
 		label = "{ServiceFactory||+createInstance() : ServicePtr\l+getName() : string\l+getMask() : unsigned int\l}"
 	]
+	
+	edge [
+                arrowhead = "none"
+
+                headlabel = "N"
+                taillabel = "1"
+        ]
+	
+	ServiceManager->Service
+	ServiceManager->ServiceFactory
 }

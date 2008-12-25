@@ -1,0 +1,57 @@
+digraph G {
+	fontname = "Bitstream Vera Sans"
+	fontsize = 8
+	
+	node [
+		fontname = "Bitstream Vera Sans"
+		fontsize = 7
+		shape = "record"	
+	]
+	
+	edge [
+		fontname = "Bitstream Vera Sans"
+		fontsize = 7
+	]
+	
+	
+	subgraph clusterBase {
+		label = "Base classes"
+	
+		Service [
+			label = "{Service||}"
+		]
+	}
+		
+	subgraph clusterInputSvc {
+		label = "Input Service"
+		
+		InputService [
+			label = "{InputService||}"
+		]
+	
+		InputEventMapper [
+			label = "{InputEventMapper||}"
+		]
+	}	
+	
+        subgraph clusterLoopSvc {
+                label = "Loop Service"
+
+                LoopClient [
+                        label = "{LoopClient||}"
+                ]
+        }
+
+	
+	Service -> InputService
+	LoopClient -> InputService
+	
+	edge [
+		arrowhead = "none"
+
+                headlabel = "N"
+                taillabel = "1"
+	]
+	
+	InputService -> InputEventMapper
+}

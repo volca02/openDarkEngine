@@ -7,11 +7,12 @@ Last updated on 19-Oct-2008
 - Requirements -
 ----------------
 OPDE needs:
-* OGRE3D library, 1.4 series and FreeImage library (an ogre requirement, should be a part of SDK under windows).
+* OGRE3D library, version 1.6
+* FreeImage library
 * OIS (The part of Ogre SDK under windows, do not install separately)
 * CMake
 * Python
-* FreeImage
+* For documentation builds: epydoc, texi2html, doxygen and graphviz
 
 Coding
 ------

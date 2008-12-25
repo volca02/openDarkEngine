@@ -199,33 +199,76 @@ To learn more, look inside the src/services/serviceCommon.h file.
 @chapter Services
 @cindex Services
 
-This is the current list of available engines services:
+This is the current list of available engines services, divided by categories, and classified with a rough current completeness level (>90% means feature complete, bug-fix only):
 
+@subheading Input/Output
 @table @asis
-@item @ref{Binary Service}
-	Is a helper service that holds dynamically defined types and enumerations, as specified by, for example the dtdef scripts.
-@item @ref{Database Service}
+@item @ref{Input Service} - 70%
+	This service handles input devices and their translations to game commands. Also handles .BND files and console commands.
+@item @ref{Database Service} - 60%
 	Is a game database loading/saving service. Manages the loading/saving of .GAM/.MIS/.SAV files. All the services which store some
 	data inside these files listen to the events that this service generates and act accordingly.
-@item @ref{Object Service}
+@end table
+
+@subheading Various
+@table @asis
+@item @ref{Binary Service} - 100 %
+	Is a helper service that holds dynamically defined types and enumerations, as specified by, for example the dtdef scripts.
+@item @ref{Config Service} - 20 %
+	Is a service that stores Name->Value type info. Reads opde.cfg at the moment. Will handle all the Dark Engine config file formats later, except bnd files.
+@item @ref{Loop Service} - 90 %
+	Responsible for the main game loop. A modular approach to game loop - different loop modes only handle different subsets of the great game loop.
+@end table
+
+@subheading Object System
+@table @asis
+@item @ref{Object Service} - 70%
 	Is the main service for the engine's object system. Manages game object's lifetime.
-@item @ref{Link Service}
+@item @ref{Link Service} - 70%
 	Is the link management service. Stores Relation objects. Each relation object stores all links of particular flavor.
-@item @ref{Property Service}
+@item @ref{Property Service} - 70%
 	Is the property manager. Properties are named "types" that object can carry. Each of the property types has one PropertyGroup instance held by this service.
-@item @ref{Inherit Service}
+@item @ref{Inherit Service} - 100%
 	This service manages object @i{trait} inheritance. Currently is used to cache and propagate inherited properties for objects.
-@item @ref{WorldRep Service}
+@end table
+
+@subheading Rendering
+@table @asis
+@item @ref{WorldRep Service} - 80%
 	This service is responsible for loading and preparing the World Rep, which is a different name for the level geometry. It loads and prepares it for display.
-@item @ref{Light Service}
+@item @ref{Light Service} - 40%
 	This service manages lights in the world
-@item @ref{Material Service}
+@item @ref{Material Service} - 20%
 	Helper service that helps with game object materials (textures, etc).
-@item @ref{Render Service}
+@item @ref{Render Service} - 30%
 	This service manages the display of the engine.
-@item Input Service
-	Service that manages keyboard and mouse inputs and their translation to commands.
-@item Script Service
+@item Draw Service - 0%
+	Service responsible for 2D rendering (GUI, HUD).
+@end table
+
+@subheading Simulation
+@table @asis
+@item Sim Service - 0%
+	Similar to the loop service, is it's client in fact. Will handle the simulation time management and time step distribution.
+@item Physics Service - 1%
+	Will handle all game object physics.
+@item Particle Service - 0%
+	This service is somewhere between simulation and rendering, but will use sim service so it's defined here. Currently not implemented, will handle particle effects.
+@item Player Service - 0%
+	Will handle player - all the player movement input commands, as well as life of the player, it's container, and other things.
+@item Container Service - 0%
+	Will handle in-game containers (chests for example), containment of objects in other objects and it's effect on those.
+@item AI Service - 0%
+	Will handle game AI's - behaviors, senses, etc. (Also, maybe, Act/React system)
+@item Sound Service - 0%
+	Will handle in-game sounds and their effect on in-game objects
+@item Stim/Receptron Service - 0%
+	Will handle stimulations and senses of objects
+@item Puppet Service - 0%
+	Will handle animations of AI's
+@item Tweq Service - 0%
+	Will handle tweqs - time-related changes of objects (Scaling, rotation, etc).
+@item @ref{Script Service} - 1%
 	Script interfacing service. Manages loading/unloading of script modules, script instantization and event translation.
 @end table
 
@@ -285,7 +328,7 @@ yet handled effectively using some other approaches.
 
 @image{img/databasesvc}
 
-This service is responsible for game state handling. It can load and unload mission files, gamesys files, savegames, etc. and also save 
+This service is responsible for in-game state loads and saves. It can load and unload mission files, gamesys files, savegames, etc. and also save 
 them. It also exposes two types of messages, one is used to load or save data, the other is used to display loading/saving status.
 
 The service is currently a placeholder for a more propper implementation, but works well for the loading part.
@@ -493,13 +536,100 @@ are the only ones which influence the lighting of the static geometry in realtim
 @image{img/materialsvc}
 
 Manages all the materials for static geometry, models and AI. Later it will also manage material properties and material overrides.
+Also currently manages flow textures (those are the textures applied to water surface).
 
 @c --------------------------------------------------------------------
 @node Render Service
 @section Render Service
 @cindex Render Service
 
+@image{img/rendersvc}
+
 This service is a connection point between Ogre and Opde. It manages display (resolution etc) and model rendering.
+It also manages render subgroup of Properties (RenderAlpha, RenderType, HasRefs, Scale). Listens to Object Service's position property and adjusts SceneNodes of
+objects accordingly.
+
+@c --------------------------------------------------------------------
+@node Input Service
+@section Input Service
+@cindex Input Service
+
+@image{img/inputsvc}
+
+This service processes, translates and dispatches events sourcing from user's input. It supports two modes of function - mapped and unmapped. These two can be switched
+on the fly, and are there to support GUI/in-game modes (as well as MFD/normal mode in System Shock 2). One direct input listener can exist, and numerous mapped input modes can, via bind contexts. 
+The Bind Contexts are categories of user input, that can be switched. So, for example, there can be editor bind context and game bind context, MFD bind context etc.
+Different bind contexts are realised via different instances of InputEventMapper object.
+
+@c --------------------------------------------------------------------
+@node Config Service
+@section Config Service
+@cindex Config Service
+
+@image{img/configsvc}
+
+Config service loads configuration files and exposes them as name/value configuration pairs. It will later manage install.cfg, dark.cfg and others.
+
+
+@c --------------------------------------------------------------------
+@node Loop Service
+@section Loop Service
+@cindex Loop Service
+
+@image{img/loopsvc}
+
+Loop service implements a modular approach to game loop. All it does is the plain old game loop code with some extensions. 
+
+@cindex LoopMode
+@cindex LoopMask
+@cindex LoopClient
+@subheading LoopMode, LoopMask and LoopClient
+Meet loop mode and mask. These two come in pairs, and define game loop modes together with bit mask of categories they include. Each of the loop clients
+also includes a loop mask. The Mode and Client masks must have a nonzero and product in order for the loop client to be included in a loop mode.
+Example (self explaining, really):
+
+@itemize @bullet
+@item
+	LoopClient GUILoopClient - Loop Mask 0x0001
+@item
+	LoopClient VideoLoopClient - Loop Mask 0x0002
+@item
+	LoopClient SimLoopClient - Loop Mask 0x0004
+@item
+	LoopClient InputSystemLoopClient - Loop Mask 0x0FFFF
+@end itemize
+
+@itemize @bullet
+@item
+	LoopMode GUIOnly - LoopMask 0x0001
+@item
+	LoopMode VideoOnly - LoopMask 0x0002
+@item
+	LoopMode SimAndGui - LoopMask 0x0005
+@end itemize
+
+
+Loop service also features a primitive loop profiler - each loop client's time is logged for one loop run when activated.
+
+@c --------------------------------------------------------------------
+@node Script Service
+@section Script Service
+@cindex Script Service
+
+@image{img/scriptsvc}
+
+This service will handle scripting. Currently only a compilable empty skeleton exists, no code to inject engine events to scripts is written, as there is 
+no scripting module loader code yet.
+
+@cindex Script
+@subheading Script
+Script is an class/it's instance written in some scripting language that handles a certain aspect of object's behavior. Scripts listen to various game
+messages and handle the object's properties or other things accordingly. For example hypothetical Mine script would listen to physics messages,
+wait for PhysFellAsleep message and then activate a Receptron that would cause the mine to be sensitive to movement around it.
+
+@cindex Script Module
+@subheading Script Module
+Script module is a named package of Scripts. In the context of original Dark Engine, this is a .OSM file (which in reality is a DLL file).
 
 @c --------------------------------------------------------------------
 @node Index
