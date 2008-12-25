@@ -355,7 +355,7 @@ namespace Opde {
 			goOn = false;
 			String newname = name + '_' + StringConverter::toString(order++) + '.' + ext;
 
-			LOG_INFO("MaterialService: anim_txt trying %s", newname.c_str());
+			LOG_DEBUG("MaterialService: anim_txt trying %s", newname.c_str());
 
 			if (ResourceGroupManager::getSingleton().resourceExists(resourceGroup, newname)) {
 				goOn = true;
