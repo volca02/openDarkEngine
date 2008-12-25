@@ -37,14 +37,14 @@ namespace Opde {
 	*/
 	class OPDELIB_EXPORT SimListener {
 		public:
-			virtual void simStarted();
+			virtual void simStarted() = 0;
 			
-			virtual void simEnded();
+			virtual void simEnded() = 0;
 			
-			virtual void simStep(float simTime);
+			virtual void simStep(float simTime) = 0;
 			
 			/// Priority of the listener
-			virtual size_t getPriority();
+			virtual size_t getPriority() = 0;
 	};
 
 	/** @brief Sim Service - a simulation timer base. Implements Sim time (simulation time). This time can have different flow rate than normal time.
