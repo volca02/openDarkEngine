@@ -34,12 +34,13 @@ namespace Opde {
 	/*-------------------- GameService -------------------*/
 	/*----------------------------------------------------*/
 	GameService::GameService(ServiceManager *manager, const std::string& name) : Service(manager, name) {
-	    mDbService = GET_SERVICE(DatabaseService);
 	}
 
     //------------------------------------------------------
 	bool GameService::init() {
-	    return true;
+	    mDbService = GET_SERVICE(DatabaseService);
+
+		return (!mDbService.isNull());
 	}
 
 	//------------------------------------------------------
