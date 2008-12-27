@@ -23,7 +23,10 @@
 
 SetCompressor /SOLID /FINAL lzma
 
+; The following plugin does not install with NSIS by default.
+; Grab it from http://nsis.sourceforge.net/RecFind:_Recursive_FindFirst,_FindNext,_FindClose
 !include RecFind.nsh
+
 !include nsDialogs.nsh
 !insertmacro NSD_FUNCTION_INIFILE
 
