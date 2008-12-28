@@ -56,6 +56,7 @@ link_directories(
 target_link_libraries( OpenDark
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}
+	${ODE_LIBRARIES}
     ${FREEIMAGE_LIBRARIES}
     ${PYTHON_LIBRARIES}
 )
@@ -101,6 +102,7 @@ target_link_libraries( opde
     OpenDark
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}
+	${ODE_LIBRARIES}
     ${FREEIMAGE_LIBRARIES}
 )
 
@@ -117,6 +119,7 @@ target_link_libraries( opdeScript
     OpenDark
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}
+	${ODE_LIBRARIES}
     ${FREEIMAGE_LIBRARIES}
     ${PYTHON_LIBRARIES}
 )

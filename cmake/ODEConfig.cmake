@@ -9,6 +9,7 @@
 
 SET(ODE_FOUND)
 MARK_AS_ADVANCED(ODE_FOUND)
+MARK_AS_ADVANCED(ODE_LIBRARIES)
 MARK_AS_ADVANCED(ODE_INCLUDE_DIR)
 
 # For win32 builds. This can be filled by hand. Standard path is dependencies directory next to opde binary dir (out of source build target directory)
@@ -20,6 +21,18 @@ IF (UNIX)
         /usr/include/
         /usr/local/include/
      )
+	 
+	SET(ODE_LIB_SEARCH_PATH
+        /lib
+        /usr/lib
+        /usr/lib32
+        /usr/lib64
+        /usr/local/lib
+        /usr/local/lib32
+        /usr/local/lib64
+     )
+	 
+	SET(ODE_LIBNAMES ode_single)
 
     # The search begins
     FIND_PATH(ODE_INCLUDE_DIR ode/ode.h ${ODE_INC_SEARCH_PATH})
@@ -28,6 +41,13 @@ IF (UNIX)
         MESSAGE("Warning: ode/ode.h not found under ${ODE_INC_SEARCH_PATH}")
         SET(ODE_FOUND 0)
     ENDIF(NOT ODE_INCLUDE_DIR)
+	
+	FIND_LIBRARY(ODE_LIBRARIES NAME ${ODE_LIBNAMES} PATHS ${ODE_LIB_SEARCH_PATH})
+	
+	IF(NOT ODE_LIBRARIES)
+        MESSAGE("Warning: ode library not found under ${ODE_INC_SEARCH_PATH}")
+        SET(ODE_FOUND 0)
+    ENDIF(NOT ODE_LIBRARIES)
     
     # 
     
@@ -40,7 +60,14 @@ IF(WIN32)
         $ENV{ODE_PATH}/include
 	${ODE_PATH}/include
     )
+	
+	SET(ODE_LIB_SEARCH_PATH
+        $ENV{ODE_PATH}/lib/ReleaseSingleLib
+	${ODE_PATH}/lib/ReleaseSingleLib
+    )
     
+	SET(ODE_LIBNAMES ode_single)
+	
     # The search begins
     FIND_PATH(ODE_INCLUDE_DIR ode/ode.h ${ODE_INC_SEARCH_PATH})
 
@@ -48,5 +75,12 @@ IF(WIN32)
         MESSAGE("Warning: ode/ode.h not found under ${ODE_INC_SEARCH_PATH}")
         SET(ODE_FOUND 0)
     ENDIF(NOT ODE_INCLUDE_DIR)
+	
+	FIND_LIBRARY(ODE_LIBRARIES NAME ${ODE_LIBNAMES} PATHS ${ODE_LIB_SEARCH_PATH})
+	
+	IF(NOT ODE_LIBRARIES)
+        MESSAGE("Warning: ode library not found under ${ODE_INC_SEARCH_PATH}")
+        SET(ODE_FOUND 0)
+    ENDIF(NOT ODE_LIBRARIES)
     
 ENDIF(WIN32)
