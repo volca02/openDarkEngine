@@ -4,9 +4,9 @@ INCLUDE( ${OPDE_SOURCE_DIR}/src/services/Services.cmake )
 INCLUDE( ${OPDE_SOURCE_DIR}/src/base/Base.cmake )
 
 include_directories ( 
-    ${OIS_INCLUDE_DIR}
-    ${OGRE_INCLUDE_DIR} 
     ${ODE_INCLUDE_DIR}
+	${OIS_INCLUDE_DIR}
+    ${OGRE_INCLUDE_DIR}     
     ${OPDE_BINARY_DIR}
     ${OPDE_BASE_INCLUDES}
     ${OPDE_SERVICE_INCLUDES}
