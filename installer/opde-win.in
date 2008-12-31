@@ -195,7 +195,8 @@ Function SetupThief1
 	FileWrite $8 "Zip=$Thief1Dir$0\$1$\r$\n"
 	NextFile:
 	${RecFindNext}
-	${RecFindClose} 
+	${RecFindClose}
+	SetOutPath $INSTDIR
 	CreateShortCut "$SMPROGRAMS\openDarkEngine\openDarkEngine (TDP, TG).lnk" "$INSTDIR\opde.exe" "T1" "$Thief1Dir\Thief.exe" 0	
 	CreateShortCut "$INSTDIR\opde (Thief 1).lnk" "$INSTDIR\opde.exe" "T1" "$Thief1Dir\Thief.exe" 0	
 	FileClose $8
@@ -217,7 +218,8 @@ Function SetupThief2
 	FileWrite $8 "Zip=$Thief2Dir$0\$1$\r$\n"
 	NextFile:
 	${RecFindNext}
-	${RecFindClose} 
+	${RecFindClose}
+	SetOutPath $INSTDIR
 	CreateShortCut "$SMPROGRAMS\openDarkEngine\openDarkEngine (TMA).lnk" "$INSTDIR\opde.exe" "T2" "$Thief2Dir\thief2.exe" 0
 	CreateShortCut "$INSTDIR\opde (Thief 2).lnk" "$INSTDIR\opde.exe" "T2" "$Thief2Dir\thief2.exe" 0	
 	FileClose $8
@@ -240,6 +242,7 @@ Function SetupShock2
 	NextFile:
 	${RecFindNext}
 	${RecFindClose}
+	SetOutPath $INSTDIR
 	CreateShortCut "$SMPROGRAMS\openDarkEngine\openDarkEngine (SS2).lnk" "$INSTDIR\opde.exe" "SS2" "$Shock2Dir\Shock2.exe" 0
 	CreateShortCut "$INSTDIR\opde (Shock 2).lnk" "$INSTDIR\opde.exe" "SS2" "$Shock2Dir\Shock2.exe" 0
 	FileClose $8
