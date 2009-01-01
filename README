@@ -6,11 +6,11 @@ This is a readme file for the OPDE project version 0.2.0
     OPDE was created as an effort to build a 
 multiplatform engine supporting the LookingGlass'es (TM) 
 data files from the original DarkEngine(TM) games.
-So far, a basic display of levels work.
+So far, a basic display of the levels work.
 
 License
 -------
-All files, if not otherwise specified, are released under the GNU/GPL license.
+All the files, if not otherwise specified, are released under the GNU/GPL license.
 
 The DarkSceneManager is released under the GNU/LGPL license, to comply with the original version of the sources - The BSPSceneManager.
 Additional sources, written and added to the DarkSceneManager (found in the src/DarkSceneManager) are licensed under LGPL too.
@@ -26,7 +26,7 @@ Source code structure
 The main code resides in the 'src' subdirectory. The 'proto' directory contains some prototype code in the testing phase.
 
 
-In the src directory, you can find:
+In the src directory, you will find:
     compat - Compiler compatibility headers
     base - base classes for the engine - logging, console backend, etc.
     bindings - python bindings code
@@ -38,9 +38,9 @@ In the src directory, you can find:
 Thanks
 ------
 Thanks go to:
-TomNHarris (telliamed) - for the lots of work he done understanding the Dark Engine and data formats. Also for the irreplaceable help he is giving to us.
+TomNHarris (telliamed) - for the all the work he has done understanding the Dark Engine and its data formats. Also for the irreplaceable help he is giving us.
 ShadowSpawn - For the BIN mesh format and Movement database format descriptions.
 ataricom - For helping out with the Wiki
 Ogre3D developers - for helping out with various questions and definitely for the Ogre3D library
-TTLG comunity
+TTLG community
 ...and others
