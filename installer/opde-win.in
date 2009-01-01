@@ -261,6 +261,7 @@ Section "openDarkEngine (required)"
 	File @PROJECT_BINARY_DIR@\src\main\release\opdeScript.exe
 	File @PROJECT_BINARY_DIR@\src\main\release\OpenDark.dll
 	File /oname=opde.cfg @CMAKE_CURRENT_SOURCE_DIR@\installer\opde-sample.cfg
+	File @CMAKE_CURRENT_SOURCE_DIR@\installer\readme.txt
 	File "$%OGRE_HOME%\bin\release\*.dll"	
 	File "$%OGRE_HOME%\bin\release\Plugins.cfg"
 	File "@FREEIMAGE_PATH@\Dist\FreeImage.dll"
@@ -306,6 +307,7 @@ Section "Uninstall"
 	Delete $INSTDIR\*.dll
 	Delete $INSTDIR\*.bmp
 	Delete $INSTDIR\*.lnk
+	Delete $INSTDIR\*.txt
 	Delete $INSTDIR\uninstall.exe
 
 	; Remove shortcuts, if any
