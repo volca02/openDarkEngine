@@ -32,7 +32,7 @@ IF (UNIX)
         /usr/local/lib64
      )
 	 
-	SET(ODE_LIBNAMES ode_single)
+	SET(ODE_LIBNAMES ode)
 
     # The search begins
     FIND_PATH(ODE_INCLUDE_DIR ode/ode.h ${ODE_INC_SEARCH_PATH})
