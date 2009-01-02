@@ -37,14 +37,35 @@ namespace Opde {
 	*/
 	class OPDELIB_EXPORT SimListener {
 		public:
-			virtual void simStarted() = 0;
-			
-			virtual void simEnded() = 0;
-			
-			virtual void simStep(float simTime) = 0;
-			
-			/// Priority of the listener
+			SimListener();
+
+			virtual ~SimListener();
+
+			/** Called when the simulation is started by sim service. Sets sim time to zero. sets mSimRunning to true. */
+			virtual void simStarted();
+
+			/** Called when the simulation is ended by sim service. Sets mSimRunning to false. */
+			virtual void simEnded();
+
+			/** Called when the simulation is paused. Sets mPaused */
+			virtual void simPaused();
+
+			/** Called when the simulation is un-paused. Unsets mPaused */
+			virtual void simUnPaused();
+
+			/** simulation time step happened
+			 * @param simTime the new sim time
+			 * @param delta the time increment that happened
+			 */
+			virtual void simStep(float simTime, float delta);
+
+			/// Priority of the listener (order of execution in the loop)
 			virtual size_t getPriority() = 0;
+
+		protected:
+			float mSimTime;
+			bool mPaused;
+			bool mSimRunning;
 	};
 
 	/** @brief Sim Service - a simulation timer base. Implements Sim time (simulation time). This time can have different flow rate than normal time.
@@ -56,26 +77,70 @@ namespace Opde {
 			virtual ~SimService();
 
 			// --- Registration/Unregistration of clients
+
+			/// registers a loop listener
 			void registerListener(SimListener* listener);
-			
+
+			/// unregisters a loop listener
 			void unregisterListener(SimListener* listener);
-			
+
 			// --- Loop Service Client related ---
+
+			/// called from loop service
 			void loopStep(float deltaTime);
+
+			/** Pauses sim. Only possible if sim time is running and paused. Informs all sim listeners.
+			 * @note This method is called automatically if loop listener this class implements is informed the next loop mode won't include this listener
+			*/
+			void pauseSim();
+
+			/** un-pauses sim. Only possible if sim-time is running and paused. Informs all sim listeners.
+			 * @note This method is called automatically if loop listener this class implments is informed the next loop mode will include this listener.
+			 */
+			void unPauseSim();
+
+			/// Getter for sim time state (paused or running). Value for stopped sim time is unspecified.
+			inline bool isSimPaused() { return mPaused; };
+
+			/** Starts sim-time. Will reset the sim-time value to 0. Informs all sim listeners.
+			 *  Does not touch the sim time flow coeff.
+			 */
+			void startSim();
+
+			/** Ends the sim-time. Possibly destructive to the sim related data. Informs all sim listeners.
+			  */
+			void endSim();
+
+			/// Getter for sim-time running state (can be true although pause is in progress).
+			inline bool isSimRunning() { return mSimRunning; };
+
+			/// Detects if sim-time is effectively running - not stopped and not paused
+			inline bool isSimEffectivelyRunning() { return mSimRunning && (!mPaused); };
+
+			/// Sets the sim time flow ration (speed of flow of the sim in comparison with the real time)
+			void setFlowCoeff(float flowCoeff);
+
+			inline float getFlowCoeff() { return mTimeCoeff; };
 
 		protected:
 			/// Service initialization
 			bool init();
-			
+
 			/// Time flow coefficient - 1.0 means the sim time is 1:1 with real time. 0.5 means sim time flows 2 times slower than normal time
 			float mTimeCoeff;
-			
+
 			/// Sim time. Set to zero on simulation start
 			float mSimTime;
-			
-			/// Simulation listeners - multimap, as we need prioritised behavior 
+
+			/// Sim-Time pause in progress
+			bool mPaused;
+
+			/// Sim-Time is running (only true between startSim and endSim calls)
+			bool mSimRunning;
+
+			/// Simulation listeners - multimap, as we need prioritised behavior
 			typedef std::multimap<size_t, SimListener*> SimListeners;
-			
+
 			SimListeners mSimListeners;
 	};
 
@@ -94,7 +159,7 @@ namespace Opde {
 
 			virtual const std::string& getName();
 
-			virtual const uint getMask(); 
+			virtual const uint getMask();
 		private:
 			static std::string mName;
 	};

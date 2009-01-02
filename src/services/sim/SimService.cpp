@@ -29,14 +29,51 @@
 using namespace std;
 
 namespace Opde {
+	/*----------------------------------------------------*/
+	/*-------------------- Sim Listener ------------------*/
+	/*----------------------------------------------------*/
+	SimListener::SimListener() : mSimTime(0), mPaused(false), mSimRunning(false) {
+
+	}
+
+	//------------------------------------------------------
+	SimListener::~SimListener() {
+	}
+
+	//------------------------------------------------------
+	void SimListener::simStarted() {
+		mSimTime = 0;
+		mSimRunning = true;
+	}
+
+	//------------------------------------------------------
+	void SimListener::simEnded() {
+		mSimRunning = false;
+	}
+
+
+	//------------------------------------------------------
+	void SimListener::simPaused() {
+		mPaused = true;
+	}
+
+	//------------------------------------------------------
+	void SimListener::simUnPaused() {
+		mPaused = false;
+	}
+
+	//------------------------------------------------------
+	void SimListener::simStep(float simTime, float delta) {
+		mSimTime = simTime;
+	}
 
 	/*----------------------------------------------------*/
 	/*-------------------- Sim Service -------------------*/
 	/*----------------------------------------------------*/
-	SimService::SimService(ServiceManager *manager, const std::string& name) : Service(manager, name) {
+	SimService::SimService(ServiceManager *manager, const std::string& name) : Service(manager, name), mTimeCoeff(1), mSimTime(0), mPaused(false) {
 	}
 
-    	//------------------------------------------------------
+   	//------------------------------------------------------
 	bool SimService::init() {
 	    return true;
 	}
@@ -47,21 +84,92 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void SimService::loopStep(float deltaTime) {
-		mSimTime += mTimeCoeff * deltaTime;
-		// TODO: Iterate over listeners, broadcast
+		if (!mPaused && mSimRunning) {
+			float delta = mTimeCoeff * deltaTime;
+
+			SimListeners::iterator it;
+
+			while (it != mSimListeners.end()) {
+				(it++)->second->simStep(mSimTime, delta);
+			}
+
+			mSimTime += delta;
+		}
 	}
-	
+
 	//------------------------------------------------------
 	void SimService::registerListener(SimListener* listener) {
-		// TODO: Code
+		mSimListeners.insert(std::make_pair(listener->getPriority(), listener));
 	}
 
 	//------------------------------------------------------
 	void SimService::unregisterListener(SimListener* listener) {
-		// TODO: Code
+		SimListeners::iterator it;
+
+		while (it != mSimListeners.end()) {
+		    if (it->second == listener) {
+		    	SimListeners::iterator rem = it++;
+		    	mSimListeners.erase(rem);
+			} else {
+				it++;
+	        }
+		}
 	}
-	
-	
+
+	//------------------------------------------------------
+	void SimService::pauseSim() {
+		if (mPaused || !mSimRunning)
+			return;
+
+		SimListeners::iterator it;
+
+		while (it != mSimListeners.end()) {
+			(it++)->second->simPaused();
+		}
+
+		mPaused = true;
+	}
+
+	//------------------------------------------------------
+	void SimService::unPauseSim() {
+		if (!mPaused || !mSimRunning)
+			return;
+
+		SimListeners::iterator it;
+
+		while (it != mSimListeners.end()) {
+			(it++)->second->simUnPaused();
+		}
+
+		mPaused = false;
+	}
+
+	//------------------------------------------------------
+	void SimService::startSim() {
+		if (mSimRunning)
+			return;
+
+		mSimTime = 0;
+
+		SimListeners::iterator it;
+
+		while (it != mSimListeners.end()) {
+			(it++)->second->simStarted();
+		}
+	}
+
+	//------------------------------------------------------
+	void SimService::endSim() {
+		if (!mSimRunning)
+			return;
+
+		SimListeners::iterator it;
+
+		while (it != mSimListeners.end()) {
+			(it++)->second->simEnded();
+		}
+	}
+
 
 	//-------------------------- Factory implementation
 	std::string SimServiceFactory::mName = "SimService";
