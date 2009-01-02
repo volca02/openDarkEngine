@@ -8,38 +8,33 @@ Pre-0.3 release:
     * new main.cpp - preferably only a small wrapper for python scripts to be executed with
     * propper Big/Little endian handling for DType/DTypeDef classes (and OPDE in general). This (together with some other fixes) should enable the code to run on non-intel macs and other architectures
     * Finalization of the core services bindings, coupled with Doc strings to make coder's life easier
-    * installation scripts / win32 installer - should also prepare opde's config files to be ready to rock after install
+    + installation scripts / win32 installer - should also prepare opde's config files to be ready to rock after install
     * better handling of missing data
     * ogre's (and others) resource system management. How to organize resource unloading? How to classify loaded data? Those need to be answered
     * small clarifications of the methods working with property/link data - what the data flow will be? getData can return archetype's data, so changes should be disallowed on that returned object
     * Testing: for example how to correctly (and legally) transfer python's lib together with opde, bug fixes for opde if it does not find data it needs
     * Example scripts to the SVN - resources.cfg, opde.cfg, plugins.cfg, etc should be placed in SVN to ease the pain for people trying to build from source
     * Other example scripts/documentation, including FAQ - How do I create a custom material replacement? How do I create a mesh replacement? (...New movements for AI?...)
-    * optional: Optimization. The new SM for example does not perform so well one could be satisfied with it.
-    * Built-in properties: To stop the opde from failing fatally if the core sripts are corrupted/missing, the property/link/binary data specifications could be created in code (including the DTypeDef 
-	format descriptor).  This can be accomplished for example with a header file generator that would convert the .pldef and .dtype scripts	into included routines. 
-	Not terribly hard to do, and would simply mean one preprocessing step - (1) compile the converter, (2) convert the files (somewhat simmilar to GUI code generators) 
-	generating .h or .cpp files, then compiled in as libGAMEData where GAME is one of the games (Thief1,Thief2,Shock2). Result: Routines accessible to the python
-	code or bootstrap code, setting up the binary definitions/properties/links.
-	
-    * DTypeDef cleanup: It now seems we can safely swap endianness of DTypeDef supported data. This means we can do all the byte mumbo-jumbo whilst loading, and have a cleaner get/set code.
+    + optional: Optimization. The new SM for example does not perform so well one could be satisfied with it.
+    + Built-in properties: To stop the opde from failing fatally if the core sripts are corrupted/missing
+    - DTypeDef cleanup: It now seems we can safely swap endianness of DTypeDef supported data. This means we can do all the byte mumbo-jumbo whilst loading, and have a cleaner get/set code.
 	- need to be 100% sure here - there are some unions present
 	(Also an option: Getting rid of the DType structures altogether, using linear array of field lists with type. Bit more work, result would be much more simmilar to Dark's original impl.)
     * Cleanup in the error handling - how to report errors, how to handle exceptions to Python
     * Object construction has some pending changes: Link definition should get clone/instantinate style attribute (clone target as well, clone link/leave archetype target id, discard link)
 	- see the Thief1 (2?) Torch. In fact any archetype with particleAttachment. Then see T2's Flinderize link. Both have non-standard object instantination behavior.
-    * SceneNode should be moved to RenderSystem again. The current position in the object service was too much a shortcut.
+    + SceneNode should be moved to RenderSystem again. The current position in the object service was too much a shortcut.
 	* Here are some thoughts: both Position property setting and call to the ObjectService::setPosition/Orientation should end up calling position listeners(only once)!
 	* some internal caching of the object->position and object->orientation can be done in object service, but not needed (too much data duplication)
 	* Physics service has the ability to stop controling certain parts of the object's orientation/position. Need more info here - what does setPosition in obj. service do with it
 	* AND how the physics service should update the position of the object (in fact any service)?
 	    - seems the best way is that phys. service is a listener to the position/orientation of the object. when needing to set the position/orientation, it will call ObjService::setPos/Ori
-    * Decoupling of data representation and access. No more should the code be based on DType and DTypeDef classes (can be, but only internally).
-    * DTypeDef should have the variable length data option removed. There is property definition parameter designed just for that, and a dedicated variable length string data storage as well
-    * Redesign and reimplementation of some core properties. Those should be marked internal and be hardcoded.
-    * Possibility of property storage and implementation to be separate (for tools). This is done partially using optionality of the renderer listeners, but blind option for property group/data storage should do it better. That means core properties can reflect the values if blind is false as well.
-    * Basic type data storages - float data storage, integer data storage, bool data storage (binary array based)
-    * Advanced - structured templated data storage - something to be easilly personalised for the use with internal properties/link data that are structured (Property position for example). 
+    + Decoupling of data representation and access. No more should the code be based on DType and DTypeDef classes (can be, but only internally).
+    + DTypeDef should have the variable length data option removed. There is property definition parameter designed just for that, and a dedicated variable length string data storage as well
+    + Redesign and reimplementation of some core properties. Those should be marked internal and be hardcoded.
+    + Possibility of property storage and implementation to be separate (for tools). This is done partially using optionality of the renderer listeners, but blind option for property group/data storage should do it better. That means core properties can reflect the values if blind is false as well.
+    + Basic type data storages - float data storage, integer data storage, bool data storage (binary array based)
+    + Advanced - structured templated data storage - something to be easilly personalised for the use with internal properties/link data that are structured (Property position for example). 
     * On-the-fly max/min object id resets - should be partially implemented, but binary arrays need to be reallocated/repopulated then, this has to work (at least for editor mode)
     * Documentation - how to implement code that makes the property live. How to implement contstraints between various properties.
     * Fog rendering - the one of the last rendering problems to be solved. Fog lives in the scenemanager, but we need to render our geometry twice - once the part that is fogged, once the part that is not fogged. 
@@ -53,6 +48,8 @@ Pre-0.3 release:
 	- A/R system
 	- Physics
     * Sound system - need a propper resource system for this one, lots of data will travel because of this one
+    * Full-Bright mode for DromEd users
+    * Full support for multiple instances of Opde, also engine shutdown/restart (at least one of these has to work in order to do a fully working prop/link documentation generator)
 
 
 ----------------------------------
@@ -62,7 +59,7 @@ Pre-0.3 release:
 Documentation
 -------------
 We have the doxy system running (needs updating the comments though). Texinfo file with data flow descriptions, coding style descriptions, how-to guide, etc
-should be written.
+should be written (partially is already, more work is needed).
 
 
 Documentation generator for Properties, links and chunk formats
@@ -84,6 +81,8 @@ Prop.ModelName {
 
 The documentation generator should then produce a texinfo file that could be compiled into info, html and other formats.
 Up to three different structure descriptions would be introduced, one for each different game type (or a collored diff).
+
+Currently a prototype code exists in opdeDocGen, but should be probably rewritten into a python script.
 
 
 Preprocessor for .pldef and .dtype script files
