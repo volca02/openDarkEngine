@@ -32,7 +32,7 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- Sim Listener ------------------*/
 	/*----------------------------------------------------*/
-	SimListener::SimListener() : mSimTime(0), mPaused(false), mSimRunning(false) {
+	SimListener::SimListener() : mSimTime(0), mSimTimeFlow(1), mSimPaused(false), mSimRunning(false) {
 
 	}
 
@@ -54,12 +54,17 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void SimListener::simPaused() {
-		mPaused = true;
+		mSimPaused = true;
 	}
 
 	//------------------------------------------------------
 	void SimListener::simUnPaused() {
-		mPaused = false;
+		mSimPaused = false;
+	}
+
+	//------------------------------------------------------
+	void SimListener::simFlowChange(float newFlow) {
+		mSimTimeFlow = newFlow;
 	}
 
 	//------------------------------------------------------
@@ -70,7 +75,10 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- Sim Service -------------------*/
 	/*----------------------------------------------------*/
-	SimService::SimService(ServiceManager *manager, const std::string& name) : Service(manager, name), mTimeCoeff(1), mSimTime(0), mPaused(false) {
+	SimService::SimService(ServiceManager *manager, const std::string& name) : Service(manager, name),
+			mTimeCoeff(1),
+			mSimTime(0),
+			mPaused(false) {
 	}
 
    	//------------------------------------------------------
@@ -84,11 +92,43 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void SimService::loopStep(float deltaTime) {
+		SimListeners::iterator it;
+
+		if (mStartStopReq.getIfReq(mSimRunning)) {
+			if (mSimRunning)
+				mSimTime = 0;
+
+			it = mSimListeners.begin();
+			while (it != mSimListeners.end()) {
+				if (mSimRunning)
+					(it++)->second->simStarted();
+				else
+					(it++)->second->simEnded();
+			}
+		}
+
+		// has to happen here, otherwise half of the sim could get different scaling
+		if (mPauseChangeReq.getIfReq(mPaused)) {
+			it = mSimListeners.begin();
+			while (it != mSimListeners.end()) {
+				if (mPaused)
+					(it++)->second->simPaused();
+				else
+					(it++)->second->simUnPaused();
+			}
+		}
+
+		if (mFlowChangeReq.getIfReq(mTimeCoeff)) {
+			it = mSimListeners.begin();
+			while (it != mSimListeners.end()) {
+				(it++)->second->simFlowChange(mTimeCoeff);
+			}
+		}
+
 		if (!mPaused && mSimRunning) {
 			float delta = mTimeCoeff * deltaTime;
 
-			SimListeners::iterator it;
-
+			it = mSimListeners.begin();
 			while (it != mSimListeners.end()) {
 				(it++)->second->simStep(mSimTime, delta);
 			}
@@ -100,6 +140,19 @@ namespace Opde {
 	//------------------------------------------------------
 	void SimService::registerListener(SimListener* listener) {
 		mSimListeners.insert(std::make_pair(listener->getPriority(), listener));
+
+		// to be sure
+		if (mSimRunning)
+			listener->simStarted();
+		else
+			listener->simEnded();
+
+		if (mPaused)
+			listener->simPaused();
+		else
+			listener->simUnPaused();
+
+		listener->simFlowChange(mTimeCoeff);
 	}
 
 	//------------------------------------------------------
@@ -121,13 +174,7 @@ namespace Opde {
 		if (mPaused || !mSimRunning)
 			return;
 
-		SimListeners::iterator it;
-
-		while (it != mSimListeners.end()) {
-			(it++)->second->simPaused();
-		}
-
-		mPaused = true;
+		mPauseChangeReq.set(true);
 	}
 
 	//------------------------------------------------------
@@ -135,13 +182,7 @@ namespace Opde {
 		if (!mPaused || !mSimRunning)
 			return;
 
-		SimListeners::iterator it;
-
-		while (it != mSimListeners.end()) {
-			(it++)->second->simUnPaused();
-		}
-
-		mPaused = false;
+		mPauseChangeReq.set(false);
 	}
 
 	//------------------------------------------------------
@@ -149,13 +190,7 @@ namespace Opde {
 		if (mSimRunning)
 			return;
 
-		mSimTime = 0;
-
-		SimListeners::iterator it;
-
-		while (it != mSimListeners.end()) {
-			(it++)->second->simStarted();
-		}
+		mStartStopReq.set(true);
 	}
 
 	//------------------------------------------------------
@@ -163,11 +198,13 @@ namespace Opde {
 		if (!mSimRunning)
 			return;
 
-		SimListeners::iterator it;
+		mStartStopReq.set(false);
+	}
 
-		while (it != mSimListeners.end()) {
-			(it++)->second->simEnded();
-		}
+	//------------------------------------------------------
+	void SimService::setFlowCoeff(float flowCoeff) {
+		if (flowCoeff > 0)
+			mFlowChangeReq.set(flowCoeff);
 	}
 
 

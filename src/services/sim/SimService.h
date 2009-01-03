@@ -31,6 +31,7 @@
 #include "OpdeService.h"
 #include "LoopService.h"
 #include "SharedPtr.h"
+#include "ValueChangeRequest.h"
 
 namespace Opde {
 	/** Abstract Simulation listener - a class that does something related to simulation extends this
@@ -53,6 +54,9 @@ namespace Opde {
 			/** Called when the simulation is un-paused. Unsets mPaused */
 			virtual void simUnPaused();
 
+			/** Called every time time flow change happens. */
+			virtual void simFlowChange(float newFlow);
+
 			/** simulation time step happened
 			 * @param simTime the new sim time
 			 * @param delta the time increment that happened
@@ -64,7 +68,8 @@ namespace Opde {
 
 		protected:
 			float mSimTime;
-			bool mPaused;
+			float mSimTimeFlow;
+			bool mSimPaused;
 			bool mSimRunning;
 	};
 
@@ -128,6 +133,15 @@ namespace Opde {
 
 			/// Time flow coefficient - 1.0 means the sim time is 1:1 with real time. 0.5 means sim time flows 2 times slower than normal time
 			float mTimeCoeff;
+
+			/// Request for new flow value
+			ValueChangeRequest<float> mFlowChangeReq;
+
+			/// Request for Pause/UnPause
+			ValueChangeRequest<bool> mPauseChangeReq;
+
+			// Request for Start/Stop
+			ValueChangeRequest<bool> mStartStopReq;
 
 			/// Sim time. Set to zero on simulation start
 			float mSimTime;
