@@ -33,6 +33,8 @@
 #include "FileGroup.h"
 #include "SharedPtr.h"
 
+#include "ode/ode.h"
+
 namespace Opde {
 
 	/** @brief Physics service - service defining game states (Temporary code. Will be filled with a high level state management - screens)
@@ -46,6 +48,9 @@ namespace Opde {
 			bool init();
 
 			DatabaseServicePtr mDbService;
+
+			//Dark World
+			dWorldID dDarkWorldID;
 	};
 
 	/// Shared pointer to Physics service

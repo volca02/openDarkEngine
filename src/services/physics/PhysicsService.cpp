@@ -33,18 +33,30 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- Physics Service ---------------*/
 	/*----------------------------------------------------*/
-	PhysicsService::PhysicsService(ServiceManager *manager, const std::string& name) : Service(manager, name) {
+	PhysicsService::PhysicsService(ServiceManager *manager, const std::string& name) : Service(manager, name) 
+	{
 	}
 
 	//------------------------------------------------------
-	bool PhysicsService::init() {
+	bool PhysicsService::init() 
+	{
 		mDbService = GET_SERVICE(DatabaseService);
 
-		return (!mDbService.isNull());
+		if(mDbService.isNull())
+			return false;
+
+		// create world
+		dInitODE2(0);
+		dDarkWorldID = dWorldCreate();
+
+		return true;
 	}
 
 	//------------------------------------------------------
-	PhysicsService::~PhysicsService() {
+	PhysicsService::~PhysicsService() 
+	{
+		dWorldDestroy(dDarkWorldID);
+		dCloseODE();
 	}
 
 	//-------------------------- Factory implementation
