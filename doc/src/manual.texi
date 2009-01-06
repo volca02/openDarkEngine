@@ -46,6 +46,7 @@ This is the main developer's manual for OpenDarkEngine
 @menu
 * Introduction::      Introduction to the manual
 * Core architecture:: The core architecture of the engine
+* Directory structure:: The directory structure of the source code
 * Services::          The available services
 @c Not used roght now - * Index::             Complete index.
 @end menu
@@ -61,9 +62,18 @@ to give you some insight about the project's architecture, enable you to quickly
 code.
 
 @cindex Used technologies
-@section Used technologies
+@subheading Used technologies
 The core of OpenDarkEngine written in C++, various other parts are planned or already written in python. Build system
 used is CMake. Libraries currently used are OGRE, FreeImage.
+
+@cindex Build environment
+@subheading Build environment
+The project is being developed on windows and linux in parallel. It is verified that it is buildable using Visual C++ on
+windows and GCC4 on linux. Eclipse CDT is recommended IDE under linux, but others are also usable (for example Code::Blocks).
+CMake can generate workspace or project files for various IDEs there are - be sure to make yourself comfortable before starting
+to do any modifications.
+
+For up-to-date build guides, please consult the doc/DEVELOPERS document in the source distribution.
 
 @c --------------------------------------------------------------------
 @node Core architecture
@@ -195,6 +205,28 @@ other core services - as for example the Config service).
 To learn more, look inside the src/services/serviceCommon.h file.
 
 @c --------------------------------------------------------------------
+@node Directory structure
+@chapter Directory structure
+@cindex Directory structure
+
+The source code of OpenDarkEngine is split across numerous directories to help with orientation. To understand the structure, these
+guidelines can be followed:
+
+@example
+proto/      - the prototype code directory - anything inside here is just for testing purposes, and does not belong to the source code of the engine
+scripts/    - this directory contains non-C++ code. @ref{DType} and @ref{PLDef} scripts are to be found here, as well as Ogre material and overlay scripts
+thirdparty/ - directory which contains various libraries that were not written by OpenDarkEngine team
+src/
+    compat/       - directory containing various compatibility related headers
+    main/         - this is the main, core code directory (all the executable's source code, as well as Root object and other glue and core code)
+    base/         - the base source code - contains a wide range of basic code - arrays, shared_pointers, ServiceManager code, etc.
+    bindings/     - Python OpenDarkEngine bindings
+    scenemanager/ - the Dark Scene Manager source code
+    services/     - the important part - all the services are here, each in it's own subdirectory
+    tools/        - various tools
+@end example
+
+@c --------------------------------------------------------------------
 @node Services
 @chapter Services
 @cindex Services
@@ -279,45 +311,7 @@ This is the current list of available engines services, divided by categories, a
 
 @image{img/binarysvc}
 
-This service stores dynamically defined structures and enumerations. These are defined via .dtype scripts, which have a simple, C-like syntax:
-
-@cindex dtype script
-@verbatim
-// a comment
-
-// Bitfield - maps bits of a unsigned, 32 bit integer to string names. A special case of enumeration
-bitfield bitf {
-	key "bit one" 0x01
-	key "bit two" 0x02
-}
-
-// Enumeration - much like the C enumerations. Maps different unique values of the specified type to string name
-enum enumeration : uint {
-	key "Option A" 0x00
-	key "Option B" 0x01
-}
-
-// A sample, nested struct 
-struct str {
-	uint32 use bitf uint_with_bitfield
-	int16 array [3]
-	
-	// an array of four structs
-	struct test [4] {
-		float x
-		char [4] name
-	}
-}
-
-// an alias - like C++ typedef
-alias str str2
-
-// a namespace. Can't be nested, default namespace is ""
-namespace Test {
-}
-@end verbatim
-
-These scripts are parsed using the DTypeScriptCompiler class and compiled into DType objects, then registered in the binary service.
+This service stores dynamically defined structures and enumerations. These are defined via .dtype scripts, which have a simple, C-like syntax (see @ref{DType})
 As a result, the binary service registers all the dynamically defined data types, which can then be used to load data that are not
 yet handled effectively using some other approaches.
 
@@ -630,6 +624,114 @@ wait for PhysFellAsleep message and then activate a Receptron that would cause t
 @cindex Script Module
 @subheading Script Module
 Script module is a named package of Scripts. In the context of original Dark Engine, this is a .OSM file (which in reality is a DLL file).
+
+
+@c --------------------------------------------------------------------
+@node DType
+@section DType
+@cindex DType
+
+DType scripts define data types dynamically. They are defined using a C-like language, and parsed on demand. When the engine is initialized
+without anything other than core services, these scripts (in combination with @ref{PLDef} scripts) can be used to define properties and links
+dynamically, allowing the engine to understand data it normally would not. 
+
+@cindex dtype script
+@verbatim
+// a comment
+
+// Bitfield - maps bits of a unsigned, 32 bit integer to string names. A special case of enumeration
+bitfield bitf {
+	key "bit one" 0x01
+	key "bit two" 0x02
+}
+
+// Enumeration - much like the C enumerations. Maps different unique values of the specified type to string name
+enum enumeration : uint {
+	key "Option A" 0x00
+	key "Option B" 0x01
+}
+
+// A sample, nested struct 
+struct str {
+	uint32 use bitf uint_with_bitfield
+	int16 array [3]
+	
+	// an array of four structs
+	struct test [4] {
+		float x
+		char [4] name
+	}
+}
+
+// an alias - like C++ typedef
+alias str str2
+
+// a namespace. Can't be nested, default namespace is ""
+namespace Test {
+}
+@end verbatim
+
+These scripts are parsed using the DTypeScriptCompiler class and compiled into DType objects, then registered in the binary service.
+
+@c --------------------------------------------------------------------
+@node PLDef
+@section PLDef
+@cindex PLDef
+
+These scripts define properties and links. It is possible to define name, label, chunk versions, data types, inheritance approach and other things with them.
+
+Example:
+@verbatim
+property BloodType {
+        label "BloodType"
+        p_ver 2.17
+        type varstr
+}
+
+relation CulpableFor {
+    no_data
+}
+    
+relation Receptron {
+    hidden
+    l_ver 2.1
+    d_ver 2.1
+    fake_size 2
+}
+@end verbatim
+
+@cindex Property
+@subheading Property
+
+These are the allowed keywords for Property definition along with their meaning:
+@itemize @bullet
+@item
+    label "labeltext" - sets the property label
+@item
+    dtype "dtypename" - sets the dtype used for the property (if not specified, it is assumed that properties/property_name dtype is defined within binary service)
+@item
+    p_ver maj.min - sets the property chunk (P$) version (maj and min are numbers) 
+@item
+    inherit inh_name - sets the inheritance schema - (inheritor factory name is expected - always, never, archetype)
+@item
+    type datatype - sets the datatype the propery should use - currently only varstr is supported here (omiting means property will use dtype typed storage). Varstr means property uses variable sized string storage.    
+@end itemize
+
+@cindex Relation
+@subheading Relation
+
+@itemize @bullet
+@item
+    dtype "dtypename" - dtype datatype used
+@item
+    fake_size size - fake size of the relation data in bytes (used for some special cases where dark lies about the data size - for example receptron relation)
+@item
+    hidden - if specified, the hidden flag is set on relation - the relation won't show up in lists of relations, etc (used for system relations - for example MetaProp)
+@item
+    no_data - link does not use data (data less relations)
+@item
+    d_ver and l_ver fields - specify chunk versions of relations data chunk (LD$) and link chunk (L$)
+@end itemize
 
 @c --------------------------------------------------------------------
 @node Index

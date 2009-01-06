@@ -5,8 +5,8 @@ die() {
 	exit 1
 }
 
-[ "x$1" == "x" ] && die "buildmanual.sh: No source path specified"
-[ "x$2" == "x" ] && die "buildmanual.sh: No destination path specified"
+[ "x$1" = "x" ] && die "buildmanual.sh: No source path specified"
+[ "x$2" = "x" ] && die "buildmanual.sh: No destination path specified"
 
 SRC_DIR=$1
 DST_DIR=$2
