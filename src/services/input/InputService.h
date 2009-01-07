@@ -47,8 +47,7 @@
 
 namespace Opde {
 
-	// Damn this is just a template ok? I don't mean to use this, but there has to be a way to specify the listener type/mask interest (keypress, every key scan, key release, etc)
-	// First, I have to specify if the input servis has to be stateful or stateless
+	/// Input event types
 	typedef enum {
 			IET_KEYBOARD_PRESS,
 			IET_KEYBOARD_HOLD,
@@ -60,9 +59,12 @@ namespace Opde {
 			IET_JOYSTICK_MOVE,
 			IET_JOYSTICK_PRESS,
 			IET_JOYSTICK_HOLD,
-			IET_JOYSTICK_RELEASE
+			IET_JOYSTICK_RELEASE,
+			/// Plain command call not caused by user input directly
+			IET_COMMAND_CALL
 	} InputEventType;
 
+	/// Input event
 	typedef struct {
 		InputEventType event;
 		 // unmapped command, or empty
@@ -98,7 +100,7 @@ namespace Opde {
 	class DirectInputListener {
 		public:
 			virtual ~DirectInputListener() {};
-		
+
 			virtual bool keyPressed( const OIS::KeyEvent &e ) = 0;
 			virtual bool keyReleased( const OIS::KeyEvent &e ) = 0;
 
@@ -108,7 +110,14 @@ namespace Opde {
 	};
 
 
-	/** @brief Input service - service which handles user input, and user input mapping */
+	/** @brief Input service - service which handles user input, and user input mapping
+	 * @todo Tab completion for the service (preferably including variables)
+	 * @todo Variable registration, descriptions, enumeration (So one can get list of variables, get their value and description)
+	 * @todo Mouse axis handling
+	 * @todo Joystick handling
+	 * @todo +/without + binding modes - how they differ, how to implement the one with key repeat...
+	 * @todo BND file writing ability (needs cooperation with nonexistent platform service)
+	 */
 	class OPDELIB_EXPORT InputService : public Service, public OIS::KeyListener, public OIS::MouseListener, public LoopClient {
 		public:
 			InputService(ServiceManager *manager, const std::string& name);
@@ -131,6 +140,9 @@ namespace Opde {
 
 			/// Set a current bind context
 			void setBindContext(const std::string& context);
+
+			/// Replaces all occurences of $variable with it's value
+			std::string fillVariables(const std::string& src) const;
 
 			/// Sets the input mode to either direct or mapped (IM_DIRECT/IM_MAPPED)
 			void setInputMode(InputMode mode) { mInputMode = mode; };
@@ -164,7 +176,7 @@ namespace Opde {
 
 			/// Unregisters a command listener
 			void unregisterCommandTrap(const ListenerPtr& listener);
-			
+
 			/// Unregisters a command listener by it's name
 			void unregisterCommandTrap(const std::string& command);
 
@@ -226,31 +238,31 @@ namespace Opde {
 
 			/// map of OIS::KeyCode to the code text
 			typedef std::map< OIS::KeyCode, std::string > KeyMap; // (lower case please)
-			
+
 			/// map of the command text to the ois key code
 			typedef std::map< std::string, OIS::KeyCode > ReverseKeyMap; // (lower case please)
 
 			/// map of command text to the handling listener
 			typedef std::map< std::string, ListenerPtr > ListenerMap;
-			
+
 			/// Set of commands that receive event on hold, every refresh
 			typedef std::set< std::string > CommandSet;
-			
+
 			/// map of the context name to the mapper
 			ContextToMapper mMappers;
-			
+
 			/// Variable list
 			ValueMap mVariables;
-			
+
 			/// Key map
 			KeyMap mKeyMap;
-			
+
 			/// Reverse key map
 			ReverseKeyMap mReverseKeyMap;
 
 			/// Current mapper
 			InputEventMapperPtr mCurrentMapper;
-			
+
 			/// Current input mode
 			InputMode mInputMode;
 
@@ -260,7 +272,7 @@ namespace Opde {
 			/// Set of commands that receive events every refresh if the button is holded
 			CommandSet mOnPressCommands;
 
-			/// Current direct listener 
+			/// Current direct listener
 			/// TODO: Maybe this will become a stack
 			DirectInputListener* mDirectListener;
 
@@ -277,10 +289,10 @@ namespace Opde {
 
 			/// Config service pointer
 			ConfigServicePtr mConfigService;
-			
+
 			/// Render service pointer
 			RenderServicePtr mRenderService;
-			
+
 			/// Loop service pointer
 			LoopServicePtr mLoopService;
 	};
@@ -299,7 +311,7 @@ namespace Opde {
 
 			virtual const std::string& getName();
 
-			virtual const uint getMask(); 
+			virtual const uint getMask();
 		private:
 			static std::string mName;
 	};

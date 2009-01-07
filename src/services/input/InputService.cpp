@@ -405,9 +405,49 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
+	std::string InputService::fillVariables(const std::string& src) const {
+		// This is quite bad implementation actually.
+		// Should use a StringTokenizer with custom rule ($ and some non-alpha like space etc split).
+
+		WhitespaceStringTokenizer st(src);
+
+		if (st.end())
+			return src;
+
+		string result;
+
+		bool first = true;
+
+		while (!st.end()) {
+			if (!first)
+				result += " ";
+
+			first = false;
+
+			string var = st.next();
+
+			if (var == "")
+				continue;
+
+			if (var.substr(0,1) == "$") {
+				ValueMap::const_iterator it = mVariables.find(var.substr(1,var.length()-1));
+
+				if (it != mVariables.end())
+					result += it->second.toString();
+				else
+					result += var;
+
+			} else {
+				result += var;
+			}
+		}
+	}
+
+	//------------------------------------------------------
 	DVariant InputService::command(const std::string& command) {
 		LOG_DEBUG("InputService::command: '%s'", command.c_str());
-		string cmd = stripComment(command);
+
+		string cmd = fillVariables(stripComment(command));
 
 		// Peek at first or second position. If we find bind command
 		WhitespaceStringTokenizer st(cmd, false);
@@ -432,44 +472,43 @@ namespace Opde {
 		} else if (f == "echo") {
 			LOG_DEBUG("InputService::command: Echo cmd");
 
+			// return the string past the command
+			return st.rest();
+		} else if (f == "set") {
+			LOG_DEBUG("InputService::command: set cmd");
+			// "set var val" - var without dollar sign
+
 			if (st.end())
-				return DVariant();
+				LOG_ERROR("Incomplete set line encountered (missing variable name): %s", command.c_str());
 
-			string result;
-			bool first = true;
+			string var = st.next();
 
-			while (!st.end()) {
-				if (!first)
-					result += " ";
+			if (var == "")
+				LOG_ERROR("Incomplete set line encountered (missing variable name): %s", command.c_str());
 
-				first = false;
+			if (st.end())
+				LOG_ERROR("Incomplete set line encountered (missing variable value): %s", command.c_str());
 
-				string var = st.next();
+			string val = st.next();
 
-				if (var == "")
-					continue;
+			mVariables[var] = DVariant(val);
 
-				if (var.substr(1,1) == "$") {
-					ValueMap::const_iterator it = mVariables.find(st.next());
-
-					if (it != mVariables.end())
-						result += it->second.toString();
-
-				} else {
-					result += var;
-				}
-			}
-		} /*else if (commandDefined(f)) {
+		} else if (hasCommandTrap(f)) {
 			string f1 = "";
 
 			if (!st.end())
 				f1 = st.rest();
 
-			callCommandTrap(f, f1);
+			InputEventMsg msg;
+			msg.command = f;
+			msg.event = IET_COMMAND_CALL;
+			msg.params = f1;
+
+			callCommandTrap(msg);
 
 			return true;
 		}
-*/
+
 		if (st.end()) {
 			LOG_DEBUG("InputService::command: incomplete command?");
 			return false;
