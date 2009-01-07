@@ -47,6 +47,7 @@ This is the main developer's manual for OpenDarkEngine
 * Introduction::      Introduction to the manual
 * Core architecture:: The core architecture of the engine
 * Directory structure:: The directory structure of the source code
+* Dark Engine's core concepts:: The key concepts found in Dark Engine, definition of terms
 * Services::          The available services
 @c Not used roght now - * Index::             Complete index.
 @end menu
@@ -227,6 +228,77 @@ src/
 @end example
 
 @c --------------------------------------------------------------------
+@node Dark Engine's core concepts
+@chapter Dark Engine's core concepts
+@cindex Dark Engine's core concepts
+
+@cindex Object System
+@heading Object System
+The core of the engine is the object system. Object system in Dark Engine is quite different from what one would probably expect. There is no 
+object instance for objects one sees/uses, the game objects are just integer IDs that represent them. Everything the objects are consisted of 
+is stored as Property or link with the particular integer ID.
+
+@cindex Object types
+@cindex Archetype objects
+@cindex Concrete objects
+@subheading Object types
+There are two object types. Concrete objects and Archetype Objects. The Archetype objects (also called archetypes) are not live objects,
+but more template objects that serve as default value holders for properties and links. Archetypes typically have ID less than zero, and always bear DonorType property.
+The concrete objects are instances of the archetype objects, optionally. It is very common for concrete objects to inherit from an archetype. 
+
+There are a few archetype object types. Archetypes also inherit from each other, so there is what one could imagine as a set of trees with a root 
+object for every archetype type. Metaproperty archetype object tree needs a special attention. All the objects in that tree bear a different
+DonorType property value than the other archetypes, and when inherited, bear a different (non-zero) MetaProperty link priority value.
+The inheritance mechanisms are more explained later in the @ref{Inherit Service} section.
+
+Relations and Properies both utilise DataStorage class as a data storage backend (every object or link id can have data stored inside).
+
+@cindex property
+@cindex Properties
+@subheading Properties
+Properties are values or sets of values, that can be assigned to objects. Each object either holds a certain property type or doesn't.
+Properties come in different types, and serve different purposes. Each of those types has a different name which identifies it.
+
+Some properties are inherited (Others, like DonorType, are not). That means that if a given object does not own a value of the certain property, it still can have some inherited
+from an archetype object (see Object types). If object owns the property, any inherited values are typically masked, the priority of owned property is greater than the inherited one.
+
+Property service manages all object properties. Each of the property types has it's own PropertyGroup instance, or is constructed via code of the particular service which handles the
+property. Thus, we have SymbolicName and DonorType properties statically created in @ref{Object Service}, RenderType or RenderAlpha (and others) in @ref{Render Service}, etc.
+Properties can be implemented effectively, without the use of the DataStorage instance, or with it.
+
+
+@cindex Link
+@cindex Links
+@subheading Links
+
+Links are connections between objects. They have different types (called flavors). Each of the link flavors has different (if any - it's optional) data format attached and is managed
+with a different, separate Relation class. Relation instances come in pairs. This is meant to allow the usage of LinkFlavor, ~LinkFlavor pairs.
+
+Links have source object ID, destination object ID, flavor and link ID. Link ID is composed of three parts - Concreteness, Flavor and serial ID.
+
+@cindex Flavor
+@subheading Link Flavor
+Link flavor is a unique link type identifier. It comes as string (MetaProp, Contains, etc.) and ID (1/-1, 5/-5). The integer ID of the flavor is determined as the index of the flavor name in the 
+table stored in a chunk (see Tag File Database) named "Relations". This mapping happens dynamically upon gamesys or mission load. 
+
+@cindex Tag File Database
+@subheading Tag File Database
+Tag file database is a file format used in all 3 released dark engine games (as well as in the one unfinished). They can be viewed as uncompressed archives - 
+they contain what can be viewed as files (called tags or tag files, also sometimes referenced as chunks).
+
+@cindex GameSys
+@subheading Game System files
+Game system files. These store the abstract definitions of objects and other things. GameSys files have .GAM file extension (and use Tag File Database format). 
+They are used to define the game mechanics.
+
+@cindex Mission
+@subheading Mission files
+Mission files define the environment for particular mission. They have .MIS file extension (and are Tag File Database files). 
+They always build on top of a game system file, the (concrete) objects in missions inherit from the (abstract) objects in the gamesys,
+links in the mission files can point to gamesys objects, etc. - but not the other way round (that makes sense, since the gamesys files are used for N missions - see DARK.GAM).
+
+
+@c --------------------------------------------------------------------
 @node Services
 @chapter Services
 @cindex Services
@@ -250,6 +322,8 @@ This is the current list of available engines services, divided by categories, a
 	Is a service that stores Name->Value type info. Reads opde.cfg at the moment. Will handle all the Dark Engine config file formats later, except bnd files.
 @item @ref{Loop Service} - 90 %
 	Responsible for the main game loop. A modular approach to game loop - different loop modes only handle different subsets of the great game loop.
+@item Platform Service - 0 %
+	Platform dependent service for configuration storage and savegame handling (settings, etc).
 @end table
 
 @subheading Object System
@@ -305,6 +379,42 @@ This is the current list of available engines services, divided by categories, a
 @end table
 
 @c --------------------------------------------------------------------
+@node Input Service
+@section Input Service
+@cindex Input Service
+
+@image{img/inputsvc}
+
+This service processes, translates and dispatches events sourcing from user's input. It supports two modes of function - mapped and unmapped. These two can be switched
+on the fly, and are there to support GUI/in-game modes (as well as MFD/normal mode in System Shock 2). One direct input listener can exist, and numerous mapped input modes can, via bind contexts. 
+The Bind Contexts are categories of user input, that can be switched. So, for example, there can be editor bind context and game bind context, MFD bind context etc.
+Different bind contexts are realised via different instances of InputEventMapper object.
+
+@heading Mapped mode
+Mapped mode is the mode likely to be used during gameplay. It uses the loaded bindings (loaded from bnd files) to convert the incomming inputs from input devices to function calls.
+For that to happen, two things need to be done, code wise:
+@table @asis
+@item Input Command registration
+	Input service exposes a mechanism to register named commands that are called when conditions are met (more later). These commands have to be registered with input service in order to work
+@item Key to command binding
+	The input service exposes a mechanism to execute commands. One of the commands is "bind". It has the same syntax as the one used in Dark's .BND files (for example 'bind 1 "inv_select sword"')
+@end table
+
+@heading Input service commands
+Input commands are one parameter callables (be them C++ or python code) implemented using the Callback class. They are registered using the InputService::registerCommandTrap method. 
+There are some built-in commands that are used to work with the key bindings and simmilar things - these are: bind (input command), echo (text and variables), set(sets a variable's value). 
+if a dollar sign is encountered (currently has to be the first character of following a whitespace) the consecutive characters right to the next whitespace are treated as a variable name, and
+substituted.
+
+@subheading Input service variables
+These are freely usable variants that can be read using echo command (example: "echo $bow_zoom") or InputService interface. Some will probably be set internally. 
+
+@heading Bind contexts
+Bind contexts are used to separate some or all bindings for different game modes (MFD for example).
+
+
+
+@c --------------------------------------------------------------------
 @node Binary Service
 @section Binary Service
 @cindex Binary Service
@@ -341,26 +451,9 @@ The tag file databases have typically extensions .mis, .gam or .sav (among other
 
 @image{img/objsvc}
 
-@cindex Object System
-@heading Object System
-The core of the engine is the object system. Object system in Dark Engine is quite different from what one would probably expect. There is no 
-object instance for objects one sees/uses, the game objects are just integer IDs that represent them. Everything the objects are consisted of 
-is stored as Property or link with the particular integer ID.
+Is implementation of the Object System.
 
-@cindex Object types
-@cindex Archetype objects
-@cindex Concrete objects
-@subheading Object types
-There are two object types. Concrete objects and Archetype Objects. The Archetype objects (also called archetypes) are not live objects,
-but more template objects that serve as default value holders for properties and links. Archetypes typically have ID less than zero, and always bear DonorType property.
-The concrete objects are instances of the archetype objects, optionally. It is very common for concrete objects to inherit from an archetype. 
-
-There are a few archetype object types. Archetypes also inherit from each other, so there is what one could imagine as a set of trees with a root 
-object for every archetype type. Metaproperty archetype object tree needs a special attention. All the objects in that tree bear a different
-DonorType property value than the other archetypes, and when inherited, bear a different (non-zero) MetaProperty link priority value.
-The inheritance mechanisms are more explained later in the @ref{Inherit Service} section.
-
-Relations and Properies both utilise DataStorage class as a data storage backend (every object or link id can have data stored inside).
+@heading Implemented properties
 
 @cindex DonorType
 @subheading DonorType Property
@@ -382,19 +475,6 @@ no meaning on archetypes.
 
 @image{img/linksvc}
 
-@cindex Link
-@cindex Links
-@subheading Links
-
-Links are connections between objects. They have different types (called flavors). Each of the link flavors has different (if any - it's optional) data format attached and is managed
-with a different, separate Relation class. Relation instances come in pairs. This is meant to allow the usage of LinkFlavor, ~LinkFlavor pairs.
-
-Links have source object ID, destination object ID, flavor and link ID. Link ID is composed of three parts - Concreteness, Flavor and serial ID.
-
-@cindex Flavor
-@subheading Link Flavor
-Link flavor is a unique link type identifier. It comes as string (MetaProp, Contains, etc.) and ID (1/-1, 5/-5). The integer ID of the flavor is determined as the index of the flavor name in the 
-table stored in a chunk named "Relations". This mapping happens dynamically upon gamesys or mission load. 
 
 @cindex Relation
 @subheading Relation
@@ -407,19 +487,6 @@ flavor ID. Relation names starting with '~' sign are inverse relations. Those ha
 @cindex Property Service
 
 @image{img/propsvc}
-
-@cindex property
-@cindex Properties
-@subheading Properties
-Properties are values or sets of values, that can be assigned to objects. Each object either holds a certain property type or doesn't.
-Properties come in different types, and serve different purposes. Each of those types has a different name which identifies it.
-
-Some properties are inherited (Others, like DonorType, are not). That means that if a given object does not own a value of the certain property, it still can have some inherited
-from an archetype object (Object types). If object owns the property, any inherited values are typically masked, the priority of owned property is greater than the inherited one.
-
-Property service manages all object properties. Each of the property types has it's own PropertyGroup instance, or is constructed via code of the particular service which handles the
-property. Thus, we have SymbolicName and DonorType properties statically created in @ref{Object Service}, RenderType or RenderAlpha (and others) in @ref{Render Service}, etc.
-Properties can be implemented effectively, without the use of the DataStorage instance, or with it.
 
 @cindex effective object ID
 PropertyGroup instances typically use a Inheritor instance - it is used to determine effective object ID. This id is the id of the bearer of the effective (active) property for the object ID.
@@ -543,17 +610,6 @@ This service is a connection point between Ogre and Opde. It manages display (re
 It also manages render subgroup of Properties (RenderAlpha, RenderType, HasRefs, Scale). Listens to Object Service's position property and adjusts SceneNodes of
 objects accordingly.
 
-@c --------------------------------------------------------------------
-@node Input Service
-@section Input Service
-@cindex Input Service
-
-@image{img/inputsvc}
-
-This service processes, translates and dispatches events sourcing from user's input. It supports two modes of function - mapped and unmapped. These two can be switched
-on the fly, and are there to support GUI/in-game modes (as well as MFD/normal mode in System Shock 2). One direct input listener can exist, and numerous mapped input modes can, via bind contexts. 
-The Bind Contexts are categories of user input, that can be switched. So, for example, there can be editor bind context and game bind context, MFD bind context etc.
-Different bind contexts are realised via different instances of InputEventMapper object.
 
 @c --------------------------------------------------------------------
 @node Config Service
