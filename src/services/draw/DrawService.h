@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2009 openDarkEngine team
+ *    Copyright (C) 2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
 #include "SharedPtr.h"
+#include "DrawSheet.h"
 
 namespace Opde {
 
@@ -40,8 +41,36 @@ namespace Opde {
 			DrawService(ServiceManager *manager, const std::string& name);
 			virtual ~DrawService();
 
+			/** Creates a new DrawSheet and inserts it into internal map.
+			 * @param sheetName a unique sheet name
+			 * @return new DrawSheet if none of that name exists, or the currently existing if sheet with that name already found
+			 * */
+			DrawSheet* createSheet(const std::string& sheetName);
+
+			/** Destroys the given sheet, and removes it from the internal map
+			 * @param sheet The sheet to destroy
+			 */
+			void destroySheet(DrawSheet* sheet);
+
+			/** Returns the sheet of the given name
+			 * @param sheetName the name of the sheet to return
+			 * @return The sheet pointer, or NULL if none of that name exists
+			 */
+			DrawSheet* getSheet(const std::string& sheetName) const;
+
+			/** Sets the active (currently displayed) sheet.
+			 * @param sheet The sheet to display (or none if the parameter is NULL)
+			 */
+			void setActiveSheet(DrawSheet* sheet);
+
 		protected:
 			bool init();
+			void bootstrapFinished();
+
+			typedef std::map<std::string, DrawSheet*> SheetMap;
+
+			SheetMap mSheetMap;
+			DrawSheet* mActiveSheet;
 	};
 
 	/// Shared pointer to the draw service
@@ -59,7 +88,7 @@ namespace Opde {
 
 			virtual const std::string& getName();
 
-			virtual const uint getMask(); 
+			virtual const uint getMask();
 		private:
 			static std::string mName;
 	};

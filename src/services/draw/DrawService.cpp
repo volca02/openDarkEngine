@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2009 openDarkEngine team
+ *    Copyright (C) 2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -33,16 +33,84 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- DrawService -------------------*/
 	/*----------------------------------------------------*/
-	DrawService::DrawService(ServiceManager *manager, const std::string& name) : Service(manager, name) {
+	DrawService::DrawService(ServiceManager *manager, const std::string& name) : Service(manager, name),
+			mSheetMap(),
+			mActiveSheet(NULL) {
 	}
 
-    	//------------------------------------------------------
+	//------------------------------------------------------
+	DrawService::~DrawService() {
+		// destroy all sheets...
+		SheetMap::iterator it = mSheetMap.begin();
+
+		for (; it != mSheetMap.end(); ++it) {
+			delete it->second;
+		}
+
+		mSheetMap.clear();
+	}
+
+	//------------------------------------------------------
 	bool DrawService::init() {
 		return true;
 	}
 
 	//------------------------------------------------------
-	DrawService::~DrawService() {
+	void DrawService::bootstrapFinished() {
+		//
+	}
+
+
+	//------------------------------------------------------
+	DrawSheet* DrawService::createSheet(const std::string& sheetName) {
+		assert(!sheetName.empty());
+
+		SheetMap::iterator it = mSheetMap.find(sheetName);
+
+		if (it != mSheetMap.end())
+			return it->second;
+	}
+
+	//------------------------------------------------------
+	void DrawService::destroySheet(DrawSheet* sheet) {
+		// find it in the map, remove, then delete
+		SheetMap::iterator it = mSheetMap.begin();
+
+		while(it != mSheetMap.end()) {
+
+			if (it->second == sheet) {
+				SheetMap::iterator cur = it++;
+
+				mSheetMap.erase(cur);
+			} else {
+				++it;
+			}
+		}
+
+		delete sheet;
+	}
+
+	//------------------------------------------------------
+	DrawSheet* DrawService::getSheet(const std::string& sheetName) const {
+		SheetMap::const_iterator it = mSheetMap.find(sheetName);
+
+		if (it != mSheetMap.end())
+			return it->second;
+		else
+			return NULL;
+	}
+
+	//------------------------------------------------------
+	void DrawService::setActiveSheet(DrawSheet* sheet) {
+		if (mActiveSheet != sheet) {
+			if (mActiveSheet)
+				mActiveSheet->deactivate();
+
+			mActiveSheet = sheet;
+
+			if (mActiveSheet)
+				mActiveSheet->activate();
+		}
 	}
 
 	//-------------------------- Factory implementation
