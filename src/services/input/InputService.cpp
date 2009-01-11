@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -45,7 +45,8 @@ namespace Opde {
 			mInputMode(IM_MAPPED),
 			mDirectListener(NULL),
 			mMouse(NULL),
-			mKeyboard(NULL) {
+			mKeyboard(NULL),
+			mJoystick(NULL) {
 
     	// Loop client definition
     	mLoopClientDef.id = LOOPCLIENT_ID_INPUT;
@@ -235,6 +236,11 @@ namespace Opde {
 				mKeyboard = NULL;
 			}
 
+			if( mJoystick ) {
+				mInputSystem->destroyInputObject( mJoystick );
+				mJoystick = NULL;
+			}
+
 			mInputSystem->destroyInputSystem(mInputSystem);
 			mInputSystem = NULL;
 		}
@@ -324,11 +330,14 @@ namespace Opde {
             paramList.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_NONEXCLUSIVE")));
             paramList.insert(std::make_pair(std::string("w32_keyboard"), std::string("DISCL_FOREGROUND")));
             paramList.insert(std::make_pair(std::string("w32_keyboard"), std::string("DISCL_NONEXCLUSIVE")));
+			paramList.insert(std::make_pair(std::string("w32_joystick"), std::string("DISCL_FOREGROUND")));
+            paramList.insert(std::make_pair(std::string("w32_joystick"), std::string("DISCL_EXCLUSIVE")));
             #elif defined OIS_LINUX_PLATFORM
             paramList.insert(std::make_pair(std::string("x11_mouse_grab"), std::string("false")));
             paramList.insert(std::make_pair(std::string("x11_mouse_hide"), std::string("false")));
             paramList.insert(std::make_pair(std::string("x11_keyboard_grab"), std::string("false")));
             paramList.insert(std::make_pair(std::string("XAutoRepeatOn"), std::string("true")));
+			//TODO Linux bit for joystick
             #endif
         }
 
@@ -344,6 +353,7 @@ namespace Opde {
 #endif
 			mKeyboard = static_cast<OIS::Keyboard*>( mInputSystem->createInputObject( OIS::OISKeyboard, true ) );
 			mKeyboard->setEventCallback( this );
+			LOG_INFO("Found keyboard ", mKeyboard->vendor());
 		}
 
 		// If possible create a buffered mouse
@@ -354,6 +364,7 @@ namespace Opde {
 #endif
 			mMouse = static_cast<OIS::Mouse*>( mInputSystem->createInputObject( OIS::OISMouse, true ) );
 			mMouse->setEventCallback( this );
+			LOG_INFO("Found mouse ", mMouse->vendor());
 
 			// Get window size
 			unsigned int width, height, depth;
@@ -366,6 +377,15 @@ namespace Opde {
 			mouseState.height = height;
 		}
 
+#if OIS_VERSION >= 66048
+		if( mInputSystem->getNumberOfDevices(OIS::OISJoyStick) > 0 ) {
+#else
+		if( mInputSystem->numJoySticks() > 0 ) {
+#endif
+			mJoystick = static_cast<OIS::JoyStick*>( mInputSystem->createInputObject( OIS::OISJoyStick, true ) );
+			mJoystick->setEventCallback( this );
+			LOG_INFO("Found Joystick ", mJoystick->vendor());
+		}
 
 		// Last step: Get the loop service and register as a listener
 		mLoopService = static_pointer_cast<LoopService>(ServiceManager::getSingleton().getService("LoopService"));
@@ -646,6 +666,10 @@ namespace Opde {
 			mKeyboard->capture();
 		}
 
+		if( mJoystick ) {
+			mJoystick->capture();
+		}
+
 		// now iterate through the events, for the repeated events, dispatch command
 	}
 
@@ -850,6 +874,44 @@ namespace Opde {
 		return false;
 	}
 
+	//------------------------------------------------------
+	bool InputService::axisMoved(const JoyStickEvent &arg, int axis)
+	{
+		if (mInputMode == IM_DIRECT) { // direct event, dispatch to the current listener
+			if (mDirectListener)
+				return mDirectListener->axisMoved(arg, axis);
+		} else {
+			// dispatch the key event using the mapper
+		}
+
+		return false;
+	}
+
+	//------------------------------------------------------
+	bool InputService::buttonPressed(const JoyStickEvent &arg, int button)
+	{
+		if (mInputMode == IM_DIRECT) { // direct event, dispatch to the current listener
+			if (mDirectListener)
+				return mDirectListener->buttonPressed(arg, button);
+		} else {
+			// dispatch the key event using the mapper
+		}
+
+		return false;
+	}
+
+	//------------------------------------------------------
+	bool InputService::buttonReleased(const JoyStickEvent &arg, int button)
+	{
+		if (mInputMode == IM_DIRECT) { // direct event, dispatch to the current listener
+			if (mDirectListener)
+				return mDirectListener->buttonReleased(arg, button);
+		} else {
+			// dispatch the key event using the mapper
+		}
+
+		return false;
+	}
 
     //-------------------------- Factory implementation
     std::string InputServiceFactory::mName = "InputService";

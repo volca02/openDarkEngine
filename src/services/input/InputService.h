@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -40,6 +40,7 @@
 #include "LoopService.h"
 
 #include <OISMouse.h>
+#include <OISJoyStick.h>
 #include <OISKeyboard.h>
 #include <OISInputManager.h>
 
@@ -107,6 +108,10 @@ namespace Opde {
     		virtual bool mouseMoved( const OIS::MouseEvent &e ) = 0;
     		virtual bool mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id ) = 0;
     		virtual bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) = 0;
+
+			virtual bool axisMoved(const OIS::JoyStickEvent &arg, int axis) = 0;
+			virtual bool buttonPressed(const OIS::JoyStickEvent &arg, int button) = 0;
+			virtual bool buttonReleased(const OIS::JoyStickEvent &arg, int button) = 0;
 	};
 
 
@@ -118,7 +123,7 @@ namespace Opde {
 	 * @todo +/without + binding modes - how they differ, how to implement the one with key repeat...
 	 * @todo BND file writing ability (needs cooperation with nonexistent platform service)
 	 */
-	class OPDELIB_EXPORT InputService : public Service, public OIS::KeyListener, public OIS::MouseListener, public LoopClient {
+	class OPDELIB_EXPORT InputService : public Service, public OIS::KeyListener, public OIS::MouseListener, public OIS::JoyStickListener, public LoopClient {
 		public:
 			InputService(ServiceManager *manager, const std::string& name);
 			virtual ~InputService();
@@ -224,6 +229,10 @@ namespace Opde {
     		bool mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id );
     		bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id );
 
+			bool axisMoved(const OIS::JoyStickEvent &,int);
+			bool buttonPressed(const OIS::JoyStickEvent &,int);
+			bool buttonReleased(const OIS::JoyStickEvent &,int);			
+
 			/// Finds a mapper (Or NULL) for the specified context
             InputEventMapperPtr findMapperForContext(const std::string& ctx);
 
@@ -283,6 +292,8 @@ namespace Opde {
 			OIS::Mouse        *mMouse;
 			/// OIS keyboard pointer
     		OIS::Keyboard     *mKeyboard;
+			/// OIS joystick pointer
+    		OIS::JoyStick     *mJoystick;
 
 			/// Renderer window we listen on
 			Ogre::RenderWindow* mRenderWindow;

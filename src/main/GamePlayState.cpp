@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -452,6 +452,41 @@ namespace Opde {
 
 	bool GamePlayState::mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
 		return false;
+	}
+
+	bool GamePlayState::axisMoved(const OIS::JoyStickEvent &arg, int axis)
+	{
+		return false;
+	}
+	
+	bool GamePlayState::buttonPressed(const OIS::JoyStickEvent &arg, int button)
+	{
+		//Test code
+		if(button == 0) 
+			mForward = true;
+		else if(button == 1) 
+			mBackward = true;
+		else if(button == 2)
+			mLeft = true;
+		else if(button == 3)
+			mRight = true;
+		return true;
+		////
+	}
+	
+	bool GamePlayState::buttonReleased(const OIS::JoyStickEvent &arg, int button)
+	{
+		//Test code
+		if(button == 0) 
+			mForward = false;
+		else if(button == 1) 
+			mBackward = false;
+		else if(button == 2)
+			mLeft = false;
+		else if(button == 3)
+			mRight = false;
+		return true;
+		////
 	}
 
 	void GamePlayState::commandExecuted(std::string command, std::string parameters) {

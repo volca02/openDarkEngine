@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -76,6 +76,15 @@ namespace Opde {
 			
 			/** Mouse button was released event. */
 			virtual bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) = 0;
+			
+			/** Joystick axis moved event. */
+			virtual bool axisMoved(const OIS::JoyStickEvent &arg, int axis) = 0;
+
+			/** Joystick button pressed event. */
+			virtual bool buttonPressed(const OIS::JoyStickEvent &arg, int button) = 0;
+
+			/** Joystick button released event. */
+			virtual bool buttonReleased(const OIS::JoyStickEvent &arg, int button) = 0;
 			
 			//---------- StateManager related methods
 			

@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -356,6 +356,33 @@ namespace Opde {
 	bool GameStateManager::mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
 		if (!mStateStack.empty()) {
 			mStateStack.top()->mouseReleased(e, id);
+		}
+		return false;
+	}
+
+	bool GameStateManager::axisMoved(const OIS::JoyStickEvent &arg, int axis)
+	{
+		if (!mStateStack.empty()) 
+		{
+			mStateStack.top()->axisMoved(arg, axis);
+		}
+		return false;
+	}
+	
+	bool GameStateManager::buttonPressed(const OIS::JoyStickEvent &arg, int button)
+	{
+		if (!mStateStack.empty()) 
+		{
+			mStateStack.top()->buttonPressed(arg, button);
+		}
+		return false;
+	}
+	
+	bool GameStateManager::buttonReleased(const OIS::JoyStickEvent &arg, int button)
+	{
+		if (!mStateStack.empty()) 
+		{
+			mStateStack.top()->buttonReleased(arg, button);
 		}
 		return false;
 	}
