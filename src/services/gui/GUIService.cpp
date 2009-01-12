@@ -122,6 +122,12 @@ namespace Opde {
 	}
 
 	// -----------------------------------
+	bool GUIService::povMoved(const OIS::JoyStickEvent &e, int pov)
+	{
+		return false;
+	}
+
+	// -----------------------------------
 	bool GUIService::axisMoved(const OIS::JoyStickEvent &arg, int axis)
 	{
 		return false;

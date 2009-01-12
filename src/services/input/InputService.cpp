@@ -353,7 +353,7 @@ namespace Opde {
 #endif
 			mKeyboard = static_cast<OIS::Keyboard*>( mInputSystem->createInputObject( OIS::OISKeyboard, true ) );
 			mKeyboard->setEventCallback( this );
-			LOG_INFO("Found keyboard ", mKeyboard->vendor());
+			LOG_INFO("Found keyboard %s", mKeyboard->vendor().c_str());
 		}
 
 		// If possible create a buffered mouse
@@ -364,7 +364,7 @@ namespace Opde {
 #endif
 			mMouse = static_cast<OIS::Mouse*>( mInputSystem->createInputObject( OIS::OISMouse, true ) );
 			mMouse->setEventCallback( this );
-			LOG_INFO("Found mouse ", mMouse->vendor());
+			LOG_INFO("Found mouse %s", mMouse->vendor().c_str());
 
 			// Get window size
 			unsigned int width, height, depth;
@@ -384,7 +384,7 @@ namespace Opde {
 #endif
 			mJoystick = static_cast<OIS::JoyStick*>( mInputSystem->createInputObject( OIS::OISJoyStick, true ) );
 			mJoystick->setEventCallback( this );
-			LOG_INFO("Found Joystick ", mJoystick->vendor());
+			LOG_INFO("Found Joystick %s", mJoystick->vendor().c_str());
 		}
 
 		// Last step: Get the loop service and register as a listener
@@ -884,6 +884,19 @@ namespace Opde {
 			// dispatch the key event using the mapper
 		}
 
+		return false;
+	}
+
+	//------------------------------------------------------
+	bool InputService::povMoved( const OIS::JoyStickEvent &e, int pov )
+	{
+		if (mInputMode == IM_DIRECT) { // direct event, dispatch to the current listener
+			if (mDirectListener)
+				return mDirectListener->povMoved(e, pov);
+		} else {
+			// dispatch the key event using the mapper
+		}
+		
 		return false;
 	}
 

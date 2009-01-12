@@ -70,6 +70,7 @@ namespace Opde {
 			bool mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id );
 			bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id );
 
+			virtual bool povMoved(const OIS::JoyStickEvent &e, int pov);
 			virtual bool axisMoved(const OIS::JoyStickEvent &arg, int axis);
 			virtual bool buttonPressed(const OIS::JoyStickEvent &arg, int button);
 			virtual bool buttonReleased(const OIS::JoyStickEvent &arg, int button);

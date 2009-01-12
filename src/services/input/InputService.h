@@ -109,7 +109,8 @@ namespace Opde {
     		virtual bool mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id ) = 0;
     		virtual bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) = 0;
 
-			virtual bool axisMoved(const OIS::JoyStickEvent &arg, int axis) = 0;
+			virtual bool povMoved(const OIS::JoyStickEvent &e, int pov) = 0;
+			virtual bool axisMoved(const OIS::JoyStickEvent &arg, int axis) = 0;			
 			virtual bool buttonPressed(const OIS::JoyStickEvent &arg, int button) = 0;
 			virtual bool buttonReleased(const OIS::JoyStickEvent &arg, int button) = 0;
 	};
@@ -231,7 +232,8 @@ namespace Opde {
 
 			bool axisMoved(const OIS::JoyStickEvent &,int);
 			bool buttonPressed(const OIS::JoyStickEvent &,int);
-			bool buttonReleased(const OIS::JoyStickEvent &,int);			
+			bool buttonReleased(const OIS::JoyStickEvent &,int);
+			bool povMoved( const OIS::JoyStickEvent &, int );
 
 			/// Finds a mapper (Or NULL) for the specified context
             InputEventMapperPtr findMapperForContext(const std::string& ctx);

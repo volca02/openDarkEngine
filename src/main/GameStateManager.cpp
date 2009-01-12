@@ -360,6 +360,15 @@ namespace Opde {
 		return false;
 	}
 
+	bool GameStateManager::povMoved(const OIS::JoyStickEvent &e, int pov)
+	{
+		if (!mStateStack.empty()) 
+		{
+			mStateStack.top()->povMoved(e, pov);
+		}
+		return false;
+	}
+
 	bool GameStateManager::axisMoved(const OIS::JoyStickEvent &arg, int axis)
 	{
 		if (!mStateStack.empty()) 

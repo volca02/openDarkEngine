@@ -77,6 +77,9 @@ namespace Opde {
 			/** Mouse button was released event. */
 			virtual bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) = 0;
 			
+			/** Joystick POV moved event. */
+			virtual bool povMoved(const OIS::JoyStickEvent &e, int pov) = 0;
+
 			/** Joystick axis moved event. */
 			virtual bool axisMoved(const OIS::JoyStickEvent &arg, int axis) = 0;
 

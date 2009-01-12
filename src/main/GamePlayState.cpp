@@ -458,35 +458,42 @@ namespace Opde {
 	{
 		return false;
 	}
+
+	bool GamePlayState::povMoved(const OIS::JoyStickEvent &e, int pov)
+	{
+		if ((e.state.mPOV[pov].direction & e.state.mPOV[pov].North) != 0)
+			mForward = true;
+		else
+			mForward = false;
+
+		if ((e.state.mPOV[pov].direction & e.state.mPOV[pov].South) != 0)
+			mBackward = true;
+		else
+			mBackward = false;
+
+		if ((e.state.mPOV[pov].direction & e.state.mPOV[pov].East) != 0)
+			mRight = true;
+		else
+			mRight = false;
+
+		if ((e.state.mPOV[pov].direction & e.state.mPOV[pov].West) != 0)
+			mLeft = true;
+		else
+			mLeft = false;
+
+		return true;
+	}
 	
 	bool GamePlayState::buttonPressed(const OIS::JoyStickEvent &arg, int button)
 	{
-		//Test code
-		if(button == 0) 
-			mForward = true;
-		else if(button == 1) 
-			mBackward = true;
-		else if(button == 2)
-			mLeft = true;
-		else if(button == 3)
-			mRight = true;
 		return true;
-		////
 	}
 	
 	bool GamePlayState::buttonReleased(const OIS::JoyStickEvent &arg, int button)
 	{
-		//Test code
 		if(button == 0) 
-			mForward = false;
-		else if(button == 1) 
-			mBackward = false;
-		else if(button == 2)
-			mLeft = false;
-		else if(button == 3)
-			mRight = false;
+			requestTermination();
 		return true;
-		////
 	}
 
 	void GamePlayState::commandExecuted(std::string command, std::string parameters) {

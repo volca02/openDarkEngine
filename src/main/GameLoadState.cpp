@@ -207,6 +207,11 @@ namespace Opde {
 		return false;
 	}
 
+	bool GameLoadState::povMoved(const OIS::JoyStickEvent &e, int pov)
+	{
+		return false;
+	}
+
 	bool GameLoadState::axisMoved(const OIS::JoyStickEvent &arg, int axis)
 	{
 		return false;
