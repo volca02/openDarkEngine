@@ -1,3 +1,755 @@
+2009-01-13 09:52  volca
+
+	* src/services/sim/SimService.cpp, src/services/sim/SimService.h:
+	  This seems a shorter and better solution for client registration
+
+2009-01-13 09:51  volca
+
+	* src/base/loaders/ManualBinFileLoader.cpp,
+	  src/main/GamePlayState.cpp, src/main/GameStateManager.cpp: A few
+	  waring and comment (and other) fixes
+
+2009-01-13 09:47  volca
+
+	* src/scenemanager/DarkGeometry.cpp: Invalid comment removed
+
+2009-01-13 09:39  volca
+
+	* src/services/draw/DrawBuffer.cpp, src/services/draw/DrawBuffer.h,
+	  src/services/draw/DrawCommon.cpp, src/services/draw/DrawCommon.h,
+	  src/services/draw/DrawOperation.cpp,
+	  src/services/draw/DrawOperation.h,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawSheet.cpp: Draw Service progress. Still no
+	  rendering, but buffer builder seems ready
+
+2009-01-13 05:51  patryn
+
+	* installer/readme.txt: Fixed a typo.
+
+2009-01-13 04:37  patryn
+
+	* installer/readme.txt: An update to readme.txt.
+
+2009-01-12 08:47  volca
+
+	* src/services/input/InputService.cpp: No linux nonexclusive for
+	  joystick needed
+
+2009-01-12 08:45  patryn
+
+	* src/main/GameLoadState.cpp, src/main/GameLoadState.h,
+	  src/main/GamePlayState.cpp, src/main/GamePlayState.h,
+	  src/main/GameState.h, src/main/GameStateManager.cpp,
+	  src/main/GameStateManager.h, src/services/gui/GUIService.cpp,
+	  src/services/gui/GUIService.h,
+	  src/services/input/InputService.cpp,
+	  src/services/input/InputService.h: More work on joystick handling
+	  (POV working now).
+
+2009-01-11 13:19  volca
+
+	* src/services/draw/DrawBuffer.cpp, src/services/draw/DrawBuffer.h,
+	  src/services/draw/DrawOperation.cpp,
+	  src/services/draw/DrawOperation.h,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h, src/services/draw/DrawSheet.cpp,
+	  src/services/draw/DrawSheet.h: a first stub of Draw Service. Some
+	  classes added, still not doing anything
+
+2009-01-11 08:27  patryn
+
+	* src/main/GameLoadState.cpp, src/main/GameLoadState.h,
+	  src/main/GamePlayState.cpp, src/main/GamePlayState.h,
+	  src/main/GameState.h, src/main/GameStateManager.cpp,
+	  src/main/GameStateManager.h, src/services/gui/GUIService.cpp,
+	  src/services/gui/GUIService.h,
+	  src/services/input/InputService.cpp,
+	  src/services/input/InputService.h: Joystick handling, work in
+	  progress.
+
+2009-01-10 13:08  patryn
+
+	* src/services/draw/CMakeLists.txt,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h: Added the SVN keywords.
+
+2009-01-09 11:30  volca
+
+	* src/services/draw, src/services/draw/CMakeLists.txt,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h: Adding the DrawService empty
+	  shell - to be filled with code
+
+2009-01-09 11:26  volca
+
+	* src/services/game/GameService.cpp,
+	  src/services/game/GameService.h: Copyright year fix
+
+2009-01-08 03:41  patryn
+
+	* doc/src/buildmanual.bat, doc/src/buildmanual.sh: Added the manual
+	  building script for Windows machines.
+
+2009-01-07 18:39  volca
+
+	* doc/src/manual.texi: Core concepts, input service docs, fixes
+
+2009-01-07 18:34  volca
+
+	* src/services/input/InputService.cpp,
+	  src/services/input/InputService.h: Input service modifications
+
+2009-01-06 16:04  volca
+
+	* doc/src/buildmanual.sh, doc/src/manual.texi: manual changes
+
+2009-01-05 12:55  volca
+
+	* AUTHORS: fix dot. -> dot
+
+2009-01-05 12:47  volca
+
+	* AUTHORS: Forgot to add Displacer! Fixed
+
+2009-01-03 22:53  patryn
+
+	* src/services/physics/PhysicsService.cpp,
+	  src/services/physics/PhysicsService.h: Added a couple of lines to
+	  verify that ODE includes and links properly unde Windows. Filip
+	  could you please check to see if it also builds under Linux?
+
+2009-01-03 22:48  patryn
+
+	* AUTHORS: Updated the AUTHORS list.
+
+2009-01-03 12:58  volca
+
+	* src/services/sim/SimService.cpp, src/services/sim/SimService.h:
+	  Changed the handling of new state (sim service should already
+	  work now)
+
+2009-01-03 12:57  volca
+
+	* src/base/ValueChangeRequest.h: Adding a simple asynchronous value
+	  handling helper (stores new value of something for later use)
+
+2009-01-02 23:25  patryn
+
+	* installer/readme.txt: Updated readme.txt.
+
+2009-01-02 11:58  volca
+
+	* src/services/sim/SimService.cpp, src/services/sim/SimService.h:
+	  More sim service work
+
+2009-01-02 11:58  volca
+
+	* TODO: some todo updates
+
+2009-01-02 08:50  volca
+
+	* cmake/ODEConfig.cmake: reverted to dyn. linking ode on linux (no
+	  static lib present)
+
+2009-01-01 10:52  patryn
+
+	* README: A few minor corrections.
+
+2009-01-01 10:48  patryn
+
+	* installer/opde-win.in, installer/readme.txt: Added a very basic
+	  readme.txt for now.
+
+2009-01-01 01:12  patryn
+
+	* installer/opde-sample.cfg: Enabled the FPS counter by default for
+	  the checkpoint releases.
+
+2008-12-31 04:43  patryn
+
+	* installer/opde-win.in: Fixed a problem in which the working
+	  directory was not set properly on some machines.
+
+2008-12-28 22:03  patryn
+
+	* installer/opde-win.in: ODE DLL is not needed anymore.
+
+2008-12-28 09:33  patryn
+
+	* proto/python/CMakeLists.txt, src/base/CMakeLists.txt,
+	  src/base/console/CMakeLists.txt, src/bindings/CMakeLists.txt,
+	  src/main/CMakeLists.txt, src/services/material/CMakeLists.txt,
+	  src/services/object/CMakeLists.txt,
+	  src/services/physics/CMakeLists.txt,
+	  src/services/property/CMakeLists.txt,
+	  src/services/script/CMakeLists.txt,
+	  src/services/sim/CMakeLists.txt: Change the include order to stop
+	  Ogre's (very) outdated ode.h from getting included.
+
+2008-12-28 08:43  patryn
+
+	* CMakeLists.txt, cmake/FREEIMAGEConfig.cmake,
+	  cmake/ODEConfig.cmake, src/main/CMakeLists.txt: After much
+	  consideration and contemplation, I decided it is better to
+	  statically link ODE. Filip can you again check the Linux setup
+	  please?
+
+2008-12-27 10:33  patryn
+
+	* installer/opde-win.in: Added a comment about a plugin.
+
+2008-12-27 10:28  patryn
+
+	* src/services/game/GameService.cpp: Fixed the initialization of
+	  the Game Service.
+
+2008-12-25 22:44  patryn
+
+	* src/services/sim/SimService.h: Made the functions of the abstract
+	  SimListener class pure virtual for now so the code would compile.
+	  MSVC doesn't like the mixture of OPDELIB_EXPORT and missing
+	  function implementation.
+
+2008-12-25 19:35  volca
+
+	* src/services/sim, src/services/sim/CMakeLists.txt,
+	  src/services/sim/SimService.cpp, src/services/sim/SimService.h:
+	  Adding sim service skeleton.
+
+2008-12-25 19:31  volca
+
+	* src/services/material/MaterialService.cpp: This definately should
+	  be only debug level log (anim texture search logging)
+
+2008-12-25 19:29  volca
+
+	* doc/DEVELOPERS, doc/src/configsvc.dot, doc/src/inputsvc.dot,
+	  doc/src/loopsvc.dot, doc/src/manual.texi, doc/src/overview.dot,
+	  doc/src/rendersvc.dot, doc/src/scriptsvc.dot,
+	  doc/src/service.dot: Manual updates, DEVELOPERS updates
+
+2008-12-25 10:20  volca
+
+	* src/services/physics/PhysicsService.cpp: Moving db config ref
+	  initialization to init - all service deps have to be resolved in
+	  init, otherwise construction might recurse forever
+
+2008-12-25 10:19  volca
+
+	* cmake/ODEConfig.cmake: Changes to ode cmake config script - we
+	  need to prepend path to the include names to stop config.h mixing
+
+2008-12-25 00:05  patryn
+
+	* src/base/servicemanager/OpdeService.h, src/main/Root.cpp,
+	  src/services/CMakeLists.txt, src/services/ServiceCommon.h,
+	  src/services/Services.cmake: Added Physics Service to the game.
+
+2008-12-24 23:45  patryn
+
+	* src/services/physics, src/services/physics/CMakeLists.txt,
+	  src/services/physics/PhysicsService.cpp,
+	  src/services/physics/PhysicsService.h: Added Physics Service.
+
+2008-12-24 09:14  patryn
+
+	* src/bindings/InheritServiceBinder.cpp,
+	  src/bindings/LoopServiceBinder.cpp,
+	  src/services/gui/GUIService.cpp: Fixed more comments.
+
+2008-12-24 08:40  patryn
+
+	* src/base/servicemanager/OpdeServiceFactory.h,
+	  src/bindings/InheritServiceBinder.h,
+	  src/bindings/LoopServiceBinder.h,
+	  src/services/config/ConfigService.h,
+	  src/services/database/DatabaseService.h,
+	  src/services/inherit/InheritService.h,
+	  src/services/loop/LoopService.h,
+	  src/services/material/MaterialService.h,
+	  src/services/object/ObjectService.h: Fixed some comments.
+
+2008-12-24 07:09  patryn
+
+	* doc/src/binarysvc.dot, doc/src/buildmanual.sh,
+	  doc/src/databasesvc.dot, doc/src/inheritsvc.dot,
+	  doc/src/lightsvc.dot, doc/src/linksvc.dot, doc/src/manual.texi,
+	  doc/src/materialsvc.dot, doc/src/objsvc.dot,
+	  doc/src/opdetexi2html.init, doc/src/overview.dot,
+	  doc/src/propinh.dot, doc/src/propsvc.dot, doc/src/service.dot,
+	  doc/src/worldrepsvc.dot, doc/style.css, installer/icon.png,
+	  installer/installer.bmp, proto/python/CMakeLists.txt,
+	  proto/python/test.cpp, proto/python/test.h, proto/python/test.py,
+	  scripts/carleton.ttf, scripts/latex2html.conf,
+	  scripts/opde.fontdef, scripts/opdedoc.css,
+	  scripts/python/tree.py, scripts/python/writedoc.py,
+	  scripts/thief.ttf, src/base/Array.h, src/base/BitArray.h,
+	  src/base/Dark/DarkDBLinkDefs.h, src/base/Dark/DarkDBPropDefs.h,
+	  src/base/Dark/DarkTypes.h, src/base/Dark/fon.h,
+	  src/base/Dark/lgcolors.h, src/base/Dark/utils.h,
+	  src/base/MessageSource.h, src/base/OpdeException.cpp,
+	  src/base/OpdeSingleton.h, src/base/RefCounted.cpp,
+	  src/base/console/ConsoleCommandListener.cpp,
+	  src/base/dyntype/DTHelpers.h, src/base/dyntype/DVariant.cpp,
+	  src/base/dyntype/DataStorage.cpp, src/base/dyntype/DataStorage.h,
+	  src/base/dyntype/Serializer.cpp, src/base/dyntype/Serializer.h,
+	  src/base/dyntype/SingleFieldDataStorage.h,
+	  src/base/dyntype/StructDataStorage.h,
+	  src/base/file/FileGroup.cpp, src/base/file/darkdb.h,
+	  src/base/loaders/BinFormat.h,
+	  src/base/logger/OgreOpdeLogConnector.cpp,
+	  src/base/logger/OgreOpdeLogConnector.h,
+	  src/base/logger/stdlog.cpp, src/bindings/Bindings.cmake,
+	  src/bindings/DTypeBinder.cpp, src/bindings/DTypeBinder.h,
+	  src/bindings/DataFieldDescIteratorBinder.cpp,
+	  src/bindings/DataFieldDescIteratorBinder.h,
+	  src/bindings/DatabaseServiceBinder.cpp,
+	  src/bindings/DatabaseServiceBinder.h,
+	  src/bindings/InheritQueryResultBinder.cpp,
+	  src/bindings/InheritQueryResultBinder.h,
+	  src/bindings/InheritServiceBinder.cpp,
+	  src/bindings/InheritServiceBinder.h,
+	  src/bindings/InputServiceBinder.cpp,
+	  src/bindings/InputServiceBinder.h,
+	  src/bindings/LinkQueryResultBinder.cpp,
+	  src/bindings/LinkQueryResultBinder.h,
+	  src/bindings/LoopServiceBinder.cpp,
+	  src/bindings/LoopServiceBinder.h,
+	  src/bindings/ObjectServiceBinder.cpp,
+	  src/bindings/ObjectServiceBinder.h,
+	  src/bindings/PropertyServiceBinder.cpp,
+	  src/bindings/PropertyServiceBinder.h,
+	  src/bindings/PythonCallback.h, src/bindings/PythonStruct.h,
+	  src/bindings/RootBinder.cpp, src/bindings/RootBinder.h,
+	  src/bindings/StringIteratorBinder.cpp,
+	  src/bindings/StringIteratorBinder.h, src/main/CustomImageCodec.h,
+	  src/main/DTypeScriptLoader.cpp, src/main/GameLoadState.h,
+	  src/main/GamePlayState.h, src/main/GameState.cpp,
+	  src/main/OpdeDocGen.cpp, src/main/OpdeScript.cpp,
+	  src/main/PLDefScriptCompiler.cpp, src/main/PLDefScriptLoader.cpp,
+	  src/main/ProxyArchive.cpp, src/main/ProxyArchive.h,
+	  src/main/Root.cpp, src/main/Root.h,
+	  src/scenemanager/DarkCamera.cpp, src/scenemanager/DarkCamera.h,
+	  src/scenemanager/DarkGeometry.cpp,
+	  src/scenemanager/DarkGeometry.h, src/scenemanager/DarkLight.cpp,
+	  src/scenemanager/DarkLight.h,
+	  src/scenemanager/DarkSceneManager.cmake,
+	  src/services/ServiceCommon.h,
+	  src/services/config/ConfigService.cpp,
+	  src/services/database/DatabaseService.cpp,
+	  src/services/game/GameService.cpp,
+	  src/services/game/GameService.h, src/services/gui/CMakeLists.txt,
+	  src/services/gui/GUIService.cpp, src/services/gui/GUIService.h,
+	  src/services/inherit/ArchetypeInheritor.cpp,
+	  src/services/inherit/CachedInheritor.cpp,
+	  src/services/inherit/CachedInheritor.h,
+	  src/services/inherit/NeverInheritor.cpp,
+	  src/services/inherit/NeverInheritor.h,
+	  src/services/input/InputEventMapper.cpp,
+	  src/services/input/InputEventMapper.h,
+	  src/services/light/CMakeLists.txt,
+	  src/services/light/LightService.cpp,
+	  src/services/light/LightService.h,
+	  src/services/link/LinkCommon.h,
+	  src/services/link/LinkService.cpp,
+	  src/services/link/LinkService.h, src/services/link/Relation.h,
+	  src/services/loop/LoopService.cpp,
+	  src/services/loop/LoopService.h,
+	  src/services/material/CMakeLists.txt,
+	  src/services/material/MaterialService.cpp,
+	  src/services/material/MaterialService.h,
+	  src/services/object/CMakeLists.txt,
+	  src/services/object/ObjectService.cpp,
+	  src/services/object/ObjectService.h,
+	  src/services/object/PositionPropertyStorage.cpp,
+	  src/services/object/PositionPropertyStorage.h,
+	  src/services/object/SymNamePropertyStorage.cpp,
+	  src/services/object/SymNamePropertyStorage.h,
+	  src/services/property/PropertyCommon.h,
+	  src/services/property/PropertyService.h,
+	  src/services/render/EntityMaterialInstance.cpp,
+	  src/services/render/EntityMaterialInstance.h,
+	  src/services/render/HasRefsProperty.cpp,
+	  src/services/render/HasRefsProperty.h,
+	  src/services/render/MaterialInstance.cpp,
+	  src/services/render/MaterialInstance.h,
+	  src/services/render/ModelNameProperty.cpp,
+	  src/services/render/ModelNameProperty.h,
+	  src/services/render/ModelScaleProperty.cpp,
+	  src/services/render/ModelScaleProperty.h,
+	  src/services/render/RenderAlphaProperty.cpp,
+	  src/services/render/RenderAlphaProperty.h,
+	  src/services/render/RenderTypeProperty.cpp,
+	  src/services/render/RenderTypeProperty.h,
+	  src/services/render/RenderedProperty.cpp,
+	  src/services/render/RenderedProperty.h,
+	  src/services/render/SubEntityMaterialInstance.cpp,
+	  src/services/render/SubEntityMaterialInstance.h,
+	  src/services/render/ZBiasProperty.cpp,
+	  src/services/render/ZBiasProperty.h, src/services/render/jorge.h,
+	  src/services/worldrep/WRCell.h, src/services/worldrep/WRCommon.h,
+	  src/tools/chunk.cpp, thirdparty/CMakeLists.txt, writedoc.py.in:
+	  Added the remaining missing keywords and properties.
+
+2008-12-23 22:08  patryn
+
+	* installer/opde-win.in: Added ODE to the installer.
+
+2008-12-23 22:03  patryn
+
+	* CMakeLists.txt, proto/python/CMakeLists.txt,
+	  src/base/CMakeLists.txt, src/base/console/CMakeLists.txt,
+	  src/bindings/CMakeLists.txt, src/main/CMakeLists.txt,
+	  src/services/material/CMakeLists.txt,
+	  src/services/object/CMakeLists.txt,
+	  src/services/property/CMakeLists.txt,
+	  src/services/script/CMakeLists.txt: Added ODE include to a few
+	  places. More might be needed to be added/removed later.
+
+2008-12-23 21:58  patryn
+
+	* cmake/ODEConfig.cmake: Added ODE to CMake. Filip could you please
+	  verify the Linux setup?
+
+2008-12-23 21:15  volca
+
+	* doc/src/manual.texi, doc/style.css: Some minor changes to manual
+	  and css
+
+2008-12-23 17:02  volca
+
+	* doc/src/overview.dot: overview changes (although it will probably
+	  be redone again)
+
+2008-12-23 16:15  volca
+
+	* doc/src/lightsvc.dot, doc/src/manual.texi,
+	  doc/src/materialsvc.dot, doc/src/overview.dot,
+	  doc/src/worldrepsvc.dot: Manual improvements
+
+2008-12-23 08:53  patryn
+
+	* cmake/FREEIMAGEConfig.cmake, cmake/OISConfig.cmake: Fixed a few
+	  comments.
+
+2008-12-22 21:03  volca
+
+	* CMakeLists.txt, doc/src/manual.texi, doc/src/overview.dot,
+	  src/base/MessageSource.h: Manual improvements
+
+2008-12-22 13:57  volca
+
+	* doc/src/inheritsvc.dot, doc/src/manual.texi, doc/src/objsvc.dot:
+	  more manual work
+
+2008-12-22 12:50  volca
+
+	* doc/src/binarysvc.dot, doc/src/databasesvc.dot,
+	  doc/src/inheritsvc.dot, doc/src/manual.texi: more manual work
+
+2008-12-22 12:21  volca
+
+	* installer/icon.png: Adding icon
+
+2008-12-22 12:20  volca
+
+	* doc/src/inheritsvc.dot, doc/src/linksvc.dot, doc/src/propinh.dot:
+	  small graph tweaks
+
+2008-12-22 12:10  volca
+
+	* doc/src/inheritsvc.dot, doc/src/linksvc.dot, doc/src/manual.texi,
+	  doc/src/objsvc.dot, doc/src/propinh.dot, doc/src/propsvc.dot,
+	  doc/src/service.dot: Some more graphs added, as well as new text
+	  to the manual
+
+2008-12-22 09:36  volca
+
+	* CMakeLists.txt, doc/src/buildmanual.sh, doc/src/manual.texi,
+	  doc/src/overview.dot: + Manual building changes
+	  + Overview graph now pretty complete
+	  + every .dot graph now built automatically
+
+2008-12-22 09:36  volca
+
+	* src/main/GamePlayState.cpp: + Manual building changes
+	  + Overview graph now pretty complete
+	  + every .dot graph now built automatically
+
+2008-12-21 21:30  volca
+
+	* doc/src/overview.dot: Graphviz source for the unfinished UML
+	  overview
+
+2008-12-20 17:10  volca
+
+	* doc/style.css: Verbatim block skinned
+
+2008-12-20 17:10  volca
+
+	* doc/src/manual.texi: Updating the manual
+
+2008-12-19 22:40  patryn
+
+	* src/main/CustomImageCodec.h, src/main/ProxyArchive.h: Added empty
+	  bodies for the recently added pure virtual functions in OgreSDK
+	  so the code would compile. Later we can decide what we want to do
+	  with them.
+
+2008-12-19 22:17  patryn
+
+	* src/scenemanager/DarkSceneManager.cpp: Renamed ShadowListenerList
+	  to ListenerList to conform with the latest OgreSDK:
+	  http://www.ogre3d.org/wiki/index.php/ShoggothNotes
+
+2008-12-19 14:15  volca
+
+	* CMakeLists.txt, Doxyfile.in, doc/src, doc/src/manual.texi,
+	  doc/src/opdetexi2html.init, doc/style.css: * Adding dev. manual
+	  torso
+	  * some doc changes
+	  * css stylesheet base for the manual torso
+
+2008-12-18 11:45  volca
+
+	* CMakeLists.txt, Doxyfile.in, src/base/SharedPtr.h,
+	  src/base/file/File.h, src/base/loaders/BinFormat.h,
+	  src/base/loaders/ManualBinFileLoader.cpp,
+	  src/scenemanager/DarkSceneManager.h,
+	  src/services/link/LinkCommon.h: Various minor documentation
+	  related changes
+
+2008-12-17 19:59  volca
+
+	* src/base/dyntype/Serializer.h: VC compatibility fix
+
+2008-12-17 15:19  volca
+
+	* scripts/shock2/ss2-props.pldef, scripts/thief1/t1-links.pldef,
+	  scripts/thief1/t1-props.pldef, scripts/thief2/t2-links.pldef,
+	  scripts/thief2/t2-props.pldef,
+	  src/base/servicemanager/OpdeService.h,
+	  src/base/servicemanager/OpdeServiceManager.cpp,
+	  src/main/GameStateManager.cpp, src/main/ProxyArchive.cpp,
+	  src/main/ProxyArchive.h, src/services/inherit/InheritService.cpp,
+	  src/services/link/LinkService.cpp,
+	  src/services/render/RenderService.cpp: Couple of fixes - opde is
+	  now usable without dtype scripts!
+
+2008-12-17 12:24  volca
+
+	* src/main/GamePlayState.cpp,
+	  src/services/inherit/InheritService.cpp,
+	  src/services/render/RenderService.cpp: Modifications. ModelName
+	  now works through ActiveProperty
+
+2008-12-17 07:08  volca
+
+	* src/base/dyntype/Serializer.h,
+	  src/base/dyntype/SingleFieldDataStorage.h,
+	  src/services/render/ModelNameProperty.cpp,
+	  src/services/render/ModelNameProperty.h,
+	  src/services/render/ModelScaleProperty.h,
+	  src/services/render/RenderAlphaProperty.h,
+	  src/services/render/RenderService.cpp,
+	  src/services/render/RenderService.h: ModelName as fixed length
+	  single-field storage/prop and builtin (unfinished - crashes now)
+
+2008-12-17 06:46  volca
+
+	* src/base/dyntype/DataStorage.h,
+	  src/services/inherit/InheritCommon.h: Fixed warning with warning
+	  - removed
+
+2008-12-16 13:05  volca
+
+	* src/base/dyntype/Serializer.h,
+	  src/base/dyntype/SingleFieldDataStorage.h,
+	  src/services/inherit/InheritService.cpp,
+	  src/services/object/ObjectService.cpp,
+	  src/services/render/HasRefsProperty.cpp,
+	  src/services/render/ModelScaleProperty.cpp,
+	  src/services/render/RenderAlphaProperty.cpp,
+	  src/services/render/ZBiasProperty.cpp: Fixed length string data
+	  storage impl.
+
+2008-12-16 05:10  patryn
+
+	* src/services/inherit/InheritCommon.h: Added $Id$.
+
+2008-12-16 05:09  patryn
+
+	* src/base/console/ConsoleFrontend.h,
+	  src/base/dyntype/DataStorage.h,
+	  src/bindings/LinkServiceBinder.cpp,
+	  src/bindings/RelationBinder.cpp,
+	  src/scenemanager/DarkBspNode.cpp,
+	  src/scenemanager/DarkCamera.cpp,
+	  src/services/inherit/InheritCommon.h: Got rid of 198 warnings.
+
+2008-12-15 23:08  patryn
+
+	* installer/opde-win.in: Getting rid of QuickGUI.
+
+2008-12-15 20:14  volca
+
+	* src/services/render/ModelScaleProperty.cpp,
+	  src/services/render/RenderService.cpp,
+	  src/services/render/RenderService.h: A few modifications to the
+	  new scale prop handler
+
+2008-12-15 20:04  volca
+
+	* scripts/shock2/ss2-props.pldef, scripts/thief1/t1-props.pldef,
+	  scripts/thief2/t2-props.pldef, src/base/dyntype/DVariant.h,
+	  src/base/dyntype/Serializer.h,
+	  src/base/dyntype/SingleFieldDataStorage.h,
+	  src/bindings/PythonStruct.h,
+	  src/services/render/ModelScaleProperty.cpp,
+	  src/services/render/ModelScaleProperty.h,
+	  src/services/render/RenderService.cpp,
+	  src/services/render/RenderService.h: + VC fixes
+	  + ModelScale built-in
+
+2008-12-15 12:33  volca
+
+	* src/base/dyntype/SingleFieldDataStorage.h:
+	  SingleFieldDataStorages greatly simplified
+
+2008-12-15 08:37  volca
+
+	* src/base/dyntype/StructDataStorage.h,
+	  src/base/loaders/ManualBinFileLoader.cpp,
+	  src/bindings/RelationBinder.cpp,
+	  src/bindings/StringIteratorBinder.cpp,
+	  src/main/DTypeScriptCompiler.cpp,
+	  src/main/PLDefScriptCompiler.cpp,
+	  src/services/input/InputService.cpp,
+	  src/services/light/LightService.cpp,
+	  src/services/link/Relation.cpp,
+	  src/services/loop/LoopService.cpp,
+	  src/services/worldrep/LightmapAtlas.cpp,
+	  src/services/worldrep/WRCell.cpp: Warning fixes
+
+2008-12-15 07:36  volca
+
+	* src/base/dyntype/Serializer.h: warning fix
+
+2008-12-14 19:18  volca
+
+	* CMakeLists.txt, Doxyfile.in, src/base/dyntype/Serializer.h:
+	  Fixing docs
+
+2008-12-14 19:04  volca
+
+	* CMakeLists.txt, NEWS, scripts/shock2/ss2-props.pldef,
+	  scripts/thief1/t1-props.pldef, scripts/thief2/t2-props.pldef,
+	  src/base/dyntype/DTypeDef.h, src/base/dyntype/DVariant.cpp,
+	  src/base/dyntype/DVariant.h, src/base/dyntype/Serializer.cpp,
+	  src/base/dyntype/Serializer.h,
+	  src/base/dyntype/SingleFieldDataStorage.h,
+	  src/base/dyntype/StructDataStorage.h,
+	  src/base/loaders/BinFormat.h,
+	  src/base/loaders/ManualBinFileLoader.cpp,
+	  src/main/CMakeLists.txt, src/services/object/ObjectService.cpp,
+	  src/services/object/ObjectService.h,
+	  src/services/object/PositionPropertyStorage.cpp,
+	  src/services/object/PositionPropertyStorage.h, writedoc.py.in:
+	  +docs make target
+	  +struct property storage (for structured properties)
+	  + Position prop now builtin
+
+2008-12-13 15:55  volca
+
+	* src/bindings/DatabaseServiceBinder.cpp,
+	  src/bindings/PythonStruct.h: EPyDoc++
+
+2008-12-13 14:51  volca
+
+	* src/scenemanager/DarkBspTree.cpp: sort the light list at the end
+	  of light population
+
+2008-12-13 08:41  volca
+
+	* src/bindings/ConfigServiceBinder.cpp,
+	  src/bindings/PropertyServiceBinder.cpp,
+	  src/bindings/RelationBinder.cpp, src/bindings/RootBinder.cpp,
+	  src/bindings/bindings.cpp, src/scenemanager/DarkBspNode.cpp: VC
+	  compatibility fixes
+
+2008-12-12 11:01  volca
+
+	* scripts/shock2/water.material: Water for ss2
+
+2008-12-12 11:00  volca
+
+	* src/main/GamePlayState.cpp,
+	  src/services/render/RenderService.cpp: widescreen sort-of works
+	  now
+
+2008-12-12 10:58  volca
+
+	* src/bindings/ConfigServiceBinder.cpp,
+	  src/bindings/ServiceBinder.cpp: Config service epydoc
+
+2008-12-12 10:57  volca
+
+	* src/base/loaders/ManualBinFileLoader.cpp: No anim. txt for models
+	  (wrong assumption)
+
+2008-12-11 07:23  volca
+
+	* src/services/material/MaterialService.cpp: Bug fix - c_str needed
+	  for logging
+
+2008-12-11 07:22  volca
+
+	* thirdparty/QuickGUI: Removing quickgui
+
+2008-12-11 07:22  volca
+
+	* src/bindings/QuickGUIBindings.cpp,
+	  src/bindings/QuickGUIBindings.h, src/main/CMakeLists.txt,
+	  src/services/gui/CMakeLists.txt, src/services/gui/GUIService.cpp,
+	  src/services/gui/GUIService.h, thirdparty/CMakeLists.txt:
+	  Removing quickgui
+
+2008-12-09 20:39  volca
+
+	* ChangeLog: ChangeLog update
+
+2008-12-09 20:35  volca
+
+	* scripts/python/writedoc.py,
+	  src/base/loaders/ManualBinFileLoader.cpp,
+	  src/bindings/ConfigServiceBinder.cpp,
+	  src/bindings/DTypeBinder.cpp, src/bindings/DTypeBinder.h,
+	  src/bindings/DataFieldDescIteratorBinder.cpp,
+	  src/bindings/DatabaseServiceBinder.cpp,
+	  src/bindings/InheritQueryResultBinder.cpp,
+	  src/bindings/InheritServiceBinder.cpp,
+	  src/bindings/InputServiceBinder.cpp,
+	  src/bindings/LinkQueryResultBinder.cpp,
+	  src/bindings/LinkServiceBinder.cpp,
+	  src/bindings/LoopServiceBinder.cpp,
+	  src/bindings/ObjectServiceBinder.cpp,
+	  src/bindings/PropertyServiceBinder.cpp,
+	  src/bindings/RelationBinder.cpp, src/bindings/RootBinder.cpp,
+	  src/bindings/ServiceBinder.cpp,
+	  src/bindings/StringIteratorBinder.cpp, src/bindings/bindings.cpp,
+	  src/bindings/bindings.h,
+	  src/services/render/MaterialInstance.cpp: EPyDoc compatible
+	  docstrings added + doc. tool example added (needs more
+	  documenting, but works)
+
+2008-12-09 20:33  volca
+
+	* CMakeLists.txt, installer/opde-win.in,
+	  proto/python/CMakeLists.txt, src/bindings/CMakeLists.txt,
+	  src/main/CMakeLists.txt, src/tools/CMakeLists.txt: Cmake system
+	  changes + OpdeLib -> OpenDark renamed
+
 2008-12-09 20:30  volca
 
 	* src/services/worldrep/WRTypes.h: Origin vertex. The texure is
