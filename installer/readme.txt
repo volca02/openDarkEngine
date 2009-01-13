@@ -6,6 +6,7 @@ A few things to keep in mind:
 2. Use the created shortcuts to run the program. Don't run opde.exe directly.
 3. To improve the performance adjust the value of MaxAtlasSize in opde.cfg.
 4. Use WASD to navigate, the mouse to look around, F5 to take screenshot, and Esc to quit. For additional fun you can try P, O and I.
+5. If you are running OPDE in windowed mode, it is strongly recommended to turn on VSync. Otherwise you might experience some graphical and/or timing anomalies.
 
 I you have any problems running openDarkEngine:
 
