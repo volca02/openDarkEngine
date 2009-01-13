@@ -110,7 +110,7 @@ namespace Opde {
     		virtual bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) = 0;
 
 			virtual bool povMoved(const OIS::JoyStickEvent &e, int pov) = 0;
-			virtual bool axisMoved(const OIS::JoyStickEvent &arg, int axis) = 0;			
+			virtual bool axisMoved(const OIS::JoyStickEvent &arg, int axis) = 0;
 			virtual bool buttonPressed(const OIS::JoyStickEvent &arg, int button) = 0;
 			virtual bool buttonReleased(const OIS::JoyStickEvent &arg, int button) = 0;
 	};
@@ -154,7 +154,8 @@ namespace Opde {
 			void setInputMode(InputMode mode) { mInputMode = mode; };
 
 			/** Loads a bindings file, possibly rebinding the current bindings
-			* @param dcontext The default context for bind commands not preceeded with the context information. Defaults to the current context if not specified
+			 * @param filename The filename of the bnd file to load
+			* @todo dcontext The default context for bind commands not preceeded with the context information. Defaults to the current context if not specified
 			*/
 			void loadBNDFile(const std::string& filename);
 

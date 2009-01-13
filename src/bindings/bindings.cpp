@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -216,7 +216,8 @@ namespace Opde {
 		PyObject* module = Py_InitModule("Opde", sOpdeMethods);
 
 		// Call all the binders here. The result is initialized Python VM
-		PyObject *servicemod = Python::ServiceBinder::init(module);
+		//PyObject *servicemod =
+		Python::ServiceBinder::init(module);
 		Python::RootBinder::init(module);
 
 		Python::StringIteratorBinder::init(module);

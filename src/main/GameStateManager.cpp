@@ -362,7 +362,7 @@ namespace Opde {
 
 	bool GameStateManager::povMoved(const OIS::JoyStickEvent &e, int pov)
 	{
-		if (!mStateStack.empty()) 
+		if (!mStateStack.empty())
 		{
 			mStateStack.top()->povMoved(e, pov);
 		}
@@ -371,25 +371,25 @@ namespace Opde {
 
 	bool GameStateManager::axisMoved(const OIS::JoyStickEvent &arg, int axis)
 	{
-		if (!mStateStack.empty()) 
+		if (!mStateStack.empty())
 		{
 			mStateStack.top()->axisMoved(arg, axis);
 		}
 		return false;
 	}
-	
+
 	bool GameStateManager::buttonPressed(const OIS::JoyStickEvent &arg, int button)
 	{
-		if (!mStateStack.empty()) 
+		if (!mStateStack.empty())
 		{
 			mStateStack.top()->buttonPressed(arg, button);
 		}
 		return false;
 	}
-	
+
 	bool GameStateManager::buttonReleased(const OIS::JoyStickEvent &arg, int button)
 	{
-		if (!mStateStack.empty()) 
+		if (!mStateStack.empty())
 		{
 			mStateStack.top()->buttonReleased(arg, button);
 		}

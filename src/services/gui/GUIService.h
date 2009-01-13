@@ -39,29 +39,29 @@ namespace Opde {
 		public:
 			GUIService(ServiceManager *manager, const std::string& name);
 			virtual ~GUIService();
-			
+
 			/** Set's the activeness state for GUI.
 			* Either GUI gets input, or the mapped way for input is realized. @see InputService
 			* @note if active, cursor is shown, hidden otherwise.
-			* @param capture If true, the GUI is active, cursor is shown, and all inputs go into GUI. 
+			* @param active If true, the GUI is active, cursor is shown, and all inputs go into GUI.
 			*/
 			void setActive(bool active);
-			
-			/** Sets the visibility state of the gui. Note: This differs from activeness in that Active 
+
+			/** Sets the visibility state of the gui. Note: This differs from activeness in that Active
 			* GUI can be Invisible and the other way round.
 			* @param visible If true, the active sheet is set to show(), if false, set to hide()
 			*/
 			void setVisible(bool visible);
-			
+
 
 		protected:
 			// Service initialization related methods
 			bool init();
-			
+
 			void bootstrapFinished();
-			
+
 			void onRenderServiceMsg(const RenderServiceMsg& message);
-		
+
 			// Input related methods
 			bool keyPressed( const OIS::KeyEvent &e );
 			bool keyReleased( const OIS::KeyEvent &e );
@@ -74,7 +74,7 @@ namespace Opde {
 			virtual bool axisMoved(const OIS::JoyStickEvent &arg, int axis);
 			virtual bool buttonPressed(const OIS::JoyStickEvent &arg, int button);
 			virtual bool buttonReleased(const OIS::JoyStickEvent &arg, int button);
-		
+
 			InputServicePtr mInputSrv;
 			RenderServicePtr mRenderSrv;
 
@@ -83,7 +83,7 @@ namespace Opde {
 
 			/// Visibility indicator
 			bool mVisible;
-			
+
 			RenderService::ListenerID mRenderServiceListenerID;
 	};
 

@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -40,19 +40,17 @@
 namespace Opde {
 	// forward decl.
 	class PropertyService;
-	
+
 	/** @brief Property group - a group of properties of the same kind (name, type).
 	* Property group holds all the properties of the same kind for all the objects.
 	*/
 	class OPDELIB_EXPORT PropertyGroup : public NonCopyable, public MessageSource<PropertyChangeMsg> {
 		public:
 			/** PropertyGroup Constructor
+			* @param owner The owner property service
 			* @param name The property name
 			* @param chunk_name The name of the chunk (without the P$)
 			* @param storage The property storage created to hold the data
-			* @param deleteStorageOnDestroy delete the property storage on destroy of this prop. group?
-			* @param ver_maj The major version of the chunk that stores this property
-			* @param ver_min The minor version of the chunk that stores this property
 			*/
 			PropertyGroup(PropertyService* owner, const std::string& name, const std::string& chunk_name, const DataStoragePtr& storage, std::string inheritorName);
 
@@ -61,31 +59,31 @@ namespace Opde {
 				mVerMaj = verMaj;
 				mVerMin = verMin;
 			};
-			
+
 			/** gets the major version of the chunk */
 			inline uint getChunkVersionMajor(void) { return mVerMaj; };
-			
+
 			/** gets the minor version of the chunk */
 			inline uint getChunkVersionMinor(void) { return mVerMin; };
 
 			/** Destructor */
 			virtual ~PropertyGroup();
-			
+
 			/** Shutdown routine. All dependencies must be be released here */
 			virtual void shutdown();
-			
+
 			/// Sets this property group's flag mBuiltIn to true, meaning this PropertyGroup was created by code as a core property
 			inline void setBuiltin() { mBuiltin = true; };
-			
+
 			/// Gets the builtin flag
 			inline bool getBuiltin() { return mBuiltin; };
-			
+
 			/** Property storage setter
-			* @param propStorage The new storage for properties
+			* @param newStorage The new storage for properties
 			* @warning This should not be used when the property group holds some data
 			*/
 			virtual void setPropertyStorage(const DataStoragePtr& newStorage);
-			
+
 
 			/// Name getter. Returns the name of property this group manages
 			const std::string& getName() { return mName; };
@@ -115,7 +113,7 @@ namespace Opde {
 			}
 
 			/** Loads properties from a file group
-			* @param db The database to load from 
+			* @param db The database to load from
 			* @param objMask The BitArray of objects to be loaded (other properties are skipped)
 			*/
 			void load(const FileGroupPtr& db, const BitArray& objMask);
@@ -168,7 +166,7 @@ namespace Opde {
 			* @return false if field name was invalid, true if value was set in target
 			*/
 			virtual bool get(int id, const std::string& field, DVariant& target);
-			
+
 			/** Notification that an object was destroyed. @see PropertyService::objectDestroyed */
 			void objectDestroyed(int id);
 
@@ -194,7 +192,7 @@ namespace Opde {
             /// The listener to the inheritance messages
             void onInheritChange(const InheritValueChangeMsg& msg);
 
-			/** A connection point usable for descendants to implement property behavior. 
+			/** A connection point usable for descendants to implement property behavior.
 			* Called from onInheritChange. In it's default this does nothing.
 			* @see ActiveProperty
 			*/
@@ -226,25 +224,25 @@ namespace Opde {
 
 			/// Inheritor value changes listener
 			Inheritor::ListenerID mInheritorListenerID;
-			
+
 			/// Property storage used to store data for the property
 			DataStoragePtr mPropertyStorage;
-			
+
 			/// Owner service
 			PropertyService* mOwner;
-			
+
 			/// Builtin flag - property groups created in code as builtin have true here
 			bool mBuiltin;
 	};
 
 	/** Common ancestor to engine-implemented properties - those that handle property value in a "visible" way.
-	* Every class inheriting from this should implement all the abstract methods (sure) and also some of the 
+	* Every class inheriting from this should implement all the abstract methods (sure) and also some of the
 	* virtual ones, for example clear, which can happen to be called instead of removeProperty when unloading data.
 	* @note All the methods introduced here are only called on concrete objects!
 	*/
 	class OPDELIB_EXPORT ActiveProperty : public PropertyGroup {
 		public:
-			ActiveProperty(PropertyService* owner, const std::string& name, 
+			ActiveProperty(PropertyService* owner, const std::string& name,
 							const std::string& chunk_name, std::string inheritorName);
 		protected:
 			/// Overriden from the ancestor, which handles the property life/value events
@@ -268,7 +266,7 @@ namespace Opde {
 			*/
 			virtual void setPropertySource(int oid, int effid) {};
 
-			/** A field of the property changed event. 
+			/** A field of the property changed event.
 			* Called on all objects effectively inheriting values from some source object (not specified).
 			* @note This kind of event is typically only fired when changing the property of the object itself, or in editor mode. This is thanks to the fact that no archetype changes are possible in gameplay mode
 			* @param oid The object id of the object onto which the change applies

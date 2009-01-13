@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -167,7 +167,7 @@ namespace Opde {
 			int getFaceCount();
 
 			/** Attaches all the found portals to the source and destination DarkSceneNodes
-			* @param cellList The cell list which the method uses to set source and destination BspNodes
+			* @param smgr The scene manager to use for portal attachment
 			* @return int Number of vertices removed by optimization
 			*/
 			int attachPortals(Ogre::DarkSceneManager* smgr);

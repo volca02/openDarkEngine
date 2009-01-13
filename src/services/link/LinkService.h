@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -63,9 +63,8 @@ namespace Opde {
 			std::string flavorToName(int flavor);
 
 			/** Creates a relation type (link kind)
-			* @param id The ID the relation will have (>0)
 			* @param name The relation name
-			* @param type The type defining the data format for link data
+			* @param stor The data storage to use
 			* @param hidden The hidden relations (true) will not show up on public link list places */
 			RelationPtr createRelation(const std::string& name, const DataStoragePtr& stor, bool hidden);
 
