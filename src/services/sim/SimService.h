@@ -63,9 +63,6 @@ namespace Opde {
 			 */
 			virtual void simStep(float simTime, float delta);
 
-			/// Priority of the listener (order of execution in the loop)
-			virtual size_t getPriority() = 0;
-
 		protected:
 			float mSimTime;
 			float mSimTimeFlow;
@@ -83,8 +80,11 @@ namespace Opde {
 
 			// --- Registration/Unregistration of clients
 
-			/// registers a loop listener
-			void registerListener(SimListener* listener);
+			/** registers a loop listener
+			 * @param listener The listener instance pointer to register
+			 * @param priority The loop priority (order)
+			 */
+			void registerListener(SimListener* listener, size_t priority);
 
 			/// unregisters a loop listener
 			void unregisterListener(SimListener* listener);

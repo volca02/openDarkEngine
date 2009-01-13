@@ -138,8 +138,8 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void SimService::registerListener(SimListener* listener) {
-		mSimListeners.insert(std::make_pair(listener->getPriority(), listener));
+	void SimService::registerListener(SimListener* listener, size_t priority) {
+		mSimListeners.insert(std::make_pair(priority, listener));
 
 		// to be sure
 		if (mSimRunning)
