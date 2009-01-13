@@ -43,23 +43,32 @@ namespace Opde {
 			mIsUpdating(false),
 			mVertexData(NULL),
 			mIndexData(NULL),
-			mQuadCount(0) {
-		mMaterial = Ogre::MaterialManager::getSingleton().create(materialName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+			mQuadCount(0),
+			mRenderQueueID(Ogre::RENDER_QUEUE_OVERLAY) {
 
-		// get the autocreated pass
-		Ogre::Pass* pass = mMaterial->getTechnique(0)->getPass(0);
+		// See if the material specified already exists or not. This allows the user to customize the behavior (Animated materials for example)
 
-		// order of rendering will influence the result
-		pass->setDepthCheckEnabled(true);
-		pass->setDepthWriteEnabled(true);
-		pass->setLightingEnabled(false);
-		pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+		if (Ogre::MaterialManager::getSingleton().resourceExists(materialName)) {
+			mMaterial = Ogre::MaterialManager::getSingleton().getByName(materialName);
+		} else {
+			mMaterial = Ogre::MaterialManager::getSingleton().create(materialName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
+			// get the autocreated pass
+			Ogre::Pass* pass = mMaterial->getTechnique(0)->getPass(0);
+
+			// order of rendering will influence the result
+			pass->setDepthCheckEnabled(true);
+			pass->setDepthWriteEnabled(true);
+			pass->setLightingEnabled(false);
+			pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+		}
 	};
 
 	//------------------------------------------------------
 	DrawBuffer::~DrawBuffer() {
 		// destroy the material again
 		// Ogre::MaterialManager::getSingleton().remove(mMaterial);
+		destroyBuffers();
 	};
 
 	//------------------------------------------------------

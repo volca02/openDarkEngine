@@ -30,13 +30,16 @@
 
 #include <OgreRenderable.h>
 #include <OgreMaterial.h>
+#include <OgreMovableObject.h>
 
 namespace Opde {
 
 	/** A single renderable representing all drawn quads for particular rendered settings combination (DrawSheet stores N of these for N materials) */
 	class DrawBuffer : public Ogre::Renderable {
 		public:
-			/// Constructor
+			/** Constructor
+			 * @param materialName The name of the material to use for rendering. The constructor will look for the specified material and if it does not find it, it will create a new one
+			 */
 			DrawBuffer(const Ogre::String& materialName);
 
 			/// Destructor
@@ -70,6 +73,9 @@ namespace Opde {
 			Ogre::Real getSquaredViewDepth(const Ogre::Camera*) const;
 			const Ogre::LightList& getLights() const;
 
+			inline Ogre::uint8 getRenderQueueID() const { return mRenderQueueID; };
+
+			inline bool isDirty() { return mIsDirty; };
 		protected:
 			/// (re)builds the VBO according to the mQuadList
 			void buildBuffer();
@@ -89,6 +95,8 @@ namespace Opde {
 			Ogre::IndexData* mIndexData;
 
 			size_t mQuadCount;
+
+			Ogre::uint8 mRenderQueueID;
 	};
 
 	/// Draw buffer map for all render op. combinations (currently, we index by image name, we could reindex with image ID later for performance)

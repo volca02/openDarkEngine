@@ -33,7 +33,7 @@ namespace Opde {
 	/** A 2D rendering sheet. Represents one visible screen.
 	 * Stores rendering operations, can queue itself for rendering to ogre.
 	 * Uses DrawBuffer for render op. storage */
-	class DrawSheet {
+	class DrawSheet : public Ogre::MovableObject {
 		public:
 			/// Constructor
 			DrawSheet();
@@ -59,11 +59,19 @@ namespace Opde {
 			/// Will remove all Buffers with zero Draw operations
 			void purge();
 
+			//--- MovableObject mandatory ---
+			const Ogre::String& getMovableType() const;
+			const Ogre::AxisAlignedBox& getBoundingBox() const;
+			Ogre::Real getBoundingRadius() const;
+			void visitRenderables(Ogre::Renderable::Visitor* vis, bool debugRenderables);
+
 		protected:
 			/// Called to ensure all the DrawBuffers are current and reflect the requested state
 			void rebuildBuffers();
 
 			DrawBuffer* getBufferForOperation(DrawOperation* drawOp, bool autoCreate = false);
+
+			void _updateRenderQueue(Ogre::RenderQueue* queue);
 
 			/// All draw buffers for the sheet as map
 			DrawBufferMap mDrawBufferMap;

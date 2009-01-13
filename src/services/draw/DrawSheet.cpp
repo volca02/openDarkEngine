@@ -23,6 +23,8 @@
 
 #include "DrawSheet.h"
 
+#include <OgreRenderQueue.h>
+
 namespace Opde {
 
 	/*----------------------------------------------------*/
@@ -120,4 +122,45 @@ namespace Opde {
 				it->second->update();
 		}
 	}
+
+	//------------------------------------------------------
+	const Ogre::String& DrawSheet::getMovableType() const {
+		static Ogre::String type = "DrawSheet";
+        return type;
+	};
+
+	//------------------------------------------------------
+	const Ogre::AxisAlignedBox& DrawSheet::getBoundingBox() const {
+		static Ogre::AxisAlignedBox box;
+		box.setInfinite();
+
+		return box;
+	};
+
+	//------------------------------------------------------
+	Ogre::Real DrawSheet::getBoundingRadius() const {
+		return 1.0; // TODO: What radius is appropriate?
+	};
+
+	//------------------------------------------------------
+	void DrawSheet::visitRenderables(Ogre::Renderable::Visitor* vis, bool debugRenderables) {
+		// visit all the renderables - all drawbuffers
+		for (DrawBufferMap::iterator it = mDrawBufferMap.begin(); it != mDrawBufferMap.end(); ++it) {
+			vis->visit(it->second, 0, debugRenderables);
+		}
+	};
+
+	//------------------------------------------------------
+	void DrawSheet::_updateRenderQueue(Ogre::RenderQueue* queue) {
+		// do this for all the Buffers
+		for (DrawBufferMap::iterator it = mDrawBufferMap.begin(); it != mDrawBufferMap.end(); ++it) {
+			DrawBuffer* db = it->second;
+
+			// could be done in Renderable::preRender hidden from the eyes
+			if (db->isDirty())
+				db->update();
+
+			queue->addRenderable(db, db->getRenderQueueID(), OGRE_RENDERABLE_DEFAULT_PRIORITY);
+		}
+	};
 };
