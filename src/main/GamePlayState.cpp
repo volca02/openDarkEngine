@@ -514,14 +514,11 @@ namespace Opde {
 	}
 
 	void GamePlayState::onLinkPlayerFactoryMsg(const LinkChangeMsg& msg) {
-		switch (msg.change) {
-			case LNK_ADDED : {
-				LOG_INFO("GamePlayState: Found StartingPoint");
-				// get the Link ref.
-				LinkPtr l = mPlayerFactoryRelation->getLink(msg.linkID);
-				StartingPointObjID = l->src();
-				break;
-			}
+		if (msg.change == LNK_ADDED) {
+			LOG_INFO("GamePlayState: Found StartingPoint");
+			// get the Link ref.
+			LinkPtr l = mPlayerFactoryRelation->getLink(msg.linkID);
+			StartingPointObjID = l->src();
 		}
 	}
 

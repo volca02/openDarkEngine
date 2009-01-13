@@ -191,7 +191,7 @@ namespace Ogre {
 
 		// hard to imagine a body with 512 torsos... a cartepillar? :)
 		if (mHeader.num_torsos > 512)
-			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Cal file has more than 128 torsos : ") + mFileName, "CalSkeletonLoader::readTorsos");
+			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Cal file has more than 512 torsos : ") + mFileName, "CalSkeletonLoader::readTorsos");
 
 		mTorsos = new CalTorso[mHeader.num_torsos];
 
@@ -314,7 +314,7 @@ namespace Ogre {
             max_index = getIndex(bone, vidx[numverts-1], normal, lightidx[numverts-1], uvidx[numverts-1]);
         } else {
             last_index = getIndex(bone, vidx[0], normal, lightidx[0], 0);
-            max_index = getIndex(bone, vidx[numverts-1], lightidx[numverts-1], normal, 0);
+            max_index = getIndex(bone, vidx[numverts-1], normal, lightidx[numverts-1], 0);
         }
 
         for (size_t i = 1; i < (numverts-1); i++) {
@@ -601,7 +601,7 @@ namespace Ogre {
             VertexBoneAssignment vba;
             vba.boneIndex = it->bone;
             vba.vertexIndex = idx;
-            vba.weight = 1.0f;
+            vba.weight = 1.0f; // TODO: Stretchy vertices will have this split to two parts
 
             mSubMesh->addBoneAssignment(vba);
         }

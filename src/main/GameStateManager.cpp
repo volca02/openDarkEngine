@@ -67,11 +67,11 @@ namespace Opde {
 	GameStateManager::GameStateManager(const std::string& GameType) :
 			mStateStack(),
 			mTerminate(false),
-			mRoot(NULL),
 			mConsoleBackend(NULL),
-			mServiceMgr(NULL),
+			mRoot(NULL),
+			mConfigService(NULL),
 			mInputService(NULL),
-			mConfigService(NULL) {
+			mServiceMgr(NULL) {
 				mGameType = GameType;
 
 		mRoot = new Opde::Root(SERVICE_ALL, "opde.log");
