@@ -344,14 +344,14 @@ namespace Ogre {
 
 			mRenderOp.indexData->indexBuffer = HardwareBufferManager::getSingleton()
 				.createIndexBuffer(
-					HardwareIndexBuffer::IT_16BIT, // always 32-bit
+					HardwareIndexBuffer::IT_16BIT,
 					mIdxCount,
 					HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY_DISCARDABLE, false);
 		} else {
 			// For now, we only use 32BIT. TODO: estimate the possibility to move to 16bit
 			mRenderOp.indexData->indexBuffer = HardwareBufferManager::getSingleton()
 				.createIndexBuffer(
-					HardwareIndexBuffer::IT_32BIT, // always 32-bit
+					HardwareIndexBuffer::IT_32BIT,
 					mIdxCount,
 					HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY_DISCARDABLE, false);
 		}
