@@ -461,6 +461,8 @@ namespace Opde {
 				result += var;
 			}
 		}
+
+		return result;
 	}
 
 	//------------------------------------------------------
@@ -896,7 +898,7 @@ namespace Opde {
 		} else {
 			// dispatch the key event using the mapper
 		}
-		
+
 		return false;
 	}
 

@@ -31,7 +31,8 @@ namespace Opde {
 	/*-------------------- DrawSheet ---------------------*/
 	/*----------------------------------------------------*/
 	DrawSheet::DrawSheet() : mActive(false) {
-		// nothing to do!
+		// default to no visibility
+		setVisible(false);
 	};
 
 	//------------------------------------------------------
@@ -50,12 +51,15 @@ namespace Opde {
 	void DrawSheet::activate() {
 		mActive = true;
 
+		setVisible(true);
 		// TODO: Need to inform all DrawBuffers?
 	}
 
 	//------------------------------------------------------
 	void DrawSheet::deactivate() {
 		mActive = false;
+
+		setVisible(false);
 	}
 
 	//------------------------------------------------------
