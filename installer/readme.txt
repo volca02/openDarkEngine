@@ -8,7 +8,7 @@ A few things to keep in mind:
 4. Use WASD to navigate, the mouse to look around, F5 to take screenshot, and Esc to quit. For additional fun you can try P, O and I.
 5. If you are running OPDE in windowed mode, it is strongly recommended to turn on VSync. Otherwise you might experience some graphical and/or timing anomalies.
 
-I you have any problems running openDarkEngine:
+If you have any problems running openDarkEngine:
 
 1. Make sure you have the Microsoft VC8 redist package installed. If you get an error messages similar to "This application has failed to start because the application configuration is incorrect" it is very likely that you are missing the VC8 redist package. You can get it from: http://www.microsoft.com/downloads/details.aspx?FamilyID=9b2da534-3e03-4391-8a4d-074b9f2bc1bf&displaylang=en
 
