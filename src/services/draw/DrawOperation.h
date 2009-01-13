@@ -31,6 +31,7 @@ namespace Opde {
 	// Forward decls.
 	class DrawService;
 	class DrawBuffer;
+	class DrawSheet;
 
 	/** A single 2D draw operation (Bitmap draw for example). Internally this explodes to N vertices stored in the VBO of choice (via DrawBuffer) - For building itself into a VBO, this produces N DrawQuads. */
 	class DrawOperation {
@@ -49,11 +50,25 @@ namespace Opde {
 			/// Called by DrawBuffer to get the Quads queued for rendering. Fill this method to get the rendering done (via DrawBuffer::_queueDrawQuad())
 			virtual void visitDrawBuffer(DrawBuffer* db);
 
+			/// Called by sheet when the operation is added to a sheet. Default implementation adds the sheet to the sheet set.
+			virtual void onSheetRegister(DrawSheet* sheet);
+
+			/// Called by sheet when the operation is removed from a sheet. Default implementation adds the sheet to the sheet set.
+			virtual void onSheetUnregister(DrawSheet* sheet);
+
 		protected:
+			/// On change updater - marks all using sheets as dirty
+			virtual void onChange();
+
 			ID mID;
 
 			Ogre::String mImageName;
 			DrawService* mOwner;
+
+			typedef std::set<DrawSheet*> DrawSheetSet;
+
+			/// Sheets using this draw op
+			DrawSheetSet mUsingSheets;
 	};
 
 	/// Map of all draw operations by it's ID

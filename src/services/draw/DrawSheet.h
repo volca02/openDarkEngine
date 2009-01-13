@@ -53,7 +53,7 @@ namespace Opde {
 			/// Removes the draw operation from this sheet.
 			void removeDrawOperation(DrawOperation* toRemove);
 
-			/// Internal: Marks a certain draw operation dirty in this sheet. Called internally on DrawOp. change
+			/// Internal: Marks a certain draw operation dirty in this sheet. Called internally on a DrawOp. change
 			void _markDirty(DrawOperation* drawOp);
 
 			/// Will remove all Buffers with zero Draw operations

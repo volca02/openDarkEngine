@@ -21,11 +21,14 @@
  *
  *****************************************************************************/
 
-
 #include "DrawOperation.h"
+#include "DrawSheet.h"
 
 namespace Opde {
 
+	/*----------------------------------------------------*/
+	/*-------------------- DrawBuffer --------------------*/
+	/*----------------------------------------------------*/
 	DrawOperation::DrawOperation(DrawService* owner, ID id, size_t order, const Ogre::String& name)
 			: mID(id),
 			mImageName(name),
@@ -33,15 +36,34 @@ namespace Opde {
 		//
 	};
 
+	//------------------------------------------------------
 	DrawOperation::~DrawOperation() {
 	};
 
+	//------------------------------------------------------
 	const Ogre::String& DrawOperation::getMaterialName() const {
 		return mImageName;
 	};
 
-
+	//------------------------------------------------------
 	void DrawOperation::visitDrawBuffer(DrawBuffer* db) {
-		// empty. To be overriden by ancestor to do the rendering
+		// empty. To be overridden by ancestor to do the rendering (via DrawBuffer::_queueDrawQuad)
 	};
+
+	//------------------------------------------------------
+	void DrawOperation::onSheetRegister(DrawSheet* sheet) {
+		mUsingSheets.insert(sheet);
+	};
+
+	//------------------------------------------------------
+	void DrawOperation::onSheetUnregister(DrawSheet* sheet) {
+		mUsingSheets.erase(sheet);
+	};
+
+	//------------------------------------------------------
+	void DrawOperation::onChange() {
+		for (DrawSheetSet::iterator it = mUsingSheets.begin(); it != mUsingSheets.end(); ++it) {
+			(*it)->_markDirty(this);
+		}
+	}
 }
