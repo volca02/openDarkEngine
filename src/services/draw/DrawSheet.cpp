@@ -95,14 +95,14 @@ namespace Opde {
 	//------------------------------------------------------
 	DrawBuffer* DrawSheet::getBufferForOperation(DrawOperation* drawOp, bool autoCreate) {
 
-		DrawBufferMap::iterator it = mDrawBufferMap.find(drawOp->getImageName());
+		DrawBufferMap::iterator it = mDrawBufferMap.find(drawOp->getMaterialName());
 
 		if (it != mDrawBufferMap.end()) {
 			return it->second;
 		}
 
 		if (autoCreate) {
-			const Ogre::String& inm = drawOp->getImageName();
+			const Ogre::String& inm = drawOp->getMaterialName();
 			DrawBuffer* db = new DrawBuffer(inm);
 			mDrawBufferMap[inm] = db;
 			return db;
@@ -114,7 +114,7 @@ namespace Opde {
 	//------------------------------------------------------
 	void DrawSheet::rebuildBuffers() {
 		DrawBufferMap::iterator it = mDrawBufferMap.begin();
-		
+
 		for (; it != mDrawBufferMap.end(); ++it) {
 			if (it->second->isDirty())
 				it->second->update();

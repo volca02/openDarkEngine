@@ -33,9 +33,15 @@ namespace Opde {
 		//
 	};
 
-	const Ogre::String& DrawOperation::getImageName() const {
+	DrawOperation::~DrawOperation() {
+	};
+
+	const Ogre::String& DrawOperation::getMaterialName() const {
 		return mImageName;
 	};
 
 
+	void DrawOperation::visitDrawBuffer(DrawBuffer* db) {
+		// empty. To be overriden by ancestor to do the rendering
+	};
 }

@@ -25,16 +25,26 @@
 #include "DrawBuffer.h"
 
 #include <OgreMaterialManager.h>
+#include <OgreHardwareBufferManager.h>
 #include <OgreMaterial.h>
 #include <OgreTechnique.h>
 #include <OgrePass.h>
+#include <OgreRoot.h>
 
 using namespace Ogre;
 
 namespace Opde {
 
-	DrawBuffer::DrawBuffer(const Ogre::String& imageName) : mIsDirty(false) {
-		mMaterial = Ogre::MaterialManager::getSingleton().create("Draw_" + imageName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+	/*----------------------------------------------------*/
+	/*-------------------- DrawBuffer --------------------*/
+	/*----------------------------------------------------*/
+	DrawBuffer::DrawBuffer(const Ogre::String& materialName) :
+			mIsDirty(false),
+			mIsUpdating(false),
+			mVertexData(NULL),
+			mIndexData(NULL),
+			mQuadCount(0) {
+		mMaterial = Ogre::MaterialManager::getSingleton().create(materialName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
 		// get the autocreated pass
 		Ogre::Pass* pass = mMaterial->getTechnique(0)->getPass(0);
@@ -46,62 +56,246 @@ namespace Opde {
 		pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
 	};
 
+	//------------------------------------------------------
 	DrawBuffer::~DrawBuffer() {
 		// destroy the material again
 		// Ogre::MaterialManager::getSingleton().remove(mMaterial);
 	};
 
+	//------------------------------------------------------
 	void DrawBuffer::addDrawOperation(DrawOperation* op) {
 		mIsDirty = true;
 	};
 
+	//------------------------------------------------------
 	void DrawBuffer::removeDrawOperation(DrawOperation* op) {
 		mIsDirty = true;
 	};
 
+	//------------------------------------------------------
 	void DrawBuffer::queueUpdate(DrawOperation* drawOp) {
 		mIsDirty = true;
 	};
 
+	//------------------------------------------------------
 	void DrawBuffer::update() {
-		// rebuild the queue. First calculate the vertex count
-		// STUB
+		// let's update the queue!
+
+		// We'll set isUpdating to true - _queueDrawQuad can then be used
+		mIsUpdating = true;
+
+		// now we call all the render ops to visit this buffer
+		DrawOperationMap::iterator iend = mDrawOpMap.end();
+
+		// clear the quad list for this usage
+		mQuadList.clear();
+
+		for (DrawOperationMap::iterator it = mDrawOpMap.begin(); it != iend; ++it) {
+			// visit!
+			it->second->visitDrawBuffer(this);
+		}
+
+		mIsUpdating = false;
+
+		// done. We now have the list full
+		// sort with stable sort (to leave the order of draw quads the same draw op requested)
+		std::stable_sort(mQuadList.begin(), mQuadList.end(), QuadLess());
+
+		// Sorted. Now (re)build the buffer
+		buildBuffer();
+
+		mIsDirty = false;
+
 	}
 
+
+	//------------------------------------------------------
+	void DrawBuffer::_queueDrawQuad(const DrawQuad* dq) {
+		assert(mIsUpdating);
+
+		mQuadList.push_back(dq);
+	};
+
+	//------------------------------------------------------
 	const MaterialPtr& DrawBuffer::getMaterial(void) const {
 		return mMaterial;
 	};
 
+	//------------------------------------------------------
 	void DrawBuffer::getRenderOperation(Ogre::RenderOperation& op) {
-		/*
 	        op.operationType = Ogre::RenderOperation::OT_TRIANGLE_LIST;
 
         	op.vertexData = mVertexData;
 	        op.vertexData->vertexStart = 0;
-	        op.vertexData->vertexCount = quadList.size() * 4;
+	        op.vertexData->vertexCount = mQuadList.size() * 4;
 
         	op.useIndexes = true;
 	        op.indexData = mIndexData;
 	        op.indexData->indexStart = 0;
-	        op.indexData->indexCount = quadList.size() * 6;
-		*/
+	        op.indexData->indexCount = mQuadList.size() * 6;
 	};
 
+	//------------------------------------------------------
 	void DrawBuffer::getWorldTransforms(Ogre::Matrix4* trans) const {
 		// Identity
 		*trans = Matrix4::IDENTITY;
 	};
 
+	//------------------------------------------------------
 	Ogre::Real DrawBuffer::getSquaredViewDepth(const Ogre::Camera* cam) const {
 		// TODO: What?
 		return 1.0f;
 	};
 
+	//------------------------------------------------------
 	const Ogre::LightList& DrawBuffer::getLights() const {
 		static LightList ll;
 		return ll;
 	};
 
+	//------------------------------------------------------
+	void DrawBuffer::buildBuffer() {
+		// if size differs, we reallocate the buffers
+		if (mQuadCount < mQuadList.size()) {
+			// raise the buffer, with some padding
+			mQuadCount = mQuadList.size() * 2;
+			destroyBuffers();
+		}
+
+		if (!mVertexData) {
+			// no vertex data, let's reallocate some!
+			mVertexData = new Ogre::VertexData();
+			mVertexData->vertexStart = 0;
+			mVertexData->vertexCount = mQuadCount * 4;
+
+			Ogre::VertexDeclaration* decl = mVertexData->vertexDeclaration;
+			Ogre::VertexBufferBinding* binding = mVertexData->vertexBufferBinding;
+
+			size_t offset = 0;
+			decl->addElement(0, offset, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+			offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
+			decl->addElement(0, offset, Ogre::VET_COLOUR, Ogre::VES_DIFFUSE);
+			offset += Ogre::VertexElement::getTypeSize(Ogre::VET_COLOUR);
+			decl->addElement(0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES, 0);
+
+			mBuffer = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
+					decl->getVertexSize(0), mVertexData->vertexCount, Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
+
+			binding->setBinding(0, mBuffer);
+		}
+
+		if (!mIndexData) {
+			// no index data, so let's rebuilt it.
+			mIndexData = new Ogre::IndexData();
+			mIndexData->indexStart = 0;
+			mIndexData->indexCount = mQuadCount * 6;
+
+			// As canvas does it - build the IBO statically, we don't need no per-update updates
+			mIndexData->indexBuffer = Ogre::HardwareBufferManager::getSingleton().createIndexBuffer(
+					Ogre::HardwareIndexBuffer::IT_16BIT,
+					mIndexData->indexCount,
+					Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY_DISCARDABLE, false);
+
+			// now we'll fill the buffer with indices of triangles (0,2,1; 1,2,3)
+			unsigned short* iData = reinterpret_cast<unsigned short*>(mIndexData->indexBuffer->lock(0, mIndexData->indexBuffer->getSizeInBytes(),
+					Ogre::HardwareBuffer::HBL_DISCARD));
+
+			// Inspired by Canvas. It's true we don't need to do this per frame,
+			// we'll just set the mIndexData->indexCount to the propper value after building
+			for (size_t iindex = 0, ivertex = 0, iquad = 0; iquad < mQuadCount; ++iquad, ivertex += 4) {
+				iindex = iquad * 6;
+				// tri 1
+				iData[iindex++] = (unsigned short)(ivertex);
+				iData[iindex++] = (unsigned short)(ivertex + 2);
+				iData[iindex++] = (unsigned short)(ivertex + 1);
+				// tri 2
+				iData[iindex++] = (unsigned short)(ivertex + 1);
+				iData[iindex++] = (unsigned short)(ivertex + 2);
+				iData[iindex++] = (unsigned short)(ivertex + 3);
+			}
+
+			mIndexData->indexBuffer->unlock();
+		};
+
+		// now we'll build the vertex part - we are already sorted so we'll just need quad rewritten
+		// to the vertex part
+		float* buf = reinterpret_cast<float*>(mBuffer->lock(0, mQuadList.size() * mBuffer->getVertexSize() * 4, Ogre::HardwareBuffer::HBL_DISCARD));
+
+		Ogre::RGBA* colptr;
+
+		for (DrawQuadList::iterator it = mQuadList.begin(); it != mQuadList.end(); ++it) {
+			// all the vertices
+			const DrawQuad* dq = *it;
+
+			/// Top Left corner
+			*buf++ = dq->positions.topleft.x;
+			*buf++ = dq->positions.topleft.y;
+			*buf++ = dq->positions.topleft.z;
+
+			*buf++ = dq->texCoords.topleft.x;
+			*buf++ = dq->texCoords.topleft.y;
+
+			colptr = reinterpret_cast<Ogre::RGBA*>(buf);
+			Ogre::Root::getSingleton().convertColourValue(dq->colors.topleft, colptr);
+			colptr++;
+			buf = reinterpret_cast<float*>(colptr);
+
+			/// Top right corner
+			*buf++ = dq->positions.topright.x;
+			*buf++ = dq->positions.topright.y;
+			*buf++ = dq->positions.topright.z;
+
+			*buf++ = dq->texCoords.topright.x;
+			*buf++ = dq->texCoords.topright.y;
+
+			colptr = reinterpret_cast<Ogre::RGBA*>(buf);
+			Ogre::Root::getSingleton().convertColourValue(dq->colors.topright, colptr);
+			colptr++;
+			buf = reinterpret_cast<float*>(colptr);
+
+			/// Bottom left corner
+			*buf++ = dq->positions.bottomleft.x;
+			*buf++ = dq->positions.bottomleft.y;
+			*buf++ = dq->positions.bottomleft.z;
+
+			*buf++ = dq->texCoords.bottomleft.x;
+			*buf++ = dq->texCoords.bottomleft.y;
+
+			colptr = reinterpret_cast<Ogre::RGBA*>(buf);
+			Ogre::Root::getSingleton().convertColourValue(dq->colors.bottomleft, colptr);
+			colptr++;
+			buf = reinterpret_cast<float*>(colptr);
+
+			/// Bottom right corner
+			*buf++ = dq->positions.bottomright.x;
+			*buf++ = dq->positions.bottomright.y;
+			*buf++ = dq->positions.bottomright.z;
+
+			*buf++ = dq->texCoords.bottomright.x;
+			*buf++ = dq->texCoords.bottomright.y;
+
+			colptr = reinterpret_cast<Ogre::RGBA*>(buf);
+			Ogre::Root::getSingleton().convertColourValue(dq->colors.bottomright, colptr);
+			colptr++;
+			buf = reinterpret_cast<float*>(colptr);
+		}
+
+		// ibo length to the number of quads times six
+		mIndexData->indexCount = mQuadCount * 6;
+
+		mBuffer->unlock();
+	};
+
+	//------------------------------------------------------
+	void DrawBuffer::destroyBuffers() {
+		delete mVertexData;
+		mVertexData = NULL;
+
+		delete mIndexData;
+		mIndexData = NULL;
+
+		mBuffer.setNull();
+	};
 
 }
 

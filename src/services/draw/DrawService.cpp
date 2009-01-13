@@ -69,7 +69,9 @@ namespace Opde {
 
 		if (it != mSheetMap.end())
 			return it->second;
-	}
+		else
+			return NULL;
+	};
 
 	//------------------------------------------------------
 	void DrawService::destroySheet(DrawSheet* sheet) {

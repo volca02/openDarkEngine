@@ -22,42 +22,41 @@
  *****************************************************************************/
 
 
-#ifndef __DRAWOPERATION_H
-#define __DRAWOPERATION_H
+#ifndef __DRAWCOMMON_H
+#define __DRAWCOMMON_H
 
-#include <OgreString.h>
+#include "DrawOperation.h"
+
+#include <OgreVector3.h>
+#include <OgreVector2.h>
+#include <OgreColourValue.h>
 
 namespace Opde {
-	// Forward decls.
-	class DrawService;
-	class DrawBuffer;
 
-	/** A single 2D draw operation (Bitmap draw for example). Internally this explodes to N vertices stored in the VBO of choice (via DrawBuffer) - For building itself into a VBO, this produces N DrawQuads. */
-	class DrawOperation {
-		public:
-			/// ID type of this operation
-			typedef size_t ID;
-
-			DrawOperation(DrawService* owner, ID id, size_t order, const Ogre::String& name);
-
-			virtual ~DrawOperation();
-
-			inline ID getID() const { return mID; };
-
-			const Ogre::String& getMaterialName() const;
-
-			/// Called by DrawBuffer to get the Quads queued for rendering. Fill this method to get the rendering done (via DrawBuffer::_queueDrawQuad())
-			virtual void visitDrawBuffer(DrawBuffer* db);
-
-		protected:
-			ID mID;
-
-			Ogre::String mImageName;
-			DrawService* mOwner;
+	/// Universal rect. (Idea cloned after Canvas'es quad)
+	template<typename T> struct DrawRect {
+		T topleft;
+		T topright;
+		T bottomleft;
+		T bottomright;
 	};
 
-	/// Map of all draw operations by it's ID
-	typedef std::map<DrawOperation::ID, DrawOperation*> DrawOperationMap;
-}
+	/// Draw quad - a single Rectangle that can be stored for rendering
+	struct DrawQuad {
+		DrawRect<Ogre::Vector3> positions;
+		DrawRect<Ogre::Vector2> texCoords;
+		DrawRect<Ogre::ColourValue> colors;
+
+		// TODO: IBO and VBO position markers (mutable)
+	};
+
+	/// List of drawn quads (pointers to avoid copying)
+	typedef std::vector<const DrawQuad*> DrawQuadList;
+
+	/// Sorting comparison op.
+	struct QuadLess {
+		bool operator()(const DrawQuad* a, const DrawQuad* b) const;
+	};
+};
 
 #endif
