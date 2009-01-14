@@ -75,6 +75,11 @@ Page components
 Page directory
 Page instfiles
 Page Custom SelectGames CreateResourceCfg
+PageEx license
+   LicenseText "Readme.txt:" "Next >"
+   LicenseData @CMAKE_CURRENT_SOURCE_DIR@\installer\Readme.txt
+   LicenseForceSelection off
+PageExEnd
 Page Custom ShowDone
 
 UninstPage uninstConfirm

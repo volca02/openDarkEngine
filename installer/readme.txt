@@ -23,7 +23,6 @@ This should create a file called "tree.txt" in the same folder.
 3. In the directory that you installed openDarkEngine zip up all the .cfg files and .log files, the two files "DxDiag.txt" and "tree.txt" that were created above, and the generated shortcuts ("opde (Thief 1)", "opde (Thief 2)" and "opde (Shock 2)") and send the zip file to opendarkengine@gmail.com .
 
 
-
 Thanks for trying openDarkEngine!
 
 The openDarkEngine team
