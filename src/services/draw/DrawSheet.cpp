@@ -89,6 +89,9 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void DrawSheet::_markDirty(DrawOperation* drawOp) {
+		// Marking dirty could mean the buffer changes.
+		// We ignore that. Atlasing can only happen before creating the Draw Ops.
+
 		// look up the DrawBuffer for this DrawOp.
 		DrawBuffer* buf = getBufferForOperation(drawOp);
 
@@ -100,17 +103,18 @@ namespace Opde {
 
 	//------------------------------------------------------
 	DrawBuffer* DrawSheet::getBufferForOperation(DrawOperation* drawOp, bool autoCreate) {
-
-		DrawBufferMap::iterator it = mDrawBufferMap.find(drawOp->getMaterialName());
+		// TODO: Temp. Fix. We should be able to sort by draw source unique ID or something
+		DrawBufferMap::iterator it = mDrawBufferMap.find(drawOp->getDrawSource()->material->getName());
 
 		if (it != mDrawBufferMap.end()) {
 			return it->second;
 		}
 
 		if (autoCreate) {
-			const Ogre::String& inm = drawOp->getMaterialName();
-			DrawBuffer* db = new DrawBuffer(inm);
-			mDrawBufferMap[inm] = db;
+			const Ogre::MaterialPtr& mp = drawOp->getDrawSource()->material;
+			DrawBuffer* db = new DrawBuffer(mp);
+			// TODO: And here as well. ID should be enough
+			mDrawBufferMap[drawOp->getDrawSource()->material->getName()] = db;
 			return db;
 		} else {
 			return NULL;

@@ -31,6 +31,9 @@
 #include "OpdeService.h"
 #include "SharedPtr.h"
 #include "DrawSheet.h"
+#include "Array.h"
+
+#include <stack>
 
 namespace Opde {
 
@@ -63,14 +66,39 @@ namespace Opde {
 			 */
 			void setActiveSheet(DrawSheet* sheet);
 
+
+			/** Creates a DrawSource that represents a specified image.
+			 * Also creates a material that is used to render the image.
+			 * @param img The image name
+			 * @return Shared ptr to the draw source usable for draw operations
+			 */
+			DrawSourcePtr& createDrawSource(const std::string& img, const std::string& group);
+
+			/** Creates a rendered image (e.g. a sprite)
+			 * @param draw The image source for this operation
+			 */
+			// RenderedImage* createRenderedImage(DrawSourcePtr& draw);
+
+			/** Destroys the specified draw operation (any ancestor)
+			 * @param dop The draw operation to destroy
+			 */
+			void destroyDrawOperation(DrawOperation* dop);
+
 		protected:
 			bool init();
 			void bootstrapFinished();
 
+			DrawOperation::ID getNewDrawOperationID();
+
 			typedef std::map<std::string, DrawSheet*> SheetMap;
+			typedef std::stack<size_t> IDStack;
+			typedef SimpleArray<DrawOperation*> DrawOperationArray;
 
 			SheetMap mSheetMap;
 			DrawSheet* mActiveSheet;
+			DrawOperation::ID mDrawOpID;
+			IDStack mFreeIDs;
+			DrawOperationArray mDrawOperations;
 	};
 
 	/// Shared pointer to the draw service

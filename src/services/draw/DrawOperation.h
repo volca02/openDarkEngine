@@ -25,7 +25,9 @@
 #ifndef __DRAWOPERATION_H
 #define __DRAWOPERATION_H
 
+#include "DrawCommon.h"
 #include <OgreString.h>
+
 
 namespace Opde {
 	// Forward decls.
@@ -34,18 +36,18 @@ namespace Opde {
 	class DrawSheet;
 
 	/** A single 2D draw operation (Bitmap draw for example). Internally this explodes to N vertices stored in the VBO of choice (via DrawBuffer) - For building itself into a VBO, this produces N DrawQuads. */
-	class DrawOperation {
+	class OPDELIB_EXPORT DrawOperation {
 		public:
 			/// ID type of this operation
 			typedef size_t ID;
 
-			DrawOperation(DrawService* owner, ID id, size_t order, const Ogre::String& name);
+			DrawOperation(DrawService* owner, ID id, const DrawSourcePtr& ds);
 
 			virtual ~DrawOperation();
 
 			inline ID getID() const { return mID; };
 
-			const Ogre::String& getMaterialName() const;
+			const DrawSourcePtr& getDrawSource() const;
 
 			/// Called by DrawBuffer to get the Quads queued for rendering. Fill this method to get the rendering done (via DrawBuffer::_queueDrawQuad())
 			virtual void visitDrawBuffer(DrawBuffer* db);
@@ -60,9 +62,9 @@ namespace Opde {
 			/// On change updater - marks all using sheets as dirty
 			virtual void onChange();
 
-			ID mID;
+			const ID mID;
 
-			Ogre::String mImageName;
+			DrawSourcePtr mDrawSource;
 			DrawService* mOwner;
 
 			typedef std::set<DrawSheet*> DrawSheetSet;

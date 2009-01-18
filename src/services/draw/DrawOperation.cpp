@@ -21,6 +21,7 @@
  *
  *****************************************************************************/
 
+#include "DrawService.h"
 #include "DrawOperation.h"
 #include "DrawSheet.h"
 
@@ -29,11 +30,11 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- DrawBuffer --------------------*/
 	/*----------------------------------------------------*/
-	DrawOperation::DrawOperation(DrawService* owner, ID id, size_t order, const Ogre::String& name)
-			: mID(id),
-			mImageName(name),
+	DrawOperation::DrawOperation(DrawService* owner, DrawOperation::ID id, const DrawSourcePtr& ds) :
+			mID(id),
+			mDrawSource(ds),
 			mOwner(owner) {
-		//
+		// nothing to do besides this
 	};
 
 	//------------------------------------------------------
@@ -41,8 +42,8 @@ namespace Opde {
 	};
 
 	//------------------------------------------------------
-	const Ogre::String& DrawOperation::getMaterialName() const {
-		return mImageName;
+	const DrawSourcePtr& DrawOperation::getDrawSource() const {
+		return mDrawSource;
 	};
 
 	//------------------------------------------------------

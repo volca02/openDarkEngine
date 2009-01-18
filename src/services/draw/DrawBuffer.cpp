@@ -38,7 +38,8 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- DrawBuffer --------------------*/
 	/*----------------------------------------------------*/
-	DrawBuffer::DrawBuffer(const Ogre::String& materialName) :
+	DrawBuffer::DrawBuffer(const Ogre::MaterialPtr& material) :
+			mMaterial(material),
 			mIsDirty(false),
 			mIsUpdating(false),
 			mVertexData(NULL),
@@ -46,22 +47,6 @@ namespace Opde {
 			mQuadCount(0),
 			mRenderQueueID(Ogre::RENDER_QUEUE_OVERLAY) {
 
-		// See if the material specified already exists or not. This allows the user to customize the behavior (Animated materials for example)
-
-		if (Ogre::MaterialManager::getSingleton().resourceExists(materialName)) {
-			mMaterial = Ogre::MaterialManager::getSingleton().getByName(materialName);
-		} else {
-			mMaterial = Ogre::MaterialManager::getSingleton().create(materialName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-
-			// get the autocreated pass
-			Ogre::Pass* pass = mMaterial->getTechnique(0)->getPass(0);
-
-			// order of rendering will influence the result
-			pass->setDepthCheckEnabled(true);
-			pass->setDepthWriteEnabled(true);
-			pass->setLightingEnabled(false);
-			pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-		}
 	};
 
 	//------------------------------------------------------

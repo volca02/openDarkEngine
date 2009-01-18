@@ -23,6 +23,9 @@
 
 
 #include "DrawCommon.h"
+#include <OgreVector2.h>
+
+using Ogre::Vector2;
 
 namespace Opde {
 
@@ -31,4 +34,27 @@ namespace Opde {
 		return a->positions.topleft.z < b->positions.topleft.z;
 	};
 
+	Vector2 DrawSource::transform(const Vector2& input) {
+		Vector2 tran(input);
+
+		tran *= size;
+		tran += displacement;
+	};
+
+	DrawSourcePtr DrawSource::atlas(DrawSourcePtr& dsrc, const PixelCoord& position) {
+		// we have to transform the pixel size of the image, recalculate the size
+		// and position
+		DrawSourcePtr nds = new DrawSource();
+
+		nds->pixelSize = dsrc->pixelSize;
+		nds->size.x = (float)nds->pixelSize.first / pixelSize.first;
+		nds->size.y = (float)nds->pixelSize.second / pixelSize.second;
+		nds->displacement.x = (float)position.first / pixelSize.first;
+		nds->displacement.y = (float)position.second / pixelSize.second;
+
+		nds->texture = texture;
+		nds->material = material;
+
+		return nds;
+	}
 };

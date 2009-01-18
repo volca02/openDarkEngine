@@ -33,7 +33,7 @@ namespace Opde {
 	/** A 2D rendering sheet. Represents one visible screen.
 	 * Stores rendering operations, can queue itself for rendering to ogre.
 	 * Uses DrawBuffer for render op. storage */
-	class DrawSheet : public Ogre::MovableObject {
+	class OPDELIB_EXPORT DrawSheet : public Ogre::MovableObject {
 		public:
 			/// Constructor
 			DrawSheet();

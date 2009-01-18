@@ -21,12 +21,19 @@
  *
  *****************************************************************************/
 
-
+#include "config.h"
+#include "integers.h"
 #include "DrawService.h"
 #include "OpdeException.h"
 #include "ServiceCommon.h"
 
+#include <OgreTexture.h>
+#include <OgreTextureManager.h>
+#include <OgreMaterial.h>
+#include <OgreMaterialManager.h>
+
 using namespace std;
+using namespace Ogre;
 
 namespace Opde {
 
@@ -114,6 +121,62 @@ namespace Opde {
 				mActiveSheet->activate();
 		}
 	}
+
+	//------------------------------------------------------
+	DrawSourcePtr& DrawService::createDrawSource(const std::string& img, const std::string& group) {
+		/*TODO:
+		// First we load the image.
+		// TexturePtr tex = Ogre::TextureManager().getSingleton().create(img, group);
+
+		MaterialPtr mat = Ogre::MaterialManager().getSingleton().create(img, group);
+
+		DrawSourcePtr ds = new DrawSource();
+
+		ds->material = mat;
+		ds->texture = tex;
+		ds->pixelSize.first = tex->getWidth();
+		ds->pixelSize.second = tex->getHeight();
+		ds->size = Vector2(1.0f, 1.0f);
+		ds->displacement = Vector2(0, 0);
+		*/
+	}
+
+	//------------------------------------------------------
+	/* TODO:
+	  RenderedImage* DrawService::createRenderedImage(DrawSourcePtr& draw) {
+		DrawOperation::ID opID = getNewOperationID();
+		RenderedImage* ri = new RenderedImage(opID, draw);
+
+		// register so we'll be able to remove it
+		mDrawOperations[opID] = ri;
+
+		return ri;
+	}*/
+
+	//------------------------------------------------------
+	size_t DrawService::getNewDrawOperationID() {
+		// do we have some free id's in the stack?
+		if (mFreeIDs.empty()) {
+			// raise the id
+			mDrawOpID++;
+			mDrawOperations.grow(mDrawOpID * 2);
+		} else {
+			size_t newid = mFreeIDs.top();
+			mFreeIDs.pop();
+			return newid;
+		}
+	}
+
+	//------------------------------------------------------
+	void DrawService::destroyDrawOperation(DrawOperation* dop) {
+		//
+		DrawOperation::ID id = dop->getID();
+		mDrawOperations[id] = NULL;
+		// recycle the id for reuse
+		mFreeIDs.push(id);
+		delete dop;
+	}
+
 
 	//-------------------------- Factory implementation
 	std::string DrawServiceFactory::mName = "DrawService";
