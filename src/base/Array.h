@@ -27,6 +27,7 @@
 #define __ARRAY_H
 
 #include "config.h"
+#include "OpdeException.h"
 
 namespace Opde {
 	/** A negative index capable, fixed size, growable array. Targetted at

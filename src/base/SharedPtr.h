@@ -28,6 +28,7 @@
 #include "config.h"
 
 #include <stdio.h>
+#include <cassert>
 
 namespace Opde {
 
@@ -39,7 +40,7 @@ namespace Opde {
 		protected:
 			T* mPtr;
 			unsigned int* mReferences;
-			
+
 			void release() {
 				if (mReferences) {
 					if (--(*mReferences) == 0) {
@@ -57,7 +58,7 @@ namespace Opde {
 			}
 
 		public:
-			/** Helper ctor for shared_ptr casting with static_pointer_cast<U>(). 
+			/** Helper ctor for shared_ptr casting with static_pointer_cast<U>().
 			* @warning Do not use directly */
 			shared_ptr(T* ptr, unsigned int *refs) : mPtr(ptr), mReferences(refs) {
 				++(*mReferences);
@@ -68,7 +69,7 @@ namespace Opde {
 				if (mReferences)
 					++(*mReferences);
 			}
-		
+
 			/// NULL ctor
 			shared_ptr() : mPtr(NULL), mReferences(NULL) { };
 
@@ -84,7 +85,7 @@ namespace Opde {
 					mReferences = new unsigned int(1);
 				}
 			};
-			
+
 			~shared_ptr() {
 				release();
 			}
@@ -127,11 +128,11 @@ namespace Opde {
 				mReferences = NULL;
 
 			}
-			
+
 			unsigned int* getRefCountPtr(void) const {
 				return mReferences;
 			}
-			
+
 	};
 
 	template<class A, class B> inline bool operator==(shared_ptr<A> const& a, shared_ptr<B> const& b) {
@@ -148,7 +149,7 @@ namespace Opde {
 
 		return shared_ptr<U>(ptr, src.getRefCountPtr());
 	}
-	
+
 } // namespace Opde
 
 #endif
