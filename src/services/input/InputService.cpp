@@ -879,6 +879,9 @@ namespace Opde {
 	//------------------------------------------------------
 	bool InputService::axisMoved(const JoyStickEvent &arg, int axis)
 	{
+		if((arg.state.mAxes[axis].abs > JoyStick::MIN_AXIS / 10) && (arg.state.mAxes[axis].abs < JoyStick::MAX_AXIS / 10))
+			return true;	//Eat the small axis movements.
+
 		if (mInputMode == IM_DIRECT) { // direct event, dispatch to the current listener
 			if (mDirectListener)
 				return mDirectListener->axisMoved(arg, axis);
