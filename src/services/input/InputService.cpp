@@ -556,9 +556,13 @@ namespace Opde {
 
 	//------------------------------------------------------
 	bool InputService::validateEventString(const std::string& ev) {
-		IsChar isplus('+');
+		
+		IsChar Splitter('+');
 
-		StringTokenizer stc(ev, isplus, false);
+		if(ev.length() == 1)
+			Splitter = ' ';
+	
+		StringTokenizer stc(ev, Splitter, false);
 
 		while (!stc.end()) {
 			string key = stc.next();
