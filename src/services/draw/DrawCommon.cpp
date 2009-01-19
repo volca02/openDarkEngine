@@ -39,6 +39,8 @@ namespace Opde {
 
 		tran *= size;
 		tran += displacement;
+		
+		return tran;
 	};
 
 	DrawSourcePtr DrawSource::atlas(DrawSourcePtr& dsrc, const PixelCoord& position) {

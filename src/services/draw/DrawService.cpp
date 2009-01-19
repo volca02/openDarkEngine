@@ -124,6 +124,8 @@ namespace Opde {
 
 	//------------------------------------------------------
 	DrawSourcePtr& DrawService::createDrawSource(const std::string& img, const std::string& group) {
+		
+		DrawSourcePtr ds = new DrawSource();
 		/*TODO:
 		// First we load the image.
 		// TexturePtr tex = Ogre::TextureManager().getSingleton().create(img, group);
@@ -139,6 +141,7 @@ namespace Opde {
 		ds->size = Vector2(1.0f, 1.0f);
 		ds->displacement = Vector2(0, 0);
 		*/
+		return ds;
 	}
 
 	//------------------------------------------------------
@@ -160,6 +163,7 @@ namespace Opde {
 			// raise the id
 			mDrawOpID++;
 			mDrawOperations.grow(mDrawOpID * 2);
+			return 0; //TODO return the correct value here
 		} else {
 			size_t newid = mFreeIDs.top();
 			mFreeIDs.pop();
