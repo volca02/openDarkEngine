@@ -27,6 +27,7 @@
 #include "DarkBspTree.h"
 #include "DarkCamera.h"
 #include "DarkPortal.h"
+#include "OgreIteratorWrappers.h"
 #include "DarkSceneNode.h"
 #include "DarkGeometry.h"
 
@@ -237,7 +238,6 @@ namespace Ogre {
 		// update the camera's internal visibility list
 		static_cast<DarkCamera*>(cam)->updateVisibleCellList();
 
-
 		MovablesForRendering movablesForRendering; // using a tag (frameNum) would probably be faster. hmm.
 
 		// clear the current visibility list
@@ -274,6 +274,23 @@ namespace Ogre {
 							movablesForRendering.insert(*oi);
 					}
 				}
+			}
+		}
+
+		// As a fix, all objects with infinite bounds attached to the Root SN will also be visible
+		// TODO: Be sure to check if this does not take too much time
+		SceneNode::ObjectIterator oit = getRootSceneNode()->getAttachedObjectIterator();
+
+		while (oit.hasMoreElements()) {
+			MovableObject* mo = oit.getNext();
+
+			if (mo->getWorldBoundingBox().isInfinite() && !onlyShadowCasters || mo->getCastShadows()) {
+				mo->_notifyCurrentCamera(cam);
+				mo->_updateRenderQueue( getRenderQueue() );
+
+				visibleBounds->merge(mo->getBoundingBox(), mo->getWorldBoundingSphere(), cam);
+
+				movablesForRendering.insert(mo);
 			}
 		}
 
