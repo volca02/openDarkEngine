@@ -42,6 +42,8 @@ namespace Opde {
 	//------------------------------------------------------
 	LightService::~LightService() {
 		clear();
+		
+		delete mAtlasList;
 	}
 
 
