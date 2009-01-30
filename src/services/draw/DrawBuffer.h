@@ -66,12 +66,24 @@ namespace Opde {
 			/// Called by DrawOperation::visitDrawBuffer, this method queues the quads emited by the operation for sorting and rendering
 			void _queueDrawQuad(const DrawQuad* dq);
 
+			/// Called by sheet on setActive to inform the buffer is now rendered within a different sheet (this also means we'll have to rebuild usually)
+			void _parentChanged(DrawSheet* parent);
+
 			//--- Renderable mandatory ---
 			const Ogre::MaterialPtr& getMaterial(void) const;
+
 			void getRenderOperation(Ogre::RenderOperation&);
+
 			void getWorldTransforms(Ogre::Matrix4*) const;
+
 			Ogre::Real getSquaredViewDepth(const Ogre::Camera*) const;
+
 			const Ogre::LightList& getLights() const;
+
+			const Ogre::Quaternion& getWorldOrientation(void) const;
+
+			const Ogre::Vector3& getWorldPosition(void) const;
+
 
 			inline Ogre::uint8 getRenderQueueID() const { return mRenderQueueID; };
 
@@ -94,13 +106,17 @@ namespace Opde {
 			Ogre::VertexData* mVertexData;
 			Ogre::IndexData* mIndexData;
 
+			/// This is the reserved quad count, not the rendered quad count (which is less usually)
 			size_t mQuadCount;
 
 			Ogre::uint8 mRenderQueueID;
+
+			/// Parent sheet - the one currently displaying the buffer
+			DrawSheet* mParent;
 	};
 
-	/// Draw buffer map for all render op. combinations (currently, we index by image name, we could reindex with image ID later for performance)
-	typedef std::map<Ogre::String, DrawBuffer*> DrawBufferMap;
+	/// Draw buffer map for all render op. combinations (indexed with texture source ID)
+	typedef std::map<DrawSource::ID, DrawBuffer*> DrawBufferMap;
 }
 
 #endif

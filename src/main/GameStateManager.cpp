@@ -44,6 +44,7 @@
 #include "InputService.h"
 #include "LoopService.h"
 #include "ObjectService.h"
+#include "DrawService.h"
 
 #include "GameLoadState.h"
 #include "GamePlayState.h"

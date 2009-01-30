@@ -58,9 +58,18 @@ namespace Opde {
 			/// Called by sheet when the operation is removed from a sheet. Default implementation adds the sheet to the sheet set.
 			virtual void onSheetUnregister(DrawSheet* sheet);
 
+			/// Position setter with separate x,y parameters (for convenience)
+			void setPosition(int x, int y);
+
+			/// Sets the Z order of the rendered image
+			void setZOrder(int z);
+
 		protected:
 			/// On change updater - marks all using sheets as dirty
-			virtual void onChange();
+			virtual void _markDirty();
+
+			// On position change
+			virtual void positionChanged();
 
 			const ID mID;
 
@@ -71,6 +80,10 @@ namespace Opde {
 
 			/// Sheets using this draw op
 			DrawSheetSet mUsingSheets;
+
+			PixelCoord mPosition;
+
+			int mZOrder;
 	};
 
 	/// Map of all draw operations by it's ID

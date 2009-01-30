@@ -33,12 +33,20 @@ namespace Opde {
 	DrawOperation::DrawOperation(DrawService* owner, DrawOperation::ID id, const DrawSourcePtr& ds) :
 			mID(id),
 			mDrawSource(ds),
-			mOwner(owner) {
+			mOwner(owner),
+			mPosition(0,0),
+			mZOrder(0) {
 		// nothing to do besides this
 	};
 
 	//------------------------------------------------------
 	DrawOperation::~DrawOperation() {
+		// remove from all sheets left
+		for (DrawSheetSet::iterator it = mUsingSheets.begin(); it != mUsingSheets.end(); ++it) {
+			(*it)->_removeDrawOperation(this);
+		}
+
+		mUsingSheets.clear();
 	};
 
 	//------------------------------------------------------
@@ -62,9 +70,29 @@ namespace Opde {
 	};
 
 	//------------------------------------------------------
-	void DrawOperation::onChange() {
+	void DrawOperation::_markDirty() {
 		for (DrawSheetSet::iterator it = mUsingSheets.begin(); it != mUsingSheets.end(); ++it) {
 			(*it)->_markDirty(this);
 		}
+	}
+	
+	//------------------------------------------------------
+	void DrawOperation::setPosition(int x, int y) {
+		mPosition.first = x;
+		mPosition.second = y;
+		
+		positionChanged();
+	}
+	
+	//------------------------------------------------------
+	void DrawOperation::setZOrder(int z) {
+		mZOrder = z;
+		
+		positionChanged();
+	}
+
+	//------------------------------------------------------
+	void DrawOperation::positionChanged() {
+		
 	}
 }

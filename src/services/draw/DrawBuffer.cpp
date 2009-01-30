@@ -23,6 +23,7 @@
 
 
 #include "DrawBuffer.h"
+#include "DrawSheet.h"
 
 #include <OgreMaterialManager.h>
 #include <OgreHardwareBufferManager.h>
@@ -30,6 +31,7 @@
 #include <OgreTechnique.h>
 #include <OgrePass.h>
 #include <OgreRoot.h>
+
 
 using namespace Ogre;
 
@@ -45,8 +47,11 @@ namespace Opde {
 			mVertexData(NULL),
 			mIndexData(NULL),
 			mQuadCount(0),
-			mRenderQueueID(Ogre::RENDER_QUEUE_OVERLAY) {
+			mRenderQueueID(Ogre::RENDER_QUEUE_OVERLAY),
+			mParent(NULL) {
 
+		setUseIdentityProjection(true);
+		setUseIdentityView(true);
 	};
 
 	//------------------------------------------------------
@@ -58,11 +63,13 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void DrawBuffer::addDrawOperation(DrawOperation* op) {
+		mDrawOpMap.insert(std::make_pair(op->getID(), op));
 		mIsDirty = true;
 	};
 
 	//------------------------------------------------------
 	void DrawBuffer::removeDrawOperation(DrawOperation* op) {
+		// find the draw op. mentioned, remove
 		mIsDirty = true;
 	};
 
@@ -74,7 +81,6 @@ namespace Opde {
 	//------------------------------------------------------
 	void DrawBuffer::update() {
 		// let's update the queue!
-
 		// We'll set isUpdating to true - _queueDrawQuad can then be used
 		mIsUpdating = true;
 
@@ -111,6 +117,11 @@ namespace Opde {
 	};
 
 	//------------------------------------------------------
+	void DrawBuffer::_parentChanged(DrawSheet* parent) {
+		mParent = parent;
+	}
+
+	//------------------------------------------------------
 	const MaterialPtr& DrawBuffer::getMaterial(void) const {
 		return mMaterial;
 	};
@@ -132,26 +143,43 @@ namespace Opde {
 	//------------------------------------------------------
 	void DrawBuffer::getWorldTransforms(Ogre::Matrix4* trans) const {
 		// Identity
-		*trans = Matrix4::IDENTITY;
+		*trans = mParent->_getParentNodeFullTransform();
+	};
+
+	//------------------------------------------------------
+	const Ogre::Quaternion& DrawBuffer::getWorldOrientation(void) const {
+		if (mParent)
+			return mParent->getParentNode()->_getDerivedOrientation();
+		else
+			return Quaternion::IDENTITY;
+	};
+
+	//------------------------------------------------------
+	const Ogre::Vector3& DrawBuffer::getWorldPosition(void) const {
+		if (mParent)
+			return mParent->getParentNode()->_getDerivedPosition();
+		else
+			return Vector3::ZERO;
 	};
 
 	//------------------------------------------------------
 	Ogre::Real DrawBuffer::getSquaredViewDepth(const Ogre::Camera* cam) const {
-		// TODO: What?
-		return 1.0f;
+		assert(mParent);
+		Node* n = mParent->getParentNode();
+		assert(n);
+		return n->getSquaredViewDepth(cam);
 	};
 
 	//------------------------------------------------------
 	const Ogre::LightList& DrawBuffer::getLights() const {
-		static LightList ll;
-		return ll;
+		return mParent->queryLights();
 	};
 
 	//------------------------------------------------------
 	void DrawBuffer::buildBuffer() {
 		// if size differs, we reallocate the buffers
 		if (mQuadCount < mQuadList.size()) {
-			// raise the buffer, with some padding
+			// raise the buffer, with some padding to avoid frequent reallocations
 			mQuadCount = mQuadList.size() * 2;
 			destroyBuffers();
 		}
@@ -160,7 +188,7 @@ namespace Opde {
 			// no vertex data, let's reallocate some!
 			mVertexData = new Ogre::VertexData();
 			mVertexData->vertexStart = 0;
-			mVertexData->vertexCount = mQuadCount * 4;
+			mVertexData->vertexCount = mQuadList.size() * 4;
 
 			Ogre::VertexDeclaration* decl = mVertexData->vertexDeclaration;
 			Ogre::VertexBufferBinding* binding = mVertexData->vertexBufferBinding;
@@ -168,9 +196,9 @@ namespace Opde {
 			size_t offset = 0;
 			decl->addElement(0, offset, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
 			offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
-			decl->addElement(0, offset, Ogre::VET_COLOUR, Ogre::VES_DIFFUSE);
-			offset += Ogre::VertexElement::getTypeSize(Ogre::VET_COLOUR);
 			decl->addElement(0, offset, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES, 0);
+			offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT2);
+			decl->addElement(0, offset, Ogre::VET_COLOUR, Ogre::VES_DIFFUSE);
 
 			mBuffer = Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
 					decl->getVertexSize(0), mVertexData->vertexCount, Ogre::HardwareBuffer::HBU_DYNAMIC_WRITE_ONLY_DISCARDABLE);
@@ -182,7 +210,7 @@ namespace Opde {
 			// no index data, so let's rebuilt it.
 			mIndexData = new Ogre::IndexData();
 			mIndexData->indexStart = 0;
-			mIndexData->indexCount = mQuadCount * 6;
+			mIndexData->indexCount = mQuadCount * 6; // quad count, so we have a reserve
 
 			// As canvas does it - build the IBO statically, we don't need no per-update updates
 			mIndexData->indexBuffer = Ogre::HardwareBufferManager::getSingleton().createIndexBuffer(
@@ -195,7 +223,7 @@ namespace Opde {
 					Ogre::HardwareBuffer::HBL_DISCARD));
 
 			// Inspired by Canvas. It's true we don't need to do this per frame,
-			// we'll just set the mIndexData->indexCount to the propper value after building
+			// we'll just set the mIndexData->indexCount to the proper value after building
 			for (size_t iindex = 0, ivertex = 0, iquad = 0; iquad < mQuadCount; ++iquad, ivertex += 4) {
 				iindex = iquad * 6;
 				// tri 1
@@ -275,7 +303,7 @@ namespace Opde {
 		}
 
 		// ibo length to the number of quads times six
-		mIndexData->indexCount = mQuadCount * 6;
+		mIndexData->indexCount = mQuadList.size() * 6;
 
 		mBuffer->unlock();
 	};

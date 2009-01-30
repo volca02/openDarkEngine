@@ -41,6 +41,7 @@
 #include <OgreAnimation.h>
 #include <OgreWindowEventUtilities.h>
 #include <OgreException.h>
+#include <OgreViewport.h>
 
 // Jorge texture png
 #include "jorge.h"

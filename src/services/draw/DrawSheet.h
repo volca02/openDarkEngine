@@ -36,7 +36,7 @@ namespace Opde {
 	class OPDELIB_EXPORT DrawSheet : public Ogre::MovableObject {
 		public:
 			/// Constructor
-			DrawSheet();
+			DrawSheet(const std::string& sheetName);
 
 			/// Destructor
 			~DrawSheet();
@@ -53,6 +53,11 @@ namespace Opde {
 			/// Removes the draw operation from this sheet.
 			void removeDrawOperation(DrawOperation* toRemove);
 
+			/** Does the core removal of draw operation, without any notification
+			 * @note Internal, use removeDrawOperation instead
+			*/
+			void _removeDrawOperation(DrawOperation* toRemove);
+
 			/// Internal: Marks a certain draw operation dirty in this sheet. Called internally on a DrawOp. change
 			void _markDirty(DrawOperation* drawOp);
 
@@ -65,10 +70,12 @@ namespace Opde {
 			Ogre::Real getBoundingRadius() const;
 			void visitRenderables(Ogre::Renderable::Visitor* vis, bool debugRenderables);
 
-		protected:
+			bool isVisible() const;
+
 			/// Called to ensure all the DrawBuffers are current and reflect the requested state
 			void rebuildBuffers();
 
+		protected:
 			DrawBuffer* getBufferForOperation(DrawOperation* drawOp, bool autoCreate = false);
 
 			void _updateRenderQueue(Ogre::RenderQueue* queue);
@@ -81,6 +88,9 @@ namespace Opde {
 
 			/// All draw operations on this sheet
 			DrawOperationMap mDrawOpMap;
+
+			/// Sheet name
+			std::string mSheetName;
 	};
 }
 

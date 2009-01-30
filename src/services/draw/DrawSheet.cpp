@@ -30,13 +30,21 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- DrawSheet ---------------------*/
 	/*----------------------------------------------------*/
-	DrawSheet::DrawSheet() : mActive(false) {
+	DrawSheet::DrawSheet(const std::string& sheetName) : mActive(false), mSheetName(sheetName) {
 		// default to no visibility
 		setVisible(false);
 	};
 
 	//------------------------------------------------------
 	DrawSheet::~DrawSheet() {
+		DrawOperationMap::iterator iend = mDrawOpMap.end();
+
+		for (DrawOperationMap::iterator doi = mDrawOpMap.begin(); doi != iend; ++doi) {
+			removeDrawOperation(doi->second);
+		}
+
+		mDrawOpMap.clear();
+
 		// TODO: destroy all the render buffers
 		DrawBufferMap::iterator it = mDrawBufferMap.begin();
 
@@ -52,7 +60,13 @@ namespace Opde {
 		mActive = true;
 
 		setVisible(true);
-		// TODO: Need to inform all DrawBuffers?
+
+		// Inform all buffers that the parent changed
+		for (DrawBufferMap::iterator it = mDrawBufferMap.begin(); it != mDrawBufferMap.end(); ++it) {
+			DrawBuffer* db = it->second;
+
+			db->_parentChanged(this);
+		}
 	}
 
 	//------------------------------------------------------
@@ -64,17 +78,26 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void DrawSheet::addDrawOperation(DrawOperation* drawOp) {
-		DrawBuffer* buf = getBufferForOperation(drawOp);
+		DrawBuffer* buf = getBufferForOperation(drawOp, true);
 
 		assert(buf);
 
 		buf->addDrawOperation(drawOp);
 
 		mDrawOpMap[drawOp->getID()] = drawOp;
+
+		drawOp->onSheetRegister(this);
 	}
 
 	//------------------------------------------------------
 	void DrawSheet::removeDrawOperation(DrawOperation* toRemove) {
+		_removeDrawOperation(toRemove);
+
+		toRemove->onSheetUnregister(this);
+	}
+
+	//------------------------------------------------------
+	void DrawSheet::_removeDrawOperation(DrawOperation* toRemove) {
 		DrawBuffer* buf = getBufferForOperation(toRemove);
 
 		assert(buf);
@@ -103,8 +126,7 @@ namespace Opde {
 
 	//------------------------------------------------------
 	DrawBuffer* DrawSheet::getBufferForOperation(DrawOperation* drawOp, bool autoCreate) {
-		// TODO: Temp. Fix. We should be able to sort by draw source unique ID or something
-		DrawBufferMap::iterator it = mDrawBufferMap.find(drawOp->getDrawSource()->material->getName());
+		DrawBufferMap::iterator it = mDrawBufferMap.find(drawOp->getDrawSource()->sourceID);
 
 		if (it != mDrawBufferMap.end()) {
 			return it->second;
@@ -114,7 +136,7 @@ namespace Opde {
 			const Ogre::MaterialPtr& mp = drawOp->getDrawSource()->material;
 			DrawBuffer* db = new DrawBuffer(mp);
 			// TODO: And here as well. ID should be enough
-			mDrawBufferMap[drawOp->getDrawSource()->material->getName()] = db;
+			mDrawBufferMap[drawOp->getDrawSource()->sourceID] = db;
 			return db;
 		} else {
 			return NULL;
@@ -141,22 +163,26 @@ namespace Opde {
 	const Ogre::AxisAlignedBox& DrawSheet::getBoundingBox() const {
 		static Ogre::AxisAlignedBox box;
 		box.setInfinite();
-
 		return box;
 	};
 
 	//------------------------------------------------------
 	Ogre::Real DrawSheet::getBoundingRadius() const {
-		return 1.0; // TODO: What radius is appropriate?
+		return 1.0; // What radius is appropriate?
 	};
 
 	//------------------------------------------------------
 	void DrawSheet::visitRenderables(Ogre::Renderable::Visitor* vis, bool debugRenderables) {
-		// visit all the renderables - all drawbuffers
+		// visit all the renderables - all draw buffers
 		for (DrawBufferMap::iterator it = mDrawBufferMap.begin(); it != mDrawBufferMap.end(); ++it) {
 			vis->visit(it->second, 0, debugRenderables);
 		}
 	};
+
+	//------------------------------------------------------
+	bool DrawSheet::isVisible() const {
+		return true;
+	}
 
 	//------------------------------------------------------
 	void DrawSheet::_updateRenderQueue(Ogre::RenderQueue* queue) {

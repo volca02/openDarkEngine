@@ -32,14 +32,20 @@
 #include "SharedPtr.h"
 #include "DrawSheet.h"
 #include "Array.h"
+#include "RenderedImage.h"
+
+#include <OgreViewport.h>
+#include <OgreRenderQueueListener.h>
 
 #include <stack>
 
 namespace Opde {
+	// Forward decl.
+	class TextureAtlas;
 
 	/** @brief Draw Service - 2D rendering service.
 	*/
-	class OPDELIB_EXPORT DrawService : public Service {
+	class OPDELIB_EXPORT DrawService : public Service, public Ogre::RenderQueueListener {
 		public:
 			DrawService(ServiceManager *manager, const std::string& name);
 			virtual ~DrawService();
@@ -66,39 +72,78 @@ namespace Opde {
 			 */
 			void setActiveSheet(DrawSheet* sheet);
 
-
 			/** Creates a DrawSource that represents a specified image.
 			 * Also creates a material that is used to render the image.
 			 * @param img The image name
 			 * @return Shared ptr to the draw source usable for draw operations
 			 */
-			DrawSourcePtr& createDrawSource(const std::string& img, const std::string& group);
+			DrawSourcePtr createDrawSource(const std::string& img, const std::string& group);
 
 			/** Creates a rendered image (e.g. a sprite)
 			 * @param draw The image source for this operation
 			 */
-			// RenderedImage* createRenderedImage(DrawSourcePtr& draw);
+			RenderedImage* createRenderedImage(DrawSourcePtr& draw);
 
 			/** Destroys the specified draw operation (any ancestor)
 			 * @param dop The draw operation to destroy
 			 */
 			void destroyDrawOperation(DrawOperation* dop);
 
+			/** Atlas factory. Generates a new texture atlas usable for storing numerous different images - which are then combined into a single draw call.
+			 * @return New atlas pointer
+			 */
+			TextureAtlas* createAtlas();
+
+			/** Destroys the given instance of texture atlas.
+			 * @param atlas The atlas to be destroyed
+			 */
+			void destroyAtlas(TextureAtlas* atlas);
+
+			/** Converts the given coordinates to the screen space x,y,z coordinates
+			 */
+			Ogre::Vector3 convertToScreenSpace(int x, int y, int z);
+
+			/** Converts the given depth to screen-space
+			 * @param z the depth in 0 - MAX_Z_VALUE range
+			 * @return Real number describing the depth
+			 */
+			Ogre::Real getConvertedDepth(int z);
+
+			static const int MAX_Z_VALUE;
+
+			void renderQueueStarted(Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& skipThisInvocation);
+
+			void renderQueueEnded(Ogre::uint8 queueGroupId, const Ogre::String& invocation, bool& skipThisInvocation);
+
 		protected:
 			bool init();
 			void bootstrapFinished();
+			void shutdown();
 
 			DrawOperation::ID getNewDrawOperationID();
 
 			typedef std::map<std::string, DrawSheet*> SheetMap;
 			typedef std::stack<size_t> IDStack;
 			typedef SimpleArray<DrawOperation*> DrawOperationArray;
+			typedef std::map<DrawSource::ID, TextureAtlas*> TextureAtlasMap;
 
 			SheetMap mSheetMap;
 			DrawSheet* mActiveSheet;
 			DrawOperation::ID mDrawOpID;
+			DrawSource::ID mDrawSourceID; // draw sources in atlas have the same ID
 			IDStack mFreeIDs;
 			DrawOperationArray mDrawOperations;
+
+			Ogre::RenderSystem* mRenderSystem;
+
+			Ogre::Real mXTextelOffset;
+			Ogre::Real mYTextelOffset;
+
+			Ogre::Viewport* mViewport;
+
+			Ogre::SceneManager* mSceneManager;
+
+
 	};
 
 	/// Shared pointer to the draw service

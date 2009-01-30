@@ -22,25 +22,29 @@
  *****************************************************************************/
 
 
-#include "DrawCommon.h"
-#include <OgreVector2.h>
+#ifndef __RENDEREDIMAGE_H
+#define __RENDEREDIMAGE_H
 
-using Ogre::Vector2;
+#include "DrawOperation.h"
+
+#include <OgreVector3.h>
 
 namespace Opde {
 
-	/// Sorting comparison op.
-	bool QuadLess::operator()(const DrawQuad* a, const DrawQuad* b) const {
-		return a->positions.topleft.z < b->positions.topleft.z;
-	};
+	class RenderedImage : public DrawOperation {
+		public:
+			RenderedImage(DrawService* owner, DrawOperation::ID id, const DrawSourcePtr& ds);
 
-	Vector2 DrawSource::transform(const Vector2& input) {
-		Vector2 tran(input);
+			void visitDrawBuffer(DrawBuffer* db);
 
-		tran *= size;
-		tran += displacement;
-
-		return tran;
+		protected:
+			
+			/// override that updates the image and marks dirty
+			void positionChanged();
+			
+			DrawQuad mDrawQuad;
 	};
 
 };
+
+#endif

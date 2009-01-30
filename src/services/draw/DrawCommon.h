@@ -30,6 +30,7 @@
 #include <OgreVector3.h>
 #include <OgreVector2.h>
 #include <OgreColourValue.h>
+#include <OgreImage.h>
 #include <OgreTexture.h>
 #include <OgreMaterial.h>
 
@@ -46,6 +47,19 @@ namespace Opde {
 	/// A pixel coordinates type
 	typedef std::pair<int, int> PixelCoord;
 
+	/// A pixel dimensions type
+	struct OPDELIB_EXPORT PixelSize {
+		PixelSize(size_t w, size_t h) {
+			width = w;
+			height = h;
+		};
+
+		PixelSize() : width(0), height(0) {};
+
+		size_t width;
+		size_t height;
+	};
+
 	/// Draw quad - a single Rectangle that can be stored for rendering
 	struct OPDELIB_EXPORT DrawQuad {
 		DrawRect<Ogre::Vector3> positions;
@@ -59,7 +73,7 @@ namespace Opde {
 	typedef std::vector<const DrawQuad*> DrawQuadList;
 
 	/// Sorting comparison op.
-	struct QuadLess {
+	struct OPDELIB_EXPORT QuadLess {
 		bool operator()(const DrawQuad* a, const DrawQuad* b) const;
 	};
 
@@ -71,8 +85,17 @@ namespace Opde {
 
 	/// A drawn bitmap source
 	struct OPDELIB_EXPORT DrawSource {
+		/// Draw source image ID. Atlased draw sources have the same ID. It is used to organize buffers.
+		typedef size_t ID;
+
+		/// Identifies the texture id (image id).
+		ID sourceID;
+
 		/** Texture this draw source represents */
 		Ogre::TexturePtr texture;
+		
+		/** Source image of this draw source - may be lost after atlassing this, internal  */
+		Ogre::Image	image;
 
 		/** Material this draw source represents */
 		Ogre::MaterialPtr material;
@@ -84,18 +107,23 @@ namespace Opde {
 		Ogre::Vector2 size;
 
 		/// size in pixels of the DrawSource
-		PixelCoord pixelSize;
+		PixelSize pixelSize;
+
+		/// Additional pointer, used by atlas
+		void* placement;
+
+		inline Ogre::Vector2 getPixelSizeVector() { return Ogre::Vector2(pixelSize.width, pixelSize.height); };
 
 		/// Will transform the Texture coordinates to those usable for rendering
 		Ogre::Vector2 transform(const Ogre::Vector2& input);
+	};
 
-		/** Helper transformation method for DrawSources now being atlased into the owner.
-		* Position is coordinate in 0-1 of the atlas to which the image is translated while atlased.
-		* Result is that the specified DrawSource is transformed into the atlas, and returned as a new pointer.
-		* @param original The original DrawSource, not yet atlased
-		* @param position The translation by which the image is moved, in pixels (size conversion is calculated)
-		*/
-		DrawSourcePtr atlas(DrawSourcePtr& dsrc, const PixelCoord& position);
+	struct DrawSourceLess {
+		bool operator() (const DrawSourcePtr& a, const DrawSourcePtr& b) {
+			size_t sa = a->pixelSize.width * a->pixelSize.height;
+			size_t sb = b->pixelSize.width * b->pixelSize.height;
+			return sa < sb;
+		}
 	};
 };
 
