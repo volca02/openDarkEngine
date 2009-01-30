@@ -20,6 +20,7 @@ SET(OPDE_SERVICE_INCLUDES
     ${OPDE_SOURCE_DIR}/src/services/script
     ${OPDE_SOURCE_DIR}/src/services/material
     ${OPDE_SOURCE_DIR}/src/services/light
+    ${OPDE_SOURCE_DIR}/src/services/draw
 )
 
 # All the resulting libraries in a nice package as well
@@ -40,6 +41,7 @@ SET(OPDE_SERVICE_LIBRARIES
     OpdeLoopService
     OpdeGUIService
     OpdeScriptService
+    OpdeDrawService
 )
 
 FILE(GLOB_RECURSE OPDE_SERVICE_SOURCES ${OPDE_SOURCE_DIR}/src/services/*.h)
