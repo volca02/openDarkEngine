@@ -264,7 +264,11 @@ namespace Opde {
 					growBuf(newSize);
 				}
 
+				/// Size Getter
 				size_t getSize() { return mSize; };
+
+				/// Size Getter
+				size_t size() { return mSize; };
 
 			protected:
 				void growBuf(size_t newSize) {
