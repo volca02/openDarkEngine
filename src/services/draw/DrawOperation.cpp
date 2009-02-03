@@ -92,6 +92,13 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
+	void DrawOperation::setClipRect(const ClipRect& cr) {
+		mClipRect = cr;
+
+		positionChanged();
+	}
+
+	//------------------------------------------------------
 	void DrawOperation::positionChanged() {
 		
 	}

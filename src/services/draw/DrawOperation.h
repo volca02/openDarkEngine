@@ -64,6 +64,9 @@ namespace Opde {
 			/// Sets the Z order of the rendered image
 			void setZOrder(int z);
 
+			/// Sets a new clipping rectangle
+			void setClipRect(const ClipRect& cr);
+
 		protected:
 			/// On change updater - marks all using sheets as dirty
 			virtual void _markDirty();
@@ -84,6 +87,8 @@ namespace Opde {
 			PixelCoord mPosition;
 
 			int mZOrder;
+
+			ClipRect mClipRect;
 	};
 
 	/// Map of all draw operations by it's ID
