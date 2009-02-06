@@ -10,10 +10,17 @@ add_executable ( meshconvert meshconvert.cpp )
 
 add_executable ( chunk chunk.cpp )
 
+add_executable ( physver physver.cpp )
+
 add_executable ( DarkFontConverter DarkFontConverter.cpp )
 
 # TODO: Only compile-in the virtual file system statically instead of the whole OpenDark library 
 target_link_libraries( chunk
+        ${OGRE_LIBRARIES}
+        OpenDark
+)
+
+target_link_libraries( physver
         ${OGRE_LIBRARIES}
         OpenDark
 )
