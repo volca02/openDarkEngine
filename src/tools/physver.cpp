@@ -31,11 +31,8 @@ void usage(char* message = NULL) {
     if (message)
 	std::cerr << message << std::endl;
 
-    std::cout << "chunk FILE [CHUNK OUTFILE]" << std::endl
-	      << "  FILE - the dark database file to read" << std::endl
-	      << "  CHUNK - the chunk name to extract" << std::endl
-	      << "  OUTFILE - the file that the chunk is written into" << std::endl
-	      << "  with just the first argument, the program lists the chunks contained: CHUNK_NAME SIZE VERSION" << std::endl;
+    std::cout << "physver File [files...]" << std::endl
+	      << "  FILE - the dark database file to read" << std::endl;
 
     exit(1);
 }
