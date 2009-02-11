@@ -53,7 +53,7 @@ namespace Opde {
 	TextureAtlas::~TextureAtlas() {
 		// release all the draw sources
 		mMyDrawSources.clear();
-		
+
 		// and get rid of the allocation info too
 		delete mAtlasAllocation;
 	}
@@ -63,7 +63,7 @@ namespace Opde {
 		// Load as single first, but wit the same id
 		// First we load the image.
 		DrawSourcePtr ds = new DrawSource();
-		
+
 		ds->image.load(imgName, groupName);
 
 		ds->sourceID = mAtlasID;
@@ -80,6 +80,12 @@ namespace Opde {
 		return ds;
 	}
 
+	//------------------------------------------------------
+	void TextureAtlas::_addDrawSource(DrawSourcePtr& ds) {
+		// just insert into the list
+		mMyDrawSources.push_back(ds);
+		mIsDirty = true;
+	}
 
 	//------------------------------------------------------
 	void TextureAtlas::build() {

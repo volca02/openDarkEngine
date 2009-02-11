@@ -28,7 +28,7 @@
 namespace Opde {
 
 	/*----------------------------------------------------*/
-	/*-------------------- DrawBuffer --------------------*/
+	/*-------------------- 	DrawOperation ----------------*/
 	/*----------------------------------------------------*/
 	DrawOperation::DrawOperation(DrawService* owner, DrawOperation::ID id, const DrawSourcePtr& ds) :
 			mID(id),
@@ -75,19 +75,19 @@ namespace Opde {
 			(*it)->_markDirty(this);
 		}
 	}
-	
+
 	//------------------------------------------------------
 	void DrawOperation::setPosition(int x, int y) {
 		mPosition.first = x;
 		mPosition.second = y;
-		
+
 		positionChanged();
 	}
-	
+
 	//------------------------------------------------------
 	void DrawOperation::setZOrder(int z) {
 		mZOrder = z;
-		
+
 		positionChanged();
 	}
 
@@ -100,6 +100,6 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void DrawOperation::positionChanged() {
-		
+
 	}
 }

@@ -34,6 +34,7 @@ namespace Opde {
 	/** Texture atlas for DrawSource grouping. Textures created within this atlas are
 	 * grouped together into a single rendering call when used as a source for draw operations, resulting
 	 * in better performance.
+	 * @todo The dirty concept is unfinished and needs work
 	 */
 	class TextureAtlas {
 		public:
@@ -48,6 +49,9 @@ namespace Opde {
 
 			/** returns this Atlase's source ID */
 			inline DrawSource::ID getAtlasID() { return mAtlasID; };
+
+			/** Internal tool to allow external addition of draw sources. Used by font code. */
+			void _addDrawSource(DrawSourcePtr& ds);
 
 			/** Builds the atlas. Locks it for further additions, makes it useable */
 			void build();

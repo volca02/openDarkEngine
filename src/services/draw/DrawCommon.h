@@ -230,11 +230,16 @@ namespace Opde {
 		}
 	};
 
-	/// A structure that holds a Font definition with the accompanying palette
-	struct FontDefinition {
+	/// A font character type
+	typedef char FontCharType;
 
+	/// A single RGB color
+	struct RGBQuad {
+		uint8_t red;
+		uint8_t green;
+		uint8_t blue;
+		uint8_t reserved;
 	};
-
 };
 
 #endif
