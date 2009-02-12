@@ -56,6 +56,12 @@ namespace Opde {
 
 		PixelSize() : width(0), height(0) {};
 
+		PixelSize(const PixelSize& b) : width(b.width), height(b.height) { };
+
+		inline size_t getPixelCount() const { return width * height; };
+
+		const PixelSize& operator=(const PixelSize& b) { width = b.width; height = b.height; return *this; };
+
 		size_t width;
 		size_t height;
 	};
@@ -197,7 +203,7 @@ namespace Opde {
 
 		/** Texture this draw source represents */
 		Ogre::TexturePtr texture;
-		
+
 		/** Source image of this draw source - may be lost after atlassing this, internal  */
 		Ogre::Image	image;
 
@@ -231,15 +237,24 @@ namespace Opde {
 	};
 
 	/// A font character type
-	typedef char FontCharType;
+	typedef uint16_t FontCharType;
 
-	/// A single RGB color
-	struct RGBQuad {
+	/// A single RGBA color
+	struct RGBAQuad {
 		uint8_t red;
 		uint8_t green;
 		uint8_t blue;
-		uint8_t reserved;
+		uint8_t alpha;
 	};
+
+	typedef enum {
+		DPF_MONO,
+		DPF_8BIT,
+		DPF_RGBA
+	} DarkPixelFormat;
+
+
+
 };
 
 #endif

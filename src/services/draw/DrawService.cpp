@@ -28,6 +28,7 @@
 #include "ServiceCommon.h"
 #include "RenderService.h"
 #include "TextureAtlas.h"
+#include "FonFormat.h"
 
 #include <OgreTexture.h>
 #include <OgreTechnique.h>
@@ -43,6 +44,7 @@ using namespace Ogre;
 namespace Opde {
 
 	const int DrawService::MAX_Z_VALUE = 1024;
+	const RGBAQuad DrawService::msMonoPalette[2] = {{0,0,0,0}, {255,255,255,255}};
 
 	/*----------------------------------------------------*/
 	/*-------------------- DrawService -------------------*/
@@ -52,7 +54,8 @@ namespace Opde {
 			mActiveSheet(NULL),
 			mDrawOpID(0),
 			mDrawSourceID(0),
-			mViewport(NULL) {
+			mViewport(NULL),
+			mCurrentPalette(NULL) {
 	}
 
 	//------------------------------------------------------
@@ -75,6 +78,9 @@ namespace Opde {
 		}
 
 		mDrawOperations.clear();
+		
+		// TODO: if (mCurrentPalette != DefaultPalette)
+		delete[] mCurrentPalette;
 	}
 
 	//------------------------------------------------------
@@ -164,12 +170,250 @@ namespace Opde {
 		// Clear Z buffer to be ready to render overlayed meshes and stuff
 		if(queueGroupId == RENDER_QUEUE_OVERLAY) {
 			Ogre::Root::getSingleton().getRenderSystem()->clearFrameBuffer(Ogre::FBT_DEPTH);
+
+			// and rebuild the atlasses as needed
+			rebuildAtlases();
 		}
+	}
+
+	//------------------------------------------------------
+	void DrawService::rebuildAtlases() {
+		AtlasSet::iterator it = mAtlasesForRebuild.begin();
+		AtlasSet::iterator end = mAtlasesForRebuild.end();
+
+		while (it != end) {
+			(*it++)->build();
+		}
+
+		mAtlasesForRebuild.clear();
 	}
 
 	//------------------------------------------------------
 	void DrawService::renderQueueEnded(uint8 queueGroupId, const String& invocation, bool& skipThisInvocation) {
 
+	}
+
+	//------------------------------------------------------
+	FontDrawSource* DrawService::loadFont(TextureAtlas* atlas, const std::string& name, const std::string& group) {
+		// load the font according to the specs
+		assert(atlas);
+		FontDrawSource* nfs = atlas->createFont(name);
+		
+		// now we'll load the glyphs from the file
+		loadFonFile(name, group, nfs);
+		
+		return nfs;
+	}
+
+	//------------------------------------------------------
+	void DrawService::loadFonFile(const std::string& name, const std::string& group, FontDrawSource* fon) {
+		DarkFontHeader header;
+		
+		Ogre::DataStreamPtr Stream = Ogre::ResourceGroupManager::getSingleton().openResource(name, name, true, NULL);
+		FilePtr fontFile = new OgreFile(Stream);
+		
+		fontFile->readElem(&header.Format,2);
+		fontFile->readElem(&header.Unknown,1);
+		fontFile->readElem(&header.Palette,1);
+		fontFile->readElem(&header.Zeros1, 1, 32);
+		fontFile->readElem(&header.FirstChar, 2);
+		fontFile->readElem(&header.LastChar, 2);
+		fontFile->readElem(&header.Zeros2, 1, 32);
+		fontFile->readElem(&header.WidthOffset, 4);
+		fontFile->readElem(&header.BitmapOffset, 4);
+		fontFile->readElem(&header.RowWidth, 2);
+		fontFile->readElem(&header.NumRows, 2);
+	
+		// what format do we have?
+		DarkPixelFormat dpf;
+		const RGBAQuad* curpalette;
+		
+		if (header.Format == 0) { 
+			dpf = DPF_MONO;
+			curpalette = msMonoPalette;
+		} else {
+			dpf = DPF_8BIT;
+			curpalette = mCurrentPalette;
+		}
+			
+		
+		size_t nchars = header.LastChar - header.FirstChar + 1; 
+		
+		uint16_t* columns = new uint16_t[nchars + 1];
+			
+		// seek to the char column specs
+		fontFile->seek(header.WidthOffset, File::FSEEK_BEG);
+		fontFile->readElem(columns, 2, nchars+1);
+		
+		// seek to the bitmap part
+		fontFile->seek(header.BitmapOffset, File::FSEEK_BEG);
+		
+		size_t bitmapSize = fontFile->size() - header.BitmapOffset;  
+		
+		unsigned char *bitmap = new unsigned char[bitmapSize];
+		unsigned char *bmpos = bitmap;
+		
+		fontFile->read(bitmap, bitmapSize);
+		
+		// load the characters
+		for (FontCharType chr = header.FirstChar; chr <= header.LastChar; ++chr) {
+			// span is columns[chr] to columns[chr+1]
+			size_t width = columns[chr+1] - columns[chr];
+			PixelSize ps(width, header.NumRows);
+			fon->addGlyph(chr, ps, dpf, header.RowWidth, bmpos, curpalette);
+			bmpos += header.RowWidth * header.NumRows;
+		}
+		
+		delete[] bitmap;
+		delete[] columns;
+	}
+
+	
+	//------------------------------------------------------
+	void DrawService::setFontPalette(Ogre::ManualFonFileLoader::PaletteType paltype, const Ogre::String& fname) {
+		// Code written by patryn, reused here for the new font rendering pipeline support
+		/*
+		ExternalPaletteHeader PaletteHeader;
+		WORD Count;
+		char *Buffer, *C;
+		BYTE S;
+		unsigned int I;
+
+		// Open the file
+		Ogre::DataStreamPtr Stream;
+		
+		try 
+		{
+			Stream = Ogre::ResourceGroupManager::getSingleton().openResource(mPaletteFileName, mFontGroup, true);
+			mPaletteFile = new OgreFile(Stream);
+		} catch(Ogre::FileNotFoundException) {
+			// Could not find resource, use the default table
+			LogManager::getSingleton().logMessage("Specified palette file not found - using default palette!");
+			return (RGBQUAD*)ColorTable;
+		}
+		
+		RGBQUAD *Palette = new RGBQUAD[256];
+		if (!Palette)
+			return NULL;
+		
+		if((mPaletteType == ePT_PCX) || (mPaletteType == ePT_DefaultBook))	// PCX file specified...
+		{
+			RGBQUAD *Palette = new RGBQUAD[256];
+			
+			// Test to see if we're facing a PCX file. (0A) (xx) (01)
+			uint8_t Manuf, Enc;
+			mPaletteFile->read(&Manuf, 1);
+			mPaletteFile->seek(2);
+			mPaletteFile->read(&Enc, 1);
+			
+			if (Manuf != 0x0A || Enc != 0x01) // Invalid file, does not seem like a PCX at all
+			{ 
+				delete[] Palette; // Clean up!
+				LogManager::getSingleton().logMessage("Invalid palette file specified - seems not to be a PCX file!");
+				return (RGBQUAD*)ColorTable; // Should not matter - the cast (if packed)
+			}
+			
+			BYTE BPP;
+			mPaletteFile->readElem(&BPP, 1);
+			
+			mPaletteFile->seek(3 * 256 + 1, File::FSEEK_END);
+			BYTE Padding;
+			mPaletteFile->readElem(&Padding, 1);
+			
+			if((BPP == 8) && (Padding == 0x0C)) //Make sure it is an 8bpp and a valid PCX
+			{
+				// Byte sized structures - endianness always ok
+				for (unsigned int I = 0; I < 256; I++)
+				{
+					
+					mPaletteFile->read(&Palette[I].rgbRed, 1);
+					mPaletteFile->read(&Palette[I].rgbGreen, 1);
+					mPaletteFile->read(&Palette[I].rgbBlue, 1);
+					Palette[I].rgbReserved = 0;
+				}
+			} else 
+			{
+				delete[] Palette; // Clean up!
+				LogManager::getSingleton().logMessage("Invalid palette file specified - not 8 BPP or invalid Padding!");
+				return (RGBQUAD*)ColorTable; // Return default palette
+			}			
+			return Palette;
+		}
+		
+		if (mPaletteType != ePT_External) 
+		{
+			delete[] Palette; // Clean up!
+			LogManager::getSingleton().logMessage("Invalid palette type specified!");
+			return (RGBQUAD*)ColorTable;
+		}
+		
+		// We're sure that we have external palette here:
+		mPaletteFile->readStruct(&PaletteHeader, ExternalPaletteHeader_Format, sizeof(ExternalPaletteHeader));
+		if (PaletteHeader.RiffSig == 0x46464952)
+		{
+			if (PaletteHeader.PSig1 != 0x204C4150)
+			{
+				delete []Palette;
+				return NULL;
+			}
+			mPaletteFile->seek(2L, StdFile::FSEEK_CUR);
+			mPaletteFile->readElem(&Count, 2);
+			if (Count > 256)
+				Count = 256;
+			for (I = 0; I < Count; I++)
+			{
+				mPaletteFile->readStruct(&Palette[I], RGBQUAD_Format, sizeof(RGBQUAD));
+				S = Palette[I].rgbRed;
+				Palette[I].rgbRed = Palette[I].rgbBlue;
+				Palette[I].rgbBlue = S;
+			}
+		}
+		else if (PaletteHeader.RiffSig == 0x4353414A)
+		{
+			mPaletteFile->seek(0);
+			Buffer = new char[3360];
+			if (!Buffer)
+			{
+				delete []Palette;
+				return NULL;
+			}
+			mPaletteFile->read(Buffer, 3352);
+			if (strncmp(Buffer, "JASC-PAL", 8))
+			{
+				delete []Buffer;
+				delete []Palette;
+				return NULL;
+			}
+			C = strchr(Buffer, '\n')+1;
+			C = strchr(C, '\n')+1;
+			Count = (WORD)strtoul(C, NULL, 10);
+			if (Count > 256)
+				Count = 256;
+			for (I = 0; I < Count; I++)
+			{
+				C = strchr(C, '\n')+1;
+				Palette[I].rgbRed = (BYTE)strtoul(C, &C, 10);
+				C++;
+				Palette[I].rgbGreen = (BYTE)strtoul(C, &C, 10);
+				C++;
+				Palette[I].rgbBlue = (BYTE)strtoul(C, &C, 10);
+			}
+			delete []Buffer;
+		}
+		else
+		{
+			mPaletteFile->seek(0);
+			RGBTRIPLE P;
+			for (I = 0; I < mPaletteFile->size() / sizeof(RGBTRIPLE); I++)
+			{
+				mPaletteFile->readStruct(&P, RGBTRIPLE_Format, sizeof(RGBTRIPLE));
+				Palette[I].rgbRed = P.rgbtBlue;
+				Palette[I].rgbGreen = P.rgbtGreen;
+				Palette[I].rgbBlue = P.rgbtRed;
+			}
+		}
+		return Palette;
+		*/
 	}
 
 	//------------------------------------------------------
@@ -265,6 +509,11 @@ namespace Opde {
 			z = MAX_Z_VALUE;
 
 		return mRenderSystem->getMaximumDepthInputValue() - (z * depth / MAX_Z_VALUE);
+	}
+
+	//------------------------------------------------------
+	void DrawService::_queueAtlasForRebuild(TextureAtlas* atlas) {
+		mAtlasesForRebuild.insert(atlas);
 	}
 
 	//------------------------------------------------------

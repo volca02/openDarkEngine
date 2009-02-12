@@ -26,6 +26,7 @@
 
 #include "DrawCommon.h"
 #include "FreeSpaceInfo.h"
+#include "FontDrawSource.h"
 
 namespace Opde {
 	// Forward decl.
@@ -34,7 +35,6 @@ namespace Opde {
 	/** Texture atlas for DrawSource grouping. Textures created within this atlas are
 	 * grouped together into a single rendering call when used as a source for draw operations, resulting
 	 * in better performance.
-	 * @todo The dirty concept is unfinished and needs work
 	 */
 	class TextureAtlas {
 		public:
@@ -46,6 +46,10 @@ namespace Opde {
 
 			/** Creates an atlased draw source */
 			DrawSourcePtr createDrawSource(const Ogre::String& imgName, const Ogre::String& groupName);
+
+			/** Creates a font instance (to be filled with glyphs afterwards) that is stored inside this atlas
+			 * @note You probably don't want to use this. You'll want to use DrawService::loadFont instead */
+			FontDrawSource* createFont(const std::string& name);
 
 			/** returns this Atlase's source ID */
 			inline DrawSource::ID getAtlasID() { return mAtlasID; };
@@ -59,13 +63,17 @@ namespace Opde {
 		protected:
 			void enlarge(size_t area);
 
+			void markDirty();
+
 			DrawService* mOwner;
 
 			DrawSource::ID mAtlasID;
 
 			typedef std::list<DrawSourcePtr> DrawSourceSet;
+			typedef std::list<FontDrawSource*> FontSet;
 
 			DrawSourceSet mMyDrawSources;
+			FontSet mMyFonts;
 
 			FreeSpaceInfo* mAtlasAllocation;
 

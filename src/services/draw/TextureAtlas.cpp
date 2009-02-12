@@ -24,6 +24,8 @@
 // Portions inspired by ajs' Atlas code
 
 #include "TextureAtlas.h"
+#include "DrawService.h"
+#include "FontDrawSource.h"
 
 #include <OgreTextureManager.h>
 #include <OgreStringConverter.h>
@@ -56,6 +58,15 @@ namespace Opde {
 
 		// and get rid of the allocation info too
 		delete mAtlasAllocation;
+		
+		FontSet::iterator fit = mMyFonts.begin();
+		FontSet::iterator fend = mMyFonts.end();
+		
+		while (fit != fend) {
+			delete *fit++;
+		}
+		
+		mMyFonts.clear();
 	}
 
 	//------------------------------------------------------
@@ -75,16 +86,28 @@ namespace Opde {
 		ds->displacement = Ogre::Vector2(0, 0);
 
 		mMyDrawSources.push_back(ds);
-		mIsDirty = true;
+		markDirty();
 
 		return ds;
+	}
+
+
+	//------------------------------------------------------
+	FontDrawSource* TextureAtlas::createFont(const std::string& name) {
+		// creates a new font instance to be filled with glyphs
+		FontDrawSource* fdsp = new FontDrawSource(this, name);
+
+		mMyFonts.push_back(fdsp);
+		markDirty();
+
+		return fdsp;
 	}
 
 	//------------------------------------------------------
 	void TextureAtlas::_addDrawSource(DrawSourcePtr& ds) {
 		// just insert into the list
 		mMyDrawSources.push_back(ds);
-		mIsDirty = true;
+		markDirty();
 	}
 
 	//------------------------------------------------------
@@ -98,6 +121,17 @@ namespace Opde {
 
 		// First, we sort by size of the DrawSource
 		mMyDrawSources.sort(DrawSourceLess());
+
+		// build the fonts (if this didn't happen already)
+		// so we'll be sure the glyphs are there to be atlassed
+		FontSet::iterator fit = mMyFonts.begin();
+
+		while (fit != mMyFonts.end()) {
+			FontDrawSource* fdsp = *fit++;
+
+			if (!fdsp->isBuilt())
+				fdsp->build();
+		}
 
 		// now try to allocate all the draw sources. If we fail, grow and try again
 		do {
@@ -207,7 +241,7 @@ namespace Opde {
 		// Ogre::TextureManager::getSingleton().unload(mAtlasTexture);
 
 		// mark dirty the atlas
-		mIsDirty = true;
+		markDirty();
 
 		size_t size;
 
@@ -226,4 +260,11 @@ namespace Opde {
 		mAtlasAllocation = new FreeSpaceInfo(0,0,mAtlasSize.width, mAtlasSize.height);
 	}
 
+	//------------------------------------------------------
+	void TextureAtlas::markDirty() {
+		mIsDirty = true;
+
+		// queue this atlas for automatic rebuilding
+		mOwner->_queueAtlasForRebuild(this);
+	}
 };

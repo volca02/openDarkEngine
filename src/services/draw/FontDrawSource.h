@@ -26,14 +26,14 @@
 #define __FONTDRAWSOURCE_H
 
 #include "DrawCommon.h"
-#include "TextureAtlas.h"
+#include "SharedPtr.h"
 
 #include <OgreImage.h>
 #include <OgreTexture.h>
 #include <OgreMaterial.h>
 
 namespace Opde {
-
+	class TextureAtlas;
 
 	/// A structure that holds a Font definition ready for usage (as numerous DrawSourcePtrs)
 	class FontDrawSource {
@@ -46,8 +46,9 @@ namespace Opde {
 			* @param chr The character represented by this definition
 			* @param dimensions the final dimensions of the glyph
 			* @param pf The pixelformat of the source
+			* @param rowlen the length of one row in bytes (e.g. the byte skip count to get to next row)
 			* @param data The linear buffer pointer to the pixel data in the specified format */
-			void addGlyph(FontCharType chr, const PixelSize& dimensions, Ogre::PixelFormat pf, void* data, RGBQuad* pallette = NULL);
+			void addGlyph(FontCharType chr, const PixelSize& dimensions, DarkPixelFormat pf, size_t rowlen, void* data, const RGBAQuad* pallette = NULL);
 
 			/** Retrieves a glyph as a draw source for rendering usage */
 			DrawSourcePtr getGlyph(FontCharType chr);
@@ -58,10 +59,23 @@ namespace Opde {
 			/// Reurns the maximal height of any glyph from this font
 			inline size_t getHeight() { return mMaxHeight; };
 
-			/** Bakes the font - this means that the font is complete and won't change any more, and informs us it's ready for atlassing. This method will queue all the glyphs in the owning atlas for atlassing. */
-			void bake();
+			/// Built indicator - After font build operation, this returns true. @see build()
+			inline bool isBuilt() { return mBuilt; };
+
+			/** Builds the font - this means that the font is complete and won't change any more, and informs us it's ready for atlassing. This method will queue all the glyphs in the owning atlas for atlassing. */
+			void build();
 
 		protected:
+			/** populates the Image in the drawsource with a RGB conversion of the supplied 1Bit mono image
+			 *  @note uses the first two records in the specified pallette for conversion
+			 */
+			void populateImageFromMono(DrawSourcePtr& dsp, const PixelSize& dimensions, size_t rowlen, void* data, const RGBAQuad* pal);
+
+			/** populates the Image in the drawsource with a RGB conversion of the supplied 8Bit palletized image
+			 *  @note uses the records in the specified pallette for conversion
+			 */
+			void populateImageFrom8BitPal(DrawSourcePtr& dsp, const PixelSize& dimensions, size_t rowlen, void* data, const RGBAQuad* pal);
+
 			/// The map from character to the drawing source it represents
 			typedef std::map<FontCharType, DrawSourcePtr> GlyphMap;
 
@@ -79,8 +93,12 @@ namespace Opde {
 
 			/// Maximal width detected
 			size_t mMaxWidth;
+
+			/// Built flag (finalization indicator)
+			bool mBuilt;
 	};
 
+	typedef shared_ptr<FontDrawSource> FontDrawSourcePtr;
 };
 
 #endif
