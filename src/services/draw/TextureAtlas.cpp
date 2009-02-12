@@ -226,6 +226,7 @@ namespace Opde {
 
 			delete[] conversionBuf;
 
+			// TODO: This needs rewrite. Multiple builds on the same images and !bam! the coordinates are lost
 			// convert the full texturing coords to the atlassed ones
 			ds->displacement = Ogre::Vector2((Ogre::Real)fsi->x / mAtlasSize.width, (Ogre::Real)fsi->y / mAtlasSize.height);
 			ds->size = Ogre::Vector2((Ogre::Real)ds->pixelSize.width / mAtlasSize.width, (Ogre::Real)ds->pixelSize.height / mAtlasSize.height);

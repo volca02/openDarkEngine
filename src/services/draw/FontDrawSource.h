@@ -97,8 +97,6 @@ namespace Opde {
 			/// Built flag (finalization indicator)
 			bool mBuilt;
 	};
-
-	typedef shared_ptr<FontDrawSource> FontDrawSourcePtr;
 };
 
 #endif

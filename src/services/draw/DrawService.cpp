@@ -209,7 +209,7 @@ namespace Opde {
 	void DrawService::loadFonFile(const std::string& name, const std::string& group, FontDrawSource* fon) {
 		DarkFontHeader header;
 		
-		Ogre::DataStreamPtr Stream = Ogre::ResourceGroupManager::getSingleton().openResource(name, name, true, NULL);
+		Ogre::DataStreamPtr Stream = Ogre::ResourceGroupManager::getSingleton().openResource(name, group, true, NULL);
 		FilePtr fontFile = new OgreFile(Stream);
 		
 		fontFile->readElem(&header.Format,2);
