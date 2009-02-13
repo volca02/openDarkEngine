@@ -26,6 +26,7 @@
 #define __DRAWCOMMON_H
 
 #include "SharedPtr.h"
+#include "integers.h"
 
 #include <OgreVector3.h>
 #include <OgreVector2.h>
