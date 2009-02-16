@@ -34,6 +34,7 @@
 #include "ManualFonFileLoader.h"
 #include "Array.h"
 #include "RenderedImage.h"
+#include "RenderedLabel.h"
 
 #include <OgreViewport.h>
 #include <OgreRenderQueueListener.h>
@@ -84,12 +85,18 @@ namespace Opde {
 			 * @param img The image name
 			 * @return Shared ptr to the draw source usable for draw operations
 			 */
-			DrawSourcePtr createDrawSource(const std::string& img, const std::string& group);
+			DrawSource* createDrawSource(const std::string& img, const std::string& group);
 
 			/** Creates a rendered image (e.g. a sprite)
 			 * @param draw The image source for this operation
 			 */
-			RenderedImage* createRenderedImage(DrawSourcePtr& draw);
+			RenderedImage* createRenderedImage(DrawSource* draw);
+
+			/** Creates a rendered label (e.g. a text)
+			 * @param fds The font to use for the rendering
+			 * @param label Optional label to start with
+			 */
+			RenderedLabel* createRenderedLabel(FontDrawSource* fds, const std::string& label = "");
 
 			/** Destroys the specified draw operation (any ancestor)
 			 * @param dop The draw operation to destroy
@@ -135,27 +142,37 @@ namespace Opde {
 			/** supplies the palette info - needed for 8Bit palletized font color loads. The specified palette is then used
 			 * in further font loading operations.
 			 */
-			void setFontPalette(Ogre::ManualFonFileLoader::PaletteType paltype, const Ogre::String& fname = "");
+			void setFontPalette(Ogre::ManualFonFileLoader::PaletteType paltype, const Ogre::String& fname = "", const Ogre::String& group = "");
 
 		protected:
 			// Service related:
 			bool init();
 			void bootstrapFinished();
 			void shutdown();
-			
-			/// Loads the LG's fon file and populates the given font instance with it's glyphs 
+
+			/// Loads the LG's fon file and populates the given font instance with it's glyphs
 			void loadFonFile(const std::string& name, const std::string& group, FontDrawSource* fon);
+
+			/// Loads the current palette from a specified pcx file
+			void loadPaletteFromPCX(const Ogre::String& fname, const Ogre::String& group);
+
+			/// Loads the palette from an external file
+			void loadPaletteExternal(const Ogre::String& fname, const Ogre::String& group);
 
 			DrawOperation::ID getNewDrawOperationID();
 
 			/// Rebuilds all queued atlasses (so those can be used for rendering)
 			void rebuildAtlases();
 
+			/// frees the currently used font palette
+			void freeCurrentPal();
+
 			typedef std::map<std::string, DrawSheet*> SheetMap;
 			typedef std::stack<size_t> IDStack;
 			typedef SimpleArray<DrawOperation*> DrawOperationArray;
 			typedef std::map<DrawSource::ID, TextureAtlas*> TextureAtlasMap;
 			typedef std::set<TextureAtlas*> AtlasSet;
+			typedef std::set<DrawSource*> DrawSourceSet;
 
 			SheetMap mSheetMap;
 			DrawSheet* mActiveSheet;
@@ -174,10 +191,14 @@ namespace Opde {
 			Ogre::SceneManager* mSceneManager;
 
 			AtlasSet mAtlasesForRebuild;
-			
+
 			static const RGBAQuad msMonoPalette[2];
-			RGBAQuad* mCurrentPalette; 
-	};
+			static RGBAQuad msDefaultPalette[256];
+
+			RGBAQuad* mCurrentPalette;
+
+			DrawSourceSet mDrawSources;
+		};
 
 	/// Shared pointer to the draw service
 	typedef shared_ptr<DrawService> DrawServicePtr;

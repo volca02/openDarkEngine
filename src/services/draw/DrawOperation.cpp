@@ -30,9 +30,8 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- 	DrawOperation ----------------*/
 	/*----------------------------------------------------*/
-	DrawOperation::DrawOperation(DrawService* owner, DrawOperation::ID id, const DrawSourcePtr& ds) :
+	DrawOperation::DrawOperation(DrawService* owner, DrawOperation::ID id) :
 			mID(id),
-			mDrawSource(ds),
 			mOwner(owner),
 			mPosition(0,0),
 			mZOrder(0) {
@@ -47,11 +46,6 @@ namespace Opde {
 		}
 
 		mUsingSheets.clear();
-	};
-
-	//------------------------------------------------------
-	const DrawSourcePtr& DrawOperation::getDrawSource() const {
-		return mDrawSource;
 	};
 
 	//------------------------------------------------------

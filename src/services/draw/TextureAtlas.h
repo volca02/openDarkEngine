@@ -36,7 +36,7 @@ namespace Opde {
 	 * grouped together into a single rendering call when used as a source for draw operations, resulting
 	 * in better performance.
 	 */
-	class TextureAtlas {
+	class TextureAtlas : public DrawSourceBase {
 		public:
 			/** Constructor. Creates a new atlas for texture storage */
 			TextureAtlas(DrawService* owner, DrawSource::ID id);
@@ -45,7 +45,7 @@ namespace Opde {
 			~TextureAtlas();
 
 			/** Creates an atlased draw source */
-			DrawSourcePtr createDrawSource(const Ogre::String& imgName, const Ogre::String& groupName);
+			DrawSource* createDrawSource(const Ogre::String& imgName, const Ogre::String& groupName);
 
 			/** Creates a font instance (to be filled with glyphs afterwards) that is stored inside this atlas
 			 * @note You probably don't want to use this. You'll want to use DrawService::loadFont instead */
@@ -55,7 +55,7 @@ namespace Opde {
 			inline DrawSource::ID getAtlasID() { return mAtlasID; };
 
 			/** Internal tool to allow external addition of draw sources. Used by font code. */
-			void _addDrawSource(DrawSourcePtr& ds);
+			void _addDrawSource(DrawSource* ds);
 
 			/** Builds the atlas. Locks it for further additions, makes it useable */
 			void build();
@@ -69,7 +69,7 @@ namespace Opde {
 
 			DrawSource::ID mAtlasID;
 
-			typedef std::list<DrawSourcePtr> DrawSourceSet;
+			typedef std::list<DrawSource*> DrawSourceSet;
 			typedef std::list<FontDrawSource*> FontSet;
 
 			DrawSourceSet mMyDrawSources;
@@ -79,11 +79,7 @@ namespace Opde {
 
 			bool mIsDirty; // TODO: Replace by mIsBuilt
 
-			Ogre::MaterialPtr mAtlasMaterial;
-
 			PixelSize mAtlasSize;
-
-			Ogre::TexturePtr mAtlasTexture;
 
 			Ogre::String mAtlasName; // atlas texture name
 	};

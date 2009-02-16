@@ -41,6 +41,7 @@ namespace Opde {
 	/*-------------------- TextureAtlas ------------------*/
 	/*----------------------------------------------------*/
 	TextureAtlas::TextureAtlas(DrawService* owner, DrawSource::ID id) :
+			DrawSourceBase(),
 			mOwner(owner),
 			mAtlasID(id),
 			mMyDrawSources(),
@@ -66,24 +67,25 @@ namespace Opde {
 			delete *fit++;
 		}
 		
-		mMyFonts.clear();
+		DrawSourceSet::iterator dit = mMyDrawSources.begin();
+		DrawSourceSet::iterator dend = mMyDrawSources.end();
+		
+		while (dit != dend) {
+			delete *dit++;
+		}
+		
+		mMyDrawSources.clear();
 	}
 
 	//------------------------------------------------------
-	DrawSourcePtr TextureAtlas::createDrawSource(const Ogre::String& imgName, const Ogre::String& groupName) {
+	DrawSource* TextureAtlas::createDrawSource(const Ogre::String& imgName, const Ogre::String& groupName) {
 		// Load as single first, but wit the same id
 		// First we load the image.
-		DrawSourcePtr ds = new DrawSource();
+		DrawSource* ds = new DrawSource();
 
-		ds->image.load(imgName, groupName);
+		ds->loadImage(imgName, groupName);
 
-		ds->sourceID = mAtlasID;
-		ds->material.setNull();
-		ds->texture.setNull();
-		ds->pixelSize.width  = ds->image.getWidth();
-		ds->pixelSize.height = ds->image.getHeight();
-		ds->size = Ogre::Vector2(1.0f, 1.0f);
-		ds->displacement = Ogre::Vector2(0, 0);
+		ds->setSourceID(mAtlasID);
 
 		mMyDrawSources.push_back(ds);
 		markDirty();
@@ -104,7 +106,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void TextureAtlas::_addDrawSource(DrawSourcePtr& ds) {
+	void TextureAtlas::_addDrawSource(DrawSource* ds) {
 		// just insert into the list
 		mMyDrawSources.push_back(ds);
 		markDirty();
@@ -142,15 +144,16 @@ namespace Opde {
 			DrawSourceSet::iterator it = mMyDrawSources.begin();
 
 			while (it != mMyDrawSources.end()) {
-				DrawSourcePtr ds = *it++;
+				DrawSource* ds = *it++;
 
-				area += ds->pixelSize.width * ds->pixelSize.height;
+				const PixelSize& ps = ds->getPixelSize();
+				area += ps.getPixelArea();
 
 				// try to allocate
-				FreeSpaceInfo* area = mAtlasAllocation->allocate(ds->pixelSize.width, ds->pixelSize.height);
+				FreeSpaceInfo* area = mAtlasAllocation->allocate(ps.width, ps.height);
 
 				if (area) {
-					ds->placement = area;
+					ds->setPlacementPtr(area);
 				} else {
 					fitted = false;
 					break;
@@ -163,7 +166,7 @@ namespace Opde {
 		} while (!fitted);
 
 		// it seems we're here because we fitted! Lets paint the textures into the atlas
-		mAtlasTexture = Ogre::TextureManager::getSingleton().createManual(mAtlasName,
+		mTexture = Ogre::TextureManager::getSingleton().createManual(mAtlasName,
 			Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
 			Ogre::TEX_TYPE_2D,
 			mAtlasSize.width,
@@ -172,17 +175,17 @@ namespace Opde {
 			Ogre::PF_BYTE_BGRA,
 			Ogre::TU_STATIC_WRITE_ONLY);
 
-		mAtlasMaterial = Ogre::MaterialManager::getSingleton().create("M_" + mAtlasName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-		Ogre::TextureUnitState* tus = mAtlasMaterial->getTechnique(0)->getPass(0)->createTextureUnitState(mAtlasTexture->getName());
+		mMaterial = Ogre::MaterialManager::getSingleton().create("M_" + mAtlasName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+		Ogre::TextureUnitState* tus = mMaterial->getTechnique(0)->getPass(0)->createTextureUnitState(mTexture->getName());
 
 		tus->setTextureFiltering(Ogre::FO_NONE, Ogre::FO_NONE, Ogre::FO_NONE);
 
-		Ogre::Pass *pass = mAtlasMaterial->getTechnique(0)->getPass(0);
+		Ogre::Pass *pass = mMaterial->getTechnique(0)->getPass(0);
 		pass->setAlphaRejectSettings(Ogre::CMPF_GREATER, 128);
 		pass->setLightingEnabled(false);
 
 
-		 Ogre::HardwarePixelBufferSharedPtr pixelBuffer = mAtlasTexture->getBuffer();
+		 Ogre::HardwarePixelBufferSharedPtr pixelBuffer = mTexture->getBuffer();
 		 pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
 		 const Ogre::PixelBox& targetBox = pixelBuffer->getCurrentLock();
 		 size_t pixelsize = Ogre::PixelUtil::getNumElemBytes(targetBox.format);
@@ -194,21 +197,23 @@ namespace Opde {
 		 DrawSourceSet::iterator it = mMyDrawSources.begin();
 
 		while (it != mMyDrawSources.end()) {
-			DrawSourcePtr ds = *it++;
-
-			ds->material = mAtlasMaterial;
+			DrawSource* ds = *it++;
 
 			// render all pixels into the right place
-			FreeSpaceInfo* fsi = reinterpret_cast<FreeSpaceInfo*>(ds->placement);
+			FreeSpaceInfo* fsi = reinterpret_cast<FreeSpaceInfo*>(ds->getPlacementPtr());
 
 			// render into the specified place
 			unsigned char* conversionBuf = NULL;
-			Ogre::PixelBox srcPixels = ds->image.getPixelBox();
+			
 
+			const PixelSize& dps = ds->getPixelSize();
+			Ogre::Image& img = ds->getImage();
+			Ogre::PixelBox srcPixels = img.getPixelBox();
+			
 			// convert if the source data don't match
-			if(ds->image.getFormat() != Ogre::PF_BYTE_BGRA) {
-					conversionBuf = new unsigned char[ds->texture->getWidth() * ds->texture->getHeight() * pixelsize];
-					Ogre::PixelBox convPixels(Ogre::Box(0, 0, ds->pixelSize.width, ds->pixelSize.height), Ogre::PF_BYTE_BGRA, conversionBuf);
+			if(img.getFormat() != Ogre::PF_BYTE_BGRA) {
+					conversionBuf = new unsigned char[img.getWidth() * img.getHeight() * pixelsize];
+					Ogre::PixelBox convPixels(Ogre::Box(0, 0, dps.width, dps.height), Ogre::PF_BYTE_BGRA, conversionBuf);
 					Ogre::PixelUtil::bulkPixelConversion(srcPixels, convPixels);
 					srcPixels = convPixels;
 			}
@@ -216,8 +221,8 @@ namespace Opde {
 			size_t srcrowsize = srcPixels.rowPitch * pixelsize;
 
 			Ogre::uint8* srcData = static_cast<Ogre::uint8*>(srcPixels.data);
-
-			for(size_t row = 0; row < ds->pixelSize.height; row++) {
+			
+			for(size_t row = 0; row < dps.height; row++) {
 					for(size_t col = 0; col < srcrowsize; col++) {
 							dstData[((row + fsi->y) * rowsize) + (fsi->x * pixelsize) + col] =
 								srcData[(row * srcrowsize) + col];
@@ -228,9 +233,7 @@ namespace Opde {
 
 			// TODO: This needs rewrite. Multiple builds on the same images and !bam! the coordinates are lost
 			// convert the full texturing coords to the atlassed ones
-			ds->displacement = Ogre::Vector2((Ogre::Real)fsi->x / mAtlasSize.width, (Ogre::Real)fsi->y / mAtlasSize.height);
-			ds->size = Ogre::Vector2((Ogre::Real)ds->pixelSize.width / mAtlasSize.width, (Ogre::Real)ds->pixelSize.height / mAtlasSize.height);
-
+			ds->atlas(mMaterial, fsi->x, fsi->y, mAtlasSize.width, mAtlasSize.height);
 		}
 
 		 pixelBuffer->unlock();

@@ -29,6 +29,7 @@
 #include "RenderService.h"
 #include "TextureAtlas.h"
 #include "FonFormat.h"
+#include "StringTokenizer.h"
 
 #include <OgreTexture.h>
 #include <OgreTechnique.h>
@@ -37,6 +38,9 @@
 #include <OgreTextureManager.h>
 #include <OgreMaterial.h>
 #include <OgreMaterialManager.h>
+
+// lg palette for default - moved to external definition file for readibility reasons...
+#include <LGPalette.h>
 
 using namespace std;
 using namespace Ogre;
@@ -56,6 +60,8 @@ namespace Opde {
 			mDrawSourceID(0),
 			mViewport(NULL),
 			mCurrentPalette(NULL) {
+
+		mCurrentPalette = msDefaultPalette;
 	}
 
 	//------------------------------------------------------
@@ -78,9 +84,15 @@ namespace Opde {
 		}
 
 		mDrawOperations.clear();
-		
-		// TODO: if (mCurrentPalette != DefaultPalette)
-		delete[] mCurrentPalette;
+
+		// destroy all draw sources
+		for (DrawSourceSet::iterator it = mDrawSources.begin(); it != mDrawSources.end(); ++it) {
+			delete *it;
+		}
+
+		mDrawSources.clear();
+
+		freeCurrentPal();
 	}
 
 	//------------------------------------------------------
@@ -117,7 +129,7 @@ namespace Opde {
 		if (it != mSheetMap.end())
 			return it->second;
 		else {
-			DrawSheet* sheet = new DrawSheet(sheetName);
+			DrawSheet* sheet = new DrawSheet(this, sheetName);
 			mSheetMap[sheetName] = sheet;
 			return sheet;
 		}
@@ -198,229 +210,250 @@ namespace Opde {
 		// load the font according to the specs
 		assert(atlas);
 		FontDrawSource* nfs = atlas->createFont(name);
-		
+
 		// now we'll load the glyphs from the file
 		loadFonFile(name, group, nfs);
-		
+
 		return nfs;
 	}
 
 	//------------------------------------------------------
 	void DrawService::loadFonFile(const std::string& name, const std::string& group, FontDrawSource* fon) {
 		DarkFontHeader header;
-		
+
 		Ogre::DataStreamPtr Stream = Ogre::ResourceGroupManager::getSingleton().openResource(name, group, true, NULL);
 		FilePtr fontFile = new OgreFile(Stream);
-		
-		fontFile->readElem(&header.Format,2);
-		fontFile->readElem(&header.Unknown,1);
-		fontFile->readElem(&header.Palette,1);
-		fontFile->readElem(&header.Zeros1, 1, 32);
-		fontFile->readElem(&header.FirstChar, 2);
-		fontFile->readElem(&header.LastChar, 2);
-		fontFile->readElem(&header.Zeros2, 1, 32);
-		fontFile->readElem(&header.WidthOffset, 4);
-		fontFile->readElem(&header.BitmapOffset, 4);
-		fontFile->readElem(&header.RowWidth, 2);
-		fontFile->readElem(&header.NumRows, 2);
-	
+
+		fontFile->readElem(&header.Format,2); // 0
+		fontFile->readElem(&header.Unknown,1); // 2
+		fontFile->readElem(&header.Palette,1); // 3
+		fontFile->readElem(&header.Zeros1, 1, 32); // 4
+		fontFile->readElem(&header.FirstChar, 2); // 36
+		fontFile->readElem(&header.LastChar, 2); // 38
+		fontFile->readElem(&header.Zeros2, 1, 32); // 40
+		fontFile->readElem(&header.WidthOffset, 4); // 72
+		fontFile->readElem(&header.BitmapOffset, 4); // 76
+		fontFile->readElem(&header.RowWidth, 2); // 80
+		fontFile->readElem(&header.NumRows, 2); // 82
+
 		// what format do we have?
-		DarkPixelFormat dpf;
-		const RGBAQuad* curpalette;
-		
-		if (header.Format == 0) { 
+		DarkPixelFormat dpf = DPF_8BIT;
+		const RGBAQuad* curpalette = mCurrentPalette;
+
+		if (header.Format == 0) {
 			dpf = DPF_MONO;
 			curpalette = msMonoPalette;
-		} else {
-			dpf = DPF_8BIT;
-			curpalette = mCurrentPalette;
 		}
-			
-		
-		size_t nchars = header.LastChar - header.FirstChar + 1; 
-		
+
+		size_t nchars = header.LastChar - header.FirstChar + 1;
+
 		uint16_t* columns = new uint16_t[nchars + 1];
-			
+
 		// seek to the char column specs
 		fontFile->seek(header.WidthOffset, File::FSEEK_BEG);
-		fontFile->readElem(columns, 2, nchars+1);
-		
+		fontFile->readElem(columns, 2, nchars + 1);
+
 		// seek to the bitmap part
 		fontFile->seek(header.BitmapOffset, File::FSEEK_BEG);
-		
-		size_t bitmapSize = fontFile->size() - header.BitmapOffset;  
-		
+
+		size_t bitmapSize = fontFile->size() - header.BitmapOffset;
+
 		unsigned char *bitmap = new unsigned char[bitmapSize];
-		unsigned char *bmpos = bitmap;
-		
+
 		fontFile->read(bitmap, bitmapSize);
-		
+
 		// load the characters
-		for (FontCharType chr = header.FirstChar; chr <= header.LastChar; ++chr) {
+		for (FontCharType n = 0; n < nchars; ++n) {
+			assert(columns[n+1] >= columns[n]);
+			
 			// span is columns[chr] to columns[chr+1]
-			size_t width = columns[chr+1] - columns[chr];
+			size_t width = columns[n+1] - columns[n];
 			PixelSize ps(width, header.NumRows);
-			fon->addGlyph(chr, ps, dpf, header.RowWidth, bmpos, curpalette);
-			bmpos += header.RowWidth * header.NumRows;
+			
+			if (width > 1)
+				std::cerr << n + header.FirstChar << " " << width << std::endl;
+			
+			fon->addGlyph(n + header.FirstChar, ps, dpf, header.RowWidth, bitmap, columns[n], curpalette);
 		}
-		
+
 		delete[] bitmap;
 		delete[] columns;
 	}
 
-	
-	//------------------------------------------------------
-	void DrawService::setFontPalette(Ogre::ManualFonFileLoader::PaletteType paltype, const Ogre::String& fname) {
-		// Code written by patryn, reused here for the new font rendering pipeline support
-		/*
-		ExternalPaletteHeader PaletteHeader;
-		WORD Count;
-		char *Buffer, *C;
-		BYTE S;
-		unsigned int I;
 
-		// Open the file
-		Ogre::DataStreamPtr Stream;
-		
-		try 
-		{
-			Stream = Ogre::ResourceGroupManager::getSingleton().openResource(mPaletteFileName, mFontGroup, true);
-			mPaletteFile = new OgreFile(Stream);
-		} catch(Ogre::FileNotFoundException) {
-			// Could not find resource, use the default table
-			LogManager::getSingleton().logMessage("Specified palette file not found - using default palette!");
-			return (RGBQUAD*)ColorTable;
+	//------------------------------------------------------
+	void DrawService::setFontPalette(Ogre::ManualFonFileLoader::PaletteType paltype, const Ogre::String& fname, const Ogre::String& group) {
+		switch (paltype) {
+			case ManualFonFileLoader::ePT_Default:
+				freeCurrentPal();
+				break;
+			case ManualFonFileLoader::ePT_DefaultBook:
+			case ManualFonFileLoader::ePT_PCX:
+				loadPaletteFromPCX(fname, group);
+				break;
+			case ManualFonFileLoader::ePT_External:
+				loadPaletteExternal(fname, group);
+				break;
+			default:
+				freeCurrentPal();
+				LOG_ERROR("DrawService: Invalid type for palette specified (not loading '%s'). Using default palette instead.", fname.c_str());
 		}
-		
-		RGBQUAD *Palette = new RGBQUAD[256];
-		if (!Palette)
-			return NULL;
-		
-		if((mPaletteType == ePT_PCX) || (mPaletteType == ePT_DefaultBook))	// PCX file specified...
-		{
-			RGBQUAD *Palette = new RGBQUAD[256];
-			
-			// Test to see if we're facing a PCX file. (0A) (xx) (01)
-			uint8_t Manuf, Enc;
-			mPaletteFile->read(&Manuf, 1);
-			mPaletteFile->seek(2);
-			mPaletteFile->read(&Enc, 1);
-			
-			if (Manuf != 0x0A || Enc != 0x01) // Invalid file, does not seem like a PCX at all
-			{ 
-				delete[] Palette; // Clean up!
-				LogManager::getSingleton().logMessage("Invalid palette file specified - seems not to be a PCX file!");
-				return (RGBQUAD*)ColorTable; // Should not matter - the cast (if packed)
-			}
-			
-			BYTE BPP;
-			mPaletteFile->readElem(&BPP, 1);
-			
-			mPaletteFile->seek(3 * 256 + 1, File::FSEEK_END);
-			BYTE Padding;
-			mPaletteFile->readElem(&Padding, 1);
-			
-			if((BPP == 8) && (Padding == 0x0C)) //Make sure it is an 8bpp and a valid PCX
-			{
-				// Byte sized structures - endianness always ok
-				for (unsigned int I = 0; I < 256; I++)
-				{
-					
-					mPaletteFile->read(&Palette[I].rgbRed, 1);
-					mPaletteFile->read(&Palette[I].rgbGreen, 1);
-					mPaletteFile->read(&Palette[I].rgbBlue, 1);
-					Palette[I].rgbReserved = 0;
-				}
-			} else 
-			{
-				delete[] Palette; // Clean up!
-				LogManager::getSingleton().logMessage("Invalid palette file specified - not 8 BPP or invalid Padding!");
-				return (RGBQUAD*)ColorTable; // Return default palette
-			}			
-			return Palette;
-		}
-		
-		if (mPaletteType != ePT_External) 
-		{
-			delete[] Palette; // Clean up!
-			LogManager::getSingleton().logMessage("Invalid palette type specified!");
-			return (RGBQUAD*)ColorTable;
-		}
-		
-		// We're sure that we have external palette here:
-		mPaletteFile->readStruct(&PaletteHeader, ExternalPaletteHeader_Format, sizeof(ExternalPaletteHeader));
-		if (PaletteHeader.RiffSig == 0x46464952)
-		{
-			if (PaletteHeader.PSig1 != 0x204C4150)
-			{
-				delete []Palette;
-				return NULL;
-			}
-			mPaletteFile->seek(2L, StdFile::FSEEK_CUR);
-			mPaletteFile->readElem(&Count, 2);
-			if (Count > 256)
-				Count = 256;
-			for (I = 0; I < Count; I++)
-			{
-				mPaletteFile->readStruct(&Palette[I], RGBQUAD_Format, sizeof(RGBQUAD));
-				S = Palette[I].rgbRed;
-				Palette[I].rgbRed = Palette[I].rgbBlue;
-				Palette[I].rgbBlue = S;
-			}
-		}
-		else if (PaletteHeader.RiffSig == 0x4353414A)
-		{
-			mPaletteFile->seek(0);
-			Buffer = new char[3360];
-			if (!Buffer)
-			{
-				delete []Palette;
-				return NULL;
-			}
-			mPaletteFile->read(Buffer, 3352);
-			if (strncmp(Buffer, "JASC-PAL", 8))
-			{
-				delete []Buffer;
-				delete []Palette;
-				return NULL;
-			}
-			C = strchr(Buffer, '\n')+1;
-			C = strchr(C, '\n')+1;
-			Count = (WORD)strtoul(C, NULL, 10);
-			if (Count > 256)
-				Count = 256;
-			for (I = 0; I < Count; I++)
-			{
-				C = strchr(C, '\n')+1;
-				Palette[I].rgbRed = (BYTE)strtoul(C, &C, 10);
-				C++;
-				Palette[I].rgbGreen = (BYTE)strtoul(C, &C, 10);
-				C++;
-				Palette[I].rgbBlue = (BYTE)strtoul(C, &C, 10);
-			}
-			delete []Buffer;
-		}
-		else
-		{
-			mPaletteFile->seek(0);
-			RGBTRIPLE P;
-			for (I = 0; I < mPaletteFile->size() / sizeof(RGBTRIPLE); I++)
-			{
-				mPaletteFile->readStruct(&P, RGBTRIPLE_Format, sizeof(RGBTRIPLE));
-				Palette[I].rgbRed = P.rgbtBlue;
-				Palette[I].rgbGreen = P.rgbtGreen;
-				Palette[I].rgbBlue = P.rgbtRed;
-			}
-		}
-		return Palette;
-		*/
 	}
 
 	//------------------------------------------------------
-	DrawSourcePtr DrawService::createDrawSource(const std::string& img, const std::string& group) {
+	void DrawService::loadPaletteFromPCX(const Ogre::String& fname, const Ogre::String& group) {
+		// Code written by patryn, reused here for the new font rendering pipeline support
+		// Open the file
+		Ogre::DataStreamPtr stream;
+		FilePtr paletteFile;
 
-		DrawSourcePtr ds = new DrawSource();
+		freeCurrentPal();
 
+		try {
+			stream = Ogre::ResourceGroupManager::getSingleton().openResource(fname, group, true);
+			paletteFile = new OgreFile(stream);
+		} catch(Ogre::FileNotFoundException) {
+			// Could not find resource, use the default table
+			LOG_ERROR("DrawService: Specified palette file not found - using default palette!");
+			return;
+		}
+
+		mCurrentPalette = new RGBAQuad[256];
+
+		// Test to see if we're facing a PCX file. (0A) (xx) (01)
+		uint8_t manuf, enc;
+		paletteFile->read(&manuf, 1);
+		paletteFile->seek(2);
+		paletteFile->read(&enc, 1);
+
+		if (manuf != 0x0A || enc != 0x01) { // Invalid file, does not seem like a PCX at all
+			freeCurrentPal();
+			LOG_ERROR("DrawService: invalid palette file specified (%s) - seems not to be a PCX file!", fname.c_str());
+			return;
+		}
+
+		BYTE bpp;
+		paletteFile->readElem(&bpp, 1);
+
+		paletteFile->seek(3 * 256 + 1, File::FSEEK_END);
+		BYTE padding;
+		paletteFile->readElem(&padding, 1);
+
+		if((bpp == 8) && (padding == 0x0C)) { //Make sure it is an 8bpp and a valid PCX
+			// Byte sized structures - endianness always ok
+			for (unsigned int i = 0; i < 256; i++) {
+				paletteFile->read(&mCurrentPalette[i].red, 1);
+				paletteFile->read(&mCurrentPalette[i].green, 1);
+				paletteFile->read(&mCurrentPalette[i].blue, 1);
+				mCurrentPalette[i].alpha = i == 0 ? 0 : 255;
+			}
+		} else {
+			freeCurrentPal();
+			LOG_ERROR("DrawService: Invalid palette file (%s) specified - not 8 BPP or invalid Padding!", fname.c_str());
+			return;
+		}
+
+		return;
+	}
+
+	//------------------------------------------------------
+	void DrawService::loadPaletteExternal(const Ogre::String& fname, const Ogre::String& group) {
+		// Code written by patryn, reused here for the new font rendering pipeline support
+		ExternalPaletteHeader paletteHeader;
+		WORD count;
+		char *buffer, *c;
+		BYTE s;
+		unsigned int i;
+
+		freeCurrentPal();
+
+		// Open the file
+		Ogre::DataStreamPtr stream;
+		FilePtr paletteFile;
+
+		try {
+			stream = Ogre::ResourceGroupManager::getSingleton().openResource(fname, group, true);
+			paletteFile = new OgreFile(stream);
+		} catch(Ogre::FileNotFoundException) {
+			// Could not find resource, use the default table
+			LOG_ERROR("DrawService: Specified palette file not found - using default palette!");
+			return;
+		}
+
+		mCurrentPalette = new RGBAQuad[256];
+
+		// We're sure that we have external palette here:
+		paletteFile->readElem(&paletteHeader.RiffSig, sizeof(DWORD));
+		paletteFile->readElem(&paletteHeader.RiffLength, sizeof(DWORD));
+		paletteFile->readElem(&paletteHeader.PSig1, sizeof(DWORD));
+		paletteFile->readElem(&paletteHeader.PSig2, sizeof(DWORD));
+		paletteFile->readElem(&paletteHeader.Length, sizeof(DWORD));
+
+		if (paletteHeader.RiffSig == 0x46464952) {
+			if (paletteHeader.PSig1 != 0x204C4150) {
+				freeCurrentPal();
+				LOG_ERROR("DrawService: Invalid external palette signature (%s)!", fname.c_str());
+				return;
+			}
+
+			paletteFile->seek(2L, StdFile::FSEEK_CUR);
+			paletteFile->readElem(&count, 2);
+			if (count > 256)
+				count = 256;
+
+			for (i = 0; i < count; i++)
+			{
+				paletteFile->read(&mCurrentPalette[i].blue, 1);
+				paletteFile->read(&mCurrentPalette[i].green, 1);
+				paletteFile->read(&mCurrentPalette[i].red, 1);
+				paletteFile->read(&mCurrentPalette[i].alpha, 1);
+				mCurrentPalette[i].alpha = i == 0 ? 0 : 255; // alpha read from file is most probably bogus, so we're just skipping it
+			}
+		} else if (paletteHeader.RiffSig == 0x4353414A) {
+			paletteFile->seek(0); // it is a text file JASC!
+			std::string line = paletteFile->getLine();
+
+			if (line != "JASC-PAL") {
+				LOG_ERROR("Not a RIFF nor JASC-PAL file although is seemed so (%s). Defaulting the palette.", fname.c_str());
+				freeCurrentPal();
+				return;
+			}
+
+			// version (0100?)
+			line = paletteFile->getLine();
+
+			// First line contains the count of records
+			line = paletteFile->getLine();
+
+			count = Ogre::StringConverter::parseLong(line);
+
+			if (count > 256)
+				count = 256;
+
+			for (i = 0; i < count; i++)	{
+				line = paletteFile->getLine();
+				WhitespaceStringTokenizer toker(line, true);
+
+				mCurrentPalette[i].red   = Ogre::StringConverter::parseUnsignedInt(toker.next());
+				mCurrentPalette[i].green = Ogre::StringConverter::parseUnsignedInt(toker.next());
+				mCurrentPalette[i].blue  = Ogre::StringConverter::parseUnsignedInt(toker.next());
+				mCurrentPalette[i].alpha = i == 0 ? 0 : 255;
+			}
+		} else {
+			// raw file
+			paletteFile->seek(0);
+
+			for (i = 0; !paletteFile->eof(); i++) {
+				paletteFile->read(&mCurrentPalette[i].blue, 1);
+				paletteFile->read(&mCurrentPalette[i].green, 1);
+				paletteFile->read(&mCurrentPalette[i].red, 1);
+				mCurrentPalette[i].alpha = i == 0 ? 0 : 255;
+			}
+		}
+	}
+
+	//------------------------------------------------------
+	DrawSource* DrawService::createDrawSource(const std::string& img, const std::string& group) {
 		// First we load the image.
 		TexturePtr tex = Ogre::TextureManager::getSingleton().load(img, group, TEX_TYPE_2D, 1);
 
@@ -435,19 +468,16 @@ namespace Opde {
 
 		mat->load();
 
-		ds->sourceID = mDrawSourceID++;
-		ds->material = mat;
-		ds->texture = tex;
-		ds->pixelSize.width  = tex->getWidth();
-		ds->pixelSize.height = tex->getHeight();
-		ds->size = Vector2(1.0f, 1.0f);
-		ds->displacement = Vector2(0, 0);
+		// will set up the pixelsize automatically for us
+		DrawSource* ds = new DrawSource(mDrawSourceID++, mat, tex);
+
+		mDrawSources.insert(ds);
 
 		return ds;
 	}
 
 	//------------------------------------------------------
-	RenderedImage* DrawService::createRenderedImage(DrawSourcePtr& draw) {
+	RenderedImage* DrawService::createRenderedImage(DrawSource* draw) {
 		DrawOperation::ID opID = getNewDrawOperationID();
 		RenderedImage* ri = new RenderedImage(this, opID, draw);
 
@@ -455,6 +485,17 @@ namespace Opde {
 		mDrawOperations[opID] = ri;
 
 		return ri;
+	}
+
+	//------------------------------------------------------
+	RenderedLabel* DrawService::createRenderedLabel(FontDrawSource* fds, const std::string& label) {
+		DrawOperation::ID opID = getNewDrawOperationID();
+		RenderedLabel* rl = new RenderedLabel(this, opID, fds, label);
+
+		// register so we'll be able to remove it
+		mDrawOperations[opID] = rl;
+
+		return rl;
 	}
 
 	//------------------------------------------------------
@@ -532,6 +573,14 @@ namespace Opde {
 		delete atlas;
 	}
 
+
+	//------------------------------------------------------
+	void DrawService::freeCurrentPal() {
+		if (mCurrentPalette != msDefaultPalette) {
+			delete[] mCurrentPalette;
+			mCurrentPalette = msDefaultPalette;
+		}
+	}
 
 	//-------------------------- Factory implementation
 	std::string DrawServiceFactory::mName = "DrawService";

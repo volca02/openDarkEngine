@@ -41,13 +41,11 @@ namespace Opde {
 			/// ID type of this operation
 			typedef size_t ID;
 
-			DrawOperation(DrawService* owner, ID id, const DrawSourcePtr& ds);
+			DrawOperation(DrawService* owner, ID id);
 
 			virtual ~DrawOperation();
 
 			inline ID getID() const { return mID; };
-
-			const DrawSourcePtr& getDrawSource() const;
 
 			/// Called by DrawBuffer to get the Quads queued for rendering. Fill this method to get the rendering done (via DrawBuffer::_queueDrawQuad())
 			virtual void visitDrawBuffer(DrawBuffer* db);
@@ -66,6 +64,8 @@ namespace Opde {
 
 			/// Sets a new clipping rectangle
 			void setClipRect(const ClipRect& cr);
+			
+			virtual DrawSourceBase* getDrawSourceBase() = 0;
 
 		protected:
 			/// On change updater - marks all using sheets as dirty
@@ -76,7 +76,6 @@ namespace Opde {
 
 			const ID mID;
 
-			DrawSourcePtr mDrawSource;
 			DrawService* mOwner;
 
 			typedef std::set<DrawSheet*> DrawSheetSet;

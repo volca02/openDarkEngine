@@ -29,14 +29,16 @@
 #include "DrawOperation.h"
 
 namespace Opde {
-
+	// forward decl.
+	class DrawService;
+	
 	/** A 2D rendering sheet. Represents one visible screen.
 	 * Stores rendering operations, can queue itself for rendering to ogre.
 	 * Uses DrawBuffer for render op. storage */
 	class OPDELIB_EXPORT DrawSheet : public Ogre::MovableObject {
 		public:
 			/// Constructor
-			DrawSheet(const std::string& sheetName);
+			DrawSheet(DrawService* owner, const std::string& sheetName);
 
 			/// Destructor
 			~DrawSheet();
@@ -91,6 +93,9 @@ namespace Opde {
 
 			/// Sheet name
 			std::string mSheetName;
+			
+			/// onwer of this sheet
+			DrawService* mOwner;
 	};
 }
 

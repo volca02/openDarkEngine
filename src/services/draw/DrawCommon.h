@@ -59,7 +59,7 @@ namespace Opde {
 
 		PixelSize(const PixelSize& b) : width(b.width), height(b.height) { };
 
-		inline size_t getPixelCount() const { return width * height; };
+		inline size_t getPixelArea() const { return width * height; };
 
 		const PixelSize& operator=(const PixelSize& b) { width = b.width; height = b.height; return *this; };
 
@@ -191,48 +191,103 @@ namespace Opde {
 	// forward decl
 	struct DrawSource;
 
-	/// Shared ptr to draw source
-	typedef shared_ptr<DrawSource> DrawSourcePtr;
+	// A base rendering source info - material and texture
+	class OPDELIB_EXPORT DrawSourceBase {
+		public:
+			/// Constructor
+			DrawSourceBase(const Ogre::MaterialPtr& mat, const Ogre::TexturePtr& tex);
+			
+			/// NULL-setting constructor
+			DrawSourceBase();
+			
+			/// Draw source image ID. Atlased draw sources have the same ID. It is used to organize buffers.
+			typedef size_t ID;
+			
+			/// Material getter
+			inline Ogre::MaterialPtr getMaterial() const { return mMaterial; };
 
-	/// A drawn bitmap source
-	struct OPDELIB_EXPORT DrawSource {
-		/// Draw source image ID. Atlased draw sources have the same ID. It is used to organize buffers.
-		typedef size_t ID;
+			/// Texture getter
+			inline Ogre::TexturePtr getTexture() const { return mTexture; };
+			
+			/// Source (texture id) getter
+			inline ID getSourceID() const { return mSourceID; };
+			
+			/// Source (texture id) setter
+			inline void setSourceID(ID id) { mSourceID = id; };
 
-		/// Identifies the texture id (image id).
-		ID sourceID;
+			/// Returns a vector of width and height
+			inline Ogre::Vector2 getPixelSizeVector() { return Ogre::Vector2(mPixelSize.width, mPixelSize.height); };
+			
+			inline const PixelSize& getPixelSize() const { return mPixelSize; };
 
-		/** Texture this draw source represents */
-		Ogre::TexturePtr texture;
+			/// @return The area covered by the image pixels
+			inline size_t getPixelArea() const { return mPixelSize.getPixelArea(); };
+			
+		protected:
+			/// Material used for rendering of this DrawSourceBase
+			Ogre::MaterialPtr mMaterial;
 
-		/** Source image of this draw source - may be lost after atlassing this, internal  */
-		Ogre::Image	image;
+			/// Texture used for rendering of this DrawSourceBase
+			Ogre::TexturePtr mTexture;
 
-		/** Material this draw source represents */
-		Ogre::MaterialPtr material;
+			/// Identifies the texture id (image id).
+			ID mSourceID;
 
-		/// displacement of the Image in the storage (position in atlas)
-		Ogre::Vector2 displacement;
+			/// size in pixels of the DrawSource
+			PixelSize mPixelSize;
+	};
+	
+	/// A drawn bitmap source (can be a part of an atlas)
+	class OPDELIB_EXPORT DrawSource : public DrawSourceBase {
+		public:
+			DrawSource();
+			
+			DrawSource(ID id, const Ogre::MaterialPtr& mat, const Ogre::TexturePtr& tex);
+			
+			/// Will transform the Texture coordinates to those usable for rendering
+			Ogre::Vector2 transform(const Ogre::Vector2& input);
 
-		/// size in units in storage (size in atlas)
-		Ogre::Vector2 size;
+			inline void* getPlacementPtr() const { return mPlacement; };
+			
+			inline void setPlacementPtr(void* placement) { mPlacement = placement; };
+			
+			/// Atlas insertion notifier. Will modify the image UV transforms to fit into the specified position 
+			void atlas(const Ogre::MaterialPtr& mat, size_t x, size_t y, size_t width, size_t height);
 
-		/// size in pixels of the DrawSource
-		PixelSize pixelSize;
+			/// Image getter (Image is used for pre-atlas image data storage)
+			inline Ogre::Image& getImage() { return mImage; };
+			
+			/** Loads image data into the mImage. This is preffered over getImage().load() because it also updates pixels size. */
+			void loadImage(const Ogre::String& name, const Ogre::String& group);
+			
+			/// Updates the pixel size from the supplied image. Do NOT forget to call this after loading the image by hand.
+			void updatePixelSizeFromImage();
+			
+			/// Fills the specified DrawRect of vector2 elements to represent the full image of this draw source
+			void fillTexCoords(DrawRect<Ogre::Vector2>& tc);
+		protected:
 
-		/// Additional pointer, used by atlas
-		void* placement;
+			/** Source image of this draw source - may be lost after atlassing this, internal  */
+			Ogre::Image	mImage;
 
-		inline Ogre::Vector2 getPixelSizeVector() { return Ogre::Vector2(pixelSize.width, pixelSize.height); };
+			/// displacement of the Image in the storage (position in atlas)
+			Ogre::Vector2 mDisplacement;
 
-		/// Will transform the Texture coordinates to those usable for rendering
-		Ogre::Vector2 transform(const Ogre::Vector2& input);
+			/// size in units in storage (size in atlas)
+			Ogre::Vector2 mSize;
+	
+			/// Additional pointer, used by atlas
+			void* mPlacement;
+			
+			/// True if this ds is already part of some atlas
+			bool mAtlassed;
+	
 	};
 
 	struct DrawSourceLess {
-		bool operator() (const DrawSourcePtr& a, const DrawSourcePtr& b) {
-			size_t sa = a->pixelSize.width * a->pixelSize.height;
-			size_t sb = b->pixelSize.width * b->pixelSize.height;
+		bool operator() (const DrawSource* a, const DrawSource* b) {
+			size_t sa = a->getPixelArea();
+			size_t sb = b->getPixelArea();
 			return sa < sb;
 		}
 	};

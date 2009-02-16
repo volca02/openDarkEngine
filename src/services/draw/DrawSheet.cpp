@@ -30,7 +30,7 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- DrawSheet ---------------------*/
 	/*----------------------------------------------------*/
-	DrawSheet::DrawSheet(const std::string& sheetName) : mActive(false), mSheetName(sheetName) {
+	DrawSheet::DrawSheet(DrawService* owner, const std::string& sheetName) : mActive(false), mSheetName(sheetName), mOwner(owner) {
 		// default to no visibility
 		setVisible(false);
 	};
@@ -126,17 +126,18 @@ namespace Opde {
 
 	//------------------------------------------------------
 	DrawBuffer* DrawSheet::getBufferForOperation(DrawOperation* drawOp, bool autoCreate) {
-		DrawBufferMap::iterator it = mDrawBufferMap.find(drawOp->getDrawSource()->sourceID);
+		DrawSourceBase* dsb = drawOp->getDrawSourceBase();
+		DrawBufferMap::iterator it = mDrawBufferMap.find(dsb->getSourceID());
 
 		if (it != mDrawBufferMap.end()) {
 			return it->second;
 		}
 
 		if (autoCreate) {
-			const Ogre::MaterialPtr& mp = drawOp->getDrawSource()->material;
+			const Ogre::MaterialPtr& mp = dsb->getMaterial();
 			DrawBuffer* db = new DrawBuffer(mp);
 			// TODO: And here as well. ID should be enough
-			mDrawBufferMap[drawOp->getDrawSource()->sourceID] = db;
+			mDrawBufferMap[dsb->getSourceID()] = db;
 			return db;
 		} else {
 			return NULL;

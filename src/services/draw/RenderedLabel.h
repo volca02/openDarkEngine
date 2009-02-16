@@ -22,30 +22,42 @@
  *****************************************************************************/
 
 
-#ifndef __RENDEREDIMAGE_H
-#define __RENDEREDIMAGE_H
+#ifndef __RENDEREDLABEL_H
+#define __RENDEREDLABEL_H
 
-#include "DrawCommon.h"
 #include "DrawOperation.h"
+#include "FontDrawSource.h"
 
 #include <OgreVector3.h>
 
 namespace Opde {
-	class RenderedImage : public DrawOperation {
+
+	class RenderedLabel : public DrawOperation {
 		public:
-			RenderedImage(DrawService* owner, DrawOperation::ID id, DrawSource* ds);
+			RenderedLabel(DrawService* owner, DrawOperation::ID id, FontDrawSource* fds, const std::string& label);
 
 			void visitDrawBuffer(DrawBuffer* db);
-			
+
+			void setLabel(const std::string& label);
+
 			DrawSourceBase* getDrawSourceBase();
 
 		protected:
+			/// Rebuilds the label - makes new glyph instances
+			void rebuild();
+
 			/// override that updates the image and marks dirty
 			void positionChanged();
-			
-			DrawQuad mDrawQuad;
-			
-			DrawSource* mDrawSource;
+
+			void fillQuad(int x, int y, const unsigned char chr, DrawSource* ds, DrawQuad& dq);
+
+			typedef std::list<DrawQuad> DrawQuadList;
+
+			DrawQuadList mDrawQuadList;
+
+			FontDrawSource* mFontSource;
+
+			std::string mLabel;
 	};
 
 };

@@ -33,9 +33,8 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- RenderedImage -----------------*/
 	/*----------------------------------------------------*/
-	RenderedImage::RenderedImage(DrawService* owner, DrawOperation::ID id, const DrawSourcePtr& ds) :
-		DrawOperation(owner, id, ds) {
-		// Nothing more now
+	RenderedImage::RenderedImage(DrawService* owner, DrawOperation::ID id, DrawSource* ds) :
+			DrawOperation(owner, id), mDrawSource(ds) {
 		mDrawQuad.texCoords.topleft = ds->transform(Vector2(0,0));
 		mDrawQuad.texCoords.topright = ds->transform(Vector2(1.0f,0));
 		mDrawQuad.texCoords.bottomleft = ds->transform(Vector2(0,1.0f));
@@ -56,11 +55,17 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
+	DrawSourceBase* RenderedImage::getDrawSourceBase() {
+		return mDrawSource;
+	}
+	
+	//------------------------------------------------------
 	void RenderedImage::positionChanged() {
+		const PixelSize& ps = mDrawSource->getPixelSize();
 		mDrawQuad.positions.topleft     = mOwner->convertToScreenSpace(mPosition.first, mPosition.second, mZOrder);
-		mDrawQuad.positions.topright    = mOwner->convertToScreenSpace(mPosition.first + mDrawSource->pixelSize.width, mPosition.second, mZOrder);
-		mDrawQuad.positions.bottomleft  = mOwner->convertToScreenSpace(mPosition.first, mPosition.second + mDrawSource->pixelSize.height, mZOrder);
-		mDrawQuad.positions.bottomright = mOwner->convertToScreenSpace(mPosition.first + mDrawSource->pixelSize.width, mPosition.second + mDrawSource->pixelSize.height, mZOrder);
+		mDrawQuad.positions.topright    = mOwner->convertToScreenSpace(mPosition.first + ps.width, mPosition.second, mZOrder);
+		mDrawQuad.positions.bottomleft  = mOwner->convertToScreenSpace(mPosition.first, mPosition.second + ps.height, mZOrder);
+		mDrawQuad.positions.bottomright = mOwner->convertToScreenSpace(mPosition.first + ps.width, mPosition.second + ps.height, mZOrder);
 
 		_markDirty();
 	}
