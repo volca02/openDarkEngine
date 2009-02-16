@@ -157,7 +157,7 @@ namespace Opde {
 			* @param size the element size
 			* @param count the element count */
 			File& writeElem(const void* buf, file_size_t size, uint count = 1);
-			
+
 			/** Reads structured data from the file
 			The format string determines how to load the data. The format is specified as this
 			@li c Character (one byte). No byte swapping is done, direct read
@@ -169,13 +169,17 @@ namespace Opde {
 			@param buf The buffer to read to
 			@param format The format to use
 			@param ExpectedLen The numbers of bytes expected to be read/written
-			@param count The count of the structures to read (use in case of struct array)			
+			@param count The count of the structures to read (use in case of struct array)
 			*/
 			File& readStruct(void* buf, const char* format, uint32_t ExpectedLen, uint count = 1);
-			
+
 			/** Writes a structure to the file. @see File::readStruct
 			*/
 			File& writeStruct(const void* buf, const char* format, uint32_t ExpectedLen, uint count = 1);
+
+			/** Reads one line from a file (treating it as a text file). Strips the line ending in the process
+			 */
+			std::string getLine();
 
 		protected:
 			/** swaps the endianness of the given buffer
