@@ -61,7 +61,7 @@ namespace Opde {
 			~Logger();
 
 			/** Log a message using printf syntax. */
-			void log(LogLevel level, char* fmt, ...);
+			void log(LogLevel level, const char* fmt, ...);
 
 			/** Register a new listener instance. The instance will receive all logging messages. */
 			void registerLogListener(LogListener* listener);

@@ -31,7 +31,7 @@ using namespace std;
 namespace Opde {
 	
 	
-		BasicException::BasicException(const std::string& desc, const std::string& src, char* file, long line) {
+		BasicException::BasicException(const std::string& desc, const std::string& src, const char* file, long line) {
 			description = desc;
 			source = src;
 			

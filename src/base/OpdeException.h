@@ -50,7 +50,7 @@ namespace Opde {
 			long lineNum;
 		public:
 			/** Constructor. */
-			BasicException(const std::string& desc, const std::string& src, char* file = NULL, long line = -1);
+			BasicException(const std::string& desc, const std::string& src, const char* file = NULL, long line = -1);
 		
 			~BasicException() throw();
 		
@@ -62,7 +62,7 @@ namespace Opde {
 	
 	class IndexOutOfBoundsException : public BasicException {
 		public:
-			IndexOutOfBoundsException(const std::string& txt, char* file = NULL, long line = -1)
+			IndexOutOfBoundsException(const std::string& txt, const char* file = NULL, long line = -1)
 				: BasicException(txt, "", file, line) {};
 	};
 	

@@ -27,7 +27,7 @@
 #include <cstdarg>
 #include <sstream>
 
-#ifdef _MSC_VER 
+#ifdef _MSC_VER
 #pragma warning( disable : 4996 )
 #endif
 
@@ -65,7 +65,7 @@ namespace Opde {
 		}
 	}
 
-	void Logger::log(LogLevel level, char *fmt, ...) {
+	void Logger::log(LogLevel level, const char *fmt, ...) {
 		// Ignore the message if the level is too high
 		if (mLoggingLevel < level)
 			return;
