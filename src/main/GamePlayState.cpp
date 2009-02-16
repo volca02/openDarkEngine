@@ -33,6 +33,8 @@
 
 #include "DarkCamera.h"
 
+#include "TextureAtlas.h"
+
 #include <OgreRenderWindow.h>
 #include <OgreOverlayElement.h>
 #include <OgreStringConverter.h>
@@ -180,7 +182,43 @@ namespace Opde {
 		mWindow->resetStatistics();
 
 		mToLoadScreen = false;
+	/*
+		mDrawService = GET_SERVICE(DrawService);
 
+		mCamera->setPosition(0,10,-15);
+		mCamera->lookAt(0,0,30);
+		mCamera->setNearClipDistance(0.5f);
+		mSceneMgr->setAmbientLight(ColourValue(1, 1, 1));
+
+		TextureAtlas* ta = mDrawService->createAtlas();
+		DrawSource* ds = ta->createDrawSource("access.pcx", "General");
+		// testing what happens when a font is loaded (e.g. where it segv's)
+		FontDrawSource* fds = mDrawService->loadFont(ta, "fonts/MAINFONT.FON" , "General");
+		FontDrawSource* fds1 = mDrawService->loadFont(ta, "fonts/MAINAA.FON" , "General");
+
+		ta->build();
+		
+		RenderedLabel* rl = mDrawService->createRenderedLabel(fds, "OpenDarkEngine test");
+		RenderedLabel* rl2 = mDrawService->createRenderedLabel(fds, "TEST 2");
+		rl->setPosition(250, 100);
+		rl2->setPosition(250, 120);
+
+		mRi = mDrawService->createRenderedImage(ds);
+
+		mRi->setZOrder(DrawService::MAX_Z_VALUE);
+		mRi->setPosition(0, 0);
+
+		DrawSheet* dsh = mDrawService->createSheet("GameScreen");
+
+		dsh->addDrawOperation(mRi);
+		dsh->addDrawOperation(rl);
+		dsh->addDrawOperation(rl2);
+
+		dsh->setVisible(true);
+
+		mSceneMgr->getRootSceneNode()->attachObject(dsh);
+		mDrawService->setActiveSheet(dsh);
+	*/
 		LOG_INFO("GamePlayState: Started");
 	}
 
@@ -440,6 +478,8 @@ namespace Opde {
 	}
 
 	bool GamePlayState::mouseMoved( const OIS::MouseEvent &e ) {
+		// mRi->setPosition(e.state.X.abs, e.state.Y.abs);
+
 		mRotX -= Degree( e.state.X.rel * 20.00);
 		// use Y axis invert
 		mRotY -= Degree( e.state.Y.rel * 20.00 * mRotateYFactor);

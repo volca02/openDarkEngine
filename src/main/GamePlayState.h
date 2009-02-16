@@ -34,6 +34,7 @@
 #include "LinkCommon.h"
 #include "ConfigService.h"
 #include "LinkService.h"
+#include "DrawService.h"
 
 #include <OgreMath.h>
 #include <OgreRoot.h>
@@ -122,6 +123,8 @@ namespace Opde {
 			int mNumScreenShots;
 			// config service
 			ConfigServicePtr mConfigService;
+
+			RenderedImage* mRi;
 	private:
 			/// Direct link to the player factory relation
 			RelationPtr mPlayerFactoryRelation;
@@ -130,6 +133,8 @@ namespace Opde {
 			int StartingPointObjID;
 			/// Link (Relation player factory) listener registration ID
 			Relation::ListenerID mPlayerFactoryListenerID;
+
+			DrawServicePtr mDrawService;
 	};
 }
 
