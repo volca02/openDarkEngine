@@ -46,8 +46,11 @@ namespace Opde {
 			return false;
 
 		// create world
+		/*
 		dInitODE2(0);
+		dInitODE();
 		dDarkWorldID = dWorldCreate();
+		*/
 
 		return true;
 	}
@@ -55,8 +58,10 @@ namespace Opde {
 	//------------------------------------------------------
 	PhysicsService::~PhysicsService() 
 	{
+		/*
 		dWorldDestroy(dDarkWorldID);
 		dCloseODE();
+		*/
 	}
 
 	//-------------------------- Factory implementation
