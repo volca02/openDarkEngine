@@ -35,7 +35,7 @@ namespace Opde {
 	/// Link ID type. 32bit number at least...
 	typedef unsigned int link_id_t;
 
-	typedef struct LinkStruct { // sLink-like, but this one contains id as well. Size: Fixed to 14 bytes
+	struct LinkStruct { // sLink-like, but this one contains id as well. Size: Fixed to 14 bytes
 		uint32_t id;
 		int32_t src;
 		int32_t dest;
@@ -123,7 +123,7 @@ namespace Opde {
 	} LinkChangeType;
 
 	/// Link chage message
-	typedef struct LinkChangeMsg {
+	struct LinkChangeMsg {
 		LinkChangeMsg() : link(NULL) {};
 		LinkChangeMsg(const LinkPtr& lnk) : link(lnk) {};
 		
@@ -136,7 +136,7 @@ namespace Opde {
 	};
 	
 /// Creates a link ID from flavor, concreteness and index
-#define LINK_MAKE_ID(flavor, concrete, index) (flavor<<20 | concrete << 16 | index)
+#define LINK_MAKE_ID(flavor, concrete, index) ((flavor<<20) | (concrete << 16) | index)
 /// Extracts Flavor ID from the link ID
 #define LINK_ID_FLAVOR(id) (id >> 20)
 /// Extracts Concreteness from the link ID

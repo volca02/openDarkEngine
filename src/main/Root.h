@@ -57,7 +57,7 @@ namespace Opde {
 			* @param serviceMask the mask of the services which should be used (others will be ignored and unreachable) 
 			* @param logFileName - optional log file name - when specified, logging to file will be initialized automatically
 			*/
-			Root(uint serviceMask = SERVICE_ALL, char* logFileName = NULL);
+			Root(uint serviceMask = SERVICE_ALL, const char* logFileName = NULL);
 			
 			/** stops the opde core, does cleanup */
 			~Root();

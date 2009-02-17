@@ -39,7 +39,7 @@ namespace Opde {
 	class InputEventMapper {
 		public:
 			/// Command event transformation
-			typedef enum CommandEventType {
+			enum CommandEventType {
 				/// Go positive on keypress, negative on release (Edge detection)
 				CET_PEDGE,
 				/// Go negative on keypress, positive on release (Edge detection)

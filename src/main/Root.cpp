@@ -68,7 +68,7 @@ namespace Opde {
 	template<> Root* Singleton<Root>::ms_Singleton = 0;
 
 	// -------------------------------------------------------
-	Root::Root(uint serviceMask, char* logFileName) :
+	Root::Root(uint serviceMask, const char* logFileName) :
 			mLogger(NULL),
 			mServiceMgr(NULL),
 			mOgreRoot(NULL),

@@ -59,7 +59,7 @@ namespace Opde {
 
 
 	/// window size message details
-	typedef struct RenderWindowSize {
+	struct RenderWindowSize {
 		/// The message type
 		RenderMessageType msg_type;
 		/// New width of the window (pixels)
@@ -72,11 +72,11 @@ namespace Opde {
 	};
 
 	/// Render service message (Used to signalize a change in the renderer setup)
-	typedef union {
+	union RenderServiceMsg {
 		RenderMessageType msg_type;
 
 		RenderWindowSize size;
-	} RenderServiceMsg;
+	};
 
 	/// A package of an entity and a EntityMaterialInstance
 	class EntityInfo {

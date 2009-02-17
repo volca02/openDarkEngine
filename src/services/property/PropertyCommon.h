@@ -76,7 +76,7 @@ namespace Opde {
 	}
 	
 	/// Property change types
-	typedef enum {
+	enum PropertyChangeType {
 		/// Link was added (Sent after the addition)
 		PROP_ADDED = 1,
 		/// Link was removed (Sent before the removal)
@@ -85,10 +85,10 @@ namespace Opde {
 		PROP_CHANGED,
 		/// All the links were removed from the relation (Sent before the cleanout)
 		PROP_GROUP_CLEARED
-	} PropertyChangeType;
+	};
 	
 	/// Property chage message
-	typedef struct PropertyChangeMsg {
+	struct PropertyChangeMsg {
 		/// A change that happened
 		PropertyChangeType change;
 		

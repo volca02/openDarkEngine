@@ -254,7 +254,7 @@ namespace Ogre {
 
             void build();
 
-            typedef struct VertexDefinition {
+            struct VertexDefinition {
                 uint16_t vertex;
                 uint16_t normal;
                 uint16_t light;
