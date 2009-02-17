@@ -182,7 +182,7 @@ namespace Opde {
 		mWindow->resetStatistics();
 
 		mToLoadScreen = false;
-	/**/
+	/*
 		mDrawService = GET_SERVICE(DrawService);
 
 		mCamera->setPosition(0,10,-15);

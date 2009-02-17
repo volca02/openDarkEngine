@@ -194,6 +194,7 @@ namespace Opde {
 
 			static const RGBAQuad msMonoPalette[2];
 			static RGBAQuad msDefaultPalette[256];
+			static RGBAQuad msAAPalette[256];
 
 			RGBAQuad* mCurrentPalette;
 

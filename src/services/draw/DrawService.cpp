@@ -243,8 +243,11 @@ namespace Opde {
 		if (header.Format == 0) {
 			dpf = DPF_MONO;
 			curpalette = msMonoPalette;
+		} else if (header.Format == 0x0CCCC) {
+			curpalette = msAAPalette;
+			// these are inverted! At least it seems so.
 		}
-
+		
 		size_t nchars = header.LastChar - header.FirstChar + 1;
 
 		uint16_t* columns = new uint16_t[nchars + 1];
