@@ -270,9 +270,6 @@ namespace Opde {
 			size_t width = columns[n+1] - columns[n];
 			PixelSize ps(width, header.NumRows);
 			
-			if (width > 1)
-				std::cerr << n + header.FirstChar << " " << width << std::endl;
-			
 			fon->addGlyph(n + header.FirstChar, ps, dpf, header.RowWidth, bitmap, columns[n], curpalette);
 		}
 
@@ -361,8 +358,6 @@ namespace Opde {
 		// Code written by patryn, reused here for the new font rendering pipeline support
 		ExternalPaletteHeader paletteHeader;
 		WORD count;
-		char *buffer, *c;
-		BYTE s;
 		unsigned int i;
 
 		freeCurrentPal();

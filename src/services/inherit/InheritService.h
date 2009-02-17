@@ -36,7 +36,7 @@
 
 namespace Opde {
 
-	typedef struct InheritLink {
+	struct InheritLink {
 		/// Source object ID
 		int 	srcID;
 		/// Source object ID

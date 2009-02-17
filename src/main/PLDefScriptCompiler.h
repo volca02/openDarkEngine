@@ -101,7 +101,7 @@ namespace Opde {
 		};
 		
 		/** Compilation state. The position the compilation is in, together with some information about the context. */
-		typedef struct CompileState {
+		struct CompileState {
 			CompileStateID state;
 			
 			Ogre::String name;

@@ -76,7 +76,7 @@ namespace Opde {
 			const DVariant& value(const std::string& symbol) const;
 
 			/** Enumeration field. A single field that is either checked or not, and has a specific value */
-			typedef struct EnumField {
+			struct EnumField {
 				EnumField(std::string _k, const DVariant& _v, bool _c) : checked(_c), key(_k), value(_v) {};
 
 				/** True if the field is enabled or the value is selected in case of non-bitfield enumerations */
@@ -116,7 +116,7 @@ namespace Opde {
 	class OPDELIB_EXPORT DTPrivateBase {
 		public:
 			/** DTypeDef private node type */
-			typedef enum NodeType {
+			enum NodeType {
 				/// Simple value holder
 				NT_SIMPLE,
 				/// Array of elements
@@ -246,7 +246,7 @@ namespace Opde {
 			void setDefault(const DVariant& val);
 
 			/** Field definition. Used in the built version of the type definition */
-			typedef struct FieldDef {
+			struct FieldDef {
 				unsigned int	offset;
 				std::string	name; // Absolute name
 				DTypeDefPtr 	type;

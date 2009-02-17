@@ -182,7 +182,7 @@ namespace Opde {
 		mWindow->resetStatistics();
 
 		mToLoadScreen = false;
-	/*
+	/**/
 		mDrawService = GET_SERVICE(DrawService);
 
 		mCamera->setPosition(0,10,-15);
@@ -199,13 +199,15 @@ namespace Opde {
 		ta->build();
 		
 		RenderedLabel* rl = mDrawService->createRenderedLabel(fds, "OpenDarkEngine test");
-		RenderedLabel* rl2 = mDrawService->createRenderedLabel(fds, "TEST 2");
-		rl->setPosition(250, 100);
-		rl2->setPosition(250, 120);
+		RenderedLabel* rl2 = mDrawService->createRenderedLabel(fds1, "TEST 2");
+		rl->setPosition(50, 100);
+		rl2->setPosition(50, 120);
+		rl->setZOrder(2);
+		rl2->setZOrder(2);
 
 		mRi = mDrawService->createRenderedImage(ds);
 
-		mRi->setZOrder(DrawService::MAX_Z_VALUE);
+		// mRi->setZOrder(DrawService::MAX_Z_VALUE);
 		mRi->setPosition(0, 0);
 
 		DrawSheet* dsh = mDrawService->createSheet("GameScreen");
@@ -218,7 +220,7 @@ namespace Opde {
 
 		mSceneMgr->getRootSceneNode()->attachObject(dsh);
 		mDrawService->setActiveSheet(dsh);
-	*/
+	/**/
 		LOG_INFO("GamePlayState: Started");
 	}
 

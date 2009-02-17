@@ -53,7 +53,7 @@ namespace Opde {
 	} InheritValueChangeType;
 
 	/// Inheritance change message
-	typedef struct InheritValueChangeMsg {
+	struct InheritValueChangeMsg {
 		/// A change that happened
 		InheritValueChangeType change;
 		/// An ID of the affected object
@@ -149,7 +149,7 @@ namespace Opde {
 	} InheritChangeType;
 
 	/// Inheritance change message
-	typedef struct InheritChangeMsg {
+	struct InheritChangeMsg {
 		/// A change that happened
 		InheritChangeType change;
 		/// An ID of src object of the inheritance

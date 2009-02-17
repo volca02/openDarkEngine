@@ -79,7 +79,7 @@ namespace Opde {
 			std::string getName();
 
 			/** Chunk duo - it's header and the file that contains the data */
-			typedef struct Chunk {
+			struct Chunk {
 				DarkDBChunkHeader header;
 				FilePtr file;
 			};

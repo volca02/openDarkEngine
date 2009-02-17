@@ -91,7 +91,7 @@ namespace Opde {
 	//------------------------------------------------------
 	void DrawOperation::rebuild() {
 		_rebuild();
-		mDirty = false;
+		mIsDirty = false;
 	}
 
 	//------------------------------------------------------

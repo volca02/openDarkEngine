@@ -134,7 +134,7 @@ namespace Opde {
 		};
 		
 		/** Compilation state. The position the compilation is in, together with some information about the context. */
-		typedef struct CompileState {
+		struct CompileState {
 			CompileStateID state;
 			bool unioned; // true if the created struct should be unioned
 			DTypeDefVector types; // for struct, list of members.
