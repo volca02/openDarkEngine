@@ -46,14 +46,14 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void RenderedLabel::rebuild() {
+	void RenderedLabel::_rebuild() {
 		std::string::iterator it = mLabel.begin();
 		std::string::iterator end = mLabel.end();
 
 		mDrawQuadList.clear();
 		int x = 0, y = 0;
 
-		// TODO: Clipping, reusal of quads if the quad count does not change, etc.
+		// TODO: Clipping, reuse of quads if the quad count does not change, etc.
 		while (it != end) {
 			const unsigned char& chr = *it++;
 
@@ -73,6 +73,8 @@ namespace Opde {
 			if (ds != NULL) {
 				x += ds->getPixelSize().width;
 				DrawQuad dq;
+				
+				
 				fillQuad(x, y, chr, ds, dq);
 				mDrawQuadList.push_back(dq);
 			} else {
@@ -96,11 +98,6 @@ namespace Opde {
 	//------------------------------------------------------
 	DrawSourceBase* RenderedLabel::getDrawSourceBase() {
 		return mFontSource->getAtlas();
-	}
-
-	//------------------------------------------------------
-	void RenderedLabel::positionChanged() {
-		rebuild();
 	}
 
 	//------------------------------------------------------

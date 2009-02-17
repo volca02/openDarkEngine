@@ -91,6 +91,12 @@ namespace Opde {
 		mQuadList.clear();
 
 		for (DrawOperationMap::iterator it = mDrawOpMap.begin(); it != iend; ++it) {
+			DrawOperation* op = it->second; 
+			
+			// rebuild the drawop if needed
+			if (op->isDirty())
+				op->rebuild();
+			
 			// visit!
 			it->second->visitDrawBuffer(this);
 		}

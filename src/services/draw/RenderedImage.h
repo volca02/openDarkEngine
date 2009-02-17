@@ -41,7 +41,7 @@ namespace Opde {
 
 		protected:
 			/// override that updates the image and marks dirty
-			void positionChanged();
+			void _rebuild();
 			
 			DrawQuad mDrawQuad;
 			

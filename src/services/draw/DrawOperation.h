@@ -67,13 +67,19 @@ namespace Opde {
 			
 			virtual DrawSourceBase* getDrawSourceBase() = 0;
 
+			/// Dirtiness detector. Dirty operations need rebuild() call before using for display
+			inline bool isDirty() { return mIsDirty; };
+
+			/// On a change this is to be called
+			void rebuild();
+			
 		protected:
 			/// On change updater - marks all using sheets as dirty
 			virtual void _markDirty();
 
-			// On position change
-			virtual void positionChanged();
-
+			/// Rebuilds the buffers
+			virtual void _rebuild();
+			
 			const ID mID;
 
 			DrawService* mOwner;
@@ -88,6 +94,9 @@ namespace Opde {
 			int mZOrder;
 
 			ClipRect mClipRect;
+			
+			// is the operation dirty? True means it needs to be rebuilt in order to produce valid quads
+			bool mIsDirty;
 	};
 
 	/// Map of all draw operations by it's ID

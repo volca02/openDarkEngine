@@ -34,7 +34,8 @@ namespace Opde {
 			mID(id),
 			mOwner(owner),
 			mPosition(0,0),
-			mZOrder(0) {
+			mZOrder(0),
+			mIsDirty(false) {
 		// nothing to do besides this
 	};
 
@@ -65,6 +66,8 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void DrawOperation::_markDirty() {
+		mIsDirty = true;
+		
 		for (DrawSheetSet::iterator it = mUsingSheets.begin(); it != mUsingSheets.end(); ++it) {
 			(*it)->_markDirty(this);
 		}
@@ -75,25 +78,31 @@ namespace Opde {
 		mPosition.first = x;
 		mPosition.second = y;
 
-		positionChanged();
+		_markDirty();
 	}
 
 	//------------------------------------------------------
 	void DrawOperation::setZOrder(int z) {
 		mZOrder = z;
 
-		positionChanged();
+		_markDirty();
+	}
+	
+	//------------------------------------------------------
+	void DrawOperation::rebuild() {
+		_rebuild();
+		mDirty = false;
 	}
 
+	//------------------------------------------------------
+	void DrawOperation::_rebuild() {
+		// nothing
+	}
+	
 	//------------------------------------------------------
 	void DrawOperation::setClipRect(const ClipRect& cr) {
 		mClipRect = cr;
 
-		positionChanged();
-	}
-
-	//------------------------------------------------------
-	void DrawOperation::positionChanged() {
-
+		_markDirty();
 	}
 }

@@ -46,7 +46,7 @@ namespace Opde {
 		mDrawQuad.colors.bottomright = ColourValue(1.0f, 1.0f, 1.0f);
 
 		// to be sure we are up-to-date
-		positionChanged();
+		_markDirty();
 	}
 
 	//------------------------------------------------------
@@ -60,7 +60,7 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
-	void RenderedImage::positionChanged() {
+	void RenderedImage::_rebuild() {
 		const PixelSize& ps = mDrawSource->getPixelSize();
 		mDrawQuad.positions.topleft     = mOwner->convertToScreenSpace(mPosition.first, mPosition.second, mZOrder);
 		mDrawQuad.positions.topright    = mOwner->convertToScreenSpace(mPosition.first + ps.width, mPosition.second, mZOrder);

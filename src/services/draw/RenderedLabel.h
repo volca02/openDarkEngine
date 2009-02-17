@@ -44,10 +44,7 @@ namespace Opde {
 
 		protected:
 			/// Rebuilds the label - makes new glyph instances
-			void rebuild();
-
-			/// override that updates the image and marks dirty
-			void positionChanged();
+			void _rebuild();
 
 			void fillQuad(int x, int y, const unsigned char chr, DrawSource* ds, DrawQuad& dq);
 
