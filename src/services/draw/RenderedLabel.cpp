@@ -71,11 +71,9 @@ namespace Opde {
 			DrawSource* ds = mFontSource->getGlyph(chr);
 
 			if (ds != NULL) {
-				x += ds->getPixelSize().width;
 				DrawQuad dq;
-				
-				
 				fillQuad(x, y, chr, ds, dq);
+				x += ds->getPixelSize().width;
 				mDrawQuadList.push_back(dq);
 			} else {
 				x += mFontSource->getWidth();

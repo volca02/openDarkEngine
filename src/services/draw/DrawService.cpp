@@ -236,6 +236,8 @@ namespace Opde {
 		fontFile->readElem(&header.RowWidth, 2); // 80
 		fontFile->readElem(&header.NumRows, 2); // 82
 
+		LOG_DEBUG("DrawService: Loading font '%s'", name.c_str());
+		
 		// what format do we have?
 		DarkPixelFormat dpf = DPF_8BIT;
 		const RGBAQuad* curpalette = mCurrentPalette;
@@ -243,9 +245,16 @@ namespace Opde {
 		if (header.Format == 0) {
 			dpf = DPF_MONO;
 			curpalette = msMonoPalette;
+			LOG_DEBUG("DrawService: Font is monochromatic");
 		} else if (header.Format == 0x0CCCC) {
-			curpalette = msAAPalette;
+			LOG_DEBUG("DrawService: Font is antialiased");
+			if (header.Palette != 0) // 0 == use current, otherwise we'll use the default one
+				curpalette = msAAPalette;
 			// these are inverted! At least it seems so.
+		} else {
+			LOG_DEBUG("DrawService: Font 8Bit with palette");
+			if (header.Palette != 0) // 0 == use current, otherwise we'll use the default one
+				curpalette = msDefaultPalette;
 		}
 		
 		size_t nchars = header.LastChar - header.FirstChar + 1;
