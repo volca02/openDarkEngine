@@ -74,7 +74,10 @@ namespace Opde {
 				DrawQuad dq;
 				fillQuad(x, y, chr, ds, dq);
 				x += ds->getPixelSize().width;
-				mDrawQuadList.push_back(dq);
+				
+				// if clipping produced some non-empty result
+				if (mClipRect.clip(dq)) // the quad is queued
+					mDrawQuadList.push_back(dq);
 			} else {
 				x += mFontSource->getWidth();
 			}

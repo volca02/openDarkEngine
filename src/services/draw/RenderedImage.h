@@ -46,6 +46,8 @@ namespace Opde {
 			DrawQuad mDrawQuad;
 			
 			DrawSource* mDrawSource;
+			
+			bool mInClip;
 	};
 
 };

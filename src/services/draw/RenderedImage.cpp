@@ -44,6 +44,8 @@ namespace Opde {
 		mDrawQuad.colors.topright = ColourValue(1.0f, 1.0f, 1.0f);
 		mDrawQuad.colors.bottomleft = ColourValue(1.0f, 1.0f, 1.0f);
 		mDrawQuad.colors.bottomright = ColourValue(1.0f, 1.0f, 1.0f);
+		
+		mInClip = true;
 
 		// to be sure we are up-to-date
 		_markDirty();
@@ -51,7 +53,9 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void RenderedImage::visitDrawBuffer(DrawBuffer* db) {
-		db->_queueDrawQuad(&mDrawQuad);
+		// are we in the clip area?
+		if (mInClip)
+			db->_queueDrawQuad(&mDrawQuad);
 	}
 
 	//------------------------------------------------------
@@ -67,6 +71,7 @@ namespace Opde {
 		mDrawQuad.positions.bottomleft  = mOwner->convertToScreenSpace(mPosition.first, mPosition.second + ps.height, mZOrder);
 		mDrawQuad.positions.bottomright = mOwner->convertToScreenSpace(mPosition.first + ps.width, mPosition.second + ps.height, mZOrder);
 
+		mInClip = mClipRect.clip(mDrawQuad);
 		_markDirty();
 	}
 
