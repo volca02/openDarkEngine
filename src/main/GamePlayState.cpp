@@ -191,19 +191,27 @@ namespace Opde {
 		mSceneMgr->setAmbientLight(ColourValue(1, 1, 1));
 
 		TextureAtlas* ta = mDrawService->createAtlas();
+		TextureAtlas* ta1 = mDrawService->createAtlas();
+		
 		DrawSource* ds = ta->createDrawSource("access.pcx", "General");
 		// testing what happens when a font is loaded (e.g. where it segv's)
+		mDrawService->setFontPalette(Ogre::ManualFonFileLoader::ePT_PCX, "fontpal.pcx", "General");
 		FontDrawSource* fds = mDrawService->loadFont(ta, "fonts/MAINFONT.FON" , "General");
 		FontDrawSource* fds1 = mDrawService->loadFont(ta, "fonts/MAINAA.FON" , "General");
+		FontDrawSource* fds2 = mDrawService->loadFont(ta1, "fonts/keyfonta.FON" , "General");
 
 		ta->build();
+		ta1->build();
 		
 		RenderedLabel* rl = mDrawService->createRenderedLabel(fds, "OpenDarkEngine test");
 		RenderedLabel* rl2 = mDrawService->createRenderedLabel(fds1, "TEST 2");
-		rl->setPosition(50, 100);
-		rl2->setPosition(50, 120);
+		RenderedLabel* rl3 = mDrawService->createRenderedLabel(fds2, "OpenDarkEngine test 0123456789");
+		rl->setPosition(250, 100);
+		rl2->setPosition(250, 120);
+		rl3->setPosition(250, 140);
 		rl->setZOrder(2);
 		rl2->setZOrder(2);
+		rl3->setZOrder(2);
 
 		mRi = mDrawService->createRenderedImage(ds);
 
@@ -215,6 +223,7 @@ namespace Opde {
 		dsh->addDrawOperation(mRi);
 		dsh->addDrawOperation(rl);
 		dsh->addDrawOperation(rl2);
+		dsh->addDrawOperation(rl3);
 
 		dsh->setVisible(true);
 
