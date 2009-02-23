@@ -310,6 +310,19 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
+	ClipRect DrawService::getClipRect(int left, int right, int top, int bottom) {
+		ClipRect cr;
+		
+		cr.left   = convertToScreenSpaceX(left);
+		cr.right  = convertToScreenSpaceX(right);
+		cr.top    = convertToScreenSpaceY(top);
+		cr.bottom = convertToScreenSpaceY(bottom);
+		cr.noClip = false;
+		
+		return cr;
+	}
+
+	//------------------------------------------------------
 	void DrawService::loadPaletteFromPCX(const Ogre::String& fname, const Ogre::String& group) {
 		// Code written by patryn, reused here for the new font rendering pipeline support
 		// Open the file

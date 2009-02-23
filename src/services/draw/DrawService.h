@@ -49,6 +49,7 @@ namespace Opde {
 	/** @brief Draw Service - 2D rendering service.
 	 * @author volca
 	 * @note some parts written by Patryn as well
+	 * @todo The system of to screen-space conversion is not modular enough. DrawOperations should rely on current owner (sheet) for conversion - that would allow us to override the screen resolution for example.
 	*/
 	class OPDELIB_EXPORT DrawService : public Service, public Ogre::RenderQueueListener {
 		public:
@@ -147,6 +148,10 @@ namespace Opde {
 			 * in further font loading operations.
 			 */
 			void setFontPalette(Ogre::ManualFonFileLoader::PaletteType paltype, const Ogre::String& fname = "", const Ogre::String& group = "");
+			
+			/** Creates a clip rectangle with the specified screen coordinates.
+			*/
+			ClipRect getClipRect(int left, int right, int top, int bottom);
 
 		protected:
 			// Service related:

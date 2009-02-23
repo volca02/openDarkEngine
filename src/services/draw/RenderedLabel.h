@@ -35,6 +35,8 @@ namespace Opde {
 	class RenderedLabel : public DrawOperation {
 		public:
 			RenderedLabel(DrawService* owner, DrawOperation::ID id, FontDrawSource* fds, const std::string& label);
+			
+			virtual ~RenderedLabel();
 
 			void visitDrawBuffer(DrawBuffer* db);
 
@@ -46,9 +48,12 @@ namespace Opde {
 			/// Rebuilds the label - makes new glyph instances
 			void _rebuild();
 
+			/// Frees all allocated instances stored in the quad list, then clears the quad list itself
+			void freeQuadList();
+			
 			void fillQuad(int x, int y, const unsigned char chr, DrawSource* ds, DrawQuad& dq);
 
-			typedef std::list<DrawQuad> DrawQuadList;
+			typedef std::list<DrawQuad*> DrawQuadList;
 
 			DrawQuadList mDrawQuadList;
 

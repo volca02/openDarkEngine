@@ -92,6 +92,14 @@ namespace Opde {
 		/// If set to true (default) the clipping is not done
 		bool noClip;
 
+		void operator=(const ClipRect& b) {
+			left = b.left;
+			right = b.right;
+			top = b.top;
+			bottom = b.bottom;
+			noClip = b.noClip;
+		}
+		
 		/** Clips a specified DrawQuad to the specified boundaries.
 		* @param quad The DrawQuad which is to be clipped
 		* @note this method simplifies it's work by assuming the input is a rectangular DrawQuad, not a trapezoid
@@ -104,7 +112,7 @@ namespace Opde {
 
 			// invalid cliprect, return false
 			// bottom is less than the top (screen coordinates go negative downwards, as in graphs)
-			if ((left > right) || (bottom > top))
+			if ((left > right) || (top < bottom))
 				return false;
 
 			// Okay, we should clip.
@@ -129,42 +137,33 @@ namespace Opde {
 			if ((pleft > right) || (pright < left) || (ptop < bottom) || (pbottom > top))
 				return false;
 
-			// horizontal position to tex coord conversion coefficient
-			Ogre::Real hconv = (tright-tleft)/(right-left);
+			// horizontal position to tex coord conversion coefficient (slope)
+			Ogre::Real hconv = (tright-tleft)/(pright-pleft);
 			// and a vertical one
-			Ogre::Real vconv = (ttop-tbottom)/(top-bottom);
+			Ogre::Real vconv = (ttop-tbottom)/(ptop-pbottom);
 
 			// And here we clip finally
 			if (pleft < left) {
-				// move the txt coord by the
-				Ogre::Real tnleft = tleft + (left-pleft)*hconv;
-
-				// move the txt
-				quad.texCoords.left = tnleft;
-
 				// move the position
 				quad.positions.left = left;
+				
+				// move the txt coord (original left plus the slope * difference added)
+				quad.texCoords.left = tleft + (left - pleft)*hconv;
 			}
 
 			if (pright > right) {
-				Ogre::Real tnright = tright - (right - pright) * hconv;
-
-				quad.texCoords.right = tnright;
 				quad.positions.right = right;
+				quad.texCoords.right = tright + (right - pright) * hconv;
 			}
 
 			if (pbottom < bottom) {
-				Ogre::Real tnbottom = tbottom + (bottom - pbottom) * vconv;
-
-				quad.texCoords.bottom = tnbottom;
 				quad.positions.bottom = bottom;
+				quad.texCoords.bottom = tbottom + (bottom - pbottom) * vconv;
 			}
 
 			if (ptop > top) {
-				Ogre::Real tntop = ttop - (top - ptop) * vconv;
-
-				quad.texCoords.top = tntop;
 				quad.positions.top = top;
+				quad.texCoords.top = ttop + (top - ptop) * vconv;				
 			}
 
 			return true;
@@ -186,14 +185,14 @@ namespace Opde {
 	// A base rendering source info - material and texture
 	class OPDELIB_EXPORT DrawSourceBase {
 		public:
+			/// Draw source image ID. Atlased draw sources have the same ID. It is used to organize buffers.
+			typedef size_t ID;
+
 			/// Constructor
-			DrawSourceBase(const Ogre::MaterialPtr& mat, const Ogre::TexturePtr& tex);
+			DrawSourceBase(ID srcID, const Ogre::MaterialPtr& mat, const Ogre::TexturePtr& tex);
 			
 			/// NULL-setting constructor
 			DrawSourceBase();
-			
-			/// Draw source image ID. Atlased draw sources have the same ID. It is used to organize buffers.
-			typedef size_t ID;
 			
 			/// Material getter
 			inline Ogre::MaterialPtr getMaterial() const { return mMaterial; };

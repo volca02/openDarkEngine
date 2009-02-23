@@ -124,7 +124,7 @@ namespace Opde {
 			// config service
 			ConfigServicePtr mConfigService;
 
-			RenderedImage* mRi;
+			RenderedLabel *mRl1, *mRl2;
 	private:
 			/// Direct link to the player factory relation
 			RelationPtr mPlayerFactoryRelation;

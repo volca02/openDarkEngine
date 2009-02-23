@@ -194,7 +194,7 @@ namespace Opde {
 			// no vertex data, let's reallocate some!
 			mVertexData = new Ogre::VertexData();
 			mVertexData->vertexStart = 0;
-			mVertexData->vertexCount = mQuadList.size() * 4;
+			mVertexData->vertexCount = mQuadCount * 4;
 
 			Ogre::VertexDeclaration* decl = mVertexData->vertexDeclaration;
 			Ogre::VertexBufferBinding* binding = mVertexData->vertexBufferBinding;

@@ -29,13 +29,16 @@ using Ogre::Vector2;
 
 namespace Opde {
 	//------------------------------------------------------
-	DrawSourceBase::DrawSourceBase(const Ogre::MaterialPtr& mat, const Ogre::TexturePtr& tex) : mMaterial(mat), mTexture(tex) {
+	DrawSourceBase::DrawSourceBase(ID srcID, const Ogre::MaterialPtr& mat, const Ogre::TexturePtr& tex) : mMaterial(mat), mTexture(tex), mSourceID(srcID) {
 		mPixelSize.width = tex->getWidth();
 		mPixelSize.height = tex->getHeight();
 	};
 	
 	//------------------------------------------------------	
-	DrawSourceBase::DrawSourceBase() : mMaterial(), mTexture() {
+	DrawSourceBase::DrawSourceBase() : mMaterial(), mTexture(), mSourceID(0) {
+		mMaterial.setNull();
+		mTexture.setNull();
+
 		mPixelSize.width = 0;
 		mPixelSize.height = 0;
 	};
@@ -46,14 +49,11 @@ namespace Opde {
 	};
 
 	//------------------------------------------------------	
-	DrawSource::DrawSource(ID id, const Ogre::MaterialPtr& mat, const Ogre::TexturePtr& tex) : DrawSourceBase(mat, tex), mAtlassed(false) {
-		setSourceID(id);
+	DrawSource::DrawSource(ID id, const Ogre::MaterialPtr& mat, const Ogre::TexturePtr& tex) : DrawSourceBase(id, mat, tex), mAtlassed(false) {
 	}
 
 	//------------------------------------------------------
-	DrawSource::DrawSource() : mAtlassed(false) {
-		mMaterial.setNull();
-		mTexture.setNull();
+	DrawSource::DrawSource() : DrawSourceBase(), mAtlassed(false) {
 		mPixelSize.width  = 0; // needs to be filled on loadimage
 		mPixelSize.height = 0;
 		mSize = Ogre::Vector2(1.0f, 1.0f);

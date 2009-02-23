@@ -38,11 +38,16 @@ namespace Opde {
 
 		rebuild();
 	}
+	
+	//------------------------------------------------------
+	RenderedLabel::~RenderedLabel() {
+		freeQuadList();
+	}
 
 	//------------------------------------------------------
 	void RenderedLabel::setLabel(const std::string& label) {
 		mLabel = label;
-		rebuild();
+		_markDirty();
 	}
 
 	//------------------------------------------------------
@@ -50,12 +55,13 @@ namespace Opde {
 		std::string::iterator it = mLabel.begin();
 		std::string::iterator end = mLabel.end();
 
-		mDrawQuadList.clear();
+		freeQuadList();
+		
 		int x = 0, y = 0;
 
 		// TODO: Clipping, reuse of quads if the quad count does not change, etc.
 		while (it != end) {
-			const unsigned char& chr = *it++;
+			const unsigned char chr = *it++;
 
 			if (chr == '\n') {
 				y += mFontSource->getHeight();
@@ -76,23 +82,36 @@ namespace Opde {
 				x += ds->getPixelSize().width;
 				
 				// if clipping produced some non-empty result
-				if (mClipRect.clip(dq)) // the quad is queued
-					mDrawQuadList.push_back(dq);
+				if (mClipRect.clip(dq)) { 
+					// the quad is queued (by making a dynamically allocated copy)
+					DrawQuad* toStore = new DrawQuad(dq);
+					mDrawQuadList.push_back(toStore);
+				}
 			} else {
-				x += mFontSource->getWidth();
+				x += mFontSource->getWidth(); // move the maximal width (maybe 1px would be better?)
 			}
 		}
 	}
 
 	//------------------------------------------------------
-	void RenderedLabel::visitDrawBuffer(DrawBuffer* db) {
-		// TODO: For every generated glyph instance
-		// db->_queueDrawQuad(&mDrawQuad);
+	void RenderedLabel::freeQuadList() {
 		DrawQuadList::iterator it = mDrawQuadList.begin();
 		DrawQuadList::iterator end = mDrawQuadList.end();
 		
 		for (; it != end; ++it) {
-			db->_queueDrawQuad(&*it);
+			delete *it;
+		}
+		
+		mDrawQuadList.clear();
+	}
+	
+	//------------------------------------------------------
+	void RenderedLabel::visitDrawBuffer(DrawBuffer* db) {
+		DrawQuadList::iterator it = mDrawQuadList.begin();
+		DrawQuadList::iterator end = mDrawQuadList.end();
+		
+		for (; it != end; ++it) {
+			db->_queueDrawQuad(*it);
 		}
 	}
 

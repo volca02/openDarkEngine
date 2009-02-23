@@ -198,32 +198,37 @@ namespace Opde {
 		mDrawService->setFontPalette(Ogre::ManualFonFileLoader::ePT_PCX, "fontpal.pcx", "General");
 		FontDrawSource* fds = mDrawService->loadFont(ta, "fonts/MAINFONT.FON" , "General");
 		FontDrawSource* fds1 = mDrawService->loadFont(ta, "fonts/MAINAA.FON" , "General");
-		FontDrawSource* fds2 = mDrawService->loadFont(ta1, "fonts/keyfonta.FON" , "General");
-
+		FontDrawSource* fds2 = mDrawService->loadFont(ta, "fonts/keyfonta.FON" , "General");
+		
 		ta->build();
 		ta1->build();
 		
 		RenderedLabel* rl = mDrawService->createRenderedLabel(fds, "OpenDarkEngine test");
-		RenderedLabel* rl2 = mDrawService->createRenderedLabel(fds1, "TEST 2");
-		RenderedLabel* rl3 = mDrawService->createRenderedLabel(fds2, "OpenDarkEngine test 0123456789");
+
+		mRl1 = mDrawService->createRenderedLabel(fds, "TEST 2");
+		mRl2 = mDrawService->createRenderedLabel(fds, "ONLY VISIBLE IN CLIPPED AREA\nThis text is a multiline text that is only to be seen\nif inside a clipping rectangle that it is set to be\nviewed through.");
+
+		ClipRect cr = mDrawService->getClipRect(150, 300, 150, 176);
+		mRl2->setClipRect(cr);
+
+		RenderedImage* ri = mDrawService->createRenderedImage(ds);
+		ri->setPosition(100, 250);
+
+
+		
 		rl->setPosition(250, 100);
-		rl2->setPosition(250, 120);
-		rl3->setPosition(250, 140);
+		mRl1->setPosition(0, 0);
+		mRl2->setPosition(0, 12);
 		rl->setZOrder(2);
-		rl2->setZOrder(2);
-		rl3->setZOrder(2);
-
-		mRi = mDrawService->createRenderedImage(ds);
-
-		// mRi->setZOrder(DrawService::MAX_Z_VALUE);
-		mRi->setPosition(0, 0);
+		mRl2->setZOrder(2);
+		mRl2->setZOrder(2);
 
 		DrawSheet* dsh = mDrawService->createSheet("GameScreen");
 
-		dsh->addDrawOperation(mRi);
+		dsh->addDrawOperation(ri);
 		dsh->addDrawOperation(rl);
-		dsh->addDrawOperation(rl2);
-		dsh->addDrawOperation(rl3);
+		dsh->addDrawOperation(mRl1);
+		dsh->addDrawOperation(mRl2);
 
 		dsh->setVisible(true);
 
@@ -490,6 +495,8 @@ namespace Opde {
 
 	bool GamePlayState::mouseMoved( const OIS::MouseEvent &e ) {
 		// mRi->setPosition(e.state.X.abs, e.state.Y.abs);
+		mRl1->setPosition(e.state.X.abs, e.state.Y.abs);
+		mRl2->setPosition(e.state.X.abs, e.state.Y.abs + 12);
 
 		mRotX -= Degree( e.state.X.rel * 20.00);
 		// use Y axis invert

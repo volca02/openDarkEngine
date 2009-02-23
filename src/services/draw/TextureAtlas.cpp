@@ -49,7 +49,7 @@ namespace Opde {
 			mIsDirty(false),
 			mAtlasSize(1,1) {
 
-		mAtlasAllocation = new FreeSpaceInfo(0,0,1,1);
+		mAtlasAllocation = new FreeSpaceInfo(0,0,1.0f,1.0f);
 		mAtlasName = "DrawAtlas" + Ogre::StringConverter::toString(mAtlasID);
 	}
 
@@ -177,7 +177,7 @@ namespace Opde {
 			Ogre::TEX_TYPE_2D,
 			mAtlasSize.width,
 			mAtlasSize.height,
-			0,
+			1,
 			Ogre::PF_BYTE_BGRA,
 			Ogre::TU_STATIC_WRITE_ONLY);
 
@@ -237,22 +237,25 @@ namespace Opde {
 
 			delete[] conversionBuf;
 
-			// TODO: This needs rewrite. Multiple builds on the same images and !bam! the coordinates are lost
-			// convert the full texturing coords to the atlassed ones
+			// Convert the full draw source pixel coordinates to the atlas contained ones (initializes the texturing coordinates transform)
 			ds->atlas(mMaterial, fsi->x, fsi->y, mAtlasSize.width, mAtlasSize.height);
 		}
 
 
+		
 		 // for debug, write the texture to a file
-		 
+		/* 
 		unsigned char *readrefdata = static_cast<unsigned char*>(targetBox.data);		
 				     
 		Ogre::Image img;
 		img = img.loadDynamicImage (readrefdata, mTexture->getWidth(),
 		    mTexture->getHeight(), mTexture->getFormat());	
 		img.save(mAtlasName + ".png");
-		  
+		*/  
+
+		// and close the pixel buffer of the atlas at the end
 		pixelBuffer->unlock();
+		mIsDirty = false;
 	}
 
 	//------------------------------------------------------
