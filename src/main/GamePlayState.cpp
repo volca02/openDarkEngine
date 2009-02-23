@@ -495,8 +495,9 @@ namespace Opde {
 
 	bool GamePlayState::mouseMoved( const OIS::MouseEvent &e ) {
 		// mRi->setPosition(e.state.X.abs, e.state.Y.abs);
-		mRl1->setPosition(e.state.X.abs, e.state.Y.abs);
+		/*mRl1->setPosition(e.state.X.abs, e.state.Y.abs);
 		mRl2->setPosition(e.state.X.abs, e.state.Y.abs + 12);
+		*/
 
 		mRotX -= Degree( e.state.X.rel * 20.00);
 		// use Y axis invert
