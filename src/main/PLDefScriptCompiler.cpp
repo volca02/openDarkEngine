@@ -104,6 +104,12 @@ namespace Opde {
 		mPropertyService = GET_SERVICE(PropertyService);
 
 		mCurrentState.state = CS_UNKNOWN;
+		mDefaultDMajor = 1;
+		mDefaultDMinor = 1;
+		mDefaultLMajor = 1;
+		mDefaultLMinor = 1;
+		mDefaultPMajor = 1;
+		mDefaultPMinor = 1;
 	}
 
 	//-----------------------------------------------------------------------
@@ -162,7 +168,7 @@ namespace Opde {
 			try {
 				(this->*action->second)();
 			} catch (Exception& ogreException) {
-				// an unknown token found or BNF Grammer rule was not successful
+				// an unknown token found or BNF Grammar rule was not successful
 				// in finding a valid terminal token to complete the rule expression.
 				logParseError(ogreException.getDescription());
 			} catch (BasicException& ogreException) {
