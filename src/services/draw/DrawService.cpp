@@ -537,17 +537,26 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	Ogre::Vector3 DrawService::convertToScreenSpace(int x, int y, int z) {
-		Ogre::Vector3 res(x,y,getConvertedDepth(z));
-		// Portions inspired by/taken from ajs's Canvas code
-		res.x = ((res.x + mXTextelOffset) / mViewport->getActualWidth()) * 2.0f - 1.0f;
-		res.y = ((res.y + mYTextelOffset) / mViewport->getActualHeight()) * -2.0f + 1.0f;
+	Ogre::Real DrawService::convertToScreenSpaceX(int x) {
+		Ogre::Real res = x;
+
+		res = ((res + mXTextelOffset) / mViewport->getActualWidth()) * 2.0f - 1.0f;
 
 		return res;
 	}
-
+	
+	
 	//------------------------------------------------------
-	Ogre::Real DrawService::getConvertedDepth(int z) {
+	Ogre::Real DrawService::convertToScreenSpaceY(int y) {
+		Ogre::Real res = y;
+		
+		res = ((res + mYTextelOffset) / mViewport->getActualHeight()) * -2.0f + 1.0f;
+
+		return res;
+	}
+				
+	//------------------------------------------------------
+	Ogre::Real DrawService::convertToScreenSpaceZ(int z) {
 		Ogre::Real depth = mRenderSystem->getMaximumDepthInputValue() - mRenderSystem->getMinimumDepthInputValue();
 
 		if (z < 0)
@@ -558,6 +567,7 @@ namespace Opde {
 
 		return mRenderSystem->getMaximumDepthInputValue() - (z * depth / MAX_Z_VALUE);
 	}
+	
 
 	//------------------------------------------------------
 	void DrawService::_queueAtlasForRebuild(TextureAtlas* atlas) {

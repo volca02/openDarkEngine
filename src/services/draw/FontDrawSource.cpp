@@ -121,7 +121,7 @@ namespace Opde {
 		}
 
 		// we have the image data ready, now we'll populate image with it
-		dsp->getImage().loadDynamicImage(reinterpret_cast<Ogre::uchar*>(pixels), dimensions.width, dimensions.height, 1, Ogre::PF_BYTE_BGRA, true);
+		dsp->getImage().loadDynamicImage(reinterpret_cast<Ogre::uchar*>(pixels), dimensions.width, dimensions.height, 1, Ogre::PF_A8R8G8B8, true);
 	}
 
 	//------------------------------------------------------
@@ -151,7 +151,7 @@ namespace Opde {
 		}
 
 		// we have the image data ready, now we'll populate image with it
-		dsp->getImage().loadDynamicImage(reinterpret_cast<Ogre::uchar*>(pixels), dimensions.width, dimensions.height, 1, Ogre::PF_BYTE_BGRA, true);
+		dsp->getImage().loadDynamicImage(reinterpret_cast<Ogre::uchar*>(pixels), dimensions.width, dimensions.height, 1, Ogre::PF_A8R8G8B8, true);
 	}
 
 };

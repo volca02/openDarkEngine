@@ -37,12 +37,12 @@
 
 namespace Opde {
 
-	/// Universal rect. (Idea cloned after Canvas'es quad)
+	/// Universal rect. Specifies left, right, top and bottom coordinates
 	template<typename T> struct DrawRect {
-		T topleft;
-		T topright;
-		T bottomleft;
-		T bottomright;
+		T left;
+		T right;
+		T top;
+		T bottom;
 	};
 
 	/// A pixel coordinates type
@@ -67,12 +67,16 @@ namespace Opde {
 		size_t height;
 	};
 
-	/// Draw quad - a single Rectangle that can be stored for rendering
+	/// Draw quad - a single Rectangle that can be stored for rendering. All coordinates are already transformed as needed
 	struct OPDELIB_EXPORT DrawQuad {
-		DrawRect<Ogre::Vector3> positions;
-		DrawRect<Ogre::Vector2> texCoords;
-		DrawRect<Ogre::ColourValue> colors;
-
+		/// Positions of the rect
+		DrawRect<Ogre::Real> positions;
+		/// Positions in the texture space
+		DrawRect<Ogre::Real> texCoords;
+		/// Color of the rect
+		Ogre::ColourValue color;
+		/// The Z value to use (after transform)
+		Ogre::Real depth;
 		// TODO: IBO and VBO position markers (mutable) (That means current position specifier)
 	};
 
@@ -108,18 +112,18 @@ namespace Opde {
 			// first we gather the txt coordinates of the corners (the same manner we use here)
 			Ogre::Real tleft, tright, ttop, tbottom;
 
-			tleft   = quad.texCoords.topleft.x;
-			tright  = quad.texCoords.topright.x;
-			ttop    = quad.texCoords.topleft.y;
-			tbottom = quad.texCoords.bottomleft.y;
+			tleft   = quad.texCoords.left;
+			tright  = quad.texCoords.right;
+			ttop    = quad.texCoords.top;
+			tbottom = quad.texCoords.bottom;
 
 			// Then we gather the screen positions
 			Ogre::Real pleft, pright, ptop, pbottom;
 
-			pleft   = quad.positions.topleft.x;
-			pright  = quad.positions.topright.x;
-			ptop    = quad.positions.topleft.y;
-			pbottom = quad.positions.bottomleft.y;
+			pleft   = quad.positions.left;
+			pright  = quad.positions.right;
+			ptop    = quad.positions.top;
+			pbottom = quad.positions.bottom;
 
 			// No intersection?
 			if ((pleft > right) || (pright < left) || (ptop < bottom) || (pbottom > top))
@@ -136,43 +140,31 @@ namespace Opde {
 				Ogre::Real tnleft = tleft + (left-pleft)*hconv;
 
 				// move the txt
-				quad.texCoords.topleft.x = tnleft;
-				quad.texCoords.bottomleft.x = tnleft;
+				quad.texCoords.left = tnleft;
 
 				// move the position
-				quad.positions.topleft.x = left;
-				quad.positions.bottomleft.x = left;
+				quad.positions.left = left;
 			}
 
 			if (pright > right) {
 				Ogre::Real tnright = tright - (right - pright) * hconv;
 
-				quad.texCoords.topright.x = tnright;
-				quad.texCoords.bottomright.x = tnright;
-
-
-				quad.positions.bottomright.x = right;
-				quad.positions.topright.x = right;
+				quad.texCoords.right = tnright;
+				quad.positions.right = right;
 			}
 
 			if (pbottom < bottom) {
 				Ogre::Real tnbottom = tbottom + (bottom - pbottom) * vconv;
 
-				quad.texCoords.bottomleft.y = tnbottom;
-				quad.texCoords.bottomright.y = tnbottom;
-
-				quad.positions.bottomleft.y = bottom;
-				quad.positions.bottomright.y = bottom;
+				quad.texCoords.bottom = tnbottom;
+				quad.positions.bottom = bottom;
 			}
 
 			if (ptop > top) {
 				Ogre::Real tntop = ttop - (top - ptop) * vconv;
 
-				quad.texCoords.topleft.y = tntop;
-				quad.texCoords.topright.y = tntop;
-
-				quad.positions.topleft.y = top;
-				quad.positions.topright.y = top;
+				quad.texCoords.top = tntop;
+				quad.positions.top = top;
 			}
 
 			return true;
@@ -246,6 +238,12 @@ namespace Opde {
 			
 			/// Will transform the Texture coordinates to those usable for rendering
 			Ogre::Vector2 transform(const Ogre::Vector2& input);
+			
+			/// Transforms the X part of the texture coordinate
+			Ogre::Real transformX(Ogre::Real x);
+			
+			/// Transforms the Y part of the texture coordinate
+			Ogre::Real transformY(Ogre::Real y);
 
 			inline void* getPlacementPtr() const { return mPlacement; };
 			
@@ -263,8 +261,8 @@ namespace Opde {
 			/// Updates the pixel size from the supplied image. Do NOT forget to call this after loading the image by hand.
 			void updatePixelSizeFromImage();
 			
-			/// Fills the specified DrawRect of vector2 elements to represent the full image of this draw source
-			void fillTexCoords(DrawRect<Ogre::Vector2>& tc);
+			/// Fills the specified DrawRect to represent the full image of this draw source
+			void fillTexCoords(DrawRect<Ogre::Real>& tc);
 		protected:
 
 			/** Source image of this draw source - may be lost after atlassing this, internal  */
@@ -284,11 +282,11 @@ namespace Opde {
 	
 	};
 
-	struct DrawSourceLess {
+	struct OPDELIB_EXPORT DrawSourceLess {
 		bool operator() (const DrawSource* a, const DrawSource* b) {
 			size_t sa = a->getPixelArea();
 			size_t sb = b->getPixelArea();
-			return sa < sb;
+			return sa > sb;
 		}
 	};
 

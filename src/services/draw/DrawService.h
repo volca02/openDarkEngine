@@ -113,15 +113,19 @@ namespace Opde {
 			 */
 			void destroyAtlas(TextureAtlas* atlas);
 
-			/** Converts the given coordinates to the screen space x,y,z coordinates
+			/** Converts the given coordinate to the screen space x coordinate
 			 */
-			Ogre::Vector3 convertToScreenSpace(int x, int y, int z);
-
-			/** Converts the given depth to screen-space
+			Ogre::Real convertToScreenSpaceX(int x);
+			
+			/** Converts the given coordinate to the screen space y coordinates
+			 */
+			Ogre::Real convertToScreenSpaceY(int y);
+			
+			/** Converts the given coordinate to the screen space y coordinates
 			 * @param z the depth in 0 - MAX_Z_VALUE range
 			 * @return Real number describing the depth
 			 */
-			Ogre::Real getConvertedDepth(int z);
+			Ogre::Real convertToScreenSpaceZ(int z);
 
 			/// Queues an atlas for rebuilding (on render queue started event)
 			void _queueAtlasForRebuild(TextureAtlas* atlas);

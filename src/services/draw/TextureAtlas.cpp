@@ -26,6 +26,7 @@
 #include "TextureAtlas.h"
 #include "DrawService.h"
 #include "FontDrawSource.h"
+#include "logger.h"
 
 #include <OgreTextureManager.h>
 #include <OgreStringConverter.h>
@@ -121,9 +122,6 @@ namespace Opde {
 
 		size_t area = 0;
 
-		// First, we sort by size of the DrawSource
-		mMyDrawSources.sort(DrawSourceLess());
-
 		// build the fonts (if this didn't happen already)
 		// so we'll be sure the glyphs are there to be atlassed
 		FontSet::iterator fit = mMyFonts.begin();
@@ -135,6 +133,9 @@ namespace Opde {
 				fdsp->build();
 		}
 
+		// First, we sort by size of the DrawSource
+		mMyDrawSources.sort(DrawSourceLess());
+
 		// now try to allocate all the draw sources. If we fail, grow and try again
 		do {
 			fitted = true;
@@ -144,16 +145,19 @@ namespace Opde {
 			DrawSourceSet::iterator it = mMyDrawSources.begin();
 
 			while (it != mMyDrawSources.end()) {
+				
 				DrawSource* ds = *it++;
 
 				const PixelSize& ps = ds->getPixelSize();
 				area += ps.getPixelArea();
+				
+				LOG_DEBUG("TextureAtlas: Trying to place %d x %d (%d -> %d)", ps.width, ps.height, ps.getPixelArea(), area);
 
 				// try to allocate
-				FreeSpaceInfo* area = mAtlasAllocation->allocate(ps.width, ps.height);
+				FreeSpaceInfo* fsi = mAtlasAllocation->allocate(ps.width, ps.height);
 
-				if (area) {
-					ds->setPlacementPtr(area);
+				if (fsi) {
+					ds->setPlacementPtr(fsi);
 				} else {
 					fitted = false;
 					break;
@@ -164,6 +168,8 @@ namespace Opde {
 			if (!fitted) // nope - Enlarge!
 				enlarge(area);
 		} while (!fitted);
+		
+		LOG_INFO("TextureAtlas: Creating atlas '%s' with dimensions %d x %d", mAtlasName.c_str(), mAtlasSize.width, mAtlasSize.height);
 
 		// it seems we're here because we fitted! Lets paint the textures into the atlas
 		mTexture = Ogre::TextureManager::getSingleton().createManual(mAtlasName,
@@ -236,7 +242,17 @@ namespace Opde {
 			ds->atlas(mMaterial, fsi->x, fsi->y, mAtlasSize.width, mAtlasSize.height);
 		}
 
-		 pixelBuffer->unlock();
+
+		 // for debug, write the texture to a file
+		 
+		unsigned char *readrefdata = static_cast<unsigned char*>(targetBox.data);		
+				     
+		Ogre::Image img;
+		img = img.loadDynamicImage (readrefdata, mTexture->getWidth(),
+		    mTexture->getHeight(), mTexture->getFormat());	
+		img.save(mAtlasName + ".png");
+		  
+		pixelBuffer->unlock();
 	}
 
 	//------------------------------------------------------
@@ -246,6 +262,8 @@ namespace Opde {
 
 		// mark dirty the atlas
 		markDirty();
+		
+		LOG_DEBUG("TextureAtlas: Enlarging atlas from %d x %d", mAtlasSize.width, mAtlasSize.height);
 
 		size_t size;
 
@@ -259,6 +277,9 @@ namespace Opde {
 
 			size = mAtlasSize.width * mAtlasSize.height;
 		} while (size < area);
+
+
+		LOG_DEBUG("TextureAtlas: Enlarged atlas to %d x %d", mAtlasSize.width, mAtlasSize.height);
 
 		delete mAtlasAllocation;
 		mAtlasAllocation = new FreeSpaceInfo(0,0,mAtlasSize.width, mAtlasSize.height);

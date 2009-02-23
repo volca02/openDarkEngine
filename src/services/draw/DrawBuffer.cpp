@@ -256,54 +256,54 @@ namespace Opde {
 			const DrawQuad* dq = *it;
 
 			/// Top Left corner
-			*buf++ = dq->positions.topleft.x;
-			*buf++ = dq->positions.topleft.y;
-			*buf++ = dq->positions.topleft.z;
+			*buf++ = dq->positions.left;
+			*buf++ = dq->positions.top;
+			*buf++ = dq->depth;
 
-			*buf++ = dq->texCoords.topleft.x;
-			*buf++ = dq->texCoords.topleft.y;
+			*buf++ = dq->texCoords.left;
+			*buf++ = dq->texCoords.top;
 
 			colptr = reinterpret_cast<Ogre::RGBA*>(buf);
-			Ogre::Root::getSingleton().convertColourValue(dq->colors.topleft, colptr);
+			Ogre::Root::getSingleton().convertColourValue(dq->color, colptr);
 			colptr++;
 			buf = reinterpret_cast<float*>(colptr);
 
 			/// Top right corner
-			*buf++ = dq->positions.topright.x;
-			*buf++ = dq->positions.topright.y;
-			*buf++ = dq->positions.topright.z;
+			*buf++ = dq->positions.right;
+			*buf++ = dq->positions.top;
+			*buf++ = dq->depth;
 
-			*buf++ = dq->texCoords.topright.x;
-			*buf++ = dq->texCoords.topright.y;
+			*buf++ = dq->texCoords.right;
+			*buf++ = dq->texCoords.top;
 
 			colptr = reinterpret_cast<Ogre::RGBA*>(buf);
-			Ogre::Root::getSingleton().convertColourValue(dq->colors.topright, colptr);
+			Ogre::Root::getSingleton().convertColourValue(dq->color, colptr);
 			colptr++;
 			buf = reinterpret_cast<float*>(colptr);
 
 			/// Bottom left corner
-			*buf++ = dq->positions.bottomleft.x;
-			*buf++ = dq->positions.bottomleft.y;
-			*buf++ = dq->positions.bottomleft.z;
+			*buf++ = dq->positions.left;
+			*buf++ = dq->positions.bottom;
+			*buf++ = dq->depth;
 
-			*buf++ = dq->texCoords.bottomleft.x;
-			*buf++ = dq->texCoords.bottomleft.y;
+			*buf++ = dq->texCoords.left;
+			*buf++ = dq->texCoords.bottom;
 
 			colptr = reinterpret_cast<Ogre::RGBA*>(buf);
-			Ogre::Root::getSingleton().convertColourValue(dq->colors.bottomleft, colptr);
+			Ogre::Root::getSingleton().convertColourValue(dq->color, colptr);
 			colptr++;
 			buf = reinterpret_cast<float*>(colptr);
 
 			/// Bottom right corner
-			*buf++ = dq->positions.bottomright.x;
-			*buf++ = dq->positions.bottomright.y;
-			*buf++ = dq->positions.bottomright.z;
+			*buf++ = dq->positions.right;
+			*buf++ = dq->positions.bottom;
+			*buf++ = dq->depth;
 
-			*buf++ = dq->texCoords.bottomright.x;
-			*buf++ = dq->texCoords.bottomright.y;
+			*buf++ = dq->texCoords.right;
+			*buf++ = dq->texCoords.bottom;
 
 			colptr = reinterpret_cast<Ogre::RGBA*>(buf);
-			Ogre::Root::getSingleton().convertColourValue(dq->colors.bottomright, colptr);
+			Ogre::Root::getSingleton().convertColourValue(dq->color, colptr);
 			colptr++;
 			buf = reinterpret_cast<float*>(colptr);
 		}

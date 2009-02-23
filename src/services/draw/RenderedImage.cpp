@@ -35,15 +35,13 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	RenderedImage::RenderedImage(DrawService* owner, DrawOperation::ID id, DrawSource* ds) :
 			DrawOperation(owner, id), mDrawSource(ds) {
-		mDrawQuad.texCoords.topleft = ds->transform(Vector2(0,0));
-		mDrawQuad.texCoords.topright = ds->transform(Vector2(1.0f,0));
-		mDrawQuad.texCoords.bottomleft = ds->transform(Vector2(0,1.0f));
-		mDrawQuad.texCoords.bottomright = ds->transform(Vector2(1.0f,1.0f));
+		mDrawQuad.texCoords.left = ds->transformX(0);
+		mDrawQuad.texCoords.right = ds->transformX(1.0f);
+		mDrawQuad.texCoords.top = ds->transformY(0);
+		mDrawQuad.texCoords.bottom = ds->transformY(1.0f);
+		
 
-		mDrawQuad.colors.topleft = ColourValue(1.0f, 1.0f, 1.0f);
-		mDrawQuad.colors.topright = ColourValue(1.0f, 1.0f, 1.0f);
-		mDrawQuad.colors.bottomleft = ColourValue(1.0f, 1.0f, 1.0f);
-		mDrawQuad.colors.bottomright = ColourValue(1.0f, 1.0f, 1.0f);
+		mDrawQuad.color = ColourValue(1.0f, 1.0f, 1.0f);
 		
 		mInClip = true;
 
@@ -66,10 +64,12 @@ namespace Opde {
 	//------------------------------------------------------
 	void RenderedImage::_rebuild() {
 		const PixelSize& ps = mDrawSource->getPixelSize();
-		mDrawQuad.positions.topleft     = mOwner->convertToScreenSpace(mPosition.first, mPosition.second, mZOrder);
-		mDrawQuad.positions.topright    = mOwner->convertToScreenSpace(mPosition.first + ps.width, mPosition.second, mZOrder);
-		mDrawQuad.positions.bottomleft  = mOwner->convertToScreenSpace(mPosition.first, mPosition.second + ps.height, mZOrder);
-		mDrawQuad.positions.bottomright = mOwner->convertToScreenSpace(mPosition.first + ps.width, mPosition.second + ps.height, mZOrder);
+		
+		mDrawQuad.positions.left   = mOwner->convertToScreenSpaceX(mPosition.first);
+		mDrawQuad.positions.right  = mOwner->convertToScreenSpaceX(mPosition.first + ps.width);
+		mDrawQuad.positions.top    = mOwner->convertToScreenSpaceY(mPosition.second);
+		mDrawQuad.positions.bottom = mOwner->convertToScreenSpaceY(mPosition.second + ps.height);
+		mDrawQuad.depth = mOwner->convertToScreenSpaceZ(mZOrder);
 
 		mInClip = mClipRect.clip(mDrawQuad);
 		_markDirty();

@@ -105,10 +105,11 @@ namespace Opde {
 	void RenderedLabel::fillQuad(int x, int y, const unsigned char chr, DrawSource* ds, DrawQuad& dq) {
 		const PixelSize& ps = ds->getPixelSize();
 
-		dq.positions.topleft     = mOwner->convertToScreenSpace(mPosition.first + x, mPosition.second + y, mZOrder);
-		dq.positions.topright    = mOwner->convertToScreenSpace(mPosition.first + x + ps.width, mPosition.second + y, mZOrder);
-		dq.positions.bottomleft  = mOwner->convertToScreenSpace(mPosition.first + x, mPosition.second + y + ps.height, mZOrder);
-		dq.positions.bottomright = mOwner->convertToScreenSpace(mPosition.first + x + ps.width, mPosition.second + y + ps.height, mZOrder);
+		dq.positions.left    = mOwner->convertToScreenSpaceX(mPosition.first + x);
+		dq.positions.right   = mOwner->convertToScreenSpaceX(mPosition.first + x + ps.width);
+		dq.positions.top     = mOwner->convertToScreenSpaceY(mPosition.second + y);
+		dq.positions.bottom  = mOwner->convertToScreenSpaceY(mPosition.second + y + ps.height);
+		dq.depth = mOwner->convertToScreenSpaceZ(mZOrder);
 
 		ds->fillTexCoords(dq.texCoords);
 	}

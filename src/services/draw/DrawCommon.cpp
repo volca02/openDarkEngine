@@ -42,7 +42,7 @@ namespace Opde {
 
 	//------------------------------------------------------	
 	bool QuadLess::operator()(const DrawQuad* a, const DrawQuad* b) const {
-		return a->positions.topleft.z < b->positions.topleft.z;
+		return a->depth < b->depth;
 	};
 
 	//------------------------------------------------------	
@@ -69,6 +69,16 @@ namespace Opde {
 
 		return tran;
 	};
+	
+	//------------------------------------------------------
+	Ogre::Real DrawSource::transformX(Ogre::Real x) {
+		return x*mSize.x + mDisplacement.x;
+	}
+				
+	//------------------------------------------------------
+	Ogre::Real DrawSource::transformY(Ogre::Real y) {
+		return y*mSize.y + mDisplacement.y;
+	}
 		
 	//------------------------------------------------------
 	void DrawSource::atlas(const Ogre::MaterialPtr& mat, size_t x, size_t y, size_t width, size_t height) {
@@ -85,11 +95,11 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
-	void DrawSource::fillTexCoords(DrawRect<Ogre::Vector2>& tc) {
-		tc.topleft     = mDisplacement;
-		tc.topright    = mDisplacement + Vector2(mSize.x, 0);
-		tc.bottomleft  = mDisplacement + Vector2(0, mSize.y);
-		tc.bottomright = mDisplacement + Vector2(mSize.x, mSize.y);
+	void DrawSource::fillTexCoords(DrawRect<Ogre::Real>& tc) { 
+		tc.left     = mDisplacement.x;
+		tc.right    = mDisplacement.x + mSize.x;
+		tc.top      = mDisplacement.y;
+		tc.bottom   = mDisplacement.y + mSize.y;
 	}
 	
 	//------------------------------------------------------
