@@ -354,11 +354,11 @@ namespace Opde {
 			return;
 		}
 
-		BYTE bpp;
+		uint8_t bpp;
 		paletteFile->readElem(&bpp, 1);
 
 		paletteFile->seek(3 * 256 + 1, File::FSEEK_END);
-		BYTE padding;
+		uint8_t padding;
 		paletteFile->readElem(&padding, 1);
 
 		if((bpp == 8) && (padding == 0x0C)) { //Make sure it is an 8bpp and a valid PCX
@@ -382,7 +382,7 @@ namespace Opde {
 	void DrawService::loadPaletteExternal(const Ogre::String& fname, const Ogre::String& group) {
 		// Code written by patryn, reused here for the new font rendering pipeline support
 		ExternalPaletteHeader paletteHeader;
-		WORD count;
+		uint16_t count;
 		unsigned int i;
 
 		freeCurrentPal();
@@ -403,11 +403,11 @@ namespace Opde {
 		mCurrentPalette = new RGBAQuad[256];
 
 		// We're sure that we have external palette here:
-		paletteFile->readElem(&paletteHeader.RiffSig, sizeof(DWORD));
-		paletteFile->readElem(&paletteHeader.RiffLength, sizeof(DWORD));
-		paletteFile->readElem(&paletteHeader.PSig1, sizeof(DWORD));
-		paletteFile->readElem(&paletteHeader.PSig2, sizeof(DWORD));
-		paletteFile->readElem(&paletteHeader.Length, sizeof(DWORD));
+		paletteFile->readElem(&paletteHeader.RiffSig, sizeof(uint32_t));
+		paletteFile->readElem(&paletteHeader.RiffLength, sizeof(uint32_t));
+		paletteFile->readElem(&paletteHeader.PSig1, sizeof(uint32_t));
+		paletteFile->readElem(&paletteHeader.PSig2, sizeof(uint32_t));
+		paletteFile->readElem(&paletteHeader.Length, sizeof(uint32_t));
 
 		if (paletteHeader.RiffSig == 0x46464952) {
 			if (paletteHeader.PSig1 != 0x204C4150) {
