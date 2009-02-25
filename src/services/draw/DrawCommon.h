@@ -180,7 +180,7 @@ namespace Opde {
 	};
 
 	// forward decl
-	struct DrawSource;
+	class DrawSource;
 
 	// A base rendering source info - material and texture
 	class OPDELIB_EXPORT DrawSourceBase {
