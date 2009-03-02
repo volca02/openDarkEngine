@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ namespace Opde {
 		};
 
 		template<typename T> struct TypeInfo : public TypeInfoBase {
-			char* typeName;
+			const char* typeName;
 			VariableType type;
 
 			TypeInfo() : typeName("invalid"), type(VT_INVALID) {};
@@ -53,7 +53,7 @@ namespace Opde {
 
 
 		template<> struct TypeInfo<bool> {
-			char* typeName;
+			const char* typeName;
 			VariableType type;
 
 			TypeInfo() : typeName("bool"), type(VT_BOOL) {};
@@ -68,7 +68,7 @@ namespace Opde {
 		};
 
 		template<> struct TypeInfo<int> {
-			char* typeName;
+			const char* typeName;
             VariableType type;
 
 			TypeInfo() : typeName("int"), type(VT_INT) {};
@@ -79,7 +79,7 @@ namespace Opde {
 		};
 
 		template<> struct TypeInfo<long> {
-			char* typeName;
+			const char* typeName;
 			VariableType type;
 
 			TypeInfo() : typeName("long"), type(VT_LONG) {};
@@ -91,7 +91,7 @@ namespace Opde {
 
 
 		template<> struct TypeInfo<float> {
-			char* typeName;
+			const char* typeName;
 			VariableType type;
 
 			TypeInfo() : typeName("float"), type(VT_FLOAT) {};
@@ -102,7 +102,7 @@ namespace Opde {
 		};
 
 		template<> struct TypeInfo<std::string> {
-			char* typeName;
+			const char* typeName;
 			VariableType type;
 
 			TypeInfo() : typeName("std::string"), type(VT_STRING) {};
@@ -118,7 +118,7 @@ namespace Opde {
 
 		// DVariant type info
 		template<> struct TypeInfo<DVariant> {
-			char* typeName;
+			const char* typeName;
 			VariableType type;
 
 			TypeInfo() : typeName("DVariant"), type(VT_CUSTOM_TYPE) {};

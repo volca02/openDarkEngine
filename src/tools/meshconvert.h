@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -488,7 +488,7 @@ class SingleMaterialMesh {
 		}
 
 		// preline should contain the right ammount of \t characters to indent the xml correctly
-		void output(ofstream &outter, char *preline) {
+		void output(ofstream &outter, const char *preline) {
 			// output function
 			//  we transform each of the entries according to the objidxs index (non-zero), zero index means no transform
 			// so the vertices are transformed,

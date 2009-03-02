@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -136,7 +136,7 @@ namespace Opde {
 	};
 	
 /// Creates a link ID from flavor, concreteness and index
-#define LINK_MAKE_ID(flavor, concrete, index) ((flavor<<20) | (concrete << 16) | index)
+#define LINK_MAKE_ID(flavor, concrete, index) (((flavor<<20) | (concrete << 16)) | (index))
 /// Extracts Flavor ID from the link ID
 #define LINK_ID_FLAVOR(id) (id >> 20)
 /// Extracts Concreteness from the link ID

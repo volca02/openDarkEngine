@@ -36,7 +36,7 @@ namespace Opde
         // InputEventType type info
 		template<> struct TypeInfo<InputEventType> {
 			VariableType type;
-			char* typeName;
+			const char* typeName;
 
 			TypeInfo() : type(VT_CUSTOM_TYPE), typeName("InputEventType") {};
 			virtual ~TypeInfo() {};
@@ -56,7 +56,7 @@ namespace Opde
 				}
 		};
 
-		template<> char* PythonStruct<InputEventMsg>::msName = "InputEventMsg";
+		template<> const char* PythonStruct<InputEventMsg>::msName = "InputEventMsg";
 
 		class PythonInputMessageConverter {
 			public:
@@ -71,7 +71,7 @@ namespace Opde
 		typedef shared_ptr<PythonInputCallback> PythonInputCallbackPtr;
 
 		// -------------------- Input Service --------------------
-		char* InputServiceBinder::msName = "InputService";
+		const char* InputServiceBinder::msName = "InputService";
 
 		// ------------------------------------------
 		PyTypeObject InputServiceBinder::msType =

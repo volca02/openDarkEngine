@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -68,7 +68,7 @@ namespace Opde
                  * @param tpName the name of the type (incl. the module - e.g. "Opde.SampleStruct")
                  * @param module the container to put the type into (has to agree with the tpName's path)
                  */
-                static void publish(char* tpDoc, const char* tpName, PyObject* module) {
+                static void publish(const char* tpDoc, const char* tpName, PyObject* module) {
                 	msType.tp_doc = tpDoc;
 					msType.tp_name = const_cast<char*>(tpName);
 
@@ -98,7 +98,7 @@ namespace Opde
 				struct FieldDefBase {
 					virtual PyObject* operator()(const T* var) const = 0;
 
-					virtual char* getType() const = 0;
+					virtual const char* getType() const = 0;
 
 					virtual ~FieldDefBase() {};
 				};
@@ -116,7 +116,7 @@ namespace Opde
 						return type.toPyObject(var->*field);
 					}
 
-					virtual char* getType() const {
+					virtual const char* getType() const {
 					    return type.typeName;
 					}
 				};
@@ -135,14 +135,14 @@ namespace Opde
 				}
 
 				// Needs to be filled prior to usage
-				static char* msName;
+				static const char* msName;
 
 				typedef ObjectBase<T*> Object;
 
 				static PyTypeObject msType;
 		};
 
-        template<typename T> char* PythonStruct<T>::msName = "PythonStruct::InvalidType!";
+        template<typename T> const char* PythonStruct<T>::msName = "PythonStruct::InvalidType!";
 
 		// Static member initialization
 		template<typename T> typename PythonStruct<T>::NameToAttr PythonStruct<T>::msNameToAttr;

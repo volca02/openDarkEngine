@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Lesser General Public License as published by the Free Software
@@ -196,9 +196,9 @@ namespace Ogre {
 				m16BitIndices(false),
 				mMaterial(material),
 				mRenderQueueID(renderQueueID),
+				mLightList(centralLightList),
 				mBuilt(false),
-				mCellCount(cellCount),
-				mLightList(centralLightList) {
+				mCellCount(cellCount) {
 
 		assert(mCellCount > 0);
 

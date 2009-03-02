@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ namespace Opde {
 
 	namespace Python {
 
-		char* opde_PythonDatabaseProgressMessage__doc__ = "Database Progress Message structure. Structure informing about loading/saving progress.\n"
+	const char* opde_PythonDatabaseProgressMessage__doc__ = "Database Progress Message structure. Structure informing about loading/saving progress.\n"
 			"@ivar completed: Overall 0.0-1.0 progress\n"
 			"@ivar totalCoarse: Coarse steps total\n"
 			"@ivar currentCoarse: Coarse steps current\n"
@@ -49,7 +49,7 @@ namespace Opde {
 				}
 		};
 
-		template<> char* PythonStruct<DatabaseProgressMsg>::msName = "DatabaseProgressMsg";
+		template<> const char* PythonStruct<DatabaseProgressMsg>::msName = "DatabaseProgressMsg";
 
         // -------------------- Database Progress message --------------------
         class PythonDatabaseProgressMessageConverter {
@@ -65,9 +65,9 @@ namespace Opde {
 		typedef shared_ptr<PythonDatabaseProgressCallback> PythonDatabaseProgressCallbackPtr;
 
 		// -------------------- Database Service --------------------
-		char* DatabaseServiceBinder::msName = "DatabaseService";
+		const char* DatabaseServiceBinder::msName = "DatabaseService";
 
-		char* opde_DatabaseService__doc__ = "Database service. Used to load/save game state";
+		const char* opde_DatabaseService__doc__ = "Database service. Used to load/save game state";
 
 		// ------------------------------------------
 		PyTypeObject DatabaseServiceBinder::msType = {
@@ -105,27 +105,27 @@ namespace Opde {
 		};
 
 		// ------------------------------------------
-		char* opde_DatabaseService_load__doc__ = "load(filename)\n"
+		const char* opde_DatabaseService_load__doc__ = "load(filename)\n"
 				"Loads a mission file (.mis) from the specified location. Clears all the previous loaded data\n"
 				"@type filename: string\n"
 				"@param filename: The filename of the mission file\n"
 				"@raise IOError: if something bad happened while loading";
 
-		char* opde_DatabaseService_loadGameSys__doc__ = "loadGameSys(filename)\n"
+		const char* opde_DatabaseService_loadGameSys__doc__ = "loadGameSys(filename)\n"
 				"Loads a game database file (.gam) from the specified location. Clears all the previous loaded data\n"
 				"@type filename: string\n"
 				"@param filename: The filename of the mission file\n"
 				"@raise IOError: if something bad happened while loading";
 
-		char* opde_DatabaseService_unload__doc__ = "unload()\n"
+		const char* opde_DatabaseService_unload__doc__ = "unload()\n"
 				"unloads all data. Clears everything\n";
 
-		char* opde_DatabaseService_setProgressListener__doc__ = "setProgressListener(listener)\n"
+		const char* opde_DatabaseService_setProgressListener__doc__ = "setProgressListener(listener)\n"
 				"Registers a new database listener to be called every loading step. The callable has to have one parameter, which will receive L{DatabaseProgressMsg<Opde.Services.DatabaseProgressMsg>}\n"
 				"@type listener: callable\n"
 				"@param listener: The function to call on every DB change\n";
 
-		char* opde_DatabaseService_unsetProgressListener__doc__ = "unsetProgressListener()\n"
+		const char* opde_DatabaseService_unsetProgressListener__doc__ = "unsetProgressListener()\n"
 				"Unsets the previously specified DB loading listner.";
 
 		// ------------------------------------------

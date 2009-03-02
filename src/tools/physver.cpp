@@ -27,7 +27,7 @@
 
 using namespace Opde;
 
-void usage(char* message = NULL) {
+void usage(const char* message = NULL) {
     if (message)
 	std::cerr << message << std::endl;
 

@@ -234,7 +234,7 @@ namespace Opde {
 
 		mSceneMgr->getRootSceneNode()->attachObject(dsh);
 		mDrawService->setActiveSheet(dsh);
-	/**/
+	*/
 		LOG_INFO("GamePlayState: Started");
 	}
 

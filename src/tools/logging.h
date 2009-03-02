@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 #endif
 
 //////////////////// logging mumbo - jumbo
-char* LOG_LEVEL_STRINGS[5] = {"FATAL","ERROR","INFO ","DEBUG", "ALL  "};
+const char* LOG_LEVEL_STRINGS[5] = {"FATAL","ERROR","INFO ","DEBUG", "ALL  "};
 
 #define LOG_VERBOSE 4
 #define LOG_DEBUG 3
@@ -39,7 +39,7 @@ char* LOG_LEVEL_STRINGS[5] = {"FATAL","ERROR","INFO ","DEBUG", "ALL  "};
 
 long loglevel = LOG_ERROR;
 
-void log(long level, char *fmt, ...) {
+void log(long level, const char *fmt, ...) {
 	if (level > loglevel)
 		return;
 	

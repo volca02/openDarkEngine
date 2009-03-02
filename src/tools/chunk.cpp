@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2007 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 
 using namespace Opde;
 
-void usage(char* message = NULL) {
+void usage(const char* message = NULL) {
     if (message)
 	std::cerr << message << std::endl;
 

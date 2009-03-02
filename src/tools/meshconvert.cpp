@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -97,7 +97,7 @@ material basename/matNN
 	}
 }
 */
-void SaveMaterialFile(char* basename, char *path, BinHeader &hdr) {
+void SaveMaterialFile(const char* basename, const char *path, BinHeader &hdr) {
 	char filepath[1024];
 
 	snprintf(filepath, 1024, "%s%s.material", path, basename);
@@ -257,10 +257,10 @@ void loadPolygon(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &hd
 		in.read((char *) uv_indices, sizeof(short) * polyHdr.num_verts);
 	}
 
-	char Material;
+	uint8_t Material;
 
 	if ( thdr.version == 4 )
-		in.read(&Material, 1);
+		in.read((char*)&Material, 1);
 	else {
 		int mat = SlotToMatIndex(polyHdr.data); // Material here uses a slot... we'll se if the v4 does that too (so no -1)
 		log_verbose("\t\t\t\tMaterial, type, textured : %d %02X %d", mat, polyHdr.type, (polyHdr.type == MD_PGON_TMAP));
@@ -286,7 +286,7 @@ void loadPolygon(ifstream &in, BinHeadType &thdr, BinHeader &hdr, BinHeader2 &hd
 				uv_indices[i+1],
 				uv_indices[i]);
 		else {
-			if (materials[Material].type == MD_MAT_TMAP) {
+			if (materials[static_cast<size_t>(Material)].type == MD_MAT_TMAP) {
 				log_error("Material needs UV and none found, using vertex index for uv");
 				addTriangle(hdr, shdr, objidx, Material,
 					vertex_indices[0],

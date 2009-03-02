@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -30,15 +30,15 @@ namespace Opde {
 	namespace Python {
 
 		// -------------------- Config Service --------------------
-		char* ConfigServiceBinder::msName = "ConfigService";
+		const char* ConfigServiceBinder::msName = "ConfigService";
 
-		char* opde_ConfigService__doc__ = "ConfigService proxy. Service that manages engine configuration";
+		const char* opde_ConfigService__doc__ = "ConfigService proxy. Service that manages engine configuration";
 
 		// ------------------------------------------
 		PyTypeObject ConfigServiceBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			"Opde.Services.ConfigService",                   // char *tp_name; */
+			const_cast<char*>("Opde.Services.ConfigService"),                   // char *tp_name; */
 			sizeof(ConfigServiceBinder::Object),      // int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			ConfigServiceBinder::dealloc,   // destructor tp_dealloc; */
@@ -57,7 +57,7 @@ namespace Opde {
 			0,			              // setattrofunc tp_setattro; */
 			0,			              // PyBufferProcs *tp_as_buffer; */
 			0,			              // long tp_flags; */
-			opde_ConfigService__doc__,// char *tp_doc;  */
+			const_cast<char*>(opde_ConfigService__doc__),// char *tp_doc;  */
 			0,			              // traverseproc tp_traverse; */
 			0,			              // inquiry tp_clear; */
 			0,			              // richcmpfunc tp_richcompare; */
@@ -70,38 +70,38 @@ namespace Opde {
 		};
 
 		// ------------------------------------------
-		char* opde_ConfigService_setParam__doc__ = "setParam(key, value)\n"
+		const char* opde_ConfigService_setParam__doc__ = "setParam(key, value)\n"
 				"Sets a new configuration parameter value\n"
 				"@type key: string\n"
 				"@param key: The configuration key name\n"
 				"@type value: object\n"
 				"@param value: the new value for the configuration key\n";
 
-		char* opde_ConfigService_getParam__doc__ = "getParam(key)\n"
+		const char* opde_ConfigService_getParam__doc__ = "getParam(key)\n"
 				"Gets the value associated with the given configuration key\n"
 				"@type key: string\n"
 				"@param key: The configuration key name\n"
 				"@rtype: object\n"
 				"@return: the value associated with the key\n";
 
-		char* opde_ConfigService_hasParam__doc__ = "hasParam(key)\n"
+		const char* opde_ConfigService_hasParam__doc__ = "hasParam(key)\n"
 				"Detects if the given configuration key is defined\n"
 				"@type key: string\n"
 				"@param key: The configuration key name\n"
 				"@rtype: boolean\n"
 				"@return: true if key defined, false otherwise\n";
 
-		char* opde_ConfigService_loadParams__doc__ = "loadParams(path)\n"
+		const char* opde_ConfigService_loadParams__doc__ = "loadParams(path)\n"
 				"Detects if the given configuration key is defined\n"
 				"@type path: string\n"
 				"@param path: The configuration file name\n";
 
 		// ------------------------------------------
 		PyMethodDef ConfigServiceBinder::msMethods[] = {
-			{"setParam", setParam, METH_VARARGS, opde_ConfigService_setParam__doc__},
-			{"getParam", getParam, METH_VARARGS, opde_ConfigService_getParam__doc__},
-			{"hasParam", hasParam, METH_VARARGS, opde_ConfigService_hasParam__doc__},
-			{"loadParams", loadParams, METH_VARARGS, opde_ConfigService_loadParams__doc__},
+			{"setParam", setParam, METH_VARARGS, const_cast<char*>(opde_ConfigService_setParam__doc__)},
+			{"getParam", getParam, METH_VARARGS, const_cast<char*>(opde_ConfigService_getParam__doc__)},
+			{"hasParam", hasParam, METH_VARARGS, const_cast<char*>(opde_ConfigService_hasParam__doc__)},
+			{"loadParams", loadParams, METH_VARARGS, const_cast<char*>(opde_ConfigService_loadParams__doc__)},
 			{NULL, NULL},
 		};
 

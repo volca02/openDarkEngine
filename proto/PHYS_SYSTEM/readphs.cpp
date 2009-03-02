@@ -266,7 +266,7 @@ void fpos(FILE *f) {
 		printf("-----------------------------------\n");
 }
 
-void readMatrixLong(FILE *f, int width, int height, char *prefix) {
+void readMatrixLong(FILE *f, int width, int height, const char *prefix) {
 	for (int y = 0; y < height; y++) {
 		printf("%s[%4d] ", prefix, y);
 		for (int x = 0; x < width; x++) {
@@ -278,7 +278,7 @@ void readMatrixLong(FILE *f, int width, int height, char *prefix) {
 	}
 }
 
-void readMatrixFloat(FILE *f, int width, int height, char *prefix) {
+void readMatrixFloat(FILE *f, int width, int height, const char *prefix) {
 	for (int y = 0; y < height; y++) {
 		printf("%s[%4d] ", prefix, y);
 		for (int x = 0; x < width; x++) {
@@ -305,7 +305,7 @@ void readVector3N(FILE *f) {
 	printf(" X: %8.2g Y: %8.2g Z: %8.2g NORM: %8.2g\n", vect.x, vect.y, vect.z, vect.norm);
 }
 
-void readStruct(char *format, FILE *f) {
+void readStruct(const char *format, FILE *f) {
 	unsigned int x;
 
 	for (x = 0; x < strlen(format); x++) {
@@ -560,9 +560,9 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 		// printf("\t SUBOBJ[%4d] : ",n); readStruct("FFFLFFFFXFFFFFLFXX", f);printf("\n");
 		// printf("\t SUBOBJ[%4d] : ",n); readStruct("FFFXXXFFXXXFFFXXXX", f);printf("\n");
 		if (n < num_subobjs)
-			printf("\t SUBOBJ[%4d]  :\n", n);
+			printf("\t SUBOBJ       [%4d] :\n", n);
 		else
-			printf("\t OBJECT WHOLE :\n", n);
+			printf("\t OBJECT WHOLE [%4d] :\n", n);
 
 		readSubObject(f);
 	}

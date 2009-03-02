@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -38,18 +38,18 @@ namespace Opde {
 	namespace Python {
 
 		// ---------------------- class Services --------------------
-		char* ServiceBinder::msName = "Opde.Services";
+		const char* ServiceBinder::msName = "Opde.Services";
 
 		PyMethodDef ServiceBinder::msMethods[] = {
-			{"getConfigService", getConfigService, METH_NOARGS},
-			{"getLinkService", getLinkService, METH_NOARGS},
-			{"getPropertyService", getPropertyService, METH_NOARGS, "getPropertyService() -> self.PropertyService\n\tReturns a reference object to the PropertyService instance"},
-			{"getLoopService", getLoopService, METH_NOARGS},
-			{"getInputService", getInputService, METH_NOARGS},
-			{"getGUIService", getGUIService, METH_NOARGS},
-			{"getDatabaseService", getDatabaseService, METH_NOARGS},
-			{"getObjectService", getObjectService, METH_NOARGS},
-			{"getInheritService", getInheritService, METH_NOARGS},
+			{const_cast<char*>("getConfigService"), getConfigService, METH_NOARGS},
+			{const_cast<char*>("getLinkService"), getLinkService, METH_NOARGS},
+			{const_cast<char*>("getPropertyService"), getPropertyService, METH_NOARGS, "getPropertyService() -> self.PropertyService\n\tReturns a reference object to the PropertyService instance"},
+			{const_cast<char*>("getLoopService"), getLoopService, METH_NOARGS},
+			{const_cast<char*>("getInputService"), getInputService, METH_NOARGS},
+			{const_cast<char*>("getGUIService"), getGUIService, METH_NOARGS},
+			{const_cast<char*>("getDatabaseService"), getDatabaseService, METH_NOARGS},
+			{const_cast<char*>("getObjectService"), getObjectService, METH_NOARGS},
+			{const_cast<char*>("getInheritService"), getInheritService, METH_NOARGS},
 			{NULL, NULL},
 		};
 

@@ -31,7 +31,7 @@ namespace Opde {
 	namespace Python {
 
 		// -------------------- Inherit Service --------------------
-		char* InheritServiceBinder::msName = "InheritService";
+		const char* InheritServiceBinder::msName = "InheritService";
 
 		// ------------------------------------------
 		PyTypeObject InheritServiceBinder::msType = {
@@ -202,7 +202,7 @@ namespace Opde {
 
 
         // -------------------- Link --------------------
-		char* InheritLinkBinder::msName = "InheritLink";
+		const char* InheritLinkBinder::msName = "InheritLink";
 
 		// ------------------------------------------
 		PyTypeObject InheritLinkBinder::msType = {

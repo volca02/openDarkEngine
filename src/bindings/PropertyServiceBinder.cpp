@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -34,9 +34,9 @@ namespace Opde
 	{
 
 		// -------------------- Property Service --------------------
-		char* PropertyServiceBinder::msName = "PropertyService";
+		const char* PropertyServiceBinder::msName = "PropertyService";
 
-		char* opde_PropertyService__doc__ = "PropertyService proxy. Service that manages properties of game objects";
+		const char* opde_PropertyService__doc__ = "PropertyService proxy. Service that manages properties of game objects";
 
 		// ------------------------------------------
 		PyTypeObject PropertyServiceBinder::msType =
@@ -75,7 +75,7 @@ namespace Opde
 		};
 
 		// ------------------------------------------
-		char* opde_PropertyService_has__doc__ = "has(id, name)\n"
+		const char* opde_PropertyService_has__doc__ = "has(id, name)\n"
 				"Detects if the given object has certain property\n"
 				"@type id: integer\n"
 				"@param id: Object ID\n"
@@ -84,7 +84,7 @@ namespace Opde
 				"@rtype: bool\n"
 				"@return: True if the object has the specified property";
 
-		char* opde_PropertyService_owns__doc__ = "owns(id, name)\n"
+		const char* opde_PropertyService_owns__doc__ = "owns(id, name)\n"
 				"Detects if the given object owns certain property (not through inheritance but directly)\n"
 				"@type id: integer\n"
 				"@param id: Object ID\n"
@@ -93,7 +93,7 @@ namespace Opde
 				"@rtype: bool\n"
 				"@return: True if the object has the specified property";
 
-		char* opde_PropertyService_set__doc__ = "set(id, name, field, value)\n"
+		const char* opde_PropertyService_set__doc__ = "set(id, name, field, value)\n"
 				"Sets a new value of the given objects property field\n"
 				"@type id: integer\n"
 				"@param id: Object ID\n"
@@ -104,7 +104,7 @@ namespace Opde
 				"@type value: object\n"
 				"@param value: New value object\n";
 
-		char* opde_PropertyService_get__doc__ = "set(id, name, field, value)\n"
+		const char* opde_PropertyService_get__doc__ = "set(id, name, field, value)\n"
 				"Gets property field value for the specified object\n"
 				"@type id: integer\n"
 				"@param id: Object ID\n"
@@ -115,11 +115,11 @@ namespace Opde
 				"@rtype: object\n"
 				"@return: Property field value, or None on error\n";
 
-		char* opde_PropertyService_getAllPropertyNames__doc__ = "getAllPropertyNames()\n"
+		const char* opde_PropertyService_getAllPropertyNames__doc__ = "getAllPropertyNames()\n"
 				"@rtype: iterable object\n"
 				"@return: Returns iterable object containing all property names as strings\n";
 
-		char* opde_PropertyService_getPropertyFieldsDesc__doc__ = "getPropertyFieldsDesc()\n"
+		const char* opde_PropertyService_getPropertyFieldsDesc__doc__ = "getPropertyFieldsDesc()\n"
 				"@type name: string\n"
 				"@param name: Property name\n"
 				"@rtype: iterable object\n"

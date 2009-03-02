@@ -157,51 +157,51 @@ namespace Opde {
 	} // namespace Python
 
 	// ---- Doc Strings ----
-	char* opde_log_fatal__doc__ = "log_fatal(msg)\n"
+	const char* opde_log_fatal__doc__ = "log_fatal(msg)\n"
 		"\tLogs a message with FATAL log level.\n"
 		"@type msg: string\n"
 		"@param msg: The logged string\n";
 
-	char* opde_log_error__doc__ = "log_error(msg)\n"
+	const char* opde_log_error__doc__ = "log_error(msg)\n"
 		"\tLogs a message with ERROR log level.\n"
 		"@type msg: string\n"
 		"@param msg: The logged string\n";;
 
-	char* opde_log_info__doc__ = "log_info(msg)\n"
+	const char* opde_log_info__doc__ = "log_info(msg)\n"
 		"\tLogs a message with INFO log level.\n"
 		"@type msg: string\n"
 		"@param msg: The logged string\n";
 
-	char* opde_log_debug__doc__ = "log_debug(msg)\n"
+	const char* opde_log_debug__doc__ = "log_debug(msg)\n"
 		"\tLogs a message with DEBUG log level.\n"
 		"@type msg: string\n"
 		"@param msg: The logged string\n";
 
-	char* opde_log_verbose__doc__ = "log_verbose(msg)\n"
+	const char* opde_log_verbose__doc__ = "log_verbose(msg)\n"
 		"\tLogs a message with VERBOSE (=ALL) log level.\n"
 		"@type msg: string\n"
 		"@param msg: The logged string\n";
 
-	char* opde_createRoot__doc__ = "createRoot(mask)\n"
+	const char* opde_createRoot__doc__ = "createRoot(mask)\n"
 		"Creates the Opde.Root object with the specified service mask (See L{Opde.Services<Opde.Services>}).\n"
 		"@type mask: number\n"
 		"@param mask: Service creation mask\n"
 		"@rtype: Root\n"
 		"@return: A new Opde.Root object reference";
 
-	char* opde_getRoot__doc__ = "getRoot()\n"
+	const char* opde_getRoot__doc__ = "getRoot()\n"
 		"Retrieves the previously created Opde.Root object.\n"
 		"@rtype: Root\n"
 		"@return: A new Opde.Root object reference";
 
 	PyMethodDef sOpdeMethods[] = {
-		{"log_fatal", Python::Py_Log_Fatal, METH_VARARGS, opde_log_fatal__doc__},
-		{"log_error", Python::Py_Log_Error, METH_VARARGS, opde_log_error__doc__},
-		{"log_info", Python::Py_Log_Info, METH_VARARGS, opde_log_info__doc__},
-		{"log_debug", Python::Py_Log_Debug, METH_VARARGS, opde_log_debug__doc__},
-		{"log_verbose", Python::Py_Log_Verbose, METH_VARARGS, opde_log_verbose__doc__},
-		{"createRoot", PythonLanguage::createRoot, METH_VARARGS, opde_createRoot__doc__},
-		{"getRoot", PythonLanguage::getRoot, METH_NOARGS, opde_getRoot__doc__},
+		{const_cast<char*>("log_fatal"), Python::Py_Log_Fatal, METH_VARARGS, opde_log_fatal__doc__},
+		{const_cast<char*>("log_error"), Python::Py_Log_Error, METH_VARARGS, opde_log_error__doc__},
+		{const_cast<char*>("log_info"), Python::Py_Log_Info, METH_VARARGS, opde_log_info__doc__},
+		{const_cast<char*>("log_debug"), Python::Py_Log_Debug, METH_VARARGS, opde_log_debug__doc__},
+		{const_cast<char*>("log_verbose"), Python::Py_Log_Verbose, METH_VARARGS, opde_log_verbose__doc__},
+		{const_cast<char*>("createRoot"), PythonLanguage::createRoot, METH_VARARGS, opde_createRoot__doc__},
+		{const_cast<char*>("getRoot"), PythonLanguage::getRoot, METH_NOARGS, opde_getRoot__doc__},
 		{NULL, NULL},
 	};
 

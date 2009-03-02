@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -30,13 +30,13 @@ namespace Opde {
 	namespace Python {
 
 		// -------------------- Link Service --------------------
-		char* DTypeBinder::msName = "DType";
+		const char* DTypeBinder::msName = "DType";
 
 		// ------------------------------------------
 		PyTypeObject DTypeBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			"Opde.DType",    /* char *tp_name; */
+			const_cast<char*>("Opde.DType"),    /* char *tp_name; */
 			sizeof(DTypeBinder::Object),      /* int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			DTypeBinder::dealloc,   /* destructor tp_dealloc; */
@@ -70,7 +70,7 @@ namespace Opde {
 		// ------------------------------------------
 		PyMethodDef DTypeBinder::msMethods[] = {
 			// {"set", set, METH_VARARGS}, // Volca: Commented setter. Would lead to inappropriate usage (no data change broadcast)
-			{"get", get, METH_VARARGS},
+			{const_cast<char*>("get"), get, METH_VARARGS},
 			{NULL, NULL},
 		};
 

@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ namespace Opde {
 	namespace Python {
 
 		// -------------------- Link Service --------------------
-		char* LinkServiceBinder::msName = "LinkService";
+		const char* LinkServiceBinder::msName = "LinkService";
 
 		// ------------------------------------------
 		PyTypeObject LinkServiceBinder::msType = {
@@ -309,7 +309,7 @@ namespace Opde {
 
 
         // -------------------- Link --------------------
-		char* LinkBinder::msName = "Link";
+		const char* LinkBinder::msName = "Link";
 
 		// ------------------------------------------
 		PyTypeObject LinkBinder::msType = {
