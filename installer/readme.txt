@@ -10,7 +10,7 @@ A few things to keep in mind:
 
 If you have any problems running openDarkEngine:
 
-1. Make sure you have the Microsoft VC8 redist package installed. If you get an error messages similar to "This application has failed to start because the application configuration is incorrect" it is very likely that you are missing the VC8 redist package. You can get it from: http://www.microsoft.com/downloads/details.aspx?FamilyID=9b2da534-3e03-4391-8a4d-074b9f2bc1bf&displaylang=en
+1. Make sure you have the Microsoft VC8 redist package installed. If you get an error messages similar to "This application has failed to start because the application configuration is incorrect" it is very likely that you are missing the VC9 redist package. You can get it from: http://www.microsoft.com/downloads/details.aspx?FamilyID=9b2da534-3e03-4391-8a4d-074b9f2bc1bf&displaylang=en
 
 2. Microsoft has the habit of updating DirectX without changing the version number. The originally released DirectX 9.0c is very different from the DirectX 9.0c that is available for download on Microsoft's site today. If you still encounter any problems with running openDarkEngine (especially with missing DirectX DLLs) download the latest DirectX installer and run it to update your DirectX. 
 
