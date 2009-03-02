@@ -32,6 +32,7 @@
 
 namespace Opde {
 
+	/** Rendered label. This class represents single font text area, possibly wrapped and coloured. */
 	class RenderedLabel : public DrawOperation {
 		public:
 			RenderedLabel(DrawService* owner, DrawOperation::ID id, FontDrawSource* fds, const std::string& label);
@@ -40,11 +41,30 @@ namespace Opde {
 
 			void visitDrawBuffer(DrawBuffer* db);
 
+			/// A shortcut to call clear+addText(label);
 			void setLabel(const std::string& label);
 
+			/// Adds a segment of text with a given color
+			void addText(const std::string& text, const Ogre::ColourValue& colour);
+			
+			/// Clears all the text from the label
+			void clearText();
+			
+			/** Calculates a width and height of the given text string.
+			 *  The resulting size is of a unclipped, newline respecting text
+			 */ 
+			PixelSize calculateTextSize(const std::string& text);
+			
 			DrawSourceBase* getDrawSourceBase();
 
 		protected:
+			struct TextSegment {
+				Ogre::ColourValue colour;
+				std::string text;
+			};
+			
+			typedef std::list< TextSegment > SegmentList;
+			
 			/// Rebuilds the label - makes new glyph instances
 			void _rebuild();
 
@@ -59,7 +79,7 @@ namespace Opde {
 
 			FontDrawSource* mFontSource;
 
-			std::string mLabel;
+			SegmentList mText; 
 	};
 
 };

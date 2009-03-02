@@ -34,7 +34,7 @@ namespace Opde {
 	/*-------------------- RenderedLabel -----------------*/
 	/*----------------------------------------------------*/
 	RenderedLabel::RenderedLabel(DrawService* owner, DrawOperation::ID id, FontDrawSource* fds, const std::string& label) :
-		DrawOperation(owner, id), mFontSource(fds), mLabel(label) {
+		DrawOperation(owner, id), mFontSource(fds), mText() {
 
 		rebuild();
 	}
@@ -46,25 +46,43 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void RenderedLabel::setLabel(const std::string& label) {
-		mLabel = label;
+		clearText();
+		addText(label, Ogre::ColourValue::White);
+		
 		_markDirty();
 	}
 
 	//------------------------------------------------------
-	void RenderedLabel::_rebuild() {
-		std::string::iterator it = mLabel.begin();
-		std::string::iterator end = mLabel.end();
-
-		freeQuadList();
+	void RenderedLabel::addText(const std::string& text, const Ogre::ColourValue& colour) {
+		TextSegment seg;
+		seg.colour = colour;
+		seg.text = text;
 		
-		int x = 0, y = 0;
+		mText.push_back(seg);
+		_markDirty();
+	}
+				
+	//------------------------------------------------------
+	void RenderedLabel::clearText() {
+		mText.clear();
+		_markDirty();
+	}
 
-		// TODO: Clipping, reuse of quads if the quad count does not change, etc.
-		while (it != end) {
-			const unsigned char chr = *it++;
+	//------------------------------------------------------
+	PixelSize RenderedLabel::calculateTextSize(const std::string& text) {
+		std::string::const_iterator cit = text.begin();
+		std::string::const_iterator cend = text.end();
+		
+		size_t x = 0, y = 0;
+		PixelSize sz(0,0);
+		
+		while (cit != cend) {
+			const unsigned char chr = *cit++;
 
 			if (chr == '\n') {
 				y += mFontSource->getHeight();
+				if (sz.width < x)
+					sz.width = x;
 				x = 0;
 				continue;
 			}
@@ -78,17 +96,73 @@ namespace Opde {
 
 			if (ds != NULL) {
 				DrawQuad dq;
-				fillQuad(x, y, chr, ds, dq);
-				x += ds->getPixelSize().width;
 				
-				// if clipping produced some non-empty result
-				if (mClipRect.clip(dq)) { 
-					// the quad is queued (by making a dynamically allocated copy)
-					DrawQuad* toStore = new DrawQuad(dq);
-					mDrawQuadList.push_back(toStore);
-				}
+				x += ds->getPixelSize().width;
 			} else {
-				x += mFontSource->getWidth(); // move the maximal width (maybe 1px would be better?)
+				// move the maximal width (maybe 1px would be better?)
+				x += mFontSource->getWidth(); 
+			}
+		}
+		
+		// not a first char on the line, so some text would be drawn. 
+		// have to include the line's height though
+		if (x != 0)
+			sz.height = y + mFontSource->getHeight();;
+			
+		return sz;
+	}
+	
+	//------------------------------------------------------
+	void RenderedLabel::_rebuild() {
+		SegmentList::iterator it = mText.begin();
+		SegmentList::iterator end = mText.end();
+
+		freeQuadList();
+		
+		int x = 0, y = 0;
+
+		// TODO: Reuse of quads if the quad count does not change, etc.
+		while (it != end) {
+			// for each segment
+			TextSegment& ts = *it++;
+			
+			std::string::iterator cit = ts.text.begin();
+			std::string::iterator cend = ts.text.end();
+			
+			while (cit != cend) {
+				const unsigned char chr = *cit++;
+
+				if (chr == '\n') {
+					y += mFontSource->getHeight();
+					x = 0;
+					continue;
+				}
+	
+				// eat DOS line feeds as well...
+				if (chr == '\r') {
+					continue;
+				}
+	
+				DrawSource* ds = mFontSource->getGlyph(chr);
+	
+				if (ds != NULL) {
+					DrawQuad dq;
+					
+					fillQuad(x, y, chr, ds, dq);
+					
+					dq.color = ts.colour;
+					
+					x += ds->getPixelSize().width;
+					
+					// if clipping produced some non-empty result
+					if (mClipRect.clip(dq)) { 
+						// the quad is queued (by making a dynamically allocated copy)
+						DrawQuad* toStore = new DrawQuad(dq);
+						mDrawQuadList.push_back(toStore);
+					}
+				} else {
+					x += mFontSource->getWidth(); // move the maximal width (maybe 1px would be better?)
+				}
 			}
 		}
 	}
