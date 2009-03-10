@@ -56,8 +56,8 @@ OPTION(STATIC_LIBS
 # Compiler profiling flags
 IF (PROFILING)
     IF(CMAKE_COMPILER_IS_GNUCXX)
-	SET(PROFILER "-pg") # GCC only profiler option
-    ENDIF(CMAKE_COMPILER_IS_GNUCXX)	
+    SET(PROFILER "-pg") # GCC only profiler option
+    ENDIF(CMAKE_COMPILER_IS_GNUCXX) 
 ELSE (PROFILING)
     SET(PROFILER "")
 ENDIF (PROFILING)
@@ -67,8 +67,8 @@ ENDIF (PROFILING)
 
 # MinGW specific
 IF(CMAKE_COMPILER_IS_MINGW)
-	SET(CMAKE_EXE_LINKER_FLAGS "-Wl,--enable-auto-image-base -Wl,--add-stdcall-alias -Wl,--enable-runtime-pseudo-reloc -Wl,--enable-auto-import")
-	SET(CMAKE_SHARED_LINKER_FLAGS"-Wl,--enable-auto-image-base -Wl,--add-stdcall-alias -Wl,--enable-runtime-pseudo-reloc -Wl,--enable-auto-import")
+    SET(CMAKE_EXE_LINKER_FLAGS "-Wl,--enable-auto-image-base -Wl,--add-stdcall-alias -Wl,--enable-runtime-pseudo-reloc -Wl,--enable-auto-import")
+    SET(CMAKE_SHARED_LINKER_FLAGS"-Wl,--enable-auto-image-base -Wl,--add-stdcall-alias -Wl,--enable-runtime-pseudo-reloc -Wl,--enable-auto-import")
 ENDIF(CMAKE_COMPILER_IS_MINGW)
 
 # Warning level high (Lowered by one to supress the payload of ogre related warnings in VC)
@@ -76,18 +76,18 @@ SET(CMAKE_CXX_WARNING_LEVEL 3)
 
 # GCC specific. Release/Debug flags (I add some debug/profiler switches there)
 IF(CMAKE_COMPILER_IS_GNUCXX)
-	SET(CMAKE_C_FLAGS_DEBUG "-g -O3 ${PROFILER}")
-	SET(CMAKE_CXX_FLAGS_DEBUG "-g -O3 ${PROFILER}")
-	SET(CMAKE_CXX_FLAGS_DISTRIBUTION "-O3 ${PROFILER}")
-	SET(CMAKE_C_FLAGS_DISTRIBUTION "-O3 ${PROFILER}")
+    SET(CMAKE_C_FLAGS_DEBUG "-g -O3 ${PROFILER}")
+    SET(CMAKE_CXX_FLAGS_DEBUG "-g -O3 ${PROFILER}")
+    SET(CMAKE_CXX_FLAGS_DISTRIBUTION "-O3 ${PROFILER}")
+    SET(CMAKE_C_FLAGS_DISTRIBUTION "-O3 ${PROFILER}")
 
     SET(CMAKE_CXX_FLAGS "-O3 ${PROFILER}")
     SET(CMAKE_C_FLAGS "-O3 ${PROFILER}")
 
-	# extra warnings, but no unused params (too common)
-	# no strict aliasing (see Py_True type punned pointer aliasing errors)
-	ADD_DEFINITIONS(-Wall -fno-strict-aliasing -fvisibility=default)
-	#  -Wextra -Wno-unused-parameter
+    # extra warnings, but no unused params (too common)
+    # no strict aliasing (see Py_True type punned pointer aliasing errors)
+    ADD_DEFINITIONS(-Wall -fno-strict-aliasing -fvisibility=default)
+    #  -Wextra -Wno-unused-parameter
 ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 # -fPIC for 64bit IA (x86_64 that is)
@@ -106,7 +106,7 @@ ENDIF(UNIX AND NOT WIN32)
 
 # MSVC specific stuff
 IF(CMAKE_COMPILER_IS_MSVC)
-	# STUB. Nothing now
+    # STUB. Nothing now
 ENDIF(CMAKE_COMPILER_IS_MSVC)
 
 # Various modules used for library path detections.
@@ -134,36 +134,37 @@ FIND_PACKAGE(OGRE REQUIRED)
 FIND_PACKAGE(FREEIMAGE REQUIRED)
 
 IF(FREEIMAGE_FOUND)
-	MESSAGE(STATUS "FreeImage Found OK")
-	MESSAGE(STATUS " - FreeImage includes ${FREEIMAGE_INCLUDE_DIR}")
-	MESSAGE(STATUS " - FreeImage libs ${FREEIMAGE_LIBRARIES}")
+    MESSAGE(STATUS "FreeImage Found OK")
+    MESSAGE(STATUS " - FreeImage includes ${FREEIMAGE_INCLUDE_DIR}")
+    MESSAGE(STATUS " - FreeImage libs ${FREEIMAGE_LIBRARIES}")
 ELSE(FREEIMAGE_FOUND)
-	MESSAGE(FATAL_ERROR "FreeImage not found and selected in options!")
+    MESSAGE(FATAL_ERROR "FreeImage not found and selected in options!")
 ENDIF(FREEIMAGE_FOUND)
 
 IF(ODE_FOUND)
-	MESSAGE(STATUS "ODE Found OK")
-	MESSAGE(STATUS " - ODE includes ${ODE_INCLUDE_DIR}")
-	MESSAGE(STATUS " - ODE libs ${ODE_LIBRARIES}")
+    MESSAGE(STATUS "ODE Found OK")
+    MESSAGE(STATUS " - ODE includes ${ODE_INCLUDE_DIR}")
+    MESSAGE(STATUS " - ODE libs ${ODE_LIBRARIES}")
 ELSE(ODE_FOUND)
-	MESSAGE(FATAL_ERROR "ODE not found and selected in options!")
+    MESSAGE(FATAL_ERROR "ODE not found and selected in options!")
 ENDIF(ODE_FOUND)
 
 FIND_PACKAGE(PythonLibs REQUIRED)
+SET(OPDE_PYTHON_LIBRARIES optimized ${PYTHON_LIBRARIES} debug ${PYTHON_DEBUG_LIBRARIES})
     
 # Aditional libraries - deps of the python lib
 IF(UNIX)
-	INCLUDE(PythonDeps.cmake)
-	FIND_PYTHON_DEPS(PYTHON_LIBRARIES)
+    INCLUDE(PythonDeps.cmake)
+    FIND_PYTHON_DEPS(OPDE_PYTHON_LIBRARIES)
 ENDIF(UNIX)
 
-IF(PYTHON_LIBRARIES)
-	MESSAGE(STATUS "Python Found OK")
-	MESSAGE(STATUS " - Python includes ${PYTHON_INCLUDE_PATH}")
-	MESSAGE(STATUS " - Python libs ${PYTHON_LIBRARIES}")
-ELSE(PYTHON_LIBRARIES)
-	MESSAGE(FATAL_ERROR "Python not found and selected in options!")
-ENDIF(PYTHON_LIBRARIES)
+IF(OPDE_PYTHON_LIBRARIES)
+    MESSAGE(STATUS "Python Found OK")
+    MESSAGE(STATUS " - Python includes ${PYTHON_INCLUDE_PATH}")
+    MESSAGE(STATUS " - Python libs ${OPDE_PYTHON_LIBRARIES}")
+ELSE(OPDE_PYTHON_LIBRARIES)
+    MESSAGE(FATAL_ERROR "Python not found and selected in options!")
+ENDIF(OPDE_PYTHON_LIBRARIES)
 
 
 # Only visual check enabling verbose output, and package found info
@@ -201,7 +202,7 @@ add_subdirectory (proto)
 add_subdirectory (thirdparty)
 
 # Generate the doxyfile if selected as an option
-IF (UNIX AND PYTHON_LIBRARIES)
+IF (UNIX AND OPDE_PYTHON_LIBRARIES)
     # Generate the doxyfile from the template file
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
                       ${CMAKE_BINARY_DIR}/Doxyfile)
@@ -215,54 +216,54 @@ IF (UNIX AND PYTHON_LIBRARIES)
     
     # generates the Doxygen docs.
     ADD_CUSTOM_COMMAND(
-	OUTPUT ${CMAKE_BINARY_DIR}/doc/main/html/index.html
-	COMMAND rm -rf ${CMAKE_BINARY_DIR}/doc/main/html
-	COMMAND mkdir -p ${CMAKE_BINARY_DIR}/doc/main/html
-	COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
+    OUTPUT ${CMAKE_BINARY_DIR}/doc/main/html/index.html
+    COMMAND rm -rf ${CMAKE_BINARY_DIR}/doc/main/html
+    COMMAND mkdir -p ${CMAKE_BINARY_DIR}/doc/main/html
+    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
     )
     
     # generates the Python docs.
     ADD_CUSTOM_COMMAND(
-	OUTPUT ${CMAKE_BINARY_DIR}/doc/python/html/index.html
-	COMMAND rm -rf ${CMAKE_BINARY_DIR}/doc/python/html
-	COMMAND mkdir -p ${CMAKE_BINARY_DIR}/doc/python/html
-	COMMAND ${CMAKE_BINARY_DIR}/src/main/opdeScript ${CMAKE_BINARY_DIR}/writedoc.py
+    OUTPUT ${CMAKE_BINARY_DIR}/doc/python/html/index.html
+    COMMAND rm -rf ${CMAKE_BINARY_DIR}/doc/python/html
+    COMMAND mkdir -p ${CMAKE_BINARY_DIR}/doc/python/html
+    COMMAND ${CMAKE_BINARY_DIR}/src/main/opdeScript ${CMAKE_BINARY_DIR}/writedoc.py
     )
     
     # generates the Developers manual
     ADD_CUSTOM_COMMAND(
-	OUTPUT ${CMAKE_BINARY_DIR}/doc/manual/index.html
-	COMMAND rm -rf ${CMAKE_BINARY_DIR}/doc/manual
-	COMMAND mkdir -p ${CMAKE_BINARY_DIR}/doc/manual
-	COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/doc/src/buildmanual.sh ${CMAKE_CURRENT_SOURCE_DIR}/doc/src/ ${CMAKE_BINARY_DIR}/doc/manual/
+    OUTPUT ${CMAKE_BINARY_DIR}/doc/manual/index.html
+    COMMAND rm -rf ${CMAKE_BINARY_DIR}/doc/manual
+    COMMAND mkdir -p ${CMAKE_BINARY_DIR}/doc/manual
+    COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/doc/src/buildmanual.sh ${CMAKE_CURRENT_SOURCE_DIR}/doc/src/ ${CMAKE_BINARY_DIR}/doc/manual/
     )
     
     # Copies various common files
     ADD_CUSTOM_COMMAND(
-	OUTPUT ${CMAKE_BINARY_DIR}/doc/style.css
-	COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/style.css ${CMAKE_BINARY_DIR}/doc/style.css
+    OUTPUT ${CMAKE_BINARY_DIR}/doc/style.css
+    COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/style.css ${CMAKE_BINARY_DIR}/doc/style.css
     )
     
     # TODO: property/link docs (maybe part of the writedoc.py?)
  
     IF (DOXYGEN_EXECUTABLE)
-	ADD_CUSTOM_TARGET(docs ALL
-	    DEPENDS
+    ADD_CUSTOM_TARGET(docs ALL
+        DEPENDS
             opdeScript
-	    opdeDocGen
-	    ${CMAKE_BINARY_DIR}/doc/main/html/index.html
-	    ${CMAKE_BINARY_DIR}/doc/python/html/index.html
-	    ${CMAKE_BINARY_DIR}/doc/manual/index.html
-	    ${CMAKE_BINARY_DIR}/doc/style.css
-	    ${DOXYGEN_EXECUTABLE}
-	)
+        opdeDocGen
+        ${CMAKE_BINARY_DIR}/doc/main/html/index.html
+        ${CMAKE_BINARY_DIR}/doc/python/html/index.html
+        ${CMAKE_BINARY_DIR}/doc/manual/index.html
+        ${CMAKE_BINARY_DIR}/doc/style.css
+        ${DOXYGEN_EXECUTABLE}
+    )
     ELSE (DOXYGEN_EXECUTABLE)
-	MESSAGE("Warning: Doxygen not found, docs target disabled.")
+    MESSAGE("Warning: Doxygen not found, docs target disabled.")
     ENDIF (DOXYGEN_EXECUTABLE)
-ENDIF (UNIX AND PYTHON_LIBRARIES)
+ENDIF (UNIX AND OPDE_PYTHON_LIBRARIES)
 
 IF (GENERATE_NSIS)
-	CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/installer/opde-win.in
+    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/installer/opde-win.in
                       ${CMAKE_BINARY_DIR}/installer/opde-win.nsi @ONLY)
         MESSAGE(STATUS "Installer script was generated in ${CMAKE_BINARY_DIR}/installer.")
 ENDIF (GENERATE_NSIS)        

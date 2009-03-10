@@ -7,7 +7,7 @@ INCLUDE( ${OPDE_SOURCE_DIR}/src/scenemanager/DarkSceneManager.cmake )
 
 include_directories(
     ${ODE_INCLUDE_DIR}
-	${OGRE_INCLUDE_DIR}
+    ${OGRE_INCLUDE_DIR}
     ${OIS_INCLUDE_DIR}    
     ${OPDE_BINARY_DIR}
     ${OPDE_BASE_INCLUDES}
@@ -56,9 +56,9 @@ link_directories(
 target_link_libraries( OpenDark
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}
-	${ODE_LIBRARIES}
+    ${ODE_LIBRARIES}
     ${FREEIMAGE_LIBRARIES}
-    ${PYTHON_LIBRARIES}
+    ${OPDE_PYTHON_LIBRARIES}
 )
 
 set_property(TARGET OpenDark PROPERTY LINK_INTERFACE_LIBRARIES "")
@@ -102,7 +102,7 @@ target_link_libraries( opde
     OpenDark
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}
-	${ODE_LIBRARIES}
+    ${ODE_LIBRARIES}
     ${FREEIMAGE_LIBRARIES}
 )
 
@@ -119,9 +119,9 @@ target_link_libraries( opdeScript
     OpenDark
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}
-	${ODE_LIBRARIES}
+    ${ODE_LIBRARIES}
     ${FREEIMAGE_LIBRARIES}
-    ${PYTHON_LIBRARIES}
+    ${OPDE_PYTHON_LIBRARIES}
 )
 
 SET_TARGET_PROPERTIES( opdeScript PROPERTIES
