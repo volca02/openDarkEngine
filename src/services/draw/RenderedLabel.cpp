@@ -67,50 +67,6 @@ namespace Opde {
 		mText.clear();
 		_markDirty();
 	}
-
-	//------------------------------------------------------
-	PixelSize RenderedLabel::calculateTextSize(const std::string& text) {
-		std::string::const_iterator cit = text.begin();
-		std::string::const_iterator cend = text.end();
-		
-		size_t x = 0, y = 0;
-		PixelSize sz(0,0);
-		
-		while (cit != cend) {
-			const unsigned char chr = *cit++;
-
-			if (chr == '\n') {
-				y += mFontSource->getHeight();
-				if (sz.width < x)
-					sz.width = x;
-				x = 0;
-				continue;
-			}
-
-			// eat DOS line feeds as well...
-			if (chr == '\r') {
-				continue;
-			}
-
-			DrawSource* ds = mFontSource->getGlyph(chr);
-
-			if (ds != NULL) {
-				DrawQuad dq;
-				
-				x += ds->getPixelSize().width;
-			} else {
-				// move the maximal width (maybe 1px would be better?)
-				x += mFontSource->getWidth(); 
-			}
-		}
-		
-		// not a first char on the line, so some text would be drawn. 
-		// have to include the line's height though
-		if (x != 0)
-			sz.height = y + mFontSource->getHeight();;
-			
-		return sz;
-	}
 	
 	//------------------------------------------------------
 	void RenderedLabel::_rebuild() {

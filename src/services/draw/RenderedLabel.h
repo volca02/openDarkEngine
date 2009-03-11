@@ -50,11 +50,6 @@ namespace Opde {
 			/// Clears all the text from the label
 			void clearText();
 			
-			/** Calculates a width and height of the given text string.
-			 *  The resulting size is of a unclipped, newline respecting text
-			 */ 
-			PixelSize calculateTextSize(const std::string& text);
-			
 			DrawSourceBase* getDrawSourceBase() const;
 
 		protected:

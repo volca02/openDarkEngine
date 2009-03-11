@@ -90,6 +90,53 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
+	PixelSize FontDrawSource::calculateTextSize(const std::string& text) {
+		std::string::const_iterator cit = text.begin();
+		std::string::const_iterator cend = text.end();
+		
+		size_t x = 0, y = 0;
+		PixelSize sz(0,0);
+		
+		while (cit != cend) {
+			const unsigned char chr = *cit++;
+
+			if (chr == '\n') {
+				y += getHeight();
+				if (sz.width < x)
+					sz.width = x;
+				
+				x = 0;
+				continue;
+			}
+
+			// eat DOS line feeds as well...
+			if (chr == '\r') {
+				continue;
+			}
+
+			DrawSource* ds = getGlyph(chr);
+
+			if (ds != NULL) {
+				DrawQuad dq;
+				
+				x += ds->getPixelSize().width;
+			} else {
+				// move the maximal width (maybe 1px would be better?)
+				x += getWidth(); 
+			}
+		}
+		
+		// not a first char on the line, so some text would be drawn. 
+		// have to include the line's height though
+		if (x != 0)
+			sz.height = y + getHeight();
+		else
+			sz.height = y;
+		
+		return sz;
+	}
+	
+	//------------------------------------------------------
 	void FontDrawSource::populateImageFromMono(DrawSource* dsp, const PixelSize& dimensions, size_t rowlen, void* data, size_t pxoffset, const RGBAQuad* pal) {
 		// We'll use the first two records in the pal for conversion.
 		// first we take the number of the bits to process

@@ -70,6 +70,12 @@ namespace Opde {
 			/// Returns the owning atlas of this font draw source 
 			inline TextureAtlas* getAtlas() { return mContainer; };
 			
+			/** Calculates a width and height of the given text string.
+			 *  The resulting size is of a unclipped, newline respecting text
+			 */ 
+			PixelSize calculateTextSize(const std::string& text);
+						
+			
 		protected:
 			/** populates the Image in the drawsource with a RGB conversion of the supplied 1Bit mono image
 			 *  @note uses the first two records in the specified pallette for conversion
