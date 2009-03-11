@@ -49,7 +49,7 @@ namespace Opde {
 			mIsDirty(false),
 			mAtlasSize(1,1) {
 
-		mAtlasAllocation = new FreeSpaceInfo(0,0,1.0f,1.0f);
+		mAtlasAllocation = new FreeSpaceInfo(0,0,1,1);
 		mAtlasName = "DrawAtlas" + Ogre::StringConverter::toString(mAtlasID);
 	}
 

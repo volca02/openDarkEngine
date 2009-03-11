@@ -190,7 +190,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	DrawSourceBase* RenderedLabel::getDrawSourceBase() {
+	DrawSourceBase* RenderedLabel::getDrawSourceBase() const {
 		return mFontSource->getAtlas();
 	}
 

@@ -65,7 +65,7 @@ namespace Opde {
 			/// Sets a new clipping rectangle
 			void setClipRect(const ClipRect& cr);
 			
-			virtual DrawSourceBase* getDrawSourceBase() = 0;
+			virtual DrawSourceBase* getDrawSourceBase() const = 0;
 
 			/// Dirtiness detector. Dirty operations need rebuild() call before using for display
 			inline bool isDirty() { return mIsDirty; };
@@ -80,6 +80,9 @@ namespace Opde {
 			/// Rebuilds the buffers
 			virtual void _rebuild();
 			
+			/// To be called when the draw source is changing
+			void _sourceChanged(DrawSource* old);
+
 			const ID mID;
 
 			DrawService* mOwner;

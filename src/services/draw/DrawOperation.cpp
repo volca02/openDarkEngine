@@ -65,6 +65,13 @@ namespace Opde {
 	};
 
 	//------------------------------------------------------
+	void DrawOperation::_sourceChanged(DrawSource* old) {
+		for (DrawSheetSet::iterator it = mUsingSheets.begin(); it != mUsingSheets.end(); ++it) {
+				(*it)->_sourceChanged(this, old);
+		}
+	}
+	
+	//------------------------------------------------------
 	void DrawOperation::_markDirty() {
 		mIsDirty = true;
 		

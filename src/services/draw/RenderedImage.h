@@ -37,15 +37,19 @@ namespace Opde {
 
 			void visitDrawBuffer(DrawBuffer* db);
 			
-			DrawSourceBase* getDrawSourceBase();
+			DrawSourceBase* getDrawSourceBase() const;
+			
+			void setDrawSource(DrawSource* nsrc);
 
 		protected:
 			/// override that updates the image and marks dirty
 			void _rebuild();
 			
+			void _setNewDrawSource();
+			
 			DrawQuad mDrawQuad;
 			
-			DrawSource* mDrawSource;
+			DrawSource *mDrawSource;
 			
 			bool mInClip;
 	};

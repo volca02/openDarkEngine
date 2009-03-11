@@ -55,7 +55,7 @@ namespace Opde {
 			 */ 
 			PixelSize calculateTextSize(const std::string& text);
 			
-			DrawSourceBase* getDrawSourceBase();
+			DrawSourceBase* getDrawSourceBase() const;
 
 		protected:
 			struct TextSegment {

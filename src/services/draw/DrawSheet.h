@@ -55,6 +55,9 @@ namespace Opde {
 			/// Removes the draw operation from this sheet.
 			void removeDrawOperation(DrawOperation* toRemove);
 
+			/// Called when a draw source changed for given operation 
+			void _sourceChanged(DrawOperation* op, DrawSource* oldsrc);
+			
 			/** Does the core removal of draw operation, without any notification
 			 * @note Internal, use removeDrawOperation instead
 			*/
@@ -80,6 +83,8 @@ namespace Opde {
 		protected:
 			DrawBuffer* getBufferForOperation(DrawOperation* drawOp, bool autoCreate = false);
 
+			DrawBuffer* getBufferForSourceID(DrawSourceBase::ID id);
+			
 			void _updateRenderQueue(Ogre::RenderQueue* queue);
 
 			/// All draw buffers for the sheet as map

@@ -97,6 +97,22 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
+	void DrawSheet::_sourceChanged(DrawOperation* op, DrawSource* oldsrc) {
+		DrawSourceBase::ID oldID = oldsrc->getSourceID();
+		DrawSourceBase::ID newID = op->getDrawSourceBase()->getSourceID();
+		
+		if (oldID != newID) {
+			DrawBuffer* dbo = getBufferForSourceID(oldID);
+			DrawBuffer* dbn = getBufferForSourceID(oldID);
+			
+			// remove from the old buffer
+			// add into the new one
+			dbo->removeDrawOperation(op);
+			dbn->addDrawOperation(op);
+		}
+	}
+	
+	//------------------------------------------------------
 	void DrawSheet::_removeDrawOperation(DrawOperation* toRemove) {
 		DrawBuffer* buf = getBufferForOperation(toRemove);
 
@@ -127,12 +143,14 @@ namespace Opde {
 	//------------------------------------------------------
 	DrawBuffer* DrawSheet::getBufferForOperation(DrawOperation* drawOp, bool autoCreate) {
 		DrawSourceBase* dsb = drawOp->getDrawSourceBase();
-		DrawBufferMap::iterator it = mDrawBufferMap.find(dsb->getSourceID());
-
-		if (it != mDrawBufferMap.end()) {
-			return it->second;
-		}
-
+		
+		// todf
+		DrawBuffer *db = getBufferForSourceID(dsb->getSourceID());
+		
+		if (db) // if found, return
+			return db;
+		
+		// not found, autocreate?
 		if (autoCreate) {
 			const Ogre::MaterialPtr& mp = dsb->getMaterial();
 			DrawBuffer* db = new DrawBuffer(mp);
@@ -140,8 +158,19 @@ namespace Opde {
 			mDrawBufferMap[dsb->getSourceID()] = db;
 			return db;
 		} else {
-			return NULL;
+			return NULL; // nope, just return null
 		}
+	}
+	
+	//------------------------------------------------------
+	DrawBuffer* DrawSheet::getBufferForSourceID(DrawSourceBase::ID id) {
+		DrawBufferMap::iterator it = mDrawBufferMap.find(id);
+
+		if (it != mDrawBufferMap.end()) {
+			return it->second;
+		}
+		
+		return NULL;
 	}
 
 	//------------------------------------------------------

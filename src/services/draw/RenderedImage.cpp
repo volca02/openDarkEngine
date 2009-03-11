@@ -57,8 +57,16 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	DrawSourceBase* RenderedImage::getDrawSourceBase() {
+	DrawSourceBase* RenderedImage::getDrawSourceBase() const {
 		return mDrawSource;
+	}
+
+	//------------------------------------------------------
+	void RenderedImage::setDrawSource(DrawSource* nsrc) {
+		DrawSource* olds = mDrawSource;
+		mDrawSource = nsrc;
+		
+		_sourceChanged(olds);
 	}
 	
 	//------------------------------------------------------
