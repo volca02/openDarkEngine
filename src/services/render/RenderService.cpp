@@ -643,6 +643,8 @@ namespace Opde {
 
 				break;
 			}
+			
+			default: break;
 		}
 	}
 
@@ -695,6 +697,8 @@ namespace Opde {
 
 				return;
 			}
+			
+			default: break; // nothing, ignore
 		}
 	}
 
