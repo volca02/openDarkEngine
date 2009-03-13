@@ -73,11 +73,11 @@ namespace Opde {
 	void RenderedImage::_rebuild() {
 		const PixelSize& ps = mDrawSource->getPixelSize();
 		
-		mDrawQuad.positions.left   = mOwner->convertToScreenSpaceX(mPosition.first);
-		mDrawQuad.positions.right  = mOwner->convertToScreenSpaceX(mPosition.first + ps.width);
-		mDrawQuad.positions.top    = mOwner->convertToScreenSpaceY(mPosition.second);
-		mDrawQuad.positions.bottom = mOwner->convertToScreenSpaceY(mPosition.second + ps.height);
-		mDrawQuad.depth = mOwner->convertToScreenSpaceZ(mZOrder);
+		mDrawQuad.positions.left   = mActiveSheet->convertToScreenSpaceX(mPosition.first);
+		mDrawQuad.positions.right  = mActiveSheet->convertToScreenSpaceX(mPosition.first + ps.width);
+		mDrawQuad.positions.top    = mActiveSheet->convertToScreenSpaceY(mPosition.second);
+		mDrawQuad.positions.bottom = mActiveSheet->convertToScreenSpaceY(mPosition.second + ps.height);
+		mDrawQuad.depth = mActiveSheet->convertToScreenSpaceZ(mZOrder);
 
 		mInClip = mClipRect.clip(mDrawQuad);
 		_markDirty();

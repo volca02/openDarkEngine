@@ -73,6 +73,9 @@ namespace Opde {
 			/// On a change this is to be called
 			void rebuild();
 			
+			/// Notifies this draw operation the active sheet changed
+			void _notifyActiveSheet(DrawSheet *actsh);
+			
 		protected:
 			/// On change updater - marks all using sheets as dirty
 			virtual void _markDirty();
@@ -91,6 +94,9 @@ namespace Opde {
 
 			/// Sheets using this draw op
 			DrawSheetSet mUsingSheets;
+			
+			/// Sheet which is now displaying the op
+			DrawSheet *mActiveSheet;
 
 			PixelCoord mPosition;
 

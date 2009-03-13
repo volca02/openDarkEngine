@@ -79,13 +79,45 @@ namespace Opde {
 
 			/// Called to ensure all the DrawBuffers are current and reflect the requested state
 			void rebuildBuffers();
+			
+			/** Sets a resolution override for this sheet.
+			 * @param override specifies whether to use the override or not (and use the real screen resolution) 
+			 * @param width the width to use in overriden state
+			 * @param height the height to use in the overriden state*/
+			void setResolutionOverride(bool override, size_t width = 0, size_t height = 0);
 
+			/** Converts the given coordinate to the screen space x coordinate
+			 */
+			Ogre::Real convertToScreenSpaceX(int x);
+			
+			/** Converts the given coordinate to the screen space y coordinates
+			 */
+			Ogre::Real convertToScreenSpaceY(int y);
+			
+			/** Converts the given coordinate to the screen space y coordinates
+			 * @param z the depth in 0 - MAX_Z_VALUE range
+			 * @return Real number describing the depth
+			 */
+			Ogre::Real convertToScreenSpaceZ(int z);
+			
+			/** Informs this sheet the viewport resolution changed. Internal, do not use explicitly (use setResolutionOverride instead).
+			 */
+			void _setResolution(size_t width, size_t height);
+			
+			/** Creates a clip rectangle with the specified screen coordinates.
+			*/
+			ClipRect getClipRect(int left, int right, int top, int bottom);
+			
 		protected:
 			DrawBuffer* getBufferForOperation(DrawOperation* drawOp, bool autoCreate = false);
 
 			DrawBuffer* getBufferForSourceID(DrawSourceBase::ID id);
 			
+			/// this does the rendering - updates the render queue with the buffers to display
 			void _updateRenderQueue(Ogre::RenderQueue* queue);
+			
+			/// marks all buffers as dirty
+			void markBuffersDirty(); 
 
 			/// All draw buffers for the sheet as map
 			DrawBufferMap mDrawBufferMap;
@@ -101,6 +133,12 @@ namespace Opde {
 			
 			/// onwer of this sheet
 			DrawService* mOwner;
+			
+			/// screen resolution override for this sheet
+			bool mResOverride;
+			
+			/// Resolution of the screen (either updated or overriden)
+			size_t mWidth, mHeight;
 	};
 }
 

@@ -36,6 +36,8 @@
 #include "RenderedImage.h"
 #include "RenderedLabel.h"
 
+#include "RenderService.h"
+
 #include <OgreViewport.h>
 #include <OgreRenderQueueListener.h>
 
@@ -116,11 +118,11 @@ namespace Opde {
 
 			/** Converts the given coordinate to the screen space x coordinate
 			 */
-			Ogre::Real convertToScreenSpaceX(int x);
+			Ogre::Real convertToScreenSpaceX(int x, size_t width);
 			
 			/** Converts the given coordinate to the screen space y coordinates
 			 */
-			Ogre::Real convertToScreenSpaceY(int y);
+			Ogre::Real convertToScreenSpaceY(int y, size_t height);
 			
 			/** Converts the given coordinate to the screen space y coordinates
 			 * @param z the depth in 0 - MAX_Z_VALUE range
@@ -149,10 +151,14 @@ namespace Opde {
 			 */
 			void setFontPalette(Ogre::ManualFonFileLoader::PaletteType paltype, const Ogre::String& fname = "", const Ogre::String& group = "");
 			
-			/** Creates a clip rectangle with the specified screen coordinates.
+			/** Getter for the current actual pixel width of the screen
+			 * @todo: Once the resolution handling is ok, rewrite to use mWidth instead (the same for height)
 			*/
-			ClipRect getClipRect(int left, int right, int top, int bottom);
-
+			inline size_t getActualWidth() const { /*return mWidth;*/ return mViewport->getActualWidth(); };
+			
+			/// Getter for the current actual pixel height of the screen
+			inline size_t getActualHeight() const { /*return mHeight;*/ return mViewport->getActualHeight(); };
+			
 		protected:
 			// Service related:
 			bool init();
@@ -175,6 +181,13 @@ namespace Opde {
 
 			/// frees the currently used font palette
 			void freeCurrentPal();
+			
+			/// Callback from render service - resolution changed on the render window
+			void onRenderServiceMsg(const RenderServiceMsg& msg);
+			
+			/// Finalizes the creation of object
+			void postCreate(DrawOperation* dop);
+	
 
 			typedef std::map<std::string, DrawSheet*> SheetMap;
 			typedef std::stack<size_t> IDStack;
@@ -208,6 +221,11 @@ namespace Opde {
 			RGBAQuad* mCurrentPalette;
 
 			DrawSourceSet mDrawSources;
+			
+			RenderServicePtr mRenderService;
+			
+			size_t mWidth;
+			size_t mHeight;
 		};
 
 	/// Shared pointer to the draw service

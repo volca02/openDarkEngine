@@ -59,6 +59,9 @@ namespace Opde {
 
 			/// is dirty (needs update) getter
 			inline bool isDirty() const { return mIsDirty; };
+			
+			/// manually marks this buffer as dirty - informs it that it needs a rebuild
+			inline void markDirty() { mIsDirty = true; };
 
 			/// Does a forced update (ignoring isDirty state)
 			void update();

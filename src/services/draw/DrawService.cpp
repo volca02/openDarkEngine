@@ -59,7 +59,9 @@ namespace Opde {
 			mDrawOpID(0),
 			mDrawSourceID(0),
 			mViewport(NULL),
-			mCurrentPalette(NULL) {
+			mCurrentPalette(NULL),
+			mWidth(1),
+			mHeight(1) {
 
 		mCurrentPalette = msDefaultPalette;
 	}
@@ -102,14 +104,14 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void DrawService::bootstrapFinished() {
-		RenderServicePtr rsp = GET_SERVICE(RenderService);
-		mViewport = rsp->getDefaultViewport();
+		mRenderService = GET_SERVICE(RenderService);
+		mViewport = mRenderService->getDefaultViewport();
 
 		mRenderSystem = Ogre::Root::getSingleton().getRenderSystem();
 		mXTextelOffset = mRenderSystem->getHorizontalTexelOffset();
 		mYTextelOffset = mRenderSystem->getVerticalTexelOffset();
 
-		mSceneManager = rsp->getSceneManager();
+		mSceneManager = mRenderService->getSceneManager();
 		mSceneManager->addRenderQueueListener(this);
 
 	}
@@ -310,19 +312,6 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	ClipRect DrawService::getClipRect(int left, int right, int top, int bottom) {
-		ClipRect cr;
-		
-		cr.left   = convertToScreenSpaceX(left);
-		cr.right  = convertToScreenSpaceX(right);
-		cr.top    = convertToScreenSpaceY(top);
-		cr.bottom = convertToScreenSpaceY(bottom);
-		cr.noClip = false;
-		
-		return cr;
-	}
-
-	//------------------------------------------------------
 	void DrawService::loadPaletteFromPCX(const Ogre::String& fname, const Ogre::String& group) {
 		// Code written by patryn, reused here for the new font rendering pipeline support
 		// Open the file
@@ -492,7 +481,7 @@ namespace Opde {
 		DrawSource* ds = new DrawSource(mDrawSourceID++, mat, tex);
 
 		mDrawSources.insert(ds);
-
+		
 		return ds;
 	}
 
@@ -503,6 +492,8 @@ namespace Opde {
 
 		// register so we'll be able to remove it
 		mDrawOperations[opID] = ri;
+		
+		postCreate(ri);
 
 		return ri;
 	}
@@ -515,6 +506,8 @@ namespace Opde {
 		// register so we'll be able to remove it
 		mDrawOperations[opID] = rl;
 
+		postCreate(rl);
+		
 		return rl;
 	}
 
@@ -550,20 +543,20 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	Ogre::Real DrawService::convertToScreenSpaceX(int x) {
+	Ogre::Real DrawService::convertToScreenSpaceX(int x, size_t width) {
 		Ogre::Real res = x;
 
-		res = ((res + mXTextelOffset) / mViewport->getActualWidth()) * 2.0f - 1.0f;
+		res = ((res + mXTextelOffset) / width) * 2.0f - 1.0f;
 
 		return res;
 	}
 	
 	
 	//------------------------------------------------------
-	Ogre::Real DrawService::convertToScreenSpaceY(int y) {
+	Ogre::Real DrawService::convertToScreenSpaceY(int y, size_t height) {
 		Ogre::Real res = y;
 		
-		res = ((res + mYTextelOffset) / mViewport->getActualHeight()) * -2.0f + 1.0f;
+		res = ((res + mYTextelOffset) / height) * -2.0f + 1.0f;
 
 		return res;
 	}
@@ -610,6 +603,26 @@ namespace Opde {
 			delete[] mCurrentPalette;
 			mCurrentPalette = msDefaultPalette;
 		}
+	}
+	
+	//------------------------------------------------------
+	void DrawService::onRenderServiceMsg(const RenderServiceMsg& msg) {
+		mWidth = msg.size.width;
+		mHeight = msg.size.height;
+		
+		// inform all sheets...
+		SheetMap::iterator it = mSheetMap.begin();
+
+		while(it != mSheetMap.end()) {
+			DrawSheet* sht = (it++)->second;
+			
+			sht->_setResolution(mWidth, mHeight);
+		}
+	}
+	
+	//------------------------------------------------------
+	void DrawService::postCreate(DrawOperation *dop) {
+		dop->_notifyActiveSheet(mActiveSheet);
 	}
 
 	//-------------------------- Factory implementation

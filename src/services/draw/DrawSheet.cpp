@@ -22,6 +22,7 @@
  *****************************************************************************/
 
 #include "DrawSheet.h"
+#include "DrawService.h"
 
 #include <OgreRenderQueue.h>
 
@@ -30,9 +31,19 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- DrawSheet ---------------------*/
 	/*----------------------------------------------------*/
-	DrawSheet::DrawSheet(DrawService* owner, const std::string& sheetName) : mActive(false), mSheetName(sheetName), mOwner(owner) {
+	DrawSheet::DrawSheet(DrawService* owner, const std::string& sheetName) : 
+			mActive(false), 
+			mSheetName(sheetName), 
+			mOwner(owner),
+			mResOverride(false),
+			mWidth(1),
+			mHeight(1) {
 		// default to no visibility
 		setVisible(false);
+		
+		// initial size
+		mWidth = mOwner->getActualWidth();
+		mHeight = mOwner->getActualHeight();
 	};
 
 	//------------------------------------------------------
@@ -66,6 +77,13 @@ namespace Opde {
 			DrawBuffer* db = it->second;
 
 			db->_parentChanged(this);
+		}
+		
+		// Inform all the operations about the new sheet
+		DrawOperationMap::iterator iend = mDrawOpMap.end();
+
+		for (DrawOperationMap::iterator doi = mDrawOpMap.begin(); doi != iend; ++doi) {
+			doi->second->_notifyActiveSheet(this);
 		}
 	}
 
@@ -182,7 +200,62 @@ namespace Opde {
 				it->second->update();
 		}
 	}
-
+	
+	//------------------------------------------------------
+	void DrawSheet::setResolutionOverride(bool override, size_t width, size_t height) {
+		mResOverride = override;
+		
+		if (mResOverride) {
+			assert(mWidth);
+			assert(mHeight);
+			
+			mWidth = width;
+			mHeight = height;
+		} else {
+			mWidth  = mOwner->getActualWidth();
+			mHeight = mOwner->getActualHeight();
+		}
+		
+		// must queue rebuild, the quad coords are invalid now		
+		markBuffersDirty();
+	}
+	
+	//------------------------------------------------------
+	Ogre::Real DrawSheet::convertToScreenSpaceX(int x) {
+		return mOwner->convertToScreenSpaceX(x, mWidth);
+	}
+	
+	//------------------------------------------------------
+	Ogre::Real DrawSheet::convertToScreenSpaceY(int y) {
+		return mOwner->convertToScreenSpaceY(y, mHeight);
+	}
+	
+	//------------------------------------------------------
+	Ogre::Real DrawSheet::convertToScreenSpaceZ(int z) {
+		return mOwner->convertToScreenSpaceZ(z);
+	}
+	
+	//------------------------------------------------------
+	void DrawSheet::_setResolution(size_t width, size_t height) {
+		if (!mResOverride) {
+			mWidth = width;
+			mHeight=  height;
+		}
+	}
+	
+	//------------------------------------------------------
+	ClipRect DrawSheet::getClipRect(int left, int right, int top, int bottom) {
+		ClipRect cr;
+		
+		cr.left   = convertToScreenSpaceX(left);
+		cr.right  = convertToScreenSpaceX(right);
+		cr.top    = convertToScreenSpaceY(top);
+		cr.bottom = convertToScreenSpaceY(bottom);
+		cr.noClip = false;
+		
+		return cr;
+	}
+	
 	//------------------------------------------------------
 	const Ogre::String& DrawSheet::getMovableType() const {
 		static Ogre::String type = "DrawSheet";
@@ -227,4 +300,13 @@ namespace Opde {
 			queue->addRenderable(db, db->getRenderQueueID(), OGRE_RENDERABLE_DEFAULT_PRIORITY);
 		}
 	};
+	
+	//-----------------------------------------------------
+	void DrawSheet::markBuffersDirty() {
+		for (DrawBufferMap::iterator it = mDrawBufferMap.begin(); it != mDrawBufferMap.end(); ++it) {
+			DrawBuffer* db = it->second;
+
+			db->markDirty();
+		}
+	}
 };

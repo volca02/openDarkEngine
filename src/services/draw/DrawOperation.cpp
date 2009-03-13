@@ -33,6 +33,7 @@ namespace Opde {
 	DrawOperation::DrawOperation(DrawService* owner, DrawOperation::ID id) :
 			mID(id),
 			mOwner(owner),
+			mActiveSheet(NULL),
 			mPosition(0,0),
 			mZOrder(0),
 			mIsDirty(false) {
@@ -69,6 +70,11 @@ namespace Opde {
 		for (DrawSheetSet::iterator it = mUsingSheets.begin(); it != mUsingSheets.end(); ++it) {
 				(*it)->_sourceChanged(this, old);
 		}
+		
+		// Texture didn't change, be sure to invalidate at least
+		if (old->getSourceID() == getDrawSourceBase()->getSourceID()) {
+			_markDirty();
+		}
 	}
 	
 	//------------------------------------------------------
@@ -99,6 +105,11 @@ namespace Opde {
 	void DrawOperation::rebuild() {
 		_rebuild();
 		mIsDirty = false;
+	}
+	
+	//------------------------------------------------------
+	void DrawOperation::_notifyActiveSheet(DrawSheet *actsh) {
+		mActiveSheet = actsh;
 	}
 
 	//------------------------------------------------------
