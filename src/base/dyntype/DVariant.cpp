@@ -472,7 +472,7 @@ namespace Opde {
 	}
 
 	//------------------------------------
-	const DVariant& DVariant::operator =(char* s) {
+	const DVariant& DVariant::operator =(const char* s) {
 		if (mPrivate.isShared)
 			delete mPrivate.data.shared;
 

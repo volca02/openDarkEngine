@@ -170,7 +170,7 @@ namespace Opde {
 			/** Asignment operator */
 			const DVariant& operator =(float f);
 			/** Asignment operator */
-			const DVariant& operator =(char* s);
+			const DVariant& operator =(const char* s);
 			/** Asignment operator */
 			const DVariant& operator =(const std::string& s);
 			/** Asignment operator */
