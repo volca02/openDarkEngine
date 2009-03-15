@@ -236,19 +236,20 @@ namespace Opde {
 		RegisterValidKey(joy_axisr, "joy_axisr");
 		RegisterValidKey(joy_axisx, "joy_axisx");
 		RegisterValidKey(joy_axisy, "joy_axisy");
-		RegisterValidKey(joy_hat_up, "joy_hat_up");
-		RegisterValidKey(joy_hat_down, "joy_hat_down");
-		RegisterValidKey(joy_hat_right, "joy_hat_right");
-		RegisterValidKey(joy_hat_left, "joy_hat_left");
-		RegisterValidKey(joy_1, "joy_1");
-		RegisterValidKey(joy_2, "joy_2");
-		RegisterValidKey(joy_3, "joy_3");
-		RegisterValidKey(joy_4, "joy_4");
-		RegisterValidKey(joy_5, "joy_5");
-		RegisterValidKey(joy_6, "joy_6");
-		RegisterValidKey(joy_7, "joy_7");
-		RegisterValidKey(joy_8, "joy_8");
-		RegisterValidKey(joy_9, "joy_9");
+		RegisterValidKey(joy_hat_up, "joy_hatup");
+		RegisterValidKey(joy_hat_down, "joy_hatdn");
+		RegisterValidKey(joy_hat_right, "joy_hatrt");
+		RegisterValidKey(joy_hat_left, "joy_hatlt");
+		RegisterValidKey(joy_1, "joy1");
+		RegisterValidKey(joy_2, "joy2");
+		RegisterValidKey(joy_3, "joy3");
+		RegisterValidKey(joy_4, "joy4");
+		RegisterValidKey(joy_5, "joy5");
+		RegisterValidKey(joy_6, "joy6");
+		RegisterValidKey(joy_7, "joy7");
+		RegisterValidKey(joy_8, "joy8");
+		RegisterValidKey(joy_9, "joy9");
+		RegisterValidKey(joy_10, "joy10");
 		RegisterValidKey(Mouse1, "mouse1");
 		RegisterValidKey(Mouse2, "mouse2");
 		RegisterValidKey(Mouse3, "mouse3");
@@ -342,7 +343,7 @@ namespace Opde {
 				Key = Keys;
 			
 			int Code = MapToOISCode(Key);
-			CommandMap.insert(make_pair(Code | Modifier, Command->at(2)));
+			CommandMap.insert(make_pair(Code | Modifier, stripComment(Command->at(2))));
 		}
 
 		return true;

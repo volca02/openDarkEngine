@@ -88,7 +88,8 @@ namespace Opde {
 		joy_6,
 		joy_7,
 		joy_8,
-		joy_9
+		joy_9,
+		joy_10
 	};
 
 	enum DarkMouseEvents
