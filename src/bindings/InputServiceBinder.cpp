@@ -172,7 +172,7 @@ namespace Opde
 			char* command;
 
 			if (PyArg_ParseTuple(args, "s", &command)) {
-			    o->mInstance->command(command);
+			    //o->mInstance->command(command); This has to be fixed for the new input service
 
 			    result = Py_None;
 			    Py_INCREF(result);

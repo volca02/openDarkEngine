@@ -65,8 +65,50 @@ namespace Opde {
 			IET_COMMAND_CALL
 	} InputEventType;
 
+#define SHIFT_MOD			(1 << 31)
+#define CTRL_MOD			(1 << 30)
+#define ALT_MOD				(1 << 29)
+#define DARK_JOY_EVENT		(1 << 28)
+#define DARK_MOUSE_EVENT	(1 << 27)
+
+	enum DarkJoyStickEvents
+	{
+		joy_axisr = DARK_JOY_EVENT,
+		joy_axisx,
+		joy_axisy,
+		joy_hat_up,
+		joy_hat_down,
+		joy_hat_right,
+		joy_hat_left,
+		joy_1,
+		joy_2,
+		joy_3,
+		joy_4,
+		joy_5,
+		joy_6,
+		joy_7,
+		joy_8,
+		joy_9
+	};
+
+	enum DarkMouseEvents
+	{
+		Mouse1 = DARK_MOUSE_EVENT + OIS::MB_Left,
+		Mouse2 = DARK_MOUSE_EVENT + OIS::MB_Right,
+		Mouse3 = DARK_MOUSE_EVENT + OIS::MB_Middle,
+		Mouse4 = DARK_MOUSE_EVENT + OIS::MB_Button3,
+		Mouse5 = DARK_MOUSE_EVENT + OIS::MB_Button4,
+		Mouse6 = DARK_MOUSE_EVENT + OIS::MB_Button5,
+		Mouse7 = DARK_MOUSE_EVENT + OIS::MB_Button6,
+		Mouse8 = DARK_MOUSE_EVENT + OIS::MB_Button7,
+		Mouse_axisx,
+		Mouse_axisy,
+		Mouse_wheel
+	};
+
 	/// Input event
-	typedef struct {
+	typedef struct 
+	{
 		InputEventType event;
 		 // unmapped command, or empty
 		std::string command;
@@ -75,7 +117,8 @@ namespace Opde {
 	} InputEventMsg;
 
 	/// The state of input modifiers
-	typedef enum {
+	typedef enum 
+	{
 		/// Shift key modifier
 		IST_SHIFT = 1,
 		/// Alt key modifier
@@ -85,7 +128,8 @@ namespace Opde {
 	} InputModifierState;
 
 	/// The input mode - direct or translated to the commands
-	typedef enum {
+	typedef enum 
+	{
 		/// Direct mode
 		IM_DIRECT = 1,
 		/// Translated mode
@@ -98,16 +142,17 @@ namespace Opde {
 	typedef OIS::MouseButtonID MouseButtonID;*/
 
 	/// Listener for the direct - unfiltered events. Typically one per application (GUIService for example)
-	class DirectInputListener {
+	class DirectInputListener 
+	{
 		public:
 			virtual ~DirectInputListener() {};
 
-			virtual bool keyPressed( const OIS::KeyEvent &e ) = 0;
-			virtual bool keyReleased( const OIS::KeyEvent &e ) = 0;
+			virtual bool keyPressed(const OIS::KeyEvent &e) = 0;
+			virtual bool keyReleased(const OIS::KeyEvent &e) = 0;
 
-    		virtual bool mouseMoved( const OIS::MouseEvent &e ) = 0;
-    		virtual bool mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id ) = 0;
-    		virtual bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) = 0;
+    		virtual bool mouseMoved(const OIS::MouseEvent &e) = 0;
+    		virtual bool mousePressed(const OIS::MouseEvent &e, OIS::MouseButtonID id) = 0;
+    		virtual bool mouseReleased(const OIS::MouseEvent &e, OIS::MouseButtonID id) = 0;
 
 			virtual bool povMoved(const OIS::JoyStickEvent &e, int pov) = 0;
 			virtual bool axisMoved(const OIS::JoyStickEvent &arg, int axis) = 0;
@@ -124,25 +169,14 @@ namespace Opde {
 	 * @todo +/without + binding modes - how they differ, how to implement the one with key repeat...
 	 * @todo BND file writing ability (needs cooperation with nonexistent platform service)
 	 */
-	class OPDELIB_EXPORT InputService : public Service, public OIS::KeyListener, public OIS::MouseListener, public OIS::JoyStickListener, public LoopClient {
+	class OPDELIB_EXPORT InputService : public Service, public OIS::KeyListener, public OIS::MouseListener, public OIS::JoyStickListener, public LoopClient 
+	{
 		public:
 			InputService(ServiceManager *manager, const std::string& name);
 			virtual ~InputService();
 
 			/// Creates bind context (e.g. a switchable context, that maps events to commands if IM_MAPPED is active, using the mapper of this context)
 			void createBindContext(const std::string& ctx);
-
-			/// returns true if the key text is a valid key name
-			bool isKeyTextValid(std::string& txt);
-
-			/// returns ois::KeyCode code for the key text, or KC_UNASSIGNED if not found
-			OIS::KeyCode getKeyTextCode(std::string& txt);
-
-			/// returns the mapped key text for the OIS key code
-			std::string getKeyText(OIS::KeyCode kc);
-
-			/// Input Service command. If you call this one a line-by-line on .BND file, it should catch up and be ready to operate with the settings
-			DVariant command(const std::string& command);
 
 			/// Set a current bind context
 			void setBindContext(const std::string& context);
@@ -151,13 +185,13 @@ namespace Opde {
 			std::string fillVariables(const std::string& src) const;
 
 			/// Sets the input mode to either direct or mapped (IM_DIRECT/IM_MAPPED)
-			void setInputMode(InputMode mode) { mInputMode = mode; };
+			void setInputMode(InputMode mode) {mInputMode = mode;};
 
 			/** Loads a bindings file, possibly rebinding the current bindings
 			 * @param filename The filename of the bnd file to load
 			* @todo dcontext The default context for bind commands not preceeded with the context information. Defaults to the current context if not specified
 			*/
-			void loadBNDFile(const std::string& filename);
+			bool LoadBNDFile(const std::string& filename);
 
 			/// TODO:	void saveBNDFile(const std::string& filename);
 
@@ -166,11 +200,6 @@ namespace Opde {
 
 			/// Variable setter (for mouse senitivity, etc)
 			void setVariable(const std::string& var, const DVariant& val);
-
-			/** Validates the event string (checks for format "event[+modifier]")
-			* @return true if the string is valid, true otherwise
-			*/
-			bool validateEventString(const std::string& ev);
 
 			/// Definition of the command listener
 			typedef Callback< InputEventMsg > Listener;
@@ -188,10 +217,10 @@ namespace Opde {
 			void unregisterCommandTrap(const std::string& command);
 
 			/// Sets a direct listener (only notified when IM_DIRECT is active)
-			void setDirectListener(DirectInputListener* listener) { mDirectListener = listener; };
+			void setDirectListener(DirectInputListener* listener) {mDirectListener = listener;};
 
 			/// Clears the direct listener mapping
-			void unsetDirectListener() { mDirectListener = NULL; };
+			void unsetDirectListener() {mDirectListener = NULL;};
 
 			/** Capture the inputs. Should be called every frame (Temporary code, will be removed after loop service is done) */
 			void captureInputs();
@@ -203,11 +232,12 @@ namespace Opde {
 
 			void loopStep(float deltaTime);
 
-			/// registers OIS::KeyCode to textual representation and inverse mappings
-			void registerValidKey(OIS::KeyCode kc, const std::string& txt);
+			void InitKeyMap();
+			void Tokenize(std::string , std::vector<std::string> &OutVector, char Token);
+			int InputService::MapToOISCode(std::string Key);
 
-			/// Attaches the ctrl, alt and shift texts if they are pressed
-			void attachModifiers(std::string& tgt);
+			/// registers (int)OIS::KeyCode to textual representation and inverse mappings
+			void RegisterValidKey(int kc, const std::string& txt);
 
 			/// Calls a trap for a command
 			/// @returns true if the command was found, false otherwise
@@ -220,21 +250,23 @@ namespace Opde {
 			std::pair<std::string, std::string> splitCommand(const std::string& cmd) const;
 
 			/// Processes the received key event with current mapper, and if it finds a match, sends an event
-			void processKeyEvent(const OIS::KeyEvent &e, InputEventType t);
+			void ProcessKeyEvent(const OIS::KeyEvent &e, InputEventType t);
+
+			void ProcessJoyMouseEvent(int Id, InputEventType Event);
 
 
 			// ---- OIS input events ----
-			bool keyPressed( const OIS::KeyEvent &e );
-			bool keyReleased( const OIS::KeyEvent &e );
+			bool keyPressed(const OIS::KeyEvent &e);
+			bool keyReleased(const OIS::KeyEvent &e);
 
-    		bool mouseMoved( const OIS::MouseEvent &e );
-    		bool mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id );
-    		bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id );
+    		bool mouseMoved(const OIS::MouseEvent &e);
+    		bool mousePressed(const OIS::MouseEvent &e, OIS::MouseButtonID id);
+    		bool mouseReleased(const OIS::MouseEvent &e, OIS::MouseButtonID id);
 
 			bool axisMoved(const OIS::JoyStickEvent &,int);
 			bool buttonPressed(const OIS::JoyStickEvent &,int);
 			bool buttonReleased(const OIS::JoyStickEvent &,int);
-			bool povMoved( const OIS::JoyStickEvent &, int );
+			bool povMoved(const OIS::JoyStickEvent &, int);
 
 			/// Finds a mapper (Or NULL) for the specified context
             InputEventMapperPtr findMapperForContext(const std::string& ctx);
@@ -242,17 +274,23 @@ namespace Opde {
 			/// Strips a comment (any text after ';' including that character)
 			std::string stripComment(const std::string& cmd);
 
+			typedef std::vector<std::string> ContentsVector;
+
+			typedef std::vector<ContentsVector> BindFileCommands;
+
+			typedef std::map<int, std::string> CommandMapVector;
+
 			/// Named context to an event mapper map
 			typedef std::map< std::string, InputEventMapperPtr > ContextToMapper;
 
 			/// string variable name to variant map
 			typedef std::map< std::string, DVariant > ValueMap;
 
-			/// map of OIS::KeyCode to the code text
-			typedef std::map< OIS::KeyCode, std::string > KeyMap; // (lower case please)
+			/// map of (int)OIS::KeyCode to the code text
+			typedef std::map<int, std::string> KeyMap; // (lower case please)
 
-			/// map of the command text to the ois key code
-			typedef std::map< std::string, OIS::KeyCode > ReverseKeyMap; // (lower case please)
+			/// map of the command text to the (int) ois key code
+			typedef std::map<std::string, int> ReverseKeyMap; // (lower case please)
 
 			/// map of command text to the handling listener
 			typedef std::map< std::string, ListenerPtr > ListenerMap;
@@ -268,9 +306,11 @@ namespace Opde {
 
 			/// Key map
 			KeyMap mKeyMap;
-
+			
 			/// Reverse key map
 			ReverseKeyMap mReverseKeyMap;
+
+			CommandMapVector CommandMap;
 
 			/// Current mapper
 			InputEventMapperPtr mCurrentMapper;
@@ -281,7 +321,7 @@ namespace Opde {
 			/// Map of the command trappers
 			ListenerMap mCommandTraps;
 
-			/// Set of commands that receive events every refresh if the button is holded
+			/// Set of commands that receive events every refresh if the button is held
 			CommandSet mOnPressCommands;
 
 			/// Current direct listener
@@ -315,7 +355,8 @@ namespace Opde {
 	typedef shared_ptr<InputService> InputServicePtr;
 
 	/// Factory for the InputService objects
-	class OPDELIB_EXPORT InputServiceFactory : public ServiceFactory {
+	class OPDELIB_EXPORT InputServiceFactory : public ServiceFactory 
+	{
 		public:
 			InputServiceFactory();
 			~InputServiceFactory() {};

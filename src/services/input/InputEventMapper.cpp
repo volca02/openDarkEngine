@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -61,70 +61,4 @@ namespace Opde {
 			std::vector<std::string> a;
 			return a;
 		}
-
-    //------------------------------------------------------
-    bool InputEventMapper::command(const std::string& cmd) {
-    	WhitespaceStringTokenizer stok(cmd, false);
-
-    	if (stok.end())
-			return false;
-
-    	// if the bind keyword is not present, return false
-		if (stok.next() != "bind")
-			return false;
-
-		// validate the keyboard command
-
-		if (stok.end())
-			return false;
-
-		string ev = stok.next();
-
-		if (stok.end())
-			return false;
-
-		// The whole command, with parameters and binding type
-		string wcommand = stok.next();
-
-		Command spc;
-
-		if (wcommand == "")
-			return false;
-
-		spc.type = CET_NORMAL;
-
-		if (wcommand.substr(1,1) == "+") {
-			spc.command = wcommand.substr(1);
-			spc.type = CET_PEDGE;
-		} else if (cmd.substr(1,1) == "-") {
-			spc.command = wcommand.substr(1);
-			spc.type = CET_NEDGE;
-		} else {
-			spc.command = wcommand;
-		}
-
-		// The bnd files are not case sensitive. Thus, I convert the ev to lower case before validating/inserting
-		// (Argh. The lower case conversion is way complicated in c++, the reason being locales and stuff like that. I simply ignore this here, OK?)
-		transform(ev.begin(), ev.end(), ev.begin(), ::tolower);
-
-		if (!mInputService->validateEventString(ev)) {
-			LOG_ERROR("Encountered invalid event code: %s" ,ev.c_str());
-			return false;
-		}
-
-		// event to command lookup
-		pair<EventToCommandMap::const_iterator, bool> res = mEventToCommand.insert(make_pair(ev, spc));
-
-		LOG_DEBUG("InputEventMapper::command: Mapping '%s' to cmd '%s'", ev.c_str(), wcommand.c_str());
-
-		if (res.second) { // did insert
-			return true;
-		}
-
-		// Reverse lookup helper (command to keys)
-		// TODO: Code. Not needed for now. I guess that this one should search on command part, not the whole command
-
-		return false;
-    }
-
 }

@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -67,9 +67,6 @@ namespace Opde {
 
 			/** Gets the list of events leading to a command */
 			std::vector<std::string> getCommandEvents(const std::string& command);
-
-			/// Executes a command. The only supported command is "bind event command"
-			bool command(const std::string& cmd);
 
 		protected:
 
