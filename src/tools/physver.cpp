@@ -17,7 +17,7 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *	  $Id: chunk.cpp 1116 2009-01-18 21:34:20Z volca $
+ *	  $Id$
  *
  *****************************************************************************/
 
