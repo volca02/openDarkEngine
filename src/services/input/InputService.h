@@ -235,7 +235,7 @@ namespace Opde {
 
 			void InitKeyMap();
 			void Tokenize(std::string , std::vector<std::string> &OutVector, char Token);
-			int InputService::MapToOISCode(std::string Key);
+			int MapToOISCode(std::string Key) const;
 
 			/// registers (int)OIS::KeyCode to textual representation and inverse mappings
 			void RegisterValidKey(int kc, const std::string& txt);

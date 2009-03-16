@@ -280,7 +280,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	int InputService::MapToOISCode(std::string Key)
+	int InputService::MapToOISCode(std::string Key) const
 	{
 		int Code;
 		ReverseKeyMap::const_iterator it = mReverseKeyMap.find(Key);
@@ -309,7 +309,7 @@ namespace Opde {
 			std::string Line = Stream->getLine();
 			if((Line.length() == 0) || (Line.at(0) == ';'))
 				continue;
-			std::transform(Line.begin(), Line.end(), Line.begin(), tolower);	//Lowercase
+			std::transform(Line.begin(), Line.end(), Line.begin(), ::tolower);	//Lowercase
 			Tokenize(Line, Contents, ' ');
 			if(Contents.at(0) == "bind")
 				BindCommands.push_back (Contents);
