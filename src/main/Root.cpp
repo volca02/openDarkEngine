@@ -88,7 +88,7 @@ namespace Opde {
 			logToFile(logFileName);
 		}
 
-		LOG_INFO("Starting openDarkEngine %d.%d.%d (%s)", OPDE_VER_MAJOR, OPDE_VER_MINOR, OPDE_VER_PATCH, OPDE_CODE_NAME);
+		LOG_INFO("Starting openDarkEngine %d.%d.%d (%s), build %s, %s", OPDE_VER_MAJOR, OPDE_VER_MINOR, OPDE_VER_PATCH, OPDE_CODE_NAME, __DATE__, __TIME__);
 
 		mServiceMgr = new ServiceManager(mServiceMask);
 
