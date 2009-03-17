@@ -22,9 +22,9 @@ cmake_minimum_required(VERSION 2.6)
 project (OPDE)
 
 SET(OPDE_VER_MAJOR "0")
-SET(OPDE_VER_MINOR "2")
-SET(OPDE_VER_PATCH "9")
-SET(REL_CODE_NAME  "Segmentation Fault")
+SET(OPDE_VER_MINOR "3")
+SET(OPDE_VER_PATCH "0")
+SET(REL_CODE_NAME  "El Motor Oscuro")
 
 # Build type selection. Use ccmake for selection of this (or the commandline switches)
 # Default build type
