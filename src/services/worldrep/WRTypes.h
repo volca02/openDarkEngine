@@ -111,8 +111,8 @@ namespace Opde {
 		uint8_t  ly; // this is the dimension Y
 		uint8_t  unk;
 
-		uint32_t	handle;   // internal handle we can ignore [TNH]
-		uint32_t zero;    // Always zero?
+		uint32_t static_lmap_ptr;   // Static lightmap pointer in memory - ignored by us
+		uint32_t dynamic_lmap_ptr;    // Dynamic lightmap pointer in memory - ignored by us
 
 		uint32_t animflags; // map of animlight lightmaps present - bit 1 means yes for that light - count ones, add 1 and you get the total num of lmaps for this lmap info
 	} wr_light_info_t;
