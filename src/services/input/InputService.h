@@ -235,7 +235,7 @@ namespace Opde {
 
 			void InitKeyMap();
 			void Tokenize(std::string , std::vector<std::string> &OutVector, char Token);
-			int MapToOISCode(std::string Key) const;
+			unsigned int MapToOISCode(std::string Key) const;
 
 			/// registers (int)OIS::KeyCode to textual representation and inverse mappings
 			void RegisterValidKey(int kc, const std::string& txt);
@@ -253,7 +253,7 @@ namespace Opde {
 			/// Processes the received key event with current mapper, and if it finds a match, sends an event
 			void ProcessKeyEvent(const OIS::KeyEvent &e, InputEventType t);
 
-			void ProcessJoyMouseEvent(int Id, InputEventType Event);
+			void ProcessJoyMouseEvent(unsigned int Id, InputEventType Event);
 
 
 			// ---- OIS input events ----
@@ -279,7 +279,7 @@ namespace Opde {
 
 			typedef std::vector<ContentsVector> BindFileCommands;
 
-			typedef std::map<int, std::string> CommandMapVector;
+			typedef std::map<unsigned int, std::string> CommandMapVector;
 
 			/// Named context to an event mapper map
 			typedef std::map< std::string, InputEventMapperPtr > ContextToMapper;
@@ -288,7 +288,7 @@ namespace Opde {
 			typedef std::map< std::string, DVariant > ValueMap;
 
 			/// map of (int)OIS::KeyCode to the code text
-			typedef std::map<int, std::string> KeyMap; // (lower case please)
+			typedef std::map<unsigned int, std::string> KeyMap; // (lower case please)
 
 			/// map of the command text to the (int) ois key code
 			typedef std::map<std::string, int> ReverseKeyMap; // (lower case please)

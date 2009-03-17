@@ -280,9 +280,9 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	int InputService::MapToOISCode(std::string Key) const
+	unsigned int InputService::MapToOISCode(std::string Key) const
 	{
-		int Code;
+		unsigned int Code;
 		ReverseKeyMap::const_iterator it = mReverseKeyMap.find(Key);
 
 		if (it != mReverseKeyMap.end())
@@ -319,7 +319,7 @@ namespace Opde {
 		
 		for(BindFileCommands::const_iterator Command = BindCommands.begin(); Command != BindCommands.end(); Command++)
 		{
-			int Modifier = 0;
+			unsigned int Modifier = 0;
 			std::string Key, Keys = Command->at(1);
 
 			if((Keys.length() > 1) && (Keys.find('+') != string::npos))
@@ -342,7 +342,7 @@ namespace Opde {
 			else
 				Key = Keys;
 			
-			int Code = MapToOISCode(Key);
+			unsigned int Code = MapToOISCode(Key);
 			CommandMap.insert(make_pair(Code | Modifier, stripComment(Command->at(2))));
 		}
 
@@ -626,7 +626,7 @@ namespace Opde {
 		}
 
 		// dispatch the key event using the mapper
-		int Key = (int)e.key;
+		unsigned int Key = (unsigned int)e.key;
 
 		if (mKeyboard->isModifierDown(Keyboard::Alt))
 			Key |= ALT_MOD;
@@ -670,7 +670,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void InputService::ProcessJoyMouseEvent(int Id, InputEventType Event)
+	void InputService::ProcessJoyMouseEvent(unsigned int Id, InputEventType Event)
 	{
 		// Some safety checks
 		if (mInputMode == IM_DIRECT)
@@ -682,7 +682,7 @@ namespace Opde {
 		}
 
 		// dispatch the key event using the mapper
-		int Button = Id;
+		unsigned int Button = Id;
 		if((Event == IET_MOUSE_PRESS) || (Event == IET_MOUSE_RELEASE))
 			Button += DARK_MOUSE_EVENT;
 		else
