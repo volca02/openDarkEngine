@@ -194,6 +194,9 @@ namespace Opde {
 			*/
 			bool LoadBNDFile(const std::string& filename);
 
+			//Adds a command to the pool
+			void AddCommand(std::string& CommandString);
+
 			/// TODO:	void saveBNDFile(const std::string& filename);
 
 			/// Variable getter (for mouse senitivity, etc)

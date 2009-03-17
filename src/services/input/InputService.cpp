@@ -294,11 +294,47 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
+	void InputService::AddCommand( std::string& CommandString)
+	{
+		ContentsVector Contents, Command;
+
+		if((CommandString.length() == 0) || (CommandString.at(0) == ';'))
+			return;
+		std::transform(CommandString.begin(), CommandString.end(), CommandString.begin(), ::tolower);	//Lowercase
+		Tokenize(CommandString, Command, ' ');
+		if(Command.at(0) != "bind")
+			return;		//We only care about bindings at the moment
+
+		unsigned int Modifier = 0;
+		std::string Key, Keys = Command.at(1);
+
+		if((Keys.length() > 1) && (Keys.find('+') != string::npos))
+		{
+			Contents.clear();
+			Tokenize(Keys, Contents, '+');
+			for(ContentsVector::const_iterator Content = Contents.begin(); Content != Contents.end(); Content++)
+			{
+				std::string ContentStr = *Content;
+				if (ContentStr == "shift")
+					Modifier |= SHIFT_MOD;
+				else if (ContentStr == "ctrl")
+					Modifier |= CTRL_MOD;
+				else if (ContentStr == "alt")
+					Modifier |= ALT_MOD;
+				else
+					Key = ContentStr;
+			}
+		}
+		else
+			Key = Keys;
+		
+		const unsigned int Code = MapToOISCode(Key);
+		CommandMap.insert(make_pair(Code | Modifier, stripComment(Command.at(2))));
+	}
+
+	//------------------------------------------------------
 	bool InputService::LoadBNDFile(const std::string& FileName)
 	{
-		ContentsVector Contents;
-		BindFileCommands BindCommands;
-
 		if(Ogre::ResourceGroupManager::getSingleton().resourceExists(ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, FileName) == false)
 			return false;
 
@@ -307,44 +343,8 @@ namespace Opde {
 		while (!Stream->eof())
 		{
 			std::string Line = Stream->getLine();
-			if((Line.length() == 0) || (Line.at(0) == ';'))
-				continue;
-			std::transform(Line.begin(), Line.end(), Line.begin(), ::tolower);	//Lowercase
-			Tokenize(Line, Contents, ' ');
-			if(Contents.at(0) == "bind")
-				BindCommands.push_back (Contents);
-			Contents.clear();
-		}
-
-		
-		for(BindFileCommands::const_iterator Command = BindCommands.begin(); Command != BindCommands.end(); Command++)
-		{
-			unsigned int Modifier = 0;
-			std::string Key, Keys = Command->at(1);
-
-			if((Keys.length() > 1) && (Keys.find('+') != string::npos))
-			{
-				Contents.clear();
-				Tokenize(Keys, Contents, '+');
-				for(ContentsVector::const_iterator Content = Contents.begin(); Content != Contents.end(); Content++)
-				{
-					std::string ContentStr = *Content;
-					if (ContentStr == "shift")
-						Modifier |= SHIFT_MOD;
-					else if (ContentStr == "ctrl")
-						Modifier |= CTRL_MOD;
-					else if (ContentStr == "alt")
-						Modifier |= ALT_MOD;
-					else
-						Key = ContentStr;
-				}
-			}
-			else
-				Key = Keys;
-			
-			unsigned int Code = MapToOISCode(Key);
-			CommandMap.insert(make_pair(Code | Modifier, stripComment(Command->at(2))));
-		}
+			AddCommand(Line);			
+		}	
 
 		return true;
 	}
