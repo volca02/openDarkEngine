@@ -78,7 +78,8 @@ namespace Opde {
 		uint8_t	plane; //  plane number
 		uint8_t	unk;   // seems zero
 		uint16_t	tgt_cell; // target leaf for this portal...
-		uint8_t	unk1[2]; // the second seems to contain some flags... 41, FF... etc...
+		uint8_t	unk1; // Cell motion related
+		uint8_t	unk2; // Some flags... 41, FF... etc...
 	}  wr_polygon_t;
 
 	typedef struct { // SIZE: 12+12+12+12 = 48
