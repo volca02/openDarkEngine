@@ -115,7 +115,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void DrawSheet::_sourceChanged(DrawOperation* op, DrawSource* oldsrc) {
+	void DrawSheet::_sourceChanged(DrawOperation* op, const DrawSourcePtr& oldsrc) {
 		DrawSourceBase::ID oldID = oldsrc->getSourceID();
 		DrawSourceBase::ID newID = op->getDrawSourceBase()->getSourceID();
 		
@@ -160,7 +160,7 @@ namespace Opde {
 
 	//------------------------------------------------------
 	DrawBuffer* DrawSheet::getBufferForOperation(DrawOperation* drawOp, bool autoCreate) {
-		DrawSourceBase* dsb = drawOp->getDrawSourceBase();
+		DrawSourceBasePtr dsb = drawOp->getDrawSourceBase();
 		
 		// todf
 		DrawBuffer *db = getBufferForSourceID(dsb->getSourceID());

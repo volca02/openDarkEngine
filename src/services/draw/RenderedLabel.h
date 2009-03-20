@@ -35,7 +35,7 @@ namespace Opde {
 	/** Rendered label. This class represents single font text area, possibly wrapped and coloured. */
 	class RenderedLabel : public DrawOperation {
 		public:
-			RenderedLabel(DrawService* owner, DrawOperation::ID id, FontDrawSource* fds, const std::string& label);
+			RenderedLabel(DrawService* owner, DrawOperation::ID id, const FontDrawSourcePtr fds, const std::string& label);
 			
 			virtual ~RenderedLabel();
 
@@ -50,7 +50,7 @@ namespace Opde {
 			/// Clears all the text from the label
 			void clearText();
 			
-			DrawSourceBase* getDrawSourceBase() const;
+			DrawSourceBasePtr getDrawSourceBase();
 
 		protected:
 			struct TextSegment {
@@ -72,7 +72,7 @@ namespace Opde {
 
 			DrawQuadList mDrawQuadList;
 
-			FontDrawSource* mFontSource;
+			FontDrawSourcePtr mFontSource;
 
 			SegmentList mText; 
 	};

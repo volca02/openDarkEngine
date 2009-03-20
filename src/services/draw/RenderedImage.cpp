@@ -24,7 +24,7 @@
 #include "RenderedImage.h"
 #include "DrawService.h"
 #include "DrawBuffer.h"
-
+#include "DrawCommon.h"
 
 using namespace Ogre;
 
@@ -33,7 +33,7 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- RenderedImage -----------------*/
 	/*----------------------------------------------------*/
-	RenderedImage::RenderedImage(DrawService* owner, DrawOperation::ID id, DrawSource* ds) :
+	RenderedImage::RenderedImage(DrawService* owner, DrawOperation::ID id, const DrawSourcePtr& ds) :
 			DrawOperation(owner, id), mDrawSource(ds) {
 		mDrawQuad.texCoords.left = ds->transformX(0);
 		mDrawQuad.texCoords.right = ds->transformX(1.0f);
@@ -57,13 +57,13 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	DrawSourceBase* RenderedImage::getDrawSourceBase() const {
+	DrawSourceBasePtr RenderedImage::getDrawSourceBase() {
 		return mDrawSource;
 	}
 
 	//------------------------------------------------------
-	void RenderedImage::setDrawSource(DrawSource* nsrc) {
-		DrawSource* olds = mDrawSource;
+	void RenderedImage::setDrawSource(const DrawSourcePtr& nsrc) {
+		DrawSourcePtr olds = mDrawSource;
 		mDrawSource = nsrc;
 		
 		_sourceChanged(olds);

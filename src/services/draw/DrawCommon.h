@@ -228,6 +228,9 @@ namespace Opde {
 			PixelSize mPixelSize;
 	};
 	
+	/// Shared pointer to the draw source base
+	typedef shared_ptr<DrawSourceBase> DrawSourceBasePtr;
+	
 	/// A drawn bitmap source (can be a part of an atlas)
 	class OPDELIB_EXPORT DrawSource : public DrawSourceBase {
 		public:
@@ -281,8 +284,11 @@ namespace Opde {
 	
 	};
 
+	/// Shared pointer to the draw source base
+	typedef shared_ptr<DrawSource> DrawSourcePtr;
+
 	struct OPDELIB_EXPORT DrawSourceLess {
-		bool operator() (const DrawSource* a, const DrawSource* b) {
+		bool operator() (const DrawSourceBasePtr& a, const DrawSourceBasePtr& b) {
 			size_t sa = a->getPixelArea();
 			size_t sb = b->getPixelArea();
 			return sa > sb;

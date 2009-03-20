@@ -88,18 +88,18 @@ namespace Opde {
 			 * @param img The image name
 			 * @return Shared ptr to the draw source usable for draw operations
 			 */
-			DrawSource* createDrawSource(const std::string& img, const std::string& group);
+			DrawSourcePtr createDrawSource(const std::string& img, const std::string& group);
 
 			/** Creates a rendered image (e.g. a sprite)
 			 * @param draw The image source for this operation
 			 */
-			RenderedImage* createRenderedImage(DrawSource* draw);
+			RenderedImage* createRenderedImage(const DrawSourcePtr& draw);
 
 			/** Creates a rendered label (e.g. a text)
 			 * @param fds The font to use for the rendering
 			 * @param label Optional label to start with
 			 */
-			RenderedLabel* createRenderedLabel(FontDrawSource* fds, const std::string& label = "");
+			RenderedLabel* createRenderedLabel(const FontDrawSourcePtr& fds, const std::string& label = "");
 
 			/** Destroys the specified draw operation (any ancestor)
 			 * @param dop The draw operation to destroy
@@ -144,7 +144,7 @@ namespace Opde {
 			/** Font loading interface. It is capable of loading .fon files only at the moment.
 			 * @note To supply additional settings, use the
 			 */
-			FontDrawSource* loadFont(TextureAtlas* atlas, const std::string& name, const std::string& group);
+			FontDrawSourcePtr loadFont(TextureAtlas* atlas, const std::string& name, const std::string& group);
 
 			/** supplies the palette info - needed for 8Bit palletized font color loads. The specified palette is then used
 			 * in further font loading operations.
@@ -166,7 +166,7 @@ namespace Opde {
 			void shutdown();
 
 			/// Loads the LG's fon file and populates the given font instance with it's glyphs
-			void loadFonFile(const std::string& name, const std::string& group, FontDrawSource* fon);
+			void loadFonFile(const std::string& name, const std::string& group, FontDrawSourcePtr fon);
 
 			/// Loads the current palette from a specified pcx file
 			void loadPaletteFromPCX(const Ogre::String& fname, const Ogre::String& group);
@@ -194,7 +194,7 @@ namespace Opde {
 			typedef SimpleArray<DrawOperation*> DrawOperationArray;
 			typedef std::map<DrawSource::ID, TextureAtlas*> TextureAtlasMap;
 			typedef std::set<TextureAtlas*> AtlasSet;
-			typedef std::set<DrawSource*> DrawSourceSet;
+			typedef std::list<DrawSourceBasePtr> DrawSourceList;
 
 			SheetMap mSheetMap;
 			DrawSheet* mActiveSheet;
@@ -220,7 +220,7 @@ namespace Opde {
 
 			RGBAQuad* mCurrentPalette;
 
-			DrawSourceSet mDrawSources;
+			DrawSourceList mDrawSources;
 			
 			RenderServicePtr mRenderService;
 			

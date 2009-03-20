@@ -56,7 +56,7 @@ namespace Opde {
 			void removeDrawOperation(DrawOperation* toRemove);
 
 			/// Called when a draw source changed for given operation 
-			void _sourceChanged(DrawOperation* op, DrawSource* oldsrc);
+			void _sourceChanged(DrawOperation* op, const DrawSourcePtr& oldsrc);
 			
 			/** Does the core removal of draw operation, without any notification
 			 * @note Internal, use removeDrawOperation instead

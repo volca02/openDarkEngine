@@ -33,7 +33,7 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- RenderedLabel -----------------*/
 	/*----------------------------------------------------*/
-	RenderedLabel::RenderedLabel(DrawService* owner, DrawOperation::ID id, FontDrawSource* fds, const std::string& label) :
+	RenderedLabel::RenderedLabel(DrawService* owner, DrawOperation::ID id, const FontDrawSourcePtr fds, const std::string& label) :
 		DrawOperation(owner, id), mFontSource(fds), mText() {
 
 		rebuild();
@@ -146,7 +146,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	DrawSourceBase* RenderedLabel::getDrawSourceBase() const {
+	DrawSourceBasePtr RenderedLabel::getDrawSourceBase() {
 		return mFontSource->getAtlas();
 	}
 

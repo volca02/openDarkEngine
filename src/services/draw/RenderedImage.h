@@ -33,13 +33,13 @@
 namespace Opde {
 	class RenderedImage : public DrawOperation {
 		public:
-			RenderedImage(DrawService* owner, DrawOperation::ID id, DrawSource* ds);
+			RenderedImage(DrawService* owner, DrawOperation::ID id, const DrawSourcePtr& ds);
 
 			void visitDrawBuffer(DrawBuffer* db);
 			
-			DrawSourceBase* getDrawSourceBase() const;
+			DrawSourceBasePtr getDrawSourceBase();
 			
-			void setDrawSource(DrawSource* nsrc);
+			void setDrawSource(const DrawSourcePtr& nsrc);
 
 		protected:
 			/// override that updates the image and marks dirty
@@ -49,7 +49,7 @@ namespace Opde {
 			
 			DrawQuad mDrawQuad;
 			
-			DrawSource *mDrawSource;
+			DrawSourcePtr mDrawSource;
 			
 			bool mInClip;
 	};

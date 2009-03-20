@@ -88,10 +88,6 @@ namespace Opde {
 		mDrawOperations.clear();
 
 		// destroy all draw sources
-		for (DrawSourceSet::iterator it = mDrawSources.begin(); it != mDrawSources.end(); ++it) {
-			delete *it;
-		}
-
 		mDrawSources.clear();
 
 		freeCurrentPal();
@@ -208,10 +204,10 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	FontDrawSource* DrawService::loadFont(TextureAtlas* atlas, const std::string& name, const std::string& group) {
+	FontDrawSourcePtr DrawService::loadFont(TextureAtlas* atlas, const std::string& name, const std::string& group) {
 		// load the font according to the specs
 		assert(atlas);
-		FontDrawSource* nfs = atlas->createFont(name);
+		FontDrawSourcePtr nfs = atlas->createFont(name);
 
 		// now we'll load the glyphs from the file
 		loadFonFile(name, group, nfs);
@@ -220,7 +216,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void DrawService::loadFonFile(const std::string& name, const std::string& group, FontDrawSource* fon) {
+	void DrawService::loadFonFile(const std::string& name, const std::string& group, FontDrawSourcePtr fon) {
 		DarkFontHeader header;
 
 		Ogre::DataStreamPtr Stream = Ogre::ResourceGroupManager::getSingleton().openResource(name, group, true, NULL);
@@ -462,7 +458,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	DrawSource* DrawService::createDrawSource(const std::string& img, const std::string& group) {
+	DrawSourcePtr DrawService::createDrawSource(const std::string& img, const std::string& group) {
 		// First we load the image.
 		TexturePtr tex = Ogre::TextureManager::getSingleton().load(img, group, TEX_TYPE_2D, 1);
 
@@ -478,15 +474,15 @@ namespace Opde {
 		mat->load();
 
 		// will set up the pixelsize automatically for us
-		DrawSource* ds = new DrawSource(mDrawSourceID++, mat, tex);
+		DrawSourcePtr ds = new DrawSource(mDrawSourceID++, mat, tex);
 
-		mDrawSources.insert(ds);
+		mDrawSources.push_back(ds);
 		
 		return ds;
 	}
 
 	//------------------------------------------------------
-	RenderedImage* DrawService::createRenderedImage(DrawSource* draw) {
+	RenderedImage* DrawService::createRenderedImage(const DrawSourcePtr& draw) {
 		DrawOperation::ID opID = getNewDrawOperationID();
 		RenderedImage* ri = new RenderedImage(this, opID, draw);
 
@@ -499,7 +495,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	RenderedLabel* DrawService::createRenderedLabel(FontDrawSource* fds, const std::string& label) {
+	RenderedLabel* DrawService::createRenderedLabel(const FontDrawSourcePtr& fds, const std::string& label) {
 		DrawOperation::ID opID = getNewDrawOperationID();
 		RenderedLabel* rl = new RenderedLabel(this, opID, fds, label);
 

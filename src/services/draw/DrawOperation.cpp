@@ -66,7 +66,7 @@ namespace Opde {
 	};
 
 	//------------------------------------------------------
-	void DrawOperation::_sourceChanged(DrawSource* old) {
+	void DrawOperation::_sourceChanged(const DrawSourcePtr& old) {
 		for (DrawSheetSet::iterator it = mUsingSheets.begin(); it != mUsingSheets.end(); ++it) {
 				(*it)->_sourceChanged(this, old);
 		}
