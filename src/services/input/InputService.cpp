@@ -294,17 +294,9 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void InputService::AddCommand( std::string& CommandString)
+	void InputService::AddBindCommand(ContentsVector Command)
 	{
-		ContentsVector Contents, Command;
-
-		if((CommandString.length() == 0) || (CommandString.at(0) == ';'))
-			return;
-		std::transform(CommandString.begin(), CommandString.end(), CommandString.begin(), ::tolower);	//Lowercase
-		Tokenize(CommandString, Command, ' ');
-		if(Command.at(0) != "bind")
-			return;		//We only care about bindings at the moment
-
+		ContentsVector Contents;
 		unsigned int Modifier = 0;
 		std::string Key, Keys = Command.at(1);
 
@@ -330,6 +322,32 @@ namespace Opde {
 		
 		const unsigned int Code = MapToOISCode(Key);
 		CommandMap.insert(make_pair(Code | Modifier, stripComment(Command.at(2))));
+	}
+
+	//------------------------------------------------------
+	DVariant InputService::AddCommand(std::string& CommandString)
+	{
+		ContentsVector Contents, Command;
+
+		if((CommandString.length() == 0) || (CommandString.at(0) == ';'))
+			return false;
+		std::transform(CommandString.begin(), CommandString.end(), CommandString.begin(), ::tolower);	//Lowercase
+		Tokenize(CommandString, Command, ' ');
+		if(Command.at(0) == "bind")
+		{
+			AddBindCommand(Command);
+			return true;
+		}
+		else if(Command.at(0) == "echo")
+			return CommandString.substr(5);
+		else if(Command.at(0) == "echo")
+		{
+			setVariable(Command.at(1), Command.at(2));
+			return true;
+		}
+		
+		setVariable(Command.at(0), Command.at(1));
+		return true;
 	}
 
 	//------------------------------------------------------

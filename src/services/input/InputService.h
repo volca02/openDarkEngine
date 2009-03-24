@@ -195,7 +195,7 @@ namespace Opde {
 			bool LoadBNDFile(const std::string& filename);
 
 			//Adds a command to the pool
-			void AddCommand(std::string& CommandString);
+			DVariant AddCommand(std::string& CommandString);
 
 			/// TODO:	void saveBNDFile(const std::string& filename);
 
@@ -353,6 +353,8 @@ namespace Opde {
 
 			/// Loop service pointer
 			LoopServicePtr mLoopService;
+
+			void AddBindCommand(ContentsVector Command);
 	};
 
 	/// Shared pointer to input service
