@@ -340,7 +340,7 @@ namespace Opde {
 		}
 		else if(Command.at(0) == "echo")
 			return CommandString.substr(5);
-		else if(Command.at(0) == "echo")
+		else if(Command.at(0) == "set")
 		{
 			setVariable(Command.at(1), Command.at(2));
 			return true;
