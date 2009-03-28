@@ -195,7 +195,7 @@ namespace Opde {
 			bool LoadBNDFile(const std::string& filename);
 
 			//Adds a command to the pool
-			DVariant AddCommand(std::string& CommandString);
+			DVariant ProcessCommand(std::string& CommandString);
 
 			/// TODO:	void saveBNDFile(const std::string& filename);
 

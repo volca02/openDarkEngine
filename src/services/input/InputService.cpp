@@ -325,7 +325,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	DVariant InputService::AddCommand(std::string& CommandString)
+	DVariant InputService::ProcessCommand(std::string& CommandString)
 	{
 		ContentsVector Contents, Command;
 
@@ -361,7 +361,7 @@ namespace Opde {
 		while (!Stream->eof())
 		{
 			std::string Line = Stream->getLine();
-			AddCommand(Line);			
+			ProcessCommand(Line);			
 		}	
 
 		return true;

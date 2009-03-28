@@ -174,7 +174,7 @@ namespace Opde
 			if (PyArg_ParseTuple(args, "s", &command)) 
 			{
 				std::string Command = command;
-			    o->mInstance->AddCommand(Command);
+			    o->mInstance->ProcessCommand(Command);
 
 			    result = Py_None;
 			    Py_INCREF(result);
