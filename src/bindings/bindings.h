@@ -31,6 +31,13 @@
 #include <Python.h>
 #include <OgreVector3.h>
 
+// Exception guard for the python code. use this as first/last lines of the binding function to have it prepared for exceptions
+#define __PYTHON_EXCEPTION_GUARD_BEGIN_ try {
+#define __PYTHON_EXCEPTION_GUARD_END_ } catch (BasicException& e) { \
+			        PyErr_Format(PyExc_RuntimeError, "C++ side exception (%s:%s) : %s", __FILE__, __LINE__, e.getDetails().c_str()); \
+			        return NULL; \
+			    }
+
 namespace Opde {
 	namespace Python {
 	    // Type converters
