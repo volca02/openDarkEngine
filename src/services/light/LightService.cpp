@@ -81,7 +81,7 @@ namespace Opde {
 
 	//------------------------------------------------------
 	LightsForCellPtr LightService::_loadLightDefinitionsForCell(size_t cellID, const FilePtr& tag,
-	        size_t num_anim_lights, size_t num_textured, wr_polygon_texturing_t* face_infos) {
+	        size_t num_anim_lights, size_t num_textured, WRPolygonTexturing* face_infos) {
 		assert(mLightPixelSize != 0);
 
 		// create a new cell, load the definitions for it
@@ -146,7 +146,7 @@ namespace Opde {
 
 
 	//------------------------------------------------------
-	const wr_light_info_t& LightService::getLightInfo(size_t cellID, size_t faceID) {
+	const WRLightInfo& LightService::getLightInfo(size_t cellID, size_t faceID) {
 		// find the LFC pointer for the cell
 		return mLightsForCell[cellID]->getLightInfo(faceID);
 	}
@@ -212,7 +212,7 @@ namespace Opde {
 	/*------------------ LightsForCell -------------------*/
 	/*----------------------------------------------------*/
 	LightsForCell::LightsForCell(const FilePtr& file, size_t num_anim_lights, size_t num_textured, size_t light_size,
-	        wr_polygon_texturing_t* face_infos) :
+	        WRPolygonTexturing* face_infos) :
 			mLightSize(light_size), 
 			mNumTextured(num_textured), 
 			mNumAnimLights(num_anim_lights),
@@ -225,8 +225,8 @@ namespace Opde {
 		file->read(anim_map, sizeof(int16_t) * mNumAnimLights);
 
 		//8. load the lightmap descriptors
-		lm_infos = new wr_light_info_t[mNumTextured];
-		file->read(lm_infos, sizeof(wr_light_info_t) * mNumTextured);
+		lm_infos = new WRLightInfo[mNumTextured];
+		file->read(lm_infos, sizeof(WRLightInfo) * mNumTextured);
 
 		//9. load the lightmaps
 		// alloc the space for all the pointers
@@ -334,7 +334,7 @@ namespace Opde {
 
 
 	//------------------------------------------------------
-	const wr_light_info_t& LightsForCell::getLightInfo(size_t face_id) {
+	const WRLightInfo& LightsForCell::getLightInfo(size_t face_id) {
 		assert(face_id < mNumTextured);
 
 		return lm_infos[face_id];

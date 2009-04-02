@@ -63,25 +63,25 @@ namespace Opde {
 	class OPDELIB_EXPORT WRCell {
 		private:
 			/** The cell number this cell represents */
-			int cellNum;
+			int mCellNum;
 
-			wr_cell_hdr_t	header;
+			WRCellHeader	mHeader;
 
 			/** the list of the cell's vertices (count is in the header) */
-			wr_coord_t	*vertices;
+			WRVector3	*mVertices;
 
 			/** the list of the polygon map headers */
-			wr_polygon_t	*face_maps;
+			WRPolygon	*mFaceMaps;
 
 			/** the list of the face texturing infos */
-			wr_polygon_texturing_t	*face_infos;
+			WRPolygonTexturing	*mFaceInfos;
 
 			/** polygon mapping struct.. pointer to array of indices on each poly index  poly_indices[0][0]... etc.*/
 			// uint32_t		num_indices;
-			uint8_t		**poly_indices;
+			uint8_t		**mPolyIndices;
 
 			/** Planes forming the cell */
-			Ogre::Plane *planes;
+			Ogre::Plane *mPlanes;
 
 			/** Indicates the fact that the cell data have already been loaded */
 			bool mLoaded;
@@ -95,18 +95,18 @@ namespace Opde {
 
 			/** Inserts a new vertex into the manual object. Calculates all the UV values needed
 			* @deprecated For moving towards the geometry by buffers */
-			void insertTexturedVertex(Ogre::ManualObject *manual, int faceNum, wr_coord_t pos, const Ogre::Vector2& displacement,
+			void insertTexturedVertex(Ogre::ManualObject *manual, int faceNum, WRVector3 pos, const Ogre::Vector2& displacement,
 					const std::pair< Ogre::uint, Ogre::uint >& dimensions, Ogre::Vector3 origin);
 
 			/** Constructs a BSPVertex out of our data */
-			void constructBspVertex(int faceNum, wr_coord_t pos, const Ogre::Vector2& displacement, const std::pair< Ogre::uint, Ogre::uint >& dimensions, BspVertex *vtx);
+			void constructBspVertex(int faceNum, WRVector3 pos, const Ogre::Vector2& displacement, const std::pair< Ogre::uint, Ogre::uint >& dimensions, BspVertex *vtx);
 
 			/** Calculates the Lightmap center in texture space, using Bounding coordinates as the base. */
 			Ogre::Vector2 calcLightmapDisplacement(int polyNum);
 
 
 			/** The bsp node constructed by this class. Filled with static geometry and otherwise initialized */
-			Ogre::BspNode* bspNode;
+			Ogre::BspNode* mBSPNode;
 
 			/** Owner service of this cell */
 			WorldRepService* mOwner;

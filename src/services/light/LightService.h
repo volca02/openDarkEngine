@@ -60,9 +60,9 @@ namespace Opde {
 			tag->readElem(&radius, sizeof(float));
 		};
 
-		wr_coord_t pos; // 12
-		wr_coord_t rot; // 12 - 24
-		wr_coord_t brightness; // 4 - 28
+		WRVector3 pos; // 12
+		WRVector3 rot; // 12 - 24
+		WRVector3 brightness; // 4 - 28
 		float cone_inner; // 4 - 32 - TODO: This is cos(alpha), not radians!
 		float cone_outer; // 4 - 36
 		float radius; // 4 - 40
@@ -81,12 +81,12 @@ namespace Opde {
 			 * @param light_size The size of the pixel in bytes (1=>grayscale lmaps, 2=>16 bit rgb lmaps)
 			 */
 			LightsForCell(const FilePtr& file, size_t num_anim_lights,
-					size_t num_textured, size_t light_size, wr_polygon_texturing_t* face_infos);
+					size_t num_textured, size_t light_size, WRPolygonTexturing* face_infos);
 			~LightsForCell();
 
 			void atlasLightMaps(LightAtlasList* atlas);
 
-			const wr_light_info_t& getLightInfo(size_t face_id);
+			const WRLightInfo& getLightInfo(size_t face_id);
 
 			size_t getAtlasForPolygon(size_t face_id);
 
@@ -101,7 +101,7 @@ namespace Opde {
 			/** animated lights map (e.g. bit to object number mapping) - count is to be found in the header */
 			int16_t *anim_map; // index by bit num, and ya get the object number the animated lightmap belongs to
 
-			wr_light_info_t *lm_infos;
+			WRLightInfo *lm_infos;
 
 			// Lightmaps:
 			// The count of lightmaps per face index
@@ -125,7 +125,7 @@ namespace Opde {
 			size_t mNumAnimLights;
 
 			/** Borrowed reference to face infos, used to determine the texture of polygon */
-			wr_polygon_texturing_t* mFaceInfos;
+			WRPolygonTexturing* mFaceInfos;
 
 			bool mAtlased;
 	};
@@ -155,7 +155,7 @@ namespace Opde {
 			/** Loads the light definitions for the given cell from the current position of the tag file
 			 */
 			LightsForCellPtr _loadLightDefinitionsForCell(size_t cellID, const FilePtr& tag, size_t num_anim_lights,
-			        size_t num_textured, wr_polygon_texturing_t* face_infos);
+			        size_t num_textured, WRPolygonTexturing* face_infos);
 
 			/** loads the light definition table from the specified file.
 			 * @note this method is internal, used by WorldRepService when loading the WR tag file */
@@ -171,7 +171,7 @@ namespace Opde {
 			void clear();
 
 			/** Lightmap info getter */
-			const wr_light_info_t& getLightInfo(size_t cellID, size_t faceID);
+			const WRLightInfo& getLightInfo(size_t cellID, size_t faceID);
 
 			/// Returns the atlas index for cell id and it's polygon id
 			size_t getAtlasForCellPolygon(size_t cellID, size_t faceID);

@@ -185,15 +185,15 @@ namespace Opde {
 
 	// ----------------------- The level loading methods follow
 	void WorldRepService::loadFromChunk(FilePtr& wrChunk, size_t lightSize) {
-		wr_hdr_t header;
-		wrChunk->read(&header, sizeof(wr_hdr_t));
+		WRHeader header;
+		wrChunk->read(&header, sizeof(WRHeader));
 
-		mNumCells = header.num_cells;
+		mNumCells = header.numCells;
 
-		mCells = new WRCell*[header.num_cells];
+		mCells = new WRCell*[header.numCells];
 
 		mWorldGeometry = mSceneMgr->createGeometry("LEVEL_GEOMETRY"); // will be deleted on clear_scene
-		mWorldGeometry->setCellCount(header.num_cells);
+		mWorldGeometry->setCellCount(header.numCells);
 
 		for (uint32_t i = 0; i < mNumCells; i++) {
 			mCells[i] = new WRCell(this, mWorldGeometry);
@@ -202,7 +202,7 @@ namespace Opde {
 		mLightService->setLightPixelSize(lightSize);
 
 		unsigned int idx;
-		for (idx = 0; idx < header.num_cells; idx++) {
+		for (idx = 0; idx < header.numCells; idx++) {
 			// Load one Cell
 			mCells[idx]->loadFromChunk(idx, wrChunk, lightSize);
 		}
@@ -210,8 +210,8 @@ namespace Opde {
 		// -- Load the extra planes
 		wrChunk->read(&mExtraPlaneCount, sizeof(uint32_t));
 
-		mExtraPlanes = new wr_plane_t[mExtraPlaneCount];
-		wrChunk->read(mExtraPlanes, sizeof(wr_plane_t) * mExtraPlaneCount);
+		mExtraPlanes = new WRPlane[mExtraPlaneCount];
+		wrChunk->read(mExtraPlanes, sizeof(WRPlane) * mExtraPlaneCount);
 
 		// --------------------------------------------------------------------------------
 		// -- Load and process the BSP tree
@@ -219,8 +219,8 @@ namespace Opde {
 		wrChunk->read(&BspRows, sizeof(uint32_t));
 
 		// Load the BSP, and construct it
-		wr_BSP_node_t *Bsp = new wr_BSP_node_t[BspRows];
-		wrChunk->read(Bsp, BspRows * sizeof(wr_BSP_node_t));
+		WRBSPNode *Bsp = new WRBSPNode[BspRows];
+		wrChunk->read(Bsp, BspRows * sizeof(WRBSPNode));
 
 		// Create the BspTree
 		createBSP(BspRows, Bsp);
@@ -233,7 +233,7 @@ namespace Opde {
 		mLightService->build();
 
 		// assign the leaf nodes
-		for (idx = 0; idx < header.num_cells; idx++) {
+		for (idx = 0; idx < header.numCells; idx++) {
 			BspNode* node = mSceneMgr->getBspLeaf(idx);
 			mCells[idx]->setBspNode(node);
 		}
@@ -242,7 +242,7 @@ namespace Opde {
 		// Attach the portals to the BSP tree leafs
 		int optimized = 0;
 
-		for (idx = 0; idx < header.num_cells; idx++) {
+		for (idx = 0; idx < header.numCells; idx++) {
 			optimized += mCells[idx]->attachPortals(mSceneMgr);
 		}
 
@@ -250,7 +250,7 @@ namespace Opde {
 
 		// --------------------------------------------------------------------------------
 		// Build the portal meshes and cell geometry
-		for (idx = 0; idx < header.num_cells; idx++) {
+		for (idx = 0; idx < header.numCells; idx++) {
 			mCells[idx]->constructPortalMeshes(mSceneMgr);
 			mCells[idx]->createCellGeometry();
 		}
@@ -269,10 +269,10 @@ namespace Opde {
 
 
 	// ---------------------------------------------------------------------
-	void WorldRepService::createBSP(unsigned int BspRows, wr_BSP_node_t *tree) {
+	void WorldRepService::createBSP(unsigned int BspRows, WRBSPNode *tree) {
 		// First pass - creates all the BSP nodes
 		for (unsigned int i = 0; i < BspRows; i++) {
-			const wr_BSP_node_t& wr_node = tree[i];
+			const WRBSPNode& wr_node = tree[i];
 
 			if (_BSP_FLAGS(wr_node) & 0x01) { // leaf node
 				mSceneMgr->createBspNode(i, wr_node.front);
@@ -284,7 +284,7 @@ namespace Opde {
 
 		// Second Pass. Set front, back pointers on the tree split nodes
 		for (unsigned int i = 0; i < BspRows; i++) {
-			const wr_BSP_node_t& wr_node = tree[i];
+			const WRBSPNode& wr_node = tree[i];
 
 
 			// If this is a leaf node, go to next row
@@ -339,7 +339,7 @@ namespace Opde {
 
 
 	//-----------------------------------------------------------------------
-	Ogre::Plane WorldRepService::constructPlane(wr_plane_t plane) {
+	Ogre::Plane WorldRepService::constructPlane(WRPlane plane) {
 		Vector3 normal(plane.normal.x, plane.normal.y, plane.normal.z);
 		float dist = plane.d;
 		Ogre::Plane oplane;
