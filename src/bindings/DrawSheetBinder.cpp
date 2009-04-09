@@ -23,7 +23,7 @@
  *****************************************************************************/
 
 #include "bindings.h"
-#include "DrawServiceBinder.h"
+#include "DrawSheetBinder.h"
 #include "DrawSheet.h"
 
 namespace Opde {
@@ -81,7 +81,7 @@ namespace Opde {
 		};
 
 		// ------------------------------------------
-		PyObject* DrawServiceBinder::activate(PyObject* self, PyObject* args) {
+		PyObject* DrawSheetBinder::activate(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
 			PyObject *result = NULL;
@@ -97,7 +97,7 @@ namespace Opde {
 		}
 		
 		// ------------------------------------------
-		PyObject* DrawServiceBinder::deactivate(PyObject* self, PyObject* args) {
+		PyObject* DrawSheetBinder::deactivate(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
 			PyObject *result = NULL;
@@ -113,7 +113,7 @@ namespace Opde {
 		}
 		
 		// ------------------------------------------
-		PyObject* DrawServiceBinder::addDrawOperation(PyObject* self, PyObject* args) {
+		PyObject* DrawSheetBinder::addDrawOperation(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
 			PyObject *result = NULL;
@@ -123,7 +123,7 @@ namespace Opde {
 		}
 		
 		// ------------------------------------------
-		PyObject* DrawServiceBinder::removeDrawOperation(PyObject* self, PyObject* args) {
+		PyObject* DrawSheetBinder::removeDrawOperation(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
 			PyObject *result = NULL;
@@ -133,7 +133,7 @@ namespace Opde {
 		}
 		
 		// ------------------------------------------
-		PyObject* DrawServiceBinder::purge(PyObject* self, PyObject* args) {
+		PyObject* DrawSheetBinder::purge(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
 			PyObject *result = NULL;
@@ -143,7 +143,7 @@ namespace Opde {
 		}
 		
 		// ------------------------------------------
-		PyObject* DrawServiceBinder::setResolutionOverride(PyObject* self, PyObject* args) {
+		PyObject* DrawSheetBinder::setResolutionOverride(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
 			PyObject *result = NULL;
@@ -153,7 +153,7 @@ namespace Opde {
 		}
 		
 		// ------------------------------------------
-		PyObject* DrawServiceBinder::getClipRect(PyObject* self, PyObject* args) {
+		PyObject* DrawSheetBinder::getClipRect(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
 			PyObject *result = NULL;

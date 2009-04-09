@@ -493,6 +493,11 @@ namespace Opde {
 
 		return ri;
 	}
+	
+	//------------------------------------------------------
+	void DrawService::destroyRenderedImage(RenderedImage* ri) {
+		destroyDrawOperation(ri);
+	}
 
 	//------------------------------------------------------
 	RenderedLabel* DrawService::createRenderedLabel(const FontDrawSourcePtr& fds, const std::string& label) {

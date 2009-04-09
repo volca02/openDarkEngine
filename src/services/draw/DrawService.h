@@ -51,8 +51,7 @@ namespace Opde {
 	/** @brief Draw Service - 2D rendering service.
 	 * @author volca
 	 * @note some parts written by Patryn as well
-	 * @todo The system of to screen-space conversion is not modular enough. DrawOperations should rely on current owner (sheet) for conversion - that would allow us to override the screen resolution for example.
-	*/
+	 */
 	class OPDELIB_EXPORT DrawService : public Service, public Ogre::RenderQueueListener {
 		public:
 			/// Constructor
@@ -86,14 +85,18 @@ namespace Opde {
 			/** Creates a DrawSource that represents a specified image.
 			 * Also creates a material that is used to render the image.
 			 * @param img The image name
-			 * @return Shared ptr to the draw source usable for draw operations
+			 * @return the draw source usable for draw operations
 			 */
 			DrawSourcePtr createDrawSource(const std::string& img, const std::string& group);
-
+			
 			/** Creates a rendered image (e.g. a sprite)
 			 * @param draw The image source for this operation
 			 */
 			RenderedImage* createRenderedImage(const DrawSourcePtr& draw);
+			
+			/** Destroys a rendered image. For convenience. Calls destroyDrawOperation 
+			 */
+			void destroyRenderedImage(RenderedImage* ri);
 
 			/** Creates a rendered label (e.g. a text)
 			 * @param fds The font to use for the rendering
