@@ -1,4 +1,4 @@
-# $Id: CMakeLists.txt 1163 2009-03-15 08:48:57Z patryn $
+# $Id$
 
 include_directories(
     ${OGRE_INCLUDE_DIR}

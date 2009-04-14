@@ -116,58 +116,69 @@ namespace Opde {
 		PyObject* DrawServiceBinder::destroySheet(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
+			return result;	//Temporary return to fix the VC build
 		}
 		
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::getSheet(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
+			return result;	//Temporary return to fix the VC build
 		}
 		
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::setActiveSheet(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);			
+			Object* o = python_cast<Object*>(self, &msType);
+			return result;	//Temporary return to fix the VC build
 		}
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::createDrawSource(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
+			return result;	//Temporary return to fix the VC build
 		}
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::createRenderedImage(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
+			return result;	//Temporary return to fix the VC build
 		}
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::createRenderedLabel(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
+			return result;	//Temporary return to fix the VC build
 		}
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::destroyDrawOperation(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
+			return result;	//Temporary return to fix the VC build
 		}
 		// ------------------------------------------		
 		PyObject* DrawServiceBinder::createAtlas(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
+			return result;	//Temporary return to fix the VC build
 		}
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::destroyAtlas(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
+			return result;	//Temporary return to fix the VC build
 		}
 		// ------------------------------------------		
 		PyObject* DrawServiceBinder::loadFont(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
+			return result;	//Temporary return to fix the VC build
 		}
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::setFontPalette(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
+			return result;	//Temporary return to fix the VC build
 		}
 		
 		// ------------------------------------------
