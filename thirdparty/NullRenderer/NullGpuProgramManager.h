@@ -22,6 +22,8 @@
  *
  *****************************************************************************/
 
+// This source code is a fixed and maintained version of the Null render system written by xyzzy@ogre3d.org forum
+
 #ifndef __NULLGPUPROGRAMMANAGER_H
 #define __NULLGPUPROGRAMMANAGER_H
 
