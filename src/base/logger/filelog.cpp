@@ -43,9 +43,9 @@ namespace Opde {
 		ofile.close();
 	};
 
-	void FileLog::logMessage(Logger::LogLevel level, char *message) {
+	void FileLog::logMessage(Logger::LogLevel level, const std::string& msg) {
 		// Put in the severity/log level too
-		ofile <<  "LOG [" << Logger::getSingleton().getLogLevelStr(level) << "] : " << message << std::endl;
+		ofile <<  "LOG [" << Logger::getSingleton().getLogLevelStr(level) << "] : " << msg << std::endl;
 		ofile.flush();
 	}
 }

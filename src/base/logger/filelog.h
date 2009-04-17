@@ -41,7 +41,7 @@ namespace Opde {
 		public:
 			FileLog(const std::string& fname);
 			virtual ~FileLog();
-			virtual void logMessage(Logger::LogLevel level, char *message);
+			virtual void logMessage(Logger::LogLevel level, const std::string& msg);
 	};
 }
 

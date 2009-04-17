@@ -36,7 +36,7 @@ namespace Opde {
 	}
 	
 	void OgreOpdeLogConnector::messageLogged(const Ogre::String &message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String &logName) {
-		mOpdeLogger->log(Logger::LOG_LEVEL_INFO, "OGRE_LOG: %s", message.c_str());
+		mOpdeLogger->log(Logger::LOG_LEVEL_DEBUG, "OGRE_LOG: %s", message.c_str());
 	}
 	
 } // namespace

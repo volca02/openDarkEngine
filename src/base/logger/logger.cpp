@@ -33,6 +33,14 @@
 
 namespace Opde {
 
+	struct IsNewline : public std::unary_function<char, bool> {
+				bool operator()(char c) {
+					return (c == '\n' || c == '\r');
+				}
+			};
+	
+	static IsNewline sIsNewLine;
+
 	/** Just a helping array for the log string construction method */
 	const char* LOG_LEVEL_STRINGS[5] = {"FATAL","ERROR","INFO ","DEBUG", "ALL  "};
 
@@ -55,13 +63,13 @@ namespace Opde {
 		return ms_Singleton;
 	}
 
-	void Logger::dispatchLogMessage(LogLevel level, char *message) {
+	void Logger::dispatchLogMessage(LogLevel level, const std::string& msg) {
 		LogListenerSet::iterator it = mListeners.begin();
 
 		for (; it != mListeners.end(); it++) {
 			LogListener* listener = *it;
 
-			listener->logMessage(level, message);
+			listener->logMessage(level, msg);
 		}
 	}
 
@@ -79,8 +87,28 @@ namespace Opde {
 
 		// This is how the log listener could work:
 		// printf("Log (%s) : %s\n", LOG_LEVEL_STRINGS[level], result);
+		
+		// Now that the string is complete, we'll split it on newlines
+		// to avoid losing headers on some lines
+		std::string msg(result);
+		
+		std::string::iterator it = msg.begin(); 
+		
+		IsNewline inl;
+		
+		while (it != msg.end()) {
+			std::string::iterator next = std::find_if(it, msg.end(), sIsNewLine);
+			
+			if (it != next) // drop empty ones
+				dispatchLogMessage(level, std::string(it, next));
+			
+			it = next;
+			
+			if (sIsNewLine(*it))
+				it++;
+		};
 
-		dispatchLogMessage(level, result);
+		
 	}
 
 

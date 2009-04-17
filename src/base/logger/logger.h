@@ -51,7 +51,7 @@ namespace Opde {
 			LogLevel mLoggingLevel;
 
 			/** Message dispatching method. Sends the logging message to all log listeners */
-			void dispatchLogMessage(LogLevel level, char *msg);
+			void dispatchLogMessage(LogLevel level, const std::string& msg);
 
 		public:
 			/** Constructor */
@@ -94,7 +94,7 @@ namespace Opde {
 		public:
 			LogListener();
 			virtual ~LogListener();
-			virtual void logMessage(Logger::LogLevel level, char *message) = 0;
+			virtual void logMessage(Logger::LogLevel level, const std::string& msg) = 0;
 	};
 
 

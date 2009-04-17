@@ -32,7 +32,7 @@ namespace Opde {
 	
 	StdLog::~StdLog() {};
 		
-	void StdLog::logMessage(Logger::LogLevel level, char *message) {
-		std::cerr << "LOG [" << Logger::getSingleton().getLogLevelStr(level).c_str() << "] : " << message << std::endl;
+	void StdLog::logMessage(Logger::LogLevel level, const std::string& msg) {
+		std::cerr << "LOG [" << Logger::getSingleton().getLogLevelStr(level).c_str() << "] : " << msg << std::endl;
 	}
 }

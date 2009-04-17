@@ -144,9 +144,8 @@ namespace Opde {
 			addText("OgreLog: (" + logName + ") : " + message);
 	}
 
-	void ConsoleBackend::logMessage(Logger::LogLevel level, char *message) {
-		std::string smessage(message);
-		addText("LOG[" + string(logLevels[level]) + "] : " + smessage);
+	void ConsoleBackend::logMessage(Logger::LogLevel level, const std::string& msg) {
+		addText("LOG[" + string(logLevels[level]) + "] : " + msg);
 	}
 
 	bool ConsoleBackend::getChanged() {

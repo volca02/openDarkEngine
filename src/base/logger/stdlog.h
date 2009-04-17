@@ -30,12 +30,12 @@
   
 namespace Opde {
 
-	/** Log listener, writing the logging messsages to std::cerr */
+	/** Log listener, writing the logging messages to std::cerr */
 	class OPDELIB_EXPORT StdLog : public LogListener {
 		public:
 			StdLog();
 			virtual ~StdLog();
-			virtual void logMessage(Logger::LogLevel level, char *message);
+			virtual void logMessage(Logger::LogLevel level, const std::string& msg);
 	};
 }
 
