@@ -46,7 +46,7 @@ namespace Opde {
 		if (dimensions.width > mMaxWidth)
 			mMaxWidth = dimensions.width;
 
-		DrawSource* ds = new DrawSource();
+		DrawSource* ds = new DrawSource(mContainer->getOwner());
 
 		// TODO: Fill the image, dimensions, atlas ref. etc.
 		switch (pf) {

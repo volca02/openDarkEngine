@@ -21,8 +21,9 @@
  *
  *****************************************************************************/
 
-
+#include "OpdeException.h"
 #include "DrawCommon.h"
+#include "DrawService.h"
 #include <OgreVector2.h>
 
 using Ogre::Vector2;
@@ -49,15 +50,24 @@ namespace Opde {
 	};
 
 	//------------------------------------------------------	
-	DrawSource::DrawSource(ID id, const Ogre::MaterialPtr& mat, const Ogre::TexturePtr& tex) : DrawSourceBase(id, mat, tex), mAtlassed(false) {
+	DrawSource::DrawSource(DrawService *owner, ID id, const Ogre::MaterialPtr& mat, const Ogre::TexturePtr& tex) : 
+		DrawSourceBase(id, mat, tex),
+		mOwner(owner),
+		mAtlassed(false),
+		mImageLoaded(false) {
 	}
 
 	//------------------------------------------------------
-	DrawSource::DrawSource() : DrawSourceBase(), mAtlassed(false) {
+	DrawSource::DrawSource(DrawService *owner) : mOwner(owner), DrawSourceBase(), mAtlassed(false), mImageLoaded(false) {
 		mPixelSize.width  = 0; // needs to be filled on loadimage
 		mPixelSize.height = 0;
 		mSize = Ogre::Vector2(1.0f, 1.0f);
 		mDisplacement = Ogre::Vector2(0, 0);
+	}
+	
+	//------------------------------------------------------
+	DrawSource::~DrawSource() {
+		mOwner->unregisterDrawSource(this);
 	}
 	
 	//------------------------------------------------------	
@@ -104,7 +114,14 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	void DrawSource::loadImage(const Ogre::String& name, const Ogre::String& group) {
+		// If the image is loaded already, we have an error
+		if (mImageLoaded)
+			OPDE_EXCEPT("Image already loaded in this DrawSource", "DrawSource::loadImage");
+		
 		mImage.load(name, group);
 		updatePixelSizeFromImage();
+
+		mOwner->registerDrawSource(this, name, group);
+		mImageLoaded = true;
 	}
 };

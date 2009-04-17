@@ -308,6 +308,44 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
+	void DrawService::registerDrawSource(const DrawSourcePtr& ds, const Ogre::String& img, const Ogre::String& group) {
+		// TODO: Code
+		mResourceMap.insert(std::make_pair(getResourcePath(img, group), ds));
+	}
+	
+	//------------------------------------------------------
+	void DrawService::unregisterDrawSource(const DrawSourcePtr& ds) {
+		ResourceDrawSourceMap::iterator it = mResourceMap.begin();
+		
+		while (it != mResourceMap.end()) {
+			DrawSourcePtr cds = it->second;
+			
+			if (cds == ds) {
+				ResourceDrawSourceMap::iterator th = it++;
+				mResourceMap.erase(th);
+			} else {
+				++it;
+			}
+		}
+	}
+	
+	//------------------------------------------------------
+	void DrawService::unregisterDrawSource(const DrawSource* ds) {
+		ResourceDrawSourceMap::iterator it = mResourceMap.begin();
+		
+		while (it != mResourceMap.end()) {
+			DrawSource *cds = it->second.ptr();
+			
+			if (cds == ds) {
+				ResourceDrawSourceMap::iterator th = it++;
+				mResourceMap.erase(th);
+			} else {
+				++it;
+			}
+		}
+	}
+	
+	//------------------------------------------------------
 	void DrawService::loadPaletteFromPCX(const Ogre::String& fname, const Ogre::String& group) {
 		// Code written by patryn, reused here for the new font rendering pipeline support
 		// Open the file
@@ -459,6 +497,13 @@ namespace Opde {
 
 	//------------------------------------------------------
 	DrawSourcePtr DrawService::createDrawSource(const std::string& img, const std::string& group) {
+		Ogre::String pth = getResourcePath(img, group);
+		
+		ResourceDrawSourceMap::iterator it = mResourceMap.find(pth);
+		
+		if (it != mResourceMap.end())
+			return it->second;
+		
 		// First we load the image.
 		TexturePtr tex = Ogre::TextureManager::getSingleton().load(img, group, TEX_TYPE_2D, 1);
 
@@ -474,7 +519,7 @@ namespace Opde {
 		mat->load();
 
 		// will set up the pixelsize automatically for us
-		DrawSourcePtr ds = new DrawSource(mDrawSourceID++, mat, tex);
+		DrawSourcePtr ds = new DrawSource(this, mDrawSourceID++, mat, tex);
 
 		mDrawSources.push_back(ds);
 		
@@ -624,6 +669,11 @@ namespace Opde {
 	//------------------------------------------------------
 	void DrawService::postCreate(DrawOperation *dop) {
 		dop->_notifyActiveSheet(mActiveSheet);
+	}
+	
+	//------------------------------------------------------
+	Ogre::String DrawService::getResourcePath(const Ogre::String& res, const Ogre::String& grp) {
+		return grp + ':' + res;
 	}
 
 	//-------------------------- Factory implementation

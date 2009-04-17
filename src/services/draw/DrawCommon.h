@@ -36,6 +36,8 @@
 #include <OgreMaterial.h>
 
 namespace Opde {
+	/// Forward decl. (ownership)
+	class DrawService;
 
 	/// Universal rect. Specifies left, right, top and bottom coordinates
 	template<typename T> struct DrawRect {
@@ -234,9 +236,11 @@ namespace Opde {
 	/// A drawn bitmap source (can be a part of an atlas)
 	class OPDELIB_EXPORT DrawSource : public DrawSourceBase {
 		public:
-			DrawSource();
+			DrawSource(DrawService *owner);
 			
-			DrawSource(ID id, const Ogre::MaterialPtr& mat, const Ogre::TexturePtr& tex);
+			DrawSource(DrawService *owner, ID id, const Ogre::MaterialPtr& mat, const Ogre::TexturePtr& tex);
+			
+			virtual ~DrawSource();
 			
 			/// Will transform the Texture coordinates to those usable for rendering
 			Ogre::Vector2 transform(const Ogre::Vector2& input);
@@ -281,6 +285,12 @@ namespace Opde {
 			
 			/// True if this ds is already part of some atlas
 			bool mAtlassed;
+			
+			/// Informs that there already is some image loaded in this draw source
+			bool mImageLoaded;
+			
+			/// Owning Draw Service - for resource uniqueness handling
+			DrawService *mOwner;
 	
 	};
 

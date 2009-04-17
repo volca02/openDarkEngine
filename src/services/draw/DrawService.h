@@ -162,6 +162,15 @@ namespace Opde {
 			/// Getter for the current actual pixel height of the screen
 			inline size_t getActualHeight() const { /*return mHeight;*/ return mViewport->getActualHeight(); };
 			
+			/// registers a draw source as a combination of image name and resource group name
+			void registerDrawSource(const DrawSourcePtr& ds, const Ogre::String& img, const Ogre::String& group);
+			
+			/// unregisters a draw source from the resource name to draw source mapping
+			void unregisterDrawSource(const DrawSourcePtr& ds);
+			
+			/// unregisters a draw source by it's raw pointer
+			void unregisterDrawSource(const DrawSource *ds);
+			
 		protected:
 			// Service related:
 			bool init();
@@ -190,7 +199,8 @@ namespace Opde {
 			
 			/// Finalizes the creation of object
 			void postCreate(DrawOperation* dop);
-	
+			
+			Ogre::String getResourcePath(const Ogre::String& res, const Ogre::String& grp);
 
 			typedef std::map<std::string, DrawSheet*> SheetMap;
 			typedef std::stack<size_t> IDStack;
@@ -198,6 +208,7 @@ namespace Opde {
 			typedef std::map<DrawSource::ID, TextureAtlas*> TextureAtlasMap;
 			typedef std::set<TextureAtlas*> AtlasSet;
 			typedef std::list<DrawSourceBasePtr> DrawSourceList;
+			typedef std::map<std::string, DrawSourcePtr> ResourceDrawSourceMap;
 
 			SheetMap mSheetMap;
 			DrawSheet* mActiveSheet;
@@ -205,6 +216,7 @@ namespace Opde {
 			DrawSource::ID mDrawSourceID; // draw sources in atlas have the same ID
 			IDStack mFreeIDs;
 			DrawOperationArray mDrawOperations;
+			ResourceDrawSourceMap mResourceMap;
 
 			Ogre::RenderSystem* mRenderSystem;
 

@@ -72,17 +72,17 @@ namespace Opde {
 		DrawSourceSet::iterator dend = mMyDrawSources.end();
 		
 		while (dit != dend) {
-			delete *dit++;
+			mOwner->unregisterDrawSource(*dit++);
 		}
 		
 		mMyDrawSources.clear();
 	}
 
 	//------------------------------------------------------
-	DrawSource* TextureAtlas::createDrawSource(const Ogre::String& imgName, const Ogre::String& groupName) {
+	DrawSourcePtr TextureAtlas::createDrawSource(const Ogre::String& imgName, const Ogre::String& groupName) {
 		// Load as single first, but wit the same id
 		// First we load the image.
-		DrawSource* ds = new DrawSource();
+		DrawSourcePtr ds = new DrawSource(mOwner);
 
 		ds->loadImage(imgName, groupName);
 
@@ -90,6 +90,9 @@ namespace Opde {
 
 		mMyDrawSources.push_back(ds);
 		markDirty();
+		
+		// register the draw source
+		mOwner->registerDrawSource(ds, imgName, groupName);
 
 		return ds;
 	}
@@ -146,7 +149,7 @@ namespace Opde {
 
 			while (it != mMyDrawSources.end()) {
 				
-				DrawSource* ds = *it++;
+				const DrawSourcePtr& ds = *it++;
 
 				const PixelSize& ps = ds->getPixelSize();
 				area += ps.getPixelArea();
@@ -203,7 +206,7 @@ namespace Opde {
 		 DrawSourceSet::iterator it = mMyDrawSources.begin();
 
 		while (it != mMyDrawSources.end()) {
-			DrawSource* ds = *it++;
+			const DrawSourcePtr& ds = *it++;
 
 			// render all pixels into the right place
 			FreeSpaceInfo* fsi = reinterpret_cast<FreeSpaceInfo*>(ds->getPlacementPtr());

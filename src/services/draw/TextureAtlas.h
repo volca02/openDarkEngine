@@ -45,7 +45,7 @@ namespace Opde {
 			~TextureAtlas();
 
 			/** Creates an atlased draw source */
-			DrawSource* createDrawSource(const Ogre::String& imgName, const Ogre::String& groupName);
+			DrawSourcePtr createDrawSource(const Ogre::String& imgName, const Ogre::String& groupName);
 
 			/** Creates a font instance (to be filled with glyphs afterwards) that is stored inside this atlas
 			 * @note You probably don't want to use this. You'll want to use DrawService::loadFont instead */
@@ -59,6 +59,9 @@ namespace Opde {
 
 			/** Builds the atlas. Locks it for further additions, makes it useable */
 			void build();
+			
+			/// Owner getter
+			inline DrawService* getOwner() const { return mOwner; };
 
 		protected:
 			void enlarge(size_t area);
@@ -69,7 +72,7 @@ namespace Opde {
 
 			DrawSource::ID mAtlasID;
 
-			typedef std::list<DrawSource*> DrawSourceSet;
+			typedef std::list<DrawSourcePtr> DrawSourceSet;
 			typedef std::list<FontDrawSource*> FontSet;
 
 			DrawSourceSet mMyDrawSources;
