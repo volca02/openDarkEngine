@@ -26,6 +26,7 @@
 #include <iostream>
 #include <cstdarg>
 #include <sstream>
+#include <algorithm>
 
 #ifdef _MSC_VER
 #pragma warning( disable : 4996 )
@@ -94,8 +95,6 @@ namespace Opde {
 		
 		std::string::iterator it = msg.begin(); 
 		
-		IsNewline inl;
-		
 		while (it != msg.end()) {
 			std::string::iterator next = std::find_if(it, msg.end(), sIsNewLine);
 			
@@ -104,6 +103,9 @@ namespace Opde {
 			
 			it = next;
 			
+			if (it == msg.end())
+				break;
+
 			if (sIsNewLine(*it))
 				it++;
 		};
