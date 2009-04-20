@@ -266,17 +266,15 @@ namespace Opde {
 	//------------------------------------------------------
 	void InputService::Tokenize(std::string InString, std::vector<std::string> &OutVector, char Token)
 	{
-		unsigned int OldOffset = 0, NewOffset;
+		size_t OldOffset = 0, NewOffset;
 
-		do
-		{
+		while(OldOffset < InString.length()) {
 			NewOffset = InString.find(Token, OldOffset);
-			if((NewOffset == string::npos) || (InString.at(OldOffset) == 0x22))
+			if( (NewOffset == string::npos) || (InString.at(OldOffset) == 0x22))
 				NewOffset = InString.length();
 			OutVector.push_back (InString.substr(OldOffset, NewOffset - OldOffset));
 			OldOffset = NewOffset + 1;
-		}
-		while(OldOffset < InString.length());
+		};
 	}
 
 	//------------------------------------------------------
