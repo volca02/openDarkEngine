@@ -37,7 +37,7 @@ namespace Opde {
 		PyTypeObject InheritServiceBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			"Opde.Services.InheritService",                   /* char *tp_name; */
+			"opde.services.InheritService",                   /* char *tp_name; */
 			sizeof(InheritServiceBinder::Object),      /* int tp_basicsize; */
 			0,                        /* int tp_itemsize;       // not used much */
 			InheritServiceBinder::dealloc,   /* destructor tp_dealloc; */

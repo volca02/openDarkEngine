@@ -39,7 +39,7 @@ namespace Opde
 		{
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			"Opde.Services.ObjectService",		// char *tp_name; */
+			"opde.services.ObjectService",		// char *tp_name; */
 			sizeof(ObjectServiceBinder::Object), // int tp_basicsize; */
 			0,									// int tp_itemsize;       /* not used much */
 			ObjectServiceBinder::dealloc,		// destructor tp_dealloc; */

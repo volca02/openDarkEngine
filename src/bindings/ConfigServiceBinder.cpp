@@ -38,7 +38,7 @@ namespace Opde {
 		PyTypeObject ConfigServiceBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			const_cast<char*>("Opde.Services.ConfigService"),                   // char *tp_name; */
+			const_cast<char*>("opde.services.ConfigService"),                   // char *tp_name; */
 			sizeof(ConfigServiceBinder::Object),      // int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			ConfigServiceBinder::dealloc,   // destructor tp_dealloc; */

@@ -183,16 +183,16 @@ namespace Opde {
 		"@param msg: The logged string\n";
 
 	const char* opde_createRoot__doc__ = "createRoot(mask)\n"
-		"Creates the Opde.Root object with the specified service mask (See L{Opde.Services<Opde.Services>}).\n"
+		"Creates the Opde.Root object with the specified service mask (See L{opde.services<Opde.Services>}).\n"
 		"@type mask: number\n"
 		"@param mask: Service creation mask\n"
 		"@rtype: Root\n"
-		"@return: A new Opde.Root object reference";
+		"@return: A new opde.Root object reference";
 
 	const char* opde_getRoot__doc__ = "getRoot()\n"
-		"Retrieves the previously created Opde.Root object.\n"
+		"Retrieves the previously created opde.Root object.\n"
 		"@rtype: Root\n"
-		"@return: A new Opde.Root object reference";
+		"@return: An opde.Root object reference";
 
 	PyMethodDef sOpdeMethods[] = {
 		{const_cast<char*>("log_fatal"), Python::Py_Log_Fatal, METH_VARARGS, opde_log_fatal__doc__},
@@ -209,11 +209,23 @@ namespace Opde {
 
 	void PythonLanguage::init(int argc, char **argv) {
 		Py_Initialize();
+		
+		initModule();
 
+		if (PyErr_Occurred()) {
+			// TODO: Do something useful here, or forget it
+			PyErr_Print();
+			PyErr_Clear();
+		}
+
+		PySys_SetArgv(argc, argv);
+	}
+	
+	void PythonLanguage::initModule() {
 		msRoot = NULL;
 
 		// Create an Opde module
-		PyObject* module = Py_InitModule("Opde", sOpdeMethods);
+		PyObject* module = Py_InitModule("opde", sOpdeMethods);
 
 		// Call all the binders here. The result is initialized Python VM
 		//PyObject *servicemod =
@@ -223,14 +235,6 @@ namespace Opde {
 		Python::StringIteratorBinder::init(module);
 		Python::DataFieldDescIteratorBinder::init(module);
 		Python::DTypeBinder::init(module);
-
-		if (PyErr_Occurred()) {
-			// TODO: Do something useful here, or forget it
-			PyErr_Print();
-			PyErr_Clear();
-		}
-
-		PySys_SetArgv(argc, argv);
 	}
 
 	void PythonLanguage::term() {

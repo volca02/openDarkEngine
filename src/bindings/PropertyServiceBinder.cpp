@@ -43,7 +43,7 @@ namespace Opde
 		{
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			"Opde.Services.PropertyService",                   // char *tp_name; */
+			"opde.services.PropertyService",                   // char *tp_name; */
 			sizeof(PropertyServiceBinder::Object),      /* int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			PropertyServiceBinder::dealloc,   // destructor tp_dealloc; */

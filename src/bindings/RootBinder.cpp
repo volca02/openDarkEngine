@@ -38,7 +38,7 @@ namespace Opde {
 		PyTypeObject RootBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			"Opde.Root",                   /* char *tp_name; */
+			"opde.Root",                   /* char *tp_name; */
 			sizeof(RootBinder::Object),      /* int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			RootBinder::dealloc,   /* destructor tp_dealloc; */

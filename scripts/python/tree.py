@@ -43,7 +43,7 @@ note it might make your PC burn if something goes wrong, or anything like that;)
 $Id$
 
 """
-import getopt, sys, Opde
+import sys, getopt, opde
 
 def usage():
 	sys.stderr.write( __doc__)
@@ -98,7 +98,7 @@ for o, a in opts:
 
 
 # Tell Opde.Root to only create CORE services (those which are sufficient for tools, no renderer, etc)
-opderoot = Opde.createRoot(Opde.Services.SERVICE_CORE)
+opderoot = opde.createRoot(opde.services.SERVICE_CORE)
 
 # Logging - defaults to none. the line below would enable logging to opde.log in the current directory
 # Which is good for debugging
@@ -119,8 +119,11 @@ opderoot.loadConfigFile(config)
 
 # Just some resource path initializations
 # These configurations should be based on some platform service
-cfgsrv = Opde.Services.getConfigService()
-opderoot.addResourceLocation(cfgsrv.getParam("script_path"), "Dir", "General", False)
+cfgsrv = opde.services.getConfigService()
+spath = cfgsrv.getParam("script_path")
+
+if (spath):
+	opderoot.addResourceLocation(spath, "Dir", "General", False)
 
 if (cfgsrv.hasParam("script_path_extra") == True):
 	opderoot.addResourceLocation(cfgsrv.getParam("script_path_extra"), "Dir", "General", False)
@@ -134,11 +137,11 @@ opderoot.loadPLDefScript(gametype + "-props.pldef", "General")
 opderoot.bootstrapFinished();
 
 # Service globals
-dbsrv = Opde.Services.getDatabaseService()
-linksrv = Opde.Services.getLinkService()
-inhsrv = Opde.Services.getInheritService()
-objsrv = Opde.Services.getObjectService()
-psrv = Opde.Services.getPropertyService()
+dbsrv = opde.services.getDatabaseService()
+linksrv = opde.services.getLinkService()
+inhsrv = opde.services.getInheritService()
+objsrv = opde.services.getObjectService()
+psrv = opde.services.getPropertyService()
 
 # Load the gamesys (note: dbsrv.load("miss1.mis") would load both mission-2 and gamesys-1)
 # Ogre is case sensitive on linux. Will have to resolve this
@@ -317,4 +320,4 @@ for srcobj in ["Object", "MetaProperty", "Stimulus", "Flow Group", "Base Room", 
 	print
 
 # see, this is the way to log from python (the python log calls are prefixed "Python:" in the log)
-Opde.log_info("Terminating Opde");
+opde.log_info("Terminating opde");

@@ -39,7 +39,7 @@ namespace Opde
 		{
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			"Opde.Services.LoopService",		// char *tp_name; */
+			"opde.services.LoopService",		// char *tp_name; */
 			sizeof(LoopServiceBinder::Object),  // int tp_basicsize; */
 			0,									// int tp_itemsize;       /* not used much */
 			LoopServiceBinder::dealloc,			// destructor tp_dealloc; */

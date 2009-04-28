@@ -36,7 +36,7 @@ namespace Opde {
 		PyTypeObject DTypeBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			const_cast<char*>("Opde.DType"),    /* char *tp_name; */
+			const_cast<char*>("opde.DType"),    /* char *tp_name; */
 			sizeof(DTypeBinder::Object),      /* int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			DTypeBinder::dealloc,   /* destructor tp_dealloc; */

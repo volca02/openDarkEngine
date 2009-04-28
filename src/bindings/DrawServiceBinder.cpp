@@ -37,7 +37,7 @@ namespace Opde {
 		PyTypeObject DrawServiceBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			"Opde.Services.DrawService",                   // char *tp_name; */
+			"opde.services.DrawService",                   // char *tp_name; */
 			sizeof(DrawServiceBinder::Object),  // int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			DrawServiceBinder::dealloc,   // destructor tp_dealloc; */

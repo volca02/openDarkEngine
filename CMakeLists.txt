@@ -50,8 +50,14 @@ OPTION(PROFILING
 
 # Option to build all the libs as static
 OPTION(STATIC_LIBS
-    "Build the libs as static"
+    "Build the libs as static (defunct)"
     OFF)
+
+# Option to build all the libs as static
+OPTION(PYTHON_MODULE
+    "Build the python module version of the OpenDark library"
+    OFF)
+
 
 # Compiler profiling flags
 IF (PROFILING)
@@ -277,6 +283,7 @@ MESSAGE(STATUS "Your build parameters:")
 MESSAGE(STATUS " * Global debugging : ${GLOBAL_DEBUG}")
 MESSAGE(STATUS " * Build type       : ${CMAKE_BUILD_TYPE}")
 MESSAGE(STATUS " * Profilling       : ${PROFILING}")
+MESSAGE(STATUS " * Python module    : ${PYTHON_MODULE}")
 MESSAGE(STATUS " * Doxy generation  : ${GENERATE_DOC}")
 MESSAGE(STATUS " * C compiler       : ${CMAKE_C_COMPILER}")
 MESSAGE(STATUS " * C++ compiler     : ${CMAKE_CXX_COMPILER}")

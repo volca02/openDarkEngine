@@ -38,7 +38,7 @@ namespace Opde {
 	namespace Python {
 
 		// ---------------------- class Services --------------------
-		const char* ServiceBinder::msName = "Opde.Services";
+		const char* ServiceBinder::msName = "opde.services";
 
 		PyMethodDef ServiceBinder::msMethods[] = {
 			{const_cast<char*>("getConfigService"), getConfigService, METH_NOARGS},
@@ -141,7 +141,7 @@ namespace Opde {
 
 			// Register itself as a member of the container we got
 			PyObject *dir = PyModule_GetDict(container);
-			PyDict_SetItemString(dir, "Services", module);
+			PyDict_SetItemString(dir, "services", module);
 
 			// init the services (we init all, they register into the module, enabling pydoc usage on them)
 			ConfigServiceBinder::init(module);

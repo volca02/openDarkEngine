@@ -30,7 +30,7 @@
 namespace Opde {
 	namespace Python {
 		
-		/** A Service interface for python. Manages a module "Opde.services".
+		/** A Service interface for python. Manages a module "opde.services".
 		* Exposes getters for services. Each getter is named exactly the same as the service itself.
 		* @note When creating a new service, remember to expose it here
 		*/

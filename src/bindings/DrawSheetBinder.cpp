@@ -37,7 +37,7 @@ namespace Opde {
 		PyTypeObject DrawSheetBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			"Opde.Services.DrawSheet",                   // char *tp_name; */
+			"opde.services.DrawSheet",                   // char *tp_name; */
 			sizeof(DrawSheetBinder::Object),  // int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			DrawSheetBinder::dealloc,   // destructor tp_dealloc; */

@@ -36,7 +36,7 @@ namespace Opde {
 		PyTypeObject StringIteratorBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			"Opde.StringIterator",    /* char *tp_name; */
+			"opde.StringIterator",    /* char *tp_name; */
 			sizeof(StringIteratorBinder::Object),      /* int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			StringIteratorBinder::dealloc,   /* destructor tp_dealloc; */

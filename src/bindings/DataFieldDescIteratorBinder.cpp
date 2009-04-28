@@ -56,7 +56,7 @@ namespace Opde {
 		PyTypeObject DataFieldDescIteratorBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			"Opde.DataFieldDescIterator",  // char *tp_name; */
+			"opde.DataFieldDescIterator",  // char *tp_name; */
 			sizeof(DataFieldDescIteratorBinder::Object),      /* int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			DataFieldDescIteratorBinder::dealloc,   // destructor tp_dealloc; */

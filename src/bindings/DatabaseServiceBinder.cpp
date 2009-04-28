@@ -45,7 +45,7 @@ namespace Opde {
 					field("currentCoarse", &DatabaseProgressMsg::currentCoarse);
 					field("overallFine", &DatabaseProgressMsg::overallFine);
 
-					publish(opde_PythonDatabaseProgressMessage__doc__, "Opde.Services.DatabaseProgressMsg", container);
+					publish(opde_PythonDatabaseProgressMessage__doc__, "opde.services.DatabaseProgressMsg", container);
 				}
 		};
 
@@ -73,7 +73,7 @@ namespace Opde {
 		PyTypeObject DatabaseServiceBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			"Opde.Services.DatabaseService",                   // char *tp_name; */
+			"opde.services.DatabaseService",                   // char *tp_name; */
 			sizeof(DatabaseServiceBinder::Object),      // int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			DatabaseServiceBinder::dealloc,   // destructor tp_dealloc; */
@@ -121,7 +121,7 @@ namespace Opde {
 				"unloads all data. Clears everything\n";
 
 		const char* opde_DatabaseService_setProgressListener__doc__ = "setProgressListener(listener)\n"
-				"Registers a new database listener to be called every loading step. The callable has to have one parameter, which will receive L{DatabaseProgressMsg<Opde.Services.DatabaseProgressMsg>}\n"
+				"Registers a new database listener to be called every loading step. The callable has to have one parameter, which will receive L{DatabaseProgressMsg<opde.services.DatabaseProgressMsg>}\n"
 				"@type listener: callable\n"
 				"@param listener: The function to call on every DB change\n";
 
@@ -140,19 +140,16 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* DatabaseServiceBinder::load(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			
 		    PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
 
 			const char* fname;
 
 			if (PyArg_ParseTuple(args, "s", &fname)) {
-			    try {
-                    o->mInstance->load(fname);
-			    } catch (BasicException& e) {
-			        PyErr_Format(PyExc_IOError, "Exception catched while trying to load mission database : %s", e.getDetails().c_str());
-			        return NULL;
-			    }
-
+			    o->mInstance->load(fname);
+			    
 				result = Py_None;
 				Py_INCREF(result);
 				return result;
@@ -161,6 +158,8 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
 				return NULL;
 			}
+			
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------

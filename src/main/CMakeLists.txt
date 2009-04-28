@@ -47,6 +47,27 @@ add_library (OpenDark SHARED
     ${OPDE_SCENEMANAGER_FILES}
 )
 
+IF (PYTHON_MODULE)
+	# Library that exposes the OpenDark lib as a python module - for direct python usage
+	add_library(opde MODULE
+	    PyRoot.cpp # the python module root itself (wraps the Binding code minimally)
+	)
+
+	target_link_libraries(opde
+    		OpenDark
+		${OGRE_LIBRARIES}
+		${OIS_LIBRARIES}
+		${ODE_LIBRARIES}
+		${FREEIMAGE_LIBRARIES}
+	)	
+
+	# We need the library to be named *exactly* opde.so/opde.dll in order to find it with python	
+	# So we remove any platform specific library name prefix
+	set_property(TARGET opde PROPERTY PREFIX "")
+	
+	# TODO: Make it installable via standard setup.py or other means. Also enclose the __init__.py
+ENDIF(PYTHON_MODULE)
+
 link_directories(
     ${OPDE_BASE_INCLUDES}
     ${OPDE_SOURCE_DIR}/src/scenemanager
@@ -86,7 +107,7 @@ if (UNIX)
 endif(UNIX)
 
 # Main executable
-add_executable (opde WIN32 
+add_executable (opdeMain WIN32 
     Opde.cpp
     GameStateManager.cpp
     GameState.cpp
@@ -98,7 +119,7 @@ add_executable (opde WIN32
     GameLoadState.h
 )
 
-target_link_libraries( opde
+target_link_libraries( opdeMain
     OpenDark
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}
@@ -106,7 +127,7 @@ target_link_libraries( opde
     ${FREEIMAGE_LIBRARIES}
 )
 
-SET_TARGET_PROPERTIES( opde PROPERTIES
+SET_TARGET_PROPERTIES( opdeMain PROPERTIES
   COMPILE_DEFINITIONS "OPDE_EXE_TARGET"
 )
 

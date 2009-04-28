@@ -236,7 +236,10 @@ namespace Opde {
     	public:
 			/** Initializes python lang and all the bindings */
 			static void init(int argc, char **argv);
-
+			
+			/** Initializes the Opde module itself, without the interpretter */
+			static void initModule();
+			
 			/** Finalizes python lang */
 			static void term();
 

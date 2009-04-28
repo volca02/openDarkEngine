@@ -78,7 +78,7 @@ namespace Opde
 		{
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			"Opde.Services.InputService",		// char *tp_name; */
+			"opde.services.InputService",		// char *tp_name; */
 			sizeof(InputServiceBinder::Object), // int tp_basicsize; */
 			0,									// int tp_itemsize;       /* not used much */
 			InputServiceBinder::dealloc,		// destructor tp_dealloc; */

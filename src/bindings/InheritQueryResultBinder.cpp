@@ -37,7 +37,7 @@ namespace Opde {
 		PyTypeObject InheritQueryResultBinder::msType = {
 			PyObject_HEAD_INIT(&PyType_Type)
 			0,
-			"Opde.Services.InheritQueryResult",                   /* char *tp_name; */
+			"opde.services.InheritQueryResult",                   /* char *tp_name; */
 			sizeof(InheritQueryResultBinder::Object),      /* int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			InheritQueryResultBinder::dealloc,   /* destructor tp_dealloc; */
