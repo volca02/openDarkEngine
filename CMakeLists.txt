@@ -48,12 +48,12 @@ OPTION(PROFILING
     "Build the sources with profiling support (Only Debug build type)"
     OFF)
 
-# Option to build all the libs as static
+# Option to build all the libs as static (defunct - linking problems)
 OPTION(STATIC_LIBS
     "Build the libs as static (defunct)"
     OFF)
 
-# Option to build all the libs as static
+# Option to build the python module/extension
 OPTION(PYTHON_MODULE
     "Build the python module version of the OpenDark library"
     OFF)
@@ -171,7 +171,6 @@ IF(OPDE_PYTHON_LIBRARIES)
 ELSE(OPDE_PYTHON_LIBRARIES)
     MESSAGE(FATAL_ERROR "Python not found and selected in options!")
 ENDIF(OPDE_PYTHON_LIBRARIES)
-
 
 # Only visual check enabling verbose output, and package found info
 IF(OIS_FOUND)

@@ -49,10 +49,10 @@ add_library (OpenDark SHARED
 
 IF (PYTHON_MODULE)
 	# Library that exposes the OpenDark lib as a python module - for direct python usage
-	add_library(opde MODULE
-	    PyRoot.cpp # the python module root itself (wraps the Binding code minimally)
+	PYTHON_ADD_MODULE(opde
+		PyRoot.cpp
 	)
-
+	
 	target_link_libraries(opde
     		OpenDark
 		${OGRE_LIBRARIES}
@@ -65,7 +65,37 @@ IF (PYTHON_MODULE)
 	# So we remove any platform specific library name prefix
 	set_property(TARGET opde PROPERTY PREFIX "")
 	
-	# TODO: Make it installable via standard setup.py or other means. Also enclose the __init__.py
+	# We install into the python's site-packages dir based on distutils
+	# Thanks to PLPlot for this snippet
+	execute_process(
+		COMMAND
+		${PYTHON_EXECUTABLE} -c "from distutils import sysconfig; print sysconfig.get_python_lib(1,0,prefix='${CMAKE_INSTALL_EXEC_PREFIX}')"
+		OUTPUT_VARIABLE PYTHON_SITE_PACKAGES_DIR
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+	)
+	
+	# Directory name for the module's headers
+	if(USE_RPATH)
+		set_target_properties(
+			opde
+			PROPERTIES
+			INSTALL_RPATH "${LIB_INSTALL_RPATH}"
+			INSTALL_NAME_DIR "${PYTHON_SITE_PACKAGES_DIR}"
+		)
+   	else(USE_RPATH)
+		set_target_properties(
+			opde
+			PROPERTIES
+			INSTALL_NAME_DIR "${PYTHON_SITE_PACKAGES_DIR}"
+		)
+	endif(USE_RPATH)
+	
+	# install directives
+	install(
+		TARGETS opde
+		LIBRARY 
+		DESTINATION ${PYTHON_SITE_PACKAGES_DIR}
+	)
 ENDIF(PYTHON_MODULE)
 
 link_directories(
