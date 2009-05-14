@@ -123,6 +123,12 @@ namespace Opde {
 			* @return LinkQueryResultPtr filled with the query result */
 			LinkQueryResultPtr getAllLinks(int src, int dst) const;
 
+			/** Gets all links that come from given source, including inherited links (links from source or source's ancestors). 
+			* Target object id is ommited here for both simplicity and rationalization, since the destination will likely be abstract object
+			* @param src Source object ID
+			* @return LinkQueryResultPtr filled with the query result */
+			LinkQueryResultPtr getAllInherited(int src) const;
+
 			/** Gets single link ID that is coming from source to destination
 			* @param src Source object ID, or 0 if any source
 			* @param dst Destination object ID or 0 if any destination
@@ -132,7 +138,7 @@ namespace Opde {
 			*/
 			LinkPtr getOneLink(int src, int dst) const;
 
-            /** Gets single link given the link ID
+			/** Gets single link given the link ID
 			* @param id The link's ID
 			* @return LinkPtr link instance that fulfills the requirements, or NULL
 			*/
@@ -160,7 +166,8 @@ namespace Opde {
 			DataFieldDescIteratorPtr getFieldDescIterator(void);
 
 		protected:
-            class MultiTargetLinkQueryResult;
+			class MultiTargetLinkQueryResult;
+			class InheritedMultiTargetLinkQueryResult;
 
 			/** Internal method for link insertion. Inserts the link to the map, notifies listeners and query databases
 			* @param newlnk The link to be inserted

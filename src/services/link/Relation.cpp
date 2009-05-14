@@ -27,8 +27,10 @@
 #include "Relation.h"
 #include "DTypeDef.h"
 #include "LinkCommon.h"
-
+#include "InheritService.h"
 #include "logger.h"
+
+#include <stack>
 
 using namespace std;
 
@@ -70,6 +72,58 @@ namespace Opde {
         protected:
             const Relation::ObjectIDToLinks& mLinkMap;
             Relation::ObjectIDToLinks::const_iterator mIter, mBegin, mEnd;
+	};
+	
+	/// Link query that walks all ancestral objects as well
+	class Relation::InheritedMultiTargetLinkQueryResult : public LinkQueryResult {
+		public:
+			InheritedMultiTargetLinkQueryResult(int objID, const Relation* rel) : mOwner(rel) {
+				// we need inherit service so we can ask for all object's sources
+				mInheritService = GET_SERVICE(InheritService);
+				mAncestorStack.push(objID);
+			}
+
+            		virtual const LinkPtr& next() {
+				// see if we have any more in the current iterator
+				if (mCurrentIt.isNull() || mCurrentIt->end()) {
+					pollNextAncestor();
+				}
+
+				assert(!mCurrentIt.isNull());
+				return mCurrentIt->next();
+		        }
+			
+		        virtual bool end() const {
+				if (mCurrentIt.isNull())
+					return mAncestorStack.empty();
+				else
+					return mCurrentIt->end() && mAncestorStack.empty();
+		        }
+		
+		protected:
+			void pollNextAncestor() {
+				if (mAncestorStack.empty())
+					return;
+			
+				int curId = mAncestorStack.top();
+				
+				// ask inherit service for list of ancestors 
+				InheritQueryResultPtr anci = mInheritService->getSources(curId);
+				
+				while (!anci->end()) {
+					const InheritLinkPtr& l = anci->next();
+					
+					mAncestorStack.push(l->srcID);
+				}
+				
+				// and unroll into the iterator
+				mCurrentIt = mOwner->getAllLinks(curId, 0);
+			}	
+		
+			LinkQueryResultPtr mCurrentIt;
+			std::stack<int> mAncestorStack;
+			InheritServicePtr mInheritService;
+			const Relation *mOwner; 
 	};
 
 	/*-----------------------------------------------------*/
@@ -468,7 +522,14 @@ namespace Opde {
         LinkQueryResultPtr r = new EmptyLinkQueryResult();
         return r;
 	}
-
+	
+	// --------------------------------------------------------------------------
+	LinkQueryResultPtr Relation::getAllInherited(int src) const {
+		assert(src != 0); // Source can't be zero
+		
+		return new InheritedMultiTargetLinkQueryResult(src, this);
+	}
+	
 	// --------------------------------------------------------------------------
 	LinkPtr Relation::getOneLink(int src, int dst) const {
 		LinkQueryResultPtr res = getAllLinks(src, dst);

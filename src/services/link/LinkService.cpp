@@ -283,6 +283,21 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
+	LinkQueryResultPtr LinkService::getAllInherited(int flavor, int src) const {
+		// find the relation with the specified flavor.
+		//If none such found, return empty iterator
+		RelationIDMap::const_iterator it = mRelationIDMap.find(flavor);
+
+		if (it != mRelationIDMap.end()) {
+			// dedicate to the given relation
+			return it->second->getAllInherited(src);
+		} else {
+			return new EmptyLinkQueryResult();
+		}
+	}
+
+
+	//------------------------------------------------------
 	LinkPtr LinkService::getOneLink(int flavor, int src, int dst) const {
 		// find the relation with the specified flavor.
 		//If none such found, return NULL link
