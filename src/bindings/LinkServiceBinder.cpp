@@ -78,6 +78,7 @@ namespace Opde {
 			{"flavorToName", flavorToName, METH_VARARGS},
 			{"getRelation", getRelation, METH_VARARGS},
 			{"getAllLinks", getAllLinks, METH_VARARGS},
+			{"getAllInherited", getAllInherited, METH_VARARGS},
 			{"getOneLink", getOneLink, METH_VARARGS},
 			{"getAllLinkNames", getAllLinkNames, METH_NOARGS},
 			{"getFieldsDesc", getFieldsDesc, METH_VARARGS},
@@ -214,6 +215,46 @@ namespace Opde {
 		}
 
 		// ------------------------------------------
+		bool LinkServiceBinder::getFlavor(PyObject *src, Object* obj, int& flavor) {
+			if (PyString_Check(src)) {
+				char* str = PyString_AsString(src);
+				flavor = obj->mInstance->nameToFlavor(str);
+				return true;
+			} else if (PyInt_Check(src)) {
+				flavor = PyInt_AsLong(src);
+				return true;
+			} else {
+				PyErr_SetString(PyExc_TypeError, "Invalid type given for flavor: expected string or integer");
+				return false;
+			}
+		}
+		
+		// ------------------------------------------
+		PyObject* LinkServiceBinder::getAllInherited(PyObject* self, PyObject* args) {
+			Object* o = python_cast<Object*>(self, &msType);
+
+			int flavor = 0, src, dst;
+			PyObject* objflav;
+
+			// let the third parameter be either string or integer
+			// if it's a string, we first have to parse the string to get flavor id
+
+			if (PyArg_ParseTuple(args, "Oii", &objflav, &src, &dst)) {
+				if (!getFlavor(objflav, o, flavor))
+					return NULL;
+
+				LinkQueryResultPtr res = o->mInstance->getAllInherited(flavor, src, dst);
+
+				return LinkQueryResultBinder::create(res);
+			} else {
+				// Invalid parameters
+				PyErr_SetString(PyExc_TypeError, "Expected three parameters: flavor, src and dst!");
+				return NULL;
+			}
+		}
+
+
+		// ------------------------------------------
 		PyObject* LinkServiceBinder::getOneLink(PyObject* self, PyObject* args) {
 			// Nearly the same as getAllLinks. Only that it returns PyObject for LinkPtr directly
 			Object* o = python_cast<Object*>(self, &msType);
@@ -222,15 +263,8 @@ namespace Opde {
 			PyObject* objflav;
 
 			if (PyArg_ParseTuple(args, "Oii", &objflav, &src, &dst)) {
-				if (PyString_Check(objflav)) {
-					char* str = PyString_AsString(objflav);
-					flavor = o->mInstance->nameToFlavor(str);
-				} else if (PyInt_Check(objflav)) {
-					flavor = PyInt_AsLong(objflav);
-				} else {
-					PyErr_SetString(PyExc_TypeError, "Invalid type given for flavor: expected string or integer");
+				if (!getFlavor(objflav, o, flavor))
 					return NULL;
-				}
 
 				LinkPtr res = o->mInstance->getOneLink(flavor, src, dst);
 				return LinkBinder::create(res);
@@ -262,15 +296,8 @@ namespace Opde {
 			int flavor = 0;
 
 			if (PyArg_ParseTuple(args, "O", &objflav)) {
-				if (PyString_Check(objflav)) {
-					char* str = PyString_AsString(objflav);
-					flavor = o->mInstance->nameToFlavor(str);
-				} else if (PyInt_Check(objflav)) {
-					flavor = PyInt_AsLong(objflav);
-				} else {
-					PyErr_SetString(PyExc_TypeError, "Invalid type given for flavor: expected string or integer");
+				if (!getFlavor(objflav, o, flavor))
 					return NULL;
-				}
 
 				// wrap the returned StringIterator into StringIteratorBinder, return
 				DataFieldDescIteratorPtr res = o->mInstance->getFieldDescIterator(flavor);

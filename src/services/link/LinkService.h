@@ -113,7 +113,7 @@ namespace Opde {
 			@param src The source object ID
 			@return LinkQueryResultPtr Link iterator for resulting links
 			@throw If invalid flavor is specified, this method will return an empty iterator */
-			LinkQueryResultPtr getAllInherited(int flavor, int src) const;
+			LinkQueryResultPtr getAllInherited(int flavor, int src, int dst) const;
 
 			/** @see Relation::getOneLink
 			@param flavor The link flavor (relation type).

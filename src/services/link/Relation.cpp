@@ -77,10 +77,10 @@ namespace Opde {
 	/// Link query that walks all ancestral objects as well
 	class Relation::InheritedMultiTargetLinkQueryResult : public LinkQueryResult {
 		public:
-			InheritedMultiTargetLinkQueryResult(int objID, const Relation* rel) : mOwner(rel) {
+			InheritedMultiTargetLinkQueryResult(int objID, int dstID, const Relation* rel) : mOwner(rel), mSrcID(objID), mDstID(dstID) {
 				// we need inherit service so we can ask for all object's sources
 				mInheritService = GET_SERVICE(InheritService);
-				mAncestorStack.push(objID);
+				mAncestorStack.push(mSrcID);
 			}
 
             		virtual const LinkPtr& next() {
@@ -117,13 +117,15 @@ namespace Opde {
 				}
 				
 				// and unroll into the iterator
-				mCurrentIt = mOwner->getAllLinks(curId, 0);
+				mCurrentIt = mOwner->getAllLinks(curId, mDstID);
 			}	
 		
 			LinkQueryResultPtr mCurrentIt;
 			std::stack<int> mAncestorStack;
 			InheritServicePtr mInheritService;
 			const Relation *mOwner; 
+			int mSrcID;
+			int mDstID;
 	};
 
 	/*-----------------------------------------------------*/
@@ -524,10 +526,10 @@ namespace Opde {
 	}
 	
 	// --------------------------------------------------------------------------
-	LinkQueryResultPtr Relation::getAllInherited(int src) const {
+	LinkQueryResultPtr Relation::getAllInherited(int src, int dst) const {
 		assert(src != 0); // Source can't be zero
 		
-		return new InheritedMultiTargetLinkQueryResult(src, this);
+		return new InheritedMultiTargetLinkQueryResult(src, dst, this);
 	}
 	
 	// --------------------------------------------------------------------------

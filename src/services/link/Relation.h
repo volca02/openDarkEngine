@@ -123,11 +123,11 @@ namespace Opde {
 			* @return LinkQueryResultPtr filled with the query result */
 			LinkQueryResultPtr getAllLinks(int src, int dst) const;
 
-			/** Gets all links that come from given source, including inherited links (links from source or source's ancestors). 
-			* Target object id is ommited here for both simplicity and rationalization, since the destination will likely be abstract object
+			/** Gets all links that come from given source, including links inherited from source's ancestors (links from source or source's ancestors). 
 			* @param src Source object ID
+			* @param dst Optional destination object ID (or zero for any)
 			* @return LinkQueryResultPtr filled with the query result */
-			LinkQueryResultPtr getAllInherited(int src) const;
+			LinkQueryResultPtr getAllInherited(int src, int dst) const;
 
 			/** Gets single link ID that is coming from source to destination
 			* @param src Source object ID, or 0 if any source
