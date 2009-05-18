@@ -65,9 +65,8 @@ namespace Opde {
 				*/
 
 			protected:
-				/// Static type definition for LinkService
 				static PyTypeObject msType;
-
+			
 				/// Name of the python type
 				static const char* msName;
 

@@ -47,6 +47,9 @@ namespace Opde {
 			
 			assert(eraseok);
 			
+			if (!eraseok)
+				return false;
+			
 			// destroy our record as well
 			ReverseNameMap::iterator it = mReverseMap.find(res.toString());
 		

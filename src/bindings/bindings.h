@@ -34,7 +34,7 @@
 // Exception guard for the python code. use this as first/last lines of the binding function to have it prepared for exceptions
 #define __PYTHON_EXCEPTION_GUARD_BEGIN_ try {
 #define __PYTHON_EXCEPTION_GUARD_END_ } catch (BasicException& e) { \
-			        PyErr_Format(PyExc_RuntimeError, "C++ side exception (%s:%s) : %s", __FILE__, __LINE__, e.getDetails().c_str()); \
+			        PyErr_Format(PyExc_RuntimeError, "C++ side exception (%s:%u) : %s", __FILE__, __LINE__, e.getDetails().c_str()); \
 			        return NULL; \
 			    }
 
@@ -43,14 +43,17 @@ namespace Opde {
 	    // Type converters
 	    enum VariableType { VT_INVALID, VT_BOOL, VT_INT, VT_LONG, VT_FLOAT, VT_CHARPTR, VT_STRING, VT_CUSTOM_TYPE };
 
-		struct TypeInfoBase {
-		};
-
-		template<typename T> struct TypeInfo : public TypeInfoBase {
+		template<typename T> struct TypeInfoBase {
 			const char* typeName;
 			VariableType type;
+			
+			TypeInfoBase(const char* tn, VariableType tt) : typeName(tn), type(tt) {};
+		};
 
-			TypeInfo() : typeName("invalid"), type(VT_INVALID) {};
+		template<typename T> struct TypeInfo : public TypeInfoBase<T> {
+			TypeInfo() : TypeInfoBase<T>("invalid", VT_INVALID) {};
+
+			// TypeInfo(const char* tname, VariableType tt) : TypeInfoBase(tname, tt) {};
 
 			PyObject* toPyObject(T val) const {
 				PyErr_SetString(PyExc_TypeError, "Binding error: Type has no conversion or TypeInfo specified!");
@@ -59,11 +62,8 @@ namespace Opde {
 		};
 
 
-		template<> struct TypeInfo<bool> {
-			const char* typeName;
-			VariableType type;
-
-			TypeInfo() : typeName("bool"), type(VT_BOOL) {};
+		template<> struct TypeInfo<bool> : TypeInfoBase<bool> {
+			TypeInfo() : TypeInfoBase<bool>("bool", VT_BOOL) {};
 
 			PyObject* toPyObject(bool val) const {
 				PyObject* res = val ? Py_True : Py_False;
@@ -74,22 +74,16 @@ namespace Opde {
 			}
 		};
 
-		template<> struct TypeInfo<int> {
-			const char* typeName;
-            VariableType type;
-
-			TypeInfo() : typeName("int"), type(VT_INT) {};
+		template<> struct TypeInfo<int> : TypeInfoBase<int> {
+			TypeInfo() : TypeInfoBase<int>("int", VT_INT) {};
 
 			PyObject* toPyObject(int val) const {
 				return PyLong_FromLong(val);
 			}
 		};
 
-		template<> struct TypeInfo<long> {
-			const char* typeName;
-			VariableType type;
-
-			TypeInfo() : typeName("long"), type(VT_LONG) {};
+		template<> struct TypeInfo<long> : TypeInfoBase<long> {
+			TypeInfo() : TypeInfoBase<long>("long", VT_LONG) {};
 
 			PyObject* toPyObject(long val) const {
 				return PyLong_FromLong(val);
@@ -97,22 +91,16 @@ namespace Opde {
 		};
 
 
-		template<> struct TypeInfo<float> {
-			const char* typeName;
-			VariableType type;
-
-			TypeInfo() : typeName("float"), type(VT_FLOAT) {};
+		template<> struct TypeInfo<float> : TypeInfoBase<float> {
+			TypeInfo() : TypeInfoBase<float>("float", VT_FLOAT) {};
 
 			PyObject* toPyObject(float val) const {
 				return PyFloat_FromDouble(val);
 			}
 		};
 
-		template<> struct TypeInfo<std::string> {
-			const char* typeName;
-			VariableType type;
-
-			TypeInfo() : typeName("std::string"), type(VT_STRING) {};
+		template<> struct TypeInfo<std::string>  : TypeInfoBase<std::string> {
+			TypeInfo() : TypeInfoBase<std::string>("std::string", VT_STRING) {};
 
 			PyObject* toPyObject(const std::string& val) const {
 				return PyString_FromString(val.c_str());
@@ -124,11 +112,8 @@ namespace Opde {
 		DVariant PyObjectToDVariant(PyObject* obj);
 
 		// DVariant type info
-		template<> struct TypeInfo<DVariant> {
-			const char* typeName;
-			VariableType type;
-
-			TypeInfo() : typeName("DVariant"), type(VT_CUSTOM_TYPE) {};
+		template<> struct TypeInfo<DVariant> : TypeInfoBase<DVariant> {
+			TypeInfo() : TypeInfoBase<DVariant>("DVariant", VT_CUSTOM_TYPE) {};
 
 			PyObject* toPyObject(const DVariant& val) const {
 				return DVariantToPyObject(val);
@@ -162,10 +147,11 @@ namespace Opde {
 
 		/// A template that binds sharedptr typed classes
 		template <typename T> class shared_ptr_binder : public PythonPublishedType {
-			protected:
+			public:
 				/// A python object type
 				typedef ObjectBase<T> Object;
-
+				
+			protected:
 				/// A sort-of constructor method. To be used to create a new NULL Object*
 				static Object* construct(PyTypeObject* type) {
 					Object* object;
@@ -201,9 +187,14 @@ namespace Opde {
 		/// A template that binds a pointer to class (simmilar to shared_ptr_binder, but no special handling is used)
 		template <typename T> class class_ptr_binder : public PythonPublishedType {
 			protected:
+				static PyTypeObject msType;
+				
+			public:
 				/// A python object type
 				typedef ObjectBase<T*> Object;
+			
 
+			protected:
 				/// A sort-of constructor method. To be used to create a new NULL Object*
 				static Object* construct(PyTypeObject* type) {
 					Object* object;

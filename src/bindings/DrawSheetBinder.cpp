@@ -90,8 +90,8 @@ namespace Opde {
 			o->mInstance->activate();
 			
 			result = Py_None;
-            Py_INCREF(result);
-            return result;
+			Py_INCREF(result);
+			return result;
 			
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
@@ -106,9 +106,12 @@ namespace Opde {
 			o->mInstance->deactivate();
 			
 			result = Py_None;
-            Py_INCREF(result);
-            return result;
+			Py_INCREF(result);
+			return result;
 			
+			/// TODO: Stub. Stupid return fix both
+			return result;
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 		
@@ -118,6 +121,9 @@ namespace Opde {
 			
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
+
+			/// TODO: Stub. Stupid return fix both
+			return result;
 			
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
@@ -129,6 +135,9 @@ namespace Opde {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
 			
+			/// TODO: Stub. Stupid return fix both
+			return result;
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 		
@@ -138,6 +147,9 @@ namespace Opde {
 			
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
+
+			/// TODO: Stub. Stupid return fix both
+			return result;
 			
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
@@ -148,6 +160,9 @@ namespace Opde {
 			
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
+
+			/// TODO: Stub. Stupid return fix both
+			return result;
 			
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
@@ -158,6 +173,9 @@ namespace Opde {
 			
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
+			
+			/// TODO: Stub. Stupid return fix both
+			return result;
 			
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
@@ -172,6 +190,11 @@ namespace Opde {
 		// ------------------------------------------
 		PyObject* DrawSheetBinder::repr(PyObject *self) {
 			return PyString_FromFormat("<DrawService at %p>", self);
+		}
+		
+		// ------------------------------------------
+		DrawSheet* DrawSheetBinder::extract(PyObject *obj) {
+			return python_cast<Object*>(obj, &msType)->mInstance;
 		}
 		
 		// ------------------------------------------

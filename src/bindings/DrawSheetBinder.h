@@ -43,6 +43,9 @@ namespace Opde {
 				/// to string - reprfunc conversion
 				static PyObject* repr(PyObject *self);
 				
+				/// helper class pointer extractor
+				static DrawSheet* extract(PyObject *object);
+				
 				// --- Methods ---
 				static PyObject* activate(PyObject* self, PyObject* args);
 				static PyObject* deactivate(PyObject* self, PyObject* args);				

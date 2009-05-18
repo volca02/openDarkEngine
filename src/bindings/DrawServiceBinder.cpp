@@ -25,6 +25,7 @@
 #include "bindings.h"
 #include "DrawServiceBinder.h"
 #include "DrawSheet.h"
+#include "DrawSheetBinder.h"
 
 namespace Opde {
 
@@ -99,8 +100,57 @@ namespace Opde {
 			    DrawSheet* i = o->mInstance->createSheet(sname);
 			    
 			    // TODO: Sheet binding...
+			    PyObject *o = DrawSheetBinder::create(i);
 			    
-				result = Py_None;
+				result = o;
+				
+				return result;
+			} else {
+				// Invalid parameters
+				PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
+				return NULL;
+			}
+		
+			__PYTHON_EXCEPTION_GUARD_END_;
+		}
+		
+		// ------------------------------------------
+		PyObject* DrawServiceBinder::destroySheet(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			
+			PyObject *result = NULL;
+			Object* o = python_cast<Object*>(self, &msType);
+			
+			PyObject *sheet;
+			if (PyArg_ParseTuple(args, "o", &sheet)) {
+				// cast to drawsheet and destroy
+				o->mInstance->destroySheet(DrawSheetBinder::extract(sheet));
+			}
+
+			result = Py_None;
+			Py_INCREF(result);
+			return result;
+			
+			__PYTHON_EXCEPTION_GUARD_END_;
+		}
+		
+		// ------------------------------------------
+		PyObject* DrawServiceBinder::getSheet(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+						
+			PyObject *result = NULL;
+			Object* o = python_cast<Object*>(self, &msType);
+			
+			// argument - the name of the sheet to create, string
+			const char* sname;
+
+			if (PyArg_ParseTuple(args, "s", &sname)) {
+				DrawSheet* i = o->mInstance->getSheet(sname);
+				
+				// TODO: Sheet binding...
+				PyObject *o = DrawSheetBinder::create(i);
+				
+				result = o;
 				Py_INCREF(result);
 				return result;
 			} else {
@@ -113,24 +163,21 @@ namespace Opde {
 		}
 		
 		// ------------------------------------------
-		PyObject* DrawServiceBinder::destroySheet(PyObject* self, PyObject* args) {
-			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
-			return result;	//Temporary return to fix the VC build
-		}
-		
-		// ------------------------------------------
-		PyObject* DrawServiceBinder::getSheet(PyObject* self, PyObject* args) {
-			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
-			return result;	//Temporary return to fix the VC build
-		}
-		
-		// ------------------------------------------
 		PyObject* DrawServiceBinder::setActiveSheet(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+						
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
-			return result;	//Temporary return to fix the VC build
+			
+			PyObject *sheet;
+			if (PyArg_ParseTuple(args, "o", &sheet)) {
+				// cast to drawsheet and destroy
+				o->mInstance->setActiveSheet(DrawSheetBinder::extract(sheet));
+			}
+			
+			return result;
+			
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::createDrawSource(PyObject* self, PyObject* args) {
