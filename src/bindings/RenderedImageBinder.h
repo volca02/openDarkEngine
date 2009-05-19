@@ -18,22 +18,22 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *	   $Id$
+ *	   $Id: DrawSheetBinder.h 1193 2009-05-18 12:59:46Z volca $
  *
  *****************************************************************************/
 
-#ifndef __DRAWSHEETBINDER_H
-#define __DRAWSHEETBINDER_H
+#ifndef __RENDEREDIMAGEBINDER_H
+#define __RENDEREDIMAGEBINDER_H
 
 #include "bindings.h"
-#include "DrawSheet.h"
+#include "RenderedImage.h"
 
 namespace Opde {
 
 	namespace Python {
 
-		/// DrawSheet python binder
-		class DrawSheetBinder : public class_ptr_binder<DrawSheet> {
+		/// RenderedImage python binder
+		class RenderedImageBinder : public class_ptr_binder<RenderedImage> {
 			public:
 				static void init(PyObject* module);
 
@@ -44,18 +44,14 @@ namespace Opde {
 				static PyObject* repr(PyObject *self);
 				
 				/// helper class pointer extractor
-				static DrawSheet* extract(PyObject *object);
+				static RenderedImage* extract(PyObject *object);
 				
 				// --- Methods ---
-				static PyObject* activate(PyObject* self, PyObject* args);
-				static PyObject* deactivate(PyObject* self, PyObject* args);				
-				static PyObject* addDrawOperation(PyObject* self, PyObject* args);
-				static PyObject* removeDrawOperation(PyObject* self, PyObject* args);
-				static PyObject* purge(PyObject* self, PyObject* args);
-				static PyObject* setResolutionOverride(PyObject* self, PyObject* args);
-				static PyObject* getClipRect(PyObject* self, PyObject* args);
+				static PyObject* setPosition(PyObject *self, PyObject *args);
+				static PyObject* setZOrder(PyObject *self, PyObject *args);
+				static PyObject* setClipRect(PyObject *self, PyObject *args);				
 				
-				static PyObject* create(DrawSheet *ds);
+				static PyObject* create(RenderedImage* ds);
 
 			protected:
 				/// Static type definition
@@ -66,6 +62,8 @@ namespace Opde {
 
 				/// Method list
 				static PyMethodDef msMethods[];
+				
+				static TypeInfo<ClipRect> msRectTypeInfo;
 		};
 
 	}

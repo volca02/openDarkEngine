@@ -65,7 +65,7 @@ namespace Opde {
 				static PyObject* create();
 
 			protected:
-				/// Static type definition for LinkService
+				/// Static type definition
 				static PyTypeObject msType;
 
 				/// Name of the python type
@@ -74,7 +74,40 @@ namespace Opde {
 				/// Method list
 				static PyMethodDef msMethods[];
 		};
+		
 
+		// ClipRect type info
+                template<> struct TypeInfo<ClipRect> : TypeInfoBase<ClipRect> {
+                        TypeInfo() : TypeInfoBase<ClipRect>("ClipRect", VT_CUSTOM_TYPE) {};
+
+                        PyObject* toPyObject(const ClipRect& cr) const {
+				// tuple it is
+				PyObject *crp = PyTuple_New(4);
+				PyTuple_SetItem(crp, 0, PyFloat_FromDouble(cr.left)); // Steals reference
+				PyTuple_SetItem(crp, 1, PyFloat_FromDouble(cr.right)); // Steals reference
+				PyTuple_SetItem(crp, 2, PyFloat_FromDouble(cr.top)); // Steals reference
+				PyTuple_SetItem(crp, 3, PyFloat_FromDouble(cr.bottom)); // Steals reference
+				
+				return crp;
+                        }
+			
+			bool fromPyObject(PyObject* o, ClipRect& cr) {
+				if (!PyTuple_Check(o))
+					return false;
+					
+				if (PyTuple_GET_SIZE(o) != 4)
+					return false;
+				
+				cr.left   = PyFloat_AsDouble(PyTuple_GetItem(o, 0));
+				cr.right  = PyFloat_AsDouble(PyTuple_GetItem(o, 1));
+				cr.top    = PyFloat_AsDouble(PyTuple_GetItem(o, 2));
+				cr.bottom = PyFloat_AsDouble(PyTuple_GetItem(o, 3));
+				
+				return true;
+			}
+                };
+                   
+		
 	}
 }
 

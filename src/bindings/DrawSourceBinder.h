@@ -22,18 +22,18 @@
  *
  *****************************************************************************/
 
-#ifndef __DRAWSHEETBINDER_H
-#define __DRAWSHEETBINDER_H
+#ifndef __DRAWSOURCEBINDER_H
+#define __DRAWSOURCEBINDER_H
 
 #include "bindings.h"
-#include "DrawSheet.h"
+#include "DrawCommon.h"
 
 namespace Opde {
 
 	namespace Python {
 
-		/// DrawSheet python binder
-		class DrawSheetBinder : public class_ptr_binder<DrawSheet> {
+		/// DrawSource python binder
+		class DrawSourceBinder : public shared_ptr_binder<DrawSourcePtr> {
 			public:
 				static void init(PyObject* module);
 
@@ -44,18 +44,11 @@ namespace Opde {
 				static PyObject* repr(PyObject *self);
 				
 				/// helper class pointer extractor
-				static DrawSheet* extract(PyObject *object);
+				static DrawSourcePtr extract(PyObject *object);
 				
-				// --- Methods ---
-				static PyObject* activate(PyObject* self, PyObject* args);
-				static PyObject* deactivate(PyObject* self, PyObject* args);				
-				static PyObject* addDrawOperation(PyObject* self, PyObject* args);
-				static PyObject* removeDrawOperation(PyObject* self, PyObject* args);
-				static PyObject* purge(PyObject* self, PyObject* args);
-				static PyObject* setResolutionOverride(PyObject* self, PyObject* args);
-				static PyObject* getClipRect(PyObject* self, PyObject* args);
+				// no methods here
 				
-				static PyObject* create(DrawSheet *ds);
+				static PyObject* create(const DrawSourcePtr& ds);
 
 			protected:
 				/// Static type definition

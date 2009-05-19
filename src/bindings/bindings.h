@@ -59,6 +59,10 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Binding error: Type has no conversion or TypeInfo specified!");
 				return NULL;
 			}
+			
+			bool fromPyObject(PyObject* src, T& dst) {
+				return false;
+			}
 		};
 
 
@@ -119,7 +123,7 @@ namespace Opde {
 				return DVariantToPyObject(val);
 			}
 		};
-
+		
 		/// Template definition of a Python instance holding a single object
 		template<typename T> struct ObjectBase {
 			PyObject_HEAD

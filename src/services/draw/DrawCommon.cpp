@@ -53,12 +53,12 @@ namespace Opde {
 	DrawSource::DrawSource(DrawService *owner, ID id, const Ogre::MaterialPtr& mat, const Ogre::TexturePtr& tex) : 
 		DrawSourceBase(id, mat, tex),
 		mAtlassed(false),
-		mOwner(owner),
-		mImageLoaded(false) {
+		mImageLoaded(false),
+		mOwner(owner) {
 	}
 
 	//------------------------------------------------------
-	DrawSource::DrawSource(DrawService *owner) : DrawSourceBase(), mAtlassed(false), mOwner(owner), mImageLoaded(false) {
+	DrawSource::DrawSource(DrawService *owner) : DrawSourceBase(), mAtlassed(false),  mImageLoaded(false), mOwner(owner) {
 		mPixelSize.width  = 0; // needs to be filled on loadimage
 		mPixelSize.height = 0;
 		mSize = Ogre::Vector2(1.0f, 1.0f);

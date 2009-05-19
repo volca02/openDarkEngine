@@ -26,6 +26,8 @@
 #include "DrawServiceBinder.h"
 #include "DrawSheet.h"
 #include "DrawSheetBinder.h"
+#include "DrawSourceBinder.h"
+#include "RenderedImageBinder.h"
 
 namespace Opde {
 
@@ -147,7 +149,6 @@ namespace Opde {
 			if (PyArg_ParseTuple(args, "s", &sname)) {
 				DrawSheet* i = o->mInstance->getSheet(sname);
 				
-				// TODO: Sheet binding...
 				PyObject *o = DrawSheetBinder::create(i);
 				
 				result = o;
@@ -179,18 +180,53 @@ namespace Opde {
 			
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
+		
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::createDrawSource(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+						
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
-			return result;	//Temporary return to fix the VC build
+			
+			// argument - the name of the sheet to create, string
+			const char *name, *group;
+
+			if (PyArg_ParseTuple(args, "ss", &name, &group)) {
+				DrawSourcePtr i = o->mInstance->createDrawSource(name, group);
+				
+				PyObject *o = DrawSourceBinder::create(i);
+				
+				result = o;
+				Py_INCREF(result);
+				return result;
+			} else {
+				// Invalid parameters
+				PyErr_SetString(PyExc_TypeError, "Expected two string arguments!");
+				return NULL;
+			}
+			
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
+		
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::createRenderedImage(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+						
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
-			return result;	//Temporary return to fix the VC build
+			
+			PyObject *ds;
+			if (PyArg_ParseTuple(args, "o", &ds)) {
+				RenderedImage* ri = o->mInstance->createRenderedImage(DrawSourceBinder::extract(ds));
+				
+				return RenderedImageBinder::create(ri);
+			}
+			
+			return result;
+			
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
+		
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::createRenderedLabel(PyObject* self, PyObject* args) {
 			PyObject *result = NULL;

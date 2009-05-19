@@ -122,6 +122,20 @@ namespace Opde {
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
 
+			if (PyArg_ParseTuple(args, "o", &dop)) {
+				// Either it is RenderedImage or RenderedLabel. Anyway:
+				DrawOperation* dopc = ;
+
+                                result = o;
+
+                                return result;
+                        } else {
+                                // Invalid parameters
+                                PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
+                                return NULL;
+                        }
+
+
 			/// TODO: Stub. Stupid return fix both
 			return result;
 			
@@ -189,7 +203,7 @@ namespace Opde {
 				
 		// ------------------------------------------
 		PyObject* DrawSheetBinder::repr(PyObject *self) {
-			return PyString_FromFormat("<DrawService at %p>", self);
+			return PyString_FromFormat("<DrawSheet at %p>", self);
 		}
 		
 		// ------------------------------------------

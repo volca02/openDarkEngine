@@ -31,6 +31,7 @@
 #include <OgreVector3.h>
 
 namespace Opde {
+	/** Rendered image. A single image on-screen rectangle utilising a single bitmap image source (be it atlassed or not). */
 	class RenderedImage : public DrawOperation {
 		public:
 			RenderedImage(DrawService* owner, DrawOperation::ID id, const DrawSourcePtr& ds);
