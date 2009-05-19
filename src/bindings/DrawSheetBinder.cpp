@@ -121,10 +121,10 @@ namespace Opde {
 			
 			PyObject *result = NULL;
 			Object* o = python_cast<Object*>(self, &msType);
-
+			/*
 			if (PyArg_ParseTuple(args, "o", &dop)) {
 				// Either it is RenderedImage or RenderedLabel. Anyway:
-				DrawOperation* dopc = ;
+								DrawOperation* dopc = ;
 
                                 result = o;
 
@@ -135,10 +135,10 @@ namespace Opde {
                                 return NULL;
                         }
 
-
+			*/
 			/// TODO: Stub. Stupid return fix both
 			return result;
-			
+				
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 		
