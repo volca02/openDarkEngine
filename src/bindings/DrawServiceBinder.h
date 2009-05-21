@@ -106,7 +106,50 @@ namespace Opde {
 				return true;
 			}
                 };
-                   
+		
+                
+        /// forward declaration of the child classes
+        class RenderedImageBinder;
+        
+		/// DrawOperation base class binder
+		class DrawOperationBinder : public class_ptr_binder<DrawOperation> {
+			// For inheritance - msType access
+			friend class RenderedImageBinder;
+			
+			public:
+				static void init(PyObject* module);
+
+				// --- Python type related methods ---
+				static PyObject* getattr(PyObject *self, char *name);
+				
+				/// to string - reprfunc conversion
+				static PyObject* repr(PyObject *self);
+				
+				/// helper class pointer extractor
+				static bool extract(PyObject *object, DrawOperation*& op);
+				
+				// --- Methods ---
+				static PyObject* setPosition(PyObject *self, PyObject *args);
+				static PyObject* setZOrder(PyObject *self, PyObject *args);
+				static PyObject* setClipRect(PyObject *self, PyObject *args);				
+				
+				static PyObject* create(DrawOperation* ds);
+
+			protected:
+				/// Static type definition
+				static PyTypeObject msType;
+
+				/// Name of the python type
+				static const char* msName;
+
+				/// Method list
+				static PyMethodDef msMethods[];
+				
+				/// Up-casting helper structures
+				static CastInfo<DrawOperation*> msCastInfo[];
+				
+				static TypeInfo<ClipRect> msRectTypeInfo;
+		};
 		
 	}
 }

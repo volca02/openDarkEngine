@@ -76,9 +76,13 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* DTypeBinder::set(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			
 			// Simmilar to PropertyServiceBinder::set
-			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			DTypePtr o;
+			
+			if (!python_cast<DTypePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			const char* field;
 			PyObject* Object;
@@ -87,11 +91,9 @@ namespace Opde {
 			{
 				DVariant value;
 				value = PyObjectToDVariant(Object);
-				o->mInstance->set(field, value);
+				o->set(field, value);
 
-				result = Py_None;
-				Py_INCREF(result);
-				return result;
+				__PY_NONE_RET;
 			}
 			else
 			{
@@ -99,19 +101,25 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected a string and a DVariant!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* DTypeBinder::get(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			DTypePtr o;
+			
+			if (!python_cast<DTypePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			const char* field;
 
 			if (PyArg_ParseTuple(args, "s", &field))
 			{
 				DVariant value;
-				value = o->mInstance->get(field);
+				value = o->get(field);
 
 				result = DVariantToPyObject(value);
 				return result;
@@ -122,6 +130,8 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
 				return NULL;
 			}
+			
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
@@ -130,13 +140,8 @@ namespace Opde {
 		}
 
 		// ------------------------------------------
-		DTypePtr DTypeBinder::extractDType(PyObject* object) {
-			// Get Object from PyObject, return mInstance
-			Object* o = python_cast<Object*>(object, &msType);
-
-			// It is always good to remember that it is not wise to return shared_ptr directly
-			DTypePtr t = o->mInstance;
-			return t;
+		bool DTypeBinder::extract(PyObject* object, DTypePtr& target) {
+			return python_cast<DTypePtr>(object, &msType, &target);
 		}
 
 		// ------------------------------------------

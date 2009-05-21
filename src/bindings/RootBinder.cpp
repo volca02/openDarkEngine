@@ -148,14 +148,18 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* RootBinder::loadResourceConfig(PyObject *self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// ARGS: string
-			Object* o = python_cast<Object*>(self, &msType);
+			Root* o = NULL;
+			
+			if (!python_cast<Root*>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			const char* fname;
 
 			if (PyArg_ParseTuple(args, "s", &fname)) {
 			    try {
-                    o->mInstance->loadResourceConfig(fname);
+                    o->loadResourceConfig(fname);
 			    } catch (BasicException& e) {
 			        PyErr_Format(PyExc_IOError, "Exception catched while trying to load resource config : %s", e.getDetails().c_str());
 			        return NULL;
@@ -164,26 +168,29 @@ namespace Opde {
 			        return NULL;
 			    }
 
-				PyObject *result = Py_None;
-				Py_INCREF(result);
-				return result;
+				__PY_NONE_RET;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* RootBinder::loadDTypeScript(PyObject *self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// ARGS: string, string
-			Object* o = python_cast<Object*>(self, &msType);
+			Root* o = NULL;
+			
+			if (!python_cast<Root*>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			const char *fname, *gname;
 
 			if (PyArg_ParseTuple(args, "ss", &fname, &gname)) {
 			    try {
-                    o->mInstance->loadDTypeScript(fname, gname);
+                    o->loadDTypeScript(fname, gname);
 			    } catch (BasicException& e) {
 			        PyErr_Format(PyExc_IOError, "Exception catched while trying to load DType script : %s", e.getDetails().c_str());
 			        return NULL;
@@ -192,26 +199,29 @@ namespace Opde {
 			        return NULL;
 			    }
 
-				PyObject *result = Py_None;
-				Py_INCREF(result);
-				return result;
+				__PY_NONE_RET;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected two string arguments!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* RootBinder::loadPLDefScript(PyObject *self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// ARGS: string, string
-			Object* o = python_cast<Object*>(self, &msType);
+			Root* o = NULL;
+			
+			if (!python_cast<Root*>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			const char  *fname, *gname;
 
 			if (PyArg_ParseTuple(args, "ss", &fname, &gname)) {
 			    try {
-                    o->mInstance->loadPLDefScript(fname, gname);
+                    o->loadPLDefScript(fname, gname);
 			    } catch (BasicException& e) {
 			        PyErr_Format(PyExc_IOError, "Exception catched while trying to load PLDef script : %s", e.getDetails().c_str());
 			        return NULL;
@@ -220,26 +230,29 @@ namespace Opde {
 			        return NULL;
 			    }
 
-				PyObject *result = Py_None;
-				Py_INCREF(result);
-				return result;
+				__PY_NONE_RET;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected two string arguments!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* RootBinder::loadConfigFile(PyObject *self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// ARGS: string
-			Object* o = python_cast<Object*>(self, &msType);
+			Root* o = NULL;
+			
+			if (!python_cast<Root*>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			const char *fname;
 
 			if (PyArg_ParseTuple(args, "s", &fname)) {
 			    try {
-                    o->mInstance->loadConfigFile(fname);
+                    o->loadConfigFile(fname);
 			    } catch (BasicException& e) {
 			        PyErr_Format(PyExc_IOError, "Exception catched while trying to load config : %s", e.getDetails().c_str());
 			        return NULL;
@@ -248,20 +261,23 @@ namespace Opde {
 			        return NULL;
 			    }
 
-				PyObject *result = Py_None;
-				Py_INCREF(result);
-				return result;
+				__PY_NONE_RET;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* RootBinder::addResourceLocation(PyObject *self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// ARGS: string, string, string, bool
-			Object *o = python_cast<Object*>(self, &msType);
+			Root* o = NULL;
+			
+			if (!python_cast<Root*>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			const char *name, *type, *section;
 			PyObject *recursive = Py_False;
@@ -276,7 +292,7 @@ namespace Opde {
 						return NULL;
 					}
 
-					o->mInstance->addResourceLocation(name, type, section, recb);
+					o->addResourceLocation(name, type, section, recb);
 				} catch (BasicException& e) {
 					PyErr_Format(PyExc_IOError, "Exception catched while trying to add resource location : %s", e.getDetails().c_str());
 					return NULL;
@@ -285,26 +301,29 @@ namespace Opde {
 					return NULL;
 				}
 
-				PyObject *result = Py_None;
-				Py_INCREF(result);
-				return result;
+				__PY_NONE_RET;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected three string arguments and one optional bool!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* RootBinder::removeResourceLocation(PyObject *self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// ARGS: string, string
-			Object* o = python_cast<Object*>(self, &msType);
+			Root* o = NULL;
+			
+			if (!python_cast<Root*>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			const char *name, *section;
 
 			if (PyArg_ParseTuple(args, "ss", &name, &section)) {
 			    try {
-                    o->mInstance->removeResourceLocation(name, section);
+                    o->removeResourceLocation(name, section);
 			    } catch (BasicException& e) {
 			        PyErr_Format(PyExc_IOError, "Exception catched while trying to remove a resource location : %s", e.getDetails().c_str());
 			        return NULL;
@@ -313,23 +332,26 @@ namespace Opde {
 			        return NULL;
 			    }
 
-				PyObject *result = Py_None;
-				Py_INCREF(result);
-				return result;
+				__PY_NONE_RET;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected two string arguments!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* RootBinder::bootstrapFinished(PyObject *self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// ARGS: No arguments!
-			Object* o = python_cast<Object*>(self, &msType);
+			Root* o = NULL;
+			
+			if (!python_cast<Root*>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			try {
-				o->mInstance->bootstrapFinished();
+				o->bootstrapFinished();
 			} catch (BasicException& e) {
 				PyErr_Format(PyExc_IOError, "Exception catched while finishing bootstrap : %s", e.getDetails().c_str());
 				return NULL;
@@ -338,21 +360,25 @@ namespace Opde {
 				return NULL;
 			}
 
-			PyObject *result = Py_None;
-			Py_INCREF(result);
-			return result;
+			__PY_NONE_RET;
+			
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* RootBinder::logToFile(PyObject *self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// ARGS: string
-			Object* o = python_cast<Object*>(self, &msType);
+			Root* o = NULL;
+			
+			if (!python_cast<Root*>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			const char* fname;
 
 			if (PyArg_ParseTuple(args, "s", &fname)) {
 			    try {
-                    o->mInstance->logToFile(fname);
+                    o->logToFile(fname);
 			    } catch (BasicException& e) {
 			        PyErr_Format(PyExc_IOError, "Exception catched while trying to setup file logging : %s", e.getDetails().c_str());
 			        return NULL;
@@ -361,34 +387,39 @@ namespace Opde {
 			        return NULL;
 			    }
 
-				PyObject *result = Py_None;
-				Py_INCREF(result);
-				return result;
+			    __PY_NONE_RET;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
 				return NULL;
 			}
+			
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* RootBinder::setLogLevel(PyObject *self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// ARGS: string
-			Object* o = python_cast<Object*>(self, &msType);
+			Root* o = NULL;
+			
+			if (!python_cast<Root*>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			int level;
 
 			if (PyArg_ParseTuple(args, "i", &level)) {
-                o->mInstance->setLogLevel(level); // does not throw
+                o->setLogLevel(level); // does not throw
 
-				PyObject *result = Py_None;
-				Py_INCREF(result);
-				return result;
+				__PY_NONE_RET;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected an integer argument!");
 				return NULL;
 			}
+			
+			
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------

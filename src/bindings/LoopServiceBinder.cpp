@@ -83,39 +83,53 @@ namespace Opde
 		// ------------------------------------------
 		PyObject* LoopServiceBinder::run(PyObject* self, PyObject* args)
 		{
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			LoopServicePtr o;
+			
+			if (!python_cast<LoopServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
-			o->mInstance->run();
+			o->run();
 			result = Py_None;
 			Py_INCREF(result);
 			return result;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* LoopServiceBinder::requestTermination(PyObject* self, PyObject* args)
 		{
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			LoopServicePtr o;
+			
+			if (!python_cast<LoopServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
-			o->mInstance->requestTermination();
+			o->requestTermination();
 
 			result = Py_None;
 			Py_INCREF(result);
 			return result;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* LoopServiceBinder::requestLoopMode(PyObject* self, PyObject* args)
 		{
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// Let's request a new loop mode. Python version only works for strings to make it simple
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			LoopServicePtr o;
+			
+			if (!python_cast<LoopServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			char* name;
 
 			if (PyArg_ParseTuple(args, "s", &name)) {
-				bool res = o->mInstance->requestLoopMode(name);
+				bool res = o->requestLoopMode(name);
 
 				result = res ? Py_True : Py_False;
 				Py_INCREF(result);
@@ -124,18 +138,24 @@ namespace Opde
 			}
 
 			return result;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* LoopServiceBinder::debugOneFrame(PyObject* self, PyObject* args)
 		{
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			LoopServicePtr o;
+			
+			if (!python_cast<LoopServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
-			o->mInstance->debugOneFrame();
+			o->debugOneFrame();
 			result = Py_None;
 			Py_INCREF(result);
 			return result;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------

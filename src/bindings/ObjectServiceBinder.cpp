@@ -91,8 +91,12 @@ namespace Opde
 
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::objectCreate(PyObject* self, PyObject* args) {
-			Object* o = python_cast<Object*>(self, &msType);
-
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			ObjectServicePtr o;
+			
+			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
+			
 			// param: archetype object to inherit from
 			int archetype;
 
@@ -100,7 +104,7 @@ namespace Opde
 				int newid;
 
 			    try {
-                    newid = o->mInstance->create(archetype);
+                    newid = o->create(archetype);
 			    } catch (BasicException& e) {
 			        PyErr_Format(PyExc_IOError, "Exception catched while trying to create object : %s", e.getDetails().c_str());
 			        return NULL;
@@ -112,11 +116,16 @@ namespace Opde
 				PyErr_SetString(PyExc_TypeError, "Expected a integer (archetype object id) argument!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::beginCreate(PyObject* self, PyObject* args) {
-			Object* o = python_cast<Object*>(self, &msType);
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			ObjectServicePtr o;
+			
+			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			// param: archetype object to inherit from
 			int archetype;
@@ -125,7 +134,7 @@ namespace Opde
 				int newid;
 
 			    try {
-                    newid = o->mInstance->beginCreate(archetype);
+                    newid = o->beginCreate(archetype);
 			    } catch (BasicException& e) {
 			        PyErr_Format(PyExc_IOError, "Exception catched while trying to beginCreate object : %s", e.getDetails().c_str());
 			        return NULL;
@@ -137,19 +146,24 @@ namespace Opde
 				PyErr_SetString(PyExc_TypeError, "Expected a integer (archetype object id) argument!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::endCreate(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			ObjectServicePtr o;
+			
+			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			// param: archetype object to inherit from
 			int objid;
 
 			if (PyArg_ParseTuple(args, "i", &objid)) {
 			    try {
-                    o->mInstance->endCreate(objid);
+                    o->endCreate(objid);
 			    } catch (BasicException& e) {
 			        PyErr_Format(PyExc_IOError, "Exception catched while trying to endCreate object : %s", e.getDetails().c_str());
 			        return NULL;
@@ -163,18 +177,22 @@ namespace Opde
 				PyErr_SetString(PyExc_TypeError, "Expected a integer (object id) argument!");
 				return NULL;
 			}
-
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::exists(PyObject* self, PyObject* args) {
-			Object* o = python_cast<Object*>(self, &msType);
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			ObjectServicePtr o;
+			
+			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			// param: The object ID to test for existence
 			int objid;
 
 			if (PyArg_ParseTuple(args, "i", &objid)) {
-			    bool res = o->mInstance->exists(objid);
+			    bool res = o->exists(objid);
 
 			    PyObject* ret = res ? Py_True : Py_False;
 				Py_INCREF(ret);
@@ -184,29 +202,40 @@ namespace Opde
 				PyErr_SetString(PyExc_TypeError, "Expected a integer (object id) argument!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::position(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			// TODO: Impl
 			PyErr_SetString(PyExc_NotImplementedError, "Not Implemented yet!");
 			return NULL;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::orientation(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			// TODO: Impl
 			PyErr_SetString(PyExc_NotImplementedError, "Not Implemented yet!");
 			return NULL;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::getName(PyObject* self, PyObject* args) {
-			Object* o = python_cast<Object*>(self, &msType);
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			ObjectServicePtr o;
+			
+			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			// param: The object ID to get name for
 			int objid;
 
 			if (PyArg_ParseTuple(args, "i", &objid)) {
-			    std::string name = o->mInstance->getName(objid);
+			    std::string name = o->getName(objid);
 
 				return PyString_FromString(name.c_str());
 			} else {
@@ -214,39 +243,46 @@ namespace Opde
 				PyErr_SetString(PyExc_TypeError, "Expected a integer (object id) argument!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::setName(PyObject* self, PyObject* args) {
-			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			ObjectServicePtr o;
+			
+			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			// param: The object ID to set name for
 			int objid;
 			char* name;
 
 			if (PyArg_ParseTuple(args, "is", &objid, &name)) {
-			    o->mInstance->setName(objid, name);
+			    o->setName(objid, name);
 
-				result = Py_None;
-				Py_INCREF(result);
-				return result;
+				__PY_NONE_RET;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected a integer and string arguments!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::named(PyObject* self, PyObject* args) {
-			Object* o = python_cast<Object*>(self, &msType);
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			ObjectServicePtr o;
+			
+			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			// param: The object ID to set name for
 			char* name;
 
 			if (PyArg_ParseTuple(args, "s", &name)) {
-				int objid = o->mInstance->named(name);
+				int objid = o->named(name);
 
 				return PyInt_FromLong(objid);
 			} else {
@@ -254,30 +290,43 @@ namespace Opde
 				PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::teleport(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			// TODO: Impl
 			PyErr_SetString(PyExc_NotImplementedError, "Not Implemented yet!");
 			return NULL;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::addMetaProperty(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			// TODO: Impl
 			PyErr_SetString(PyExc_NotImplementedError, "Not Implemented yet!");
 			return NULL;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::removeMetaProperty(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			// TODO: Impl
 			PyErr_SetString(PyExc_NotImplementedError, "Not Implemented yet!");
 			return NULL;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::hasMetaProperty(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			// TODO: Impl
 			PyErr_SetString(PyExc_NotImplementedError, "Not Implemented yet!");
 			return NULL;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 

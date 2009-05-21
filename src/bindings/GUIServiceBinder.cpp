@@ -82,13 +82,18 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* GUIServiceBinder::setActive(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			GUIServicePtr o;
+			
+			if (!python_cast<GUIServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 			
 			PyObject* active;
 			
 			if (PyArg_ParseTuple(args, "O", &active)) {
-				o->mInstance->setActive(PyObject_IsTrue(active)  == 1);
+				o->setActive(PyObject_IsTrue(active)  == 1);
 				
 				result = Py_None;
 				Py_INCREF(result);
@@ -97,17 +102,22 @@ namespace Opde {
 			}
 			
 			return result;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 		
 		// ------------------------------------------
 		PyObject* GUIServiceBinder::setVisible(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			GUIServicePtr o;
+			
+			if (!python_cast<GUIServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 			
 			PyObject* visible;
 			
 			if (PyArg_ParseTuple(args, "O", &visible)) {
-				o->mInstance->setVisible(PyObject_IsTrue(visible)  == 1);
+				o->setVisible(PyObject_IsTrue(visible)  == 1);
 				
 				result = Py_None;
 				Py_INCREF(result);
@@ -116,34 +126,44 @@ namespace Opde {
 			}
 			
 			return result;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 		
 		// ------------------------------------------
 		PyObject* GUIServiceBinder::getActiveSheet(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// TODO: Code
 			PyErr_SetString(PyExc_TypeError, "NOT IMPLEMENTED YET");
+		
 			return NULL;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 		
 		// ------------------------------------------
 		PyObject* GUIServiceBinder::setActiveSheet(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// TODO: Code
 			PyErr_SetString(PyExc_TypeError, "NOT IMPLEMENTED YET");
 			return NULL;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 		
 		// ------------------------------------------
 		PyObject* GUIServiceBinder::createSheet(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// TODO: Code
 			PyErr_SetString(PyExc_TypeError, "NOT IMPLEMENTED YET");
 			return NULL;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 		
 		// ------------------------------------------
 		PyObject* GUIServiceBinder::destroySheet(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// TODO: Code
 			PyErr_SetString(PyExc_TypeError, "NOT IMPLEMENTED YET");
 			return NULL;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 		
 		// ------------------------------------------

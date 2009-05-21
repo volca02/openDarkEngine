@@ -25,6 +25,8 @@
 #include "bindings.h"
 #include "RenderedImageBinder.h"
 #include "RenderedImage.h"
+#include "DrawServiceBinder.h"
+#include "DrawSourceBinder.h"
 
 namespace Opde {
 
@@ -55,7 +57,8 @@ namespace Opde {
 			0,			              // getattrofunc tp_getattro; */
 			0,			              // setattrofunc tp_setattro; */
 			0,			              // PyBufferProcs *tp_as_buffer; */
-			0,			              // long tp_flags; */
+			// for inheritance searches to work we need this
+			Py_TPFLAGS_HAVE_CLASS,	              // long tp_flags; */
 			0,			              // char *tp_doc;  */
 			0,			              // traverseproc tp_traverse; */
 			0,			              // inquiry tp_clear; */
@@ -63,97 +66,51 @@ namespace Opde {
 			0,			              // long tp_weaklistoffset; */
 			0,			              // getiterfunc tp_iter; */
 			0,			              // iternextfunc tp_iternext; */
-			msMethods,	              // struct PyMethodDef *tp_methods; */
-			0,			              // struct memberlist *tp_members; */
-			0,			              // struct getsetlist *tp_getset; */
+			msMethods,	                      // struct PyMethodDef *tp_methods; */
+			0,                                    // struct memberlist /*  *tp_members; */
+            0,                                    // struct getsetlist /* *tp_getset; */
+            // Base object type - needed for inheritance checks. Here, it is the DrawOperationBinder stub.
+			&DrawOperationBinder::msType          // struct _typeobject *tp_base; 
 		};
 
 		// ------------------------------------------
 		PyMethodDef RenderedImageBinder::msMethods[] = {
-			{"setPosition", setPosition, METH_VARARGS},
-			{"setZOrder", setZOrder, METH_VARARGS},
-			{"setClipRect", setClipRect, METH_VARARGS},			
+			{"setDrawSource", setDrawSource, METH_VARARGS},			
 			{NULL, NULL}
 		};
 		
 		
 		// ------------------------------------------
-		PyObject* RenderedImageBinder::setPosition(PyObject* self, PyObject* args)  {
+		PyObject* RenderedImageBinder::setDrawSource(PyObject* self, PyObject* args)  {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
                 
-                        PyObject *result = NULL;
-                        Object* o = python_cast<Object*>(self, &msType);
+			RenderedImage* o = NULL;
+			
+			if (!python_cast<RenderedImage*>(self, &msType, &o))
+				__PY_CONVERR_RET;
                   
-                        int x, y;
+			PyObject *ds;
                         
-                        if (PyArg_ParseTuple(args, "ii", &x, &y)) {
-                       		o->mInstance->setPosition(x, y);
-                        
-				result = Py_None;
-                        	Py_INCREF(result);
-                                return result;
-                        } else {
-                                // Invalid parameters
-                                PyErr_SetString(PyExc_TypeError, "Expected two integer arguments!");
-                                return NULL;
-                        }
-                                
-                        __PYTHON_EXCEPTION_GUARD_END_;
-		}
-
-		// ------------------------------------------
-		PyObject* RenderedImageBinder::setZOrder(PyObject* self, PyObject* args)  {
-			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-                
-                        PyObject *result = NULL;
-                        Object* o = python_cast<Object*>(self, &msType);
-                  
-                        int z;
-                        
-                        if (PyArg_ParseTuple(args, "i", &z)) {
-                       		o->mInstance->setZOrder(z);
-                        
-				result = Py_None;
-                        	Py_INCREF(result);
-                                return result;
-                        } else {
-                                // Invalid parameters
-                                PyErr_SetString(PyExc_TypeError, "Expected an integer argument!");
-                                return NULL;
-                        }
-                                
-                        __PYTHON_EXCEPTION_GUARD_END_;
-		}
-
-		// ------------------------------------------
-		PyObject* RenderedImageBinder::setClipRect(PyObject* self, PyObject* args)  {
-			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-                
-                        PyObject *result = NULL;
-                        Object* o = python_cast<Object*>(self, &msType);
-                  
-			PyObject *cr;
-                        
-                        if (PyArg_ParseTuple(args, "o", &cr)) {
+			if (PyArg_ParseTuple(args, "o", &ds)) {
 				// if it's a tuple, it should contain four floats
-				ClipRect rect;
-				if (!msRectTypeInfo.fromPyObject(cr, rect)) {
-					PyErr_SetString(PyExc_TypeError, "Expected 4 float tuple!");
-	                                return NULL;
-				};
+				DrawSourcePtr dsp;
 				
-				o->mInstance->setClipRect(rect);
-                        
-				result = Py_None;
-                        	Py_INCREF(result);
-                                return result;
-                        } else {
-                                // Invalid parameters
-                                PyErr_SetString(PyExc_TypeError, "Expected an integer argument!");
-                                return NULL;
-                        }
-                                
-                        __PYTHON_EXCEPTION_GUARD_END_;
+				if (!DrawSourceBinder::extract(ds, dsp)) {
+					PyErr_SetString(PyExc_TypeError, "Expected a DrawSource as an argument!");
+					return NULL;
+				}
+					
+				
+				o->setDrawSource(dsp);
+						
+				__PY_NONE_RET;
+			} else {
+				// Invalid parameters
+				PyErr_SetString(PyExc_TypeError, "Expected a DrawSource as an argument!");
+				return NULL;
+			}
+								
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
@@ -168,8 +125,8 @@ namespace Opde {
 		}
 		
 		// ------------------------------------------
-		RenderedImage* RenderedImageBinder::extract(PyObject *obj) {
-			return python_cast<Object*>(obj, &msType)->mInstance;
+		bool RenderedImageBinder::extract(PyObject *obj, RenderedImage*& tgt) {
+			return python_cast<RenderedImage*>(obj, &msType, &tgt);
 		}
 		
 		// ------------------------------------------

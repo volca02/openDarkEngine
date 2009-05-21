@@ -84,8 +84,8 @@ namespace Opde {
 		}
 		
 		// ------------------------------------------
-		DrawSourcePtr DrawSourceBinder::extract(PyObject *obj) {
-			return python_cast<Object*>(obj, &msType)->mInstance;
+		bool DrawSourceBinder::extract(PyObject *obj, DrawSourcePtr& tgt) {
+			return python_cast<DrawSourcePtr>(obj, &msType, &tgt);
 		}
 		
 		// ------------------------------------------

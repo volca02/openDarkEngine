@@ -123,29 +123,40 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* ConfigServiceBinder::setParam(PyObject* self, PyObject* args) {
-			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			
+			ConfigServicePtr o;
+			
+			if (!python_cast<ConfigServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
+			
 			const char* name;
 			const char* value;
 
 			if (PyArg_ParseTuple(args, "ss", &name, &value)) {
-				o->mInstance->setParam(name, value);
-				result = Py_None;
-				Py_INCREF(result);
+				o->setParam(name, value);
+				__PY_NONE_RET;
 			} else {
 				PyErr_SetString(PyExc_TypeError, "Expected two string parameters!");
+				return NULL;
 			}
-
-			return result;
+			
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* ConfigServiceBinder::getParam(PyObject* self, PyObject* args) {
-			Object* o = python_cast<Object*>(self, &msType);
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			
+			ConfigServicePtr o;
+			
+			if (!python_cast<ConfigServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
+			
 			const char* name;
 
 			if (PyArg_ParseTuple(args, "s", &name)) {
-				DVariant rv = o->mInstance->getParam(name);
+				DVariant rv = o->getParam(name);
 
 				return DVariantToPyObject(rv);
 			} else {
@@ -153,15 +164,21 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* ConfigServiceBinder::hasParam(PyObject* self, PyObject* args) {
-			Object* o = python_cast<Object*>(self, &msType);
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			ConfigServicePtr o;
+			
+			if (!python_cast<ConfigServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
+			
 			const char* name;
 
 			if (PyArg_ParseTuple(args, "s", &name)) {
-				bool has = o->mInstance->hasParam(name);
+				bool has = o->hasParam(name);
 
 				PyObject* ret = has ? Py_True : Py_False;
 				Py_INCREF(ret);
@@ -171,24 +188,28 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* ConfigServiceBinder::loadParams(PyObject* self, PyObject* args) {
-			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			ConfigServicePtr o;
+			
+			if (!python_cast<ConfigServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
+			
 			const char* fname;
 
 			if (PyArg_ParseTuple(args, "s", &fname)) {
-				o->mInstance->loadParams(fname);
+				o->loadParams(fname);
 
-				result = Py_None;
-				Py_INCREF(result);
+				__PY_NONE_RET;
 			} else {
 				PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
+				return NULL;
 			}
-
-			return result;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------

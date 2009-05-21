@@ -34,6 +34,9 @@ namespace Opde {
 
 		/// RenderedImage python binder
 		class RenderedImageBinder : public class_ptr_binder<RenderedImage> {
+			// for msType handling
+			friend class DrawOperationBinder;
+			
 			public:
 				static void init(PyObject* module);
 
@@ -44,12 +47,10 @@ namespace Opde {
 				static PyObject* repr(PyObject *self);
 				
 				/// helper class pointer extractor
-				static RenderedImage* extract(PyObject *object);
+				static bool extract(PyObject *obj, RenderedImage*& tgt);
 				
 				// --- Methods ---
-				static PyObject* setPosition(PyObject *self, PyObject *args);
-				static PyObject* setZOrder(PyObject *self, PyObject *args);
-				static PyObject* setClipRect(PyObject *self, PyObject *args);				
+				static PyObject* setDrawSource(PyObject *self, PyObject *args);				
 				
 				static PyObject* create(RenderedImage* ds);
 

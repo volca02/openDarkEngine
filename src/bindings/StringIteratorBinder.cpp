@@ -81,13 +81,16 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* StringIteratorBinder::getNext(PyObject* self) {
-			Object* o = python_cast<Object*>(self, &msType);
+			StringIteratorPtr o;
+			
+			if (!python_cast<StringIteratorPtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			// Get returnable object, advance to next.
 			PyObject* next = NULL;
 
-			if ((!o->mInstance.isNull()) && !o->mInstance->end()) {
-				const std::string& s = o->mInstance->next();
+			if ((!o.isNull()) && !o->end()) {
+				const std::string& s = o->next();
 
 				next = PyString_FromString(s.c_str());
 			}

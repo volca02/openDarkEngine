@@ -44,7 +44,7 @@ namespace Opde {
 				static PyObject* repr(PyObject *self);
 				
 				/// helper class pointer extractor
-				static DrawSheet* extract(PyObject *object);
+				static bool extract(PyObject *object, DrawSheet*& sheet);
 				
 				// --- Methods ---
 				static PyObject* activate(PyObject* self, PyObject* args);

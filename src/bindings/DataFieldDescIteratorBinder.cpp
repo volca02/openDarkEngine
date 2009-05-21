@@ -101,13 +101,16 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* DataFieldDescIteratorBinder::getNext(PyObject* self) {
-			Object* o = python_cast<Object*>(self, &msType);
+			DataFieldDescIteratorPtr o;
+			
+			if (!python_cast<DataFieldDescIteratorPtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			// Get returnable object, advance to next.
 			PyObject* next = NULL;
 
-			if ((!o->mInstance.isNull()) && !o->mInstance->end()) {
-				const DataFieldDesc& d = o->mInstance->next();
+			if ((!o.isNull()) && !o->end()) {
+				const DataFieldDesc& d = o->next();
 				next = DataFieldDescBinder::create(d);
 			}
 

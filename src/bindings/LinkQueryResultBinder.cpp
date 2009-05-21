@@ -82,13 +82,16 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* LinkQueryResultBinder::getNext(PyObject* self) {
-			Object* o = python_cast<Object*>(self, &msType);
+			LinkQueryResultPtr o;
+			
+			if (!python_cast<LinkQueryResultPtr>(self, &msType, &o)) 
+				__PY_CONVERR_RET;
 
 			// Get returnable object, advance to next.
 			PyObject* next = NULL;
 
-			if ((!o->mInstance.isNull()) && !o->mInstance->end()) {
-				LinkPtr l = o->mInstance->next();
+			if ((!o.isNull()) && !o->end()) {
+				LinkPtr l = o->next();
 				next = LinkBinder::create(l);
 			}
 

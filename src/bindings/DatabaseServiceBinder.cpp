@@ -143,12 +143,15 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
 		    PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			DatabaseServicePtr o;
+			
+			if (!python_cast<DatabaseServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			const char* fname;
 
 			if (PyArg_ParseTuple(args, "s", &fname)) {
-			    o->mInstance->load(fname);
+			    o->load(fname);
 			    
 				result = Py_None;
 				Py_INCREF(result);
@@ -164,79 +167,84 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* DatabaseServiceBinder::loadGameSys(PyObject* self, PyObject* args) {
-		    PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			
+			DatabaseServicePtr o;
+			
+			if (!python_cast<DatabaseServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			const char* fname;
 
 			if (PyArg_ParseTuple(args, "s", &fname)) {
-			    try {
-                    o->mInstance->loadGameSys(fname);
-			    } catch (BasicException& e) {
-			        PyErr_Format(PyExc_IOError, "Exception catched while trying to load gamesys database : %s", e.getDetails().c_str());
-			        return NULL;
-			    }
-
-				result = Py_None;
-				Py_INCREF(result);
-				return result;
+				o->loadGameSys(fname);
+			    
+				__PY_NONE_RET;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
 				return NULL;
 			}
+			
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
         PyObject* DatabaseServiceBinder::unload(PyObject* self, PyObject* args) {
-            PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+        	__PYTHON_EXCEPTION_GUARD_BEGIN_;        	
+			DatabaseServicePtr o;
+			
+			if (!python_cast<DatabaseServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
-			o->mInstance->unload();
+			o->unload();
 
-			result = Py_None;
-            Py_INCREF(result);
-            return result;
+			__PY_NONE_RET;
+			
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
         // ------------------------------------------
         PyObject* DatabaseServiceBinder::setProgressListener(PyObject* self, PyObject* args) {
+        	__PYTHON_EXCEPTION_GUARD_BEGIN_;
+        	
             PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			DatabaseServicePtr o;
+			
+			if (!python_cast<DatabaseServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			PyObject* callable;
 
 			if (PyArg_ParseTuple(args, "O", &callable)) {
-				try {
-					DatabaseService::ProgressListenerPtr pcp = new PythonDatabaseProgressCallback(callable);
+				DatabaseService::ProgressListenerPtr pcp = new PythonDatabaseProgressCallback(callable);
 
-					// call the is to register the command trap
-					o->mInstance->setProgressListener(pcp);
+				// call the is to register the command trap
+				o->setProgressListener(pcp);
 
-					result = Py_None;
-					Py_INCREF(result);
-					return result;
-				} catch (BasicException) {
-					PyErr_SetString(PyExc_TypeError, "Error setting a callback, is the given argument a callable?");
-					return NULL;
-				}
+				__PY_NONE_RET;
 			} else {
 					PyErr_SetString(PyExc_TypeError, "Expected a callable parameter!");
 			}
 
 			return result;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
         // ------------------------------------------
         PyObject* DatabaseServiceBinder::unsetProgressListener(PyObject* self, PyObject* args) {
-            PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+        	__PYTHON_EXCEPTION_GUARD_BEGIN_;
+        	
+			DatabaseServicePtr o;
+			
+			if (!python_cast<DatabaseServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
-			o->mInstance->unsetProgressListener();
+			o->unsetProgressListener();
 
-			result = Py_None;
-            Py_INCREF(result);
-            return result;
+			__PY_NONE_RET;
+			
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------

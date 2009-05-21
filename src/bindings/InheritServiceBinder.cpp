@@ -80,13 +80,17 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* InheritServiceBinder::getSources(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			InheritServicePtr o;
+			
+			if (!python_cast<InheritServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			int objID;
 
 			if (PyArg_ParseTuple(args, "i", &objID)) {
-				InheritQueryResultPtr res = o->mInstance->getSources(objID);
+				InheritQueryResultPtr res = o->getSources(objID);
 
 				result = InheritQueryResultBinder::create(res);
 
@@ -96,17 +100,23 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected one integer argument!");
 				return NULL;
 			}
+			
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* InheritServiceBinder::getTargets(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
-
+			InheritServicePtr o;
+			
+			if (!python_cast<InheritServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
+			
 			int objID;
 
 			if (PyArg_ParseTuple(args, "i", &objID)) {
-				InheritQueryResultPtr res = o->mInstance->getTargets(objID);
+				InheritQueryResultPtr res = o->getTargets(objID);
 
 				result = InheritQueryResultBinder::create(res);
 
@@ -116,17 +126,22 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected one integer argument!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* InheritServiceBinder::getArchetype(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			InheritServicePtr o;
+			
+			if (!python_cast<InheritServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			int id;
 
 			if (PyArg_ParseTuple(args, "i", &id)) {
-				int archID = o->mInstance->getArchetype(id);
+				int archID = o->getArchetype(id);
 
 				result = PyLong_FromLong(archID);
 				return result;
@@ -135,36 +150,44 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected an integer argument!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* InheritServiceBinder::setArchetype(PyObject* self, PyObject* args) {
-			Object* o = python_cast<Object*>(self, &msType);
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			InheritServicePtr o;
+			
+			if (!python_cast<InheritServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			int id, srcid;
 
 			if (PyArg_ParseTuple(args, "ii", &id, &srcid)) {
-				o->mInstance->setArchetype(id, srcid);
+				o->setArchetype(id, srcid);
 
-				PyObject* result = Py_None;
-				Py_INCREF(result);
-				return result;
+				__PY_NONE_RET;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected an integer argument!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* InheritServiceBinder::inheritsFrom(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			InheritServicePtr o;
+			
+			if (!python_cast<InheritServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			int id, srcid;
 
 			if (PyArg_ParseTuple(args, "ii", &id, &srcid)) {
-				bool inh = o->mInstance->inheritsFrom(id, srcid);
+				bool inh = o->inheritsFrom(id, srcid);
 
 				result = inh ? Py_True : Py_False;
 				Py_INCREF(result);
@@ -174,6 +197,7 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected an integer argument!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
@@ -219,21 +243,20 @@ namespace Opde {
 
         // ------------------------------------------
 		PyObject* InheritLinkBinder::getattr(PyObject *self, char *name) {
-			Object* o = python_cast<Object*>(self, &msType);
+			InheritLinkPtr o;
+			if (!python_cast<InheritLinkPtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
-			if (o->mInstance.isNull()) {
+			if (o.isNull()) 
 				// Just return PyNone
-				PyObject* result = Py_None;
-				Py_INCREF(result);
-				return result;
-			}
+				__PY_NONE_RET;
 
 			if (strcmp(name, "src") == 0) {
-			    return PyLong_FromLong(o->mInstance->srcID);
+			    return PyLong_FromLong(o->srcID);
 			} else if (strcmp(name, "dst") == 0) {
-			    return PyLong_FromLong(o->mInstance->dstID);
+			    return PyLong_FromLong(o->dstID);
             } else if (strcmp(name, "priority") == 0) {
-			    return PyLong_FromLong(o->mInstance->priority);
+			    return PyLong_FromLong(o->priority);
             } else {
                 PyErr_SetString(PyExc_TypeError, "Unknown attribute specified!");
             }

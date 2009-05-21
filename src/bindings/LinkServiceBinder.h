@@ -56,7 +56,7 @@ namespace Opde {
 				static PyObject* getFieldsDesc(PyObject* self, PyObject* args);
 
 			protected:
-				static bool getFlavor(PyObject *src, Object *obj, int& flavor);
+				static bool getFlavor(PyObject *src, LinkServicePtr& obj, int& flavor);
 			
 				/// Static type definition for LinkService
 				static PyTypeObject msType;

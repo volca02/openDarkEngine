@@ -79,12 +79,15 @@ namespace Opde
 
 				static PyObject* getattr(PyObject* self, char* attrname) {
 					PyObject* result = NULL;
-					Object* object = python_cast<Object*>(self, &msType);
+					T object;
+			
+					if (!python_cast<T>(self, &msType, &object))
+						__PY_CONVERR_RET;
 
 					typename NameToAttr::iterator it = msNameToAttr.find(attrname);
 
 					if (it != msNameToAttr.end()) {
-						result = (*it->second)(object->mInstance);
+						result = (*it->second)(&object);
 					} else
 						PyErr_Format(PyExc_AttributeError, "Invalid attribute name encountered: %s", attrname);
 

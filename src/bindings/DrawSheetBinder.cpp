@@ -25,6 +25,7 @@
 #include "bindings.h"
 #include "DrawSheetBinder.h"
 #include "DrawSheet.h"
+#include "DrawServiceBinder.h"
 
 namespace Opde {
 
@@ -84,14 +85,14 @@ namespace Opde {
 		PyObject* DrawSheetBinder::activate(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
-			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			DrawSheet* o;
 			
-			o->mInstance->activate();
+			if (!python_cast<DrawSheet*>(self, &msType, &o))
+				__PY_CONVERR_RET;
 			
-			result = Py_None;
-			Py_INCREF(result);
-			return result;
+			o->activate();
+			
+			__PY_NONE_RET;
 			
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
@@ -100,17 +101,14 @@ namespace Opde {
 		PyObject* DrawSheetBinder::deactivate(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
-			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			DrawSheet* o;
 			
-			o->mInstance->deactivate();
+			if (!python_cast<DrawSheet*>(self, &msType, &o))
+				__PY_CONVERR_RET;
 			
-			result = Py_None;
-			Py_INCREF(result);
-			return result;
+			o->deactivate();
 			
-			/// TODO: Stub. Stupid return fix both
-			return result;
+			__PY_NONE_RET;
 
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
@@ -119,26 +117,29 @@ namespace Opde {
 		PyObject* DrawSheetBinder::addDrawOperation(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
-			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
-			/*
+			DrawSheet* o;
+			
+			if (!python_cast<DrawSheet*>(self, &msType, &o))
+				__PY_CONVERR_RET;
+			
+			PyObject *dop;
+			
 			if (PyArg_ParseTuple(args, "o", &dop)) {
-				// Either it is RenderedImage or RenderedLabel. Anyway:
-								DrawOperation* dopc = ;
+					// Either it is RenderedImage or RenderedLabel. DrawOperation should extract, Anyway
+					DrawOperation* dopc;
+					
+					if (!DrawOperationBinder::extract(dop, dopc))
+						__PY_CONVERR_RET;
+					
+					o->addDrawOperation(dopc);
 
-                                result = o;
+					__PY_NONE_RET;
+			} else {
+					// Invalid parameters
+					PyErr_SetString(PyExc_TypeError, "Expected a DrawOperation as an argument!");
+					return NULL;
+			}
 
-                                return result;
-                        } else {
-                                // Invalid parameters
-                                PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
-                                return NULL;
-                        }
-
-			*/
-			/// TODO: Stub. Stupid return fix both
-			return result;
-				
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 		
@@ -146,11 +147,27 @@ namespace Opde {
 		PyObject* DrawSheetBinder::removeDrawOperation(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
-			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			DrawSheet* o;
 			
-			/// TODO: Stub. Stupid return fix both
-			return result;
+			if (!python_cast<DrawSheet*>(self, &msType, &o))
+				__PY_CONVERR_RET;
+			
+			PyObject *dop;
+			
+			if (PyArg_ParseTuple(args, "o", &dop)) {
+					DrawOperation* dopc;
+					
+					if (!DrawOperationBinder::extract(dop, dopc))
+						__PY_CONVERR_RET;
+					
+					o->removeDrawOperation(dopc);
+
+					__PY_NONE_RET;
+			} else {
+					// Invalid parameters
+					PyErr_SetString(PyExc_TypeError, "Expected a DrawOperation as an argument!");
+					return NULL;
+			}
 
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
@@ -160,7 +177,10 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			DrawSheet* o;
+			
+			if (!python_cast<DrawSheet*>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			/// TODO: Stub. Stupid return fix both
 			return result;
@@ -173,8 +193,11 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
-
+			DrawSheet* o;
+			
+			if (!python_cast<DrawSheet*>(self, &msType, &o))
+				__PY_CONVERR_RET;
+			
 			/// TODO: Stub. Stupid return fix both
 			return result;
 			
@@ -186,7 +209,10 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			DrawSheet* o;
+			
+			if (!python_cast<DrawSheet*>(self, &msType, &o))
+				__PY_CONVERR_RET;
 			
 			/// TODO: Stub. Stupid return fix both
 			return result;
@@ -207,8 +233,13 @@ namespace Opde {
 		}
 		
 		// ------------------------------------------
-		DrawSheet* DrawSheetBinder::extract(PyObject *obj) {
-			return python_cast<Object*>(obj, &msType)->mInstance;
+		bool DrawSheetBinder::extract(PyObject *object, DrawSheet*& sheet) {
+			// The extraction in this way will ONLY work on the object itself.
+			// we can't just hope reinterpret_cast will upcast right
+			
+			// to overcome this, we have a casting method embedded in the type tree where needed (so it's transparent here)
+			
+			return python_cast<DrawSheet*>(object, &msType, &sheet);
 		}
 		
 		// ------------------------------------------

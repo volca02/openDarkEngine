@@ -124,73 +124,86 @@ namespace Opde
 		// ------------------------------------------
 		PyObject* InputServiceBinder::createBindContext(PyObject* self, PyObject* args)
 		{
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			InputServicePtr o;
+			
+			if (!python_cast<InputServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			char* name;
 
 			if (PyArg_ParseTuple(args, "s", &name)) {
-			    o->mInstance->createBindContext(name);
+			    o->createBindContext(name);
 
-			    result = Py_None;
-			    Py_INCREF(result);
-			    return result;
+			    __PY_NONE_RET;
 			} else {
 				PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
 			}
 
 			return result;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* InputServiceBinder::setBindContext(PyObject* self, PyObject* args)
 		{
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			InputServicePtr o;
+			
+			if (!python_cast<InputServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			char* name;
 
 			if (PyArg_ParseTuple(args, "s", &name)) {
-				o->mInstance->setBindContext(name);
+				o->setBindContext(name);
 
-				result = Py_None;
-				Py_INCREF(result);
-				return result;
+				__PY_NONE_RET;
 			} else {
 				PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
 			}
 
 			return result;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* InputServiceBinder::command(PyObject* self, PyObject* args)
 		{
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			InputServicePtr o;
+			
+			if (!python_cast<InputServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			char* command;
 
 			if (PyArg_ParseTuple(args, "s", &command)) 
 			{
 				std::string Command = command;
-			    o->mInstance->ProcessCommand(Command);
+			    o->ProcessCommand(Command);
 
-			    result = Py_None;
-			    Py_INCREF(result);
-			    return result;
+			    __PY_NONE_RET;
 			} else {
 				PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
 			}
 
 			return result;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* InputServiceBinder::registerCommandTrap(PyObject* self, PyObject* args)
 		{
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			InputServicePtr o;
+			
+			if (!python_cast<InputServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			char* name;
 			PyObject* callable;
@@ -200,11 +213,9 @@ namespace Opde
 					InputService::ListenerPtr pcp = new PythonInputCallback(callable);
 
 					// call the is to register the command trap
-					o->mInstance->registerCommandTrap(name, pcp);
+					o->registerCommandTrap(name, pcp);
 
-					result = Py_None;
-					Py_INCREF(result);
-					return result;
+					__PY_NONE_RET;
 				} catch (BasicException) {
 					PyErr_SetString(PyExc_TypeError, "Error setting a callback, is the given argument a callable?");
 					return NULL;
@@ -214,27 +225,31 @@ namespace Opde
 			}
 
 			return result;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* InputServiceBinder::unregisterCommandTrap(PyObject* self, PyObject* args)
 		{
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			InputServicePtr o;
+			
+			if (!python_cast<InputServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			char* name;
 
 			if (PyArg_ParseTuple(args, "s", &name)) {
-				o->mInstance->unregisterCommandTrap(name);
+				o->unregisterCommandTrap(name);
 
-				result = Py_None;
-				Py_INCREF(result);
-				return result;
+				__PY_NONE_RET;
 			} else {
 					PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
 			}
 
 			return result;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------

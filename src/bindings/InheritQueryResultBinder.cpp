@@ -82,13 +82,16 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* InheritQueryResultBinder::getNext(PyObject* self) {
-			Object* o = python_cast<Object*>(self, &msType);
+			InheritQueryResultPtr o;
+			
+			if (!python_cast<InheritQueryResultPtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			// Get returnable object, advance to next.
 			PyObject* next = NULL;
 
-			if ((!o->mInstance.isNull()) && !o->mInstance->end()) {
-				InheritLinkPtr l = o->mInstance->next();
+			if ((!o.isNull()) && !o->end()) {
+				InheritLinkPtr l = o->next();
 				next = InheritLinkBinder::create(l);
 			}
 

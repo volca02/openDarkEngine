@@ -40,7 +40,7 @@ namespace Opde {
 				static PyObject* create(const DTypePtr& type);
 
 				/// Extracts a DTypePtr from the PyObject*, checking type
-				static DTypePtr extractDType(PyObject* object);
+				static bool extract(PyObject* object, DTypePtr& target);
 
 				// --- Methods ---
 				/// setter for values

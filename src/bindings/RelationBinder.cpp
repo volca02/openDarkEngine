@@ -87,28 +87,44 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* RelationBinder::getID(PyObject* self, PyObject* args) {
-			Object* o = python_cast<Object*>(self, &msType);
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			
+			Relation* o = NULL;
+			
+			if (!python_cast<Relation*>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			// Get the flavor, construct a python string, return.
-			return PyInt_FromLong(o->mInstance->getID());
+			return PyInt_FromLong(o->getID());
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* RelationBinder::getName(PyObject* self, PyObject* args) {
-			Object* o = python_cast<Object*>(self, &msType);
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			
+			Relation* o = NULL;
+			
+			if (!python_cast<Relation*>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			// Get the name, construct a python string, return.
-			return PyString_FromString(o->mInstance->getName().c_str());
+			return PyString_FromString(o->getName().c_str());
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* RelationBinder::remove(PyObject* self, PyObject* args) {
-			Object* o = python_cast<Object*>(self, &msType);
-
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			Relation* o = NULL;
+			
+			if (!python_cast<Relation*>(self, &msType, &o))
+				__PY_CONVERR_RET;
+			
 			int id;
 
 			if (PyArg_ParseTuple(args, "i", &id)) {
-				o->mInstance->remove(id);
+				o->remove(id);
 
 				PyObject* result = Py_None;
 				Py_INCREF(result);
@@ -118,18 +134,23 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected an integer argument!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* RelationBinder::createLink(PyObject* self, PyObject* args) {
-			Object* o = python_cast<Object*>(self, &msType);
-
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			Relation* o = NULL;
+			
+			if (!python_cast<Relation*>(self, &msType, &o))
+				__PY_CONVERR_RET;
+			
 			int from, to;
 
 			if (PyArg_ParseTuple(args, "ii", &from, &to)) {
 				link_id_t id;
 
-				id = o->mInstance->create(from, to);
+				id = o->create(from, to);
 
 				return PyLong_FromUnsignedLong(id);
 			} else {
@@ -137,12 +158,18 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected two integer arguments (from, to) and optional link data values (DType)!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* RelationBinder::getLinkField(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			Relation* o = NULL;
+			
+			if (!python_cast<Relation*>(self, &msType, &o))
+				__PY_CONVERR_RET;
+			
 
 			int id;
 			const char* field;
@@ -150,7 +177,7 @@ namespace Opde {
 			if (PyArg_ParseTuple(args, "is", &id, &field))
 			{
 				DVariant value;
-				value = o->mInstance->getLinkField(id, field);
+				value = o->getLinkField(id, field);
 
 				result = DVariantToPyObject(value);
 				return result;
@@ -161,13 +188,17 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* RelationBinder::setLinkField(PyObject* self, PyObject* args) {
-			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
-
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			Relation* o = NULL;
+			
+			if (!python_cast<Relation*>(self, &msType, &o))
+				__PY_CONVERR_RET;
+			
 			int id;
 			const char* field;
 			PyObject* Object = NULL;
@@ -176,11 +207,9 @@ namespace Opde {
 			{
 				DVariant value;
 				value = PyObjectToDVariant(Object);
-				o->mInstance->setLinkField(id, field, value);
+				o->setLinkField(id, field, value);
 
-				result = Py_None;
-				Py_INCREF(result);
-				return result;
+				__PY_NONE_RET;
 			}
 			else
 			{
@@ -188,17 +217,22 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected a string and a value!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* RelationBinder::getAllLinks(PyObject* self, PyObject* args) {
-			Object* o = python_cast<Object*>(self, &msType);
-
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			Relation* o = NULL;
+			
+			if (!python_cast<Relation*>(self, &msType, &o))
+				__PY_CONVERR_RET;
+			
 			int src, dst;
 
 			if (PyArg_ParseTuple(args, "ii", &src, &dst))
 			{
-				LinkQueryResultPtr res = o->mInstance->getAllLinks(src, dst);
+				LinkQueryResultPtr res = o->getAllLinks(src, dst);
 
 				return LinkQueryResultBinder::create(res);
 			}
@@ -208,18 +242,23 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected two integer parameters: src and dst!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* RelationBinder::getOneLink(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// Nearly the same as getAllLinks. Only that it returns PyObject for LinkPtr directly
-			Object* o = python_cast<Object*>(self, &msType);
-
+			Relation* o = NULL;
+			
+			if (!python_cast<Relation*>(self, &msType, &o))
+				__PY_CONVERR_RET;
+			
 			int src, dst;
 
 			if (PyArg_ParseTuple(args, "ii", &src, &dst))
 			{
-				LinkPtr res = o->mInstance->getOneLink(src, dst);
+				LinkPtr res = o->getOneLink(src, dst);
 				return LinkBinder::create(res);
 			}
 			else
@@ -228,15 +267,22 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected two integer parameters: src and dst!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* RelationBinder::getFieldsDesc(PyObject* self, PyObject* args) {
-			Object* o = python_cast<Object*>(self, &msType);
-
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			Relation* o = NULL;
+			
+			if (!python_cast<Relation*>(self, &msType, &o))
+				__PY_CONVERR_RET;
+			
 			// wrap the returned StringIterator into StringIteratorBinder, return
-			DataFieldDescIteratorPtr res = o->mInstance->getFieldDescIterator();
+			DataFieldDescIteratorPtr res = o->getFieldDescIterator();
 			return DataFieldDescIteratorBinder::create(res);
+			
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------

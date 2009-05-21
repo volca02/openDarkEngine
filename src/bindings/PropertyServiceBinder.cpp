@@ -140,44 +140,57 @@ namespace Opde
 		// ------------------------------------------
 		PyObject* PropertyServiceBinder::has(PyObject* self, PyObject* args)
 		{
-			Object* o = python_cast<Object*>(self, &msType);
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			PropertyServicePtr o;
+			
+			if (!python_cast<PropertyServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			int obj_id;
 			const char* propName;
 
 			if (PyArg_ParseTuple(args, "is", &obj_id, &propName))
-				return PyBool_FromLong(o->mInstance->has(obj_id, propName));
+				return PyBool_FromLong(o->has(obj_id, propName));
 			else
 			{
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected an integer and a string!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* PropertyServiceBinder::owns(PyObject* self, PyObject* args)
 		{
-			Object* o = python_cast<Object*>(self, &msType);
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			PropertyServicePtr o;
+			
+			if (!python_cast<PropertyServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			int obj_id;
 			const char* propName;
 
 			if (PyArg_ParseTuple(args, "is", &obj_id, &propName))
-				return PyBool_FromLong(o->mInstance->owns(obj_id, propName));
+				return PyBool_FromLong(o->owns(obj_id, propName));
 			else
 			{
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected an integer and a string!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* PropertyServiceBinder::set(PyObject* self, PyObject* args)
 		{
-			PyObject *result = NULL;
-			Object* o = python_cast<Object*>(self, &msType);
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			PropertyServicePtr o;
+			
+			if (!python_cast<PropertyServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			int obj_id;
 			const char* propName;
@@ -188,11 +201,10 @@ namespace Opde
 			if (PyArg_ParseTuple(args, "issO", &obj_id, &propName, &propField, &Object))
 			{
 				value = PyObjectToDVariant(Object);
-				o->mInstance->set(obj_id, propName, propField, value);
+				o->set(obj_id, propName, propField, value);
+				
 				// TODO: should indicate by Py_True/Py_False here
-				result = Py_None;
-				Py_INCREF(result);
-				return result;
+				__PY_NONE_RET;
 			}
 			else
 			{
@@ -200,12 +212,18 @@ namespace Opde
 				PyErr_SetString(PyExc_TypeError, "Expected an integer, two strings and a DVariant!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* PropertyServiceBinder::get(PyObject* self, PyObject* args)
 		{
-			Object* o = python_cast<Object*>(self, &msType);
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			PropertyServicePtr o;
+			
+			if (!python_cast<PropertyServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
+
 
 			int obj_id;
 			const char* propName;
@@ -214,7 +232,7 @@ namespace Opde
 			if (PyArg_ParseTuple(args, "iss", &obj_id, &propName, &propField)) {
 				DVariant ret;
 
-				if (o->mInstance->get(obj_id, propName, propField, ret)) {
+				if (o->get(obj_id, propName, propField, ret)) {
 					return DVariantToPyObject(ret);
 				} else {
 					PyObject* result = Py_None;
@@ -227,36 +245,48 @@ namespace Opde
 				PyErr_SetString(PyExc_TypeError, "Expected an integer and two strings!");
 				return NULL;
 			}
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* PropertyServiceBinder::getAllPropertyNames(PyObject* self, PyObject* args)
 		{
-			Object* o = python_cast<Object*>(self, &msType);
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			PropertyServicePtr o;
+			
+			if (!python_cast<PropertyServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
+
 
 			// wrap the returned StringIterator into StringIteratorBinder, return
-			StringIteratorPtr res = o->mInstance->getAllPropertyNames();
+			StringIteratorPtr res = o->getAllPropertyNames();
 
 			return StringIteratorBinder::create(res);
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* PropertyServiceBinder::getPropertyFieldsDesc(PyObject* self, PyObject* args)
 		{
-			Object* o = python_cast<Object*>(self, &msType);
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			PropertyServicePtr o;
+			
+			if (!python_cast<PropertyServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
 
 			const char* propName;
 
 			if (PyArg_ParseTuple(args, "s", &propName))
 			{
 				// wrap the returned StringIterator into StringIteratorBinder, return
-				DataFieldDescIteratorPtr res = o->mInstance->getFieldDescIterator(propName);
+				DataFieldDescIteratorPtr res = o->getFieldDescIterator(propName);
 				return DataFieldDescIteratorBinder::create(res);
 			}
 
 			// Invalid parameters
 			PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
 			return NULL;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------

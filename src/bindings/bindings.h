@@ -38,6 +38,11 @@
 			        return NULL; \
 			    }
 
+#define __PYTHON_EXCEPTION_GUARD_END_RVAL(rval) } catch (BasicException& e) { \
+			        PyErr_Format(PyExc_RuntimeError, "C++ side exception (%s:%u) : %s", __FILE__, __LINE__, e.getDetails().c_str()); \
+			        return rval; \
+			    }
+
 namespace Opde {
 	namespace Python {
 	    // Type converters
@@ -124,19 +129,78 @@ namespace Opde {
 			}
 		};
 		
+		/// helper upcasting method
+		 
+		
+		// One casting info slot. Contains Python type object an casting method pointer
+		template<class C> struct CastInfo {
+			PyTypeObject *type;
+			/** Upcasting method. Should return a static_cast'ed instance if class C given the wrapping repr. of object
+			 * Example:
+			 * @code
+			 * ParentClass *castChildToParent(PyObject* obj) {
+			 * 	Object* mywrap = reinterpret_cast<ObjectBase<ChildClass*>>(obj)->mInstance;
+			 * 	assert(mywrap->ob_type == msType); 
+			 * 	return &mywrap->mInstance;
+			 * }
+			 * @endcode
+			 * @see defaultPythonCaster for default impl.
+			 * @todo It should be possible to templatize the casting method and reference it
+			 */ 
+			typedef C (*CastMethod)(PyObject* obj);
+			CastMethod caster;
+		};
+		
+		
+		
 		/// Template definition of a Python instance holding a single object
 		template<typename T> struct ObjectBase {
 			PyObject_HEAD
 			T mInstance;
 		};
-
-		/// helper function to get type from Object
-		template<typename T> T python_cast(PyObject* obj, PyTypeObject* type) {
-			// More generic: Checks for ancestors as well
-			assert(PyObject_TypeCheck(obj, type));
-
-			return reinterpret_cast< T >(obj);
+		
+		/// Upcaster for python side class inheritance resolution for non-smartptr objects 
+		template<class P, class C> P defaultPythonUpcaster(PyObject *obj) {
+			ObjectBase<C> *mywrap = reinterpret_cast< ObjectBase<C>* >(obj);
+			assert(mywrap->ob_type == msType); 
+			return static_cast<P>(mywrap->mInstance);
 		}
+
+		/** helper function to get user data from Python's Object 
+		 * @param obj The source object to extract
+		 * @param typ The type object of our type
+		 * @param target Pointer to Type instance. Filled with the pointer to the instance in the object
+		 * @param castInfo The optional structure containing casting methods for conversion casts */
+		template<typename T> bool python_cast(PyObject *obj, PyTypeObject *type, T *target, CastInfo<T> *castInfo = NULL) {
+			// reinterpret cast is not a correct operation on subclasses
+			// so we need the type info to agree
+			
+			// we can try searching the cast info for subtypes if those differ 
+			PyTypeObject* ot = obj->ob_type;
+			
+			if (ot != type) {
+				CastInfo<T> * current = castInfo;
+				if (current != NULL) {
+					while (current->type != NULL) {
+						// do we have a match?
+						if (ot == current->type)
+							// yep. Cast using the upcaster
+							*target = current->caster(obj);
+							return true;
+					}
+				}
+				
+				return false;
+			}
+			
+			*target = reinterpret_cast< ObjectBase<T>* >(obj)->mInstance;
+			return true;
+		}
+		
+		// Conversion error for simplicity
+#define __PY_CONVERR_RET { PyErr_SetString(PyExc_TypeError, "Incompatible types error."); return NULL;	}
+#define __PY_NONE_RET { Py_INCREF(Py_None); return Py_None; }		
+		
 
 		/// Common ancestor for all python published C types
 		class PythonPublishedType {
