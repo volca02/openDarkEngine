@@ -158,16 +158,8 @@ namespace Opde {
 			const char* fname;
 
 			if (PyArg_ParseTuple(args, "s", &fname)) {
-			    try {
-                    o->loadResourceConfig(fname);
-			    } catch (BasicException& e) {
-			        PyErr_Format(PyExc_IOError, "Exception catched while trying to load resource config : %s", e.getDetails().c_str());
-			        return NULL;
-			    } catch (...) {
-			    	PyErr_Format(PyExc_IOError, "Exception catched while trying to load resource config");
-			        return NULL;
-			    }
-
+			    o->loadResourceConfig(fname);
+			    
 				__PY_NONE_RET;
 			} else {
 				// Invalid parameters
@@ -189,15 +181,7 @@ namespace Opde {
 			const char *fname, *gname;
 
 			if (PyArg_ParseTuple(args, "ss", &fname, &gname)) {
-			    try {
-                    o->loadDTypeScript(fname, gname);
-			    } catch (BasicException& e) {
-			        PyErr_Format(PyExc_IOError, "Exception catched while trying to load DType script : %s", e.getDetails().c_str());
-			        return NULL;
-			    } catch (...) {
-			    	PyErr_Format(PyExc_IOError, "Exception catched while trying to load DType script");
-			        return NULL;
-			    }
+				o->loadDTypeScript(fname, gname);
 
 				__PY_NONE_RET;
 			} else {
@@ -220,15 +204,7 @@ namespace Opde {
 			const char  *fname, *gname;
 
 			if (PyArg_ParseTuple(args, "ss", &fname, &gname)) {
-			    try {
-                    o->loadPLDefScript(fname, gname);
-			    } catch (BasicException& e) {
-			        PyErr_Format(PyExc_IOError, "Exception catched while trying to load PLDef script : %s", e.getDetails().c_str());
-			        return NULL;
-			    } catch (...) {
-			    	PyErr_Format(PyExc_IOError, "Exception catched while trying to load PLDef script");
-			        return NULL;
-			    }
+				o->loadPLDefScript(fname, gname);
 
 				__PY_NONE_RET;
 			} else {
@@ -251,15 +227,7 @@ namespace Opde {
 			const char *fname;
 
 			if (PyArg_ParseTuple(args, "s", &fname)) {
-			    try {
-                    o->loadConfigFile(fname);
-			    } catch (BasicException& e) {
-			        PyErr_Format(PyExc_IOError, "Exception catched while trying to load config : %s", e.getDetails().c_str());
-			        return NULL;
-			    } catch (...) {
-			    	PyErr_Format(PyExc_IOError, "Exception catched while trying to load config");
-			        return NULL;
-			    }
+				o->loadConfigFile(fname);
 
 				__PY_NONE_RET;
 			} else {
@@ -283,23 +251,12 @@ namespace Opde {
 			PyObject *recursive = Py_False;
 
 			if (PyArg_ParseTuple(args, "sss|O", &name, &type, &section, &recursive)) {
-				try {
-					bool recb = false;
-					if (PyBool_Check(recursive)) {
-						recb = (recursive == Py_True);
-					} else {
-						PyErr_Format(PyExc_TypeError, "The optional argument is expected to be Bool");
-						return NULL;
-					}
+				bool recb = false;
+				
+				if (!TypeInfo<bool>::fromPyObject(recursive, recb)) 
+					__PY_BADPARM_RET("recursive");
 
-					o->addResourceLocation(name, type, section, recb);
-				} catch (BasicException& e) {
-					PyErr_Format(PyExc_IOError, "Exception catched while trying to add resource location : %s", e.getDetails().c_str());
-					return NULL;
-				} catch (...) {
-					PyErr_Format(PyExc_IOError, "Exception catched while trying to add resource location");
-					return NULL;
-				}
+				o->addResourceLocation(name, type, section, recb);
 
 				__PY_NONE_RET;
 			} else {
@@ -322,15 +279,7 @@ namespace Opde {
 			const char *name, *section;
 
 			if (PyArg_ParseTuple(args, "ss", &name, &section)) {
-			    try {
-                    o->removeResourceLocation(name, section);
-			    } catch (BasicException& e) {
-			        PyErr_Format(PyExc_IOError, "Exception catched while trying to remove a resource location : %s", e.getDetails().c_str());
-			        return NULL;
-			    } catch (...) {
-			    	PyErr_Format(PyExc_IOError, "Exception catched while trying to remove resource location");
-			        return NULL;
-			    }
+				o->removeResourceLocation(name, section);
 
 				__PY_NONE_RET;
 			} else {
@@ -350,16 +299,8 @@ namespace Opde {
 			if (!python_cast<Root*>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
-			try {
-				o->bootstrapFinished();
-			} catch (BasicException& e) {
-				PyErr_Format(PyExc_IOError, "Exception catched while finishing bootstrap : %s", e.getDetails().c_str());
-				return NULL;
-			} catch (...) {
-				PyErr_Format(PyExc_IOError, "Exception catched while finishing bootstrap");
-				return NULL;
-			}
-
+			o->bootstrapFinished();
+			
 			__PY_NONE_RET;
 			
 			__PYTHON_EXCEPTION_GUARD_END_;
@@ -377,16 +318,8 @@ namespace Opde {
 			const char* fname;
 
 			if (PyArg_ParseTuple(args, "s", &fname)) {
-			    try {
-                    o->logToFile(fname);
-			    } catch (BasicException& e) {
-			        PyErr_Format(PyExc_IOError, "Exception catched while trying to setup file logging : %s", e.getDetails().c_str());
-			        return NULL;
-			    } catch (...) {
-			    	PyErr_Format(PyExc_IOError, "Exception catched while trying to setup file logging");
-			        return NULL;
-			    }
-
+			    o->logToFile(fname);
+			    
 			    __PY_NONE_RET;
 			} else {
 				// Invalid parameters

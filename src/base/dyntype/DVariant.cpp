@@ -199,6 +199,13 @@ namespace Opde {
 		mPrivate.data.shared = new Shared<Vector3>(Vector3(x, y, z));
 		mPrivate.isShared = true;
 	}
+	
+	//------------------------------------
+	DVariant::DVariant(float x, float y, float z, float w) {
+		mPrivate.type = DV_QUATERNION;
+		mPrivate.data.shared = new Shared<Quaternion>(Quaternion(x, y, z, w));
+		mPrivate.isShared = true;
+	}
 
 	//------------------------------------
 	DVariant::~DVariant() {

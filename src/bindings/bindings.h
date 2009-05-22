@@ -60,12 +60,12 @@ namespace Opde {
 
 			// TypeInfo(const char* tname, VariableType tt) : TypeInfoBase(tname, tt) {};
 
-			PyObject* toPyObject(T val) const {
+			static PyObject* toPyObject(T val) {
 				PyErr_SetString(PyExc_TypeError, "Binding error: Type has no conversion or TypeInfo specified!");
 				return NULL;
 			}
 			
-			bool fromPyObject(PyObject* src, T& dst) {
+			static bool fromPyObject(PyObject* src, T& dst) {
 				return false;
 			}
 		};
@@ -74,28 +74,55 @@ namespace Opde {
 		template<> struct TypeInfo<bool> : TypeInfoBase<bool> {
 			TypeInfo() : TypeInfoBase<bool>("bool", VT_BOOL) {};
 
-			PyObject* toPyObject(bool val) const {
+			static PyObject* toPyObject(bool val) {
 				PyObject* res = val ? Py_True : Py_False;
 
 				Py_INCREF(res);
 
 				return res;
 			}
+			
+			static bool fromPyObject(PyObject* src, bool& dst) {
+				if (PyBool_Check(src)) {
+					dst = (src == Py_True);
+					return true;
+				} else {
+					return false;
+				}
+			}
 		};
 
 		template<> struct TypeInfo<int> : TypeInfoBase<int> {
 			TypeInfo() : TypeInfoBase<int>("int", VT_INT) {};
 
-			PyObject* toPyObject(int val) const {
+			static PyObject* toPyObject(int val) {
 				return PyLong_FromLong(val);
+			}
+			
+			static bool fromPyObject(PyObject *src, int& dst) {
+				if (PyInt_Check(src)) {
+					dst = static_cast<int>(PyInt_AsLong(src));
+					return true;
+				} else {
+					return false;
+				}
 			}
 		};
 
 		template<> struct TypeInfo<long> : TypeInfoBase<long> {
 			TypeInfo() : TypeInfoBase<long>("long", VT_LONG) {};
 
-			PyObject* toPyObject(long val) const {
+			static PyObject* toPyObject(long val) {
 				return PyLong_FromLong(val);
+			}
+			
+			static bool fromPyObject(PyObject *src, long& dst) {
+				if (PyLong_Check(src)) {
+					dst = PyLong_AsLong(src);
+					return true;
+				} else {
+					return false;
+				}
 			}
 		};
 
@@ -103,18 +130,77 @@ namespace Opde {
 		template<> struct TypeInfo<float> : TypeInfoBase<float> {
 			TypeInfo() : TypeInfoBase<float>("float", VT_FLOAT) {};
 
-			PyObject* toPyObject(float val) const {
+			static PyObject* toPyObject(float val) {
 				return PyFloat_FromDouble(val);
+			}
+			
+			static bool fromPyObject(PyObject *src, float& dst) {
+				if (PyFloat_Check(src)) {
+					dst = PyFloat_AsDouble(src);
+					return true;
+				} else {
+					return false;
+				}
 			}
 		};
 
 		template<> struct TypeInfo<std::string>  : TypeInfoBase<std::string> {
 			TypeInfo() : TypeInfoBase<std::string>("std::string", VT_STRING) {};
 
-			PyObject* toPyObject(const std::string& val) const {
+			static PyObject* toPyObject(const std::string& val) {
 				return PyString_FromString(val.c_str());
 			}
+			
+			static bool fromPyObject(PyObject *src, std::string& dst) {
+				if (PyString_Check(src)) {
+					dst = PyString_AsString(src);
+					return true; 
+				} else {
+					return false;
+				}
+			}
 		};
+		
+		template<> struct TypeInfo<Vector3>  : TypeInfoBase<Vector3> {
+			TypeInfo() : TypeInfoBase<Vector3>("Vector3", VT_CUSTOM_TYPE) {};
+
+			static PyObject* toPyObject(const Vector3& val) {
+				return Py_BuildValue("[fff]", val.x, val.y, val.z);
+			}
+			
+			static bool fromPyObject(PyObject *src, Vector3& dst) {
+				float x, y, z;
+				if (PyArg_Parse(src, "[fff]", &x, &y, &z)) {
+					dst.x = x;
+					dst.y = y;
+					dst.z = z;
+					return true;
+				} else {
+					return false;
+				}
+			}
+		};
+		
+		template<> struct TypeInfo<Quaternion>  : TypeInfoBase<Quaternion> {
+			TypeInfo() : TypeInfoBase<Quaternion>("Quaternion", VT_CUSTOM_TYPE) {};
+
+			static PyObject* toPyObject(const Quaternion& val) {
+				return Py_BuildValue("[ffff]", val.x, val.y, val.z, val.w);
+			}
+			
+			static bool fromPyObject(PyObject *src, Quaternion& dst) {
+				float x, y, z, w;
+				if (PyArg_Parse(src, "[ffff]", &x, &y, &z, &w)) {
+					dst.x = x;
+					dst.y = y;
+					dst.z = z;
+					dst.z = w;
+					return true;
+				} else {
+					return false;
+				}
+			}
+		};	
 
 		// Global utilities - object conversion and such
 		PyObject* DVariantToPyObject(const DVariant& inst);
@@ -124,13 +210,10 @@ namespace Opde {
 		template<> struct TypeInfo<DVariant> : TypeInfoBase<DVariant> {
 			TypeInfo() : TypeInfoBase<DVariant>("DVariant", VT_CUSTOM_TYPE) {};
 
-			PyObject* toPyObject(const DVariant& val) const {
+			static PyObject* toPyObject(const DVariant& val) {
 				return DVariantToPyObject(val);
 			}
 		};
-		
-		/// helper upcasting method
-		 
 		
 		// One casting info slot. Contains Python type object an casting method pointer
 		template<class C> struct CastInfo {
@@ -199,6 +282,7 @@ namespace Opde {
 		
 		// Conversion error for simplicity
 #define __PY_CONVERR_RET { PyErr_SetString(PyExc_TypeError, "Incompatible types error."); return NULL;	}
+#define __PY_BADPARM_RET(parm) { PyErr_SetString(PyExc_TypeError, "Incompatible parameter type on '" #parm "'"); return NULL;	}
 #define __PY_NONE_RET { Py_INCREF(Py_None); return Py_None; }		
 		
 

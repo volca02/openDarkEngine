@@ -108,6 +108,13 @@ namespace Opde {
 			* @param y the Y part of the vector
 			* @param z the Z part of the vector */
 			DVariant(float x, float y, float z);
+			
+			/** Quaternion constructor.
+			* @param x the X part of the quaternion
+			* @param y the Y part of the quaternion
+			* @param z the Z part of the quaternion 
+			* @param w the W part of the quaternion */
+			DVariant(float x, float y, float z, float w);
 
 			/** Vector3 constructor.
 			* @param vec the source vector to copy value from */

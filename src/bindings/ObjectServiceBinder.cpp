@@ -296,37 +296,110 @@ namespace Opde
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::teleport(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			// TODO: Impl
-			PyErr_SetString(PyExc_NotImplementedError, "Not Implemented yet!");
-			return NULL;
+			ObjectServicePtr o;
+			
+			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
+
+			// params: The object ID, position, rotation
+			int id;
+			PyObject *pos, *rot, *rel = Py_False;
+
+			if (PyArg_ParseTuple(args, "iOO|O", &id, &pos, &rot, &rel)) {
+				Vector3 cpos;
+				Quaternion crot;
+				bool crel = false;
+
+				if (!TypeInfo<Vector3>::fromPyObject(pos, cpos))
+					__PY_BADPARM_RET(2);
+				
+				if (!TypeInfo<Quaternion>::fromPyObject(rot, crot))
+					__PY_BADPARM_RET(3);
+				
+				if (!TypeInfo<bool>::fromPyObject(rel, crel))
+					__PY_BADPARM_RET(4);
+				
+				o->teleport(id, cpos, crot, crel);
+
+				__PY_NONE_RET;
+			} else {
+				// Invalid parameters
+				PyErr_SetString(PyExc_TypeError, "Expected an integer, vector, quaternion and optional boolean arguments!");
+				return NULL;
+			}
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::addMetaProperty(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			// TODO: Impl
-			PyErr_SetString(PyExc_NotImplementedError, "Not Implemented yet!");
-			return NULL;
+			ObjectServicePtr o;
+			
+			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
+
+			// params: The object ID, mp name
+			int id;
+			char *mp;
+
+			if (PyArg_ParseTuple(args, "is", &id, &mp)) {
+				int retc = o->addMetaProperty(id, mp);
+
+				// return code
+				return TypeInfo<int>::toPyObject(retc);
+			} else {
+				// Invalid parameters
+				PyErr_SetString(PyExc_TypeError, "Expected an integer and string arguments!");
+				return NULL;
+			}
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::removeMetaProperty(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			// TODO: Impl
-			PyErr_SetString(PyExc_NotImplementedError, "Not Implemented yet!");
-			return NULL;
+			ObjectServicePtr o;
+			
+			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
+
+			// params: The object ID, mp name
+			int id;
+			char *mp;
+
+			if (PyArg_ParseTuple(args, "is", &id, &mp)) {
+				int retc = o->removeMetaProperty(id, mp);
+
+				// return code
+				return TypeInfo<int>::toPyObject(retc);
+			} else {
+				// Invalid parameters
+				PyErr_SetString(PyExc_TypeError, "Expected an integer and string arguments!");
+				return NULL;
+			}
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* ObjectServiceBinder::hasMetaProperty(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			// TODO: Impl
-			PyErr_SetString(PyExc_NotImplementedError, "Not Implemented yet!");
-			return NULL;
-			__PYTHON_EXCEPTION_GUARD_END_;
+			ObjectServicePtr o;
+			
+			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
+
+			// params: The object ID, mp name
+			int id;
+			char *mp;
+
+			if (PyArg_ParseTuple(args, "is", &id, &mp)) {
+				return TypeInfo<bool>::toPyObject( o->hasMetaProperty(id, mp) );
+			} else {
+				// Invalid parameters
+				PyErr_SetString(PyExc_TypeError, "Expected an integer and string arguments!");
+				return NULL;
+			}
+			__PYTHON_EXCEPTION_GUARD_END_;		
 		}
 
 

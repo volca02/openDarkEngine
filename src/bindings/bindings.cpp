@@ -44,36 +44,20 @@ namespace Opde {
 					Py_INCREF(Py_None);
 					return Py_None;
 
-				case DVariant::DV_BOOL: {
-					PyObject* ret = inst.toBool() ? Py_True : Py_False;
-					Py_INCREF(ret);
-					return ret;
-				}
-
+				case DVariant::DV_BOOL:
+					return TypeInfo<bool>::toPyObject(inst.toBool());
 				case DVariant::DV_FLOAT:
-					return PyFloat_FromDouble(inst.toFloat());
-
+					return TypeInfo<float>::toPyObject(inst.toFloat());
 				case DVariant::DV_INT:
-					return PyInt_FromLong(inst.toInt());
-
+					return TypeInfo<int>::toPyObject(inst.toInt());
 				case DVariant::DV_UINT:
-					return PyInt_FromLong(inst.toUInt());
-
+					return TypeInfo<int>::toPyObject(inst.toUInt());
 				case DVariant::DV_STRING:
-					return PyString_FromString(inst.toString().c_str());
-
-				case DVariant::DV_VECTOR: {
-					// Build a touple
-					const Ogre::Vector3& v = inst.toVector();
-					return Py_BuildValue("[fff]", v.x, v.y, v.z);
-				}
-
-				case DVariant::DV_QUATERNION: {
-					// Build a touple
-					const Ogre::Quaternion& q = inst.toQuaternion();
-					return Py_BuildValue("[ffff]", q.x, q.y, q.z, q.w);
-				}
-
+					return TypeInfo<std::string>::toPyObject(inst.toString());
+				case DVariant::DV_VECTOR: 
+					return TypeInfo<Vector3>::toPyObject(inst.toVector());
+				case DVariant::DV_QUATERNION: 
+					return TypeInfo<Quaternion>::toPyObject(inst.toQuaternion());
 				default:	//All possible paths must return a value
                     PyErr_SetString(PyExc_TypeError, "Invalid DVariant type");
                     return NULL;
@@ -99,9 +83,15 @@ namespace Opde {
 				return DVariant(PyString_AsString(obj));
 			else if (PyModule_Check(obj))
 			{
-				float X, Y, Z;
-				PyArg_Parse(obj, "[fff]", &X, &Y, &Z);
-				return DVariant(X, Y, Z);
+				float x, y, z, w;
+				
+				if (PyArg_Parse(obj, "[ffff]", &x, &y, &z, &w)) {
+					return DVariant(x, y, z, w);
+				} else if (PyArg_Parse(obj, "[fff]", &x, &y, &z)) {
+					return DVariant(x, y, z);
+				} else
+					return DVariant(DVariant::DV_INVALID);
+				
 			}
 
 			return DVariant(DVariant::DV_INVALID); //Py_None, or a non-handled type
