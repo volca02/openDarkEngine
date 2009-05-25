@@ -27,7 +27,10 @@
 #include "DrawSheet.h"
 #include "DrawSheetBinder.h"
 #include "DrawSourceBinder.h"
+#include "FontDrawSourceBinder.h"
 #include "RenderedImageBinder.h"
+#include "RenderedLabelBinder.h"
+#include "TextureAtlasBinder.h"
 
 namespace Opde {
 
@@ -92,7 +95,6 @@ namespace Opde {
 		PyObject* DrawServiceBinder::createSheet(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
-			PyObject *result = NULL;
 			DrawServicePtr o;
 			
 			if (!python_cast<DrawServicePtr>(self, &msType, &o))
@@ -105,12 +107,9 @@ namespace Opde {
 			if (PyArg_ParseTuple(args, "s", &sname)) {
 			    DrawSheet* i = o->createSheet(sname);
 			    
-			    // TODO: Sheet binding...
 			    PyObject *o = DrawSheetBinder::create(i);
-			    
-				result = o;
 				
-				return result;
+				return o;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
@@ -263,56 +262,122 @@ namespace Opde {
 		
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::createRenderedLabel(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			
 			PyObject *result = NULL;
 			DrawServicePtr o;
 			
 			if (!python_cast<DrawServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 			
-			return result;	//Temporary return to fix the VC build
+
+			PyObject *ds;
+			if (PyArg_ParseTuple(args, "o", &ds)) {
+				FontDrawSourcePtr cds;
+				
+				if (!FontDrawSourceBinder::extract(ds, cds))
+					__PY_CONVERR_RET;
+					
+				RenderedLabel* ri = o->createRenderedLabel(cds);
+				
+				return RenderedLabelBinder::create(ri);
+			}
+			
+			return result;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::destroyDrawOperation(PyObject* self, PyObject* args) {
-			PyObject *result = NULL;
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			DrawServicePtr o;
 			
 			if (!python_cast<DrawServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 			
-			return result;	//Temporary return to fix the VC build
+			PyObject *dop;
+			
+			if (!PyArg_ParseTuple(args, "o", &dop))
+				__PY_BADPARM_RET(1);
+					
+			
+			DrawOperation* dopc;
+			
+			if (!DrawOperationBinder::extract(dop, dopc))
+				__PY_CONVERR_RET;
+			
+			o->destroyDrawOperation(dopc);
+			
+			__PY_NONE_RET;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
+		
 		// ------------------------------------------		
 		PyObject* DrawServiceBinder::createAtlas(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
 			DrawServicePtr o;
 			
 			if (!python_cast<DrawServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 			
-			return result;	//Temporary return to fix the VC build
+			TextureAtlas *a = o->createAtlas();
+			
+			return TextureAtlasBinder::create(a);
+			
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::destroyAtlas(PyObject* self, PyObject* args) {
-			PyObject *result = NULL;
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			DrawServicePtr o;
 			
 			if (!python_cast<DrawServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 			
-			return result;	//Temporary return to fix the VC build
+			PyObject *atp;
+			
+			if (!PyArg_ParseTuple(args, "o", &atp))
+				__PY_BADPARM_RET(1);
+					
+			
+			TextureAtlas* atl;
+			
+			if (!TextureAtlasBinder::extract(atp, atl))
+				__PY_CONVERR_RET;
+			
+			o->destroyAtlas(atl);
+			
+			__PY_NONE_RET;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 		// ------------------------------------------		
 		PyObject* DrawServiceBinder::loadFont(PyObject* self, PyObject* args) {
-			PyObject *result = NULL;
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			DrawServicePtr o;
 			
 			if (!python_cast<DrawServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 			
-			return result;	//Temporary return to fix the VC build
+			// name, group
+			PyObject* patlas = NULL;
+			char *name, *group;
+			if (!PyArg_ParseTuple(args, "oss", &name, &group))
+				__PY_BADPARMS_RET;
+			
+			TextureAtlas *atlas;
+			
+			if (!TextureAtlasBinder::extract(patlas, atlas))
+				__PY_BADPARM_RET("atlas");
+			
+			FontDrawSourcePtr fds = o->loadFont(atlas, name, group);
+			
+			return FontDrawSourceBinder::create(fds);
+			
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::setFontPalette(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
 			DrawServicePtr o;
 			
@@ -320,6 +385,7 @@ namespace Opde {
 				__PY_CONVERR_RET;
 			
 			return result;	//Temporary return to fix the VC build
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 		
 		// ------------------------------------------

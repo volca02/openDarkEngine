@@ -77,10 +77,10 @@ namespace Opde {
 		
 
 		// ClipRect type info
-                template<> struct TypeInfo<ClipRect> : TypeInfoBase<ClipRect> {
-                        TypeInfo() : TypeInfoBase<ClipRect>("ClipRect", VT_CUSTOM_TYPE) {};
+		template<> struct TypeInfo<ClipRect> : TypeInfoBase<ClipRect> {
+			TypeInfo() : TypeInfoBase<ClipRect>("ClipRect", VT_CUSTOM_TYPE) {};
 
-                        PyObject* toPyObject(const ClipRect& cr) const {
+			PyObject* toPyObject(const ClipRect& cr) const {
 				// tuple it is
 				PyObject *crp = PyTuple_New(4);
 				PyTuple_SetItem(crp, 0, PyFloat_FromDouble(cr.left)); // Steals reference
@@ -89,7 +89,7 @@ namespace Opde {
 				PyTuple_SetItem(crp, 3, PyFloat_FromDouble(cr.bottom)); // Steals reference
 				
 				return crp;
-                        }
+			}
 			
 			bool fromPyObject(PyObject* o, ClipRect& cr) {
 				if (!PyTuple_Check(o))
@@ -105,16 +105,18 @@ namespace Opde {
 				
 				return true;
 			}
-                };
+		};
 		
                 
         /// forward declaration of the child classes
         class RenderedImageBinder;
+        class RenderedLabelBinder;
         
 		/// DrawOperation base class binder
 		class DrawOperationBinder : public class_ptr_binder<DrawOperation> {
 			// For inheritance - msType access
 			friend class RenderedImageBinder;
+			friend class RenderedLabelBinder;
 			
 			public:
 				static void init(PyObject* module);

@@ -200,6 +200,27 @@ namespace Opde {
 					return false;
 				}
 			}
+		};
+		
+		template<> struct TypeInfo<Ogre::ColourValue>  : TypeInfoBase<Ogre::ColourValue> {
+			TypeInfo() : TypeInfoBase<Ogre::ColourValue>("Ogre::ColourValue", VT_CUSTOM_TYPE) {};
+
+			static PyObject* toPyObject(const Ogre::ColourValue& val) {
+				return Py_BuildValue("[ffff]", val.r, val.g, val.b, val.a);
+			}
+			
+			static bool fromPyObject(PyObject *src, Ogre::ColourValue& dst) {
+				float r, g, b, a;
+				if (PyArg_Parse(src, "[ffff]", &r, &g, &b, &a)) {
+					dst.r = r;
+					dst.g = g;
+					dst.b = b;
+					dst.a = a;
+					return true;
+				} else {
+					return false;
+				}
+			}
 		};	
 
 		// Global utilities - object conversion and such
@@ -212,6 +233,11 @@ namespace Opde {
 
 			static PyObject* toPyObject(const DVariant& val) {
 				return DVariantToPyObject(val);
+			}
+			
+			static bool fromPyObject(PyObject *src, DVariant& dst) {
+				dst = PyObjectToDVariant(src);
+				return true;
 			}
 		};
 		
@@ -245,7 +271,6 @@ namespace Opde {
 		/// Upcaster for python side class inheritance resolution for non-smartptr objects 
 		template<class P, class C> P defaultPythonUpcaster(PyObject *obj) {
 			ObjectBase<C> *mywrap = reinterpret_cast< ObjectBase<C>* >(obj);
-			assert(mywrap->ob_type == msType); 
 			return static_cast<P>(mywrap->mInstance);
 		}
 
@@ -283,6 +308,7 @@ namespace Opde {
 		// Conversion error for simplicity
 #define __PY_CONVERR_RET { PyErr_SetString(PyExc_TypeError, "Incompatible types error."); return NULL;	}
 #define __PY_BADPARM_RET(parm) { PyErr_SetString(PyExc_TypeError, "Incompatible parameter type on '" #parm "'"); return NULL;	}
+#define __PY_BADPARMS_RET { PyErr_SetString(PyExc_TypeError, "Incompatible parameters"); return NULL;	}
 #define __PY_NONE_RET { Py_INCREF(Py_None); return Py_None; }		
 		
 
