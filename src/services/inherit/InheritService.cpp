@@ -279,6 +279,14 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
+	bool InheritService::hasTargets(int objID) const {
+		InheritMap::const_iterator it = mInheritTargets.find(objID);
+
+		return (it != mInheritTargets.end());
+	}
+
+
+	//------------------------------------------------------
 	void InheritService::setArchetype(int objID, int archetypeID) {
 		if (getArchetype(objID) != 0) {
 			OPDE_EXCEPT("Given object already has an archetype set","InheritService::setArchetype");

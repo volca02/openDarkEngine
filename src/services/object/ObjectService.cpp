@@ -386,6 +386,8 @@ namespace Opde {
 			}
 		}
 
+		mDatabaseService->fineStep(1);
+		
 		// Now, inform link service and property service (let them load)
 		try {
 			mPropertyService->load(db, fileObjs);
@@ -393,12 +395,16 @@ namespace Opde {
 			LOG_FATAL("Exception while loading properties from mission database : %s", e.getDetails().c_str());
 		}
 
+		mDatabaseService->fineStep(1);
+		
 		try {
 			mLinkService->load(db, mAllocatedObjects); // will load MP links if those exist as well, causing inherited properties to emerge
 		} catch (BasicException& e) {
 			LOG_FATAL("Exception while loading links from mission database : %s", e.getDetails().c_str());
 		}
 
+		mDatabaseService->fineStep(1);
+		
 		// Free all id's that are not in use for reuse
 		for (int i = 0; i < lastID; i++) {
 			// if the bitmaps is zeroed on the position, free the ID for reuse

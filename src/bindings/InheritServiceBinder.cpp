@@ -72,6 +72,7 @@ namespace Opde {
 		PyMethodDef InheritServiceBinder::msMethods[] = {
 			{"getSources", getSources, METH_VARARGS},
 			{"getTargets", getTargets, METH_VARARGS},
+			{"hasTargets", hasTargets, METH_VARARGS},
 			{"getArchetype", getArchetype, METH_VARARGS},
 			{"setArchetype", setArchetype, METH_VARARGS},
 			{"inheritsFrom", inheritsFrom, METH_VARARGS},
@@ -128,6 +129,28 @@ namespace Opde {
 			}
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
+
+		// ------------------------------------------
+		PyObject* InheritServiceBinder::hasTargets(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			PyObject *result = NULL;
+			InheritServicePtr o;
+			
+			if (!python_cast<InheritServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
+			
+			int objID;
+
+			if (PyArg_ParseTuple(args, "i", &objID)) {
+				return TypeInfo<bool>::toPyObject(o->hasTargets(objID));
+			} else {
+				// Invalid parameters
+				PyErr_SetString(PyExc_TypeError, "Expected one integer argument!");
+				return NULL;
+			}
+			__PYTHON_EXCEPTION_GUARD_END_;
+		}
+
 
 		// ------------------------------------------
 		PyObject* InheritServiceBinder::getArchetype(PyObject* self, PyObject* args) {

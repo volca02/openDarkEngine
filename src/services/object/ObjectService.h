@@ -169,13 +169,13 @@ namespace Opde {
 			/** Database change callback */
 			void onDBChange(const DatabaseChangeMsg& m);
 
-			/** load links from a single database */
+			/** load objects from a single database */
 			void _load(const FileGroupPtr& db, uint clearMask);
 
-			/** Saves the links and link data according to the saveMask */
+			/** Saves the objects according to the saveMask */
 			void _save(const FileGroupPtr& db, uint saveMask);
 
-			/** Clears all the data and the relation mappings */
+			/** Clears all the data (whole object system) */
 			void _clear(uint clearMask);
 
 			/// Begins the creation of an object. Prepares properties and links as needed

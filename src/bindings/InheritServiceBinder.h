@@ -44,6 +44,7 @@ namespace Opde {
 				// --- Methods ---
 				static PyObject* getSources(PyObject* self, PyObject* args);
 				static PyObject* getTargets(PyObject* self, PyObject* args);
+				static PyObject* hasTargets(PyObject* self, PyObject* args);				
 				static PyObject* getArchetype(PyObject* self, PyObject* args);
 				static PyObject* setArchetype(PyObject* self, PyObject* args);
 				// metaprop handling is already binded in ObjectService

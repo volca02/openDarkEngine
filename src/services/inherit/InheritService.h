@@ -90,6 +90,10 @@ namespace Opde {
 			 * @param objID the id of the object to get inheritance targets for
 			 * */
 			InheritQueryResultPtr getTargets(int objID) const;
+			
+			/** Simple detector of inheritance target existance. Returns true if there are objects inheriting from the given one
+			  */
+			bool hasTargets(int objID) const;
 
 			/** Sets an archetype for given object (MP link with priority 0)
 			* @param objID the target object to set archetype for
