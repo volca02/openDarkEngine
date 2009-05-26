@@ -1,0 +1,6 @@
+LIST(APPEND OPDE_SERVICE_SOURCES ${OPDE_SOURCE_DIR}/src/services/object/ObjectService.cpp)
+LIST(APPEND OPDE_SERVICE_SOURCES ${OPDE_SOURCE_DIR}/src/services/object/PositionPropertyStorage.cpp)
+LIST(APPEND OPDE_SERVICE_SOURCES ${OPDE_SOURCE_DIR}/src/services/object/SymNamePropertyStorage.cpp)
+LIST(APPEND OPDE_SERVICE_HEADERS ${OPDE_SOURCE_DIR}/src/services/object/ObjectService.h)
+LIST(APPEND OPDE_SERVICE_HEADERS ${OPDE_SOURCE_DIR}/src/services/object/PositionPropertyStorage.h)
+LIST(APPEND OPDE_SERVICE_HEADERS ${OPDE_SOURCE_DIR}/src/services/object/SymNamePropertyStorage.h)

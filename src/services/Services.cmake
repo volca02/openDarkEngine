@@ -5,7 +5,7 @@ SET(OPDE_SERVICE_INCLUDES
     ${OPDE_SOURCE_DIR}/src/services/
     ${OPDE_SOURCE_DIR}/src/services/binary
     ${OPDE_SOURCE_DIR}/src/services/game
-	${OPDE_SOURCE_DIR}/src/services/physics
+    ${OPDE_SOURCE_DIR}/src/services/physics
     ${OPDE_SOURCE_DIR}/src/services/config
     ${OPDE_SOURCE_DIR}/src/services/worldrep
     ${OPDE_SOURCE_DIR}/src/services/link
@@ -44,8 +44,30 @@ SET(OPDE_SERVICE_LIBRARIES
     OpdeDrawService
 )
 
-FILE(GLOB_RECURSE OPDE_SERVICE_SOURCES ${OPDE_SOURCE_DIR}/src/services/*.h)
-FILE(GLOB_RECURSE OPDE_SERVICE_HEADERS ${OPDE_SOURCE_DIR}/src/services/*.cpp)
-SET(OPDE_SERVICE_FILES ${OPDE_SERVICE_HEADERS} ${OPDE_SERVICE_SOURCES})
+# include the configuration from all the services (each config.cmake should append the OPDE_SERVICE_HEADERS and OPDE_SERVICE_SOURCES)
+# that is done via: LIST(APPEND OPDE_SERVICE_SOURCES myfile.cpp) and simmilar...
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/binary/config.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/config/config.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/database/config.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/draw/config.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/game/config.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/gui/config.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/inherit/config.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/input/config.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/light/config.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/link/config.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/loop/config.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/material/config.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/object/config.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/physics/config.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/property/config.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/render/config.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/script/config.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/sim/config.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/worldrep/config.cmake )
+
+# join the variables
+SET(OPDE_SERVICE_FILES ${OPDE_SERVICE_HEADERS})
+LIST(APPEND OPDE_SERVICE_FILES ${OPDE_SERVICE_SOURCES})
 
 # To use this, just do INCLUDE(${OPDE_SOURCE_DIR}/src/services/Services.cmake)
