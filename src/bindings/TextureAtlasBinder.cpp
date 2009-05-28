@@ -79,7 +79,6 @@ namespace Opde {
 		PyObject *TextureAtlasBinder::createDrawSource(PyObject *self, PyObject *args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
-			PyObject *result = NULL;
 			TextureAtlas* o;
 			
 			if (!python_cast<TextureAtlas*>(self, &msType, &o))
@@ -106,9 +105,8 @@ namespace Opde {
 		
 		// ------------------------------------------
 		PyObject *TextureAtlasBinder::getAtlasID(PyObject *self, PyObject *args) {
-		__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
-			PyObject *result = NULL;
 			TextureAtlas* o;
 			
 			if (!python_cast<TextureAtlas*>(self, &msType, &o))

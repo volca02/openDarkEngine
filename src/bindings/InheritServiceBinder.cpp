@@ -133,7 +133,6 @@ namespace Opde {
 		// ------------------------------------------
 		PyObject* InheritServiceBinder::hasTargets(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			PyObject *result = NULL;
 			InheritServicePtr o;
 			
 			if (!python_cast<InheritServicePtr>(self, &msType, &o))
