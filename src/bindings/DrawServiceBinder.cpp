@@ -314,7 +314,6 @@ namespace Opde {
 		// ------------------------------------------		
 		PyObject* DrawServiceBinder::createAtlas(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			PyObject *result = NULL;
 			DrawServicePtr o;
 			
 			if (!python_cast<DrawServicePtr>(self, &msType, &o))
@@ -463,7 +462,8 @@ namespace Opde {
 		};
 		
 		CastInfo<DrawOperation*> DrawOperationBinder::msCastInfo[] = {
-				{&RenderedImageBinder::msType, &defaultPythonUpcaster<DrawOperation*, RenderedImage*>}
+				{&RenderedImageBinder::msType, &defaultPythonUpcaster<DrawOperation*, RenderedImage*>},
+				{&RenderedLabelBinder::msType, &defaultPythonUpcaster<DrawOperation*, RenderedLabel*>}
 		};
 		
 		// ------------------------------------------
@@ -528,7 +528,7 @@ namespace Opde {
 			if (PyArg_ParseTuple(args, "o", &cr)) {
 				// if it's a tuple, it should contain four floats
 				ClipRect rect;
-				if (!msRectTypeInfo.fromPyObject(cr, rect)) {
+				if (!TypeInfo<ClipRect>::fromPyObject(cr, rect)) {
 					PyErr_SetString(PyExc_TypeError, "Expected 4 float tuple!");
 	                                return NULL;
 				};

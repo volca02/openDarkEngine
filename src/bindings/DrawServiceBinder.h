@@ -80,7 +80,7 @@ namespace Opde {
 		template<> struct TypeInfo<ClipRect> : TypeInfoBase<ClipRect> {
 			TypeInfo() : TypeInfoBase<ClipRect>("ClipRect", VT_CUSTOM_TYPE) {};
 
-			PyObject* toPyObject(const ClipRect& cr) const {
+			static PyObject* toPyObject(const ClipRect& cr) {
 				// tuple it is
 				PyObject *crp = PyTuple_New(4);
 				PyTuple_SetItem(crp, 0, PyFloat_FromDouble(cr.left)); // Steals reference
@@ -91,7 +91,7 @@ namespace Opde {
 				return crp;
 			}
 			
-			bool fromPyObject(PyObject* o, ClipRect& cr) {
+			static bool fromPyObject(PyObject* o, ClipRect& cr) {
 				if (!PyTuple_Check(o))
 					return false;
 					
@@ -149,8 +149,6 @@ namespace Opde {
 				
 				/// Up-casting helper structures
 				static CastInfo<DrawOperation*> msCastInfo[];
-				
-				static TypeInfo<ClipRect> msRectTypeInfo;
 		};
 		
 	}
