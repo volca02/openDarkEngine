@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *	   $Id: DrawSheetBinder.h 1193 2009-05-18 12:59:46Z volca $
+ *	   $Id$
  *
  *****************************************************************************/
 
