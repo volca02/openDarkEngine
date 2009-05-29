@@ -54,7 +54,7 @@ namespace Opde {
 			0,			              // hashfunc tp_hash;     /* __hash__ */
 			0,                        // ternaryfunc tp_call;  /* __call__ */
 			0,			              // reprfunc tp_str;      /* __str__ */
-			0,			              // getattrofunc tp_getattro; */
+			PyObject_GenericGetAttr,              // getattrofunc tp_getattro; */
 			0,			              // setattrofunc tp_setattro; */
 			0,			              // PyBufferProcs *tp_as_buffer; */
 			// for inheritance searches to work we need this

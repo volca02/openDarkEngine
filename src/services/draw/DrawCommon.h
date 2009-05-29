@@ -38,6 +38,11 @@
 namespace Opde {
 	/// Forward decl. (ownership)
 	class DrawService;
+	class TextureAtlas;
+	class FontDrawSource;
+	
+	typedef shared_ptr<TextureAtlas> TextureAtlasPtr;
+	typedef shared_ptr<FontDrawSource> FontDrawSourcePtr;
 
 	/// Universal rect. Specifies left, right, top and bottom coordinates
 	template<typename T> struct DrawRect {

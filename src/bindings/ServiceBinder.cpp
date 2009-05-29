@@ -29,6 +29,7 @@
 #include "PropertyServiceBinder.h"
 #include "LoopServiceBinder.h"
 #include "InputServiceBinder.h"
+#include "DrawServiceBinder.h"
 #include "GUIServiceBinder.h"
 #include "DatabaseServiceBinder.h"
 #include "ObjectServiceBinder.h"
@@ -41,11 +42,12 @@ namespace Opde {
 		const char* ServiceBinder::msName = "opde.services";
 
 		PyMethodDef ServiceBinder::msMethods[] = {
-			{const_cast<char*>("getConfigService"), getConfigService, METH_NOARGS},
-			{const_cast<char*>("getLinkService"), getLinkService, METH_NOARGS},
-			{const_cast<char*>("getPropertyService"), getPropertyService, METH_NOARGS, "getPropertyService() -> self.PropertyService\n\tReturns a reference object to the PropertyService instance"},
+			{const_cast<char*>("getConfigService"), getConfigService, METH_NOARGS, "getConfigService() -> opde.services.ConfigService\n\tReturns a reference object to the ConfigService instance"},
+			{const_cast<char*>("getLinkService"), getLinkService, METH_NOARGS, "getLinkService() -> opde.services.LinkService\n\tReturns a reference object to the LinkService instance"},
+			{const_cast<char*>("getPropertyService"), getPropertyService, METH_NOARGS, "getPropertyService() -> opde.services.PropertyService\n\tReturns a reference object to the PropertyService instance"},
 			{const_cast<char*>("getLoopService"), getLoopService, METH_NOARGS},
 			{const_cast<char*>("getInputService"), getInputService, METH_NOARGS},
+			{const_cast<char*>("getDrawService"), getDrawService, METH_NOARGS},
 			{const_cast<char*>("getGUIService"), getGUIService, METH_NOARGS},
 			{const_cast<char*>("getDatabaseService"), getDatabaseService, METH_NOARGS},
 			{const_cast<char*>("getObjectService"), getObjectService, METH_NOARGS},
@@ -92,6 +94,15 @@ namespace Opde {
 		PyObject* ServiceBinder::getInputService(PyObject* self, PyObject* args) {
 			try {
                 return InputServiceBinder::create();
+			} catch (BasicException &e) {
+			    PyErr_Format(PyExc_EnvironmentError, "Exception happened while getting service: %s", e.getDetails().c_str());
+			    return NULL;
+			}
+		}
+
+		PyObject* ServiceBinder::getDrawService(PyObject* self, PyObject* args) {
+			try {
+        		    return DrawServiceBinder::create();
 			} catch (BasicException &e) {
 			    PyErr_Format(PyExc_EnvironmentError, "Exception happened while getting service: %s", e.getDetails().c_str());
 			    return NULL;

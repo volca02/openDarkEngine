@@ -33,7 +33,7 @@ namespace Opde {
 	namespace Python {
 
 		/// TextureAtlas python binder
-		class TextureAtlasBinder : public class_ptr_binder<TextureAtlas> {
+		class TextureAtlasBinder : public shared_ptr_binder<TextureAtlasPtr> {
 			public:
 				static void init(PyObject* module);
 
@@ -44,14 +44,14 @@ namespace Opde {
 				static PyObject* repr(PyObject *self);
 				
 				/// helper class pointer extractor
-				static bool extract(PyObject *obj, TextureAtlas*& tgt);
+				static bool extract(PyObject *obj, TextureAtlasPtr& tgt);
 				
 				// methods:
 				static PyObject *createDrawSource(PyObject *self, PyObject *args);
 				static PyObject *getAtlasID(PyObject *self, PyObject *args);
 
 				
-				static PyObject* create(TextureAtlas*& ds);
+				static PyObject* create(const TextureAtlasPtr& ds);
 
 			protected:
 				/// Static type definition

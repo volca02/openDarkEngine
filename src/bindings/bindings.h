@@ -30,18 +30,23 @@
 
 #include <Python.h>
 #include <OgreVector3.h>
+#include <OgreException.h>
 
+// TODO: We should create our own exception type to help python side coding
 // Exception guard for the python code. use this as first/last lines of the binding function to have it prepared for exceptions
 #define __PYTHON_EXCEPTION_GUARD_BEGIN_ try {
-#define __PYTHON_EXCEPTION_GUARD_END_ } catch (BasicException& e) { \
-			        PyErr_Format(PyExc_RuntimeError, "C++ side exception (%s:%u) : %s", __FILE__, __LINE__, e.getDetails().c_str()); \
-			        return NULL; \
-			    }
 
 #define __PYTHON_EXCEPTION_GUARD_END_RVAL(rval) } catch (BasicException& e) { \
 			        PyErr_Format(PyExc_RuntimeError, "C++ side exception (%s:%u) : %s", __FILE__, __LINE__, e.getDetails().c_str()); \
 			        return rval; \
+			    } catch (Ogre::Exception& e) { \
+			        PyErr_Format(PyExc_RuntimeError, "Ogre exception (%s:%u) : %s", __FILE__, __LINE__, e.getFullDescription().c_str()); \
+			        return rval; \
 			    }
+
+#define __PYTHON_EXCEPTION_GUARD_END_ __PYTHON_EXCEPTION_GUARD_END_RVAL(NULL)
+
+
 
 namespace Opde {
 	namespace Python {
@@ -289,12 +294,13 @@ namespace Opde {
 			if (ot != type) {
 				CastInfo<T> * current = castInfo;
 				if (current != NULL) {
-					while (current->type != NULL) {
+					for (;current->type != NULL; ++current) {
 						// do we have a match?
-						if (ot == current->type)
+						if (ot == current->type) {
 							// yep. Cast using the upcaster
 							*target = current->caster(obj);
 							return true;
+						}
 					}
 				}
 				

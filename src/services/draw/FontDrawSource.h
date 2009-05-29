@@ -27,6 +27,7 @@
 
 #include "DrawCommon.h"
 #include "SharedPtr.h"
+#include "TextureAtlas.h"
 
 #include <OgreImage.h>
 #include <OgreTexture.h>
@@ -40,7 +41,7 @@ namespace Opde {
 		public:
 			/** A font definition constructor
 			* @param container The rendering atlas */
-			FontDrawSource(TextureAtlas* container, const std::string& name);
+			FontDrawSource(const TextureAtlasPtr& container, const std::string& name);
 
 			/** Adds a glyph definition
 			* @param chr The character represented by this definition
@@ -68,7 +69,7 @@ namespace Opde {
 			void build();
 
 			/// Returns the owning atlas of this font draw source 
-			inline TextureAtlas* getAtlas() { return mContainer; };
+			inline const TextureAtlasPtr& getAtlas() { return mContainer; };
 			
 			/** Calculates a width and height of the given text string.
 			 *  The resulting size is of a unclipped, newline respecting text
@@ -91,7 +92,7 @@ namespace Opde {
 			typedef std::map<FontCharType, DrawSource*> GlyphMap;
 
 			/// Containing atlas
-			TextureAtlas* mContainer;
+			TextureAtlasPtr mContainer;
 
 			/// The map of the glyphs this font containts
 			GlyphMap mRepresentedGlyphs;
@@ -108,8 +109,6 @@ namespace Opde {
 			/// Built flag (finalization indicator)
 			bool mBuilt;
 	};
-	
-	typedef shared_ptr<FontDrawSource> FontDrawSourcePtr;
 };
 
 #endif

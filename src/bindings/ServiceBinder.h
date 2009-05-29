@@ -43,6 +43,7 @@ namespace Opde {
 				static PyObject* getPropertyService(PyObject* self, PyObject* args);
 				static PyObject* getLoopService(PyObject* self, PyObject* args);
 				static PyObject* getInputService(PyObject* self, PyObject* args);
+				static PyObject* getDrawService(PyObject* self, PyObject* args);
 				static PyObject* getGUIService(PyObject* self, PyObject* args);
 				static PyObject* getDatabaseService(PyObject* self, PyObject* args);
 				static PyObject* getObjectService(PyObject* self, PyObject* args);

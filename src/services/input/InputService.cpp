@@ -96,192 +96,192 @@ namespace Opde {
     }
 
 	//------------------------------------------------------
-	void InputService::RegisterValidKey(int kc, const std::string& txt) 
+	void InputService::registerValidKey(int kc, const std::string& txt) 
 	{
 		mKeyMap.insert(make_pair(kc, txt));
 		mReverseKeyMap.insert(make_pair(txt, kc));
 	}
 
 	//------------------------------------------------------
-	void InputService::InitKeyMap()
+	void InputService::initKeyMap()
 	{
-		RegisterValidKey(KC_ESCAPE, "esc");
+		registerValidKey(KC_ESCAPE, "esc");
 
-		RegisterValidKey(KC_1, "1");
-		RegisterValidKey(KC_1 | SHIFT_MOD, "!");
-		RegisterValidKey(KC_2, "2");
-		RegisterValidKey(KC_2 | SHIFT_MOD, "@");
-		RegisterValidKey(KC_3, "3");
-		RegisterValidKey(KC_3 | SHIFT_MOD, "#");
-		RegisterValidKey(KC_4, "4");
-		RegisterValidKey(KC_4 | SHIFT_MOD, "$");
-		RegisterValidKey(KC_5, "5");
-		RegisterValidKey(KC_5 | SHIFT_MOD, "%");
-		RegisterValidKey(KC_6, "6");
-		RegisterValidKey(KC_6 | SHIFT_MOD, "^");
-		RegisterValidKey(KC_7, "7");
-		RegisterValidKey(KC_7 | SHIFT_MOD, "&");
-		RegisterValidKey(KC_8, "8");
-		RegisterValidKey(KC_8 | SHIFT_MOD, "*");
-		RegisterValidKey(KC_9, "9");
-		RegisterValidKey(KC_9 | SHIFT_MOD, "(");
-		RegisterValidKey(KC_0, "0");
-		RegisterValidKey(KC_0 | SHIFT_MOD, ")");
+		registerValidKey(KC_1, "1");
+		registerValidKey(KC_1 | SHIFT_MOD, "!");
+		registerValidKey(KC_2, "2");
+		registerValidKey(KC_2 | SHIFT_MOD, "@");
+		registerValidKey(KC_3, "3");
+		registerValidKey(KC_3 | SHIFT_MOD, "#");
+		registerValidKey(KC_4, "4");
+		registerValidKey(KC_4 | SHIFT_MOD, "$");
+		registerValidKey(KC_5, "5");
+		registerValidKey(KC_5 | SHIFT_MOD, "%");
+		registerValidKey(KC_6, "6");
+		registerValidKey(KC_6 | SHIFT_MOD, "^");
+		registerValidKey(KC_7, "7");
+		registerValidKey(KC_7 | SHIFT_MOD, "&");
+		registerValidKey(KC_8, "8");
+		registerValidKey(KC_8 | SHIFT_MOD, "*");
+		registerValidKey(KC_9, "9");
+		registerValidKey(KC_9 | SHIFT_MOD, "(");
+		registerValidKey(KC_0, "0");
+		registerValidKey(KC_0 | SHIFT_MOD, ")");
 
-		RegisterValidKey(KC_MINUS, "-");
-		RegisterValidKey(KC_MINUS | SHIFT_MOD, "_");
-		RegisterValidKey(KC_EQUALS, "=");
-		RegisterValidKey(KC_EQUALS | SHIFT_MOD, "+");
-		RegisterValidKey(KC_BACK, "backspace");
-		RegisterValidKey(KC_TAB, "tab");
+		registerValidKey(KC_MINUS, "-");
+		registerValidKey(KC_MINUS | SHIFT_MOD, "_");
+		registerValidKey(KC_EQUALS, "=");
+		registerValidKey(KC_EQUALS | SHIFT_MOD, "+");
+		registerValidKey(KC_BACK, "backspace");
+		registerValidKey(KC_TAB, "tab");
 
-		RegisterValidKey(KC_Q, "q");
-		RegisterValidKey(KC_W, "w");
-		RegisterValidKey(KC_E, "e");
-		RegisterValidKey(KC_R, "r");
-		RegisterValidKey(KC_T, "t");
-		RegisterValidKey(KC_Y, "y");
-		RegisterValidKey(KC_U, "u");
-		RegisterValidKey(KC_I, "i");
-		RegisterValidKey(KC_O, "o");
-		RegisterValidKey(KC_P, "p");
+		registerValidKey(KC_Q, "q");
+		registerValidKey(KC_W, "w");
+		registerValidKey(KC_E, "e");
+		registerValidKey(KC_R, "r");
+		registerValidKey(KC_T, "t");
+		registerValidKey(KC_Y, "y");
+		registerValidKey(KC_U, "u");
+		registerValidKey(KC_I, "i");
+		registerValidKey(KC_O, "o");
+		registerValidKey(KC_P, "p");
 
-		RegisterValidKey(KC_LBRACKET, "[");
-		RegisterValidKey(KC_LBRACKET | SHIFT_MOD, "{");
-		RegisterValidKey(KC_RBRACKET, "]");
-		RegisterValidKey(KC_RBRACKET | SHIFT_MOD, "}");
-		RegisterValidKey(KC_RETURN, "enter");
-		RegisterValidKey(KC_LCONTROL, "ctrl");
+		registerValidKey(KC_LBRACKET, "[");
+		registerValidKey(KC_LBRACKET | SHIFT_MOD, "{");
+		registerValidKey(KC_RBRACKET, "]");
+		registerValidKey(KC_RBRACKET | SHIFT_MOD, "}");
+		registerValidKey(KC_RETURN, "enter");
+		registerValidKey(KC_LCONTROL, "ctrl");
 
-		RegisterValidKey(KC_A, "a");
-		RegisterValidKey(KC_S, "s");
-		RegisterValidKey(KC_D, "d");
-		RegisterValidKey(KC_F, "f");
-		RegisterValidKey(KC_G, "g");
-		RegisterValidKey(KC_H, "h");
-		RegisterValidKey(KC_J, "j");
-		RegisterValidKey(KC_K, "k");
-		RegisterValidKey(KC_L, "l");
-		RegisterValidKey(KC_SEMICOLON, ";");
-		RegisterValidKey(KC_SEMICOLON | SHIFT_MOD, ":");
-		RegisterValidKey(KC_APOSTROPHE, "'");
-		RegisterValidKey(KC_APOSTROPHE | SHIFT_MOD, "\"");
-		RegisterValidKey(KC_LSHIFT, "shift");
-		RegisterValidKey(KC_BACKSLASH, "\\");
-		RegisterValidKey(KC_BACKSLASH | SHIFT_MOD, "|");
-		RegisterValidKey(KC_Z, "z");
-		RegisterValidKey(KC_X, "x");
-		RegisterValidKey(KC_C, "c");
-		RegisterValidKey(KC_V, "v");
-		RegisterValidKey(KC_B, "b");
-		RegisterValidKey(KC_N, "n");
-		RegisterValidKey(KC_M, "m");
-		RegisterValidKey(KC_COMMA, ",");
-		RegisterValidKey(KC_COMMA | SHIFT_MOD, "<");
-		RegisterValidKey(KC_PERIOD, ".");
-		RegisterValidKey(KC_PERIOD | SHIFT_MOD, ">");
-		RegisterValidKey(KC_SLASH, "/");
-		RegisterValidKey(KC_SLASH, "keypad_slash");
-		RegisterValidKey(KC_SLASH | SHIFT_MOD, "?");
-		RegisterValidKey(KC_RSHIFT, "shift");
-		RegisterValidKey(KC_MULTIPLY, "keypad_star");
-		RegisterValidKey(KC_LMENU, "alt");
-		RegisterValidKey(KC_SPACE, "space");
-		RegisterValidKey(KC_F1, "f1");
-		RegisterValidKey(KC_F2, "f2");
-		RegisterValidKey(KC_F3, "f3");
-		RegisterValidKey(KC_F4, "f4");
-		RegisterValidKey(KC_F5, "f5");
-		RegisterValidKey(KC_F6, "f6");
-		RegisterValidKey(KC_F7, "f7");
-		RegisterValidKey(KC_F8, "f8");
-		RegisterValidKey(KC_F9, "f9");
-		RegisterValidKey(KC_F10, "f10");
-		RegisterValidKey(KC_NUMLOCK, "numlock");
-		RegisterValidKey(KC_SCROLL, "scroll");
-		RegisterValidKey(KC_NUMPAD7, "keypad_home");
-		RegisterValidKey(KC_NUMPAD8, "keypad_up");
-		RegisterValidKey(KC_NUMPAD9, "keypad_pgup");
-		RegisterValidKey(KC_SUBTRACT, "keypad_minus");
-		RegisterValidKey(KC_NUMPAD4, "keypad_left");
-		RegisterValidKey(KC_NUMPAD5, "keypad_center");
-		RegisterValidKey(KC_NUMPAD6, "keypad_right");
-		RegisterValidKey(KC_ADD, "keypad_plus");
-		RegisterValidKey(KC_NUMPAD1, "keypad_end");
-		RegisterValidKey(KC_NUMPAD2, "keypad_down");
-		RegisterValidKey(KC_NUMPAD3, "keypad_pgdn");
-		RegisterValidKey(KC_NUMPAD0, "keypad_ins");
-		RegisterValidKey(KC_DECIMAL, "keypad_del");
-		RegisterValidKey(KC_F11, "f11");
-		RegisterValidKey(KC_F12, "f12");
-		RegisterValidKey(KC_F13, "f13");
-		RegisterValidKey(KC_F14, "f14");
-		RegisterValidKey(KC_F15, "f15");
+		registerValidKey(KC_A, "a");
+		registerValidKey(KC_S, "s");
+		registerValidKey(KC_D, "d");
+		registerValidKey(KC_F, "f");
+		registerValidKey(KC_G, "g");
+		registerValidKey(KC_H, "h");
+		registerValidKey(KC_J, "j");
+		registerValidKey(KC_K, "k");
+		registerValidKey(KC_L, "l");
+		registerValidKey(KC_SEMICOLON, ";");
+		registerValidKey(KC_SEMICOLON | SHIFT_MOD, ":");
+		registerValidKey(KC_APOSTROPHE, "'");
+		registerValidKey(KC_APOSTROPHE | SHIFT_MOD, "\"");
+		registerValidKey(KC_LSHIFT, "shift");
+		registerValidKey(KC_BACKSLASH, "\\");
+		registerValidKey(KC_BACKSLASH | SHIFT_MOD, "|");
+		registerValidKey(KC_Z, "z");
+		registerValidKey(KC_X, "x");
+		registerValidKey(KC_C, "c");
+		registerValidKey(KC_V, "v");
+		registerValidKey(KC_B, "b");
+		registerValidKey(KC_N, "n");
+		registerValidKey(KC_M, "m");
+		registerValidKey(KC_COMMA, ",");
+		registerValidKey(KC_COMMA | SHIFT_MOD, "<");
+		registerValidKey(KC_PERIOD, ".");
+		registerValidKey(KC_PERIOD | SHIFT_MOD, ">");
+		registerValidKey(KC_SLASH, "/");
+		registerValidKey(KC_SLASH, "keypad_slash");
+		registerValidKey(KC_SLASH | SHIFT_MOD, "?");
+		registerValidKey(KC_RSHIFT, "shift");
+		registerValidKey(KC_MULTIPLY, "keypad_star");
+		registerValidKey(KC_LMENU, "alt");
+		registerValidKey(KC_SPACE, "space");
+		registerValidKey(KC_F1, "f1");
+		registerValidKey(KC_F2, "f2");
+		registerValidKey(KC_F3, "f3");
+		registerValidKey(KC_F4, "f4");
+		registerValidKey(KC_F5, "f5");
+		registerValidKey(KC_F6, "f6");
+		registerValidKey(KC_F7, "f7");
+		registerValidKey(KC_F8, "f8");
+		registerValidKey(KC_F9, "f9");
+		registerValidKey(KC_F10, "f10");
+		registerValidKey(KC_NUMLOCK, "numlock");
+		registerValidKey(KC_SCROLL, "scroll");
+		registerValidKey(KC_NUMPAD7, "keypad_home");
+		registerValidKey(KC_NUMPAD8, "keypad_up");
+		registerValidKey(KC_NUMPAD9, "keypad_pgup");
+		registerValidKey(KC_SUBTRACT, "keypad_minus");
+		registerValidKey(KC_NUMPAD4, "keypad_left");
+		registerValidKey(KC_NUMPAD5, "keypad_center");
+		registerValidKey(KC_NUMPAD6, "keypad_right");
+		registerValidKey(KC_ADD, "keypad_plus");
+		registerValidKey(KC_NUMPAD1, "keypad_end");
+		registerValidKey(KC_NUMPAD2, "keypad_down");
+		registerValidKey(KC_NUMPAD3, "keypad_pgdn");
+		registerValidKey(KC_NUMPAD0, "keypad_ins");
+		registerValidKey(KC_DECIMAL, "keypad_del");
+		registerValidKey(KC_F11, "f11");
+		registerValidKey(KC_F12, "f12");
+		registerValidKey(KC_F13, "f13");
+		registerValidKey(KC_F14, "f14");
+		registerValidKey(KC_F15, "f15");
 
-		RegisterValidKey(KC_NUMPADENTER, "keypad_enter");
-		RegisterValidKey(KC_RMENU, "alt");
-		RegisterValidKey(KC_HOME, "home");
-		RegisterValidKey(KC_UP, "up");
-		RegisterValidKey(KC_PGUP, "pgup");
-		RegisterValidKey(KC_LEFT, "left");
-		RegisterValidKey(KC_RIGHT, "right");
-		RegisterValidKey(KC_END, "end");
-		RegisterValidKey(KC_DOWN, "down");
-		RegisterValidKey(KC_PGDOWN, "pgdn");
-		RegisterValidKey(KC_INSERT, "ins");
-		RegisterValidKey(KC_DELETE, "del");
-		RegisterValidKey(KC_GRAVE, "`");
-		RegisterValidKey(KC_GRAVE | SHIFT_MOD, "~");
-		RegisterValidKey(KC_SYSRQ, "print_screen");
-		RegisterValidKey(joy_axisr, "joy_axisr");
-		RegisterValidKey(joy_axisx, "joy_axisx");
-		RegisterValidKey(joy_axisy, "joy_axisy");
-		RegisterValidKey(joy_hat_up, "joy_hatup");
-		RegisterValidKey(joy_hat_down, "joy_hatdn");
-		RegisterValidKey(joy_hat_right, "joy_hatrt");
-		RegisterValidKey(joy_hat_left, "joy_hatlt");
-		RegisterValidKey(joy_1, "joy1");
-		RegisterValidKey(joy_2, "joy2");
-		RegisterValidKey(joy_3, "joy3");
-		RegisterValidKey(joy_4, "joy4");
-		RegisterValidKey(joy_5, "joy5");
-		RegisterValidKey(joy_6, "joy6");
-		RegisterValidKey(joy_7, "joy7");
-		RegisterValidKey(joy_8, "joy8");
-		RegisterValidKey(joy_9, "joy9");
-		RegisterValidKey(joy_10, "joy10");
-		RegisterValidKey(Mouse1, "mouse1");
-		RegisterValidKey(Mouse2, "mouse2");
-		RegisterValidKey(Mouse3, "mouse3");
-		RegisterValidKey(Mouse4, "mouse4");
-		RegisterValidKey(Mouse5, "mouse5");
-		RegisterValidKey(Mouse6, "mouse6");
-		RegisterValidKey(Mouse7, "mouse7");
-		RegisterValidKey(Mouse8, "mouse8");
-		RegisterValidKey(Mouse_axisx, "mouse_axisx");
-		RegisterValidKey(Mouse_axisy, "mouse_axisy");
-		RegisterValidKey(Mouse_wheel, "mouse_wheel");
+		registerValidKey(KC_NUMPADENTER, "keypad_enter");
+		registerValidKey(KC_RMENU, "alt");
+		registerValidKey(KC_HOME, "home");
+		registerValidKey(KC_UP, "up");
+		registerValidKey(KC_PGUP, "pgup");
+		registerValidKey(KC_LEFT, "left");
+		registerValidKey(KC_RIGHT, "right");
+		registerValidKey(KC_END, "end");
+		registerValidKey(KC_DOWN, "down");
+		registerValidKey(KC_PGDOWN, "pgdn");
+		registerValidKey(KC_INSERT, "ins");
+		registerValidKey(KC_DELETE, "del");
+		registerValidKey(KC_GRAVE, "`");
+		registerValidKey(KC_GRAVE | SHIFT_MOD, "~");
+		registerValidKey(KC_SYSRQ, "print_screen");
+		registerValidKey(joy_axisr, "joy_axisr");
+		registerValidKey(joy_axisx, "joy_axisx");
+		registerValidKey(joy_axisy, "joy_axisy");
+		registerValidKey(joy_hat_up, "joy_hatup");
+		registerValidKey(joy_hat_down, "joy_hatdn");
+		registerValidKey(joy_hat_right, "joy_hatrt");
+		registerValidKey(joy_hat_left, "joy_hatlt");
+		registerValidKey(joy_1, "joy1");
+		registerValidKey(joy_2, "joy2");
+		registerValidKey(joy_3, "joy3");
+		registerValidKey(joy_4, "joy4");
+		registerValidKey(joy_5, "joy5");
+		registerValidKey(joy_6, "joy6");
+		registerValidKey(joy_7, "joy7");
+		registerValidKey(joy_8, "joy8");
+		registerValidKey(joy_9, "joy9");
+		registerValidKey(joy_10, "joy10");
+		registerValidKey(Mouse1, "mouse1");
+		registerValidKey(Mouse2, "mouse2");
+		registerValidKey(Mouse3, "mouse3");
+		registerValidKey(Mouse4, "mouse4");
+		registerValidKey(Mouse5, "mouse5");
+		registerValidKey(Mouse6, "mouse6");
+		registerValidKey(Mouse7, "mouse7");
+		registerValidKey(Mouse8, "mouse8");
+		registerValidKey(Mouse_axisx, "mouse_axisx");
+		registerValidKey(Mouse_axisy, "mouse_axisy");
+		registerValidKey(Mouse_wheel, "mouse_wheel");
 	}
 
 	//------------------------------------------------------
-	void InputService::Tokenize(std::string InString, std::vector<std::string> &OutVector, char Token)
+	void InputService::tokenize(std::string inString, std::vector<std::string> &outVector, char token)
 	{
 		size_t OldOffset = 0, NewOffset;
 
-		while(OldOffset < InString.length()) {
-			NewOffset = InString.find(Token, OldOffset);
-			if( (NewOffset == string::npos) || (InString.at(OldOffset) == 0x22))
-				NewOffset = InString.length();
-			OutVector.push_back (InString.substr(OldOffset, NewOffset - OldOffset));
+		while(OldOffset < inString.length()) {
+			NewOffset = inString.find(token, OldOffset);
+			if( (NewOffset == string::npos) || (inString.at(OldOffset) == 0x22))
+				NewOffset = inString.length();
+			outVector.push_back (inString.substr(OldOffset, NewOffset - OldOffset));
 			OldOffset = NewOffset + 1;
 		};
 	}
 
 	//------------------------------------------------------
-	unsigned int InputService::MapToOISCode(std::string Key) const
+	unsigned int InputService::mapToOISCode(std::string key) const
 	{
 		unsigned int Code;
-		ReverseKeyMap::const_iterator it = mReverseKeyMap.find(Key);
+		ReverseKeyMap::const_iterator it = mReverseKeyMap.find(key);
 
 		if (it != mReverseKeyMap.end())
 			Code = it->second;
@@ -292,74 +292,83 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void InputService::AddBindCommand(ContentsVector Command)
+	void InputService::addBindCommand(const ContentsVector& command)
 	{
-		ContentsVector Contents;
-		unsigned int Modifier = 0;
-		std::string Key, Keys = Command.at(1);
+		ContentsVector contents;
+		unsigned int modifier = 0;
+		std::string key, keys = command.at(1);
 
-		if((Keys.length() > 1) && (Keys.find('+') != string::npos))
+		if((keys.length() > 1) && (keys.find('+') != string::npos))
 		{
-			Contents.clear();
-			Tokenize(Keys, Contents, '+');
-			for(ContentsVector::const_iterator Content = Contents.begin(); Content != Contents.end(); Content++)
+			contents.clear();
+			tokenize(keys, contents, '+');
+			for(ContentsVector::const_iterator content = contents.begin(); content != contents.end(); content++)
 			{
-				std::string ContentStr = *Content;
+				std::string ContentStr = *content;
 				if (ContentStr == "shift")
-					Modifier |= SHIFT_MOD;
+					modifier |= SHIFT_MOD;
 				else if (ContentStr == "ctrl")
-					Modifier |= CTRL_MOD;
+					modifier |= CTRL_MOD;
 				else if (ContentStr == "alt")
-					Modifier |= ALT_MOD;
+					modifier |= ALT_MOD;
 				else
-					Key = ContentStr;
+					key = ContentStr;
 			}
 		}
 		else
-			Key = Keys;
+			key = keys;
 		
-		const unsigned int Code = MapToOISCode(Key);
-		CommandMap.insert(make_pair(Code | Modifier, stripComment(Command.at(2))));
+		const unsigned int code = mapToOISCode(key);
+		mCommandMap.insert(make_pair(code | modifier, stripComment(command.at(2))));
 	}
 
 	//------------------------------------------------------
-	DVariant InputService::ProcessCommand(std::string& CommandString)
+	DVariant InputService::processCommand(const std::string& commandStr)
 	{
-		ContentsVector Contents, Command;
-
-		if((CommandString.length() == 0) || (CommandString.at(0) == ';'))
+		ContentsVector contents, command;
+		
+		std::string cstr;
+		cstr = stripComment(commandStr);
+		
+		if((commandStr.length() == 0) || (commandStr.at(0) == ';'))
 			return false;
-		std::transform(CommandString.begin(), CommandString.end(), CommandString.begin(), ::tolower);	//Lowercase
-		Tokenize(CommandString, Command, ' ');
-		if(Command.at(0) == "bind")
+		
+		std::transform(cstr.begin(), cstr.end(), cstr.begin(), ::tolower);	//Lowercase
+		
+		WhitespaceStringTokenizer tok(cstr, false);
+	
+		while (!tok.end()) 
+			command.push_back(tok.next());
+		
+		if(command.at(0) == "bind")
 		{
-			AddBindCommand(Command);
+			addBindCommand(command);
 			return true;
 		}
-		else if(Command.at(0) == "echo")
-			return CommandString.substr(5);
-		else if(Command.at(0) == "set")
+		else if(command.at(0) == "echo")
+			return commandStr.substr(5);
+		else if(command.at(0) == "set")
 		{
-			setVariable(Command.at(1), Command.at(2));
+			setVariable(command.at(1), command.at(2));
 			return true;
 		}
 		
-		setVariable(Command.at(0), Command.at(1));
+		setVariable(command.at(0), command.at(1));
 		return true;
 	}
 
 	//------------------------------------------------------
-	bool InputService::LoadBNDFile(const std::string& FileName)
+	bool InputService::loadBNDFile(const std::string& fname)
 	{
-		if(Ogre::ResourceGroupManager::getSingleton().resourceExists(ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, FileName) == false)
+		if(Ogre::ResourceGroupManager::getSingleton().resourceExists(ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, fname) == false)
 			return false;
 
-		Ogre::DataStreamPtr Stream = Ogre::ResourceGroupManager::getSingleton().openResource(FileName, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
+		Ogre::DataStreamPtr Stream = Ogre::ResourceGroupManager::getSingleton().openResource(fname, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
 
 		while (!Stream->eof())
 		{
 			std::string Line = Stream->getLine();
-			ProcessCommand(Line);			
+			processCommand(Line);			
 		}	
 
 		return true;
@@ -474,9 +483,7 @@ namespace Opde {
 		mLoopService = static_pointer_cast<LoopService>(ServiceManager::getSingleton().getService("LoopService"));
 		mLoopService->addLoopClient(this);
 
-		InitKeyMap();
-		if(LoadBNDFile("user.bnd") == false)
-			LoadBNDFile("dark.bnd");
+		initKeyMap();
 
 		return true;
     }
@@ -630,7 +637,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void InputService::ProcessKeyEvent(const OIS::KeyEvent &e, InputEventType t)
+	void InputService::processKeyEvent(const OIS::KeyEvent &e, InputEventType t)
 	{
 		// Some safety checks
 		if (mInputMode == IM_DIRECT)
@@ -642,51 +649,57 @@ namespace Opde {
 		}
 
 		// dispatch the key event using the mapper
-		unsigned int Key = (unsigned int)e.key;
+		unsigned int key = (unsigned int)e.key;
 
 		if (mKeyboard->isModifierDown(Keyboard::Alt))
-			Key |= ALT_MOD;
+			key |= ALT_MOD;
 		if (mKeyboard->isModifierDown(Keyboard::Ctrl))
-			Key |= CTRL_MOD;
+			key |= CTRL_MOD;
 		if (mKeyboard->isModifierDown(Keyboard::Shift))
-			Key |= SHIFT_MOD;
+			key |= SHIFT_MOD;
 
-		std::string Command;
-		CommandMapVector::const_iterator it = CommandMap.find(Key);
-		if (it != CommandMap.end())
-			Command = it->second;
-		else
+		std::string command;
+		CommandMap::const_iterator it = mCommandMap.find(key);
+		
+		if (it != mCommandMap.end()) 
+		{
+			command = it->second;
+		} else { 
+			LOG_DEBUG("Encountered an unmapped key event '%s'", e.text);
 			return;
-
-		InputEventMsg Msg;
-		std::pair<string, string> Split = splitCommand(Command);		
-
-		Msg.command = Split.first;
-		Msg.params = Split.second;
-		Msg.event = t;
-
-		if (Command[0] == '+') 
-		{
-			if (t == IET_KEYBOARD_PRESS)
-				Msg.params = 1.0f;
-			else
-				Msg.params = 0.0f;
-			Command = Command.substr(1);
-		} 
-		else if (Command[0] == '-') 
-		{
-			if (t == IET_KEYBOARD_PRESS)
-				Msg.params = 0.0f;
-			else
-				Msg.params = 1.0f;
-			Command = Command.substr(1);
 		}
 
-		callCommandTrap(Msg);
+		InputEventMsg msg;
+		std::pair<string, string> Split = splitCommand(command);		
+
+		msg.command = Split.first;
+		msg.params = Split.second;
+		msg.event = t;
+
+		if (command[0] == '+') 
+		{
+			if (t == IET_KEYBOARD_PRESS)
+				msg.params = 1.0f;
+			else
+				msg.params = 0.0f;
+			command = command.substr(1);
+		} 
+		else if (command[0] == '-') 
+		{
+			if (t == IET_KEYBOARD_PRESS)
+				msg.params = 0.0f;
+			else
+				msg.params = 1.0f;
+			command = command.substr(1);
+		}
+
+		if (!callCommandTrap(msg)) {
+			LOG_DEBUG("Encountered an unmapped key event '%s'", e.text);
+		}
 	}
 
 	//------------------------------------------------------
-	void InputService::ProcessJoyMouseEvent(unsigned int Id, InputEventType Event)
+	void InputService::processJoyMouseEvent(unsigned int id, InputEventType event)
 	{
 		// Some safety checks
 		if (mInputMode == IM_DIRECT)
@@ -698,44 +711,44 @@ namespace Opde {
 		}
 
 		// dispatch the key event using the mapper
-		unsigned int Button = Id;
-		if((Event == IET_MOUSE_PRESS) || (Event == IET_MOUSE_RELEASE))
-			Button += DARK_MOUSE_EVENT;
+		unsigned int button = id;
+		if((event == IET_MOUSE_PRESS) || (event == IET_MOUSE_RELEASE))
+			button += DARK_MOUSE_EVENT;
 		else
-			Button += DARK_JOY_EVENT;
+			button += DARK_JOY_EVENT;
 
-		std::string Command;
-		CommandMapVector::const_iterator it = CommandMap.find(Button);
-		if (it != CommandMap.end())
-			Command = it->second;
+		std::string command;
+		CommandMap::const_iterator it = mCommandMap.find(button);
+		if (it != mCommandMap.end())
+			command = it->second;
 		else
 			return;
 
-		InputEventMsg Msg;
-		std::pair<string, string> Split = splitCommand(Command);		
+		InputEventMsg msg;
+		std::pair<string, string> split = splitCommand(command);		
 
-		Msg.command = Split.first;
-		Msg.params = Split.second;
-		Msg.event = Event;
+		msg.command = split.first;
+		msg.params = split.second;
+		msg.event = event;
 
-		if (Command[0] == '+') 
+		if (command[0] == '+') 
 		{
-			if (Event == IET_MOUSE_PRESS)
-				Msg.params = 1.0f;
+			if (event == IET_MOUSE_PRESS)
+				msg.params = 1.0f;
 			else
-				Msg.params = 0.0f;
-			Command = Command.substr(1);
+				msg.params = 0.0f;
+			command = command.substr(1);
 		} 
-		else if (Command[0] == '-') 
+		else if (command[0] == '-') 
 		{
-			if (Event == IET_MOUSE_PRESS)
-				Msg.params = 0.0f;
+			if (event == IET_MOUSE_PRESS)
+				msg.params = 0.0f;
 			else
-				Msg.params = 1.0f;
-			Command = Command.substr(1);
+				msg.params = 1.0f;
+			command = command.substr(1);
 		}
 
-		callCommandTrap(Msg);
+		callCommandTrap(msg);
 	}
 
 	//------------------------------------------------------
@@ -786,6 +799,8 @@ namespace Opde {
 	{
 		ListenerMap::const_iterator it = mCommandTraps.find(msg.command);
 
+		LOG_VERBOSE("Command trap '%s'", msg.command.c_str());
+		
 		if (it != mCommandTraps.end()) 
 		{
 			(*it->second)(msg);
@@ -824,11 +839,12 @@ namespace Opde {
 	bool InputService::keyPressed(const OIS::KeyEvent &e) 
 	{
 
-		if (mInputMode == IM_DIRECT) 
+		if (mInputMode == IM_DIRECT) {   
 			if (mDirectListener)	// direct event, dispatch to the current listener
 				return mDirectListener->keyPressed(e);
-		else 
-			ProcessKeyEvent(e, IET_KEYBOARD_PRESS);
+		} else { 
+			processKeyEvent(e, IET_KEYBOARD_PRESS);
+		}
 
 		return false;
 	}
@@ -837,12 +853,13 @@ namespace Opde {
 	bool InputService::keyReleased(const OIS::KeyEvent &e) 
 	{
 
-		if (mInputMode == IM_DIRECT) 
+		if (mInputMode == IM_DIRECT) { 
 			if (mDirectListener)	// direct event, dispatch to the current listener
 				return mDirectListener->keyReleased(e);
-		else 
-			ProcessKeyEvent(e, IET_KEYBOARD_RELEASE);
-
+		} else { 
+			processKeyEvent(e, IET_KEYBOARD_RELEASE);
+		}
+		
 		return false;
 	}
 
@@ -850,12 +867,11 @@ namespace Opde {
 	bool InputService::mouseMoved(const OIS::MouseEvent &e) 
 	{
 
-		if (mInputMode == IM_DIRECT) 
+		if (mInputMode == IM_DIRECT) { 
 			if (mDirectListener)	// direct event, dispatch to the current listener
 				return mDirectListener->mouseMoved(e);
-		else 
-		{
-			// dispatch the key event using the mapper
+		} else {
+			// TODO: dispatch the mouse movement using the mapper (axisx or axisy)
 		}
 
 		return false;
@@ -864,13 +880,14 @@ namespace Opde {
 	//------------------------------------------------------
 	bool InputService::mousePressed(const OIS::MouseEvent &e, OIS::MouseButtonID id)
 	{
-		ProcessJoyMouseEvent((int) id, IET_MOUSE_PRESS);
+		processJoyMouseEvent((int) id, IET_MOUSE_PRESS);
 
-		if (mInputMode == IM_DIRECT) 
+		if (mInputMode == IM_DIRECT) {
 			if (mDirectListener)	// direct event, dispatch to the current listener
 				return mDirectListener->mousePressed(e, id);
-		else 
-			ProcessJoyMouseEvent((int) id, IET_MOUSE_PRESS);
+		} else { 
+			processJoyMouseEvent((int) id, IET_MOUSE_PRESS);
+		}
 
 		return false;
 	}
@@ -879,11 +896,12 @@ namespace Opde {
 	bool InputService::mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id) 
 	{
 
-		if (mInputMode == IM_DIRECT) 
+		if (mInputMode == IM_DIRECT) { 
 			if (mDirectListener)	// direct event, dispatch to the current listener
 				return mDirectListener->mouseReleased(e, id);
-		else
-			ProcessJoyMouseEvent((int) id, IET_MOUSE_RELEASE);
+		} else {
+			processJoyMouseEvent((int) id, IET_MOUSE_RELEASE);
+		}
 
 		return false;
 	}
@@ -894,12 +912,11 @@ namespace Opde {
 		if((arg.state.mAxes[axis].abs > JoyStick::MIN_AXIS / 10) && (arg.state.mAxes[axis].abs < JoyStick::MAX_AXIS / 10))
 			return true;	//Eat the small axis movements.
 
-		if (mInputMode == IM_DIRECT) 
+		if (mInputMode == IM_DIRECT) { 
 			if (mDirectListener)	// direct event, dispatch to the current listener
 				return mDirectListener->axisMoved(arg, axis);
-		else
-		{
-			// dispatch the key event using the mapper
+		} else {
+			// TODO: dispatch the axis event using the mapper
 		}
 
 		return false;
@@ -908,11 +925,11 @@ namespace Opde {
 	//------------------------------------------------------
 	bool InputService::povMoved(const OIS::JoyStickEvent &e, int pov)
 	{
-		if (mInputMode == IM_DIRECT) 
+		if (mInputMode == IM_DIRECT) {
 			if (mDirectListener)	// direct event, dispatch to the current listener
 				return mDirectListener->povMoved(e, pov);
-		else 
-		{
+		} else { 
+		
 			// dispatch the key event using the mapper
 		}
 
@@ -922,13 +939,14 @@ namespace Opde {
 	//------------------------------------------------------
 	bool InputService::buttonPressed(const JoyStickEvent &arg, int button)
 	{
-		ProcessJoyMouseEvent((int) button, IET_JOYSTICK_PRESS);
+		processJoyMouseEvent((int) button, IET_JOYSTICK_PRESS);
 
-		if (mInputMode == IM_DIRECT) 
+		if (mInputMode == IM_DIRECT) { 
 			if (mDirectListener)	// direct event, dispatch to the current listener
 				return mDirectListener->buttonPressed(arg, button);
-		else
-			ProcessJoyMouseEvent((int) button, IET_JOYSTICK_PRESS);
+		} else {
+			processJoyMouseEvent((int) button, IET_JOYSTICK_PRESS);
+		}
 
 		return false;
 	}
@@ -936,11 +954,12 @@ namespace Opde {
 	//------------------------------------------------------
 	bool InputService::buttonReleased(const JoyStickEvent &arg, int button)
 	{
-		if (mInputMode == IM_DIRECT) 
+		if (mInputMode == IM_DIRECT) { 
 			if (mDirectListener)	// direct event, dispatch to the current listener
 				return mDirectListener->buttonReleased(arg, button);
-		else
-			ProcessJoyMouseEvent((int) button, IET_JOYSTICK_RELEASE);
+		} else {
+			processJoyMouseEvent((int) button, IET_JOYSTICK_RELEASE);
+		}
 
 		return false;
 	}

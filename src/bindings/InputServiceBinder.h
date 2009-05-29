@@ -50,6 +50,7 @@ namespace Opde
 				static PyObject* command(PyObject* self, PyObject* args);
 				static PyObject* registerCommandTrap(PyObject* self, PyObject* args);
 				static PyObject* unregisterCommandTrap(PyObject* self, PyObject* args);
+				static PyObject* setInputMapped(PyObject* self, PyObject* args);
 				
 			protected:
 				/// Static type definition for InputService

@@ -59,6 +59,9 @@ namespace Opde {
 				static PyObject* logToFile(PyObject *self, PyObject* args);
 				static PyObject* setLogLevel(PyObject *self, PyObject* args);
 				
+				static PyObject* registerCustomScriptLoaders(PyObject *self, PyObject* args);
+				
+				
 				/* TODO: Need bindings written first
 				static PyObject* getLogger(PyObject *self, PyObject* args);
 				static PyObject* getServiceManager(PyObject *self, PyObject* args);

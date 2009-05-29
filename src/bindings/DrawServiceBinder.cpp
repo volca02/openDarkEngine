@@ -58,7 +58,7 @@ namespace Opde {
 			0,			              // hashfunc tp_hash;     /* __hash__ */
 			0,                        // ternaryfunc tp_call;  /* __call__ */
 			0,			              // reprfunc tp_str;      /* __str__ */
-			0,			              // getattrofunc tp_getattro; */
+			PyObject_GenericGetAttr,  // getattrofunc tp_getattro; */
 			0,			              // setattrofunc tp_setattro; */
 			0,			              // PyBufferProcs *tp_as_buffer; */
 			0,			              // long tp_flags; */
@@ -131,7 +131,7 @@ namespace Opde {
 
 			
 			PyObject *sheet;
-			if (PyArg_ParseTuple(args, "o", &sheet)) {
+			if (PyArg_ParseTuple(args, "O", &sheet)) {
 				// cast to drawsheet and destroy
 				DrawSheet* ds;
 				
@@ -188,7 +188,7 @@ namespace Opde {
 				__PY_CONVERR_RET;
 			
 			PyObject *sheet;
-			if (PyArg_ParseTuple(args, "o", &sheet)) {
+			if (PyArg_ParseTuple(args, "O", &sheet)) {
 				DrawSheet* ds;
 				
 				if (!DrawSheetBinder::extract(sheet, ds))
@@ -244,7 +244,7 @@ namespace Opde {
 				__PY_CONVERR_RET;
 			
 			PyObject *ds;
-			if (PyArg_ParseTuple(args, "o", &ds)) {
+			if (PyArg_ParseTuple(args, "O", &ds)) {
 				DrawSourcePtr cds;
 				
 				if (!DrawSourceBinder::extract(ds, cds))
@@ -272,7 +272,7 @@ namespace Opde {
 			
 
 			PyObject *ds;
-			if (PyArg_ParseTuple(args, "o", &ds)) {
+			if (PyArg_ParseTuple(args, "O", &ds)) {
 				FontDrawSourcePtr cds;
 				
 				if (!FontDrawSourceBinder::extract(ds, cds))
@@ -296,7 +296,7 @@ namespace Opde {
 			
 			PyObject *dop;
 			
-			if (!PyArg_ParseTuple(args, "o", &dop))
+			if (!PyArg_ParseTuple(args, "O", &dop))
 				__PY_BADPARM_RET(1);
 					
 			
@@ -319,7 +319,7 @@ namespace Opde {
 			if (!python_cast<DrawServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 			
-			TextureAtlas *a = o->createAtlas();
+			TextureAtlasPtr a = o->createAtlas();
 			
 			return TextureAtlasBinder::create(a);
 			
@@ -335,11 +335,11 @@ namespace Opde {
 			
 			PyObject *atp;
 			
-			if (!PyArg_ParseTuple(args, "o", &atp))
+			if (!PyArg_ParseTuple(args, "O", &atp))
 				__PY_BADPARM_RET(1);
 					
 			
-			TextureAtlas* atl;
+			TextureAtlasPtr atl;
 			
 			if (!TextureAtlasBinder::extract(atp, atl))
 				__PY_CONVERR_RET;
@@ -360,10 +360,10 @@ namespace Opde {
 			// name, group
 			PyObject* patlas = NULL;
 			char *name, *group;
-			if (!PyArg_ParseTuple(args, "oss", &name, &group))
+			if (!PyArg_ParseTuple(args, "Oss", &patlas, &name, &group))
 				__PY_BADPARMS_RET;
 			
-			TextureAtlas *atlas;
+			TextureAtlasPtr atlas;
 			
 			if (!TextureAtlasBinder::extract(patlas, atlas))
 				__PY_BADPARM_RET("atlas");
@@ -436,7 +436,7 @@ namespace Opde {
 			0,			              // hashfunc tp_hash;     /* __hash__ */
 			0,                        // ternaryfunc tp_call;  /* __call__ */
 			0,			              // reprfunc tp_str;      /* __str__ */
-			0,			              // getattrofunc tp_getattro; */
+			PyObject_GenericGetAttr,  // getattrofunc tp_getattro; */
 			0,			              // setattrofunc tp_setattro; */
 			0,			              // PyBufferProcs *tp_as_buffer; */
 			// for inheritance searches to work we need this
@@ -463,7 +463,8 @@ namespace Opde {
 		
 		CastInfo<DrawOperation*> DrawOperationBinder::msCastInfo[] = {
 				{&RenderedImageBinder::msType, &defaultPythonUpcaster<DrawOperation*, RenderedImage*>},
-				{&RenderedLabelBinder::msType, &defaultPythonUpcaster<DrawOperation*, RenderedLabel*>}
+				{&RenderedLabelBinder::msType, &defaultPythonUpcaster<DrawOperation*, RenderedLabel*>},
+				{NULL}
 		};
 		
 		// ------------------------------------------
@@ -472,9 +473,13 @@ namespace Opde {
                 
 			DrawOperation* o = NULL;
 			
+			assert(self != NULL);
+			
 			if (!python_cast<DrawOperation*>(self, &msType, &o, msCastInfo))
 				__PY_CONVERR_RET;
 	  
+			assert(o != NULL);
+			
 			int x, y;
 			
 			if (PyArg_ParseTuple(args, "ii", &x, &y)) {
@@ -525,7 +530,7 @@ namespace Opde {
                   
 			PyObject *cr;
                         
-			if (PyArg_ParseTuple(args, "o", &cr)) {
+			if (PyArg_ParseTuple(args, "O", &cr)) {
 				// if it's a tuple, it should contain four floats
 				ClipRect rect;
 				if (!TypeInfo<ClipRect>::fromPyObject(cr, rect)) {
@@ -558,7 +563,7 @@ namespace Opde {
 		
 		// ------------------------------------------
 		bool DrawOperationBinder::extract(PyObject *object, DrawOperation*& op) {
-			return python_cast<DrawOperation*>(object, &msType, &op);
+			return python_cast<DrawOperation*>(object, &msType, &op, msCastInfo);
 		}
 		
 		// ------------------------------------------

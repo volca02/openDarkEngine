@@ -53,7 +53,7 @@ namespace Opde {
 			0,			              // hashfunc tp_hash;     /* __hash__ */
 			0,                        // ternaryfunc tp_call;  /* __call__ */
 			0,			              // reprfunc tp_str;      /* __str__ */
-			0,			              // getattrofunc tp_getattro; */
+			PyObject_GenericGetAttr,  // getattrofunc tp_getattro; */
 			0,			              // setattrofunc tp_setattro; */
 			0,			              // PyBufferProcs *tp_as_buffer; */
 			Py_TPFLAGS_DEFAULT|Py_TPFLAGS_BASETYPE,       // long tp_flags; */
@@ -132,6 +132,10 @@ namespace Opde {
 						"@type level: integer\n"
 						"@param level: The desired log level\n";
 
+		const char* opde_Root_registerCustomScriptLoaders__doc__ = "registerCustomScriptLoaders()\n"
+						"Registers .dtype and .pldef script loaders to ogre for automatic loading (this means from this point in time further all encountered scripts of those types will be automatically parsed)\n";
+
+
 		// ------------------------------------------
 		PyMethodDef RootBinder::msMethods[] = {
 			{"loadResourceConfig", RootBinder::loadResourceConfig, METH_VARARGS, opde_Root_loadResourceConfig__doc__},
@@ -143,6 +147,7 @@ namespace Opde {
 			{"bootstrapFinished", RootBinder::bootstrapFinished, METH_NOARGS, opde_Root_bootstrapFinished__doc__},
 			{"logToFile", RootBinder::logToFile, METH_VARARGS, opde_Root_logToFile__doc__},
 			{"setLogLevel", RootBinder::setLogLevel, METH_VARARGS, opde_Root_setLogLevel__doc__},
+			{"registerCustomScriptLoaders", RootBinder::registerCustomScriptLoaders, METH_NOARGS, opde_Root_registerCustomScriptLoaders__doc__},
 			{NULL, NULL},
 		};
 
@@ -354,6 +359,23 @@ namespace Opde {
 			
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
+
+
+		// ------------------------------------------
+		PyObject* RootBinder::registerCustomScriptLoaders(PyObject *self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			Root* o = NULL;
+			
+			if (!python_cast<Root*>(self, &msType, &o))
+				__PY_CONVERR_RET;
+
+		        o->registerCustomScriptLoaders();
+
+			__PY_NONE_RET;
+		
+			__PYTHON_EXCEPTION_GUARD_END_;
+		}
+
 
 		// ------------------------------------------
 		PyObject* RootBinder::repr(PyObject *self) {

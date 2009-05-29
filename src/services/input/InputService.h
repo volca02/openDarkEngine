@@ -186,16 +186,16 @@ namespace Opde {
 			std::string fillVariables(const std::string& src) const;
 
 			/// Sets the input mode to either direct or mapped (IM_DIRECT/IM_MAPPED)
-			void setInputMode(InputMode mode) {mInputMode = mode;};
+			void setInputMode(InputMode mode) { mInputMode = mode; };
 
 			/** Loads a bindings file, possibly rebinding the current bindings
 			 * @param filename The filename of the bnd file to load
 			* @todo dcontext The default context for bind commands not preceeded with the context information. Defaults to the current context if not specified
 			*/
-			bool LoadBNDFile(const std::string& filename);
+			bool loadBNDFile(const std::string& filename);
 
 			//Adds a command to the pool
-			DVariant ProcessCommand(std::string& CommandString);
+			DVariant processCommand(const std::string& CommandString);
 
 			/// TODO:	void saveBNDFile(const std::string& filename);
 
@@ -236,12 +236,12 @@ namespace Opde {
 
 			void loopStep(float deltaTime);
 
-			void InitKeyMap();
-			void Tokenize(std::string , std::vector<std::string> &OutVector, char Token);
-			unsigned int MapToOISCode(std::string Key) const;
+			void initKeyMap();
+			void tokenize(std::string , std::vector<std::string> &OutVector, char Token);
+			unsigned int mapToOISCode(std::string Key) const;
 
 			/// registers (int)OIS::KeyCode to textual representation and inverse mappings
-			void RegisterValidKey(int kc, const std::string& txt);
+			void registerValidKey(int kc, const std::string& txt);
 
 			/// Calls a trap for a command
 			/// @returns true if the command was found, false otherwise
@@ -254,9 +254,9 @@ namespace Opde {
 			std::pair<std::string, std::string> splitCommand(const std::string& cmd) const;
 
 			/// Processes the received key event with current mapper, and if it finds a match, sends an event
-			void ProcessKeyEvent(const OIS::KeyEvent &e, InputEventType t);
+			void processKeyEvent(const OIS::KeyEvent &e, InputEventType t);
 
-			void ProcessJoyMouseEvent(unsigned int Id, InputEventType Event);
+			void processJoyMouseEvent(unsigned int Id, InputEventType Event);
 
 
 			// ---- OIS input events ----
@@ -277,12 +277,14 @@ namespace Opde {
 
 			/// Strips a comment (any text after ';' including that character)
 			std::string stripComment(const std::string& cmd);
-
+			
 			typedef std::vector<std::string> ContentsVector;
+			
+			void addBindCommand(const ContentsVector& Command);
 
 			typedef std::vector<ContentsVector> BindFileCommands;
 
-			typedef std::map<unsigned int, std::string> CommandMapVector;
+			typedef std::map<unsigned int, std::string> CommandMap;
 
 			/// Named context to an event mapper map
 			typedef std::map< std::string, InputEventMapperPtr > ContextToMapper;
@@ -314,7 +316,7 @@ namespace Opde {
 			/// Reverse key map
 			ReverseKeyMap mReverseKeyMap;
 
-			CommandMapVector CommandMap;
+			CommandMap mCommandMap;
 
 			/// Current mapper
 			InputEventMapperPtr mCurrentMapper;
@@ -353,8 +355,6 @@ namespace Opde {
 
 			/// Loop service pointer
 			LoopServicePtr mLoopService;
-
-			void AddBindCommand(ContentsVector Command);
 	};
 
 	/// Shared pointer to input service

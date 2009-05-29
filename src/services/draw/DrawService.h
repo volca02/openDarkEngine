@@ -35,6 +35,7 @@
 #include "Array.h"
 #include "RenderedImage.h"
 #include "RenderedLabel.h"
+#include "TextureAtlas.h"
 
 #include "RenderService.h"
 
@@ -112,12 +113,12 @@ namespace Opde {
 			/** Atlas factory. Generates a new texture atlas usable for storing numerous different images - which are then combined into a single draw call.
 			 * @return New atlas pointer
 			 */
-			TextureAtlas* createAtlas();
+			TextureAtlasPtr createAtlas();
 
 			/** Destroys the given instance of texture atlas.
 			 * @param atlas The atlas to be destroyed
 			 */
-			void destroyAtlas(TextureAtlas* atlas);
+			void destroyAtlas(const TextureAtlasPtr& atlas);
 
 			/** Converts the given coordinate to the screen space x coordinate
 			 */
@@ -147,7 +148,7 @@ namespace Opde {
 			/** Font loading interface. It is capable of loading .fon files only at the moment.
 			 * @note To supply additional settings, use the
 			 */
-			FontDrawSourcePtr loadFont(TextureAtlas* atlas, const std::string& name, const std::string& group);
+			FontDrawSourcePtr loadFont(const TextureAtlasPtr& atlas, const std::string& name, const std::string& group);
 
 			/** supplies the palette info - needed for 8Bit palletized font color loads. The specified palette is then used
 			 * in further font loading operations.
@@ -205,8 +206,8 @@ namespace Opde {
 			typedef std::map<std::string, DrawSheet*> SheetMap;
 			typedef std::stack<size_t> IDStack;
 			typedef SimpleArray<DrawOperation*> DrawOperationArray;
-			typedef std::map<DrawSource::ID, TextureAtlas*> TextureAtlasMap;
-			typedef std::set<TextureAtlas*> AtlasSet;
+			typedef std::map<DrawSource::ID, TextureAtlasPtr> TextureAtlasMap;
+			typedef std::set<TextureAtlas*> AtlasList;
 			typedef std::list<DrawSourceBasePtr> DrawSourceList;
 			typedef std::map<std::string, DrawSourcePtr> ResourceDrawSourceMap;
 
@@ -227,7 +228,7 @@ namespace Opde {
 
 			Ogre::SceneManager* mSceneManager;
 
-			AtlasSet mAtlasesForRebuild;
+			AtlasList mAtlasesForRebuild;
 
 			static const RGBAQuad msMonoPalette[2];
 			static RGBAQuad msDefaultPalette[256];

@@ -61,12 +61,8 @@ namespace Opde {
 		// and get rid of the allocation info too
 		delete mAtlasAllocation;
 		
-		FontSet::iterator fit = mMyFonts.begin();
-		FontSet::iterator fend = mMyFonts.end();
-		
-		while (fit != fend) {
-			delete *fit++;
-		}
+
+		mMyFonts.clear();
 		
 		DrawSourceSet::iterator dit = mMyDrawSources.begin();
 		DrawSourceSet::iterator dend = mMyDrawSources.end();
@@ -98,15 +94,12 @@ namespace Opde {
 	}
 
 
+	 
+	
 	//------------------------------------------------------
-	FontDrawSource* TextureAtlas::createFont(const std::string& name) {
-		// creates a new font instance to be filled with glyphs
-		FontDrawSource* fdsp = new FontDrawSource(this, name);
-
+	void TextureAtlas::_addFont(const FontDrawSourcePtr& fdsp) {
 		mMyFonts.push_back(fdsp);
 		markDirty();
-
-		return fdsp;
 	}
 
 	//------------------------------------------------------
@@ -130,7 +123,7 @@ namespace Opde {
 		FontSet::iterator fit = mMyFonts.begin();
 
 		while (fit != mMyFonts.end()) {
-			FontDrawSource* fdsp = *fit++;
+			const FontDrawSourcePtr& fdsp = *fit++;
 
 			if (!fdsp->isBuilt())
 				fdsp->build();

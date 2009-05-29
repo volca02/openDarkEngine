@@ -188,10 +188,11 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void DrawService::rebuildAtlases() {
-		AtlasSet::iterator it = mAtlasesForRebuild.begin();
-		AtlasSet::iterator end = mAtlasesForRebuild.end();
+		AtlasList::iterator it = mAtlasesForRebuild.begin();
+		AtlasList::iterator end = mAtlasesForRebuild.end();
 
 		while (it != end) {
+			// TODO: Dirty status to avoid repeated rebuilds 
 			(*it++)->build();
 		}
 
@@ -204,11 +205,12 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	FontDrawSourcePtr DrawService::loadFont(TextureAtlas* atlas, const std::string& name, const std::string& group) {
+	FontDrawSourcePtr DrawService::loadFont(const TextureAtlasPtr& atlas, const std::string& name, const std::string& group) {
 		// load the font according to the specs
-		assert(atlas);
-		FontDrawSourcePtr nfs = atlas->createFont(name);
+		FontDrawSourcePtr nfs = new FontDrawSource(atlas, name);
 
+		atlas->_addFont(nfs);
+		
 		// now we'll load the glyphs from the file
 		loadFonFile(name, group, nfs);
 
@@ -627,9 +629,9 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	TextureAtlas* DrawService::createAtlas() {
+	TextureAtlasPtr DrawService::createAtlas() {
 		//
-		TextureAtlas* ta = new TextureAtlas(this, getNewDrawOperationID());
+		TextureAtlasPtr ta = new TextureAtlas(this, getNewDrawOperationID());
 
 		// TODO: Stack of atlases for release purposes (cleanup)
 
@@ -637,9 +639,12 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void DrawService::destroyAtlas(TextureAtlas* atlas) {
+	void DrawService::destroyAtlas(const TextureAtlasPtr& atlas) {
+		/* TODO: INVALID:
 		mFreeIDs.push(atlas->getAtlasID());
 		delete atlas;
+		*/
+		LOG_INFO("DrawService::destroyAtlas ignored");
 	}
 
 

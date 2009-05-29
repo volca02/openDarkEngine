@@ -31,7 +31,7 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*------------------- FontDrawSource -----------------*/
 	/*----------------------------------------------------*/
-	FontDrawSource::FontDrawSource(TextureAtlas* container, const std::string& name) : mContainer(container), mName(name), mMaxHeight(0), mMaxWidth(0), mBuilt(false) {
+	FontDrawSource::FontDrawSource(const TextureAtlasPtr& container, const std::string& name) : mContainer(container), mName(name), mMaxHeight(0), mMaxWidth(0), mBuilt(false) {
 		//
 	}
 

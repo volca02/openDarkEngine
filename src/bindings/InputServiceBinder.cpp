@@ -93,7 +93,7 @@ namespace Opde
 			0,									// hashfunc tp_hash;     /* __hash__ */
 			0,									// ternaryfunc tp_call;  /* __call__ */
 			0,									// reprfunc tp_str;      /* __str__ */
-			0,									// getattrofunc tp_getattro; */
+			PyObject_GenericGetAttr,  			// getattrofunc tp_getattro; */
 			0,									// setattrofunc tp_setattro; */
 			0,									// PyBufferProcs *tp_as_buffer; */
 			0,									// long tp_flags; */
@@ -117,6 +117,7 @@ namespace Opde
 		    {"command", command, METH_VARARGS},
 		    {"registerCommandTrap", registerCommandTrap, METH_VARARGS},
 		    {"unregisterCommandTrap", unregisterCommandTrap, METH_VARARGS},
+		    {"setInputMapped", setInputMapped, METH_VARARGS},
 		    {NULL, NULL},
 		};
 
@@ -184,7 +185,7 @@ namespace Opde
 			if (PyArg_ParseTuple(args, "s", &command)) 
 			{
 				std::string Command = command;
-			    o->ProcessCommand(Command);
+			    o->processCommand(Command);
 
 			    __PY_NONE_RET;
 			} else {
@@ -232,7 +233,6 @@ namespace Opde
 		PyObject* InputServiceBinder::unregisterCommandTrap(PyObject* self, PyObject* args)
 		{
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			PyObject *result = NULL;
 			InputServicePtr o;
 			
 			if (!python_cast<InputServicePtr>(self, &msType, &o))
@@ -246,9 +246,37 @@ namespace Opde
 				__PY_NONE_RET;
 			} else {
 					PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
+					return NULL;
 			}
 
-			return result;
+			__PYTHON_EXCEPTION_GUARD_END_;
+		}
+		
+		// ------------------------------------------
+		PyObject* InputServiceBinder::setInputMapped(PyObject* self, PyObject* args)		
+		{
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			InputServicePtr o;
+			
+			if (!python_cast<InputServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
+
+			PyObject *mapped;
+
+			if (PyArg_ParseTuple(args, "O", &mapped)) {
+				bool cmap;
+				
+				if (!TypeInfo<bool>::fromPyObject(mapped, cmap))
+					__PY_BADPARMS_RET;
+				
+				o->setInputMode(cmap ? IM_MAPPED : IM_DIRECT);
+
+				__PY_NONE_RET;
+			} else {
+					PyErr_SetString(PyExc_TypeError, "Expected a bool parameter!");
+					return NULL;
+			}
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 

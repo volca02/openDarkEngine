@@ -147,7 +147,7 @@ namespace Opde {
 
 	//------------------------------------------------------
 	DrawSourceBasePtr RenderedLabel::getDrawSourceBase() {
-		return mFontSource->getAtlas();
+		return static_pointer_cast<DrawSourceBase>(mFontSource->getAtlas());
 	}
 
 	//------------------------------------------------------
