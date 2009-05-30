@@ -85,9 +85,9 @@ namespace Opde {
 		PyObject* DrawSheetBinder::activate(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
-			DrawSheet* o;
+			DrawSheetPtr o;
 			
-			if (!python_cast<DrawSheet*>(self, &msType, &o))
+			if (!python_cast<DrawSheetPtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 			
 			o->activate();
@@ -101,9 +101,9 @@ namespace Opde {
 		PyObject* DrawSheetBinder::deactivate(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
-			DrawSheet* o;
+			DrawSheetPtr o;
 			
-			if (!python_cast<DrawSheet*>(self, &msType, &o))
+			if (!python_cast<DrawSheetPtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 			
 			o->deactivate();
@@ -117,9 +117,9 @@ namespace Opde {
 		PyObject* DrawSheetBinder::addDrawOperation(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
-			DrawSheet* o;
+			DrawSheetPtr o;
 			
-			if (!python_cast<DrawSheet*>(self, &msType, &o))
+			if (!python_cast<DrawSheetPtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 			
 			PyObject *dop;
@@ -147,9 +147,9 @@ namespace Opde {
 		PyObject* DrawSheetBinder::removeDrawOperation(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
-			DrawSheet* o;
+			DrawSheetPtr o;
 			
-			if (!python_cast<DrawSheet*>(self, &msType, &o))
+			if (!python_cast<DrawSheetPtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 			
 			PyObject *dop;
@@ -177,9 +177,9 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
 			PyObject *result = NULL;
-			DrawSheet* o;
+			DrawSheetPtr o;
 			
-			if (!python_cast<DrawSheet*>(self, &msType, &o))
+			if (!python_cast<DrawSheetPtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
 			/// TODO: Stub. Stupid return fix both
@@ -193,9 +193,9 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
 			PyObject *result = NULL;
-			DrawSheet* o;
+			DrawSheetPtr o;
 			
-			if (!python_cast<DrawSheet*>(self, &msType, &o))
+			if (!python_cast<DrawSheetPtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 			
 			/// TODO: Stub. Stupid return fix both
@@ -209,9 +209,9 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
 			PyObject *result = NULL;
-			DrawSheet* o;
+			DrawSheetPtr o;
 			
-			if (!python_cast<DrawSheet*>(self, &msType, &o))
+			if (!python_cast<DrawSheetPtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 			
 			/// TODO: Stub. Stupid return fix both
@@ -233,17 +233,17 @@ namespace Opde {
 		}
 		
 		// ------------------------------------------
-		bool DrawSheetBinder::extract(PyObject *object, DrawSheet*& sheet) {
+		bool DrawSheetBinder::extract(PyObject *object, DrawSheetPtr& sheet) {
 			// The extraction in this way will ONLY work on the object itself.
 			// we can't just hope reinterpret_cast will upcast right
 			
 			// to overcome this, we have a casting method embedded in the type tree where needed (so it's transparent here)
 			
-			return python_cast<DrawSheet*>(object, &msType, &sheet);
+			return python_cast<DrawSheetPtr>(object, &msType, &sheet);
 		}
 		
 		// ------------------------------------------
-		PyObject* DrawSheetBinder::create(DrawSheet *sh) {
+		PyObject* DrawSheetBinder::create(const DrawSheetPtr& sh) {
 			Object* object = construct(&msType);
 
 			if (object != NULL) {

@@ -40,9 +40,11 @@ namespace Opde {
 	class DrawService;
 	class TextureAtlas;
 	class FontDrawSource;
+	class DrawSheet;
 	
 	typedef shared_ptr<TextureAtlas> TextureAtlasPtr;
 	typedef shared_ptr<FontDrawSource> FontDrawSourcePtr;
+	typedef shared_ptr<DrawSheet> DrawSheetPtr;
 
 	/// Universal rect. Specifies left, right, top and bottom coordinates
 	template<typename T> struct DrawRect {
@@ -243,6 +245,8 @@ namespace Opde {
 		public:
 			DrawSource(DrawService *owner);
 			
+			DrawSource(DrawService *owner, const Ogre::String& name, const Ogre::String& group, const Ogre::MaterialPtr& extMaterial);
+			
 			DrawSource(DrawService *owner, ID id, const Ogre::MaterialPtr& mat, const Ogre::TexturePtr& tex);
 			
 			virtual ~DrawSource();
@@ -266,16 +270,15 @@ namespace Opde {
 			/// Image getter (Image is used for pre-atlas image data storage)
 			inline Ogre::Image& getImage() { return mImage; };
 			
-			/** Loads image data into the mImage. This is preffered over getImage().load() because it also updates pixels size. */
-			void loadImage(const Ogre::String& name, const Ogre::String& group);
-			
 			/// Updates the pixel size from the supplied image. Do NOT forget to call this after loading the image by hand.
 			void updatePixelSizeFromImage();
 			
 			/// Fills the specified DrawRect to represent the full image of this draw source
 			void fillTexCoords(DrawRect<Ogre::Real>& tc);
 		protected:
-
+			/** Loads image data into the mImage. This is preffered over getImage().load() because it also updates pixels size. */
+			void loadImage(const Ogre::String& name, const Ogre::String& group);
+			
 			/** Source image of this draw source - may be lost after atlassing this, internal  */
 			Ogre::Image	mImage;
 
@@ -328,7 +331,8 @@ namespace Opde {
 	} DarkPixelFormat;
 
 
-
+	// helper comparison operator for draw source shared_ptrs - to be able to put them into sets for example
+	bool operator<(const DrawSheetPtr& a, const DrawSheetPtr& b);
 };
 
 #endif

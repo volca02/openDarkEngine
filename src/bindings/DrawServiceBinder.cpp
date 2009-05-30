@@ -32,6 +32,8 @@
 #include "RenderedLabelBinder.h"
 #include "TextureAtlasBinder.h"
 
+using Ogre::ManualFonFileLoader;
+
 namespace Opde {
 
 	namespace Python {
@@ -105,7 +107,7 @@ namespace Opde {
 			const char* sname;
 
 			if (PyArg_ParseTuple(args, "s", &sname)) {
-			    DrawSheet* i = o->createSheet(sname);
+			    const DrawSheetPtr& i = o->createSheet(sname);
 			    
 			    PyObject *o = DrawSheetBinder::create(i);
 				
@@ -133,7 +135,7 @@ namespace Opde {
 			PyObject *sheet;
 			if (PyArg_ParseTuple(args, "O", &sheet)) {
 				// cast to drawsheet and destroy
-				DrawSheet* ds;
+				DrawSheetPtr ds;
 				
 				if (!DrawSheetBinder::extract(sheet, ds))
 					__PY_CONVERR_RET;
@@ -162,7 +164,7 @@ namespace Opde {
 			const char* sname;
 
 			if (PyArg_ParseTuple(args, "s", &sname)) {
-				DrawSheet* i = o->getSheet(sname);
+				const DrawSheetPtr& i = o->getSheet(sname);
 				
 				PyObject *o = DrawSheetBinder::create(i);
 				
@@ -189,7 +191,7 @@ namespace Opde {
 			
 			PyObject *sheet;
 			if (PyArg_ParseTuple(args, "O", &sheet)) {
-				DrawSheet* ds;
+				DrawSheetPtr ds;
 				
 				if (!DrawSheetBinder::extract(sheet, ds))
 					__PY_CONVERR_RET;
@@ -377,13 +379,34 @@ namespace Opde {
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::setFontPalette(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			PyObject *result = NULL;
 			DrawServicePtr o;
 			
 			if (!python_cast<DrawServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 			
-			return result;	//Temporary return to fix the VC build
+			int ptype;
+			char *fname;
+			char *group;
+			
+			if (!PyArg_ParseTuple(args, "iss", &ptype, &fname, &group))
+				__PY_BADPARMS_RET;
+			
+			Ogre::ManualFonFileLoader::PaletteType pt;
+			// validate the ptype
+			switch (ptype) {
+				case (int)ManualFonFileLoader::ePT_Default : pt = ManualFonFileLoader::ePT_Default; break;
+				case (int)ManualFonFileLoader::ePT_DefaultBook : pt = ManualFonFileLoader::ePT_DefaultBook; break;
+				case (int)ManualFonFileLoader::ePT_PCX : pt = ManualFonFileLoader::ePT_PCX; break;
+				case (int)ManualFonFileLoader::ePT_External : pt = ManualFonFileLoader::ePT_External; break;
+			default:
+				__PY_BADPARM_RET("paltype");
+			}
+			
+			// okay! call
+			o->setFontPalette(pt, fname, group);
+			
+			__PY_NONE_RET;
+			
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 		
@@ -411,6 +434,11 @@ namespace Opde {
 		// ------------------------------------------
 		void DrawServiceBinder::init(PyObject* module) {
 			publishType(module, &msType, msName);
+                                
+			PyModule_AddIntConstant(module, "PT_DEFAULT", ManualFonFileLoader::ePT_Default);
+			PyModule_AddIntConstant(module, "PT_DEFAULTBOOK", ManualFonFileLoader::ePT_DefaultBook);
+			PyModule_AddIntConstant(module, "PT_PCX", ManualFonFileLoader::ePT_PCX);
+			PyModule_AddIntConstant(module, "PT_EXTERNAL", ManualFonFileLoader::ePT_External);
 		}
 
 		

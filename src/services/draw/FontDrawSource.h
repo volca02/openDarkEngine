@@ -54,7 +54,7 @@ namespace Opde {
 			void addGlyph(FontCharType chr, const PixelSize& dimensions, DarkPixelFormat pf, size_t rowlen, void* data, size_t pxoffset, const RGBAQuad* palette = NULL);
 
 			/** Retrieves a glyph as a draw source for rendering usage */
-			DrawSource* getGlyph(FontCharType chr);
+			DrawSourcePtr getGlyph(FontCharType chr);
 
 			/// Returns the maximal width of any glyph from this font
 			inline size_t getWidth() { return mMaxWidth; };
@@ -81,15 +81,15 @@ namespace Opde {
 			/** populates the Image in the drawsource with a RGB conversion of the supplied 1Bit mono image
 			 *  @note uses the first two records in the specified pallette for conversion
 			 */
-			void populateImageFromMono(DrawSource* dsp, const PixelSize& dimensions, size_t rowlen, void* data, size_t pxoffset, const RGBAQuad* pal);
+			void populateImageFromMono(const DrawSourcePtr& dsp, const PixelSize& dimensions, size_t rowlen, void* data, size_t pxoffset, const RGBAQuad* pal);
 
 			/** populates the Image in the drawsource with a RGB conversion of the supplied 8Bit palletized image
 			 *  @note uses the records in the specified pallette for conversion
 			 */
-			void populateImageFrom8BitPal(DrawSource* dsp, const PixelSize& dimensions, size_t rowlen, void* data, size_t pxoffset, const RGBAQuad* pal);
+			void populateImageFrom8BitPal(const DrawSourcePtr& dsp, const PixelSize& dimensions, size_t rowlen, void* data, size_t pxoffset, const RGBAQuad* pal);
 
 			/// The map from character to the drawing source it represents
-			typedef std::map<FontCharType, DrawSource*> GlyphMap;
+			typedef std::map<FontCharType, DrawSourcePtr> GlyphMap;
 
 			/// Containing atlas
 			TextureAtlasPtr mContainer;

@@ -1,46 +1,41 @@
-from Opde import *
+import opde
 
 # TODO: We need to export service mask constants!
-opderoot = createRoot(0x0FFFFFFFF)
+opderoot = opde.createRoot(opde.services.SERVICE_ALL)
 
 opderoot.logToFile("opde.log")
-opderoot.setLogLevel(1)
+opderoot.setLogLevel(4)
 
 # Setup resources
-opderoot.loadResourceConfig("resources.cfg")
+opderoot.registerCustomScriptLoaders()
+opderoot.loadResourceConfig("thief1.cfg")
 opderoot.loadConfigFile("opde.cfg")
 
 # Load the dype scripts (this should vary depending on the game type)
-opderoot.loadDTypeScript("common.dtype", "General")
-opderoot.loadDTypeScript("t1-types.dtype", "General")
-opderoot.loadPLDefScript("t1-links.pldef", "General")
-opderoot.loadPLDefScript("t1-props.pldef", "General")
+# opderoot.loadDTypeScript("common.dtype", "General")
+#opderoot.loadDTypeScript("t1-types.dtype", "General")
+#opderoot.loadPLDefScript("t1-links.pldef", "General")
+#opderoot.loadPLDefScript("t1-props.pldef", "General")
 
 
 # Bootstrapping finished. We can progress wit the actual engine run
 opderoot.bootstrapFinished();
 
 # Service globals
-lsrv = Services.LoopService()
-isrv = Services.InputService()
+lsrv = opde.services.getLoopService()
+isrv = opde.services.getInputService()
 # osrv = Services.ObjectService()
 
 # ------------- State management -------------
 # To sim menu switcher
 # To be called from a key input handler
 def switchToSimMenu():
-    log_debug("Switching to sim menu")
+    opde.log_debug("Switching to sim menu")
     lsrv.requestLoopMode("GUIOnlyLoopMode")
-    # TODO:
-    # guisrv.setActiveSheet(SimMenuSheet)
-    # guisrv.setActive(true)
-    # guisrv.setVisible(true)
-    # render service -> hide world geometry
-    # simservice.stop or thing like that to avoid step problems (but this can be auto via loopModeEnded)
     
 # The reverse (to game switch from gui)
 def switchToGameMode():
-    log_debug("Switching to game mode")
+    opde.log_debug("Switching to game mode")
     # TODO: Render service -> set world visible
     lsrv.requestLoopMode("AllClientsLoopMode")
     # guisrv.setActiveSheet(GameModeSheet)
@@ -57,23 +52,18 @@ def simMenuRequest(msg):
 
 def exitRequest(msg):
 #    log_info("Received a message for exitRequest " + str(msg.event))
-    log_info("Termination requested!")
+    opde.log_info("Termination requested!")
     lsrv.requestTermination()
 
 def debugFrameRequest(msg):
-    log_info("Received a message for frame debugger. Will debug one frame")
-    log_info("Comand field: " + msg.command)
-    log_info("Comand params: " + str(msg.params))
+    opde.log_info("Received a message for frame debugger. Will debug one frame")
+    opde.log_info("Comand field: " + msg.command)
+    opde.log_info("Comand params: " + str(msg.params))
     lsrv.debugOneFrame()
 
 # ------------ Main code -------------
-
-# A small thought: A callback would be created in database service to support redraws.
-# But would be handled here by PythonCallback (DatabaseProgressMessage), like this:
-# class LoadSaveScreen: .... Holds sheet and ui elements, publishes methods to set progress...
-# loadScreen = LoadSaveScreen.create(guisrv)
 def databaseProgressUpdate(msg):
-    log_info("Loading progress : " + str(msg.completed  * 100))
+    opde.log_info("Loading progress : " + str(msg.completed  * 100))
 #    loadScreen.setLeftGauge(msg['progress_master'])
 #    loadScreen.setRightGauge(msg['progress_slave'])
 #    rendersrv.renderOneFrame()
@@ -94,22 +84,28 @@ isrv.registerCommandTrap("debug_frame", debugFrameRequest)
 # Map to escape and 1 keys (TODO: hardcoded_bind command could come handy to avoid breakage)
 isrv.command("bind esc exit_request") # Would be sim_menu switcher binding, for example.
 isrv.command("bind 1 debug_frame")
-
-# guisrv = Services.GUIService()
-# guisrv.setVisible(True)
-# guisrv.setActive(True)
+isrv.setInputMapped(True)
 
 # A sample mission load
-dbsrv = Services.DatabaseService()
+dbsrv = opde.services.getDatabaseService()
 dbsrv.setProgressListener(databaseProgressUpdate)
 # dbsrv.load("miss1.mis")
 
-# a test link query
-linksrv = Services.LinkService()
-mprel = linksrv.getRelation("MetaProp")
+# some on-screen text
+drawsrv = opde.services.getDrawService()
 
-for l in mprel.getAllLinks(1,0):
-    print "Link from 1: " + str(l.id) + " from " + str(l.src) + " to " + str(l.dst) + " flav " + str(l.flavor)
+dsht = drawsrv.createSheet("default")
+drawsrv.setActiveSheet(dsht)
+atl = drawsrv.createAtlas()
+# load a font
+drawsrv.setFontPalette(opde.services.PT_PCX, "darkpal.pcx", "General")
+#drawsrv.setFontPalette(opde.services.PT_PCX, "amappal.pcx", "General")
+fnt = drawsrv.loadFont(atl, "TEXTFONT.FON" , "General")
+lab = drawsrv.createRenderedLabel(fnt)
+lab.setLabel("A small text on screen")
+lab.setPosition(0,0)
+dsht.addDrawOperation(lab)
+
 
 # Loop setup and execution
 if (not lsrv.requestLoopMode("GUIOnlyLoopMode")):
@@ -118,7 +114,7 @@ else:
     lsrv.run() # Run the main loop
     
 # Termination
-log_info("Terminating Opde");
+opde.log_info("Terminating Opde");
 
 isrv.unregisterCommandTrap("debug_frame")
 isrv.unregisterCommandTrap("exit_request")

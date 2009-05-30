@@ -73,7 +73,7 @@ namespace Opde {
 
 		// destroy all sheets
 		for (; it != mSheetMap.end(); ++it) {
-			delete it->second;
+			it->second->clear();
 		}
 
 		mSheetMap.clear();
@@ -81,14 +81,28 @@ namespace Opde {
 		// destroy all draw operations left
 		for (size_t idx = 0; idx < mDrawOperations.size(); ++idx) {
 			// delete
-			delete mDrawOperations[idx];
+			DrawOperation* dop = mDrawOperations[idx];
+			
+			if (dop != NULL)
+				dop->clear();
+			
+			delete dop;
 			mDrawOperations[idx] = NULL;
 		}
 
+		TextureAtlasMap::iterator end = mAtlasMap.end();
+		for (TextureAtlasMap::iterator it = mAtlasMap.begin(); it != end; ++it) {
+			destroyAtlas(it->second);
+		}
+		
+		mAtlasMap.clear();
+		
 		mDrawOperations.clear();
 
 		// destroy all draw sources
 		mDrawSources.clear();
+		
+		mResourceMap.clear();
 
 		freeCurrentPal();
 	}
@@ -119,7 +133,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	DrawSheet* DrawService::createSheet(const std::string& sheetName) {
+	DrawSheetPtr DrawService::createSheet(const std::string& sheetName) {
 		assert(!sheetName.empty());
 
 		SheetMap::iterator it = mSheetMap.find(sheetName);
@@ -127,14 +141,14 @@ namespace Opde {
 		if (it != mSheetMap.end())
 			return it->second;
 		else {
-			DrawSheet* sheet = new DrawSheet(this, sheetName);
+			DrawSheetPtr sheet = new DrawSheet(this, sheetName);
 			mSheetMap[sheetName] = sheet;
 			return sheet;
 		}
 	};
 
 	//------------------------------------------------------
-	void DrawService::destroySheet(DrawSheet* sheet) {
+	void DrawService::destroySheet(const DrawSheetPtr& sheet) {
 		// find it in the map, remove, then delete
 		SheetMap::iterator it = mSheetMap.begin();
 
@@ -149,11 +163,15 @@ namespace Opde {
 			}
 		}
 
-		delete sheet;
+		if (mActiveSheet == sheet)
+			setActiveSheet(NULL);
+		
+		sheet->clear();
+		// and we're done
 	}
 
 	//------------------------------------------------------
-	DrawSheet* DrawService::getSheet(const std::string& sheetName) const {
+	const DrawSheetPtr& DrawService::getSheet(const std::string& sheetName) const {
 		SheetMap::const_iterator it = mSheetMap.find(sheetName);
 
 		if (it != mSheetMap.end())
@@ -163,14 +181,14 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void DrawService::setActiveSheet(DrawSheet* sheet) {
+	void DrawService::setActiveSheet(const DrawSheetPtr& sheet) {
 		if (mActiveSheet != sheet) {
-			if (mActiveSheet)
+			if (!mActiveSheet.isNull())
 				mActiveSheet->deactivate();
 
 			mActiveSheet = sheet;
 
-			if (mActiveSheet)
+			if (!mActiveSheet.isNull())
 				mActiveSheet->activate();
 		}
 	}
@@ -178,11 +196,18 @@ namespace Opde {
 	//------------------------------------------------------
 	void DrawService::renderQueueStarted(uint8 queueGroupId, const String& invocation, bool& skipThisInvocation) {
 		// Clear Z buffer to be ready to render overlayed meshes and stuff
-		if(queueGroupId == RENDER_QUEUE_OVERLAY) {
-			Ogre::Root::getSingleton().getRenderSystem()->clearFrameBuffer(Ogre::FBT_DEPTH);
-
+		if(queueGroupId == RENDER_QUEUE_BACKGROUND) {
 			// and rebuild the atlasses as needed
 			rebuildAtlases();
+			
+			// and render the 2d parts
+			if (!mActiveSheet.isNull()) {
+				// update the render queue to contain the rendereables of the sheet
+				mActiveSheet->queueRenderables(mSceneManager->getRenderQueue());
+			}
+			
+		} else if(queueGroupId == RENDER_QUEUE_OVERLAY) { 
+			Ogre::Root::getSingleton().getRenderSystem()->clearFrameBuffer(Ogre::FBT_DEPTH);
 		}
 	}
 
@@ -287,6 +312,7 @@ namespace Opde {
 
 		delete[] bitmap;
 		delete[] columns;
+		LOG_INFO("DrawService: Loaded font '%s'", name.c_str());
 	}
 
 
@@ -321,22 +347,6 @@ namespace Opde {
 		
 		while (it != mResourceMap.end()) {
 			DrawSourcePtr cds = it->second;
-			
-			if (cds == ds) {
-				ResourceDrawSourceMap::iterator th = it++;
-				mResourceMap.erase(th);
-			} else {
-				++it;
-			}
-		}
-	}
-	
-	//------------------------------------------------------
-	void DrawService::unregisterDrawSource(const DrawSource* ds) {
-		ResourceDrawSourceMap::iterator it = mResourceMap.begin();
-		
-		while (it != mResourceMap.end()) {
-			DrawSource *cds = it->second.ptr();
 			
 			if (cds == ds) {
 				ResourceDrawSourceMap::iterator th = it++;
@@ -525,6 +535,8 @@ namespace Opde {
 
 		mDrawSources.push_back(ds);
 		
+		registerDrawSource(ds, img, group);
+		
 		return ds;
 	}
 
@@ -587,6 +599,8 @@ namespace Opde {
 		mDrawOperations[id] = NULL;
 		// recycle the id for reuse
 		mFreeIDs.push(id);
+		
+		dop->clear();
 		delete dop;
 	}
 
@@ -633,7 +647,7 @@ namespace Opde {
 		//
 		TextureAtlasPtr ta = new TextureAtlas(this, getNewDrawOperationID());
 
-		// TODO: Stack of atlases for release purposes (cleanup)
+		mAtlasMap.insert(std::make_pair(ta->getAtlasID(), ta));
 
 		return ta;
 	}
@@ -665,7 +679,7 @@ namespace Opde {
 		SheetMap::iterator it = mSheetMap.begin();
 
 		while(it != mSheetMap.end()) {
-			DrawSheet* sht = (it++)->second;
+			const DrawSheetPtr& sht = (it++)->second;
 			
 			sht->_setResolution(mWidth, mHeight);
 		}
@@ -673,7 +687,7 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	void DrawService::postCreate(DrawOperation *dop) {
-		dop->_notifyActiveSheet(mActiveSheet);
+		dop->_notifyActiveSheet(mActiveSheet.ptr());
 	}
 	
 	//------------------------------------------------------

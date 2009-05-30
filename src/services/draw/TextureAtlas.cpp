@@ -51,6 +51,7 @@ namespace Opde {
 
 		mAtlasAllocation = new FreeSpaceInfo(0,0,1,1);
 		mAtlasName = "DrawAtlas" + Ogre::StringConverter::toString(mAtlasID);
+		mMaterial = Ogre::MaterialManager::getSingleton().create("M_" + mAtlasName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 	}
 
 	//------------------------------------------------------
@@ -64,23 +65,25 @@ namespace Opde {
 
 		mMyFonts.clear();
 		
-		DrawSourceSet::iterator dit = mMyDrawSources.begin();
-		DrawSourceSet::iterator dend = mMyDrawSources.end();
+		DrawSourceList::iterator dit = mMyDrawSources.begin();
+		DrawSourceList::iterator dend = mMyDrawSources.end();
 		
 		while (dit != dend) {
 			mOwner->unregisterDrawSource(*dit++);
 		}
 		
 		mMyDrawSources.clear();
+		
+		dropResources();
+		
+		Ogre::MaterialManager::getSingleton().remove(mMaterial->getName());
 	}
 
 	//------------------------------------------------------
 	DrawSourcePtr TextureAtlas::createDrawSource(const Ogre::String& imgName, const Ogre::String& groupName) {
 		// Load as single first, but wit the same id
 		// First we load the image.
-		DrawSourcePtr ds = new DrawSource(mOwner);
-
-		ds->loadImage(imgName, groupName);
+		DrawSourcePtr ds = new DrawSource(mOwner, imgName, groupName, mMaterial);
 
 		ds->setSourceID(mAtlasID);
 
@@ -103,7 +106,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void TextureAtlas::_addDrawSource(DrawSource* ds) {
+	void TextureAtlas::_addDrawSource(const DrawSourcePtr& ds) {
 		// just insert into the list
 		mMyDrawSources.push_back(ds);
 		markDirty();
@@ -138,7 +141,7 @@ namespace Opde {
 			area = 0;
 
 			// try to fit
-			DrawSourceSet::iterator it = mMyDrawSources.begin();
+			DrawSourceList::iterator it = mMyDrawSources.begin();
 
 			while (it != mMyDrawSources.end()) {
 				
@@ -167,36 +170,21 @@ namespace Opde {
 		
 		LOG_INFO("TextureAtlas: Creating atlas '%s' with dimensions %d x %d", mAtlasName.c_str(), mAtlasSize.width, mAtlasSize.height);
 
-		// it seems we're here because we fitted! Lets paint the textures into the atlas
-		mTexture = Ogre::TextureManager::getSingleton().createManual(mAtlasName,
-			Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-			Ogre::TEX_TYPE_2D,
-			mAtlasSize.width,
-			mAtlasSize.height,
-			1,
-			Ogre::PF_BYTE_BGRA,
-			Ogre::TU_STATIC_WRITE_ONLY);
+		if (mTexture.isNull())
+			prepareResources();
+		
+		Ogre::HardwarePixelBufferSharedPtr pixelBuffer = mTexture->getBuffer();
+		pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
+		
+		const Ogre::PixelBox& targetBox = pixelBuffer->getCurrentLock();
+		
+		size_t pixelsize = Ogre::PixelUtil::getNumElemBytes(targetBox.format);
+		size_t rowsize = targetBox.rowPitch * pixelsize;
 
-		mMaterial = Ogre::MaterialManager::getSingleton().create("M_" + mAtlasName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-		Ogre::TextureUnitState* tus = mMaterial->getTechnique(0)->getPass(0)->createTextureUnitState(mTexture->getName());
+		Ogre::uint8* dstData = static_cast<Ogre::uint8*>(targetBox.data);
 
-		tus->setTextureFiltering(Ogre::FO_NONE, Ogre::FO_NONE, Ogre::FO_NONE);
-
-		Ogre::Pass *pass = mMaterial->getTechnique(0)->getPass(0);
-		pass->setAlphaRejectSettings(Ogre::CMPF_GREATER, 128);
-		pass->setLightingEnabled(false);
-
-
-		 Ogre::HardwarePixelBufferSharedPtr pixelBuffer = mTexture->getBuffer();
-		 pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
-		 const Ogre::PixelBox& targetBox = pixelBuffer->getCurrentLock();
-		 size_t pixelsize = Ogre::PixelUtil::getNumElemBytes(targetBox.format);
-		 size_t rowsize = targetBox.rowPitch * pixelsize;
-
-		 Ogre::uint8* dstData = static_cast<Ogre::uint8*>(targetBox.data);
-
-		 // We'll iterate over all draw sources, painting the pixels onto the allocated space
-		 DrawSourceSet::iterator it = mMyDrawSources.begin();
+		// We'll iterate over all draw sources, painting the pixels onto the allocated space
+		DrawSourceList::iterator it = mMyDrawSources.begin();
 
 		while (it != mMyDrawSources.end()) {
 			const DrawSourcePtr& ds = *it++;
@@ -232,22 +220,18 @@ namespace Opde {
 			}
 
 			delete[] conversionBuf;
-
+			
 			// Convert the full draw source pixel coordinates to the atlas contained ones (initializes the texturing coordinates transform)
 			ds->atlas(mMaterial, fsi->x, fsi->y, mAtlasSize.width, mAtlasSize.height);
 		}
 
-
-		
 		 // for debug, write the texture to a file
-		/* 
-		unsigned char *readrefdata = static_cast<unsigned char*>(targetBox.data);		
+		/*unsigned char *readrefdata = static_cast<unsigned char*>(targetBox.data);		
 				     
 		Ogre::Image img;
 		img = img.loadDynamicImage (readrefdata, mTexture->getWidth(),
 		    mTexture->getHeight(), mTexture->getFormat());	
-		img.save(mAtlasName + ".png");
-		*/  
+		img.save(mAtlasName + ".png");*/
 
 		// and close the pixel buffer of the atlas at the end
 		pixelBuffer->unlock();
@@ -256,6 +240,8 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void TextureAtlas::enlarge(size_t area) {
+		dropResources();
+		
 		// TODO: destroy the prev. texture.
 		// Ogre::TextureManager::getSingleton().unload(mAtlasTexture);
 
@@ -291,4 +277,40 @@ namespace Opde {
 		// queue this atlas for automatic rebuilding
 		mOwner->_queueAtlasForRebuild(this);
 	}
+
+	//------------------------------------------------------
+	void TextureAtlas::prepareResources() {
+		mTexture = Ogre::TextureManager::getSingleton().createManual(mAtlasName,
+			Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+			Ogre::TEX_TYPE_2D,
+			mAtlasSize.width,
+			mAtlasSize.height,
+			1,
+			Ogre::PF_BYTE_BGRA,
+			Ogre::TU_STATIC_WRITE_ONLY);
+
+		Ogre::TextureUnitState* tus = mMaterial->getTechnique(0)->getPass(0)->createTextureUnitState(mTexture->getName());
+
+		tus->setTextureFiltering(Ogre::FO_NONE, Ogre::FO_NONE, Ogre::FO_NONE);
+
+		Ogre::Pass *pass = mMaterial->getTechnique(0)->getPass(0);
+		pass->setAlphaRejectSettings(Ogre::CMPF_GREATER, 128);
+		pass->setLightingEnabled(false);
+	}
+	
+	//------------------------------------------------------
+	void TextureAtlas::dropResources() {
+		if (!mTexture.isNull()) {
+			Ogre::TextureUnitState* tus = mMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(mTexture->getName());
+			
+			if (tus) {
+				int index = mMaterial->getTechnique(0)->getPass(0)->getTextureUnitStateIndex(tus);
+				mMaterial->getTechnique(0)->getPass(0)->removeTextureUnitState(index);
+			}
+			
+			Ogre::TextureManager::getSingleton().remove(mTexture->getName());
+			mTexture.setNull();
+		}
+	}
+
 };

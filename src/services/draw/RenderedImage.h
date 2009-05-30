@@ -35,10 +35,12 @@ namespace Opde {
 	class RenderedImage : public DrawOperation {
 		public:
 			RenderedImage(DrawService* owner, DrawOperation::ID id, const DrawSourcePtr& ds);
+			
+			virtual ~RenderedImage();
 
 			void visitDrawBuffer(DrawBuffer* db);
 			
-			DrawSourceBasePtr getDrawSourceBase();
+			virtual DrawSourceBasePtr getDrawSourceBase();
 			
 			void setDrawSource(const DrawSourcePtr& nsrc);
 
@@ -50,9 +52,9 @@ namespace Opde {
 			
 			DrawQuad mDrawQuad;
 			
-			DrawSourcePtr mDrawSource;
-			
 			bool mInClip;
+			
+			DrawSourcePtr mDrawSource;
 	};
 
 };

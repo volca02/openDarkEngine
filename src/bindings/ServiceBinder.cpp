@@ -159,6 +159,7 @@ namespace Opde {
 			PropertyServiceBinder::init(module);
 			DatabaseServiceBinder::init(module);
 			InputServiceBinder::init(module);
+			DrawServiceBinder::init(module);
 			GUIServiceBinder::init(module);
 			LinkServiceBinder::init(module);
 			LoopServiceBinder::init(module);

@@ -48,22 +48,7 @@ namespace Opde {
 
 	//------------------------------------------------------
 	DrawSheet::~DrawSheet() {
-		DrawOperationMap::iterator iend = mDrawOpMap.end();
-
-		for (DrawOperationMap::iterator doi = mDrawOpMap.begin(); doi != iend; ++doi) {
-			removeDrawOperation(doi->second);
-		}
-
-		mDrawOpMap.clear();
-
-		// TODO: destroy all the render buffers
-		DrawBufferMap::iterator it = mDrawBufferMap.begin();
-
-		for (; it != mDrawBufferMap.end(); ++it) {
-			delete it->second;
-		}
-
-		mDrawBufferMap.clear();
+		clear();
 	}
 
 	//------------------------------------------------------
@@ -121,7 +106,7 @@ namespace Opde {
 		
 		if (oldID != newID) {
 			DrawBuffer* dbo = getBufferForSourceID(oldID);
-			DrawBuffer* dbn = getBufferForSourceID(oldID);
+			DrawBuffer* dbn = getBufferForSourceID(newID);
 			
 			// remove from the old buffer
 			// add into the new one
@@ -134,9 +119,8 @@ namespace Opde {
 	void DrawSheet::_removeDrawOperation(DrawOperation* toRemove) {
 		DrawBuffer* buf = getBufferForOperation(toRemove);
 
-		assert(buf);
-
-		buf->removeDrawOperation(toRemove);
+		if (buf)
+			buf->removeDrawOperation(toRemove);
 
 		DrawOperationMap::iterator it = mDrawOpMap.find(toRemove->getID());
 
@@ -172,7 +156,6 @@ namespace Opde {
 		if (autoCreate) {
 			const Ogre::MaterialPtr& mp = dsb->getMaterial();
 			DrawBuffer* db = new DrawBuffer(mp);
-			// TODO: And here as well. ID should be enough
 			mDrawBufferMap[dsb->getSourceID()] = db;
 			return db;
 		} else {
@@ -257,6 +240,51 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
+	void DrawSheet::queueRenderables(Ogre::RenderQueue* rq) {
+		for (DrawBufferMap::iterator it = mDrawBufferMap.begin(); it != mDrawBufferMap.end(); ++it) {
+			DrawBuffer* db = it->second;
+
+			// could be done in Renderable::preRender hidden from the eyes
+			if (db->isDirty())
+				db->update();
+
+			// see if the renderable should be queued
+			if (db->isEmpty())
+				continue;
+			
+			rq->addRenderable(db, db->getRenderQueueID(), OGRE_RENDERABLE_DEFAULT_PRIORITY);
+		}
+		
+	}
+	
+	//------------------------------------------------------
+	void DrawSheet::clear() {
+		// this ensures we have not shared pointers hanging in there to cause troubles
+		// for example.
+		DrawOperationMap::iterator iend = mDrawOpMap.end();
+
+		for (DrawOperationMap::iterator doi = mDrawOpMap.begin(); doi != iend; ++doi) {
+			DrawOperation* dop = doi->second;
+			DrawBuffer* buf = getBufferForOperation(dop);
+	
+			assert(buf);
+	
+			buf->removeDrawOperation(dop);
+			dop->onSheetUnregister(this);
+		}
+
+		mDrawOpMap.clear();
+
+		DrawBufferMap::iterator it = mDrawBufferMap.begin();
+
+		for (; it != mDrawBufferMap.end(); ++it) {
+			delete it->second;
+		}
+
+		mDrawBufferMap.clear();
+	}
+	
+	//------------------------------------------------------
 	const Ogre::String& DrawSheet::getMovableType() const {
 		static Ogre::String type = "DrawSheet";
         return type;
@@ -290,7 +318,7 @@ namespace Opde {
 	//------------------------------------------------------
 	void DrawSheet::_updateRenderQueue(Ogre::RenderQueue* queue) {
 		// do this for all the Buffers
-		for (DrawBufferMap::iterator it = mDrawBufferMap.begin(); it != mDrawBufferMap.end(); ++it) {
+		/*for (DrawBufferMap::iterator it = mDrawBufferMap.begin(); it != mDrawBufferMap.end(); ++it) {
 			DrawBuffer* db = it->second;
 
 			// could be done in Renderable::preRender hidden from the eyes
@@ -298,7 +326,7 @@ namespace Opde {
 				db->update();
 
 			queue->addRenderable(db, db->getRenderQueueID(), OGRE_RENDERABLE_DEFAULT_PRIORITY);
-		}
+		}*/
 	};
 	
 	//-----------------------------------------------------

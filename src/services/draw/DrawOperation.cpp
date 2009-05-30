@@ -42,11 +42,7 @@ namespace Opde {
 
 	//------------------------------------------------------
 	DrawOperation::~DrawOperation() {
-		// remove from all sheets left
-		for (DrawSheetSet::iterator it = mUsingSheets.begin(); it != mUsingSheets.end(); ++it) {
-			(*it)->_removeDrawOperation(this);
-		}
-
+		// at least break the circle (but clear should've been called anyway)
 		mUsingSheets.clear();
 	};
 
@@ -108,7 +104,7 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
-	void DrawOperation::_notifyActiveSheet(DrawSheet *actsh) {
+	void DrawOperation::_notifyActiveSheet(DrawSheet* actsh) {
 		mActiveSheet = actsh;
 	}
 
@@ -118,9 +114,20 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
+	void DrawOperation::clear() {
+		// remove from all sheets left
+		for (DrawSheetSet::iterator it = mUsingSheets.begin(); it != mUsingSheets.end(); ++it) {
+			(*it)->_removeDrawOperation(this);
+		}
+
+		mUsingSheets.clear();
+	}
+	
+	//------------------------------------------------------
 	void DrawOperation::setClipRect(const ClipRect& cr) {
 		mClipRect = cr;
 
 		_markDirty();
 	}
+	
 }

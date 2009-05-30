@@ -70,6 +70,9 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	void RenderedLabel::_rebuild() {
+		if (!mFontSource->isBuilt())
+			mFontSource->build();
+		
 		SegmentList::iterator it = mText.begin();
 		SegmentList::iterator end = mText.end();
 
@@ -99,9 +102,9 @@ namespace Opde {
 					continue;
 				}
 	
-				DrawSource* ds = mFontSource->getGlyph(chr);
+				DrawSourcePtr ds = mFontSource->getGlyph(chr);
 	
-				if (ds != NULL) {
+				if (!ds.isNull()) {
 					DrawQuad dq;
 					
 					fillQuad(x, y, chr, ds, dq);
@@ -151,7 +154,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void RenderedLabel::fillQuad(int x, int y, const unsigned char chr, DrawSource* ds, DrawQuad& dq) {
+	void RenderedLabel::fillQuad(int x, int y, const unsigned char chr, DrawSourcePtr ds, DrawQuad& dq) {
 		const PixelSize& ps = ds->getPixelSize();
 		assert(mActiveSheet);
 

@@ -91,6 +91,10 @@ namespace Opde {
 			inline Ogre::uint8 getRenderQueueID() const { return mRenderQueueID; };
 
 			inline bool isDirty() { return mIsDirty; };
+			
+			/// returns true if this buffer contains no rendered objects
+			inline bool isEmpty() { return mQuadList.size() == 0; };
+			
 		protected:
 			/// (re)builds the VBO according to the mQuadList
 			void buildBuffer();

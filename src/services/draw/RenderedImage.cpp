@@ -39,7 +39,6 @@ namespace Opde {
 		mDrawQuad.texCoords.right = ds->transformX(1.0f);
 		mDrawQuad.texCoords.top = ds->transformY(0);
 		mDrawQuad.texCoords.bottom = ds->transformY(1.0f);
-		
 
 		mDrawQuad.color = ColourValue(1.0f, 1.0f, 1.0f);
 		
@@ -50,6 +49,11 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
+	RenderedImage::~RenderedImage() {
+		// nothing
+	}
+	
+	//------------------------------------------------------
 	void RenderedImage::visitDrawBuffer(DrawBuffer* db) {
 		// are we in the clip area?
 		if (mInClip)
@@ -58,7 +62,7 @@ namespace Opde {
 
 	//------------------------------------------------------
 	DrawSourceBasePtr RenderedImage::getDrawSourceBase() {
-		return mDrawSource;
+		return static_pointer_cast<DrawSourceBase>(mDrawSource);
 	}
 
 	//------------------------------------------------------
@@ -72,6 +76,11 @@ namespace Opde {
 	//------------------------------------------------------
 	void RenderedImage::_rebuild() {
 		const PixelSize& ps = mDrawSource->getPixelSize();
+
+		mDrawQuad.texCoords.left = mDrawSource->transformX(0);
+		mDrawQuad.texCoords.right = mDrawSource->transformX(1.0f);
+		mDrawQuad.texCoords.top = mDrawSource->transformY(0);
+		mDrawQuad.texCoords.bottom = mDrawSource->transformY(1.0f);
 		
 		mDrawQuad.positions.left   = mActiveSheet->convertToScreenSpaceX(mPosition.first);
 		mDrawQuad.positions.right  = mActiveSheet->convertToScreenSpaceX(mPosition.first + ps.width);

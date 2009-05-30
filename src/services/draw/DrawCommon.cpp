@@ -49,6 +49,16 @@ namespace Opde {
 		return a->depth < b->depth;
 	};
 
+	//------------------------------------------------------
+	DrawSource::DrawSource(DrawService *owner) :
+		DrawSourceBase(), 
+		mAtlassed(false),  
+		mImageLoaded(false), 
+		mOwner(owner)
+	{
+		// nothing here
+	}
+	
 	//------------------------------------------------------	
 	DrawSource::DrawSource(DrawService *owner, ID id, const Ogre::MaterialPtr& mat, const Ogre::TexturePtr& tex) : 
 		DrawSourceBase(id, mat, tex),
@@ -58,16 +68,27 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	DrawSource::DrawSource(DrawService *owner) : DrawSourceBase(), mAtlassed(false),  mImageLoaded(false), mOwner(owner) {
+	DrawSource::DrawSource(DrawService *owner, const Ogre::String& name, const Ogre::String& group, const Ogre::MaterialPtr& extMaterial) : 
+			DrawSourceBase(),
+			mAtlassed(false),  
+			mImageLoaded(false), 
+			mOwner(owner) {
+		
 		mPixelSize.width  = 0; // needs to be filled on loadimage
 		mPixelSize.height = 0;
 		mSize = Ogre::Vector2(1.0f, 1.0f);
 		mDisplacement = Ogre::Vector2(0, 0);
+		
+		loadImage(name, group);
+		
+		// if there was an external material specified then assign now
+		if (!extMaterial.isNull())
+			mMaterial = extMaterial;
 	}
 	
 	//------------------------------------------------------
 	DrawSource::~DrawSource() {
-		mOwner->unregisterDrawSource(this);
+		// TODO: mOwner->unregisterDrawSourceByPtr(this);
 	}
 	
 	//------------------------------------------------------	
@@ -121,7 +142,11 @@ namespace Opde {
 		mImage.load(name, group);
 		updatePixelSizeFromImage();
 
-		mOwner->registerDrawSource(this, name, group);
 		mImageLoaded = true;
+	}
+	
+	//------------------------------------------------------
+	bool operator<(const DrawSheetPtr& a, const DrawSheetPtr& b) {
+		return a.ptr() < b.ptr();
 	}
 };

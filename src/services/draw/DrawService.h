@@ -65,23 +65,23 @@ namespace Opde {
 			 * @param sheetName a unique sheet name
 			 * @return new DrawSheet if none of that name exists, or the currently existing if sheet with that name already found
 			 * */
-			DrawSheet* createSheet(const std::string& sheetName);
+			DrawSheetPtr createSheet(const std::string& sheetName);
 
 			/** Destroys the given sheet, and removes it from the internal map
 			 * @param sheet The sheet to destroy
 			 */
-			void destroySheet(DrawSheet* sheet);
+			void destroySheet(const DrawSheetPtr& sheet);
 
 			/** Returns the sheet of the given name
 			 * @param sheetName the name of the sheet to return
 			 * @return The sheet pointer, or NULL if none of that name exists
 			 */
-			DrawSheet* getSheet(const std::string& sheetName) const;
+			const DrawSheetPtr& getSheet(const std::string& sheetName) const;
 
 			/** Sets the active (currently displayed) sheet.
 			 * @param sheet The sheet to display (or none if the parameter is NULL)
 			 */
-			void setActiveSheet(DrawSheet* sheet);
+			void setActiveSheet(const DrawSheetPtr& sheet);
 
 			/** Creates a DrawSource that represents a specified image.
 			 * Also creates a material that is used to render the image.
@@ -163,14 +163,12 @@ namespace Opde {
 			/// Getter for the current actual pixel height of the screen
 			inline size_t getActualHeight() const { /*return mHeight;*/ return mViewport->getActualHeight(); };
 			
-			/// registers a draw source as a combination of image name and resource group name
+			/** registers a draw source ID as a holder of a image name and resource group name combination 
+			*/
 			void registerDrawSource(const DrawSourcePtr& ds, const Ogre::String& img, const Ogre::String& group);
 			
 			/// unregisters a draw source from the resource name to draw source mapping
 			void unregisterDrawSource(const DrawSourcePtr& ds);
-			
-			/// unregisters a draw source by it's raw pointer
-			void unregisterDrawSource(const DrawSource *ds);
 			
 		protected:
 			// Service related:
@@ -203,7 +201,7 @@ namespace Opde {
 			
 			Ogre::String getResourcePath(const Ogre::String& res, const Ogre::String& grp);
 
-			typedef std::map<std::string, DrawSheet*> SheetMap;
+			typedef std::map<std::string, DrawSheetPtr> SheetMap;
 			typedef std::stack<size_t> IDStack;
 			typedef SimpleArray<DrawOperation*> DrawOperationArray;
 			typedef std::map<DrawSource::ID, TextureAtlasPtr> TextureAtlasMap;
@@ -212,7 +210,7 @@ namespace Opde {
 			typedef std::map<std::string, DrawSourcePtr> ResourceDrawSourceMap;
 
 			SheetMap mSheetMap;
-			DrawSheet* mActiveSheet;
+			DrawSheetPtr mActiveSheet;
 			DrawOperation::ID mDrawOpID;
 			DrawSource::ID mDrawSourceID; // draw sources in atlas have the same ID
 			IDStack mFreeIDs;
@@ -239,6 +237,8 @@ namespace Opde {
 			DrawSourceList mDrawSources;
 			
 			RenderServicePtr mRenderService;
+			
+			TextureAtlasMap mAtlasMap;
 			
 			size_t mWidth;
 			size_t mHeight;

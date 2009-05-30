@@ -55,7 +55,7 @@ namespace Opde {
 			inline DrawSource::ID getAtlasID() { return mAtlasID; };
 
 			/** Internal tool to allow external addition of draw sources. Used by font code. */
-			void _addDrawSource(DrawSource* ds);
+			void _addDrawSource(const DrawSourcePtr& ds);
 
 			/** Builds the atlas. Locks it for further additions, makes it useable */
 			void build();
@@ -67,15 +67,19 @@ namespace Opde {
 			void enlarge(size_t area);
 
 			void markDirty();
+			
+			void prepareResources();
+			
+			void dropResources();
 
 			DrawService* mOwner;
 
 			DrawSource::ID mAtlasID;
 
-			typedef std::list<DrawSourcePtr> DrawSourceSet;
+			typedef std::list<DrawSourcePtr> DrawSourceList;
 			typedef std::list<FontDrawSourcePtr> FontSet;
 
-			DrawSourceSet mMyDrawSources;
+			DrawSourceList mMyDrawSources;
 			FontSet mMyFonts;
 
 			FreeSpaceInfo* mAtlasAllocation;

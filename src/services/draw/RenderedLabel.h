@@ -66,7 +66,7 @@ namespace Opde {
 			/// Frees all allocated instances stored in the quad list, then clears the quad list itself
 			void freeQuadList();
 			
-			void fillQuad(int x, int y, const unsigned char chr, DrawSource* ds, DrawQuad& dq);
+			void fillQuad(int x, int y, const unsigned char chr, DrawSourcePtr ds, DrawQuad& dq);
 
 			typedef std::list<DrawQuad*> DrawQuadList;
 

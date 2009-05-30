@@ -27,6 +27,7 @@
 
 #include "DrawBuffer.h"
 #include "DrawOperation.h"
+#include <OgreRenderQueue.h>
 
 namespace Opde {
 	// forward decl.
@@ -107,6 +108,14 @@ namespace Opde {
 			/** Creates a clip rectangle with the specified screen coordinates.
 			*/
 			ClipRect getClipRect(int left, int right, int top, int bottom);
+			
+			/** Queues all the Renderables into appropriate RenderQueueGroups
+			 */
+			void queueRenderables(Ogre::RenderQueue* rq);
+			
+			/** Clears all data present in the sheet
+			  */
+			void clear();
 			
 		protected:
 			DrawBuffer* getBufferForOperation(DrawOperation* drawOp, bool autoCreate = false);

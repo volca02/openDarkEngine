@@ -74,7 +74,9 @@ namespace Opde {
 			void rebuild();
 			
 			/// Notifies this draw operation the active sheet changed
-			void _notifyActiveSheet(DrawSheet *actsh);
+			void _notifyActiveSheet(DrawSheet* actsh);
+			
+			virtual void clear();
 			
 		protected:
 			/// On change updater - marks all using sheets as dirty
@@ -90,13 +92,14 @@ namespace Opde {
 
 			DrawService* mOwner;
 
+			// Should have used weak_ptr here to avoid circles (DrawSheet::clear should handle this though) 
 			typedef std::set<DrawSheet*> DrawSheetSet;
 
 			/// Sheets using this draw op
 			DrawSheetSet mUsingSheets;
 			
 			/// Sheet which is now displaying the op
-			DrawSheet *mActiveSheet;
+			DrawSheet* mActiveSheet;
 
 			PixelCoord mPosition;
 

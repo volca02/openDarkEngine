@@ -149,7 +149,10 @@ namespace Opde {
 	//------------------------------------------------------
 	void DrawBuffer::getWorldTransforms(Ogre::Matrix4* trans) const {
 		// Identity
-		*trans = mParent->_getParentNodeFullTransform();
+		if (mParent)
+			*trans = mParent->_getParentNodeFullTransform();
+		else
+			*trans = Ogre::Matrix4::IDENTITY;
 	};
 
 	//------------------------------------------------------
@@ -170,15 +173,23 @@ namespace Opde {
 
 	//------------------------------------------------------
 	Ogre::Real DrawBuffer::getSquaredViewDepth(const Ogre::Camera* cam) const {
-		assert(mParent);
-		Node* n = mParent->getParentNode();
-		assert(n);
-		return n->getSquaredViewDepth(cam);
+		if (mParent) {
+			Node* n = mParent->getParentNode();
+			assert(n);
+			return n->getSquaredViewDepth(cam);
+		} else {
+			return 1.0f; // TODO: Good? Bad?
+		}
 	};
 
 	//------------------------------------------------------
 	const Ogre::LightList& DrawBuffer::getLights() const {
-		return mParent->queryLights();
+		if (mParent) {
+			return mParent->queryLights();
+		} else {
+			static Ogre::LightList emptyLightList; 
+			return emptyLightList;
+		}
 	};
 
 	//------------------------------------------------------
@@ -190,6 +201,9 @@ namespace Opde {
 			destroyBuffers();
 		}
 
+		if (mQuadCount == 0)
+			return;
+		
 		if (!mVertexData) {
 			// no vertex data, let's reallocate some!
 			mVertexData = new Ogre::VertexData();

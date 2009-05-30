@@ -46,7 +46,7 @@ namespace Opde {
 		if (dimensions.width > mMaxWidth)
 			mMaxWidth = dimensions.width;
 
-		DrawSource* ds = new DrawSource(mContainer->getOwner());
+		DrawSourcePtr ds = new DrawSource(mContainer->getOwner());
 
 		// TODO: Fill the image, dimensions, atlas ref. etc.
 		switch (pf) {
@@ -63,7 +63,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	DrawSource* FontDrawSource::getGlyph(FontCharType chr) {
+	DrawSourcePtr FontDrawSource::getGlyph(FontCharType chr) {
 		assert(mBuilt);
 
 		GlyphMap::iterator it = mRepresentedGlyphs.find(chr);
@@ -80,7 +80,7 @@ namespace Opde {
 
 		GlyphMap::iterator it = mRepresentedGlyphs.begin();
 		while (it != mRepresentedGlyphs.end()) {
-			DrawSource* ds = (it++)->second;
+			DrawSourcePtr ds = (it++)->second;
 
 			// atlas
 			mContainer->_addDrawSource(ds);
@@ -114,9 +114,9 @@ namespace Opde {
 				continue;
 			}
 
-			DrawSource* ds = getGlyph(chr);
+			DrawSourcePtr ds = getGlyph(chr);
 
-			if (ds != NULL) {
+			if (!ds.isNull()) {
 				DrawQuad dq;
 				
 				x += ds->getPixelSize().width;
@@ -137,7 +137,7 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
-	void FontDrawSource::populateImageFromMono(DrawSource* dsp, const PixelSize& dimensions, size_t rowlen, void* data, size_t pxoffset, const RGBAQuad* pal) {
+	void FontDrawSource::populateImageFromMono(const DrawSourcePtr& dsp, const PixelSize& dimensions, size_t rowlen, void* data, size_t pxoffset, const RGBAQuad* pal) {
 		// We'll use the first two records in the pal for conversion.
 		// first we take the number of the bits to process
 		size_t cr = 0;
@@ -172,7 +172,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void FontDrawSource::populateImageFrom8BitPal(DrawSource* dsp, const PixelSize& dimensions, size_t rowlen, void* data, size_t pxoffset, const RGBAQuad* pal) {
+	void FontDrawSource::populateImageFrom8BitPal(const DrawSourcePtr& dsp, const PixelSize& dimensions, size_t rowlen, void* data, size_t pxoffset, const RGBAQuad* pal) {
 		// We'll use the first two records in the pal for conversion.
 		// first we take the number of the bits to process
 		size_t cr = 0;

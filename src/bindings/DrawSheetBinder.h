@@ -33,7 +33,7 @@ namespace Opde {
 	namespace Python {
 
 		/// DrawSheet python binder
-		class DrawSheetBinder : public class_ptr_binder<DrawSheet> {
+		class DrawSheetBinder : public shared_ptr_binder<DrawSheetPtr> {
 			public:
 				static void init(PyObject* module);
 
@@ -44,7 +44,7 @@ namespace Opde {
 				static PyObject* repr(PyObject *self);
 				
 				/// helper class pointer extractor
-				static bool extract(PyObject *object, DrawSheet*& sheet);
+				static bool extract(PyObject *object, DrawSheetPtr& sheet);
 				
 				// --- Methods ---
 				static PyObject* activate(PyObject* self, PyObject* args);
@@ -55,7 +55,7 @@ namespace Opde {
 				static PyObject* setResolutionOverride(PyObject* self, PyObject* args);
 				static PyObject* getClipRect(PyObject* self, PyObject* args);
 				
-				static PyObject* create(DrawSheet *ds);
+				static PyObject* create(const DrawSheetPtr& ds);
 
 			protected:
 				/// Static type definition
