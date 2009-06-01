@@ -56,6 +56,13 @@ namespace Opde {
     	mLoopClientDef.name = mName;
 
 		mCurrentMapper = new InputEventMapper(this);
+
+		mCurrentKey = OIS::KC_UNASSIGNED;
+		mKeyPressTime = 0.0f;
+		mInitialDelay = 0.4f; // TODO: Read these from the config service
+		mRepeatDelay = 0.3f;
+		
+		mNonExclusive = false;
     }
 
     //------------------------------------------------------
@@ -407,12 +414,12 @@ namespace Opde {
 		paramList.insert( std::make_pair( std::string( "WINDOW" ), windowHndStr.str()));
 
 		// Non-exclusive input - for debugging purposes
-		bool nonex = false;
+		bool mNonExclusive = false;
 
         if (mConfigService->hasParam("nonexclusive"))
-            nonex = mConfigService->getParam("nonexclusive").toBool();
+            mNonExclusive = mConfigService->getParam("nonexclusive").toBool();
 
-        if (nonex) 
+        if (mNonExclusive) 
 		{
             #if defined OIS_WIN32_PLATFORM
             paramList.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_FOREGROUND" )));
@@ -507,6 +514,30 @@ namespace Opde {
 	{
 		// TODO: For now. The code will move here for 0.3
 		captureInputs();
+
+		// Process the key repeat (but only for exclusive input)
+		if (!mNonExclusive)
+			processKeyRepeat(deltaTime/1000.0f); // loop time is in milis
+	}
+
+	//------------------------------------------------------
+	void InputService::processKeyRepeat(float deltaTime) {
+		if (mCurrentKey == OIS::KC_UNASSIGNED)
+			return;
+
+		mKeyPressTime += deltaTime;
+		
+		assert(mCurrentDelay > 0);
+		assert(mRepeatDelay > 0);
+		
+		// see if we overlapped
+		while (mKeyPressTime > mRepeatDelay) {
+			mKeyPressTime -= mCurrentDelay;
+			mCurrentDelay = mRepeatDelay;
+			
+			if (mInputMode == IM_MAPPED)
+				processKeyEvent(mCurrentKey, IET_KEYBOARD_HOLD);
+		}
 	}
 
 	//------------------------------------------------------
@@ -637,66 +668,71 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void InputService::processKeyEvent(const OIS::KeyEvent &e, InputEventType t)
-	{
+	void InputService::processKeyEvent(unsigned int keyCode, InputEventType t) {
 		// Some safety checks
 		if (mInputMode == IM_DIRECT)
 			return;
-
+	
 		if (mCurrentMapper.isNull()) {
 			LOG_ERROR("InputService::processKeyEvent: Mapped input, but no mapper set for the current state!");
 			return;
 		}
-
-		// dispatch the key event using the mapper
-		unsigned int key = (unsigned int)e.key;
-
+	
 		if (mKeyboard->isModifierDown(Keyboard::Alt))
-			key |= ALT_MOD;
-		if (mKeyboard->isModifierDown(Keyboard::Ctrl))
-			key |= CTRL_MOD;
-		if (mKeyboard->isModifierDown(Keyboard::Shift))
-			key |= SHIFT_MOD;
-
-		std::string command;
-		CommandMap::const_iterator it = mCommandMap.find(key);
+			keyCode |= ALT_MOD;
 		
-		if (it != mCommandMap.end()) 
-		{
+		if (mKeyboard->isModifierDown(Keyboard::Ctrl))
+			keyCode |= CTRL_MOD;
+		
+		if (mKeyboard->isModifierDown(Keyboard::Shift))
+			keyCode |= SHIFT_MOD;
+	
+		std::string command;
+		CommandMap::const_iterator it = mCommandMap.find(keyCode);
+	
+		if (it != mCommandMap.end()) {
 			command = it->second;
-		} else { 
+		} else {
 			LOG_DEBUG("Encountered an unmapped key event '%s'", e.text);
 			return;
 		}
-
+	
 		InputEventMsg msg;
-		std::pair<string, string> Split = splitCommand(command);		
-
+		std::pair<string, string> Split = splitCommand(command);
+	
 		msg.command = Split.first;
 		msg.params = Split.second;
 		msg.event = t;
-
-		if (command[0] == '+') 
-		{
+	
+		if (command[0] == '+') {
 			if (t == IET_KEYBOARD_PRESS)
 				msg.params = 1.0f;
-			else
+			else if (t == IET_KEYBOARD_RELEASE)
 				msg.params = 0.0f;
+			else
+				// no processing for keyboard hold
+				return;
+	
 			command = command.substr(1);
-		} 
-		else if (command[0] == '-') 
-		{
+		} else if (command[0] == '-') {
 			if (t == IET_KEYBOARD_PRESS)
 				msg.params = 0.0f;
-			else
+			else if (t == IET_KEYBOARD_RELEASE)
 				msg.params = 1.0f;
+			else
+				// no processing for keyboard hold
+				return;
 			command = command.substr(1);
+		} else if (t == IET_KEYBOARD_RELEASE) {
+			// no key release for the non-on/off type events
+			return;
 		}
-
+	
 		if (!callCommandTrap(msg)) {
-			LOG_DEBUG("Encountered an unmapped key event '%s'", e.text);
+			LOG_DEBUG("Encountered an unmapped key event '%d'", keyCode);
 		}
 	}
+
 
 	//------------------------------------------------------
 	void InputService::processJoyMouseEvent(unsigned int id, InputEventType event)
@@ -838,12 +874,16 @@ namespace Opde {
 	//------------------------------------------------------
 	bool InputService::keyPressed(const OIS::KeyEvent &e) 
 	{
+		// TODO: We could use a key filter to detect if the key is repeatable 
+		mCurrentKey = e.key;
+		mKeyPressTime = 0;
+		mCurrentDelay = mInitialDelay;
 
 		if (mInputMode == IM_DIRECT) {   
 			if (mDirectListener)	// direct event, dispatch to the current listener
 				return mDirectListener->keyPressed(e);
 		} else { 
-			processKeyEvent(e, IET_KEYBOARD_PRESS);
+			processKeyEvent(static_cast<unsigned int>(e.key), IET_KEYBOARD_PRESS);
 		}
 
 		return false;
@@ -852,12 +892,15 @@ namespace Opde {
 	//------------------------------------------------------
 	bool InputService::keyReleased(const OIS::KeyEvent &e) 
 	{
+		if (e.key == mCurrentKey)
+			mCurrentKey = OIS::KC_UNASSIGNED;
 
+		
 		if (mInputMode == IM_DIRECT) { 
 			if (mDirectListener)	// direct event, dispatch to the current listener
 				return mDirectListener->keyReleased(e);
 		} else { 
-			processKeyEvent(e, IET_KEYBOARD_RELEASE);
+			processKeyEvent(static_cast<unsigned int>(e.key), IET_KEYBOARD_RELEASE);
 		}
 		
 		return false;

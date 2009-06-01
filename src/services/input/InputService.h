@@ -235,6 +235,9 @@ namespace Opde {
             void shutdown();
 
 			void loopStep(float deltaTime);
+			
+			/// Processes key repeats, calls processKeyEvent on appropriate delays
+			void processKeyRepeat(float deltaTime);
 
 			void initKeyMap();
 			void tokenize(std::string , std::vector<std::string> &OutVector, char Token);
@@ -254,7 +257,7 @@ namespace Opde {
 			std::pair<std::string, std::string> splitCommand(const std::string& cmd) const;
 
 			/// Processes the received key event with current mapper, and if it finds a match, sends an event
-			void processKeyEvent(const OIS::KeyEvent &e, InputEventType t);
+			void processKeyEvent(unsigned int keyCode, InputEventType t);
 
 			void processJoyMouseEvent(unsigned int Id, InputEventType Event);
 
@@ -333,6 +336,17 @@ namespace Opde {
 			/// Current direct listener
 			/// TODO: Maybe this will become a stack
 			DirectInputListener* mDirectListener;
+			
+			/// Key Repeat: Initial delay (between first and second key repeats)
+			float mInitialDelay; 
+			/// Key Repeat: Repeat delay (between second and latter key repeats)
+			float mRepeatDelay;
+			/// Key Repeat: Current key time
+			float mKeyPressTime;
+			/// Key Repeat: Current target delay time
+			float mCurrentDelay;
+			/// Key Repeat: Current key pressed
+			OIS::KeyCode mCurrentKey;
 
 			// Input system related objects
 			/// OIS input system
@@ -355,6 +369,9 @@ namespace Opde {
 
 			/// Loop service pointer
 			LoopServicePtr mLoopService;
+			
+			/// Non-exclusive input
+			bool mNonExclusive;
 	};
 
 	/// Shared pointer to input service

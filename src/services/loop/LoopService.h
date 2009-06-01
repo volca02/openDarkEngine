@@ -111,7 +111,7 @@ namespace Opde {
 			virtual void loopModeEnded(const LoopModeDefinition& loopMode);
 			
 			/** Loop step event. Called every frame by the active loop mode, if this mode is the member of the new mode
-			* @param deltaTime The time that passed since the start of the last frame to the start of this frame
+			* @param deltaTime The time (in miliseconds) that passed since the start of the last frame to the start of this frame
 			*/
 			virtual void loopStep(float deltaTime) = 0;
 			
