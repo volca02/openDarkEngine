@@ -273,11 +273,7 @@ namespace Opde {
 			PyRun_SimpleStringFlags(ftxt.c_str(), NULL);
 		}
 
-		if (PyErr_Occurred()) {
-			PyErr_Print();
-			PyErr_Clear();
-			return false;
-		}
+		__PY_HANDLE_PYTHON_ERROR;
 
 		return true;
 	}

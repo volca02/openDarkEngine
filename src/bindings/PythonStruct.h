@@ -78,7 +78,8 @@ namespace Opde
                 };
 
 				static PyObject* getattr(PyObject* self, char* attrname) {
-					PyObject* result = NULL;
+					__PYTHON_EXCEPTION_GUARD_BEGIN_;
+					
 					T* object;
 			
 					if (!python_cast<T*>(self, &msType, &object))
@@ -87,11 +88,13 @@ namespace Opde
 					typename NameToAttr::iterator it = msNameToAttr.find(attrname);
 
 					if (it != msNameToAttr.end()) {
-						result = (*it->second)(object);
-					} else
+						return (*it->second)(object);
+					} else {
 						PyErr_Format(PyExc_AttributeError, "Invalid attribute name encountered: %s", attrname);
+						return NULL;
+					}
 
-					return result;
+					__PYTHON_EXCEPTION_GUARD_END_;
 				}
 
                 static PyObject* repr(PyObject *self) {

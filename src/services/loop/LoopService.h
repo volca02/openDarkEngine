@@ -226,6 +226,9 @@ namespace Opde {
 			/// Logs DEBUG level info of one frame timings
 			void debugOneFrame();
 
+			/// returns time in miliseconds the last frame took		
+			unsigned long getLastFrameTime();
+
 		protected:
 			/// Service intialization
 			bool init();
@@ -264,6 +267,9 @@ namespace Opde {
 			
 			/// Time of the last frame (absolute)
 			unsigned long mLastFrameTime;
+			
+			/// Length of the last frame (in miliseconds)
+			unsigned long mLastFrameLength;
 			
 			bool mDebugOneFrame;
 	};

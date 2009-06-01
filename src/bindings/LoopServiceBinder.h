@@ -49,6 +49,7 @@ namespace Opde
 				static PyObject* requestLoopMode(PyObject* self, PyObject* args);
 				static PyObject* requestTermination(PyObject* self, PyObject* args);
 				static PyObject* debugOneFrame(PyObject* self, PyObject* args);
+				static PyObject* getLastFrameTime(PyObject* self, PyObject* args);
 				
 			protected:
 				/// Static type definition for LoopService

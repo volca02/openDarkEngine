@@ -61,6 +61,8 @@ namespace Opde
 					Py_DECREF(rslt);
 				}
 				
+				__PY_HANDLE_PYTHON_ERROR; // converts python side error to PythonException
+					
 				Py_DECREF(args);
 			}
 			

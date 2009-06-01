@@ -27,10 +27,14 @@
 
 #include "DVariant.h"
 #include "Root.h"
+#include "OpdeException.h"
+
 
 #include <Python.h>
 #include <OgreVector3.h>
 #include <OgreException.h>
+#include <traceback.h>
+#include <frameobject.h>
 
 // TODO: We should create our own exception type to help python side coding
 // Exception guard for the python code. use this as first/last lines of the binding function to have it prepared for exceptions
@@ -46,10 +50,79 @@
 
 #define __PYTHON_EXCEPTION_GUARD_END_ __PYTHON_EXCEPTION_GUARD_END_RVAL(NULL)
 
+			
 
 
 namespace Opde {
 	namespace Python {
+
+		class OPDELIB_EXPORT PythonException : public Opde::BasicException {
+			protected:
+				std::string mType;
+				
+			public:
+				PythonException(const std::string& type, const std::string& desc,
+						const std::string& src, const char* file = NULL, long line = -1) : 
+							BasicException(desc,src,file,line), 
+							mType(type) {
+					details = std::string("PythonException: " + type + " " + details);
+				}
+				
+				~PythonException() throw() {};
+
+				/// wraps and throws PythonException from the python error detected, if such happened...
+				static void checkAndThrow() {
+					if (PyErr_Occurred()) {
+						// get the error into a string description (filename, line are needed as well)
+						PyObject *errobj, *errdata, *errtraceback, *pystring = NULL;
+					
+						/* get latest python exception info */ 
+						PyErr_Fetch(&errobj, &errdata, &errtraceback);       /* increfs all 3 */
+					
+						std::string etype = "<unknown exception type>";
+						std::string edata = "<unknown exception data>";
+							
+						if (errobj != NULL &&
+						   (pystring = PyObject_Str(errobj)) != NULL &&      /*	str(errobj) */
+						   (PyString_Check(pystring))                        /* str():increfs */
+						   )
+							etype = PyString_AsString(pystring);   /* Py->C */
+						
+						// decref again
+						Py_XDECREF(pystring);
+					
+						pystring = NULL;
+						if (errdata != NULL &&
+						   (pystring = PyObject_Str(errdata)) != NULL &&     /* str():increfs */
+						   (PyString_Check(pystring)) 
+						   )
+							edata = PyString_AsString(pystring);   /* Py->C */
+						
+						Py_XDECREF(pystring);
+						
+						long lineno = -1;
+						std::string fname = "<unknown file>";
+
+						if(errtraceback) {
+							lineno = ((PyTracebackObject *) errtraceback)->tb_lineno;
+							PyObject *pyfname = ((PyTracebackObject *) errtraceback)->tb_frame->f_code->co_filename;
+							
+							if (pyfname != NULL && PyString_Check(pyfname)) 
+								fname = PyString_AsString(pyfname);
+						}
+
+						Py_XDECREF(errobj);
+						Py_XDECREF(errdata);         /* caller owns all 3 objects */
+						Py_XDECREF(errtraceback);    /* already NULL'd out in Python */
+
+						
+						throw (PythonException(etype, edata, "Python", fname.c_str(), lineno));
+					}
+				}
+		};
+	
+#define __PY_HANDLE_PYTHON_ERROR Opde::Python::PythonException::checkAndThrow() 
+	
 	    // Type converters
 	    enum VariableType { VT_INVALID, VT_BOOL, VT_INT, VT_LONG, VT_FLOAT, VT_CHARPTR, VT_STRING, VT_CUSTOM_TYPE };
 

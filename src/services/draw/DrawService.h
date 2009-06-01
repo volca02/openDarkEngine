@@ -76,7 +76,7 @@ namespace Opde {
 			 * @param sheetName the name of the sheet to return
 			 * @return The sheet pointer, or NULL if none of that name exists
 			 */
-			const DrawSheetPtr& getSheet(const std::string& sheetName) const;
+			DrawSheetPtr getSheet(const std::string& sheetName) const;
 
 			/** Sets the active (currently displayed) sheet.
 			 * @param sheet The sheet to display (or none if the parameter is NULL)

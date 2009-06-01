@@ -171,7 +171,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	const DrawSheetPtr& DrawService::getSheet(const std::string& sheetName) const {
+	DrawSheetPtr DrawService::getSheet(const std::string& sheetName) const {
 		SheetMap::const_iterator it = mSheetMap.find(sheetName);
 
 		if (it != mSheetMap.end())

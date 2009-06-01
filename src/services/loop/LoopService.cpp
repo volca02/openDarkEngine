@@ -277,8 +277,10 @@ namespace Opde {
 				mActiveMode->loopModeStarted();
 			}
 			
+			mLastFrameLength = getCurrentTime() - mLastFrameTime;
+			
 			if (debugFrame) {
-				LOG_FATAL("---- One frame timings end. Total frame time: %d ms ----", getCurrentTime() - mLastFrameTime);
+				LOG_FATAL("---- One frame timings end. Total frame time: %d ms ----", mLastFrameLength);
 			}
 			mLastFrameTime = lFrameStart;
 		}
@@ -298,6 +300,11 @@ namespace Opde {
 	//------------------------------------------------------
 	void LoopService::debugOneFrame() {
 		mDebugOneFrame = true;
+	}
+	
+	//------------------------------------------------------
+	unsigned long LoopService::getLastFrameTime() {
+		return mLastFrameLength;
 	}
 
     //-------------------------- Factory implementation
