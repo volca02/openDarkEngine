@@ -34,7 +34,7 @@ namespace Opde {
 	ModelNameProperty::ModelNameProperty(RenderService* rs, PropertyService* owner) :
 			RenderedProperty(rs, owner, "ModelName", "ModelName", "always") {
 
-		mPropertyStorage = new FixedStringDataStorage<16>(NULL);
+		mPropertyStorage = DataStoragePtr(new FixedStringDataStorage<16>(NULL));
 
 		setChunkVersions(2, 16);
 

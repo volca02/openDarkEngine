@@ -99,9 +99,9 @@ namespace Opde {
 	FileGroupPtr DatabaseService::getDBFileNamed(const std::string& filename) {
 	    // TODO: Group of of the resource through the configuration service, once written
 	    Ogre::DataStreamPtr stream = Ogre::ResourceGroupManager::getSingleton().openResource(filename, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
-		FilePtr fp = new OgreFile(stream);
+		FilePtr fp(new OgreFile(stream));
 
-		return new DarkFileGroup(fp);
+		return FileGroupPtr(new DarkFileGroup(fp));
 	}
 
 	//------------------------------------------------------

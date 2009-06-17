@@ -49,7 +49,7 @@ namespace Opde {
 	}
 	
 	DataFieldDescIteratorPtr DTypeDefFieldDesc::getIterator() {
-		return new DataFieldDescListIterator(mDataFieldDescList);
+		return DataFieldDescIteratorPtr(new DataFieldDescListIterator(mDataFieldDescList));
 	}
 	
 	// --------------------------------------------------------------------------
@@ -176,7 +176,7 @@ namespace Opde {
 			
 		DTypePtr pd = getDataForObject(srcID);
 		
-		DTypePtr nd = new DType(*pd, mUseDataCache);
+		DTypePtr nd(new DType(*pd, mUseDataCache));
 		
 		// insert into map for the new object
 		std::pair<DataMap::iterator, bool> res  = mDataMap.insert(std::make_pair(dstID, nd));
@@ -206,7 +206,7 @@ namespace Opde {
 		DataMap::iterator it = mDataMap.find(objID);
 		
 		if (it == mDataMap.end()) {
-			DTypePtr propd = new DType(mTypeDef, mUseDataCache);
+			DTypePtr propd(new DType(mTypeDef, mUseDataCache));
 			
 			mDataMap.insert(std::make_pair(objID, propd));
 			
@@ -218,7 +218,7 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------	
 	IntIteratorPtr StructuredDataStorage::getAllStoredObjects() {
-		return new DataKeyIterator(mDataMap);
+		return IntIteratorPtr(new DataKeyIterator(mDataMap));
 	}
 	
 	// --------------------------------------------------------------------------
@@ -228,7 +228,7 @@ namespace Opde {
 		if (it != mDataMap.end()) {
 			return it->second;
 		} else {
-			return NULL;
+			return DTypePtr();
 		}
 	}
 	

@@ -83,7 +83,7 @@ namespace Opde {
 	DrawSourcePtr TextureAtlas::createDrawSource(const Ogre::String& imgName, const Ogre::String& groupName) {
 		// Load as single first, but wit the same id
 		// First we load the image.
-		DrawSourcePtr ds = new DrawSource(mOwner, imgName, groupName, mMaterial);
+		DrawSourcePtr ds(new DrawSource(mOwner, imgName, groupName, mMaterial));
 
 		ds->setSourceID(mAtlasID);
 

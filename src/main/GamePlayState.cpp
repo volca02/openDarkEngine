@@ -583,8 +583,8 @@ namespace Opde {
 
 	void GamePlayState::bootstrapFinished() {
 		mLinkService = GET_SERVICE(LinkService);
-		Relation::ListenerPtr metaPropCallback =
-			new ClassCallback<LinkChangeMsg, GamePlayState>(this, &GamePlayState::onLinkPlayerFactoryMsg);
+		Relation::ListenerPtr metaPropCallback(
+			new ClassCallback<LinkChangeMsg, GamePlayState>(this, &GamePlayState::onLinkPlayerFactoryMsg));
 
 		mPlayerFactoryRelation = mLinkService->getRelation("PlayerFactory");
 

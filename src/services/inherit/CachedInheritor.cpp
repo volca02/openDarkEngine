@@ -31,8 +31,8 @@ namespace Opde {
     /*--------------------- CachedInheritor -------------------*/
 	/*---------------------------------------------------------*/
     CachedInheritor::CachedInheritor(const InheritorFactory* fac, InheritService* is) : Inheritor(fac), mInheritService(is) {
-		InheritService::ListenerPtr callback = new
-			ClassCallback<InheritChangeMsg, CachedInheritor>(this, &CachedInheritor::onInheritMsg);
+		InheritService::ListenerPtr callback(new
+			ClassCallback<InheritChangeMsg, CachedInheritor>(this, &CachedInheritor::onInheritMsg));
 
 		mListenerID = mInheritService->registerListener(callback);
     };

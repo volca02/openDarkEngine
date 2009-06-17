@@ -174,8 +174,8 @@ namespace Opde {
 		string lchn = "L$" + mName;
 		string ldchn = "LD$" + mName;
 
-		FilePtr flink = NULL;
-		FilePtr fldata = NULL;
+		FilePtr flink;
+		FilePtr fldata;
 
 		// let's open the L$NAME and LD$NAME files in the db
 		try {
@@ -263,7 +263,7 @@ namespace Opde {
 			flink->readElem(&slink.dest, sizeof(int32_t));
 			flink->readElem(&slink.flavor, sizeof(uint16_t));
 
-			LinkPtr link = new Link(slink);
+			LinkPtr link(new Link(slink));
 
 			LOG_VERBOSE("Relation (%s - %d): Read link ID %d, from %d to %d (F,C,IX: %d, %d, %d)",
 				  mName.c_str(),
@@ -436,7 +436,7 @@ namespace Opde {
 
 		link_id_t id = getFreeLinkID(cidx);
 
-		LinkPtr newl = new Link(id, from, to, mID);
+		LinkPtr newl(new Link(id, from, to, mID));
 
 		mStorage->create(id);
 
@@ -498,11 +498,9 @@ namespace Opde {
 			ObjectLinkMap::const_iterator r = mSrcDstLinkMap.find(src);
 
 			if (r != mSrcDstLinkMap.end()) {
-    			LinkQueryResultPtr res;
-
-				// We have the source object. Now branch on the dest
-			    res = new MultiTargetLinkQueryResult(r->second, r->second.begin(), r->second.end());
-
+    			LinkQueryResultPtr res(
+						new MultiTargetLinkQueryResult(r->second, r->second.begin(), r->second.end())
+					);
 				return res;
 			}
 
@@ -514,14 +512,15 @@ namespace Opde {
 				ObjectIDToLinks::const_iterator ri = r->second.find(dst);
 
 				if (ri != r->second.end()) {
-	    			LinkQueryResultPtr res;
-                    res = new MultiTargetLinkQueryResult(r->second, ri, r->second.upper_bound(dst));
+	    			LinkQueryResultPtr res(
+	    					new MultiTargetLinkQueryResult(r->second, ri, r->second.upper_bound(dst))
+	    				);
                     return res;
 				}
 			}
 		}
 
-        LinkQueryResultPtr r = new EmptyLinkQueryResult();
+        LinkQueryResultPtr r(new EmptyLinkQueryResult());
         return r;
 	}
 	
@@ -529,7 +528,7 @@ namespace Opde {
 	LinkQueryResultPtr Relation::getAllInherited(int src, int dst) const {
 		assert(src != 0); // Source can't be zero
 		
-		return new InheritedMultiTargetLinkQueryResult(src, dst, this);
+		return LinkQueryResultPtr(new InheritedMultiTargetLinkQueryResult(src, dst, this));
 	}
 	
 	// --------------------------------------------------------------------------
@@ -537,7 +536,7 @@ namespace Opde {
 		LinkQueryResultPtr res = getAllLinks(src, dst);
 
         if (res->end())
-            return NULL;
+            return LinkPtr(NULL);
 
         LinkPtr l = res->next();
 
@@ -556,7 +555,7 @@ namespace Opde {
 			LinkPtr l = r->second; // I've heard direct return will confuse the ref-counting
 			return l;
 		} else
-			return NULL;
+			return LinkPtr(NULL);
 	}
 
 	// --------------------------------------------------------------------------
@@ -570,7 +569,7 @@ namespace Opde {
 		if (!mStorage.isNull()) {
 			return mStorage->getFieldDescIterator();
 		} else {
-			return new EmptyDataFieldDescListIterator();
+			return DataFieldDescIteratorPtr(new EmptyDataFieldDescListIterator());
 		}
 	}
 
@@ -595,7 +594,7 @@ namespace Opde {
 			r.first->second.insert(make_pair(link->mDst, link));
 
 			// fire the notification about inserted link
-			LinkPtr lcopy = new Link(*link);
+			LinkPtr lcopy(new Link(*link));
 			LinkChangeMsg m(lcopy);
 
 			m.change = LNK_ADDED;
@@ -695,7 +694,7 @@ namespace Opde {
 
 		link_id_t lidx = LINK_ID_INDEX(id);
 
-		// I could make this customisible via some constructor parameter (having index array and bool, iterating)
+		// I could make this customizable via some constructor parameter (having index array and bool, iterating)
 		if (mMaxID[cidx] == lidx) {
 			mMaxID[cidx]--;
 		}
@@ -705,12 +704,12 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	LinkPtr Relation::createInverseLink(const LinkPtr& src) {
-		LinkPtr inv = new Link(
+		LinkPtr inv(new Link(
 			src->id(),
 			src->dst(),
 			src->src(),
 			src->flavor()
-		);
+		));
 
 		return inv;
 	}
@@ -724,11 +723,9 @@ namespace Opde {
 		if (r != mSrcDstLinkMap.end()) {
 			// I could just remove it, but let's be fair and broadcast
 			// This will be very stormy. Maybe we will have to
-			LinkQueryResultPtr res;
+			LinkQueryResultPtr res(new MultiTargetLinkQueryResult(r->second, r->second.begin(), r->second.end()));
 
 			// We have the source object. Now branch on the dest
-			res = new MultiTargetLinkQueryResult(r->second, r->second.begin(), r->second.end());
-
 			while (!res->end()) {
 				const LinkPtr& l = res->next();
 

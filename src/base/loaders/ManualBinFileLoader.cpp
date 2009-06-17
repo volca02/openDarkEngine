@@ -123,7 +123,7 @@ namespace Ogre {
 		// quite simple, really
 		Ogre::DataStreamPtr stream = Ogre::ResourceGroupManager::getSingleton().openResource(mFileName, mGroup, true, mResource);
 
-        mFile = new OgreFile(stream);
+        mFile = FilePtr(new OgreFile(stream));
 
 		// ok, got it open
 		// read the header
@@ -2012,15 +2012,11 @@ namespace Ogre {
         //Open the file, and detect the mesh type (Model/AI)
         Ogre::DataStreamPtr stream = Ogre::ResourceGroupManager::getSingleton().openResource(basename, m->getGroup(), true, resource);
 
-        FilePtr fin = new OgreFile(stream);
+        FilePtr fin = FilePtr(new OgreFile(stream));
 
 		// This here (the mf wrap) prevents the direct use of read on bad file offsets. Don't use normally. Just a fix for zzip segv
-        MemoryFile* mf = new MemoryFile(basename, File::FILE_R);
-        mf->initFromFile(*fin, fin->size()); // read the whole contents into the mem. file
-
-        FilePtr f = mf; // wrap into mem. file
-
-
+        FilePtr f = FilePtr(new MemoryFile(basename, File::FILE_R));
+        static_pointer_cast<MemoryFile>(f)->initFromFile(*fin, fin->size()); // read the whole contents into the mem. file
 
         char _hdr[5];
         _hdr[4] = 0;

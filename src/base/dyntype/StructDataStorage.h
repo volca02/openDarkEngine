@@ -254,7 +254,7 @@ namespace Opde {
 
 			/** @see DataStorage::getAllStoredObjects */
 			virtual IntIteratorPtr getAllStoredObjects() {
-				return new DataMapKeyIterator(mDataMap);
+				return IntIteratorPtr(new DataMapKeyIterator(mDataMap));
 			}
 
 			/** Core Data creation routine */
@@ -267,7 +267,7 @@ namespace Opde {
 
 			/** @see DataStorage::getFieldDescIterator */
 			virtual DataFieldDescIteratorPtr getFieldDescIterator(void) {
-				return new DataFieldDescListIterator(mFieldDescList);
+				return DataFieldDescIteratorPtr(new DataFieldDescListIterator(mFieldDescList));
 			}
 
 			/** @see DataStorage::getDataSize */
@@ -347,7 +347,7 @@ namespace Opde {
 					setter = &StructDataStorage::defaultFieldSetter;
 
 				// data manipulation helper
-				TypeHelperBasePtr thb = new TypeHelper<FT>(fieldPtr, getter, setter);
+				TypeHelperBasePtr thb(new TypeHelper<FT>(fieldPtr, getter, setter));
 				mTypeHelpers[name] = thb;
 
 				mStoredSize += thb->getSerializer()->getStoredSize(0);

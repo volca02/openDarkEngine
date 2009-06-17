@@ -380,7 +380,7 @@ namespace Opde {
 		mFamilies = NULL;
 
 		// db listener registration
-		mDbCallback = new ClassCallback<DatabaseChangeMsg, MaterialService> (this, &MaterialService::onDBChange);
+		mDbCallback = DatabaseService::ListenerPtr(new ClassCallback<DatabaseChangeMsg, MaterialService> (this, &MaterialService::onDBChange));
 
 		mDatabaseService = GET_SERVICE(DatabaseService);
 

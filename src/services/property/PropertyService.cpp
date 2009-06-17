@@ -178,7 +178,7 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	StringIteratorPtr PropertyService::getAllPropertyNames() {
-		return new PropertyGroupMapKeyIterator(mPropertyGroupMap);
+		return StringIteratorPtr(new PropertyGroupMapKeyIterator(mPropertyGroupMap));
 	}
 	
 	//------------------------------------------------------
@@ -256,7 +256,7 @@ namespace Opde {
 		}
 		
 		LOG_ERROR("Invalid or undefined property name '%s' on call to PropertyService::getFieldDescIterator", propName.c_str());
-		return 0; // NULL iterator, no fun for the caller
+		return DataFieldDescIteratorPtr(NULL); // NULL iterator, no fun for the caller
 	}
 
 	// --------------------------------------------------------------------------

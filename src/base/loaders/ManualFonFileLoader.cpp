@@ -236,7 +236,7 @@ namespace Ogre
 		try 
 		{
 			Stream = Ogre::ResourceGroupManager::getSingleton().openResource(mPaletteFileName, mFontGroup, true);
-			mPaletteFile = new OgreFile(Stream);
+			mPaletteFile = FilePtr(new OgreFile(Stream));
 		} catch(Ogre::FileNotFoundException) {
 			// Could not find resource, use the default table
 			LogManager::getSingleton().logMessage("Specified palette file not found - using default palette!");
@@ -594,7 +594,7 @@ namespace Ogre
 
         //Open the file
         Ogre::DataStreamPtr Stream = Ogre::ResourceGroupManager::getSingleton().openResource(BaseName, mFontGroup, true, resource);
-		mFontFile = new OgreFile(Stream);
+		mFontFile = FilePtr(new OgreFile(Stream));
 
         if(LoadDarkFont())
 			LogManager::getSingleton().logMessage("An error occurred while loading the font " + BaseName);

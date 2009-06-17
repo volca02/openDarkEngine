@@ -217,7 +217,7 @@ namespace Opde {
 			PyObject* callable;
 
 			if (PyArg_ParseTuple(args, "O", &callable)) {
-				DatabaseService::ProgressListenerPtr pcp = new PythonDatabaseProgressCallback(callable);
+				DatabaseService::ProgressListenerPtr pcp(new PythonDatabaseProgressCallback(callable));
 
 				// call the is to register the command trap
 				o->setProgressListener(pcp);

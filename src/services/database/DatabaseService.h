@@ -126,7 +126,7 @@ namespace Opde {
 			void setProgressListener(const ProgressListenerPtr& listener) { mProgressListener = listener; };
             
 			/// Clears (unsets) the progress listener (disabling it)
-			void unsetProgressListener() { mProgressListener = NULL; };
+			void unsetProgressListener() { mProgressListener.setNull(); };
 	
 			/// A free to use fine step function that calls the Progress Listener to reflect the loading progress
 			/// Use this especially in some long-to load services

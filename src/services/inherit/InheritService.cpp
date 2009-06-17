@@ -87,13 +87,13 @@ namespace Opde {
 			mMetaPropRelation() {
 		// Register some common factories.
 		// If a special factory would be needed, it has to be registered prior to it's usage, okay?
-		InheritorFactoryPtr if_cached = new CachedInheritorFactory();
+		InheritorFactoryPtr if_cached(new CachedInheritorFactory());
 		addInheritorFactory(if_cached);
 
-		InheritorFactoryPtr if_never = new NeverInheritorFactory();
+		InheritorFactoryPtr if_never(new NeverInheritorFactory());
 		addInheritorFactory(if_never);
 
-		InheritorFactoryPtr if_arch = new ArchetypeInheritorFactory();
+		InheritorFactoryPtr if_arch(new ArchetypeInheritorFactory());
 		addInheritorFactory(if_arch);
 	}
 
@@ -157,7 +157,7 @@ namespace Opde {
 		}
 
 		// create the built-in meta property relation and it's storage...
-		DataStoragePtr stor = new UIntDataStorage(NULL);
+		DataStoragePtr stor(new UIntDataStorage(NULL));
 		mMetaPropRelation = mLinkService->createRelation("MetaProp", stor, true);
 
 		// Could not be created?
@@ -174,8 +174,8 @@ namespace Opde {
 		// So we can register as a link service listener
 		LOG_INFO("InheritService::bootstrapFinished()");
 
-		Relation::ListenerPtr metaPropCallback =
-			new ClassCallback<LinkChangeMsg, InheritService>(this, &InheritService::onMetaPropMsg);
+		Relation::ListenerPtr metaPropCallback(new ClassCallback<LinkChangeMsg, InheritService>
+			(this, &InheritService::onMetaPropMsg));
 
 		// Get the LinkService, then the relation metaprop
 
@@ -256,10 +256,10 @@ namespace Opde {
 		InheritMap::const_iterator it = mInheritSources.find(objID);
 
 		if (it != mInheritSources.end()) {
-			InheritQueryResultPtr res = new SimpleInheritQueryResult(it->second);
+			InheritQueryResultPtr res(new SimpleInheritQueryResult(it->second));
 			return res;
 		} else {
-			InheritQueryResultPtr res = new EmptyInheritQueryResult();
+			InheritQueryResultPtr res(new EmptyInheritQueryResult());
 			return res;
 		}
 
@@ -270,10 +270,10 @@ namespace Opde {
 		InheritMap::const_iterator it = mInheritTargets.find(objID);
 
 		if (it != mInheritTargets.end()) {
-			InheritQueryResultPtr res = new SimpleInheritQueryResult(it->second);
+			InheritQueryResultPtr res(new SimpleInheritQueryResult(it->second));
 			return res;
 		} else {
-			InheritQueryResultPtr res = new EmptyInheritQueryResult();
+			InheritQueryResultPtr res(new EmptyInheritQueryResult());
 			return res;
 		}
 	}
@@ -391,7 +391,7 @@ namespace Opde {
 	//------------------------------------------------------
 	void InheritService::_addLink(const LinkPtr& link, unsigned int priority) {
 		// It works like this. link.src() is the target for inheritance, link.dst() is the source for inheritance
-		InheritLinkPtr ilp = new InheritLink;
+		InheritLinkPtr ilp(new InheritLink());
 
 		// we've got the link reverse. MetaProp has src the target for inh, and dst the parent.
 		ilp->srcID = link->dst();

@@ -234,17 +234,17 @@ namespace Opde {
 		mPropertyService = GET_SERVICE(PropertyService);
 
 		// DonorType property (single integer property, built in):
-		DataStoragePtr stor = new IntDataStorage(NULL);
+		DataStoragePtr stor(new IntDataStorage(NULL));
 		mPropDonorType = mPropertyService->createPropertyGroup("DonorType", "DonorType", "never", stor);
 		// version of the property tag
 		mPropDonorType->setChunkVersions(2, 4);
 
 		// symbolic name builtin property
-		mSymNameStorage = new SymNamePropertyStorage();
+		mSymNameStorage = SymNamePropertyStoragePtr(new SymNamePropertyStorage());
 		mPropSymName = mPropertyService->createPropertyGroup("SymbolicName", "SymName", "never", mSymNameStorage);
 		mPropSymName->setChunkVersions(2, 17);
 
-		mPositionStorage = new PositionPropertyStorage();
+		mPositionStorage = PositionPropertyStoragePtr(new PositionPropertyStorage());
 		mPropPosition = mPropertyService->createPropertyGroup("Position", "Position", "never", mPositionStorage);
 		mPropPosition->setChunkVersions(2, 65558);
 	}
@@ -255,7 +255,7 @@ namespace Opde {
 		mServiceManager->createByMask(SERVICE_OBJECT_LISTENER);
 
     		// Register as a database listener
-		mDbCallback = new ClassCallback<DatabaseChangeMsg, ObjectService>(this, &ObjectService::onDBChange);
+		mDbCallback = DatabaseService::ListenerPtr(new ClassCallback<DatabaseChangeMsg, ObjectService>(this, &ObjectService::onDBChange));
 
 		mDatabaseService = GET_SERVICE(DatabaseService);
 		mDatabaseService->registerListener(mDbCallback, DBP_OBJECT);
@@ -270,13 +270,13 @@ namespace Opde {
 		if (!mDatabaseService.isNull())
 	        mDatabaseService->unregisterListener(mDbCallback);
 
-		mPropertyService = NULL;
-		mLinkService = NULL;
-		mInheritService = NULL;
+		mPropertyService.setNull();
+		mLinkService.setNull();
+		mInheritService.setNull();
 
 		mPropPosition = NULL;
 		mPropSymName = NULL;
-		mSymNameStorage = NULL;
+		mSymNameStorage.setNull();
 	}
 
 	//------------------------------------------------------

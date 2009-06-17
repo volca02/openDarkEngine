@@ -34,7 +34,7 @@ namespace Opde {
 	RenderAlphaProperty::RenderAlphaProperty(RenderService* rs, PropertyService* owner) :
 			RenderedProperty(rs, owner, "RenderAlpha", "RenderAlp", "always") {
 
-		mPropertyStorage = new FloatDataStorage(NULL);
+		mPropertyStorage = DataStoragePtr(new FloatDataStorage(NULL));
 
 		// TODO: Check the version
 		setChunkVersions(2, 65540);

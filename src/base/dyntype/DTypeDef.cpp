@@ -295,7 +295,7 @@ namespace Opde {
 		mDefVal = templ;
 		mDefaultUsed = true;
 
-		mPriv = new DTPrivateSimple(templ.type(), size, _enum);
+		mPriv = DTPrivateBasePtr(new DTPrivateSimple(templ.type(), size, _enum));
 	}
 
 	//------------------------------------
@@ -333,7 +333,7 @@ namespace Opde {
 
 		mDefaultUsed = false;
 
-		mPriv = new DTPrivateSimple(type, size, _enum);
+		mPriv = DTPrivateBasePtr(new DTPrivateSimple(type, size, _enum));
 	}
 
 	//------------------------------------
@@ -391,7 +391,7 @@ namespace Opde {
 
 		mDefaultUsed = false;
 
-		mPriv = new DTPrivateStructured(member, size);
+		mPriv = DTPrivateBasePtr(new DTPrivateStructured(member, size));
 	}
 
 	//------------------------------------
@@ -463,13 +463,13 @@ namespace Opde {
 
 		mDefaultUsed = false;
 
-		mPriv = new DTPrivateStructured(members, unioned);
+		mPriv = DTPrivateBasePtr(new DTPrivateStructured(members, unioned));
 	}
 
 	//------------------------------------
 	DTypeDef::~DTypeDef() {
 		mFields.clear();
-		mPriv = NULL;
+		mPriv = DTPrivateBasePtr();
 	}
 
 	//------------------------------------

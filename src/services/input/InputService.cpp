@@ -55,7 +55,7 @@ namespace Opde {
     	mLoopClientDef.priority = LOOPCLIENT_PRIORITY_INPUT;
     	mLoopClientDef.name = mName;
 
-		mCurrentMapper = new InputEventMapper(this);
+		mCurrentMapper = InputEventMapperPtr(new InputEventMapper(this));
 
 		mCurrentKey = OIS::KC_UNASSIGNED;
 		mKeyPressTime = 0.0f;
@@ -69,7 +69,7 @@ namespace Opde {
     InputService::~InputService() 
 	{
     	mMappers.clear();
-    	mCurrentMapper = NULL;
+    	mCurrentMapper.setNull();
 
 		if (mInputSystem) 
 		{
@@ -387,7 +387,7 @@ namespace Opde {
 		ContextToMapper::const_iterator it = mMappers.find(ctx);
 
 		if (it == mMappers.end()) {
-			InputEventMapperPtr mapper = new InputEventMapper(this);
+			InputEventMapperPtr mapper(new InputEventMapper(this));
 			mMappers.insert(make_pair(ctx, mapper));
 		} else {
 			LOG_ERROR("InputService::createBindContext: Context already exists: %s", ctx.c_str());
@@ -414,7 +414,7 @@ namespace Opde {
 		paramList.insert( std::make_pair( std::string( "WINDOW" ), windowHndStr.str()));
 
 		// Non-exclusive input - for debugging purposes
-		bool mNonExclusive = false;
+		mNonExclusive = false;
 
         if (mConfigService->hasParam("nonexclusive"))
             mNonExclusive = mConfigService->getParam("nonexclusive").toBool();
@@ -549,7 +549,7 @@ namespace Opde {
 			mCurrentMapper = iemp;
 		else 
 		{
-			mCurrentMapper = NULL;
+			mCurrentMapper.setNull();
 			LOG_ERROR("InputService::setBindContext: invalid context specified: %s", context.c_str());
 		}
 	}
@@ -606,7 +606,7 @@ namespace Opde {
 		if (it != mMappers.end())
 			return it->second;
 		else
-			return NULL;
+			return InputEventMapperPtr();
 	}
 
 	//------------------------------------------------------

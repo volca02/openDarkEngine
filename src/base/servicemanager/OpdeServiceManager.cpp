@@ -121,7 +121,7 @@ namespace Opde {
 		if (service_it != mServiceInstances.end()) {
 			return service_it->second;
 		} else {
-			return NULL;
+			return ServicePtr();
 		}
 	}
 
@@ -134,7 +134,7 @@ namespace Opde {
 			if (!(factory->getMask() & mGlobalServiceMask))
 			    OPDE_EXCEPT("Initialization of service " + factory->getName() + " was not permitted by mask. Please consult OPDE log for details", "ServiceManager::createInstance");
 
-			ServicePtr ns = factory->createInstance(this);
+			ServicePtr ns(factory->createInstance(this));
 			mServiceInstances.insert(make_pair(factory->getName(), ns));
 
 			if (!ns->init()) {

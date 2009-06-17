@@ -46,7 +46,7 @@ namespace Opde {
 		if (dimensions.width > mMaxWidth)
 			mMaxWidth = dimensions.width;
 
-		DrawSourcePtr ds = new DrawSource(mContainer->getOwner());
+		DrawSourcePtr ds(new DrawSource(mContainer->getOwner()));
 
 		// TODO: Fill the image, dimensions, atlas ref. etc.
 		switch (pf) {
@@ -71,7 +71,7 @@ namespace Opde {
 		if (it!=mRepresentedGlyphs.end())
 			return it->second;
 
-		return NULL;
+		return DrawSourcePtr(NULL);
 	}
 
 	//------------------------------------------------------

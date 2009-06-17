@@ -200,7 +200,7 @@ namespace Opde {
 
 			/** @see DataStorage::getAllStoredObjects */
 			virtual IntIteratorPtr getAllStoredObjects() {
-				return new DataMapKeyIterator(mDataMap);
+				return IntIteratorPtr(new DataMapKeyIterator(mDataMap));
 			}
 
 			/** Core Data creation routine */
@@ -213,7 +213,7 @@ namespace Opde {
 
 			/** @see DataStorage::getFieldDescIterator */
 			virtual DataFieldDescIteratorPtr getFieldDescIterator(void) {
-				return new SingleFieldDescIterator(mFieldDesc);
+				return DataFieldDescIteratorPtr(new SingleFieldDescIterator(mFieldDesc));
 			}
 
 			/** @see DataStorage::getDataSize */

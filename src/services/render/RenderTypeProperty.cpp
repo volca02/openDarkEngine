@@ -47,7 +47,7 @@ namespace Opde {
 		mEnum->insert("No Lightmap", RENDER_TYPE_NO_LIGHTMAP);
 		mEnum->insert("Editor Only", RENDER_TYPE_EDITOR_ONLY);
 		
-		mPropertyStorage = new UIntDataStorage(mEnum);
+		mPropertyStorage = DataStoragePtr(new UIntDataStorage(mEnum));
 		
 		// TODO: Check the version
 		setChunkVersions(2, 4);

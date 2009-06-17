@@ -258,11 +258,11 @@ namespace Opde {
 
 		if (!mLoopService.isNull()) {
 			mLoopService->removeLoopClient(this);
-			mLoopService = NULL;
+			mLoopService.setNull();
 		}
 
-		mConfigService = NULL;
-		mPropertyService = NULL;
+		mConfigService.setNull();
+		mPropertyService.setNull();
 	}
 
     // --------------------------------------------------------------------------
@@ -394,8 +394,8 @@ namespace Opde {
             OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "RenderService::bootstrapFinished");
 
 		// listener to the position property to control the scenenode
-		PropertyGroup::ListenerPtr cposc =
-			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropPositionMsg);
+		PropertyGroup::ListenerPtr cposc(
+			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropPositionMsg));
 
 		mPropPositionListenerID = mPropPosition->registerListener(cposc);
 
@@ -403,8 +403,8 @@ namespace Opde {
 		mObjectService = GET_SERVICE(ObjectService);
 
 		// Listener to object messages
-		ObjectService::ListenerPtr objlist =
-			new ClassCallback<ObjectServiceMsg, RenderService>(this, &RenderService::onObjectMsg);
+		ObjectService::ListenerPtr objlist(
+			new ClassCallback<ObjectServiceMsg, RenderService>(this, &RenderService::onObjectMsg));
 
 		mObjSystemListenerID = mObjectService->registerListener(objlist);
 
@@ -468,7 +468,7 @@ namespace Opde {
 
 		prepareEntity(ent);
 
-		EntityInfoPtr ei = new EntityInfo(mSceneMgr, ent, enode);
+		EntityInfoPtr ei(new EntityInfo(mSceneMgr, ent, enode));
 		ei->refreshVisibility();
 
 		mEntityMap.insert(make_pair(id, ei));

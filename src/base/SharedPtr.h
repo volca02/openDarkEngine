@@ -29,6 +29,7 @@
 
 #include <stdio.h>
 #include <cassert>
+#include <functional>
 
 namespace Opde {
 
@@ -80,7 +81,7 @@ namespace Opde {
 			}
 
 			/// Ctor from instance pointer
-			shared_ptr(T* ptr) : mPtr(ptr), mReferences(NULL) {
+			explicit shared_ptr(T* ptr) : mPtr(ptr), mReferences(NULL) {
 				if (mPtr) {
 					mReferences = new unsigned int(1);
 				}
@@ -126,7 +127,6 @@ namespace Opde {
 
 				mPtr = NULL;
 				mReferences = NULL;
-
 			}
 
 			unsigned int* getRefCountPtr(void) const {
@@ -141,6 +141,10 @@ namespace Opde {
 
     template<class A, class B> inline bool operator!=(shared_ptr<A> const& a, shared_ptr<B> const& b) {
       	return a.ptr() != b.ptr();
+    }
+    
+    template<class A, class B> inline bool operator<(shared_ptr<A> const& a, shared_ptr<B> const& b) {
+      	return std::less<const void*>()(a.ptr(), b.ptr());
     }
 
 	/// static cast of the shared_ptr

@@ -389,7 +389,7 @@ namespace Opde {
 			}
 
 			~DocGenerator(void) {
-				mConfigSvc = NULL;
+				mConfigSvc.setNull();
 				delete mRoot;
 			}
 

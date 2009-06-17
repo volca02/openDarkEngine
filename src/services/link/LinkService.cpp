@@ -87,7 +87,7 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void LinkService::shutdown() {
-		mDatabaseService = NULL;
+		mDatabaseService.setNull();
 	}
 
 	//------------------------------------------------------
@@ -226,8 +226,8 @@ namespace Opde {
 
 		std::string inverse = "~" + name;
 
-		RelationPtr nr = new Relation(name, stor, false, hidden);
-		RelationPtr nrinv = new Relation(inverse, stor, true, hidden);
+		RelationPtr nr(new Relation(name, stor, false, hidden));
+		RelationPtr nrinv(new Relation(inverse, stor, true, hidden));
 
 		// Assign inverse relations...
 		nr->setInverseRelation(nrinv.ptr());
@@ -278,7 +278,7 @@ namespace Opde {
 			// dedicate to the given relation
 			return it->second->getAllLinks(src, dst);
 		} else {
-			return new EmptyLinkQueryResult();
+			return LinkQueryResultPtr(new EmptyLinkQueryResult());
 		}
 	}
 
@@ -292,7 +292,7 @@ namespace Opde {
 			// dedicate to the given relation
 			return it->second->getAllInherited(src, dst);
 		} else {
-			return new EmptyLinkQueryResult();
+			return LinkQueryResultPtr(new EmptyLinkQueryResult());
 		}
 	}
 
@@ -307,7 +307,7 @@ namespace Opde {
 			// dedicate to the given relation
 			return it->second->getOneLink(src, dst);
 		} else {
-			return NULL;
+			return LinkPtr(NULL);
 		}
 	}
 
@@ -323,14 +323,14 @@ namespace Opde {
 			// dedicate to the given relation
 			return it->second->getLink(id);
 		} else {
-			return NULL;
+			return LinkPtr(NULL);
 		}
 	}
 
 
 	// --------------------------------------------------------------------------
 	StringIteratorPtr LinkService::getAllLinkNames() {
-		return new RelationNameMapKeyIterator(mRelationNameMap);
+		return StringIteratorPtr(new RelationNameMapKeyIterator(mRelationNameMap));
 	}
 
 	// --------------------------------------------------------------------------
@@ -342,7 +342,7 @@ namespace Opde {
 			// dedicate to the given relation
 			return it->second->getFieldDescIterator();
 		} else {
-			return NULL;
+			return DataFieldDescIteratorPtr(NULL);
 		}
 	}
 

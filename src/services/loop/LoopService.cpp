@@ -156,7 +156,7 @@ namespace Opde {
 			return;
 		}
 		
-		LoopModePtr mode = new LoopMode(modeDef, this);
+		LoopModePtr mode(new LoopMode(modeDef, this));
 		
 		mLoopModes[modeDef.id] = mode;
 		mLoopNamedModes[modeDef.name] = mode;

@@ -33,7 +33,7 @@ namespace Opde {
 	/*--------------------------------------------------------*/
 	HasRefsProperty::HasRefsProperty(RenderService* rs, PropertyService* owner) :
 			RenderedProperty(rs, owner, "HasRefs", "HasRefs", "always") {
-		mPropertyStorage = new BoolDataStorage(NULL);
+		mPropertyStorage = DataStoragePtr(new BoolDataStorage(NULL));
 
 		setChunkVersions(2, 4);
 

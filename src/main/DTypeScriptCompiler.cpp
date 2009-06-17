@@ -224,7 +224,7 @@ namespace Opde {
 		} else {
 			// state stack is empty!
 			mCurrentState.state = CS_UNKNOWN;
-			mCurrentState.enumeration = NULL;
+			mCurrentState.enumeration.setNull();
 			return old;
 		}
 	}
@@ -233,7 +233,7 @@ namespace Opde {
 	void DTypeScriptCompiler::pushCurrentState() {
 		mStateStack.push(mCurrentState);
 		mCurrentState.state = CS_UNKNOWN;
-		mCurrentState.enumeration = NULL;
+		mCurrentState.enumeration.setNull();
 	}
 
 	//-----------------------------------------------------------------------
@@ -268,10 +268,10 @@ namespace Opde {
 			// if specified an array, wrap it up so
 			if (was.arraylen > 1) {
 				// wrap up
-				DTypeDefPtr nelem = new DTypeDef(was.name, was.types, was.unioned);
-				nt = new DTypeDef(nelem, was.arraylen);
+				DTypeDefPtr nelem(new DTypeDef(was.name, was.types, was.unioned));
+				nt = DTypeDefPtr(new DTypeDef(nelem, was.arraylen));
 			} else {
-				nt = new DTypeDef(was.name, was.types, was.unioned);
+				nt = DTypeDefPtr(new DTypeDef(was.name, was.types, was.unioned));
 			}
 
 			// create the struct according to the 'was' structure fields
@@ -302,7 +302,7 @@ namespace Opde {
 		mGroupName = newGrp;
 		mCurrentState.state = CS_NAMESPACE;
 		mCurrentState.name = mGroupName;
-		mCurrentState.enumeration = NULL;
+		mCurrentState.enumeration.setNull();
 	}
 
 	//-----------------------------------------------------------------------
@@ -339,11 +339,11 @@ namespace Opde {
 					return mBinaryService->getType("", name);
 				} else {
 					logParseError("Type definition not found : " + name);
-					return NULL;
+					return DTypeDefPtr(); // NULL
 				}
 			} catch (BasicException) {
 				logParseError("Type definition not found : " + name);
-				return NULL;
+				return DTypeDefPtr(); // NULL
 			}
 		}
 	}
@@ -358,11 +358,11 @@ namespace Opde {
 					return mBinaryService->getEnum("", name);
 				} else {
 					logParseError("Enum definition not found : " + name);
-					return NULL;
+					return DEnumPtr(); // NULL
 				}
 			} catch (BasicException) {
 				logParseError("Enum definition not found : " + name);
-				return NULL;
+				return DEnumPtr(); // NULL
 			}
 		}
 	}
@@ -389,7 +389,7 @@ namespace Opde {
 
 		bool bitfield = getCurrentTokenID() == ID_BITFIELD ? true : false;
 
-		mCurrentState.enumeration = NULL;
+		mCurrentState.enumeration.setNull();
 		mCurrentState.state = CS_ENUM;
 		mCurrentState.name = getNextTokenLabel();
 
@@ -410,10 +410,10 @@ namespace Opde {
 
 			mCurrentState.enumvaltype = ntype;
 
-			mCurrentState.enumeration = new DEnum(mCurrentState.name, ntype, false);
+			mCurrentState.enumeration = DEnumPtr(new DEnum(mCurrentState.name, ntype, false));
 		} else {
 			mCurrentState.enumvaltype = DVariant::DV_UINT;
-			mCurrentState.enumeration = new DEnum(mCurrentState.name, DVariant::DV_UINT, true);
+			mCurrentState.enumeration = DEnumPtr(new DEnum(mCurrentState.name, DVariant::DV_UINT, true));
 		}
 	}
 
@@ -450,7 +450,7 @@ namespace Opde {
 		if (testNextTokenID(ID_OPENBOX)) {
 			int len = parseBoxBrace();
 
-			DTypeDefPtr arrayt = new DTypeDef(newt, len);
+			DTypeDefPtr arrayt(new DTypeDef(newt, len));
 
 			dispatchType(arrayt);
 		} else
@@ -542,7 +542,7 @@ namespace Opde {
 		// get the field type out of the current token ID
 		DVariant::Type type = getDVTypeFromID(typei);
 
-		DEnumPtr enm = NULL;
+		DEnumPtr enm;
 
 		size_t array_len = 1;
 
@@ -587,17 +587,17 @@ namespace Opde {
 			}
 		}
 
-		DTypeDefPtr ndef = NULL;
+		DTypeDefPtr ndef;
 
 		if (hasDefault)
 			try {
-				ndef = new DTypeDef(name, templ, datasize, enm);
+				ndef = DTypeDefPtr(new DTypeDef(name, templ, datasize, enm));
 			} catch (Opde::BasicException &ex) {
 				logParseError("Exception while constructing the field's '" + name + "' type : " + ex.getDetails());
 			}
 		else
 			try {
-				ndef = new DTypeDef(name, type, datasize, enm);
+				ndef = DTypeDefPtr(new DTypeDef(name, type, datasize, enm));
 			} catch (Opde::BasicException &ex) {
 				logParseError("Exception while constructing the field's '" + name + "' type : " + ex.getDetails());
 			}
@@ -605,7 +605,7 @@ namespace Opde {
 		if (array_len <= 1) {
 			dispatchType(ndef);
 		} else {
-			DTypeDefPtr arr = new DTypeDef(ndef, array_len);
+			DTypeDefPtr arr(new DTypeDef(ndef, array_len));
 
 			dispatchType(arr);
 		}

@@ -91,7 +91,7 @@ namespace Opde {
 		mInputSrv->setDirectListener(this);
 
 		// Register as a listener for the resolution changes
-		RenderService::ListenerPtr renderServiceListener = new ClassCallback<RenderServiceMsg, GUIService>(this, &GUIService::onRenderServiceMsg);
+		RenderService::ListenerPtr renderServiceListener(new ClassCallback<RenderServiceMsg, GUIService>(this, &GUIService::onRenderServiceMsg));
 		mRenderServiceListenerID = mRenderSrv->registerListener(renderServiceListener);
 	}
 

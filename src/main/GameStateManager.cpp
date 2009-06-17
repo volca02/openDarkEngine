@@ -163,7 +163,7 @@ namespace Opde {
 		// and to remove the need to parse scripts,
 		// we create the data-less Relation PlayerFactory here
 		LinkServicePtr linksvc = GET_SERVICE(LinkService);
-		linksvc->createRelation("PlayerFactory", NULL, false);
+		linksvc->createRelation("PlayerFactory", DataStoragePtr(NULL), false);
 		linksvc.setNull();
 
 		RenderServicePtr rends = GET_SERVICE(RenderService);

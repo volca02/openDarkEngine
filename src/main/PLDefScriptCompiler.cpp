@@ -202,7 +202,7 @@ namespace Opde {
 			DataStoragePtr stor;
 
 			if (!dt.isNull())
-				stor = new StructuredDataStorage(dt, false);
+				stor = DataStoragePtr(new StructuredDataStorage(dt, false));
 
 			RelationPtr rel = mLinkService->createRelation(mCurrentState.name, stor, mCurrentState.hidden);
 
@@ -222,13 +222,13 @@ namespace Opde {
 			DataStoragePtr stor;
 
 			if (mCurrentState.ptype == "varstr") {
-				stor = new StringDataStorage();
+				stor = DataStoragePtr(new StringDataStorage());
 			} else {
 				DTypeDefPtr dt;
 
 				dt = getTypeDef("properties", mCurrentState.dtypename);
 
-				stor = new StructuredDataStorage(dt, mCurrentState.cached);
+				stor = DataStoragePtr(new StructuredDataStorage(dt, mCurrentState.cached));
 			}
 
 			pg = mPropertyService->createPropertyGroup(
@@ -258,11 +258,11 @@ namespace Opde {
 					return mBinaryService->getType("", name);
 				} else {
 					logParseError("Type definition not found : '" + name + "'");
-					return NULL;
+					return DTypeDefPtr();
 				}
 			} catch (BasicException) {
 				logParseError("Type definition not found : '" + name +  "'");
-				return NULL;
+				return DTypeDefPtr();
 			}
 		}
 	}

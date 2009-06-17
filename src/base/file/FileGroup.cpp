@@ -108,7 +108,7 @@ namespace Opde {
 				OPDE_EXCEPT(string("Inventory chunk name mismatch: ") + ch.header.name + "-" + inventory[idx].name,
 					    "DarkFileGroup::_initSource");
 			
-			ch.file = new FilePart(inventory[idx].name, File::FILE_R, mSrcFile, inventory[idx].offset + sizeof(ch.header), inventory[idx].length);
+			ch.file = FilePtr(new FilePart(inventory[idx].name, File::FILE_R, mSrcFile, inventory[idx].offset + sizeof(ch.header), inventory[idx].length));
 			
 			mFiles.insert(make_pair(std::string(inventory[idx].name), ch));
 		}
@@ -156,6 +156,7 @@ namespace Opde {
 		return (it != mFiles.end());
 	}
 	
+	//------------------------------------
 	const DarkDBChunkHeader& DarkFileGroup::getFileHeader(const std::string& name) {
 		ChunkMap::iterator it = mFiles.find(name);
 		
@@ -174,7 +175,7 @@ namespace Opde {
 		
 		if (it != mFiles.end()) {
 			it->second.file->seek(0);
-			return FilePtr(it->second.file);
+			return it->second.file;
 		} else
 			OPDE_FILEEXCEPT(FILE_OP_FAILED, string("File named ") + sname + " was not found in this FileGroup", "DarkFileGroup::getFile");
 	}

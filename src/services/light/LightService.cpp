@@ -85,7 +85,7 @@ namespace Opde {
 		assert(mLightPixelSize != 0);
 
 		// create a new cell, load the definitions for it
-		LightsForCellPtr lfc = new LightsForCell(tag, num_anim_lights, num_textured, mLightPixelSize, face_infos);
+		LightsForCellPtr lfc(new LightsForCell(tag, num_anim_lights, num_textured, mLightPixelSize, face_infos));
 
 		mLightsForCell.insert(make_pair(cellID, lfc));
 

@@ -135,7 +135,7 @@ namespace Opde
 
 				// Field definition statics:
 				template<typename FT> static void field(const char* name, FT T::* fieldPtr) {
-					FieldDefBasePtr fd = new FieldDef<FT>(fieldPtr);
+					FieldDefBasePtr fd(new FieldDef<FT>(fieldPtr));
 
 					msNameToAttr.insert(std::make_pair(name, fd));
 				}

@@ -141,7 +141,7 @@ namespace Opde {
 		if (it != mSheetMap.end())
 			return it->second;
 		else {
-			DrawSheetPtr sheet = new DrawSheet(this, sheetName);
+			DrawSheetPtr sheet(new DrawSheet(this, sheetName));
 			mSheetMap[sheetName] = sheet;
 			return sheet;
 		}
@@ -164,7 +164,7 @@ namespace Opde {
 		}
 
 		if (mActiveSheet == sheet)
-			setActiveSheet(NULL);
+			setActiveSheet(DrawSheetPtr(NULL));
 		
 		sheet->clear();
 		// and we're done
@@ -177,7 +177,7 @@ namespace Opde {
 		if (it != mSheetMap.end())
 			return it->second;
 		else
-			return NULL;
+			return DrawSheetPtr(NULL);
 	}
 
 	//------------------------------------------------------
@@ -232,7 +232,7 @@ namespace Opde {
 	//------------------------------------------------------
 	FontDrawSourcePtr DrawService::loadFont(const TextureAtlasPtr& atlas, const std::string& name, const std::string& group) {
 		// load the font according to the specs
-		FontDrawSourcePtr nfs = new FontDrawSource(atlas, name);
+		FontDrawSourcePtr nfs(new FontDrawSource(atlas, name));
 
 		atlas->_addFont(nfs);
 		
@@ -247,7 +247,7 @@ namespace Opde {
 		DarkFontHeader header;
 
 		Ogre::DataStreamPtr Stream = Ogre::ResourceGroupManager::getSingleton().openResource(name, group, true, NULL);
-		FilePtr fontFile = new OgreFile(Stream);
+		FilePtr fontFile(new OgreFile(Stream));
 
 		fontFile->readElem(&header.Format,2); // 0
 		fontFile->readElem(&header.Unknown,1); // 2
@@ -368,7 +368,7 @@ namespace Opde {
 
 		try {
 			stream = Ogre::ResourceGroupManager::getSingleton().openResource(fname, group, true);
-			paletteFile = new OgreFile(stream);
+			paletteFile = FilePtr(new OgreFile(stream));
 		} catch(Ogre::FileNotFoundException) {
 			// Could not find resource, use the default table
 			LOG_ERROR("DrawService: Specified palette file not found - using default palette!");
@@ -428,7 +428,7 @@ namespace Opde {
 
 		try {
 			stream = Ogre::ResourceGroupManager::getSingleton().openResource(fname, group, true);
-			paletteFile = new OgreFile(stream);
+			paletteFile = FilePtr(new OgreFile(stream));
 		} catch(Ogre::FileNotFoundException) {
 			// Could not find resource, use the default table
 			LOG_ERROR("DrawService: Specified palette file not found - using default palette!");
@@ -531,7 +531,7 @@ namespace Opde {
 		mat->load();
 
 		// will set up the pixelsize automatically for us
-		DrawSourcePtr ds = new DrawSource(this, mDrawSourceID++, mat, tex);
+		DrawSourcePtr ds(new DrawSource(this, mDrawSourceID++, mat, tex));
 
 		mDrawSources.push_back(ds);
 		
@@ -645,7 +645,7 @@ namespace Opde {
 	//------------------------------------------------------
 	TextureAtlasPtr DrawService::createAtlas() {
 		//
-		TextureAtlasPtr ta = new TextureAtlas(this, getNewDrawOperationID());
+		TextureAtlasPtr ta(new TextureAtlas(this, getNewDrawOperationID()));
 
 		mAtlasMap.insert(std::make_pair(ta->getAtlasID(), ta));
 

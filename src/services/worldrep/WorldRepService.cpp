@@ -72,7 +72,7 @@ namespace Opde {
 		mExtraPlanes = NULL;
 
 		LOG_DEBUG("WorldRepService: Registering as a listener to the database messages");
-		mDbCallback = new ClassCallback<DatabaseChangeMsg, WorldRepService> (this, &WorldRepService::onDBChange);
+		mDbCallback = DatabaseService::ListenerPtr(new ClassCallback<DatabaseChangeMsg, WorldRepService> (this, &WorldRepService::onDBChange));
 
 		mDatabaseService = GET_SERVICE(DatabaseService);
 		mDatabaseService->registerListener(mDbCallback, DBP_WORLDREP);
@@ -82,7 +82,7 @@ namespace Opde {
 
 	void WorldRepService::shutdown() {
 		mDatabaseService->unregisterListener(mDbCallback);
-		mDatabaseService = NULL;
+		mDatabaseService.setNull();
 		clearData();
 
 		mRenderService.setNull();

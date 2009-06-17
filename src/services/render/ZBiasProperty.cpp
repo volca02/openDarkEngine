@@ -34,7 +34,7 @@ namespace Opde {
 	ZBiasProperty::ZBiasProperty(RenderService* rs, PropertyService* owner) :
 			RenderedProperty(rs, owner, "RendererZBias", "Z-Bias", "always") {
 
-		mPropertyStorage = new UIntDataStorage(NULL);
+		mPropertyStorage = DataStoragePtr(new UIntDataStorage(NULL));
 
 		setChunkVersions(2, 4);
 

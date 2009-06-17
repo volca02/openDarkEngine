@@ -34,7 +34,7 @@ namespace Opde {
 	ModelScaleProperty::ModelScaleProperty(RenderService* rs, PropertyService* owner) :
 			RenderedProperty(rs, owner, "ModelScale", "Scale", "always") {
 
-		mPropertyStorage = new Vector3DataStorage(NULL);
+		mPropertyStorage = DataStoragePtr(new Vector3DataStorage(NULL));
 
 		// TODO: Check the version
 		setChunkVersions(2, 12);

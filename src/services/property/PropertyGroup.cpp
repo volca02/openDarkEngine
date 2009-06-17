@@ -45,7 +45,7 @@ namespace Opde {
 		mInheritor = mInheritService->createInheritor(inheritorName);
 
 		// And as a final step, register as inheritor listener
-		Inheritor::ListenerPtr cil = new ClassCallback<InheritValueChangeMsg, PropertyGroup>(this, &PropertyGroup::onInheritChange);
+		Inheritor::ListenerPtr cil(new ClassCallback<InheritValueChangeMsg, PropertyGroup>(this, &PropertyGroup::onInheritChange));
 
         mInheritorListenerID = mInheritor->registerListener(cil);
 
@@ -69,7 +69,7 @@ namespace Opde {
 		mInheritor = mInheritService->createInheritor(inheritorName);
 
 		// And as a final step, register as inheritor listener
-		Inheritor::ListenerPtr cil = new ClassCallback<InheritValueChangeMsg, PropertyGroup>(this, &PropertyGroup::onInheritChange);
+		Inheritor::ListenerPtr cil(new ClassCallback<InheritValueChangeMsg, PropertyGroup>(this, &PropertyGroup::onInheritChange));
 
         mInheritorListenerID = mInheritor->registerListener(cil);
 	}
@@ -87,7 +87,7 @@ namespace Opde {
 			mInheritor->unregisterListener(mInheritorListenerID);
 			mInheritService->destroyInheritor(mInheritor);
 			mInheritor = NULL;
-			mInheritService = NULL; // releases the reference
+			mInheritService.setNull(); // releases the reference
 		}
 	}
 
