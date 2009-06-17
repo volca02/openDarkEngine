@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ using namespace Ogre;
 namespace Opde {
 
 	/*----------------------------------------------------*/
-	/*-------------------- ConfigService -------------------*/
+	/*-------------------- ConfigService -----------------*/
 	/*----------------------------------------------------*/
 	ConfigService::ConfigService(ServiceManager *manager, const std::string& name) : Service(manager, name), mConfigFileName("opde.cfg") {
 	}
@@ -51,6 +51,11 @@ namespace Opde {
 
 
     //------------------------------------------------------
+    void ConfigService::setParamDescription(const std::string& param, const std::string& desc) {
+    	mConfigKeyDescriptions[param] = desc;
+    }
+    
+    //------------------------------------------------------
     void ConfigService::setParam(const std::string& param, const std::string& value) {
         Parameters::iterator it = mParameters.find(param);
 
@@ -65,6 +70,13 @@ namespace Opde {
     DVariant ConfigService::getParam(const std::string& param) {
         Parameters::const_iterator it = mParameters.find(param);
 
+        Parameters::const_iterator dit = mConfigKeyDescriptions.find(param);
+        
+		// warn if param has no desc specified
+		if (dit == mConfigKeyDescriptions.end()) {
+			LOG_ERROR("ConfigService: Warning: Config key '%s' has no description specified", param.c_str());
+		}
+        	
         if (it != mParameters.end()) {
             return DVariant(it->second);
         } else {
