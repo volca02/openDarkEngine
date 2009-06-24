@@ -58,12 +58,24 @@ namespace Opde {
 
 			/// Position setter with separate x,y parameters (for convenience)
 			void setPosition(int x, int y);
+			
+			/// position setter via PixelCoord reference
+			void setPosition(const PixelCoord& pos);
+			
+			/// Position getter
+			const PixelCoord& getPosition() const { return mPosition; };
 
 			/// Sets the Z order of the rendered image
 			void setZOrder(int z);
+			
+			/// Z order getter
+			int getZOrder() const { return mZOrder; };
 
 			/// Sets a new clipping rectangle
 			void setClipRect(const ClipRect& cr);
+			
+			/// Clip rect const. ref getter
+			const ClipRect& getClipRect() const { return mClipRect; };
 			
 			virtual DrawSourceBasePtr getDrawSourceBase() = 0;
 

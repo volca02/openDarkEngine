@@ -478,7 +478,7 @@ namespace Opde {
 			0,			              // iternextfunc tp_iternext; */
 			msMethods,	                      // struct PyMethodDef *tp_methods; */
 			0,                                    // struct memberlist /*  *tp_members; */
-			0                                    // struct getsetlist /* *tp_getset; */
+			msGetSet                              // struct getsetlist /* *tp_getset; */
 		};
 
 		// ------------------------------------------
@@ -489,6 +489,16 @@ namespace Opde {
 			{NULL, NULL}
 		};
 		
+		
+		// ------------------------------------------
+		PyGetSetDef DrawOperationBinder::msGetSet[] = {
+			{"position", getPPosition, setPPosition, "On-Screen Position", NULL},
+			{"zorder", getPZOrder, setPZOrder, "Z Order", NULL},
+			{"cliprect", getPClipRect, setPClipRect, "Clipping rectangle", NULL},
+			{NULL}
+		};
+
+		// ------------------------------------------		
 		CastInfo<DrawOperation*> DrawOperationBinder::msCastInfo[] = {
 				{&RenderedImageBinder::msType, &defaultPythonUpcaster<DrawOperation*, RenderedImage*>},
 				{&RenderedLabelBinder::msType, &defaultPythonUpcaster<DrawOperation*, RenderedLabel*>},
@@ -497,87 +507,211 @@ namespace Opde {
 		
 		// ------------------------------------------
 		PyObject* DrawOperationBinder::setPosition(PyObject* self, PyObject* args)  {
+			// args: either (x,y) or ((x,y)). The setPPosition expects (x,y) so we have to unwrap the tuple if encountered
+			PyObject *tup;
+			
+			// We can't use PyArg_ParseTuple as it terminates on parameter inconsistencies.
+			// instead, we look at the tuple in more detail and decide
+			if (!PyTuple_Check(args))
+					__PY_BADPARMS_RET;
+			
+			int len = PyTuple_Size(args); 
+			
+			if (len == 2) {
+				// use the args direcly, the called func. checks
+				if (setPPosition(self, args, NULL) == 0) { 
+					__PY_NONE_RET;
+				} else { // otherwise return null to indicate a problem
+					return NULL;
+				}
+			} else if (len == 1) {
+				// extract the tuple
+				PyObject *tup = PyTuple_GetItem(args, 0);
+				
+				if (!PyTuple_Check(tup))
+					__PY_BADPARMS_RET;
+				
+				if (setPPosition(self, tup, NULL) == 0) { 
+					__PY_NONE_RET;
+				} else { // otherwise return null to indicate a problem
+					return NULL;
+				}
+			} else {
+				// Not the right type, no sir!
+				__PY_BADPARMS_RET;
+			}
+			
+			if (PyArg_ParseTuple(args, "O", &tup)) { // tuple in tuple
+				
+				
+				
+			} else {
+				if (setPPosition(self, args, NULL) == 0) {
+					__PY_NONE_RET;
+				} else { // otherwise return null to indicate a problem
+					return NULL;
+				}
+			}
+		}
+
+		// ------------------------------------------
+		PyObject* DrawOperationBinder::setZOrder(PyObject* self, PyObject* args)  {
+			if (setPZOrder(self, args, NULL) == 0) { // if succeeded
+				__PY_NONE_RET;
+			} else { // otherwise return null to indicate a problem
+				return NULL;
+			}
+		}
+
+		// ------------------------------------------
+		PyObject* DrawOperationBinder::setClipRect(PyObject* self, PyObject* args)  {
+			if (setPClipRect(self, args, NULL) == 0) { // if succeeded
+				__PY_NONE_RET;
+			} else { // otherwise return null to indicate a problem
+				return NULL;
+			}
+		}
+
+		// ------------------------------------------
+		int DrawOperationBinder::setPPosition(PyObject *self, PyObject *value, void *closure) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-                
+			
 			DrawOperation* o = NULL;
 			
 			assert(self != NULL);
 			
 			if (!python_cast<DrawOperation*>(self, &msType, &o, msCastInfo))
-				__PY_CONVERR_RET;
+				__PY_CONVERR_RET_VAL(-1);
 	  
 			assert(o != NULL);
+		
+			if (value == NULL) {
+				PyErr_SetString(PyExc_TypeError, "Cannot delete the attribute");
+				return -1;
+			}
 			
-			int x, y;
+			// okay, we can proceed with the setting now
 			
-			if (PyArg_ParseTuple(args, "ii", &x, &y)) {
-				o->setPosition(x, y);
+			
+			PixelCoord pc;
+			
+			if (TypeInfo<PixelCoord>::fromPyObject(value, pc)) {
+				o->setPosition(pc);
                         
-				__PY_NONE_RET;
+				return 0;
 			} else {
 				// Invalid parameters
-				PyErr_SetString(PyExc_TypeError, "Expected two integer arguments!");
-				return NULL;
+				PyErr_SetString(PyExc_TypeError, "Expected a two integer tuple!");
+				return -1;
 			}
-					
-			__PYTHON_EXCEPTION_GUARD_END_;
+			
+			__PYTHON_EXCEPTION_GUARD_END_RVAL(-1);
 		}
-
 		// ------------------------------------------
-		PyObject* DrawOperationBinder::setZOrder(PyObject* self, PyObject* args)  {
+		int DrawOperationBinder::setPZOrder(PyObject *self, PyObject *value, void *closure) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
                 
 			DrawOperation* o = NULL;
 			
 			if (!python_cast<DrawOperation*>(self, &msType, &o, msCastInfo))
-				__PY_CONVERR_RET;
+				__PY_CONVERR_RET_VAL(-1);
 	  
+			
+			if (value == NULL) {
+				PyErr_SetString(PyExc_TypeError, "Cannot delete the attribute");
+				return -1;
+			}
+			
 			int z;
 			
-			if (PyArg_ParseTuple(args, "i", &z)) {
+			if (PyArg_ParseTuple(value, "i", &z)) {
 				o->setZOrder(z);
 			
-				__PY_NONE_RET;
+				return 0;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected an integer argument!");
-				return NULL;
+				return -1;
 			}
 					
-			__PYTHON_EXCEPTION_GUARD_END_;
+			__PYTHON_EXCEPTION_GUARD_END_RVAL(-1);
 		}
-
+		
 		// ------------------------------------------
-		PyObject* DrawOperationBinder::setClipRect(PyObject* self, PyObject* args)  {
+		int DrawOperationBinder::setPClipRect(PyObject *self, PyObject *value, void *closure) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
                 
 			DrawOperation* o = NULL;
 			
 			if (!python_cast<DrawOperation*>(self, &msType, &o, msCastInfo))
-				__PY_CONVERR_RET;
-                  
+				__PY_CONVERR_RET_VAL(-1);
+                
+			if (value == NULL) {
+				PyErr_SetString(PyExc_TypeError, "Cannot delete the attribute");
+				return -1;
+			}
+			
 			PyObject *cr;
                         
-			if (PyArg_ParseTuple(args, "O", &cr)) {
+			if (PyArg_ParseTuple(value, "O", &cr)) {
 				// if it's a tuple, it should contain four floats
 				ClipRect rect;
 				if (!TypeInfo<ClipRect>::fromPyObject(cr, rect)) {
 					PyErr_SetString(PyExc_TypeError, "Expected 4 float tuple!");
-	                                return NULL;
+					return -1;
 				};
 				
 				o->setClipRect(rect);
                         
-				__PY_NONE_RET;
+				return 0;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected an integer argument!");
-				return NULL;
+				return -1;
 			}
 					
+			__PYTHON_EXCEPTION_GUARD_END_RVAL(-1);
+		}
+		
+		// ------------------------------------------
+		PyObject* DrawOperationBinder::getPPosition(PyObject *self, void *closure) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			DrawOperation* o = NULL;
+			
+			if (!python_cast<DrawOperation*>(self, &msType, &o, msCastInfo))
+				__PY_CONVERR_RET;
+			
+			return TypeInfo<PixelCoord>::toPyObject(o->getPosition());
+			
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-
+		
+		// ------------------------------------------
+		PyObject* DrawOperationBinder::getPZOrder(PyObject *self, void *closure) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			DrawOperation* o = NULL;
+			
+			if (!python_cast<DrawOperation*>(self, &msType, &o, msCastInfo))
+				__PY_CONVERR_RET;
+			
+			return TypeInfo<int>::toPyObject(o->getZOrder());
+			
+			__PYTHON_EXCEPTION_GUARD_END_; 
+		}
+		
+		// ------------------------------------------
+		PyObject* DrawOperationBinder::getPClipRect(PyObject *self, void *closure) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			DrawOperation* o = NULL;
+			
+			if (!python_cast<DrawOperation*>(self, &msType, &o, msCastInfo))
+				__PY_CONVERR_RET;
+			
+			return TypeInfo<ClipRect>::toPyObject(o->getClipRect());
+			
+			__PYTHON_EXCEPTION_GUARD_END_;
+		}
+		
 		// ------------------------------------------
 		PyObject* DrawOperationBinder::getattr(PyObject *self, char *name) {
 			// TODO: Image/Group name getters?

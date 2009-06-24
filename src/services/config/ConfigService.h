@@ -71,7 +71,7 @@ namespace Opde {
             /** determine an existence of a parameter */
 			bool hasParam(const std::string& param);
 
-			/** Injects the settings from a ogre's cfg file */
+			/** Injects the settings from a specified cfg file */
 			bool loadParams(const std::string& cfgfile);
 
 			/** returns the set game type. This should normally be the cam.cfg's game dark/game shock, but we also need to differentiate t1/t2

@@ -98,14 +98,65 @@ namespace Opde {
 				if (PyTuple_GET_SIZE(o) != 4)
 					return false;
 				
-				cr.left   = PyFloat_AsDouble(PyTuple_GetItem(o, 0));
-				cr.right  = PyFloat_AsDouble(PyTuple_GetItem(o, 1));
-				cr.top    = PyFloat_AsDouble(PyTuple_GetItem(o, 2));
-				cr.bottom = PyFloat_AsDouble(PyTuple_GetItem(o, 3));
+				// Type check all those before setting them
+				PyObject *pl, *pr, *pt, *pb;
+				pl = PyTuple_GetItem(o, 0);
+				pr = PyTuple_GetItem(o, 1);
+				pt = PyTuple_GetItem(o, 2);
+				pb = PyTuple_GetItem(o, 3);
+				
+				if (!PyFloat_Check(pl) ||
+					!PyFloat_Check(pr) ||
+					!PyFloat_Check(pt) ||
+					!PyFloat_Check(pb) )
+					return false;
+				
+				cr.left   = PyFloat_AsDouble(pl);
+				cr.right  = PyFloat_AsDouble(pr);
+				cr.top    = PyFloat_AsDouble(pt);
+				cr.bottom = PyFloat_AsDouble(pb);
 				
 				return true;
 			}
 		};
+		
+		//
+		template<> struct TypeInfo<PixelCoord> : TypeInfoBase<PixelCoord> {
+			TypeInfo() : TypeInfoBase<PixelCoord>("PixelCoord", VT_CUSTOM_TYPE) {};
+
+			static PyObject* toPyObject(const PixelCoord& pc) {
+				// tuple it is
+				PyObject *cp = PyTuple_New(2);
+				PyTuple_SetItem(cp, 0, PyLong_FromLong(pc.first)); // Steals reference
+				PyTuple_SetItem(cp, 1, PyLong_FromLong(pc.second)); // Steals reference
+				
+				return cp;
+			}
+			
+			static bool fromPyObject(PyObject* o, PixelCoord& pc) {
+				if (!PyTuple_Check(o))
+					return false;
+					
+				if (PyTuple_GET_SIZE(o) != 2)
+					return false;
+				
+				PyObject *arg = PyTuple_GetItem(o, 0);
+				
+				if ((!PyLong_Check(arg)) && (!PyInt_Check(arg)))
+					return false;
+				
+				PyObject *arg1 = PyTuple_GetItem(o, 1);
+				
+				if ((!PyLong_Check(arg1)) && (!PyInt_Check(arg1)))
+					return false;
+				
+				pc.first  = PyLong_AsLong(arg);
+				pc.second = PyLong_AsLong(arg1);
+								
+				return true;
+			}
+		};
+		
 		
                 
         /// forward declaration of the child classes
@@ -133,7 +184,19 @@ namespace Opde {
 				// --- Methods ---
 				static PyObject* setPosition(PyObject *self, PyObject *args);
 				static PyObject* setZOrder(PyObject *self, PyObject *args);
-				static PyObject* setClipRect(PyObject *self, PyObject *args);				
+				static PyObject* setClipRect(PyObject *self, PyObject *args);
+
+				// --- Properties ---
+				// -- setters --
+				static int setPPosition(PyObject *self, PyObject *value, void *closure);
+				static int setPZOrder(PyObject *self, PyObject *value, void *closure);
+				static int setPClipRect(PyObject *self, PyObject *value, void *closure);
+				
+				// -- getters --				
+				static PyObject* getPPosition(PyObject *self, void *closure);
+				static PyObject* getPZOrder(PyObject *self, void *closure);
+				static PyObject* getPClipRect(PyObject *self, void *closure);
+				
 				
 				static PyObject* create(DrawOperation* ds);
 
@@ -146,6 +209,9 @@ namespace Opde {
 
 				/// Method list
 				static PyMethodDef msMethods[];
+				
+				/// Getters and setters for field access
+				static PyGetSetDef msGetSet[];
 				
 				/// Up-casting helper structures
 				static CastInfo<DrawOperation*> msCastInfo[];

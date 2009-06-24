@@ -65,7 +65,7 @@ namespace Opde {
 						const std::string& src, const char* file = NULL, long line = -1) : 
 							BasicException(desc,src,file,line), 
 							mType(type) {
-					details = std::string("PythonException: " + type + " " + details);
+					details = std::string("PythonException: " + type + "\n\t" + details);
 				}
 				
 				~PythonException() throw() {};
@@ -385,7 +385,8 @@ namespace Opde {
 		}
 		
 		// Conversion error for simplicity
-#define __PY_CONVERR_RET { PyErr_SetString(PyExc_TypeError, "Incompatible types error."); return NULL;	}
+#define __PY_CONVERR_RET_VAL(val) { PyErr_SetString(PyExc_TypeError, "Incompatible types error."); return val;	}
+#define __PY_CONVERR_RET __PY_CONVERR_RET_VAL(NULL)
 #define __PY_BADPARM_RET(parm) { PyErr_SetString(PyExc_TypeError, "Incompatible parameter type on '" #parm "'"); return NULL;	}
 #define __PY_BADPARMS_RET { PyErr_SetString(PyExc_TypeError, "Incompatible parameters"); return NULL;	}
 #define __PY_NONE_RET { Py_INCREF(Py_None); return Py_None; }		

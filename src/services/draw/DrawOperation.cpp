@@ -89,6 +89,13 @@ namespace Opde {
 
 		_markDirty();
 	}
+	
+	//------------------------------------------------------
+	void DrawOperation::setPosition(const PixelCoord& pos) {
+		mPosition = pos;
+		
+		_markDirty();
+	}
 
 	//------------------------------------------------------
 	void DrawOperation::setZOrder(int z) {
