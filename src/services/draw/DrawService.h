@@ -122,17 +122,17 @@ namespace Opde {
 
 			/** Converts the given coordinate to the screen space x coordinate
 			 */
-			Ogre::Real convertToScreenSpaceX(int x, size_t width);
+			Ogre::Real convertToScreenSpaceX(int x, size_t width) const;
 			
 			/** Converts the given coordinate to the screen space y coordinates
 			 */
-			Ogre::Real convertToScreenSpaceY(int y, size_t height);
+			Ogre::Real convertToScreenSpaceY(int y, size_t height) const;
 			
 			/** Converts the given coordinate to the screen space y coordinates
 			 * @param z the depth in 0 - MAX_Z_VALUE range
 			 * @return Real number describing the depth
 			 */
-			Ogre::Real convertToScreenSpaceZ(int z);
+			Ogre::Real convertToScreenSpaceZ(int z) const;
 
 			/// Queues an atlas for rebuilding (on render queue started event)
 			void _queueAtlasForRebuild(TextureAtlas* atlas);

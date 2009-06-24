@@ -106,6 +106,13 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	void DrawOperation::rebuild() {
+		// update the clip rect -> on screen projection
+		if (mActiveSheet) {
+			mActiveSheet->convertClipToScreen(mClipRect, mClipOnScreen);
+		} else {
+			mClipOnScreen.noClip = true;
+		}
+
 		_rebuild();
 		mIsDirty = false;
 	}
@@ -113,6 +120,9 @@ namespace Opde {
 	//------------------------------------------------------
 	void DrawOperation::_notifyActiveSheet(DrawSheet* actsh) {
 		mActiveSheet = actsh;
+		
+		// need rebuild thanks to different sheet dimensions, etc.
+		_markDirty();
 	}
 
 	//------------------------------------------------------

@@ -55,7 +55,7 @@ namespace Opde {
 			0,                        // ternaryfunc tp_call;  /* __call__ */
 			0,			              // reprfunc tp_str;      /* __str__ */
 			PyObject_GenericGetAttr,  // getattrofunc tp_getattro; */
-			0,			              // setattrofunc tp_setattro; */
+			PyObject_GenericSetAttr,  // setattrofunc tp_setattro; */
 			0,			              // PyBufferProcs *tp_as_buffer; */
 			// for inheritance searches to work we need this
 			Py_TPFLAGS_HAVE_CLASS,	              // long tp_flags; */

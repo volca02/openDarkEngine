@@ -89,17 +89,17 @@ namespace Opde {
 
 			/** Converts the given coordinate to the screen space x coordinate
 			 */
-			Ogre::Real convertToScreenSpaceX(int x);
+			Ogre::Real convertToScreenSpaceX(int x) const;
 			
 			/** Converts the given coordinate to the screen space y coordinates
 			 */
-			Ogre::Real convertToScreenSpaceY(int y);
+			Ogre::Real convertToScreenSpaceY(int y) const;
 			
 			/** Converts the given coordinate to the screen space y coordinates
 			 * @param z the depth in 0 - MAX_Z_VALUE range
 			 * @return Real number describing the depth
 			 */
-			Ogre::Real convertToScreenSpaceZ(int z);
+			Ogre::Real convertToScreenSpaceZ(int z) const;
 			
 			/** Informs this sheet the viewport resolution changed. Internal, do not use explicitly (use setResolutionOverride instead).
 			 */
@@ -107,7 +107,7 @@ namespace Opde {
 			
 			/** Creates a clip rectangle with the specified screen coordinates.
 			*/
-			ClipRect getClipRect(int left, int right, int top, int bottom);
+			void convertClipToScreen(const ClipRect& cr, ScreenRect& tgt) const;
 			
 			/** Queues all the Renderables into appropriate RenderQueueGroups
 			 */

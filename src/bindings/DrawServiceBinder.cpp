@@ -465,7 +465,7 @@ namespace Opde {
 			0,                        // ternaryfunc tp_call;  /* __call__ */
 			0,			              // reprfunc tp_str;      /* __str__ */
 			PyObject_GenericGetAttr,  // getattrofunc tp_getattro; */
-			0,			              // setattrofunc tp_setattro; */
+			PyObject_GenericSetAttr,  // setattrofunc tp_setattro; */
 			0,			              // PyBufferProcs *tp_as_buffer; */
 			// for inheritance searches to work we need this
 			Py_TPFLAGS_HAVE_CLASS,	              // long tp_flags; */
@@ -565,7 +565,17 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* DrawOperationBinder::setClipRect(PyObject* self, PyObject* args)  {
-			if (setPClipRect(self, args, NULL) == 0) { // if succeeded
+			int len = PyTuple_Size(args);
+			
+			if (len != 1)
+				__PY_BADPARMS_RET;
+
+			PyObject *tup = PyTuple_GetItem(args, 0);
+			
+			if (!PyTuple_Check(tup))
+				__PY_BADPARMS_RET;
+				
+			if (setPClipRect(self, tup, NULL) == 0) { // if succeeded
 				__PY_NONE_RET;
 			} else { // otherwise return null to indicate a problem
 				return NULL;
@@ -651,24 +661,16 @@ namespace Opde {
 				return -1;
 			}
 			
-			PyObject *cr;
-                        
-			if (PyArg_ParseTuple(value, "O", &cr)) {
-				// if it's a tuple, it should contain four floats
-				ClipRect rect;
-				if (!TypeInfo<ClipRect>::fromPyObject(cr, rect)) {
-					PyErr_SetString(PyExc_TypeError, "Expected 4 float tuple!");
-					return -1;
-				};
-				
-				o->setClipRect(rect);
-                        
-				return 0;
-			} else {
-				// Invalid parameters
-				PyErr_SetString(PyExc_TypeError, "Expected an integer argument!");
+			ClipRect rect;
+			if (!TypeInfo<ClipRect>::fromPyObject(value, rect)) {
+				PyErr_SetString(PyExc_TypeError, "Expected a 4 integer tuple(left,right,top,bottom)!");
 				return -1;
-			}
+			};
+				
+			o->setClipRect(rect);
+                        
+			return 0;
+			
 					
 			__PYTHON_EXCEPTION_GUARD_END_RVAL(-1);
 		}

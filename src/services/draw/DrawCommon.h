@@ -72,6 +72,11 @@ namespace Opde {
 
 		const PixelSize& operator=(const PixelSize& b) { width = b.width; height = b.height; return *this; };
 
+		inline OPDELIB_EXPORT friend std::ostream& operator <<(std::ostream& o, const PixelSize& ps) {
+			o << "PixelSize(" << ps.width << ", " << ps.height << ")";
+			return o;
+		}
+		
 		size_t width;
 		size_t height;
 	};
@@ -90,9 +95,35 @@ namespace Opde {
 	};
 
 
-	/// A Clipping rectangle - used to set rendered boundaries for rendered (drawn) objects
 	struct OPDELIB_EXPORT ClipRect {
 		ClipRect() : left(0), right(0), top(0), bottom(0), noClip(true) {};
+		int left;
+		int right;
+		int top;
+		int bottom;
+		
+		/// If set to true (default) the clipping is not done
+		bool noClip;
+		
+		void operator=(const ClipRect& b) {
+			left = b.left;
+			right = b.right;
+			top = b.top;
+			bottom = b.bottom;
+			noClip = b.noClip;
+		}
+		
+		inline OPDELIB_EXPORT friend std::ostream& operator <<(std::ostream& o, const ClipRect& cr) {
+			o << "ClipRect(" << cr.left << ", " << cr.right << ", " 
+			<< cr.top << ", " << cr.bottom << ", " << cr.noClip << ")";
+			return o;
+		}
+	};
+	
+	/// A Clipping rectangle (on-screen version, in -1 - 1 range).
+	/// This struct is used to set rendered boundaries for rendered (drawn) objects
+	struct OPDELIB_EXPORT ScreenRect {
+		ScreenRect() : left(0), right(0), top(0), bottom(0), noClip(true) {};
 		Ogre::Real left;
 		Ogre::Real right;
 		Ogre::Real top;
@@ -101,7 +132,7 @@ namespace Opde {
 		/// If set to true (default) the clipping is not done
 		bool noClip;
 
-		void operator=(const ClipRect& b) {
+		void operator=(const ScreenRect& b) {
 			left = b.left;
 			right = b.right;
 			top = b.top;
@@ -177,6 +208,12 @@ namespace Opde {
 
 			return true;
 		};
+		
+		inline OPDELIB_EXPORT friend std::ostream& operator <<(std::ostream& o, const ScreenRect& sr) {
+			o << "ScreenRect(" << sr.left << ", " << sr.right << ", " 
+			<< sr.top << ", " << sr.bottom  << ", " << sr.noClip << ")";
+			return o;
+		}
 	};
 
 
@@ -333,6 +370,7 @@ namespace Opde {
 
 	// helper comparison operator for draw source shared_ptrs - to be able to put them into sets for example
 	bool operator<(const DrawSheetPtr& a, const DrawSheetPtr& b);
+
 };
 
 #endif

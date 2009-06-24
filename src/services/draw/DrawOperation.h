@@ -117,7 +117,11 @@ namespace Opde {
 
 			int mZOrder;
 
+			/// Clip rectangle in pixel coordinates
 			ClipRect mClipRect;
+			
+			/// clip rectangle after transforming via owning sheet to 0-1 coordinate range on screen. 
+			ScreenRect mClipOnScreen;
 			
 			// is the operation dirty? True means it needs to be rebuilt in order to produce valid quads
 			bool mIsDirty;

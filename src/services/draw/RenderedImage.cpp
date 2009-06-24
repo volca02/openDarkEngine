@@ -88,7 +88,7 @@ namespace Opde {
 		mDrawQuad.positions.bottom = mActiveSheet->convertToScreenSpaceY(mPosition.second + ps.height);
 		mDrawQuad.depth = mActiveSheet->convertToScreenSpaceZ(mZOrder);
 
-		mInClip = mClipRect.clip(mDrawQuad);
+		mInClip = mClipOnScreen.clip(mDrawQuad);
 		_markDirty();
 	}
 

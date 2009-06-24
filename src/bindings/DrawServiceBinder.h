@@ -83,10 +83,10 @@ namespace Opde {
 			static PyObject* toPyObject(const ClipRect& cr) {
 				// tuple it is
 				PyObject *crp = PyTuple_New(4);
-				PyTuple_SetItem(crp, 0, PyFloat_FromDouble(cr.left)); // Steals reference
-				PyTuple_SetItem(crp, 1, PyFloat_FromDouble(cr.right)); // Steals reference
-				PyTuple_SetItem(crp, 2, PyFloat_FromDouble(cr.top)); // Steals reference
-				PyTuple_SetItem(crp, 3, PyFloat_FromDouble(cr.bottom)); // Steals reference
+				PyTuple_SetItem(crp, 0, PyLong_FromLong(cr.left)); // Steals reference
+				PyTuple_SetItem(crp, 1, PyLong_FromLong(cr.right)); // Steals reference
+				PyTuple_SetItem(crp, 2, PyLong_FromLong(cr.top)); // Steals reference
+				PyTuple_SetItem(crp, 3, PyLong_FromLong(cr.bottom)); // Steals reference
 				
 				return crp;
 			}
@@ -94,8 +94,16 @@ namespace Opde {
 			static bool fromPyObject(PyObject* o, ClipRect& cr) {
 				if (!PyTuple_Check(o))
 					return false;
-					
-				if (PyTuple_GET_SIZE(o) != 4)
+				
+				int size = PyTuple_GET_SIZE(o);	
+				
+				// empty tuple means no clipping 
+				if (size == 0) {
+					cr.noClip = true;
+					return true;
+				}
+				
+				if (size != 4)
 					return false;
 				
 				// Type check all those before setting them
@@ -105,16 +113,17 @@ namespace Opde {
 				pt = PyTuple_GetItem(o, 2);
 				pb = PyTuple_GetItem(o, 3);
 				
-				if (!PyFloat_Check(pl) ||
-					!PyFloat_Check(pr) ||
-					!PyFloat_Check(pt) ||
-					!PyFloat_Check(pb) )
+				if (!__PYINTLONG_CHECK(pl) ||
+					!__PYINTLONG_CHECK(pr) ||
+					!__PYINTLONG_CHECK(pt) ||
+					!__PYINTLONG_CHECK(pb) )
 					return false;
 				
-				cr.left   = PyFloat_AsDouble(pl);
-				cr.right  = PyFloat_AsDouble(pr);
-				cr.top    = PyFloat_AsDouble(pt);
-				cr.bottom = PyFloat_AsDouble(pb);
+				cr.left   = PyLong_AsLong(pl);
+				cr.right  = PyLong_AsLong(pr);
+				cr.top    = PyLong_AsLong(pt);
+				cr.bottom = PyLong_AsLong(pb);
+				cr.noClip = false;
 				
 				return true;
 			}
@@ -142,12 +151,12 @@ namespace Opde {
 				
 				PyObject *arg = PyTuple_GetItem(o, 0);
 				
-				if ((!PyLong_Check(arg)) && (!PyInt_Check(arg)))
+				if (!__PYINTLONG_CHECK(arg))
 					return false;
 				
 				PyObject *arg1 = PyTuple_GetItem(o, 1);
 				
-				if ((!PyLong_Check(arg1)) && (!PyInt_Check(arg1)))
+				if (!__PYINTLONG_CHECK(arg1))
 					return false;
 				
 				pc.first  = PyLong_AsLong(arg);

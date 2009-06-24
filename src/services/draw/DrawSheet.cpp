@@ -204,39 +204,35 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
-	Ogre::Real DrawSheet::convertToScreenSpaceX(int x) {
+	Ogre::Real DrawSheet::convertToScreenSpaceX(int x) const {
 		return mOwner->convertToScreenSpaceX(x, mWidth);
 	}
 	
 	//------------------------------------------------------
-	Ogre::Real DrawSheet::convertToScreenSpaceY(int y) {
+	Ogre::Real DrawSheet::convertToScreenSpaceY(int y) const {
 		return mOwner->convertToScreenSpaceY(y, mHeight);
 	}
 	
 	//------------------------------------------------------
-	Ogre::Real DrawSheet::convertToScreenSpaceZ(int z) {
+	Ogre::Real DrawSheet::convertToScreenSpaceZ(int z) const {
 		return mOwner->convertToScreenSpaceZ(z);
 	}
 	
 	//------------------------------------------------------
 	void DrawSheet::_setResolution(size_t width, size_t height) {
 		if (!mResOverride) {
-			mWidth = width;
-			mHeight=  height;
+			mWidth  = width;
+			mHeight = height;
 		}
 	}
 	
 	//------------------------------------------------------
-	ClipRect DrawSheet::getClipRect(int left, int right, int top, int bottom) {
-		ClipRect cr;
-		
-		cr.left   = convertToScreenSpaceX(left);
-		cr.right  = convertToScreenSpaceX(right);
-		cr.top    = convertToScreenSpaceY(top);
-		cr.bottom = convertToScreenSpaceY(bottom);
-		cr.noClip = false;
-		
-		return cr;
+	void DrawSheet::convertClipToScreen(const ClipRect& cr, ScreenRect& tgt) const {
+		tgt.left   = convertToScreenSpaceX(cr.left);
+		tgt.right  = convertToScreenSpaceX(cr.right);
+		tgt.top    = convertToScreenSpaceY(cr.top);
+		tgt.bottom = convertToScreenSpaceY(cr.bottom);
+		tgt.noClip = cr.noClip;
 	}
 	
 	//------------------------------------------------------

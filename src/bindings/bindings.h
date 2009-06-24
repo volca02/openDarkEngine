@@ -50,7 +50,8 @@
 
 #define __PYTHON_EXCEPTION_GUARD_END_ __PYTHON_EXCEPTION_GUARD_END_RVAL(NULL)
 
-			
+/// Checks if the specified PyObject is int or long
+#define __PYINTLONG_CHECK(a) (PyLong_Check(a) || PyInt_Check(a))			
 
 
 namespace Opde {

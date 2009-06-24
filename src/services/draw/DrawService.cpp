@@ -605,26 +605,26 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	Ogre::Real DrawService::convertToScreenSpaceX(int x, size_t width) {
+	Ogre::Real DrawService::convertToScreenSpaceX(int x, size_t width) const {
 		Ogre::Real res = x;
 
-		res = ((res + mXTextelOffset) / width) * 2.0f - 1.0f;
-
+		res = ((res + mXTextelOffset) / (Ogre::Real)(width)) * 2.0f - 1.0f;
+		
 		return res;
 	}
 	
 	
 	//------------------------------------------------------
-	Ogre::Real DrawService::convertToScreenSpaceY(int y, size_t height) {
+	Ogre::Real DrawService::convertToScreenSpaceY(int y, size_t height) const {
 		Ogre::Real res = y;
 		
-		res = ((res + mYTextelOffset) / height) * -2.0f + 1.0f;
+		res = ((res + mYTextelOffset) / (Ogre::Real)(height)) * -2.0f + 1.0f;
 
 		return res;
 	}
 				
 	//------------------------------------------------------
-	Ogre::Real DrawService::convertToScreenSpaceZ(int z) {
+	Ogre::Real DrawService::convertToScreenSpaceZ(int z) const {
 		Ogre::Real depth = mRenderSystem->getMaximumDepthInputValue() - mRenderSystem->getMinimumDepthInputValue();
 
 		if (z < 0)

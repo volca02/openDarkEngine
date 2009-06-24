@@ -114,7 +114,7 @@ namespace Opde {
 					x += ds->getPixelSize().width;
 					
 					// if clipping produced some non-empty result
-					if (mClipRect.clip(dq)) { 
+					if (mClipOnScreen.clip(dq)) { 
 						// the quad is queued (by making a dynamically allocated copy)
 						DrawQuad* toStore = new DrawQuad(dq);
 						mDrawQuadList.push_back(toStore);
