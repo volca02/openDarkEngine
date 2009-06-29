@@ -52,7 +52,7 @@ namespace Opde {
 			void _addFont(const FontDrawSourcePtr& fdsp);
 
 			/** returns this Atlase's source ID */
-			inline DrawSource::ID getAtlasID() { return mAtlasID; };
+			inline DrawSource::ID getAtlasID() const { return mAtlasID; };
 
 			/** Internal tool to allow external addition of draw sources. Used by font code. */
 			void _addDrawSource(const DrawSourcePtr& ds);
@@ -62,6 +62,8 @@ namespace Opde {
 			
 			/// Owner getter
 			inline DrawService* getOwner() const { return mOwner; };
+			
+			const DrawSourcePtr& getVertexColourDrawSource() const { return mVertexColour; };
 
 		protected:
 			void enlarge(size_t area);
@@ -89,6 +91,9 @@ namespace Opde {
 			PixelSize mAtlasSize;
 
 			Ogre::String mAtlasName; // atlas texture name
+			
+			/// Used with vertex colour (texture less) rendering
+			DrawSourcePtr mVertexColour;
 	};
 };
 

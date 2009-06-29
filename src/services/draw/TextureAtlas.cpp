@@ -52,6 +52,22 @@ namespace Opde {
 		mAtlasAllocation = new FreeSpaceInfo(0,0,1,1);
 		mAtlasName = "DrawAtlas" + Ogre::StringConverter::toString(mAtlasID);
 		mMaterial = Ogre::MaterialManager::getSingleton().create("M_" + mAtlasName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+		
+		// Here, we insert the white 2x2 texture into the draw sources. It is always there,
+		// so we have a direct pointer to it in the atlas as well.
+		// it is used for texture-less objects (Governed by vertex colour alone)
+		// Inspiration was taken from Canvas, as with other things
+		// image:
+		uint32_t* pixels = new uint32_t[4];
+		memset(pixels, 255, 4 * 4);
+		
+		// draw source:
+		mVertexColour = DrawSourcePtr(new DrawSource(mOwner));
+		mVertexColour->getImage().loadDynamicImage(reinterpret_cast<Ogre::uchar*>(pixels), 2, 2, 1, Ogre::PF_A8R8G8B8, true);
+		mVertexColour->updatePixelSizeFromImage();
+		
+		// register:
+		_addDrawSource(mVertexColour);
 	}
 
 	//------------------------------------------------------
@@ -172,6 +188,7 @@ namespace Opde {
 
 		if (mTexture.isNull())
 			prepareResources();
+		// TODO: Reallocate the texture here if needed!
 		
 		Ogre::HardwarePixelBufferSharedPtr pixelBuffer = mTexture->getBuffer();
 		pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
