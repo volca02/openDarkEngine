@@ -64,7 +64,8 @@ namespace Opde {
 	typedef int64_t LoopClientPriority;
 	
 	/// Mask that permits all the clients to run
-	#define LOOPMODE_MASK_ALL_CLIENTS 0xFFFFFFFFFFFFFFFF
+	/// ULL at the end of the value means unsigned long long
+	#define LOOPMODE_MASK_ALL_CLIENTS 0xFFFFFFFFFFFFFFFFULL
 	
 	/// The definition of a loop client
 	typedef struct {
