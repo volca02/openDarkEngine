@@ -163,7 +163,6 @@ namespace Opde
 		PyObject* LoopServiceBinder::getLastFrameTime(PyObject* self, PyObject* args)
 		{
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			PyObject *result = NULL;
 			LoopServicePtr o;
 			
 			if (!python_cast<LoopServicePtr>(self, &msType, &o))

@@ -107,7 +107,7 @@ namespace Opde {
 							LOG_DEBUG("Dispatched link desc for '%s': %s", addr.c_str(), txt.c_str());
 							mLinkDocs[addr] = txt;
 							break;
-                        case DT_ENUM:
+						case DT_ENUM:
 							LOG_DEBUG("Dispatched enum desc for '%s': %s", addr.c_str(), txt.c_str());
 							mEnumDocs[addr] = txt;
 							break;

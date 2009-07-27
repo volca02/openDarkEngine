@@ -50,8 +50,7 @@ namespace Opde {
             bool mEnd;
 	};
 
-	/** Common ancestor template for all the single value data storages (with fixed length data)
-	*/
+	/** Common ancestor template for all the single value data storages (with fixed length data) */
 	template<typename T> class OPDELIB_EXPORT SingleFieldDataStorage : public DataStorage {
 		public:
 			explicit SingleFieldDataStorage(DEnum* enm) {
@@ -231,7 +230,6 @@ namespace Opde {
 			virtual T fromVariant(const DVariant& v) const {
 				return v.as<T>();
 			}
-
 
 			/// Data map
 			typedef typename std::map<int, T> DataMap;

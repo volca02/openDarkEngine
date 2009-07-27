@@ -92,7 +92,7 @@ namespace Opde {
 			void setSkip(bool _skip);
 			void setAlpha(float alpha);
 			void setZBias(float bias);
-			void setScale(const Vector3& scale);
+			void setScale(const Ogre::Vector3& scale);
 
 			void setEntity(Ogre::Entity* newEntity);
 
@@ -141,21 +141,21 @@ namespace Opde {
 			RenderService(ServiceManager *manager, const std::string& name);
 			virtual ~RenderService();
 
-            Ogre::Root* getOgreRoot();
-            Ogre::SceneManager* getSceneManager();
-            Ogre::RenderWindow* getRenderWindow();
+			Ogre::Root* getOgreRoot();
+			Ogre::SceneManager* getSceneManager();
+			Ogre::RenderWindow* getRenderWindow();
 
-            /**
-            Getter for the default viewport. Most of the time sufficient (for game)
-            @returns The default viewport (Viewport of the default camera )
+			/**
+			Getter for the default viewport. Most of the time sufficient (for game)
+			@returns The default viewport (Viewport of the default camera )
 			*/
-            Ogre::Viewport* getDefaultViewport();
+			Ogre::Viewport* getDefaultViewport();
 
-            /**
-            Getter for the default camera. Default camera is a camera named "DefaultCamera" that is autocreated and added to the autocreated window
-            @returns The default camera
+			/**
+			Getter for the default camera. Default camera is a camera named "DefaultCamera" that is autocreated and added to the autocreated window
+			@returns The default camera
 			*/
-            Ogre::Camera* getDefaultCamera();
+			Ogre::Camera* getDefaultCamera();
 
 			// TODO: Here, we need some code to gather possible resolutions to switch to (to fill the GUI with options).
 			/// Screen size setter. Please use this instead of the Ogre::RenderWindow methods, as it broadcasts a message about the change
@@ -186,9 +186,9 @@ namespace Opde {
 
 		protected:
 
-            virtual bool init();
-            virtual void bootstrapFinished();
-            virtual void shutdown();
+			virtual bool init();
+			virtual void bootstrapFinished();
+			virtual void shutdown();
 
 			virtual void loopStep(float deltaTime);
 
