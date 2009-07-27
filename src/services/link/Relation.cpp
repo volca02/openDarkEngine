@@ -475,6 +475,30 @@ namespace Opde {
 	}
 	
 	// --------------------------------------------------------------------------
+	link_id_t Relation::createWithValue(int from, int to, const DVariant& value)  {
+		// Request an id. First let's see what concreteness we have
+		unsigned int cidx = 0;
+
+		if (from >= 0 || to >= 0)
+			cidx = 1;
+
+		link_id_t id = getFreeLinkID(cidx);
+
+		LinkPtr newl(new Link(id, from, to, mID));
+
+		mStorage->createWithValue(id, value);
+
+		// Last, insert the link to the database and notify
+		_addLink(newl);
+
+		LinkPtr ilink = createInverseLink(newl);
+
+		mInverse->_addLink(ilink);
+
+		return id;
+	}
+	
+	// --------------------------------------------------------------------------
 	void Relation::remove(link_id_t id) {
 		// A waste I smell here. Maybe there will be a difference in Broadcasts later
 		_removeLink(id);

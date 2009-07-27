@@ -461,7 +461,7 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void InheritService::_createMPLink(int objID, int srcID, int priority) {
-		mMetaPropRelation->createWithValue(objID, srcID, DVariant(m));
+		mMetaPropRelation->createWithValue(objID, srcID, DVariant(priority));
 	}
 
 	//-------------------------- Factory implementation

@@ -112,6 +112,17 @@ namespace Opde {
 			* @todo Some relations could be limited to one link between obect pair(!). This could be
 			*/
 			link_id_t createWithValues(int from, int to, const DVariantStringMap& dataValues);
+			
+			/** Creates a new link, returning it's ID
+			* @param from The source object ID of this link
+			* @param to The destination obect ID of this link
+			* @param values The data value to inject into the link data upon creation (only valid for single-value data)
+			* @note This version of link creation does initialize the Link data with predefined value
+			* @return the id of the newly created link (The concreteness of the link is autodetected given the from and to values (both < 0 - non concrete, otherwise concrete))
+			* @note Broadcasts the link creation message
+			* @todo Some relations could be limited to one link between obect pair(!). This could be
+			*/
+			link_id_t createWithValue(int from, int to, const DVariant& value);
 
 			/** Sets the link data field
 			* @param id The link id
