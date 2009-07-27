@@ -1,3 +1,1200 @@
+2009-06-17 17:48  volca
+
+	* src/services/config/ConfigService.cpp,
+	  src/services/config/ConfigService.h: Issue a warning whenewer an
+	  undocumented configuration key is used
+
+2009-06-17 17:33  volca
+
+	* src/base/SharedPtr.h, src/base/dyntype/DTypeDef.cpp,
+	  src/base/dyntype/DataStorage.cpp,
+	  src/base/dyntype/SingleFieldDataStorage.h,
+	  src/base/dyntype/StructDataStorage.h,
+	  src/base/file/FileGroup.cpp,
+	  src/base/loaders/ManualBinFileLoader.cpp,
+	  src/base/loaders/ManualFonFileLoader.cpp,
+	  src/base/servicemanager/OpdeServiceManager.cpp,
+	  src/bindings/DatabaseServiceBinder.cpp,
+	  src/bindings/InputServiceBinder.cpp, src/bindings/PythonStruct.h,
+	  src/main/DTypeScriptCompiler.cpp, src/main/GamePlayState.cpp,
+	  src/main/GameStateManager.cpp, src/main/OpdeDocGen.cpp,
+	  src/main/PLDefScriptCompiler.cpp,
+	  src/services/database/DatabaseService.cpp,
+	  src/services/database/DatabaseService.h,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/FontDrawSource.cpp,
+	  src/services/draw/TextureAtlas.cpp,
+	  src/services/gui/GUIService.cpp,
+	  src/services/inherit/CachedInheritor.cpp,
+	  src/services/inherit/InheritService.cpp,
+	  src/services/input/InputService.cpp,
+	  src/services/light/LightService.cpp,
+	  src/services/link/LinkService.cpp,
+	  src/services/link/Relation.cpp,
+	  src/services/loop/LoopService.cpp,
+	  src/services/material/MaterialService.cpp,
+	  src/services/object/ObjectService.cpp,
+	  src/services/property/PropertyGroup.cpp,
+	  src/services/property/PropertyService.cpp,
+	  src/services/render/HasRefsProperty.cpp,
+	  src/services/render/ModelNameProperty.cpp,
+	  src/services/render/ModelScaleProperty.cpp,
+	  src/services/render/RenderAlphaProperty.cpp,
+	  src/services/render/RenderService.cpp,
+	  src/services/render/RenderTypeProperty.cpp,
+	  src/services/render/ZBiasProperty.cpp,
+	  src/services/worldrep/WorldRepService.cpp: Making shared_ptr's
+	  constructor explicit to avoid implicit conversions on raw
+	  pointers passed as parameters where shared ptr is expected (A
+	  hard to find mistake which is likely to happen)
+
+2009-06-01 19:55  volca
+
+	* src/services/input/InputService.cpp,
+	  src/services/input/InputService.h,
+	  src/services/loop/LoopService.h: a really simple key repeat
+	  implemented, the key off for non-on/off events removed.
+
+2009-06-01 10:17  volca
+
+	* src/bindings/LoopServiceBinder.cpp,
+	  src/bindings/LoopServiceBinder.h, src/bindings/PythonCallback.h,
+	  src/bindings/PythonStruct.h, src/bindings/bindings.cpp,
+	  src/bindings/bindings.h, src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h,
+	  src/services/loop/LoopService.cpp,
+	  src/services/loop/LoopService.h: * python error handling
+	  improvements (python side exception is being converted to C++
+	  exception now)
+	  * loop frame length getter
+	  * fixes
+
+2009-05-30 15:31  volca
+
+	* proto/python/test.py, src/bindings/DrawServiceBinder.cpp,
+	  src/bindings/DrawSheetBinder.cpp, src/bindings/DrawSheetBinder.h,
+	  src/bindings/ServiceBinder.cpp, src/services/draw/DrawBuffer.cpp,
+	  src/services/draw/DrawBuffer.h, src/services/draw/DrawCommon.cpp,
+	  src/services/draw/DrawCommon.h,
+	  src/services/draw/DrawOperation.cpp,
+	  src/services/draw/DrawOperation.h,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h, src/services/draw/DrawSheet.cpp,
+	  src/services/draw/DrawSheet.h,
+	  src/services/draw/FontDrawSource.cpp,
+	  src/services/draw/FontDrawSource.h,
+	  src/services/draw/RenderedImage.cpp,
+	  src/services/draw/RenderedImage.h,
+	  src/services/draw/RenderedLabel.cpp,
+	  src/services/draw/RenderedLabel.h,
+	  src/services/draw/TextureAtlas.cpp,
+	  src/services/draw/TextureAtlas.h: * changed the memory handling
+	  in draw service slightly
+	  * many bug fixes in the draw service
+	  * draw service python binding fixes
+	  * test.py now capable of rendering on-screen text via draw
+	  service
+
+2009-05-29 12:03  volca
+
+	* src/bindings/ConfigServiceBinder.cpp,
+	  src/bindings/DTypeBinder.cpp,
+	  src/bindings/DataFieldDescIteratorBinder.cpp,
+	  src/bindings/DatabaseServiceBinder.cpp,
+	  src/bindings/DrawServiceBinder.cpp,
+	  src/bindings/DrawSheetBinder.cpp,
+	  src/bindings/DrawSourceBinder.cpp,
+	  src/bindings/FontDrawSourceBinder.cpp,
+	  src/bindings/GUIServiceBinder.cpp,
+	  src/bindings/InheritQueryResultBinder.cpp,
+	  src/bindings/InheritServiceBinder.cpp,
+	  src/bindings/InputServiceBinder.cpp,
+	  src/bindings/InputServiceBinder.h,
+	  src/bindings/LinkQueryResultBinder.cpp,
+	  src/bindings/LinkServiceBinder.cpp,
+	  src/bindings/LoopServiceBinder.cpp,
+	  src/bindings/ObjectServiceBinder.cpp,
+	  src/bindings/PropertyServiceBinder.cpp,
+	  src/bindings/RelationBinder.cpp,
+	  src/bindings/RenderedImageBinder.cpp,
+	  src/bindings/RenderedLabelBinder.cpp,
+	  src/bindings/RootBinder.cpp, src/bindings/RootBinder.h,
+	  src/bindings/ServiceBinder.cpp, src/bindings/ServiceBinder.h,
+	  src/bindings/StringIteratorBinder.cpp,
+	  src/bindings/TextureAtlasBinder.cpp,
+	  src/bindings/TextureAtlasBinder.h, src/bindings/bindings.h,
+	  src/services/draw/DrawCommon.h,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h,
+	  src/services/draw/FontDrawSource.cpp,
+	  src/services/draw/FontDrawSource.h,
+	  src/services/draw/RenderedLabel.cpp,
+	  src/services/draw/TextureAtlas.cpp,
+	  src/services/draw/TextureAtlas.h,
+	  src/services/input/InputService.cpp,
+	  src/services/input/InputService.h: * python bindings: attribute
+	  lookup using getattro
+	  * draw service shared pointer usage fixes
+
+2009-05-28 14:28  volca
+
+	* src/bindings/InheritServiceBinder.cpp,
+	  src/bindings/TextureAtlasBinder.cpp: warning fixes
+
+2009-05-28 06:02  volca
+
+	* src/bindings/DrawServiceBinder.cpp,
+	  src/bindings/DrawServiceBinder.h: old style typeinfo for cliprect
+	  rewritten to the new style - a fix at the same time
+
+2009-05-28 00:21  patryn
+
+	* src/bindings/DrawSourceBinder.cpp,
+	  src/bindings/DrawSourceBinder.h,
+	  src/bindings/RenderedImageBinder.cpp,
+	  src/bindings/RenderedImageBinder.h,
+	  src/services/binary/config.cmake,
+	  src/services/config/config.cmake,
+	  src/services/database/config.cmake,
+	  src/services/draw/config.cmake, src/services/game/config.cmake,
+	  src/services/gui/config.cmake, src/services/inherit/config.cmake,
+	  src/services/input/config.cmake, src/services/light/config.cmake,
+	  src/services/link/config.cmake, src/services/loop/config.cmake,
+	  src/services/material/config.cmake,
+	  src/services/object/config.cmake,
+	  src/services/physics/config.cmake,
+	  src/services/property/config.cmake,
+	  src/services/render/config.cmake,
+	  src/services/script/config.cmake, src/services/sim/config.cmake,
+	  src/services/worldrep/config.cmake: Adding SVN keywords.
+
+2009-05-27 08:01  volca
+
+	* src/bindings/RenderedImageBinder.cpp,
+	  src/bindings/RenderedLabelBinder.cpp: include order fix
+	  (probably)
+
+2009-05-26 12:56  volca
+
+	* src/services/Services.cmake, src/services/binary/config.cmake,
+	  src/services/config/config.cmake,
+	  src/services/database/config.cmake,
+	  src/services/draw/config.cmake, src/services/game/config.cmake,
+	  src/services/gui/config.cmake, src/services/inherit/config.cmake,
+	  src/services/input/config.cmake, src/services/light/config.cmake,
+	  src/services/link/config.cmake, src/services/loop/config.cmake,
+	  src/services/material/config.cmake,
+	  src/services/object/config.cmake,
+	  src/services/physics/config.cmake,
+	  src/services/property/config.cmake,
+	  src/services/render/config.cmake,
+	  src/services/script/config.cmake, src/services/sim/config.cmake,
+	  src/services/worldrep/config.cmake: service files are now
+	  explicitly listed to avoid problems (this also fixes some
+	  problems with adding new files - has to be done explicitely now)
+
+2009-05-26 07:31  volca
+
+	* src/bindings/InheritServiceBinder.cpp,
+	  src/bindings/InheritServiceBinder.h,
+	  src/services/inherit/InheritService.cpp,
+	  src/services/inherit/InheritService.h,
+	  src/services/object/ObjectService.cpp,
+	  src/services/object/ObjectService.h: * introducing hasTargets for
+	  inheritService
+	  * comment fixes
+
+2009-05-25 17:53  volca
+
+	* src/bindings/DrawServiceBinder.cpp,
+	  src/bindings/DrawServiceBinder.h,
+	  src/bindings/FontDrawSourceBinder.cpp,
+	  src/bindings/FontDrawSourceBinder.h,
+	  src/bindings/RenderedLabelBinder.cpp,
+	  src/bindings/RenderedLabelBinder.h,
+	  src/bindings/TextureAtlasBinder.cpp,
+	  src/bindings/TextureAtlasBinder.h, src/bindings/bindings.h:
+	  changes (fixes, additions) to the python binding code -
+	  DrawService bindings
+
+2009-05-22 07:37  volca
+
+	* src/base/dyntype/DVariant.cpp, src/base/dyntype/DVariant.h,
+	  src/bindings/ObjectServiceBinder.cpp,
+	  src/bindings/RootBinder.cpp, src/bindings/bindings.cpp,
+	  src/bindings/bindings.h: * implementing remaining todo's in obj
+	  serv. binder
+	  * type info reworked a bit
+
+2009-05-21 13:53  volca
+
+	* src/bindings/PythonStruct.h: struct handling fix
+
+2009-05-21 13:19  volca
+
+	* src/bindings/ConfigServiceBinder.cpp,
+	  src/bindings/DTypeBinder.cpp, src/bindings/DTypeBinder.h,
+	  src/bindings/DataFieldDescIteratorBinder.cpp,
+	  src/bindings/DatabaseServiceBinder.cpp,
+	  src/bindings/DrawServiceBinder.cpp,
+	  src/bindings/DrawServiceBinder.h,
+	  src/bindings/DrawSheetBinder.cpp, src/bindings/DrawSheetBinder.h,
+	  src/bindings/DrawSourceBinder.cpp,
+	  src/bindings/DrawSourceBinder.h,
+	  src/bindings/GUIServiceBinder.cpp,
+	  src/bindings/InheritQueryResultBinder.cpp,
+	  src/bindings/InheritServiceBinder.cpp,
+	  src/bindings/InputServiceBinder.cpp,
+	  src/bindings/LinkQueryResultBinder.cpp,
+	  src/bindings/LinkServiceBinder.cpp,
+	  src/bindings/LinkServiceBinder.h,
+	  src/bindings/LoopServiceBinder.cpp,
+	  src/bindings/ObjectServiceBinder.cpp,
+	  src/bindings/PropertyServiceBinder.cpp,
+	  src/bindings/PythonStruct.h, src/bindings/RelationBinder.cpp,
+	  src/bindings/RenderedImageBinder.cpp,
+	  src/bindings/RenderedImageBinder.h, src/bindings/RootBinder.cpp,
+	  src/bindings/StringIteratorBinder.cpp, src/bindings/bindings.h:
+	  phew. A small overhaul of python bindings - exception catching,
+	  inheritance handling, type checking changes/implementations.
+	  Partially tested only
+
+2009-05-20 07:50  volca
+
+	* writedoc.py.in: Fixing the python doc generator
+
+2009-05-19 14:02  volca
+
+	* src/bindings/DrawSheetBinder.cpp: dammit! Forgot to comment out
+	  this wip code
+
+2009-05-19 13:04  volca
+
+	* src/bindings/DrawServiceBinder.cpp,
+	  src/bindings/DrawServiceBinder.h,
+	  src/bindings/DrawSheetBinder.cpp, src/bindings/DrawSheetBinder.h,
+	  src/bindings/DrawSourceBinder.cpp,
+	  src/bindings/DrawSourceBinder.h,
+	  src/bindings/RenderedImageBinder.cpp,
+	  src/bindings/RenderedImageBinder.h, src/bindings/bindings.h,
+	  src/services/draw/DrawCommon.cpp,
+	  src/services/draw/RenderedImage.h: some updates to the draw
+	  service bindings
+
+2009-05-18 13:20  volca
+
+	* src/bindings/LinkServiceBinder.cpp,
+	  src/bindings/LinkServiceBinder.h,
+	  src/services/link/LinkService.cpp,
+	  src/services/link/LinkService.h, src/services/link/Relation.cpp,
+	  src/services/link/Relation.h: inherited link query finished, not
+	  tested though. Some optimizations too
+
+2009-05-18 12:59  volca
+
+	* src/bindings/DrawServiceBinder.cpp,
+	  src/bindings/DrawSheetBinder.cpp, src/bindings/DrawSheetBinder.h,
+	  src/bindings/RootBinder.h, src/bindings/bindings.h,
+	  src/services/draw/DrawCommon.cpp,
+	  src/services/object/SymNamePropertyStorage.cpp: changes, fixes
+
+2009-05-14 13:58  volca
+
+	* src/services/link/LinkService.cpp,
+	  src/services/link/LinkService.h, src/services/link/Relation.cpp,
+	  src/services/link/Relation.h: (untested) inherited link query
+	  result
+
+2009-05-12 14:48  volca
+
+	* CMakeLists.txt, src/main/CMakeLists.txt: Some changes to the
+	  build system - spelling and comment errors, work on pythonizing
+	  the module
+
+2009-04-29 00:10  patryn
+
+	* src/main/PyRoot.cpp: Added keywords.
+
+2009-04-28 14:19  volca
+
+	* scripts/python/writedoc.py: doc gen. fix for new module names
+
+2009-04-28 12:04  volca
+
+	* CMakeLists.txt, scripts/python/tree.py,
+	  src/bindings/ConfigServiceBinder.cpp,
+	  src/bindings/DTypeBinder.cpp,
+	  src/bindings/DataFieldDescIteratorBinder.cpp,
+	  src/bindings/DatabaseServiceBinder.cpp,
+	  src/bindings/DrawServiceBinder.cpp,
+	  src/bindings/DrawSheetBinder.cpp,
+	  src/bindings/InheritQueryResultBinder.cpp,
+	  src/bindings/InheritServiceBinder.cpp,
+	  src/bindings/InputServiceBinder.cpp,
+	  src/bindings/LinkQueryResultBinder.cpp,
+	  src/bindings/LinkServiceBinder.cpp,
+	  src/bindings/LoopServiceBinder.cpp,
+	  src/bindings/ObjectServiceBinder.cpp,
+	  src/bindings/PropertyServiceBinder.cpp,
+	  src/bindings/RelationBinder.cpp, src/bindings/RootBinder.cpp,
+	  src/bindings/RootBinder.h, src/bindings/ServiceBinder.cpp,
+	  src/bindings/ServiceBinder.h,
+	  src/bindings/StringIteratorBinder.cpp, src/bindings/bindings.cpp,
+	  src/bindings/bindings.h, src/main/CMakeLists.txt,
+	  src/main/PyRoot.cpp: Standardising the python module names (opde,
+	  opde.services) to lower case as they should be.
+	  Adding an optional wrapper library to use OpenDark library as a
+	  python extension (without the loader binary, yay!). Missing a
+	  propper installer setup.py for now though
+
+2009-04-20 06:27  volca
+
+	* src/services/input/InputService.cpp: fixing endless loop in
+	  tokenize
+
+2009-04-19 19:21  volca
+
+	* src/base/logger/logger.cpp: fixing the new logger changes
+
+2009-04-18 14:27  patryn
+
+	* src/bindings/DrawServiceBinder.cpp,
+	  src/bindings/DrawServiceBinder.h,
+	  src/bindings/DrawSheetBinder.cpp, src/bindings/DrawSheetBinder.h:
+	  Added the keywords.
+
+2009-04-17 16:01  volca
+
+	* src/services/draw/DrawCommon.cpp, src/services/draw/DrawCommon.h,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h,
+	  src/services/draw/FontDrawSource.cpp,
+	  src/services/draw/TextureAtlas.cpp,
+	  src/services/draw/TextureAtlas.h: implementing a primitive
+	  resource management technique - unique resource names
+
+2009-04-17 16:00  volca
+
+	* src/base/console/ConsoleBackend.cpp,
+	  src/base/console/ConsoleBackend.h,
+	  src/base/logger/OgreOpdeLogConnector.cpp,
+	  src/base/logger/filelog.cpp, src/base/logger/filelog.h,
+	  src/base/logger/logger.cpp, src/base/logger/logger.h,
+	  src/base/logger/stdlog.cpp, src/base/logger/stdlog.h: Logging
+	  improvement - prefixes now applied to all lines if multiline
+	  logging is used
+
+2009-04-17 15:56  volca
+
+	* thirdparty/NullRenderer/NullGpuProgram.h,
+	  thirdparty/NullRenderer/NullGpuProgramManager.cpp,
+	  thirdparty/NullRenderer/NullGpuProgramManager.h,
+	  thirdparty/NullRenderer/NullHardwareBufferManager.cpp,
+	  thirdparty/NullRenderer/NullHardwareBufferManager.h,
+	  thirdparty/NullRenderer/NullHardwareIndexBuffer.cpp,
+	  thirdparty/NullRenderer/NullHardwareIndexBuffer.h,
+	  thirdparty/NullRenderer/NullHardwareVertexBuffer.cpp,
+	  thirdparty/NullRenderer/NullHardwareVertexBuffer.h,
+	  thirdparty/NullRenderer/NullHlslProgramFactory.cpp,
+	  thirdparty/NullRenderer/NullHlslProgramFactory.h,
+	  thirdparty/NullRenderer/NullRenderSystem.cpp,
+	  thirdparty/NullRenderer/NullRenderSystem.h,
+	  thirdparty/NullRenderer/NullRenderToVertexBuffer.h,
+	  thirdparty/NullRenderer/NullRenderWindow.cpp,
+	  thirdparty/NullRenderer/NullRenderWindow.h,
+	  thirdparty/NullRenderer/NullRendererDll.cpp,
+	  thirdparty/NullRenderer/NullTexture.h,
+	  thirdparty/NullRenderer/NullTextureManager.cpp,
+	  thirdparty/NullRenderer/NullTextureManager.h,
+	  thirdparty/NullRenderer/stdafx.h: adding info about the
+	  thirdparty nature of the source code
+
+2009-04-14 03:35  patryn
+
+	* src/bindings/DrawServiceBinder.cpp,
+	  thirdparty/NullRenderer/CMakeLists.txt,
+	  thirdparty/NullRenderer/NullGpuProgram.h,
+	  thirdparty/NullRenderer/NullGpuProgramManager.cpp,
+	  thirdparty/NullRenderer/NullGpuProgramManager.h,
+	  thirdparty/NullRenderer/NullHardwareBufferManager.cpp,
+	  thirdparty/NullRenderer/NullHardwareBufferManager.h,
+	  thirdparty/NullRenderer/NullHardwareIndexBuffer.cpp,
+	  thirdparty/NullRenderer/NullHardwareIndexBuffer.h,
+	  thirdparty/NullRenderer/NullHardwareVertexBuffer.cpp,
+	  thirdparty/NullRenderer/NullHardwareVertexBuffer.h,
+	  thirdparty/NullRenderer/NullHlslProgramFactory.cpp,
+	  thirdparty/NullRenderer/NullHlslProgramFactory.h,
+	  thirdparty/NullRenderer/NullRenderSystem.cpp,
+	  thirdparty/NullRenderer/NullRenderSystem.h,
+	  thirdparty/NullRenderer/NullRenderToVertexBuffer.h,
+	  thirdparty/NullRenderer/NullRenderWindow.cpp,
+	  thirdparty/NullRenderer/NullRenderWindow.h,
+	  thirdparty/NullRenderer/NullRendererDll.cpp,
+	  thirdparty/NullRenderer/NullTexture.h,
+	  thirdparty/NullRenderer/NullTextureManager.cpp,
+	  thirdparty/NullRenderer/NullTextureManager.h,
+	  thirdparty/NullRenderer/stdafx.h: Added the copyright headers.
+	  Added SVN keywords.
+	  Fixed Windows build.
+
+2009-04-09 13:52  volca
+
+	* thirdparty/CMakeLists.txt, thirdparty/NullRenderer,
+	  thirdparty/NullRenderer/CMakeLists.txt,
+	  thirdparty/NullRenderer/NullGpuProgram.h,
+	  thirdparty/NullRenderer/NullGpuProgramManager.cpp,
+	  thirdparty/NullRenderer/NullGpuProgramManager.h,
+	  thirdparty/NullRenderer/NullHardwareBufferManager.cpp,
+	  thirdparty/NullRenderer/NullHardwareBufferManager.h,
+	  thirdparty/NullRenderer/NullHardwareIndexBuffer.cpp,
+	  thirdparty/NullRenderer/NullHardwareIndexBuffer.h,
+	  thirdparty/NullRenderer/NullHardwareVertexBuffer.cpp,
+	  thirdparty/NullRenderer/NullHardwareVertexBuffer.h,
+	  thirdparty/NullRenderer/NullHlslProgramFactory.cpp,
+	  thirdparty/NullRenderer/NullHlslProgramFactory.h,
+	  thirdparty/NullRenderer/NullRenderSystem.cpp,
+	  thirdparty/NullRenderer/NullRenderSystem.h,
+	  thirdparty/NullRenderer/NullRenderToVertexBuffer.h,
+	  thirdparty/NullRenderer/NullRenderWindow.cpp,
+	  thirdparty/NullRenderer/NullRenderWindow.h,
+	  thirdparty/NullRenderer/NullRendererDll.cpp,
+	  thirdparty/NullRenderer/NullTexture.h,
+	  thirdparty/NullRenderer/NullTextureManager.cpp,
+	  thirdparty/NullRenderer/NullTextureManager.h,
+	  thirdparty/NullRenderer/stdafx.h: adding thirdparty null render
+	  system. Not working (has to be stabilised) but usable for OPDE
+	  core services, I guess.
+
+2009-04-09 13:51  volca
+
+	* src/bindings/DrawSheetBinder.cpp,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h: a few pending fixes
+
+2009-04-06 13:51  volca
+
+	* src/bindings/DrawServiceBinder.cpp,
+	  src/bindings/DrawServiceBinder.h,
+	  src/bindings/DrawSheetBinder.cpp, src/bindings/DrawSheetBinder.h:
+	  partial, not working, impl. of python bindings for draw service.
+	  Practically everything is missing still...
+
+2009-04-02 11:46  volca
+
+	* src/services/light/LightService.cpp,
+	  src/services/light/LightService.h,
+	  src/services/worldrep/WRCell.cpp, src/services/worldrep/WRCell.h,
+	  src/services/worldrep/WRTypes.h,
+	  src/services/worldrep/WorldRepService.cpp,
+	  src/services/worldrep/WorldRepService.h: Coding style
+	  rectification
+
+2009-04-02 11:17  volca
+
+	* src/bindings/bindings.h: Adding a macro for python exception
+	  guard
+
+2009-03-28 07:35  patryn
+
+	* src/bindings/InputServiceBinder.cpp,
+	  src/services/input/InputService.cpp,
+	  src/services/input/InputService.h: Renamed AddCommand to
+	  ProcessCommand.
+
+2009-03-24 06:39  patryn
+
+	* src/services/input/InputService.cpp: Fixed a typo.
+
+2009-03-24 06:37  patryn
+
+	* src/services/input/InputService.cpp,
+	  src/services/input/InputService.h: More work on the InputService.
+
+2009-03-20 12:19  volca
+
+	* src/services/draw/DrawCommon.h,
+	  src/services/draw/DrawOperation.cpp,
+	  src/services/draw/DrawOperation.h,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h, src/services/draw/DrawSheet.cpp,
+	  src/services/draw/DrawSheet.h,
+	  src/services/draw/FontDrawSource.h,
+	  src/services/draw/RenderedImage.cpp,
+	  src/services/draw/RenderedImage.h,
+	  src/services/draw/RenderedLabel.cpp,
+	  src/services/draw/RenderedLabel.h: All references to DrawService
+	  now use shared_ptr. This will allow us to automatically collect
+	  garbage
+
+2009-03-19 15:45  volca
+
+	* src/services/worldrep/WRTypes.h: Disp: First of the last two
+	  bytes contains cell motion index or something
+
+2009-03-17 12:41  volca
+
+	* src/services/worldrep/WRTypes.h: some changes by Disp. propagated
+	  to code (lightmap pointers)
+
+2009-03-17 04:18  patryn
+
+	* src/bindings/InputServiceBinder.cpp,
+	  src/services/input/InputService.cpp,
+	  src/services/input/InputService.h: Added the AddCommand method.
+
+2009-03-17 02:35  patryn
+
+	* CMakeLists.txt: Changing the version number, a new era has
+	  already begun!
+
+2009-03-17 02:29  patryn
+
+	* src/services/input/InputService.cpp,
+	  src/services/input/InputService.h: Changing the keymapping to
+	  unsigned int.
+
+2009-03-16 16:40  volca
+
+	* src/services/input/InputService.cpp,
+	  src/services/input/InputService.h: just fixing to let it compile
+	  on linux
+
+2009-03-16 11:23  patryn
+
+	* src/main/Root.cpp: Adding the build time and date to the log
+	  file.
+
+2009-03-15 08:52  patryn
+
+	* doc/src/configsvc.dot, doc/src/inputsvc.dot, doc/src/loopsvc.dot,
+	  doc/src/rendersvc.dot, doc/src/scriptsvc.dot,
+	  installer/readme.txt, src/base/FreeSpaceInfo.h,
+	  src/base/ValueChangeRequest.h, src/services/draw/DrawBuffer.cpp,
+	  src/services/draw/DrawBuffer.h, src/services/draw/DrawCommon.cpp,
+	  src/services/draw/DrawCommon.h,
+	  src/services/draw/DrawOperation.cpp,
+	  src/services/draw/DrawOperation.h,
+	  src/services/draw/DrawSheet.cpp, src/services/draw/DrawSheet.h,
+	  src/services/draw/FontDrawSource.cpp,
+	  src/services/draw/FontDrawSource.h,
+	  src/services/draw/LGPalette.h,
+	  src/services/draw/RenderedImage.cpp,
+	  src/services/draw/RenderedImage.h,
+	  src/services/draw/RenderedLabel.cpp,
+	  src/services/draw/RenderedLabel.h,
+	  src/services/draw/TextureAtlas.cpp,
+	  src/services/draw/TextureAtlas.h,
+	  src/services/sim/CMakeLists.txt, src/services/sim/SimService.cpp,
+	  src/services/sim/SimService.h, src/tools/physver.cpp: Fixed the
+	  keywords.
+
+2009-03-15 08:48  patryn
+
+	* AUTHORS, CMakeLists.txt, COPYING, ChangeLog,
+	  ConfigureChecks.cmake, Doxyfile.in, NEWS, PythonDeps.cmake,
+	  README, TODO, cmake/CEGUIConfig.cmake,
+	  cmake/FREEIMAGEConfig.cmake, cmake/OGREConfig.cmake,
+	  cmake/OISConfig.cmake, config.h.cmake, doc/ANNOUNCE,
+	  doc/DEVELOPERS, doc/src/buildmanual.bat, installer/installer.ini,
+	  installer/opde-sample.cfg, installer/opde-win.in,
+	  proto/CMakeLists.txt, proto/PHYS_SYSTEM/CMakeLists.txt,
+	  proto/PHYS_SYSTEM/readphs.cpp, proto/python/CMakeLists.txt,
+	  proto/python/test.cpp, proto/python/test.h,
+	  scripts/DebugPanel.overlay, scripts/OpdeConsole.material,
+	  scripts/OpdeConsole.overlay, scripts/OpdeDebugPanel.overlay,
+	  scripts/OpdeLoadingPanel.overlay, scripts/common.dtype,
+	  scripts/materials/thief1/skybox.material,
+	  scripts/materials/thief1/water.material,
+	  scripts/materials/thief2/skybox.material,
+	  scripts/materials/thief2/water.material, scripts/opde.fontdef,
+	  scripts/python/tree.py, scripts/shock2/skybox.material,
+	  scripts/shock2/ss2-links.pldef, scripts/shock2/ss2-props.pldef,
+	  scripts/shock2/ss2-types.dtype, scripts/shock2/water.material,
+	  scripts/thief1/skybox.material, scripts/thief1/t1-links.pldef,
+	  scripts/thief1/t1-props.pldef, scripts/thief1/t1-types.dtype,
+	  scripts/thief1/water.material, scripts/thief2/skybox.material,
+	  scripts/thief2/t2-links.pldef, scripts/thief2/t2-props.pldef,
+	  scripts/thief2/t2-types.dtype, scripts/thief2/water.material,
+	  src/CMakeLists.txt, src/base/Base.cmake, src/base/CMakeLists.txt,
+	  src/base/Callback.h, src/base/Dark/DarkDBDefs.h,
+	  src/base/Dark/DarkDBLinkDefs.h, src/base/Dark/DarkDBPropDefs.h,
+	  src/base/Dark/DarkTypes.h, src/base/Dark/fon.h,
+	  src/base/Dark/lgcolors.h, src/base/Dark/utils.h,
+	  src/base/Iterator.h, src/base/MessageSource.h,
+	  src/base/NonCopyable.h, src/base/OpdeException.cpp,
+	  src/base/OpdeException.h, src/base/OpdeSingleton.h,
+	  src/base/PrioritizedMessageSource.h, src/base/RefCounted.cpp,
+	  src/base/RefCounted.h, src/base/SharedPtr.h,
+	  src/base/StringTokenizer.h, src/base/console/CMakeLists.txt,
+	  src/base/console/ConsoleBackend.cpp,
+	  src/base/console/ConsoleBackend.h,
+	  src/base/console/ConsoleCommandListener.h,
+	  src/base/console/ConsoleFrontend.cpp,
+	  src/base/console/ConsoleFrontend.h,
+	  src/base/dyntype/CMakeLists.txt, src/base/dyntype/DTypeDef.cpp,
+	  src/base/dyntype/DTypeDef.h, src/base/dyntype/DVariant.cpp,
+	  src/base/dyntype/DVariant.h, src/base/file/CMakeLists.txt,
+	  src/base/file/File.cpp, src/base/file/File.h,
+	  src/base/file/FileGroup.cpp, src/base/file/FileGroup.h,
+	  src/base/file/darkdb.h, src/base/loaders/BinFormat.h,
+	  src/base/loaders/CMakeLists.txt, src/base/loaders/FonFormat.h,
+	  src/base/loaders/ManualBinFileLoader.cpp,
+	  src/base/loaders/ManualBinFileLoader.h,
+	  src/base/loaders/ManualFonFileLoader.cpp,
+	  src/base/loaders/ManualFonFileLoader.h,
+	  src/base/logger/CMakeLists.txt, src/base/logger/filelog.cpp,
+	  src/base/logger/filelog.h, src/base/logger/logger.cpp,
+	  src/base/logger/logger.h, src/base/logger/stdlog.cpp,
+	  src/base/logger/stdlog.h, src/base/servicemanager/CMakeLists.txt,
+	  src/base/servicemanager/OpdeService.cpp,
+	  src/base/servicemanager/OpdeService.h,
+	  src/base/servicemanager/OpdeServiceFactory.h,
+	  src/base/servicemanager/OpdeServiceManager.cpp,
+	  src/base/servicemanager/OpdeServiceManager.h,
+	  src/bindings/CMakeLists.txt,
+	  src/bindings/ConfigServiceBinder.cpp,
+	  src/bindings/ConfigServiceBinder.h,
+	  src/bindings/LinkServiceBinder.cpp,
+	  src/bindings/LinkServiceBinder.h,
+	  src/bindings/RelationBinder.cpp, src/bindings/RelationBinder.h,
+	  src/bindings/ServiceBinder.cpp, src/bindings/ServiceBinder.h,
+	  src/bindings/bindings.cpp, src/bindings/bindings.h,
+	  src/compat/compat.h, src/compat/integers.h, src/compat/vector3.h,
+	  src/main/CMakeLists.txt, src/main/CustomImageCodec.cpp,
+	  src/main/CustomImageCodec.h, src/main/DTypeScriptCompiler.cpp,
+	  src/main/DTypeScriptCompiler.h, src/main/DTypeScriptLoader.cpp,
+	  src/main/DTypeScriptLoader.h, src/main/GameLoadState.cpp,
+	  src/main/GameLoadState.h, src/main/GamePlayState.cpp,
+	  src/main/GamePlayState.h, src/main/GameState.cpp,
+	  src/main/GameState.h, src/main/GameStateManager.cpp,
+	  src/main/GameStateManager.h, src/main/Opde.cpp,
+	  src/main/PLDefScriptCompiler.cpp, src/main/PLDefScriptCompiler.h,
+	  src/main/PLDefScriptLoader.cpp, src/main/PLDefScriptLoader.h,
+	  src/scenemanager/CMakeLists.txt,
+	  src/scenemanager/DarkBspNode.cpp, src/scenemanager/DarkBspNode.h,
+	  src/scenemanager/DarkBspPrerequisites.h,
+	  src/scenemanager/DarkBspTree.cpp, src/scenemanager/DarkBspTree.h,
+	  src/scenemanager/DarkConvexPolygon.cpp,
+	  src/scenemanager/DarkConvexPolygon.h,
+	  src/scenemanager/DarkPortal.cpp, src/scenemanager/DarkPortal.h,
+	  src/scenemanager/DarkPortalFrustum.cpp,
+	  src/scenemanager/DarkPortalFrustum.h,
+	  src/scenemanager/DarkSceneManager.cpp,
+	  src/scenemanager/DarkSceneManager.h,
+	  src/scenemanager/DarkSceneNode.cpp,
+	  src/scenemanager/DarkSceneNode.h, src/services/CMakeLists.txt,
+	  src/services/ServiceCommon.h, src/services/Services.cmake,
+	  src/services/binary/BinaryService.cpp,
+	  src/services/binary/BinaryService.h,
+	  src/services/binary/CMakeLists.txt,
+	  src/services/config/CMakeLists.txt,
+	  src/services/config/ConfigService.cpp,
+	  src/services/config/ConfigService.h,
+	  src/services/database/CMakeLists.txt,
+	  src/services/database/DatabaseService.cpp,
+	  src/services/database/DatabaseService.h,
+	  src/services/game/CMakeLists.txt,
+	  src/services/game/GameService.cpp,
+	  src/services/game/GameService.h,
+	  src/services/inherit/ArchetypeInheritor.cpp,
+	  src/services/inherit/ArchetypeInheritor.h,
+	  src/services/inherit/CMakeLists.txt,
+	  src/services/inherit/CachedInheritor.cpp,
+	  src/services/inherit/CachedInheritor.h,
+	  src/services/inherit/InheritCommon.h,
+	  src/services/inherit/InheritService.cpp,
+	  src/services/inherit/InheritService.h,
+	  src/services/inherit/NeverInheritor.cpp,
+	  src/services/inherit/NeverInheritor.h,
+	  src/services/input/CMakeLists.txt,
+	  src/services/input/InputEventMapper.cpp,
+	  src/services/input/InputEventMapper.h,
+	  src/services/input/InputService.cpp,
+	  src/services/input/InputService.h,
+	  src/services/link/CMakeLists.txt, src/services/link/LinkCommon.h,
+	  src/services/link/LinkService.cpp,
+	  src/services/link/LinkService.h, src/services/link/Relation.cpp,
+	  src/services/link/Relation.h, src/services/loop/CMakeLists.txt,
+	  src/services/loop/LoopService.cpp,
+	  src/services/loop/LoopService.h,
+	  src/services/property/CMakeLists.txt,
+	  src/services/property/PropertyCommon.h,
+	  src/services/property/PropertyGroup.cpp,
+	  src/services/property/PropertyGroup.h,
+	  src/services/property/PropertyService.cpp,
+	  src/services/property/PropertyService.h,
+	  src/services/render/CMakeLists.txt,
+	  src/services/render/RenderService.cpp,
+	  src/services/render/RenderService.h,
+	  src/services/worldrep/CMakeLists.txt,
+	  src/services/worldrep/LightmapAtlas.cpp,
+	  src/services/worldrep/LightmapAtlas.h,
+	  src/services/worldrep/WRCell.cpp, src/services/worldrep/WRCell.h,
+	  src/services/worldrep/WRCommon.h,
+	  src/services/worldrep/WRTypes.h,
+	  src/services/worldrep/WorldRepService.cpp,
+	  src/services/worldrep/WorldRepService.h,
+	  src/tools/CMakeLists.txt, src/tools/DarkFontConverter.cpp,
+	  src/tools/DarkFontConverter.h, src/tools/chunk.cpp,
+	  src/tools/logging.h, src/tools/meshconvert.cpp,
+	  src/tools/meshconvert.h: Fixed the EOL styles.
+
+2009-03-15 08:28  patryn
+
+	* CMakeLists.txt, src/base/Array.h, src/base/OpdeException.cpp,
+	  src/base/OpdeException.h, src/base/SharedPtr.h,
+	  src/base/ValueChangeRequest.h, src/base/dyntype/DTypeDef.h,
+	  src/base/dyntype/DVariant.cpp, src/base/dyntype/DVariant.h,
+	  src/base/file/File.cpp, src/base/file/FileGroup.h,
+	  src/base/loaders/ManualBinFileLoader.cpp,
+	  src/base/logger/logger.cpp, src/base/logger/logger.h,
+	  src/main/DTypeScriptCompiler.h, src/main/PLDefScriptCompiler.cpp,
+	  src/main/PLDefScriptCompiler.h, src/main/Root.cpp,
+	  src/main/Root.h, src/services/inherit/InheritCommon.h,
+	  src/services/inherit/InheritService.h,
+	  src/services/light/LightService.cpp,
+	  src/services/physics/PhysicsService.cpp,
+	  src/services/physics/PhysicsService.h,
+	  src/services/property/PropertyCommon.h,
+	  src/services/render/RenderService.cpp,
+	  src/services/render/RenderService.h,
+	  src/services/sim/SimService.cpp,
+	  src/services/worldrep/LightmapAtlas.h: Fixed copyright dates.
+
+2009-03-15 03:23  patryn
+
+	* src/services/input/InputService.cpp,
+	  src/services/input/InputService.h: Strip comments from commands
+	  Some corrections to joystick mappings
+
+2009-03-15 00:47  patryn
+
+	* src/bindings/InputServiceBinder.cpp,
+	  src/services/input/InputEventMapper.cpp,
+	  src/services/input/InputEventMapper.h,
+	  src/services/input/InputService.cpp,
+	  src/services/input/InputService.h: A major rewrite of the
+	  InputService to add the capability of parsing DarkEngine's BND
+	  files. Still very much work in progress, please have patience!
+
+2009-03-13 15:27  volca
+
+	* src/base/dyntype/DVariant.cpp, src/base/dyntype/DVariant.h:
+	  warning fix
+
+2009-03-13 14:51  volca
+
+	* src/services/draw/DrawBuffer.h,
+	  src/services/draw/DrawOperation.cpp,
+	  src/services/draw/DrawOperation.h,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h, src/services/draw/DrawSheet.cpp,
+	  src/services/draw/DrawSheet.h,
+	  src/services/draw/RenderedImage.cpp,
+	  src/services/draw/RenderedLabel.cpp: per-sheet resolution
+	  overrides implemented
+
+2009-03-11 17:31  volca
+
+	* src/services/draw/FontDrawSource.cpp,
+	  src/services/draw/FontDrawSource.h,
+	  src/services/draw/RenderedLabel.cpp,
+	  src/services/draw/RenderedLabel.h: moving text calculation
+	  routines to the font instance
+
+2009-03-11 17:26  volca
+
+	* src/services/render/RenderService.cpp: warning fixes
+
+2009-03-11 17:24  volca
+
+	* src/services/draw/DrawOperation.cpp,
+	  src/services/draw/DrawOperation.h,
+	  src/services/draw/DrawSheet.cpp, src/services/draw/DrawSheet.h,
+	  src/services/draw/RenderedImage.cpp,
+	  src/services/draw/RenderedImage.h,
+	  src/services/draw/RenderedLabel.cpp,
+	  src/services/draw/RenderedLabel.h,
+	  src/services/draw/TextureAtlas.cpp: draw source swapping enabled
+
+2009-03-10 00:38  patryn
+
+	* CMakeLists.txt, proto/python/CMakeLists.txt,
+	  src/bindings/CMakeLists.txt, src/main/CMakeLists.txt: Fixing the
+	  Pythonxx_d.lib debug build.
+
+2009-03-02 23:36  patryn
+
+	* installer/readme.txt: Fixed a typo.
+
+2009-03-02 20:53  volca
+
+	* proto/PHYS_SYSTEM/readphs.cpp, src/base/file/File.h,
+	  src/bindings/ConfigServiceBinder.cpp,
+	  src/bindings/ConfigServiceBinder.h, src/bindings/DTypeBinder.cpp,
+	  src/bindings/DTypeBinder.h,
+	  src/bindings/DataFieldDescIteratorBinder.cpp,
+	  src/bindings/DataFieldDescIteratorBinder.h,
+	  src/bindings/DatabaseServiceBinder.cpp,
+	  src/bindings/DatabaseServiceBinder.h,
+	  src/bindings/GUIServiceBinder.cpp,
+	  src/bindings/GUIServiceBinder.h,
+	  src/bindings/InheritQueryResultBinder.cpp,
+	  src/bindings/InheritQueryResultBinder.h,
+	  src/bindings/InheritServiceBinder.cpp,
+	  src/bindings/InheritServiceBinder.h,
+	  src/bindings/InputServiceBinder.cpp,
+	  src/bindings/InputServiceBinder.h,
+	  src/bindings/LinkQueryResultBinder.cpp,
+	  src/bindings/LinkQueryResultBinder.h,
+	  src/bindings/LinkServiceBinder.cpp,
+	  src/bindings/LinkServiceBinder.h,
+	  src/bindings/LoopServiceBinder.cpp,
+	  src/bindings/LoopServiceBinder.h,
+	  src/bindings/ObjectServiceBinder.cpp,
+	  src/bindings/ObjectServiceBinder.h,
+	  src/bindings/PropertyServiceBinder.cpp,
+	  src/bindings/PropertyServiceBinder.h,
+	  src/bindings/PythonStruct.h, src/bindings/RelationBinder.cpp,
+	  src/bindings/RelationBinder.h, src/bindings/RootBinder.cpp,
+	  src/bindings/RootBinder.h, src/bindings/ServiceBinder.cpp,
+	  src/bindings/ServiceBinder.h,
+	  src/bindings/StringIteratorBinder.cpp,
+	  src/bindings/StringIteratorBinder.h, src/bindings/bindings.cpp,
+	  src/bindings/bindings.h, src/main/GamePlayState.cpp,
+	  src/scenemanager/DarkCamera.h, src/scenemanager/DarkGeometry.cpp,
+	  src/scenemanager/DarkSceneManager.cpp,
+	  src/services/link/LinkCommon.h, src/services/link/Relation.cpp,
+	  src/services/loop/LoopService.cpp, src/tools/chunk.cpp,
+	  src/tools/logging.h, src/tools/meshconvert.cpp,
+	  src/tools/meshconvert.h, src/tools/physver.cpp: Phew! Got rid of
+	  a heck of a lot warnings. Nearly all related to new gcc's dislike
+	  of const char* asignments to char* variables, etc.
+
+2009-03-02 20:41  volca
+
+	* src/services/draw/RenderedLabel.cpp,
+	  src/services/draw/RenderedLabel.h: * adding segmented text
+	  addText method (for coloured labels)
+	  * comments
+
+2009-02-25 06:30  volca
+
+	* src/services/draw/DrawService.cpp: Converting to use primitives
+	  from integers.h
+
+2009-02-25 05:36  patryn
+
+	* src/services/draw/DrawCommon.h: Replace "struct" with "class" to
+	  keep VC happy.
+
+2009-02-23 20:53  volca
+
+	* src/main/PLDefScriptCompiler.cpp: default values for the
+	  different chunk versions
+
+2009-02-23 20:42  volca
+
+	* src/main/GamePlayState.cpp: oops. Testing code-commented
+
+2009-02-23 17:05  volca
+
+	* src/main/GamePlayState.cpp, src/main/GamePlayState.h,
+	  src/services/draw/DrawBuffer.cpp,
+	  src/services/draw/DrawCommon.cpp, src/services/draw/DrawCommon.h,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h,
+	  src/services/draw/RenderedLabel.cpp,
+	  src/services/draw/RenderedLabel.h,
+	  src/services/draw/TextureAtlas.cpp: Fixed the clipping and VBO
+	  size. Code seems stable and clips works like a charm
+
+2009-02-23 11:21  volca
+
+	* src/services/draw/DrawBuffer.cpp,
+	  src/services/draw/DrawCommon.cpp, src/services/draw/DrawCommon.h,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h,
+	  src/services/draw/FontDrawSource.cpp,
+	  src/services/draw/RenderedImage.cpp,
+	  src/services/draw/RenderedLabel.cpp,
+	  src/services/draw/TextureAtlas.cpp: * Changed the DrawQuad to not
+	  contain duplicities
+	  * Font's Glyphs sorting, and atlas draw source sorting in
+	  general, was fixed
+
+2009-02-19 20:08  volca
+
+	* src/services/draw/RenderedImage.cpp,
+	  src/services/draw/RenderedImage.h,
+	  src/services/draw/RenderedLabel.cpp: clipping implemented (but
+	  not tested yet)
+
+2009-02-19 18:09  volca
+
+	* src/main/GamePlayState.cpp: some changes to the testing code
+
+2009-02-19 18:07  volca
+
+	* src/services/draw/DrawService.cpp,
+	  src/services/draw/RenderedLabel.cpp: Palette and character
+	  spacing fixes. Works ok now for explicit palette AA fonts now
+
+2009-02-17 19:57  volca
+
+	* src/main/GamePlayState.cpp, src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h, src/services/draw/LGPalette.h:
+	  AA palette added (it currently makes things worse, sure, but
+	  we'll fix that).
+	  And commenting out the testing code again (some rushy commit I
+	  made put it in accidentally).
+
+2009-02-17 19:55  volca
+
+	* src/base/loaders/ManualBinFileLoader.cpp, src/main/Root.cpp,
+	  src/main/Root.h, src/services/input/InputEventMapper.h,
+	  src/services/link/LinkCommon.h,
+	  src/services/property/PropertyCommon.h,
+	  src/services/render/RenderService.h: some more warning fixes
+
+2009-02-17 19:22  volca
+
+	* src/base/dyntype/DTypeDef.h, src/base/file/FileGroup.h,
+	  src/main/DTypeScriptCompiler.h, src/main/GamePlayState.cpp,
+	  src/main/PLDefScriptCompiler.h,
+	  src/services/draw/DrawOperation.cpp,
+	  src/services/draw/DrawService.cpp,
+	  src/services/inherit/InheritCommon.h,
+	  src/services/inherit/InheritService.h: fixing some warnings and
+	  an overlooked typo
+
+2009-02-17 18:37  volca
+
+	* src/services/draw/DrawBuffer.cpp,
+	  src/services/draw/DrawOperation.cpp,
+	  src/services/draw/DrawOperation.h,
+	  src/services/draw/RenderedImage.cpp,
+	  src/services/draw/RenderedImage.h,
+	  src/services/draw/RenderedLabel.cpp,
+	  src/services/draw/RenderedLabel.h: positionChanged removed (not a
+	  fitting name any more). _markDirty now the one
+
+2009-02-16 21:05  volca
+
+	* src/main/GamePlayState.cpp, src/main/GamePlayState.h: some
+	  testing code added (commented out for now)
+
+2009-02-16 21:02  volca
+
+	* src/services/draw/DrawCommon.cpp, src/services/draw/DrawCommon.h,
+	  src/services/draw/DrawOperation.cpp,
+	  src/services/draw/DrawOperation.h,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h, src/services/draw/DrawSheet.cpp,
+	  src/services/draw/DrawSheet.h,
+	  src/services/draw/FontDrawSource.cpp,
+	  src/services/draw/FontDrawSource.h,
+	  src/services/draw/LGPalette.h,
+	  src/services/draw/RenderedImage.cpp,
+	  src/services/draw/RenderedImage.h,
+	  src/services/draw/RenderedLabel.cpp,
+	  src/services/draw/RenderedLabel.h,
+	  src/services/draw/TextureAtlas.cpp,
+	  src/services/draw/TextureAtlas.h: Font rendering implemented and
+	  seems to be working
+
+2009-02-16 20:59  volca
+
+	* src/base/OpdeException.cpp, src/base/OpdeException.h,
+	  src/base/logger/logger.cpp, src/base/logger/logger.h: warning
+	  fixes - converting to const char as intended anyway
+
+2009-02-16 20:58  volca
+
+	* src/base/file/File.cpp, src/base/file/File.h: simple line reading
+	  ability added (untested)
+
+2009-02-16 20:57  volca
+
+	* src/services/physics/PhysicsService.cpp: Does not work for
+	  default ode versions on linux distros I live on, so commenting
+	  out till SiO2 picks it up
+
+2009-02-13 01:24  patryn
+
+	* src/services/draw/DrawCommon.h: Added a missing header that broke
+	  the build.
+
+2009-02-12 16:29  volca
+
+	* src/services/draw/DrawService.cpp,
+	  src/services/draw/FontDrawSource.h,
+	  src/services/draw/TextureAtlas.cpp: various fixes
+
+2009-02-12 16:12  volca
+
+	* src/services/draw/DrawCommon.h,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h,
+	  src/services/draw/FontDrawSource.cpp,
+	  src/services/draw/FontDrawSource.h,
+	  src/services/draw/TextureAtlas.cpp,
+	  src/services/draw/TextureAtlas.h: Some untested font loading code
+
+2009-02-11 13:58  volca
+
+	* src/tools/physver.cpp: fixin the help
+
+2009-02-11 13:37  volca
+
+	* src/services/draw/DrawCommon.h,
+	  src/services/draw/DrawOperation.cpp,
+	  src/services/draw/FontDrawSource.cpp,
+	  src/services/draw/FontDrawSource.h,
+	  src/services/draw/TextureAtlas.cpp,
+	  src/services/draw/TextureAtlas.h: Font support basics (no
+	  rendering/loading yet)
+
+2009-02-06 06:57  volca
+
+	* src/tools/physver.cpp: Copyright year fix (I always forget about
+	  this one!)
+
+2009-02-06 06:56  volca
+
+	* src/tools/CMakeLists.txt, src/tools/physver.cpp: Phys_system
+	  version harversting tool
+
+2009-02-03 12:01  volca
+
+	* src/services/draw/DrawCommon.h,
+	  src/services/draw/DrawOperation.cpp,
+	  src/services/draw/DrawOperation.h: ClipRect basics introduced
+
+2009-01-31 01:43  patryn
+
+	* src/base/FreeSpaceInfo.h: Fixed the copyright year.
+
+2009-01-30 13:31  volca
+
+	* src/base/FreeSpaceInfo.h, src/main/GameStateManager.cpp,
+	  src/main/Root.cpp, src/services/draw/DrawBuffer.cpp,
+	  src/services/draw/DrawBuffer.h, src/services/draw/DrawCommon.cpp,
+	  src/services/draw/DrawCommon.h,
+	  src/services/draw/DrawOperation.cpp,
+	  src/services/draw/DrawOperation.h,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h, src/services/draw/DrawSheet.cpp,
+	  src/services/draw/DrawSheet.h,
+	  src/services/draw/RenderedImage.cpp,
+	  src/services/draw/RenderedImage.h,
+	  src/services/draw/TextureAtlas.cpp,
+	  src/services/draw/TextureAtlas.h,
+	  src/services/render/RenderService.cpp: new, now working, version
+	  of draw service. Added atlas support etc.
+
+2009-01-30 13:28  volca
+
+	* src/services/worldrep/LightmapAtlas.h: freespaceinfo externalized
+
+2009-01-30 13:26  volca
+
+	* src/services/Services.cmake: draw service added to services
+
+2009-01-30 13:25  volca
+
+	* src/base/Array.h: a stl-like size getter (without the get part)
+
+2009-01-30 13:23  volca
+
+	* src/services/light/LightService.cpp: leak fix
+
+2009-01-30 13:22  volca
+
+	* src/scenemanager/DarkSceneManager.cpp: A fix for infinite
+	  boundary movables attached to root - this allows us to render the
+	  gui sheets
+
+2009-01-19 03:24  patryn
+
+	* src/services/draw/DrawCommon.cpp,
+	  src/services/draw/DrawService.cpp: Added a couple of returns to
+	  keep the VC build happy.
+
+2009-01-18 21:34  volca
+
+	* src/base/Array.h, src/base/SharedPtr.h, src/tools/chunk.cpp: Some
+	  random fixes
+
+2009-01-18 21:33  volca
+
+	* src/services/draw/DrawBuffer.cpp, src/services/draw/DrawBuffer.h,
+	  src/services/draw/DrawCommon.cpp, src/services/draw/DrawCommon.h,
+	  src/services/draw/DrawOperation.cpp,
+	  src/services/draw/DrawOperation.h,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h, src/services/draw/DrawSheet.cpp,
+	  src/services/draw/DrawSheet.h: * Some DrawService improvements
+
+2009-01-18 09:15  patryn
+
+	* src/services/input/InputService.cpp: Do not split if the key
+	  event length is 1 (was causing problem with '+').
+
+2009-01-18 07:47  patryn
+
+	* src/services/input/InputService.cpp: Eat the small axis
+	  movements.
+
+2009-01-14 02:55  patryn
+
+	* installer/opde-win.in: And updated the year.
+
+2009-01-14 02:53  patryn
+
+	* installer/opde-win.in, installer/readme.txt: Display readme.txt
+	  in the installation window at the end.
+
+2009-01-13 15:40  volca
+
+	* src/services/draw/DrawOperation.cpp,
+	  src/services/draw/DrawOperation.h, src/services/draw/DrawSheet.h:
+	  Operation dirty update code path
+
+2009-01-13 14:39  volca
+
+	* src/services/draw/DrawCommon.cpp, src/services/draw/DrawCommon.h:
+	  SVN keyword substitiution
+
+2009-01-13 14:35  volca
+
+	* src/services/draw/DrawSheet.cpp,
+	  src/services/input/InputService.cpp: * Visibilty handling for
+	  sheet
+	  * Fix for InputService::fillVariables
+
+2009-01-13 14:27  volca
+
+	* ChangeLog: ChangeLog update
+
+2009-01-13 14:25  volca
+
+	* src/bindings/InheritServiceBinder.cpp,
+	  src/bindings/InputServiceBinder.cpp, src/bindings/bindings.cpp,
+	  src/main/GameStateManager.cpp, src/services/gui/GUIService.h,
+	  src/services/input/InputService.h,
+	  src/services/link/LinkService.h, src/services/link/Relation.h,
+	  src/services/property/PropertyGroup.h,
+	  src/services/worldrep/WRCell.h: Some random warning and doxy
+	  fixes (also copyright bump)
+
+2009-01-13 14:21  volca
+
+	* src/services/draw/DrawBuffer.cpp, src/services/draw/DrawBuffer.h,
+	  src/services/draw/DrawSheet.cpp, src/services/draw/DrawSheet.h:
+	  MovableObject out of DrawSheet (can be attached to scene nodes
+	  now)
+
 2009-01-13 09:52  volca
 
 	* src/services/sim/SimService.cpp, src/services/sim/SimService.h:
