@@ -67,9 +67,11 @@ int main(int argc, char**argv)
 #endif
 
     // Create application object
-    GameStateManager* man = new GameStateManager(GameType);
+    GameStateManager* man = NULL;
 
     try {
+    	man = new GameStateManager(GameType);
+
     	// if we have a mission name, supply
     	if (missionName != "")
 			man->setDesiredMissionName(missionName);
