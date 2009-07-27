@@ -210,6 +210,7 @@ namespace Opde {
 			typedef std::list<DrawSourceBasePtr> DrawSourceList;
 			typedef std::map<std::string, DrawSourcePtr> ResourceDrawSourceMap;
 
+		private:
 			SheetMap mSheetMap;
 			DrawSheetPtr mActiveSheet;
 			DrawOperation::ID mDrawOpID;
@@ -243,6 +244,8 @@ namespace Opde {
 			
 			size_t mWidth;
 			size_t mHeight;
+			
+			MessageSource<RenderServiceMsg>::ListenerID mRenderServiceCallBackID;
 		};
 
 	/// Shared pointer to the draw service

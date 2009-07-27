@@ -124,13 +124,20 @@ namespace Opde {
 		mSceneManager = mRenderService->getSceneManager();
 		mSceneManager->addRenderQueueListener(this);
 		
-		// TODO: Register as render service listener to get current resolution readings
+		mRenderServiceCallBackID = 
+			mRenderService->registerListener(
+					RenderService::ListenerPtr(
+							new ClassCallback<RenderServiceMsg, DrawService>(this, &DrawService::onRenderServiceMsg))
+				);
 	}
 
 	//------------------------------------------------------
 	void DrawService::shutdown() {
 		// get rid of the render queue listener stuff
 		mSceneManager->removeRenderQueueListener(this);
+		
+		mRenderService->unregisterListener(mRenderServiceCallBackID);
+		mRenderService.setNull(); // break the circle 
 	}
 
 	//------------------------------------------------------
