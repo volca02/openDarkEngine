@@ -461,10 +461,7 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void InheritService::_createMPLink(int objID, int srcID, int priority) {
-		// Create a new link, that will do all the work...
-		// TODO: This should be made possible in a single go
-		link_id_t lid = mMetaPropRelation->create(objID, srcID);
-		mMetaPropRelation->setLinkField(lid, "", priority);
+		mMetaPropRelation->createWithValue(objID, srcID, DVariant(m));
 	}
 
 	//-------------------------- Factory implementation
