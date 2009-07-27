@@ -137,6 +137,7 @@ namespace Opde {
 			/// Queues an atlas for rebuilding (on render queue started event)
 			void _queueAtlasForRebuild(TextureAtlas* atlas);
 
+			/// Maximal Z value (maximal Z order of the 2d draw operation)
 			static const int MAX_Z_VALUE;
 
 			/// Render queue listener related
@@ -156,7 +157,7 @@ namespace Opde {
 			void setFontPalette(Ogre::ManualFonFileLoader::PaletteType paltype, const Ogre::String& fname = "", const Ogre::String& group = "");
 			
 			/** Getter for the current actual pixel width of the screen
-			 * @todo: Once the resolution handling is ok, rewrite to use mWidth instead (the same for height)
+			 * @todo Once the resolution handling is ok, rewrite to use mWidth instead (the same for height)
 			*/
 			inline size_t getActualWidth() const { /*return mWidth;*/ return mViewport->getActualWidth(); };
 			

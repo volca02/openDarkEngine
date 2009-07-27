@@ -327,9 +327,9 @@ namespace Opde {
 			 * Example:
 			 * @code
 			 * ParentClass *castChildToParent(PyObject* obj) {
-			 * 	Object* mywrap = reinterpret_cast<ObjectBase<ChildClass*>>(obj)->mInstance;
+			 * 	ChildClass* myi = reinterpret_cast<ObjectBase<ChildClass>*>(obj)->mInstance;
 			 * 	assert(mywrap->ob_type == msType); 
-			 * 	return &mywrap->mInstance;
+			 * 	return static_cast<Parent>(myi);
 			 * }
 			 * @endcode
 			 * @see defaultPythonCaster for default impl.

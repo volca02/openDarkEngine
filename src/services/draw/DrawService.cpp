@@ -39,7 +39,7 @@
 #include <OgreMaterial.h>
 #include <OgreMaterialManager.h>
 
-// lg palette for default - moved to external definition file for readibility reasons...
+// lg palette for default - moved to external definition file for readability reasons...
 #include <LGPalette.h>
 
 using namespace std;
@@ -123,7 +123,8 @@ namespace Opde {
 
 		mSceneManager = mRenderService->getSceneManager();
 		mSceneManager->addRenderQueueListener(this);
-
+		
+		// TODO: Register as render service listener to get current resolution readings
 	}
 
 	//------------------------------------------------------
