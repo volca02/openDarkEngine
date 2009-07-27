@@ -48,6 +48,25 @@ namespace Opde {
 			*/
 			virtual bool create(int objID) = 0;
 			
+			/** Creates a default-value data with value overrides
+			 * @param objID the object id
+			 * @param dataValues map of key name -> value to set upon creation 
+			 * @see create
+			 * @note for simplicity, invalid key names are ignored 
+			 * @return true if creation wen't ok
+			 * 
+			 */
+			virtual bool createWithValues(int objID, const DVariantStringMap& dataValues);
+			
+			/** Creates a single-value data with specified value
+			 * @param objID the object id
+			 * @param values DVariant value of the created record 
+			 * @see create
+			 * @return true if creation wen't ok
+			 * 
+			 */
+			virtual bool createWithValue(int objID, const DVariant& values);
+			
 			/** Destroys data on a defined object
 			* @param objID the object to destroy the data for
 			* @return true if data was destroyed, false if something went wrong (data was not assigned to the object)

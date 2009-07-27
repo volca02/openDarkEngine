@@ -314,6 +314,9 @@ namespace Opde {
 	template<> DVariant::Type DVariantTypeTraits<std::string>::getType();
 	template<> DVariant::Type DVariantTypeTraits<Vector3>::getType();
 	template<> DVariant::Type DVariantTypeTraits<Quaternion>::getType();
+	
+	/// Map of string -> DVariant values
+	typedef std::map<std::string, DVariant> DVariantStringMap;
 }
 
 #endif

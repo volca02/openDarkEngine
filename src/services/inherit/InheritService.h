@@ -36,10 +36,10 @@
 
 namespace Opde {
 
-	struct InheritLink {
+	 struct InheritLink {
 		/// Source object ID
 		int 	srcID;
-		/// Source object ID
+		/// Destination object ID
 		int 	dstID;
 		/// The priority of this inheritance definition (It's int to help comparison with negative values)
 		int 	priority;
@@ -68,7 +68,6 @@ namespace Opde {
 
 			/// Destructor
 			virtual ~InheritService();
-
 
 			/** Registers an inheritor factory */
 			void addInheritorFactory(const InheritorFactoryPtr& factory);
@@ -144,10 +143,14 @@ namespace Opde {
 			typedef std::map< int, InheritLinkMap > InheritMap;
 
 		private:
-		            /// Service initialization - @see Service::init()
+			/** Service initialization
+			 * @see Service::init()
+			 */
 			virtual bool init();
 
-			/// Service bootstraping ended - @see Service::bootstrapFinished()
+			/** Service bootstraping ended
+			 * @see Service::bootstrapFinished()
+			 */
 			virtual void bootstrapFinished();
 
 			/** Adds an inheritance link.

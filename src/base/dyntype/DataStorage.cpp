@@ -52,6 +52,32 @@ namespace Opde {
 		return DataFieldDescIteratorPtr(new DataFieldDescListIterator(mDataFieldDescList));
 	}
 	
+	
+	// --------------------------------------------------------------------------
+	// ---------------------------- Data Storage --------------------------------
+	// --------------------------------------------------------------------------
+	bool DataStorage::createWithValues(int objID, const DVariantStringMap& dataValues) {
+		if (!create(objID))
+			return false;
+		
+		DVariantStringMap::const_iterator end = dataValues.end();
+		DVariantStringMap::const_iterator it = dataValues.begin(); 
+
+		for (; it != end; ++it) {
+			setField(objID, it->first, it->second);
+		}
+		
+		return true;
+	}
+	
+	// --------------------------------------------------------------------------
+	bool DataStorage::createWithValue(int objID, const DVariant& value) {
+		if (!create(objID))
+			return false;
+		
+		return setField(objID, "", value);
+	}
+	
 	// --------------------------------------------------------------------------
 	// --------------- Structured Data Storage (DType based) --------------------
 	// --------------------------------------------------------------------------
