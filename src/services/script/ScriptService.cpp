@@ -38,7 +38,9 @@ namespace Opde {
 	/*------------------------------------------------------*/
 	/*-------------------- ScriptService -------------------*/
 	/*------------------------------------------------------*/
-	ScriptService::ScriptService(ServiceManager* manager, const std::string& name) : Service(manager, name) {
+	template<> const size_t ServiceImpl<ScriptService>::SID = __SERVICE_ID_SCRIPT;
+	
+	ScriptService::ScriptService(ServiceManager* manager, const std::string& name) : ServiceImpl< Opde::ScriptService >(manager, name) {
 
 	};
 
@@ -147,4 +149,7 @@ namespace Opde {
 			return SERVICE_ENGINE;
 	}
 
+	const size_t ScriptServiceFactory::getSID() {
+		return ScriptService::SID;
+	}
 }

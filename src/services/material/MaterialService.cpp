@@ -49,8 +49,10 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- MaterialService ---------------*/
 	/*----------------------------------------------------*/
+	template<> const size_t ServiceImpl<MaterialService>::SID = __SERVICE_ID_MATERIAL;
+	
 	MaterialService::MaterialService(ServiceManager *manager, const std::string& name) :
-		Service(manager, name) {
+		ServiceImpl< Opde::MaterialService >(manager, name) {
 	}
 
 
@@ -769,7 +771,11 @@ namespace Opde {
 	const uint MaterialServiceFactory::getMask() {
 		return SERVICE_RENDERER | SERVICE_DATABASE_LISTENER;
 	}
-
+	
+	//------------------------------------------------------
+	const size_t MaterialServiceFactory::getSID() {
+		return MaterialService::SID;
+	}
 
 	//------------------------------------------------------
 	Service* MaterialServiceFactory::createInstance(ServiceManager* manager) {

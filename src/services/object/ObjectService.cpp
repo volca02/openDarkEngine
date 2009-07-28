@@ -40,7 +40,9 @@ namespace Opde {
 	/*------------------------------------------------------*/
 	/*-------------------- ObjectService -------------------*/
 	/*------------------------------------------------------*/
-	ObjectService::ObjectService(ServiceManager *manager, const std::string& name) : Service(manager, name),
+	template<> const size_t ServiceImpl<ObjectService>::SID = __SERVICE_ID_OBJECT;
+	
+	ObjectService::ObjectService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::ObjectService >(manager, name),
 			mAllocatedObjects(-6144, 2048),
 			mDatabaseService(NULL),
 			mObjVecVerMaj(0), // Seems to be the same for all versions
@@ -664,6 +666,10 @@ namespace Opde {
 
 	const uint ObjectServiceFactory::getMask() {
 	    return SERVICE_DATABASE_LISTENER | SERVICE_CORE;
+	}
+	
+	const size_t ObjectServiceFactory::getSID() {
+		return ObjectService::SID;
 	}
 
 }

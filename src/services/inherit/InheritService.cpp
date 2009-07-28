@@ -81,8 +81,10 @@ namespace Opde {
 	/*--------------------------------------------------------*/
 	/*--------------------- InheritService -------------------*/
 	/*--------------------------------------------------------*/
+	template<> const size_t ServiceImpl<InheritService>::SID = __SERVICE_ID_INHERIT;
+	
 	InheritService::InheritService(ServiceManager *manager, const std::string& name) :
-			Service(manager, name),
+			ServiceImpl< Opde::InheritService >(manager, name),
 			mMetaPropListenerID(0),
 			mMetaPropRelation() {
 		// Register some common factories.
@@ -477,6 +479,10 @@ namespace Opde {
 
 	const uint InheritServiceFactory::getMask() {
 		return SERVICE_LINK_LISTENER | SERVICE_CORE;
+	}
+	
+	const size_t InheritServiceFactory::getSID() {
+		return InheritService::SID;
 	}
 
 	Service* InheritServiceFactory::createInstance(ServiceManager* manager) {

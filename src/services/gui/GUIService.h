@@ -34,8 +34,9 @@
 
 namespace Opde {
 
-	/** @brief GUI service - service which handles user interfaces */
-	class OPDELIB_EXPORT GUIService : public Service, public DirectInputListener {
+	/** @brief GUI service - service which handles user interfaces
+	  * @note Currently this class does nothing useful. It should be able to handle mouse and screen input event routing for gui modes */
+	class OPDELIB_EXPORT GUIService : public ServiceImpl<GUIService>, public DirectInputListener {
 		public:
 			GUIService(ServiceManager *manager, const std::string& name);
 			virtual ~GUIService();
@@ -102,6 +103,8 @@ namespace Opde {
 			virtual const std::string& getName();
 
                         virtual const uint getMask();
+			
+			virtual const size_t getSID();
 		private:
 			static std::string mName;
 	};

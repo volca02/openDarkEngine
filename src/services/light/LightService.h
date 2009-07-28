@@ -138,7 +138,7 @@ namespace Opde {
 	 * animlights and probably dynamic lights as well, when there is a request to change the brightness/position. Static lights
 	 * don't respond to Light/Spotlight property changes, as those properties (although exposed by this service) are Dromed side
 	 * only. */
-	class OPDELIB_EXPORT LightService: public Service {
+	class OPDELIB_EXPORT LightService : public ServiceImpl<LightService> {
 		public:
 			/** Constructor
 			 * @param manager The ServiceManager that created this service
@@ -234,6 +234,8 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask();
+			
+			virtual const size_t getSID();
 		private:
 			static std::string mName;
 	};

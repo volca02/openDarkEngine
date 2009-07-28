@@ -102,7 +102,7 @@ namespace Opde {
 	* @li Mission loading will drop with DB_COMPLETE
 	* @li Savegame loading will have DB_SAVEGAME as dbtarget (so the services handling savegame related chunks will not process the mission's chunks)
 	*/
-	class OPDELIB_EXPORT DatabaseService : public Service, public PrioritizedMessageSource<DatabaseChangeMsg> {
+	class OPDELIB_EXPORT DatabaseService : public ServiceImpl<DatabaseService>, public PrioritizedMessageSource<DatabaseChangeMsg> {
 		public:
 			DatabaseService(ServiceManager *manager, const std::string& name);
 			virtual ~DatabaseService();
@@ -131,6 +131,7 @@ namespace Opde {
 			/// A free to use fine step function that calls the Progress Listener to reflect the loading progress
 			/// Use this especially in some long-to load services
 			void fineStep(int count);
+    void mLoadingStaus();
 			
 		protected:
 			virtual bool init();
@@ -174,6 +175,8 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask(); 
+			
+			virtual const size_t getSID();
 		private:
 			static std::string mName;
 	};

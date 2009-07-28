@@ -25,7 +25,8 @@
 #include "config.h"
 
 #include <iostream>
-#include <vector>
+#include <sstream>
+#include <list>
 
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
@@ -37,40 +38,46 @@ using namespace std;
 namespace Opde {
 
 	template<> ServiceManager* Singleton<ServiceManager>::ms_Singleton = 0;
+	const uint ServiceManager::msMaxServiceSID = 128;
 
 	ServiceManager::ServiceManager(uint serviceMask) :
 		mServiceFactories(),
 		mServiceInstances(),
 		mBootstrapFinished(false),
 		mGlobalServiceMask(serviceMask) {
+			
+		mServiceInstances.grow(msMaxServiceSID);
+		mServiceFactories.grow(msMaxServiceSID);
+		
+		for (size_t idx = 0; idx < msMaxServiceSID; ++idx)
+			mServiceFactories[idx] = NULL;
 	}
 
 	ServiceManager::~ServiceManager() {
 		// Will release all services
 		LOG_DEBUG("ServiceManager: Releasing all services");
 
-		ServiceInstanceMap::iterator s_it;
-
-		s_it = mServiceInstances.begin();
-
 		LOG_INFO("ServiceManager: Shutting down all services");
 
 		// Shutdown loop. Resolver for some possible problems
-		for (; s_it != mServiceInstances.end(); ++s_it) {
-			LOG_INFO(" * Shutting down service '%s'", s_it->first.c_str());
-			s_it->second->shutdown();
+		for (size_t idx = 0; idx < mServiceInstances.size(); ++idx) {
+			ServicePtr& sp = mServiceInstances[idx];
+			
+			if (!sp.isNull()) {
+				LOG_INFO("ServiceManager: * Shutting down service '%s'", sp->getName().c_str());
+				sp->shutdown();
+			}
 		}
 
-		s_it = mServiceInstances.begin();
 		LOG_INFO("ServiceManager: Releasing all services");
 
-		for (; s_it != mServiceInstances.end(); ++s_it) {
-			LOG_INFO(" * Releasing service %s (ref. count %d)", s_it->first.c_str(), s_it->second.getRefCount());
-
-			/*if (s_it->second.getRefCount() > 0)
-				LOG_FATAL(" * Service '%s' has reference count > 1. It won't probably be released immediately!", s_it->first.c_str());*/
-
-			s_it->second.setNull();
+		for (size_t idx = 0; idx < mServiceInstances.size(); ++idx) {
+			ServicePtr& sp = mServiceInstances[idx];
+			
+			if (!sp.isNull()) {
+				LOG_INFO("ServiceManager: * Releasing service '%s'", sp->getName().c_str());
+				sp.setNull();
+			}
 		}
 
 		mServiceInstances.clear();
@@ -79,10 +86,8 @@ namespace Opde {
 		// delete all factories registered
 
 		LOG_DEBUG("ServiceManager: Deleting all service factories");
-		ServiceFactoryMap::iterator factory_it = mServiceFactories.begin();
-
-		for (; factory_it != mServiceFactories.end(); ++factory_it) {
-			delete factory_it->second;
+		for (size_t idx = 0; idx < mServiceFactories.size(); ++idx) {
+			delete mServiceFactories[idx];
 		}
 
 		mServiceFactories.clear();
@@ -100,105 +105,115 @@ namespace Opde {
 
 	//------------------ Main implementation ------------------
 	void ServiceManager::addServiceFactory(ServiceFactory* factory) {
-		mServiceFactories.insert(make_pair(factory->getName(), factory));
+		LOG_INFO("ServiceManager: Registered service factory for %s (%d)", factory->getName().c_str(), factory->getSID());
+		
+		size_t fsid = factory->getSID();
+		
+		if (fsid > msMaxServiceSID)
+			OPDE_EXCEPT("ServiceFactory SID beyond maximum for " + factory->getName(), "ServiceManager::addServiceFactory");
+			
+		if (mServiceFactories[fsid] != NULL)
+			OPDE_EXCEPT("ServiceFactory SID already taken by " + mServiceFactories[fsid]->getName() + " could not issue it to " + factory->getName(), "ServiceManager::addServiceFactory");
+		
+		mServiceFactories[fsid] = factory;
 	}
 
-	ServiceFactory* ServiceManager::findFactory(const std::string& name) {
-
-		ServiceFactoryMap::const_iterator factory_it = mServiceFactories.find(name);
-
-		if (factory_it != mServiceFactories.end()) {
-			return factory_it->second;
-		} else {
-			return NULL;
-		}
+	ServiceFactory* ServiceManager::findFactory(size_t sid) {
+		return mServiceFactories[sid];
 	}
 
-	ServicePtr ServiceManager::findService(const std::string& name) {
-
-		ServiceInstanceMap::iterator service_it = mServiceInstances.find(name);
-
-		if (service_it != mServiceInstances.end()) {
-			return service_it->second;
-		} else {
-			return ServicePtr();
-		}
+	ServicePtr ServiceManager::findService(size_t sid) {
+		return mServiceInstances[sid];
 	}
 
-	ServicePtr ServiceManager::createInstance(const std::string& name) {
-		ServiceFactory* factory = findFactory(name);
-
-        LOG_DEBUG("ServiceManager: Creating service %s", name.c_str());
+	ServicePtr ServiceManager::createInstance(size_t sid) {
+		ServiceFactory* factory = mServiceFactories[sid];
 
 		if (factory != NULL) { // Found a factory for the Service name
+			size_t fsid = factory->getSID();
+			assert(fsid == sid);
+			
+			LOG_INFO("ServiceManager: Creating service %s (%d)", factory->getName().c_str(), sid);
+			
 			if (!(factory->getMask() & mGlobalServiceMask))
-			    OPDE_EXCEPT("Initialization of service " + factory->getName() + " was not permitted by mask. Please consult OPDE log for details", "ServiceManager::createInstance");
+			    OPDE_EXCEPT("Creation of service " + factory->getName() + " was not permitted by mask. Please consult OPDE log for details", "ServiceManager::createInstance");
 
 			ServicePtr ns(factory->createInstance(this));
-			mServiceInstances.insert(make_pair(factory->getName(), ns));
+			
+			if(!mServiceInstances[fsid].isNull())
+				LOG_INFO("ServiceManager: Service already created?! (%s (%d))", factory->getName().c_str(), sid);
+			
+			assert(mServiceInstances[fsid].isNull());
+			mServiceInstances[fsid] = ns;
 
 			if (!ns->init()) {
 			    OPDE_EXCEPT("Initialization of service " + factory->getName() + " failed. Fatal. Please consult OPDE log for details", "ServiceManager::createInstance");
 			}
 
 			if (mBootstrapFinished) // Bootstrap already over, call the after-bootstrap init too
-                ns->bootstrapFinished();
+				ns->bootstrapFinished();
 
 			return ns;
 		} else {
-			OPDE_EXCEPT(string("Factory named ") + name + string(" not found"), "OpdeServiceManager::getService");
+			std::ostringstream oss;
+			oss << "ServiceFactory with ID " << sid << string(" not found");
+			
+			OPDE_EXCEPT(oss.str(), "OpdeServiceManager::getService");
 		}
 	}
 
-	ServicePtr ServiceManager::getService(const std::string& name) {
-		ServicePtr service = findService(name);
+	ServicePtr ServiceManager::getService(size_t sid) {
+		ServicePtr service = mServiceInstances[sid];
 
 		if (!service.isNull())
 			return service;
 		else {
-    		LOG_DEBUG("ServiceManager: Service instance for %s not found, will create.", name.c_str());
-			return createInstance(name);
+			LOG_DEBUG("ServiceManager: Service instance for %d not found, will create.", sid);
+			return createInstance(sid);
 		}
 	}
 
 	void ServiceManager::createByMask(uint mask) {
-		ServiceFactoryMap::iterator factory_it = mServiceFactories.begin();
-
-		for (; factory_it != mServiceFactories.end(); ++factory_it) {
-
+		for (size_t idx = 0; idx < mServiceInstances.size(); ++idx) {
+			ServiceFactory* factory = mServiceFactories[idx];
+			
+			if (!factory)
+				continue;
+			
 			// if the mask fits and the service is permitted by global service mask
-			if ((factory_it->second->getMask() & mask) && (factory_it->second->getMask() & mGlobalServiceMask)) {
-			    ServicePtr service = getService(factory_it->second->getName());
+			if ((factory->getMask() & mask) && (factory->getMask() & mGlobalServiceMask)) {
+			    ServicePtr service = getService(factory->getSID());
 			}
 		}
 	}
 
 	void ServiceManager::bootstrapFinished() {
-	    if (mBootstrapFinished) // just do this once
-            return;
+		if (mBootstrapFinished) // just do this once
+			return;
 
-	    // Here's a catch: The services can create other services while bootstrapping
-	    // process is performed. That means the service map can be modified,
-	    // and so it's not guaranteed that the bootstrap will be called on those.
-	    // For a fix, we set the mBootstrapFinished flag in advance, which means
-	    // createInstance will also bootstrap
+		// Here's a catch: The services can create other services while bootstrapping
+		// process is performed. That means the service map can be modified,
+		// and so it's not guaranteed that the bootstrap will be called on those.
+		// For a fix, we set the mBootstrapFinished flag in advance, which means
+		// createInstance will also bootstrap
 
-	    std::vector<ServicePtr> toBootstrap;
+		std::list<ServicePtr> toBootstrap;
 
-	    ServiceInstanceMap::iterator it = mServiceInstances.begin();
+		for (size_t idx = 0; idx < mServiceInstances.size() ; ++idx ) {
+			ServicePtr& sp = mServiceInstances[idx];
+		
+			if (!sp.isNull())
+				toBootstrap.push_back(sp);
+		}
 
-	    for (; it != mServiceInstances.end() ; ++it )
-	    	toBootstrap.push_back(it->second);
+		mBootstrapFinished = true;
 
-	    mBootstrapFinished = true;
+		std::list<ServicePtr>::iterator tit = toBootstrap.begin();
 
-	    std::vector<ServicePtr>::iterator tit = toBootstrap.begin();
-
-        for (; tit != toBootstrap.end() ; ++tit ) {
-            LOG_DEBUG("ServiceManager: Bootstrap finished: informing %s", (*tit)->getName().c_str());
-
-            (*tit)->bootstrapFinished();
-        };
+		for (; tit != toBootstrap.end() ; ++tit ) {
+			LOG_DEBUG("ServiceManager: Bootstrap finished: informing %s", (*tit)->getName().c_str());
+			(*tit)->bootstrapFinished();
+		};
 	}
 
 }

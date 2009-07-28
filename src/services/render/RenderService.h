@@ -135,7 +135,7 @@ namespace Opde {
 	* Some preliminary notes: VHot will probably be converted to TagPoints somehow
 	* The 0,0,0 bug will reveal itself here too, maybe. This is caused by default object coordinates being 0,0,0 and we have to wait for Position prop message to come in order to move the node
 	*/
-	class OPDELIB_EXPORT RenderService : public Service, public MessageSource< RenderServiceMsg >, public LoopClient {
+	class OPDELIB_EXPORT RenderService : public ServiceImpl<RenderService>, public MessageSource< RenderServiceMsg >, public LoopClient {
 		friend class ModelNameProperty; // so it can set object model name
 		public:
 			RenderService(ServiceManager *manager, const std::string& name);
@@ -320,6 +320,8 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const unsigned int getMask() { return SERVICE_PROPERTY_LISTENER | SERVICE_RENDERER; };
+			
+			virtual const size_t getSID();
 
 		private:
 			static std::string mName;

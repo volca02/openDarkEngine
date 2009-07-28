@@ -34,7 +34,9 @@ namespace Opde {
     /*-----------------------------------------------------*/
     /*-------------------- GUIService ---------------------*/
     /*-----------------------------------------------------*/
-    GUIService::GUIService(ServiceManager *manager, const std::string& name) : Service(manager, name),
+    template<> const size_t ServiceImpl<GUIService>::SID = __SERVICE_ID_GUI;
+    
+    GUIService::GUIService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::GUIService >(manager, name),
 			mInputSrv(NULL),
 			mRenderSrv(NULL),
 			mActive(false),
@@ -150,23 +152,27 @@ namespace Opde {
 		// TODO: Inform the manager about the resolution change
 	}
 
-    //-------------------------- Factory implementation
-    std::string GUIServiceFactory::mName = "GUIService";
+	//-------------------------- Factory implementation
+	std::string GUIServiceFactory::mName = "GUIService";
 
-    GUIServiceFactory::GUIServiceFactory() : ServiceFactory() {
+	GUIServiceFactory::GUIServiceFactory() : ServiceFactory() {
 		ServiceManager::getSingleton().addServiceFactory(this);
-    };
+	};
 
-    const std::string& GUIServiceFactory::getName() {
+	const std::string& GUIServiceFactory::getName() {
 		return mName;
-    }
+	}
 
-        const uint GUIServiceFactory::getMask() {
-                return SERVICE_RENDERER;
-        }
+	const uint GUIServiceFactory::getMask() {
+		return SERVICE_RENDERER;
+	}
 
-    Service* GUIServiceFactory::createInstance(ServiceManager* manager) {
+	const size_t GUIServiceFactory::getSID() {
+		return GUIService::SID;
+	}
+
+	Service* GUIServiceFactory::createInstance(ServiceManager* manager) {
 		return new GUIService(manager, mName);
-    }
+	}
 
 }

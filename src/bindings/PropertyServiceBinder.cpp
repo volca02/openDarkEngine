@@ -310,7 +310,7 @@ namespace Opde
 
 			if (object != NULL)
 			{
-				object->mInstance = static_pointer_cast<PropertyService>(ServiceManager::getSingleton().getService(msName));
+				object->mInstance = GET_SERVICE(PropertyService);
 			}
 			return (PyObject *)object;
 		}

@@ -29,6 +29,7 @@
 #include "OpdeServiceFactory.h"
 #include "OpdeService.h"
 #include "OpdeSingleton.h"
+#include "Array.h"
 #include <map>
 
 namespace Opde {
@@ -42,19 +43,21 @@ namespace Opde {
 	*/
 	class OPDELIB_EXPORT ServiceManager : public Singleton<ServiceManager>, public NonCopyable {
 		private:
-			typedef std::map< std::string, ServiceFactory* > ServiceFactoryMap;
-			typedef std::map< std::string, ServicePtr > ServiceInstanceMap;
+			typedef SimpleArray<ServiceFactory*> ServiceFactoryMap;
+			typedef SimpleArray<ServicePtr> ServiceInstanceMap;
 
 			ServiceFactoryMap mServiceFactories;
 			ServiceInstanceMap mServiceInstances;
 
 			bool mBootstrapFinished;
 
-			ServiceFactory* findFactory(const std::string& name);
-			ServicePtr findService(const std::string& name);
-			ServicePtr createInstance(const std::string& name);
+			ServiceFactory* findFactory(size_t sid);
+			ServicePtr findService(size_t sid);
+			ServicePtr createInstance(size_t sid);
 
 			const uint mGlobalServiceMask;
+			
+			static const uint msMaxServiceSID;
 
 		public:
 			ServiceManager(uint serviceMask);
@@ -73,21 +76,21 @@ namespace Opde {
 			* @param name The service type name (The name returned by the ServiceFactory)
 			* @see ServiceFactory
 			*/
-			ServicePtr getService(const std::string& name);
+			ServicePtr getService(size_t sid);
 
-			/** Mass creation of services. All services which will have nonzero '&' operation with the factories service mask will be created.
+			/** Mass creation of services. All services which will have nonzero binary and operation with the factorie's service mask will be created.
 			* Typical usage: Creation of listeners
 			* @param mask The mask to use */
 			void createByMask(uint mask);
 
-            /** Inform the services that bootstraping has finished
-            */
+			/** Inform the services that bootstraping has finished
+			*/
 			void bootstrapFinished();
 	};
 
 
-// Shortcut to service getter... Once all services are given a unique ID as well, we can redo this to getServiceByID(ID_##sname) or alike
-#define GET_SERVICE(sname) static_pointer_cast<sname>(ServiceManager::getSingleton().getService(#sname));
+// Shortcut to service getter... Once all services are given a unique ID as well, we can redo this to getServiceByID(ID_##__sname__) or alike
+#define GET_SERVICE(__sname__) static_pointer_cast<__sname__>(ServiceManager::getSingleton().getService(__sname__::SID));
 
 }
 

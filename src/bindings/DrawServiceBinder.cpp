@@ -425,7 +425,7 @@ namespace Opde {
 			Object* object = construct(&msType);
 
 			if (object != NULL) {
-				object->mInstance = static_pointer_cast<DrawService>(ServiceManager::getSingleton().getService(msName));
+				object->mInstance = GET_SERVICE(DrawService);
 			}
 
 			return (PyObject *)object;

@@ -34,6 +34,29 @@ This file contains some global definitions common to all services
 
 // TODO: Redo these constants to const int ....,
 
+// -------------------------------------
+// ----------- Service ID's  -----------
+// -------------------------------------
+#define __SERVICE_ID_BINARY 1
+#define __SERVICE_ID_CONFIG 2
+#define __SERVICE_ID_DATABASE 3
+#define __SERVICE_ID_DRAW 4
+#define __SERVICE_ID_GAME 5
+#define __SERVICE_ID_GUI 6
+#define __SERVICE_ID_INHERIT 7
+#define __SERVICE_ID_INPUT 8
+#define __SERVICE_ID_LIGHT 9
+#define __SERVICE_ID_LINK 10
+#define __SERVICE_ID_LOOP 11
+#define __SERVICE_ID_MATERIAL 12
+#define __SERVICE_ID_OBJECT 13
+#define __SERVICE_ID_PHYSICS 14
+#define __SERVICE_ID_PROPERTY 15
+#define __SERVICE_ID_RENDER 16
+#define __SERVICE_ID_SCRIPT 17
+#define __SERVICE_ID_SIM 18
+#define __SERVICE_ID_WORLDREP 19
+
 // --------------------------------------
 // ---  Bitmasks for service masking  ---
 // --------------------------------------
@@ -110,5 +133,7 @@ priorities (not necessary unique) for the database service listeners
 #define LOOPCLIENT_PRIORITY_INPUT 1
 // Renderer last
 #define LOOPCLIENT_PRIORITY_RENDERER 1024
+
+
 
 #endif

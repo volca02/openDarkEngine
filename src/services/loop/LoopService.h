@@ -175,7 +175,7 @@ namespace Opde {
 	typedef shared_ptr< LoopMode > LoopModePtr;
 	
 	/** @brief Loop Service - service which handles game loop (per-frame loop) */
-	class OPDELIB_EXPORT LoopService : public Service {
+	class OPDELIB_EXPORT LoopService : public ServiceImpl<LoopService> {
 		public:
 			/** Constructor
 			* @param manager The ServiceManager that created this service
@@ -292,6 +292,8 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask(); 
+			
+			virtual const size_t getSID();
 		private:
 			static std::string mName;
 	};

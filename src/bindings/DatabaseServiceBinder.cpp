@@ -31,7 +31,7 @@ namespace Opde {
 
 	namespace Python {
 
-	const char* opde_PythonDatabaseProgressMessage__doc__ = "Database Progress Message structure. Structure informing about loading/saving progress.\n"
+		const char* opde_PythonDatabaseProgressMessage__doc__ = "Database Progress Message structure. Structure informing about loading/saving progress.\n"
 			"@ivar completed: Overall 0.0-1.0 progress\n"
 			"@ivar totalCoarse: Coarse steps total\n"
 			"@ivar currentCoarse: Coarse steps current\n"
@@ -51,8 +51,8 @@ namespace Opde {
 
 		template<> const char* PythonStruct<DatabaseProgressMsg>::msName = "DatabaseProgressMsg";
 
-        // -------------------- Database Progress message --------------------
-        class PythonDatabaseProgressMessageConverter {
+		// -------------------- Database Progress message --------------------
+		class PythonDatabaseProgressMessageConverter {
 			public:
 				PyObject* operator()(const DatabaseProgressMsg& ev) {
 					PyObject* result = PythonDatabaseProgressMessage::create(ev);
@@ -142,7 +142,7 @@ namespace Opde {
 		PyObject* DatabaseServiceBinder::load(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
-		    PyObject *result = NULL;
+			PyObject *result = NULL;
 			DatabaseServicePtr o;
 			
 			if (!python_cast<DatabaseServicePtr>(self, &msType, &o))
@@ -151,8 +151,8 @@ namespace Opde {
 			const char* fname;
 
 			if (PyArg_ParseTuple(args, "s", &fname)) {
-			    o->load(fname);
-			    
+				o->load(fname);
+				
 				result = Py_None;
 				Py_INCREF(result);
 				return result;
@@ -178,7 +178,7 @@ namespace Opde {
 
 			if (PyArg_ParseTuple(args, "s", &fname)) {
 				o->loadGameSys(fname);
-			    
+				
 				__PY_NONE_RET;
 			} else {
 				// Invalid parameters
@@ -190,8 +190,8 @@ namespace Opde {
 		}
 
 		// ------------------------------------------
-        PyObject* DatabaseServiceBinder::unload(PyObject* self, PyObject* args) {
-        	__PYTHON_EXCEPTION_GUARD_BEGIN_;        	
+		PyObject* DatabaseServiceBinder::unload(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;        	
 			DatabaseServicePtr o;
 			
 			if (!python_cast<DatabaseServicePtr>(self, &msType, &o))
@@ -204,11 +204,11 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
-        // ------------------------------------------
-        PyObject* DatabaseServiceBinder::setProgressListener(PyObject* self, PyObject* args) {
-        	__PYTHON_EXCEPTION_GUARD_BEGIN_;
-        	
-            PyObject *result = NULL;
+		// ------------------------------------------
+		PyObject* DatabaseServiceBinder::setProgressListener(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			
+			PyObject *result = NULL;
 			DatabaseServicePtr o;
 			
 			if (!python_cast<DatabaseServicePtr>(self, &msType, &o))
@@ -231,10 +231,10 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
-        // ------------------------------------------
-        PyObject* DatabaseServiceBinder::unsetProgressListener(PyObject* self, PyObject* args) {
-        	__PYTHON_EXCEPTION_GUARD_BEGIN_;
-        	
+		// ------------------------------------------
+		PyObject* DatabaseServiceBinder::unsetProgressListener(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			
 			DatabaseServicePtr o;
 			
 			if (!python_cast<DatabaseServicePtr>(self, &msType, &o))
@@ -257,7 +257,7 @@ namespace Opde {
 			Object* object = construct(&msType);
 
 			if (object != NULL) {
-				object->mInstance = static_pointer_cast<DatabaseService>(ServiceManager::getSingleton().getService(msName));
+				object->mInstance = GET_SERVICE(DatabaseService);
 			}
 
 			return (PyObject *)object;
@@ -270,7 +270,7 @@ namespace Opde {
 			publishType(module, &msType, msName);
 		}
 
-	}
+	} // namespace Python
 
 } // namespace Opde
 

@@ -44,13 +44,18 @@ using namespace Ogre;
 // #define __SG
 
 namespace Opde {
-	// Implementation of the WorldRep service
+	/*----------------------------------------------------*/
+	/*----------------- WorldRep Service -----------------*/
+	/*----------------------------------------------------*/
+	template<> const size_t ServiceImpl<WorldRepService>::SID = __SERVICE_ID_WORLDREP;
+	
 	WorldRepService::WorldRepService(ServiceManager *manager, const std::string& name) :
-		Service(manager, name), mNumCells(0) {
+		ServiceImpl< Opde::WorldRepService >(manager, name), mNumCells(0) {
 		// ResourceGroupManager::getSingleton().setWorldResourceGroupName(TEMPTEXTURE_RESOURCE_GROUP);
 
 	}
 
+	//------------------------------------------------------
 	bool WorldRepService::init() {
 		mRenderService
 		        = GET_SERVICE(RenderService);
@@ -66,6 +71,7 @@ namespace Opde {
 		return true;
 	}
 
+	//------------------------------------------------------
 	void WorldRepService::bootstrapFinished() {
 		// Get a reference to the sceneManager. We can get DarkSceneManager directly because of the format of the data we load (BSP/Portals)
 		mCells = NULL;
@@ -80,6 +86,7 @@ namespace Opde {
 		mLightService = GET_SERVICE(LightService);
 	}
 
+	//------------------------------------------------------
 	void WorldRepService::shutdown() {
 		mDatabaseService->unregisterListener(mDbCallback);
 		mDatabaseService.setNull();
@@ -88,11 +95,13 @@ namespace Opde {
 		mRenderService.setNull();
 	}
 
+	//------------------------------------------------------
 	WorldRepService::~WorldRepService() {
 	}
 
 
 	// ---- The ServiceInterface mathods ---
+	//------------------------------------------------------
 	void WorldRepService::onDBChange(const DatabaseChangeMsg& m) {
 		LOG_DEBUG("WorldRepService::onDBChange called by a callback");
 		if (m.change == DBC_DROPPING) {
@@ -127,6 +136,7 @@ namespace Opde {
 		}
 	}
 
+	//------------------------------------------------------
 	void WorldRepService::setSkyBox(const FileGroupPtr& db) {
 		return;
 		FilePtr skyChunk = db->getFile("SKYMODE");
@@ -145,6 +155,7 @@ namespace Opde {
 		}
 	}
 
+	//------------------------------------------------------
 	void WorldRepService::unload() {
 		mIndexes.setNull();
 
@@ -153,6 +164,7 @@ namespace Opde {
 		clearData();
 	}
 
+	//------------------------------------------------------
 	void WorldRepService::clearData() {
 		LOG_INFO("WorldRepService::clearData called");
 
@@ -183,6 +195,7 @@ namespace Opde {
 	}
 
 
+	//------------------------------------------------------
 	// ----------------------- The level loading methods follow
 	void WorldRepService::loadFromChunk(FilePtr& wrChunk, size_t lightSize) {
 		WRHeader header;
@@ -361,8 +374,7 @@ namespace Opde {
 	WorldRepServiceFactory::WorldRepServiceFactory() :
 		ServiceFactory() {
 		ServiceManager::getSingleton().addServiceFactory(this);
-	}
-	;
+	};
 
 	Service* WorldRepServiceFactory::createInstance(ServiceManager* manager) {
 		return new WorldRepService(manager, mName);
@@ -374,5 +386,9 @@ namespace Opde {
 
 	const uint WorldRepServiceFactory::getMask() {
 		return SERVICE_DATABASE_LISTENER | SERVICE_RENDERER | SERVICE_ENGINE;
+	}
+	
+	const size_t WorldRepServiceFactory::getSID() {
+		return WorldRepService::SID;
 	}
 }

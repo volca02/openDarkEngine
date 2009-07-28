@@ -33,10 +33,12 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- GameService -------------------*/
 	/*----------------------------------------------------*/
-	GameService::GameService(ServiceManager *manager, const std::string& name) : Service(manager, name) {
+	template<> const size_t ServiceImpl<GameService>::SID = __SERVICE_ID_GAME;
+	
+	GameService::GameService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::GameService >(manager, name) {
 	}
 
-    //------------------------------------------------------
+	//------------------------------------------------------
 	bool GameService::init() {
 	    mDbService = GET_SERVICE(DatabaseService);
 
@@ -65,6 +67,10 @@ namespace Opde {
 
 	const uint GameServiceFactory::getMask() {
 		return SERVICE_ENGINE;
+	}
+
+	const size_t GameServiceFactory::getSID() {
+		return GameService::SID;
 	}
 
 	Service* GameServiceFactory::createInstance(ServiceManager* manager) {

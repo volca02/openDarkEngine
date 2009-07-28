@@ -80,7 +80,7 @@ namespace Opde {
 
 
 	/** @brief Material Service - Service which handles materials for terrain and objects - their loading, unloading, cloning, etc. */
-	class OPDELIB_EXPORT MaterialService: public Service {
+	class OPDELIB_EXPORT MaterialService : public ServiceImpl<MaterialService> {
 		public:
 			/** Constructor
 			 * @param manager The ServiceManager that created this service
@@ -244,6 +244,8 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask();
+			
+			virtual const size_t getSID();
 
 		private:
 			static std::string mName;

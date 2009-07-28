@@ -163,7 +163,9 @@ namespace Opde {
 	/*--------------------------------------------------------*/
 	/*--------------------- RenderService --------------------*/
 	/*--------------------------------------------------------*/
-	RenderService::RenderService(ServiceManager *manager, const std::string& name) : Service(manager, name),
+	template<> const size_t ServiceImpl<RenderService>::SID = __SERVICE_ID_RENDER;
+	
+	RenderService::RenderService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::RenderService >(manager, name),
 			mPropModelName(NULL),
 			mPropPosition(NULL),
 			mPropScale(NULL),
@@ -861,6 +863,10 @@ namespace Opde {
 
 	Service* RenderServiceFactory::createInstance(ServiceManager* manager) {
 		return new RenderService(manager, mName);
+	}
+	
+	const size_t RenderServiceFactory::getSID() {
+		return RenderService::SID;
 	}
 }
 

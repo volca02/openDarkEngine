@@ -32,8 +32,10 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- LightService ------------------*/
 	/*----------------------------------------------------*/
+	template<> const size_t ServiceImpl<LightService>::SID = __SERVICE_ID_LIGHT;
+	
 	LightService::LightService(ServiceManager *manager, const std::string& name) :
-		Service(manager, name), mLightPixelSize(0) {
+		ServiceImpl< Opde::LightService >(manager, name), mLightPixelSize(0) {
 
 		mAtlasList = new LightAtlasList();
 	}
@@ -387,6 +389,10 @@ namespace Opde {
 
 	const uint LightServiceFactory::getMask() {
 		return SERVICE_RENDERER;
+	}
+	
+	const size_t LightServiceFactory::getSID() {
+		return LightService::SID;
 	}
 
 	Service* LightServiceFactory::createInstance(ServiceManager* manager) {

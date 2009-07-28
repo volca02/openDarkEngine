@@ -151,9 +151,9 @@ namespace Opde {
 			virtual bool keyPressed(const OIS::KeyEvent &e) = 0;
 			virtual bool keyReleased(const OIS::KeyEvent &e) = 0;
 
-    		virtual bool mouseMoved(const OIS::MouseEvent &e) = 0;
-    		virtual bool mousePressed(const OIS::MouseEvent &e, OIS::MouseButtonID id) = 0;
-    		virtual bool mouseReleased(const OIS::MouseEvent &e, OIS::MouseButtonID id) = 0;
+			virtual bool mouseMoved(const OIS::MouseEvent &e) = 0;
+			virtual bool mousePressed(const OIS::MouseEvent &e, OIS::MouseButtonID id) = 0;
+			virtual bool mouseReleased(const OIS::MouseEvent &e, OIS::MouseButtonID id) = 0;
 
 			virtual bool povMoved(const OIS::JoyStickEvent &e, int pov) = 0;
 			virtual bool axisMoved(const OIS::JoyStickEvent &arg, int axis) = 0;
@@ -170,7 +170,7 @@ namespace Opde {
 	 * @todo +/without + binding modes - how they differ, how to implement the one with key repeat...
 	 * @todo BND file writing ability (needs cooperation with nonexistent platform service)
 	 */
-	class OPDELIB_EXPORT InputService : public Service, public OIS::KeyListener, public OIS::MouseListener, public OIS::JoyStickListener, public LoopClient 
+	class OPDELIB_EXPORT InputService : public ServiceImpl<InputService>, public OIS::KeyListener, public OIS::MouseListener, public OIS::JoyStickListener, public LoopClient 
 	{
 		public:
 			InputService(ServiceManager *manager, const std::string& name);
@@ -230,9 +230,9 @@ namespace Opde {
 			void captureInputs();
 
 		protected:
-            bool init();
-            void bootstrapFinished();
-            void shutdown();
+			bool init();
+			void bootstrapFinished();
+			void shutdown();
 
 			void loopStep(float deltaTime);
 			
@@ -266,9 +266,9 @@ namespace Opde {
 			bool keyPressed(const OIS::KeyEvent &e);
 			bool keyReleased(const OIS::KeyEvent &e);
 
-    		bool mouseMoved(const OIS::MouseEvent &e);
-    		bool mousePressed(const OIS::MouseEvent &e, OIS::MouseButtonID id);
-    		bool mouseReleased(const OIS::MouseEvent &e, OIS::MouseButtonID id);
+			bool mouseMoved(const OIS::MouseEvent &e);
+			bool mousePressed(const OIS::MouseEvent &e, OIS::MouseButtonID id);
+			bool mouseReleased(const OIS::MouseEvent &e, OIS::MouseButtonID id);
 
 			bool axisMoved(const OIS::JoyStickEvent &,int);
 			bool buttonPressed(const OIS::JoyStickEvent &,int);
@@ -276,7 +276,7 @@ namespace Opde {
 			bool povMoved(const OIS::JoyStickEvent &, int);
 
 			/// Finds a mapper (Or NULL) for the specified context
-            InputEventMapperPtr findMapperForContext(const std::string& ctx);
+			InputEventMapperPtr findMapperForContext(const std::string& ctx);
 
 			/// Strips a comment (any text after ';' including that character)
 			std::string stripComment(const std::string& cmd);
@@ -354,9 +354,9 @@ namespace Opde {
 			/// OIS mouse pointer
 			OIS::Mouse        *mMouse;
 			/// OIS keyboard pointer
-    		OIS::Keyboard     *mKeyboard;
+			OIS::Keyboard     *mKeyboard;
 			/// OIS joystick pointer
-    		OIS::JoyStick     *mJoystick;
+			OIS::JoyStick     *mJoystick;
 
 			/// Renderer window we listen on
 			Ogre::RenderWindow* mRenderWindow;
@@ -390,6 +390,8 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask();
+			
+			virtual const size_t getSID();
 		private:
 			static std::string mName;
 	};

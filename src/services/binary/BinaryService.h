@@ -40,7 +40,7 @@ namespace Opde {
 	*
 	* This service is responsible for storing the definitions of the dynamic binary templates.
 	*/
-	class OPDELIB_EXPORT BinaryService : public Service, public ConsoleCommandListener {
+	class OPDELIB_EXPORT BinaryService : public ServiceImpl<BinaryService>, public ConsoleCommandListener {
 		public:
 			/** Initializes the Service */
 			BinaryService(ServiceManager* manager, const std::string& name);
@@ -128,6 +128,8 @@ namespace Opde {
 			virtual const std::string& getName();
 			
 			virtual const uint getMask(); 
+			
+			virtual const size_t getSID();
 		private:
 			static std::string mName;
 	};

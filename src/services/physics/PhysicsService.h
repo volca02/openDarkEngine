@@ -37,9 +37,9 @@
 
 namespace Opde {
 
-	/** @brief Physics service - service defining game states (Temporary code. Will be filled with a high level state management - screens)
+	/** @brief Physics service - service handling physics (STUB)
 	*/
-	class OPDELIB_EXPORT PhysicsService : public Service {
+	class OPDELIB_EXPORT PhysicsService : public ServiceImpl<PhysicsService> {
 		public:
 			PhysicsService(ServiceManager *manager, const std::string& name);
 			virtual ~PhysicsService();
@@ -69,6 +69,8 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask(); 
+			
+			virtual const size_t getSID();
 		private:
 			static std::string mName;
 	};

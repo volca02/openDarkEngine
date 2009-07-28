@@ -53,7 +53,7 @@ namespace Opde {
 	 * @author volca
 	 * @note some parts written by Patryn as well
 	 */
-	class OPDELIB_EXPORT DrawService : public Service, public Ogre::RenderQueueListener {
+	class OPDELIB_EXPORT DrawService : public ServiceImpl<DrawService>, public Ogre::RenderQueueListener {
 		public:
 			/// Constructor
 			DrawService(ServiceManager *manager, const std::string& name);
@@ -264,6 +264,8 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask();
+			
+			virtual const size_t getSID();
 		private:
 			static std::string mName;
 	};

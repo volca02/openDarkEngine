@@ -232,7 +232,7 @@ namespace Opde {
 			Object* object = construct(&msType);
 
 			if (object != NULL) {
-				object->mInstance = static_pointer_cast<InheritService>(ServiceManager::getSingleton().getService(msName));
+				object->mInstance = GET_SERVICE(InheritService);
 			}
 
 			return (PyObject *)object;
@@ -277,13 +277,13 @@ namespace Opde {
 			    return PyLong_FromLong(o->srcID);
 			} else if (strcmp(name, "dst") == 0) {
 			    return PyLong_FromLong(o->dstID);
-            } else if (strcmp(name, "priority") == 0) {
+			} else if (strcmp(name, "priority") == 0) {
 			    return PyLong_FromLong(o->priority);
-            } else {
-                PyErr_SetString(PyExc_TypeError, "Unknown attribute specified!");
-            }
+			} else {
+				PyErr_SetString(PyExc_TypeError, "Unknown attribute specified!");
+			}
 
-            return NULL;
+			return NULL;
 		}
 
 		// ------------------------------------------

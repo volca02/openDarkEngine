@@ -53,7 +53,9 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- DrawService -------------------*/
 	/*----------------------------------------------------*/
-	DrawService::DrawService(ServiceManager *manager, const std::string& name) : Service(manager, name),
+	template<> const size_t ServiceImpl<DrawService>::SID = __SERVICE_ID_DRAW;
+	
+	DrawService::DrawService(ServiceManager *manager, const std::string& name) : ServiceImpl<DrawService>(manager, name),
 			mSheetMap(),
 			mActiveSheet(NULL),
 			mDrawOpID(0),
@@ -716,6 +718,10 @@ namespace Opde {
 
 	const uint DrawServiceFactory::getMask() {
 		return SERVICE_ENGINE;
+	}
+
+	const size_t DrawServiceFactory::getSID() {
+		return DrawService::SID;
 	}
 
 	Service* DrawServiceFactory::createInstance(ServiceManager* manager) {

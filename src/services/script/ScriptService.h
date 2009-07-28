@@ -100,7 +100,7 @@ namespace Opde {
 	* @todo A small todo: Script data service could be exposed nicely to python. A small cooperation, using getters and setters could let us do things like data['something'] = 1, etc.
 	* With automatic mapping of object ID, internally calling ScriptDataService::get(id, name)... etc.
 	*/
-	class OPDELIB_EXPORT ScriptService : public Service {
+	class OPDELIB_EXPORT ScriptService : public ServiceImpl<ScriptService> {
 		public:
 			/** Initializes the Service */
 			ScriptService(ServiceManager* manager, const std::string& name);
@@ -142,7 +142,9 @@ namespace Opde {
 
 			virtual const std::string& getName();
 
-			virtual const uint getMask();			
+			virtual const uint getMask();	
+			
+			virtual const size_t getSID();
 		private:
 			static std::string mName;
 	};

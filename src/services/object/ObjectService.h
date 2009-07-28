@@ -82,7 +82,7 @@ namespace Opde {
 	* @todo OBJECT_CREATE_STARTED message type for those services needing a preparation for object creation
 		(for example render service will create a SceneNode at that time, so it can update it's position and orientation when loading Position properties)
 	*/
-	class OPDELIB_EXPORT ObjectService : public Service, public MessageSource<ObjectServiceMsg> {
+	class OPDELIB_EXPORT ObjectService : public ServiceImpl<ObjectService>, public MessageSource<ObjectServiceMsg> {
 		public:
 			ObjectService(ServiceManager *manager, const std::string& name);
 
@@ -270,6 +270,8 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask();
+			
+			virtual const size_t getSID();
 
 		private:
 			static std::string mName;

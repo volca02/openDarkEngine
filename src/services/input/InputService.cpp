@@ -40,8 +40,10 @@ namespace Opde {
     /*-----------------------------------------------------*/
     /*-------------------- InputService -------------------*/
     /*-----------------------------------------------------*/
+    template<> const size_t ServiceImpl<InputService>::SID = __SERVICE_ID_INPUT;
+    
     InputService::InputService(ServiceManager *manager, const std::string& name) :
-			Service(manager, name),
+			ServiceImpl< Opde::InputService >(manager, name),
 			mInputMode(IM_MAPPED),
 			mDirectListener(NULL),
 			mMouse(NULL),
@@ -49,11 +51,11 @@ namespace Opde {
 			mJoystick(NULL) 
 	{
 
-    	// Loop client definition
-    	mLoopClientDef.id = LOOPCLIENT_ID_INPUT;
-    	mLoopClientDef.mask = LOOPMODE_INPUT;
-    	mLoopClientDef.priority = LOOPCLIENT_PRIORITY_INPUT;
-    	mLoopClientDef.name = mName;
+		// Loop client definition
+		mLoopClientDef.id = LOOPCLIENT_ID_INPUT;
+		mLoopClientDef.mask = LOOPMODE_INPUT;
+		mLoopClientDef.priority = LOOPCLIENT_PRIORITY_INPUT;
+		mLoopClientDef.name = mName;
 
 		mCurrentMapper = InputEventMapperPtr(new InputEventMapper(this));
 
@@ -487,7 +489,7 @@ namespace Opde {
 		}
 
 		// Last step: Get the loop service and register as a listener
-		mLoopService = static_pointer_cast<LoopService>(ServiceManager::getSingleton().getService("LoopService"));
+		mLoopService = GET_SERVICE(LoopService);
 		mLoopService->addLoopClient(this);
 
 		initKeyMap();
@@ -495,12 +497,12 @@ namespace Opde {
 		return true;
     }
 
-    //------------------------------------------------------
-    void InputService::bootstrapFinished()
+	//------------------------------------------------------
+	void InputService::bootstrapFinished()
 	{
 		// So the services will be able to catch up
 		ServiceManager::getSingleton().createByMask(SERVICE_INPUT_LISTENER);
-    }
+	}
 
 	//------------------------------------------------------
 	void InputService::shutdown() 
@@ -1007,26 +1009,30 @@ namespace Opde {
 		return false;
 	}
 
-    //-------------------------- Factory implementation
-    std::string InputServiceFactory::mName = "InputService";
+	//-------------------------- Factory implementation
+	std::string InputServiceFactory::mName = "InputService";
 
-    InputServiceFactory::InputServiceFactory() : ServiceFactory()
+	InputServiceFactory::InputServiceFactory() : ServiceFactory()
 	{
 		ServiceManager::getSingleton().addServiceFactory(this);
-    }
+	}
 
-    const std::string& InputServiceFactory::getName() 
+	const std::string& InputServiceFactory::getName() 
 	{
 		return mName;
-    }
+	}
 
 	const uint InputServiceFactory::getMask()
 	{
 		return SERVICE_ENGINE;
 	}
+	
+	const size_t InputServiceFactory::getSID() {
+		return InputService::SID;
+	}
 
-    Service* InputServiceFactory::createInstance(ServiceManager* manager) 
+	Service* InputServiceFactory::createInstance(ServiceManager* manager) 
 	{
 		return new InputService(manager, mName);
-    }
+	}
 }

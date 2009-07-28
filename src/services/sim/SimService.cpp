@@ -75,7 +75,9 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- Sim Service -------------------*/
 	/*----------------------------------------------------*/
-	SimService::SimService(ServiceManager *manager, const std::string& name) : Service(manager, name),
+	template<> const size_t ServiceImpl<SimService>::SID = __SERVICE_ID_SIM;
+		
+	SimService::SimService(ServiceManager *manager, const std::string& name) : ServiceImpl< SimService >(manager, name),
 			mTimeCoeff(1),
 			mSimTime(0),
 			mPaused(false) {
@@ -221,6 +223,10 @@ namespace Opde {
 
 	const uint SimServiceFactory::getMask() {
 		return SERVICE_ENGINE;
+	}
+	
+	const size_t SimServiceFactory::getSID() {
+		return SimService::SID;
 	}
 
 	Service* SimServiceFactory::createInstance(ServiceManager* manager) {

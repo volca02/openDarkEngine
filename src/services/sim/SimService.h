@@ -73,7 +73,7 @@ namespace Opde {
 	/** @brief Sim Service - a simulation timer base. Implements Sim time (simulation time). This time can have different flow rate than normal time.
 	  *  All simulation related listeners register here, not via loop service, which only handles game loop (and does not have the capability to pause/stretch time).
 	*/
-	class OPDELIB_EXPORT SimService : public Service, LoopClient {
+	class OPDELIB_EXPORT SimService : public ServiceImpl<SimService>, LoopClient {
 		public:
 			SimService(ServiceManager *manager, const std::string& name);
 			virtual ~SimService();
@@ -174,6 +174,8 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask();
+			
+			virtual const size_t getSID();
 		private:
 			static std::string mName;
 	};

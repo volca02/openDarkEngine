@@ -39,7 +39,7 @@ namespace Opde {
 
 	/** @brief config service
 	*/
-	class OPDELIB_EXPORT ConfigService : public Service {
+	class OPDELIB_EXPORT ConfigService : public ServiceImpl<ConfigService> {
 		public:
 			typedef enum {
 				GAME_TYPE_INVALID = 0,
@@ -119,6 +119,8 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask();
+			
+			virtual const size_t getSID();
 		private:
 			static std::string mName;
 	};

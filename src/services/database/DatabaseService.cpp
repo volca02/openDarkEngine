@@ -38,16 +38,18 @@ namespace Opde {
 	/*--------------------------------------------------------*/
 	/*-------------------- DatabaseService -------------------*/
 	/*--------------------------------------------------------*/
-	DatabaseService::DatabaseService(ServiceManager *manager, const std::string& name) : Service(manager, name), mCurDB(NULL), mProgressListener(NULL) {
+	template<> const size_t ServiceImpl<DatabaseService>::SID = __SERVICE_ID_DATABASE;
+	
+	DatabaseService::DatabaseService(ServiceManager *manager, const std::string& name) : ServiceImpl<DatabaseService>(manager, name), mCurDB(NULL), mProgressListener(NULL) {
 
 	}
 
-    //------------------------------------------------------
-    bool DatabaseService::init() {
-        // Create all services listening to the database messages...
-	    ServiceManager::getSingleton().createByMask(SERVICE_DATABASE_LISTENER);
-			return true;
-    }
+	//------------------------------------------------------
+	bool DatabaseService::init() {
+		// Create all services listening to the database messages...
+		ServiceManager::getSingleton().createByMask(SERVICE_DATABASE_LISTENER);
+		return true;
+	}
 
 	//------------------------------------------------------
 	DatabaseService::~DatabaseService() {
@@ -55,18 +57,19 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void DatabaseService::load(const std::string& filename) {
-	    LOG_DEBUG("DatabaseService::load - Loading requested file %s", filename.c_str());
-        // if there is another database in hold
+		LOG_DEBUG("DatabaseService::load - Loading requested file %s", filename.c_str());
+		
+		// if there is another database in hold
 		if (!mCurDB.isNull())
 			unload();
 
-	    // Try to find the database
+		// Try to find the database
 		mCurDB = getDBFileNamed(filename);
 
-        mLoadingStatus.reset();
+		mLoadingStatus.reset();
         
-        // TODO: Overall coarse step - calculated from TagFile Count * mListeners.size()
-        mLoadingStatus.totalCoarse = mListeners.size() * 2;
+		// TODO: Overall coarse step - calculated from TagFile Count * mListeners.size()
+		mLoadingStatus.totalCoarse = mListeners.size() * 2;
         
 		// Currently hardcoded to mission db
 		_loadMissionDB(mCurDB);
@@ -76,18 +79,19 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	void DatabaseService::loadGameSys(const std::string& filename) {
-	    LOG_DEBUG("DatabaseService::loadGameSys - Loading requested file %s", filename.c_str());
-        // if there is another database in hold
+		LOG_DEBUG("DatabaseService::loadGameSys - Loading requested file %s", filename.c_str());
+		
+		// if there is another database in hold
 		if (!mCurDB.isNull())
 			unload();
 
-	    // Try to find the database
+		// Try to find the database
 		mCurDB = getDBFileNamed(filename);
 
-        mLoadingStatus.reset();
+		mLoadingStatus.reset();
         
-        // TODO: Overall coarse step - calculated from TagFile Count * mListeners.size()
-        mLoadingStatus.totalCoarse = mListeners.size();
+		// TODO: Overall coarse step - calculated from TagFile Count * mListeners.size()
+		mLoadingStatus.totalCoarse = mListeners.size();
         
 		// Currently hardcoded to mission db
 		_loadGameSysDB(mCurDB);
@@ -97,8 +101,8 @@ namespace Opde {
 
 	//------------------------------------------------------
 	FileGroupPtr DatabaseService::getDBFileNamed(const std::string& filename) {
-	    // TODO: Group of of the resource through the configuration service, once written
-	    Ogre::DataStreamPtr stream = Ogre::ResourceGroupManager::getSingleton().openResource(filename, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
+		// TODO: Group of of the resource through the configuration service, once written
+		Ogre::DataStreamPtr stream = Ogre::ResourceGroupManager::getSingleton().openResource(filename, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
 		FilePtr fp(new OgreFile(stream));
 
 		return FileGroupPtr(new DarkFileGroup(fp));
@@ -106,17 +110,17 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void DatabaseService::unload() {
-	    LOG_DEBUG("DatabaseService::unload");
-	    DatabaseChangeMsg m;
+		LOG_DEBUG("DatabaseService::unload");
+		DatabaseChangeMsg m;
 
-	    m.change = DBC_DROPPING;
-        m.dbtype = DBT_COMPLETE;
-        m.dbtarget = DBT_COMPLETE; // No meaning here, at least now.
-        // ^ It could be used to unload f.e. only mission or savegame, thus saving reload. This is a nice subject to think about, yes
+		m.change = DBC_DROPPING;
+		m.dbtype = DBT_COMPLETE;
+		m.dbtarget = DBT_COMPLETE; // No meaning here, at least now.
+		// ^ It could be used to unload f.e. only mission or savegame, thus saving reload. This is a nice subject to think about, yes
 
-        m.db = mCurDB;
+		m.db = mCurDB;
 
-        broadcastMessageReversed(m);
+		broadcastMessageReversed(m);
 
 		/// Wipe out the files we used
 		mCurDB.setNull();
@@ -126,21 +130,21 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	void DatabaseService::fineStep(int count) {
-	    // recalculate the status
-        mLoadingStatus.overallFine += count;
+		// recalculate the status
+		mLoadingStatus.overallFine += count;
         
-        // Won't probably do anything, but could, in theory
-        mLoadingStatus.recalc();
+		// Won't probably do anything, but could, in theory
+		mLoadingStatus.recalc();
                     
-        // call the progress listener if it is set
-        if (!mProgressListener.isNull()) {
-            (*mProgressListener)(mLoadingStatus);
-        }
+		// call the progress listener if it is set
+		if (!mProgressListener.isNull()) {
+			(*mProgressListener)(mLoadingStatus);
+		}
 	}
 
 	//------------------------------------------------------
 	void DatabaseService::_loadMissionDB(const FileGroupPtr& db) {
-	    LOG_DEBUG("DatabaseService::_loadMissionDB");
+		LOG_DEBUG("DatabaseService::_loadMissionDB");
 
 		// Get the gamesys, load
 		// GAM_FILE
@@ -162,77 +166,77 @@ namespace Opde {
 		_loadGameSysDB(gs);
 
 		// Load the Mission
-        // Create a DB change message, and broadcast
-        DatabaseChangeMsg m;
+		// Create a DB change message, and broadcast
+		DatabaseChangeMsg m;
 
-        m.change = DBC_LOADING;
-        m.dbtype = DBT_MISSION;
-        m.dbtarget = DBT_MISSION; // TODO: Hardcoded
-        m.db = db;
+		m.change = DBC_LOADING;
+		m.dbtype = DBT_MISSION;
+		m.dbtarget = DBT_MISSION; // TODO: Hardcoded
+		m.db = db;
 
-        broadcastMessage(m);
+		broadcastMessage(m);
 	}
 
 	//------------------------------------------------------
 	void DatabaseService::_loadGameSysDB(const FileGroupPtr& db) {
-	    LOG_DEBUG("DatabaseService::_loadGameSysDB");
+		LOG_DEBUG("DatabaseService::_loadGameSysDB");
 
-        // Create a DB change message, and broadcast
-        DatabaseChangeMsg m;
+		// Create a DB change message, and broadcast
+		DatabaseChangeMsg m;
 
-        m.change = DBC_LOADING;
-        m.dbtype = DBT_GAMESYS;
-        m.dbtarget = DBT_MISSION; // TODO: Hardcoded
-        m.db = db;
+		m.change = DBC_LOADING;
+		m.dbtype = DBT_GAMESYS;
+		m.dbtarget = DBT_MISSION; // TODO: Hardcoded
+		m.db = db;
 
-        broadcastMessage(m);
+		broadcastMessage(m);
 	}
 
   
-    //------------------------------------------------------
-    void DatabaseService::broadcastMessage(const DatabaseChangeMsg& msg) {
-        Listeners::iterator it = mListeners.begin();
+	//------------------------------------------------------
+	void DatabaseService::broadcastMessage(const DatabaseChangeMsg& msg) {
+		Listeners::iterator it = mListeners.begin();
 		
 
-        for (; it != mListeners.end(); ++it) {
+		for (; it != mListeners.end(); ++it) {
 			unsigned long sttime = Ogre::Root::getSingleton().getTimer()->getMilliseconds();
-            // Use the callback functor to fire the callback
-            (*it->second)(msg);
+			// Use the callback functor to fire the callback
+			(*it->second)(msg);
 			unsigned long now = Ogre::Root::getSingleton().getTimer()->getMilliseconds();
 			
 			LOG_INFO("DatabaseService: Operation took %f seconds", (float)(now-sttime) / 1000);
             
-            // recalculate the status
-            mLoadingStatus.currentCoarse++;
+			// recalculate the status
+			mLoadingStatus.currentCoarse++;
             
-            mLoadingStatus.recalc();
+			mLoadingStatus.recalc();
                         
-            // call the progress listener if it is set
-            if (!mProgressListener.isNull()) {
-                (*mProgressListener)(mLoadingStatus);
-            }
-        }
-    }
+			// call the progress listener if it is set
+			if (!mProgressListener.isNull()) {
+				(*mProgressListener)(mLoadingStatus);
+			}
+		}
+	}
 
 	//------------------------------------------------------
-    void DatabaseService::broadcastMessageReversed(const DatabaseChangeMsg& msg) {
-        Listeners::reverse_iterator it = mListeners.rbegin();
+	void DatabaseService::broadcastMessageReversed(const DatabaseChangeMsg& msg) {
+		Listeners::reverse_iterator it = mListeners.rbegin();
 
-        for (; it != mListeners.rend(); ++it) {
-            // Use the callback functor to fire the callback
-            (*it->second)(msg);
+		for (; it != mListeners.rend(); ++it) {
+			// Use the callback functor to fire the callback
+			(*it->second)(msg);
             
-            // recalculate the status
-            mLoadingStatus.currentCoarse++;
+			// recalculate the status
+			mLoadingStatus.currentCoarse++;
             
-            mLoadingStatus.recalc();
+			mLoadingStatus.recalc();
                         
-            // call the progress listener if it is set
-            if (!mProgressListener.isNull()) {
-                (*mProgressListener)(mLoadingStatus);
-            }
-        }
-    }
+			// call the progress listener if it is set
+			if (!mProgressListener.isNull()) {
+				(*mProgressListener)(mLoadingStatus);
+			}
+		}
+	}
 
 	//-------------------------- Factory implementation
 	std::string DatabaseServiceFactory::mName = "DatabaseService";
@@ -247,6 +251,10 @@ namespace Opde {
 
 	const uint DatabaseServiceFactory::getMask() {
 		return SERVICE_CORE;
+	}
+	
+	const size_t DatabaseServiceFactory::getSID() {
+		return DatabaseService::SID;
 	}
 
 	Service* DatabaseServiceFactory::createInstance(ServiceManager* manager) {

@@ -32,7 +32,6 @@ namespace Opde {
     /*-------------------------------------------------*/
     /*-------------------- LoopMode -------------------*/
     /*-------------------------------------------------*/
-    
     LoopMode::LoopMode(const LoopModeDefinition& def, LoopService* owner) : mLoopModeDef(def), mOwner(owner), mDebugNextFrame(false) {
     }
     
@@ -114,19 +113,21 @@ namespace Opde {
 	void LoopClient::loopModeEnded(const LoopModeDefinition& loopMode) {
 	}
     
-    /*----------------------------------------------------*/
-    /*-------------------- LoopService -------------------*/
-    /*----------------------------------------------------*/
-    LoopService::LoopService(ServiceManager *manager, const std::string& name) : Service(manager, name), 
+	/*----------------------------------------------------*/
+	/*-------------------- LoopService -------------------*/
+	/*----------------------------------------------------*/
+	template<> const size_t ServiceImpl<LoopService>::SID = __SERVICE_ID_LOOP;
+    
+	LoopService::LoopService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::LoopService >(manager, name), 
 			mTerminationRequested(false), mNewLoopMode(NULL), mNewModeRequested(false), mLastFrameTime(0),
 			mDebugOneFrame(false) {
 				
 		mActiveMode.setNull();
-    }
+	}
 
-    //------------------------------------------------------
-    LoopService::~LoopService() {
-    }
+	//------------------------------------------------------
+	LoopService::~LoopService() {
+	}
 
 	//------------------------------------------------------
 	bool LoopService::init() {
@@ -307,23 +308,27 @@ namespace Opde {
 		return mLastFrameLength;
 	}
 
-    //-------------------------- Factory implementation
-    std::string LoopServiceFactory::mName = "LoopService";
+	//-------------------------- Factory implementation
+	std::string LoopServiceFactory::mName = "LoopService";
 
-    LoopServiceFactory::LoopServiceFactory() : ServiceFactory() {
+	LoopServiceFactory::LoopServiceFactory() : ServiceFactory() {
 		ServiceManager::getSingleton().addServiceFactory(this);
-    };
+	};
 
-    const std::string& LoopServiceFactory::getName() {
+	const std::string& LoopServiceFactory::getName() {
 		return mName;
-    }
+	}
 
 	const uint LoopServiceFactory::getMask() {
 		return SERVICE_ENGINE;
 	}
 	
-    Service* LoopServiceFactory::createInstance(ServiceManager* manager) {
-	return new LoopService(manager, mName);
-    }
+	const size_t LoopServiceFactory::getSID() {
+		return LoopService::SID;
+	}
+	
+	Service* LoopServiceFactory::createInstance(ServiceManager* manager) {
+		return new LoopService(manager, mName);
+	}
 
 }

@@ -38,7 +38,7 @@
 namespace Opde {
 	/** @brief Property service - service managing in-game object properties
 	*/
-	class OPDELIB_EXPORT PropertyService : public Service {
+	class OPDELIB_EXPORT PropertyService : public ServiceImpl<PropertyService> {
 		public:
 			PropertyService(ServiceManager *manager, const std::string& name);
 			virtual ~PropertyService();
@@ -170,6 +170,8 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask();
+			
+			virtual const size_t getSID();
 
 		private:
 			static std::string mName;

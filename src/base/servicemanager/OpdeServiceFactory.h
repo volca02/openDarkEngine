@@ -52,6 +52,9 @@ namespace Opde {
 			/** Get the name of the created objects. What object this factory creates? */
 			virtual const std::string& getName() = 0;
 			
+			/** Gets the Service ID of the created services. */
+			virtual const size_t getSID() = 0;
+			
 			/** Get the mask of the service.
 			* Masks are freely chosen bitmaps that describe what the requirements/capabilities of the service are.
 			* Bitmasks are used to automatically initialize listeners and filter the used services.

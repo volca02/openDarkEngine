@@ -33,7 +33,9 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- Physics Service ---------------*/
 	/*----------------------------------------------------*/
-	PhysicsService::PhysicsService(ServiceManager *manager, const std::string& name) : Service(manager, name) 
+	template<> const size_t ServiceImpl<PhysicsService>::SID = __SERVICE_ID_PHYSICS;
+	
+	PhysicsService::PhysicsService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::PhysicsService >(manager, name) 
 	{
 	}
 
@@ -77,6 +79,10 @@ namespace Opde {
 
 	const uint PhysicsServiceFactory::getMask() {
 		return SERVICE_ENGINE;
+	}
+	
+	const size_t PhysicsServiceFactory::getSID() {
+		return PhysicsService::SID;
 	}
 
 	Service* PhysicsServiceFactory::createInstance(ServiceManager* manager) {

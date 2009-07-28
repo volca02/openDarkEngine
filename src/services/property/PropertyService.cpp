@@ -62,10 +62,10 @@ namespace Opde {
 	/*--------------------------------------------------------*/
 	/*--------------------- PropertyService ------------------*/
 	/*--------------------------------------------------------*/
-	PropertyService::PropertyService(ServiceManager *manager, const std::string& name) : Service(manager, name) {
+	template<> const size_t ServiceImpl<PropertyService>::SID = __SERVICE_ID_PROPERTY;
+	
+	PropertyService::PropertyService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::PropertyService >(manager, name) {
 		// Ensure listeners are created
-		mServiceManager->createByMask(SERVICE_PROPERTY_LISTENER);
-		
 		// Create the standard property storage factories...
 	}
 
@@ -90,10 +90,11 @@ namespace Opde {
 		}
 	}
 
-    // --------------------------------------------------------------------------
-    bool PropertyService::init() {
-        return true;
-    }
+	// --------------------------------------------------------------------------
+	bool PropertyService::init() {
+		mServiceManager->createByMask(SERVICE_PROPERTY_LISTENER);
+		return true;
+	}
 
 	// --------------------------------------------------------------------------
 	void PropertyService::bootstrapFinished() {
@@ -214,7 +215,7 @@ namespace Opde {
 	}
     
 	// --------------------------------------------------------------------------
-    bool PropertyService::owns(int obj_id, const std::string& propName) {
+	bool PropertyService::owns(int obj_id, const std::string& propName) {
 		PropertyGroup* prop = getPropertyGroup(propName);
 		
 		if (prop != NULL) {
@@ -222,10 +223,10 @@ namespace Opde {
 		}
 		
 		return false;
-    }
+	}
     
 	// --------------------------------------------------------------------------
-    bool PropertyService::set(int obj_id, const std::string& propName, const std::string& propField, const DVariant& value) {
+	bool PropertyService::set(int obj_id, const std::string& propName, const std::string& propField, const DVariant& value) {
 		PropertyGroup* prop = getPropertyGroup(propName);
 		
 		if (prop != NULL) {
@@ -234,7 +235,7 @@ namespace Opde {
 		
 		LOG_ERROR("Invalid or undefined property name '%s' on call to PropertyService::set", propName.c_str());
 		return false;
-    }
+	}
 	
 	// --------------------------------------------------------------------------
 	bool PropertyService::get(int obj_id, const std::string& propName, const std::string& propField, DVariant& target) {
@@ -278,12 +279,16 @@ namespace Opde {
 	const std::string& PropertyServiceFactory::getName() {
 		return mName;
 	}
-
+	
 	Service* PropertyServiceFactory::createInstance(ServiceManager* manager) {
 		return new PropertyService(manager, mName);
 	}
 
 	const uint PropertyServiceFactory::getMask() {
 	    return SERVICE_DATABASE_LISTENER | SERVICE_CORE;
+	}
+	
+	const size_t PropertyServiceFactory::getSID() {
+		return PropertyService::SID;
 	}
 }

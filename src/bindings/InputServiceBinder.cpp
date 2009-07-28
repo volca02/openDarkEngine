@@ -293,7 +293,7 @@ namespace Opde
 
 			if (object != NULL)
 			{
-				object->mInstance = static_pointer_cast<InputService>(ServiceManager::getSingleton().getService(msName));
+				object->mInstance = GET_SERVICE(InputService);
 			}
 			return (PyObject *)object;
 		}

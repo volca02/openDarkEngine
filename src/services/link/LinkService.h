@@ -40,7 +40,7 @@ namespace Opde {
 
 	/** @brief Link service - service managing in-game object links
 	*/
-	class OPDELIB_EXPORT LinkService : public Service {
+	class OPDELIB_EXPORT LinkService : public ServiceImpl<LinkService> {
 		public:
 			LinkService(ServiceManager *manager, const std::string& name);
 
@@ -185,6 +185,8 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask();
+			
+			virtual const size_t getSID();
 
 		private:
 			static std::string mName;

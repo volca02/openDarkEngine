@@ -29,10 +29,6 @@
 
 namespace Opde {
 
-	Service::Service(ServiceManager* manager,  const std::string& name) : mServiceManager(manager), mName(name) {
-	}
+	
 
-	Service::~Service() {
-		LOG_DEBUG("Service %s destroyed", mName.c_str());
-	}
 }

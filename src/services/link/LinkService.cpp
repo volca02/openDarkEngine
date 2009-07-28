@@ -61,7 +61,9 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- LinkService -------------------*/
 	/*----------------------------------------------------*/
-	LinkService::LinkService(ServiceManager *manager, const std::string& name) : Service(manager, name), mDatabaseService(NULL) {
+	template<> const size_t ServiceImpl<LinkService>::SID = __SERVICE_ID_LINK;
+	
+	LinkService::LinkService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::LinkService >(manager, name), mDatabaseService(NULL) {
 	}
 
 	//------------------------------------------------------
@@ -419,6 +421,10 @@ namespace Opde {
 
 	const uint LinkServiceFactory::getMask() {
 	    return SERVICE_DATABASE_LISTENER | SERVICE_CORE;
+	}
+	
+	const size_t LinkServiceFactory::getSID() {
+		return LinkService::SID;
 	}
 
 }

@@ -37,64 +37,66 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*-------------------- ConfigService -----------------*/
 	/*----------------------------------------------------*/
-	ConfigService::ConfigService(ServiceManager *manager, const std::string& name) : Service(manager, name), mConfigFileName("opde.cfg") {
+	template<> const size_t ServiceImpl<ConfigService>::SID = __SERVICE_ID_CONFIG;
+	
+	ConfigService::ConfigService(ServiceManager *manager, const std::string& name) : ServiceImpl<ConfigService>(manager, name), mConfigFileName("opde.cfg") {
 	}
 
 	//------------------------------------------------------
 	ConfigService::~ConfigService() {
 	}
 
-    //------------------------------------------------------
-    bool ConfigService::init() {
+	//------------------------------------------------------
+	bool ConfigService::init() {
 		return true;
-    }
+	}
 
 
-    //------------------------------------------------------
-    void ConfigService::setParamDescription(const std::string& param, const std::string& desc) {
-    	mConfigKeyDescriptions[param] = desc;
-    }
+	//------------------------------------------------------
+	void ConfigService::setParamDescription(const std::string& param, const std::string& desc) {
+		mConfigKeyDescriptions[param] = desc;
+	}
     
-    //------------------------------------------------------
-    void ConfigService::setParam(const std::string& param, const std::string& value) {
-        Parameters::iterator it = mParameters.find(param);
+	//------------------------------------------------------
+	void ConfigService::setParam(const std::string& param, const std::string& value) {
+		Parameters::iterator it = mParameters.find(param);
 
-        if (it != mParameters.end()) {
-            it->second = value;
-        } else {
-            mParameters.insert(make_pair(param, value));
-        }
-    }
+		if (it != mParameters.end()) {
+			it->second = value;
+		} else {
+			mParameters.insert(make_pair(param, value));
+		}
+	}
 
-    //------------------------------------------------------
-    DVariant ConfigService::getParam(const std::string& param) {
-        Parameters::const_iterator it = mParameters.find(param);
+	//------------------------------------------------------
+	DVariant ConfigService::getParam(const std::string& param) {
+		Parameters::const_iterator it = mParameters.find(param);
 
-        Parameters::const_iterator dit = mConfigKeyDescriptions.find(param);
-        
+		Parameters::const_iterator dit = mConfigKeyDescriptions.find(param);
+		
 		// warn if param has no desc specified
 		if (dit == mConfigKeyDescriptions.end()) {
 			LOG_ERROR("ConfigService: Warning: Config key '%s' has no description specified", param.c_str());
 		}
         	
-        if (it != mParameters.end()) {
-            return DVariant(it->second);
-        } else {
-            return DVariant();
-        }
-    }
+		if (it != mParameters.end()) {
+			return DVariant(it->second);
+		} else {
+			return DVariant();
+		}
+	}
 
-    //------------------------------------------------------
-    bool ConfigService::getParam(const std::string& param, DVariant& tgt) {
-        Parameters::const_iterator it = mParameters.find(param);
+	//------------------------------------------------------
+	bool ConfigService::getParam(const std::string& param, DVariant& tgt) {
+		Parameters::const_iterator it = mParameters.find(param);
 
-        if (it != mParameters.end()) {
-            tgt = it->second;
-            return true;
-        } else {
-            return false;
-        }
-    }
+		if (it != mParameters.end()) {
+			tgt = it->second;
+			return true;
+		} else {
+			return false;
+		}
+	}
 
     //------------------------------------------------------
     bool ConfigService::hasParam(const std::string& param) {
@@ -187,6 +189,10 @@ namespace Opde {
 
 	const uint ConfigServiceFactory::getMask() {
 		return SERVICE_CORE;
+	}
+	
+	const size_t ConfigServiceFactory::getSID() {
+		return ConfigService::SID;
 	}
 
 	Service* ConfigServiceFactory::createInstance(ServiceManager* manager) {

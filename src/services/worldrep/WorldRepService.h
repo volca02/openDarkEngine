@@ -56,7 +56,7 @@ namespace Opde {
 	*
 	* This service is responsible for the level geometry initialization.
 	* @note Should handle world-geometry related methods later on. For example - Light switching */
-	class OPDELIB_EXPORT WorldRepService : public Service {
+	class OPDELIB_EXPORT WorldRepService : public ServiceImpl<WorldRepService> {
 		public:
 			/** Initializes the Service */
 			WorldRepService(ServiceManager* manager, const std::string& name);
@@ -148,6 +148,7 @@ namespace Opde {
 
 			virtual const uint getMask();
 
+			virtual const size_t getSID();
 		private:
 			static std::string mName;
 	};

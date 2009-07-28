@@ -61,7 +61,7 @@ namespace Opde {
 	* Effective object is the carrier of the effective value - the value that has the maximal priority.
 	* @note This class creates and uses the Metaproperty link, which is built-in
 	* */
-	class OPDELIB_EXPORT InheritService : public Service, public MessageSource<InheritChangeMsg> {
+	class OPDELIB_EXPORT InheritService : public ServiceImpl<InheritService>, public MessageSource<InheritChangeMsg> {
 		public:
 			/// Constructor
 			InheritService(ServiceManager *manager, const std::string& name);
@@ -215,6 +215,8 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask();
+			
+			virtual const size_t getSID();
 
 		private:
 			static std::string mName;
