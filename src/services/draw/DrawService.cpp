@@ -227,7 +227,6 @@ namespace Opde {
 		AtlasList::iterator end = mAtlasesForRebuild.end();
 
 		while (it != end) {
-			// TODO: Dirty status to avoid repeated rebuilds 
 			(*it++)->build();
 		}
 

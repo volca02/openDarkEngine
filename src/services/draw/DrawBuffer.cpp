@@ -111,7 +111,6 @@ namespace Opde {
 		buildBuffer();
 
 		mIsDirty = false;
-
 	}
 
 
