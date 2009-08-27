@@ -51,17 +51,17 @@ namespace Opde {
 			/// Listeners for the link changes
 			Listeners mListeners;
 
-            /// Sends a message to all listeners
-            virtual void broadcastMessage(const M& msg) {
-                typename Listeners::iterator it = mListeners.begin();
+			/// Sends a message to all listeners
+			virtual void broadcastMessage(const M& msg) {
+				typename Listeners::iterator it = mListeners.begin();
 
-                for (; it != mListeners.end(); ++it) {
-                    // Use the callback functor to fire the callback
+				for (; it != mListeners.end(); ++it) {
+					// Use the callback functor to fire the callback
 					(*it->second)(msg);
-                }
-            }
+				}
+			}
 
-        public:
+		public:
 			PrioritizedMessageSource() {};
 			virtual ~PrioritizedMessageSource() { mListeners.clear(); };
 
@@ -78,21 +78,20 @@ namespace Opde {
 			* @note The pointer has to be the same as the one supplied to the registerListener
 			*/
 			void unregisterListener(const ListenerPtr& listener) {
-			    // If priority was a member of Callback, then this would be find(prio);
-			    typename Listeners::iterator it = mListeners.begin();
+				// If priority was a member of Callback, then this would be find(prio);
+				typename Listeners::iterator it = mListeners.begin();
 
 				while (it != mListeners.end()) {
 
-				    if (it->second == listener) {
-				        typename Listeners::iterator rem = it++;
-                        mListeners.erase(rem);
-				    } else {
-				        it++;
-				    }
-
+					if (it->second == listener) {
+						typename Listeners::iterator rem = it++;
+						mListeners.erase(rem);
+					} else {
+						it++;
+					}
 				}
-            }
-    };
+			}
+	};
 
 }
 

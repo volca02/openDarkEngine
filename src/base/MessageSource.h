@@ -43,23 +43,23 @@ namespace Opde {
 		protected:
 			ListenerID mCurrent;
 
-		    /// A set of listeners
+			/// A set of listeners
 			typedef typename std::map< ListenerID, ListenerPtr > Listeners;
 
 			/// Listeners for the link changes
 			Listeners mListeners;
 
-            /// Sends a message to all listeners
-            void broadcastMessage(const M& msg) {
-                typename Listeners::iterator it = mListeners.begin();
+			/// Sends a message to all listeners
+			void broadcastMessage(const M& msg) {
+				typename Listeners::iterator it = mListeners.begin();
 
-                for (; it != mListeners.end(); ++it) {
-                    // Use the callback functor to fire the callback
+				for (; it != mListeners.end(); ++it) {
+					// Use the callback functor to fire the callback
 					(*it->second)(msg);
-                }
-            }
+				}
+			}
 
-        public:
+		public:
 			MessageSource() : mCurrent(0) {};
 			~MessageSource() { mListeners.clear(); };
 
@@ -81,8 +81,8 @@ namespace Opde {
 				if (it != mListeners.end()) {
 					mListeners.erase(it);
 				}
-            }
-    };
+			}
+	};
 
 }
 
