@@ -102,7 +102,7 @@ namespace Opde {
 				mNegativeArray = NULL;
 				mPositiveArray = NULL;
 				
-				mMinIndex = 0;
+				mMinIndex = 1;
 				mMaxIndex = -1;
 			}
 			
@@ -283,9 +283,14 @@ namespace Opde {
 				if (oldIndex < 0)
 					oldByteSize = 0;
 				else
-				   oldByteSize = getSizeFromIndex(oldIndex);
-				   
-				size_t newByteSize = getSizeFromIndex(newIndex);
+					oldByteSize = getSizeFromIndex(oldIndex);
+				
+				size_t newByteSize;
+				
+				if (newIndex < 0)
+					newByteSize = 0;
+				else
+					newByteSize = getSizeFromIndex(newIndex);
 				
 				if (newByteSize == oldByteSize)
 					return;
