@@ -43,14 +43,13 @@ namespace Opde {
 	template<> const size_t ServiceImpl<ObjectService>::SID = __SERVICE_ID_OBJECT;
 	
 	ObjectService::ObjectService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::ObjectService >(manager, name),
-			mAllocatedObjects(-6144, 2048),
+			mAllocatedObjects(),
 			mDatabaseService(NULL),
 			mObjVecVerMaj(0), // Seems to be the same for all versions
 			mObjVecVerMin(2),
 			mSceneMgr(NULL),
 			mSymNameStorage(NULL),
 			mPositionStorage(NULL) {
-
 	}
 
 	//------------------------------------------------------
@@ -210,9 +209,12 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void ObjectService::grow(int minID, int maxID) {
+		LOG_DEBUG("ObjectService::grow: Growing id pool to %d - %d (old size %d-%d)", minID, maxID, 
+				mAllocatedObjects.getMinIndex(), mAllocatedObjects.getMaxIndex());
+		
 		// grow the allocated objects to have enough room for new object flags
 		mAllocatedObjects.grow(minID, maxID);
-
+		
 		// grow the Properties
 		mPropertyService->grow(minID, maxID);
 
@@ -257,10 +259,8 @@ namespace Opde {
 		mServiceManager->createByMask(SERVICE_OBJECT_LISTENER);
 
     		// Register as a database listener
-		mDbCallback = DatabaseService::ListenerPtr(new ClassCallback<DatabaseChangeMsg, ObjectService>(this, &ObjectService::onDBChange));
-
 		mDatabaseService = GET_SERVICE(DatabaseService);
-		mDatabaseService->registerListener(mDbCallback, DBP_OBJECT);
+		mDatabaseService->registerListener(this, DBP_OBJECT);
 
 		mInheritService = GET_SERVICE(InheritService);
 		mLinkService = GET_SERVICE(LinkService);
@@ -270,7 +270,7 @@ namespace Opde {
 	//------------------------------------------------------
 	void ObjectService::shutdown() {
 		if (!mDatabaseService.isNull())
-	        mDatabaseService->unregisterListener(mDbCallback);
+	        mDatabaseService->unregisterListener(this);
 
 		mPropertyService.setNull();
 		mLinkService.setNull();
@@ -282,50 +282,62 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void ObjectService::onDBChange(const DatabaseChangeMsg& m) {
-	    if (m.change == DBC_DROPPING) {
-			// TODO: Clear the object mapping, broadcast the 'objects are being released' change
-			_clear(0x03);
-	    } else if (m.change == DBC_LOADING) {
-		// TODO: Load the object mapping bitmap (16 categories, although just 0 abstract, 1 concrete are in use)
-		// NOTE: Just the given range is used (based on the bitmap of the file - bit 0 abstract objs, bit 1 concrete objs)
-		// NOTE: Upon loading a savegame, skip the mission file as the property and link services do it
-		// NOTE: A good idea would probably be to introduce loadmask (for quicksaves - archetypes would stay intact f.e.)
-		// NOTE: Original dark always saves complete bitmap, although the mission loadout will overwrite the part which is concrete
-		// NOTE: Use the same config parameter name here to avoid confusion (If needed, that is): obj_min, obj_max (ID's)
-		// NOTE: Two pass search for free ID's would be nice: first look into the stack of free id's, then iterate the object bitmap and find first zero
-		uint loadMask = 0x03;
-
-		// No loading of objsys in mission if savegame is the target...
-		if (m.dbtarget == DBT_SAVEGAME && m.dbtype == DBT_MISSION)
-			return;
-
-		// Not loading an empty mission, ignore the concretes of the GAMESYS!
-		if (m.dbtype == DBT_GAMESYS && m.dbtarget != DBT_GAMESYS) {
-			loadMask = 0x01;
-		}
-
-		if (m.dbtype == DBT_MISSION || m.dbtype == DBT_SAVEGAME)
-			loadMask = 0x02;
-
-			_load(m.db, loadMask);
-	    } else if (m.change == DBC_SAVING) {
-			// Write the object allocation bitmap, whole (as original dark does it)
-			uint savemask = 0x03; // whole system (archetypes and concretes)
-
-			if (m.dbtarget == DBT_GAMESYS)
-				savemask = 0x01;
-
-			if (m.dbtarget == DBT_MISSION)
-				savemask = 0x02;
-
-			_save(m.db, savemask);
-	    }
+	void ObjectService::onDBLoad(const FileGroupPtr& db, uint32_t curmask) {
+		LOG_INFO("ObjectService::onDBLoad called.");
+		
+		uint loadMask = 0x00;
+		
+		// curtype contains the database's FILE_TYPE value. We use it to decide what to load
+		if (curmask & DBM_OBJTREE_CONCRETE)
+			loadMask |= 0x02;
+		
+		if (curmask & DBM_OBJTREE_GAMESYS)
+			loadMask |= 0x01;
+		
+		if (loadMask != 0x00)
+			_load(db, loadMask);
+	}
+	
+	//------------------------------------------------------
+	void ObjectService::onDBSave(const FileGroupPtr& db, uint32_t tgtmask) {
+		LOG_INFO("ObjectService::onDBSave called.");
+		
+		uint saveMask = 0x00;
+		
+		// curtype contains the database's FILE_TYPE value. We use it to decide what to load
+		if (tgtmask & DBM_OBJTREE_CONCRETE)
+			saveMask |= 0x02;
+		
+		if (tgtmask & DBM_OBJTREE_GAMESYS)
+			saveMask |= 0x01;
+		
+		if (saveMask != 0x00)
+			_save(db, saveMask);
+	}
+	
+	//------------------------------------------------------
+	void ObjectService::onDBDrop(uint32_t dropmask) {
+		LOG_INFO("ObjectService::onDBDrop called.");
+		// if mission or gamesys is dropped,
+		// drop here as well
+		
+		uint mask = 0x00;
+		
+		// curtype contains the database's FILE_TYPE value. We use it to decide what to load
+		if (dropmask & DBM_OBJTREE_CONCRETE)
+			mask |= 0x02;
+		
+		if (dropmask & DBM_OBJTREE_GAMESYS)
+			mask |= 0x01;
+		
+		if (dropmask != 0x00)
+			_clear(mask);
 	}
 
 
 	//------------------------------------------------------
 	void ObjectService::_load(const FileGroupPtr& db, uint loadMask) {
+		LOG_VERBOSE("ObjectService::_load Called on %s with %d", db->getName().c_str(), loadMask);
 		// Load min, max obj id, then the rest of the FilePtr as a bitmap data. Those then are unpacked to ease the use
 
 		int32_t minID, maxID;
@@ -337,6 +349,7 @@ namespace Opde {
 		f->readElem(&maxID, 4);
 
 		LOG_DEBUG("ObjectService: ObjVec MinID %d, MaxID %d", minID, maxID);
+		assert(minID <= maxID);
 
 		if ((minID & 0x07) != 0) {
 			// compensate the start bits. not aligned to byte
@@ -374,7 +387,7 @@ namespace Opde {
 		 * Now I don't want to do any dirty handling of this issue, so all code has to be prepared for this
 		*/
 
-		// Processes one byte a time
+		// Processes all the new ID's
 		for(id = minID; id < maxID ; ++id) {
 			if (fileObjs[id]) {
 				LOG_VERBOSE("Found object ID %d", id);
@@ -425,6 +438,8 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void ObjectService::_clear(uint clearMask) {
+		LOG_DEBUG("ObjectService::clear Clear called with mask %d", clearMask);
+		
 		// Only bit idx 0 and 1 are used
 		bool clearArchetypes = clearMask & 0x01;
 		bool clearConcretes = (clearMask & 0x02) || clearArchetypes;

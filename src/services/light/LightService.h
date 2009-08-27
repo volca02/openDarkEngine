@@ -33,6 +33,7 @@
 #include "File.h"
 #include "DarkLight.h"
 #include "LightmapAtlas.h"
+#include "DarkCommon.h"
 #include "WRTypes.h"
 #include "OpdeServiceManager.h"
 #include "Array.h"
@@ -45,8 +46,8 @@ using Ogre::DarkLight;
 namespace Opde {
 	struct  LightTableEntry {
 		LightTableEntry(const FilePtr& tag, bool rgb) {
-			tag->readElem(&pos, sizeof(float), 3);
-			tag->readElem(&rot, sizeof(float), 3);
+			pos.read(tag);
+			rot.read(tag);
 
 			if (rgb) {
 				tag->readElem(&brightness, sizeof(float), 3);
@@ -60,9 +61,9 @@ namespace Opde {
 			tag->readElem(&radius, sizeof(float));
 		};
 
-		WRVector3 pos; // 12
-		WRVector3 rot; // 12 - 24
-		WRVector3 brightness; // 4 - 28
+		DVector3 pos; // 12
+		DVector3 rot; // 12 - 24
+		DVector3 brightness; // 4 - 28
 		float cone_inner; // 4 - 32 - TODO: This is cos(alpha), not radians!
 		float cone_outer; // 4 - 36
 		float radius; // 4 - 40

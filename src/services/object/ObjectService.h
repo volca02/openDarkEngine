@@ -82,7 +82,7 @@ namespace Opde {
 	* @todo OBJECT_CREATE_STARTED message type for those services needing a preparation for object creation
 		(for example render service will create a SceneNode at that time, so it can update it's position and orientation when loading Position properties)
 	*/
-	class OPDELIB_EXPORT ObjectService : public ServiceImpl<ObjectService>, public MessageSource<ObjectServiceMsg> {
+	class OPDELIB_EXPORT ObjectService : public ServiceImpl<ObjectService>, public MessageSource<ObjectServiceMsg>, public DatabaseListener {
 		public:
 			ObjectService(ServiceManager *manager, const std::string& name);
 
@@ -98,7 +98,7 @@ namespace Opde {
 			/// Good to use when wanting to prevent broadcasting of the creation before the properties/links are set
 			int beginCreate(int archetype);
 
-			/// finalises the creation if the given object (only broadcasts that object was created)
+			/// finalises the creation of the given object (only broadcasts that object was created)
 			void endCreate(int objID);
 
 			/// Returns true if the object exists, false otherwise
@@ -166,8 +166,17 @@ namespace Opde {
 
 			void shutdown();
 
-			/** Database change callback */
-			void onDBChange(const DatabaseChangeMsg& m);
+			/** Database load callback 
+			* @see DatabaseListener::onDBLoad */
+			void onDBLoad(const FileGroupPtr& db, uint32_t curmask);
+			
+			/** Database save callback 
+			* @see DatabaseListener::onDBSave */
+			void onDBSave(const FileGroupPtr& db, uint32_t tgtmask);
+			
+			/** Database drop callback 
+			* @see DatabaseListener::onDBDrop */
+			void onDBDrop(uint32_t dropmask);
 
 			/** load objects from a single database */
 			void _load(const FileGroupPtr& db, uint clearMask);
@@ -215,9 +224,6 @@ namespace Opde {
 			PropertyGroup* mPropPosition;
 
 			/// Map's symbolic name to object ID
-
-			/// Database callback
-			DatabaseService::ListenerPtr mDbCallback;
 
 			/// Database service
 			DatabaseServicePtr mDatabaseService;

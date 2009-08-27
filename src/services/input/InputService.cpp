@@ -695,7 +695,7 @@ namespace Opde {
 		if (it != mCommandMap.end()) {
 			command = it->second;
 		} else {
-			LOG_DEBUG("Encountered an unmapped key event '%s'", e.text);
+			LOG_DEBUG("Encountered an unmapped key event %d", keyCode);
 			return;
 		}
 	

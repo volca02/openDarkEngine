@@ -56,7 +56,7 @@ namespace Opde {
 	*
 	* This service is responsible for the level geometry initialization.
 	* @note Should handle world-geometry related methods later on. For example - Light switching */
-	class OPDELIB_EXPORT WorldRepService : public ServiceImpl<WorldRepService> {
+	class OPDELIB_EXPORT WorldRepService : public ServiceImpl<WorldRepService>, public DatabaseListener {
 		public:
 			/** Initializes the Service */
 			WorldRepService(ServiceManager* manager, const std::string& name);
@@ -71,8 +71,17 @@ namespace Opde {
 			virtual void bootstrapFinished();
 			void shutdown();
 
-			/// Database change callback
-			void onDBChange(const DatabaseChangeMsg& m);
+			/** Database load callback 
+			* @see DatabaseListener::onDBLoad */
+			void onDBLoad(const FileGroupPtr& db, uint32_t curmask);
+			
+			/** Database save callback 
+			* @see DatabaseListener::onDBSave */
+			void onDBSave(const FileGroupPtr& db, uint32_t tgtmask);
+			
+			/** Database drop callback 
+			* @see DatabaseListener::onDBDrop */
+			void onDBDrop(uint32_t dropmask);
 
 			/** Internal method. Clears all the used data and scene */
 			void clearData();
@@ -90,7 +99,7 @@ namespace Opde {
 			void createBSP(unsigned int BspRows, WRBSPNode *tree);
 
 			/** Internal method. Constructs Ogre plane out of worldrep plane */
-			Ogre::Plane constructPlane(WRPlane plane);
+			Ogre::Plane constructPlane(const DPlane& plane);
 
 			// TODO: Move this away... RenderService->getRoot?
 			Ogre::Root *mRoot;
@@ -102,7 +111,7 @@ namespace Opde {
 			WRCell** mCells;
 
 			uint32_t mExtraPlaneCount;
-			WRPlane* mExtraPlanes;
+			DPlane* mExtraPlanes;
 
 			/** Cell count from header */
 			uint32_t mNumCells;
@@ -115,9 +124,6 @@ namespace Opde {
 
 			/// Face groups
 			Ogre::StaticFaceGroup* mFaceGroups;
-
-			/// Database callback
-			DatabaseService::ListenerPtr mDbCallback;
 
 			/// Database service
 			DatabaseServicePtr mDatabaseService;

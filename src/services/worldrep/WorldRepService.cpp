@@ -78,17 +78,15 @@ namespace Opde {
 		mExtraPlanes = NULL;
 
 		LOG_DEBUG("WorldRepService: Registering as a listener to the database messages");
-		mDbCallback = DatabaseService::ListenerPtr(new ClassCallback<DatabaseChangeMsg, WorldRepService> (this, &WorldRepService::onDBChange));
-
 		mDatabaseService = GET_SERVICE(DatabaseService);
-		mDatabaseService->registerListener(mDbCallback, DBP_WORLDREP);
+ 		mDatabaseService->registerListener(this, DBP_WORLDREP);
 
 		mLightService = GET_SERVICE(LightService);
 	}
 
 	//------------------------------------------------------
 	void WorldRepService::shutdown() {
-		mDatabaseService->unregisterListener(mDbCallback);
+		mDatabaseService->unregisterListener(this);
 		mDatabaseService.setNull();
 		clearData();
 
@@ -100,40 +98,46 @@ namespace Opde {
 	}
 
 
-	// ---- The ServiceInterface mathods ---
 	//------------------------------------------------------
-	void WorldRepService::onDBChange(const DatabaseChangeMsg& m) {
-		LOG_DEBUG("WorldRepService::onDBChange called by a callback");
-		if (m.change == DBC_DROPPING) {
-			unload();
+	void WorldRepService::onDBLoad(const FileGroupPtr& db, uint32_t curmask) {
+		LOG_INFO("WorldRepService::onDBLoad called.");
+		
+		if (!(curmask & DBM_MIS_DATA))
 			return;
+		
+		// If there is some scene already, clear it
+		clearData();
+
+		int lightSize = 1;
+
+		FilePtr wrChunk;
+
+		if (db->hasFile("WR")) {
+			wrChunk = db->getFile("WR");
+		} else if (db->hasFile("WRRGB")) {
+			lightSize = 2;
+			wrChunk = db->getFile("WRRGB");
+		} else {
+			// Still no data?
+			OPDE_EXCEPT("Could not find WR nor WRRGB chunk...", "WorldRepService::loadFromDarkDatabase");
 		}
 
-		if (m.change == DBC_LOADING && m.dbtype == DBT_MISSION) {
-			// If there is some scene already, clear it
-			clearData();
-
-			int lightSize = 1;
-
-			FilePtr wrChunk;
-
-			if (m.db->hasFile("WR")) {
-				wrChunk = m.db->getFile("WR");
-			} else if (m.db->hasFile("WRRGB")) {
-				lightSize = 2;
-				wrChunk = m.db->getFile("WRRGB");
-			} else {
-				// Still no data?
-				OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Could not find WR nor WRRGB chunk...","WorldRepService::loadFromDarkDatabase");
-			}
-
-			loadFromChunk(wrChunk, lightSize);
-
-
-            // --- Finally, set sky according to the SKY chunk
-            // TODO: A good sky implementation
-			// setSkyBox(m.db);
-		}
+		loadFromChunk(wrChunk, lightSize);
+	}
+	
+	//------------------------------------------------------
+	void WorldRepService::onDBSave(const FileGroupPtr& db, uint32_t tgtmask) {
+		LOG_INFO("WorldRepService::onDBSave called.");
+		// TODO: Stub
+	}
+	
+	//------------------------------------------------------
+	void WorldRepService::onDBDrop(uint32_t dropmask) {
+		LOG_INFO("WorldRepService::onDBDrop called.");
+		// if mission or gamesys is dropped,
+		// drop here as well
+		if (dropmask & DBM_MIS_DATA)
+			unload();
 	}
 
 	//------------------------------------------------------
@@ -223,8 +227,8 @@ namespace Opde {
 		// -- Load the extra planes
 		wrChunk->read(&mExtraPlaneCount, sizeof(uint32_t));
 
-		mExtraPlanes = new WRPlane[mExtraPlaneCount];
-		wrChunk->read(mExtraPlanes, sizeof(WRPlane) * mExtraPlaneCount);
+		mExtraPlanes = new DPlane[mExtraPlaneCount];
+		wrChunk->read(mExtraPlanes, sizeof(DPlane) * mExtraPlaneCount);
 
 		// --------------------------------------------------------------------------------
 		// -- Load and process the BSP tree
@@ -352,7 +356,7 @@ namespace Opde {
 
 
 	//-----------------------------------------------------------------------
-	Ogre::Plane WorldRepService::constructPlane(WRPlane plane) {
+	Ogre::Plane WorldRepService::constructPlane(const DPlane& plane) {
 		Vector3 normal(plane.normal.x, plane.normal.y, plane.normal.z);
 		float dist = plane.d;
 		Ogre::Plane oplane;

@@ -51,7 +51,7 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void GameService::load(const std::string& filename) {
-		mDbService->load(filename);
+		mDbService->load(filename, DBM_COMPLETE);
 	}
 
 	//-------------------------- Factory implementation

@@ -382,17 +382,21 @@ namespace Opde {
 		mFamilies = NULL;
 
 		// db listener registration
-		mDbCallback = DatabaseService::ListenerPtr(new ClassCallback<DatabaseChangeMsg, MaterialService> (this, &MaterialService::onDBChange));
-
 		mDatabaseService = GET_SERVICE(DatabaseService);
 
-		mDatabaseService->registerListener(mDbCallback, DBP_MATERIAL);
+		mDatabaseService->registerListener(this, DBP_MATERIAL);
 
 		mLightService = GET_SERVICE(LightService);
 
 		mConfigService = GET_SERVICE(ConfigService);
 	}
 
+
+	//------------------------------------------------------
+	void MaterialService::shutdown() {
+		if (!mDatabaseService.isNull())
+			mDatabaseService->unregisterListener(this);
+	}
 
 	//-----------------------------------------------------------------------
 	void MaterialService::loadFlowTextures(const FileGroupPtr& db) {
@@ -640,23 +644,28 @@ namespace Opde {
 		}
 	}
 
-
 	//------------------------------------------------------
-	void MaterialService::onDBChange(const DatabaseChangeMsg& m) {
-		LOG_INFO("MaterialService::onDBChange called.");
-		if (m.change == DBC_DROPPING) {
+	void MaterialService::onDBLoad(const FileGroupPtr& db, uint32_t curmask) {
+		LOG_INFO("MaterialService::onDBLoad called.");
+		
+		// see if we're facing a mission file
+		if (curmask & DBM_MIS_DATA)
+			loadMaterials(db);
+	}
+	
+	//------------------------------------------------------
+	void MaterialService::onDBSave(const FileGroupPtr& db, uint32_t tgtmask) {
+		LOG_INFO("MaterialService::onDBSave called.");
+		// TODO: Save the materials to the database
+	}
+	
+	//------------------------------------------------------
+	void MaterialService::onDBDrop(uint32_t tgtdrop) {
+		LOG_INFO("MaterialService::onDBDrop called.");
+		// if mission or gamesys is dropped,
+		// drop here as well
+		if (tgtdrop & DBM_MIS_DATA)
 			clear();
-			return;
-		}
-
-		if (m.change == DBC_LOADING && m.dbtype == DBT_MISSION) {
-			// If there is some scene already, clear it
-			clear();
-
-
-			// Initialize materials here:
-			loadMaterials(m.db);
-		}
 	}
 
 

@@ -183,6 +183,8 @@ namespace Opde {
 
 			/** Internal method that returns entity info for a given object ID, or NULL if such does not exist */
 			EntityInfo* _getEntityInfo(int oid);
+			
+			inline const RenderWindowSize& getCurrentScreenSize() const { return mCurrentSize; };
 
 		protected:
 
@@ -303,6 +305,9 @@ namespace Opde {
 			RenderTypeProperty* mRenderTypeProperty;
 			RenderAlphaProperty* mRenderAlphaProperty;
 			ZBiasProperty* mZBiasProperty;
+		
+		private:
+			RenderWindowSize mCurrentSize;
 	};
 
 	/// Shared pointer to Link service

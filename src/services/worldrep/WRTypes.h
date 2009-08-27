@@ -27,6 +27,7 @@
 
 #include "LightmapAtlas.h"
 #include "integers.h"
+#include "DarkCommon.h"
 
 // the only one which collided is wr_cell_hdr, but to be sure...
 #pragma pack(push, 1)
@@ -37,13 +38,6 @@ namespace Opde {
 		uint32_t  	unk;
 		uint32_t	numCells;
 	} WRHeader;
-
-	typedef struct { // SIZE: 8
-		float	 x;
-		float    y;
-		float    z;
-	} WRVector3;
-
 
 	typedef struct { // SIZE: 31
 		uint8_t	numVertices; // vertex count
@@ -62,15 +56,9 @@ namespace Opde {
 		uint8_t	flowGroup; // 0-no flow group, otherwise the flow group no.
 
 		// cell's bounding sphere
-		WRVector3	center;
+		DVector3	center;
 		float	radius; // Only an approximation, but enough to guarantee that every point in the cell is enclosed by this sphere.
 	} WRCellHeader;
-
-	typedef struct { // SIZE: 8
-		float	x;
-		float   y;
-	} WRVector2;
-
 
 	typedef struct { // SIZE: 8
 		uint8_t	flags; // Nonzero for watered polygons
@@ -83,8 +71,8 @@ namespace Opde {
 	}  WRPolygon;
 
 	typedef struct { // SIZE: 12+12+12+12 = 48
-		WRVector3	axisU; // U axis
-		WRVector3	axisV; // V axis - both directions of texture growth (e.g. U axis and V axis) - and they are not normalised! (in some way related to scale)
+		DVector3	axisU; // U axis
+		DVector3	axisV; // V axis - both directions of texture growth (e.g. U axis and V axis) - and they are not normalised! (in some way related to scale)
 
 		int16_t		u; // txt shift u (must divide by 1024 to get float number (and I dunno why, I had to invert it too))
 		int16_t		v; // txt shift v
@@ -94,14 +82,8 @@ namespace Opde {
 		uint16_t		unk; // something related to texture cache
 
 		float		scale; // scale of the texture
-		WRVector3	center;
+		DVector3	center;
 	} WRPolygonTexturing;
-
-	// a plane
-	typedef struct { // SIZE: 16
-		WRVector3	normal;
-		float		d;
-	} WRPlane;
 
 	/** Lightmap Information struct. */
 	typedef struct { // SIZE: 4+4+12 = 20

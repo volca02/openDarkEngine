@@ -80,7 +80,7 @@ namespace Opde {
 
 
 	/** @brief Material Service - Service which handles materials for terrain and objects - their loading, unloading, cloning, etc. */
-	class OPDELIB_EXPORT MaterialService : public ServiceImpl<MaterialService> {
+	class OPDELIB_EXPORT MaterialService : public ServiceImpl<MaterialService>, public DatabaseListener {
 		public:
 			/** Constructor
 			 * @param manager The ServiceManager that created this service
@@ -129,9 +129,24 @@ namespace Opde {
 
 			/// @see Service::bootstrapFinished
 			void bootstrapFinished();
+			
+			/// @see Service::shutdown
+			void shutdown();
 
 			/// DB load/unload event callback method
-			void onDBChange(const DatabaseChangeMsg& m);
+			// void onDBChange(const DatabaseChangeMsg& m);
+// 			
+			/** Database load callback 
+			* @see DatabaseListener::onDBLoad */
+			void onDBLoad(const FileGroupPtr& db, uint32_t curmask);
+			
+			/** Database save callback 
+			* @see DatabaseListener::onDBSave */
+			void onDBSave(const FileGroupPtr& db, uint32_t tgtmask);
+			
+			/** Database drop callback 
+			* @see DatabaseListener::onDBDrop */
+			void onDBDrop(uint32_t dropmask);
 
 			/** Called by loadMaterials. Load the FLOW_TEX and initializes \@templateXXXX according to IN and OUT texture numbers and names. Needs material definitions
 			 * named water/AAAA_in and water/AAAA_out where AAAA is the expected flow texture name (usualy bl, gr, l2, l3, l4) */
@@ -176,9 +191,6 @@ namespace Opde {
 
 			// Texture scale setter (for custom texture overrides)
 			void setWRTextureScale(unsigned int idx, std::pair<float, float> scale);
-
-			/// Database callback
-			DatabaseService::ListenerPtr mDbCallback;
 
 			/// Database service
 			DatabaseServicePtr mDatabaseService;

@@ -54,49 +54,87 @@ namespace Opde {
 	//------------------------------------------------------
 	DatabaseService::~DatabaseService() {
 	}
-
+	
 	//------------------------------------------------------
-	void DatabaseService::load(const std::string& filename) {
+	void DatabaseService::load(const std::string& filename, uint32_t loadMask) {
 		LOG_DEBUG("DatabaseService::load - Loading requested file %s", filename.c_str());
 		
-		// if there is another database in hold
-		if (!mCurDB.isNull())
-			unload();
-
-		// Try to find the database
-		mCurDB = getDBFileNamed(filename);
-
 		mLoadingStatus.reset();
-        
-		// TODO: Overall coarse step - calculated from TagFile Count * mListeners.size()
-		mLoadingStatus.totalCoarse = mListeners.size() * 2;
-        
-		// Currently hardcoded to mission db
-		_loadMissionDB(mCurDB);
-
+		
+		// drop first
+		unload(DBM_COMPLETE);
+		
+		// do a recursive load as needed
+		recursiveMergeLoad(filename, loadMask);
+		
 		LOG_DEBUG("DatabaseService::load - end()");
 	}
 	
 	//------------------------------------------------------
-	void DatabaseService::loadGameSys(const std::string& filename) {
-		LOG_DEBUG("DatabaseService::loadGameSys - Loading requested file %s", filename.c_str());
+	void DatabaseService::recursiveMergeLoad(const std::string& filename, uint32_t loadMask) {
+		// load the database, but see for the parents first
+		LOG_DEBUG("DatabaseService::recursiveMergeLoad - Recurse load of file %s", filename.c_str());
 		
-		// if there is another database in hold
-		if (!mCurDB.isNull())
-			unload();
-
-		// Try to find the database
-		mCurDB = getDBFileNamed(filename);
+		FileGroupPtr db = getDBFileNamed(filename);
+		
+		// the coarse count is lifted every call to ensure all the databases are counted
+		mLoadingStatus.totalCoarse++;
+		
+		uint32_t ft = getFileType(db);
+		
+		const char* parentDbTag = getParentDBTagName(ft);
+		
+		if (parentDbTag != NULL) {
+			// load the parent first
+			// but filter out any bits overriden by overlay database
+			// this is to ensure that .sav data will be loaded instead of .mis, for example
+			
+			std::string parentFile = loadFileNameFromTag(db, parentDbTag);
+			recursiveMergeLoad(parentFile, loadMask & ~ft);
+		}
+		
+		broadcastOnDBLoad(db, ft & loadMask);
+	}
+	
+	//------------------------------------------------------
+	void DatabaseService::mergeLoad(const std::string& filename, uint32_t loadMask) {
+		FileGroupPtr db = getDBFileNamed(filename);
+		uint32_t ft = getFileType(db);
+		
+		LOG_DEBUG("DatabaseService::mergeLoad - Merge load of file %s", filename.c_str());
+		
+		mLoadingStatus.reset();
+		mLoadingStatus.totalCoarse++;
+		
+		broadcastOnDBLoad(db, ft & loadMask);
+		
+		LOG_DEBUG("DatabaseService::mergeLoad - end()");
+	}
+	
+	//------------------------------------------------------
+	void DatabaseService::save(const std::string& filename, uint32_t saveMask) {
+		// just prepare the progress and delegate to the broadcast
+		FilePtr fp = FilePtr(new StdFile(filename, File::FILE_RW));
+		FileGroupPtr tgtdb = FileGroupPtr(new DarkFileGroup(fp));
+		
+		LOG_DEBUG("DatabaseService::save - Save to file %s, mask %X", filename.c_str(), saveMask);
 
 		mLoadingStatus.reset();
-        
-		// TODO: Overall coarse step - calculated from TagFile Count * mListeners.size()
-		mLoadingStatus.totalCoarse = mListeners.size();
-        
-		// Currently hardcoded to mission db
-		_loadGameSysDB(mCurDB);
+		mLoadingStatus.totalCoarse++;
+		
+		broadcastOnDBSave(tgtdb, saveMask);
+	}
+	
+	//------------------------------------------------------
+	void DatabaseService::unload(uint32_t dropMask) {
+		LOG_DEBUG("DatabaseService::unload");
+		
+		broadcastOnDBDrop(dropMask);
+		
+		/// Wipe out the file we used
+		mCurDB.setNull();
 
-		LOG_DEBUG("DatabaseService::loadGameSys - end()");
+		LOG_DEBUG("DatabaseService::unload - end()");
 	}
 
 	//------------------------------------------------------
@@ -108,26 +146,6 @@ namespace Opde {
 		return FileGroupPtr(new DarkFileGroup(fp));
 	}
 
-	//------------------------------------------------------
-	void DatabaseService::unload() {
-		LOG_DEBUG("DatabaseService::unload");
-		DatabaseChangeMsg m;
-
-		m.change = DBC_DROPPING;
-		m.dbtype = DBT_COMPLETE;
-		m.dbtarget = DBT_COMPLETE; // No meaning here, at least now.
-		// ^ It could be used to unload f.e. only mission or savegame, thus saving reload. This is a nice subject to think about, yes
-
-		m.db = mCurDB;
-
-		broadcastMessageReversed(m);
-
-		/// Wipe out the files we used
-		mCurDB.setNull();
-
-		LOG_DEBUG("DatabaseService::unload - end()");
-	}
-	
 	//------------------------------------------------------
 	void DatabaseService::fineStep(int count) {
 		// recalculate the status
@@ -141,67 +159,98 @@ namespace Opde {
 			(*mProgressListener)(mLoadingStatus);
 		}
 	}
+	
+	//------------------------------------------------------
+	void DatabaseService::registerListener(DatabaseListener* listener, size_t priority) {
+		mListeners.insert(std::make_pair(priority, listener));
+	}
+	
+	//------------------------------------------------------	
+	void DatabaseService::unregisterListener(DatabaseListener* listener) {
+		Listeners::iterator it = mListeners.begin();
+
+		while (it != mListeners.end()) {
+
+			if (it->second == listener) {
+				Listeners::iterator rem = it++;
+				mListeners.erase(rem);
+			} else {
+				it++;
+			}
+		}
+	}
 
 	//------------------------------------------------------
-	void DatabaseService::_loadMissionDB(const FileGroupPtr& db) {
-		LOG_DEBUG("DatabaseService::_loadMissionDB");
+	uint32_t DatabaseService::getFileType(const FileGroupPtr& db) {
+		// TODO: load FILE_TYPE for the first parameter
+		FilePtr fttag = db->getFile("FILE_TYPE");
+		
+		if (fttag.isNull()) {
+			// TODO: Exception, rather
+			LOG_FATAL("Database file did not contain FILE_TYPE tag");
+			return 0;
+		}
+		
+		
+		if (fttag->size() < sizeof(uint32_t)) {
+			// TODO: Exception, rather
+			LOG_FATAL("Database file did contain an invalid FILE_TYPE tag");
+			return 0;
+		}
+			
+		uint32_t filetype;
+		
+		fttag->readElem(&filetype, sizeof(uint32_t));
+		
+		return filetype;
+	}
 
-		// Get the gamesys, load
-		// GAM_FILE
-		FilePtr fdm = db->getFile("GAM_FILE");
+	//------------------------------------------------------
+	const char* DatabaseService::getParentDBTagName(uint32_t fileType) {
+		// fixed for now
+		if (fileType == DBM_FILETYPE_SAV)
+			return "MIS_FILE";
+		
+		if (fileType == DBM_FILETYPE_MIS)
+			return "GAM_FILE";
+		
+		return NULL;
+	}
+	
+	//------------------------------------------------------
+	std::string DatabaseService::loadFileNameFromTag(const Opde::FileGroupPtr& db, const char* tagname) {
+		FilePtr fdm = db->getFile(tagname);
 
-		// never happened
 		size_t gft_size = fdm->size();
-		char* data = new char[gft_size + 1];
-
+				
+		std::string res;
+		
+		char* data = NULL;
+		
+		data = new char[gft_size + 1];
 		data[0] = 0x0;
 		data[gft_size] = 0x0;
 
-		fdm->read(data, fdm->size());
+		fdm->read(data, fdm->size()); // TODO: Catch exception
 
-		FileGroupPtr gs = getDBFileNamed(data);
-
-		delete[] data;
-
-		_loadGameSysDB(gs);
-
-		// Load the Mission
-		// Create a DB change message, and broadcast
-		DatabaseChangeMsg m;
-
-		m.change = DBC_LOADING;
-		m.dbtype = DBT_MISSION;
-		m.dbtarget = DBT_MISSION; // TODO: Hardcoded
-		m.db = db;
-
-		broadcastMessage(m);
+		res = std::string(data);
+		
+		delete data;
+		
+		
+		return res;
 	}
 
 	//------------------------------------------------------
-	void DatabaseService::_loadGameSysDB(const FileGroupPtr& db) {
-		LOG_DEBUG("DatabaseService::_loadGameSysDB");
-
-		// Create a DB change message, and broadcast
-		DatabaseChangeMsg m;
-
-		m.change = DBC_LOADING;
-		m.dbtype = DBT_GAMESYS;
-		m.dbtarget = DBT_MISSION; // TODO: Hardcoded
-		m.db = db;
-
-		broadcastMessage(m);
-	}
-
-  
-	//------------------------------------------------------
-	void DatabaseService::broadcastMessage(const DatabaseChangeMsg& msg) {
+	void DatabaseService::broadcastOnDBLoad(const FileGroupPtr& db, uint32_t curmask) {
 		Listeners::iterator it = mListeners.begin();
 		
-
 		for (; it != mListeners.end(); ++it) {
 			unsigned long sttime = Ogre::Root::getSingleton().getTimer()->getMilliseconds();
-			// Use the callback functor to fire the callback
-			(*it->second)(msg);
+			
+			// Inform about the load
+			it->second->onDBLoad(db, curmask);
+			
 			unsigned long now = Ogre::Root::getSingleton().getTimer()->getMilliseconds();
 			
 			LOG_INFO("DatabaseService: Operation took %f seconds", (float)(now-sttime) / 1000);
@@ -217,14 +266,20 @@ namespace Opde {
 			}
 		}
 	}
-
+		
 	//------------------------------------------------------
-	void DatabaseService::broadcastMessageReversed(const DatabaseChangeMsg& msg) {
-		Listeners::reverse_iterator it = mListeners.rbegin();
-
-		for (; it != mListeners.rend(); ++it) {
-			// Use the callback functor to fire the callback
-			(*it->second)(msg);
+	void DatabaseService::broadcastOnDBSave(const FileGroupPtr& db, uint32_t tgtmask) {
+		Listeners::iterator it = mListeners.begin();
+		
+		for (; it != mListeners.end(); ++it) {
+			unsigned long sttime = Ogre::Root::getSingleton().getTimer()->getMilliseconds();
+			
+			// Inform about the save
+			it->second->onDBSave(db, tgtmask);
+			
+			unsigned long now = Ogre::Root::getSingleton().getTimer()->getMilliseconds();
+			
+			LOG_INFO("DatabaseService: Operation took %f seconds", (float)(now-sttime) / 1000);
             
 			// recalculate the status
 			mLoadingStatus.currentCoarse++;
@@ -237,7 +292,33 @@ namespace Opde {
 			}
 		}
 	}
-
+		
+	//------------------------------------------------------
+	void DatabaseService::broadcastOnDBDrop(uint32_t dropmask) {
+		Listeners::reverse_iterator it = mListeners.rbegin();
+		
+		for (; it != mListeners.rend(); ++it) {
+			unsigned long sttime = Ogre::Root::getSingleton().getTimer()->getMilliseconds();
+			
+			// Inform about the drop
+			it->second->onDBDrop(dropmask);
+			
+			unsigned long now = Ogre::Root::getSingleton().getTimer()->getMilliseconds();
+			
+			LOG_INFO("DatabaseService: Operation took %f seconds", (float)(now-sttime) / 1000);
+            
+			// recalculate the status
+			mLoadingStatus.currentCoarse++;
+            
+			mLoadingStatus.recalc();
+                        
+			// call the progress listener if it is set
+			if (!mProgressListener.isNull()) {
+				(*mProgressListener)(mLoadingStatus);
+			}
+		}
+	}
+  
 	//-------------------------- Factory implementation
 	std::string DatabaseServiceFactory::mName = "DatabaseService";
 

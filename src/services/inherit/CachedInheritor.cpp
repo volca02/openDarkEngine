@@ -80,7 +80,7 @@ namespace Opde {
         // First, get the old effective ID
         int oldEffID = getEffectiveID(objID);
 
-        // Let' vote for a new effective object ID
+        // Let's vote for a new effective object ID
         InheritQueryResultPtr sources = mInheritService->getSources(objID);
 
         int maxPrio = -1; // no inheritance indicator itself
@@ -171,7 +171,12 @@ namespace Opde {
 
     //------------------------------------------------------
     void CachedInheritor::onInheritMsg(const InheritChangeMsg& msg) {
-        // Received an even about inheritance change. Must refresh target object of such change
+        if (msg.change == INH_CLEARED_ALL) {
+			clear();
+			return;
+        }
+        
+    	// Received an even about inheritance change. Must refresh target object of such change
         refresh(msg.dstID);
     }
     

@@ -180,12 +180,13 @@ namespace Opde {
 			mRenderTypeProperty(NULL),
 			mRenderAlphaProperty(NULL),
 			mZBiasProperty(NULL) {
-	    // TODO: This is just plain wrong. This service should be the maintainer of the used scene manager, if any other service needs the direct handle, etc.
-	    // The fact is this service is probably game only, and should be the initialiser of graphics as the whole. This will be the
-	    // modification that should be done soon in order to let the code look and be nice
-	    // FIX!
-	    mRoot = Root::getSingletonPtr();
-	    mManualBinFileLoader = new ManualBinFileLoader();
+		
+		// TODO: This is just plain wrong. This service should be the maintainer of the used scene manager, if any other service needs the direct handle, etc.
+		// The fact is this service is probably game only, and should be the initialiser of graphics as the whole. This will be the
+		// modification that should be done soon in order to let the code look and be nice
+		// FIX!
+		mRoot = Root::getSingletonPtr();
+		mManualBinFileLoader = new ManualBinFileLoader();
 
 		mLoopClientDef.id = LOOPCLIENT_ID_RENDERER;
 		mLoopClientDef.mask = LOOPMODE_RENDER;
@@ -215,7 +216,7 @@ namespace Opde {
 	void RenderService::shutdown() {
 		LOG_INFO("RenderService::shutdown()");
 
-        clear();
+		clear();
 
 		if (mHasRefsProperty) {
 			mPropertyService->unregisterPropertyGroup(mHasRefsProperty);
@@ -267,22 +268,22 @@ namespace Opde {
 		mPropertyService.setNull();
 	}
 
-    // --------------------------------------------------------------------------
-    bool RenderService::init() {
-        // TODO: These can be gathered from the config file. Usage of the config service would be a nice thing to do
-        if( !mRoot->restoreConfig() ) {
-        		// If there is no config file, show the configuration dialog
-        		if( !mRoot->showConfigDialog() ) {
-            			LOG_ERROR("RenderService::init: The renderer setup was canceled. Application termination in progress.");
-            			return false;
-        		}
-        }
+	// --------------------------------------------------------------------------
+	bool RenderService::init() {
+		// TODO: These can be gathered from the config file. Usage of the config service would be a nice thing to do
+		if( !mRoot->restoreConfig() ) {
+			// If there is no config file, show the configuration dialog
+			if( !mRoot->showConfigDialog() ) {
+				LOG_ERROR("RenderService::init: The renderer setup was canceled. Application termination in progress.");
+				return false;
+			}
+		}
 
-        // Initialise and create a default rendering window
+		// Initialise and create a default rendering window
 		mRenderWindow = mRoot->initialise( true, "openDarkEngine" );
 
-        // Dark scene manager factory
-        LOG_DEBUG("RenderService::init(): new DarkSceneManagerFactory()");
+		// Dark scene manager factory
+		LOG_DEBUG("RenderService::init(): new DarkSceneManagerFactory()");
 		mDarkSMFactory = new DarkSceneManagerFactory();
 
 		// Register
@@ -321,34 +322,34 @@ namespace Opde {
     }
 
 
-    // --------------------------------------------------------------------------
-    Ogre::Root* RenderService::getOgreRoot() {
-        assert(mRoot);
-        return mRoot;
-    }
-
-    // --------------------------------------------------------------------------
-    Ogre::SceneManager* RenderService::getSceneManager() {
-        assert(mSceneMgr);
-        return mSceneMgr;
-    }
-
-    // --------------------------------------------------------------------------
-    Ogre::RenderWindow* RenderService::getRenderWindow() {
-        assert(mRenderWindow);
-        return mRenderWindow;
-    }
+	// --------------------------------------------------------------------------
+	Ogre::Root* RenderService::getOgreRoot() {
+		assert(mRoot);
+		return mRoot;
+	}
 
 	// --------------------------------------------------------------------------
-    Ogre::Viewport* RenderService::getDefaultViewport() {
-    	assert(mDefaultCamera);
-    	return mDefaultCamera->getViewport();
-    }
+	Ogre::SceneManager* RenderService::getSceneManager() {
+		assert(mSceneMgr);
+		return mSceneMgr;
+	}
 
-    // --------------------------------------------------------------------------
-    Ogre::Camera* RenderService::getDefaultCamera() {
+	// --------------------------------------------------------------------------
+	Ogre::RenderWindow* RenderService::getRenderWindow() {
+		assert(mRenderWindow);
+		return mRenderWindow;
+	}
+
+		// --------------------------------------------------------------------------
+	Ogre::Viewport* RenderService::getDefaultViewport() {
+		assert(mDefaultCamera);
+		return mDefaultCamera->getViewport();
+	}
+
+	// --------------------------------------------------------------------------
+	Ogre::Camera* RenderService::getDefaultCamera() {
 		return mDefaultCamera;
-    }
+	}
 
 	// --------------------------------------------------------------------------
 	void RenderService::setScreenSize(bool fullScreen, unsigned int width, unsigned int height) {
@@ -356,13 +357,14 @@ namespace Opde {
 
 		mRenderWindow->setFullscreen(fullScreen, width, height);
 
+		mCurrentSize.fullscreen = fullScreen;
+		mCurrentSize.width = width;
+		mCurrentSize.height = height;
+		
 		RenderServiceMsg msg;
 
 		msg.msg_type = RENDER_WINDOW_SIZE_CHANGE;
-
-		msg.size.fullscreen = fullScreen;
-		msg.size.width = width;
-		msg.size.height = height;
+		msg.size = mCurrentSize;
 
 		broadcastMessage(msg);
 	}
@@ -393,7 +395,7 @@ namespace Opde {
 		mPropPosition = mPropertyService->getPropertyGroup("Position");
 
 		if (mPropPosition == NULL)
-            OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "RenderService::bootstrapFinished");
+			OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "RenderService::bootstrapFinished");
 
 		// listener to the position property to control the scenenode
 		PropertyGroup::ListenerPtr cposc(
@@ -420,31 +422,31 @@ namespace Opde {
 		Ogre::WindowEventUtilities::messagePump();
 	}
 
-    // --------------------------------------------------------------------------
-    void RenderService::prepareMesh(const Ogre::String& name) {
-        String fname = name + ".mesh";
+	// --------------------------------------------------------------------------
+	void RenderService::prepareMesh(const Ogre::String& name) {
+		String fname = name + ".mesh";
 
 		if (!Ogre::MeshManager::getSingleton().resourceExists(fname)) {
-            // Undefine in advance, so there will be no clash
-            Ogre::MeshManager::getSingleton().remove(fname);
-            // If it is not found
-            LOG_DEBUG("RenderService::prepareMesh: Mesh definition for %s not found, loading manually from .bin file...", name.c_str());
-            // do a create
+			// Undefine in advance, so there will be no clash
+			Ogre::MeshManager::getSingleton().remove(fname);
+			// If it is not found
+			LOG_DEBUG("RenderService::prepareMesh: Mesh definition for %s not found, loading manually from .bin file...", name.c_str());
+			// do a create
 
-            try {
-                Ogre::MeshPtr mesh1 = Ogre::MeshManager::getSingleton().create(fname, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                   true, mManualBinFileLoader);
-            } catch (FileNotFoundException) {
-                LOG_ERROR("RenderService::prepareMesh: Could not find the requested model %s", name.c_str());
-            } catch (Opde::FileException) {
-                LOG_ERROR("RenderService::prepareMesh: Could not load the requested model %s", name.c_str());
-            }
-        }
+			try {
+				Ogre::MeshPtr mesh1 = Ogre::MeshManager::getSingleton().create(fname, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+					true, mManualBinFileLoader);
+			} catch (FileNotFoundException) {
+				LOG_ERROR("RenderService::prepareMesh: Could not find the requested model %s", name.c_str());
+			} catch (Opde::FileException) {
+				LOG_ERROR("RenderService::prepareMesh: Could not load the requested model %s", name.c_str());
+			}
+		}
     }
 
-    // --------------------------------------------------------------------------
-    void RenderService::createObjectModel(int id) {
-    	Ogre::String idstr = StringConverter::toString(id);
+	// --------------------------------------------------------------------------
+	void RenderService::createObjectModel(int id) {
+		Ogre::String idstr = StringConverter::toString(id);
 
 		Entity *ent = mSceneMgr->createEntity( "Object" + idstr, DEFAULT_RAMP_OBJECT_NAME);
 
@@ -474,10 +476,10 @@ namespace Opde {
 		ei->refreshVisibility();
 
 		mEntityMap.insert(make_pair(id, ei));
-    }
+	}
 
-    // --------------------------------------------------------------------------
-    void RenderService::removeObjectModel(int id) {
+	// --------------------------------------------------------------------------
+	void RenderService::removeObjectModel(int id) {
 		// Not validated in prop service to be any different
 		// just remove the entity, will add a new one
 		ObjectEntityMap::iterator it = mEntityMap.find(id);
@@ -488,7 +490,7 @@ namespace Opde {
 			// erase the record itself - will destroy the EntityInfo
 			mEntityMap.erase(it);
 		}
-    }
+	}
 
 	// --------------------------------------------------------------------------
 	void RenderService::setObjectModel(int id, const std::string& name) {
@@ -539,7 +541,7 @@ namespace Opde {
 		ei->setSkip(false);
 	}
 
-    // --------------------------------------------------------------------------
+	// --------------------------------------------------------------------------
 	void RenderService::prepareEntity(Ogre::Entity* e) {
 		e->_initialise(true);
 
@@ -561,13 +563,13 @@ namespace Opde {
 		}
 	}
 
-    // --------------------------------------------------------------------------
-    void RenderService::clear() {
+	// --------------------------------------------------------------------------
+	void RenderService::clear() {
 		// will destroy all EntityInfos
-        mEntityMap.clear();
+		mEntityMap.clear();
 
 		mObjectToNode.clear();
-    }
+	}
 
 
 	// --------------------------------------------------------------------------
@@ -724,6 +726,7 @@ namespace Opde {
 		createRampMesh();
 	}
 
+	// --------------------------------------------------------------------------
 	void RenderService::createRampMesh() {
 		// Code copied from Ogre3D wiki, and modified (Thanks to the original author for saving my time!)
 		/// Create the mesh via the MeshManager

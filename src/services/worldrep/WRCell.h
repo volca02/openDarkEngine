@@ -68,7 +68,7 @@ namespace Opde {
 			WRCellHeader	mHeader;
 
 			/** the list of the cell's vertices (count is in the header) */
-			WRVector3	*mVertices;
+			DVector3	*mVertices;
 
 			/** the list of the polygon map headers */
 			WRPolygon	*mFaceMaps;
@@ -95,11 +95,11 @@ namespace Opde {
 
 			/** Inserts a new vertex into the manual object. Calculates all the UV values needed
 			* @deprecated For moving towards the geometry by buffers */
-			void insertTexturedVertex(Ogre::ManualObject *manual, int faceNum, WRVector3 pos, const Ogre::Vector2& displacement,
+			void insertTexturedVertex(Ogre::ManualObject *manual, int faceNum, DVector3 pos, const Ogre::Vector2& displacement,
 					const std::pair< Ogre::uint, Ogre::uint >& dimensions, Ogre::Vector3 origin);
 
 			/** Constructs a BSPVertex out of our data */
-			void constructBspVertex(int faceNum, WRVector3 pos, const Ogre::Vector2& displacement, const std::pair< Ogre::uint, Ogre::uint >& dimensions, BspVertex *vtx);
+			void constructBspVertex(int faceNum, DVector3 pos, const Ogre::Vector2& displacement, const std::pair< Ogre::uint, Ogre::uint >& dimensions, BspVertex *vtx);
 
 			/** Calculates the Lightmap center in texture space, using Bounding coordinates as the base. */
 			Ogre::Vector2 calcLightmapDisplacement(int polyNum);
