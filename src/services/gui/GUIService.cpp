@@ -37,22 +37,26 @@ namespace Opde {
     template<> const size_t ServiceImpl<GUIService>::SID = __SERVICE_ID_GUI;
     
     GUIService::GUIService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::GUIService >(manager, name),
-			mInputSrv(NULL),
-			mRenderSrv(NULL),
 			mActive(false),
 			mVisible(false),
-			mRenderServiceListenerID(0) {
-    }
+			mActiveSheet(),
+			mConsole(NULL),
+			mCoreAtlas(NULL),
+			mConsoleFont(NULL),
+			mRenderServiceListenerID(0),
+			mInputSrv(NULL),
+			mRenderSrv(NULL) {
+				
+		mLoopClientDef.id = LOOPCLIENT_ID_GUI;
+		mLoopClientDef.mask = LOOPMODE_GUI;
+		mLoopClientDef.name = mName;
+		mLoopClientDef.priority = LOOPCLIENT_PRIORITY_GUI;
+	}
 
-    // -----------------------------------
-    GUIService::~GUIService() {
-    	if (!mInputSrv.isNull()) {
-    		mInputSrv->unsetDirectListener();
-    	}
-
-    	if (!mRenderSrv.isNull())
-			mRenderSrv->unregisterListener(mRenderServiceListenerID);
-    }
+	// -----------------------------------
+	GUIService::~GUIService() {
+		delete mConsole;
+	}
 
 	// -----------------------------------
 	void GUIService::setActive(bool active) {
@@ -74,6 +78,12 @@ namespace Opde {
 	// -----------------------------------
 	void GUIService::setVisible(bool visible) {
 		mVisible = visible;
+		
+		if (!mVisible) {
+			hideConsole();
+			setActive(false);
+		}
+		
 	}
 
 
@@ -86,7 +96,10 @@ namespace Opde {
 	void GUIService::bootstrapFinished() {
 		mInputSrv = GET_SERVICE(InputService);
 		mRenderSrv = GET_SERVICE(RenderService);
-
+		mDrawSrv = GET_SERVICE(DrawService);
+		mConfigSrv = GET_SERVICE(ConfigService);
+		mLoopSrv = GET_SERVICE(LoopService);
+		
         	assert(mRenderSrv->getSceneManager());
 
 		// handler for direct listener
@@ -95,12 +108,61 @@ namespace Opde {
 		// Register as a listener for the resolution changes
 		RenderService::ListenerPtr renderServiceListener(new ClassCallback<RenderServiceMsg, GUIService>(this, &GUIService::onRenderServiceMsg));
 		mRenderServiceListenerID = mRenderSrv->registerListener(renderServiceListener);
+		
+		InputService::ListenerPtr showConsoleListener(new ClassCallback<InputEventMsg, GUIService>(this, &GUIService::onShowConsole));
+		
+		mInputSrv->registerCommandTrap("show_console", showConsoleListener);
+		
+		mLoopSrv->addLoopClient(this);
+		
+		// Core rendering sources
+		mConfigSrv->setParamDescription("console_font_name", "Font file name of the base console font used for debuggging");
+		mConfigSrv->setParamDescription("console_font_group", "Resource group of the base console font");
+		
+		mConsoleFontName = mConfigSrv->getParam("console_font_name");
+		mConsoleFontGroup = mConfigSrv->getParam("console_font_group");
+		// TODO: Do we need palette for the console font?
+		
+		mCoreAtlas = mDrawSrv->createAtlas();
+		mDrawSrv->setFontPalette(ManualFonFileLoader::ePT_Default);
+		mConsoleFont = mDrawSrv->loadFont(mCoreAtlas, mConsoleFontName, mConsoleFontGroup);
+		
+		// create the console.
+		mConsole = new ConsoleGUI(this);
+	}
+
+	// -----------------------------------
+	void GUIService::shutdown() {
+		if (!mInputSrv.isNull()) {
+			mInputSrv->unsetDirectListener();
+		}
+
+		if (!mRenderSrv.isNull())
+			mRenderSrv->unregisterListener(mRenderServiceListenerID);
+		
+		mLoopSrv->removeLoopClient(this);
+		
+		mInputSrv->unregisterCommandTrap("show_console");
+		
+		delete mConsole;
+		
+		mRenderSrv.setNull();
+		mInputSrv.setNull();
+		mDrawSrv.setNull();
+		mConfigSrv.setNull();
+		mLoopSrv.setNull();
 	}
 
 
 	// -----------------------------------
 	bool GUIService::keyPressed( const OIS::KeyEvent &e ) {
-        	return true;
+		if (mConsole && mConsole->isActive()) {
+			mConsole->injectKeyPress(e);
+			return true;
+		} else {
+			// TODO: Inject into the focussed GUI object
+			return true;
+		}
 	}
 
 	// -----------------------------------
@@ -149,9 +211,74 @@ namespace Opde {
 
 	// -----------------------------------
 	void GUIService::onRenderServiceMsg(const RenderServiceMsg& message) {
-		// TODO: Inform the manager about the resolution change
+		// Inform the console about the resolution change
+		if (mConsole)
+			mConsole->resolutionChanged(message.size.width, message.size.height);
+		
+		// TODO: Inform the GUI components as well?
+	}
+	
+	// -----------------------------------
+	void GUIService::onShowConsole(const InputEventMsg& iem) {
+		if (mConsole && mConsole->isActive()) {
+			hideConsole();
+		} else {
+			showConsole();
+		}
 	}
 
+	// -----------------------------------
+	void GUIService::showConsole() {
+		if (!mConsole)
+			return;
+		
+		// backup the previous situation
+		mCBActive = mActive;
+		mCBSheet = mActiveSheet;
+		mCBVisible = mVisible;
+		
+		// Activate the console
+		mConsole->setActive(true);
+		
+		// activate GUI
+		setActive(true);
+		setVisible(true);
+	}
+
+
+	// -----------------------------------
+	void GUIService::hideConsole() {
+		if (!mConsole)
+			return;
+		
+		mConsole->setActive(false);
+		
+		// restore the previous situation
+		mDrawSrv->setActiveSheet(mCBSheet);
+		setActive(mCBActive);
+		setVisible(mCBVisible);
+	}
+	
+
+	// -----------------------------------
+	void GUIService::loopStep(float deltaTime) {
+		// hmm. console update here
+		if (mConsole)
+			mConsole->update(deltaTime * 1000);
+	}
+
+	// -----------------------------------
+	FontDrawSourcePtr GUIService::getConsoleFont() const {
+		return mConsoleFont;
+	}
+
+
+	// -----------------------------------
+	TextureAtlasPtr GUIService::getCoreAtlas() const {
+		return mCoreAtlas;
+	}
+
+	
 	//-------------------------- Factory implementation
 	std::string GUIServiceFactory::mName = "GUIService";
 

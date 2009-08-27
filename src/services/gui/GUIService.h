@@ -28,15 +28,19 @@
 
 #include "config.h"
 
+#include "ServiceCommon.h"
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
 #include "InputService.h"
+#include "DrawService.h"
+#include "ConfigService.h"
+#include "ConsoleGUI.h"
 
 namespace Opde {
 
 	/** @brief GUI service - service which handles user interfaces
-	  * @note Currently this class does nothing useful. It should be able to handle mouse and screen input event routing for gui modes */
-	class OPDELIB_EXPORT GUIService : public ServiceImpl<GUIService>, public DirectInputListener {
+	  * @note This class also handles console and show_console input command */
+	class OPDELIB_EXPORT GUIService : public ServiceImpl<GUIService>, public DirectInputListener, public LoopClient {
 		public:
 			GUIService(ServiceManager *manager, const std::string& name);
 			virtual ~GUIService();
@@ -53,16 +57,34 @@ namespace Opde {
 			* @param visible If true, the active sheet is set to show(), if false, set to hide()
 			*/
 			void setVisible(bool visible);
-
+			
+			/** Returns the pre-prepared console font. Used to render console and some debug info.
+			*/
+			FontDrawSourcePtr getConsoleFont() const;
+			
+			/** Returns the atlas containing the core render sources - mouse cursor, console font, etc. 
+			* Use this to render various debug overlays and stuff like that. */
+			TextureAtlasPtr getCoreAtlas() const;
 
 		protected:
 			// Service initialization related methods
 			bool init();
 
 			void bootstrapFinished();
+			
+			void shutdown();
 
 			void onRenderServiceMsg(const RenderServiceMsg& message);
-
+			
+			void onShowConsole(const InputEventMsg& iem);
+			
+			void hideConsole();
+			
+			void showConsole();
+			
+			/// Loop step event
+			void loopStep(float deltaTime);
+			
 			// Input related methods
 			bool keyPressed( const OIS::KeyEvent &e );
 			bool keyReleased( const OIS::KeyEvent &e );
@@ -76,16 +98,59 @@ namespace Opde {
 			virtual bool buttonPressed(const OIS::JoyStickEvent &arg, int button);
 			virtual bool buttonReleased(const OIS::JoyStickEvent &arg, int button);
 
-			InputServicePtr mInputSrv;
-			RenderServicePtr mRenderSrv;
-
+		private:
 			/// Activity indicator
 			bool mActive;
 
 			/// Visibility indicator
 			bool mVisible;
+			
+			/// Currently visible sheet
+			DrawSheetPtr mActiveSheet;
+			
+			/// Console frontend - GUI render of the console
+			ConsoleGUI* mConsole;
+			
+			// --- Console backup ---
+			/// Console Backup - activeness flag
+			bool mCBActive;
+			
+			/// Console Backup - visibility flag
+			bool mCBVisible;
+			
+			/// Console Backup - prev. active sheet
+			DrawSheetPtr mCBSheet;
+			
+			// --- Core rendering ---
+			/// Core rendering atlas. Various overlays, mouse cursor, etc...
+			TextureAtlasPtr mCoreAtlas;
+			
+			/// Console font - automatically loaded upon bootstrap finish...
+			FontDrawSourcePtr mConsoleFont;
+			
+			/// Console font name
+			std::string mConsoleFontName;
+			
+			/// Console font group
+			std::string mConsoleFontGroup;
 
+			/// Render service listener ID (for resolution changes)
 			RenderService::ListenerID mRenderServiceListenerID;
+
+			/// Input service ptr - used for input handling
+			InputServicePtr mInputSrv;
+			
+			/// Render service ptr - used for various utilitary needs
+			RenderServicePtr mRenderSrv;
+			
+			/// Loop service ptr - used for animation and other things
+			LoopServicePtr mLoopSrv;
+
+			/// Draw service ptr - used for gui rendering itself
+			DrawServicePtr mDrawSrv;
+			
+			/// Config service ptr - used for font and cursor settings, etc.
+			ConfigServicePtr mConfigSrv;
 	};
 
 	/// Shared pointer to a GUI service
