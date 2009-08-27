@@ -43,8 +43,11 @@ namespace Opde {
 				
 				// --- Methods ---
 				static PyObject* load(PyObject* self, PyObject* args);
-				static PyObject* loadGameSys(PyObject* self, PyObject* args);
+				static PyObject* mergeLoad(PyObject* self, PyObject* args);
+				static PyObject* recursiveMergeLoad(PyObject* self, PyObject* args);
+				static PyObject* save(PyObject* self, PyObject* args);
 				static PyObject* unload(PyObject* self, PyObject* args);
+				
 				static PyObject* setProgressListener(PyObject* self, PyObject* args);
 				static PyObject* unsetProgressListener(PyObject* self, PyObject* args);
 				

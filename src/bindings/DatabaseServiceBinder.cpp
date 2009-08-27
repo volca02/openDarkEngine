@@ -105,20 +105,42 @@ namespace Opde {
 		};
 
 		// ------------------------------------------
-		const char* opde_DatabaseService_load__doc__ = "load(filename)\n"
-				"Loads a mission file (.mis) from the specified location. Clears all the previous loaded data\n"
+		const char* opde_DatabaseService_load__doc__ = "load(filename, mask)\n"
+				"Loads a database file and the parent databases it refers to from the specified location. Clears all the previous loaded data\n"
 				"@type filename: string\n"
+				"@type mask: integer\n"
 				"@param filename: The filename of the mission file\n"
+				"@param mask: The mask to use while loading (see the DBM_ constants for more info)\n"
+				"@raise IOError: if something bad happened while loading";
+				
+		const char* opde_DatabaseService_mergeLoad__doc__ = "mergeLoad(filename, mask)\n"
+				"Loads a database file from the specified location, not destroying any previously loaded data (can be dangerous)\n"
+				"@type filename: string\n"
+				"@type mask: integer\n"
+				"@param filename: The filename of the mission file\n"
+				"@param mask: The mask to use while loading (see the DBM_ constants for more info)\n"
+				"@raise IOError: if something bad happened while loading";
+				
+		const char* opde_DatabaseService_recursiveMergeLoad__doc__ = "recursiveMergeLoad(filename, mask)\n"
+				"Loads a database file and the parent databases it refers to from the specified location, not destroying any previously loaded data (can be dangerous)\n"
+				"@type filename: string\n"
+				"@type mask: integer\n"
+				"@param filename: The filename of the mission file\n"
+				"@param mask: The mask to use while loading (see the DBM_ constants for more info)\n"
 				"@raise IOError: if something bad happened while loading";
 
-		const char* opde_DatabaseService_loadGameSys__doc__ = "loadGameSys(filename)\n"
-				"Loads a game database file (.gam) from the specified location. Clears all the previous loaded data\n"
+		const char* opde_DatabaseService_save__doc__ = "save(filename, mask)\n"
+				"Saves a tag database file of the especified type to a specified location.\n"
 				"@type filename: string\n"
-				"@param filename: The filename of the mission file\n"
+				"@type mask: integer\n"
+				"@param filename: The filename of the file to save\n"
+				"@param mask: The mask to use while loading (see the DBM_ constants for more info)\n"
 				"@raise IOError: if something bad happened while loading";
 
-		const char* opde_DatabaseService_unload__doc__ = "unload()\n"
-				"unloads all data. Clears everything\n";
+		const char* opde_DatabaseService_unload__doc__ = "unload(mask)\n"
+				"unloads all data. Clears specified subset of the engine data\n"
+				"@type mask: integer\n"
+				"@param mask: The mask to use while clearing (see the DBM_ constants for more info)";
 
 		const char* opde_DatabaseService_setProgressListener__doc__ = "setProgressListener(listener)\n"
 				"Registers a new database listener to be called every loading step. The callable has to have one parameter, which will receive L{DatabaseProgressMsg<opde.services.DatabaseProgressMsg>}\n"
@@ -131,7 +153,9 @@ namespace Opde {
 		// ------------------------------------------
 		PyMethodDef DatabaseServiceBinder::msMethods[] = {
 			{"load", load, METH_VARARGS, opde_DatabaseService_load__doc__},
-			{"loadGameSys", loadGameSys, METH_VARARGS, opde_DatabaseService_loadGameSys__doc__},
+			{"mergeLoad", mergeLoad, METH_VARARGS, opde_DatabaseService_mergeLoad__doc__},
+			{"recursiveMergeLoad", recursiveMergeLoad, METH_VARARGS, opde_DatabaseService_recursiveMergeLoad__doc__},
+			{"save", save, METH_VARARGS, opde_DatabaseService_save__doc__},
 			{"unload", unload, METH_NOARGS, opde_DatabaseService_unload__doc__},
 			{"setProgressListener", setProgressListener, METH_VARARGS, opde_DatabaseService_setProgressListener__doc__},
 			{"unsetProgressListener", unsetProgressListener, METH_NOARGS, opde_DatabaseService_unsetProgressListener__doc__},
@@ -142,31 +166,29 @@ namespace Opde {
 		PyObject* DatabaseServiceBinder::load(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
-			PyObject *result = NULL;
 			DatabaseServicePtr o;
 			
 			if (!python_cast<DatabaseServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
 			const char* fname;
+			uint32_t mask;
 
-			if (PyArg_ParseTuple(args, "s", &fname)) {
-				o->load(fname);
+			if (PyArg_ParseTuple(args, "si", &fname, &mask)) {
+				o->load(fname, mask);
 				
-				result = Py_None;
-				Py_INCREF(result);
-				return result;
+				__PY_NONE_RET;
 			} else {
 				// Invalid parameters
-				PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
+				PyErr_SetString(PyExc_TypeError, "Expected a string and integer arguments!");
 				return NULL;
 			}
 			
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-
+		
 		// ------------------------------------------
-		PyObject* DatabaseServiceBinder::loadGameSys(PyObject* self, PyObject* args) {
+		PyObject* DatabaseServiceBinder::mergeLoad(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			
 			DatabaseServicePtr o;
@@ -175,19 +197,71 @@ namespace Opde {
 				__PY_CONVERR_RET;
 
 			const char* fname;
+			uint32_t mask;
 
-			if (PyArg_ParseTuple(args, "s", &fname)) {
-				o->loadGameSys(fname);
+			if (PyArg_ParseTuple(args, "si", &fname, &mask)) {
+				o->mergeLoad(fname, mask);
 				
 				__PY_NONE_RET;
 			} else {
 				// Invalid parameters
-				PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
+				PyErr_SetString(PyExc_TypeError, "Expected a string and integer arguments!");
 				return NULL;
 			}
 			
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
+		
+		// ------------------------------------------
+		PyObject* DatabaseServiceBinder::recursiveMergeLoad(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			
+			DatabaseServicePtr o;
+			
+			if (!python_cast<DatabaseServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
+
+			const char* fname;
+			uint32_t mask;
+
+			if (PyArg_ParseTuple(args, "si", &fname, &mask)) {
+				o->recursiveMergeLoad(fname, mask);
+				
+				__PY_NONE_RET;
+			} else {
+				// Invalid parameters
+				PyErr_SetString(PyExc_TypeError, "Expected a string and integer arguments!");
+				return NULL;
+			}
+			
+			__PYTHON_EXCEPTION_GUARD_END_;
+		}
+		
+		// ------------------------------------------
+		PyObject* DatabaseServiceBinder::save(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			
+			DatabaseServicePtr o;
+			
+			if (!python_cast<DatabaseServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
+
+			const char* fname;
+			uint32_t mask;
+
+			if (PyArg_ParseTuple(args, "si", &fname, &mask)) {
+				o->save(fname, mask);
+				
+				__PY_NONE_RET;
+			} else {
+				// Invalid parameters
+				PyErr_SetString(PyExc_TypeError, "Expected a string and integer arguments!");
+				return NULL;
+			}
+			
+			__PYTHON_EXCEPTION_GUARD_END_;
+		}
+
 
 		// ------------------------------------------
 		PyObject* DatabaseServiceBinder::unload(PyObject* self, PyObject* args) {
@@ -197,7 +271,17 @@ namespace Opde {
 			if (!python_cast<DatabaseServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
-			o->unload();
+			uint32_t mask;
+
+			if (PyArg_ParseTuple(args, "i", &mask)) {
+				o->unload(mask);
+				
+				__PY_NONE_RET;
+			} else {
+				// Invalid parameters
+				PyErr_SetString(PyExc_TypeError, "Expected an integer argument!");
+				return NULL;
+			}
 
 			__PY_NONE_RET;
 			
