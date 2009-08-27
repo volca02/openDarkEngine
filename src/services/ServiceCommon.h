@@ -56,6 +56,7 @@ This file contains some global definitions common to all services
 #define __SERVICE_ID_SCRIPT 17
 #define __SERVICE_ID_SIM 18
 #define __SERVICE_ID_WORLDREP 19
+#define __SERVICE_ID_ROOM 20
 
 // --------------------------------------
 // ---  Bitmasks for service masking  ---
@@ -111,6 +112,8 @@ priorities (not necessary unique) for the database service listeners
 #define DBP_MATERIAL 5
 // then worldrep is loaded
 #define DBP_WORLDREP 10
+// then room database
+#define DBP_ROOM 15
 // Links and Properties are loaded in object system
 // Object system loading order
 #define DBP_OBJECT 20
@@ -123,17 +126,21 @@ priorities (not necessary unique) for the database service listeners
 // ---------------------------------------------
 #define LOOPMODE_INPUT 1
 #define LOOPMODE_RENDER 2
+#define LOOPMODE_GUI 4
 
 
 // Loop client ids and priorities
 #define LOOPCLIENT_ID_INPUT 1
 #define LOOPCLIENT_ID_RENDERER 2
+#define LOOPCLIENT_ID_GUI 4
 
 // Input first
 #define LOOPCLIENT_PRIORITY_INPUT 1
+// GUI some time before render
+#define LOOPCLIENT_PRIORITY_GUI 900
 // Renderer last
 #define LOOPCLIENT_PRIORITY_RENDERER 1024
 
-
+// TODO: Forward decl. anything service related here to shorten the compilation time (in combination with header inclusion removal...)
 
 #endif
