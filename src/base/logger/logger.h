@@ -69,7 +69,7 @@ namespace Opde {
 			/** Unregister a listener instance */
 			void unregisterLogListener(LogListener* listener);
 
-            /** Translates the log level into something readable */
+			/** Translates the log level into something readable */
 			const std::string getLogLevelStr(LogLevel level) const;
 
 			/** C++ cout-like stream operator. Logs to INFO level */
