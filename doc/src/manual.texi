@@ -171,8 +171,8 @@ purposes. All service instances are managed using a ServiceManager object. Each 
 once within ServiceManager's ownership. Services reference, use each other. For this to work well, shared pointers are
 used to reference services. 
 
-Each of the services has a name and service mask. Name is used to reference the service, mask is used to automate some common
-tasks, and to mask the instantinated services, as requested via the parameter to the Opde::Root constructor. The service mask
+Each of the services has a name, type SID (e.g. Service ID) and service mask. SID is used to reference the service, Name is there to help debugging and logging,
+mask is used to automate some common tasks, and to mask the instantinated services, as requested via the parameter to the Opde::Root constructor. The service mask
 also enables one to construct, for example, only the core object system of the engine, meaning no graphical output, no simulation
 is done. This is especially usable for tool makers.
 
