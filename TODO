@@ -50,6 +50,7 @@ Pre-0.3 release:
     * Sound system - need a propper resource system for this one, lots of data will travel because of this one
     * Full-Bright mode for DromEd users
     * Full support for multiple instances of Opde, also engine shutdown/restart (at least one of these has to work in order to do a fully working prop/link documentation generator)
+    + DB load/save interfacing change. The old "one message covers all" adds code to services where it should rather save space. Rewrite to DBListener approach (onLoad, onSave...)
 
 
 ----------------------------------
@@ -64,7 +65,7 @@ should be written (partially is already, more work is needed).
 
 Documentation generator for Properties, links and chunk formats
 ---------------------------------------------------------------
-
+STATUS: Prototype code present written in C++, should be rewritten in Python and use some smart templating.
 Preferably generating texinfo files. Should run game's core without any graphics, collect data on properties/links/chunks
 A detail holding text file should be possible to load, so there could be more than just the basic look of property or link described.
 
@@ -87,7 +88,7 @@ Currently a prototype code exists in opdeDocGen, but should be probably rewritte
 
 Preprocessor for .pldef and .dtype script files
 -----------------------------------------------
-
+STATUS: Not yet started.
 A preprocessor with a C style syntax (simple is sufficient) could be introduced to help with merging of the 3 different versions of property, link and data
 description scripts. It would be feeded with a preprepared set of variables (integer variables should be enough). Should handle simple condition evaluation.
 File processing would then be done using a stack based machine, that would evaluate #if, #else, #endif lines. 
@@ -130,6 +131,7 @@ Other statements could be also introduced, but I believe these will be more than
  
 Editor side-Project
 -------------------
+STATUS: Not yet started
 
 An editor (codename CamelEd ;) ) could be created. The basic operations should not be a problem to implement, as there already is the whole object system
 roughly prepared for that. Basing it on WxPython could be a good idea. 
@@ -150,6 +152,7 @@ Need inspiration for other ideas. These listed are just some random dumb ideas t
 
 OPDE as a python extension
 --------------------------
+STATUS: In progress
 
 Ok, the 0.3 version release should include a python script using opde python module to implement the particular game. The principle is to use python's
 library with our binary. We could also (and it would be a good idea) introduce the whole OPDE as a python Extension, meaning it would install into the 
