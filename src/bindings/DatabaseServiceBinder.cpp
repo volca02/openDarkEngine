@@ -352,6 +352,21 @@ namespace Opde {
 			PythonDatabaseProgressMessage::init(module);
 
 			publishType(module, &msType, msName);
+			
+			PyModule_AddIntConstant(module, "DBM_CONCRETE", DBM_CONCRETE); 
+			PyModule_AddIntConstant(module, "DBM_ABSTRACT", DBM_ABSTRACT); 
+			PyModule_AddIntConstant(module, "DBM_MBRUSHES", DBM_MBRUSHES); 
+			PyModule_AddIntConstant(module, "DBM_UNKNOWN1", DBM_UNKNOWN1);
+			PyModule_AddIntConstant(module, "DBM_CONCRETE_OLP", DBM_CONCRETE_OLP);
+			PyModule_AddIntConstant(module, "DBM_OBJTREE_CONCRETE", DBM_OBJTREE_CONCRETE);
+			PyModule_AddIntConstant(module, "DBM_MIS_DATA", DBM_MIS_DATA);
+			PyModule_AddIntConstant(module, "DBM_OBJTREE_GAMESYS", DBM_OBJTREE_GAMESYS);
+			PyModule_AddIntConstant(module, "DBM_COMPLETE", DBM_COMPLETE);
+			PyModule_AddIntConstant(module, "DBM_FILETYPE_GAM", DBM_FILETYPE_GAM);
+			PyModule_AddIntConstant(module, "DBM_FILETYPE_VBR", DBM_FILETYPE_VBR);
+			PyModule_AddIntConstant(module, "DBM_FILETYPE_SAV", DBM_FILETYPE_SAV);
+			PyModule_AddIntConstant(module, "DBM_FILETYPE_MIS", DBM_FILETYPE_MIS);
+			PyModule_AddIntConstant(module, "DBM_FILETYPE_COW", DBM_FILETYPE_COW);
 		}
 
 	} // namespace Python
