@@ -21,6 +21,7 @@ SET(OPDE_SERVICE_INCLUDES
     ${OPDE_SOURCE_DIR}/src/services/material
     ${OPDE_SOURCE_DIR}/src/services/light
     ${OPDE_SOURCE_DIR}/src/services/draw
+    ${OPDE_SOURCE_DIR}/src/services/room
 )
 
 # All the resulting libraries in a nice package as well
@@ -42,6 +43,7 @@ SET(OPDE_SERVICE_LIBRARIES
     OpdeGUIService
     OpdeScriptService
     OpdeDrawService
+    OpdeRoomService
 )
 
 # include the configuration from all the services (each config.cmake should append the OPDE_SERVICE_HEADERS and OPDE_SERVICE_SOURCES)
