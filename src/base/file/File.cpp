@@ -79,7 +79,7 @@ namespace Opde {
 		file_size_t bsize = size * count;
 		char *copyb = new char[bsize];
 
-		memcpy(copyb, buf, bsize);
+		memcpy(copyb, buf, bsize); // TODO: This is kind-of ineffective - the swapEndian could work on different target buffer 
 
 		swapEndian(copyb, size, count);
 
@@ -256,6 +256,89 @@ namespace Opde {
 		}
 	}
 
+	//------------------------------------
+	File& operator<<(File& st, uint8_t val) {
+		st.write(&val, sizeof(uint8_t));
+		return st;
+	}
+	
+	//------------------------------------
+	File& operator<<(File& st, int8_t val) {
+		st.write(&val, sizeof(int8_t));
+		return st;
+	}
+	
+	//------------------------------------
+	File& operator<<(File& st, uint16_t val) {
+		st.writeElem(&val, sizeof(uint16_t));
+		return st;
+	}
+	
+	//------------------------------------
+	File& operator<<(File& st, int16_t val) {
+		st.writeElem(&val, sizeof(int16_t));
+		return st;
+	}
+	
+	//------------------------------------
+	File& operator<<(File& st, uint32_t val) {
+		st.writeElem(&val, sizeof(uint32_t));
+		return st;
+	}
+	
+	//------------------------------------
+	File& operator<<(File& st, int32_t val) {
+		st.writeElem(&val, sizeof(int32_t));
+		return st;
+	}	
+	//------------------------------------
+	File& operator<<(File& st, float val) {
+		st.writeElem(&val, sizeof(float));
+		return st;
+	}
+	
+	//------------------------------------
+	File& operator>>(File& st, uint8_t& val) {
+		st.read(&val, sizeof(uint8_t));
+		return st;
+	}
+	
+	//------------------------------------
+	File& operator>>(File& st, int8_t& val) {
+		st.read(&val, sizeof(int8_t));
+		return st;
+	}
+	
+	//------------------------------------
+	File& operator>>(File& st, uint16_t& val) {
+		st.readElem(&val, sizeof(uint16_t));
+		return st;
+	}
+	
+	//------------------------------------
+	File& operator>>(File& st, int16_t& val) {
+		st.readElem(&val, sizeof(int16_t));
+		return st;
+	}
+	
+	//------------------------------------
+	File& operator>>(File& st, uint32_t& val) {
+		st.readElem(&val, sizeof(uint32_t));
+		return st;
+	}
+	
+	//------------------------------------
+	File& operator>>(File& st, int32_t& val) {
+		st.readElem(&val, sizeof(int32_t));
+		return st;
+	}
+	
+	//------------------------------------
+	File& operator>>(File& st, float& val) {
+		st.readElem(&val, sizeof(float));
+		return st;
+	}
+	
 	/*------------------------------------------------------*/
 	/*---------------------- StdFile -----------------------*/
 	/*------------------------------------------------------*/

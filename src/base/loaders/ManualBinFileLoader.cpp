@@ -179,9 +179,9 @@ namespace Ogre {
 	}
 
 	void CalSkeletonLoader::readHeader(void) {
-		mFile->readElem(&mHeader.Version, 4);
-		mFile->readElem(&mHeader.num_torsos, 4);
-		mFile->readElem(&mHeader.num_limbs, 4);
+		*mFile >> mHeader.Version
+		       >> mHeader.num_torsos
+		       >> mHeader.num_limbs;
 	}
 
 	void CalSkeletonLoader::readTorsos(void) {
@@ -196,9 +196,10 @@ namespace Ogre {
 		mTorsos = new CalTorso[mHeader.num_torsos];
 
 		for (int32_t i = 0; i < mHeader.num_torsos; ++i) {
-			mFile->readElem(&mTorsos[i].root, sizeof(uint32_t));
-			mFile->readElem(&mTorsos[i].parent, sizeof(int32_t));
-			mFile->readElem(&mTorsos[i].fixed_count, sizeof(int32_t));
+			*mFile >> mTorsos[i].root
+			       >> mTorsos[i].parent
+			       >> mTorsos[i].fixed_count;
+			
 			mFile->readElem(&mTorsos[i].fixed_joints, sizeof(uint32_t), 16);
 			mFile->readElem(&mTorsos[i].fixed_joint_diff_coord, sizeof(float), 3 * 16); // 3 <-> x,y,z
 		}
@@ -211,10 +212,11 @@ namespace Ogre {
 		mLimbs = new CalLimb[mHeader.num_limbs];
 
 		for (int32_t i = 0; i < mHeader.num_limbs; ++i) {
-			mFile->readElem(&mLimbs[i].torso_index, sizeof(int32_t));
-			mFile->readElem(&mLimbs[i].junk1, sizeof(int32_t));
-			mFile->readElem(&mLimbs[i].num_segments, sizeof(int32_t));
-			mFile->readElem(&mLimbs[i].attachment_joint, sizeof(uint16_t));
+			*mFile 	>> mLimbs[i].torso_index
+				>> mLimbs[i].junk1
+				>> mLimbs[i].num_segments
+				>> mLimbs[i].attachment_joint;
+			
 			mFile->readElem(&mLimbs[i].segments, sizeof(uint16_t), 16);
 			mFile->readElem(&mLimbs[i].segment_diff_coord, sizeof(float), 3 * 16); // 3 <-> x,y,z
 			mFile->readElem(&mLimbs[i].lengths, sizeof(float), 16);
@@ -716,7 +718,7 @@ namespace Ogre {
             UVMap* mUVs;
             SubObjectHeader* mSubObjects;
 
-			int mNumUVs;
+            int mNumUVs;
             int mNumNorms;
             int mNumLights;
 

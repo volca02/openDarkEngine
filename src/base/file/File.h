@@ -192,6 +192,24 @@ namespace Opde {
 			AccessMode mAccessMode;
 	};
 
+	// Stream - like bit shift operator overloads for common types
+	File& operator<<(File& st, uint8_t val);
+	File& operator<<(File& st, int8_t val);
+	File& operator<<(File& st, uint16_t val);
+	File& operator<<(File& st, int16_t val);
+	File& operator<<(File& st, uint32_t val);
+	File& operator<<(File& st, int32_t val);
+	File& operator<<(File& st, float val);
+	
+	File& operator>>(File& st, uint8_t& val);
+	File& operator>>(File& st, int8_t& val);
+	File& operator>>(File& st, uint16_t& val);
+	File& operator>>(File& st, int16_t& val);
+	File& operator>>(File& st, uint32_t& val);
+	File& operator>>(File& st, int32_t& val);
+	File& operator>>(File& st, float& val);
+
+
 	/** Shared file pointer */
 	typedef shared_ptr<File> FilePtr;
 

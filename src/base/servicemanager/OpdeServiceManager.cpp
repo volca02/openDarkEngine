@@ -105,7 +105,7 @@ namespace Opde {
 
 	//------------------ Main implementation ------------------
 	void ServiceManager::addServiceFactory(ServiceFactory* factory) {
-		LOG_INFO("ServiceManager: Registered service factory for %s (%d)", factory->getName().c_str(), factory->getSID());
+		LOG_INFO("ServiceManager: Registered service factory for %s (%d - mask %X)", factory->getName().c_str(), factory->getSID(), factory->getMask());
 		
 		size_t fsid = factory->getSID();
 		
