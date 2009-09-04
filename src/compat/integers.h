@@ -26,14 +26,14 @@
 
 #ifndef HAVE_INTTYPES_H
 // Try to use VC++ types
-	#define uint64_t unsigned __int64
-	#define uint32_t unsigned __int32
-	#define uint16_t unsigned __int16
-	#define uint8_t  unsigned __int8
-	#define int64_t  __int64	
-	#define int32_t  __int32
-	#define int16_t  __int16
-	#define int8_t   __int8
+	typedef unsigned __int64 uint64_t;
+	typedef unsigned __int32 uint32_t;
+	typedef unsigned __int16 uint16_t;
+	typedef unsigned __int8 uint8_t;
+	typedef __int64 int64_t;
+	typedef __int32 int32_t;
+	typedef __int16 int16_t;
+	typedef __int8 int8_t;
 #else
 	#include <inttypes.h>
 #endif
