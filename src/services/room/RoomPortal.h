@@ -26,18 +26,50 @@
 #define __ROOMPORTAL_H
 
 #include "config.h"
+#include "integers.h"
 #include "SharedPtr.h"
+#include "RoomCommon.h"
+#include "File.h"
+#include "Array.h"
+
+#include <OgreVector3.h>
+#include <OgrePlane.h>
 
 namespace Opde {
 	/** @brief A room portal. Room portals connect two Room instances (doorways)
 	*/
 	class OPDELIB_EXPORT RoomPortal {
 		public:
-			RoomPortal();
+			RoomPortal(RoomService* owner);
 			~RoomPortal();
+			
+			void read(const FilePtr& sf);
+			void write(const FilePtr& sf);
 
 		private:
-
+			void clear();
+			
+			/// Owner service
+			RoomService* mOwner;
+			/// Portal ID
+			int32_t  mID;
+			/// The index of this portal in the room's portal list
+			uint32_t  mIndex;
+			/// Plane this portal lies on 
+			Ogre::Plane mPlane;
+			/// Number of portal edges
+			uint32_t  mEdgeCount;
+			/// Plane list - planes that make up the portal
+			SimpleArray<Ogre::Plane> mEdges; 
+			// Source and destination rooms
+			/// room number this portal goes to
+			Room*     mDestRoom;      
+			/// the source room number
+			Room*     mSrcRoom;
+			/// center point of the portal. (should not be in solid space)
+			Ogre::Vector3 mCenter;
+			/// portal ID on the other side of this portal
+			int32_t  mDestPortal;
 	};
 
 	/// Shared pointer to a room portal instance

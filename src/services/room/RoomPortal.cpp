@@ -23,13 +23,73 @@
 
 
 #include "RoomPortal.h"
+#include "Room.h"
+#include "RoomService.h"
+#include "FileCompat.h"
 
 namespace Opde {
-	RoomPortal::RoomPortal() {
+	/*----------------------------------------------------*/
+	/*--------------------- RoomPortal -------------------*/
+	/*----------------------------------------------------*/
+	RoomPortal::RoomPortal(RoomService* owner) :
+			mOwner(owner) {
 		
 	}
 	
+	//------------------------------------------------------
 	RoomPortal::~RoomPortal() {
+		clear();
+	}
+	
+	//------------------------------------------------------
+	void RoomPortal::read(const FilePtr& sf) {
+		*sf >> mID >> mIndex >> mPlane >> mEdgeCount;
+		// planes that define edges
+		
+		mEdges.grow(mEdgeCount);
+		
+		for (size_t i = 0; i < mEdgeCount;++i) {
+			*sf >> mEdges[i];
+		}
+		
+		// room ID's to be linked
+		int32_t src_room, dest_room;
+		
+		*sf >> src_room >> dest_room;
+		
+		// link through room service
+		mSrcRoom = mOwner->getRoomByID(src_room);
+		mDestRoom = mOwner->getRoomByID(dest_room);
+		
+		*sf >> mCenter;
+		*sf >> mDestPortal;
+	}
+	
+	//------------------------------------------------------
+	void RoomPortal::write(const FilePtr& sf) {
+		*sf << mID << mIndex << mPlane << mEdgeCount;
+
+		// planes that define edges
+		for (size_t i = 0; i < mEdgeCount;++i) {
+			*sf << mEdges[i];
+		}
+		
+		*sf << mSrcRoom->getRoomID() << mDestRoom->getRoomID();
+		*sf << mCenter;
+		*sf << mDestPortal;
+	}
+	
+	//------------------------------------------------------
+	void RoomPortal::clear() {
+		mID = 0;
+		mIndex = 0;
+		mPlane = Ogre::Plane();
+		mEdgeCount = 0;
+		mEdges.clear();
+		mSrcRoom = NULL;
+		mDestRoom = NULL;
+		mCenter = Ogre::Vector3::ZERO;
+		mDestPortal = 0;
 		
 	}
 }

@@ -23,6 +23,7 @@
 
 
 #include "RoomService.h"
+#include "Room.h"
 #include "OpdeException.h"
 #include "ServiceCommon.h"
 #include "logger.h"
@@ -41,9 +42,14 @@ namespace Opde {
 
 	//------------------------------------------------------
 	RoomService::~RoomService() {
+		clear();
 	}
 
-
+	//------------------------------------------------------
+	Room* RoomService::getRoomByID(int32_t id) {
+		return mRoomsByID[id];
+	}
+	
 	//------------------------------------------------------
 	bool RoomService::init() {
 		return true;
@@ -63,21 +69,85 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
+	void RoomService::clear() {
+		mRoomsByID.clear();
+		
+		for (size_t rn = 0; rn < mRooms.size(); ++rn) {
+			delete mRooms[rn];
+		}
+		
+		mRooms.clear();
+	}
+	
+	//------------------------------------------------------
 	void RoomService::onDBLoad(const FileGroupPtr& db, uint32_t curmask) {
 		LOG_INFO("RoomService::onDBLoad called.");
-		// STUB
+		
+		if (!(curmask & DBM_MIS_DATA))
+			return;
+		
+		// to be sure
+		clear();
+		
+		if (!db->hasFile("ROOM_DB")) {
+		    LOG_FATAL("RoomService: Database '%d' should contain ROOM_DB by mask, but doesn't", db->getName().c_str());
+		    return;
+		}
+		
+		// load version, room count
+		uint32_t version;
+		uint32_t count;
+		
+		FilePtr rdb = db->getFile("ROOM_DB");
+		
+		*rdb >> version >> count;
+		
+		LOG_INFO("RoomService: ROOM_DB Version %u. Contains %u rooms", version, count);
+		
+		// construct array of rooms as needed
+		mRooms.grow(count);
+
+		// Two phase load... first we construct them
+		for (size_t rn = 0; rn < count; ++rn) 
+			mRooms[rn] = new Room(this);
+		
+		// then we load - the two phase construction enables us to link rooms and room portals together directly...
+		for (size_t rn = 0; rn < count; ++rn) {
+			LOG_DEBUG("RoomService: Loading room %d", rn);
+			Room* r = mRooms[rn];
+			assert(r != NULL);
+			r->read(rdb);
+			mRoomsByID[r->getRoomID()] = r;
+		}
 	}
 	
 	//------------------------------------------------------
 	void RoomService::onDBSave(const FileGroupPtr& db, uint32_t tgtmask) {
 		LOG_INFO("RoomService::onDBSave called.");
+		
+		if (!(tgtmask & DBM_MIS_DATA))
+			return;
+		
 		// STUB
+		uint32_t version = 1;
+		uint32_t count = mRooms.size();
+		
+		FilePtr rdb = db->getFile("ROOM_DB");
+		*rdb << version << count;
+		
+		for (size_t rn = 0; rn < count; ++rn) {
+			mRooms[rn]->write(rdb);
+		}
 	}
 	
 	//------------------------------------------------------
 	void RoomService::onDBDrop(uint32_t dropmask) {
 		LOG_INFO("RoomService::onDBDrop called.");
-		// STUB
+		
+		if (!dropmask & DBM_MIS_DATA)
+			return;
+		
+		clear();
 	}
 
 	//-------------------------- Factory implementation

@@ -28,7 +28,15 @@
 #define __ROOM_H
 
 #include "config.h"
+#include "integers.h"
 #include "SharedPtr.h"
+#include "RoomCommon.h"
+#include "File.h"
+#include "Array.h"
+
+#include <OgreVector3.h>
+#include <OgrePlane.h>
+
 
 namespace Opde {
 	/** @brief A single Room. Rooms are space bounded elements that are used
@@ -36,11 +44,42 @@ namespace Opde {
 	*/
 	class OPDELIB_EXPORT Room {
 		public:
-			Room();
+			Room(RoomService* owner);
 			~Room();
+			
+			void read(const FilePtr& sf);
+			void write(const FilePtr& sf);
+			
+			int32_t getObjectID() const { return mObjectID; };
+			int16_t getRoomID() const { return mRoomID; };
 
 		private:
-
+			/// clears the room into an empty state, drops all allocations
+			void clear();
+			
+			/// Owner service
+			RoomService* mOwner;
+			
+			/// Object ID
+			int32_t mObjectID;
+			/// Room number
+			int16_t mRoomID; 
+			/// Center point of the room. Should not be in solid space or overlapping another room
+			Ogre::Vector3 mCenter;
+			/// Bounding box as described by 6 enclosing planes
+			Ogre::Plane mPlanes[6];
+			/// Portal count
+			uint32_t mPortalCount;
+			/// Portal list
+			SimpleArray<RoomPortal*> mPortals;
+			/// Portal to portal distances (a 2d array, single index here for simplicity of allocations)
+			float *mPortalDistances;
+			
+			typedef std::set<int> IDSet;
+			typedef std::vector<IDSet> IDLists;
+			
+			/// lists of ID's
+			IDLists mIDLists;
 	};
 
 	/// Shared pointer to a room instance

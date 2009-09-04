@@ -26,7 +26,7 @@
 #define __ROOMSERVICE_H
 
 #include "config.h"
-
+#include "RoomCommon.h"
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
 #include "DatabaseService.h"
@@ -47,11 +47,15 @@ namespace Opde {
 			/// Destructor
 			virtual ~RoomService();
 
+			Room* getRoomByID(int32_t id);
+			
 		protected:
 			// service related
 			bool init();
 			void bootstrapFinished();
 			void shutdown();
+			
+			void clear();
 			
 			/** Database load callback 
 			* @see DatabaseListener::onDBLoad */
@@ -67,8 +71,16 @@ namespace Opde {
 		
 		
 		private:
+			typedef std::map<int32_t, Room*> RoomsByID;
+			
 			/// Database service
 			DatabaseServicePtr mDbService;
+
+			/// Array of all rooms
+			SimpleArray<Room*> mRooms;
+			
+			/// Map of rooms by their ID
+			RoomsByID mRoomsByID;
 	};
 
 	/// Shared pointer to Room service

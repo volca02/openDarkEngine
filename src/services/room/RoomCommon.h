@@ -26,8 +26,13 @@
 #define __ROOMCOMMON_H
 
 namespace Opde {
+	// Forward declaration
+	class RoomService;
+	class Room;
+	class RoomPortal;
+
 	/* Room service structures - as specified by Telliamed */
-	struct DarkDBChunkROOM_DB
+	/*struct DarkDBChunkROOM_DB
 	{
         	uint32_t  version;        // 0x01
 	        uint32_t  num_rooms;
@@ -41,9 +46,9 @@ namespace Opde {
 			f->write(&version, sizeof(uint32_t));
 			f->write(&num_rooms, sizeof(uint32_t));
 		}
-	};
+	};*/
 	
-	struct DarkDBRoom
+/*	struct DarkDBRoom
 	{
         	sint32_t  id;             // object ID
 	        sint16_t  room;           // room number
@@ -91,9 +96,9 @@ namespace Opde {
 	        DPlane    plane;
 	        uint32_t  num_edges;
 	        
-		Plane*    edge; // all planes follow at this point (num_edges)
+	        Plane*    edge; // all planes follow at this point (num_edges)
 		
-		sint32_t  dest_room;      // room number this portal goes to
+	        sint32_t  dest_room;      // room number this portal goes to
 	        sint32_t  src_room;       // this room number
         	DVector3  center;         // center point of the portal. (should not be in solid space)
 	        sint32_t  dest_portal;    // portal ID on the other side of this portal
@@ -153,7 +158,7 @@ namespace Opde {
 			f->write(&dest_portal, sizeof(sint32_t));
 		}
 	};
-
+	*/
 }
 
 
