@@ -50,6 +50,7 @@
 #include "MaterialService.h"
 #include "LightService.h"
 #include "DrawService.h"
+#include "RoomService.h"
 
 // base
 #include "ManualBinFileLoader.h"
@@ -91,6 +92,8 @@ namespace Opde {
 		LOG_INFO("Starting openDarkEngine %d.%d.%d (%s), build %s, %s", OPDE_VER_MAJOR, OPDE_VER_MINOR, OPDE_VER_PATCH, OPDE_CODE_NAME, __DATE__, __TIME__);
 
 		mServiceMgr = new ServiceManager(mServiceMask);
+		
+		LOG_INFO("Root: Created a ServiceManager instance with global mask %X", mServiceMask);
 
 		// To supress logging of OGRE (we'll use a plugin for our logger for Ogre logs)
 		// we need to create a Ogre::LogManager here on our own
@@ -269,6 +272,7 @@ namespace Opde {
 		new LightServiceFactory();
 		new MaterialServiceFactory();
 		new DrawServiceFactory();
+		new RoomServiceFactory();
 	}
 
 	// -------------------------------------------------------

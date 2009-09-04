@@ -232,6 +232,8 @@ namespace Opde {
 
 		LOG_INFO("GameStateManager: Finishing bootstrap");
 
+        // Temporary create to allow Room service creation and testing
+        ServiceManager::getSingleton().createByMask(SERVICE_ALL);
         mRoot->bootstrapFinished();
 
 		ps->bootstrapFinished();
