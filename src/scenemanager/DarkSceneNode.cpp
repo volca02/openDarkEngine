@@ -33,11 +33,11 @@ $Id$
 #include <OgreSceneManager.h>
 
 namespace Ogre {
-	//-------------------------------------------------------------------------	
+	//-------------------------------------------------------------------------
 	DarkSceneNode::DarkSceneNode(SceneManager* creator) : SceneNode(creator) {
 	}
 
-	//-------------------------------------------------------------------------	
+	//-------------------------------------------------------------------------
 	DarkSceneNode::DarkSceneNode(SceneManager* creator, const String& name) : SceneNode(creator, name) {
 	}
 
@@ -65,7 +65,6 @@ namespace Ogre {
 
 			}	
 		}
-	
 	}
 	
 	//-------------------------------------------------------------------------
@@ -121,6 +120,8 @@ namespace Ogre {
 				}
 			}
 		}
+
+		SceneNode::setInSceneGraph(inGraph);
 	}
 
 }
