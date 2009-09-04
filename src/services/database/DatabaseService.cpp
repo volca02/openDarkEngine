@@ -73,12 +73,12 @@ namespace Opde {
 	//------------------------------------------------------
 	void DatabaseService::recursiveMergeLoad(const std::string& filename, uint32_t loadMask) {
 		// load the database, but see for the parents first
-		LOG_DEBUG("DatabaseService::recursiveMergeLoad - Recurse load of file %s", filename.c_str());
+		LOG_INFO("DatabaseService::recursiveMergeLoad - Loading file %s", filename.c_str());
 		
 		FileGroupPtr db = getDBFileNamed(filename);
 		
 		// the coarse count is lifted every call to ensure all the databases are counted
-		mLoadingStatus.totalCoarse++;
+		mLoadingStatus.totalCoarse += mListeners.size();
 		
 		uint32_t ft = getFileType(db);
 		
@@ -90,9 +90,12 @@ namespace Opde {
 			// this is to ensure that .sav data will be loaded instead of .mis, for example
 			
 			std::string parentFile = loadFileNameFromTag(db, parentDbTag);
+			
+			LOG_INFO("DatabaseService::recursiveMergeLoad - Recursing to file %s", parentFile.c_str());
 			recursiveMergeLoad(parentFile, loadMask & ~ft);
 		}
 		
+		LOG_INFO("DatabaseService::recursiveMergeLoad - Recurse end. Loading file %s", filename.c_str());
 		broadcastOnDBLoad(db, ft & loadMask);
 	}
 	
@@ -104,8 +107,8 @@ namespace Opde {
 		LOG_DEBUG("DatabaseService::mergeLoad - Merge load of file %s", filename.c_str());
 		
 		mLoadingStatus.reset();
-		mLoadingStatus.totalCoarse++;
-		
+		mLoadingStatus.totalCoarse += mListeners.size();
+				
 		broadcastOnDBLoad(db, ft & loadMask);
 		
 		LOG_DEBUG("DatabaseService::mergeLoad - end()");
@@ -120,9 +123,13 @@ namespace Opde {
 		LOG_DEBUG("DatabaseService::save - Save to file %s, mask %X", filename.c_str(), saveMask);
 
 		mLoadingStatus.reset();
-		mLoadingStatus.totalCoarse++;
+		mLoadingStatus.totalCoarse += mListeners.size();
 		
 		broadcastOnDBSave(tgtdb, saveMask);
+		
+		// And write the saveMask as FILE_TYPE
+		FilePtr fpf = tgtdb->createFile("FILE_TYPE", 0, 1); // The version is fixed, really. Nothing to invent here
+		fpf->writeElem(&saveMask, sizeof(uint32_t));
 	}
 	
 	//------------------------------------------------------
@@ -235,7 +242,7 @@ namespace Opde {
 
 		res = std::string(data);
 		
-		delete data;
+		delete[] data;
 		
 		
 		return res;
