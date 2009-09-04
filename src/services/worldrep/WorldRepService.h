@@ -98,9 +98,6 @@ namespace Opde {
 			/** Internal method. Creates a BspNode instance tree, and supplies it to the sceneManager */
 			void createBSP(unsigned int BspRows, WRBSPNode *tree);
 
-			/** Internal method. Constructs Ogre plane out of worldrep plane */
-			Ogre::Plane constructPlane(const DPlane& plane);
-
 			// TODO: Move this away... RenderService->getRoot?
 			Ogre::Root *mRoot;
 
@@ -111,7 +108,7 @@ namespace Opde {
 			WRCell** mCells;
 
 			uint32_t mExtraPlaneCount;
-			DPlane* mExtraPlanes;
+			Ogre::Plane* mExtraPlanes;
 
 			/** Cell count from header */
 			uint32_t mNumCells;

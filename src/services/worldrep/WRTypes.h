@@ -28,18 +28,32 @@
 #include "LightmapAtlas.h"
 #include "integers.h"
 #include "DarkCommon.h"
+#include "File.h"
+#include "FileCompat.h"
+
+#include <OgreVector3.h>
 
 // the only one which collided is wr_cell_hdr, but to be sure...
 #pragma pack(push, 1)
 
 namespace Opde {
 
-	typedef struct { // SIZE: 8
+	struct WRHeader { // SIZE: 8
 		uint32_t  	unk;
 		uint32_t	numCells;
-	} WRHeader;
+		
+		friend File& operator<<(File& st, const WRHeader& ch) {
+			st << ch.unk << ch.numCells;
+			return st;
+		}
+		
+		friend File& operator>>(File& st, WRHeader& ch) {
+			st >> ch.unk >> ch.numCells;
+			return st;
+		}
+	};
 
-	typedef struct { // SIZE: 31
+	struct WRCellHeader { // SIZE: 31
 		uint8_t	numVertices; // vertex count
 
 		uint8_t	numPolygons;  // total number of polygons
@@ -56,11 +70,25 @@ namespace Opde {
 		uint8_t	flowGroup; // 0-no flow group, otherwise the flow group no.
 
 		// cell's bounding sphere
-		DVector3	center;
+		Ogre::Vector3	center;
 		float	radius; // Only an approximation, but enough to guarantee that every point in the cell is enclosed by this sphere.
-	} WRCellHeader;
+		
+		friend File& operator<<(File& st, const WRCellHeader& ch) {
+			st << ch.numVertices << ch.numPolygons << ch.numTextured << ch.numPortals << ch.numPlanes
+			   << ch.mediaType << ch.cellFlags << ch.nxn << ch.polymapSize << ch.numAnimLights << ch.flowGroup
+			   << ch.center << ch.radius;
+			return st;
+		}
+		
+		friend File& operator>>(File& st, WRCellHeader& ch) {
+			st >> ch.numVertices >> ch.numPolygons >> ch.numTextured >> ch.numPortals >> ch.numPlanes
+			   >> ch.mediaType >> ch.cellFlags >> ch.nxn >> ch.polymapSize >> ch.numAnimLights >> ch.flowGroup
+			   >> ch.center >> ch.radius;
+			return st;
+		}
+	};
 
-	typedef struct { // SIZE: 8
+	struct WRPolygon { // SIZE: 8
 		uint8_t	flags; // Nonzero for watered polygons
 		uint8_t	count; // Polygon vertices count
 		uint8_t	plane; //  plane number
@@ -68,11 +96,21 @@ namespace Opde {
 		uint16_t	tgtCell; // target leaf for this portal...
 		uint8_t	unk1; // Cell motion related
 		uint8_t	unk2; // Some flags... 41, FF... etc... (0x010 might be light map only render)
-	}  WRPolygon;
+		
+		friend File& operator<<(File& st, const WRPolygon& ch) {
+			st << ch.flags << ch.count << ch.plane << ch.unk << ch.tgtCell << ch.unk1 << ch.unk2;
+			return st;
+		}
+		
+		friend File& operator>>(File& st, WRPolygon& ch) {
+			st >> ch.flags >> ch.count >> ch.plane >> ch.unk >> ch.tgtCell >> ch.unk1 >> ch.unk2;
+			return st;
+		}
+	};
 
-	typedef struct { // SIZE: 12+12+12+12 = 48
-		DVector3	axisU; // U axis
-		DVector3	axisV; // V axis - both directions of texture growth (e.g. U axis and V axis) - and they are not normalised! (in some way related to scale)
+	struct WRPolygonTexturing { // SIZE: 12+12+12+12 = 48
+		Ogre::Vector3	axisU; // U axis
+		Ogre::Vector3	axisV; // V axis - both directions of texture growth (e.g. U axis and V axis) - and they are not normalised! (in some way related to scale)
 
 		int16_t		u; // txt shift u (must divide by 1024 to get float number (and I dunno why, I had to invert it too))
 		int16_t		v; // txt shift v
@@ -82,11 +120,21 @@ namespace Opde {
 		uint16_t		unk; // something related to texture cache
 
 		float		scale; // scale of the texture
-		DVector3	center;
-	} WRPolygonTexturing;
+		Ogre::Vector3	center;
+		
+		friend File& operator<<(File& st, const WRPolygonTexturing& ch) {
+			st << ch.axisU << ch.axisV << ch.u << ch.v << ch.txt << ch.originVertex << ch.unk << ch.scale << ch.center;
+			return st;
+		}
+		
+		friend File& operator>>(File& st, WRPolygonTexturing& ch) {
+			st >> ch.axisU >> ch.axisV >> ch.u >> ch.v >> ch.txt >> ch.originVertex >> ch.unk >> ch.scale >> ch.center;
+			return st;
+		}
+	};
 
 	/** Lightmap Information struct. */
-	typedef struct { // SIZE: 4+4+12 = 20
+	struct WRLightInfo { // SIZE: 4+4+12 = 20
 		int16_t u; // LMAP U shift probably (if, then the same approach as in the wr_face_info_t)
 		int16_t v; // LMAP V shift probably
 
@@ -98,13 +146,25 @@ namespace Opde {
 		uint32_t dynamicLmapPtr;    // Dynamic lightmap pointer in memory - ignored by us
 
 		uint32_t animflags; // map of animlight lightmaps present - bit 1 means yes for that light - count ones, add 1 and you get the total num of lmaps for this lmap info
-	} WRLightInfo;
+		
+		friend File& operator<<(File& st, const WRLightInfo& ch) {
+			st << ch.u << ch.v << ch.lx << ch.ly << ch.lx8 << ch.staticLmapPtr << ch.dynamicLmapPtr << ch.animflags;
+			
+			return st;
+		}
+		
+		friend File& operator>>(File& st, WRLightInfo& ch) {
+			st >> ch.u >> ch.v >> ch.lx >> ch.ly >> ch.lx8 >> ch.staticLmapPtr >> ch.dynamicLmapPtr >> ch.animflags;
+			
+			return st;
+		}
+	};
 
 
 	/**
 	* A bsp Tree node - e.g. a leaf or a split plane
 	*/
-	typedef struct { // 20b - BSP node
+	struct WRBSPNode { // 20b - BSP node
 		// As TNH says: 24 bits node number, 8 bits flags.
 		// I put those into one field, as Msvc and GCC differ in bitfield packing
 		uint32_t ndn_fl;
@@ -113,7 +173,19 @@ namespace Opde {
 		int32_t plane; // if non-leaf, the splitting cells plane number - e.g. read nodes[cell].plane[plane] to get the plane you want
 		uint32_t front; // Or Cell index if leaf node (or END if 0xFFFFFF)
 		uint32_t back;  // Not used in leaf node
-	} WRBSPNode;
+		
+		friend File& operator<<(File& st, const WRBSPNode& ch) {
+			st << ch.ndn_fl << ch.cell << ch.plane << ch.front << ch.back;
+			
+			return st;
+		}
+		
+		friend File& operator>>(File& st, WRBSPNode& ch) {
+			st >> ch.ndn_fl >> ch.cell >> ch.plane >> ch.front >> ch.back;
+			
+			return st;
+		}
+	};
 
 	#define _BSP_NODENUM(a) (a.ndn_fl & 0x00FFFFFF)
 	#define _BSP_FLAGS(a) (a.ndn_fl  >> 24)

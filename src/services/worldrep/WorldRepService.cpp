@@ -38,6 +38,7 @@
 #include "WRCommon.h"
 #include "logger.h"
 #include "File.h"
+#include "FileCompat.h"
 
 using namespace Ogre;
 
@@ -203,7 +204,7 @@ namespace Opde {
 	// ----------------------- The level loading methods follow
 	void WorldRepService::loadFromChunk(FilePtr& wrChunk, size_t lightSize) {
 		WRHeader header;
-		wrChunk->read(&header, sizeof(WRHeader));
+		*wrChunk >> header;
 
 		mNumCells = header.numCells;
 
@@ -227,9 +228,10 @@ namespace Opde {
 		// -- Load the extra planes
 		wrChunk->read(&mExtraPlaneCount, sizeof(uint32_t));
 
-		mExtraPlanes = new DPlane[mExtraPlaneCount];
-		wrChunk->read(mExtraPlanes, sizeof(DPlane) * mExtraPlaneCount);
-
+		mExtraPlanes = new Plane[mExtraPlaneCount];
+		for (size_t i = 0; i < mExtraPlaneCount; ++i)
+			*wrChunk >> mExtraPlanes[i];
+		
 		// --------------------------------------------------------------------------------
 		// -- Load and process the BSP tree
 		uint32_t BspRows;
@@ -325,7 +327,7 @@ namespace Opde {
 			if (wr_node.cell < 0) {
 				assert(wr_node.plane >= 0);
 				assert((unsigned int) (wr_node.plane) < mExtraPlaneCount);
-				node->setSplitPlane(constructPlane(mExtraPlanes[wr_node.plane])); // Extra planes
+				node->setSplitPlane(mExtraPlanes[wr_node.plane]); // Extra planes
 			} else {
 				assert((unsigned int) (wr_node.cell) < mNumCells);
 				node->setSplitPlane(mCells[wr_node.cell]->getPlane(wr_node.plane));
@@ -353,18 +355,6 @@ namespace Opde {
 
 		LOG_DEBUG("Worldrep: Finished the BSP build");
 	}
-
-
-	//-----------------------------------------------------------------------
-	Ogre::Plane WorldRepService::constructPlane(const DPlane& plane) {
-		Vector3 normal(plane.normal.x, plane.normal.y, plane.normal.z);
-		float dist = plane.d;
-		Ogre::Plane oplane;
-		oplane.normal = normal;
-		oplane.d = dist;
-		return oplane;
-	}
-
 
 	// ---------------------------------------------------------------------
 	Ogre::SceneManager *WorldRepService::getSceneManager() {

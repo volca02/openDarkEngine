@@ -90,26 +90,30 @@ namespace Opde {
 
 		// The number in the comment is used by me to check if I deallocate what I allocated...
 		// load the header
-		chunk->read(&mHeader, sizeof(WRCellHeader));
+		*chunk >> mHeader;
 
 		//1. load the vertices
-		mVertices = new DVector3[mHeader.numVertices];
-		chunk->read(mVertices, sizeof(DVector3) * mHeader.numVertices);
-
+		mVertices = new Vector3[mHeader.numVertices];
+		
+		for (size_t i = 0; i < mHeader.numVertices; ++i)
+			*chunk >> mVertices[i]; 
+				
 		//2. load the cell's polygon mapping
 		mFaceMaps = new WRPolygon[mHeader.numPolygons];
-		chunk->read(mFaceMaps, sizeof(WRPolygon) * mHeader.numPolygons);
+		for (size_t i = 0; i < mHeader.numPolygons; ++i)
+			*chunk >> mFaceMaps[i];
 
 		//3. load the cell's texturing infos
 		mFaceInfos = new WRPolygonTexturing[mHeader.numTextured];
-		chunk->read(mFaceInfos, sizeof(WRPolygonTexturing) * mHeader.numTextured);
+		for (size_t i = 0; i < mHeader.numTextured; ++i)
+			*chunk >> mFaceInfos[i];
 
 		// polygon mapping struct.. len and data
 
 		// load the polygon indices map (indices to the vertex data for this cell)
 		// skip the total count of the indices
 		uint32_t num_indices;
-		chunk->read(&num_indices, sizeof(uint32_t));
+		*chunk >> num_indices;
 
 		// 4.
 		mPolyIndices = new uint8_t*[mHeader.numPolygons];
@@ -121,22 +125,10 @@ namespace Opde {
 		}
 
 		//6. load the planes
-		DPlane* wr_planes = new DPlane[mHeader.numPlanes];
-		chunk->read(wr_planes, sizeof(DPlane) * mHeader.numPlanes);
-
 		mPlanes = new Ogre::Plane[mHeader.numPlanes];
-		// convert the planes to the ogre format
-		for (int x = 0; x < mHeader.numPlanes; x++) {
-			DPlane origpl = wr_planes[x];
-			Ogre::Plane tplane;
-
-			tplane.normal = Vector3(origpl.normal.x, origpl.normal.y, origpl.normal.z);
-			tplane.d = origpl.d;
-
-			mPlanes[x] = tplane;
-		}
-		delete[] wr_planes;
-
+		for (size_t i = 0; i < mHeader.numPlanes; ++i)
+			*chunk >> mPlanes[i];
+		
 		// and load it's light info
 		mLights = mLightService->_loadLightDefinitionsForCell(mCellNum, chunk, mHeader.numAnimLights, mHeader.numTextured, mFaceInfos);
 
@@ -157,7 +149,7 @@ namespace Opde {
 
 
 	//------------------------------------------------------------------------------------
-	void WRCell::insertTexturedVertex(Ogre::ManualObject *manual, int faceNum, DVector3 coord,
+	void WRCell::insertTexturedVertex(Ogre::ManualObject *manual, int faceNum, const Vector3& coord,
 	        const Ogre::Vector2& displacement, const std::pair<Ogre::uint, Ogre::uint>& dimensions, Vector3 origin) {
 
 		BspVertex vert;
@@ -178,7 +170,7 @@ namespace Opde {
 
 
 	//------------------------------------------------------------------------------------
-	void WRCell::constructBspVertex(int faceNum, DVector3 pos, const Ogre::Vector2& displacement, const std::pair<
+	void WRCell::constructBspVertex(int faceNum, const Vector3& pos, const Ogre::Vector2& displacement, const std::pair<
 	        Ogre::uint, Ogre::uint>& dimensions, BspVertex *vtx) {
 		// Position copy
 		vtx->position[0] = pos.x;
@@ -202,20 +194,12 @@ namespace Opde {
 		float lx, ly;
 
 
-		// the texturing axises
-		Vector3 ax_u, ax_v;
 		// normalised versions of the above
 		Vector3 nax_u, nax_v;
 
-
-		// Texturing axises
-		const DVector3& _axu = mFaceInfos[faceNum].axisU;
-		const DVector3& _axv = mFaceInfos[faceNum].axisV;
-
-
-		// convert the vectors to the Ogre types
-		ax_u = Vector3(_axu.x, _axu.y, _axu.z);
-		ax_v = Vector3(_axv.x, _axv.y, _axv.z);
+		// Texturing axes
+		const Vector3& ax_u = mFaceInfos[faceNum].axisU;
+		const Vector3& ax_v = mFaceInfos[faceNum].axisV;
 
 		// Normalise the texturing axises
 		nax_u = ax_u.normalisedCopy(); // Normalized version of the axis U
@@ -235,15 +219,11 @@ namespace Opde {
 		sh_v = mFaceInfos[faceNum].v / 4096.0;
 
 		// the original vertex:
-		Vector3 tmp = Vector3(pos.x, pos.y, pos.z);
+		Vector3 tmp = pos;
 
 
 		// The first vertex in the poly.
-		const DVector3& first = mVertices[mPolyIndices[faceNum][0]]; //cell->face_maps[faceNum].flags
-
-		// converted to Ogre Vector3
-		Vector3 o_first = Vector3(first.x, first.y, first.z);
-
+		const Vector3& o_first = mVertices[mPolyIndices[faceNum][0]]; //cell->face_maps[faceNum].flags
 
 		// The texturing origin is substracted
 		tmp -= o_first;
@@ -265,10 +245,9 @@ namespace Opde {
 		vtx->texcoords[1] = ty;
 
 		// ----------------- LIGHTMAP COORDS --------------------
-		const DVector3& o_center = mFaceInfos[faceNum].center;
-		Vector3 center = Vector3(o_center.x, o_center.y, o_center.z);
+		// const Vector3& center = mFaceInfos[faceNum].center;
 
-		tmp = Vector3(pos.x, pos.y, pos.z);
+		tmp = pos;
 
 		Vector3 orig = tmp; // for debugging, remove...
 
@@ -318,14 +297,8 @@ namespace Opde {
 		// ------------- Calculate the UV center displacement (as the poly center is off)
 		// This method is just a hack. We need to find a proper way to detect light map on polygon alignment
 		// readout from the cell info
-		DVector3 _axu = mFaceInfos[polyNum].axisU;
-		DVector3 _axv = mFaceInfos[polyNum].axisV;
-
-
-		// convert the vectors to the Ogre types
-		Vector3 ax_u = Vector3(_axu.x, _axu.y, _axu.z);
-		Vector3 ax_v = Vector3(_axv.x, _axv.y, _axv.z);
-
+		const Vector3& ax_u = mFaceInfos[polyNum].axisU;
+		const Vector3& ax_v = mFaceInfos[polyNum].axisV;
 
 		// Normalise those texturing axises
 		Vector3 nax_u = ax_u.normalisedCopy(); // Normalized version of the axis U
@@ -338,10 +311,7 @@ namespace Opde {
 		// Precalculate the lightmap displacement. (To get the resulting lmap uv to 0-1 range)
 		for (int vert = 0; vert < mFaceMaps[polyNum].count; vert++) {
 			// find the min and max coords in texture space
-			DVector3 coord = mVertices[mPolyIndices[polyNum][vert]];
-
-			Vector3 vcoord(coord.x, coord.y, coord.z);
-
+			const Vector3& vcoord = mVertices[mPolyIndices[polyNum][vert]];
 
 			// To uv space
 			Vector2 uvs(nax_u.dotProduct(vcoord), nax_v.dotProduct(vcoord));
@@ -393,18 +363,13 @@ namespace Opde {
 
 
 			// Hmm. I use a SceneNode centered at the polygon's center. Otherwise I get huge radius (from 0,0,0 of the sceneNode).
-			DVector3 polyCenter = mFaceInfos[polyNum].center;
-			Vector3 nodeCenter = Vector3(polyCenter.x, polyCenter.y, polyCenter.z);
+			const Vector3& nodeCenter = mFaceInfos[polyNum].center;
 
-			DVector3 zero;
-			zero.x = 0;
-			zero.y = 0;
-			zero.z = 0;
 			// insertTexturedVertex(manual, polyNum, zero, displacement, dimensions, nodeCenter);
 
 			// for each vertex, insert into the model
 			for (int vert = 0; vert < mFaceMaps[polyNum].count; vert++) {
-				DVector3 vrelative = mVertices[mPolyIndices[polyNum][vert]];
+				const Vector3& vrelative = mVertices[mPolyIndices[polyNum][vert]];
 
 				insertTexturedVertex(manual, polyNum, vrelative, displacement, dimensions, nodeCenter);
 			}
@@ -463,9 +428,7 @@ namespace Opde {
 
 			for (int vert = 0; vert < mFaceMaps[portalNum].count; vert++) {
 				// for each vertex of that poly
-				DVector3 coord = mVertices[mPolyIndices[portalNum][vert]];
-
-				portal->addPoint(coord.x, coord.y, coord.z);
+				portal->addPoint(mVertices[mPolyIndices[portalNum][vert]]);
 			} // for each vertex
 
 			// Debbuging portal order ID
@@ -549,10 +512,8 @@ namespace Opde {
 		int faceCount = mHeader.numTextured;
 
 
-		// Cell is recentered with this
-		DVector3 cellCenter = mHeader.center;
-		Vector3 nodeCenter = Vector3(cellCenter.x, cellCenter.y, cellCenter.z);
-
+		// Cell is re-centered with this
+		// const Vector3& nodeCenter = mHeader.center;
 
 		// Now let's iterate over the materials
 		// Prepare the object's name
@@ -616,7 +577,7 @@ namespace Opde {
 				uint32_t *idxmap = new uint32_t[mFaceMaps[polyNum].count];
 
 				for (int vert = 0; vert < mFaceMaps[polyNum].count; vert++) {
-					DVector3 vrelative = mVertices[mPolyIndices[polyNum][vert]];
+					const Vector3& vrelative = mVertices[mPolyIndices[polyNum][vert]];
 
 
 					// insertTexturedVertex(manual, polyNum, vrelative, displacement, dimensions, nodeCenter);
