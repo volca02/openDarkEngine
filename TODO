@@ -3,26 +3,23 @@ This is a TODO for openDarkEngine
 
 Pre-0.3 release:
     
-    * Code cleanup
-    * cleanup of WorldRep service. New style of struct reading using the signatures should be used
-    * new main.cpp - preferably only a small wrapper for python scripts to be executed with
-    * propper Big/Little endian handling for DType/DTypeDef classes (and OPDE in general). This (together with some other fixes) should enable the code to run on non-intel macs and other architectures
-    * Finalization of the core services bindings, coupled with Doc strings to make coder's life easier
+    - cleanup of WorldRep service. New style of struct reading using the signatures should be used
+      - partially done. The struct signatures are pain because of the alignment needed. Rewritten to use bitshift-like operators insted
+    - new main.cpp - preferably only a small wrapper for python scripts to be executed with
+      - this will be done differently. We have a testing viewer ready, the next task is to come up with gui and simulation. Python side code with opde module import.
     + installation scripts / win32 installer - should also prepare opde's config files to be ready to rock after install
-    * better handling of missing data
-    * ogre's (and others) resource system management. How to organize resource unloading? How to classify loaded data? Those need to be answered
-    * small clarifications of the methods working with property/link data - what the data flow will be? getData can return archetype's data, so changes should be disallowed on that returned object
-    * Testing: for example how to correctly (and legally) transfer python's lib together with opde, bug fixes for opde if it does not find data it needs
-    * Example scripts to the SVN - resources.cfg, opde.cfg, plugins.cfg, etc should be placed in SVN to ease the pain for people trying to build from source
-    * Other example scripts/documentation, including FAQ - How do I create a custom material replacement? How do I create a mesh replacement? (...New movements for AI?...)
+    - small clarifications of the methods working with property/link data - what the data flow will be? getData can return archetype's data, so changes should be disallowed on that returned object
+      - getData was removed. The functionality of data storage now lies in data storages
+    - Testing: for example how to correctly (and legally) transfer python's lib together with opde, bug fixes for opde if it does not find data it needs
+      - Python lib instalation works now on linux
+    - Example scripts to the SVN - resources.cfg, opde.cfg, plugins.cfg, etc should be placed in SVN to ease the pain for people trying to build from source
+      - We'll have a propper platform settings system written in 0.3 instead
     + optional: Optimization. The new SM for example does not perform so well one could be satisfied with it.
     + Built-in properties: To stop the opde from failing fatally if the core sripts are corrupted/missing
     - DTypeDef cleanup: It now seems we can safely swap endianness of DTypeDef supported data. This means we can do all the byte mumbo-jumbo whilst loading, and have a cleaner get/set code.
 	- need to be 100% sure here - there are some unions present
 	(Also an option: Getting rid of the DType structures altogether, using linear array of field lists with type. Bit more work, result would be much more simmilar to Dark's original impl.)
-    * Cleanup in the error handling - how to report errors, how to handle exceptions to Python
-    * Object construction has some pending changes: Link definition should get clone/instantinate style attribute (clone target as well, clone link/leave archetype target id, discard link)
-	- see the Thief1 (2?) Torch. In fact any archetype with particleAttachment. Then see T2's Flinderize link. Both have non-standard object instantination behavior.
+	- Data storages are used now. This gets obsolete thus. The unions will be handled internally in the questioned storage though...
     + SceneNode should be moved to RenderSystem again. The current position in the object service was too much a shortcut.
 	* Here are some thoughts: both Position property setting and call to the ObjectService::setPosition/Orientation should end up calling position listeners(only once)!
 	* some internal caching of the object->position and object->orientation can be done in object service, but not needed (too much data duplication)
@@ -35,14 +32,12 @@ Pre-0.3 release:
     + Possibility of property storage and implementation to be separate (for tools). This is done partially using optionality of the renderer listeners, but blind option for property group/data storage should do it better. That means core properties can reflect the values if blind is false as well.
     + Basic type data storages - float data storage, integer data storage, bool data storage (binary array based)
     + Advanced - structured templated data storage - something to be easilly personalised for the use with internal properties/link data that are structured (Property position for example). 
-    * On-the-fly max/min object id resets - should be partially implemented, but binary arrays need to be reallocated/repopulated then, this has to work (at least for editor mode)
-    * Documentation - how to implement code that makes the property live. How to implement contstraints between various properties.
-    * Fog rendering - the one of the last rendering problems to be solved. Fog lives in the scenemanager, but we need to render our geometry twice - once the part that is fogged, once the part that is not fogged. 
-	How this works in original dark remains to be revealed - non-fogged geometry seen through a fogged area is a small example. Maybe this uses some kind of volumetric fog. The author of DDFix - TimeSlip - should know more.
 
 
 0.3 - 0.4:
     * Object Scripts. The whole infrastructure - Script Service, script message struct. Need more info/ideas here.
+        - It becomes clear that we need a full blown testing framework for scripts. We can omit the engine testing (not entirelly possible anyway),
+	  but we need a framework to easily test the scripts - how those respond to messages, etc. We will probably need a set of hooks in the script service in order to do that and some simplification API.
     * in parallel to that (to test the system on something): 
     	- Room service (probably the easiest, so should be the first)
 	- A/R system
@@ -50,8 +45,25 @@ Pre-0.3 release:
     * Sound system - need a propper resource system for this one, lots of data will travel because of this one
     * Full-Bright mode for DromEd users
     * Full support for multiple instances of Opde, also engine shutdown/restart (at least one of these has to work in order to do a fully working prop/link documentation generator)
+      - not sure here yet - problems with ogre singletons. And after all this should not be needed besides object system comaparisons (can do a GAM<->XML importer/exporter instead)
     + DB load/save interfacing change. The old "one message covers all" adds code to services where it should rather save space. Rewrite to DBListener approach (onLoad, onSave...)
-
+    + Platform service to take care of configuration storage directory, registry handling, per user save directories and other specifics (preparation was done by allowing platform dependent source code inclusion/compilation with cmake).
+  From 0.2:
+  * Code cleanup
+  * Finalization of the core services bindings, coupled with Doc strings to make coder's life easier (This will continue till beta release of the project)
+  * better handling of missing data
+  * propper Big/Little endian handling for DType/DTypeDef classes (and OPDE in general). This (together with some other fixes) should enable the code to run on non-intel macs and other architectures
+    - should be done now. Needs to be tested. The old handling of structure loads/saves needs to be removed (only one path to a problem solution should exist)
+  * ogre's (and others) resource system management. How to organize resource unloading? How to classify loaded data? Those need to be answered
+  * Other example scripts/documentation, including FAQ - How do I create a custom material replacement? How do I create a mesh replacement? (...New movements for AI?...)
+  * Cleanup in the error handling - how to report errors, how to handle exceptions to Python
+  * Object construction has some pending changes: Link definition should get clone/instantinate style attribute (clone target as well, clone link/leave archetype target id, discard link)
+    - see the Thief1 (2?) Torch. In fact any archetype with particleAttachment. Then see T2's Flinderize link. Both have non-standard object instantination behavior.
+  * On-the-fly max/min object id resets - should be partially implemented, but binary arrays need to be reallocated/repopulated then, this has to work (at least for editor mode)    
+  * Documentation - how to implement code that makes the property live. How to implement contstraints between various properties.
+  * Fog rendering - the one of the last rendering problems to be solved. Fog lives in the scenemanager, but we need to render our geometry twice - once the part that is fogged, once the part that is not fogged. 
+	How this works in original dark remains to be revealed - non-fogged geometry seen through a fogged area is a small example. Maybe this uses some kind of volumetric fog. The author of DDFix - TimeSlip - should know more.
+	
 
 ----------------------------------
 - Some random side-project ideas -
