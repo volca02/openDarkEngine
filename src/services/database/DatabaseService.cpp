@@ -118,7 +118,8 @@ namespace Opde {
 	void DatabaseService::save(const std::string& filename, uint32_t saveMask) {
 		// just prepare the progress and delegate to the broadcast
 		FilePtr fp = FilePtr(new StdFile(filename, File::FILE_RW));
-		FileGroupPtr tgtdb = FileGroupPtr(new DarkFileGroup(fp));
+		
+		FileGroupPtr tgtdb = FileGroupPtr(new DarkFileGroup());
 		
 		LOG_DEBUG("DatabaseService::save - Save to file %s, mask %X", filename.c_str(), saveMask);
 
@@ -130,6 +131,9 @@ namespace Opde {
 		// And write the saveMask as FILE_TYPE
 		FilePtr fpf = tgtdb->createFile("FILE_TYPE", 0, 1); // The version is fixed, really. Nothing to invent here
 		fpf->writeElem(&saveMask, sizeof(uint32_t));
+		
+		// And Write!
+		tgtdb->write(fp);
 	}
 	
 	//------------------------------------------------------
