@@ -42,6 +42,11 @@ OPTION(GLOBAL_DEBUG
 OPTION(GENERATE_NSIS
     "Creates Windows installer script"
     ON)
+
+# Option to generate documentation
+OPTION(GENERATE_DOC
+    "Generate documentation"
+    OFF)
     
 # Option to build in the debugging code
 OPTION(PROFILING 
@@ -49,15 +54,16 @@ OPTION(PROFILING
     OFF)
 
 # Option to build all the libs as static (defunct - linking problems)
-OPTION(STATIC_LIBS
-    "Build the libs as static (defunct)"
-    OFF)
+# OPTION(STATIC_LIBS
+#    "Build the libs as static (defunct)"
+#    OFF)
+SET(STATIC_LIBS OFF)
+MARK_AS_ADVANCED(STATIC_LIBS)
 
 # Option to build the python module/extension
 OPTION(PYTHON_MODULE
     "Build the python module version of the OpenDark library"
     OFF)
-
 
 # Compiler profiling flags
 IF (PROFILING)
@@ -109,7 +115,6 @@ IF(UNIX AND NOT WIN32)
   ENDIF(CMAKE_UNAME)
 ENDIF(UNIX AND NOT WIN32)
 
-
 # MSVC specific stuff
 IF(CMAKE_COMPILER_IS_MSVC)
     # STUB. Nothing now
@@ -127,7 +132,6 @@ ELSE(GLOBAL_DEBUG)
 ENDIF(GLOBAL_DEBUG)
 
 
-
 # Solve the dependencies
 SET(OIS_DIR ${CMAKE_MODULE_PATH})
 SET(ODE_DIR ${CMAKE_MODULE_PATH})
@@ -138,6 +142,20 @@ FIND_PACKAGE(OIS REQUIRED)
 FIND_PACKAGE(ODE REQUIRED)
 FIND_PACKAGE(OGRE REQUIRED)
 FIND_PACKAGE(FREEIMAGE REQUIRED)
+
+# Documentation
+# On Ubuntu, the following command does not search for Dot :(
+FIND_PACKAGE(Doxygen)
+FIND_PROGRAM(TEXI2HTML texi2html)
+
+IF(NOT DOT)
+	FIND_PROGRAM(DOT dot)
+ENDIF(NOT DOT)
+
+MARK_AS_ADVANCED(TEXI2HTML DOT)
+
+INCLUDE(FindPythonModule.cmake)
+FIND_PYTHON_MODULE("epydoc" "EPYDOC")
 
 IF(FREEIMAGE_FOUND)
     MESSAGE(STATUS "FreeImage Found OK")
@@ -169,7 +187,7 @@ IF(OPDE_PYTHON_LIBRARIES)
     MESSAGE(STATUS " - Python includes ${PYTHON_INCLUDE_PATH}")
     MESSAGE(STATUS " - Python libs ${OPDE_PYTHON_LIBRARIES}")
 ELSE(OPDE_PYTHON_LIBRARIES)
-    MESSAGE(FATAL_ERROR "Python not found and selected in options!")
+    MESSAGE(FATAL_ERROR "Python not found")
 ENDIF(OPDE_PYTHON_LIBRARIES)
 
 # Only visual check enabling verbose output, and package found info
@@ -189,13 +207,43 @@ ELSE(OGRE_FOUND)
     MESSAGE(FATAL_ERROR "OGRE not found")
 ENDIF(OGRE_FOUND)
 
-#IF(CEGUI_FOUND)
-#    MESSAGE(STATUS "CEGUI Found OK")
-#    MESSAGE(STATUS " - CEGUI includes ${CEGUI_INCLUDE_DIR}")
-#    MESSAGE(STATUS " - CEGUI libs ${CEGUI_LIBRARIES}")
-#ELSE(CEGUI_FOUND)
-#    MESSAGE(FATAL_ERROR "CEGUI not found")
-#ENDIF(CEGUI_FOUND)
+SET(DOC_DEPS_SATISFIED OFF)
+MARK_AS_ADVANCED(DOC_DEPS_SATISFIED)
+
+# Preparation for the documentation generators - do we have all dependencies?
+IF (GENERATE_DOC)
+	IF(DOXYGEN_EXECUTABLE)
+		MESSAGE(STATUS "Doxygen Found OK")
+	ELSE(DOXYGEN_EXECUTABLE)
+		MESSAGE("Doxygen not found")
+	ENDIF(DOXYGEN_EXECUTABLE)
+	
+	IF(TEXI2HTML)
+		MESSAGE(STATUS "Texi2html Found OK")
+	ELSE(TEXI2HTML)
+		MESSAGE("Texi2html not found")
+	ENDIF(TEXI2HTML)
+
+	IF(DOT)
+		MESSAGE(STATUS "Dot Found OK")
+	ELSE(DOT)
+		MESSAGE("Dot not found")
+	ENDIF(DOT)
+	
+	IF(EPYDOC)
+		MESSAGE(STATUS "Epydoc Found OK")
+	ELSE(EPYDOC)
+		MESSAGE("Epydoc not found")
+	ENDIF(EPYDOC)
+	
+	# See if we have all the dependencies for DOC_DEPS_SATISFIED
+	IF (DOXYGEN_EXECUTABLE AND TEXI2HTML AND DOT AND EPYDOC)
+		SET(DOC_DEPS_SATISFIED ON)
+	ELSE (DOXYGEN_EXECUTABLE AND TEXI2HTML AND DOT AND EPYDOC)
+		MESSAGE("Warning: Documentation dependencies not satisfied. Doc generation will be disabled.")
+		SET(GENERATE_DOC OFF)
+	ENDIF (DOXYGEN_EXECUTABLE AND TEXI2HTML AND DOT AND EPYDOC)
+ENDIF (GENERATE_DOC)
 
 # Some configuration checks to allow platform independence
 INCLUDE(ConfigureChecks.cmake)
@@ -207,7 +255,8 @@ add_subdirectory (proto)
 add_subdirectory (thirdparty)
 
 # Generate the doxyfile if selected as an option
-IF (UNIX AND OPDE_PYTHON_LIBRARIES)
+# TODO: This will most certainly fail on windows due to the fact we use unix commands.
+IF (GENERATE_DOC AND DOC_DEPS_SATISFIED)
     # Generate the doxyfile from the template file
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
                       ${CMAKE_BINARY_DIR}/Doxyfile)
@@ -216,9 +265,6 @@ IF (UNIX AND OPDE_PYTHON_LIBRARIES)
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/writedoc.py.in
                       ${CMAKE_BINARY_DIR}/writedoc.py)
                 
-    
-    FIND_PACKAGE(Doxygen REQUIRED)
-    
     # generates the Doxygen docs.
     ADD_CUSTOM_COMMAND(
     OUTPUT ${CMAKE_BINARY_DIR}/doc/main/html/index.html
@@ -255,7 +301,7 @@ IF (UNIX AND OPDE_PYTHON_LIBRARIES)
     ADD_CUSTOM_TARGET(docs ALL
         DEPENDS
             opdeScript
-        opdeDocGen
+	opdeDocGen
         ${CMAKE_BINARY_DIR}/doc/main/html/index.html
         ${CMAKE_BINARY_DIR}/doc/python/html/index.html
         ${CMAKE_BINARY_DIR}/doc/manual/index.html
@@ -263,9 +309,9 @@ IF (UNIX AND OPDE_PYTHON_LIBRARIES)
         ${DOXYGEN_EXECUTABLE}
     )
     ELSE (DOXYGEN_EXECUTABLE)
-    MESSAGE("Warning: Doxygen not found, docs target disabled.")
+    	MESSAGE("Warning: Doxygen not found, docs target disabled.")
     ENDIF (DOXYGEN_EXECUTABLE)
-ENDIF (UNIX AND OPDE_PYTHON_LIBRARIES)
+ENDIF (GENERATE_DOC AND DOC_DEPS_SATISFIED)
 
 IF (GENERATE_NSIS)
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/installer/opde-win.in
@@ -283,9 +329,8 @@ MESSAGE(STATUS " * Global debugging : ${GLOBAL_DEBUG}")
 MESSAGE(STATUS " * Build type       : ${CMAKE_BUILD_TYPE}")
 MESSAGE(STATUS " * Profilling       : ${PROFILING}")
 MESSAGE(STATUS " * Python module    : ${PYTHON_MODULE}")
-MESSAGE(STATUS " * Doxy generation  : ${GENERATE_DOC}")
+MESSAGE(STATUS " * Documentation    : ${GENERATE_DOC}")
 MESSAGE(STATUS " * C compiler       : ${CMAKE_C_COMPILER}")
 MESSAGE(STATUS " * C++ compiler     : ${CMAKE_CXX_COMPILER}")
 MESSAGE(STATUS " * Source directory : ${CMAKE_CURRENT_SOURCE_DIR}")
 MESSAGE(STATUS " * Binary directory : ${CMAKE_CURRENT_BINARY_DIR}")
-
