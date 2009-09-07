@@ -11,6 +11,7 @@ SET(ODE_FOUND)
 MARK_AS_ADVANCED(ODE_FOUND)
 MARK_AS_ADVANCED(ODE_LIBRARIES)
 MARK_AS_ADVANCED(ODE_INCLUDE_DIR)
+MARK_AS_ADVANCED(ODE_PATH)
 
 # For win32 builds. This can be filled by hand. Standard path is dependencies directory next to opde binary dir (out of source build target directory)
 SET(ODE_PATH "${OPDE_BINARY_DIR}/../dependencies/ode/" CACHE STRING "For Win32 include directories and the installer. Can be filled to the path of the ODE")
