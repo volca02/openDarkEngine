@@ -121,7 +121,7 @@ namespace Opde {
 		assert(!mSrcFile.isNull());
 		
 		for (uint i = 0; i < count; i++) {
-			mSrcFile->readStruct(&inventory[i], "12c2i", sizeof(DarkDBInvItem));
+			*mSrcFile >> inventory[i];
 		}
 	}
 	
@@ -130,7 +130,7 @@ namespace Opde {
 		assert(!dest.isNull());
 		
 		for (uint i = 0; i < count; i++) {
-			dest->writeStruct(&inventory[i], "12c2i", sizeof(DarkDBInvItem));
+			*dest << inventory[i];
 		}
 	}
 
@@ -139,14 +139,14 @@ namespace Opde {
 	void DarkFileGroup::readChunkHeader(DarkDBChunkHeader* hdr) {
 		assert(!mSrcFile.isNull());
 		
-		mSrcFile->readStruct(hdr, "12c3i", sizeof(DarkDBChunkHeader));
+		*mSrcFile >> *hdr;
 	}
 	
 	//------------------------------------	
 	void DarkFileGroup::writeChunkHeader(FilePtr& dest, const DarkDBChunkHeader& hdr) {
 		assert(!dest.isNull());
 		
-		dest->writeStruct(&hdr, "12c3i", sizeof(DarkDBChunkHeader));
+		*dest << hdr;
 	}
 	
 	//------------------------------------	

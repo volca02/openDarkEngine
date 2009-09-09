@@ -28,43 +28,50 @@
 
 #include "integers.h"
 
-#pragma pack(push, 1)
-
 namespace Opde {
+	// Forward decl.
+	class File;
+	
 	/*
 	* Header of Dark Engine's tag-file database.
 	*/
-	typedef struct DarkDBHeader
-	{
+	struct DarkDBHeader {
 		uint32_t	inv_offset;		// Offset to inventory TOC from top of header
 		uint32_t	zero;
 		uint32_t	one;
 		uint8_t		zeros[256];
 		uint32_t	dead_beef;		// 0xEFBEADDE (damn little-endian)
-	} DarkDBHeader;
+	};
+
+	File& operator<<(File& st, const DarkDBHeader& h);
+	File& operator>>(File& st, DarkDBHeader& h);
+
 	
 	/*
 	* Item in chunk index.
 	*/
-	typedef struct DarkDBInvItem
-	{
+	struct DarkDBInvItem {
 		char		name[12];
 		uint32_t	offset;
 		uint32_t	length;
-	} DarkDBInvItem;
+	};
+	
+	File& operator<<(File& st, const DarkDBInvItem& h);
+	File& operator>>(File& st, DarkDBInvItem& h);
 	
 	/*
 	* Universal chunk header.
 	*/
-	typedef struct DarkDBChunkHeader
-	{
+	struct DarkDBChunkHeader {
 		char	name[12];
 		uint32_t	version_high;
 		uint32_t	version_low;
 		uint32_t	zero;
-	} DarkDBChunkHeader;
- };
+	};
 
-#pragma pack(pop)
+	
+	File& operator<<(File& st, const DarkDBChunkHeader& h);
+	File& operator>>(File& st, DarkDBChunkHeader& h);
+};
 
 #endif

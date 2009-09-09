@@ -25,6 +25,7 @@
 //---------------------------- El cargador de las fuentes para El Motor Oscuro --------------------
 #include "config.h"
 #include "ManualFonFileLoader.h"
+#include "File.h"
 
 #include <OgreLogManager.h>
 #include <OgreStringConverter.h>
@@ -64,7 +65,7 @@ namespace Ogre
 	/*-----------------------------------------------------------------*/
 	unsigned char** ManualFonFileLoader::ReadFont(int *ResultingColor)
 	{
-		struct DarkFontHeader FontHeader;
+		DarkFontHeader FontHeader;
 		unsigned int ImageWidth, ImageHeight, FinalSize = 1;
 		unsigned int X, Y;
 		unsigned int N;
@@ -73,7 +74,8 @@ namespace Ogre
 
 		mChars.clear();
 
-		mFontFile->readStruct(&FontHeader, DarkFontHeader_Format, sizeof(DarkFontHeader));
+		*mFontFile >> FontHeader;
+		
 		NumChars = FontHeader.LastChar - FontHeader.FirstChar + 1;
 		mNumRows = FontHeader.NumRows;
 
@@ -299,7 +301,7 @@ namespace Ogre
 		}
 		
 		// We're sure that we have external palette here:
-		mPaletteFile->readStruct(&PaletteHeader, ExternalPaletteHeader_Format, sizeof(ExternalPaletteHeader));
+		*mPaletteFile >> PaletteHeader;
 		if (PaletteHeader.RiffSig == 0x46464952)
 		{
 			if (PaletteHeader.PSig1 != 0x204C4150)
@@ -313,7 +315,7 @@ namespace Ogre
 				Count = 256;
 			for (I = 0; I < Count; I++)
 			{
-				mPaletteFile->readStruct(&Palette[I], RGBQUAD_Format, sizeof(RGBQUAD));
+				*mPaletteFile >> Palette[I];
 				S = Palette[I].rgbRed;
 				Palette[I].rgbRed = Palette[I].rgbBlue;
 				Palette[I].rgbBlue = S;
@@ -357,7 +359,7 @@ namespace Ogre
 			RGBTRIPLE P;
 			for (I = 0; I < mPaletteFile->size() / sizeof(RGBTRIPLE); I++)
 			{
-				mPaletteFile->readStruct(&P, RGBTRIPLE_Format, sizeof(RGBTRIPLE));
+				*mPaletteFile >> P;
 				Palette[I].rgbRed = P.rgbtBlue;
 				Palette[I].rgbGreen = P.rgbtGreen;
 				Palette[I].rgbBlue = P.rgbtRed;

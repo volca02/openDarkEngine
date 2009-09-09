@@ -29,9 +29,12 @@
 
 #include "config.h"
 #include "integers.h"
+#include <vector>
 
-namespace Ogre 
+namespace Opde 
 {
+	class File;
+	
 	typedef uint32_t  DWORD;
 	typedef int32_t   BOOL;
 	typedef uint8_t   BYTE;
@@ -39,7 +42,6 @@ namespace Ogre
 	typedef DWORD COLORREF;
 
 
-	static const char DarkFontHeader_Format[]="w34c2w32c2i2w";
 	struct DarkFontHeader
 	{
 		uint16_t	Format;		/* 1 - anti-aliased, 0xCCCC - 8bpp, else - 1bpp */
@@ -54,8 +56,10 @@ namespace Ogre
 		uint16_t	RowWidth;	/* in bytes */
 		uint16_t	NumRows;
 	};
+	
+	File& operator<<(File& st, const DarkFontHeader& h);
+	File& operator>>(File& st, DarkFontHeader& h);
 
-	static const char ExternalPaletteHeader_Format[]="5i";
 	struct ExternalPaletteHeader
 	{
 		DWORD RiffSig;
@@ -63,7 +67,11 @@ namespace Ogre
 		DWORD PSig1;
 		DWORD PSig2;
 		DWORD Length;
-	} ;
+	};
+	
+	File& operator<<(File& st, const ExternalPaletteHeader& h);
+	File& operator>>(File& st, ExternalPaletteHeader& h);
+
 
 	struct CharInfo
 	{
@@ -73,21 +81,22 @@ namespace Ogre
 		uint16_t	Height;
 		int32_t	X,Y;
 	};
+	
+	
 	typedef std::vector<CharInfo> CharInfoList;
 
-	#pragma pack(push, 1)
-	
-	static const char BITMAPFILEHEADER_Format[]="wi2wi";
-	typedef struct tagBITMAPFILEHEADER { 
+	struct BITMAPFILEHEADER { 
 	  WORD    bfType; 
 	  DWORD   bfSize; 
 	  WORD    bfReserved1; 
 	  WORD    bfReserved2; 
 	  DWORD   bfOffBits; 
-	} BITMAPFILEHEADER;
+	};
 
-	static const char BITMAPINFOHEADER_Format[]="3i2w6i";
-	typedef struct tagBITMAPINFOHEADER {
+	File& operator<<(File& st, const BITMAPFILEHEADER& h);
+	File& operator>>(File& st, BITMAPFILEHEADER& h);
+
+	struct BITMAPINFOHEADER {
 		DWORD  biSize;
 		DWORD   biWidth;
 		DWORD   biHeight;
@@ -99,29 +108,41 @@ namespace Ogre
 		DWORD   biYPelsPerMeter;
 		DWORD  biClrUsed;
 		DWORD  biClrImportant;
-	} BITMAPINFOHEADER;
+	};
 
-	static const char RGBQUAD_Format[]="4c";
-	typedef struct tagRGBQUAD {
+	File& operator<<(File& st, const BITMAPINFOHEADER& h);
+	File& operator>>(File& st, BITMAPINFOHEADER& h);
+
+
+	struct RGBQUAD {
 	  BYTE    rgbBlue; 
 	  BYTE    rgbGreen; 
 	  BYTE    rgbRed; 
 	  BYTE    rgbReserved; 
-	} RGBQUAD;
+	};
+	
+	File& operator<<(File& st, const RGBQUAD& h);
+	File& operator>>(File& st, RGBQUAD& h);
 
-	typedef struct tagBITMAPINFO {
+
+	struct BITMAPINFO {
 	   BITMAPINFOHEADER bmiHeader;
 	   RGBQUAD bmiColors[1];
-	} BITMAPINFO;
+	};
 
-	static const char RGBTRIPLE_Format[]="3c";
-	typedef struct tagRGBTRIPLE { 
+	File& operator<<(File& st, const BITMAPINFO& h);
+	File& operator>>(File& st, BITMAPINFO& h);
+
+
+	struct RGBTRIPLE { 
 	  BYTE rgbtBlue; 
 	  BYTE rgbtGreen; 
 	  BYTE rgbtRed; 
-	} RGBTRIPLE; 
+	}; 
+	
+	File& operator<<(File& st, const RGBTRIPLE& h);
+	File& operator>>(File& st, RGBTRIPLE& h);
 
-	static const char ColorTable_Format[]="256i";
 	static const COLORREF	ColorTable[] = {
 		0x000000, 0xDDDDDD, 0xB6B6B6, 0x969696, 0x7C7C7C, 0x666666, 0x545454, 0x454545,
 		0x393939, 0x2F2F2F, 0x272727, 0x202020, 0x1A1A1A, 0x161616, 0x121212, 0x0F0F0F,
@@ -193,7 +214,6 @@ namespace Ogre
 		0x777777, 0x666666, 0x555555, 0x444444, 0x333333, 0x222222, 0x111111, 0x000000
 	};
 
-	#pragma pack(pop)
 }
 
 #endif //__FONFORMAT_H
