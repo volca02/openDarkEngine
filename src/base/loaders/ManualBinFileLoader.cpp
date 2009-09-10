@@ -1876,6 +1876,7 @@ namespace Ogre {
         pass->setAmbient(1,1,1);
         pass->setDiffuse(1,1,1,1);
         pass->setSpecular(0,0,0,0);
+        pass->setCullingMode(CULL_CLOCKWISE);
 
         if (mat.type == MD_MAT_TMAP) {
             // Texture unit state for the main texture...
