@@ -172,10 +172,12 @@ namespace Opde {
 		"@type msg: string\n"
 		"@param msg: The logged string\n";
 
-	const char* opde_createRoot__doc__ = "createRoot(mask)\n"
+	const char* opde_createRoot__doc__ = "createRoot(mask;logfile)\n"
 		"Creates the Opde.Root object with the specified service mask (See L{opde.services<Opde.Services>}).\n"
 		"@type mask: number\n"
 		"@param mask: Service creation mask\n"
+		"@type logfile: string\n"
+		"@param logfile: The log file (optional)\n"
 		"@rtype: Root\n"
 		"@return: A new opde.Root object reference";
 
@@ -281,11 +283,17 @@ namespace Opde {
 	PyObject* PythonLanguage::createRoot(PyObject *self, PyObject* args) {
 		// args: Module mask - unsigned long long
 		PyObject *result = NULL;
+		const char *logfile = NULL;
 		unsigned long mask;
 
-		if (PyArg_ParseTuple(args, "l", &mask)) {
-			// Create new root, wrap, return
-			msRoot = new Opde::Root(mask);
+		if (PyArg_ParseTuple(args, "l|s", &mask, &logfile)) {
+			if (logfile) {
+				// Create new root, wrap, return
+				msRoot = new Opde::Root(mask, logfile);
+			} else {
+				// new root without logfile specifier
+				msRoot = new Opde::Root(mask);
+			}
 
 			// Todo: We could also share a single object instance here PyObject - mPyRoot PyIncRef on it, return
 			result = Python::RootBinder::create(msRoot);
