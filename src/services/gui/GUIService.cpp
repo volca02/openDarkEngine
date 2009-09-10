@@ -116,7 +116,7 @@ namespace Opde {
 		mLoopSrv->addLoopClient(this);
 		
 		// Core rendering sources
-		mConfigSrv->setParamDescription("console_font_name", "Font file name of the base console font used for debuggging");
+		mConfigSrv->setParamDescription("console_font_name", "Font file name of the base console font used for debugging");
 		mConfigSrv->setParamDescription("console_font_group", "Resource group of the base console font");
 		
 		mConsoleFontName = mConfigSrv->getParam("console_font_name");
