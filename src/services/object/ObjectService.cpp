@@ -124,7 +124,7 @@ namespace Opde {
 		int prevusage = named(name);
 
 		if (mSymNameStorage->nameUsed(name) != 0 && prevusage != objID) {
-			LOG_ERROR("Tried to set name '%s' to object %d which was alredy used by object %d", name.c_str(), objID, prevusage);
+			LOG_ERROR("ObjectService::setName: Tried to set name '%s' to object %d which was alredy used by object %d", name.c_str(), objID, prevusage);
 			return;
 		}
 
@@ -153,7 +153,7 @@ namespace Opde {
 	//------------------------------------------------------
 	int ObjectService::addMetaProperty(int id, const std::string& mpName) {
 		if (!exists(id)) {
-			LOG_DEBUG("Adding MP '%s' on invalid object %d", mpName.c_str(), id);
+			LOG_DEBUG("ObjectService::addMetaProperty: Adding MP '%s' on invalid object %d", mpName.c_str(), id);
 			return 0;
 		}
 
@@ -161,7 +161,7 @@ namespace Opde {
 		int mpid = named(mpName);
 
 		if (mpid == 0) {
-			LOG_DEBUG("Adding invalid MP '%s' to object %d", mpName.c_str(), id);
+			LOG_DEBUG("ObjectService::addMetaProperty: Adding invalid MP '%s' to object %d", mpName.c_str(), id);
 			return 0;
 		}
 
@@ -174,7 +174,7 @@ namespace Opde {
 	//------------------------------------------------------
 	int ObjectService::removeMetaProperty(int id, const std::string& mpName) {
 		if (!exists(id)) {
-			LOG_DEBUG("Removing MP '%s' on invalid object %d", mpName.c_str(), id);
+			LOG_DEBUG("ObjectService::removeMetaProperty: Removing MP '%s' on invalid object %d", mpName.c_str(), id);
 			return 0;
 		}
 
@@ -182,7 +182,7 @@ namespace Opde {
 		int mpid = named(mpName);
 
 		if (mpid == 0) {
-			LOG_DEBUG("Removing invalid MP '%s' to object %d", mpName.c_str(), id);
+			LOG_DEBUG("ObjectService::removeMetaProperty: Removing invalid MP '%s' to object %d", mpName.c_str(), id);
 			return 0;
 		}
 
@@ -390,7 +390,7 @@ namespace Opde {
 		// Processes all the new ID's
 		for(id = minID; id < maxID ; ++id) {
 			if (fileObjs[id]) {
-				LOG_VERBOSE("Found object ID %d", id);
+				LOG_VERBOSE("ObjectService: Found object ID %d", id);
 
 				// object should not have existed before
 				assert(!mAllocatedObjects[id]);
@@ -407,7 +407,7 @@ namespace Opde {
 		try {
 			mPropertyService->load(db, fileObjs);
 		} catch (BasicException& e) {
-			LOG_FATAL("Exception while loading properties from mission database : %s", e.getDetails().c_str());
+			LOG_FATAL("ObjectService: Exception while loading properties from mission database : %s", e.getDetails().c_str());
 		}
 
 		mDatabaseService->fineStep(1);
@@ -415,7 +415,7 @@ namespace Opde {
 		try {
 			mLinkService->load(db, mAllocatedObjects); // will load MP links if those exist as well, causing inherited properties to emerge
 		} catch (BasicException& e) {
-			LOG_FATAL("Exception while loading links from mission database : %s", e.getDetails().c_str());
+			LOG_FATAL("ObjectService: Exception while loading links from mission database : %s", e.getDetails().c_str());
 		}
 
 		mDatabaseService->fineStep(1);
@@ -609,7 +609,7 @@ namespace Opde {
 				// wanted a new id, let's grow for them!
 				grow(idx - 256, mAllocatedObjects.getMaxIndex());
 
-				LOG_INFO("Beware: Grew archetype id's by 256 to %d", mAllocatedObjects.getMinIndex());
+				LOG_INFO("ObjectService: Beware: Grew archetype id's by 256 to %d", mAllocatedObjects.getMinIndex());
 				return idx;
 			}
 		} else {
@@ -624,7 +624,7 @@ namespace Opde {
 				// wanted a new id, let's grow for them!
 				grow(mAllocatedObjects.getMinIndex(), idx + 256);
 
-				LOG_INFO("Beware: Grew concrete id's by 256 to %d", mAllocatedObjects.getMinIndex());
+				LOG_INFO("ObjectService: Beware: Grew concrete id's by 256 to %d", mAllocatedObjects.getMinIndex());
 				return idx;
 			}
 		}
