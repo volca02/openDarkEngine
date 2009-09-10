@@ -9,11 +9,14 @@ $Id$
 
 using namespace Ogre;
 
+Ogre::uint8 EntityMaterialInstance::msBaseRenderQueueGroup = 127; // Must be set!
+
 EntityMaterialInstance::EntityMaterialInstance (Entity *e) {
 	mEntity = e;
+	mOriginalRenderQueueGroup = e->getRenderQueueGroup();
 	mSceneBlendType = SBT_MODULATE;
 	mCurrentTransparency = 0.0f;
-	mZBias = 0.0f;
+	mZBias = 0;
 	
 	prepareSEMIs();
 }
@@ -59,6 +62,8 @@ void EntityMaterialInstance::setEntity(Ogre::Entity *e) {
 	
 	mEntity = e;
 	
+	mOriginalRenderQueueGroup = e->getRenderQueueGroup();
+	
 	// will destroy the current ones
 	prepareSEMIs();
 	
@@ -68,7 +73,7 @@ void EntityMaterialInstance::setEntity(Ogre::Entity *e) {
 	if (mCurrentTransparency > 0.0f) 
 		setTransparency(mCurrentTransparency);
 		
-	if (mZBias != 0.0f) 
+	if (mZBias != 0) 
 		setZBias(mZBias);		
 }
 
@@ -92,12 +97,34 @@ void EntityMaterialInstance::destroySEMIs() {
 	mSEMIs.clear();
 }
 
-void EntityMaterialInstance::setZBias(Ogre::Real zbias) {
+void EntityMaterialInstance::setZBias(size_t zbias) {
 	mZBias = zbias;
 	
-	std::vector<SubEntityMaterialInstance *>::iterator it, iend;
-	iend = mSEMIs.end ();
-	for (it = mSEMIs.begin (); it != iend; ++it) {
-		(*it)->setZBias (mZBias);
+	// limit zbias to 0-16
+	if (mZBias > 16)
+		mZBias = 16;
+	
+	if (zbias != 0) {
+		// modify the render queue accordingly
+		mEntity->setRenderQueueGroup(msBaseRenderQueueGroup - mZBias);
+		
+		std::vector<SubEntityMaterialInstance *>::iterator it, iend;
+		iend = mSEMIs.end ();
+		for (it = mSEMIs.begin (); it != iend; ++it) {
+			(*it)->setZBias(1 << mZBias);
+		}
+	} else {
+		mEntity->setRenderQueueGroup(mOriginalRenderQueueGroup);
+		
+		std::vector<SubEntityMaterialInstance *>::iterator it, iend;
+		iend = mSEMIs.end ();
+		for (it = mSEMIs.begin (); it != iend; ++it) {
+			(*it)->setZBias(0);
+		}
 	}
 }
+
+void EntityMaterialInstance::setBaseRenderQueueGroup(Ogre::uint8 baseRQ) {
+	msBaseRenderQueueGroup = baseRQ;
+}
+

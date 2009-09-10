@@ -67,8 +67,10 @@ class EntityMaterialInstance {
   
 	/** Z-Bias override. Used for SS2 billboards the most, but present in T2 as well
 	*/
-	void setZBias(Ogre::Real zbias);
+	void setZBias(size_t zbias);
 	
+	/// Initializes the render queue base. Must be done prior to usage of this class
+	static void setBaseRenderQueueGroup(Ogre::uint8 baseRQ);
   protected:
 	void prepareSEMIs();
 	void destroySEMIs();
@@ -86,7 +88,13 @@ class EntityMaterialInstance {
     
     /** Keeps the current ZBias value.
    */
-    Ogre::Real mZBias;
+    size_t mZBias;
+    
+    // Default render queue group - must be set using setBaseRenderQueueGroup!
+    static Ogre::uint8 msBaseRenderQueueGroup; 
+    
+    /// Keeps the original render queue group
+    Ogre::uint8 mOriginalRenderQueueGroup;
   
 	Ogre::SceneBlendType mSceneBlendType;
 };

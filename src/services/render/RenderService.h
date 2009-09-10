@@ -91,7 +91,7 @@ namespace Opde {
 			void setRenderType(unsigned int _renderType);
 			void setSkip(bool _skip);
 			void setAlpha(float alpha);
-			void setZBias(float bias);
+			void setZBias(size_t bias);
 			void setScale(const Ogre::Vector3& scale);
 
 			void setEntity(Ogre::Entity* newEntity);
@@ -306,6 +306,7 @@ namespace Opde {
 			RenderAlphaProperty* mRenderAlphaProperty;
 			ZBiasProperty* mZBiasProperty;
 		
+			Ogre::uint8 mDefaultRenderQueue;
 		private:
 			RenderWindowSize mCurrentSize;
 	};

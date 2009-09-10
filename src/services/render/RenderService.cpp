@@ -116,7 +116,7 @@ namespace Opde {
 	};
 
 	// --------------------------------------------------------------------------
-	void EntityInfo::setZBias(float bias) {
+	void EntityInfo::setZBias(size_t bias) {
 		mZBias = bias;
 		mEmi->setZBias(bias);
 	};
@@ -317,6 +317,11 @@ namespace Opde {
 		mPropertyService = GET_SERVICE(PropertyService);
 
 		mConfigService = GET_SERVICE(ConfigService);
+		
+		Ogre::uint8 mDefaultRenderQueue = mSceneMgr->getRenderQueue()->getDefaultQueueGroup();
+		
+		// preset the default render queue according to the RenderQueue
+		EntityMaterialInstance::setBaseRenderQueueGroup(mDefaultRenderQueue);
 
 		return true;
     }
