@@ -26,7 +26,6 @@
 #include "OpdeException.h"
 #include "logger.h"
 
-#include <OgreRoot.h>
 #include <OgreTimer.h>
 #include <OgreResourceGroupManager.h>
 
@@ -40,12 +39,17 @@ namespace Opde {
 	/*--------------------------------------------------------*/
 	template<> const size_t ServiceImpl<DatabaseService>::SID = __SERVICE_ID_DATABASE;
 	
-	DatabaseService::DatabaseService(ServiceManager *manager, const std::string& name) : ServiceImpl<DatabaseService>(manager, name), mCurDB(NULL), mProgressListener(NULL) {
+	DatabaseService::DatabaseService(ServiceManager *manager, const std::string& name) : 
+		ServiceImpl<DatabaseService>(manager, name), 
+		mCurDB(NULL), 
+		mProgressListener(NULL),
+		mTimer(NULL) {
 
 	}
 
 	//------------------------------------------------------
 	bool DatabaseService::init() {
+		mTimer = new Ogre::Timer();
 		// Create all services listening to the database messages...
 		ServiceManager::getSingleton().createByMask(SERVICE_DATABASE_LISTENER);
 		return true;
@@ -53,6 +57,7 @@ namespace Opde {
 
 	//------------------------------------------------------
 	DatabaseService::~DatabaseService() {
+		delete mTimer;
 	}
 	
 	//------------------------------------------------------
@@ -257,12 +262,12 @@ namespace Opde {
 		Listeners::iterator it = mListeners.begin();
 		
 		for (; it != mListeners.end(); ++it) {
-			unsigned long sttime = Ogre::Root::getSingleton().getTimer()->getMilliseconds();
+			unsigned long sttime = mTimer->getMilliseconds();
 			
 			// Inform about the load
 			it->second->onDBLoad(db, curmask);
 			
-			unsigned long now = Ogre::Root::getSingleton().getTimer()->getMilliseconds();
+			unsigned long now = mTimer->getMilliseconds();
 			
 			LOG_INFO("DatabaseService: Operation took %f seconds", (float)(now-sttime) / 1000);
             
@@ -283,12 +288,12 @@ namespace Opde {
 		Listeners::iterator it = mListeners.begin();
 		
 		for (; it != mListeners.end(); ++it) {
-			unsigned long sttime = Ogre::Root::getSingleton().getTimer()->getMilliseconds();
+			unsigned long sttime = mTimer->getMilliseconds();
 			
 			// Inform about the save
 			it->second->onDBSave(db, tgtmask);
 			
-			unsigned long now = Ogre::Root::getSingleton().getTimer()->getMilliseconds();
+			unsigned long now = mTimer->getMilliseconds();
 			
 			LOG_INFO("DatabaseService: Operation took %f seconds", (float)(now-sttime) / 1000);
             
@@ -309,12 +314,12 @@ namespace Opde {
 		Listeners::reverse_iterator it = mListeners.rbegin();
 		
 		for (; it != mListeners.rend(); ++it) {
-			unsigned long sttime = Ogre::Root::getSingleton().getTimer()->getMilliseconds();
+			unsigned long sttime = mTimer->getMilliseconds();
 			
 			// Inform about the drop
 			it->second->onDBDrop(dropmask);
 			
-			unsigned long now = Ogre::Root::getSingleton().getTimer()->getMilliseconds();
+			unsigned long now = mTimer->getMilliseconds();
 			
 			LOG_INFO("DatabaseService: Operation took %f seconds", (float)(now-sttime) / 1000);
             

@@ -135,6 +135,10 @@ namespace Opde {
 			Ogre::ArchiveFactory* mDirArchiveFactory;
 			
 			Ogre::ArchiveFactory* mCrfArchiveFactory;
+			
+			// If ogre is not used, these point to particular managers we hijack
+			Ogre::ResourceGroupManager* mResourceGroupManager;
+			Ogre::ArchiveManager* mArchiveManager;
 	};
 	
 } // namespace Opde

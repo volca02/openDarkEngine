@@ -32,6 +32,7 @@
 #include "FileGroup.h"
 #include "SharedPtr.h"
 #include "PrioritizedMessageSource.h"
+#include "OgreTimer.h"
 
 namespace Opde {
 
@@ -270,6 +271,8 @@ struct DarkDBChunkFILE_TYPE
 			typedef std::multimap< size_t, DatabaseListener* > Listeners;
 			
 			Listeners mListeners;
+			
+			Ogre::Timer* mTimer;
 	};
 
 	/// Shared pointer to Database service

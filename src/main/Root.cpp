@@ -81,7 +81,9 @@ namespace Opde {
 			mDTypeScriptLdr(NULL),
 			mPLDefScriptLdr(NULL),
 			mDirArchiveFactory(NULL),
-			mCrfArchiveFactory(NULL) {
+			mCrfArchiveFactory(NULL),
+			mResourceGroupManager(NULL),
+			mArchiveManager(NULL) {
 
 		mLogger = new Logger();
 
@@ -89,12 +91,13 @@ namespace Opde {
 			logToFile(logFileName);
 		}
 
-		LOG_INFO("Starting openDarkEngine %d.%d.%d (%s), build %s, %s", OPDE_VER_MAJOR, OPDE_VER_MINOR, OPDE_VER_PATCH, OPDE_CODE_NAME, __DATE__, __TIME__);
+		LOG_INFO("Root: Starting openDarkEngine %d.%d.%d (%s), build %s, %s", OPDE_VER_MAJOR, OPDE_VER_MINOR, OPDE_VER_PATCH, OPDE_CODE_NAME, __DATE__, __TIME__);
 
 		mServiceMgr = new ServiceManager(mServiceMask);
 		
 		LOG_INFO("Root: Created a ServiceManager instance with global mask %X", mServiceMask);
 
+		LOG_INFO("Root: Hooking up the Ogre logging");
 		// To supress logging of OGRE (we'll use a plugin for our logger for Ogre logs)
 		// we need to create a Ogre::LogManager here on our own
 		mOgreLogManager = new Ogre::LogManager();
@@ -105,8 +108,18 @@ namespace Opde {
 		// create our logger's ogre log listener interface. Connect together
 		mOgreLogManager->getDefaultLog()->addListener(mOgreOpdeLogConnector);
 
-		mOgreRoot = new Ogre::Root();
+		// Only initialize ogre if rendering is in serviceMask
+		if (serviceMask & SERVICE_RENDERER) {
+			LOG_INFO("Root: Initializing the Ogre's Root object");
+			mOgreRoot = new Ogre::Root();
+		} else {
+			LOG_INFO("Root: Initializing the Ogre's Resource system");
+			// only initialize Archive manager and ResourceGroupManager
+			mResourceGroupManager = new Ogre::ResourceGroupManager();
+			mArchiveManager = new Ogre::ArchiveManager();
+		}
 
+		LOG_INFO("Root: Registering custom archive factories");
 		// register the factories
 		mDirArchiveFactory = new Ogre::CaseLessFileSystemArchiveFactory();
 		// TODO: Decide if this should be used or not
@@ -115,13 +128,21 @@ namespace Opde {
 		Ogre::ArchiveManager::getSingleton().addArchiveFactory(mDirArchiveFactory);
 		// Ogre::ArchiveManager::getSingleton().addArchiveFactory(mCrfArchiveFactory);
 
-		// if custom image hooks are to be included, setup now
-		Ogre::CustomImageCodec::startup();
+		if (serviceMask & SERVICE_RENDERER) {
+			LOG_INFO("Root: Hooking up custom 8 bit image codecs");
+			// if custom image hooks are to be included, setup now
+			Ogre::CustomImageCodec::startup();
+		}
+
+		LOG_INFO("Root: Creating console backend");
 
 		mConsoleBackend = new ConsoleBackend();
+
+		LOG_INFO("Root: Registering Service factories");
 		// Now we need to register all the service factories
 		registerServiceFactories();
 
+		LOG_INFO("Root: Registering custom script compilers");
 		mDTypeScriptCompiler = new DTypeScriptCompiler();
 		mPLDefScriptCompiler = new PLDefScriptCompiler();
 
@@ -130,7 +151,7 @@ namespace Opde {
 
 	// -------------------------------------------------------
 	Root::~Root() {
-		LOG_INFO("openDarkEngine is shutting down");
+		LOG_INFO("Root: openDarkEngine is shutting down");
 
 		// if those are used, delete them
 		delete mDTypeScriptLdr;
@@ -145,8 +166,13 @@ namespace Opde {
 
 		delete mConsoleBackend;
 
-		Ogre::CustomImageCodec::shutdown();
+		if (mServiceMask & SERVICE_RENDERER) {
+				Ogre::CustomImageCodec::shutdown();
+		}
+		
 		delete mOgreRoot;
+		delete mResourceGroupManager;
+		delete mArchiveManager;
 
 		LogListenerList::iterator it = mLogListeners.begin();
 
@@ -184,6 +210,9 @@ namespace Opde {
 
 	// -------------------------------------------------------
 	void Root::bootstrapFinished() {
+		LOG_INFO("Root: Bootstrapping finished");
+		// Initialize all the remainging services in the service mask
+		mServiceMgr->createByMask(mServiceMask);
 		// Initialise all resources
 		Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 		// report the boostrap finished to all services
