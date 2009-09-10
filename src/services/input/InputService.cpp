@@ -406,6 +406,8 @@ namespace Opde {
 		mConfigService = GET_SERVICE(ConfigService);
         mRenderService = GET_SERVICE(RenderService);
 
+        mConfigService->setParamDescription("nonexclusive", "Enables non-exclusive input (Mouse and keyboard won't be blocked)");
+
         mRenderWindow = mRenderService->getRenderWindow();
 
 		// Get window handle
