@@ -98,19 +98,19 @@ for o, a in opts:
 
 
 # Tell Opde.Root to only create CORE services (those which are sufficient for tools, no renderer, etc)
-opderoot = opde.createRoot(opde.services.SERVICE_CORE)
+
 
 # Logging - defaults to none. the line below would enable logging to opde.log in the current directory
 # Which is good for debugging
 # Log level : 0-4 
 if (debug != 0):
-	opderoot.logToFile("opde.log")
+	opderoot = opde.createRoot(opde.services.SERVICE_CORE, "opde.log")
 	opderoot.setLogLevel(4)
 else:
+	opderoot = opde.createRoot(opde.services.SERVICE_CORE)
 	opderoot.setLogLevel(0)
 
 # Opde logging can be done from python with Opde.log_debug, Opde.log_error and such functions (see bindings.h)
-
 # Setup resources
 # Should have some better way of providing the resource config...
 # Loading resources autotmatically will result in an assert over here (No texture manager singleton)
@@ -145,7 +145,7 @@ psrv = opde.services.getPropertyService()
 
 # Load the gamesys (note: dbsrv.load("miss1.mis") would load both mission-2 and gamesys-1)
 # Ogre is case sensitive on linux. Will have to resolve this
-dbsrv.loadGameSys(gamesys)
+dbsrv.load(gamesys, opde.services.DBM_FILETYPE_GAM)
 
 # An example (not used here): Query which properties the given object owns, and which it inherits
 def objectInfo(oid):
