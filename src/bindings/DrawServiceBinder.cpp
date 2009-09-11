@@ -489,12 +489,20 @@ namespace Opde {
 			{NULL, NULL}
 		};
 		
+		const char* position = "position";
+		const char* zOrder = "zorder";
+		const char* clippingRect = "cliprect";
+		
+		const char* positionDoc = "On-Screen Position";
+		const char* zOrderDoc = "Z Order";
+		const char* clippingRectDoc = "Clipping rectangle";
+		
 		
 		// ------------------------------------------
 		PyGetSetDef DrawOperationBinder::msGetSet[] = {
-			{"position", getPPosition, setPPosition, "On-Screen Position", NULL},
-			{"zorder", getPZOrder, setPZOrder, "Z Order", NULL},
-			{"cliprect", getPClipRect, setPClipRect, "Clipping rectangle", NULL},
+			{const_cast<char *>(position), getPPosition, setPPosition, const_cast<char*>(positionDoc), NULL},
+			{const_cast<char *>(zOrder), getPZOrder, setPZOrder, const_cast<char*>(zOrderDoc), NULL},
+			{const_cast<char *>(clippingRect), getPClipRect, setPClipRect, const_cast<char*>(clippingRectDoc), NULL},
 			{NULL}
 		};
 
