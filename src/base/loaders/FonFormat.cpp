@@ -85,13 +85,13 @@ namespace Opde {
 		return st;
 	}
 	
-	File& operator<<(File& st, const RGBQUAD& h) {
+	File& operator<<(File& st, const RGBQuad& h) {
 		st << h.rgbBlue << h.rgbGreen << h.rgbRed << h.rgbReserved;
 		
 		return st;
 	}
 	
-	File& operator>>(File& st, RGBQUAD& h) {
+	File& operator>>(File& st, RGBQuad& h) {
 		st >> h.rgbBlue >> h.rgbGreen >> h.rgbRed >> h.rgbReserved;
 		
 		return st;

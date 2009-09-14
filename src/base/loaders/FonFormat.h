@@ -35,13 +35,6 @@ namespace Opde
 {
 	class File;
 	
-	typedef uint32_t  DWORD;
-	typedef int32_t   BOOL;
-	typedef uint8_t   BYTE;
-	typedef uint16_t  WORD;
-	typedef DWORD COLORREF;
-
-
 	struct DarkFontHeader
 	{
 		uint16_t	Format;		/* 1 - anti-aliased, 0xCCCC - 8bpp, else - 1bpp */
@@ -62,11 +55,11 @@ namespace Opde
 
 	struct ExternalPaletteHeader
 	{
-		DWORD RiffSig;
-		DWORD RiffLength;
-		DWORD PSig1;
-		DWORD PSig2;
-		DWORD Length;
+		uint32_t RiffSig;
+		uint32_t RiffLength;
+		uint32_t PSig1;
+		uint32_t PSig2;
+		uint32_t Length;
 	};
 	
 	File& operator<<(File& st, const ExternalPaletteHeader& h);
@@ -86,48 +79,48 @@ namespace Opde
 	typedef std::vector<CharInfo> CharInfoList;
 
 	struct BITMAPFILEHEADER { 
-	  WORD    bfType; 
-	  DWORD   bfSize; 
-	  WORD    bfReserved1; 
-	  WORD    bfReserved2; 
-	  DWORD   bfOffBits; 
+	  uint16_t    bfType; 
+	  uint32_t   bfSize; 
+	  uint16_t    bfReserved1; 
+	  uint16_t    bfReserved2; 
+	  uint32_t   bfOffBits; 
 	};
 
 	File& operator<<(File& st, const BITMAPFILEHEADER& h);
 	File& operator>>(File& st, BITMAPFILEHEADER& h);
 
 	struct BITMAPINFOHEADER {
-		DWORD  biSize;
-		DWORD   biWidth;
-		DWORD   biHeight;
-		WORD   biPlanes;
-		WORD   biBitCount;
-		DWORD  biCompression;
-		DWORD  biSizeImage;
-		DWORD   biXPelsPerMeter;
-		DWORD   biYPelsPerMeter;
-		DWORD  biClrUsed;
-		DWORD  biClrImportant;
+		uint32_t  biSize;
+		uint32_t   biWidth;
+		uint32_t   biHeight;
+		uint16_t   biPlanes;
+		uint16_t   biBitCount;
+		uint32_t  biCompression;
+		uint32_t  biSizeImage;
+		uint32_t   biXPelsPerMeter;
+		uint32_t   biYPelsPerMeter;
+		uint32_t  biClrUsed;
+		uint32_t  biClrImportant;
 	};
 
 	File& operator<<(File& st, const BITMAPINFOHEADER& h);
 	File& operator>>(File& st, BITMAPINFOHEADER& h);
 
 
-	struct RGBQUAD {
-	  BYTE    rgbBlue; 
-	  BYTE    rgbGreen; 
-	  BYTE    rgbRed; 
-	  BYTE    rgbReserved; 
+	struct RGBQuad {
+	  uint8_t    rgbBlue; 
+	  uint8_t    rgbGreen; 
+	  uint8_t    rgbRed; 
+	  uint8_t    rgbReserved; 
 	};
 	
-	File& operator<<(File& st, const RGBQUAD& h);
-	File& operator>>(File& st, RGBQUAD& h);
+	File& operator<<(File& st, const RGBQuad& h);
+	File& operator>>(File& st, RGBQuad& h);
 
 
 	struct BITMAPINFO {
 	   BITMAPINFOHEADER bmiHeader;
-	   RGBQUAD bmiColors[1];
+	   RGBQuad bmiColors[1];
 	};
 
 	File& operator<<(File& st, const BITMAPINFO& h);
@@ -135,15 +128,15 @@ namespace Opde
 
 
 	struct RGBTRIPLE { 
-	  BYTE rgbtBlue; 
-	  BYTE rgbtGreen; 
-	  BYTE rgbtRed; 
+	  uint8_t rgbtBlue; 
+	  uint8_t rgbtGreen; 
+	  uint8_t rgbtRed; 
 	}; 
 	
 	File& operator<<(File& st, const RGBTRIPLE& h);
 	File& operator>>(File& st, RGBTRIPLE& h);
 
-	static const COLORREF	ColorTable[] = {
+	static const uint32_t	ColorTable[] = {
 		0x000000, 0xDDDDDD, 0xB6B6B6, 0x969696, 0x7C7C7C, 0x666666, 0x545454, 0x454545,
 		0x393939, 0x2F2F2F, 0x272727, 0x202020, 0x1A1A1A, 0x161616, 0x121212, 0x0F0F0F,
 		0x0C0C0C, 0x0A0A0A, 0x080808, 0x060606, 0x050505, 0x040404, 0x030303, 0x7A8449,
@@ -179,7 +172,7 @@ namespace Opde
 	};
 
 	/* Anti-aliased fonts have a pixel Width of 8 bits, but only the lower 4 bits are used. */
-	static const COLORREF	AntiAliasedColorTable[] = {
+	static const uint32_t	AntiAliasedColorTable[] = {
 		0xFFFFFF, 0xEEEEEE, 0xDDDDDD, 0xCCCCCC, 0xBBBBBB, 0xAAAAAA, 0x999999, 0x888888,
 		0x777777, 0x666666, 0x555555, 0x444444, 0x333333, 0x222222, 0x111111, 0x000000,
 		0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF, 0xFFFFFF,

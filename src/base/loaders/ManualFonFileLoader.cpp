@@ -224,12 +224,12 @@ namespace Ogre
 
 
 	//-------------------------------------------------------------------
-	RGBQUAD* ManualFonFileLoader::ReadPalette()
+	RGBQuad* ManualFonFileLoader::ReadPalette()
 	{
 		ExternalPaletteHeader PaletteHeader;
-		WORD Count;
+		uint16_t Count;
 		char *Buffer, *C;
-		BYTE S;
+		uint8_t S;
 		unsigned int I;
 
 		// Open the file
@@ -242,16 +242,16 @@ namespace Ogre
 		} catch(Ogre::FileNotFoundException) {
 			// Could not find resource, use the default table
 			LogManager::getSingleton().logMessage("Specified palette file not found - using default palette!");
-			return (RGBQUAD*)ColorTable;
+			return (RGBQuad*)ColorTable;
 		}
 		
-		RGBQUAD *Palette = new RGBQUAD[256];
+		RGBQuad *Palette = new RGBQuad[256];
 		if (!Palette)
 			return NULL;
 		
 		if((mPaletteType == ePT_PCX) || (mPaletteType == ePT_DefaultBook))	// PCX file specified...
 		{
-			RGBQUAD *Palette = new RGBQUAD[256];
+			RGBQuad *Palette = new RGBQuad[256];
 			
 			// Test to see if we're facing a PCX file. (0A) (xx) (01)
 			uint8_t Manuf, Enc;
@@ -263,19 +263,19 @@ namespace Ogre
 			{ 
 				delete[] Palette; // Clean up!
 				LogManager::getSingleton().logMessage("Invalid palette file specified - seems not to be a PCX file!");
-				return (RGBQUAD*)ColorTable; // Should not matter - the cast (if packed)
+				return (RGBQuad*)ColorTable; // Should not matter - the cast (if packed)
 			}
 			
-			BYTE BPP;
+			uint8_t BPP;
 			mPaletteFile->readElem(&BPP, 1);
 			
 			mPaletteFile->seek(3 * 256 + 1, File::FSEEK_END);
-			BYTE Padding;
+			uint8_t Padding;
 			mPaletteFile->readElem(&Padding, 1);
 			
 			if((BPP == 8) && (Padding == 0x0C)) //Make sure it is an 8bpp and a valid PCX
 			{
-				// Byte sized structures - endianness always ok
+				// uint8_t sized structures - endianness always ok
 				for (unsigned int I = 0; I < 256; I++)
 				{
 					
@@ -288,7 +288,7 @@ namespace Ogre
 			{
 				delete[] Palette; // Clean up!
 				LogManager::getSingleton().logMessage("Invalid palette file specified - not 8 BPP or invalid Padding!");
-				return (RGBQUAD*)ColorTable; // Return default palette
+				return (RGBQuad*)ColorTable; // Return default palette
 			}			
 			return Palette;
 		}
@@ -297,7 +297,7 @@ namespace Ogre
 		{
 			delete[] Palette; // Clean up!
 			LogManager::getSingleton().logMessage("Invalid palette type specified!");
-			return (RGBQUAD*)ColorTable;
+			return (RGBQuad*)ColorTable;
 		}
 		
 		// We're sure that we have external palette here:
@@ -339,17 +339,17 @@ namespace Ogre
 			}
 			C = strchr(Buffer, '\n')+1;
 			C = strchr(C, '\n')+1;
-			Count = (WORD)strtoul(C, NULL, 10);
+			Count = (uint16_t)strtoul(C, NULL, 10);
 			if (Count > 256)
 				Count = 256;
 			for (I = 0; I < Count; I++)
 			{
 				C = strchr(C, '\n')+1;
-				Palette[I].rgbRed = (BYTE)strtoul(C, &C, 10);
+				Palette[I].rgbRed = (uint8_t)strtoul(C, &C, 10);
 				C++;
-				Palette[I].rgbGreen = (BYTE)strtoul(C, &C, 10);
+				Palette[I].rgbGreen = (uint8_t)strtoul(C, &C, 10);
 				C++;
-				Palette[I].rgbBlue = (BYTE)strtoul(C, &C, 10);
+				Palette[I].rgbBlue = (uint8_t)strtoul(C, &C, 10);
 			}
 			delete []Buffer;
 		}
@@ -369,7 +369,7 @@ namespace Ogre
 	}
 
 	//-------------------------------------------------------------------
-	int ManualFonFileLoader::WriteImage(RGBQUAD *ColorTable, unsigned char **RowPointers)
+	int ManualFonFileLoader::WriteImage(RGBQuad *ColorTable, unsigned char **RowPointers)
 	{
 		BITMAPFILEHEADER	FileHeader;
 		BITMAPINFOHEADER	BitmapHeader;
@@ -377,7 +377,7 @@ namespace Ogre
 		char	Zero[4] = {0,0,0,0};
 		unsigned char *pMemBuff;
 
-		mBmpFileSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + (sizeof(RGBQUAD) * 256) + (mImageDim * mImageDim);
+		mBmpFileSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + (sizeof(RGBQuad) * 256) + (mImageDim * mImageDim);
 		pMemBuff = new unsigned char[mBmpFileSize];
 		if(!pMemBuff)
 			return -1;
@@ -386,7 +386,7 @@ namespace Ogre
 		FileHeader.bfType = 0x4D42;
 		FileHeader.bfReserved1 = 0;
 		FileHeader.bfReserved2 = 0;
-		FileHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + (sizeof(RGBQUAD)*256);
+		FileHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + (sizeof(RGBQuad)*256);
 		BitmapHeader.biSize = sizeof(BITMAPINFOHEADER);
 		BitmapHeader.biWidth = mImageDim;
 		BitmapHeader.biHeight = mImageDim;
@@ -407,8 +407,8 @@ namespace Ogre
 		memcpy(Ptr, &BitmapHeader, sizeof(BITMAPINFOHEADER));
 		Ptr += sizeof(BITMAPINFOHEADER);
 
-		memcpy(Ptr, ColorTable, sizeof(RGBQUAD) * 256);
-		Ptr += sizeof(RGBQUAD) * 256;
+		memcpy(Ptr, ColorTable, sizeof(RGBQuad) * 256);
+		Ptr += sizeof(RGBQuad) * 256;
 
 		RowWidth -= mImageDim;
 		for (Row = mImageDim - 1; Row >= 0; Row--)
@@ -434,19 +434,19 @@ namespace Ogre
 	//-------------------------------------------------------------------
 	int ManualFonFileLoader::LoadDarkFont()
 	{
-		COLORREF *PaletteData = const_cast<COLORREF*>(ColorTable);
+		uint32_t *PaletteData = const_cast<uint32_t*>(ColorTable);
 		unsigned char **ImageRows;
 		int Color;
 
 		// Default palette
 		
 		if (mPaletteType != ePT_Default) {
-			PaletteData = (COLORREF*)ReadPalette();
+			PaletteData = (uint32_t*)ReadPalette();
 			
 			if (!PaletteData) {
 				LogManager::getSingleton().logMessage("Could not load palette data, defaulting to default palette");
 				// return -2;
-				PaletteData = const_cast<COLORREF*>(ColorTable);
+				PaletteData = const_cast<uint32_t*>(ColorTable);
 			}
 		}
 		
@@ -463,13 +463,13 @@ namespace Ogre
 			if (PaletteData != ColorTable)
 				delete[] PaletteData; // Clean up!
 				
-			PaletteData = (COLORREF*)AntiAliasedColorTable;
+			PaletteData = (uint32_t*)AntiAliasedColorTable;
 		}
 
 		// Enable to see the resulting BMP
-		// WriteImage((RGBQUAD*)PaletteData, ImageRows);
+		// WriteImage((RGBQuad*)PaletteData, ImageRows);
 
-		createOgreTexture(ImageRows, (RGBQUAD*)PaletteData);
+		createOgreTexture(ImageRows, (RGBQuad*)PaletteData);
 
 
 		delete [] ImageRows;
@@ -479,7 +479,7 @@ namespace Ogre
 	}
 
     //-------------------------------------------------------------------
-	void ManualFonFileLoader::createOgreTexture(unsigned char** Img, RGBQUAD* Palette) 
+	void ManualFonFileLoader::createOgreTexture(unsigned char** Img, RGBQuad* Palette) 
 	{
 		// Create a texure, then fill it
 		TexturePtr Txt = TextureManager::getSingleton().createManual(mTxtName, mFontGroup, TEX_TYPE_2D, mImageDim, mImageDim, 1, PF_A8R8G8B8);

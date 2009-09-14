@@ -64,7 +64,7 @@ namespace Ogre {
 
 		private:
 			CharInfoList mChars;			
-			DWORD mBmpFileSize;
+			uint32_t mBmpFileSize;
 			unsigned int mImageDim, mNumRows;
 			FilePtr mFontFile, mBookFile, mPaletteFile;
 
@@ -73,13 +73,13 @@ namespace Ogre {
 			PaletteType mPaletteType;
 			String mPaletteFileName;
 
-			RGBQUAD* ReadPalette();
+			RGBQuad* ReadPalette();
 			int CreateOgreFont(Font* DarkFont);
 			int LoadDarkFont();
-			int WriteImage(RGBQUAD *ColorTable, unsigned char **RowPointers);
+			int WriteImage(RGBQuad *ColorTable, unsigned char **RowPointers);
 			unsigned char** ReadFont(int *ResultingColor);
 
-			void createOgreTexture(unsigned char** img, RGBQUAD* palette);
+			void createOgreTexture(unsigned char** img, RGBQuad* palette);
     };
 }
 
