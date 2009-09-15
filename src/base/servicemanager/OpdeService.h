@@ -76,7 +76,7 @@ namespace Opde {
 	};
 
 	/// Implementation base for all services. Used to force-in the inclusion of service-specific version of the static variables
-	template<class C> class ServiceImpl : public Service {
+	template<class C> class OPDELIB_EXPORT ServiceImpl : public Service {
 		public:
 			/** Constructor. Do not implement inheritance resolution here! (Can cycle if you do so)
 			* @param manager The constructing manager
