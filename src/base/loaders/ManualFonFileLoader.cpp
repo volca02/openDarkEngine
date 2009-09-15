@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -356,8 +356,8 @@ namespace Ogre
 		else
 		{
 			mPaletteFile->seek(0);
-			RGBTRIPLE P;
-			for (I = 0; I < mPaletteFile->size() / sizeof(RGBTRIPLE); I++)
+			RGBTriple P;
+			for (I = 0; I < mPaletteFile->size() / sizeof(RGBTriple); I++)
 			{
 				*mPaletteFile >> P;
 				Palette[I].rgbRed = P.rgbtBlue;
@@ -372,12 +372,12 @@ namespace Ogre
 	int ManualFonFileLoader::WriteImage(RGBQuad *ColorTable, unsigned char **RowPointers)
 	{
 		BITMAPFILEHEADER	FileHeader;
-		BITMAPINFOHEADER	BitmapHeader;
+		BitmapInfoHeader	BitmapHeader;
 		int 	RowWidth, Row;
 		char	Zero[4] = {0,0,0,0};
 		unsigned char *pMemBuff;
 
-		mBmpFileSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + (sizeof(RGBQuad) * 256) + (mImageDim * mImageDim);
+		mBmpFileSize = sizeof(BITMAPFILEHEADER) + sizeof(BitmapInfoHeader) + (sizeof(RGBQuad) * 256) + (mImageDim * mImageDim);
 		pMemBuff = new unsigned char[mBmpFileSize];
 		if(!pMemBuff)
 			return -1;
@@ -386,8 +386,8 @@ namespace Ogre
 		FileHeader.bfType = 0x4D42;
 		FileHeader.bfReserved1 = 0;
 		FileHeader.bfReserved2 = 0;
-		FileHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + (sizeof(RGBQuad)*256);
-		BitmapHeader.biSize = sizeof(BITMAPINFOHEADER);
+		FileHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BitmapInfoHeader) + (sizeof(RGBQuad)*256);
+		BitmapHeader.biSize = sizeof(BitmapInfoHeader);
 		BitmapHeader.biWidth = mImageDim;
 		BitmapHeader.biHeight = mImageDim;
 		BitmapHeader.biPlanes = 1;
@@ -404,8 +404,8 @@ namespace Ogre
 		memcpy(Ptr, &FileHeader, sizeof(BITMAPFILEHEADER));
 		Ptr += sizeof(BITMAPFILEHEADER);
 
-		memcpy(Ptr, &BitmapHeader, sizeof(BITMAPINFOHEADER));
-		Ptr += sizeof(BITMAPINFOHEADER);
+		memcpy(Ptr, &BitmapHeader, sizeof(BitmapInfoHeader));
+		Ptr += sizeof(BitmapInfoHeader);
 
 		memcpy(Ptr, ColorTable, sizeof(RGBQuad) * 256);
 		Ptr += sizeof(RGBQuad) * 256;

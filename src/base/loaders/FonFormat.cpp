@@ -71,14 +71,14 @@ namespace Opde {
 		return st;
 	}
 	
-	File& operator<<(File& st, const BITMAPINFOHEADER& h) {
+	File& operator<<(File& st, const BitmapInfoHeader& h) {
 		st << h.biSize << h.biWidth << h.biHeight << h.biPlanes << h.biBitCount << h.biCompression
 			<< h.biSizeImage << h.biXPelsPerMeter << h.biYPelsPerMeter << h.biClrUsed << h.biClrImportant;
 		
 		return st;
 	}
 	
-	File& operator>>(File& st, BITMAPINFOHEADER& h) {
+	File& operator>>(File& st, BitmapInfoHeader& h) {
 		st >> h.biSize >> h.biWidth >> h.biHeight >> h.biPlanes >> h.biBitCount >> h.biCompression
 			>> h.biSizeImage >> h.biXPelsPerMeter >> h.biYPelsPerMeter >> h.biClrUsed >> h.biClrImportant;
 		
@@ -97,25 +97,25 @@ namespace Opde {
 		return st;
 	}
 	
-	File& operator<<(File& st, const BITMAPINFO& h) {
+	File& operator<<(File& st, const BitmapInfo& h) {
 		st << h.bmiHeader;
 		
 		return st;
 	}
 	
-	File& operator>>(File& st, BITMAPINFO& h) {
+	File& operator>>(File& st, BitmapInfo& h) {
 		st >> h.bmiHeader;
 		
 		return st;
 	}
 	
-	File& operator<<(File& st, const RGBTRIPLE& h) {
+	File& operator<<(File& st, const RGBTriple& h) {
 		st << h.rgbtBlue << h.rgbtGreen << h.rgbtRed;
 		
 		return st;
 	}
 	
-	File& operator>>(File& st, RGBTRIPLE& h) {
+	File& operator>>(File& st, RGBTriple& h) {
 		st >> h.rgbtBlue >> h.rgbtGreen >> h.rgbtRed;
 		
 		return st;

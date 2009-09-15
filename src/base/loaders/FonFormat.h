@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2007 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *	  Includes code based on Thief Font Converter by Tom N Harris <telliamed@whoopdedo.cjb.net>
  *
  *    This program is free software; you can redistribute it and/or modify
@@ -89,7 +89,7 @@ namespace Opde
 	File& operator<<(File& st, const BITMAPFILEHEADER& h);
 	File& operator>>(File& st, BITMAPFILEHEADER& h);
 
-	struct BITMAPINFOHEADER {
+	struct BitmapInfoHeader {
 		uint32_t  biSize;
 		uint32_t   biWidth;
 		uint32_t   biHeight;
@@ -103,8 +103,8 @@ namespace Opde
 		uint32_t  biClrImportant;
 	};
 
-	File& operator<<(File& st, const BITMAPINFOHEADER& h);
-	File& operator>>(File& st, BITMAPINFOHEADER& h);
+	File& operator<<(File& st, const BitmapInfoHeader& h);
+	File& operator>>(File& st, BitmapInfoHeader& h);
 
 
 	struct RGBQuad {
@@ -118,23 +118,23 @@ namespace Opde
 	File& operator>>(File& st, RGBQuad& h);
 
 
-	struct BITMAPINFO {
-	   BITMAPINFOHEADER bmiHeader;
+	struct BitmapInfo {
+	   BitmapInfoHeader bmiHeader;
 	   RGBQuad bmiColors[1];
 	};
 
-	File& operator<<(File& st, const BITMAPINFO& h);
-	File& operator>>(File& st, BITMAPINFO& h);
+	File& operator<<(File& st, const BitmapInfo& h);
+	File& operator>>(File& st, BitmapInfo& h);
 
 
-	struct RGBTRIPLE { 
+	struct RGBTriple { 
 	  uint8_t rgbtBlue; 
 	  uint8_t rgbtGreen; 
 	  uint8_t rgbtRed; 
 	}; 
 	
-	File& operator<<(File& st, const RGBTRIPLE& h);
-	File& operator>>(File& st, RGBTRIPLE& h);
+	File& operator<<(File& st, const RGBTriple& h);
+	File& operator>>(File& st, RGBTriple& h);
 
 	static const uint32_t	ColorTable[] = {
 		0x000000, 0xDDDDDD, 0xB6B6B6, 0x969696, 0x7C7C7C, 0x666666, 0x545454, 0x454545,
