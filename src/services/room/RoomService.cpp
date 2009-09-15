@@ -144,7 +144,7 @@ namespace Opde {
 	void RoomService::onDBDrop(uint32_t dropmask) {
 		LOG_INFO("RoomService::onDBDrop called.");
 		
-		if (!dropmask & DBM_MIS_DATA)
+		if (!(dropmask & DBM_MIS_DATA))
 			return;
 		
 		clear();
