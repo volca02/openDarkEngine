@@ -179,7 +179,8 @@ namespace Opde {
 			mHasRefsProperty(NULL),
 			mRenderTypeProperty(NULL),
 			mRenderAlphaProperty(NULL),
-			mZBiasProperty(NULL) {
+			mZBiasProperty(NULL),
+			mCurrentSize(0,0) {
 		
 		// TODO: This is just plain wrong. This service should be the maintainer of the used scene manager, if any other service needs the direct handle, etc.
 		// The fact is this service is probably game only, and should be the initialiser of graphics as the whole. This will be the
@@ -281,7 +282,14 @@ namespace Opde {
 
 		// Initialise and create a default rendering window
 		mRenderWindow = mRoot->initialise( true, "openDarkEngine" );
-
+		
+		// inform all listeners about the current resolution
+		mCurrentSize.fullscreen = mRenderWindow->isFullScreen();
+		mCurrentSize.width = mRenderWindow->getWidth();
+		mCurrentSize.height = mRenderWindow->getHeight();
+				
+		broadcastScreenSize();
+		
 		// Dark scene manager factory
 		LOG_DEBUG("RenderService::init(): new DarkSceneManagerFactory()");
 		mDarkSMFactory = new DarkSceneManagerFactory();
@@ -366,12 +374,7 @@ namespace Opde {
 		mCurrentSize.width = width;
 		mCurrentSize.height = height;
 		
-		RenderServiceMsg msg;
-
-		msg.msg_type = RENDER_WINDOW_SIZE_CHANGE;
-		msg.size = mCurrentSize;
-
-		broadcastMessage(msg);
+		broadcastScreenSize();
 	}
 
 	// --------------------------------------------------------------------------
@@ -858,6 +861,16 @@ namespace Opde {
 	}
 
 
+	// --------------------------------------------------------------------------
+	void RenderService::broadcastScreenSize() {
+		RenderServiceMsg msg;
+
+		msg.msg_type = RENDER_WINDOW_SIZE_CHANGE;
+		msg.size = mCurrentSize;
+
+		broadcastMessage(msg);
+	}
+	
 	//-------------------------- Factory implementation
 	std::string RenderServiceFactory::mName = "RenderService";
 

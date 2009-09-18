@@ -60,8 +60,6 @@ namespace Opde {
 
 	/// window size message details
 	struct RenderWindowSize {
-		/// The message type
-		RenderMessageType msg_type;
 		/// New width of the window (pixels)
 		unsigned int width;
 		/// New height of the window (pixels)
@@ -69,10 +67,13 @@ namespace Opde {
 		/// The new window is fullscreen (or windowed)
 		bool fullscreen;
 		// TODO: Pixelformat
+		
+		RenderWindowSize() : width(0), height(0), fullscreen(false) {};
+		RenderWindowSize(unsigned int w, unsigned int h, bool fs = false) : width(w), height(h), fullscreen(fs) {};
 	};
 
 	/// Render service message (Used to signalize a change in the renderer setup)
-	union RenderServiceMsg {
+	struct RenderServiceMsg {
 		RenderMessageType msg_type;
 
 		RenderWindowSize size;
@@ -235,6 +236,9 @@ namespace Opde {
 
 			/// prepares the object service structures used by renderer service
 			void createProperties();
+			
+			/// broadcasts the new windows size
+			void broadcastScreenSize();
 
 			ObjectEntityMap mEntityMap;
 
@@ -307,6 +311,7 @@ namespace Opde {
 			ZBiasProperty* mZBiasProperty;
 		
 			Ogre::uint8 mDefaultRenderQueue;
+
 		private:
 			RenderWindowSize mCurrentSize;
 	};
