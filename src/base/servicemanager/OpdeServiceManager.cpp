@@ -64,7 +64,7 @@ namespace Opde {
 			ServicePtr& sp = mServiceInstances[idx];
 			
 			if (!sp.isNull()) {
-				LOG_INFO("ServiceManager: * Shutting down service '%s'", sp->getName().c_str());
+				LOG_INFO("ServiceManager: * Shutting down service '%s' with ref. count %d", sp->getName().c_str(), sp.getRefCount());
 				sp->shutdown();
 			}
 		}
@@ -75,7 +75,7 @@ namespace Opde {
 			ServicePtr& sp = mServiceInstances[idx];
 			
 			if (!sp.isNull()) {
-				LOG_INFO("ServiceManager: * Releasing service '%s'", sp->getName().c_str());
+				LOG_INFO("ServiceManager: * Releasing service '%s' with ref. count %d", sp->getName().c_str(), sp.getRefCount());
 				sp.setNull();
 			}
 		}
