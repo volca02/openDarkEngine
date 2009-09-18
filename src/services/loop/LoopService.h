@@ -220,6 +220,9 @@ namespace Opde {
 			
 			/// The main run code. Run by the main.cpp typically. Runs the application loops
 			void run();
+			
+			/// Does a single pass through the loop mode
+			void step();
 
 			/// @return The current absolute time in ms
 			unsigned long getCurrentTime() { return mRoot->getTimer()->getMilliseconds(); };

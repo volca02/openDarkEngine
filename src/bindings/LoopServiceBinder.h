@@ -46,6 +46,7 @@ namespace Opde
 
 				// --- Methods ---
 				static PyObject* run(PyObject* self, PyObject* args);
+				static PyObject* step(PyObject* self, PyObject* args);
 				static PyObject* requestLoopMode(PyObject* self, PyObject* args);
 				static PyObject* requestTermination(PyObject* self, PyObject* args);
 				static PyObject* debugOneFrame(PyObject* self, PyObject* args);

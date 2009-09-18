@@ -171,6 +171,7 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	void LoopService::addLoopClient(LoopClient* client) {
+		LOG_INFO("LoopService: Adding a new loop client %s", client->getLoopClientSpecification().name.c_str());
 		// iterate through the loop modes. If the mask complies, add the client
 		LoopModeIDMap::const_iterator it = mLoopModes.begin();
 		
@@ -294,7 +295,20 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
+	void LoopService::step() {
+		unsigned long lFrameStart = getCurrentTime();
+		unsigned long deltaTime = lFrameStart - mLastFrameTime;
+
+		if (!mActiveMode.isNull())
+			mActiveMode->loopStep(deltaTime);
+			
+		mLastFrameLength = getCurrentTime() - mLastFrameTime;
+		mLastFrameTime = lFrameStart;
+	}
+
+	//------------------------------------------------------
 	void LoopService::setLoopMode(const LoopModePtr& newMode) {
+		LOG_INFO("LoopService: Setting loop mode %s", mNewLoopMode->getLoopModeName().c_str());			
 		mActiveMode = mNewLoopMode;
 	}
 	
