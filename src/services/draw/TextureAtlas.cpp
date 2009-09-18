@@ -63,7 +63,8 @@ namespace Opde {
 		
 		// draw source:
 		mVertexColour = DrawSourcePtr(new DrawSource(mOwner));
-		mVertexColour->getImage().loadDynamicImage(reinterpret_cast<Ogre::uchar*>(pixels), 2, 2, 1, Ogre::PF_A8R8G8B8, true);
+		mVertexColour->getImage()->loadDynamicImage(reinterpret_cast<Ogre::uchar*>(pixels), 2, 2, 1, Ogre::PF_A8R8G8B8, false);
+		mVertexColour->setSourcePixmapPointer(pixels);
 		mVertexColour->updatePixelSizeFromImage();
 		
 		// register:
@@ -116,8 +117,14 @@ namespace Opde {
 	 
 	
 	//------------------------------------------------------
-	void TextureAtlas::_addFont(const FontDrawSourcePtr& fdsp) {
+	void TextureAtlas::_addFont(FontDrawSource* fdsp) {
 		mMyFonts.push_back(fdsp);
+		markDirty();
+	}
+	
+	//------------------------------------------------------
+	void TextureAtlas::_removeFont(FontDrawSource* fdsp) {
+		mMyFonts.remove(fdsp);
 		markDirty();
 	}
 
@@ -127,6 +134,14 @@ namespace Opde {
 		mMyDrawSources.push_back(ds);
 		markDirty();
 	}
+
+	//------------------------------------------------------
+	void TextureAtlas::_removeDrawSource(const DrawSourcePtr& ds) {
+		// just insert into the list
+		mMyDrawSources.remove(ds);
+		markDirty();
+	}
+
 
 	//------------------------------------------------------
 	void TextureAtlas::build() {
@@ -142,7 +157,7 @@ namespace Opde {
 		FontSet::iterator fit = mMyFonts.begin();
 
 		while (fit != mMyFonts.end()) {
-			const FontDrawSourcePtr& fdsp = *fit++;
+			FontDrawSource* fdsp = *fit++;
 
 			if (!fdsp->isBuilt())
 				fdsp->build();
@@ -166,7 +181,7 @@ namespace Opde {
 				const PixelSize& ps = ds->getPixelSize();
 				area += ps.getPixelArea();
 				
-				LOG_DEBUG("TextureAtlas: Trying to place %d x %d (%d -> %d)", ps.width, ps.height, ps.getPixelArea(), area);
+				LOG_VERBOSE("TextureAtlas: (%s) Trying to place %d x %d (%d -> %d)", mAtlasName.c_str(), ps.width, ps.height, ps.getPixelArea(), area);
 
 				// try to allocate
 				FreeSpaceInfo* fsi = mAtlasAllocation->allocate(ps.width, ps.height);
@@ -184,7 +199,7 @@ namespace Opde {
 				enlarge(area);
 		} while (!fitted);
 		
-		LOG_INFO("TextureAtlas: Creating atlas '%s' with dimensions %d x %d", mAtlasName.c_str(), mAtlasSize.width, mAtlasSize.height);
+		LOG_INFO("TextureAtlas: (%s) Creating atlas with dimensions %d x %d", mAtlasName.c_str(), mAtlasSize.width, mAtlasSize.height);
 
 		if (mTexture.isNull())
 			prepareResources();
@@ -214,12 +229,12 @@ namespace Opde {
 			
 
 			const PixelSize& dps = ds->getPixelSize();
-			Ogre::Image& img = ds->getImage();
-			Ogre::PixelBox srcPixels = img.getPixelBox();
+			Ogre::Image* img = ds->getImage();
+			Ogre::PixelBox srcPixels = img->getPixelBox();
 			
 			// convert if the source data don't match
-			if(img.getFormat() != Ogre::PF_BYTE_BGRA) {
-					conversionBuf = new unsigned char[img.getWidth() * img.getHeight() * pixelsize];
+			if(img->getFormat() != Ogre::PF_BYTE_BGRA) {
+					conversionBuf = new unsigned char[img->getWidth() * img->getHeight() * pixelsize];
 					Ogre::PixelBox convPixels(Ogre::Box(0, 0, dps.width, dps.height), Ogre::PF_BYTE_BGRA, conversionBuf);
 					Ogre::PixelUtil::bulkPixelConversion(srcPixels, convPixels);
 					srcPixels = convPixels;
@@ -265,7 +280,7 @@ namespace Opde {
 		// mark dirty the atlas
 		markDirty();
 		
-		LOG_DEBUG("TextureAtlas: Enlarging atlas from %d x %d", mAtlasSize.width, mAtlasSize.height);
+		LOG_DEBUG("TextureAtlas: (%s) Enlarging atlas from %d x %d", mAtlasName.c_str(), mAtlasSize.width, mAtlasSize.height);
 
 		size_t size;
 
@@ -281,7 +296,7 @@ namespace Opde {
 		} while (size < area);
 
 
-		LOG_DEBUG("TextureAtlas: Enlarged atlas to %d x %d", mAtlasSize.width, mAtlasSize.height);
+		LOG_DEBUG("TextureAtlas: (%s) Enlarged atlas to %d x %d", mAtlasName.c_str(), mAtlasSize.width, mAtlasSize.height);
 
 		delete mAtlasAllocation;
 		mAtlasAllocation = new FreeSpaceInfo(0,0,mAtlasSize.width, mAtlasSize.height);

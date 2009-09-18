@@ -42,6 +42,9 @@ namespace Opde {
 			/** A font definition constructor
 			* @param container The rendering atlas */
 			FontDrawSource(const TextureAtlasPtr& container, const std::string& name);
+			
+			/// Destructor. Removes itself from the owner atlas
+			~FontDrawSource();
 
 			/** Adds a glyph definition
 			* @param chr The character represented by this definition

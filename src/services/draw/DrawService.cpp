@@ -70,6 +70,44 @@ namespace Opde {
 
 	//------------------------------------------------------
 	DrawService::~DrawService() {
+		clear();
+	}
+
+	//------------------------------------------------------
+	bool DrawService::init() {
+		return true;
+	}
+
+	//------------------------------------------------------
+	void DrawService::bootstrapFinished() {
+		mRenderService = GET_SERVICE(RenderService);
+		mViewport = mRenderService->getDefaultViewport();
+
+		mRenderSystem = Ogre::Root::getSingleton().getRenderSystem();
+		mXTextelOffset = mRenderSystem->getHorizontalTexelOffset();
+		mYTextelOffset = mRenderSystem->getVerticalTexelOffset();
+
+		mSceneManager = mRenderService->getSceneManager();
+		mSceneManager->addRenderQueueListener(this);
+		
+		mRenderServiceCallBackID = 
+			mRenderService->registerListener(
+					RenderService::ListenerPtr(
+							new ClassCallback<RenderServiceMsg, DrawService>(this, &DrawService::onRenderServiceMsg))
+				);
+	}
+
+	//------------------------------------------------------
+	void DrawService::shutdown() {
+		// get rid of the render queue listener stuff
+		mSceneManager->removeRenderQueueListener(this);
+		
+		mRenderService->unregisterListener(mRenderServiceCallBackID);
+		mRenderService.setNull(); // break the circle 
+	}
+	
+	//------------------------------------------------------
+	void DrawService::clear() {
 		// destroy all sheets...
 		SheetMap::iterator it = mSheetMap.begin();
 
@@ -108,40 +146,6 @@ namespace Opde {
 
 		freeCurrentPal();
 	}
-
-	//------------------------------------------------------
-	bool DrawService::init() {
-		return true;
-	}
-
-	//------------------------------------------------------
-	void DrawService::bootstrapFinished() {
-		mRenderService = GET_SERVICE(RenderService);
-		mViewport = mRenderService->getDefaultViewport();
-
-		mRenderSystem = Ogre::Root::getSingleton().getRenderSystem();
-		mXTextelOffset = mRenderSystem->getHorizontalTexelOffset();
-		mYTextelOffset = mRenderSystem->getVerticalTexelOffset();
-
-		mSceneManager = mRenderService->getSceneManager();
-		mSceneManager->addRenderQueueListener(this);
-		
-		mRenderServiceCallBackID = 
-			mRenderService->registerListener(
-					RenderService::ListenerPtr(
-							new ClassCallback<RenderServiceMsg, DrawService>(this, &DrawService::onRenderServiceMsg))
-				);
-	}
-
-	//------------------------------------------------------
-	void DrawService::shutdown() {
-		// get rid of the render queue listener stuff
-		mSceneManager->removeRenderQueueListener(this);
-		
-		mRenderService->unregisterListener(mRenderServiceCallBackID);
-		mRenderService.setNull(); // break the circle 
-	}
-
 	//------------------------------------------------------
 	DrawSheetPtr DrawService::createSheet(const std::string& sheetName) {
 		assert(!sheetName.empty());
@@ -243,7 +247,8 @@ namespace Opde {
 		// load the font according to the specs
 		FontDrawSourcePtr nfs(new FontDrawSource(atlas, name));
 
-		atlas->_addFont(nfs);
+		// Fonts are added as pointers to the atlas. It's safe, font removes itself from atlas upon destruction
+		atlas->_addFont(nfs.ptr());
 		
 		// now we'll load the glyphs from the file
 		loadFonFile(name, group, nfs);

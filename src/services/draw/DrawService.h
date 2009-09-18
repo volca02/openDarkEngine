@@ -82,6 +82,9 @@ namespace Opde {
 			 * @param sheet The sheet to display (or none if the parameter is NULL)
 			 */
 			void setActiveSheet(const DrawSheetPtr& sheet);
+			
+			/** Gets the currently active sheet */
+			inline const DrawSheetPtr& getActiveSheet() const { return mActiveSheet; };
 
 			/** Creates a DrawSource that represents a specified image.
 			 * Also creates a material that is used to render the image.
@@ -176,6 +179,8 @@ namespace Opde {
 			bool init();
 			void bootstrapFinished();
 			void shutdown();
+			
+			void clear();
 
 			/// Loads the LG's fon file and populates the given font instance with it's glyphs
 			void loadFonFile(const std::string& name, const std::string& group, FontDrawSourcePtr fon);

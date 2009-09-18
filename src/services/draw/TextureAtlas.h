@@ -49,13 +49,19 @@ namespace Opde {
 
 			/** Adds a font instance (to be filled with glyphs afterwards) to this atlas
 			 * @note You probably don't want to use this. You'll want to use DrawService::loadFont instead */
-			void _addFont(const FontDrawSourcePtr& fdsp);
+			void _addFont(FontDrawSource* fdsp);
+			
+			/** Removes the specified font from the atlas */
+			void _removeFont(FontDrawSource* fdsp);
 
 			/** returns this Atlase's source ID */
 			inline DrawSource::ID getAtlasID() const { return mAtlasID; };
 
 			/** Internal tool to allow external addition of draw sources. Used by font code. */
 			void _addDrawSource(const DrawSourcePtr& ds);
+			
+			/** Internal tool to allow removal of draw sources */
+			void _removeDrawSource(const DrawSourcePtr& ds);
 
 			/** Builds the atlas. Locks it for further additions, makes it useable */
 			void build();
@@ -79,7 +85,7 @@ namespace Opde {
 			DrawSource::ID mAtlasID;
 
 			typedef std::list<DrawSourcePtr> DrawSourceList;
-			typedef std::list<FontDrawSourcePtr> FontSet;
+			typedef std::list<FontDrawSource*> FontSet;
 
 			DrawSourceList mMyDrawSources;
 			FontSet mMyFonts;

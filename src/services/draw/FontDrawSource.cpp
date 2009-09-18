@@ -31,10 +31,32 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	/*------------------- FontDrawSource -----------------*/
 	/*----------------------------------------------------*/
-	FontDrawSource::FontDrawSource(const TextureAtlasPtr& container, const std::string& name) : mContainer(container), mName(name), mMaxHeight(0), mMaxWidth(0), mBuilt(false) {
-		//
+	FontDrawSource::FontDrawSource(const TextureAtlasPtr& container, const std::string& name) : 
+			mContainer(container), 
+			mName(name), 
+			mMaxHeight(0), 
+			mMaxWidth(0), 
+			mBuilt(false) {
+		// INTENTIONALLY LEFT BLANK
 	}
 
+	//------------------------------------------------------
+	FontDrawSource::~FontDrawSource() {
+		GlyphMap::iterator it = mRepresentedGlyphs.begin();
+		while (it != mRepresentedGlyphs.end()) {
+			DrawSourcePtr ds = (it++)->second;
+	
+			// atlas
+			mContainer->_removeDrawSource(ds);
+		}
+		
+		// should effectively destroy all glyphs
+		mRepresentedGlyphs.clear();
+		
+		// remove ourselves from the atlas
+		mContainer->_removeFont(this);
+	}
+	
 	//------------------------------------------------------
 	void FontDrawSource::addGlyph(FontCharType chr, const PixelSize& dimensions, DarkPixelFormat pf, size_t rowlen, void* data, size_t pxoffset, const RGBAQuad* palette) {
 		assert(!mBuilt);
@@ -168,7 +190,8 @@ namespace Opde {
 		}
 
 		// we have the image data ready, now we'll populate image with it
-		dsp->getImage().loadDynamicImage(reinterpret_cast<Ogre::uchar*>(pixels), dimensions.width, dimensions.height, 1, Ogre::PF_A8R8G8B8, true);
+		dsp->getImage()->loadDynamicImage(reinterpret_cast<Ogre::uchar*>(pixels), dimensions.width, dimensions.height, 1, Ogre::PF_A8R8G8B8, false);
+		dsp->setSourcePixmapPointer(pixels);
 	}
 
 	//------------------------------------------------------
@@ -198,7 +221,8 @@ namespace Opde {
 		}
 
 		// we have the image data ready, now we'll populate image with it
-		dsp->getImage().loadDynamicImage(reinterpret_cast<Ogre::uchar*>(pixels), dimensions.width, dimensions.height, 1, Ogre::PF_A8R8G8B8, true);
+		dsp->getImage()->loadDynamicImage(reinterpret_cast<Ogre::uchar*>(pixels), dimensions.width, dimensions.height, 1, Ogre::PF_A8R8G8B8, true);
+		dsp->setSourcePixmapPointer(pixels);
 	}
 
 };

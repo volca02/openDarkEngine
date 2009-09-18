@@ -54,9 +54,10 @@ namespace Opde {
 		DrawSourceBase(), 
 		mAtlassed(false),  
 		mImageLoaded(false), 
-		mOwner(owner)
+		mOwner(owner),
+		mPixmap(NULL)
 	{
-		// nothing here
+		mImage = new Ogre::Image();
 	}
 	
 	//------------------------------------------------------	
@@ -64,7 +65,9 @@ namespace Opde {
 		DrawSourceBase(id, mat, tex),
 		mAtlassed(false),
 		mImageLoaded(false),
-		mOwner(owner) {
+		mOwner(owner),
+		mPixmap(NULL) {
+		mImage = new Ogre::Image();
 	}
 
 	//------------------------------------------------------
@@ -72,7 +75,10 @@ namespace Opde {
 			DrawSourceBase(),
 			mAtlassed(false),  
 			mImageLoaded(false), 
-			mOwner(owner) {
+			mOwner(owner),
+			mPixmap(NULL) {
+		
+		mImage = new Ogre::Image();
 		
 		mPixelSize.width  = 0; // needs to be filled on loadimage
 		mPixelSize.height = 0;
@@ -89,6 +95,8 @@ namespace Opde {
 	//------------------------------------------------------
 	DrawSource::~DrawSource() {
 		// TODO: mOwner->unregisterDrawSourceByPtr(this);
+		delete mImage;
+		delete[] mPixmap;
 	}
 	
 	//------------------------------------------------------	
@@ -121,8 +129,8 @@ namespace Opde {
 
 	//------------------------------------------------------	
 	void DrawSource::updatePixelSizeFromImage() {
-		mPixelSize.width  = mImage.getWidth();
-		mPixelSize.height = mImage.getHeight();
+		mPixelSize.width  = mImage->getWidth();
+		mPixelSize.height = mImage->getHeight();
 	}
 	
 	//------------------------------------------------------
@@ -139,7 +147,7 @@ namespace Opde {
 		if (mImageLoaded)
 			OPDE_EXCEPT("Image already loaded in this DrawSource", "DrawSource::loadImage");
 		
-		mImage.load(name, group);
+		mImage->load(name, group);
 		updatePixelSizeFromImage();
 
 		mImageLoaded = true;

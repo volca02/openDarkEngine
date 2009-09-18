@@ -305,7 +305,9 @@ namespace Opde {
 			void atlas(const Ogre::MaterialPtr& mat, size_t x, size_t y, size_t width, size_t height);
 
 			/// Image getter (Image is used for pre-atlas image data storage)
-			inline Ogre::Image& getImage() { return mImage; };
+			inline Ogre::Image* getImage() { return mImage; };
+			
+			inline void setSourcePixmapPointer(uint32_t* pix) { mPixmap = pix; };
 			
 			/// Updates the pixel size from the supplied image. Do NOT forget to call this after loading the image by hand.
 			void updatePixelSizeFromImage();
@@ -317,7 +319,7 @@ namespace Opde {
 			void loadImage(const Ogre::String& name, const Ogre::String& group);
 			
 			/** Source image of this draw source - may be lost after atlassing this, internal  */
-			Ogre::Image	mImage;
+			Ogre::Image*	mImage;
 
 			/// displacement of the Image in the storage (position in atlas)
 			Ogre::Vector2 mDisplacement;
@@ -336,6 +338,10 @@ namespace Opde {
 			
 			/// Owning Draw Service - for resource uniqueness handling
 			DrawService *mOwner;
+			
+		private:
+			/// an optional pointer to the source data - to be safely destroyed (with delete[] op.) after destroying the image
+			uint32_t* mPixmap;
 	
 	};
 
