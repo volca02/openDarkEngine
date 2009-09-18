@@ -203,6 +203,7 @@ namespace Opde {
 	//------------------------------------------------------
 	// ----------------------- The level loading methods follow
 	void WorldRepService::loadFromChunk(FilePtr& wrChunk, size_t lightSize) {
+		LOG_DEBUG("WorldRepService: Loading WR/WRRGB");
 		WRHeader header;
 		*wrChunk >> header;
 
@@ -210,6 +211,8 @@ namespace Opde {
 
 		mCells = new WRCell*[header.numCells];
 
+		LOG_DEBUG("WorldRepService: Loading Cells");
+		
 		mWorldGeometry = mSceneMgr->createGeometry("LEVEL_GEOMETRY"); // will be deleted on clear_scene
 		mWorldGeometry->setCellCount(header.numCells);
 
@@ -225,6 +228,8 @@ namespace Opde {
 			mCells[idx]->loadFromChunk(idx, wrChunk, lightSize);
 		}
 
+		LOG_DEBUG("WorldRepService: Loading Extra planes");
+		
 		// -- Load the extra planes
 		wrChunk->read(&mExtraPlaneCount, sizeof(uint32_t));
 
@@ -234,6 +239,8 @@ namespace Opde {
 		
 		// --------------------------------------------------------------------------------
 		// -- Load and process the BSP tree
+		LOG_DEBUG("WorldRepService: Loading BSP");
+
 		uint32_t BspRows;
 		wrChunk->read(&BspRows, sizeof(uint32_t));
 
@@ -248,6 +255,7 @@ namespace Opde {
 
 		// --------------------------------------------------------------------------------
 		// let the light service build the atlases, etc
+		LOG_DEBUG("WorldRepService: Loading Lights table");
 		mLightService->_loadTableFromTagFile(wrChunk);
 		mLightService->build();
 
@@ -258,6 +266,7 @@ namespace Opde {
 		}
 
 		// --------------------------------------------------------------------------------
+		LOG_DEBUG("WorldRepService: Attaching portals");
 		// Attach the portals to the BSP tree leafs
 		int optimized = 0;
 
@@ -268,6 +277,7 @@ namespace Opde {
 		LOG_INFO("Worldrep: Optimization removed %d vertices", optimized);
 
 		// --------------------------------------------------------------------------------
+		LOG_DEBUG("WorldRepService: Creating WR geometry");
 		// Build the portal meshes and cell geometry
 		for (idx = 0; idx < header.numCells; idx++) {
 			mCells[idx]->constructPortalMeshes(mSceneMgr);
@@ -275,6 +285,7 @@ namespace Opde {
 		}
 
 		// build the buffers
+		LOG_DEBUG("WorldRepService: Building WR geometry");
 		mWorldGeometry->build();
 		mSceneMgr->setActiveGeometry(mWorldGeometry);
 
@@ -283,7 +294,8 @@ namespace Opde {
 		LOG_DEBUG("Worldrep: Freeing temporary buffers");
 
 		delete[] mExtraPlanes;
-		mExtraPlanes = NULL;LOG_DEBUG("Worldrep: Freeing done");
+		mExtraPlanes = NULL;
+		LOG_DEBUG("Worldrep: Freeing done");
 	}
 
 
