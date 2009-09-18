@@ -96,6 +96,17 @@ namespace Opde {
 				return std::string(mCurPos, mStr.end());
 			}
 
+			/** Pulls one string into the target
+			* @param target The string to be filled with next token
+			* @return true if sucessful, false if end encountered */			
+			bool pull(std::string& target) {
+				if (end())
+					return false;
+					
+				target = next();
+				return true;
+			}
+
 		protected:
 			const std::string& mStr;
 			IsChar mIsChar;
@@ -168,6 +179,18 @@ namespace Opde {
 			std::string rest() {
 				return std::string(mCurPos, mStr.end());
 			}
+
+			/** Pulls one string into the target
+			* @param target The string to be filled with next token
+			* @return true if sucessful, false if end encountered */			
+			bool pull(std::string& target) {
+				if (end())
+					return false;
+					
+				target = next();
+				return true;
+			}
+
 
 		protected:
 			bool mIgnoreQuotes;
