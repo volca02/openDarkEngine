@@ -80,7 +80,9 @@ namespace Opde {
 		mVisible = visible;
 		
 		if (!mVisible) {
-			hideConsole();
+			if (mConsole->isActive())
+				hideConsole();
+			
 			setActive(false);
 		}
 		
@@ -145,6 +147,7 @@ namespace Opde {
 		mInputSrv->unregisterCommandTrap("show_console");
 		
 		delete mConsole;
+		mConsole = NULL;
 		
 		mRenderSrv.setNull();
 		mInputSrv.setNull();
@@ -234,7 +237,7 @@ namespace Opde {
 		
 		// backup the previous situation
 		mCBActive = mActive;
-		mCBSheet = mActiveSheet;
+		mCBSheet = mDrawSrv->getActiveSheet();
 		mCBVisible = mVisible;
 		
 		// Activate the console

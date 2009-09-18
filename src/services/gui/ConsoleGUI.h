@@ -30,6 +30,7 @@
 
 #include "ConsoleBackend.h"
 #include "DrawService.h"
+#include "InputService.h"
 #include "FontDrawSource.h"
 #include "TextureAtlas.h"
 
@@ -69,6 +70,14 @@ namespace Opde {
 			FontDrawSourcePtr mFont;
 			TextureAtlasPtr mAtlas;
 			DrawServicePtr mDrawSrv;
+			InputServicePtr mInputSrv;
+			
+			RenderedLabel* mConsoleText;
+			RenderedLabel* mCommandLine;
+			DrawSheetPtr mConsoleSheet;
+			ClipRect mTextClipRect;
+			ClipRect mCmdLineClipRect;
+			std::vector<Ogre::ColourValue> mConsoleColors;
 	};
 
 }

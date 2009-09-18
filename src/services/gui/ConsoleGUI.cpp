@@ -37,6 +37,9 @@ using namespace Ogre;
 using namespace OIS;
 using namespace std;
 
+// some maximal line count for the console...
+#define CONSOLE_LINES 30
+
 namespace Opde {
 
 	ConsoleGUI::ConsoleGUI(GUIService* owner) : mIsActive(false), mOwner(owner) {
@@ -45,13 +48,33 @@ namespace Opde {
 		// Core atlas that should be used to render core gui
 		mAtlas = mOwner->getCoreAtlas();
 		
+		mConsoleColors.push_back(ColourValue::Red);
+		mConsoleColors.push_back(ColourValue(1.0f,0.7f,0.7f));
+		mConsoleColors.push_back(ColourValue::White);
+		mConsoleColors.push_back(ColourValue(0.8f,0.8f,0.6f));
+		mConsoleColors.push_back(ColourValue(0.8f,0.8f,0.5f));
+		mConsoleColors.push_back(ColourValue(0.8f,0.8f,0.3f));
+		mConsoleColors.push_back(ColourValue::Blue);
+		
 		assert(!mFont.isNull());
 		
 		mDrawSrv = GET_SERVICE(DrawService);
+		mInputSrv = GET_SERVICE(InputService);
 		
 		mConsoleBackend = ConsoleBackend::getSingletonPtr();
 
 		mPosition = -1; // follow
+		
+		// TODO: Create a grey transparent rectangle below the text (needs work in draw service)
+		mConsoleText = mDrawSrv->createRenderedLabel(mFont, "");
+		mCommandLine = mDrawSrv->createRenderedLabel(mFont, "");
+		mConsoleSheet = mDrawSrv->createSheet("CONSOLE_SHEET");
+
+		// show up on our sheet
+		mConsoleSheet->addDrawOperation(mConsoleText);
+		mConsoleSheet->addDrawOperation(mCommandLine);
+
+		mPosition = 0;
 		
 		// pull out the current resolution from render service
 		RenderServicePtr rs = GET_SERVICE(RenderService);
@@ -61,24 +84,48 @@ namespace Opde {
 	}
 
 	ConsoleGUI::~ConsoleGUI() {
+		mDrawSrv->destroyDrawOperation(mConsoleText);
+		mConsoleText = NULL;
+		mDrawSrv->destroyDrawOperation(mCommandLine);
+		mCommandLine = NULL;
+		mDrawSrv->destroySheet(mConsoleSheet);
+		
+		mConsoleSheet.setNull();
 		// destroy the draw operations and the sheet
+		mDrawSrv.setNull();
 	}
 
 	void ConsoleGUI::setActive(bool active) {
 		mIsActive = active;
+		
+		if (mIsActive)
+			mDrawSrv->setActiveSheet(mConsoleSheet);
 	}
 
 	bool ConsoleGUI::injectKeyPress(const OIS::KeyEvent &e) {
 		if (!mIsActive)
 			return false;
 
-		if (e.key == KC_RETURN) {
-			ConsoleBackend::getSingleton().executeCommand(mCommand);
+		if (e.key == KC_ESCAPE) {
+			mOwner->hideConsole();
+		} else if (e.key == KC_RETURN) {
+			// add the command to the log...
+			mConsoleBackend->putMessage(">" + mCommand, 6);
+			// and execute
+			DVariant result = mInputSrv->processCommand(mCommand);
+			
+			if (!result.toBool())
+				mConsoleBackend->putMessage("Invalid command or parameters", 1);
+				
 			mCommand = "";
 		} else if (e.key == KC_BACK) {
 			mCommand = mCommand.substr(0, mCommand.length()-1);
 		} else if (e.key == KC_PGUP) {
 			mPosition -= 28; // let two lines be the same
+			
+			if (mPosition < 0)
+				mPosition = 0;
+			
 			mConsoleBackend->setChanged();
 		} else if (e.key == KC_PGDOWN) {
 			mPosition += 28;
@@ -92,13 +139,7 @@ namespace Opde {
 		}
 		else {
 			string allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ,./:;'-_+=[]{}()| \"\t";
-			/*
-			string key = "" + (char)(e.text);
-
-			if (allowed.find(key) != string::npos) {
-				mCommand += key;
-			}*/
-
+			
 			char key[2];
 			key[0]  = (char)(e.text);
 			key[1] = 0;
@@ -107,7 +148,8 @@ namespace Opde {
 				mCommand += key;
 		}
 
-		// MOD: mCommandLine->setCaption(">" + mCommand);
+		mCommandLine->clearText();
+		mCommandLine->addText(">" + mCommand, Ogre::ColourValue::Blue);
 
 		return true;
 
@@ -115,49 +157,59 @@ namespace Opde {
 
 	void ConsoleGUI::update(int timems) {
 		if (mIsActive) {
-			// MOD: mConsoleOverlay->show();
+			mConsoleSheet->activate();
+
 			if (mConsoleBackend->getChanged()) {
 				// need to update the text window
-				std::vector< Ogre::String > texts;
+				std::vector< ConsoleBackend::Message > texts;
 				mConsoleBackend->pullMessages(texts, mPosition, 30);
 
 				String text;
 
-				std::vector< Ogre::String >::iterator it = texts.begin();
+				mConsoleText->clearText();
+				std::vector< ConsoleBackend::Message >::iterator it = texts.begin();
 
 				for (;it != texts.end(); ++it) {
-					text += *it + "\n";
+					size_t level = it->first;
+					if (level >= mConsoleColors.size())
+						level = mConsoleColors.size() - 1;
+					
+					mConsoleText->addText(it->second, mConsoleColors[level]);
+					mConsoleText->addText("\n", Ogre::ColourValue::White);
 				}
-
-				// MOD: mConsoleText->setCaption(text);
 			}
 		} else {
-			// MOD: mConsoleOverlay->hide();
+			mConsoleSheet->deactivate();
 		}
-		/*
-		Real scrollY = mConsoleOverlay->_getTop();
-
-		if (mIsActive && scrollY < 0) {
-			scrollY += timems/1000;
-
-			if (scrollY > 1)
-				scrollY = 1;
-
-			mConsoleOverlay->setTop(scrollY);
-		}
-
-		if (!mIsActive && scrollY > -0.5) {
-			scrollY -= timems/1000;
-
-			if (scrollY < -0.5)
-				scrollY = -0.5;
-
-			mConsoleOverlay->setTop(scrollY);
-		}*/
 	}
 	
 	/// recalculates the number of visible lines based on the current screen size and some limit
 	void ConsoleGUI::resolutionChanged(size_t width, size_t height) {
-		// TODO:
+		// some default positioning
+		// we handle maximally CONSOLE_LINES lines
+		size_t screenLines = (height / mFont->getHeight()) - 1;
+		if (screenLines > CONSOLE_LINES)
+			screenLines = CONSOLE_LINES;
+		
+		// maximal console width
+		size_t screenColumns = (width / mFont->getWidth());
+		
+		mTextClipRect.top = 0;
+		mTextClipRect.left = 0;
+		mTextClipRect.right = screenColumns * mFont->getWidth();
+		mTextClipRect.bottom = (screenLines - 1) * mFont->getHeight();
+		mTextClipRect.noClip = false;
+		
+		mCmdLineClipRect.top = mTextClipRect.bottom;
+		mCmdLineClipRect.left = mTextClipRect.left;
+		mCmdLineClipRect.right = mTextClipRect.right;
+		mCmdLineClipRect.bottom = mCmdLineClipRect.top + mFont->getHeight();
+		mCmdLineClipRect.noClip = false;
+		
+		mConsoleText->setPosition(mTextClipRect.left, mTextClipRect.top);
+		mCommandLine->setPosition(mCmdLineClipRect.left, mCmdLineClipRect.top);
+		
+		mConsoleText->setClipRect(mTextClipRect);
+		mCommandLine->setClipRect(mCmdLineClipRect);
 	}
 }

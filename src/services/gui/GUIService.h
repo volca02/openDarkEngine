@@ -66,6 +66,12 @@ namespace Opde {
 			* Use this to render various debug overlays and stuff like that. */
 			TextureAtlasPtr getCoreAtlas() const;
 
+			/// Hides the console window
+			void hideConsole();
+			
+			/// Shows the console window
+			void showConsole();
+			
 		protected:
 			// Service initialization related methods
 			bool init();
@@ -77,10 +83,6 @@ namespace Opde {
 			void onRenderServiceMsg(const RenderServiceMsg& message);
 			
 			void onShowConsole(const InputEventMsg& iem);
-			
-			void hideConsole();
-			
-			void showConsole();
 			
 			/// Loop step event
 			void loopStep(float deltaTime);
