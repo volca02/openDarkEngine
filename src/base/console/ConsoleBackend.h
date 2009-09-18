@@ -43,6 +43,10 @@ namespace Opde {
 	/** Backend class, used for commands processing, and console text memmory
 	* A singleton class, used to insert texts to console and to call Command Listeners */
 	class OPDELIB_EXPORT ConsoleBackend : public Singleton<ConsoleBackend>, public Ogre::LogListener, public Opde::LogListener {
+		public:
+			/** A pair - level, message */
+			typedef std::pair<size_t, Ogre::String> Message;
+			
 		private:
 			/** Map of the string to the Listeners which handle them */
 			std::map<std::string, ConsoleCommandListener *> mCommandMap;
@@ -54,10 +58,10 @@ namespace Opde {
 			std::map<std::string, std::set<std::string> > mCompletionMap;
 
 			/** Console texts list */
-			std::deque< Ogre::String > mMessages;
+			std::deque< Message > mMessages;
 
 			/** Internal method for adding text rows */
-			void addText(std::string text);
+			void addText(std::string text, size_t level = 2);
 
 			/** Indicates true if the console text / scroll changed till last time and should be redrawn */
 			bool mChanged;
@@ -87,7 +91,7 @@ namespace Opde {
 			std::string tabComplete(std::string Text);
 
 			/* Writes a simple message to the console */
-			void putMessage(std::string text);
+			void putMessage(std::string text, size_t level = 2);
 
 			/** Ogre's log listener implementation. Used as a to console logger for the ogre Logging system. This means that one can se the ogre logger to write messages to console too */
 			virtual void messageLogged( const Ogre::String& message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String &logName );
@@ -107,7 +111,7 @@ namespace Opde {
 			@param linenum The start line to load. -1 means we will pull up to #lines from end of the vector
 			@param lines the maximal count of lines to load
 			*/
-			void pullMessages(std::vector<Ogre::String>& target, unsigned int pos, unsigned int lines);
+			void pullMessages(std::vector<ConsoleBackend::Message>& target, int pos, unsigned int lines);
 
 			// Singleton stuff
 			static ConsoleBackend& getSingleton(void);

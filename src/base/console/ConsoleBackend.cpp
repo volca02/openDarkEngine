@@ -41,25 +41,26 @@ namespace Opde {
 		mChanged = true;
 
 		// Register as an ogre logger
-		//LogManager::getSingleton().getDefaultLog()->addListener(this);
+		// LogManager::getSingleton().getDefaultLog()->addListener(this);
+		// Register as Opde log listener
+		Logger::getSingleton().registerLogListener(this);
 	}
 
 	ConsoleBackend::~ConsoleBackend() {
+		Logger::getSingleton().unregisterLogListener(this);
 		mCommandMap.clear();
 		mCompletionMap.clear();
 		mMessages.clear();
 	};
 
-	void ConsoleBackend::addText(std::string text) {
+	void ConsoleBackend::addText(std::string text, size_t level) {
 		// split the text on newlines, to aid line counting
 		std::vector< String > lines = StringUtil::split(text, "\r\n");
 
 		std::vector< String >::iterator it = lines.begin();
 
-
-
 		for (;it != lines.end(); it++) {
-			mMessages.push_back(*it);
+			mMessages.push_back(std::make_pair(level, *it));
 		}
 
 		// if the size is greater the mTextHistory, remove till sufficient
@@ -135,8 +136,8 @@ namespace Opde {
 		return Text;
 	}
 
-	void ConsoleBackend::putMessage(std::string text) {
-		addText(text);
+	void ConsoleBackend::putMessage(std::string text, size_t level) {
+		addText(text, level);
 	}
 
 	void ConsoleBackend::messageLogged( const String& message, LogMessageLevel lml, bool maskDebug, const String &logName ) {
@@ -145,7 +146,7 @@ namespace Opde {
 	}
 
 	void ConsoleBackend::logMessage(Logger::LogLevel level, const std::string& msg) {
-		addText("LOG[" + string(logLevels[level]) + "] : " + msg);
+		addText(msg, static_cast<size_t>(level));
 	}
 
 	bool ConsoleBackend::getChanged() {
@@ -158,39 +159,29 @@ namespace Opde {
 		return false;
 	}
 
-	void ConsoleBackend::pullMessages(std::vector<Ogre::String>& target, unsigned int pos, unsigned int lines) {
+	void ConsoleBackend::pullMessages(std::vector<ConsoleBackend::Message>& target, int pos, unsigned int lines) {
 		// add the lines from the mMessages backwards
-
-		std::deque < Ogre::String >::iterator it;
-
 		unsigned int size = mMessages.size();
 
-		if (pos >= size) {
+		if (pos < 0) { // from end
+			pos = size - lines + 1;
+
+			if (lines > (size - pos))
+				lines = (size - pos);
+		}
+		
+		// range checks
+		if ((size_t)(pos) >= size) {
 			pos = size - 1;
 		}
 
-		if (pos < 0) { // from end
-			pos = size + (pos + 1);
-			
-			if (size - pos < lines) // if there could be more lines visible, justify
-                pos = size - lines;
-
-            if (pos < 0) { // if the resulting position is less than zero, justify both position and size
-                pos = 0;
-                
-                if (lines > size)
-					lines = size;
-            }
-
-            it = mMessages.begin() + pos;
-		} else {
-            // If the pos was negative, fill the screen
-            it = mMessages.begin() + pos;
-            lines = (size - pos) > lines ? lines : (size - pos);
-		}
-
-		for (;lines > 0; --lines, ++it) {
-			target.push_back(*it);
+		if (pos < 0)
+			pos = 0;
+		
+		lines = (size - pos) > lines ? lines : (size - pos);
+		
+		for (;lines > 0; --lines, ++pos) {
+			target.push_back(mMessages[pos]);
 		}
 	}
 

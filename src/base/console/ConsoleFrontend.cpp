@@ -117,15 +117,15 @@ namespace Opde {
 			mConsoleOverlay->show();
 			if (mConsoleBackend->getChanged()) {
 				// need to update the text window
-				std::vector< Ogre::String > texts;
+				std::vector< ConsoleBackend::Message > texts;
 				mConsoleBackend->pullMessages(texts, mPosition, 30);
 
 				String text;
 
-				std::vector< Ogre::String >::iterator it = texts.begin();
+				std::vector< ConsoleBackend::Message >::iterator it = texts.begin();
 
 				for (;it != texts.end(); ++it) {
-					text += *it + "\n";
+					text += it->second + "\n";
 				}
 
 				mConsoleText->setCaption(text);
