@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ namespace Opde {
 		LOG_INFO("ServiceManager: Shutting down all services");
 
 		// Shutdown loop. Resolver for some possible problems
-		for (size_t idx = 0; idx < mServiceInstances.size(); ++idx) {
+		for (size_t idx = 1; idx < mServiceInstances.size(); ++idx) {
 			ServicePtr& sp = mServiceInstances[idx];
 			
 			if (!sp.isNull()) {
@@ -71,7 +71,7 @@ namespace Opde {
 
 		LOG_INFO("ServiceManager: Releasing all services");
 
-		for (size_t idx = 0; idx < mServiceInstances.size(); ++idx) {
+		for (size_t idx = 1; idx < mServiceInstances.size(); ++idx) {
 			ServicePtr& sp = mServiceInstances[idx];
 			
 			if (!sp.isNull()) {
@@ -199,7 +199,7 @@ namespace Opde {
 
 		std::list<ServicePtr> toBootstrap;
 
-		for (size_t idx = 0; idx < mServiceInstances.size() ; ++idx ) {
+		for (size_t idx = 1; idx < mServiceInstances.size() ; ++idx ) {
 			ServicePtr& sp = mServiceInstances[idx];
 		
 			if (!sp.isNull())
