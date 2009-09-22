@@ -60,7 +60,7 @@ namespace Opde {
 		LOG_INFO("ServiceManager: Shutting down all services");
 
 		// Shutdown loop. Resolver for some possible problems
-		for (size_t idx = 1; idx < mServiceInstances.size(); ++idx) {
+		for (size_t idx = 0; idx < mServiceInstances.size(); ++idx) {
 			ServicePtr& sp = mServiceInstances[idx];
 			
 			if (!sp.isNull()) {
@@ -71,7 +71,7 @@ namespace Opde {
 
 		LOG_INFO("ServiceManager: Releasing all services");
 
-		for (size_t idx = 1; idx < mServiceInstances.size(); ++idx) {
+		for (size_t idx = 0; idx < mServiceInstances.size(); ++idx) {
 			ServicePtr& sp = mServiceInstances[idx];
 			
 			if (!sp.isNull()) {
@@ -199,7 +199,7 @@ namespace Opde {
 
 		std::list<ServicePtr> toBootstrap;
 
-		for (size_t idx = 1; idx < mServiceInstances.size() ; ++idx ) {
+		for (size_t idx = 0; idx < mServiceInstances.size() ; ++idx ) {
 			ServicePtr& sp = mServiceInstances[idx];
 		
 			if (!sp.isNull())
