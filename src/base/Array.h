@@ -180,11 +180,9 @@ namespace Opde {
 				assert(oldSize >= 0);
 				assert(newSize >= 0);
 
-				// the damn VC++ does not initialize the contents for primitive types it seems
-				memset((*ptr) + oldSize, 0, sizeof(T) * (newSize - oldSize));
-
 				//placement new on the new part of array
-				::new((*ptr) + oldSize) T[newSize - oldSize];
+				for (int pos = oldSize; pos < newSize; ++pos)
+					::new((*ptr) + pos) T();
 			}
 
 			int mMinIndex;
@@ -288,7 +286,8 @@ namespace Opde {
 				mArray = newptr;
 
 				//placement new on the new part of array
-				::new(mArray + mSize) T[newSize - mSize];
+				for (size_t pos = mSize; pos < newSize; ++pos)
+					::new(mArray + pos) T();
 
 				mSize = newSize;
 			}
