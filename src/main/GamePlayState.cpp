@@ -430,7 +430,7 @@ namespace Opde {
 	}
 
 	bool GamePlayState::keyPressed( const OIS::KeyEvent &e ) {
-		if( e.key == KC_F12 ) {
+		if( e.key == KC_F10 ) {
 			mConsole->setActive(!mConsole->isActive());
 			return true;
 		}
