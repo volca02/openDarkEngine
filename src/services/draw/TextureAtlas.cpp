@@ -59,13 +59,15 @@ namespace Opde {
 		// Inspiration was taken from Canvas, as with other things
 		// image:
 		uint32_t* pixels = new uint32_t[4];
-		memset(pixels, 255, 4 * 4);
+		for (size_t i = 0; i < 4; i++)
+			pixels[i] = 0x0ffffffff; // a white colour, that is
 		
 		// draw source:
 		mVertexColour = DrawSourcePtr(new DrawSource(mOwner));
-		mVertexColour->getImage()->loadDynamicImage(reinterpret_cast<Ogre::uchar*>(pixels), 2, 2, 1, Ogre::PF_A8R8G8B8, false);
+		mVertexColour->getImage()->loadDynamicImage(reinterpret_cast<Ogre::uchar*>(pixels), 2, 2, 1, Ogre::PF_BYTE_BGRA, false);
 		mVertexColour->setSourcePixmapPointer(pixels);
 		mVertexColour->updatePixelSizeFromImage();
+		mVertexColour->setSourceID(mAtlasID);
 		
 		// register:
 		_addDrawSource(mVertexColour);
@@ -74,6 +76,7 @@ namespace Opde {
 	//------------------------------------------------------
 	TextureAtlas::~TextureAtlas() {
 		// release all the draw sources
+		mVertexColour.setNull();
 		mMyDrawSources.clear();
 
 		// and get rid of the allocation info too
@@ -104,9 +107,8 @@ namespace Opde {
 
 		ds->setSourceID(mAtlasID);
 
-		mMyDrawSources.push_back(ds);
-		markDirty();
-		
+		_addDrawSource(ds);
+
 		// register the draw source
 		mOwner->registerDrawSource(ds, imgName, groupName);
 
@@ -223,6 +225,8 @@ namespace Opde {
 
 			// render all pixels into the right place
 			FreeSpaceInfo* fsi = reinterpret_cast<FreeSpaceInfo*>(ds->getPlacementPtr());
+			
+			assert(fsi);
 
 			// render into the specified place
 			unsigned char* conversionBuf = NULL;
@@ -244,6 +248,7 @@ namespace Opde {
 
 			Ogre::uint8* srcData = static_cast<Ogre::uint8*>(srcPixels.data);
 			
+			// TODO: we're always handling 32bit data, so we could as well transfer 4 bytes each iteration instead of one (speedup)
 			for(size_t row = 0; row < dps.height; row++) {
 					for(size_t col = 0; col < srcrowsize; col++) {
 							dstData[((row + fsi->y) * rowsize) + (fsi->x * pixelsize) + col] =
@@ -300,6 +305,12 @@ namespace Opde {
 
 		delete mAtlasAllocation;
 		mAtlasAllocation = new FreeSpaceInfo(0,0,mAtlasSize.width, mAtlasSize.height);
+		
+		// destroy the old invalid texture
+		if (!mTexture.isNull()) {
+			Ogre::TextureManager::getSingleton().remove(mTexture->getName());
+			mTexture.setNull();
+		}
 	}
 
 	//------------------------------------------------------

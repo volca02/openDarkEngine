@@ -69,7 +69,7 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void DrawBuffer::removeDrawOperation(DrawOperation* op) {
-		// find the draw op. mentioned, remove
+		mDrawOpMap.erase(op->getID());
 		mIsDirty = true;
 	};
 

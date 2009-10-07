@@ -69,6 +69,7 @@ namespace Opde {
 			/// Owner getter
 			inline DrawService* getOwner() const { return mOwner; };
 			
+			/// Returns a draw source for vertex colour rendering (2x2 white pixels)
 			const DrawSourcePtr& getVertexColourDrawSource() const { return mVertexColour; };
 
 		protected:

@@ -584,6 +584,29 @@ namespace Opde {
 		
 		return rl;
 	}
+	
+	//------------------------------------------------------
+	void DrawService::destroyRenderedLabel(RenderedLabel* rl) {
+		destroyDrawOperation(rl);
+	}
+	
+	//------------------------------------------------------
+	RenderedRect* DrawService::createRenderedRect(const TextureAtlasPtr& atlas) {
+		DrawOperation::ID opID = getNewDrawOperationID();
+		RenderedRect* rr = new RenderedRect(this, opID, atlas);
+
+		// register so we'll be able to remove it
+		mDrawOperations[opID] = rr;
+		
+		postCreate(rr);
+
+		return rr;
+	}
+	
+	//------------------------------------------------------
+	void DrawService::destroyRenderedRect(RenderedRect* rr) {
+		destroyDrawOperation(rr);
+	}
 
 	//------------------------------------------------------
 	size_t DrawService::getNewDrawOperationID() {

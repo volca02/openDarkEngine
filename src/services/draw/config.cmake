@@ -6,6 +6,7 @@ LIST(APPEND OPDE_SERVICE_SOURCES ${OPDE_SOURCE_DIR}/src/services/draw/DrawSheet.
 LIST(APPEND OPDE_SERVICE_SOURCES ${OPDE_SOURCE_DIR}/src/services/draw/FontDrawSource.cpp)
 LIST(APPEND OPDE_SERVICE_SOURCES ${OPDE_SOURCE_DIR}/src/services/draw/RenderedImage.cpp)
 LIST(APPEND OPDE_SERVICE_SOURCES ${OPDE_SOURCE_DIR}/src/services/draw/RenderedLabel.cpp)
+LIST(APPEND OPDE_SERVICE_SOURCES ${OPDE_SOURCE_DIR}/src/services/draw/RenderedRect.cpp)
 LIST(APPEND OPDE_SERVICE_SOURCES ${OPDE_SOURCE_DIR}/src/services/draw/TextureAtlas.cpp)
 LIST(APPEND OPDE_SERVICE_HEADERS ${OPDE_SOURCE_DIR}/src/services/draw/DrawBuffer.h)
 LIST(APPEND OPDE_SERVICE_HEADERS ${OPDE_SOURCE_DIR}/src/services/draw/DrawCommon.h)
@@ -16,4 +17,5 @@ LIST(APPEND OPDE_SERVICE_HEADERS ${OPDE_SOURCE_DIR}/src/services/draw/FontDrawSo
 LIST(APPEND OPDE_SERVICE_HEADERS ${OPDE_SOURCE_DIR}/src/services/draw/LGPalette.h)
 LIST(APPEND OPDE_SERVICE_HEADERS ${OPDE_SOURCE_DIR}/src/services/draw/RenderedImage.h)
 LIST(APPEND OPDE_SERVICE_HEADERS ${OPDE_SOURCE_DIR}/src/services/draw/RenderedLabel.h)
+LIST(APPEND OPDE_SERVICE_HEADERS ${OPDE_SOURCE_DIR}/src/services/draw/RenderedRect.h)
 LIST(APPEND OPDE_SERVICE_HEADERS ${OPDE_SOURCE_DIR}/src/services/draw/TextureAtlas.h)

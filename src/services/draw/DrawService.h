@@ -35,6 +35,7 @@
 #include "Array.h"
 #include "RenderedImage.h"
 #include "RenderedLabel.h"
+#include "RenderedRect.h"
 #include "TextureAtlas.h"
 
 #include "RenderService.h"
@@ -108,6 +109,22 @@ namespace Opde {
 			 */
 			RenderedLabel* createRenderedLabel(const FontDrawSourcePtr& fds, const std::string& label = "");
 
+			/** Destroys a rendered label. For convenience. Calls destroyDrawOperation 
+			 */
+			void destroyRenderedLabel(RenderedLabel* rl);
+			
+			/** Creates a rendered rectangle (e.g. a colour only rectangle render)
+			 * @param atlas The atlas for this operation
+			 * @note The redered rectangle still uses a texture (namely the vertex colour texture).
+			 * !That texture is used to group the rendering operations together in one buffer to ensure
+			 * !correct transparency/alpha handling. 
+			 */
+			RenderedRect* createRenderedRect(const TextureAtlasPtr& atlas);
+
+			/** Destroys a rendered rectangle. For convenience. Calls destroyDrawOperation 
+			 */
+			void destroyRenderedRect(RenderedRect* rr);
+			
 			/** Destroys the specified draw operation (any ancestor)
 			 * @param dop The draw operation to destroy
 			 */

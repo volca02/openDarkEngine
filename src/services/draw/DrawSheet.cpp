@@ -84,12 +84,12 @@ namespace Opde {
 		DrawBuffer* buf = getBufferForOperation(drawOp, true);
 
 		assert(buf);
-
-		buf->addDrawOperation(drawOp);
-
-		mDrawOpMap[drawOp->getID()] = drawOp;
-
-		drawOp->onSheetRegister(this);
+		
+		if (buf) {
+			buf->addDrawOperation(drawOp);
+			mDrawOpMap[drawOp->getID()] = drawOp;
+			drawOp->onSheetRegister(this);
+		}
 	}
 
 	//------------------------------------------------------
@@ -122,10 +122,7 @@ namespace Opde {
 		if (buf)
 			buf->removeDrawOperation(toRemove);
 
-		DrawOperationMap::iterator it = mDrawOpMap.find(toRemove->getID());
-
-		if (it != mDrawOpMap.end())
-			mDrawOpMap.erase(it);
+		mDrawOpMap.erase(toRemove->getID());
 	}
 
 	//------------------------------------------------------
