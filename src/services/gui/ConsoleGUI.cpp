@@ -39,6 +39,7 @@ using namespace std;
 
 // some maximal line count for the console...
 #define CONSOLE_LINES 30
+#define SCROLL_LINES (CONSOLE_LINES - 2)
 
 namespace Opde {
 
@@ -66,11 +67,26 @@ namespace Opde {
 		mPosition = -1; // follow
 		
 		// TODO: Create a grey transparent rectangle below the text (needs work in draw service)
+		
+		mConsoleBackground = mDrawSrv->createRenderedRect(mAtlas);
+		// mConsoleBackground->setColour(ColourValue(0.5f, 0.5f, 0.5f, 0.5f));
+		mConsoleBackground->setColour(ColourValue(0.0f, 0.0f, 0.0f));
+		mConsoleBackground->setZOrder(1);
+		
+		mCommandLineBackground = mDrawSrv->createRenderedRect(mAtlas);
+		mCommandLineBackground->setColour(ColourValue(0.95f, 0.75f, 0.55f, 0.75f));
+		mCommandLineBackground->setZOrder(1);
+		
 		mConsoleText = mDrawSrv->createRenderedLabel(mFont, "");
-		mCommandLine = mDrawSrv->createRenderedLabel(mFont, "");
+		mCommandLine = mDrawSrv->createRenderedLabel(mFont, ">");
 		mConsoleSheet = mDrawSrv->createSheet("CONSOLE_SHEET");
+		
+		mConsoleText->setZOrder(2);
+		mCommandLine->setZOrder(2);
 
 		// show up on our sheet
+		mConsoleSheet->addDrawOperation(mConsoleBackground);
+		mConsoleSheet->addDrawOperation(mCommandLineBackground);
 		mConsoleSheet->addDrawOperation(mConsoleText);
 		mConsoleSheet->addDrawOperation(mCommandLine);
 
@@ -84,14 +100,17 @@ namespace Opde {
 	}
 
 	ConsoleGUI::~ConsoleGUI() {
-		mDrawSrv->destroyDrawOperation(mConsoleText);
+		// destroy the draw operations and the sheet
+		mDrawSrv->destroyRenderedLabel(mConsoleText);
 		mConsoleText = NULL;
-		mDrawSrv->destroyDrawOperation(mCommandLine);
+		mDrawSrv->destroyRenderedLabel(mCommandLine);
 		mCommandLine = NULL;
+		mDrawSrv->destroyRenderedRect(mConsoleBackground);
+		mConsoleBackground = NULL;
 		mDrawSrv->destroySheet(mConsoleSheet);
 		
 		mConsoleSheet.setNull();
-		// destroy the draw operations and the sheet
+		
 		mDrawSrv.setNull();
 	}
 
@@ -121,14 +140,24 @@ namespace Opde {
 		} else if (e.key == KC_BACK) {
 			mCommand = mCommand.substr(0, mCommand.length()-1);
 		} else if (e.key == KC_PGUP) {
-			mPosition -= 28; // let two lines be the same
-			
-			if (mPosition < 0)
+			if (mPosition >= SCROLL_LINES)
+				mPosition -= SCROLL_LINES; // let two lines be the same
+			else if (mPosition < 0) {
+				mPosition = mConsoleBackend->getHistorySize();
+				
+				mPosition = std::max(0, mPosition - (SCROLL_LINES + SCROLL_LINES + 1));
+			} else
 				mPosition = 0;
 			
 			mConsoleBackend->setChanged();
 		} else if (e.key == KC_PGDOWN) {
-			mPosition += 28;
+			if (mPosition >= 0)
+				mPosition += SCROLL_LINES;
+			
+			// if at the end, set follow
+			if ((unsigned int)(mPosition) > mConsoleBackend->getHistorySize() - SCROLL_LINES)
+				mPosition = -1;
+				
 			mConsoleBackend->setChanged();
 		} else if (e.key == KC_END) {
 			mPosition = -1;
@@ -200,11 +229,20 @@ namespace Opde {
 		mTextClipRect.bottom = (screenLines - 1) * mFont->getHeight();
 		mTextClipRect.noClip = false;
 		
+		// background rect
+		mConsoleBackground->setPosition(mTextClipRect.left, mTextClipRect.top);
+		mConsoleBackground->setWidth(mTextClipRect.right);
+		mConsoleBackground->setHeight((screenLines - 1) * mFont->getHeight());
+		
 		mCmdLineClipRect.top = mTextClipRect.bottom;
 		mCmdLineClipRect.left = mTextClipRect.left;
 		mCmdLineClipRect.right = mTextClipRect.right;
 		mCmdLineClipRect.bottom = mCmdLineClipRect.top + mFont->getHeight();
 		mCmdLineClipRect.noClip = false;
+
+		mCommandLineBackground->setPosition(mCmdLineClipRect.left, mCmdLineClipRect.top);
+		mCommandLineBackground->setWidth(mCmdLineClipRect.right);
+		mCommandLineBackground->setHeight(mFont->getHeight());
 		
 		mConsoleText->setPosition(mTextClipRect.left, mTextClipRect.top);
 		mCommandLine->setPosition(mCmdLineClipRect.left, mCmdLineClipRect.top);

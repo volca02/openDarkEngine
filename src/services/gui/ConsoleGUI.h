@@ -72,6 +72,8 @@ namespace Opde {
 			DrawServicePtr mDrawSrv;
 			InputServicePtr mInputSrv;
 			
+			RenderedRect* mConsoleBackground;
+			RenderedRect* mCommandLineBackground;
 			RenderedLabel* mConsoleText;
 			RenderedLabel* mCommandLine;
 			DrawSheetPtr mConsoleSheet;

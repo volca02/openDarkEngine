@@ -102,7 +102,11 @@ namespace Opde {
 			/** Returns true, if the console text was changed from last time, and resets the indicator - asking twice will return true,false */
 			bool getChanged();
 
-            void setChanged() { mChanged = true; };
+			/** informs the backend a change happened (manually). This is here to aid the console frontend with rendering changes (page changes, scrolling) */
+			void setChanged() { mChanged = true; };
+			
+			/** Returns the size of history. In lines. */
+			unsigned int getHistorySize() { return mTextHistory; };
 
 			/** Scroll the view window a defined number of lines */
 			void scroll(int lines);
