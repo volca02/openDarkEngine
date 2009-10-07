@@ -49,8 +49,10 @@ namespace Opde {
 		mServiceInstances.grow(msMaxServiceSID);
 		mServiceFactories.grow(msMaxServiceSID);
 		
-		for (size_t idx = 0; idx < msMaxServiceSID; ++idx)
+		for (size_t idx = 0; idx < msMaxServiceSID; ++idx) {
 			mServiceFactories[idx] = NULL;
+			mServiceInstances[idx].setNull();
+		}
 	}
 
 	ServiceManager::~ServiceManager() {
