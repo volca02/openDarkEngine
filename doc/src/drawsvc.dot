@@ -1,0 +1,68 @@
+digraph G {
+	fontname = "Bitstream Vera Sans"
+	fontsize = 8
+	size = "13,13"
+	
+	node [
+		fontname = "Bitstream Vera Sans"
+		fontsize = 7
+		shape = "record"	
+	]
+	
+	edge [
+		fontname = "Bitstream Vera Sans"
+		fontsize = 7
+	]
+	
+	
+	subgraph clusterBase {
+		label = "Base classes"
+	
+		Service [
+			label = "{Service||}"
+		]
+	}
+	
+	subgraph clusterDrawSvc {
+		label = "Draw Service"
+		
+		DrawService [
+			label = "{DrawService||}"
+		]
+	
+		DrawBuffer [ label = "{DrawBuffer||}" ]
+		DrawOperation [ label = "{DrawOperation||}" ]
+		DrawQuad [ label = "{DrawQuad||}" ]
+		DrawRect [ label = "{DrawRect||}" ]
+		DrawSheet [ label = "{DrawSheet||}" ]
+		DrawSource [ label = "{DrawSource||}" ]
+		
+		RenderedImage [ label = "{RenderedImage||}" ]
+		RenderedLabel [ label = "{RenderedLabel||}" ]
+		
+	}
+	
+	Service -> DrawService
+	DrawOperation -> RenderedImage
+	DrawOperation -> RenderedLabel
+	
+	edge [
+		arrowhead = "none"
+
+                headlabel = "1"
+                taillabel = "N"
+	]
+	
+	DrawSheet -> DrawService
+	DrawQuad -> DrawOperation
+	DrawQuad -> DrawBuffer
+	
+	edge [
+		arrowhead = "none"
+
+                headlabel = "N"
+                taillabel = "N"
+	]
+
+	DrawSheet -> DrawOperation
+}
