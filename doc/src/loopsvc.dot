@@ -26,7 +26,7 @@ digraph G {
 		label = "Loop Service"
 		
 		LoopService [
-			label = "{InputService||}"
+			label = "{LoopService||}"
 		]
 	
 		LoopClient [

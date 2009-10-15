@@ -65,7 +65,7 @@ code.
 @cindex Used technologies
 @subheading Used technologies
 The core of OpenDarkEngine written in C++, various other parts are planned or already written in python. Build system
-used is CMake. Libraries currently used are OGRE, FreeImage.
+used is CMake. Libraries currently used are OGRE, FreeImage and OIS.
 
 @cindex Build environment
 @subheading Build environment
@@ -83,7 +83,8 @@ For up-to-date build guides, please consult the doc/DEVELOPERS document in the s
 
 Whole engine exists in the Opde namespace. That means that every class definition, as well as typedef or enumeration,
 all these things are defined within the Opde namespace, and either prefixed with 'Opde::', or imported via using keyword
-when referenced from outside of this namespace.
+when referenced from outside of this namespace. The only exceptions to this rule is code that links the openDarkEngine
+to Ogre library.
 
 @cindex shared_ptr
 Throughout the source code, some of the instances are held in memory - their lifetime is controled - by shared_ptr class.
@@ -303,13 +304,13 @@ links in the mission files can point to gamesys objects, etc. - but not the othe
 @chapter Services
 @cindex Services
 
-This is the current list of available engines services, divided by categories, and classified with a rough current completeness level (>90% means feature complete, bug-fix only):
+This is the current list of engine's services, divided by categories, and classified with a rough current completeness level (>90% means feature complete, bug-fix only):
 
 @subheading Input/Output
 @table @asis
 @item @ref{Input Service} - 70%
 	This service handles input devices and their translations to game commands. Also handles .BND files and console commands.
-@item @ref{Database Service} - 60%
+@item @ref{Database Service} - 80%
 	Is a game database loading/saving service. Manages the loading/saving of .GAM/.MIS/.SAV files. All the services which store some
 	data inside these files listen to the events that this service generates and act accordingly.
 @end table
@@ -348,13 +349,13 @@ This is the current list of available engines services, divided by categories, a
 	Helper service that helps with game object materials (textures, etc).
 @item @ref{Render Service} - 30%
 	This service manages the display of the engine.
-@item Draw Service - 0%
+@item @ref{Draw Service} - 70%
 	Service responsible for 2D rendering (GUI, HUD).
 @end table
 
 @subheading Simulation
 @table @asis
-@item Sim Service - 0%
+@item @ref{Sim Service} - 50%
 	Similar to the loop service, is it's client in fact. Will handle the simulation time management and time step distribution.
 @item Physics Service - 1%
 	Will handle all game object physics.
@@ -610,6 +611,30 @@ This service is a connection point between Ogre and Opde. It manages display (re
 It also manages render subgroup of Properties (RenderAlpha, RenderType, HasRefs, Scale). Listens to Object Service's position property and adjusts SceneNodes of
 objects accordingly.
 
+@c --------------------------------------------------------------------
+@node Draw Service
+@section Draw Service
+@cindex Draw Service
+
+@image{img/drawsvc}
+
+This service is used to draw 2D stuff on screen. It is capable of image atlassing (TextureAtlas class), bitmaps and bitmap based font rendering (it is capable of loading of .fon dark engine font format).
+
+@c --------------------------------------------------------------------
+@node Sim Service
+@section Sim Service
+@cindex Sim Service
+
+@image{img/simsvc}
+
+This service is a timer base for all simulated code. It issues per-frame time broadcasts to all listeners that should have it's time controlled in sim-time rather than via the @ref{Loop Service} timing.
+
+@cindex Sim Time
+@subheading Sim Time
+The simulation in the engine is controlled via it's own time base. This allows us to totally remove the simulation from the loop, effectively stopping the simulation, or control the simulation's time flow.
+Sim service has it's own time flow rate, controlled by flow coefficient. This coefficient determines how much simulation time passed on based on the real time gained from the Loop service.
+
+Sim service will also broadcast script messages ("Sim" with one boolean parameter starting).
 
 @c --------------------------------------------------------------------
 @node Config Service
