@@ -45,6 +45,8 @@ namespace Opde {
 			
 			void read(const FilePtr& sf);
 			void write(const FilePtr& sf);
+			
+			bool isInside(const Ogre::Vector3& point);
 
 		private:
 			void clear();

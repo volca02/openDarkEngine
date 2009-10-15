@@ -52,6 +52,8 @@ namespace Opde {
 			
 			int32_t getObjectID() const { return mObjectID; };
 			int16_t getRoomID() const { return mRoomID; };
+			
+			bool isInside(const Ogre::Vector3& point);
 
 		private:
 			/// clears the room into an empty state, drops all allocations

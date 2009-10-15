@@ -37,7 +37,7 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	template<> const size_t ServiceImpl<RoomService>::SID = __SERVICE_ID_ROOM;
 	
-	RoomService::RoomService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::RoomService >(manager, name) {
+	RoomService::RoomService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::RoomService >(manager, name), mRoomsOk(false) {
 	}
 
 	//------------------------------------------------------
@@ -54,7 +54,6 @@ namespace Opde {
 	bool RoomService::init() {
 		return true;
 	}
-	
 	
 	//------------------------------------------------------
 	void RoomService::bootstrapFinished() {
@@ -77,13 +76,14 @@ namespace Opde {
 		}
 		
 		mRooms.clear();
+		mRoomsOk = false;
 	}
 	
 	//------------------------------------------------------
 	void RoomService::onDBLoad(const FileGroupPtr& db, uint32_t curmask) {
 		LOG_INFO("RoomService::onDBLoad called.");
 		
-		if (!(curmask & DBM_MIS_DATA))
+		if (!(curmask & DBM_OBJTREE_CONCRETE)) // May not be it but seems to fit
 			return;
 		
 		// to be sure
@@ -104,8 +104,11 @@ namespace Opde {
 		
 		if (!roomsOk) {
 			LOG_ERROR("RoomService: Database '%d' had RoomOK false", db->getName().c_str());
+			mRoomsOk = false;
 			return;
 		}
+		
+		mRoomsOk = true;
 		
 		*rdb >> count;
 		
@@ -135,11 +138,17 @@ namespace Opde {
 		if (!(tgtmask & DBM_MIS_DATA))
 			return;
 		
-		uint32_t roomsOk = 1;
+		uint32_t roomsOk = mRoomsOk ? 1 : 0;
 		uint32_t count = mRooms.size();
 		
+		if (!mRoomsOk)
+			count = 0;
+			
 		FilePtr rdb = db->getFile("ROOM_DB");
 		*rdb << roomsOk << count;
+		
+		if (!mRoomsOk)
+			return;
 		
 		for (size_t rn = 0; rn < count; ++rn) {
 			mRooms[rn]->write(rdb);

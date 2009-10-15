@@ -116,22 +116,34 @@ namespace Opde {
 		uint32_t num_lists = mIDLists.size();
 		*sf << num_lists;
 		
-        for (size_t li = 0; li < num_lists; ++li) {
+		for (size_t li = 0; li < num_lists; ++li) {
             // read the list
-            IDSet ids = mIDLists[li];
+			IDSet ids = mIDLists[li];
             
-            uint32_t count = ids.size();
-            *sf << count;
+			uint32_t count = ids.size();
+			*sf << count;
             
-            IDSet::iterator i = ids.begin();
+			IDSet::iterator i = ids.begin();
             
-            for (; i != ids.end(); ++i) {
-                int32_t id = *i;
-                *sf << id;
-            }
-        }
+			for (; i != ids.end(); ++i) {
+				int32_t id = *i;
+				*sf << id;
+			}
+		}
 	}
 	
+
+	//------------------------------------------------------
+	bool Room::isInside(const Ogre::Vector3& point) {
+		// iterate over all the planes. Have to have positive side
+		for (size_t i = 0; i < 6;++i) {
+			if (mPlanes[i].getSide(point) == Ogre::Plane::NEGATIVE_SIDE)
+				return false;
+			}
+		
+		return true;
+	}
+
 	//------------------------------------------------------
 	void Room::clear() {
 		mObjectID = 0;

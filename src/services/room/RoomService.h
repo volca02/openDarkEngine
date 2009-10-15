@@ -81,6 +81,9 @@ namespace Opde {
 			
 			/// Map of rooms by their ID
 			RoomsByID mRoomsByID;
+			
+			/// Indicates the room database is loaded/ok
+			bool mRoomsOk;
 	};
 
 	/// Shared pointer to Room service
