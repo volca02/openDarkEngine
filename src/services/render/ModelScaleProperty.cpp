@@ -58,7 +58,7 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	void ModelScaleProperty::removeProperty(int oid) {
-		// reinit to 1.0 - no transparency
+		// reinit to 1.0 - no scaling
 		setScale(oid, Vector3(1.0f, 1.0f, 1.0f));
 	};
 

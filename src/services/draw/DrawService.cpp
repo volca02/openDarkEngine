@@ -146,6 +146,7 @@ namespace Opde {
 
 		freeCurrentPal();
 	}
+
 	//------------------------------------------------------
 	DrawSheetPtr DrawService::createSheet(const std::string& sheetName) {
 		assert(!sheetName.empty());
