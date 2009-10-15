@@ -21,11 +21,13 @@
  *
  *****************************************************************************/
 
+
 #include "config.h"
+#include "bindings.h"
 
 #include "GameStateManager.h"
 #include "OpdeException.h"
-#include "bindings.h"
+
 
 #include <OgreException.h>
 

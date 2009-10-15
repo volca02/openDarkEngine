@@ -25,12 +25,13 @@
 #ifndef __BINDINGS_H
 #define __BINDINGS_H
 
+// this has to be the first one - _POSIX_C_SOURCE crazyness...
+#include <Python.h>
+
 #include "DVariant.h"
 #include "Root.h"
 #include "OpdeException.h"
 
-
-#include <Python.h>
 #include <OgreVector3.h>
 #include <OgreException.h>
 #include <traceback.h>

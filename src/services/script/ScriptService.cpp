@@ -22,11 +22,11 @@
  *
  *****************************************************************************/
 
+#include "bindings.h"
 #include "ServiceCommon.h"
 #include "ScriptService.h"
 #include "OpdeException.h"
 #include "logger.h"
-#include "bindings.h"
 
 #include <OgreDataStream.h>
 #include <OgreResourceGroupManager.h>
