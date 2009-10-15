@@ -121,10 +121,23 @@ namespace Opde {
 		mConfigSrv->setParamDescription("console_font_name", "Font file name of the base console font used for debugging");
 		mConfigSrv->setParamDescription("console_font_group", "Resource group of the base console font");
 		
-		mConsoleFontName = mConfigSrv->getParam("console_font_name");
-		mConsoleFontGroup = mConfigSrv->getParam("console_font_group");
-		// TODO: Do we need palette for the console font?
+		DVariant tmp;
+		mConsoleFontName = "font.fon";
 		
+		if (mConfigSrv->getParam("console_font_name", tmp)) {
+			mConsoleFontName = tmp.toString();
+		} else {
+			LOG_ERROR("console_font_name parameter not set, using default '%s'!", mConsoleFontName.c_str());
+		}
+		
+		mConsoleFontGroup = "General";
+		if (mConfigSrv->getParam("console_font_group", tmp)) {
+			mConsoleFontGroup = tmp.toString();
+		} else {
+			LOG_ERROR("console_font_group parameter not set, using default '%s'!", mConsoleFontGroup.c_str());
+		}
+
+		// TODO: Do we need palette for the console font?
 		mCoreAtlas = mDrawSrv->createAtlas();
 		mDrawSrv->setFontPalette(ManualFonFileLoader::ePT_Default);
 		mConsoleFont = mDrawSrv->loadFont(mCoreAtlas, mConsoleFontName, mConsoleFontGroup);
