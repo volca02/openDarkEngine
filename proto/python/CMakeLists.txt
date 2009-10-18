@@ -15,7 +15,6 @@ include_directories(
     ${PYTHON_INCLUDE_PATH}
     ${OPDE_SOURCE_DIR}/src/bindings
     ${OPDE_SOURCE_DIR}/src/scenemanager
-    ${OPDE_SOURCE_DIR}/thirdparty/QuickGUI/include
     ${OPDE_SOURCE_DIR}/src/main
     ${INCLUDE_ADDITION_CUSTOM_IMAGE}
 )

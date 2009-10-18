@@ -15,7 +15,6 @@ include_directories(
     ${PYTHON_INCLUDE_PATH}
     ${OPDE_SOURCE_DIR}/src/scenemanager
     ${OPDE_SOURCE_DIR}/src/main
-    ${OPDE_SOURCE_DIR}/thirdparty/QuickGUI/include
 )
 
 IF(STATIC_LIBS)
@@ -44,8 +43,6 @@ IF(STATIC_LIBS)
         GUIServiceBinder.h
         DatabaseServiceBinder.cpp
         DatabaseServiceBinder.h
-        QuickGUIBindings.cpp
-        QuickGUIBindings.h
         PythonStruct.h
         RootBinder.cpp
         RootBinder.h
