@@ -57,6 +57,7 @@ This file contains some global definitions common to all services
 #define __SERVICE_ID_SIM 18
 #define __SERVICE_ID_WORLDREP 19
 #define __SERVICE_ID_ROOM 20
+#define __SERVICE_ID_CAMERA 21
 
 // --------------------------------------
 // ---  Bitmasks for service masking  ---

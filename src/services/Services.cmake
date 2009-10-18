@@ -68,6 +68,7 @@ INCLUDE( ${OPDE_SOURCE_DIR}/src/services/render/config.cmake )
 INCLUDE( ${OPDE_SOURCE_DIR}/src/services/script/config.cmake )
 INCLUDE( ${OPDE_SOURCE_DIR}/src/services/sim/config.cmake )
 INCLUDE( ${OPDE_SOURCE_DIR}/src/services/worldrep/config.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/camera/config.cmake )
 
 # join the variables
 SET(OPDE_SERVICE_FILES ${OPDE_SERVICE_HEADERS})
