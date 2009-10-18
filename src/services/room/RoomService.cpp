@@ -27,6 +27,7 @@
 #include "OpdeException.h"
 #include "ServiceCommon.h"
 #include "logger.h"
+#include "RoomPortal.h"
 
 using namespace std;
 
@@ -48,6 +49,71 @@ namespace Opde {
 	//------------------------------------------------------
 	Room* RoomService::getRoomByID(int32_t id) {
 		return mRoomsByID[id];
+	}
+	
+	//------------------------------------------------------
+	Room* RoomService::findObjRoom(size_t idset, int objID, const Ogre::Vector3& pos) {
+		Room* r = roomFromPoint(pos);
+		
+		if (r) {
+			// re-assign the object
+			_detachObjRoom(idset, objID, NULL);
+			_attachObjRoom(idset, objID, r);
+		}
+		
+		return r;
+	}
+				
+	//------------------------------------------------------
+	Room* RoomService::roomFromPoint(const Ogre::Vector3& pos) {
+		// iterate through all rooms....
+		RoomsByID::iterator it, end = mRoomsByID.end();
+				
+		for (it = mRoomsByID.begin(); it != end; ++it) {
+			// are we there?
+			Room* r = it->second;
+			
+			if (r->isInside(pos))
+				return r;
+		}
+		
+		return NULL;
+	}
+	
+	//------------------------------------------------------
+	void RoomService::updateObjRoom(size_t idset, int objID, const Ogre::Vector3& pos) {
+		// suppose we have a room?
+		Room* r = getCurrentObjRoom(idset, objID);
+		
+		if (!r) {
+			r = findObjRoom(idset, objID, pos);
+			
+			// only broadcast the object entered the room
+			// TODO: Broadcast the obj. entered
+			return;
+		}
+		
+		// still in room?
+		if (r->isInside(pos))
+			return;
+		
+		// nope. propagate to other via portals?
+		RoomPortal* rp = r->getPortalForPoint(pos);
+		
+		if (rp) {
+			Room* newRoom = rp->getFarRoom();
+			
+			// Also not in the dest room?
+			if (!newRoom->isInside(pos)) {
+				newRoom = findObjRoom(idset, objID, pos);
+				// TODO: Broadcast the transition
+				return;
+			}
+			
+			_detachObjRoom(idset, objID, r);
+			_attachObjRoom(idset, objID, newRoom);
+		}
+		
 	}
 	
 	//------------------------------------------------------
@@ -163,6 +229,55 @@ namespace Opde {
 			return;
 		
 		clear();
+	}
+	
+	//------------------------------------------------------
+	void RoomService::_attachObjRoom(size_t idset, int objID, Room* room) {
+		assert(room);
+		LOG_VERBOSE("RoomService: IDset %u Object %d attaching (new room %d)", idset, objID, (int)room->getRoomID());
+		room->attachObj(idset, objID);
+		setCurrentObjRoom(idset, objID, room);
+		// TODO: listener notification	
+	}
+				
+	//------------------------------------------------------
+	void RoomService::_detachObjRoom(size_t idset, int objID, Room* current) {
+		if (!current)
+			current = getCurrentObjRoom(idset, objID);
+		
+		if (current) {
+			LOG_VERBOSE("RoomService: IDset %u Object %d detaching (old room %d)", idset, objID, (int)current->getRoomID());
+			
+			current->detachObj(idset, objID);
+			
+			if (mIDSets.size() > idset) {
+				mIDSets[idset].erase(objID);
+			}
+		}
+		// TODO: listener notification
+	}
+	
+	//------------------------------------------------------
+	Room* RoomService::getCurrentObjRoom(size_t idset, int objID) const {
+		// get the idset in question
+		if (mIDSets.size() > idset) {
+			RoomsByID::const_iterator it = mIDSets[idset].find(objID); 
+			
+			if (it != mIDSets[idset].end())
+				return it->second;
+		}	
+		
+		return NULL;
+	}
+	
+	//------------------------------------------------------
+	void RoomService::setCurrentObjRoom(size_t idset, int objID, Room* room) {
+		// ensure the idset exists
+		if (mIDSets.size() <= idset) {
+			mIDSets.resize(idset + 1);
+		}
+		
+		mIDSets[idset][objID] = room;
 	}
 
 	//-------------------------- Factory implementation

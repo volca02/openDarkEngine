@@ -49,7 +49,51 @@ namespace Opde {
 
 			Room* getRoomByID(int32_t id);
 			
+			/** Reassigns he object's room if a room is sucessfully found
+			 * @param idset The id set to use (typically 0-objects, 1-AI)
+			 * @param objID The id of the object to track down
+			 * @param pos The position of the object
+			 * @return Room pointer if room was found, NULL otherwise 
+			 */ 
+			Room* findObjRoom(size_t idset, int objID, const Ogre::Vector3& pos);
+			
+			/** Finds a room which encloses the specified point
+			 * @param pos The position to locate room for
+			 * @return Room pointer if the position is enclosed in a room, NULL otherwise 
+			 */
+			Room* roomFromPoint(const Ogre::Vector3& pos);
+			
+			/** Updates the object's room (preferably incrementally without doing room search)
+			 * @param idset The id set to use (typically 0-objects, 1-AI)
+			 * @param objID The id of the object to track down
+			 * @param pos The position of the object  
+			 */
+			void updateObjRoom(size_t idset, int objID, const Ogre::Vector3& pos);
+			
+			/** Attaches the specified object to a room instance
+			 * @param idset the object id set
+			 * @param objID the object to attach
+			 * @param room the room to attach the object to 
+			 * */
+			void _attachObjRoom(size_t idset, int objID, Room* room);
+			
+			/** Detaches the object from a room (be it attached to some)
+			 * @param idset the object id set
+			 * @param objID the object id to track down and detach 
+			 * @param current the current room, or NULL if it should be searched for
+			 */
+			void _detachObjRoom(size_t idset, int objID, Room* current = NULL);
+
+			/** Returns the current room the object is attached to
+			 * @param idset the object id set
+			 * @param objID the object id
+			 * @return Room pointer or NULL if the object is not attached
+			 * */
+			Room* getCurrentObjRoom(size_t idset, int objID) const;
+			
 		protected:
+			void setCurrentObjRoom(size_t idset, int objID, Room* room);
+			
 			// service related
 			bool init();
 			void bootstrapFinished();
@@ -69,9 +113,9 @@ namespace Opde {
 			* @see DatabaseListener::onDBDrop */
 			void onDBDrop(uint32_t dropmask);
 		
-		
 		private:
 			typedef std::map<int32_t, Room*> RoomsByID;
+			typedef std::vector<RoomsByID> ObjectIDSets;
 			
 			/// Database service
 			DatabaseServicePtr mDbService;
@@ -84,6 +128,9 @@ namespace Opde {
 			
 			/// Indicates the room database is loaded/ok
 			bool mRoomsOk;
+			
+			/// Sets of object id's
+			ObjectIDSets mIDSets;
 	};
 
 	/// Shared pointer to Room service

@@ -24,6 +24,7 @@
 
 #include "Room.h"
 #include "FileCompat.h"
+#include "RoomService.h"
 #include "RoomPortal.h"
 
 namespace Opde {
@@ -76,22 +77,22 @@ namespace Opde {
 		uint32_t num_lists;
 		*sf >> num_lists;
 		
-        for (size_t li = 0; li < num_lists; ++li) {
-            // read the list
-        	IDSet ids = IDSet();
-            
-            uint32_t count;
-            *sf >> count;
-            
-            for (size_t i = 0; i < count; ++i) {
-                int32_t id;
-                *sf >> id;
-                
-                ids.insert(id);
-            }
-            
+		for (size_t li = 0; li < num_lists; ++li) {
+			// read the list
+			IDSet ids = IDSet();
 			mIDLists.push_back(ids);
-        }
+            
+			uint32_t count;
+			*sf >> count;
+            
+			for (size_t i = 0; i < count; ++i) {
+				int32_t id;
+				*sf >> id;
+                
+				// indirect. RoomService will call us back...
+				mOwner->_attachObjRoom(li, id, this);
+			}
+		}
 	}
 	
 	//------------------------------------------------------
@@ -117,7 +118,7 @@ namespace Opde {
 		*sf << num_lists;
 		
 		for (size_t li = 0; li < num_lists; ++li) {
-            // read the list
+			// read the list
 			IDSet ids = mIDLists[li];
             
 			uint32_t count = ids.size();
@@ -143,7 +144,38 @@ namespace Opde {
 		
 		return true;
 	}
-
+	
+	//------------------------------------------------------
+	RoomPortal* Room::getPortalForPoint(const Ogre::Vector3& pos) {
+		for (size_t i = 0; i < mPortalCount; ++i) {
+			RoomPortal * rp = mPortals[i];
+			if (rp->isInside(pos))
+				return rp;
+		}
+		
+		return NULL;
+	}
+	
+	//------------------------------------------------------
+	void Room::attachObj(size_t idset, int id) {
+		// just verify if we have the idset handy
+		if (mIDLists.size() <= idset) {
+			mIDLists.resize(idset + 1);
+		}
+		
+		IDSet& ir = mIDLists[idset];
+		ir.insert(id);
+	}
+				
+	//------------------------------------------------------
+	void Room::detachObj(size_t idset, int id) {
+		if (mIDLists.size() <= idset) {
+			return;
+		} else {
+			mIDLists[idset].erase(id);
+		}
+	}
+	
 	//------------------------------------------------------
 	void Room::clear() {
 		mObjectID = 0;

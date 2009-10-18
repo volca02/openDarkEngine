@@ -43,10 +43,19 @@ namespace Opde {
 			RoomPortal(RoomService* owner);
 			~RoomPortal();
 			
+			/// reads the room portal from the specified file
 			void read(const FilePtr& sf);
+			
+			/// writes the room portal into the specified file
 			void write(const FilePtr& sf);
 			
 			bool isInside(const Ogre::Vector3& point);
+			
+			/// getter for the room that is the target of this portal
+			inline Room* getFarRoom() const { return mDestRoom; };
+			
+			/// getter for the room that is the source for this portal
+			inline Room* getNearRoom() const { return mSrcRoom; };
 
 		private:
 			void clear();

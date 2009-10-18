@@ -54,6 +54,23 @@ namespace Opde {
 			int16_t getRoomID() const { return mRoomID; };
 			
 			bool isInside(const Ogre::Vector3& point);
+			
+			/** Gets portal for a given position
+			 * @param pos The position to find portal for
+			 * @return RoomPortal for the given point, or NULL if none found */
+			RoomPortal* getPortalForPoint(const Ogre::Vector3& pos);
+			
+			/** Attaches the given object to the room (into specified id set)
+			 *  @param idset the id set to use (0/1 typically)
+			 *  @param id the object id to attach
+			 */
+			void attachObj(size_t idset, int id);
+			
+			/** Detaches the given object from the room (into specified id set)
+			 *  @param idset the id set to use (0/1 typically)
+			 *  @param id the object id to detach
+			 */
+			void detachObj(size_t idset, int id);
 
 		private:
 			/// clears the room into an empty state, drops all allocations
