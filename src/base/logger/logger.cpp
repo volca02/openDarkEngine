@@ -23,6 +23,7 @@
 
 
 #include "logger.h"
+#include <stdio.h>
 #include <iostream>
 #include <cstdarg>
 #include <sstream>
