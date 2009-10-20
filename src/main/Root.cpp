@@ -51,6 +51,7 @@
 #include "LightService.h"
 #include "DrawService.h"
 #include "RoomService.h"
+#include "GUIService.h"
 
 // base
 #include "ManualBinFileLoader.h"
@@ -302,6 +303,7 @@ namespace Opde {
 		new MaterialServiceFactory();
 		new DrawServiceFactory();
 		new RoomServiceFactory();
+		// new GUIServiceFactory();
 	}
 
 	// -------------------------------------------------------
