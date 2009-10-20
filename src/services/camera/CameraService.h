@@ -30,14 +30,16 @@
 
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
+#include "InputService.h"
 #include "RenderService.h"
+#include "SimService.h"
 #include "SharedPtr.h"
 
 namespace Opde {
 
 	/** @brief camera service. Service that handles in-game camera
 	*/
-	class OPDELIB_EXPORT CameraService : public ServiceImpl<CameraService> {
+	class OPDELIB_EXPORT CameraService : public ServiceImpl<CameraService>, public SimListener {
 		public:
 			CameraService(ServiceManager *manager, const std::string& name);
 			virtual ~CameraService();
@@ -59,8 +61,52 @@ namespace Opde {
 			/** Returns (unconditionally) the camera to the player object. */
 			void forceCameraReturn();
 			
+			// sim service listener:
+			virtual void simPaused();
+			virtual void simUnPaused();
+			virtual void simStep(float simTime, float delta);
+			
+			
 		protected:
 			bool init();
+			void bootstrapFinished();
+			void shutdown();
+			
+			// input listeners
+			
+			/// Input callback. Called upon mouse left/right (X axis) movement
+			void onMTurn(const InputEventMsg& iem);
+			
+			/// Input callback. Called upon mouse up/down (Y axis) movement
+			void onMLook(const InputEventMsg& iem);
+			
+			// schedules a camera rotation. The given values are not scaled by time
+			void appendCameraRotation(float horizontal, float vertical);
+			
+		private:
+			/// Input service ptr
+			InputServicePtr mInputSrv;
+			
+			/// Render service ptr
+			RenderServicePtr mRenderSrv;
+			
+			/// Simulation service ptr
+			SimServicePtr mSimSrv;
+			
+			/// Object service ptr
+			ObjectServicePtr mObjSrv;
+			
+			float mHorizontalRot;
+			float mVerticalRot;
+			
+			/// paused flag (if paused, all rotation is discarded)
+			bool mPaused;
+			
+			/// object we're attached to, or zero if none
+			int mAttachmentObject;
+			
+			/// true means we allow the camera to rotate the object (no meaning if no attachment is done)
+			bool mDynamicAttach;
 	};
 
 	/// Shared pointer to Camera service

@@ -142,6 +142,12 @@ priorities (not necessary unique) for the database service listeners
 // Renderer last
 #define LOOPCLIENT_PRIORITY_RENDERER 1024
 
+
+// ---------------------------------------------
+// --- Sim service priority list ---------------
+// ---------------------------------------------
+#define SIM_PRIORITY_INPUT 1
+
 // TODO: Forward decl. anything service related here to shorten the compilation time (in combination with header inclusion removal...)
 
 #endif
