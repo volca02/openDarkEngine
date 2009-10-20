@@ -160,6 +160,11 @@ SET_TARGET_PROPERTIES( opdeMain PROPERTIES
   COMPILE_DEFINITIONS "OPDE_EXE_TARGET"
 )
 
+install(TARGETS opdeMain OpenDark
+	RUNTIME DESTINATION ${OPDE_BINARY_INSTALL_DIR}
+	LIBRARY DESTINATION ${OPDE_LIBRARY_INSTALL_DIR}
+)
+
 # Script executor executable
 add_executable (opdeScript
     OpdeScript.cpp

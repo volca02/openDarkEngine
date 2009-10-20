@@ -26,6 +26,10 @@ SET(OPDE_VER_MINOR "3")
 SET(OPDE_VER_PATCH "0")
 SET(REL_CODE_NAME  "El Motor Oscuro")
 
+# for installation - directories with version in them (/usr/share/... etc.)
+SET(OPDE_SHORTNAME_WITH_VERSION "${CMAKE_PROJECT_NAME}-${OPDE_VER_MAJOR}.${OPDE_VER_MINOR}")
+MARK_AS_ADVANCED(OPDE_SHORTNAME_WITH_VERSION)
+
 # Build type selection. Use ccmake for selection of this (or the commandline switches)
 # Default build type
 IF (NOT CMAKE_BUILD_TYPE)
@@ -64,6 +68,16 @@ MARK_AS_ADVANCED(STATIC_LIBS)
 OPTION(PYTHON_MODULE
     "Build the python module version of the OpenDark library"
     OFF)
+
+# Installation directories
+# SET(OPDE_BINARY_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/bin")
+SET(OPDE_BINARY_INSTALL_DIR "bin")
+MARK_AS_ADVANCED(OPDE_BINARY_INSTALL_DIR)
+# SET(OPDE_LIBRARY_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+# TODO: lib64?
+SET(OPDE_LIBRARY_INSTALL_DIR "lib")
+MARK_AS_ADVANCED(OPDE_LIBRARY_INSTALL_DIR)
+
 
 # Compiler profiling flags
 IF (PROFILING)
@@ -254,9 +268,17 @@ add_subdirectory (src)
 add_subdirectory (proto)
 add_subdirectory (thirdparty)
 
+# TODO: We have to redo the doc generation as a custom target
+
+# Additional fake_install dependencies
+SET(OPDE_DOC_INST_DEPS "")
+MARK_AS_ADVANCED(OPDE_DOC_INST_DEPS)
+
 # Generate the doxyfile if selected as an option
 # TODO: This will most certainly fail on windows due to the fact we use unix commands.
 IF (GENERATE_DOC AND DOC_DEPS_SATISFIED)
+    SET(OPDE_DOC_DIR share/${OPDE_SHORTNAME_WITH_VERSION})
+
     # Generate the doxyfile from the template file
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
                       ${CMAKE_BINARY_DIR}/Doxyfile)
@@ -264,53 +286,52 @@ IF (GENERATE_DOC AND DOC_DEPS_SATISFIED)
     # Now prepare the python doc. generator
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/writedoc.py.in
                       ${CMAKE_BINARY_DIR}/writedoc.py)
-                
-    # generates the Doxygen docs.
-    ADD_CUSTOM_COMMAND(
-    OUTPUT ${CMAKE_BINARY_DIR}/doc/main/html/index.html
-    COMMAND rm -rf ${CMAKE_BINARY_DIR}/doc/main/html
-    COMMAND mkdir -p ${CMAKE_BINARY_DIR}/doc/main/html
-    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
-    )
     
-    # generates the Python docs.
-    ADD_CUSTOM_COMMAND(
-    OUTPUT ${CMAKE_BINARY_DIR}/doc/python/html/index.html
-    COMMAND rm -rf ${CMAKE_BINARY_DIR}/doc/python/html
-    COMMAND mkdir -p ${CMAKE_BINARY_DIR}/doc/python/html
-    COMMAND ${CMAKE_BINARY_DIR}/src/main/opdeScript ${CMAKE_BINARY_DIR}/writedoc.py
-    )
-    
-    # generates the Developers manual
-    ADD_CUSTOM_COMMAND(
-    OUTPUT ${CMAKE_BINARY_DIR}/doc/manual/index.html
-    COMMAND rm -rf ${CMAKE_BINARY_DIR}/doc/manual
-    COMMAND mkdir -p ${CMAKE_BINARY_DIR}/doc/manual
-    COMMAND sh ${CMAKE_CURRENT_SOURCE_DIR}/doc/src/buildmanual.sh ${CMAKE_CURRENT_SOURCE_DIR}/doc/src/ ${CMAKE_BINARY_DIR}/doc/manual/
-    )
-    
-    # Copies various common files
-    ADD_CUSTOM_COMMAND(
-    OUTPUT ${CMAKE_BINARY_DIR}/doc/style.css
-    COMMAND cp ${CMAKE_CURRENT_SOURCE_DIR}/doc/style.css ${CMAKE_BINARY_DIR}/doc/style.css
-    )
-    
-    # TODO: property/link docs (maybe part of the writedoc.py?)
- 
+    # doxygen make target
     IF (DOXYGEN_EXECUTABLE)
-    ADD_CUSTOM_TARGET(docs ALL
-        DEPENDS
-            opdeScript
-	opdeDocGen
-        ${CMAKE_BINARY_DIR}/doc/main/html/index.html
-        ${CMAKE_BINARY_DIR}/doc/python/html/index.html
-        ${CMAKE_BINARY_DIR}/doc/manual/index.html
-        ${CMAKE_BINARY_DIR}/doc/style.css
-        ${DOXYGEN_EXECUTABLE}
-    )
+    	ADD_CUSTOM_TARGET(doc ALL
+        	COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
+		COMMENT "Building doxygen documentation" VERBATIM
+#		SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/doxyfile.in
+	)
     ELSE (DOXYGEN_EXECUTABLE)
     	MESSAGE("Warning: Doxygen not found, docs target disabled.")
     ENDIF (DOXYGEN_EXECUTABLE)
+        
+    # generates the Python docs.
+    ADD_CUSTOM_TARGET(pydoc ALL
+    	DEPENDS opdeScript
+        COMMAND ${CMAKE_BINARY_DIR}/src/main/opdeScript ${CMAKE_BINARY_DIR}/writedoc.py
+	COMMENT "Building Python API documentation" VERBATIM
+#	SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/writedoc.py.in
+    )
+ 
+    MARK_AS_ADVANCED(MANUAL_BUILDER)
+    # on win32 we use the buildmanual.bat, otherwise we use the buildmanual.sh
+    IF(WIN32)
+    	SET(MANUAL_BUILDER "${CMAKE_CURRENT_SOURCE_DIR}/doc/src/buildmanual.bat")
+    ELSE(WIN32)
+       	SET(MANUAL_BUILDER "/bin/sh" "${CMAKE_CURRENT_SOURCE_DIR}/doc/src/buildmanual.sh")
+    ENDIF(WIN32)
+    
+    # generates the Developers manual
+    ADD_CUSTOM_TARGET(manual ALL
+        COMMAND ${MANUAL_BUILDER} ${CMAKE_CURRENT_SOURCE_DIR}/doc/src/ ${CMAKE_BINARY_DIR}/doc/manual/
+	COMMENT "Building developer's manual" VERBATIM
+#	SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/doc/src/manual.texi
+    )
+
+    # Copy various common files (style.css so far)
+    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/style.css
+                      ${CMAKE_BINARY_DIR}/doc/style.css)
+    
+    # TODO: property/link docs (maybe part of the writedoc.py?)
+
+    # Install directives for the documentation
+    INSTALL(DIRECTORY ${OPDE_BINARY_DIR}/doc DESTINATION ${OPDE_DOC_DIR})
+
+    # additional fake_install deps
+    SET(OPDE_DOC_INST_DEPS "doc" "pydoc" "manual")
 ENDIF (GENERATE_DOC AND DOC_DEPS_SATISFIED)
 
 IF (GENERATE_NSIS)
@@ -318,6 +339,14 @@ IF (GENERATE_NSIS)
                       ${CMAKE_BINARY_DIR}/installer/opde-win.nsi @ONLY)
         MESSAGE(STATUS "Installer script was generated in ${CMAKE_BINARY_DIR}/installer.")
 ENDIF (GENERATE_NSIS)        
+
+# Optional testing local install (not automatic, use "make fake_install")
+ADD_CUSTOM_TARGET(fake_install 
+    "${CMAKE_COMMAND}" 
+    -D CMAKE_INSTALL_PREFIX:string=${CMAKE_CURRENT_BINARY_DIR}/fake_install/${CMAKE_INSTALL_PREFIX}
+    -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_install.cmake" 
+#    DEPENDS opdeMain OpenDark ${OPDE_DOC_INST_DEPS} 
+) 
 
 MESSAGE(STATUS "Your configuration seems to be OK!")
 
