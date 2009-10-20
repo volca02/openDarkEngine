@@ -426,11 +426,15 @@ namespace Ogre {
         if (mSkeleton.isNull())
             OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "No skeleton given prior to build!", "SubMeshFiller::build");
 
+        mSubMesh->operationType = RenderOperation::OT_TRIANGLE_LIST;
+
         mSubMesh->useSharedVertices = false;
 
         mSubMesh->vertexData = new VertexData();
 
         mSubMesh->vertexData->vertexCount = mVertexList.size();
+	
+        mSubMesh->setBuildEdgesEnabled(true);
 
         VertexDeclaration* decl = mSubMesh->vertexData->vertexDeclaration;
 
