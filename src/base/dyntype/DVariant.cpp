@@ -30,6 +30,7 @@ namespace Opde {
 	/*------------------------------------------------------*/
 	/*-------------------- DVariant ------------------------*/
 	/*------------------------------------------------------*/
+	const DVariant DVariant::INVALID = DVariant();
 
 	DVariant::DVariant() {
 		mPrivate.isShared = false;

@@ -247,6 +247,10 @@ namespace Opde {
 				Type type : 31;
 				unsigned int isShared : 1;
 			};
+			
+			
+			// A const invalid dvariant. Can be used as a shortcut to be able to return const dvariant references
+			static const DVariant INVALID;
 
 		protected:
 			/** Helper conversion routine : Vector3 from string
