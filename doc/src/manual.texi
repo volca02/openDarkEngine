@@ -7,7 +7,7 @@
 @copying
 This manual is for openDarkEngine (version @value{VERSION}, @value{UPDATED})
 
-Copyright @copyright{} 2005-2006 OpenDarkEngine team.
+Copyright @copyright{} 2005-2009 OpenDarkEngine team.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -49,7 +49,27 @@ This is the main developer's manual for OpenDarkEngine
 * Directory structure:: The directory structure of the source code
 * Dark Engine's core concepts:: The key concepts found in Dark Engine, definition of terms
 * Services::          The available services
-@c Not used roght now - * Index::             Complete index.
+* Input Service::
+* Binary Service::
+* Database Service::
+* Object Service::
+* Link Service::
+* Property Service::
+* Inherit Service::
+* MetaProperty::
+* WorldRep Service::
+* Light Service::
+* Material Service::
+* Render Service::
+* Draw Service::
+* Sim Service::
+* Config Service::
+* Loop Service::
+* Script Service::
+* DType::	Language explanation
+* PLDef::	Language explanation
+* Index::
+@c Not used right now - * Index::             Complete index.
 @end menu
 
 
@@ -377,6 +397,8 @@ This is the current list of engine's services, divided by categories, and classi
 	Will handle tweqs - time-related changes of objects (Scaling, rotation, etc).
 @item @ref{Script Service} - 1%
 	Script interfacing service. Manages loading/unloading of script modules, script instantization and event translation.
+@item Camera Service - 10%
+	A camera handling service. Is responsible for camera to object attachments and player view handling.
 @end table
 
 @c --------------------------------------------------------------------
@@ -452,7 +474,15 @@ The tag file databases have typically extensions .mis, .gam or .sav (among other
 
 @image{img/objsvc}
 
-Is implementation of the Object System.
+This is implementation of the Object System core. This service manages the objects themselves. It is able to create and destroy objects,
+manage concrete object's position/orientation values, map and unmap metaproperties by their name, etc.
+
+@heading MetaProperties
+@cindex MetaProperties
+
+What is a metaproperty? It is a special kind of object fragment, inherited via @ref{MetaProperty} link with a nonzero value.
+It attaches(via inheritance) new properties to an object or masks the properties previously inherited from archetypes of that objects. 
+As a result, the objects change their behavior.
 
 @heading Implemented properties
 
@@ -516,6 +546,7 @@ This service handles the MetaProp link. Contains named factories for different @
 	Never - This inheritor never inherits - it is used for things which are unique to both archetypes and concretes (Symbolic Name, donor type).
 @end itemize
 
+@node MetaProperty
 @cindex MetaProperty
 @subheading MetaProperty
 MetaProp link carries one unsigned integer as data (priority). If the value of it is zero, the link implements archetype inheritance. Nonzero links are MetaProperty links, and each of them has different priority. 
