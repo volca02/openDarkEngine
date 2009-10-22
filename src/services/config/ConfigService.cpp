@@ -180,7 +180,6 @@ namespace Opde {
 	std::string ConfigServiceFactory::mName = "ConfigService";
 
 	ConfigServiceFactory::ConfigServiceFactory() : ServiceFactory() {
-		ServiceManager::getSingleton().addServiceFactory(this);
 	};
 
 	const std::string& ConfigServiceFactory::getName() {

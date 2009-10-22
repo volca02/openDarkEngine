@@ -1016,7 +1016,6 @@ namespace Opde {
 
 	InputServiceFactory::InputServiceFactory() : ServiceFactory()
 	{
-		ServiceManager::getSingleton().addServiceFactory(this);
 	}
 
 	const std::string& InputServiceFactory::getName() 

@@ -875,7 +875,6 @@ namespace Opde {
 	std::string RenderServiceFactory::mName = "RenderService";
 
 	RenderServiceFactory::RenderServiceFactory() : ServiceFactory() {
-		ServiceManager::getSingleton().addServiceFactory(this);
 	};
 
 	const std::string& RenderServiceFactory::getName() {

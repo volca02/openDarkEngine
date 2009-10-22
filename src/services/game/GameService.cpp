@@ -58,7 +58,6 @@ namespace Opde {
 	std::string GameServiceFactory::mName = "GameService";
 
 	GameServiceFactory::GameServiceFactory() : ServiceFactory() {
-		ServiceManager::getSingleton().addServiceFactory(this);
 	};
 
 	const std::string& GameServiceFactory::getName() {

@@ -162,8 +162,14 @@ namespace Opde {
 		delete mPLDefScriptCompiler;
 
 		// Archive manager has no way to remove the archive factories...
-
 		delete mServiceMgr;
+		
+		// delete all the service factories
+		ServiceFactoryList::iterator sit = mServiceFactories.begin();
+
+		while (sit != mServiceFactories.end()) {
+			delete *sit++;
+		}
 
 		delete mConsoleBackend;
 
@@ -276,34 +282,30 @@ namespace Opde {
 
 	// -------------------------------------------------------
 	void Root::registerServiceFactories() {
-		// register all the service factories
-		// The factories are deleted in service manager
-
-		// TODO: WE ALL KNOW this is VERY WRONG way to work with memory allocation
-
-		/* The right way would be for example:
-		1. ServiceFactoryPtr - shared_ptr<ServiceFactory>;
-		2. Work everywhere with the shared_ptr instead
-		*/
-
-		new WorldRepServiceFactory();
-		new BinaryServiceFactory();
-		new GameServiceFactory();
-		new PhysicsServiceFactory();
-		new ConfigServiceFactory();
-		new LinkServiceFactory();
-		new PropertyServiceFactory();
-		new InheritServiceFactory();
-		new RenderServiceFactory();
-		new DatabaseServiceFactory();
-		new InputServiceFactory();
-		new LoopServiceFactory();
-		new ObjectServiceFactory();
-		new LightServiceFactory();
-		new MaterialServiceFactory();
-		new DrawServiceFactory();
-		new RoomServiceFactory();
-		// new GUIServiceFactory();
+		mServiceFactories.push_back(new WorldRepServiceFactory());
+		mServiceFactories.push_back(new BinaryServiceFactory());
+		mServiceFactories.push_back(new GameServiceFactory());
+		mServiceFactories.push_back(new PhysicsServiceFactory());
+		mServiceFactories.push_back(new ConfigServiceFactory());
+		mServiceFactories.push_back(new LinkServiceFactory());
+		mServiceFactories.push_back(new PropertyServiceFactory());
+		mServiceFactories.push_back(new InheritServiceFactory());
+		mServiceFactories.push_back(new RenderServiceFactory());
+		mServiceFactories.push_back(new DatabaseServiceFactory());
+		mServiceFactories.push_back(new InputServiceFactory());
+		mServiceFactories.push_back(new LoopServiceFactory());
+		mServiceFactories.push_back(new ObjectServiceFactory());
+		mServiceFactories.push_back(new LightServiceFactory());
+		mServiceFactories.push_back(new MaterialServiceFactory());
+		mServiceFactories.push_back(new DrawServiceFactory());
+		mServiceFactories.push_back(new RoomServiceFactory());
+		// mServiceFactories.push_back(new GUIServiceFactory());
+		
+		ServiceFactoryList::iterator it = mServiceFactories.begin();
+		
+		while (it != mServiceFactories.end()) {
+			mServiceMgr->addServiceFactory(*it++);
+		}
 	}
 
 	// -------------------------------------------------------

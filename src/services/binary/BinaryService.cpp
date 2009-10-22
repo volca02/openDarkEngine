@@ -193,7 +193,6 @@ namespace Opde {
 	std::string BinaryServiceFactory::mName = "BinaryService";
 
 	BinaryServiceFactory::BinaryServiceFactory() : ServiceFactory() {
-		ServiceManager::getSingleton().addServiceFactory(this);
 	};
 
 	const std::string& BinaryServiceFactory::getName() {

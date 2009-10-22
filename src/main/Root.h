@@ -120,6 +120,7 @@ namespace Opde {
 			PLDefScriptCompiler* mPLDefScriptCompiler;
 			
 			typedef std::list< LogListener* > LogListenerList;
+			typedef std::list< ServiceFactory* > ServiceFactoryList;
 			
 			
 			LogListenerList mLogListeners;
@@ -139,6 +140,9 @@ namespace Opde {
 			// If ogre is not used, these point to particular managers we hijack
 			Ogre::ResourceGroupManager* mResourceGroupManager;
 			Ogre::ArchiveManager* mArchiveManager;
+			
+			// list of all service factories (for deletion in destructor)
+			ServiceFactoryList mServiceFactories;
 	};
 	
 } // namespace Opde

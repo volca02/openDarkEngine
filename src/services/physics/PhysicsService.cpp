@@ -70,7 +70,6 @@ namespace Opde {
 	std::string PhysicsServiceFactory::mName = "PhysicsService";
 
 	PhysicsServiceFactory::PhysicsServiceFactory() : ServiceFactory() {
-		ServiceManager::getSingleton().addServiceFactory(this);
 	};
 
 	const std::string& PhysicsServiceFactory::getName() {

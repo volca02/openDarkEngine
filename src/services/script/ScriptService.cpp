@@ -133,8 +133,7 @@ namespace Opde {
 	std::string ScriptServiceFactory::mName = "ScriptService";
 
 	ScriptServiceFactory::ScriptServiceFactory() : ServiceFactory() {
-		ServiceManager::getSingleton().addServiceFactory(this);
-	};
+	}
 
 	const std::string& ScriptServiceFactory::getName() {
 		return mName;

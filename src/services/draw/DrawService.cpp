@@ -737,7 +737,6 @@ namespace Opde {
 	std::string DrawServiceFactory::mName = "DrawService";
 
 	DrawServiceFactory::DrawServiceFactory() : ServiceFactory() {
-		ServiceManager::getSingleton().addServiceFactory(this);
 	};
 
 	const std::string& DrawServiceFactory::getName() {

@@ -379,8 +379,7 @@ namespace Opde {
 
 	WorldRepServiceFactory::WorldRepServiceFactory() :
 		ServiceFactory() {
-		ServiceManager::getSingleton().addServiceFactory(this);
-	};
+	}
 
 	Service* WorldRepServiceFactory::createInstance(ServiceManager* manager) {
 		return new WorldRepService(manager, mName);

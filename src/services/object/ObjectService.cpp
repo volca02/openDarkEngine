@@ -668,7 +668,6 @@ namespace Opde {
 	std::string ObjectServiceFactory::mName = "ObjectService";
 
 	ObjectServiceFactory::ObjectServiceFactory() : ServiceFactory() {
-		ServiceManager::getSingleton().addServiceFactory(this);
 	};
 
 	const std::string& ObjectServiceFactory::getName() {

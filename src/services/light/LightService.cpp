@@ -379,10 +379,8 @@ namespace Opde {
 
 	LightServiceFactory::LightServiceFactory() :
 		ServiceFactory() {
-		ServiceManager::getSingleton().addServiceFactory(this);
 	}
-	;
-
+	
 	const std::string& LightServiceFactory::getName() {
 		return mName;
 	}

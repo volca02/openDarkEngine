@@ -326,7 +326,6 @@ namespace Opde {
 	std::string LoopServiceFactory::mName = "LoopService";
 
 	LoopServiceFactory::LoopServiceFactory() : ServiceFactory() {
-		ServiceManager::getSingleton().addServiceFactory(this);
 	};
 
 	const std::string& LoopServiceFactory::getName() {

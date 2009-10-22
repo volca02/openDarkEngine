@@ -214,7 +214,6 @@ namespace Opde {
 	std::string CameraServiceFactory::mName = "CameraService";
 
 	CameraServiceFactory::CameraServiceFactory() : ServiceFactory() {
-		ServiceManager::getSingleton().addServiceFactory(this);
 	};
 
 	const std::string& CameraServiceFactory::getName() {

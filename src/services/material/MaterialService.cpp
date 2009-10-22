@@ -765,9 +765,7 @@ namespace Opde {
 
 	MaterialServiceFactory::MaterialServiceFactory() :
 		ServiceFactory() {
-		ServiceManager::getSingleton().addServiceFactory(this);
 	}
-	;
 
 
 	//------------------------------------------------------

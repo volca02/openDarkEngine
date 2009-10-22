@@ -214,8 +214,7 @@ namespace Opde {
 	std::string SimServiceFactory::mName = "SimService";
 
 	SimServiceFactory::SimServiceFactory() : ServiceFactory() {
-		ServiceManager::getSingleton().addServiceFactory(this);
-	};
+	}
 
 	const std::string& SimServiceFactory::getName() {
 		return mName;

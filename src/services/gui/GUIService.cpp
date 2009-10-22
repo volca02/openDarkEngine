@@ -299,7 +299,6 @@ namespace Opde {
 	std::string GUIServiceFactory::mName = "GUIService";
 
 	GUIServiceFactory::GUIServiceFactory() : ServiceFactory() {
-		ServiceManager::getSingleton().addServiceFactory(this);
 	};
 
 	const std::string& GUIServiceFactory::getName() {

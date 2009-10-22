@@ -470,7 +470,6 @@ namespace Opde {
 	std::string InheritServiceFactory::mName = "InheritService";
 
 	InheritServiceFactory::InheritServiceFactory() : ServiceFactory() {
-		ServiceManager::getSingleton().addServiceFactory(this);
 	};
 
 	const std::string& InheritServiceFactory::getName() {

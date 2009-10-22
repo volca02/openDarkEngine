@@ -284,8 +284,7 @@ namespace Opde {
 	std::string RoomServiceFactory::mName = "RoomService";
 
 	RoomServiceFactory::RoomServiceFactory() : ServiceFactory() {
-		ServiceManager::getSingleton().addServiceFactory(this);
-	};
+	}
 
 	const std::string& RoomServiceFactory::getName() {
 		return mName;

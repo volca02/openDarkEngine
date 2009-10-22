@@ -85,15 +85,7 @@ namespace Opde {
 		mServiceInstances.clear();
 		LOG_DEBUG("ServiceManager: Services released");
 
-		// delete all factories registered
-
-		LOG_DEBUG("ServiceManager: Deleting all service factories");
-		for (size_t idx = 0; idx < mServiceFactories.size(); ++idx) {
-			delete mServiceFactories[idx];
-		}
-
 		mServiceFactories.clear();
-		LOG_DEBUG("ServiceManager: Service factories deleted");
 	}
 
 	ServiceManager& ServiceManager::getSingleton(void) {

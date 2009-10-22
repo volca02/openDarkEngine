@@ -339,7 +339,6 @@ namespace Opde {
 	std::string DatabaseServiceFactory::mName = "DatabaseService";
 
 	DatabaseServiceFactory::DatabaseServiceFactory() : ServiceFactory() {
-		ServiceManager::getSingleton().addServiceFactory(this);
 	};
 
 	const std::string& DatabaseServiceFactory::getName() {

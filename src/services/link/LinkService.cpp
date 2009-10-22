@@ -408,7 +408,6 @@ namespace Opde {
 	std::string LinkServiceFactory::mName = "LinkService";
 
 	LinkServiceFactory::LinkServiceFactory() : ServiceFactory() {
-		ServiceManager::getSingleton().addServiceFactory(this);
 	};
 
 	const std::string& LinkServiceFactory::getName() {
