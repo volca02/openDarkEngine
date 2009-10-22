@@ -79,7 +79,7 @@ namespace Opde {
 		RenderWindowSize size;
 	};
 
-	/// A package of an entity and a EntityMaterialInstance
+	/** Entity property realization object. A package of an entity and a EntityMaterialInstance. Realizes all the per-object rendering related properties. All the property handlers(of RenderedProperty class) use this class to make the property values visible. */
 	class EntityInfo {
 		public:
 			EntityInfo(Ogre::SceneManager* man, Ogre::Entity* entity, Ogre::SceneNode* node);
