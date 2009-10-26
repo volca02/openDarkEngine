@@ -1,3 +1,696 @@
+2009-10-22 10:33  volca
+
+	* src/services/render/RenderService.h: A slightly more explaining
+	  doxy for EntityInfo
+
+2009-10-22 10:31  volca
+
+	* src/base/servicemanager/OpdeServiceManager.cpp,
+	  src/main/Root.cpp, src/main/Root.h,
+	  src/services/binary/BinaryService.cpp,
+	  src/services/camera/CameraService.cpp,
+	  src/services/config/ConfigService.cpp,
+	  src/services/database/DatabaseService.cpp,
+	  src/services/draw/DrawService.cpp,
+	  src/services/game/GameService.cpp,
+	  src/services/gui/GUIService.cpp,
+	  src/services/inherit/InheritService.cpp,
+	  src/services/input/InputService.cpp,
+	  src/services/light/LightService.cpp,
+	  src/services/link/LinkService.cpp,
+	  src/services/loop/LoopService.cpp,
+	  src/services/material/MaterialService.cpp,
+	  src/services/object/ObjectService.cpp,
+	  src/services/physics/PhysicsService.cpp,
+	  src/services/property/PropertyService.cpp,
+	  src/services/render/RenderService.cpp,
+	  src/services/room/RoomService.cpp,
+	  src/services/script/ScriptService.cpp,
+	  src/services/sim/SimService.cpp,
+	  src/services/worldrep/WorldRepService.cpp: Cleaning up the
+	  ServiceFactory allocation mess (Applying "you allocate, you
+	  delete" rule)
+
+2009-10-22 10:07  volca
+
+	* Doxyfile.in: upgrading doxygen config file. Also switching off
+	  some insanely large (amount of) graphs it produced before (collab
+	  graph and call graphs namely)
+
+2009-10-20 19:51  volca
+
+	* doc/src/manual.texi: Some improvements to the manual
+
+2009-10-20 14:31  volca
+
+	* src/main/Root.cpp: Adding gui service (but commented so far
+	  because it blocks input)
+
+2009-10-20 14:25  volca
+
+	* src/base/loaders/ManualBinFileLoader.cpp: seems not to help the
+	  stencil shadows, but I want it here for reference still
+
+2009-10-20 14:23  volca
+
+	* src/services/ServiceCommon.h, src/services/Services.cmake,
+	  src/services/camera/CameraService.cpp,
+	  src/services/camera/CameraService.h: some trivial work on camera
+	  service. Far from finished still, but should shed a bit of light
+
+2009-10-20 14:21  volca
+
+	* CMakeLists.txt, Doxyfile.in, src/main/CMakeLists.txt: *
+	  documentation now optional make target. Doc building should thus
+	  work on win32 but that was not tested yet
+	  * some work on install directives. Far from complete - we need
+	  platform service for example
+
+2009-10-20 14:19  volca
+
+	* src/base/dyntype/DVariant.cpp, src/base/dyntype/DVariant.h:
+	  adding an invalid dvariant for easy const dvariant& ref returns
+
+2009-10-18 18:53  volca
+
+	* src/services/ServiceCommon.h, src/services/Services.cmake,
+	  src/services/camera, src/services/camera/CameraService.cpp,
+	  src/services/camera/CameraService.h,
+	  src/services/camera/config.cmake: adding camera service stub
+
+2009-10-18 18:38  volca
+
+	* proto/python/CMakeLists.txt, src/bindings/CMakeLists.txt,
+	  src/main/CMakeLists.txt: Some obsolete references to QuickGUI
+	  removed
+
+2009-10-18 17:35  volca
+
+	* src/base/logger/logger.cpp: missed this - for some reason stdio
+	  was included somewhere and now isn't, which caused vsnprintf not
+	  to be indentified... Fixing
+
+2009-10-18 17:26  volca
+
+	* src/services/room/Room.cpp, src/services/room/Room.h,
+	  src/services/room/RoomPortal.h,
+	  src/services/room/RoomService.cpp,
+	  src/services/room/RoomService.h: object->room tracking
+	  implemented
+
+2009-10-15 20:08  volca
+
+	* src/services/draw/DrawService.cpp,
+	  src/services/render/ModelScaleProperty.cpp: formatting
+
+2009-10-15 20:07  volca
+
+	* src/services/gui/GUIService.cpp: this failed on an unset config
+	  key. Fixed
+
+2009-10-15 19:58  volca
+
+	* src/bindings/bindings.h, src/main/OpdeScript.cpp,
+	  src/services/script/ScriptService.cpp: Fixing the _POSIX_C_SOURCE
+	  warning that sourced from python and the need to have it's header
+	  as the first one in the list
+
+2009-10-15 19:57  volca
+
+	* src/services/room/Room.cpp, src/services/room/Room.h,
+	  src/services/room/RoomPortal.cpp, src/services/room/RoomPortal.h,
+	  src/services/room/RoomService.cpp,
+	  src/services/room/RoomService.h: Room service updates. Some soup
+	  to let the objid tracking to swim in later on...
+
+2009-10-15 19:55  volca
+
+	* doc/src/loopsvc.dot, doc/src/manual.texi: some rather small doc
+	  updates
+
+2009-10-15 19:54  volca
+
+	* doc/src/drawsvc.dot, doc/src/simsvc.dot: some new graphs for the
+	  documentation (although a bit rough and unfinished)
+
+2009-10-08 19:13  volca
+
+	* src/services/room/RoomService.cpp: Room_db version is not a
+	  version. It is a valid/invalid flag...
+
+2009-10-07 13:57  volca
+
+	* src/base/servicemanager/OpdeServiceManager.cpp: release service
+	  instances as well
+
+2009-10-07 13:53  volca
+
+	* src/base/console/ConsoleBackend.h,
+	  src/services/gui/ConsoleGUI.cpp, src/services/gui/ConsoleGUI.h:
+	  console cosmetics, fixes and improvements (background, page
+	  up/down handling, etc)
+
+2009-10-07 13:50  volca
+
+	* src/services/draw/DrawBuffer.cpp,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h, src/services/draw/DrawSheet.cpp,
+	  src/services/draw/RenderedImage.cpp,
+	  src/services/draw/RenderedRect.cpp,
+	  src/services/draw/RenderedRect.h,
+	  src/services/draw/TextureAtlas.cpp,
+	  src/services/draw/TextureAtlas.h, src/services/draw/config.cmake:
+	  * fixes to draw service
+	  * RenderRect implemented (colour only rectangle), but only
+	  partially working (colour handling is screwed)
+
+2009-09-24 04:52  patryn
+
+	* src/main/GamePlayState.cpp: Changed the console activation key
+	  due to WinNT debug feature.
+	  http://support.microsoft.com/kb/q130667/
+
+2009-09-22 12:48  patryn
+
+	* src/base/servicemanager/OpdeServiceManager.cpp: Fix not needed
+	  anymore.
+
+2009-09-22 07:06  volca
+
+	* src/base/Array.h: a potential fix for VC++ problems with random
+	  object values in the custom arrays
+
+2009-09-22 06:42  patryn
+
+	* src/base/servicemanager/OpdeServiceManager.cpp: Fixed a crash due
+	  to accessing a non-existent service.
+
+2009-09-18 09:46  volca
+
+	* src/services/worldrep/WorldRepService.cpp: log WR loading in some
+	  detail at least
+
+2009-09-18 09:46  volca
+
+	* src/services/render/RenderService.cpp,
+	  src/services/render/RenderService.h: screen resolution initial
+	  broadcast and related.
+
+2009-09-18 09:45  volca
+
+	* src/bindings/LoopServiceBinder.cpp,
+	  src/bindings/LoopServiceBinder.h,
+	  src/services/loop/LoopService.cpp,
+	  src/services/loop/LoopService.h: step method for loop service
+	  (useful for loading screen updates for example)
+
+2009-09-18 09:44  volca
+
+	* src/base/servicemanager/OpdeServiceManager.cpp: adding ref count
+	  indicators to service shutdown logs
+
+2009-09-18 09:41  volca
+
+	* src/base/console/ConsoleBackend.cpp,
+	  src/base/console/ConsoleBackend.h,
+	  src/base/console/ConsoleFrontend.cpp: Console backend now stores
+	  loglevel as well
+
+2009-09-18 09:40  volca
+
+	* src/base/StringTokenizer.h: fixing year
+
+2009-09-18 09:39  volca
+
+	* src/base/StringTokenizer.h: a handy method to pull tokens (to be
+	  used in conditions)
+
+2009-09-18 09:38  volca
+
+	* src/services/gui/ConsoleGUI.cpp, src/services/gui/ConsoleGUI.h,
+	  src/services/gui/GUIService.cpp, src/services/gui/GUIService.h: *
+	  A temporary but quite ok console code (replacing the
+	  ConsoleFrontend)
+	  * GUI service fixes which make it all work (we now need mlook and
+	  mturn implementations)
+
+2009-09-18 09:27  volca
+
+	* src/services/draw/DrawCommon.cpp, src/services/draw/DrawCommon.h,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h,
+	  src/services/draw/FontDrawSource.cpp,
+	  src/services/draw/FontDrawSource.h,
+	  src/services/draw/TextureAtlas.cpp,
+	  src/services/draw/TextureAtlas.h: fixing draw service leaks and
+	  segvs (bug #2859977)
+
+2009-09-17 11:49  patryn
+
+	* FindPythonModule.cmake, scripts/python/wxtree.py,
+	  src/base/DarkCommon.h, src/base/file/FileCompat.cpp,
+	  src/base/file/FileCompat.h, src/base/file/darkdb.cpp,
+	  src/base/loaders/FonFormat.cpp,
+	  src/bindings/FontDrawSourceBinder.cpp,
+	  src/bindings/FontDrawSourceBinder.h,
+	  src/bindings/RenderedLabelBinder.cpp,
+	  src/bindings/RenderedLabelBinder.h,
+	  src/bindings/TextureAtlasBinder.cpp,
+	  src/bindings/TextureAtlasBinder.h,
+	  src/services/gui/ConsoleGUI.cpp, src/services/gui/ConsoleGUI.h,
+	  src/services/room/Room.cpp, src/services/room/Room.h,
+	  src/services/room/RoomCommon.h, src/services/room/RoomPortal.cpp,
+	  src/services/room/RoomPortal.h,
+	  src/services/room/RoomService.cpp,
+	  src/services/room/RoomService.h, src/services/room/config.cmake:
+	  Fixed keyword substitution.
+
+2009-09-15 08:52  patryn
+
+	* src/base/servicemanager/OpdeService.h: Fixed the unresolved
+	  externals.
+
+2009-09-15 07:06  volca
+
+	* src/services/room/RoomService.cpp: fixing operator precendence
+	  warning
+
+2009-09-15 00:42  patryn
+
+	* src/base/loaders/FonFormat.cpp, src/base/loaders/FonFormat.h,
+	  src/base/loaders/ManualFonFileLoader.cpp: More Windows build
+	  fixes.
+
+2009-09-14 07:03  volca
+
+	* src/base/loaders/FonFormat.cpp, src/base/loaders/FonFormat.h,
+	  src/base/loaders/ManualFonFileLoader.cpp,
+	  src/base/loaders/ManualFonFileLoader.h: getting rid of
+	  conflicting elem. types type definitions (hopefully)
+
+2009-09-11 07:07  volca
+
+	* src/bindings/DrawServiceBinder.cpp: const "correctness" for the
+	  PyGetSet. I still think they (python guys) should make these
+	  fields const...
+
+2009-09-10 19:58  volca
+
+	* scripts/python/tree.py, scripts/python/wxtree.py: + wip wx-python
+	  gam file display tool
+	  * tree,py fixed to work with new bindings of database service
+
+2009-09-10 19:31  volca
+
+	* src/services/render/EntityMaterialInstance.cpp,
+	  src/services/render/EntityMaterialInstance.h,
+	  src/services/render/RenderService.cpp,
+	  src/services/render/RenderService.h,
+	  src/services/render/ZBiasProperty.cpp: maybe a more compatible
+	  Z-Bias. Maybe not.
+
+2009-09-10 19:23  volca
+
+	* src/main/GameStateManager.cpp: full mask service initialization
+	  now in Opde::Root
+
+2009-09-10 19:23  volca
+
+	* src/base/loaders/ManualBinFileLoader.cpp: cull AI mesh materials
+	  clockwise (just to be sure)
+
+2009-09-10 19:20  volca
+
+	* src/services/object/ObjectService.cpp: Let's make this a standard
+	  - every service prefixes it's logging messages with it's name ok?
+
+2009-09-10 19:18  volca
+
+	* src/services/input/InputService.cpp: missing config parameter
+	  desc. added (nonexclusive)
+
+2009-09-10 19:18  volca
+
+	* src/services/gui/GUIService.cpp: Oooh a TYPO!
+
+2009-09-10 19:14  volca
+
+	* src/main/Root.cpp, src/main/Root.h,
+	  src/services/database/DatabaseService.cpp,
+	  src/services/database/DatabaseService.h: if render service mask
+	  bit is not included, don't initialize ogre's root at all (and
+	  fixes to allow this)
+
+2009-09-10 19:12  volca
+
+	* src/bindings/bindings.cpp: allow optional log file name whilst
+	  constructing root - this allows us not to lose any precious
+	  messages from python
+
+2009-09-09 13:02  volca
+
+	* src/base/file/File.cpp, src/base/file/File.h,
+	  src/base/file/FileGroup.cpp, src/base/file/darkdb.cpp,
+	  src/base/file/darkdb.h, src/base/loaders/FonFormat.cpp,
+	  src/base/loaders/FonFormat.h,
+	  src/base/loaders/ManualFonFileLoader.cpp: removing readStruct and
+	  writeStruct entirelly - replaced with struct alignment safe
+	  version - stream operators >> and <<
+
+2009-09-07 13:29  volca
+
+	* TODO: Moved the unfinished things to 0.3, added some more
+	  work/details
+
+2009-09-07 13:28  volca
+
+	* src/services/database/DatabaseService.cpp: A propper way to write
+	  the database. The constructor parameter is for reading, dammit!
+
+2009-09-07 13:28  volca
+
+	* cmake/ODEConfig.cmake: Although often essential, this (ODE_PATH)
+	  variable should be hidden from the eyes...
+
+2009-09-07 13:27  volca
+
+	* CMakeLists.txt, FindPythonModule.cmake: WIP doc generator
+	  consolidation (namely the deps satisfaction). Won't work on win32
+	  yet but seems to be quite stable on linux distros I have in
+	  reach.
+
+2009-09-04 05:57  volca
+
+	* src/scenemanager/DarkSceneNode.cpp: adding missing ancestor call
+	  on setInSceneGraph...
+
+2009-09-04 05:56  volca
+
+	* src/main/GameStateManager.cpp, src/main/Root.cpp: Adding Room
+	  service and SERVICE_ALL construction right before bootstrap end
+
+2009-09-04 05:55  volca
+
+	* src/compat/integers.h: Didn't test this so slap me into face if
+	  it breaks windows build, but anyway... It seems #defines should
+	  not be used here. Rewritten to use typedefs instead
+
+2009-09-04 05:54  volca
+
+	* src/services/Services.cmake: Adding room service to the openDark
+	  library
+
+2009-09-04 05:53  volca
+
+	* src/services/worldrep/WRCell.cpp, src/services/worldrep/WRCell.h,
+	  src/services/worldrep/WRTypes.h,
+	  src/services/worldrep/WorldRepService.cpp,
+	  src/services/worldrep/WorldRepService.h: Stream loading gets used
+
+2009-09-04 05:52  volca
+
+	* src/services/room/Room.cpp, src/services/room/Room.h,
+	  src/services/room/RoomCommon.h, src/services/room/RoomPortal.cpp,
+	  src/services/room/RoomPortal.h,
+	  src/services/room/RoomService.cpp,
+	  src/services/room/RoomService.h: Room database loading complete
+	  (or so it seems). Saving too, but that was not yet tested
+
+2009-09-04 05:51  volca
+
+	* src/services/light/LightService.h: Stream loading gets used
+
+2009-09-04 05:48  volca
+
+	* src/services/database/DatabaseService.cpp: Fixing logging, coarse
+	  counts and including FILE_TYPE in written databases
+
+2009-09-04 05:47  volca
+
+	* src/base/DarkCommon.h, src/base/file/File.cpp,
+	  src/base/file/File.h, src/base/file/FileCompat.cpp,
+	  src/base/file/FileCompat.h,
+	  src/base/loaders/ManualBinFileLoader.cpp,
+	  src/base/servicemanager/OpdeServiceManager.cpp: some shifts in
+	  base libraries:
+	  * File class now exposes stream-like bitshift reads/writes
+	  * FileCompat.h/.cpp added
+	  * logging of service mask upon service factory registration
+	  * DarkCommon clear again, decided to use FileCompat way of
+	  loading instead (leaving here for now).
+	  * some formatting
+
+2009-08-28 07:07  volca
+
+	* src/bindings/DatabaseServiceBinder.cpp: Adding Database filetype
+	  mask constants
+
+2009-08-27 12:16  volca
+
+	* doc/src/manual.texi: Services referenced by SID now - let the
+	  manual know that
+
+2009-08-27 12:15  volca
+
+	* TODO: * adding status indicators to side-projects
+	  * new (already done) db service rewrite todo note
+
+2009-08-27 12:14  volca
+
+	* src/bindings/DatabaseServiceBinder.cpp,
+	  src/bindings/DatabaseServiceBinder.h: python bindings change to
+	  reflect the changed db service api
+
+2009-08-27 12:13  volca
+
+	* src/services/Services.cmake,
+	  src/services/database/DatabaseService.cpp,
+	  src/services/database/DatabaseService.h,
+	  src/services/game/GameService.cpp, src/services/gui/config.cmake,
+	  src/services/inherit/CachedInheritor.cpp,
+	  src/services/input/InputService.cpp,
+	  src/services/light/LightService.h,
+	  src/services/material/MaterialService.cpp,
+	  src/services/material/MaterialService.h,
+	  src/services/object/ObjectService.cpp,
+	  src/services/object/ObjectService.h,
+	  src/services/render/RenderService.cpp,
+	  src/services/render/RenderService.h,
+	  src/services/worldrep/WRCell.cpp, src/services/worldrep/WRCell.h,
+	  src/services/worldrep/WRTypes.h,
+	  src/services/worldrep/WorldRepService.cpp,
+	  src/services/worldrep/WorldRepService.h: * rewritten the database
+	  service to use DatabaseListener class, a more comfy approach
+	  * the database loader now more similar to the dark one and uses
+	  FILE_TYPE
+	  * The DarkCommon.h header introduced to the other files (with a
+	  warm welcome)
+	  * maybe some other small edits too...
+
+2009-08-27 12:09  volca
+
+	* src/services/draw/DrawBuffer.cpp,
+	  src/services/draw/DrawService.cpp: cosmetics
+
+2009-08-27 12:08  volca
+
+	* src/services/gui/GUIService.cpp, src/services/gui/GUIService.h:
+	  GUI service work - started some coding to enable new console
+	  after it is finished being worked on
+
+2009-08-27 12:07  volca
+
+	* src/services/gui/ConsoleGUI.cpp, src/services/gui/ConsoleGUI.h:
+	  STUB rewrite of Console frontend. Needs to be finished using draw
+	  service calls
+
+2009-08-27 12:05  volca
+
+	* src/services/ServiceCommon.h: room and gui related constants
+	  added
+
+2009-08-27 12:01  volca
+
+	* src/base/MessageSource.h, src/base/PrioritizedMessageSource.h:
+	  cosmetics
+
+2009-08-27 12:01  volca
+
+	* src/base/logger/logger.h: cosmetics
+
+2009-08-27 11:58  volca
+
+	* src/base/BitArray.h: fixing a clear() method bug that caused some
+	  bits not to be reset
+
+2009-08-27 11:56  volca
+
+	* src/base/DarkCommon.h: A new header added: this file should
+	  contain all the common data structures present in dark
+
+2009-08-27 11:55  volca
+
+	* src/services/room, src/services/room/Room.cpp,
+	  src/services/room/Room.h, src/services/room/RoomCommon.h,
+	  src/services/room/RoomPortal.cpp, src/services/room/RoomPortal.h,
+	  src/services/room/RoomService.cpp,
+	  src/services/room/RoomService.h, src/services/room/config.cmake:
+	  adding room service stub
+
+2009-07-28 14:25  volca
+
+	* src/base/Array.h, src/base/servicemanager/OpdeService.cpp,
+	  src/base/servicemanager/OpdeService.h,
+	  src/base/servicemanager/OpdeServiceFactory.h,
+	  src/base/servicemanager/OpdeServiceManager.cpp,
+	  src/base/servicemanager/OpdeServiceManager.h,
+	  src/bindings/ConfigServiceBinder.cpp,
+	  src/bindings/DatabaseServiceBinder.cpp,
+	  src/bindings/DrawServiceBinder.cpp,
+	  src/bindings/GUIServiceBinder.cpp,
+	  src/bindings/InheritServiceBinder.cpp,
+	  src/bindings/InputServiceBinder.cpp,
+	  src/bindings/LinkServiceBinder.cpp,
+	  src/bindings/LoopServiceBinder.cpp,
+	  src/bindings/ObjectServiceBinder.cpp,
+	  src/bindings/PropertyServiceBinder.cpp,
+	  src/services/ServiceCommon.h,
+	  src/services/binary/BinaryService.cpp,
+	  src/services/binary/BinaryService.h,
+	  src/services/config/ConfigService.cpp,
+	  src/services/config/ConfigService.h,
+	  src/services/database/DatabaseService.cpp,
+	  src/services/database/DatabaseService.h,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h,
+	  src/services/game/GameService.cpp,
+	  src/services/game/GameService.h, src/services/gui/GUIService.cpp,
+	  src/services/gui/GUIService.h,
+	  src/services/inherit/InheritService.cpp,
+	  src/services/inherit/InheritService.h,
+	  src/services/input/InputService.cpp,
+	  src/services/input/InputService.h,
+	  src/services/light/LightService.cpp,
+	  src/services/light/LightService.h,
+	  src/services/link/LinkService.cpp,
+	  src/services/link/LinkService.h,
+	  src/services/loop/LoopService.cpp,
+	  src/services/loop/LoopService.h,
+	  src/services/material/MaterialService.cpp,
+	  src/services/material/MaterialService.h,
+	  src/services/object/ObjectService.cpp,
+	  src/services/object/ObjectService.h,
+	  src/services/physics/PhysicsService.cpp,
+	  src/services/physics/PhysicsService.h,
+	  src/services/property/PropertyService.cpp,
+	  src/services/property/PropertyService.h,
+	  src/services/render/RenderService.cpp,
+	  src/services/render/RenderService.h,
+	  src/services/script/ScriptService.cpp,
+	  src/services/script/ScriptService.h,
+	  src/services/sim/SimService.cpp, src/services/sim/SimService.h,
+	  src/services/worldrep/WorldRepService.cpp,
+	  src/services/worldrep/WorldRepService.h: Services now referenced
+	  by SID, not string
+
+2009-07-27 13:45  volca
+
+	* ChangeLog: changelog bump
+
+2009-07-27 13:25  volca
+
+	* src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h: * protected data now private as
+	  default here
+	  * render service listener to help
+
+2009-07-27 12:41  volca
+
+	* src/main/Opde.cpp: year bump
+
+2009-07-27 12:36  volca
+
+	* src/main/Opde.cpp: Fixing bug 2517370
+
+2009-07-27 10:17  volca
+
+	* src/services/inherit/InheritService.cpp,
+	  src/services/link/Relation.cpp, src/services/link/Relation.h:
+	  oops. Fixing the breakage introduced by last few commits
+
+2009-07-27 09:51  volca
+
+	* src/base/dyntype/SingleFieldDataStorage.h,
+	  src/bindings/LoopServiceBinder.cpp, src/main/OpdeDocGen.cpp,
+	  src/services/render/RenderService.h: some minor
+	  formatting/comment fixes
+
+2009-07-27 09:50  volca
+
+	* src/services/link/Relation.h: value injection on data value
+	  creation
+
+2009-07-27 09:50  volca
+
+	* src/services/inherit/InheritService.cpp: a more consistent MP
+	  link creation (avoid re-estimation of inheritance tree - which is
+	  kind of expensive)
+
+2009-07-27 09:49  volca
+
+	* src/services/link/Relation.cpp: value injection on data value
+	  creation
+
+2009-07-27 09:48  volca
+
+	* src/base/dyntype/DVariant.h, src/base/dyntype/DataStorage.cpp,
+	  src/base/dyntype/DataStorage.h,
+	  src/services/inherit/InheritService.h: value injection on data
+	  value creation
+
+2009-07-27 09:45  volca
+
+	* src/bindings/bindings.h, src/services/config/ConfigService.h,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h: minor formatting and
+	  doxy/comment fixes
+
+2009-07-27 09:07  volca
+
+	* src/services/loop/LoopService.h: Fixing bug 2823744
+
+2009-06-29 12:14  volca
+
+	* src/services/draw/TextureAtlas.cpp,
+	  src/services/draw/TextureAtlas.h: preparing for the texture-less
+	  2d renders
+
+2009-06-24 12:48  volca
+
+	* src/bindings/DrawServiceBinder.cpp,
+	  src/bindings/DrawServiceBinder.h,
+	  src/bindings/RenderedImageBinder.cpp,
+	  src/bindings/RenderedLabelBinder.cpp, src/bindings/bindings.h,
+	  src/services/draw/DrawCommon.h,
+	  src/services/draw/DrawOperation.cpp,
+	  src/services/draw/DrawOperation.h,
+	  src/services/draw/DrawService.cpp,
+	  src/services/draw/DrawService.h, src/services/draw/DrawSheet.cpp,
+	  src/services/draw/DrawSheet.h,
+	  src/services/draw/RenderedImage.cpp,
+	  src/services/draw/RenderedLabel.cpp: * clip rect in pixels now
+	  * more fixes
+
+2009-06-24 10:41  volca
+
+	* src/bindings/DrawServiceBinder.cpp,
+	  src/bindings/DrawServiceBinder.h, src/bindings/bindings.h,
+	  src/services/config/ConfigService.h,
+	  src/services/draw/DrawOperation.cpp,
+	  src/services/draw/DrawOperation.h: * draw operation's position, z
+	  order and cliprect as properties in python
+	  * some python bindings improvements/fixes
+
 2009-06-17 17:48  volca
 
 	* src/services/config/ConfigService.cpp,
