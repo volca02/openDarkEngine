@@ -42,4 +42,12 @@
  #define OPDELIB_EXPORT
 #endif
 
+// platforms
+#cmakedefine WIN32
+#cmakedefine UNIX
+#cmakedefine APPLE
+
+// data installation path
+#define OPDE_SHARE_DIR "${OPDE_FULL_DATA_INSTALL_DIR}"
+
 #endif

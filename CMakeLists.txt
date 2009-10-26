@@ -78,6 +78,10 @@ MARK_AS_ADVANCED(OPDE_BINARY_INSTALL_DIR)
 SET(OPDE_LIBRARY_INSTALL_DIR "lib")
 MARK_AS_ADVANCED(OPDE_LIBRARY_INSTALL_DIR)
 
+SET(OPDE_DATA_INSTALL_DIR share/${OPDE_SHORTNAME_WITH_VERSION})
+SET(OPDE_FULL_DATA_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/${OPDE_DATA_INSTALL_DIR})
+MARK_AS_ADVANCED(OPDE_DATA_INSTALL_DIR)
+MARK_AS_ADVANCED(OPDE_FULL_DATA_INSTALL_DIR)
 
 # Compiler profiling flags
 IF (PROFILING)
@@ -297,6 +301,12 @@ IF (GENERATE_DOC AND DOC_DEPS_SATISFIED)
     ELSE (DOXYGEN_EXECUTABLE)
     	MESSAGE("Warning: Doxygen not found, docs target disabled.")
     ENDIF (DOXYGEN_EXECUTABLE)
+
+    # Thanks Ogre guys for this trick...
+	# Create a dirctory for the python docs...
+    file(WRITE ${CMAKE_BINARY_DIR}/doc/python/html/temp.txt "This file should be deleted before installation. It is only here to force the creation of the python doc. folder")
+    file(REMOVE ${CMAKE_BINARY_DIR}/doc/python/html/temp.txt)
+       
         
     # generates the Python docs.
     ADD_CUSTOM_TARGET(pydoc ALL
@@ -328,6 +338,7 @@ IF (GENERATE_DOC AND DOC_DEPS_SATISFIED)
     # TODO: property/link docs (maybe part of the writedoc.py?)
 
     # Install directives for the documentation
+    # TODO: Skip .md5 and .map files as those are doxygen temporary
     INSTALL(DIRECTORY ${OPDE_BINARY_DIR}/doc DESTINATION ${OPDE_DOC_DIR})
 
     # additional fake_install deps
