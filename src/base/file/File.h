@@ -29,7 +29,6 @@
 
 #include "OpdeException.h"
 #include "OgreDataStream.h"
-#include "RefCounted.h"
 #include "SharedPtr.h"
 #include "integers.h"
 #include <fstream>
