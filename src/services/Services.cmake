@@ -24,6 +24,7 @@ SET(OPDE_SERVICE_INCLUDES
     ${OPDE_SOURCE_DIR}/src/services/room
     ${OPDE_SOURCE_DIR}/src/services/sim
     ${OPDE_SOURCE_DIR}/src/services/camera
+    ${OPDE_SOURCE_DIR}/src/services/platform
 )
 
 # All the resulting libraries in a nice package as well
@@ -48,6 +49,7 @@ SET(OPDE_SERVICE_LIBRARIES
     OpdeRoomService
     OpdeSimService
     OpdeCameraService
+    OpdePlatformService
 )
 
 # include the configuration from all the services (each config.cmake should append the OPDE_SERVICE_HEADERS and OPDE_SERVICE_SOURCES)
@@ -73,6 +75,7 @@ INCLUDE( ${OPDE_SOURCE_DIR}/src/services/script/config.cmake )
 INCLUDE( ${OPDE_SOURCE_DIR}/src/services/sim/config.cmake )
 INCLUDE( ${OPDE_SOURCE_DIR}/src/services/worldrep/config.cmake )
 INCLUDE( ${OPDE_SOURCE_DIR}/src/services/camera/config.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/platform/config.cmake )
 
 # join the variables
 SET(OPDE_SERVICE_FILES ${OPDE_SERVICE_HEADERS})
