@@ -30,7 +30,7 @@
 
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
-#include "DatabaseService.h"
+#include "PlatformService.h"
 #include "FileGroup.h"
 #include "SharedPtr.h"
 #include "DVariant.h"
@@ -71,8 +71,17 @@ namespace Opde {
 			/** determine an existence of a parameter */
 			bool hasParam(const std::string& param);
 
-			/** Injects the settings from a specified cfg file */
+			/** Injects the settings from a specified cfg file. 
+			 * This function uses PlatformService to obtain two possible config file paths. It then loads global followed by local 
+			 * version of the config file mentioned.
+			 * @note If ConfigPathOverride is set (via setConfigPathOverride), then that path is solely used to populate the configuration
+			 * @param cfgfile The name of the config file (without path)
+			 * @return true if config was loaded from at least one of the paths, false otherwise */
 			bool loadParams(const std::string& cfgfile);
+			
+			/** Sets an override for the config file loading paths. Used to enable debugging without installation, etc.
+			 */
+			void setConfigPathOverride(const std::string& cfgpath);
 
 			/** returns the set game type. This should normally be the cam.cfg's game dark/game shock, but we also need to differentiate t1/t2
 			* @note Uses the game_type = t1/t2/ss2 config key */
@@ -80,6 +89,7 @@ namespace Opde {
 
 			/** Language, as parsed from the install.cfg file
 			 * @todo Parse the install.cfg - now we read it from opde.cfg
+			 * @return Language name string (to be used with localized resource version reader code)
 			 * */
 			std::string getLanguage();
 
@@ -91,16 +101,27 @@ namespace Opde {
 			 */
 			std::string getLocalisedResourcePath(const std::string& origPath);
 
+			/** Helper method that logs all the config parameters with descriptions to LOG */
+			void logAllParameters();
+			
 		protected:
 			/** initializes the service. Tries to load opde.cfg */
 			bool init();
+			void shutdown();
 
-			std::string mConfigFileName;
+			/** Loads additional parameters from the specified file name */
+			bool loadFromFile(const std::string& cfgfile);
 
+		private:
 			typedef std::map< std::string, std::string > Parameters;
             
 			Parameters mParameters;
 			Parameters mConfigKeyDescriptions;
+			
+			PlatformServicePtr mPlatformService;
+			
+			/// If set, the hierarchical loading from global+local is not used, this path is used instead
+			std::string mConfigPathOverride;
 	};
 
 	/// Shared pointer to Config service

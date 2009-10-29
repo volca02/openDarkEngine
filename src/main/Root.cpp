@@ -52,6 +52,7 @@
 #include "DrawService.h"
 #include "RoomService.h"
 #include "GUIService.h"
+#include "PlatformService.h"
 
 // base
 #include "ManualBinFileLoader.h"
@@ -300,6 +301,7 @@ namespace Opde {
 		mServiceFactories.push_back(new DrawServiceFactory());
 		mServiceFactories.push_back(new RoomServiceFactory());
 		// mServiceFactories.push_back(new GUIServiceFactory());
+		mServiceFactories.push_back(new PlatformServiceFactory());
 		
 		ServiceFactoryList::iterator it = mServiceFactories.begin();
 		

@@ -53,7 +53,7 @@ namespace Opde {
 		// respectively the .opde directory inside it
 		std::string home = getenv("HOME");
 
-		return home + getDirectorySeparator() + msOpdeHomeDirName + getDirectorySeparator();
+		return home + getDirectorySeparator() + msOpdeHomeDirName;
 	}
 
 	//------------------------------------------------------

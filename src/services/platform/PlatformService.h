@@ -36,12 +36,22 @@ namespace Opde {
 	// Forward decl.
 	class Platform;
 
-	/** @brief Platform service. Service that gives the engine an abstracted way to work with various OSes and File Systems they introduce.
+	/** @brief Platform service. Service that gives the engine an abstracted way to work with various OSes and 
+	 * File Systems they introduce. Wrapper around Platform class implementation
 	*/
 	class OPDELIB_EXPORT PlatformService : public ServiceImpl<PlatformService> {
 		public:
 			PlatformService(ServiceManager *manager, const std::string& name);
 			virtual ~PlatformService();
+			
+			/// @see Platform::getGlobalConfigPath
+			std::string getGlobalConfigPath() const;
+			
+			/// @see Platform::getUserConfigPath
+			std::string getUserConfigPath() const;
+			
+			/// @see Platform::getDirectorySeparator
+			std::string getDirectorySeparator() const;
 			
 		protected:
 			bool init();

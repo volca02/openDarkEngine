@@ -39,7 +39,8 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	template<> const size_t ServiceImpl<ConfigService>::SID = __SERVICE_ID_CONFIG;
 	
-	ConfigService::ConfigService(ServiceManager *manager, const std::string& name) : ServiceImpl<ConfigService>(manager, name), mConfigFileName("opde.cfg") {
+	ConfigService::ConfigService(ServiceManager *manager, const std::string& name) : ServiceImpl<ConfigService>(manager, name), 
+			mConfigPathOverride("") {
 	}
 
 	//------------------------------------------------------
@@ -48,9 +49,14 @@ namespace Opde {
 
 	//------------------------------------------------------
 	bool ConfigService::init() {
+		mPlatformService = GET_SERVICE(PlatformService);
 		return true;
 	}
-
+	
+	//------------------------------------------------------
+	void ConfigService::shutdown() {
+		mPlatformService.setNull();
+	}
 
 	//------------------------------------------------------
 	void ConfigService::setParamDescription(const std::string& param, const std::string& desc) {
@@ -111,30 +117,27 @@ namespace Opde {
 
     //------------------------------------------------------
     bool ConfigService::loadParams(const std::string& cfgfile) {
-        try  {  // load a few options
-            Ogre::ConfigFile cf;
-            cf.load(cfgfile);
-
-            // Get the iterator over values - no section
-            ConfigFile::SettingsIterator it = cf.getSettingsIterator();
-
-
-            while (it.hasMoreElements()) {
-                std::string key = it.peekNextKey();
-                std::string val = it.peekNextValue();
-
-                setParam(key, val);
-
-                it.moveNext();
-            }
-
-            return true;
-        }
-        catch (Ogre::Exception e) {
-            LOG_ERROR("Config file '%s' was not found", cfgfile.c_str());
-            return false;
-            // Guess the file didn't exist
-        }
+    	// do we have an override set?
+    	if (mConfigPathOverride != "") {
+    		return loadFromFile(mConfigPathOverride + mPlatformService->getDirectorySeparator() + cfgfile);
+    	} else {
+    	 	// first the global config is loaded
+    		bool globalok = loadFromFile(mPlatformService->getGlobalConfigPath() 
+    				+ mPlatformService->getDirectorySeparator() 
+    				+ cfgfile);
+    		
+    		// then overriden by local one
+    		bool userok = loadFromFile(mPlatformService->getUserConfigPath() \
+    				+ mPlatformService->getDirectorySeparator()
+    				+ cfgfile);
+    		
+    		return userok || globalok;
+    	}
+    }
+    
+    //------------------------------------------------------
+    void ConfigService::setConfigPathOverride(const std::string& cfgpath) {
+    	mConfigPathOverride = cfgpath;
     }
 
     //------------------------------------------------------
@@ -172,10 +175,50 @@ namespace Opde {
 
 		StringUtil::splitFilename(origPath, fname, path);
 
-		return path + getLanguage() + '/' + fname;
+		return path + getLanguage() + mPlatformService->getDirectorySeparator() + fname;
 	}
 
+	//------------------------------------------------------
+	void ConfigService::logAllParameters() {
+		Parameters::const_iterator dit = mConfigKeyDescriptions.begin();
+		
+		LOG_INFO("ConfigService: Configuration parameters:");
+		
+		while (dit != mConfigKeyDescriptions.end()) {
+			LOG_INFO("ConfigService:\t%s - %s", dit->first.c_str(), dit->second.c_str());
+		}
+	}
 
+	//------------------------------------------------------
+	bool ConfigService::loadFromFile(const std::string& cfgfile) {
+		try  {  // load a few options
+			LOG_INFO("ConfigService: Loading config file from '%s'", cfgfile.c_str());
+			
+			Ogre::ConfigFile cf;
+			cf.load(cfgfile);
+
+			// Get the iterator over values - no section
+			ConfigFile::SettingsIterator it = cf.getSettingsIterator();
+
+
+			while (it.hasMoreElements()) {
+				std::string key = it.peekNextKey();
+				std::string val = it.peekNextValue();
+
+				setParam(key, val);
+
+				it.moveNext();
+			}
+
+			return true;
+		}
+		catch (Ogre::Exception e) {
+			LOG_ERROR("Config file '%s' was not found", cfgfile.c_str());
+			return false;
+			// Guess the file didn't exist
+		}
+	}
+	
 	//-------------------------- Factory implementation
 	std::string ConfigServiceFactory::mName = "ConfigService";
 

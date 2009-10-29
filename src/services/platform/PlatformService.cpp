@@ -61,7 +61,24 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
+	std::string PlatformService::getGlobalConfigPath() const {
+		return mPlatform->getGlobalConfigPath();
+	}
+				
+	//------------------------------------------------------
+	std::string PlatformService::getUserConfigPath() const {
+		return mPlatform->getUserConfigPath();
+	}
+	
+	//------------------------------------------------------
+	std::string PlatformService::getDirectorySeparator() const {
+		return mPlatform->getDirectorySeparator();
+	}
+	
+	//------------------------------------------------------
 	bool PlatformService::init() {
+		LOG_INFO("PlatformService: Global config path : '%s'", getGlobalConfigPath().c_str());
+		LOG_INFO("PlatformService: User config path   : '%s'", getUserConfigPath().c_str());
 		return true;
 	}
 	
