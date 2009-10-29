@@ -117,6 +117,16 @@ namespace Opde {
 			// rotate the player object
 			// TODO: rotate the camera
 			// this is not as easy as it looks. We should take physics into consideration...
+			
+			// the player should have some sub-objects present - we only rotate submodel 0
+			// e.g.:
+			
+			/* // first rotate the head sub-object accordingly to the accumulated values 
+			 * Quaternion rot = mPhysicsService->getSubModelRotation(mPlayerObject, 0, rot)
+			 * rot.yaw, rot.pitch, ....
+			 * mPhysicsService->setSubModelRotation(mPlayerObject, 0, rot)
+			 * updateCameraFromSubObject(mPlayerObject, 0);
+			 */
 		}
 		
 		// reset the rotation indicators
@@ -144,6 +154,8 @@ namespace Opde {
 		
 		// sim listener for the camera rotation
 		mSimSrv->registerListener(this, SIM_PRIORITY_INPUT);
+		
+		// TODO: what the heck is the variable user_camera_offset and how does it interfere with this code?
 	}
 	
 	//------------------------------------------------------
@@ -168,7 +180,6 @@ namespace Opde {
 		// we are interested in:
 		//  * mouse_sensitivity
 		//  * mouse_invert
-		//  * freelook
 		const DVariant& msens     = mInputSrv->getVariable("mouse_sensitivity");
 		const DVariant& minvert   = mInputSrv->getVariable("mouse_invert");
 		
