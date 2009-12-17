@@ -50,6 +50,7 @@ namespace Opde {
 				static PyObject* getParam(PyObject* self, PyObject* args);
 				static PyObject* hasParam(PyObject* self, PyObject* args);
 				static PyObject* loadParams(PyObject* self, PyObject* args);
+				static PyObject* setConfigPathOverride(PyObject* self, PyObject* args);
 
 			protected:
 				/// Static type definition for ConfigService

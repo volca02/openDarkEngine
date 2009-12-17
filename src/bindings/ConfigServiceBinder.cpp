@@ -95,6 +95,11 @@ namespace Opde {
 				"Detects if the given configuration key is defined\n"
 				"@type path: string\n"
 				"@param path: The configuration file name\n";
+				
+		const char* opde_ConfigService_setConfigPathOverride__doc__ = "setConfigPathOverride(path)\n"
+				"Sets a path that overrides the normal process of config loading - that means the path given will be the only one config files are loaded from.\n"
+				"@type path: string\n"
+				"@param path: The configuration directory\n";
 
 		// ------------------------------------------
 		PyMethodDef ConfigServiceBinder::msMethods[] = {
@@ -102,6 +107,7 @@ namespace Opde {
 			{"getParam", getParam, METH_VARARGS, const_cast<char*>(opde_ConfigService_getParam__doc__)},
 			{"hasParam", hasParam, METH_VARARGS, const_cast<char*>(opde_ConfigService_hasParam__doc__)},
 			{"loadParams", loadParams, METH_VARARGS, const_cast<char*>(opde_ConfigService_loadParams__doc__)},
+			{"setConfigPathOverride", setConfigPathOverride, METH_VARARGS, const_cast<char*>(opde_ConfigService_setConfigPathOverride__doc__)},
 			{NULL, NULL},
 		};
 
@@ -211,6 +217,28 @@ namespace Opde {
 			}
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
+
+		// ------------------------------------------
+		PyObject* ConfigServiceBinder::setConfigPathOverride(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			ConfigServicePtr o;
+			
+			if (!python_cast<ConfigServicePtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
+			
+			const char* path;
+
+			if (PyArg_ParseTuple(args, "s", &path)) {
+				o->setConfigPathOverride(path);
+
+				__PY_NONE_RET;
+			} else {
+				PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
+				return NULL;
+			}
+			__PYTHON_EXCEPTION_GUARD_END_;
+		}
+
 
 		// ------------------------------------------
 		void ConfigServiceBinder::init(PyObject* module) {

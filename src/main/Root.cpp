@@ -124,11 +124,10 @@ namespace Opde {
 		LOG_INFO("Root: Registering custom archive factories");
 		// register the factories
 		mDirArchiveFactory = new Ogre::CaseLessFileSystemArchiveFactory();
-		// TODO: Decide if this should be used or not
-		// mCrfArchiveFactory = new Ogre::CrfArchiveFactory();
+		mCrfArchiveFactory = new Ogre::CrfArchiveFactory();
 
 		Ogre::ArchiveManager::getSingleton().addArchiveFactory(mDirArchiveFactory);
-		// Ogre::ArchiveManager::getSingleton().addArchiveFactory(mCrfArchiveFactory);
+		Ogre::ArchiveManager::getSingleton().addArchiveFactory(mCrfArchiveFactory);
 
 		if (serviceMask & SERVICE_RENDERER) {
 			LOG_INFO("Root: Hooking up custom 8 bit image codecs");

@@ -133,8 +133,10 @@ namespace Opde {
 			/// Loader for the PLDef scripts
 			PLDefScriptLoader* mPLDefScriptLdr;
 			
+			/// Factory for case-less filesystem archives
 			Ogre::ArchiveFactory* mDirArchiveFactory;
 			
+			/// Factory for Crf archives (zip archives with archivename prefix)
 			Ogre::ArchiveFactory* mCrfArchiveFactory;
 			
 			// If ogre is not used, these point to particular managers we hijack

@@ -102,7 +102,7 @@ namespace Opde {
 	}
 
 	const uint PlatformServiceFactory::getMask() {
-		return SERVICE_ENGINE;
+		return SERVICE_CORE;
 	}
 	
 	const size_t PlatformServiceFactory::getSID() {
