@@ -411,7 +411,7 @@ namespace Ogre {
 		each of those are fixed point signed numbers (10 bit)
 		*/
 
-		res.z = (int16_t)((int16_t)(src & 0x0FFFC) << 4) / 16384.0f;
+		res.z = (int16_t)((int16_t)(src & 0x0FFC) << 4) / 16384.0f;
 		res.y = (int16_t)((src >> 6) & 0x0FFC0) / 16384.0f;
 		res.x = (int16_t)((src >> 16) & 0x0FFC0) / 16384.0f;
 
