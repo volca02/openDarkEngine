@@ -150,184 +150,66 @@ namespace Opde {
 
 	//------------------------------------------------------------------------------------
 	void WRCell::insertTexturedVertex(Ogre::ManualObject *manual, int faceNum, const Vector3& coord,
-	        const Ogre::Vector2& displacement, const std::pair<Ogre::uint, Ogre::uint>& dimensions, Vector3 origin) {
-
-		BspVertex vert;
-
-		constructBspVertex(faceNum, coord, displacement, dimensions, &vert);
-
-		manual->position(vert.position[0] - origin.x, vert.position[1] - origin.y, vert.position[2] - origin.z);
-
-		manual->textureCoord(vert.texcoords[0], vert.texcoords[1]);
-
-		// !NLM!
-		manual->textureCoord(vert.lightmap[0], vert.lightmap[1]);
-
-		Vector3 normal(vert.normal[0], vert.normal[1], vert.normal[2]);
-
-		manual->normal(normal);
-	}
-
-
-	//------------------------------------------------------------------------------------
-	void WRCell::constructBspVertex(int faceNum, const Vector3& pos, const Ogre::Vector2& displacement, const std::pair<
-	        Ogre::uint, Ogre::uint>& dimensions, BspVertex *vtx) {
-		// Position copy
-		vtx->position[0] = pos.x;
-		vtx->position[1] = pos.y;
-		vtx->position[2] = pos.z;
+	        const std::pair<Ogre::uint, Ogre::uint>& dimensions, Vector3 origin) {
 
 		uint pln = mFaceMaps[faceNum].plane;
 
-
 		// Normal copy
-		Vector3 normal(mPlanes[pln].normal.x, mPlanes[pln].normal.y, mPlanes[pln].normal.z);
+		Vector3 normal = mPlanes[pln].normal;
 		normal.normalise();
-
-		vtx->normal[0] = normal.x;
-		vtx->normal[1] = normal.y;
-		vtx->normal[2] = normal.z;
 
 		// texturing coordinates
 		float tx, ty;
-		// Lightmapping coordinates
-		float lx, ly;
 
-
-		// normalised versions of the above
+		// normalised versions of the texturing axes
 		Vector3 nax_u, nax_v;
 
 		// Texturing axes
 		const Vector3& ax_u = mFaceInfos[faceNum].axisU;
 		const Vector3& ax_v = mFaceInfos[faceNum].axisV;
 
-		// Normalise the texturing axises
-		nax_u = ax_u.normalisedCopy(); // Normalized version of the axis U
-		nax_v = ax_v.normalisedCopy(); // -"- V
-
-		// Lengths of the axises - contains scale projected to the axis somewhat. somehow.
-		float l_ax_u = ax_u.length(); // the length of the axis U
-		float l_ax_v = ax_v.length(); // -"- V
+		// Lengths of the axes - contains scale projected to the axis somewhat. somehow.
+		float mag2_u = ax_u.squaredLength(); // the length of the axis U
+		float mag2_v = ax_v.squaredLength(); // -"- V
 
 		// UV shifts
 		float sh_u, sh_v;
 
-
+		// dot. p of the texturing axes
+		float dotp = ax_u.dotProduct(ax_v);
+		
 		// The UV shifts can't simply be center vertex based! It all seems to be 0 vertex based.
-
 		sh_u = mFaceInfos[faceNum].u / 4096.0;
 		sh_v = mFaceInfos[faceNum].v / 4096.0;
 
-		// the original vertex:
-		Vector3 tmp = pos;
-
-
-		// The first vertex in the poly.
-		const Vector3& o_first = mVertices[mPolyIndices[faceNum][0]]; //cell->face_maps[faceNum].flags
-
 		// The texturing origin is substracted
-		tmp -= o_first;
-
-		// UV shifts apply
-		tmp = tmp + ((ax_u * sh_u) + (ax_v * sh_v));
+		Vector3 tmp = coord - mVertices[mPolyIndices[faceNum][mFaceInfos[faceNum].originVertex]];
 
 		// relative pixel sizes (float) - seems that the texture mapper scales the whole thing with this
 		float rs_x = dimensions.first / 64.0;
 		float rs_y = dimensions.second / 64.0;
 
-
-		// Projected to the UV space.
-		tx = (nax_u.dotProduct(tmp)) / (l_ax_u * rs_x); // we divide by scale to normalize
-		ty = (nax_v.dotProduct(tmp)) / (l_ax_v * rs_y);
-
-		// - write the result into the BspVertex
-		vtx->texcoords[0] = tx;
-		vtx->texcoords[1] = ty;
-
-		// ----------------- LIGHTMAP COORDS --------------------
-		// const Vector3& center = mFaceInfos[faceNum].center;
-
-		tmp = pos;
-
-		Vector3 orig = tmp; // for debugging, remove...
-
-		// The scale defines the pixel size. Nothing else does
-		float scale = mFaceInfos[faceNum].scale;
-
-
-		// lightmaps x,y sizes
-		const WRLightInfo& li = mLights->getLightInfo(faceNum);
-
-		unsigned int sz_x = li.lx;
-		unsigned int sz_y = li.ly;
-
-		// Shifts. These are *128 (e.g. fixed point, 6 bits represent 0-1 range) to get 0-1 shift (in pixels)
-		// Weird thing about these is that they are nonsymetrical, and signed (max value 63, min about -15 or such).
-		sh_u = li.u / 128;
-		sh_v = li.v / 128;
-
-		// rel. pos
-		// tmp -= poly_center;
-		// tmp -= center;
-		// tmp -= o_first;
-
-		// shifting by UV shifts...
-		tmp -= ((nax_u * sh_u) + (nax_v * sh_v));
-
-		// To the UV space
-		lx = ((nax_u.dotProduct(tmp)) - displacement.x) / (sz_x * scale / 4.0) + 0.5;
-		ly = ((nax_v.dotProduct(tmp)) - displacement.y) / (sz_y * scale / 4.0) + 0.5;
-
-		/*
-		 lx = ((nax_u.dotProduct(tmp))) / ( sz_x * scale / 4.0);
-		 ly = ((nax_v.dotProduct(tmp))) / ( sz_y * scale / 4.0);
-		 */
-
-		// remap to the atlas coords and insert it to the vertex as a second texture coord...
-		Vector2 lmUV = mLights->mapUV(faceNum, Vector2(lx,ly));
-
-		vtx->lightmap[0] = lmUV.x; // lmUV.x
-		vtx->lightmap[1] = lmUV.y;
-
-	}
-
-
-	//------------------------------------------------------------------------------------
-	Vector2 WRCell::calcLightmapDisplacement(int polyNum) {
-		// ------------- Calculate the UV center displacement (as the poly center is off)
-		// This method is just a hack. We need to find a proper way to detect light map on polygon alignment
-		// readout from the cell info
-		const Vector3& ax_u = mFaceInfos[polyNum].axisU;
-		const Vector3& ax_v = mFaceInfos[polyNum].axisV;
-
-		// Normalise those texturing axises
-		Vector3 nax_u = ax_u.normalisedCopy(); // Normalized version of the axis U
-		Vector3 nax_v = ax_v.normalisedCopy();
-
-		Vector2 min_uv(1E16, 1E16);
-		Vector2 max_uv(-1E16, -1E16);
-
-
-		// Precalculate the lightmap displacement. (To get the resulting lmap uv to 0-1 range)
-		for (int vert = 0; vert < mFaceMaps[polyNum].count; vert++) {
-			// find the min and max coords in texture space
-			const Vector3& vcoord = mVertices[mPolyIndices[polyNum][vert]];
-
-			// To uv space
-			Vector2 uvs(nax_u.dotProduct(vcoord), nax_v.dotProduct(vcoord));
-
-			min_uv.x = std::min(min_uv.x, uvs.x);
-			min_uv.y = std::min(min_uv.y, uvs.y);
-			max_uv.x = std::max(max_uv.x, uvs.x);
-			max_uv.y = std::max(max_uv.y, uvs.y);
+		if (dotp == 0.0f) {
+			// Projected to the UV space.
+			tx = (ax_u.dotProduct(tmp) / mag2_u + sh_u) / rs_x; // we divide by scale to normalize
+			ty = (ax_v.dotProduct(tmp) / mag2_v + sh_v) / rs_y;
+		} else {
+			// calc the coefficients
+			float corr = 1.0f / (mag2_u*mag2_v - dotp*dotp);
+			float cu = corr * mag2_v;
+			float cv = corr * mag2_u;
+			float cross = corr * dotp;
+			
+			Vector2 pr(ax_u.dotProduct(tmp), ax_v.dotProduct(tmp));
+			
+			tx = (pr.x * cu - pr.y * cross + sh_u) / rs_x; 
+			ty = (pr.y * cv - pr.x * cross + sh_v) / rs_y;
 		}
 
-		// Now, compute displacement.
-		max_uv -= min_uv;
-
-		return min_uv + max_uv / 2;
+		manual->position(coord - origin);
+		manual->textureCoord(tx, ty);
+		manual->normal(normal);
 	}
-
 
 	//------------------------------------------------------------------------------------
 	void WRCell::constructPortalMeshes(Ogre::SceneManager *sceneMgr) {
@@ -358,10 +240,6 @@ namespace Opde {
 			// begin inserting one polygon
 			manual->begin(mat->getName());
 
-			// temporary array of indices (for polygon triangulation)
-			Vector2 displacement = calcLightmapDisplacement(polyNum);
-
-
 			// Hmm. I use a SceneNode centered at the polygon's center. Otherwise I get huge radius (from 0,0,0 of the sceneNode).
 			const Vector3& nodeCenter = mFaceInfos[polyNum].center;
 
@@ -371,7 +249,7 @@ namespace Opde {
 			for (int vert = 0; vert < mFaceMaps[polyNum].count; vert++) {
 				const Vector3& vrelative = mVertices[mPolyIndices[polyNum][vert]];
 
-				insertTexturedVertex(manual, polyNum, vrelative, displacement, dimensions, nodeCenter);
+				insertTexturedVertex(manual, polyNum, vrelative, dimensions, nodeCenter);
 			}
 
 			// now feed the indexes
@@ -496,6 +374,20 @@ namespace Opde {
 		return mHeader.numPolygons - mHeader.numPortals;
 	}
 
+	//------------------------------------------------------------------------------------
+	float findWrap(float x) {
+		if (x >= 0) {
+			return -64.0f * (int)(x/64.0f);
+		} else {
+			return -64.0f * (-1 + (int)(x/64.0f));
+		}
+	}
+
+	//------------------------------------------------------------------------------------
+	void WRCell::findLightmapShifts(Vector2& tgt, Vector2 origin) {
+		tgt.x = findWrap(origin.x);
+		tgt.y = findWrap(origin.y);
+	}
 
 	//------------------------------------------------------------------------------------
 	void WRCell::createCellGeometry() {
@@ -570,28 +462,145 @@ namespace Opde {
 
 				dimensions = dimi->second;
 
-				Vector2 displacement = calcLightmapDisplacement(polyNum);
-
-
-				// for each vertex, insert into the model
 				uint32_t *idxmap = new uint32_t[mFaceMaps[polyNum].count];
+				
+				if (mFaceMaps[polyNum].count > 32) {
+					// Just log error and continue
+					LOG_ERROR("WRCell: Cell %d[%d]: Polygon with %d>32 vertices encountered, skipping", mCellNum, polyNum, mFaceMaps[polyNum].count);
+					continue;
+				}
+				
+				// pre-calculate the texturing coordinates
+				// we need to do this because lightmap UV shifts are a pain in the butt
+				Vector2 uv_txt[32]; // 32 is the maximum vertex count
+				Vector2 uv_light[32];
+				
+				// base vertex - texturing origin
+				Vector3 origin = mVertices[mPolyIndices[polyNum][mFaceInfos->originVertex]]; 
+				
+				// plane id of the polygon
+				unsigned int pln = mFaceMaps[polyNum].plane;
+				
+				// Normal of the polygon
+				const Vector3& normal = mPlanes[pln].normal;
+				// normal.normalise();
 
+				// Texturing axes
+				const Vector3& ax_u = mFaceInfos[polyNum].axisU;
+				const Vector3& ax_v = mFaceInfos[polyNum].axisV;
+				
+				// Lengths of the axes squared
+				float mag2_u = ax_u.squaredLength();
+				float mag2_v = ax_v.squaredLength();
+				
+				// dot product of the texturing axes. Two texturing calculations are used based on the outcome
+				float dotp = ax_u.dotProduct(ax_v);
+
+				// UV shifts in pixels
+				float sh_u = mFaceInfos[polyNum].u / 4096.0;
+				float sh_v = mFaceInfos[polyNum].v / 4096.0;
+				
+				// relative pixel sizes (float) - seems that the texture mapper scales the whole thing with this
+				float rs_x = dimensions.first / 64.0;
+				float rs_y = dimensions.second / 64.0;
+				
+				const WRLightInfo& li = mLights->getLightInfo(polyNum);
+
+				// lightmap uv shift in pixels. added a half of the pixel to be centered in corners
+				float lsh_u = ((0.5f - li.u) + mFaceInfos[polyNum].u / 1024.0f);
+				float lsh_v = ((0.5f - li.v) + mFaceInfos[polyNum].v / 1024.0f);
+				
+				// are the texturing axes orthogonal?
+				if (dotp == 0.0f) {
+					// first pass. Calculate the UV texturing coordinates
+					for (int vert = 0; vert < mFaceMaps[polyNum].count; vert++) {
+						// Rather straightforward
+						const Vector3& vrelative = mVertices[mPolyIndices[polyNum][vert]] - origin;
+						
+						Vector2 projected(ax_u.dotProduct(vrelative) / mag2_u, ax_v.dotProduct(vrelative) / mag2_v);
+						
+						// Finalised texturing coordinates (in 0-1 range already)
+						uv_txt[vert].x = (projected.x + sh_u) / rs_x;
+						uv_txt[vert].y = (projected.y + sh_v) / rs_y;
+						
+						// lightmapping coordinates - pretty close to the texturing ones (the old renderer had the pixels 
+						// aligned for surface cache purposes)
+						// These values are in lightmap pixels
+						uv_light[vert].x = (4.0f * projected.x + lsh_u);
+						uv_light[vert].y = (4.0f * projected.y + lsh_v);
+					}
+				} else { // texture axes not orthogonal. A slightly more complicated case
+					// the texturing outcomes are mixed between axes based on the dotProduct - the projection axes influence each other
+					// common denominator
+					float corr = 1.0f / (mag2_u * mag2_v - dotp * dotp);
+
+					// projection coefficients
+					float cu = corr * mag2_v;
+					float cv = corr * mag2_u;
+					float cross = corr * dotp;
+					
+					// first pass. Calculate the UV texturing coordinates
+					for (int vert = 0; vert < mFaceMaps[polyNum].count; vert++) {
+						// Rather straightforward
+						const Vector3& vrelative = mVertices[mPolyIndices[polyNum][vert]] - origin;
+						
+						Vector2 pr(ax_u.dotProduct(vrelative), ax_v.dotProduct(vrelative));
+						
+						Vector2 projected(
+							pr.x * cu - pr.y * cross, 
+							pr.y * cv - pr.x * cross);
+						
+						// Finalised texturing coordinates (in 0-1 range already)
+						uv_txt[vert].x = (projected.x + sh_u) / rs_x;  // we divide by scale to normalize
+						uv_txt[vert].y = (projected.y + sh_v) / rs_y;
+						
+						// lightmapping coordinates - pretty close to the texturing ones (the old renderer had the pixels 
+						// aligned for surface cache purposes)
+						// These values are in lightmap pixels
+						uv_light[vert].x = (4.0f * projected.x + lsh_u);
+						uv_light[vert].y = (4.0f * projected.y + lsh_v);
+					}
+				}
+				
+				// Intermezzo. Unwrapping lightmap U/V
+				/* 
+				EXPLANATION: The original dark wraps the u/v shifts of the lightmaps - i.e. there are some 
+				crazy values for lightmap uv shifts, as the surface cache in the original implementation worked solely
+				with 64x64 bitmaps for surface cache, so some shifts targetted out of 0-64 range in the resulting uv.
+				To compensate, we use these cycles to find out how to shift the whole polygon to 0-64 and then move all 
+				the values accordingly.
+				*/
+				Vector2 fv = uv_light[0]; // first vertext
+				
+				for (int vert = 1; vert < mFaceMaps[polyNum].count; vert++) {
+					fv.x = std::min(fv.x, uv_light[vert].x);
+					fv.y = std::min(fv.y, uv_light[vert].y);
+				}
+				
+				Vector2 lmsh;
+				
+				// TODO: make a method out of this
+				findLightmapShifts(lmsh, fv);
+				
+				// second pass, insert into the fragment
 				for (int vert = 0; vert < mFaceMaps[polyNum].count; vert++) {
-					const Vector3& vrelative = mVertices[mPolyIndices[polyNum][vert]];
-
-
-					// insertTexturedVertex(manual, polyNum, vrelative, displacement, dimensions, nodeCenter);
-					BspVertex vtx;
-					constructBspVertex(polyNum, vrelative, displacement, dimensions, &vtx);
-
-					idxmap[vert] = frag->vertex(Vector3(vtx.position[0], vtx.position[1], vtx.position[2]), Vector3(
-					        vtx.normal[0], vtx.normal[0], vtx.normal[0]), Vector2(vtx.texcoords[0], vtx.texcoords[1]),
-					        Vector2(vtx.lightmap[0], vtx.lightmap[1]));
+					// Shift into 0-64.0f
+					uv_light[vert] += lmsh;
+					
+					// normalise the lightmap into 0-1 range
+					Vector2 uvl = uv_light[vert];
+					uvl.x /= li.lx;
+					uvl.y /= li.ly;
+					
+					idxmap[vert] = frag->vertex(
+						mVertices[mPolyIndices[polyNum][vert]], 
+						normal, 
+						uv_txt[vert],
+					        mLights->mapUV(polyNum, uvl));
 				}
 
-				// now feed the indexes
+				// now feed the indices
 				for (int t = 1; t < mFaceMaps[polyNum].count - 1; t++) {
-					// push back the indexes
 					frag->index(idxmap[0]);
 					frag->index(idxmap[t + 1]);
 					frag->index(idxmap[t]);

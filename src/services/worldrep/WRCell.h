@@ -95,15 +95,11 @@ namespace Opde {
 
 			/** Inserts a new vertex into the manual object. Calculates all the UV values needed
 			* @deprecated For moving towards the geometry by buffers */
-			void insertTexturedVertex(Ogre::ManualObject *manual, int faceNum, const Vector3& pos, const Ogre::Vector2& displacement,
+			void insertTexturedVertex(Ogre::ManualObject *manual, int faceNum, const Vector3& pos, 
 					const std::pair< Ogre::uint, Ogre::uint >& dimensions, Ogre::Vector3 origin);
-
-			/** Constructs a BSPVertex out of our data */
-			void constructBspVertex(int faceNum, const Vector3& pos, const Ogre::Vector2& displacement, const std::pair< Ogre::uint, Ogre::uint >& dimensions, BspVertex *vtx);
-
-			/** Calculates the Lightmap center in texture space, using Bounding coordinates as the base. */
-			Ogre::Vector2 calcLightmapDisplacement(int polyNum);
-
+					
+			// Finds the unwrapping shifts (in multiple of 64.0f)
+			void findLightmapShifts(Ogre::Vector2& tgt, Ogre::Vector2 origin);
 
 			/** The bsp node constructed by this class. Filled with static geometry and otherwise initialized */
 			Ogre::BspNode* mBSPNode;
