@@ -28,6 +28,9 @@
 
 #include "compat.h"
 #include "integers.h"
+
+#include "OpdeCommon.h"
+
 #include "OpdeSingleton.h"
 #include "logger.h"
 #include "OgreOpdeLogConnector.h"
@@ -38,14 +41,6 @@
 
 #include <OgreRoot.h>
 #include <OgreLogManager.h>
-
-// Script compilers
-#include "DTypeScriptCompiler.h"
-#include "PLDefScriptCompiler.h"
-
-// script loaders
-#include "DTypeScriptLoader.h"
-#include "PLDefScriptLoader.h"
 
 /** OpenDarkEngine namespace. Holds the whole openDarkEngine project. */
 namespace Opde {
@@ -115,24 +110,25 @@ namespace Opde {
 			
 			/// @deprecated
 			ConsoleBackend* mConsoleBackend;
-			
+
+#ifdef SCRIPT_COMPILERS			
 			DTypeScriptCompiler* mDTypeScriptCompiler;
 			PLDefScriptCompiler* mPLDefScriptCompiler;
 			
-			typedef std::list< LogListener* > LogListenerList;
-			typedef std::list< ServiceFactory* > ServiceFactoryList;
-			
-			
-			LogListenerList mLogListeners;
-			
-			const unsigned int mServiceMask;		
-			
-			/// Loader for the DType scripts. Only used if 
+			/// Loader for the DType scripts.
 			DTypeScriptLoader* mDTypeScriptLdr;
 
 			/// Loader for the PLDef scripts
 			PLDefScriptLoader* mPLDefScriptLdr;
+#endif			
 			
+			typedef std::list< LogListener* > LogListenerList;
+			typedef std::list< ServiceFactory* > ServiceFactoryList;
+			
+			LogListenerList mLogListeners;
+			
+			const unsigned int mServiceMask;		
+			/// Factory for case-less filesystem archives
 			/// Factory for case-less filesystem archives
 			Ogre::ArchiveFactory* mDirArchiveFactory;
 			

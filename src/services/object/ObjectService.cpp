@@ -239,17 +239,17 @@ namespace Opde {
 
 		// DonorType property (single integer property, built in):
 		DataStoragePtr stor(new IntDataStorage(NULL));
-		mPropDonorType = mPropertyService->createPropertyGroup("DonorType", "DonorType", "never", stor);
+		mPropDonorType = mPropertyService->createProperty("DonorType", "DonorType", "never", stor);
 		// version of the property tag
 		mPropDonorType->setChunkVersions(2, 4);
 
 		// symbolic name builtin property
 		mSymNameStorage = SymNamePropertyStoragePtr(new SymNamePropertyStorage());
-		mPropSymName = mPropertyService->createPropertyGroup("SymbolicName", "SymName", "never", mSymNameStorage);
+		mPropSymName = mPropertyService->createProperty("SymbolicName", "SymName", "never", mSymNameStorage);
 		mPropSymName->setChunkVersions(2, 17);
 
 		mPositionStorage = PositionPropertyStoragePtr(new PositionPropertyStorage());
-		mPropPosition = mPropertyService->createPropertyGroup("Position", "Position", "never", mPositionStorage);
+		mPropPosition = mPropertyService->createProperty("Position", "Position", "never", mPositionStorage);
 		mPropPosition->setChunkVersions(2, 65558);
 	}
 
@@ -478,6 +478,7 @@ namespace Opde {
 			ObjectServiceMsg m;
 
 			m.type = OBJ_SYSTEM_CLEARED;
+			m.objectID = 0;
 			broadcastMessage(m);
 		}
 	}

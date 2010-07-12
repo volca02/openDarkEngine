@@ -82,7 +82,7 @@ namespace Ogre
 		if (NumChars < 0)
 			return NULL;
 
-		vector <unsigned short> Widths;
+		std::vector <unsigned short> Widths;
 		mFontFile->seek(FontHeader.WidthOffset, File::FSEEK_BEG);
 		for(N = 0; N < NumChars + 1; N++)
 		{

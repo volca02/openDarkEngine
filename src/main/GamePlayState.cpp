@@ -46,7 +46,7 @@ namespace Opde {
 
 	template<> GamePlayState* Singleton<GamePlayState>::ms_Singleton = 0;
 
-	GamePlayState::GamePlayState() : mSceneMgr(NULL), mToLoadScreen(true), mDebugOverlay(NULL) {
+	GamePlayState::GamePlayState() : mSceneMgr(NULL), mToLoadScreen(true), mDebugOverlay(NULL), mPortalOverlay(NULL) {
 		/// Register as a command listener, so we can load different levels
 		Opde::ConsoleBackend::getSingleton().registerCommandListener("load", dynamic_cast<ConsoleCommandListener*>(this));
 		Opde::ConsoleBackend::getSingleton().setCommandHint("load", "Loads a specified mission file");
@@ -92,8 +92,8 @@ namespace Opde {
 		mRoot = Ogre::Root::getSingletonPtr();
 		mOverlayMgr = OverlayManager::getSingletonPtr();
 
-		mConsole = new ConsoleFrontend();
-		mConsole->setActive(false);
+		/*mConsole = new ConsoleFrontend();
+		mConsole->setActive(false);*/
 
 		mDebugOverlay = OverlayManager::getSingleton().getByName("Opde/DebugOverlay");
 
@@ -106,16 +106,19 @@ namespace Opde {
 	}
 
 	GamePlayState::~GamePlayState() {
-		delete mConsole;
+		// delete mConsole;
 	}
 
 	void GamePlayState::start() {
 		LOG_INFO("GamePlayState: Starting");
 		PropertyServicePtr ps = GET_SERVICE(PropertyService);
-		PropertyGroup* posPG = ps->getPropertyGroup("Position");
+		Property* posPG = ps->getProperty("Position");
+		
+		InputServicePtr inputSrv = GET_SERVICE(InputService);
+		inputSrv->processCommand("bind ` show_console");
 
 		if (posPG == NULL)
-			OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "GamePlayState::start");
+			OPDE_EXCEPT("Could not get Position property. Not defined. Fatal", "GamePlayState::start");
 
 		LOG_DEBUG("Starting Point object id : %d", StartingPointObjID);
 
@@ -131,7 +134,6 @@ namespace Opde {
 
 		LOG_DEBUG("Starting Point position : %f %f %f", StartingPoint.x, StartingPoint.y, StartingPoint.z);
 
-//		std::string tmp = PropertyGroup->get(StartingPointObjID, "SymName").toString();
 		mSceneMgr = mRoot->getSceneManager( "DarkSceneManager" );
 		RenderServicePtr renderSrv = GET_SERVICE(RenderService);
 
@@ -177,7 +179,7 @@ namespace Opde {
 		}
 
 		// hidden as default
-		mConsole->setActive(false);
+		// mConsole->setActive(false);
 
 		mWindow->resetStatistics();
 
@@ -247,10 +249,14 @@ namespace Opde {
 		// std::cerr << mCamera->getPosition() << std::endl;
 		// std::cerr << mCamera->getDirection() << std::endl;
 
-		mPortalOverlay->hide();
-		mDebugOverlay->hide();
-		mConsole->setActive(false);
+		if (mPortalOverlay)
+			mPortalOverlay->hide();
+			
+		if (mDebugOverlay)
+			mDebugOverlay->hide();
+		/*mConsole->setActive(false);
 		mConsole->update(1); // to hide the console while exiting
+		*/
 
 		if (mToLoadScreen) {
 			pushState(GameLoadState::getSingletonPtr());
@@ -329,7 +335,7 @@ namespace Opde {
 			mScreenShot = false;
 		}
 
-		mConsole->update(timePassed);
+		// mConsole->update(timePassed);
 
 		if (mDebug) {
 			// update stats when necessary
@@ -430,12 +436,12 @@ namespace Opde {
 	}
 
 	bool GamePlayState::keyPressed( const OIS::KeyEvent &e ) {
-		if( e.key == KC_F10 ) {
+		/*if( e.key == KC_F10 ) {
 			mConsole->setActive(!mConsole->isActive());
 			return true;
 		}
 
-		if (!mConsole->injectKeyPress(e)) {
+		if (!mConsole->injectKeyPress(e)) {*/
 			if(e.key == KC_W) {
 				mForward = true;
 				return true;
@@ -458,13 +464,13 @@ namespace Opde {
 				mPortalDisplay = true;
 				return true;
 			} else return true;
-		 } else {
+		/* } else {
 			return true;
-		};
+		};*/
 	}
 
 	bool GamePlayState::keyReleased( const OIS::KeyEvent &e ) {
-		if (!mConsole->isActive()) {
+		/*if (!mConsole->isActive()) {*/
 			if(e.key == KC_W) {
 				mForward = false;
 				return true;
@@ -490,7 +496,7 @@ namespace Opde {
 			}
 
 			return true;
-		} else return true;
+		/*} else return true;*/
 	}
 
 	bool GamePlayState::mouseMoved( const OIS::MouseEvent &e ) {

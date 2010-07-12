@@ -115,6 +115,19 @@ namespace Opde {
 
 	// Shortcut to the Logger instance
 	#define LOG Logger::getSingleton()
+
+// based on the compiler type...
+#if defined(GCC)
+	#define STUB_WARN() Logger::getSingleton().log(Logger::LOG_LEVEL_ERROR, "STUB Warning: %s[%d]: '%s' is a stub.", __FILE__, __LINE__, __PRETTY_FUNCTION__)
+	#define STUB_WARN_TXT(reason) Logger::getSingleton().log(Logger::LOG_LEVEL_ERROR, "STUB Warning: %s[%d]: '%s' is a stub. Reason: %s", __FILE__, __LINE__, __PRETTY_FUNCTION__, reason)
+#elif defined(_MSC_VER)
+	#define STUB_WARN() Logger::getSingleton().log(Logger::LOG_LEVEL_ERROR, "STUB Warning: %s[%d]: '%s' is a stub.", __FILE__, __LINE__, __FUNCSIG__)
+	#define STUB_WARN_TXT(reason) Logger::getSingleton().log(Logger::LOG_LEVEL_ERROR, "STUB Warning: %s[%d]: '%s' is a stub. Reason: %s", __FILE__, __LINE__, __FUNCSIG__, reason)
+#else
+	#define STUB_WARN() Logger::getSingleton().log(Logger::LOG_LEVEL_ERROR, "STUB Warning: %s[%d]", __FILE__, __LINE__)
+	#define STUB_WARN_TXT(reason) Logger::getSingleton().log(Logger::LOG_LEVEL_ERROR, "STUB Warning: %s[%d].  Reason: %s", __FILE__, __LINE__, reason)
+#endif
+
 }
 
 #endif

@@ -82,6 +82,10 @@ namespace Opde {
 				mInheritService = GET_SERVICE(InheritService);
 				mAncestorStack.push(mSrcID);
 			}
+			
+			~InheritedMultiTargetLinkQueryResult() {
+				mInheritService.setNull();
+			}
 
             		virtual const LinkPtr& next() {
 				// see if we have any more in the current iterator

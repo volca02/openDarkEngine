@@ -49,7 +49,7 @@ namespace Opde {
 
 			Room* getRoomByID(int32_t id);
 			
-			/** Reassigns he object's room if a room is sucessfully found
+			/** Reassigns the object's room if a room is sucessfully found
 			 * @param idset The id set to use (typically 0-objects, 1-AI)
 			 * @param objID The id of the object to track down
 			 * @param pos The position of the object

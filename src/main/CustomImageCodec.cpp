@@ -44,7 +44,7 @@ namespace Ogre {
 
 	void CustomImageCodec::startup(void) {
 		// We should have the freeimage library already started by ogre, but let's see
-		FreeImage_Initialise(false);
+		// TODO: FreeImage_Initialise(false);
 		
 		// We're only interested in gif and pcx files...
 		// Let's see if we can find those
@@ -53,10 +53,10 @@ namespace Ogre {
 			if ((FREE_IMAGE_FORMAT)i != FIF_GIF && (FREE_IMAGE_FORMAT)i != FIF_PCX)
 				continue;
 			
-			if ((FREE_IMAGE_FORMAT)i != FIF_GIF)	
+			if ((FREE_IMAGE_FORMAT)i != FIF_GIF)
 				msGIFFound = true;
 				
-			if ((FREE_IMAGE_FORMAT)i != FIF_PCX)	
+			if ((FREE_IMAGE_FORMAT)i != FIF_PCX)
 				msPCXFound = true;
 			
 			String exts(FreeImage_GetFIFExtensionList((FREE_IMAGE_FORMAT)i));
@@ -70,7 +70,9 @@ namespace Ogre {
 				msCodecList.push_back(codec);
 				
 				try {
-					msReplacedCodecs[*v] = Codec::getCodec(*v);
+					Codec* cod = Codec::getCodec(*v);
+					msReplacedCodecs[*v] = cod;
+					Codec::unRegisterCodec(cod);
 				} catch (Ogre::Exception) {
 					// Nothing to do... that means the codec was not registered by the previous codec impl.
 				}
@@ -91,7 +93,7 @@ namespace Ogre {
 	}
 	
 	void CustomImageCodec::shutdown(void) {
-		FreeImage_DeInitialise();
+		// TODO: FreeImage_DeInitialise();
 
 		// Loop no. 1. Remove all the registered codecs
 		for (RegisteredCodecList::iterator i = msCodecList.begin(); i != msCodecList.end(); ++i) {
@@ -102,9 +104,8 @@ namespace Ogre {
 		// Loop no. 1 : Replace the codecs back to thei're originals
 		for (CodecList::iterator it = msReplacedCodecs.begin(); it != msReplacedCodecs.end(); ++it) {
 			if (it->second) // only re-register if there was an original in the first place
-                Codec::registerCodec(it->second);
+				Codec::registerCodec(it->second);
 		}
-
 		
 		msCodecList.clear();
 		msReplacedCodecs.clear();

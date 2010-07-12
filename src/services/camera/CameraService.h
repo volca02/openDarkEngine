@@ -28,12 +28,14 @@
 
 #include "config.h"
 
+#include "SharedPtr.h"
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
 #include "InputService.h"
 #include "RenderService.h"
+#include "PhysicsService.h"
 #include "SimService.h"
-#include "SharedPtr.h"
+#include "PlayerService.h"
 
 namespace Opde {
 
@@ -83,6 +85,17 @@ namespace Opde {
 			// schedules a camera rotation. The given values are not scaled by time
 			void appendCameraRotation(float horizontal, float vertical);
 			
+			/** Updates the camera position and orientation based on the submodel specified 
+			 * @param objId the object id
+			 * @param submdl the sub-model number 
+			 * @return true if the update was done, false if the parameters are invalid */
+			bool updateCameraFromSubObject(int objId, size_t submdl);
+			
+			/** Handles the object attachment details - effects, hasrefs property handling, player service handling. 
+			* @param objID the object to attach to
+			* @param dynamic Controls the dynamicity aspect of the attachment. If true, the camera can control the object's rotation */
+			void handleAttachment(int objID, bool dynamic);
+			
 		private:
 			/// Input service ptr
 			InputServicePtr mInputSrv;
@@ -107,6 +120,21 @@ namespace Opde {
 			
 			/// true means we allow the camera to rotate the object (no meaning if no attachment is done)
 			bool mDynamicAttach;
+			
+			/// Physics service for camera updates
+			PhysicsServicePtr mPhysicsService;
+			
+			/// Player service that holds the player object ID
+			PlayerServicePtr mPlayerSrv;
+			
+			/// Property service handle (For hasrefs, etc)
+			PropertyServicePtr mPropertySrv;
+			
+			/// Hasrefs property that is used to hide the object camera is currently attached to
+			Property* mHasRefsProperty;
+			
+			/// Camera that we use 
+			Ogre::Camera* mCamera;
 	};
 
 	/// Shared pointer to Camera service

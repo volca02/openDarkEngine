@@ -80,9 +80,11 @@ typedef struct {
 
 /* PHYS. OBJECT FLAGS */
 #define PHYS_OBJ_INACTIVE   0x0000004
+#define PHYS_OBJ_PLAYER     0x0000008
 #define PHYS_OBJ_SLEEPING   0x0000080
 #define PHYS_OBJ_ROPE       0x0001000
 #define PHYS_OBJ_DEPLOYED_ROPE 0x0004000
+#define PHYS_FACE_VEL       0x0040000
 #define PHYS_OBJ_MTERRAIN   0x0100000
 #define PHYS_OBJ_DOOR	    0x0200000
 #define PHYS_AI_COLLIDE     0x0400000 // Originally pPhysAICollideProp?
@@ -460,15 +462,15 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 		return false;
 	}
 
-	uint32* subobj_counts = new uint32[num_subobjs];
-	fread(subobj_counts,4,num_subobjs,f);
+	uint32* subobj_types = new uint32[num_subobjs];
+	fread(subobj_types,4,num_subobjs,f);
 
-	int total_subobjdata = 0;
-
-	printf("\tSubobj Counts : ");
+	printf("\tSubobj Types : "); // should be the same as the main object
 	for (unsigned int n = 0; n < num_subobjs; n++) {
-		printf("%d", subobj_counts[n]);
-		total_subobjdata += subobj_counts[n];
+		if (subobj_types[n] != bvolume)
+			printf("!~!");
+			
+		printf("%d", subobj_types[n]);
 		if (n < num_subobjs - 1)
 			printf(", ");
 	}
@@ -747,7 +749,7 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	fpos(f);
 
 	// release sub-obj data
-	delete subobj_counts;
+	delete subobj_types;
 
 	if (feof(f)) {
 		return false;

@@ -25,9 +25,19 @@
 #include "logger.h"
 #include "ServiceCommon.h"
 
+#ifdef WIN32
 #include "Win32Platform.h"
+#else
+#  ifdef UNIX
 #include "UnixPlatform.h"
+#  else
+#    ifdef APPLE
 #include "ApplePlatform.h"
+#    else
+#      error Unknown platform!
+#    endif
+#  endif
+#endif 
 
 using namespace std;
 

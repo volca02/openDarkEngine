@@ -151,13 +151,12 @@ namespace Ogre {
 						"DarkSceneManager::createCamera" );
 		}
 
-        Camera * c = new DarkCamera( name, this );
+		Camera * c = new DarkCamera( name, this );
 
-        mCameras.insert( CameraList::value_type( name, c ) );
+		mCameras.insert( CameraList::value_type( name, c ) );
 
-        // Visible objects bounds info for the camera
-        mCamVisibleObjectsMap[c] = VisibleObjectsBoundsInfo();
-
+		// Visible objects bounds info for the camera
+		mCamVisibleObjectsMap[c] = VisibleObjectsBoundsInfo();
 
 		return c;
 	}
@@ -228,8 +227,8 @@ namespace Ogre {
 		// Clear the render queue first
 		RenderQueue* renderQueue = getRenderQueue();
 
-        renderQueue->clear();
-        visibleBounds->reset();
+		renderQueue->clear();
+		visibleBounds->reset();
 
 		// Ensure the camera is updated (otherwise we'd have problems if it updated while in the upcoming loop)
 		static_cast<DarkCamera*>(cam)->updateFrustum();

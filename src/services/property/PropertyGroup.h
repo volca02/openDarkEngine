@@ -41,18 +41,19 @@ namespace Opde {
 	// forward decl.
 	class PropertyService;
 
-	/** @brief Property group - a group of properties of the same kind (name, type).
-	* Property group holds all the properties of the same kind for all the objects.
+	/** @brief Property - a collection of per-object values (or value sets).
+	* Property holds all the properties of the same kind for all the objects.
+	* Properties contain a set of values via key->value mapping.
 	*/
-	class OPDELIB_EXPORT PropertyGroup : public NonCopyable, public MessageSource<PropertyChangeMsg> {
+	class OPDELIB_EXPORT Property : public NonCopyable, public MessageSource<PropertyChangeMsg> {
 		public:
-			/** PropertyGroup Constructor
+			/** Property Constructor
 			* @param owner The owner property service
 			* @param name The property name
 			* @param chunk_name The name of the chunk (without the P$)
 			* @param storage The property storage created to hold the data
 			*/
-			PropertyGroup(PropertyService* owner, const std::string& name, const std::string& chunk_name, const DataStoragePtr& storage, std::string inheritorName);
+			Property(PropertyService* owner, const std::string& name, const std::string& chunk_name, const DataStoragePtr& storage, std::string inheritorName);
 
 			/** Setter for the property chunk version */
 			inline void setChunkVersions(uint verMaj, uint verMin) {
@@ -67,12 +68,12 @@ namespace Opde {
 			inline uint getChunkVersionMinor(void) { return mVerMin; };
 
 			/** Destructor */
-			virtual ~PropertyGroup();
+			virtual ~Property();
 
 			/** Shutdown routine. All dependencies must be be released here */
 			virtual void shutdown();
 
-			/// Sets this property group's flag mBuiltIn to true, meaning this PropertyGroup was created by code as a core property
+			/// Sets this property's flag mBuiltIn to true, meaning this Property was created by code as a core property
 			inline void setBuiltin() { mBuiltin = true; };
 
 			/// Gets the builtin flag
@@ -80,12 +81,12 @@ namespace Opde {
 
 			/** Property storage setter
 			* @param newStorage The new storage for properties
-			* @warning This should not be used when the property group holds some data
+			* @warning This should not be used while the property holds some data
 			*/
 			virtual void setPropertyStorage(const DataStoragePtr& newStorage);
 
 
-			/// Name getter. Returns the name of property this group manages
+			/// Name getter. Returns the name of this property
 			const std::string& getName() { return mName; };
 
 			/** Determines whether an object with id obj_id stores or inherits property of this type
@@ -124,8 +125,8 @@ namespace Opde {
 			*/
 			void save(const FileGroupPtr& db, const BitArray& objMask);
 
-			/** Clears the whole property group.
-			* Clears out all the properties, and broadcasts PROP_GROUP_CLEARED
+			/** Clears the whole property (all data on all objects)
+			* Clears out all the properties, and broadcasts PROP_CLEARED
 			*/
 			virtual void clear();
 
@@ -176,21 +177,21 @@ namespace Opde {
 			*/
 			DataFieldDescIteratorPtr getFieldDescIterator(void);
 
-			/** Grows the property group to allow the storage of minID to maxID object id's
+			/** Grows the property to allow the storage of minID to maxID object id's
 			*/
 			void grow(int minID, int maxID);
 
 		protected:
 			// storage-less property constructor. Used by properties which want to construct their storage on their own
-			PropertyGroup(PropertyService* owner, const std::string& name, const std::string& chunk_name,  std::string inheritorName);
+			Property(PropertyService* owner, const std::string& name, const std::string& chunk_name,  std::string inheritorName);
 
 			/** Does the internal handling related to the creation of a property for object
 			* @param objID The object id to which a property was added
 			*/
 			void _addProperty(int objID);
 
-            /// The listener to the inheritance messages
-            void onInheritChange(const InheritValueChangeMsg& msg);
+			/// The listener to the inheritance messages
+			void onInheritChange(const InheritValueChangeMsg& msg);
 
 			/** A connection point usable for descendants to implement property behavior.
 			* Called from onInheritChange. In it's default this does nothing.
@@ -231,7 +232,7 @@ namespace Opde {
 			/// Owner service
 			PropertyService* mOwner;
 
-			/// Builtin flag - property groups created in code as builtin have true here
+			/// Builtin flag - properties created in code as builtin have true here
 			bool mBuiltin;
 	};
 
@@ -240,7 +241,7 @@ namespace Opde {
 	* virtual ones, for example clear, which can happen to be called instead of removeProperty when unloading data.
 	* @note All the methods introduced here are only called on concrete objects!
 	*/
-	class OPDELIB_EXPORT ActiveProperty : public PropertyGroup {
+	class OPDELIB_EXPORT ActiveProperty : public Property {
 		public:
 			ActiveProperty(PropertyService* owner, const std::string& name,
 							const std::string& chunk_name, std::string inheritorName);

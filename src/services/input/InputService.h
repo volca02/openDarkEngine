@@ -194,7 +194,7 @@ namespace Opde {
 			*/
 			bool loadBNDFile(const std::string& filename);
 
-			//Adds a command to the pool
+			/// Adds a command to the pool
 			DVariant processCommand(const std::string& CommandString);
 
 			/// TODO:	void saveBNDFile(const std::string& filename);
@@ -219,12 +219,18 @@ namespace Opde {
 
 			/// Unregisters a command listener by it's name
 			void unregisterCommandTrap(const std::string& command);
+			
+			/** registers a command alias 
+			* @param alias The alias to use
+			* @param command the command that gets executed when the alias is encountered
+			*/
+			void registerCommandAlias(const std::string& alias, const std::string& command);
 
 			/// Sets a direct listener (only notified when IM_DIRECT is active)
-			void setDirectListener(DirectInputListener* listener) {mDirectListener = listener;};
+			void setDirectListener(DirectInputListener* listener) { mDirectListener = listener; };
 
 			/// Clears the direct listener mapping
-			void unsetDirectListener() {mDirectListener = NULL;};
+			void unsetDirectListener() { mDirectListener = NULL; };
 
 			/** Capture the inputs. Should be called every frame (Temporary code, will be removed after loop service is done) */
 			void captureInputs();
@@ -239,16 +245,20 @@ namespace Opde {
 			/// Processes key repeats, calls processKeyEvent on appropriate delays
 			void processKeyRepeat(float deltaTime);
 
+			/// Initilizes the key name to code map
 			void initKeyMap();
-			void tokenize(std::string , std::vector<std::string> &OutVector, char Token);
+
+			/// Unmaps the string into ois keycode
 			unsigned int mapToOISCode(std::string Key) const;
 
 			/// registers (int)OIS::KeyCode to textual representation and inverse mappings
 			void registerValidKey(int kc, const std::string& txt);
 
-			/// Calls a trap for a command
-			/// @returns true if the command was found, false otherwise
-			bool callCommandTrap(const InputEventMsg& msg);
+			/** Calls a trap for a command
+			* @warning Modifies the msg parameter upon dealiasing
+			* @returns true if the command was found, false otherwise
+			*/
+			bool callCommandTrap(InputEventMsg& msg);
 
 			/// returns true if the command trap exists for a given command
 			bool hasCommandTrap(const std::string& cmd);
@@ -256,11 +266,17 @@ namespace Opde {
 			/// Splits the given command on first whitespace to command an parameters parts
 			std::pair<std::string, std::string> splitCommand(const std::string& cmd) const;
 
+			/// Logs all available commands
+			void logCommands();
+			
+			/// Logs all available variables and their values
+			void logVariables();
+			
 			/// Processes the received key event with current mapper, and if it finds a match, sends an event
 			void processKeyEvent(unsigned int keyCode, InputEventType t);
 
+			/// Processes joystick or mouse event (axis movement, etc)
 			void processJoyMouseEvent(unsigned int Id, InputEventType Event);
-
 
 			// ---- OIS input events ----
 			bool keyPressed(const OIS::KeyEvent &e);
@@ -276,21 +292,24 @@ namespace Opde {
 			bool povMoved(const OIS::JoyStickEvent &, int);
 
 			/// Finds a mapper (Or NULL) for the specified context
-			InputEventMapperPtr findMapperForContext(const std::string& ctx);
+			InputEventMapper* findMapperForContext(const std::string& ctx);
 
 			/// Strips a comment (any text after ';' including that character)
 			std::string stripComment(const std::string& cmd);
 			
-			typedef std::vector<std::string> ContentsVector;
+			/// Defines a new input binding in specified mapper
+			void addBinding(const std::string& keys, const std::string& command, InputEventMapper* mapper);
 			
-			void addBindCommand(const ContentsVector& Command);
+			/** Gives a command found for the given alias, if any
+			* @param alias The aliased command
+			* @param command the string that gets filled with the dealiased version of the command
+			* @return true if the alias was found and command was dealiased
+			*/
+			bool dealiasCommand(const std::string& alias, std::string& command);
 
-			typedef std::vector<ContentsVector> BindFileCommands;
-
-			typedef std::map<unsigned int, std::string> CommandMap;
-
+			
 			/// Named context to an event mapper map
-			typedef std::map< std::string, InputEventMapperPtr > ContextToMapper;
+			typedef std::map< std::string, InputEventMapper* > ContextToMapper;
 
 			/// string variable name to variant map
 			typedef std::map< std::string, DVariant > ValueMap;
@@ -304,8 +323,8 @@ namespace Opde {
 			/// map of command text to the handling listener
 			typedef std::map< std::string, ListenerPtr > ListenerMap;
 
-			/// Set of commands that receive event on hold, every refresh
-			typedef std::set< std::string > CommandSet;
+			/// string variable name to dealiased value
+			typedef std::map< std::string, std::string > AliasMap;
 
 			/// map of the context name to the mapper
 			ContextToMapper mMappers;
@@ -319,10 +338,9 @@ namespace Opde {
 			/// Reverse key map
 			ReverseKeyMap mReverseKeyMap;
 
-			CommandMap mCommandMap;
-
 			/// Current mapper
-			InputEventMapperPtr mCurrentMapper;
+			InputEventMapper* mCurrentMapper;
+			InputEventMapper* mDefaultMapper;
 
 			/// Current input mode
 			InputMode mInputMode;
@@ -330,11 +348,7 @@ namespace Opde {
 			/// Map of the command trappers
 			ListenerMap mCommandTraps;
 
-			/// Set of commands that receive events every refresh if the button is held
-			CommandSet mOnPressCommands;
-
 			/// Current direct listener
-			/// TODO: Maybe this will become a stack
 			DirectInputListener* mDirectListener;
 			
 			/// Key Repeat: Initial delay (between first and second key repeats)
@@ -372,6 +386,9 @@ namespace Opde {
 			
 			/// Non-exclusive input
 			bool mNonExclusive;
+			
+			/// Aliases to commands
+			AliasMap mCommandAliases;
 	};
 
 	/// Shared pointer to input service

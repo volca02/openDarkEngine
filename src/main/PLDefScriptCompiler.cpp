@@ -218,7 +218,7 @@ namespace Opde {
 			if (mCurrentState.label == "") // default to property chunk name silently
 				mCurrentState.label = mCurrentState.name;
 
-			PropertyGroup* pg;
+			Property* pg;
 			DataStoragePtr stor;
 
 			if (mCurrentState.ptype == "varstr") {
@@ -231,7 +231,7 @@ namespace Opde {
 				stor = DataStoragePtr(new StructuredDataStorage(dt, mCurrentState.cached));
 			}
 
-			pg = mPropertyService->createPropertyGroup(
+			pg = mPropertyService->createProperty(
 				mCurrentState.label,
 				mCurrentState.name,
 				mCurrentState.inherit,

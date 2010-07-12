@@ -26,6 +26,8 @@
 
 #include "ConsoleBackend.h"
 
+#include <OgreStringVector.h>
+
 namespace Opde {
 	using namespace Ogre;
 	using namespace std;
@@ -55,9 +57,9 @@ namespace Opde {
 
 	void ConsoleBackend::addText(std::string text, size_t level) {
 		// split the text on newlines, to aid line counting
-		std::vector< String > lines = StringUtil::split(text, "\r\n");
+		StringVector lines = StringUtil::split(text, "\r\n");
 
-		std::vector< String >::iterator it = lines.begin();
+		StringVector::iterator it = lines.begin();
 
 		for (;it != lines.end(); it++) {
 			mMessages.push_back(std::make_pair(level, *it));
@@ -71,7 +73,7 @@ namespace Opde {
 	}
 
 	void ConsoleBackend::registerCommandListener(std::string command, ConsoleCommandListener *listener) {
-		map<string, ConsoleCommandListener *>::iterator commandIt = mCommandMap.find(command);
+		std::map<string, ConsoleCommandListener *>::iterator commandIt = mCommandMap.find(command);
 
 		if (commandIt != mCommandMap.end()) { // already registered
 			LOG_DEBUG("ConsoleBackend::registerCommandListener: Command %s is already registered, reregistering the listener pointer",  command.c_str());
@@ -103,12 +105,12 @@ namespace Opde {
 
 		// Try if it is a in-built command
 		if (command_part == "commands" || command_part == "?") {
-			map<string, ConsoleCommandListener *>::iterator commands = mCommandMap.begin();
+			std::map<string, ConsoleCommandListener *>::iterator commands = mCommandMap.begin();
 
 			for (;commands != mCommandMap.end(); commands++) {
 
 				// Try to look for a hint text
-				map<string, string>::const_iterator hintIt = mHintMap.find(commands->first);
+				std::map<string, string>::const_iterator hintIt = mHintMap.find(commands->first);
 
 				if (hintIt != mHintMap.end()) // if a hint text was found, use it
 					addText("  " + (commands->first) + " - " + hintIt->second);
@@ -120,7 +122,7 @@ namespace Opde {
 		}
 
 		// Find the command listener, as we are not the handler
-		map<string, ConsoleCommandListener *>::iterator commandIt = mCommandMap.find(command_part);
+		std::map<string, ConsoleCommandListener *>::iterator commandIt = mCommandMap.find(command_part);
 
 		if (commandIt != mCommandMap.end()) {
 			(commandIt->second)->commandExecuted(command_part, command_parameters);

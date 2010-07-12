@@ -827,8 +827,8 @@ namespace Ogre {
         // Read the vertices
         readVertices();
 
-		// Read the light vectors
-		readLights();
+	// Read the light vectors
+	readLights();
 
         // Read the normals
         readNormals();
@@ -857,7 +857,7 @@ namespace Ogre {
         mMesh->prepareForShadowVolume();
         mMesh->buildEdgeList();
 
-        mMesh->load();
+        // mMesh->load();
 
         // DONE!
         mMesh->_updateCompiledBoneAssignments();
@@ -1425,7 +1425,7 @@ namespace Ogre {
 
             tus->setTextureAddressingMode(TextureUnitState::TAM_WRAP);
             tus->setTextureCoordSet(0);
-            tus->setTextureFiltering(TFO_BILINEAR);
+            tus->setTextureFiltering(TFO_BILINEAR); // TODO: Should be controlled by global setting
 
             // If the transparency is used
             if (( mHdr.mat_flags & MD_MAT_TRANS) && (matext.trans > 0)) {
@@ -1435,6 +1435,7 @@ namespace Ogre {
                 tus->setColourOperation(LBO_ALPHA_BLEND);
                 pass->setAlphaRejectFunction(CMPF_ALWAYS_PASS); // Alpha rejection reset. Does not live good with the following:
                 tus->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, 1 - matext.trans);
+                pass->setDiffuse(0,0,0,0);
             }
 
             // Illumination of the material. Converted to ambient lightning here
@@ -1666,7 +1667,7 @@ namespace Ogre {
         }
 
         // DONE!
-		mMesh->load();
+	// mMesh->load();
 
         // DONE!
         mMesh->_updateCompiledBoneAssignments();

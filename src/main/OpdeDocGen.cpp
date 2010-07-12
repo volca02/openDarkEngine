@@ -27,6 +27,10 @@
 #include "Root.h"
 #include "StringTokenizer.h"
 #include "ConfigService.h"
+#include "DVariant.h"
+#include "DTypeDef.h"
+#include "PropertyService.h"
+#include "LinkService.h"
 
 #include <OgreException.h>
 
@@ -216,7 +220,7 @@ namespace Opde {
 
 					// standard info header. Chunk versions, data size, label
 					// Get the prop group
-					PropertyGroup* pg = ps->getPropertyGroup(propname);
+					Property* pg = ps->getProperty(propname);
 
 					fo << "\\textbf{Property}: " << propname << endl << endl; // TODO: Path
 
@@ -318,9 +322,9 @@ namespace Opde {
 					fo << "\\textbf{Type:}";
 
 					if (en->isBitfield())
-                        fo << "Bitfield" << endl << endl; // TODO: Path
+						fo << "Bitfield" << endl << endl; // TODO: Path
 					else
-                        fo << "Enumeration" <<  endl << endl; // TODO: Path
+						fo << "Enumeration" <<  endl << endl; // TODO: Path
 
 					DocStrings::iterator it = mEnumDocs.find(enname);
 
@@ -342,10 +346,10 @@ namespace Opde {
 
 					// iterate
 					for (; kit != l.end(); ++kit) {
-					    DEnum::EnumField& f = *kit;
+						DEnum::EnumField& f = *kit;
 
-                        fo << f.key << " & " <<
-                            f.value.toUInt() << " \\\\" << std::endl;
+						fo << f.key << " & " <<
+						f.value.toUInt() << " \\\\" << std::endl;
 					}
 
 					fo << "\\end{tabular}" << endl;
@@ -382,15 +386,19 @@ namespace Opde {
 
 		public:
 			DocGenerator(int argc, char**argv) : mArgc(argc), mArgv(argv) {
-				mRoot = new Opde::Root(SERVICE_CORE);
+				mRoot = new Opde::Root(SERVICE_CORE, "opde-dg.log");
 				// we want script autoload
-				mRoot->registerCustomScriptLoaders();
+				// mRoot->registerCustomScriptLoaders();
+				// TODO: debug config param.
+				mRoot->setLogLevel(5);
+				mRoot->bootstrapFinished();
 				mConfigSvc = GET_SERVICE(ConfigService);
 			}
 
 			~DocGenerator(void) {
 				mConfigSvc.setNull();
 				delete mRoot;
+				mRoot = NULL;
 			}
 
 			void help(void) {
@@ -403,12 +411,6 @@ namespace Opde {
 					help();
 					return false;
 				}
-
-				// TODO: debug config param.
-				mRoot->setLogLevel(5);
-				// TODO: logfile config param.
-				mRoot->logToFile("opdeDocGen.log");
-
 				// initialize the system - load the dtype scripts according to the config
 				initialize();
 

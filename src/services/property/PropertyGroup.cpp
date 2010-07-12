@@ -30,7 +30,7 @@ using namespace std;
 namespace Opde {
 
 	// --------------------------------------------------------------------------
-	PropertyGroup::PropertyGroup(PropertyService* owner, const std::string& name, const std::string& chunk_name,
+	Property::Property(PropertyService* owner, const std::string& name, const std::string& chunk_name,
 								 const DataStoragePtr& storage, std::string inheritorName) :
 			mName(name),
 			mChunkName(chunk_name),
@@ -45,16 +45,16 @@ namespace Opde {
 		mInheritor = mInheritService->createInheritor(inheritorName);
 
 		// And as a final step, register as inheritor listener
-		Inheritor::ListenerPtr cil(new ClassCallback<InheritValueChangeMsg, PropertyGroup>(this, &PropertyGroup::onInheritChange));
+		Inheritor::ListenerPtr cil(new ClassCallback<InheritValueChangeMsg, Property>(this, &Property::onInheritChange));
 
-        mInheritorListenerID = mInheritor->registerListener(cil);
+		mInheritorListenerID = mInheritor->registerListener(cil);
 
-        // create the property storage for this PropertyGroup
-        mPropertyStorage = storage;
+		// create the property storage for this Property
+		mPropertyStorage = storage;
 	}
 
 	// --------------------------------------------------------------------------
-	PropertyGroup::PropertyGroup(PropertyService* owner, const std::string& name, const std::string& chunk_name,
+	Property::Property(PropertyService* owner, const std::string& name, const std::string& chunk_name,
 		std::string inheritorName) :
 			mName(name),
 			mChunkName(chunk_name),
@@ -69,20 +69,20 @@ namespace Opde {
 		mInheritor = mInheritService->createInheritor(inheritorName);
 
 		// And as a final step, register as inheritor listener
-		Inheritor::ListenerPtr cil(new ClassCallback<InheritValueChangeMsg, PropertyGroup>(this, &PropertyGroup::onInheritChange));
+		Inheritor::ListenerPtr cil(new ClassCallback<InheritValueChangeMsg, Property>(this, &Property::onInheritChange));
 
         mInheritorListenerID = mInheritor->registerListener(cil);
 	}
 
 	// --------------------------------------------------------------------------
-	PropertyGroup::~PropertyGroup() {
+	Property::~Property() {
 	}
 
 	// --------------------------------------------------------------------------
-	void PropertyGroup::shutdown() {
+	void Property::shutdown() {
 		clear();
 
-		// have to unregister here to break shared_ptr dependencies (prop. groups are not shared_ptr handled)
+		// have to unregister here to break shared_ptr dependencies (properties are not shared_ptr handled)
 		if (!mInheritor) {
 			mInheritor->unregisterListener(mInheritorListenerID);
 			mInheritService->destroyInheritor(mInheritor);
@@ -92,7 +92,7 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	void PropertyGroup::setPropertyStorage(const DataStoragePtr& newStorage) {
+	void Property::setPropertyStorage(const DataStoragePtr& newStorage) {
 		// see if we had any data in the current
 		if (!mPropertyStorage->isEmpty()) {
 			LOG_ERROR("Property storage replacement for %s: Previous property storage had some data. This could mean something bad could happen...", mName.c_str());
@@ -102,7 +102,7 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	void PropertyGroup::load(const FileGroupPtr& db, const BitArray& objMask) {
+	void Property::load(const FileGroupPtr& db, const BitArray& objMask) {
 		// Open the chunk specified by "P$" + mChunkName
 		FilePtr fprop;
 
@@ -115,10 +115,10 @@ namespace Opde {
 
 			// compare the versions, log differences
 			if (hdr.version_high != mVerMaj || hdr.version_low != mVerMin) {
-				LOG_ERROR("Property group %s version mismatch : %d.%d expected, %d.%d encountered", pchn.c_str(), mVerMaj, mVerMin, hdr.version_high, hdr.version_low);
+				LOG_ERROR("Property %s version mismatch : %d.%d expected, %d.%d encountered", pchn.c_str(), mVerMaj, mVerMin, hdr.version_high, hdr.version_low);
 			}
 		} catch (BasicException) {
-			LOG_ERROR("PropertyGroup::load : Could not find the property chunk %s", pchn.c_str());
+			LOG_ERROR("Property::load : Could not find the property chunk %s", pchn.c_str());
 			return;
 		}
 
@@ -132,7 +132,7 @@ namespace Opde {
 
 			// if the object is not in the mask, skip the property
 			if (!objMask[id]) {
-				LOG_DEBUG("PropertyGroup::load: skipping object %d, not in bitmap", id);
+				LOG_DEBUG("Property::load: skipping object %d, not in bitmap", id);
 				// prop has length and data - so skip according to that
 				uint32_t size;
 				fprop->read(&size, sizeof(uint32_t));
@@ -151,7 +151,7 @@ namespace Opde {
 
 
 	// --------------------------------------------------------------------------
-	void PropertyGroup::save(const FileGroupPtr& db, const BitArray& objMask) {
+	void Property::save(const FileGroupPtr& db, const BitArray& objMask) {
 		// Open the chunk specified by "P$" + mChunkName
 		FilePtr fprop;
 
@@ -160,7 +160,7 @@ namespace Opde {
 		try {
 			fprop = db->createFile(pchn, mVerMaj, mVerMin);
 		} catch (BasicException) {
-			LOG_FATAL("PropertyGroup::save : Could not create property chunk %s", pchn.c_str());
+			LOG_FATAL("Property::save : Could not create property chunk %s", pchn.c_str());
 			return;
 		}
 
@@ -180,10 +180,10 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	void PropertyGroup::clear() {
+	void Property::clear() {
 		PropertyChangeMsg msg;
 
-		msg.change = PROP_GROUP_CLEARED;
+		msg.change = PROP_CLEARED;
 		msg.objectID = 0;
 
 		broadcastMessage(msg);
@@ -193,7 +193,7 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	bool PropertyGroup::createProperty(int obj_id) {
+	bool Property::createProperty(int obj_id) {
 		if (mPropertyStorage->create(obj_id)) {
 			_addProperty(obj_id);
 
@@ -204,7 +204,7 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	bool PropertyGroup::removeProperty(int obj_id) {
+	bool Property::removeProperty(int obj_id) {
 		if (mPropertyStorage->destroy(obj_id)) {
 			mInheritor->setImplements(obj_id, false);
 
@@ -216,7 +216,7 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	bool PropertyGroup::cloneProperty(int obj_id, int src_id) {
+	bool Property::cloneProperty(int obj_id, int src_id) {
 		bool had = false;
 
 		if (mPropertyStorage->has(obj_id)) {
@@ -238,7 +238,7 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	bool PropertyGroup::set(int id, const std::string& field, const DVariant& value) {
+	bool Property::set(int id, const std::string& field, const DVariant& value) {
 		if (mPropertyStorage->setField(id, field, value)) {
 			mInheritor->valueChanged(id, field, value);
 
@@ -249,18 +249,18 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	bool PropertyGroup::get(int id, const std::string& field, DVariant& target) {
+	bool Property::get(int id, const std::string& field, DVariant& target) {
 		int effID = _getEffectiveObject(id);
 		return mPropertyStorage->getField(effID, field, target);
 	}
 
 	// --------------------------------------------------------------------------
-	void PropertyGroup::_addProperty(int objID) {
+	void Property::_addProperty(int objID) {
         mInheritor->setImplements(objID, true);
 	}
 
     // --------------------------------------------------------------------------
-    void PropertyGroup::onInheritChange(const InheritValueChangeMsg& msg) {
+    void Property::onInheritChange(const InheritValueChangeMsg& msg) {
             // Consult the inheritor value change, and build a property change message
 			onPropertyModification(msg);
 
@@ -289,22 +289,22 @@ namespace Opde {
     }
 
 	// --------------------------------------------------------------------------
-	void PropertyGroup::onPropertyModification(const InheritValueChangeMsg& msg) {
+	void Property::onPropertyModification(const InheritValueChangeMsg& msg) {
 		// nothing at all
 	}
 
     // --------------------------------------------------------------------------
-    void PropertyGroup::objectDestroyed(int id) {
+    void Property::objectDestroyed(int id) {
     	removeProperty(id);
     }
 
 	// --------------------------------------------------------------------------
-	DataFieldDescIteratorPtr PropertyGroup::getFieldDescIterator(void) {
+	DataFieldDescIteratorPtr Property::getFieldDescIterator(void) {
 		return mPropertyStorage->getFieldDescIterator();
 	}
 
 	// --------------------------------------------------------------------------
-	void PropertyGroup::grow(int minID, int maxID) {
+	void Property::grow(int minID, int maxID) {
 		mPropertyStorage->grow(minID, maxID);
 		mInheritor->grow(minID, maxID);
 	}
@@ -314,7 +314,7 @@ namespace Opde {
 	// --------------------------------------------------------------------------
 	ActiveProperty::ActiveProperty(PropertyService* owner, const std::string& name,
 		const std::string& chunk_name, std::string inheritorName) :
-			PropertyGroup(owner, name, chunk_name, inheritorName) {
+			Property(owner, name, chunk_name, inheritorName) {
 	};
 
 	// --------------------------------------------------------------------------

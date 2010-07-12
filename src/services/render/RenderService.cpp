@@ -220,25 +220,25 @@ namespace Opde {
 		clear();
 
 		if (mHasRefsProperty) {
-			mPropertyService->unregisterPropertyGroup(mHasRefsProperty);
+			mPropertyService->unregisterProperty(mHasRefsProperty);
 			delete mHasRefsProperty;
 			mHasRefsProperty = NULL;
 		}
 
 		if (mRenderTypeProperty) {
-			mPropertyService->unregisterPropertyGroup(mRenderTypeProperty);
+			mPropertyService->unregisterProperty(mRenderTypeProperty);
 			delete mRenderTypeProperty;
 			mRenderTypeProperty = NULL;
 		}
 
 		if (mRenderAlphaProperty) {
-			mPropertyService->unregisterPropertyGroup(mRenderAlphaProperty);
+			mPropertyService->unregisterProperty(mRenderAlphaProperty);
 			delete mRenderAlphaProperty;
 			mRenderAlphaProperty = NULL;
 		}
 
 		if (mZBiasProperty) {
-			mPropertyService->unregisterPropertyGroup(mZBiasProperty);
+			mPropertyService->unregisterProperty(mZBiasProperty);
 			delete mZBiasProperty;
 			mZBiasProperty = NULL;
 		}
@@ -248,13 +248,13 @@ namespace Opde {
 		mPropPosition = NULL;
 
 		if (mPropModelName != NULL) {
-		    mPropertyService->unregisterPropertyGroup(mPropModelName);
+		    mPropertyService->unregisterProperty(mPropModelName);
 			delete mPropModelName;
 			mPropModelName = NULL;
 		}
 
 		if (mPropScale != NULL) {
-		    mPropertyService->unregisterPropertyGroup(mPropScale);
+		    mPropertyService->unregisterProperty(mPropScale);
 			delete mPropScale;
 			mPropScale = NULL;
 		}
@@ -398,15 +398,15 @@ namespace Opde {
 		// create the properties the render service uses (built-in)
 		createProperties();
 
-		// Get the PropertyService, then the group Position
+		// Get the PropertyService, then the property Position
 		// --- Position property listener
-		mPropPosition = mPropertyService->getPropertyGroup("Position");
+		mPropPosition = mPropertyService->getProperty("Position");
 
 		if (mPropPosition == NULL)
-			OPDE_EXCEPT("Could not get Position property group. Not defined. Fatal", "RenderService::bootstrapFinished");
+			OPDE_EXCEPT("Could not get Position property. Not defined. Fatal", "RenderService::bootstrapFinished");
 
 		// listener to the position property to control the scenenode
-		PropertyGroup::ListenerPtr cposc(
+		Property::ListenerPtr cposc(
 			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropPositionMsg));
 
 		mPropPositionListenerID = mPropPosition->registerListener(cposc);
@@ -663,8 +663,8 @@ namespace Opde {
 	// --------------------------------------------------------------------------
 	void RenderService::onObjectMsg(const ObjectServiceMsg& msg) {
 		if (msg.objectID <= 0) // no action for archetypes
-            return;
-
+			return;
+		
 		switch (msg.type) {
 			case OBJ_CREATE_STARTED   : {
 				// create scenenode, return
@@ -835,29 +835,29 @@ namespace Opde {
 		// Model Name. Simple fixed-length string prop
 		// Fixed on version 2.16
 		mPropModelName = new ModelNameProperty(this, mPropertyService.ptr());
-		mPropertyService->registerPropertyGroup(mPropModelName);
+		mPropertyService->registerProperty(mPropModelName);
 
 		// RenderAlpha property - single float prop
 		mRenderAlphaProperty = new RenderAlphaProperty(this, mPropertyService.ptr());
-		mPropertyService->registerPropertyGroup(mRenderAlphaProperty);
+		mPropertyService->registerProperty(mRenderAlphaProperty);
 
 		// HasRefs - single bool prop
 		mHasRefsProperty = new HasRefsProperty(this, mPropertyService.ptr());
-		mPropertyService->registerPropertyGroup(mHasRefsProperty);
+		mPropertyService->registerProperty(mHasRefsProperty);
 
 		// RenderType property - single unsigned int property with enum
 		mRenderTypeProperty = new RenderTypeProperty(this, mPropertyService.ptr());
-		mPropertyService->registerPropertyGroup(mRenderTypeProperty);
+		mPropertyService->registerProperty(mRenderTypeProperty);
 
 		// ZBias - z bias for depth fighting avoidance
 		if (mConfigService->getGameType() > ConfigService::GAME_TYPE_T1) { // only t1 does not have ZBIAS
 			mZBiasProperty = new ZBiasProperty(this, mPropertyService.ptr());
-			mPropertyService->registerPropertyGroup(mZBiasProperty);
+			mPropertyService->registerProperty(mZBiasProperty);
 		}
 
 		// Scale property
 		mPropScale = new ModelScaleProperty(this, mPropertyService.ptr());
-		mPropertyService->registerPropertyGroup(mPropScale);
+		mPropertyService->registerProperty(mPropScale);
 	}
 
 

@@ -107,8 +107,9 @@ namespace Ogre {
 
 		// Root exists. traverse the portal tree
 		BspNodeQueue cell_queue;
-		
+		cell_queue.reserve(1024);
 		cell_queue.push_back(root);
+		
 
 		unsigned int currentPos = 0;
 		unsigned int finishedCells = 0;

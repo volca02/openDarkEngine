@@ -45,7 +45,7 @@ namespace Opde {
 	template<> GameLoadState* Singleton<GameLoadState>::ms_Singleton = 0;
 
 	GameLoadState::GameLoadState() : mSceneMgr(NULL), mOverlayMgr(NULL), mLoaded(false) {
-        mRoot = Ogre::Root::getSingletonPtr();
+		mRoot = Ogre::Root::getSingletonPtr();
 		mOverlayMgr = OverlayManager::getSingletonPtr();
 		mServiceMgr = ServiceManager::getSingletonPtr();
 
@@ -96,7 +96,7 @@ namespace Opde {
 		if (mConfigService->getParam("font_test", fnttst))
 			mFontTest = fnttst.toBool();
 
-	    LOG_INFO("LoadState: Starting");
+		LOG_INFO("LoadState: Starting");
 
 		mSceneMgr = mRoot->getSceneManager( "DarkSceneManager" );
 
@@ -133,7 +133,7 @@ namespace Opde {
 	    LOG_INFO("LoadState: Exiting");
 		// mLoadingOverlay->hide();
 
-        mLoadingOverlay->hide();
+		mLoadingOverlay->hide();
 
 		LOG_INFO("LoadState: Exited");
 

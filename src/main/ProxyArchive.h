@@ -59,7 +59,7 @@ namespace Ogre {
 			virtual void unload(void);
 
 			/// opens a resource stream, unmapping the name first
-			virtual DataStreamPtr open(const String& filename) const;
+			virtual DataStreamPtr open(const String& filename, bool readOnly) const;
 
 			/// lists the contents of the archive. transformed.
 			virtual StringVectorPtr list(bool recursive = true, bool dirs = false);

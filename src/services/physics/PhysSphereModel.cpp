@@ -21,43 +21,22 @@
  *
  *****************************************************************************/
 
-#include "ServiceCommon.h"
-#include "InputService.h"
-#include "OpdeException.h"
+
+#include "PhysSphereModel.h"
 #include "logger.h"
-#include "StringTokenizer.h"
-
-#include <OgreResourceGroupManager.h>
-#include <cctype>
-
-using namespace std;
+#include "File.h"
 
 namespace Opde {
+	/*----------------------------------------------------*/
+	/*-------------------- PhysSphereModel ---------------*/
+	/*----------------------------------------------------*/
+	PhysSphereModel::PhysSphereModel(int objid): PhysModel(objid) {
 
-	/*---------------------------------------------------*/
-	/*-------------------- InputEventMapper -------------*/
-	/*---------------------------------------------------*/
-	InputEventMapper::InputEventMapper(InputService* is, const std::string name) : mInputService(is), mName(name) {
-		assert(mInputService != NULL);
 	}
 
 	//------------------------------------------------------
-	InputEventMapper::~InputEventMapper() {
+	PhysSphereModel::~PhysSphereModel() {
+		
 	}
 
-	//------------------------------------------------------
-	bool InputEventMapper::unmapEvent(unsigned int code, std::string& unmapped) const {
-		CodeToCommandMap::const_iterator it = mCodeToCommand.find(code);
-
-		if (it != mCodeToCommand.end()) {
-			unmapped = it->second;
-			return true;
-		} else
-			return false;
-	}
-
-	//------------------------------------------------------
-	void InputEventMapper::bind(unsigned int code, const std::string& command) {
-		mCodeToCommand[code] = command;
-	}
 }

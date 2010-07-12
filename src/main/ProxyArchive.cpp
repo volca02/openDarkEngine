@@ -174,11 +174,11 @@ namespace Ogre {
 	}
 
 	// -------------------------------------------------------
-	DataStreamPtr ProxyArchive::open(const String& filename) const {
+	DataStreamPtr ProxyArchive::open(const String& filename, bool readOnly) const {
 		String un;
 
 		if (untransformName(filename, un))
-			return mArchive->open(un);
+			return mArchive->open(un, readOnly);
 		else
 			return DataStreamPtr();
 	}

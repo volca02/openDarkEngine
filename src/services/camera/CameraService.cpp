@@ -51,8 +51,8 @@ namespace Opde {
 	//------------------------------------------------------
 	bool CameraService::staticAttach(int objID) {
 		if (mObjSrv->exists(objID)) {
-			mAttachmentObject = objID;
-			mDynamicAttach = false;
+			// TODO: Hide player's limbs and weapon (Via playerservice?)
+			handleAttachment(objID, false);
 			return true;
 		}
 		
@@ -62,8 +62,8 @@ namespace Opde {
 	//------------------------------------------------------
 	bool CameraService::dynamicAttach(int objID) {
 		if (mObjSrv->exists(objID)) {
-			mAttachmentObject = objID;
-			mDynamicAttach = true;
+			// TODO: Hide player's limbs and weapon (Via playerservice?)
+			handleAttachment(objID, true);
 			return true;
 		}
 		
@@ -72,13 +72,18 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	bool CameraService::cameraReturn(int objID) {
-		// TODO: Code
+		if (mAttachmentObject == objID) {
+			forceCameraReturn();
+			return true;
+		}
+		
 		return false;
 	}
 	
 	//------------------------------------------------------
 	void CameraService::forceCameraReturn() {
-		// TODO: Code
+		// TODO: Reveal the player's limbs and weapon again? Conditional?
+		handleAttachment(mPlayerSrv->getPlayerObject(), true);
 	}
 	
 	//------------------------------------------------------
@@ -97,13 +102,14 @@ namespace Opde {
 		if (mPaused)
 			return;
 		
+		// TODO: Handle rotation controlled/not controlled physics flags on the target object!
+
 		// scale 
 		Vector2 rotation(mHorizontalRot, mVerticalRot);
-		
 		rotation /= delta;
 		
 		// apply to the object in question
-		if (mAttachmentObject != 0) {
+		if (mAttachmentObject != mPlayerSrv->getPlayerObject()) {
 			// load the rotation
 			Quaternion rot = mObjSrv->orientation(mAttachmentObject);
 			// laod the position
@@ -114,6 +120,7 @@ namespace Opde {
 				// rot.
 			}
 		} else {
+			// 
 			// rotate the player object
 			// TODO: rotate the camera
 			// this is not as easy as it looks. We should take physics into consideration...
@@ -121,12 +128,16 @@ namespace Opde {
 			// the player should have some sub-objects present - we only rotate submodel 0
 			// e.g.:
 			
-			/* // first rotate the head sub-object accordingly to the accumulated values 
-			 * Quaternion rot = mPhysicsService->getSubModelRotation(mPlayerObject, 0, rot)
-			 * rot.yaw, rot.pitch, ....
-			 * mPhysicsService->setSubModelRotation(mPlayerObject, 0, rot)
-			 * updateCameraFromSubObject(mPlayerObject, 0);
-			 */
+			// first rotate the head sub-object accordingly to the accumulated values 
+			/* TODO:
+			Ogre::Quaternion rot = mPhysicsService->getSubModelRotation(mPlayerObject, 0, rot);
+			// TODO: multiply by delta
+			rot.yaw(rotation.x);
+			rot.pitch(rotation.y);
+		
+			mPhysicsService->setSubModelRotation(mPlayerObject, 0, rot);
+			updateCameraFromSubObject(mPlayerObject, 0);
+			*/
 		}
 		
 		// reset the rotation indicators
@@ -145,6 +156,17 @@ namespace Opde {
 		mRenderSrv = GET_SERVICE(RenderService);
 		mSimSrv = GET_SERVICE(SimService);
 		mObjSrv = GET_SERVICE(ObjectService);
+		mPlayerSrv = GET_SERVICE(PlayerService);
+		mPropertySrv = GET_SERVICE(PropertyService);
+		
+		/* TODO: Input commands:
+		- turnleftfast
+		- turnrightfast
+		- lookup
+		- lookdown
+		- lookcenter
+		- joyxaxis
+		*/
 		
 		InputService::ListenerPtr mturnListener(new ClassCallback<InputEventMsg, CameraService>(this, &CameraService::onMTurn));
 		InputService::ListenerPtr mlookListener(new ClassCallback<InputEventMsg, CameraService>(this, &CameraService::onMLook));
@@ -155,7 +177,15 @@ namespace Opde {
 		// sim listener for the camera rotation
 		mSimSrv->registerListener(this, SIM_PRIORITY_INPUT);
 		
+		mCamera = mRenderSrv->getDefaultCamera();
+		// needed for propper orientation...
+		mCamera->pitch(Degree(90));
+		mCamera->setFixedYawAxis(true, Vector3::UNIT_Z);
+		// TODO: Need to check this value...
+		mCamera->setFOVy(Degree(60));
 		// TODO: what the heck is the variable user_camera_offset and how does it interfere with this code?
+		
+		mHasRefsProperty = mPropertySrv->getProperty("HasRefs");
 	}
 	
 	//------------------------------------------------------
@@ -168,6 +198,7 @@ namespace Opde {
 		mRenderSrv.setNull();
 		mSimSrv.setNull();
 		mObjSrv.setNull();
+		mPropertySrv.setNull();
 	}
 	
 	//------------------------------------------------------
@@ -219,6 +250,41 @@ namespace Opde {
 		// will be applied upon sim service callback
 		mHorizontalRot += horizontal;
 		mVerticalRot += vertical;
+	}
+	
+	//------------------------------------------------------
+	bool CameraService::updateCameraFromSubObject(int objId, size_t submdl) {
+		if (!mPhysicsService->objHasPhysics(objId))
+			return false;
+
+		// get the position and orientation of the subobj
+		size_t smc = mPhysicsService->getSubModelCount(submdl);
+		
+		if (smc <= submdl)
+			return false;
+		
+		const Vector3& pos = mPhysicsService->getSubModelPosition(objId, submdl);
+		const Quaternion& rot = mPhysicsService->getSubModelOrientation(objId, submdl);
+		
+		mCamera->setPosition(pos);
+		mCamera->setOrientation(rot);
+
+		return true;
+	}
+
+	//------------------------------------------------------
+	void CameraService::handleAttachment(int objID, bool dynamic) {
+		// re-enable hasrefs on the prev. object
+		if (mAttachmentObject)
+			mHasRefsProperty->set(mAttachmentObject, "", 1);
+		
+		mAttachmentObject = objID;
+		mDynamicAttach = dynamic;
+		
+		if (mAttachmentObject)
+			mHasRefsProperty->set(mAttachmentObject, "", 0);
+
+		mPlayerSrv->handleCameraAttachment(mAttachmentObject);
 	}
 	
 	//-------------------------- Factory implementation

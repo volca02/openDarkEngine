@@ -59,6 +59,7 @@ This file contains some global definitions common to all services
 #define __SERVICE_ID_ROOM 20
 #define __SERVICE_ID_CAMERA 21
 #define __SERVICE_ID_PLATFORM 22
+#define __SERVICE_ID_PLAYER 23
 
 // --------------------------------------
 // ---  Bitmasks for service masking  ---
@@ -135,9 +136,12 @@ priorities (not necessary unique) for the database service listeners
 #define LOOPCLIENT_ID_INPUT 1
 #define LOOPCLIENT_ID_RENDERER 2
 #define LOOPCLIENT_ID_GUI 4
+#define LOOPCLIENT_ID_PLAYER 8
 
 // Input first
 #define LOOPCLIENT_PRIORITY_INPUT 1
+// Post - input handling
+#define LOOPCLIENT_PRIORITY_POSTINPUT 20
 // GUI some time before render
 #define LOOPCLIENT_PRIORITY_GUI 900
 // Renderer last
@@ -149,6 +153,30 @@ priorities (not necessary unique) for the database service listeners
 // ---------------------------------------------
 #define SIM_PRIORITY_INPUT 1
 
-// TODO: Forward decl. anything service related here to shorten the compilation time (in combination with header inclusion removal...)
-
+/*
+// Forward declarations. anything service related here to shorten the compilation time (in combination with header inclusion removal...)
+class BinaryService;
+class CameraService;
+class ConfigService;
+class DatabaseService;
+class DrawService;
+class GameService;
+class GuiService;
+class InheritService;
+class InputService;
+class LightService;
+class LinkService;
+class LoopService;
+class MaterialService;
+class ObjectService;
+class PhysicsService;
+class PlatformService;
+class PlayerService;
+class PropertyService;
+class RenderService;
+class RoomService;
+class ScriptService;
+class SimService;
+class WorldRepService;
+*/
 #endif

@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -17,38 +17,29 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *    $Id$
+ *	  $Id$
  *
  *****************************************************************************/
 
+#ifndef __PHYSCONTROLS_H
+#define __PHYSCONTROLS_H
 
-#include "config.h"
-#include "bindings.h"
+namespace Opde {
+	/** @brief Physics controls. Represents the controls placed on an object physics.
+	* Three different controls are possible:
+	* * Axis Velocity (In local space of the object)
+	* * Velocity (World side velocity - i.e. rotated by object's facing to get world oriented)
+	* * Rotational Velocity
+	*/
+	class OPDELIB_EXPORT PhysControls {
+		public:
+			PhysControls();
+			~PhysControls();
+			
+			void read(const FilePtr& sf);
+			void write(const FilePtr& sf);
+	};
+};
 
-#include "GameStateManager.h"
-#include "OpdeException.h"
 
-
-#include <OgreException.h>
-
-
-using namespace Opde;
-
-int main(int argc, char**argv)
-{
-	std::string scriptName = "";
-	
-	if (argc >= 2)
-		scriptName = argv[1];
-	
-	if (scriptName != "") {
-		PythonLanguage::init(argc - 1, &argv[1]);
-		PythonLanguage::runScript(scriptName.c_str());
-		PythonLanguage::term();
-	} else {
-		std::cerr << "opdeScript: Script name epected as a parameter!" << std::endl;
-		return 1;
-	}
-	
-	return 0;
-}
+#endif

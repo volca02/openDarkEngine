@@ -25,6 +25,7 @@ SET(OPDE_SERVICE_INCLUDES
     ${OPDE_SOURCE_DIR}/src/services/sim
     ${OPDE_SOURCE_DIR}/src/services/camera
     ${OPDE_SOURCE_DIR}/src/services/platform
+    ${OPDE_SOURCE_DIR}/src/services/player
 )
 
 # All the resulting libraries in a nice package as well
@@ -50,7 +51,12 @@ SET(OPDE_SERVICE_LIBRARIES
     OpdeSimService
     OpdeCameraService
     OpdePlatformService
+    OpdePlayerService
 )
+
+# Clean prepared lists
+SET(OPDE_SERVICE_HEADERS)
+SET(OPDE_SERVICE_SOURCES)
 
 # include the configuration from all the services (each config.cmake should append the OPDE_SERVICE_HEADERS and OPDE_SERVICE_SOURCES)
 # that is done via: LIST(APPEND OPDE_SERVICE_SOURCES myfile.cpp) and simmilar...
@@ -76,6 +82,7 @@ INCLUDE( ${OPDE_SOURCE_DIR}/src/services/sim/config.cmake )
 INCLUDE( ${OPDE_SOURCE_DIR}/src/services/worldrep/config.cmake )
 INCLUDE( ${OPDE_SOURCE_DIR}/src/services/camera/config.cmake )
 INCLUDE( ${OPDE_SOURCE_DIR}/src/services/platform/config.cmake )
+INCLUDE( ${OPDE_SOURCE_DIR}/src/services/player/config.cmake )
 
 # join the variables
 SET(OPDE_SERVICE_FILES ${OPDE_SERVICE_HEADERS})

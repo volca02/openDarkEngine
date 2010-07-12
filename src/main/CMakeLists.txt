@@ -1,5 +1,10 @@
 # $Id$
 
+SET(OPDE_SERVICE_FILES)
+SET(OPDE_BASE_FILES)
+SET(OPDE_BINDING_FILES)
+SET(OPDE_SCENEMANAGER_FILES)
+
 INCLUDE( ${OPDE_SOURCE_DIR}/src/services/Services.cmake )
 INCLUDE( ${OPDE_SOURCE_DIR}/src/base/Base.cmake )
 INCLUDE( ${OPDE_SOURCE_DIR}/src/bindings/Bindings.cmake )
@@ -21,17 +26,26 @@ include_directories(
     ${PYTHON_INCLUDE_PATH}
 )
 
+IF(SCRIPT_COMPILERS)
+	SET(OPDE_SCRIPT_COMPILER_FILES
+	    DTypeScriptCompiler.cpp
+	    DTypeScriptCompiler.h
+	    PLDefScriptCompiler.cpp
+	    PLDefScriptCompiler.h
+	    DTypeScriptLoader.cpp
+	    DTypeScriptLoader.h
+	    PLDefScriptLoader.cpp
+	    PLDefScriptLoader.h
+	)
+ELSE(SCRIPT_COMPILERS)
+	SET(OPDE_SCRIPT_COMPILER_FILES)
+ENDIF(SCRIPT_COMPILERS)
+
+
 add_library (OpenDark SHARED
     Root.cpp
     Root.h
-    DTypeScriptCompiler.cpp
-    DTypeScriptCompiler.h
-    PLDefScriptCompiler.cpp
-    PLDefScriptCompiler.h
-    DTypeScriptLoader.cpp
-    DTypeScriptLoader.h
-    PLDefScriptLoader.cpp
-    PLDefScriptLoader.h
+    ${OPDE_SCRIPT_COMPILER_FILES}
     CustomImageCodec.cpp
     CustomImageCodec.h
     ProxyArchive.cpp
@@ -57,8 +71,7 @@ IF (PYTHON_MODULE)
 		${OGRE_LIBRARIES}
 		${OIS_LIBRARIES}
 		${ODE_LIBRARIES}
-		${FREEIMAGE_LIBRARIES}
-	)	
+	)
 
 	# We need the library to be named *exactly* opde.so/opde.dll in order to find it with python	
 	# So we remove any platform specific library name prefix
@@ -153,7 +166,6 @@ target_link_libraries( opdeMain
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}
     ${ODE_LIBRARIES}
-    ${FREEIMAGE_LIBRARIES}
 )
 
 SET_TARGET_PROPERTIES( opdeMain PROPERTIES
@@ -175,7 +187,6 @@ target_link_libraries( opdeScript
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}
     ${ODE_LIBRARIES}
-    ${FREEIMAGE_LIBRARIES}
     ${OPDE_PYTHON_LIBRARIES}
 )
 

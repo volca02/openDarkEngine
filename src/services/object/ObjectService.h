@@ -221,7 +221,7 @@ namespace Opde {
 			BitArray mAllocatedObjects;
 
 			/// Position property (to set/get position/orientation of objects)
-			PropertyGroup* mPropPosition;
+			Property* mPropPosition;
 
 			/// Map's symbolic name to object ID
 
@@ -247,9 +247,9 @@ namespace Opde {
 			PropertyServicePtr mPropertyService;
 
 			/// Symbolic name property pointer
-			PropertyGroup* mPropSymName;
+			Property* mPropSymName;
 			/// Donor type property pointer
-			PropertyGroup* mPropDonorType;
+			Property* mPropDonorType;
 
 			/// Scene manager pointer
 			Ogre::SceneManager* mSceneMgr;

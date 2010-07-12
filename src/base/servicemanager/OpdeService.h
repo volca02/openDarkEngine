@@ -29,6 +29,7 @@
 
 #include "NonCopyable.h"
 #include "SharedPtr.h"
+#include "logger.h"
 
 #include <string>
 
@@ -86,8 +87,9 @@ namespace Opde {
 			};
 			
 			/** Destructor */
-			~ServiceImpl() {
-			}
+			virtual ~ServiceImpl() {
+				LOG_DEBUG("Service '%s' shut down...", mName.c_str());
+			};
 			
 			/** Service ID of the service.
 			* To be filled in the implementation of the service.

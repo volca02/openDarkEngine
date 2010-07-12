@@ -32,15 +32,15 @@ using namespace std;
 
 namespace Opde {
 	/// helper string iterator over map keys
-	class PropertyGroupMapKeyIterator : public StringIterator {
+	class PropertyMapKeyIterator : public StringIterator {
 		public:
-			PropertyGroupMapKeyIterator(PropertyService::PropertyGroupMap& pGroupMap) :
-                            mPGroupMap(pGroupMap) {
-				mIter = mPGroupMap.begin();
-				mEnd = mPGroupMap.end();
-            }
+			PropertyMapKeyIterator(PropertyService::PropertyMap& pPropertyMap) :
+					mPropertyMap(pPropertyMap) {
+				mIter = mPropertyMap.begin();
+				mEnd = mPropertyMap.end();
+			}
 
-            virtual const std::string& next() {
+			virtual const std::string& next() {
 				assert(!end());
 				
 				const std::string& s = mIter->first;
@@ -48,15 +48,15 @@ namespace Opde {
 				++mIter;
 
 				return s;
-            }
+			}
 
-            virtual bool end() const {
-                return (mIter == mEnd);
-            }
+			virtual bool end() const {
+				return (mIter == mEnd);
+			}
 
-        protected:
-			PropertyService::PropertyGroupMap::iterator mIter, mEnd;
-            PropertyService::PropertyGroupMap& mPGroupMap;
+		protected:
+			PropertyService::PropertyMap::iterator mIter, mEnd;
+			PropertyService::PropertyMap& mPropertyMap;
 	};
 	
 	/*--------------------------------------------------------*/
@@ -78,14 +78,14 @@ namespace Opde {
 		}
 
 		mOwnedProperties.clear();
-		mPropertyGroupMap.clear();
+		mPropertyMap.clear();
 	}
 
 	// --------------------------------------------------------------------------
 	void PropertyService::shutdown() {
-		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
+		PropertyMap::iterator it = mPropertyMap.begin();
 		
-		for( ; it != mPropertyGroupMap.end(); ++it) {
+		for( ; it != mPropertyMap.end(); ++it) {
 			it->second->shutdown();
 		}
 	}
@@ -101,102 +101,102 @@ namespace Opde {
 	}
 
 	// --------------------------------------------------------------------------
-	PropertyGroup* PropertyService::createPropertyGroup(const std::string& name, const std::string& chunkName, std::string inheritorName, const DataStoragePtr& storage) {
-		PropertyGroup* nr;
+	Property* PropertyService::createProperty(const std::string& name, const std::string& chunkName, std::string inheritorName, const DataStoragePtr& storage) {
+		Property* nr;
 		try {
-			nr = new PropertyGroup(this, name, chunkName, storage, inheritorName);
+			nr = new Property(this, name, chunkName, storage, inheritorName);
 		} catch (...) {
-			OPDE_EXCEPT("Failed to create property group for " + name,  "PropertyService::createPropertyGroup");
+			OPDE_EXCEPT("Failed to create property for " + name,  "PropertyService::createProperty");
 		}
 		
-		std::pair<PropertyGroupMap::iterator, bool> res = mPropertyGroupMap.insert(make_pair(name, nr));
+		std::pair<PropertyMap::iterator, bool> res = mPropertyMap.insert(make_pair(name, nr));
 		
 		if (!res.second) {
 			delete nr;
 			
-			OPDE_EXCEPT("Failed to insert new instance of PropertyGroup, name already allocated : " + name,
-				    "PropertyService::createPropertyGroup");
+			OPDE_EXCEPT("Failed to insert new instance of Property, name already allocated : " + name,
+				    "PropertyService::createProperty");
 		}
 		
 		// insert the pointer into the to be freed list
 		mOwnedProperties.push_back(nr);
 		
-		LOG_INFO("PropertyService::createPropertyGroup: Created a property group %s (With chunk name %s)", name.c_str(), chunkName.c_str());
+		LOG_INFO("PropertyService::createProperty: Created a property %s (With chunk name %s)", name.c_str(), chunkName.c_str());
 
 		return nr;
 	}
 	
 	// --------------------------------------------------------------------------
-	void PropertyService::registerPropertyGroup(PropertyGroup* group) {
-		mPropertyGroupMap[group->getName()] = group; // so we'll overwrite if it exists already
+	void PropertyService::registerProperty(Property* prop) {
+		mPropertyMap[prop->getName()] = prop; // so we'll overwrite if it exists already
 	}
 	
 	// --------------------------------------------------------------------------		
-	void PropertyService::unregisterPropertyGroup(PropertyGroup* group) {
+	void PropertyService::unregisterProperty(Property* prop) {
 		// try to find it by name, remove
-		assert(group);
+		assert(prop);
 		
-		PropertyGroupMap::iterator it = mPropertyGroupMap.find(group->getName());
+		PropertyMap::iterator it = mPropertyMap.find(prop->getName());
 		
-		if (it != mPropertyGroupMap.end()) {
-			mPropertyGroupMap.erase(it);
+		if (it != mPropertyMap.end()) {
+			mPropertyMap.erase(it);
 		}
 	}
 	
 	// --------------------------------------------------------------------------
 	void PropertyService::load(const FileGroupPtr& db, const BitArray& objMask) {
-		// We just give the db to all registered groups
-		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
+		// We just give the db to all registered properties
+		PropertyMap::iterator it = mPropertyMap.begin();
 
-		for (; it != mPropertyGroupMap.end(); ++it) {
+		for (; it != mPropertyMap.end(); ++it) {
 			try {
-				LOG_INFO("PropertyService: Loading property group %s", it->first.c_str());
+				LOG_INFO("PropertyService: Loading property %s", it->first.c_str());
 				it->second->load(db, objMask);
 			} catch (BasicException &e) {
-				LOG_FATAL("PropertyService: Caught a fatal exception while loading PropertyGroup %s : %s", it->first.c_str(), e.getDetails().c_str() );
+				LOG_FATAL("PropertyService: Caught a fatal exception while loading Property %s : %s", it->first.c_str(), e.getDetails().c_str() );
 			}
 		}
 	}
 	
 	// --------------------------------------------------------------------------
 	void PropertyService::save(const FileGroupPtr& db, const BitArray& objMask) {
-		// We just give the db to all registered groups
-		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
+		// We just give the db to all registered properties
+		PropertyMap::iterator it = mPropertyMap.begin();
 
-		for (; it != mPropertyGroupMap.end(); ++it) {
+		for (; it != mPropertyMap.end(); ++it) {
 			it->second->save(db, objMask);
 		}
 	}
 
 	// --------------------------------------------------------------------------
 	void PropertyService::clear() {
-		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
+		PropertyMap::iterator it = mPropertyMap.begin();
 
-		for (; it != mPropertyGroupMap.end(); ++it) {
+		for (; it != mPropertyMap.end(); ++it) {
 			it->second->clear();
 		}
 	}
 
 	// --------------------------------------------------------------------------
 	StringIteratorPtr PropertyService::getAllPropertyNames() {
-		return StringIteratorPtr(new PropertyGroupMapKeyIterator(mPropertyGroupMap));
+		return StringIteratorPtr(new PropertyMapKeyIterator(mPropertyMap));
 	}
 	
 	//------------------------------------------------------
 	void PropertyService::grow(int minID, int maxID) {
 		// grow all the properties
-		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
+		PropertyMap::iterator it = mPropertyMap.begin();
 
-		for (; it != mPropertyGroupMap.end(); ++it) {
+		for (; it != mPropertyMap.end(); ++it) {
 			it->second->grow(minID, maxID);
 		}
 	}
 	
 	// --------------------------------------------------------------------------
-	PropertyGroup* PropertyService::getPropertyGroup(const std::string& name) {
-	    PropertyGroupMap::iterator it = mPropertyGroupMap.find(name);
+	Property* PropertyService::getProperty(const std::string& name) {
+	    PropertyMap::iterator it = mPropertyMap.find(name);
 
-		if (it != mPropertyGroupMap.end()) {
+		if (it != mPropertyMap.end()) {
 		    return it->second;
 		} else
             return NULL;
@@ -205,7 +205,7 @@ namespace Opde {
 	
 	// --------------------------------------------------------------------------
 	bool PropertyService::has(int obj_id, const std::string& propName) {
-		PropertyGroup* prop = getPropertyGroup(propName);
+		Property* prop = getProperty(propName);
 		
 		if (prop != NULL) {
 			return prop->has(obj_id);
@@ -216,7 +216,7 @@ namespace Opde {
     
 	// --------------------------------------------------------------------------
 	bool PropertyService::owns(int obj_id, const std::string& propName) {
-		PropertyGroup* prop = getPropertyGroup(propName);
+		Property* prop = getProperty(propName);
 		
 		if (prop != NULL) {
 			return prop->owns(obj_id);
@@ -227,7 +227,7 @@ namespace Opde {
     
 	// --------------------------------------------------------------------------
 	bool PropertyService::set(int obj_id, const std::string& propName, const std::string& propField, const DVariant& value) {
-		PropertyGroup* prop = getPropertyGroup(propName);
+		Property* prop = getProperty(propName);
 		
 		if (prop != NULL) {
 			return prop->set(obj_id, propField, value);
@@ -239,7 +239,7 @@ namespace Opde {
 	
 	// --------------------------------------------------------------------------
 	bool PropertyService::get(int obj_id, const std::string& propName, const std::string& propField, DVariant& target) {
-		PropertyGroup* prop = getPropertyGroup(propName);
+		Property* prop = getProperty(propName);
 		
 		if (prop != NULL) {
 			return prop->get(obj_id, propField, target);
@@ -250,7 +250,7 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	DataFieldDescIteratorPtr PropertyService::getFieldDescIterator(const std::string& propName) {
-		PropertyGroup* prop = getPropertyGroup(propName);
+		Property* prop = getProperty(propName);
 		
 		if (prop != NULL) {
 			return prop->getFieldDescIterator();
@@ -262,9 +262,9 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	void PropertyService::objectDestroyed(int id) {
-		PropertyGroupMap::iterator it = mPropertyGroupMap.begin();
+		PropertyMap::iterator it = mPropertyMap.begin();
 
-		for (; it != mPropertyGroupMap.end(); ++it) {
+		for (; it != mPropertyMap.end(); ++it) {
 			it->second->objectDestroyed(id);
 		}
 	}

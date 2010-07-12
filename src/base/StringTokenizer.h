@@ -57,6 +57,15 @@ namespace Opde {
 			StringTokenizer(const std::string& src, IsChar splitter, bool eatEmpty = true) : mStr(src), mIsChar(splitter), mEatEmpty(eatEmpty) {
 				mCurPos = mStr.begin();
 			};
+			
+			/** Constructor
+			* @param src the string to tokenize
+			* @param splitter the splitter instance to use
+			* @param eatEmpty if true, eats consecutive separators, not returning empty strings on such ocasions
+			*/
+			StringTokenizer(const std::string& src, char splitchar, bool eatEmpty = true) : mStr(src), mIsChar(splitchar), mEatEmpty(eatEmpty) {
+				mCurPos = mStr.begin();
+			};
 
 			/// Returns next token, or empty string if no token is available
 			std::string next() {

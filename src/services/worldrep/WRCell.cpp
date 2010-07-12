@@ -578,8 +578,6 @@ namespace Opde {
 				}
 				
 				Vector2 lmsh;
-				
-				// TODO: make a method out of this
 				findLightmapShifts(lmsh, fv);
 				
 				// second pass, insert into the fragment

@@ -27,6 +27,8 @@
 
 #include "config.h"
 
+#include "OpdeCommon.h"
+
 #include <OISMouse.h>
 #include <OISKeyboard.h>
 #include <OISInputManager.h>
@@ -43,9 +45,6 @@
 #include "ConfigService.h"
 #include "InputService.h"
 #include "DVariant.h"
-
-#include "DTypeScriptLoader.h"
-#include "PLDefScriptLoader.h"
 
 namespace Opde {
 

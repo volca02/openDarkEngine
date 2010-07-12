@@ -25,6 +25,8 @@
 #ifndef __STRINGITERATORBINDER_H
 #define __STRINGITERATORBINDER_H
 
+#include "Iterator.h"
+
 namespace Opde {
 
 	namespace Python {

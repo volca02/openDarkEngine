@@ -7,7 +7,7 @@ Last updated on 19-Oct-2008
 - Requirements -
 ----------------
 OPDE needs:
-* OGRE3D library, version 1.6
+* OGRE3D library, version 1.7
 * FreeImage library
 * OIS (The part of Ogre SDK under windows, do not install separately)
 * CMake

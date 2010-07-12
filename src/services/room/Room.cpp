@@ -140,7 +140,7 @@ namespace Opde {
 		for (size_t i = 0; i < 6;++i) {
 			if (mPlanes[i].getSide(point) == Ogre::Plane::NEGATIVE_SIDE)
 				return false;
-			}
+		}
 		
 		return true;
 	}
@@ -192,7 +192,5 @@ namespace Opde {
 		
 		mIDLists.clear();
 	}
-	
-	
 }
 

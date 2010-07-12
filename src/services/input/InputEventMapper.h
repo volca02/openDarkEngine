@@ -38,50 +38,32 @@ namespace Opde {
 	*/
 	class InputEventMapper {
 		public:
-			/// Command event transformation
-			enum CommandEventType {
-				/// Go positive on keypress, negative on release (Edge detection)
-				CET_PEDGE,
-				/// Go negative on keypress, positive on release (Edge detection)
-				CET_NEDGE,
-				/// call command every time the state is DOWN (pressed)
-				CET_NORMAL
-			};
-
-			/// Parsed command (bind format: "[+/-]command (params)")
-			typedef struct {
-				/// Type of the event to handle
-				CommandEventType type;
-				/// Command to emit on the event
-				std::string command;
-			} Command;
-
-			InputEventMapper(InputService* is);
+			InputEventMapper(InputService* is, const std::string name);
 			virtual ~InputEventMapper();
 
 			/** Unmaps an event to a command.
 			* @param event The event to unmap
 			* @param unmapped the command that this event is mapped to
 			* @return true if a command was found for the event, false otherwise */
-			bool unmapEvent(const std::string& event, Command& unmapped);
-
-			/** Gets the list of events leading to a command */
-			std::vector<std::string> getCommandEvents(const std::string& command);
-
+			bool unmapEvent(unsigned int code, std::string& unmapped) const;
+			
+			/** binds the specified keycode to a specified command string */
+			void bind(unsigned int code, const std::string& command);
+			
+			/** returns the name of this mapper */
+			const std::string& getName() const { return mName; };
 		protected:
-
-			typedef std::map<std::string, Command> EventToCommandMap;
+			typedef std::map<unsigned int, std::string> CodeToCommandMap;
 
 			/// Map of command
-			EventToCommandMap mEventToCommand;
-
+			CodeToCommandMap mCodeToCommand;
+			
 			/// The input service owner of this event mapper
 			InputService* mInputService;
+			
+			/// Name of this mapper
+			std::string mName;
 	};
-
-	/// Shared pointer to game service
-	typedef shared_ptr<InputEventMapper> InputEventMapperPtr;
-
 }
 
 

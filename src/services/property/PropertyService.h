@@ -43,28 +43,28 @@ namespace Opde {
 			PropertyService(ServiceManager *manager, const std::string& name);
 			virtual ~PropertyService();
 			
-			/** Creates a standard (data-holding only) property group using the specified property storage. This method should only be used for data processing applications.
-			* @param name The name of the property group
+			/** Creates a standard (data-holding only) property using the specified property storage. This method should only be used for data processing applications.
+			* @param name The name of the property
 			* @param chunkName The name of the chunk the property is stored in
 			* @param inheritorName The name of the iheritor to use for the property (the published name of the inheritor factory)
 			* @param storage The property storage to be used for the property data. Caller is responsible for the storage destruction, unless takeover is set to true
-			* @param takeover If true, the storage's ownership will be taken over, meaning the storage will be destroyed upon destruction of the property group (or when construction fails)
-			* @see PropertyGroup::PropertyGroup
+			* @param takeover If true, the storage's ownership will be taken over, meaning the storage will be destroyed upon destruction of the property (or when construction fails)
+			* @see Property::Property
 			*/
-			PropertyGroup* createPropertyGroup(const std::string& name, const std::string& chunkName, std::string inheritorName, const DataStoragePtr& storage);
+			Property* createProperty(const std::string& name, const std::string& chunkName, std::string inheritorName, const DataStoragePtr& storage);
 
-			/** Registers a custom property group to the property service. These properties are not destroyed at the end of the lifetime of this service.
+			/** Registers a custom property to the property service. These properties are not destroyed at the end of the lifetime of this service.
 			*/
-			void registerPropertyGroup(PropertyGroup* group);
+			void registerProperty(Property* prop);
 			
-			/** Unregisters a custom property group from the property service.
+			/** Unregisters a custom property from the property service.
 			*/
-			void unregisterPropertyGroup(PropertyGroup* group);
+			void unregisterProperty(Property* prop);
 			
-			/** Retrieves the property group given it's name, or NULL if not found
-			* @param name The name of the property to retrieve the group for
-			* @return PropertyGroup* of the PropertyGroup named name if found, isNull()==true otherwise */
-			PropertyGroup* getPropertyGroup(const std::string& name);
+			/** Retrieves the property given it's name, or NULL if not found
+			* @param name The name of the property to retrieve
+			* @return Property pointer if found, NULL otherwise */
+			Property* getProperty(const std::string& name);
 			
 			/** Determines if the given object has a property mapped (either itself, or by inheritance through MetaProperty link)
 			* @param obj_id The object id to query
@@ -82,7 +82,7 @@ namespace Opde {
 			
 			/** Property setter. Sets a value of a property field
 			* @param obj_id The object id
-			* @param propName The name of the property group
+			* @param propName The name of the property
 			* @param propField The field path to set
 			* @param value The new value
 			*/
@@ -90,15 +90,15 @@ namespace Opde {
 			
 			/** Property getter. Gets a value of a property field
 			* @param obj_id The object id
-			* @param propName The name of the property group
+			* @param propName The name of the property
 			* @param propField The field path to get
 			*/
 			bool get(int obj_id, const std::string& propName, const std::string& propField, DVariant& target);
 
-			/** A shortcut to PropertyGroup::getFieldDescIterator
+			/** A shortcut to Property::getFieldDescIterator
 			* @param propName The name of the property
 			* @return the iterator over property field descriptions, or NULL if invalid name was specified
-			* @see PropertyGroup::getFieldDescIterator
+			* @see Property::getFieldDescIterator
 			*/
 			DataFieldDescIteratorPtr getFieldDescIterator(const std::string& propName);
 
@@ -119,7 +119,7 @@ namespace Opde {
 			* @param objMask the BitArray of objects to be written */
 			void save(const FileGroupPtr& db, const BitArray& objMask);
 
-			/** Clears out all the PropertyGroups (effectively wiping out all properties) */
+			/** Clears out all the Properties (effectively wiping out all properties) */
 			void clear();
 			
 			/** @return a property name iterator usable to iterate over all property types */
@@ -130,10 +130,10 @@ namespace Opde {
 			*/
 			void grow(int minID, int maxID);
 
-			/// maps property groups to their names
-			typedef std::map< std::string, PropertyGroup* > PropertyGroupMap;
+			/// maps properties to their names
+			typedef std::map< std::string, Property* > PropertyMap;
 			
-			typedef std::list< PropertyGroup* > PropertyList;
+			typedef std::list< Property* > PropertyList;
 
 		protected:
 			/// service initialization
@@ -146,7 +146,7 @@ namespace Opde {
 			void shutdown();
 
 			/// maps the properties by their names
-			PropertyGroupMap mPropertyGroupMap;
+			PropertyMap mPropertyMap;
 			
 			/// List of properties that will be freed upon service termination
 			PropertyList mOwnedProperties;

@@ -245,14 +245,14 @@ namespace Opde {
 			// Listener structs for property messages
 
 			// ModelName property
-			PropertyGroup* mPropModelName;
+			Property* mPropModelName;
 
 			// "Position" Property related
-			PropertyGroup::ListenerID mPropPositionListenerID;
-			PropertyGroup* mPropPosition;
+			Property::ListenerID mPropPositionListenerID;
+			Property* mPropPosition;
 
 			// "ModelScale" Property related
-			PropertyGroup* mPropScale;
+			Property* mPropScale;
 
 			/// Shared pointer to the property service
 			PropertyServicePtr mPropertyService;

@@ -1,7 +1,7 @@
 /******************************************************************************
  *
  *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *    Copyright (C) 2005-2009 openDarkEngine team
  *
  *    This program is free software; you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -17,38 +17,25 @@
  *    along with this program; if not, write to the Free Software
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- *    $Id$
+ *	  $Id$
  *
  *****************************************************************************/
 
+#ifndef __PHYSSPHEREMODEL_H
+#define __PHYSSPHEREMODEL_H
 
-#include "config.h"
-#include "bindings.h"
+#include "PhysModel.h"
 
-#include "GameStateManager.h"
-#include "OpdeException.h"
-
-
-#include <OgreException.h>
-
-
-using namespace Opde;
-
-int main(int argc, char**argv)
-{
-	std::string scriptName = "";
-	
-	if (argc >= 2)
-		scriptName = argv[1];
-	
-	if (scriptName != "") {
-		PythonLanguage::init(argc - 1, &argv[1]);
-		PythonLanguage::runScript(scriptName.c_str());
-		PythonLanguage::term();
-	} else {
-		std::cerr << "opdeScript: Script name epected as a parameter!" << std::endl;
-		return 1;
-	}
-	
-	return 0;
+namespace Opde {
+	/** @brief Spherical physics model.
+	* Model that is consisted of a sphere.
+	*/
+	class OPDELIB_EXPORT PhysSphereModel : public PhysModel {
+		public:
+			PhysSphereModel(int objid);
+			~PhysSphereModel();
+	};
 }
+
+
+#endif

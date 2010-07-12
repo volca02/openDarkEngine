@@ -114,6 +114,7 @@ namespace Opde {
 			_attachObjRoom(idset, objID, newRoom);
 		}
 		
+		// TODO: Else the object is lost in transition, maybe we should detach from current room? 
 	}
 	
 	//------------------------------------------------------

@@ -69,6 +69,11 @@ OPTION(PYTHON_MODULE
     "Build the python module version of the OpenDark library"
     OFF)
 
+# Option to build the script compilers
+OPTION(SCRIPT_COMPILERS
+    "Build the cutom script compilers (.pldef and .dtype) into the OpenDark library"
+    OFF)
+
 # Installation directories
 # SET(OPDE_BINARY_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/bin")
 SET(OPDE_BINARY_INSTALL_DIR "bin")

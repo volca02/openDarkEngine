@@ -34,7 +34,7 @@ namespace Opde {
 	* @deprecated We now have common data storage for both link and data, and extra layer of abstraction using DataStorage class
 	*/
 	class PropertyData : public DType {
-		friend class PropertyGroup;
+		friend class Property;
 		
 		public:
 			/** Constructor. Constructs new data buffer, filled with zeros */
@@ -84,7 +84,7 @@ namespace Opde {
 		/// Link has changed data (Sent after the change)
 		PROP_CHANGED,
 		/// All the links were removed from the relation (Sent before the cleanout)
-		PROP_GROUP_CLEARED
+		PROP_CLEARED
 	};
 	
 	/// Property chage message

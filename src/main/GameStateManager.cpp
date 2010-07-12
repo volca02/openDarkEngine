@@ -51,9 +51,6 @@
 
 #include "ProxyArchive.h"
 
-// If custom codec is to be used
-#include "CustomImageCodec.h"
-
 #include <OgreRoot.h>
 #include <OgreWindowEventUtilities.h>
 #include <OgreConfigFile.h>
@@ -76,7 +73,9 @@ namespace Opde {
 				mGameType = GameType;
 
 		mRoot = new Opde::Root(SERVICE_ALL, "opde.log");
+#ifdef SCRIPT_COMPILERS
 		mRoot->registerCustomScriptLoaders();
+#endif
 	}
 
 	GameStateManager::~GameStateManager() {
@@ -152,6 +151,8 @@ namespace Opde {
 			LOG_FATAL("Rotten tomatoes!");
 
 		mConfigService = GET_SERVICE(ConfigService);
+		
+		mConfigService->setConfigPathOverride(".");
 
 		mConfigService->loadParams("opde.cfg");
 
