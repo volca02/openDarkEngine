@@ -26,7 +26,7 @@
 #ifndef __RENDEREDPROPERTY_H
 #define __RENDEREDPROPERTY_H
 
-#include "PropertyGroup.h"
+#include "Property.h"
 
 namespace Opde {
 	// forward decl

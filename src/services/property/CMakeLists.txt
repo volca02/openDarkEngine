@@ -27,9 +27,9 @@ link_directories (
 IF(STATIC_LIBS)
     add_library (OpdePropertyService
 	PropertyService.cpp
-        PropertyGroup.cpp
+        Property.cpp
         PropertyService.h
-        PropertyGroup.h
+        Property.h
         PropertyCommon.h
     )
 

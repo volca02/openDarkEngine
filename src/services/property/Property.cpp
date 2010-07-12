@@ -22,7 +22,7 @@
  *
  *****************************************************************************/
 
-#include "PropertyGroup.h"
+#include "Property.h"
 #include "InheritService.h"
 
 using namespace std;

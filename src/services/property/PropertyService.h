@@ -28,7 +28,7 @@
 #include "config.h"
 
 #include "PropertyCommon.h"
-#include "PropertyGroup.h"
+#include "Property.h"
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
 #include "FileGroup.h"
