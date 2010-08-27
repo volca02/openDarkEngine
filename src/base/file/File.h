@@ -27,8 +27,9 @@
 
 #include "config.h"
 
+#include <OgreDataStream.h>
+
 #include "OpdeException.h"
-#include "OgreDataStream.h"
 #include "SharedPtr.h"
 #include "integers.h"
 #include <fstream>
@@ -180,6 +181,7 @@ namespace Opde {
 	File& operator<<(File& st, uint32_t val);
 	File& operator<<(File& st, int32_t val);
 	File& operator<<(File& st, float val);
+	File& operator<<(File& st, bool val);
 	
 	File& operator>>(File& st, uint8_t& val);
 	File& operator>>(File& st, int8_t& val);
@@ -188,7 +190,7 @@ namespace Opde {
 	File& operator>>(File& st, uint32_t& val);
 	File& operator>>(File& st, int32_t& val);
 	File& operator>>(File& st, float& val);
-
+	File& operator>>(File& st, bool& val);
 
 	/** Shared file pointer */
 	typedef shared_ptr<File> FilePtr;

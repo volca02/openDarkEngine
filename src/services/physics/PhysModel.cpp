@@ -25,6 +25,7 @@
 #include "PhysModel.h"
 #include "logger.h"
 #include "File.h"
+#include "FileCompat.h"
 
 #include "PhysSphereModel.h"
 #include "PhysOBBModel.h"
@@ -54,21 +55,18 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	PhysModel::~PhysModel()	{
-		// Delete all the data used
-		delete mSubModelTypes;
-		mSubModelTypes = NULL;
-		
-		delete mSprings;
-		mSprings = NULL;
+		clear();
 	}
 	
 	//------------------------------------------------------
 	void PhysModel::read(const FilePtr& sf, unsigned int physVersion) {
 		STUB_WARN();
 		
+		clear();
+		
 		*sf >> mObjectID >> mSubModelCount >> mFlags >> mGravity;
 		
-		delete[] mSubModelTypes;
+		// TODO: FaceVel, MovingTerrain and Door (2z) properties to set the flags
 		mSubModelTypes = new uint32_t[mSubModelCount];
 		
 		for (size_t n = 0; n < mSubModelCount; ++n)
@@ -77,7 +75,6 @@ namespace Opde {
 		*sf >> mFriction >> mMediaType;
 		
 		// spring parameters
-		delete[] mSprings;
 		mSprings = new Spring[mSubModelCount];
 		
 		for (size_t n = 0; n < mSubModelCount; ++n) {
@@ -86,28 +83,69 @@ namespace Opde {
 		
 		// some unknown 3 fields
 		uint32_t unk;
-		*sf >> unk;
-		*sf >> unk;
+		
+		*sf >> mRopeVsTerrain;   // Rope v.s. terrain bool
+		*sf >> mTime; // Dunno what exactly this is
 		
 		// attachment related (nonzero if attachments are in use)
 		*sf >> mPhysAttachments;
-		*sf >> mPhysAttached;
+		*sf >> mPhysAttached; // Could be bool, eh?
 		
 		// flags for rotation and resting
-		*sf >> mRotFlags >> mRestFlags;
+		*sf >> mRotAxes >> mRestAxes; 
 		
-		// TODO: another set of attachment data
-		*sf >> unk >> unk >> unk;
+		// Rope attachment.
+		*sf >> mRopeAttObjID >> mRopeAttSubModel >> mRopeSegPos;
 		
 		// mantling state (T2 and such)
 		if (physVersion >= 32) {
 			*sf >> mMantlingState;
+			*sf >> mMantlingVec;
 		}
 		
-		// TODO: Unknowns: 4 floats, one integer
-		*sf >> unk >> unk >> unk >> unk >> unk;
+		// Dunno what this is...
+		*sf >> unk >> unk;
 		
+		// SubModels...
+		mSubModels.grow(mSubModelCount);
 		
+		for (unsigned int i = 0; i < mSubModelCount; ++i) {
+			SubModel& sm = mSubModels[i]; 
+			*sf >> sm;
+			
+			// fix the owner
+			sm.owner = this;
+		}
+		
+		*sf >> mMainSubModel;
+		
+		// Following are what seems to be relative submodel positions
+		for (unsigned int i = 0; i < mSubModelCount; ++i) {
+			*sf >> mRelPos[i];
+		}
+		
+		// translation limit for pplate - if such exists
+		if (mFlags & PHYS_MDL_PPLATE) {
+			// see of there is a translation limit
+			uint32_t stat;
+			
+			*sf >> stat;
+			
+			// this logic is in the original...
+			if ((stat == 3) || (stat == 2)) {
+				Vector3 transl;
+				
+				*sf >> transl;
+				
+				// TODO: addTranslationLimit(transl);
+			}
+		}
+		
+		// Dynamics follow
+		
+		// Rot vel. controls.
+		
+		// only after this block, the object type specific parameters are read - e,g, here
 	}
 	
 	//------------------------------------------------------
@@ -138,5 +176,17 @@ namespace Opde {
 		* Send an appropriate message
 		* mIsAsleep?
 		*/
+	}
+	
+	//------------------------------------------------------
+	void PhysModel::clear(void) {
+		// Delete all the data used
+		delete mSubModelTypes;
+		mSubModelTypes = NULL;
+		
+		delete mSprings;
+		mSprings = NULL;
+		
+		mSubModels.clear();
 	}
 }

@@ -33,10 +33,10 @@
 #include "FileGroup.h"
 #include "SharedPtr.h"
 #include "PhysModels.h"
+#include "Vector3.h"
+#include "Quaternion.h"
 
 #include <ode/ode.h>
-#include <OgreVector3.h>
-#include <OgreQuaternion.h>
 
 namespace Opde {
 	
@@ -67,20 +67,20 @@ namespace Opde {
 			 * @param objId the object id
 			 * @param submdl the submodel id
 			 * @return Position if the given submodel exists, otherwise Vector3::ZERO */
-			const Ogre::Vector3& getSubModelPosition(int objId, size_t submdl);
+			const Vector3& getSubModelPosition(int objId, size_t submdl);
 			
 			/** Returns the orientation of given submodel if exists
 			 * @param objId the object id
 			 * @param submdl the submodel id
 			 * @return Orientation if the given submodel exists, otherwise Quaternion::IDENTITY */
-			const Ogre::Quaternion& getSubModelOrientation(int objId, size_t submdl);
+			const Quaternion& getSubModelOrientation(int objId, size_t submdl);
 			
 			/** Sets the given submodel orientation
 			 * @param objId the object id
 			 * @param submdl the submodel id
 			 * @param rot the rotation to set
 			 * @return true if the value was set */
-			void setSubModelOrientation(int objId, size_t submdl, const Ogre::Quaternion& rot);
+			void setSubModelOrientation(int objId, size_t submdl, const Quaternion& rot);
 			
 		protected:
 			bool init();

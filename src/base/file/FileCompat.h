@@ -31,22 +31,27 @@
 
 #include "config.h"
 #include "File.h"
-#include <OgreVector2.h>
-#include <OgreVector3.h>
-#include <OgrePlane.h>
+#include "Vector2.h"
+#include "Vector3.h"
+#include "Plane.h"
+#include "Quaternion.h"
 
 namespace Opde {
 	// Vector2
-	File& operator<<(File& st, const Ogre::Vector2& val);
-	File& operator>>(File& st, Ogre::Vector2& val);
+	File& operator<<(File& st, const Vector2& val);
+	File& operator>>(File& st, Vector2& val);
 	
 	// Vector3
-	File& operator<<(File& st, const Ogre::Vector3& val);	
-	File& operator>>(File& st, Ogre::Vector3& val);
+	File& operator<<(File& st, const Vector3& val);	
+	File& operator>>(File& st, Vector3& val);
 	
 	// Plane
-	File& operator<<(File& st, const Ogre::Plane& val);
-	File& operator>>(File& st, Ogre::Plane& val);
+	File& operator<<(File& st, const Plane& val);
+	File& operator>>(File& st, Plane& val);
+	
+	// Quaternion
+	File& operator<<(File& st, const Quaternion& val);
+	File& operator>>(File& st, Quaternion& val);
 }
 
 #endif

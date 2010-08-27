@@ -68,7 +68,7 @@ namespace Opde {
 			WRCellHeader	mHeader;
 
 			/** the list of the cell's vertices (count is in the header) */
-			Ogre::Vector3	*mVertices;
+			Vector3	*mVertices;
 
 			/** the list of the polygon map headers */
 			WRPolygon	*mFaceMaps;
@@ -81,7 +81,7 @@ namespace Opde {
 			uint8_t		**mPolyIndices;
 
 			/** Planes forming the cell */
-			Ogre::Plane *mPlanes;
+			Plane *mPlanes;
 
 			/** Indicates the fact that the cell data have already been loaded */
 			bool mLoaded;

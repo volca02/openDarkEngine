@@ -181,6 +181,13 @@ namespace Opde {
 	}
 	
 	//------------------------------------
+	File& operator<<(File& st, bool val) {
+		int32_t vi = val ? 1 : 0;
+		st.writeElem(&vi, sizeof(int32_t));
+		return st;
+	}
+	
+	//------------------------------------
 	File& operator>>(File& st, uint8_t& val) {
 		st.read(&val, sizeof(uint8_t));
 		return st;
@@ -219,6 +226,17 @@ namespace Opde {
 	//------------------------------------
 	File& operator>>(File& st, float& val) {
 		st.readElem(&val, sizeof(float));
+		return st;
+	}
+	
+	//------------------------------------
+	File& operator>>(File& st, bool& val) {
+		// Okay okay, I just don't wan't
+		// to guarantee bool is 32bit on all platforms
+		
+		int vi;
+		st.readElem(&vi, sizeof(int32_t));
+		val = vi; 
 		return st;
 	}
 	

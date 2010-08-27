@@ -33,10 +33,9 @@
 #include "RoomCommon.h"
 #include "File.h"
 #include "Array.h"
-
-#include <OgreVector3.h>
-#include <OgrePlane.h>
-
+#include "Vector3.h"
+#include "Quaternion.h"
+#include "Plane.h"
 
 namespace Opde {
 	/** @brief A single Room. Rooms are space bounded elements that are used
@@ -53,12 +52,12 @@ namespace Opde {
 			int32_t getObjectID() const { return mObjectID; };
 			int16_t getRoomID() const { return mRoomID; };
 			
-			bool isInside(const Ogre::Vector3& point);
+			bool isInside(const Vector3& point);
 			
 			/** Gets portal for a given position
 			 * @param pos The position to find portal for
 			 * @return RoomPortal for the given point, or NULL if none found */
-			RoomPortal* getPortalForPoint(const Ogre::Vector3& pos);
+			RoomPortal* getPortalForPoint(const Vector3& pos);
 			
 			/** Attaches the given object to the room (into specified id set)
 			 *  @param idset the id set to use (0/1 typically)
@@ -84,9 +83,9 @@ namespace Opde {
 			/// Room number
 			int16_t mRoomID; 
 			/// Center point of the room. Should not be in solid space or overlapping another room
-			Ogre::Vector3 mCenter;
+			Vector3 mCenter;
 			/// Bounding box as described by 6 enclosing planes
-			Ogre::Plane mPlanes[6];
+			Plane mPlanes[6];
 			/// Portal count
 			uint32_t mPortalCount;
 			/// Portal list

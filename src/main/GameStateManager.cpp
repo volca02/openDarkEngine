@@ -152,6 +152,7 @@ namespace Opde {
 
 		mConfigService = GET_SERVICE(ConfigService);
 		
+		// TODO: Temporary till we come up with a commandline parsing ability
 		mConfigService->setConfigPathOverride(".");
 
 		mConfigService->loadParams("opde.cfg");

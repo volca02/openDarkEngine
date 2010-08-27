@@ -31,7 +31,7 @@
 #include "File.h"
 #include "FileCompat.h"
 
-#include <OgreVector3.h>
+#include "Vector3.h"
 
 // the only one which collided is wr_cell_hdr, but to be sure...
 #pragma pack(push, 1)
@@ -70,7 +70,7 @@ namespace Opde {
 		uint8_t	flowGroup; // 0-no flow group, otherwise the flow group no.
 
 		// cell's bounding sphere
-		Ogre::Vector3	center;
+		Vector3	center;
 		float	radius; // Only an approximation, but enough to guarantee that every point in the cell is enclosed by this sphere.
 		
 		friend File& operator<<(File& st, const WRCellHeader& ch) {
@@ -109,8 +109,8 @@ namespace Opde {
 	};
 
 	struct WRPolygonTexturing { // SIZE: 12+12+12+12 = 48
-		Ogre::Vector3	axisU; // U axis
-		Ogre::Vector3	axisV; // V axis - both directions of texture growth (e.g. U axis and V axis) - and they are not normalised! (in some way related to scale)
+		Vector3	axisU; // U axis
+		Vector3	axisV; // V axis - both directions of texture growth (e.g. U axis and V axis) - and they are not normalised! (in some way related to scale)
 
 		int16_t		u; // txt shift u (must divide by 1024 to get float number (and I dunno why, I had to invert it too))
 		int16_t		v; // txt shift v
@@ -120,7 +120,7 @@ namespace Opde {
 		uint16_t		unk; // something related to texture cache
 
 		float		scale; // scale of the texture
-		Ogre::Vector3	center;
+		Vector3		center;
 		
 		friend File& operator<<(File& st, const WRPolygonTexturing& ch) {
 			st << ch.axisU << ch.axisV << ch.u << ch.v << ch.txt << ch.originVertex << ch.unk << ch.scale << ch.center;

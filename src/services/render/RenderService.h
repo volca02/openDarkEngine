@@ -93,7 +93,7 @@ namespace Opde {
 			void setSkip(bool _skip);
 			void setAlpha(float alpha);
 			void setZBias(size_t bias);
-			void setScale(const Ogre::Vector3& scale);
+			void setScale(const Vector3& scale);
 
 			void setEntity(Ogre::Entity* newEntity);
 

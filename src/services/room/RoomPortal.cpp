@@ -80,10 +80,10 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
-	bool RoomPortal::isInside(const Ogre::Vector3& point) {
+	bool RoomPortal::isInside(const Vector3& point) {
 		// iterate over all the planes. Have to have positive side
 		for (size_t i = 0; i < mEdgeCount;++i) {
-			if (mEdges[i].getSide(point) == Ogre::Plane::NEGATIVE_SIDE)
+			if (mEdges[i].getSide(point) == Plane::NEGATIVE_SIDE)
 				return false;
 		}
 		
@@ -94,12 +94,12 @@ namespace Opde {
 	void RoomPortal::clear() {
 		mID = 0;
 		mIndex = 0;
-		mPlane = Ogre::Plane();
+		mPlane = Plane();
 		mEdgeCount = 0;
 		mEdges.clear();
 		mSrcRoom = NULL;
 		mDestRoom = NULL;
-		mCenter = Ogre::Vector3::ZERO;
+		mCenter = Vector3::ZERO;
 		mDestPortal = 0;
 		
 	}

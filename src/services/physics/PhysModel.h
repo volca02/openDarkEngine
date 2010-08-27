@@ -26,16 +26,31 @@
 
 #include "integers.h"
 #include "File.h"
+#include "PhysCommon.h"
+#include "Array.h"
 
 namespace Opde {
-	/** @brief Physics model. Contains all data on physics for particular object
+	/** @brief Physics model. Contains all data on physics for particular object (Both static and dynamic).
+	* This class presents the encapsulation of the whole physical definition of the given object.
+	* Internally, this class is a composition of a multiple of other classes, logically separating the
+	* different aspects of the physical behavior of the model.
 	*/
 	class OPDELIB_EXPORT PhysModel {
 		public:
 			PhysModel(int objid);
 			~PhysModel();
 			
+			/** standard read method. Additional parameter indicates which physics version we are using.
+			* @note This method should be called prior to the specializations used in various phys. model types,\
+			* as in the file the common parameters precede the special ones.
+			* @param sf The file stream to read from
+			* @param physVersion The version of the PHYS_SYSTEM chunk(tag file) as indicated by it's header
+			*/
 			virtual void read(const FilePtr& sf, unsigned int physVersion);
+			
+			/** Writes the physical model object back to a file.
+			* @see read For comments.
+			*/
 			virtual void write(const FilePtr& sf, unsigned int physVersion);
 			
 			/// @return the object id of this model
@@ -58,6 +73,7 @@ namespace Opde {
 			void setSleep(bool sleep);
 			
 		protected:
+			void clear(void);
 			
 			int32_t mObjectID;
 			uint32_t mSubModelCount;
@@ -69,17 +85,48 @@ namespace Opde {
 			* Mapping: 3->8, 2->1, 1->0, otherwise it stays the same
 			*/
 			int32_t mMediaType;
+			
 			Spring *mSprings;
+			
+			/// Some frame time accumulator
+			float mTime;
+			
+			/// @todo Unknown meaning
+			bool mRopeVsTerrain;
+			
 			/// nonzero if the object has attachments
 			uint32_t mPhysAttachments;
+			
 			/// nonzero if the object is attached
 			uint32_t mPhysAttached;
+			
 			/// Rotational flags
-			uint32_t mRotFlags;
+			uint32_t mRotAxes;
+			
 			/// Resting flags
-			uint32_t mRestFlags;
+			uint32_t mRestAxes;
+			
 			/// Mantling state
 			uint32_t mMantlingState;
+			
+			/// Mantling related vector (or so it seems)
+			Vector3 mMantlingVec;
+			
+			/// This contains the positions and orientations of SubModels
+			SimpleArray<SubModel> mSubModels;
+			SubModel mMainSubModel;
+			
+			/// relative submodel positions
+			SimpleArray<Vector3> mRelPos;
+			
+			/// Object to which this one is attached (rope climbing)
+			int32_t mRopeAttObjID;
+			
+			/// Submodel of the rope attachment
+			int32_t mRopeAttSubModel;
+			
+			/// Position on the rope, between the two specified rope segments (i.e. mRopeAttSubModel && mRopeAttSubModel-1)
+			float mRopeSegPos;
 	};
 };
 

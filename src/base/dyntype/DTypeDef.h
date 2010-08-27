@@ -36,7 +36,7 @@
 #include <typeinfo>
 #include <sstream>
 
-#include "vector3.h"
+#include "Vector3.h"
 #include "integers.h"
 #include "SharedPtr.h"
 #include "DVariant.h"

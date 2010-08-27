@@ -47,7 +47,6 @@ using namespace std;
 using Ogre::Math;
 using Ogre::Radian;
 using Ogre::Matrix3;
-using Ogre::Quaternion;
 
 namespace Opde {
 	class DTypeDef;

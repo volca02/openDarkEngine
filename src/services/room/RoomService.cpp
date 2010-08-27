@@ -52,7 +52,7 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
-	Room* RoomService::findObjRoom(size_t idset, int objID, const Ogre::Vector3& pos) {
+	Room* RoomService::findObjRoom(size_t idset, int objID, const Vector3& pos) {
 		Room* r = roomFromPoint(pos);
 		
 		if (r) {
@@ -65,7 +65,7 @@ namespace Opde {
 	}
 				
 	//------------------------------------------------------
-	Room* RoomService::roomFromPoint(const Ogre::Vector3& pos) {
+	Room* RoomService::roomFromPoint(const Vector3& pos) {
 		// iterate through all rooms....
 		RoomsByID::iterator it, end = mRoomsByID.end();
 				
@@ -81,7 +81,7 @@ namespace Opde {
 	}
 	
 	//------------------------------------------------------
-	void RoomService::updateObjRoom(size_t idset, int objID, const Ogre::Vector3& pos) {
+	void RoomService::updateObjRoom(size_t idset, int objID, const Vector3& pos) {
 		// suppose we have a room?
 		Room* r = getCurrentObjRoom(idset, objID);
 		

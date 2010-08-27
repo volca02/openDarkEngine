@@ -32,6 +32,7 @@
 #include "DatabaseService.h"
 #include "FileGroup.h"
 #include "SharedPtr.h"
+#include "Vector3.h"
 
 namespace Opde {
 	/** @brief Room service - service providing a Room database.
@@ -55,20 +56,20 @@ namespace Opde {
 			 * @param pos The position of the object
 			 * @return Room pointer if room was found, NULL otherwise 
 			 */ 
-			Room* findObjRoom(size_t idset, int objID, const Ogre::Vector3& pos);
+			Room* findObjRoom(size_t idset, int objID, const Vector3& pos);
 			
 			/** Finds a room which encloses the specified point
 			 * @param pos The position to locate room for
 			 * @return Room pointer if the position is enclosed in a room, NULL otherwise 
 			 */
-			Room* roomFromPoint(const Ogre::Vector3& pos);
+			Room* roomFromPoint(const Vector3& pos);
 			
 			/** Updates the object's room (preferably incrementally without doing room search)
 			 * @param idset The id set to use (typically 0-objects, 1-AI)
 			 * @param objID The id of the object to track down
 			 * @param pos The position of the object  
 			 */
-			void updateObjRoom(size_t idset, int objID, const Ogre::Vector3& pos);
+			void updateObjRoom(size_t idset, int objID, const Vector3& pos);
 			
 			/** Attaches the specified object to a room instance
 			 * @param idset the object id set

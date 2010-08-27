@@ -70,7 +70,7 @@ typedef struct { // SIZE: 18 longs (72 bytes)
 } t_subObject;
 
 
-typedef struct {
+typedef struct { // Size is fixed at 20 bytes!
 	uint32	contact_type; // 1-5?
 	uint32	object_num;
 	uint32	unknown;
@@ -79,16 +79,21 @@ typedef struct {
 
 
 /* PHYS. OBJECT FLAGS */
-#define PHYS_OBJ_INACTIVE   0x0000004
-#define PHYS_OBJ_PLAYER     0x0000008
-#define PHYS_OBJ_SLEEPING   0x0000080
-#define PHYS_OBJ_ROPE       0x0001000
-#define PHYS_OBJ_DEPLOYED_ROPE 0x0004000
-#define PHYS_FACE_VEL       0x0040000
-#define PHYS_OBJ_MTERRAIN   0x0100000
-#define PHYS_OBJ_DOOR	    0x0200000
-#define PHYS_AI_COLLIDE     0x0400000 // Originally pPhysAICollideProp?
-#define PHYS_OBJ_PROJECTILE 0x0800000
+#define PHYS_OBJ_INACTIVE      0x000000004
+#define PHYS_OBJ_TRANSLATING   0x000000200
+#define PHYS_OBJ_PLAYER        0x000000800
+#define PHYS_OBJ_SLEEPING      0x000000080
+#define PHYS_OBJ_PPLATE        0x000008000
+#define PHYS_OBJ_ROPE          0x000001000
+#define PHYS_OBJ_DEPLOYED_ROPE 0x000004000
+#define PHYS_FACE_VEL          0x000040000
+#define PHYS_OBJ_MTERRAIN      0x000100000
+#define PHYS_OBJ_DOOR	       0x000200000
+#define PHYS_AI_COLLIDE        0x000400000 // Originally pPhysAICollideProp?
+#define PHYS_OBJ_PROJECTILE    0x000800000
+// This thing is set on objects that should collide with player as if with maximal radius 1.0f
+// TODO: Which one is the one?
+#define PHYS_OBJ_PROJECTILE1    0x010000000
 
 /* Control flags*/
 #define CF_LOC_CTRL 4
@@ -571,7 +576,7 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 
 
 	fpos(f);
-	printf("\tCOG Offset : "); readVector3(f);
+	printf("\tCOG Offset : "); readVector3(f); // nope?
 
 	// Sub Object direction Vectors (translations from the center)
 	fpos(f);

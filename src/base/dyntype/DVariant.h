@@ -28,8 +28,9 @@
 #include "config.h"
 
 #include <stdexcept>
-#include "vector3.h"
 #include "integers.h"
+#include "Vector3.h"
+#include "Quaternion.h"
 #include "OpdeException.h"
 
 #include <OgreQuaternion.h>

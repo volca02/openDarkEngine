@@ -10,3 +10,5 @@ LIST(APPEND OPDE_SERVICE_SOURCES ${OPDE_SOURCE_DIR}/src/services/physics/PhysBSP
 LIST(APPEND OPDE_SERVICE_HEADERS ${OPDE_SOURCE_DIR}/src/services/physics/PhysBSPModel.h)
 LIST(APPEND OPDE_SERVICE_SOURCES ${OPDE_SOURCE_DIR}/src/services/physics/PhysModels.cpp)
 LIST(APPEND OPDE_SERVICE_HEADERS ${OPDE_SOURCE_DIR}/src/services/physics/PhysModels.h)
+LIST(APPEND OPDE_SERVICE_SOURCES ${OPDE_SOURCE_DIR}/src/services/physics/PhysCommon.cpp)
+LIST(APPEND OPDE_SERVICE_HEADERS ${OPDE_SOURCE_DIR}/src/services/physics/PhysCommon.h)

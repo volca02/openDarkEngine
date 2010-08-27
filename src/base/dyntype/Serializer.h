@@ -27,12 +27,12 @@
 #include "compat.h"
 
 #include <OgreMatrix3.h>
-#include <OgreQuaternion.h>
+#include "Quaternion.h"
 #include <OgreMath.h>
 
 #include "File.h"
 #include "NonCopyable.h"
-#include "vector3.h"
+#include "Vector3.h"
 
 namespace Opde {
 	/// Data serializer - used to fill the values of data based on File contents, and the other way round

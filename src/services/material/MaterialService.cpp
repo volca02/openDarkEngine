@@ -193,6 +193,8 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void MaterialService::addWorldMaterialTemplate(unsigned int idx, const Ogre::MaterialPtr& material) {
+		assert(!material.isNull());
+		
 		mTemplateMaterials.insert(make_pair(idx, material));
 
 		TextureDimensions2D dimensions;
@@ -203,14 +205,17 @@ namespace Opde {
 		if (material->getNumTechniques() > 0) {
 			Pass *shadPass = material->getTechnique(0)->getPass(0);
 
-
-			// TXT scale to fit the size texture had originally
 			if (shadPass->getNumTextureUnitStates() > 0) {
+				TextureUnitState* tus = shadPass->getTextureUnitState(0);
 
-				if (shadPass->getNumTextureUnitStates() > 0) {
-					TextureUnitState* tus = shadPass->getTextureUnitState(0);
-
-					try {
+				try {
+					// ensure the material is loaded before getting the dimensions
+					material->escalateLoading();
+					
+					// This is stupid, but can happen - the getTextureDimensions seems buggy in this regard
+					if (tus->getNumFrames() <= 0) {
+						LOG_ERROR("MaterialService: Error getting texture dimensions (Mat. %s) : Zero frame count!", material->getName().c_str());
+					} else {
 						dimensions = tus->getTextureDimensions();
 
 						// register the scale
@@ -228,10 +233,10 @@ namespace Opde {
 
 						dimensions.first = static_cast<unsigned int> (tscale.first * dimensions.first);
 						dimensions.second = static_cast<unsigned int> (tscale.second * dimensions.second);
-					} catch (Ogre::Exception &e) {
-						// Nothing, just log it could not be done
-						LOG_ERROR("MaterialService: Error getting texture dimensions : %s", e.getFullDescription().c_str());
 					}
+				} catch (Ogre::Exception &e) {
+					// Nothing, just log it could not be done
+					LOG_ERROR("MaterialService: Error getting texture dimensions : %s", e.getFullDescription().c_str());
 				}
 			}
 		}
@@ -432,22 +437,26 @@ namespace Opde {
 				std::string matname("water/");
 				matname += flows.flow[fnum].name;
 
+				LOG_INFO("MaterialService::loadFlowTextures: Loading flow %d : %d/%d '%s'", fnum, flows.flow[fnum].in_texture,  flows.flow[fnum].out_texture, matname.c_str());
+				
 				// try to find the texture definition. If found, clone to the @template + the in_texture/out_texture number
 				if (MaterialManager::getSingleton().resourceExists(matname + "_in")) {
 					MaterialPtr origMat = MaterialManager::getSingleton().getByName(matname + "_in");
 
-					StringUtil::StrStreamType matName;
-					matName << "@template" << flows.flow[fnum].in_texture;
+					StringUtil::StrStreamType strb;
+					strb << "@template" << flows.flow[fnum].in_texture;
+					
+					std::string templn(strb.str());
 
-					if (MaterialManager::getSingleton().resourceExists(matName.str())) {
-						MaterialManager::getSingleton().remove(matName.str());
+					if (MaterialManager::getSingleton().resourceExists(templn)) {
+						MaterialManager::getSingleton().remove(templn);
 					}
 
-					MaterialPtr shadMat = origMat->clone(matName.str());
+					MaterialPtr shadMat = origMat->clone(templn);
 					shadMat->load();
-
+					
 					addWorldMaterialTemplate(flows.flow[fnum].in_texture, shadMat);
-					LOG_INFO("Flow now defined : %s (template %s_in)", matName.str().c_str(), matname.c_str());
+					LOG_INFO("Flow now defined : %s (template %s_in)", templn.c_str(), matname.c_str());
 				} else {
 					LOG_ERROR("Material not found : %s_in", matname.c_str());
 				}
@@ -457,18 +466,20 @@ namespace Opde {
 				if (MaterialManager::getSingleton().resourceExists(matname + "_out")) {
 					MaterialPtr origMat = MaterialManager::getSingleton().getByName(matname + "_out");
 
-					StringUtil::StrStreamType matName;
-					matName << "@template" << flows.flow[fnum].out_texture;
+					StringUtil::StrStreamType strb;
+					strb << "@template" << flows.flow[fnum].in_texture;
+					
+					std::string templn(strb.str());
 
-					if (MaterialManager::getSingleton().resourceExists(matName.str())) {
-						MaterialManager::getSingleton().remove(matName.str());
+					if (MaterialManager::getSingleton().resourceExists(templn)) {
+						MaterialManager::getSingleton().remove(templn);
 					}
 
-					MaterialPtr shadMat = origMat->clone(matName.str());
+					MaterialPtr shadMat = origMat->clone(templn);
 					shadMat->load();
 
 					addWorldMaterialTemplate(flows.flow[fnum].out_texture, shadMat);
-					LOG_INFO("Flow now defined : %s (template %s_in)", matName.str().c_str(), matname.c_str());
+					LOG_INFO("Flow now defined : %s (template %s_in)", templn.c_str(), matname.c_str());
 				} else {
 					LOG_ERROR("Material not found : %s_out", matname.c_str());
 				}

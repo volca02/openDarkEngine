@@ -30,10 +30,7 @@
 #include "PhysModel.h"
 #include "PhysModels.h"
 
-
 using namespace std;
-using Ogre::Quaternion;
-using Ogre::Vector3;
 
 namespace Opde {
 
@@ -158,14 +155,14 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	const Ogre::Vector3& PhysicsService::getSubModelPosition(int objId, size_t submdl) {
+	const Vector3& PhysicsService::getSubModelPosition(int objId, size_t submdl) {
 		// TODO: Stub. Code
 		STUB_WARN();
 		return Vector3::ZERO;
 	}
 
 	//------------------------------------------------------
-	const Ogre::Quaternion& PhysicsService::getSubModelOrientation(int objId, size_t submdl) {
+	const Quaternion& PhysicsService::getSubModelOrientation(int objId, size_t submdl) {
 		// TODO: Stub. Code
 		STUB_WARN();
 		return Quaternion::IDENTITY;
