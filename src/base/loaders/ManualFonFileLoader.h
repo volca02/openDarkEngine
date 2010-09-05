@@ -35,52 +35,51 @@
 using namespace Opde; // For the Opde::File
 
 namespace Ogre {
-	
+
 	extern const char BLACK_INDEX;
 	extern const char WHITE_INDEX;
 	
 	/// ManualResourceLoader for FON files.
-    class OPDELIB_EXPORT ManualFonFileLoader : public ManualResourceLoader 
-	{		
-        public:
+	class OPDELIB_EXPORT ManualFonFileLoader : public ManualResourceLoader {
+		public:
 			/// Palette type specifier
-		    enum PaletteType {		    	
-				ePT_Default = 0, /// Default palette				
-				ePT_DefaultBook, /// Palette from accompanying BOOK.PCX				
-				ePT_PCX,		 /// PCX file palette				
+			enum PaletteType {
+				ePT_Default = 0, /// Default palette
+				ePT_DefaultBook, /// Palette from accompanying BOOK.PCX
+				ePT_PCX,		 /// PCX file palette
 				ePT_External	 /// External palette
 			};
-            ManualFonFileLoader();
-            virtual ~ManualFonFileLoader();
-
-            virtual void loadResource(Resource* resource);
-            
+			ManualFonFileLoader();
+			virtual ~ManualFonFileLoader();
+			
+			virtual void loadResource(Resource* resource);
+			
 			/// Set the palette type
-            void setPalette(PaletteType PalType = ePT_Default, String PalFileName = "");
-            
-		protected:			
+			void setPalette(PaletteType PalType = ePT_Default, String PalFileName = "");
+			
+		protected:
 			typedef std::map<String, String> Parameters;
 			Parameters mParams;
-
+			
 		private:
-			CharInfoList mChars;			
+			CharInfoList mChars;
 			uint32_t mBmpFileSize;
 			unsigned int mImageDim, mNumRows;
 			FilePtr mFontFile, mBookFile, mPaletteFile;
-
+			
 			std::string mTxtName, mFontGroup; // the name of the dynamically generated texture
 			
 			PaletteType mPaletteType;
 			String mPaletteFileName;
-
+			
 			RGBQuad* ReadPalette();
 			int CreateOgreFont(Font* DarkFont);
 			int LoadDarkFont();
 			int WriteImage(RGBQuad *ColorTable, unsigned char **RowPointers);
 			unsigned char** ReadFont(int *ResultingColor);
-
+			
 			void createOgreTexture(unsigned char** img, RGBQuad* palette);
-    };
+	};
 }
 
 #endif	//__MANUALFONFILELOADER_H

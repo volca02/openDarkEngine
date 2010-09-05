@@ -39,80 +39,74 @@ using namespace Opde; //For the Opde::File
 // Both horizontal and vertical spacing for characters
 #define _SPACING 3
 
-namespace Ogre 
-{
+namespace Ogre {
 
-    const char BLACK_INDEX = 0;
-    const char WHITE_INDEX = 1;
-
-    /*-----------------------------------------------------------------*/
+	const char BLACK_INDEX = 0;
+	const char WHITE_INDEX = 1;
+	
+	/*-----------------------------------------------------------------*/
 	/*--------------------- ManualFonFileLoader -----------------------*/
 	/*-----------------------------------------------------------------*/
-    ManualFonFileLoader::ManualFonFileLoader() : ManualResourceLoader(), mChars()
-	{
+	ManualFonFileLoader::ManualFonFileLoader() : ManualResourceLoader(), mChars() {
 		mPaletteFileName = "";
 		mPaletteType = ePT_Default;
-    }
-
-    //-------------------------------------------------------------------
-    ManualFonFileLoader::~ManualFonFileLoader() 
-	{
-    }
-
-
+	}
+	
+	//-------------------------------------------------------------------
+	ManualFonFileLoader::~ManualFonFileLoader() {
+	}
+	
+	
 	/*-----------------------------------------------------------------*/
 	/*------------------------ Bitmap stuff ---------------------------*/
 	/*-----------------------------------------------------------------*/
-	unsigned char** ManualFonFileLoader::ReadFont(int *ResultingColor)
-	{
+	unsigned char** ManualFonFileLoader::ReadFont(int *ResultingColor) {
 		DarkFontHeader FontHeader;
 		unsigned int ImageWidth, ImageHeight, FinalSize = 1;
 		unsigned int X, Y;
 		unsigned int N;
 		unsigned char *Ptr;
 		unsigned int NumChars;
-
+		
 		mChars.clear();
-
+		
 		*mFontFile >> FontHeader;
 		
 		NumChars = FontHeader.LastChar - FontHeader.FirstChar + 1;
 		mNumRows = FontHeader.NumRows;
-
+		
 		if (NumChars < 0)
 			return NULL;
-
+			
 		std::vector <unsigned short> Widths;
 		mFontFile->seek(FontHeader.WidthOffset, File::FSEEK_BEG);
-		for(N = 0; N < NumChars + 1; N++)
-		{
+		for (N = 0; N < NumChars + 1; N++) {
 			unsigned short Temp;
 			mFontFile->readElem(&Temp, sizeof(Temp));
 			Widths.push_back(Temp);
 		}
-
+		
 		if (FontHeader.BitmapOffset < FontHeader.WidthOffset)
 			return NULL;
-
+			
 		unsigned char *BitmapData = new unsigned char[mFontFile->size() + 1];
 		
 		if (!BitmapData)
 			return NULL;
-		
-
+			
+			
 		mFontFile->seek(FontHeader.BitmapOffset, File::FSEEK_BEG);
-		mFontFile->read(BitmapData, mFontFile->size() - FontHeader.BitmapOffset);		
+		mFontFile->read(BitmapData, mFontFile->size() - FontHeader.BitmapOffset);
 		
 		// No precalc. Let's organise the Font into groups of 16, the resolution will come out
-
+		
 		// No more spacing than needed
 		Y = 0;
 		X = 0;
 		ImageWidth  = 0;
 		ImageHeight = 0;
-
-		for (N = 0; N < NumChars; N++)
-		{
+		
+		for (N = 0; N < NumChars; N++) {
 			CharInfo Char;
 			
 			Char.Code = FontHeader.FirstChar + N;
@@ -124,10 +118,9 @@ namespace Ogre
 			
 			X += Char.Width + _SPACING; // Occupy only what you need!
 			
-			if ((N & 0xF) == 0xF)
-			{
+			if ((N & 0xF) == 0xF) {
 				Y += FontHeader.NumRows + _SPACING; // Font Height + Spacing
-			
+				
 				if (X > ImageWidth) // Sure, for the first time
 					ImageWidth = X; // Update the maximal Width
 					
@@ -138,43 +131,37 @@ namespace Ogre
 		}
 		
 		ImageHeight = Y + FontHeader.NumRows + _SPACING;
-
+		
 		// If the process did not finish with the 16th char in the row, try to update the width
 		if (X > ImageWidth)
 			ImageWidth = X;
-
+			
 		while ((FinalSize < ImageWidth) || (FinalSize < ImageHeight))
 			FinalSize <<= 1;
-
+			
 		unsigned char ** RowPointers = new unsigned char* [FinalSize];
-		if (!RowPointers)
-		{
+		if (!RowPointers) {
 			delete [] BitmapData;
 			return NULL;
 		}
-
+		
 		unsigned char *ImageData = new unsigned char[FinalSize * FinalSize];
-		if (!ImageData)
-		{
+		if (!ImageData) {
 			delete [] RowPointers;
 			delete [] BitmapData;
 			return NULL;
 		}
 		memset(ImageData, BLACK_INDEX, FinalSize * FinalSize);
 		Ptr = ImageData;
-		for (N = 0; N < FinalSize; N++)
-		{
+		for (N = 0; N < FinalSize; N++) {
 			RowPointers[N] = Ptr;
 			Ptr += FinalSize;
 		}
-
-		if (FontHeader.Format == 0)
-		{
+		
+		if (FontHeader.Format == 0) {
 			Ptr = BitmapData;
-			for (N = 0; N < FontHeader.NumRows; N++)
-			{
-				for (CharInfoList::const_iterator It = mChars.begin(); It != mChars.end(); It++)
-				{
+			for (N = 0; N < FontHeader.NumRows; N++) {
+				for (CharInfoList::const_iterator It = mChars.begin(); It != mChars.end(); It++) {
 					const CharInfo& Char = *It;
 					Y = Char.Column;
 					for (X = 0; X < Char.Width; Y++, X++)
@@ -182,64 +169,57 @@ namespace Ogre
 				}
 				Ptr += FontHeader.RowWidth;
 			}
-		}
-		else
-		{
+		} else {
 			Ptr = BitmapData;
-			for (N = 0; N < FontHeader.NumRows; N++) // Scanline of the font character...
-			{
-				for (CharInfoList::const_iterator It = mChars.begin(); It != mChars.end(); It++)
-				{
+			for (N = 0; N < FontHeader.NumRows; N++) { // Scanline of the font character...
+				for (CharInfoList::const_iterator It = mChars.begin(); It != mChars.end(); It++) {
 					const CharInfo& Char = *It;
-
-					memcpy(RowPointers[Char.Y + N] + Char.X, Ptr, Char.Width);				
+					
+					memcpy(RowPointers[Char.Y + N] + Char.X, Ptr, Char.Width);
 					Ptr += Char.Width;
 				}
 			}
 		}
-
+		
 		mImageDim = FinalSize;
-		switch (FontHeader.Format)
-		{
-		case 0:
-			*ResultingColor = 1;
-			break;
-
-		case 1:
-			*ResultingColor = 2;
-			break;
-
-		case 0xCCCC:
-			*ResultingColor = (FontHeader.Palette == 1) ? -1 : 0;
-			break;
-
-		default:
-			*ResultingColor = 0;//Unknown pixel Format, assuming 8bpp.
-			break;
+		switch (FontHeader.Format) {
+			case 0:
+				*ResultingColor = 1;
+				break;
+				
+			case 1:
+				*ResultingColor = 2;
+				break;
+				
+			case 0xCCCC:
+				*ResultingColor = (FontHeader.Palette == 1) ? -1 : 0;
+				break;
+				
+			default:
+				*ResultingColor = 0;//Unknown pixel Format, assuming 8bpp.
+				break;
 		}
-
+		
 		delete [] BitmapData;
 		return RowPointers;
 	}
-
-
+	
+	
 	//-------------------------------------------------------------------
-	RGBQuad* ManualFonFileLoader::ReadPalette()
-	{
+	RGBQuad* ManualFonFileLoader::ReadPalette() {
 		ExternalPaletteHeader PaletteHeader;
 		uint16_t Count;
 		char *Buffer, *C;
 		uint8_t S;
 		unsigned int I;
-
+		
 		// Open the file
 		Ogre::DataStreamPtr Stream;
 		
-		try 
-		{
+		try {
 			Stream = Ogre::ResourceGroupManager::getSingleton().openResource(mPaletteFileName, mFontGroup, true);
 			mPaletteFile = FilePtr(new OgreFile(Stream));
-		} catch(Ogre::FileNotFoundException) {
+		} catch (Ogre::FileNotFoundException) {
 			// Could not find resource, use the default table
 			LogManager::getSingleton().logMessage("Specified palette file not found - using default palette!");
 			return (RGBQuad*)ColorTable;
@@ -248,9 +228,8 @@ namespace Ogre
 		RGBQuad *Palette = new RGBQuad[256];
 		if (!Palette)
 			return NULL;
-		
-		if((mPaletteType == ePT_PCX) || (mPaletteType == ePT_DefaultBook))	// PCX file specified...
-		{
+			
+		if ((mPaletteType == ePT_PCX) || (mPaletteType == ePT_DefaultBook)) {	// PCX file specified...
 			RGBQuad *Palette = new RGBQuad[256];
 			
 			// Test to see if we're facing a PCX file. (0A) (xx) (01)
@@ -259,8 +238,7 @@ namespace Ogre
 			mPaletteFile->seek(2);
 			mPaletteFile->read(&Enc, 1);
 			
-			if (Manuf != 0x0A || Enc != 0x01) // Invalid file, does not seem like a PCX at all
-			{ 
+			if (Manuf != 0x0A || Enc != 0x01) { // Invalid file, does not seem like a PCX at all
 				delete[] Palette; // Clean up!
 				LogManager::getSingleton().logMessage("Invalid palette file specified - seems not to be a PCX file!");
 				return (RGBQuad*)ColorTable; // Should not matter - the cast (if packed)
@@ -273,28 +251,24 @@ namespace Ogre
 			uint8_t Padding;
 			mPaletteFile->readElem(&Padding, 1);
 			
-			if((BPP == 8) && (Padding == 0x0C)) //Make sure it is an 8bpp and a valid PCX
-			{
+			if ((BPP == 8) && (Padding == 0x0C)) { //Make sure it is an 8bpp and a valid PCX
 				// uint8_t sized structures - endianness always ok
-				for (unsigned int I = 0; I < 256; I++)
-				{
-					
+				for (unsigned int I = 0; I < 256; I++) {
+				
 					mPaletteFile->read(&Palette[I].rgbRed, 1);
 					mPaletteFile->read(&Palette[I].rgbGreen, 1);
 					mPaletteFile->read(&Palette[I].rgbBlue, 1);
 					Palette[I].rgbReserved = 0;
 				}
-			} else 
-			{
+			} else {
 				delete[] Palette; // Clean up!
 				LogManager::getSingleton().logMessage("Invalid palette file specified - not 8 BPP or invalid Padding!");
 				return (RGBQuad*)ColorTable; // Return default palette
-			}			
+			}
 			return Palette;
 		}
 		
-		if (mPaletteType != ePT_External) 
-		{
+		if (mPaletteType != ePT_External) {
 			delete[] Palette; // Clean up!
 			LogManager::getSingleton().logMessage("Invalid palette type specified!");
 			return (RGBQuad*)ColorTable;
@@ -302,10 +276,8 @@ namespace Ogre
 		
 		// We're sure that we have external palette here:
 		*mPaletteFile >> PaletteHeader;
-		if (PaletteHeader.RiffSig == 0x46464952)
-		{
-			if (PaletteHeader.PSig1 != 0x204C4150)
-			{
+		if (PaletteHeader.RiffSig == 0x46464952) {
+			if (PaletteHeader.PSig1 != 0x204C4150) {
 				delete []Palette;
 				return NULL;
 			}
@@ -313,26 +285,21 @@ namespace Ogre
 			mPaletteFile->readElem(&Count, 2);
 			if (Count > 256)
 				Count = 256;
-			for (I = 0; I < Count; I++)
-			{
+			for (I = 0; I < Count; I++) {
 				*mPaletteFile >> Palette[I];
 				S = Palette[I].rgbRed;
 				Palette[I].rgbRed = Palette[I].rgbBlue;
 				Palette[I].rgbBlue = S;
 			}
-		}
-		else if (PaletteHeader.RiffSig == 0x4353414A)
-		{
+		} else if (PaletteHeader.RiffSig == 0x4353414A) {
 			mPaletteFile->seek(0);
 			Buffer = new char[3360];
-			if (!Buffer)
-			{
+			if (!Buffer) {
 				delete []Palette;
 				return NULL;
 			}
 			mPaletteFile->read(Buffer, 3352);
-			if (strncmp(Buffer, "JASC-PAL", 8))
-			{
+			if (strncmp(Buffer, "JASC-PAL", 8)) {
 				delete []Buffer;
 				delete []Palette;
 				return NULL;
@@ -342,8 +309,7 @@ namespace Ogre
 			Count = (uint16_t)strtoul(C, NULL, 10);
 			if (Count > 256)
 				Count = 256;
-			for (I = 0; I < Count; I++)
-			{
+			for (I = 0; I < Count; I++) {
 				C = strchr(C, '\n')+1;
 				Palette[I].rgbRed = (uint8_t)strtoul(C, &C, 10);
 				C++;
@@ -352,13 +318,10 @@ namespace Ogre
 				Palette[I].rgbBlue = (uint8_t)strtoul(C, &C, 10);
 			}
 			delete []Buffer;
-		}
-		else
-		{
+		} else {
 			mPaletteFile->seek(0);
 			RGBTriple P;
-			for (I = 0; I < mPaletteFile->size() / sizeof(RGBTriple); I++)
-			{
+			for (I = 0; I < mPaletteFile->size() / sizeof(RGBTriple); I++) {
 				*mPaletteFile >> P;
 				Palette[I].rgbRed = P.rgbtBlue;
 				Palette[I].rgbGreen = P.rgbtGreen;
@@ -367,22 +330,21 @@ namespace Ogre
 		}
 		return Palette;
 	}
-
+	
 	//-------------------------------------------------------------------
-	int ManualFonFileLoader::WriteImage(RGBQuad *ColorTable, unsigned char **RowPointers)
-	{
+	int ManualFonFileLoader::WriteImage(RGBQuad *ColorTable, unsigned char **RowPointers) {
 		BITMAPFILEHEADER	FileHeader;
 		BitmapInfoHeader	BitmapHeader;
 		int 	RowWidth, Row;
 		char	Zero[4] = {0,0,0,0};
 		unsigned char *pMemBuff;
-
+		
 		mBmpFileSize = sizeof(BITMAPFILEHEADER) + sizeof(BitmapInfoHeader) + (sizeof(RGBQuad) * 256) + (mImageDim * mImageDim);
 		pMemBuff = new unsigned char[mBmpFileSize];
-		if(!pMemBuff)
+		if (!pMemBuff)
 			return -1;
 		unsigned char *Ptr = pMemBuff;
-
+		
 		FileHeader.bfType = 0x4D42;
 		FileHeader.bfReserved1 = 0;
 		FileHeader.bfReserved2 = 0;
@@ -400,44 +362,41 @@ namespace Ogre
 		RowWidth = (mImageDim + 3) & ~3;
 		BitmapHeader.biSizeImage = RowWidth * mImageDim;
 		FileHeader.bfSize = FileHeader.bfOffBits + BitmapHeader.biSizeImage;
-
+		
 		memcpy(Ptr, &FileHeader, sizeof(BITMAPFILEHEADER));
 		Ptr += sizeof(BITMAPFILEHEADER);
-
+		
 		memcpy(Ptr, &BitmapHeader, sizeof(BitmapInfoHeader));
 		Ptr += sizeof(BitmapInfoHeader);
-
+		
 		memcpy(Ptr, ColorTable, sizeof(RGBQuad) * 256);
 		Ptr += sizeof(RGBQuad) * 256;
-
+		
 		RowWidth -= mImageDim;
-		for (Row = mImageDim - 1; Row >= 0; Row--)
-		{
+		for (Row = mImageDim - 1; Row >= 0; Row--) {
 			memcpy(Ptr, RowPointers[Row], mImageDim);
 			Ptr += mImageDim;
-
-			if (RowWidth != 0)
-			{
+			
+			if (RowWidth != 0) {
 				memcpy(Ptr, Zero, mImageDim);
 				Ptr += RowWidth;
 			}
 		}
-
+		
 		StdFile* BitmapFile = new StdFile("Font.bmp", File::FILE_W);
 		BitmapFile->write(pMemBuff, mBmpFileSize);
 		delete BitmapFile;
 		delete [] pMemBuff;
-
+		
 		return 0;
 	}
-
+	
 	//-------------------------------------------------------------------
-	int ManualFonFileLoader::LoadDarkFont()
-	{
+	int ManualFonFileLoader::LoadDarkFont() {
 		uint32_t *PaletteData = const_cast<uint32_t*>(ColorTable);
 		unsigned char **ImageRows;
 		int Color;
-
+		
 		// Default palette
 		
 		if (mPaletteType != ePT_Default) {
@@ -452,8 +411,7 @@ namespace Ogre
 		
 		ImageRows = ReadFont(&Color);
 		
-		if (!ImageRows)
-		{
+		if (!ImageRows) {
 			if (PaletteData != ColorTable)
 				delete []PaletteData;
 			return 2;
@@ -465,116 +423,106 @@ namespace Ogre
 				
 			PaletteData = (uint32_t*)AntiAliasedColorTable;
 		}
-
+		
 		// Enable to see the resulting BMP
 		// WriteImage((RGBQuad*)PaletteData, ImageRows);
-
+		
 		createOgreTexture(ImageRows, (RGBQuad*)PaletteData);
-
-
+		
+		
 		delete [] ImageRows;
 		if (PaletteData != ColorTable && PaletteData != AntiAliasedColorTable)
 			delete []PaletteData;
 		return 0;
 	}
-
-    //-------------------------------------------------------------------
-	void ManualFonFileLoader::createOgreTexture(unsigned char** Img, RGBQuad* Palette) 
-	{
+	
+	//-------------------------------------------------------------------
+	void ManualFonFileLoader::createOgreTexture(unsigned char** Img, RGBQuad* Palette) {
 		// Create a texure, then fill it
 		TexturePtr Txt = TextureManager::getSingleton().createManual(mTxtName, mFontGroup, TEX_TYPE_2D, mImageDim, mImageDim, 1, PF_A8R8G8B8);
-
+		
 		// Lock the texture, obtain a pointer
 		HardwarePixelBufferSharedPtr pBuf = Txt->getBuffer(0, 0);
-
+		
 		// Erase the lmap atlas pixel buffer
 		pBuf->lock(HardwareBuffer::HBL_DISCARD);
 		const PixelBox &pB = pBuf->getCurrentLock();
-
+		
 		// Copy the image data, converting to 32bit on the fly...
-		for (unsigned int Y = 0; Y < mImageDim; Y++)
-		{
-		    unsigned char* Row = Img[Y];
+		for (unsigned int Y = 0; Y < mImageDim; Y++) {
+			unsigned char* Row = Img[Y];
 			uint32 *Data = static_cast<uint32*>(pB.data) + Y * pB.rowPitch;
-
-			for (unsigned int X = 0; X < mImageDim; X++) 
-			{
+			
+			for (unsigned int X = 0; X < mImageDim; X++) {
 				int PalIdx = Row[X];
-
+				
 				unsigned char Red , Green, Blue, Alpha;
-
-                Alpha = 255;
+				
+				Alpha = 255;
 				if (PalIdx == BLACK_INDEX)
-                    Alpha = 0;
-
+					Alpha = 0;
+					
 				// palidx = 255 - palidx;
-
-                Red = Palette[PalIdx].rgbRed;
-                Green = Palette[PalIdx].rgbGreen;
-                Blue = Palette[PalIdx].rgbBlue;
-
+				
+				Red = Palette[PalIdx].rgbRed;
+				Green = Palette[PalIdx].rgbGreen;
+				Blue = Palette[PalIdx].rgbBlue;
+				
 				// Write the ARGB data
 				Data[X] = Blue | (Green << 8) | (Red << 16) | (Alpha << 24);
 			}
-
+			
 		}
 		pBuf->unlock();
 	}
-
+	
 	/*-----------------------------------------------------------------*/
 	/*------------------------- Ogre stuff ----------------------------*/
 	/*-----------------------------------------------------------------*/
-	int ManualFonFileLoader::CreateOgreFont(Font* DarkFont)
-	{
+	int ManualFonFileLoader::CreateOgreFont(Font* DarkFont) {
 		DarkFont->setSource(mTxtName);
 		DarkFont->setType(FT_IMAGE);
-
-		for(CharInfoList::const_iterator It = mChars.begin(); It != mChars.end(); It++)
-		{
+		
+		for (CharInfoList::const_iterator It = mChars.begin(); It != mChars.end(); It++) {
 			const CharInfo& Char = *It;
 			DarkFont->setGlyphTexCoords(Char.Code, (float)(Char.X - 2) / mImageDim,
-				(float)(Char.Y - 2) / mImageDim, (float)(Char.X + Char.Width + 2) / mImageDim,
-				(float)(Char.Y + mNumRows + 2) / mImageDim, 1.0);
+										(float)(Char.Y - 2) / mImageDim, (float)(Char.X + Char.Width + 2) / mImageDim,
+										(float)(Char.Y + mNumRows + 2) / mImageDim, 1.0);
 		}
-
+		
 		DarkFont->setParameter("size", StringConverter::toString(mNumRows)); // seems mNumRows (NumRows) means Y size of the font...
 		DarkFont->load();		//Let's rock!
-
+		
 		return 0;
 	}
-
+	
 	//-------------------------------------------------------------------
-    void ManualFonFileLoader::setPalette(PaletteType PalType, String PalFileName)
-	{
-    	mPaletteType = PalType;
+	void ManualFonFileLoader::setPalette(PaletteType PalType, String PalFileName) {
+		mPaletteType = PalType;
 		mPaletteFileName = PalFileName;
-    }
-
+	}
+	
 	//-------------------------------------------------------------------
-    void ManualFonFileLoader::loadResource(Resource* resource)
-	{
-        // Cast to font, and fill
-        Font* DarkFont = static_cast<Font*>(resource);
-
-        // Fill. Find the file to be loaded by the name, and load it
-        String FontName = DarkFont->getName();
-        mFontGroup = DarkFont->getGroup();
-
-        // Get the real filename from the nameValuePairList
-        // That means: truncate to the last dot, append .fon to the filename
-        size_t DotPos = FontName.find_last_of(".");
-        String BaseName = FontName;
-        
-        if (DotPos != String::npos)
-            BaseName = FontName.substr(0, DotPos);
+	void ManualFonFileLoader::loadResource(Resource* resource) {
+		// Cast to font, and fill
+		Font* DarkFont = static_cast<Font*>(resource);
 		
-		if(mPaletteType != ePT_Default)
-		{
-			if ((mPaletteType == ePT_DefaultBook) || 
-			   (mPaletteFileName != "" && ((mPaletteType == ePT_PCX) || (mPaletteType == ePT_External))))  // Palette file specified
-			{
-				if (mPaletteType == ePT_DefaultBook)
-				{
+		// Fill. Find the file to be loaded by the name, and load it
+		String FontName = DarkFont->getName();
+		mFontGroup = DarkFont->getGroup();
+		
+		// Get the real filename from the nameValuePairList
+		// That means: truncate to the last dot, append .fon to the filename
+		size_t DotPos = FontName.find_last_of(".");
+		String BaseName = FontName;
+		
+		if (DotPos != String::npos)
+			BaseName = FontName.substr(0, DotPos);
+			
+		if (mPaletteType != ePT_Default) {
+			if ((mPaletteType == ePT_DefaultBook) ||
+					(mPaletteFileName != "" && ((mPaletteType == ePT_PCX) || (mPaletteType == ePT_External)))) { // Palette file specified
+				if (mPaletteType == ePT_DefaultBook) {
 					// Find the accompanying BOOK.PCX
 					size_t SlashPos = FontName.find_last_of("/");
 					mPaletteFileName = "";
@@ -583,25 +531,23 @@ namespace Ogre
 					mPaletteFileName += "BOOK.PCX";
 				}
 				LogManager::getSingleton().logMessage("Font DEBUG: Will load a custom file palette");
-			} 
-			else 
-			{
+			} else {
 				LogManager::getSingleton().logMessage("Non-Default palette type, but no filename specified (Defaulting to LG's default pal). Font name " + BaseName);
 			}
 		}
-
+		
 		mTxtName = BaseName + "_Txt";
-
-        BaseName += ".fon";
-
-        //Open the file
-        Ogre::DataStreamPtr Stream = Ogre::ResourceGroupManager::getSingleton().openResource(BaseName, mFontGroup, true, resource);
+		
+		BaseName += ".fon";
+		
+		//Open the file
+		Ogre::DataStreamPtr Stream = Ogre::ResourceGroupManager::getSingleton().openResource(BaseName, mFontGroup, true, resource);
 		mFontFile = FilePtr(new OgreFile(Stream));
-
-        if(LoadDarkFont())
+		
+		if (LoadDarkFont())
 			LogManager::getSingleton().logMessage("An error occurred while loading the font " + BaseName);
-
-		if(CreateOgreFont(DarkFont))
+			
+		if (CreateOgreFont(DarkFont))
 			LogManager::getSingleton().logMessage("An error occurred creating Ogre font");
-    }    
+	}
 }
