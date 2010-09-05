@@ -523,18 +523,34 @@ void readObjectModel(ifstream &in, BinHeadType &thdr) {
 			slot2matnum[x] = -1;
 
 		for (int x = 0; x < hdr.num_mats; x++) {
-			log_debug("Adding slot %d (-> %d) to slot2matnum", materials[x].slot_num, x);
-			slot2matnum[materials[x].slot_num] = x;
+			int slot = materials[x].slot_num;
+			log_debug("Adding slot %d (-> %d) to slot2matnum", slot, x);
+			slot2matnum[slot] = x;
 		}
 	}
 
+	in.seekg(hdr.offset_mat_extra, ios::beg);
+
 	// if we need extended attributes
 	if ( hdr.mat_flags & MD_MAT_TRANS || hdr.mat_flags & MD_MAT_ILLUM ) {
-		log_info(" * Extra materials (%d)", hdr.num_mats);
+		log_info(" * Extra materials (%d)", maxslotnum);
+		log_info(" * Extra material record size %d", hdr.size_mat_extra);
 		log_debug("  - actual offset %06lX", (int) in.tellg());
 		// Extra Materials
 		materialsExtra = new MeshMaterialExtra[hdr.num_mats];
-		in.read((char *) materialsExtra, hdr.num_mats * sizeof(MeshMaterialExtra));
+		
+		
+		int extrasize = hdr.size_mat_extra - 8;
+		if (extrasize < 0) {
+			log_error(" * Extra size less than 8!");
+			extrasize = 0;
+		}
+		
+		for (int i = 0; i < hdr.num_mats; ++i) {
+			in.read((char*)&materialsExtra[i], sizeof(MeshMaterialExtra));
+			in.seekg(extrasize, ios::cur);
+			log_debug("   - Mat. %d trans %f illum %f", i, materialsExtra[i].trans, materialsExtra[i].illum);
+		}
 	}
 
 	// Read the UV map vectors

@@ -26,6 +26,7 @@
 
 #include "ManualBinFileLoader.h"
 #include "File.h"
+#include "FileCompat.h"
 #include "BinFormat.h"
 #include "lgcolors.h"
 
@@ -44,6 +45,7 @@
 
 #include <OgreMeshSerializer.h>
 #include <OgreSkeletonSerializer.h>
+#include <OgreColourValue.h>
 
 using namespace std;
 using namespace Opde; // For the Opde::File
@@ -224,81 +226,91 @@ namespace Ogre {
 	}
 
 
-    /** Helper SubMesh filler class. Receives a pointer to the UV and Vertex arrays, and is filled with triangles */
-    class SubMeshFiller {
-        public:
-            SubMeshFiller(SubMesh* sm, size_t nvert, Vertex* vertices, size_t nnorms, Vertex* normals, size_t nlights, ObjLight* lights, size_t nuvs, UVMap* uvs, bool useuvmap) :
-                    mVertices(vertices),
-                    mNormals(normals),
-                    mUVs(uvs),
-                    mUseUV(useuvmap),
-                    mBuilt(false),
-                    mSubMesh(sm),
-                    mSkeleton(NULL),
-                    mLights(lights),
-                    mNumVerts(nvert),
-                    mNumNorms(nnorms),
-                    mNumLights(nlights),
-                    mNumUVs(nuvs) {
-            };
+	/** Helper SubMesh filler class. Receives a pointer to the UV and Vertex arrays, and is filled with triangles */
+	class SubMeshFiller {
+		public:
+			SubMeshFiller(SubMesh* sm, size_t nvert, Vertex* vertices, size_t nnorms, Vertex* normals, size_t nlights, ObjLight* lights, size_t nuvs, UVMap* uvs, bool useuvmap) :
+				mVertices(vertices),
+				mNormals(normals),
+				mUVs(uvs),
+				mUseUV(useuvmap),
+				mBuilt(false),
+				mSubMesh(sm),
+				mSkeleton(NULL),
+				mLights(lights),
+				mNumVerts(nvert),
+				mNumNorms(nnorms),
+				mNumLights(nlights),
+				mNumUVs(nuvs),
+				mColour(),
+				mTrans(0.0f) {
+			};
 
-            ~SubMeshFiller() {};
+			~SubMeshFiller() {};
 
-            void setMaterialName(const String& matname) { mMaterialName = matname; mSubMesh->setMaterialName(mMaterialName); };
-            bool needsUV() {return mUseUV; };
+			void setMaterialName(const String& matname) { mMaterialName = matname; mSubMesh->setMaterialName(mMaterialName); };
+			bool needsUV() {return mUseUV; };
 
-            void addPolygon(int bone, size_t numverts, uint16_t normal, uint16_t* vidx, uint16_t* lightidx, uint16_t* uvidx);
+			void addPolygon(int bone, size_t numverts, uint16_t normal, uint16_t* vidx, uint16_t* lightidx, uint16_t* uvidx);
 
-            /// For AI meshes. All 3 coords index vert, norm and uv at once
-            void addTriangle(uint16_t a, uint16_t bone_a, uint16_t b, uint16_t bone_b, uint16_t c, uint16_t bone_c);
+			/// For AI meshes. All 3 coords index vert, norm and uv at once
+			void addTriangle(uint16_t a, uint16_t bone_a, uint16_t b, uint16_t bone_b, uint16_t c, uint16_t bone_c);
 
-            void setSkeleton(const SkeletonPtr& skel) { mSkeleton = skel; };
+			void setSkeleton(const SkeletonPtr& skel) { mSkeleton = skel; };
 
-            void build();
+			void setColour(const Ogre::ColourValue& cv) { mColour = cv; };
+			
+			void setTransparency(float trans) { mTrans = trans; };
+			
+			void build();
 
-            struct VertexDefinition {
-                uint16_t vertex;
-                uint16_t normal;
-                uint16_t light;
-                uint16_t uvidx; // Left zero if the UV's are not used
-                int bone;
-            };
+			struct VertexDefinition {
+				uint16_t vertex;
+				uint16_t normal;
+				uint16_t light;
+				uint16_t uvidx; // Left zero if the UV's are not used
+				int bone;
+			};
 
-        protected:
-            uint16_t getIndex(int bone, uint16_t vert, uint16_t norm, uint16_t light, uint16_t uv);
+		private:
+			uint16_t getIndex(int bone, uint16_t vert, uint16_t norm, uint16_t light, uint16_t uv);
 
 			/// Unpacks the 30 bit normal from light struct (at index idx)
 			Vector3 getUnpackedNormal(uint16_t idx);
 
-            /// Global vertex data pointer
-            Vertex* mVertices;
-            /// Global normals data pointer
-            Vertex* mNormals;
-            /// Global UV table pointer
-            UVMap* mUVs;
-            /// used Material name
-            String mMaterialName;
-            /// Uses UVs
-            bool mUseUV;
-            /// Already built
-            bool mBuilt;
-            /// The submesh being filled
-            SubMesh* mSubMesh;
-            /// Skeleton pointer used to transform initial vertex positions and normals (Has to be non-null prior to build operation)
-            SkeletonPtr mSkeleton;
+			/// Global vertex data pointer
+			Vertex* mVertices;
+			/// Global normals data pointer
+			Vertex* mNormals;
+			/// Global UV table pointer
+			UVMap* mUVs;
+			/// used Material name
+			String mMaterialName;
+			/// Uses UVs
+			bool mUseUV;
+			/// Already built
+			bool mBuilt;
+			/// The submesh being filled
+			SubMesh* mSubMesh;
+			/// Skeleton pointer used to transform initial vertex positions and normals (Has to be non-null prior to build operation)
+			SkeletonPtr mSkeleton;
 
 			// Lights
 			ObjLight* mLights;
 
-            size_t mNumVerts, mNumNorms, mNumLights, mNumUVs;
+			size_t mNumVerts, mNumNorms, mNumLights, mNumUVs;
 
-            typedef std::vector< uint16_t > IndexList;
-            IndexList mIndexList;
+			typedef std::vector< uint16_t > IndexList;
+			IndexList mIndexList;
 
-            typedef std::vector< VertexDefinition > VertexList;
+			typedef std::vector< VertexDefinition > VertexList;
 
-            VertexList mVertexList;
-    };
+			VertexList mVertexList;
+		
+			ColourValue mColour;
+			
+			float mTrans;
+	};
 
     bool operator==(const SubMeshFiller::VertexDefinition &a, const SubMeshFiller::VertexDefinition& b) {
         return ((a.vertex == b.vertex) && (a.normal == b.normal) && (a.uvidx == b.uvidx) && (a.bone == b.bone) && (a.light == b.light));
@@ -423,6 +435,9 @@ namespace Ogre {
         if (mBuilt)
             return;
 
+	// Ambient col is self illum times transparency
+	RGBA diffuseCol = ColourValue(mColour.r, mColour.g, mColour.b, 1.0f - mTrans).getAsRGBA();
+	
         if (mSkeleton.isNull())
             OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "No skeleton given prior to build!", "SubMeshFiller::build");
 
@@ -443,17 +458,20 @@ namespace Ogre {
         // Vertex and normal data
         decl->addElement(0, offset, VET_FLOAT3, VES_POSITION);
         offset += VertexElement::getTypeSize(VET_FLOAT3);
-
-        // Need to understand the lights block first
+	
         decl->addElement(0, offset, VET_FLOAT3, VES_NORMAL);
         offset += VertexElement::getTypeSize(VET_FLOAT3);
+	
+	// Diffuse vertex colour - used for tinting/alpha transparency
+	decl->addElement(0, offset, VET_COLOUR, VES_DIFFUSE);
+        offset += VertexElement::getTypeSize(VET_COLOUR);
 
         // Build the VertexBuffer and vertex declaration
         HardwareVertexBufferSharedPtr vbuf =
             HardwareBufferManager::getSingleton().createVertexBuffer(
                 offset, mSubMesh->vertexData->vertexCount, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
 
-        size_t elemsize = 6; // 2 * 3
+        size_t elemsize = 2 * 3 + 1;
 
         // Build the buffer. 3 floats position, 3 floats normal
         float* fptr = new float[mSubMesh->vertexData->vertexCount * elemsize];
@@ -525,7 +543,10 @@ namespace Ogre {
             f[3] = nnorm.x;
             f[4] = nnorm.y;
             f[5] = nnorm.z;
-
+	    
+	    // Diffuse colour - 32 bit
+	    *((RGBA*)&f[6]) = diffuseCol;
+	    
             f += elemsize;
         }
 
@@ -630,113 +651,117 @@ namespace Ogre {
 			DarkBINFileLoader(Mesh* mesh, const Opde::FilePtr& file, unsigned int version) :
 						mVersion(version),
 						mMesh(mesh),
-                        mFile(file) {
-            };
+						mFile(file) {
+			};
 
 		protected:
-            unsigned int mVersion;
-            Mesh* mMesh;
-            Opde::FilePtr mFile;
+			unsigned int mVersion;
+			Mesh* mMesh;
+			Opde::FilePtr mFile;
 
 			typedef std::map<int, MaterialPtr> OgreMaterials;
 			typedef std::map< int, SubMeshFiller* > FillerMap;
 	};
 
-    /** Object Mesh loader class. identified by LGMD in the file offset 0. Accepts revision 3, 4 models.
-    * This class fills the supplied mesh with a Ogre's version of the Mesh. */
-    class ObjectMeshLoader : public DarkBINFileLoader {
-        public:
-            ObjectMeshLoader(Mesh* mesh, const Opde::FilePtr& file, unsigned int version) : DarkBINFileLoader(mesh, file, version),
-                        mMaterials(NULL),
-                        mMaterialsExtra(NULL),
-                        mVHots(NULL),
-                        mVertices(NULL),
-                        mLights(NULL),
-                        mUVs(NULL),
-                        mSubObjects(NULL),
-                        mNumUVs(0),
-                        mNumNorms(0),
-                        mNumLights(0) {
+	/** Object Mesh loader class. identified by LGMD in the file offset 0. Accepts revision 3, 4 models.
+	* This class fills the supplied mesh with a Ogre's version of the Mesh. */
+	class ObjectMeshLoader : public DarkBINFileLoader {
+		public:
+			ObjectMeshLoader(Mesh* mesh, const Opde::FilePtr& file, unsigned int version) : DarkBINFileLoader(mesh, file, version),
+					mMaterials(NULL),
+					mMaterialsExtra(NULL),
+					mVHots(NULL),
+					mVertices(NULL),
+					mLights(NULL),
+					mUVs(NULL),
+					mSubObjects(NULL),
+					mNumUVs(0),
+					mNumNorms(0),
+					mNumLights(0),
+					mMaxSlot(0) {
 
-                if ((mVersion != 3) && (mVersion != 4))
-                    OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Unsupported object mesh version : " + StringConverter::toString(mVersion),"ObjectMeshLoader::ObjectMeshLoader");
+				if ((mVersion != 3) && (mVersion != 4))
+					OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Unsupported object mesh version : " + StringConverter::toString(mVersion),"ObjectMeshLoader::ObjectMeshLoader");
 
-                mMaterialService = GET_SERVICE(MaterialService);
-            };
+				mMaterialService = GET_SERVICE(MaterialService);
+			};
 
-            ~ObjectMeshLoader() {
-                // cleanout
-                delete[] mMaterials;
-                delete[] mMaterialsExtra;
-                delete[] mVHots;
-                delete[] mVertices;
-                delete[] mUVs;
-                delete[] mSubObjects;
-                delete[] mNormals;
-                delete[] mLights;
+			~ObjectMeshLoader() {
+				// cleanout
+				delete[] mMaterials;
+				delete[] mMaterialsExtra;
+				delete[] mVHots;
+				delete[] mVertices;
+				delete[] mUVs;
+				delete[] mSubObjects;
+				delete[] mNormals;
+				delete[] mLights;
 
-                FillerMap::iterator it = mFillers.begin();
+				FillerMap::iterator it = mFillers.begin();
 
-                for (; it != mFillers.end(); ++it) {
-                    delete it->second;
-                }
+				for (; it != mFillers.end(); ++it) {
+				delete it->second;
+				}
 
-                mFillers.clear();
-            };
+				mFillers.clear();
+			};
 
-            void load();
+			void load();
 
-        protected:
-            void readObjects();
-            void loadSubObject(int obj, int parent);
-            void loadSubNode(int obj, size_t offset);
-            void loadPolygons(int obj, size_t count);
-            void readBinHeader();
-            void readMaterials();
-            void readVHot();
-            void readUVs();
-            void readVertices();
-            void readNormals();
-            void readLights();
+		private:
+			void readObjects();
+			void loadSubObject(int obj, int parent);
+			void loadSubNode(int obj, size_t offset);
+			void loadPolygons(int obj, size_t count);
+			void readBinHeader();
+			void readMaterials();
+			void readVHot();
+			void readUVs();
+			void readVertices();
+			void readNormals();
+			void readLights();
 
-            Matrix3 convertRotation(const float m[9]);
+			Matrix3 convertRotation(const float m[9]);
 
-            SubMeshFiller* getFillerForPolygon(ObjPolygon& ply);
+			SubMeshFiller* getFillerForPolygon(ObjPolygon& ply);
 
-            int getMaterialIndex(int slotidx);
-            /// Creates a material from the pallete index (solid color material)
-            MaterialPtr createPalMaterial(String& matname, int palindex);
+			int getMaterialIndex(int slotidx);
+			/// Creates a material from the pallete index (solid color material)
+			MaterialPtr createPalMaterial(String& matname, int palindex);
 
-            void readVertex(Vertex& vtx);
-            MaterialPtr prepareMaterial(String matname, MeshMaterial& mat, MeshMaterialExtra& matext);
+			void readVertex(Vertex& vtx);
+			MaterialPtr prepareMaterial(String matname, MeshMaterial& mat, MeshMaterialExtra& matext);
 
 
-            BinHeader mHdr;
-            MeshMaterial* mMaterials;
-            MeshMaterialExtra* mMaterialsExtra;
-            VHotObj* mVHots;
-            Vertex* mVertices;
-            Vertex* mNormals;
+			BinHeader mHdr;
+			MeshMaterial* mMaterials;
+			MeshMaterialExtra* mMaterialsExtra;
+			VHotObj* mVHots;
+			Vertex* mVertices;
+			Vertex* mNormals;
 			ObjLight* mLights;
 
-            UVMap* mUVs;
-            SubObjectHeader* mSubObjects;
+			UVMap* mUVs;
+			SubObjectHeader* mSubObjects;
 
-            int mNumUVs;
-            int mNumNorms;
-            int mNumLights;
+			int mNumUVs;
+			int mNumNorms;
+			int mNumLights;
 
 
-            std::map<int, int> mSlotToMatNum; // only v3 uses this. v4 is filled 1:1
+			std::map<int, int> mSlotToMatNum; // only v3 uses this. v4 is filled 1:1
 
-            FillerMap mFillers;
+			FillerMap mFillers;
 
-            OgreMaterials mOgreMaterials;
+			OgreMaterials mOgreMaterials;
 
-            SkeletonPtr mSkeleton;
+			SkeletonPtr mSkeleton;
 
-            MaterialServicePtr mMaterialService;
-    };
+			MaterialServicePtr mMaterialService;
+
+			// maximal slot ID, used for extra materials, which are not unmapped to slots
+			unsigned int mMaxSlot;
+	};
 
 	class AIMeshLoader: public DarkBINFileLoader {
 		public:
@@ -840,8 +865,8 @@ namespace Ogre {
         FillerMap::iterator it = mFillers.begin();
 
         for (; it != mFillers.end(); ++it) {
-            it->second->setSkeleton(mSkeleton);
-            it->second->build();
+		it->second->setSkeleton(mSkeleton);
+		it->second->build();
         }
 
         // Cubic bounds
@@ -1129,12 +1154,12 @@ namespace Ogre {
         // version 4 addons
         if (mVersion == 4) {
             mFile->readElem(&mHdr.mat_flags, 4);
-            mFile->readElem(&mHdr.offset_new1, 4);
-            mFile->readElem(&mHdr.offset_new2, 4);
+            mFile->readElem(&mHdr.offset_mat_extra, 4);
+            mFile->readElem(&mHdr.size_mat_extra, 4);
         } else { // no mat flags, init to some non-colliding values
             mHdr.mat_flags = 0;
-            mHdr.offset_new1 = 0;
-            mHdr.offset_new2 = 0;
+            mHdr.offset_mat_extra = 0;
+            mHdr.size_mat_extra = 0;
         }
     }
 
@@ -1142,44 +1167,61 @@ namespace Ogre {
     void ObjectMeshLoader::readMaterials() {
         mFile->seek(mHdr.offset_mats);
 
+	mMaxSlot = 0;
+	
         // Allocate the materials
         mMaterials = new MeshMaterial[mHdr.num_mats];
 
-        int n;
-
         // for each of the materials, load the struct
-        for (n = 0; n < mHdr.num_mats; n++) {
+        for (unsigned int n = 0; n < mHdr.num_mats; n++) {
             // load a single material
             mFile->read(mMaterials[n].name, 16);
-            mFile->read(&mMaterials[n].type, 1);
-            mFile->read(&mMaterials[n].slot_num, 1);
+            
+	    *mFile >> mMaterials[n].type
+		  >> mMaterials[n].slot_num;
 
+	    mMaxSlot = std::max(mMaxSlot, (unsigned int)mMaterials[n].slot_num);
+	    
             // Material type variable part. 8 bytes total
             if (mMaterials[n].type == MD_MAT_COLOR) {
                 mFile->read(mMaterials[n].colour, 4);
-                mFile->readElem(&mMaterials[n].ipal_index, 4);
+                *mFile >> mMaterials[n].ipal_index;
             } else if (mMaterials[n].type == MD_MAT_TMAP) {
-                mFile->readElem(&mMaterials[n].handle, 4);
-                mFile->readElem(&mMaterials[n].uvscale, 4);
+                *mFile	>> mMaterials[n].handle
+			>> mMaterials[n].uvscale;
             } else
                 OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR,"Unknown Material type : " + (int)(mMaterials[n].type), "ManualBinFileLoader::readBinHeader");
         }
 
         // construct anyway
         mMaterialsExtra = new MeshMaterialExtra[mHdr.num_mats];
+	
+	for (unsigned int n = 0; n < mHdr.num_mats; n++) {
+		mMaterialsExtra[n].illum = 0;
+		mMaterialsExtra[n].trans = 0;
+	}
 
-        // if we need extended material attributes (this is fishy)
+	// we only know how to handle 8 byte slot records
+	if (mVersion > 3) {
+		mFile->seek(mHdr.offset_mat_extra);
 
-        for (int n = 0; n < mHdr.num_mats; n++) {
-            if ( mHdr.mat_flags & MD_MAT_TRANS || mHdr.mat_flags & MD_MAT_ILLUM ) {
-                mFile->readElem(&mMaterialsExtra[n].trans, 4);
-                mFile->readElem(&mMaterialsExtra[n].illum, 4);
-            } else {
-                mMaterialsExtra[n].illum = 0;
-                mMaterialsExtra[n].trans = 0;
-            }
+		// bytes to skip per record
+		int extralen = (mHdr.size_mat_extra - 0x08);
 
-        }
+		// in debug, reveal that there is a problem with mat. extra size...
+		assert(extralen >= 0);
+	
+		if (extralen >= 0) {
+			// if we need extended material attributes
+			for (unsigned int n = 0; n < mHdr.num_mats; n++) {
+				*mFile	>> mMaterialsExtra[n].trans
+					>> mMaterialsExtra[n].illum;
+					
+				if (extralen > 0)
+					mFile->seek(extralen, File::FSEEK_CUR);
+			}
+		}
+	}
 
         // Prepare the material slot mapping, if used
         // This means, slot index will point to material index
@@ -1302,6 +1344,7 @@ namespace Ogre {
         String matName = "";
         int fillerIdx = -1;
         bool use_uvs = true;
+	
         // TODO: MD_PGON_WIRE
 
         // Depending on the type, find the right filler, or construct one if not yet constructed
@@ -1309,6 +1352,7 @@ namespace Ogre {
             // Get the material index from the index (can be slot idx...)
             int matidx = getMaterialIndex(ply.data);
 
+	    
             // Color mode is ignored. We search the filler table simply by the material index
             it = mFillers.find(matidx);
             fillerIdx = matidx;
@@ -1318,7 +1362,7 @@ namespace Ogre {
 
         } else if (type == MD_PGON_SOLID) {
             use_uvs = false;
-
+	
             // Solid color polygon. This means we need to see if we use Material or Color table index
             if (color_mode == MD_PGON_SOLID_COLOR_PAL) {
                 // Dynamically created material. We allocate negative numbers for these fillers
@@ -1333,10 +1377,9 @@ namespace Ogre {
                 it = mFillers.find(-ply.index);
                 fillerIdx = -ply.index;
 
-                mOgreMaterials.insert(make_pair(-ply.index,material));
+                mOgreMaterials.insert(make_pair(fillerIdx, material));
 
             } else if (color_mode == MD_PGON_SOLID_COLOR_VCOLOR) {
-
                 int matidx = getMaterialIndex(ply.data);
 
                 it = mFillers.find(matidx);
@@ -1348,15 +1391,27 @@ namespace Ogre {
             OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Unknown or invalid polygon type: ") + StringConverter::toString(ply.type) +
                 " (" + StringConverter::toString(type) + " - " + StringConverter::toString(color_mode) + ")", "ObjectMeshLoader::getFillerForPolygon");
 
-
+	// Not found yet. Create one now
         if (it == mFillers.end()) {
             SubMesh* sm = mMesh->createSubMesh("SubMesh" + StringConverter::toString(fillerIdx));
 
             SubMeshFiller* f = new SubMeshFiller(sm, mHdr.num_verts, mVertices, mNumNorms, mNormals, mNumLights, mLights, mNumUVs, mUVs, use_uvs);
 
-            // Set the material for the submesh
+	    // Set the material for the submesh
             f->setMaterialName(matName);
 
+	    // Set extra parameters - transfer transparency, colour to SubmeshFillers
+	    // only if it is an original material
+	    if (fillerIdx >= 0) {
+			MeshMaterial& mm = mMaterials[fillerIdx];
+			MeshMaterialExtra& me = mMaterialsExtra[fillerIdx];
+		    
+			if ((mHdr.mat_flags & MD_MAT_TRANS) && (me.trans > 0))
+				f->setTransparency(me.trans);
+			    
+			if (mm.type == MD_MAT_COLOR) 
+				f->setColour(ColourValue(mm.colour[2] / 255.0f, mm.colour[1] / 255.0f, mm.colour[0] / 255.0f));
+	    }
 
             mFillers.insert(make_pair(fillerIdx, f));
 
@@ -1376,103 +1431,85 @@ namespace Ogre {
             OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR,String("Unknown material slot index : ") + StringConverter::toString(slotidx), "ObjectMeshLoader::getMaterialIndex");
     }
 
-    //-------------------------------------------------------------------
-    MaterialPtr ObjectMeshLoader::prepareMaterial(String matname, MeshMaterial& mat, MeshMaterialExtra& matext) {
-        // Look if the material is already defined or not (This enables anyone to replace the material without modifying anything)
-        if (MaterialManager::getSingleton().resourceExists(matname)) {
-            MaterialPtr fmat = MaterialManager::getSingleton().getByName(matname);
-            return fmat;
-        }
+	//-------------------------------------------------------------------
+	MaterialPtr ObjectMeshLoader::prepareMaterial(String matname, MeshMaterial& mat, MeshMaterialExtra& matext) {
+		// Look if the material is already defined or not (This enables anyone to replace the material without modifying anything)
+		if (MaterialManager::getSingleton().resourceExists(matname)) {
+			MaterialPtr fmat = MaterialManager::getSingleton().getByName(matname);
+			return fmat;
+		}
 
-        // We'll create a material given the mat and matext structures
-        MaterialPtr omat = MaterialManager::getSingleton().create(matname, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+		// We'll create a material given the mat and matext structures
+		MaterialPtr omat = MaterialManager::getSingleton().create(matname, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
-        omat->setLightingEnabled(true);
+		omat->setLightingEnabled(true);
 		omat->setReceiveShadows(false);
 
-        // fill it with the values given
-        Pass *pass = omat->getTechnique(0)->getPass(0);
+		// fill it with the values given
+		Pass *pass = omat->getTechnique(0)->getPass(0);
 
-        // Defaults:
-        // Ambient is one. It is controlled by mission ambient setting...
-        pass->setAmbient(1,1,1);
-        pass->setDiffuse(1,1,1,1);
-        pass->setSpecular(0,0,0,0);
-        pass->setCullingMode(CULL_CLOCKWISE);
+		// Defaults:
+		// Ambient is one. It is controlled by mission ambient setting...
+		if (( mHdr.mat_flags & MD_MAT_TRANS) && (matext.trans > 0.01f)) {
+			float a = 1- matext.trans;
+			pass->setAmbient(a,a,a);
+			pass->setDiffuse(a,a,a,a);
+		} else {
+			pass->setAmbient(1,1,1);
+			pass->setDiffuse(1,1,1,1);
+		}
+		
+		
+		pass->setSpecular(0,0,0,0);
+		pass->setCullingMode(CULL_CLOCKWISE);
 
-        if (mat.type == MD_MAT_TMAP) {
-
-            // Texture unit state for the main texture...
-            TextureUnitState* tus;
-
+		if (mat.type == MD_MAT_TMAP) {
 			// TODO: This ugly code should be in some special service. Name it ToolsService (getObjectTextureFileName, etc) and should handle language setting!
 			String txtname = String("txt16/") + String(mat.name);
 
 			if (!ResourceGroupManager::getSingleton().resourceExists(ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, String("txt16/") + String(mat.name))) {
-               // Not in txt16, will be in txt then...
-               txtname = String("txt/") + String(mat.name);
-            }
+				// Not in txt16, will be in txt then...
+				txtname = String("txt/") + String(mat.name);
+			}
 
 			pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
 			pass->setAlphaRejectSettings(CMPF_GREATER, 128); // Alpha rejection.
 			// default depth bias
 			pass->setDepthBias(0.01, 0.01);
 
-			// Some basic lightning settings
-            tus = pass->createTextureUnitState(txtname);
-            // The model textures are not animated like this. They probably use a texture swapping tweq or something
+			// Texture unit state for the main texture...
+			TextureUnitState* tus = pass->createTextureUnitState(txtname);
+			// The model textures are not animated like this. They probably use a texture swapping tweq or something
 			// tus = mMaterialService->createAnimatedTextureState(pass, txtname, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, 5);
 
-            tus->setTextureAddressingMode(TextureUnitState::TAM_WRAP);
-            tus->setTextureCoordSet(0);
-            tus->setTextureFiltering(TFO_BILINEAR); // TODO: Should be controlled by global setting
+			tus->setTextureAddressingMode(TextureUnitState::TAM_WRAP);
+			tus->setTextureCoordSet(0);
+			tus->setTextureFiltering(TFO_ANISOTROPIC); // TODO: Should be controlled by global setting
+			
+			// Based on vertex alpha and texture alpha
+			tus->setAlphaOperation(LBX_MODULATE, LBS_DIFFUSE, LBS_TEXTURE);	
 
-            // If the transparency is used
-            if (( mHdr.mat_flags & MD_MAT_TRANS) && (matext.trans > 0)) {
-            	// set at least the transparency value for the material
-                pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-                pass->setDepthWriteEnabled(false);
-                tus->setColourOperation(LBO_ALPHA_BLEND);
-                pass->setAlphaRejectFunction(CMPF_ALWAYS_PASS); // Alpha rejection reset. Does not live good with the following:
-                tus->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, 1 - matext.trans);
-                pass->setDiffuse(0,0,0,0);
-            }
+		} else if (mat.type == MD_MAT_COLOR) {
+			pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
+			pass->setAmbient(ColourValue::White); // controlled by vertex col...
+			pass->setDiffuse(ColourValue::White);
 
-            // Illumination of the material. Converted to ambient lightning here
-            if (( mHdr.mat_flags & MD_MAT_ILLUM) && (matext.illum > 0)) {
-                // set the illumination
-                pass->setSelfIllumination(matext.illum, matext.illum, matext.illum);
-            }
-
-        } else if (mat.type == MD_MAT_COLOR) {
-            // Fill in a color-only material
-            TextureUnitState* tus = pass->createTextureUnitState();
-
-			ColourValue matcolor(mat.colour[2] / 255.0, mat.colour[1] / 255.0, mat.colour[0] / 255.0);
-
-            // set the material color
-            // tus->setColourOperationEx(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, matcolor);
-            pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-            pass->setAmbient(matcolor);
-			pass->setDiffuse(matcolor);
-
-            if (( mHdr.mat_flags & MD_MAT_TRANS ) && (matext.trans > 0)) {
-                tus->setColourOperation(LBO_ALPHA_BLEND);
-                tus->setAlphaOperation(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT, 1 - matext.trans);
-            }
-
-            // Illumination of a color based material. Hmm. Dunno if this is right, but i simply multiply the color with the illumination
-            if (( mHdr.mat_flags & MD_MAT_ILLUM) && (matext.illum > 0)) {
-                // set the illumination
-                pass->setSelfIllumination(matcolor.r * matext.illum, matcolor.g * matext.illum, matcolor.b * matext.illum);
-            }
-
-            // omat->setCullingMode(CULL_ANTICLOCKWISE);
-
-        } else
-            OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Invalid material type : ") + StringConverter::toString(mat.type), "ObjectMeshLoader::prepareMaterial");
-
-        omat->setShadingMode(SO_GOURAUD);
+			// if transparent, we have to specify this in an empty tus
+			if (( mHdr.mat_flags & MD_MAT_TRANS) && (matext.trans > 0)) {
+				TextureUnitState* tus = pass->createTextureUnitState();
+				tus->setAlphaOperation(LBX_SOURCE1, LBS_DIFFUSE);	
+			}
+		} else {
+			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, String("Invalid material type : ") + StringConverter::toString(mat.type), "ObjectMeshLoader::prepareMaterial");
+		}
+		
+		// Illumination of the material. Converted to ambient lightning here
+		if (( mHdr.mat_flags & MD_MAT_ILLUM) && (matext.illum > 0)) {
+			// set the illumination
+			pass->setSelfIllumination(matext.illum, matext.illum, matext.illum);
+		}
+		
+		omat->setShadingMode(SO_GOURAUD);
 		omat->load();
 
 		return omat;

@@ -134,8 +134,8 @@ typedef struct BinHeader {
 
 	// version 4 addons
 	int32_t	            mat_flags;
-	int32_t	            offset_new1;
-	int32_t	            offset_new2;
+	int32_t	            offset_mat_extra;
+	int32_t	            size_mat_extra;
 
 	// version 6 addons
 	uint32_t            offset_hdr2;
