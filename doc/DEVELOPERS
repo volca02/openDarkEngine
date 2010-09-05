@@ -21,6 +21,8 @@ There will be a whole coding style document later on, but for now, some simple r
 * Think about the way the code looks - will it be readable by others?
 * Test before commiting
 * Think twice, code once :)
+* Formatting, simply put - every curly brace indents, curly braces do not break (on the same line)
+	- if not sure, use astyle with scripts/astyle.conf as options file (astyle --options=SOME_PATH/scripts/astyle.conf file.cpp)
 
 Be sure to update ChangeLog file sometimes. On linux, it can be updated using svn2cl script.
 
