@@ -117,6 +117,7 @@ link_directories(
 
 # We don't link any our own files here, as CMake does not support convenience libraries
 target_link_libraries( OpenDark
+    LINK_PRIVATE
     ${OGRE_LIBRARIES}
     ${OIS_LIBRARIES}
     ${ODE_LIBRARIES}
