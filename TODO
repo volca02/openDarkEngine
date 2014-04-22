@@ -63,7 +63,9 @@ Pre-0.3 release:
   * Documentation - how to implement code that makes the property live. How to implement contstraints between various properties.
   * Fog rendering - the one of the last rendering problems to be solved. Fog lives in the scenemanager, but we need to render our geometry twice - once the part that is fogged, once the part that is not fogged. 
 	How this works in original dark remains to be revealed - non-fogged geometry seen through a fogged area is a small example. Maybe this uses some kind of volumetric fog. The author of DDFix - TimeSlip - should know more.
-	
+  * remove ODE, we will use in-house physics to comply with the original engine (too sensitive to change)
+  * rendering optimizations
+  * dev assistant script - find thief/ss2 game files, setup config files accordingly next to opde executable (install-less developement)
 
 ----------------------------------
 - Some random side-project ideas -
