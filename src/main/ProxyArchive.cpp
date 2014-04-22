@@ -48,22 +48,22 @@ namespace Ogre {
 		// load, build map
 		mArchive->load();
 
-		StringVectorPtr lst = mArchive->list(true, false);
+		FileInfoListPtr lst = mArchive->listFileInfo(true, false);
 
-		StringVector::iterator it = lst->begin();
+		FileInfoList::iterator it = lst->begin();
 
 		while (it != lst->end()) {
-			const std::string& fn = *it++;
-			std::string tn = transformName(fn);
+			const FileInfo& fi = *it++;
+			std::string tn = transformName(fi.filename);
 			StringUtil::toLowerCase(tn);
 			// insert into the map
 			std::pair<NameTable::iterator, bool> result =
-				mExtToIntNames.insert(std::make_pair(tn, fn));
+				mExtToIntNames.insert(std::make_pair(tn, fi.filename));
 
 			// see if the result is ok, except if not
 			if (!result.second)
 				OGRE_EXCEPT(Exception::ERR_DUPLICATE_ITEM,
-					"Archive '" + mName + "' contains duplicities : " + fn,
+					"Archive '" + mName + "' contains duplicities : " + fi.filename,
 					"ProxyArchive::load");
 		}
 	}

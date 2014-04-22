@@ -67,6 +67,10 @@ Pre-0.3 release:
   * rendering optimizations
   * dev assistant script - find thief/ss2 game files, setup config files accordingly next to opde executable (install-less developement)
   * Redo the console using draw service to avoid the usage of ogre3d overlays
+  * Cleanup
+    - replace tabs by 4 spaces. Update formatting guide, astyle config
+    - convert pimpl where possible
+    - forward pointer types, include in cpp files as needed
 
 ----------------------------------
 - Some random side-project ideas -

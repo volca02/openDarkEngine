@@ -688,6 +688,7 @@ namespace Ogre {
 					mMaterialsExtra(NULL),
 					mVHots(NULL),
 					mVertices(NULL),
+					mNormals(NULL),
 					mLights(NULL),
 					mUVs(NULL),
 					mSubObjects(NULL),
@@ -1475,7 +1476,6 @@ namespace Ogre {
 			pass->setDiffuse(1,1,1,1);
 		}
 
-
 		pass->setSpecular(0,0,0,0);
 		pass->setCullingMode(CULL_CLOCKWISE);
 
@@ -1486,6 +1486,11 @@ namespace Ogre {
 			if (!ResourceGroupManager::getSingleton().resourceExists(ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, String("txt16/") + String(mat.name))) {
 				// Not in txt16, will be in txt then...
 				txtname = String("txt/") + String(mat.name);
+
+                if (!ResourceGroupManager::getSingleton().resourceExists(ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, txtname)) {
+                    OPDE_EXCEPT(String("Can't find texture in txt16 or txt folder: ") + mat.name,
+                                "ObjectMeshLoader::prepareMaterial");
+                }
 			}
 
 			pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);

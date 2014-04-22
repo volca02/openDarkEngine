@@ -72,10 +72,11 @@ namespace Opde {
 		mViewport = renderSrv->getDefaultViewport();
 
 		// display loading... message
-		mLoadingOverlay = OverlayManager::getSingleton().getByName("Opde/LoadOverlay");
+		// TODO: replace with DrawService code...
+        // mLoadingOverlay = OverlayManager::getSingleton().getByName("Opde/LoadOverlay");
 
 		// Create a panel
-		mLoadingOverlay->show();
+		// mLoadingOverlay->show();
 
 		LOG_INFO("LoadState: Started");
 
@@ -85,9 +86,7 @@ namespace Opde {
 
 	void GameLoadState::exit() {
 	    LOG_INFO("LoadState: Exiting");
-		// mLoadingOverlay->hide();
-
-		mLoadingOverlay->hide();
+		// TODO: Replace with drawservice code mLoadingOverlay->hide();
 
 		LOG_INFO("LoadState: Exited");
 
@@ -103,18 +102,16 @@ namespace Opde {
 	void GameLoadState::resume() {
 	    LOG_INFO("LoadState: Resume?!");
 	    mLoaded = false;
-		mFirstTime = true;
-
-
-        // mLoadingOverlay->show();
+	    mFirstTime = true;
 	}
 
 	void GameLoadState::update(unsigned long timePassed) {
 		if (!mFirstTime && !mLoaded) {
 			unsigned long start_ms = Ogre::Root::getSingleton().getTimer()->getMilliseconds();
 
-		    OverlayElement* guiLdr = OverlayManager::getSingleton().getOverlayElement("Opde/LoadPanel/Description");
-		    guiLdr->setCaption("Loading, please wait...");
+            // TODO: Replace with draw service
+            /*			OverlayElement* guiLdr = OverlayManager::getSingleton().getOverlayElement("Opde/LoadPanel/Description");
+                        guiLdr->setCaption("Loading, please wait...");*/
 
 			mRoot->renderOneFrame();
 
@@ -126,11 +123,11 @@ namespace Opde {
 
 			mLoaded = true;
 
-			guiLdr->setCaption("Loaded, press ESC...");
+            //		guiLdr->setCaption("Loaded, press ESC...");
 
 			LOG_INFO("Loading took %10.2f seconds", (Ogre::Root::getSingleton().getTimer()->getMilliseconds() - start_ms) / 1000.0f);
 
-			// popState(); // Hardcoded, so no escape key is needed
+			popState(); // Hardcoded, so no escape key is needed
 		}
 
 		mFirstTime = false;

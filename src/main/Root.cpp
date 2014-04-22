@@ -89,8 +89,9 @@ namespace Opde {
 			mDirArchiveFactory(NULL),
 			mCrfArchiveFactory(NULL),
 			mResourceGroupManager(NULL),
-			mArchiveManager(NULL) {
-
+			mArchiveManager(NULL),
+            mOverlaySystem(NULL)
+    {
 		mLogger = new Logger();
 
 		if (logFileName) {
@@ -100,7 +101,7 @@ namespace Opde {
 		LOG_INFO("Root: Starting openDarkEngine %d.%d.%d (%s), build %s, %s", OPDE_VER_MAJOR, OPDE_VER_MINOR, OPDE_VER_PATCH, OPDE_CODE_NAME, __DATE__, __TIME__);
 
 		mServiceMgr = new ServiceManager(mServiceMask);
-		
+
 		LOG_INFO("Root: Created a ServiceManager instance with global mask %X", mServiceMask);
 
 		LOG_INFO("Root: Hooking up the Ogre logging");
@@ -139,6 +140,11 @@ namespace Opde {
 			Ogre::CustomImageCodec::startup();
 		}
 
+		LOG_INFO("Root: Creating overlay system");
+
+		mOverlaySystem = new Ogre::OverlaySystem();
+#warning do this: m_pSceneMgr->addRenderQueueListener(pOverlaySystem);
+
 		LOG_INFO("Root: Creating console backend");
 
 		mConsoleBackend = new ConsoleBackend();
@@ -167,14 +173,14 @@ namespace Opde {
 #endif
 		// Archive manager has no way to remove the archive factories...
 		delete mServiceMgr;
-		
+
 		// delete all the service factories
 		ServiceFactoryList::iterator sit = mServiceFactories.begin();
 
 		while (sit != mServiceFactories.end()) {
 			delete *sit++;
 		}
-		
+
 		mServiceFactories.clear();
 
 		delete mConsoleBackend;
@@ -182,10 +188,11 @@ namespace Opde {
 		if (mServiceMask & SERVICE_RENDERER) {
 			Ogre::CustomImageCodec::shutdown();
 		}
-		
+
 		delete mOgreRoot;
 		delete mResourceGroupManager;
 		delete mArchiveManager;
+		delete mOverlaySystem;
 
 		LogListenerList::iterator it = mLogListeners.begin();
 
@@ -243,7 +250,7 @@ namespace Opde {
 
 	// -------------------------------------------------------
 	void Root::loadPLDefScript(const std::string& fileName, const std::string& groupName) {
-#ifdef SCRIPT_COMPILERS	
+#ifdef SCRIPT_COMPILERS
 		// try to open the given resource stream
 		Ogre::DataStreamPtr str = Ogre::ResourceGroupManager::getSingleton().openResource(fileName, groupName, true, NULL);
 		mPLDefScriptCompiler->parseScript(str, groupName);
@@ -317,9 +324,9 @@ namespace Opde {
 		mServiceFactories.push_back(new RoomServiceFactory());
 		// mServiceFactories.push_back(new GUIServiceFactory());
 		mServiceFactories.push_back(new PlatformServiceFactory());
-		
+
 		ServiceFactoryList::iterator it = mServiceFactories.begin();
-		
+
 		while (it != mServiceFactories.end()) {
 			mServiceMgr->addServiceFactory(*it++);
 		}

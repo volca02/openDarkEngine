@@ -7,29 +7,31 @@ $Id$
 */
 
 #include "SubEntityMaterialInstance.h"
+#include "logger.h"
 
 #include <OgreSubEntity.h>
 
+using namespace Opde;
 using namespace Ogre;
 
 SubEntityMaterialInstance::SubEntityMaterialInstance (SubEntity *se) : MaterialInstance () {
 	mSubEntity = se;
-      
+
 	initOriginalMaterial ();
 }
 
 SubEntityMaterialInstance::~SubEntityMaterialInstance () {
 	// Reset to the original material
-	mSubEntity->setMaterialName (mOriginalMat->getName ());
+	mSubEntity->setMaterial(mOriginalMat);
 }
 
 void SubEntityMaterialInstance::setMaterialName (String name) {
 	clearCopyMaterial ();
-      
+
 	mSubEntity->setMaterialName (name);
-	  
+
 	initOriginalMaterial ();
-	  
+
 	setTransparency (mCurrentTransparency);
 }
 
@@ -54,6 +56,5 @@ void SubEntityMaterialInstance::setZBias (Ogre::Real zbias) {
 }
 
 void SubEntityMaterialInstance::initOriginalMaterial () {
-	mOriginalMat = MaterialManager::getSingleton ().getByName (mSubEntity->getMaterialName ());
+	mOriginalMat = mSubEntity->getMaterial();
 }
-

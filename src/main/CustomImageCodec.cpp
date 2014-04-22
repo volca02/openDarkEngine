@@ -135,6 +135,11 @@ namespace Ogre {
 
 	// ---------------------------------------------------------------------------------------------------
 	Codec::DecodeResult CustomImageCodec::decode(DataStreamPtr& input) const {
+        if (!input.get())
+            OGRE_EXCEPT(Exception::ERR_INVALIDPARAMS,
+                        "Cannot decode empty stream",
+                        "CustomImageCodec::decode");
+
 		// Buffer stream into memory (TODO: override IO functions instead?)
 		MemoryDataStream memStream(input, true);
 
