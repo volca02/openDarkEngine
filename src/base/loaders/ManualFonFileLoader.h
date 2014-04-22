@@ -28,7 +28,7 @@
 #include "config.h"
 
 #include <OgreResourceManager.h>
-#include <OgreFont.h>
+#include <Overlay/OgreFont.h>
 #include "File.h"
 #include "FonFormat.h"
 
@@ -38,7 +38,7 @@ namespace Ogre {
 
 	extern const char BLACK_INDEX;
 	extern const char WHITE_INDEX;
-	
+
 	/// ManualResourceLoader for FON files.
 	class OPDELIB_EXPORT ManualFonFileLoader : public ManualResourceLoader {
 		public:
@@ -51,33 +51,33 @@ namespace Ogre {
 			};
 			ManualFonFileLoader();
 			virtual ~ManualFonFileLoader();
-			
+
 			virtual void loadResource(Resource* resource);
-			
+
 			/// Set the palette type
 			void setPalette(PaletteType PalType = ePT_Default, String PalFileName = "");
-			
+
 		protected:
 			typedef std::map<String, String> Parameters;
 			Parameters mParams;
-			
+
 		private:
 			CharInfoList mChars;
 			uint32_t mBmpFileSize;
 			unsigned int mImageDim, mNumRows;
 			FilePtr mFontFile, mBookFile, mPaletteFile;
-			
+
 			std::string mTxtName, mFontGroup; // the name of the dynamically generated texture
-			
+
 			PaletteType mPaletteType;
 			String mPaletteFileName;
-			
+
 			RGBQuad* ReadPalette();
 			int CreateOgreFont(Font* DarkFont);
 			int LoadDarkFont();
 			int WriteImage(RGBQuad *ColorTable, unsigned char **RowPointers);
 			unsigned char** ReadFont(int *ResultingColor);
-			
+
 			void createOgreTexture(unsigned char** img, RGBQuad* palette);
 	};
 }

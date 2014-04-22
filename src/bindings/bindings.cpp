@@ -54,9 +54,9 @@ namespace Opde {
 					return TypeInfo<int>::toPyObject(inst.toUInt());
 				case DVariant::DV_STRING:
 					return TypeInfo<std::string>::toPyObject(inst.toString());
-				case DVariant::DV_VECTOR: 
+				case DVariant::DV_VECTOR:
 					return TypeInfo<Vector3>::toPyObject(inst.toVector());
-				case DVariant::DV_QUATERNION: 
+				case DVariant::DV_QUATERNION:
 					return TypeInfo<Quaternion>::toPyObject(inst.toQuaternion());
 				default:	//All possible paths must return a value
                     PyErr_SetString(PyExc_TypeError, "Invalid DVariant type");
@@ -68,8 +68,8 @@ namespace Opde {
 			// Do a conversion from python object to DVariant instance
 			// Look for the type of the python object
 
-			if (PyInt_Check(obj))
-				return DVariant(static_cast<int>(PyInt_AsLong(obj)));
+			if (PyLong_Check(obj))
+				return DVariant(static_cast<int>(PyLong_AsLong(obj)));
 			else if (PyBool_Check(obj))
 			{
 				if(obj == Py_True)
@@ -79,19 +79,24 @@ namespace Opde {
 			}
 			else if (PyFloat_Check(obj))
 				return DVariant((float)PyFloat_AsDouble(obj));
+#ifdef IS_PY3K
+			else if (PyBytes_Check(obj))
+				return DVariant(PyBytes_AsString(obj));
+#else
 			else if (PyString_Check(obj))
 				return DVariant(PyString_AsString(obj));
+#endif
 			else if (PyModule_Check(obj))
 			{
 				float x, y, z, w;
-				
+
 				if (PyArg_Parse(obj, "[ffff]", &x, &y, &z, &w)) {
 					return DVariant(x, y, z, w);
 				} else if (PyArg_Parse(obj, "[fff]", &x, &y, &z)) {
 					return DVariant(x, y, z);
 				} else
 					return DVariant(DVariant::DV_INVALID);
-				
+
 			}
 
 			return DVariant(DVariant::DV_INVALID); //Py_None, or a non-handled type
@@ -197,11 +202,37 @@ namespace Opde {
 		{NULL, NULL},
 	};
 
-//	Ogre::Root* PythonLanguage::msRoot = NULL;
+#ifdef IS_PY3K
+	// this is tricky. For python 3 we need some more boilerplate
+
+	static int opdemodule_traverse(PyObject *m, visitproc visit, void *arg) {
+		Py_VISIT(GETSTATE(m)->error);
+		return 0;
+	}
+
+	static int opdemodule_clear(PyObject *m) {
+		Py_CLEAR(GETSTATE(m)->error);
+		return 0;
+	}
+
+	static struct PyModuleDef sOpdeModuleDef = {
+		PyModuleDef_HEAD_INIT,
+		"opde",
+		NULL,
+		sizeof(struct module_state),
+		sOpdeMethods,
+		NULL,
+		opdemodule_traverse,
+		opdemodule_clear,
+		NULL
+	};
+#else
+		static struct module_state _state;
+#endif
 
 	void PythonLanguage::init(int argc, char **argv) {
 		Py_Initialize();
-		
+
 		initModule();
 
 		if (PyErr_Occurred()) {
@@ -210,14 +241,32 @@ namespace Opde {
 			PyErr_Clear();
 		}
 
+#warning Fix this for python3!
+#ifndef IS_PY3K
 		PySys_SetArgv(argc, argv);
+#endif
 	}
-	
+
 	void PythonLanguage::initModule() {
 		msRoot = NULL;
 
 		// Create an Opde module
+#ifdef IS_PY3K
+		PyObject* module = PyModule_Create(&sOpdeModuleDef);
+#else
 		PyObject* module = Py_InitModule("opde", sOpdeMethods);
+#endif
+		// Error?
+		if (!module)
+			OPDE_EXCEPT("Could not initialize the python Module!", "PythonLanguage::initModule");
+
+		// Error handling
+		struct module_state *st = GETSTATE(module);
+		st->error = PyErr_NewException("opde.Error", NULL, NULL);
+		if (st->error == NULL) {
+			Py_DECREF(module);
+			OPDE_EXCEPT("Could not initialize the opde.Error!", "PythonLanguage::initModule");
+		}
 
 		// Call all the binders here. The result is initialized Python VM
 		//PyObject *servicemod =

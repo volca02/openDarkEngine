@@ -36,14 +36,13 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyTypeObject RootBinder::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			"opde.Root",                   /* char *tp_name; */
 			sizeof(RootBinder::Object),      /* int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			RootBinder::dealloc,   /* destructor tp_dealloc; */
 			0,			              /* printfunc  tp_print;   */
-			RootBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,  // getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
 			repr,			          // reprfunc  tp_repr;    /* __repr__ */
@@ -156,7 +155,7 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// ARGS: string
 			Root* o = NULL;
-			
+
 			if (!python_cast<Root*>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -164,7 +163,7 @@ namespace Opde {
 
 			if (PyArg_ParseTuple(args, "s", &fname)) {
 			    o->loadResourceConfig(fname);
-			    
+
 				__PY_NONE_RET;
 			} else {
 				// Invalid parameters
@@ -179,7 +178,7 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// ARGS: string, string
 			Root* o = NULL;
-			
+
 			if (!python_cast<Root*>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -202,7 +201,7 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// ARGS: string, string
 			Root* o = NULL;
-			
+
 			if (!python_cast<Root*>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -225,7 +224,7 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// ARGS: string
 			Root* o = NULL;
-			
+
 			if (!python_cast<Root*>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -248,7 +247,7 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// ARGS: string, string, string, bool
 			Root* o = NULL;
-			
+
 			if (!python_cast<Root*>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -257,8 +256,8 @@ namespace Opde {
 
 			if (PyArg_ParseTuple(args, "sss|O", &name, &type, &section, &recursive)) {
 				bool recb = false;
-				
-				if (!TypeInfo<bool>::fromPyObject(recursive, recb)) 
+
+				if (!TypeInfo<bool>::fromPyObject(recursive, recb))
 					__PY_BADPARM_RET("recursive");
 
 				o->addResourceLocation(name, type, section, recb);
@@ -277,7 +276,7 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// ARGS: string, string
 			Root* o = NULL;
-			
+
 			if (!python_cast<Root*>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -300,14 +299,14 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// ARGS: No arguments!
 			Root* o = NULL;
-			
+
 			if (!python_cast<Root*>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
 			o->bootstrapFinished();
-			
+
 			__PY_NONE_RET;
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
@@ -316,7 +315,7 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// ARGS: string
 			Root* o = NULL;
-			
+
 			if (!python_cast<Root*>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -324,14 +323,14 @@ namespace Opde {
 
 			if (PyArg_ParseTuple(args, "s", &fname)) {
 			    o->logToFile(fname);
-			    
+
 			    __PY_NONE_RET;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
 				return NULL;
 			}
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
@@ -340,7 +339,7 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// ARGS: string
 			Root* o = NULL;
-			
+
 			if (!python_cast<Root*>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -355,8 +354,8 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected an integer argument!");
 				return NULL;
 			}
-			
-			
+
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
@@ -365,28 +364,28 @@ namespace Opde {
 		PyObject* RootBinder::registerCustomScriptLoaders(PyObject *self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			Root* o = NULL;
-			
+
 			if (!python_cast<Root*>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
 		        o->registerCustomScriptLoaders();
 
 			__PY_NONE_RET;
-		
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 
 		// ------------------------------------------
 		PyObject* RootBinder::repr(PyObject *self) {
+#ifdef IS_PY3K
+			return PyBytes_FromFormat("<Opde::Root at %p>", self);
+#else
 			return PyString_FromFormat("<Opde::Root at %p>", self);
+#endif
 		}
 
 
-		// ------------------------------------------
-		PyObject* RootBinder::getattr(PyObject *self, char *name) {
-			return Py_FindMethod(msMethods, self, name);
-		}
 
 		// ------------------------------------------
 		PyObject* RootBinder::create(Root* root) {
@@ -408,4 +407,3 @@ namespace Opde {
 	}
 
 } // namespace Opde
-

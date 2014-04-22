@@ -71,15 +71,14 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyTypeObject DatabaseServiceBinder::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			"opde.services.DatabaseService",                   // char *tp_name; */
 			sizeof(DatabaseServiceBinder::Object),      // int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			DatabaseServiceBinder::dealloc,   // destructor tp_dealloc; */
-			0,			              // printfunc  tp_print;   */
-			DatabaseServiceBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
-			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
+			0,						  // printfunc  tp_print;   */
+			0,						  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,						  // setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
 			0,			              // reprfunc  tp_repr;    /* __repr__ */
 			0,				          // PyNumberMethods *tp_as_number; */
@@ -112,7 +111,7 @@ namespace Opde {
 				"@param filename: The filename of the mission file\n"
 				"@param mask: The mask to use while loading (see the DBM_ constants for more info)\n"
 				"@raise IOError: if something bad happened while loading";
-				
+
 		const char* opde_DatabaseService_mergeLoad__doc__ = "mergeLoad(filename, mask)\n"
 				"Loads a database file from the specified location, not destroying any previously loaded data (can be dangerous)\n"
 				"@type filename: string\n"
@@ -120,7 +119,7 @@ namespace Opde {
 				"@param filename: The filename of the mission file\n"
 				"@param mask: The mask to use while loading (see the DBM_ constants for more info)\n"
 				"@raise IOError: if something bad happened while loading";
-				
+
 		const char* opde_DatabaseService_recursiveMergeLoad__doc__ = "recursiveMergeLoad(filename, mask)\n"
 				"Loads a database file and the parent databases it refers to from the specified location, not destroying any previously loaded data (can be dangerous)\n"
 				"@type filename: string\n"
@@ -165,9 +164,9 @@ namespace Opde {
 		// ------------------------------------------
 		PyObject* DatabaseServiceBinder::load(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			DatabaseServicePtr o;
-			
+
 			if (!python_cast<DatabaseServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -176,23 +175,23 @@ namespace Opde {
 
 			if (PyArg_ParseTuple(args, "si", &fname, &mask)) {
 				o->load(fname, mask);
-				
+
 				__PY_NONE_RET;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected a string and integer arguments!");
 				return NULL;
 			}
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DatabaseServiceBinder::mergeLoad(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			DatabaseServicePtr o;
-			
+
 			if (!python_cast<DatabaseServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -201,23 +200,23 @@ namespace Opde {
 
 			if (PyArg_ParseTuple(args, "si", &fname, &mask)) {
 				o->mergeLoad(fname, mask);
-				
+
 				__PY_NONE_RET;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected a string and integer arguments!");
 				return NULL;
 			}
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DatabaseServiceBinder::recursiveMergeLoad(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			DatabaseServicePtr o;
-			
+
 			if (!python_cast<DatabaseServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -226,23 +225,23 @@ namespace Opde {
 
 			if (PyArg_ParseTuple(args, "si", &fname, &mask)) {
 				o->recursiveMergeLoad(fname, mask);
-				
+
 				__PY_NONE_RET;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected a string and integer arguments!");
 				return NULL;
 			}
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DatabaseServiceBinder::save(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			DatabaseServicePtr o;
-			
+
 			if (!python_cast<DatabaseServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -251,23 +250,23 @@ namespace Opde {
 
 			if (PyArg_ParseTuple(args, "si", &fname, &mask)) {
 				o->save(fname, mask);
-				
+
 				__PY_NONE_RET;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected a string and integer arguments!");
 				return NULL;
 			}
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 
 		// ------------------------------------------
 		PyObject* DatabaseServiceBinder::unload(PyObject* self, PyObject* args) {
-			__PYTHON_EXCEPTION_GUARD_BEGIN_;        	
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			DatabaseServicePtr o;
-			
+
 			if (!python_cast<DatabaseServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -275,7 +274,7 @@ namespace Opde {
 
 			if (PyArg_ParseTuple(args, "i", &mask)) {
 				o->unload(mask);
-				
+
 				__PY_NONE_RET;
 			} else {
 				// Invalid parameters
@@ -284,17 +283,17 @@ namespace Opde {
 			}
 
 			__PY_NONE_RET;
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* DatabaseServiceBinder::setProgressListener(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			PyObject *result = NULL;
 			DatabaseServicePtr o;
-			
+
 			if (!python_cast<DatabaseServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -318,22 +317,17 @@ namespace Opde {
 		// ------------------------------------------
 		PyObject* DatabaseServiceBinder::unsetProgressListener(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			DatabaseServicePtr o;
-			
+
 			if (!python_cast<DatabaseServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
 			o->unsetProgressListener();
 
 			__PY_NONE_RET;
-			
-			__PYTHON_EXCEPTION_GUARD_END_;
-		}
 
-		// ------------------------------------------
-		PyObject* DatabaseServiceBinder::getattr(PyObject *self, char *name) {
-			return Py_FindMethod(msMethods, self, name);
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
@@ -352,10 +346,10 @@ namespace Opde {
 			PythonDatabaseProgressMessage::init(module);
 
 			publishType(module, &msType, msName);
-			
-			PyModule_AddIntConstant(module, "DBM_CONCRETE", DBM_CONCRETE); 
-			PyModule_AddIntConstant(module, "DBM_ABSTRACT", DBM_ABSTRACT); 
-			PyModule_AddIntConstant(module, "DBM_MBRUSHES", DBM_MBRUSHES); 
+
+			PyModule_AddIntConstant(module, "DBM_CONCRETE", DBM_CONCRETE);
+			PyModule_AddIntConstant(module, "DBM_ABSTRACT", DBM_ABSTRACT);
+			PyModule_AddIntConstant(module, "DBM_MBRUSHES", DBM_MBRUSHES);
 			PyModule_AddIntConstant(module, "DBM_UNKNOWN1", DBM_UNKNOWN1);
 			PyModule_AddIntConstant(module, "DBM_CONCRETE_OLP", DBM_CONCRETE_OLP);
 			PyModule_AddIntConstant(module, "DBM_OBJTREE_CONCRETE", DBM_OBJTREE_CONCRETE);
@@ -372,4 +366,3 @@ namespace Opde {
 	} // namespace Python
 
 } // namespace Opde
-

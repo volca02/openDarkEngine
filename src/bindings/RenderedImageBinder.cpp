@@ -37,14 +37,13 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyTypeObject RenderedImageBinder::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			"opde.services.RenderedImage",                   // char *tp_name; */
 			sizeof(RenderedImageBinder::Object),  // int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			RenderedImageBinder::dealloc,   // destructor tp_dealloc; */
 			0,			              // printfunc  tp_print;   */
-			RenderedImageBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,  // getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
 			repr,			              // reprfunc  tp_repr;    /* __repr__ */
@@ -58,7 +57,12 @@ namespace Opde {
 			PyObject_GenericSetAttr,  // setattrofunc tp_setattro; */
 			0,			              // PyBufferProcs *tp_as_buffer; */
 			// for inheritance searches to work we need this
+#ifdef IS_PY3K
+#warning Check this for correctness
+            1,
+#else
 			Py_TPFLAGS_HAVE_CLASS,	              // long tp_flags; */
+#endif
 			0,			              // char *tp_doc;  */
 			0,			              // traverseproc tp_traverse; */
 			0,			              // inquiry tp_clear; */
@@ -70,65 +74,63 @@ namespace Opde {
 			0,                                    // struct memberlist /*  *tp_members; */
             0,                                    // struct getsetlist /* *tp_getset; */
             // Base object type - needed for inheritance checks. Here, it is the DrawOperationBinder stub.
-			&DrawOperationBinder::msType          // struct _typeobject *tp_base; 
+			&DrawOperationBinder::msType          // struct _typeobject *tp_base;
 		};
 
 		// ------------------------------------------
 		PyMethodDef RenderedImageBinder::msMethods[] = {
-			{"setDrawSource", setDrawSource, METH_VARARGS},			
+			{"setDrawSource", setDrawSource, METH_VARARGS},
 			{NULL, NULL}
 		};
-		
-		
+
+
 		// ------------------------------------------
 		PyObject* RenderedImageBinder::setDrawSource(PyObject* self, PyObject* args)  {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-                
+
 			RenderedImage* o = NULL;
-			
+
 			if (!python_cast<RenderedImage*>(self, &msType, &o))
 				__PY_CONVERR_RET;
-                  
+
 			PyObject *ds;
-                        
+
 			if (PyArg_ParseTuple(args, "O", &ds)) {
 				// if it's a tuple, it should contain four floats
 				DrawSourcePtr dsp;
-				
+
 				if (!DrawSourceBinder::extract(ds, dsp)) {
 					PyErr_SetString(PyExc_TypeError, "Expected a DrawSource as an argument!");
 					return NULL;
 				}
-					
-				
+
+
 				o->setDrawSource(dsp);
-						
+
 				__PY_NONE_RET;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected a DrawSource as an argument!");
 				return NULL;
 			}
-								
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
-		PyObject* RenderedImageBinder::getattr(PyObject *self, char *name) {
-			// TODO: Image/Group name getters?
-			return Py_FindMethod(msMethods, self, name);
-		}
-				
-		// ------------------------------------------
 		PyObject* RenderedImageBinder::repr(PyObject *self) {
+#ifdef IS_PY3K
+			return PyBytes_FromFormat("<RenderedImage at %p>", self);
+#else
 			return PyString_FromFormat("<RenderedImage at %p>", self);
+#endif
 		}
-		
+
 		// ------------------------------------------
 		bool RenderedImageBinder::extract(PyObject *obj, RenderedImage*& tgt) {
 			return python_cast<RenderedImage*>(obj, &msType, &tgt);
 		}
-		
+
 		// ------------------------------------------
 		PyObject* RenderedImageBinder::create(RenderedImage *sh) {
 			Object* object = construct(&msType);
@@ -148,4 +150,3 @@ namespace Opde {
 
   	} // namespace Python
 } // namespace Opde
-

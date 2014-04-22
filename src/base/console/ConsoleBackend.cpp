@@ -1,21 +1,21 @@
 /******************************************************************************
  *
- *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *	  This file is part of openDarkEngine project
+ *	  Copyright (C) 2005-2006 openDarkEngine team
  *
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *	  This program is free software; you can redistribute it and/or modify
+ *	  it under the terms of the GNU General Public License as published by
+ *	  the Free Software Foundation; either version 2 of the License, or
+ *	  (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *	  This program is distributed in the hope that it will be useful,
+ *	  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
+ *	  GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *	  You should have received a copy of the GNU General Public License
+ *	  along with this program; if not, write to the Free Software
+ *	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA	02111-1307	USA
  *
  *
  *	  $Id$
@@ -76,7 +76,7 @@ namespace Opde {
 		std::map<string, ConsoleCommandListener *>::iterator commandIt = mCommandMap.find(command);
 
 		if (commandIt != mCommandMap.end()) { // already registered
-			LOG_DEBUG("ConsoleBackend::registerCommandListener: Command %s is already registered, reregistering the listener pointer",  command.c_str());
+			LOG_DEBUG("ConsoleBackend::registerCommandListener: Command %s is already registered, reregistering the listener pointer",	command.c_str());
 			commandIt->second = listener;
 		} else {
 			mCommandMap.insert(make_pair(command, listener));
@@ -142,7 +142,7 @@ namespace Opde {
 		addText(text, level);
 	}
 
-	void ConsoleBackend::messageLogged( const String& message, LogMessageLevel lml, bool maskDebug, const String &logName ) {
+	void ConsoleBackend::messageLogged( const String& message, LogMessageLevel lml, bool maskDebug, const String &logName, bool &skipThisMessage ) {
 		if (lml == LML_CRITICAL)
 			addText("OgreLog: (" + logName + ") : " + message);
 	}
@@ -171,7 +171,7 @@ namespace Opde {
 			if (lines > (size - pos))
 				lines = (size - pos);
 		}
-		
+
 		// range checks
 		if ((size_t)(pos) >= size) {
 			pos = size - 1;
@@ -179,20 +179,19 @@ namespace Opde {
 
 		if (pos < 0)
 			pos = 0;
-		
+
 		lines = (size - pos) > lines ? lines : (size - pos);
-		
+
 		for (;lines > 0; --lines, ++pos) {
 			target.push_back(mMessages[pos]);
 		}
 	}
 
 	ConsoleBackend& ConsoleBackend::getSingleton(void) {
-		assert( ms_Singleton );  return ( *ms_Singleton );
+		assert( ms_Singleton );	 return ( *ms_Singleton );
 	}
 
 	ConsoleBackend* ConsoleBackend::getSingletonPtr(void) {
 		return ms_Singleton;
 	}
-
 }

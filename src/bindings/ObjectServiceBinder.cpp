@@ -35,16 +35,14 @@ namespace Opde
 		const char* ObjectServiceBinder::msName = "ObjectService";
 
 		// ------------------------------------------
-		PyTypeObject ObjectServiceBinder::msType =
-		{
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+		PyTypeObject ObjectServiceBinder::msType = {
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			"opde.services.ObjectService",		// char *tp_name; */
 			sizeof(ObjectServiceBinder::Object), // int tp_basicsize; */
 			0,									// int tp_itemsize;       /* not used much */
 			ObjectServiceBinder::dealloc,		// destructor tp_dealloc; */
 			0,									// printfunc  tp_print;   */
-			ObjectServiceBinder::getattr,		// getattrfunc  tp_getattr; /* __getattr__ */
+			0,		// getattrfunc  tp_getattr; /* __getattr__ */
 			0,   								// setattrfunc  tp_setattr;  /* __setattr__ */
 			0,									// cmpfunc  tp_compare;  /* __cmp__ */
 			0,									// reprfunc  tp_repr;    /* __repr__ */
@@ -93,10 +91,10 @@ namespace Opde
 		PyObject* ObjectServiceBinder::objectCreate(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			ObjectServicePtr o;
-			
+
 			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			// param: archetype object to inherit from
 			int archetype;
 
@@ -110,7 +108,7 @@ namespace Opde
 			        return NULL;
 			    }
 
-				return PyInt_FromLong(newid);
+				return PyLong_FromLong(newid);
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected a integer (archetype object id) argument!");
@@ -123,7 +121,7 @@ namespace Opde
 		PyObject* ObjectServiceBinder::beginCreate(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			ObjectServicePtr o;
-			
+
 			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -140,7 +138,7 @@ namespace Opde
 			        return NULL;
 			    }
 
-				return PyInt_FromLong(newid);
+				return PyLong_FromLong(newid);
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected a integer (archetype object id) argument!");
@@ -154,7 +152,7 @@ namespace Opde
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
 			ObjectServicePtr o;
-			
+
 			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -184,7 +182,7 @@ namespace Opde
 		PyObject* ObjectServiceBinder::exists(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			ObjectServicePtr o;
-			
+
 			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -227,7 +225,7 @@ namespace Opde
 		PyObject* ObjectServiceBinder::getName(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			ObjectServicePtr o;
-			
+
 			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -237,7 +235,11 @@ namespace Opde
 			if (PyArg_ParseTuple(args, "i", &objid)) {
 			    std::string name = o->getName(objid);
 
+#ifdef IS_PY3K
+				return PyBytes_FromString(name.c_str());
+#else
 				return PyString_FromString(name.c_str());
+#endif
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected a integer (object id) argument!");
@@ -250,7 +252,7 @@ namespace Opde
 		PyObject* ObjectServiceBinder::setName(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			ObjectServicePtr o;
-			
+
 			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -274,7 +276,7 @@ namespace Opde
 		PyObject* ObjectServiceBinder::named(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			ObjectServicePtr o;
-			
+
 			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -284,7 +286,7 @@ namespace Opde
 			if (PyArg_ParseTuple(args, "s", &name)) {
 				int objid = o->named(name);
 
-				return PyInt_FromLong(objid);
+				return PyLong_FromLong(objid);
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
@@ -297,7 +299,7 @@ namespace Opde
 		PyObject* ObjectServiceBinder::teleport(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			ObjectServicePtr o;
-			
+
 			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -312,13 +314,13 @@ namespace Opde
 
 				if (!TypeInfo<Vector3>::fromPyObject(pos, cpos))
 					__PY_BADPARM_RET(2);
-				
+
 				if (!TypeInfo<Quaternion>::fromPyObject(rot, crot))
 					__PY_BADPARM_RET(3);
-				
+
 				if (!TypeInfo<bool>::fromPyObject(rel, crel))
 					__PY_BADPARM_RET(4);
-				
+
 				o->teleport(id, cpos, crot, crel);
 
 				__PY_NONE_RET;
@@ -334,7 +336,7 @@ namespace Opde
 		PyObject* ObjectServiceBinder::addMetaProperty(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			ObjectServicePtr o;
-			
+
 			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -359,7 +361,7 @@ namespace Opde
 		PyObject* ObjectServiceBinder::removeMetaProperty(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			ObjectServicePtr o;
-			
+
 			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -384,7 +386,7 @@ namespace Opde
 		PyObject* ObjectServiceBinder::hasMetaProperty(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			ObjectServicePtr o;
-			
+
 			if (!python_cast<ObjectServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -399,14 +401,7 @@ namespace Opde
 				PyErr_SetString(PyExc_TypeError, "Expected an integer and string arguments!");
 				return NULL;
 			}
-			__PYTHON_EXCEPTION_GUARD_END_;		
-		}
-
-
-		// ------------------------------------------
-		PyObject* ObjectServiceBinder::getattr(PyObject *self, char *name)
-		{
-			return Py_FindMethod(msMethods, self, name);
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
@@ -428,4 +423,3 @@ namespace Opde
 	}
 
 } // namespace Opde
-

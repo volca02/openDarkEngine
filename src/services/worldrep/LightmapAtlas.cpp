@@ -48,8 +48,8 @@ namespace Opde {
 	LightAtlas::LightAtlas(int idx, int tag) :
 				mCount(0),
 				mIdx(idx),
-				mTex(NULL),
-				mAtlas(NULL),
+				mTex(),
+				mAtlas(),
 				mFreeSpace(NULL),
 				mSize(1) {
 		mName << "@lightmap" << idx; // so we can find the atlas by number in the returned AtlasInfo
@@ -604,4 +604,3 @@ namespace Opde {
 		return std::pair<int,int>(mSizeX, mSizeY);
 	}
 } // namespace ogre
-

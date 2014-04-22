@@ -38,23 +38,21 @@ namespace Opde {
 				static void init(PyObject* module);
 
 				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
-				
 				/// to string - reprfunc conversion
 				static PyObject* repr(PyObject *self);
-				
+
 				/// helper class pointer extractor
 				static bool extract(PyObject *object, DrawSheetPtr& sheet);
-				
+
 				// --- Methods ---
 				static PyObject* activate(PyObject* self, PyObject* args);
-				static PyObject* deactivate(PyObject* self, PyObject* args);				
+				static PyObject* deactivate(PyObject* self, PyObject* args);
 				static PyObject* addDrawOperation(PyObject* self, PyObject* args);
 				static PyObject* removeDrawOperation(PyObject* self, PyObject* args);
 				static PyObject* purge(PyObject* self, PyObject* args);
 				static PyObject* setResolutionOverride(PyObject* self, PyObject* args);
 				static PyObject* getClipRect(PyObject* self, PyObject* args);
-				
+
 				static PyObject* create(const DrawSheetPtr& ds);
 
 			protected:

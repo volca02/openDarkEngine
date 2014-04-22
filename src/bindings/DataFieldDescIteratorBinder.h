@@ -35,10 +35,8 @@ namespace Opde {
 		class DataFieldDescIteratorBinder : public shared_ptr_binder<DataFieldDescIteratorPtr> {
 			public:
 				static void init(PyObject* module);
-			
-				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
 
+				// --- Python type related methods ---
 				/// to string - reprfunc conversion
 				static PyObject* repr(PyObject *self);
 
@@ -48,10 +46,10 @@ namespace Opde {
 			protected:
 				/// Return self as iterator with a increased ref count.
 				static PyObject* getIterObject(PyObject* self);
-				
+
 				/// Returns current object, advances to next object (or returns NULL if at end)
 				static PyObject* getNext(PyObject* self);
-			
+
 				/// Static type definition for InheritQueryResult
 				static PyTypeObject msType;
 

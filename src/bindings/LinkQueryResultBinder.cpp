@@ -35,14 +35,13 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyTypeObject LinkQueryResultBinder::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			"opde.services.LinkQueryResult",   // char *tp_name; */
 			sizeof(LinkQueryResultBinder::Object),      // int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			LinkQueryResultBinder::dealloc,   // destructor tp_dealloc; */
 			0,			              // printfunc  tp_print;   */
-			LinkQueryResultBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,  // getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
 			repr,			          // reprfunc  tp_repr;    /* __repr__ */
@@ -83,8 +82,8 @@ namespace Opde {
 		// ------------------------------------------
 		PyObject* LinkQueryResultBinder::getNext(PyObject* self) {
 			LinkQueryResultPtr o;
-			
-			if (!python_cast<LinkQueryResultPtr>(self, &msType, &o)) 
+
+			if (!python_cast<LinkQueryResultPtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
 			// Get returnable object, advance to next.
@@ -100,13 +99,11 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* LinkQueryResultBinder::repr(PyObject *self) {
+#ifdef IS_PY3K
+			return PyBytes_FromFormat("<LinkQueryResult at %p>", self);
+#else
 			return PyString_FromFormat("<LinkQueryResult at %p>", self);
-		}
-
-
-		// ------------------------------------------
-		PyObject* LinkQueryResultBinder::getattr(PyObject *self, char *name) {
-			return Py_FindMethod(msMethods, self, name);
+#endif
 		}
 
 		// ------------------------------------------
@@ -128,4 +125,3 @@ namespace Opde {
 	}
 
 } // namespace Opde
-

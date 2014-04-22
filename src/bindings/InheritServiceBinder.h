@@ -35,22 +35,20 @@ namespace Opde {
 		class InheritServiceBinder : public shared_ptr_binder<InheritServicePtr> {
 			public:
 				static void init(PyObject* module);
-				
-				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
 
+				// --- Python type related methods ---
 				static PyObject* create();
 
 				// --- Methods ---
 				static PyObject* getSources(PyObject* self, PyObject* args);
 				static PyObject* getTargets(PyObject* self, PyObject* args);
-				static PyObject* hasTargets(PyObject* self, PyObject* args);				
+				static PyObject* hasTargets(PyObject* self, PyObject* args);
 				static PyObject* getArchetype(PyObject* self, PyObject* args);
 				static PyObject* setArchetype(PyObject* self, PyObject* args);
 				// metaprop handling is already binded in ObjectService
 				static PyObject* inheritsFrom(PyObject* self, PyObject* args);
-				
-				
+
+
 			protected:
 				/// Static type definition for LinkService
 				static PyTypeObject msType;
@@ -61,18 +59,18 @@ namespace Opde {
 				/// Method list
 				static PyMethodDef msMethods[];
 		};
-		
+
 		// -------------------------------
 		/// Inherit link struct binder. The attributes are exposed as read only to python
 		class InheritLinkBinder : public shared_ptr_binder<InheritLinkPtr> {
 			public:
 				static void init(PyObject* module);
-				
+
 				// --- Python type related methods ---
 				static PyObject* getattr(PyObject *self, char *name);
 
 				static PyObject* create(InheritLinkPtr& link);
-				
+
 			protected:
 				/// Static type definition for LinkService
 				static PyTypeObject msType;

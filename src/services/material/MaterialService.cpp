@@ -50,7 +50,7 @@ namespace Opde {
 	/*-------------------- MaterialService ---------------*/
 	/*----------------------------------------------------*/
 	template<> const size_t ServiceImpl<MaterialService>::SID = __SERVICE_ID_MATERIAL;
-	
+
 	MaterialService::MaterialService(ServiceManager *manager, const std::string& name) :
 		ServiceImpl< Opde::MaterialService >(manager, name) {
 	}
@@ -194,7 +194,7 @@ namespace Opde {
 	//------------------------------------------------------
 	void MaterialService::addWorldMaterialTemplate(unsigned int idx, const Ogre::MaterialPtr& material) {
 		assert(!material.isNull());
-		
+
 		mTemplateMaterials.insert(make_pair(idx, material));
 
 		TextureDimensions2D dimensions;
@@ -211,7 +211,7 @@ namespace Opde {
 				try {
 					// ensure the material is loaded before getting the dimensions
 					material->escalateLoading();
-					
+
 					// This is stupid, but can happen - the getTextureDimensions seems buggy in this regard
 					if (tus->getNumFrames() <= 0) {
 						LOG_ERROR("MaterialService: Error getting texture dimensions (Mat. %s) : Zero frame count!", material->getName().c_str());
@@ -258,7 +258,7 @@ namespace Opde {
 		}
 
 		LOG_FATAL("MaterialService::getWorldMaterialTemplate: Could not find material for index %u", idx);
-		return MaterialPtr(NULL);
+		return MaterialPtr();
 	}
 
 
@@ -438,14 +438,14 @@ namespace Opde {
 				matname += flows.flow[fnum].name;
 
 				LOG_INFO("MaterialService::loadFlowTextures: Loading flow %d : %d/%d '%s'", fnum, flows.flow[fnum].in_texture,  flows.flow[fnum].out_texture, matname.c_str());
-				
+
 				// try to find the texture definition. If found, clone to the @template + the in_texture/out_texture number
 				if (MaterialManager::getSingleton().resourceExists(matname + "_in")) {
 					MaterialPtr origMat = MaterialManager::getSingleton().getByName(matname + "_in");
 
 					StringUtil::StrStreamType strb;
 					strb << "@template" << flows.flow[fnum].in_texture;
-					
+
 					std::string templn(strb.str());
 
 					if (MaterialManager::getSingleton().resourceExists(templn)) {
@@ -454,7 +454,7 @@ namespace Opde {
 
 					MaterialPtr shadMat = origMat->clone(templn);
 					shadMat->load();
-					
+
 					addWorldMaterialTemplate(flows.flow[fnum].in_texture, shadMat);
 					LOG_INFO("Flow now defined : %s (template %s_in)", templn.c_str(), matname.c_str());
 				} else {
@@ -468,7 +468,7 @@ namespace Opde {
 
 					StringUtil::StrStreamType strb;
 					strb << "@template" << flows.flow[fnum].in_texture;
-					
+
 					std::string templn(strb.str());
 
 					if (MaterialManager::getSingleton().resourceExists(templn)) {
@@ -658,18 +658,18 @@ namespace Opde {
 	//------------------------------------------------------
 	void MaterialService::onDBLoad(const FileGroupPtr& db, uint32_t curmask) {
 		LOG_INFO("MaterialService::onDBLoad called.");
-		
+
 		// see if we're facing a mission file
 		if (curmask & DBM_MIS_DATA)
 			loadMaterials(db);
 	}
-	
+
 	//------------------------------------------------------
 	void MaterialService::onDBSave(const FileGroupPtr& db, uint32_t tgtmask) {
 		LOG_INFO("MaterialService::onDBSave called.");
 		// TODO: Save the materials to the database
 	}
-	
+
 	//------------------------------------------------------
 	void MaterialService::onDBDrop(uint32_t tgtdrop) {
 		LOG_INFO("MaterialService::onDBDrop called.");
@@ -789,7 +789,7 @@ namespace Opde {
 	const uint MaterialServiceFactory::getMask() {
 		return SERVICE_RENDERER | SERVICE_DATABASE_LISTENER;
 	}
-	
+
 	//------------------------------------------------------
 	const size_t MaterialServiceFactory::getSID() {
 		return MaterialService::SID;

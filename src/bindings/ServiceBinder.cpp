@@ -55,6 +55,32 @@ namespace Opde {
 			{NULL, NULL},
 		};
 
+#ifdef IS_PY3K
+		static int opdeServices_traverse(PyObject *m, visitproc visit, void *arg) {
+			Py_VISIT(GETSTATE(m)->error);
+			return 0;
+		}
+
+		static int opdeServices_clear(PyObject *m) {
+			Py_CLEAR(GETSTATE(m)->error);
+			return 0;
+		}
+
+		static struct PyModuleDef sOpdeServicesModuleDef = {
+			PyModuleDef_HEAD_INIT,
+			"opde.services",
+			NULL,
+			sizeof(struct module_state),
+			ServiceBinder::msMethods,
+			NULL,
+			opdeServices_traverse,
+			opdeServices_clear,
+			NULL
+		};
+#else
+		static struct module_state _state;
+#endif
+
 		PyObject* ServiceBinder::getConfigService(PyObject* self, PyObject* args) {
 			try {
                 return ConfigServiceBinder::create();
@@ -146,9 +172,22 @@ namespace Opde {
 		}
 
 		PyObject* ServiceBinder::init(PyObject* container) {
+#ifdef IS_PY3K
+			PyObject* module = PyModule_Create(&sOpdeServicesModuleDef);
+#else
 			PyObject* module = Py_InitModule(msName, msMethods);
+#endif
+            // Error?
+            if (!module)
+                OPDE_EXCEPT("Could not initialize the python Module!", "PythonLanguage::initModule");
 
-			assert(module);
+            // Error handling
+            struct module_state *st = GETSTATE(module);
+            st->error = PyErr_NewException("opde.Error", NULL, NULL);
+            if (st->error == NULL) {
+                Py_DECREF(module);
+                OPDE_EXCEPT("Could not initialize the opde.Error!", "PythonLanguage::initModule");
+            }
 
 			// Register itself as a member of the container we got
 			PyObject *dir = PyModule_GetDict(container);

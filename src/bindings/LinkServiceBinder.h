@@ -40,8 +40,6 @@ namespace Opde {
 				static void init(PyObject* module);
 
 				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
-
 				static PyObject* create();
 
 				// --- Methods ---
@@ -57,7 +55,7 @@ namespace Opde {
 
 			protected:
 				static bool getFlavor(PyObject *src, LinkServicePtr& obj, int& flavor);
-			
+
 				/// Static type definition for LinkService
 				static PyTypeObject msType;
 

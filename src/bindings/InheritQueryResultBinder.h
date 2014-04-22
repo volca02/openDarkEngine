@@ -36,10 +36,8 @@ namespace Opde {
 		class InheritQueryResultBinder : public shared_ptr_binder<InheritQueryResultPtr> {
 			public:
 				static void init(PyObject* module);
-			
-				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
 
+				// --- Python type related methods ---
 				/// to string - reprfunc conversion
 				static PyObject* repr(PyObject *self);
 
@@ -51,7 +49,7 @@ namespace Opde {
 				static PyObject* getIterObject(PyObject* self);
 				/// Returns current object, advances to next object (or returns NULL if at end)
 				static PyObject* getNext(PyObject* self);
-			
+
 				/// Static type definition for InheritQueryResult
 				static PyTypeObject msType;
 

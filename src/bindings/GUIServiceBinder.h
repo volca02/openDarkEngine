@@ -35,10 +35,8 @@ namespace Opde {
 		class GUIServiceBinder : public shared_ptr_binder<GUIServicePtr> {
 			public:
 				static void init(PyObject* module);
-				
-				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
 
+				// --- Python type related methods ---
 				static PyObject* create();
 
 				// --- Methods ---
@@ -48,7 +46,7 @@ namespace Opde {
 				static PyObject* setActiveSheet(PyObject* self, PyObject* args);
 				static PyObject* createSheet(PyObject* self, PyObject* args);
 				static PyObject* destroySheet(PyObject* self, PyObject* args);
-				
+
 			protected:
 				/// Static type definition for GUIService
 				static PyTypeObject msType;
@@ -59,7 +57,7 @@ namespace Opde {
 				/// Method list
 				static PyMethodDef msMethods[];
 		};
-	
+
 	}
 }
 

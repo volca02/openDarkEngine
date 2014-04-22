@@ -19,7 +19,7 @@
  *
  *
  *		$Id$
- * 
+ *
  *****************************************************************************/
 
 #include "config.h"
@@ -28,15 +28,15 @@
 #include "logger.h"
 
 namespace Opde {
-	
+
 	OgreOpdeLogConnector::OgreOpdeLogConnector(Logger* opdeLogger) : mOpdeLogger(opdeLogger) {
 	}
-	
+
 	OgreOpdeLogConnector::~OgreOpdeLogConnector() {
 	}
-	
-	void OgreOpdeLogConnector::messageLogged(const Ogre::String &message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String &logName) {
+
+	void OgreOpdeLogConnector::messageLogged(const Ogre::String &message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String &logName, bool &skipThisMessage) {
 		mOpdeLogger->log(Logger::LOG_LEVEL_DEBUG, "OGRE_LOG: %s", message.c_str());
 	}
-	
+
 } // namespace

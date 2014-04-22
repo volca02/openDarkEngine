@@ -35,14 +35,13 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyTypeObject TextureAtlasBinder::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			"opde.services.TextureAtlas",                   // char *tp_name; */
 			sizeof(TextureAtlasBinder::Object),  // int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			TextureAtlasBinder::dealloc,   // destructor tp_dealloc; */
 			0,			              // printfunc  tp_print;   */
-			TextureAtlasBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,  // getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
 			repr,			              // reprfunc  tp_repr;    /* __repr__ */
@@ -78,60 +77,59 @@ namespace Opde {
 		// ------------------------------------------
 		PyObject *TextureAtlasBinder::createDrawSource(PyObject *self, PyObject *args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			TextureAtlasPtr o;
-			
+
 			if (!python_cast<TextureAtlasPtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
-			
+
 			// argument - the name of the sheet to create, string
 			const char *name, *group;
 
 			if (PyArg_ParseTuple(args, "ss", &name, &group)) {
 			    DrawSourcePtr dsp = o->createDrawSource(name, group);
-			    
+
 			    PyObject *o = DrawSourceBinder::create(dsp);
-			    
+
 				return o;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected two string arguments!");
 				return NULL;
 			}
-		
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
 		PyObject *TextureAtlasBinder::getAtlasID(PyObject *self, PyObject *args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			TextureAtlasPtr o;
-			
+
 			if (!python_cast<TextureAtlasPtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
 			return TypeInfo<int>::toPyObject(o->getAtlasID());
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
-		// ------------------------------------------
-		PyObject* TextureAtlasBinder::getattr(PyObject *self, char *name) {
-			return Py_FindMethod(msMethods, self, name);
-		}
-				
+
 		// ------------------------------------------
 		PyObject* TextureAtlasBinder::repr(PyObject *self) {
+#ifdef IS_PY3K
+			return PyBytes_FromFormat("<TextureAtlas at %p>", self);
+#else
 			return PyString_FromFormat("<TextureAtlas at %p>", self);
+#endif
 		}
-		
+
 		// ------------------------------------------
 		bool TextureAtlasBinder::extract(PyObject *obj, TextureAtlasPtr& tgt) {
 			return python_cast<TextureAtlasPtr>(obj, &msType, &tgt);
 		}
-		
+
 		// ------------------------------------------
 		PyObject* TextureAtlasBinder::create(const TextureAtlasPtr& sh) {
 			Object* object = construct(&msType);
@@ -151,4 +149,3 @@ namespace Opde {
 
   	} // namespace Python
 } // namespace Opde
-

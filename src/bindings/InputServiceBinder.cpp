@@ -74,17 +74,15 @@ namespace Opde
 		const char* InputServiceBinder::msName = "InputService";
 
 		// ------------------------------------------
-		PyTypeObject InputServiceBinder::msType =
-		{
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+		PyTypeObject InputServiceBinder::msType = {
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			"opde.services.InputService",		// char *tp_name; */
 			sizeof(InputServiceBinder::Object), // int tp_basicsize; */
 			0,									// int tp_itemsize;       /* not used much */
 			InputServiceBinder::dealloc,		// destructor tp_dealloc; */
 			0,									// printfunc  tp_print;   */
-			InputServiceBinder::getattr,		// getattrfunc  tp_getattr; /* __getattr__ */
-			0,   								// setattrfunc  tp_setattr;  /* __setattr__ */
+			0,		// getattrfunc  tp_getattr; /* __getattr__ */
+			0,								// setattrfunc  tp_setattr;  /* __setattr__ */
 			0,									// cmpfunc  tp_compare;  /* __cmp__ */
 			0,									// reprfunc  tp_repr;    /* __repr__ */
 			0,									// PyNumberMethods *tp_as_number; */
@@ -128,7 +126,7 @@ namespace Opde
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
 			InputServicePtr o;
-			
+
 			if (!python_cast<InputServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -152,7 +150,7 @@ namespace Opde
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
 			InputServicePtr o;
-			
+
 			if (!python_cast<InputServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -176,13 +174,13 @@ namespace Opde
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
 			InputServicePtr o;
-			
+
 			if (!python_cast<InputServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
 			char* command;
 
-			if (PyArg_ParseTuple(args, "s", &command)) 
+			if (PyArg_ParseTuple(args, "s", &command))
 			{
 				std::string Command = command;
 			    o->processCommand(Command);
@@ -202,7 +200,7 @@ namespace Opde
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
 			InputServicePtr o;
-			
+
 			if (!python_cast<InputServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -234,7 +232,7 @@ namespace Opde
 		{
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			InputServicePtr o;
-			
+
 			if (!python_cast<InputServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -251,13 +249,13 @@ namespace Opde
 
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
-		PyObject* InputServiceBinder::setInputMapped(PyObject* self, PyObject* args)		
+		PyObject* InputServiceBinder::setInputMapped(PyObject* self, PyObject* args)
 		{
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			InputServicePtr o;
-			
+
 			if (!python_cast<InputServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -265,10 +263,10 @@ namespace Opde
 
 			if (PyArg_ParseTuple(args, "O", &mapped)) {
 				bool cmap;
-				
+
 				if (!TypeInfo<bool>::fromPyObject(mapped, cmap))
 					__PY_BADPARMS_RET;
-				
+
 				o->setInputMode(cmap ? IM_MAPPED : IM_DIRECT);
 
 				__PY_NONE_RET;
@@ -278,12 +276,6 @@ namespace Opde
 			}
 
 			__PYTHON_EXCEPTION_GUARD_END_;
-		}
-
-		// ------------------------------------------
-		PyObject* InputServiceBinder::getattr(PyObject *self, char *name)
-		{
-			return Py_FindMethod(msMethods, self, name);
 		}
 
 		// ------------------------------------------
@@ -307,4 +299,3 @@ namespace Opde
 	}
 
 } // namespace Opde
-

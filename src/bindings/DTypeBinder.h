@@ -35,8 +35,6 @@ namespace Opde {
 		class DTypeBinder : public shared_ptr_binder<DTypePtr> {
 			public:
 				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
-
 				static PyObject* create(const DTypePtr& type);
 
 				/// Extracts a DTypePtr from the PyObject*, checking type

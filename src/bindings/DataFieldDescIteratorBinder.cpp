@@ -54,14 +54,13 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyTypeObject DataFieldDescIteratorBinder::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			"opde.DataFieldDescIterator",  // char *tp_name; */
 			sizeof(DataFieldDescIteratorBinder::Object),      /* int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			DataFieldDescIteratorBinder::dealloc,   // destructor tp_dealloc; */
 			0,			              // printfunc  tp_print;   */
-			DataFieldDescIteratorBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,  // getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
 			repr,			          // reprfunc  tp_repr;    /* __repr__ */
@@ -102,7 +101,7 @@ namespace Opde {
 		// ------------------------------------------
 		PyObject* DataFieldDescIteratorBinder::getNext(PyObject* self) {
 			DataFieldDescIteratorPtr o;
-			
+
 			if (!python_cast<DataFieldDescIteratorPtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -119,13 +118,11 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* DataFieldDescIteratorBinder::repr(PyObject *self) {
+#ifdef IS_PY3K
+			return PyBytes_FromFormat("<DataFieldDescIterator at %p>", self);
+#else
 			return PyString_FromFormat("<DataFieldDescIterator at %p>", self);
-		}
-
-
-		// ------------------------------------------
-		PyObject* DataFieldDescIteratorBinder::getattr(PyObject *self, char *name) {
-			return Py_FindMethod(msMethods, self, name);
+#endif
 		}
 
 		// ------------------------------------------
@@ -148,4 +145,3 @@ namespace Opde {
 	}
 
 } // namespace Opde
-

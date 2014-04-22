@@ -1,21 +1,21 @@
 /******************************************************************************
  *
- *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *	  This file is part of openDarkEngine project
+ *	  Copyright (C) 2005-2006 openDarkEngine team
  *
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *	  This program is free software; you can redistribute it and/or modify
+ *	  it under the terms of the GNU General Public License as published by
+ *	  the Free Software Foundation; either version 2 of the License, or
+ *	  (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *	  This program is distributed in the hope that it will be useful,
+ *	  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
+ *	  GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *	  You should have received a copy of the GNU General Public License
+ *	  along with this program; if not, write to the Free Software
+ *	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA	02111-1307	USA
  *
  *	  $Id$
  *
@@ -32,10 +32,12 @@ namespace Ogre {
 	// -------------------------------------------------------
 	// ----- Proxy Archive -----------------------------------
 	// -------------------------------------------------------
-	ProxyArchive::ProxyArchive(const String& name, const String& archType) :
-		Archive(name, archType),
-		mArchive(NULL) {
-	}
+	ProxyArchive::ProxyArchive(const String& name,
+							   const String& archType,
+							   bool readOnly)
+		: Archive(name, archType),
+		  mArchive(NULL)
+	{}
 
 	// -------------------------------------------------------
 	ProxyArchive::~ProxyArchive(void) {
@@ -75,9 +77,9 @@ namespace Ogre {
 	}
 
 	// -------------------------------------------------------
-	FileInfoListPtr ProxyArchive::findFileInfo(const String& pattern, bool recursive , bool dirs) {
+	FileInfoListPtr ProxyArchive::findFileInfo(const String& pattern, bool recursive, bool dirs) const {
 		/// have to list all infos, filter those which fit
-		FileInfoListPtr lst = listFileInfo(recursive, dirs);
+		FileInfoListPtr lst = listFileInfoImpl(recursive, dirs);
 
 		FileInfoListPtr res(new FileInfoList());
 
@@ -127,7 +129,12 @@ namespace Ogre {
 	}
 
 	// -------------------------------------------------------
-	FileInfoListPtr ProxyArchive::listFileInfo(bool recursive , bool dirs) {
+	FileInfoListPtr ProxyArchive::listFileInfo(bool recursive, bool dirs) {
+		return listFileInfoImpl(recursive, dirs);
+	}
+
+	// -------------------------------------------------------
+	FileInfoListPtr ProxyArchive::listFileInfoImpl(bool recursive, bool dirs) const {
 		FileInfoListPtr list = mArchive->listFileInfo(recursive, dirs);
 
 		FileInfoListPtr res(new FileInfoList());
@@ -283,9 +290,11 @@ namespace Ogre {
 	// ----- CaseLess Archive --------------------------------
 	// -------------------------------------------------------
 	CaseLessFileSystemArchive::CaseLessFileSystemArchive(const String& name,
-			const String& archType) : ProxyArchive(name, archType) {
-
-		mArchive = new Ogre::FileSystemArchive(mName, mType);
+														 const String& archType,
+														 bool readOnly)
+		: ProxyArchive(name, archType, readOnly)
+	{
+		mArchive = new Ogre::FileSystemArchive(mName, mType, readOnly);
 	}
 
 	// -------------------------------------------------------
@@ -299,7 +308,7 @@ namespace Ogre {
 	}
 
 	// -------------------------------------------------------
-	String CaseLessFileSystemArchive::transformName(const std::string& name) {
+	String CaseLessFileSystemArchive::transformName(const std::string& name) const {
 		// simple - just lowercase the name
 		String res = name;
 		StringUtil::toLowerCase(res);
@@ -310,17 +319,19 @@ namespace Ogre {
 	// ----- CRF Archive -------------------------------------
 	// -------------------------------------------------------
 	CRFArchive::CRFArchive(const String& name,
-			const String& archType) : ProxyArchive(name, archType) {
-
+						   const String& archType,
+						   bool readOnly)
+		: ProxyArchive(name, archType, readOnly)
+	{
 		// split, we only want the file name part
 		String ext, path;
 		StringUtil::splitFullFilename(name, mFilePart, ext, path);
 
-        StringUtil::toLowerCase(mFilePart);
+		StringUtil::toLowerCase(mFilePart);
 
-        mFilePart += '/';
+		mFilePart += '/';
 
-        mArchive = new Ogre::ZipArchive(mName, mType);
+		mArchive = new Ogre::ZipArchive(mName, mType);
 	}
 
 	// -------------------------------------------------------
@@ -334,7 +345,7 @@ namespace Ogre {
 	}
 
 	// -------------------------------------------------------
-	String CRFArchive::transformName(const std::string& name) {
+	String CRFArchive::transformName(const std::string& name) const {
 		String res = name;
 		StringUtil::toLowerCase(res);
 		// just lowercase the name, and prefix with the mFilePart
@@ -344,12 +355,12 @@ namespace Ogre {
 	// -------------------------------------------------------
 	const String& CaseLessFileSystemArchiveFactory::getType(void) const {
 		static String name = "Dir";
-        return name;
+		return name;
 	}
 
 	// -------------------------------------------------------
 	const String& CrfArchiveFactory::getType(void) const {
 		static String name = "Crf";
-        return name;
+		return name;
 	}
 }

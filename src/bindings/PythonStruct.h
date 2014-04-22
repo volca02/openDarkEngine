@@ -79,9 +79,9 @@ namespace Opde
 
 				static PyObject* getattr(PyObject* self, char* attrname) {
 					__PYTHON_EXCEPTION_GUARD_BEGIN_;
-					
+
 					T* object;
-			
+
 					if (!python_cast<T*>(self, &msType, &object))
 						__PY_CONVERR_RET;
 
@@ -98,7 +98,11 @@ namespace Opde
 				}
 
                 static PyObject* repr(PyObject *self) {
+#ifdef IS_PY3K
+                    return PyBytes_FromFormat("<Struct:%s at %p>", msName, self);
+#else
                     return PyString_FromFormat("<Struct:%s at %p>", msName, self);
+#endif
                 }
 
 				struct FieldDefBase {
@@ -154,8 +158,7 @@ namespace Opde
 		template<typename T> typename PythonStruct<T>::NameToAttr PythonStruct<T>::msNameToAttr;
 
 		template<typename T> PyTypeObject PythonStruct<T>::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			msName,                   /* char *tp_name; */
 			sizeof(Object),      /* int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */

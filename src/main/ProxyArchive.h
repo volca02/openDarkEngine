@@ -1,21 +1,21 @@
 /******************************************************************************
  *
- *    This file is part of openDarkEngine project
- *    Copyright (C) 2005-2006 openDarkEngine team
+ *	  This file is part of openDarkEngine project
+ *	  Copyright (C) 2005-2006 openDarkEngine team
  *
- *    This program is free software; you can redistribute it and/or modify
- *    it under the terms of the GNU General Public License as published by
- *    the Free Software Foundation; either version 2 of the License, or
- *    (at your option) any later version.
+ *	  This program is free software; you can redistribute it and/or modify
+ *	  it under the terms of the GNU General Public License as published by
+ *	  the Free Software Foundation; either version 2 of the License, or
+ *	  (at your option) any later version.
  *
- *    This program is distributed in the hope that it will be useful,
- *    but WITHOUT ANY WARRANTY; without even the implied warranty of
- *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU General Public License for more details.
+ *	  This program is distributed in the hope that it will be useful,
+ *	  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
+ *	  GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU General Public License
- *    along with this program; if not, write to the Free Software
- *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *	  You should have received a copy of the GNU General Public License
+ *	  along with this program; if not, write to the Free Software
+ *	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA	02111-1307	USA
  *
  *	  $Id$
  *
@@ -47,7 +47,7 @@ namespace Ogre {
 	class OPDELIB_EXPORT ProxyArchive : public Archive {
 		public:
 			/// constructor
-			ProxyArchive(const String& name, const String& archType);
+			ProxyArchive(const String& name, const String& archType, bool readOnly);
 
 			/// destructor
 			virtual ~ProxyArchive(void);
@@ -69,16 +69,16 @@ namespace Ogre {
 
 			/// performs a pattern match find on the archive files
 			virtual StringVectorPtr find(const String& pattern, bool recursive = true,
-            bool dirs = false);
+			bool dirs = false);
 
-            /// Searches for the given name, untransforming it first
-            virtual bool exists(const String& filename);
+			/// Searches for the given name, untransforming it first
+			virtual bool exists(const String& filename);
 
-            /** Searches for files that match the given pattern
-            * @see find
+			/** Searches for files that match the given pattern
+			* @see find
 			*/
 			virtual FileInfoListPtr findFileInfo(const String& pattern,
-				bool recursive = true, bool dirs = false);
+				bool recursive = true, bool dirs = false) const;
 
 			/// reports case sensitiveness of this proxy archive
 			virtual bool isCaseSensitive(void) const = 0;
@@ -86,8 +86,11 @@ namespace Ogre {
 			time_t getModifiedTime(const String& filename) {return 0;};
 
 		protected:
+			/// This implements a const version of listFileInfo, as ogre is inconsistent in the const modifier usage...
+			FileInfoListPtr listFileInfoImpl(bool recursive = true, bool dirs = false) const;
+
 			/// performs the forward transform on a single name
-			virtual String transformName(const String& name) = 0;
+			virtual String transformName(const String& name) const = 0;
 
 			/// performs an inverse transform on a single name, turning internal name from the external one
 			virtual bool untransformName(const String& name, String& unt) const;
@@ -107,26 +110,26 @@ namespace Ogre {
 	/// Lowercase transforming file system archive
 	class CaseLessFileSystemArchive : public ProxyArchive {
 		public:
-			CaseLessFileSystemArchive(const String& name, const String& archType);
+			CaseLessFileSystemArchive(const String& name, const String& archType, bool readOnly);
 			~CaseLessFileSystemArchive(void);
 
 			bool isCaseSensitive(void) const;
 
 		protected:
-			String transformName(const std::string& name);
+			String transformName(const std::string& name) const;
 
 	};
 
 	/// Zip archive wrapper that prefixes the file names with the name without extesion (fam.crf -> fam/*)
 	class CRFArchive : public ProxyArchive {
 		public:
-			CRFArchive(const String& name, const String& archType);
+			CRFArchive(const String& name, const String& archType, bool readOnly);
 			~CRFArchive(void);
 
 			bool isCaseSensitive(void) const;
 
 		protected:
-			String transformName(const std::string& name);
+			String transformName(const std::string& name) const;
 
 			String mFilePart;
 	};
@@ -139,8 +142,8 @@ namespace Ogre {
 
 			const String& getType(void) const;
 
-			Archive* createInstance(const String& name) {
-				return new CaseLessFileSystemArchive(name, "Dir");
+			Archive* createInstance(const String& name, bool readOnly) {
+				return new CaseLessFileSystemArchive(name, "Dir", readOnly);
 			}
 
 			void destroyInstance( Archive* arch) { delete arch; }
@@ -152,8 +155,8 @@ namespace Ogre {
 
 			const String& getType(void) const;
 
-			Archive* createInstance(const String& name) {
-				return new CRFArchive(name, "Crf");
+			Archive* createInstance(const String& name, bool readOnly) {
+				return new CRFArchive(name, "Crf", readOnly);
 			}
 
 			void destroyInstance( Archive* arch) { delete arch; }

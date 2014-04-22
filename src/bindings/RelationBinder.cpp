@@ -38,14 +38,13 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyTypeObject RelationBinder::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			"opde.services.Relation", /* char *tp_name; */
 			sizeof(RelationBinder::Object),      /* int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			RelationBinder::dealloc,   /* destructor tp_dealloc; */
 			0,			              /* printfunc  tp_print;   */
-			RelationBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,  // getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
 			repr,		              // reprfunc  tp_repr;    /* __repr__ */
@@ -88,28 +87,32 @@ namespace Opde {
 		// ------------------------------------------
 		PyObject* RelationBinder::getID(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			Relation* o = NULL;
-			
+
 			if (!python_cast<Relation*>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
 			// Get the flavor, construct a python string, return.
-			return PyInt_FromLong(o->getID());
+			return PyLong_FromLong(o->getID());
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* RelationBinder::getName(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			Relation* o = NULL;
-			
+
 			if (!python_cast<Relation*>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
 			// Get the name, construct a python string, return.
+#ifdef IS_PY3K
+			return PyBytes_FromString(o->getName().c_str());
+#else
 			return PyString_FromString(o->getName().c_str());
+#endif
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
@@ -117,10 +120,10 @@ namespace Opde {
 		PyObject* RelationBinder::remove(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			Relation* o = NULL;
-			
+
 			if (!python_cast<Relation*>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			int id;
 
 			if (PyArg_ParseTuple(args, "i", &id)) {
@@ -141,10 +144,10 @@ namespace Opde {
 		PyObject* RelationBinder::createLink(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			Relation* o = NULL;
-			
+
 			if (!python_cast<Relation*>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			int from, to;
 
 			if (PyArg_ParseTuple(args, "ii", &from, &to)) {
@@ -166,10 +169,10 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
 			Relation* o = NULL;
-			
+
 			if (!python_cast<Relation*>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 
 			int id;
 			const char* field;
@@ -195,10 +198,10 @@ namespace Opde {
 		PyObject* RelationBinder::setLinkField(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			Relation* o = NULL;
-			
+
 			if (!python_cast<Relation*>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			int id;
 			const char* field;
 			PyObject* Object = NULL;
@@ -224,10 +227,10 @@ namespace Opde {
 		PyObject* RelationBinder::getAllLinks(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			Relation* o = NULL;
-			
+
 			if (!python_cast<Relation*>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			int src, dst;
 
 			if (PyArg_ParseTuple(args, "ii", &src, &dst))
@@ -250,10 +253,10 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// Nearly the same as getAllLinks. Only that it returns PyObject for LinkPtr directly
 			Relation* o = NULL;
-			
+
 			if (!python_cast<Relation*>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			int src, dst;
 
 			if (PyArg_ParseTuple(args, "ii", &src, &dst))
@@ -274,25 +277,24 @@ namespace Opde {
 		PyObject* RelationBinder::getFieldsDesc(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			Relation* o = NULL;
-			
+
 			if (!python_cast<Relation*>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			// wrap the returned StringIterator into StringIteratorBinder, return
 			DataFieldDescIteratorPtr res = o->getFieldDescIterator();
 			return DataFieldDescIteratorBinder::create(res);
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
-		PyObject* RelationBinder::getattr(PyObject *self, char *name) {
-			return Py_FindMethod(msMethods, self, name);
-		}
-
-		// ------------------------------------------
 		PyObject* RelationBinder::repr(PyObject *self) {
+#ifdef IS_PY3K
+			return PyBytes_FromFormat("<Relation at %p>", self);
+#else
 			return PyString_FromFormat("<Relation at %p>", self);
+#endif
 		}
 
 		// ------------------------------------------
@@ -313,4 +315,3 @@ namespace Opde {
 	}
 
 } // namespace Opde
-

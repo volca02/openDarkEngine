@@ -34,14 +34,13 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyTypeObject DTypeBinder::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			const_cast<char*>("opde.DType"),    /* char *tp_name; */
 			sizeof(DTypeBinder::Object),      /* int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			DTypeBinder::dealloc,   /* destructor tp_dealloc; */
 			0,			              /* printfunc  tp_print;   */
-			DTypeBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,  // getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
 			0,			              // reprfunc  tp_repr;    /* __repr__ */
@@ -77,10 +76,10 @@ namespace Opde {
 		// ------------------------------------------
 		PyObject* DTypeBinder::set(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			// Simmilar to PropertyServiceBinder::set
 			DTypePtr o;
-			
+
 			if (!python_cast<DTypePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -107,10 +106,10 @@ namespace Opde {
 		// ------------------------------------------
 		PyObject* DTypeBinder::get(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			PyObject *result = NULL;
 			DTypePtr o;
-			
+
 			if (!python_cast<DTypePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -130,13 +129,8 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
 				return NULL;
 			}
-			
-			__PYTHON_EXCEPTION_GUARD_END_;
-		}
 
-		// ------------------------------------------
-		PyObject* DTypeBinder::getattr(PyObject *self, char *name) {
-			return Py_FindMethod(msMethods, self, name);
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
@@ -162,4 +156,3 @@ namespace Opde {
 	}
 
 } // namespace Opde
-

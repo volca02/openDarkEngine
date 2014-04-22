@@ -36,14 +36,13 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyTypeObject DrawSheetBinder::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			"opde.services.DrawSheet",                   // char *tp_name; */
 			sizeof(DrawSheetBinder::Object),  // int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			DrawSheetBinder::dealloc,   // destructor tp_dealloc; */
 			0,			              // printfunc  tp_print;   */
-			DrawSheetBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,  // getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
 			repr,			              // reprfunc  tp_repr;    /* __repr__ */
@@ -84,53 +83,53 @@ namespace Opde {
 		// ------------------------------------------
 		PyObject* DrawSheetBinder::activate(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			DrawSheetPtr o;
-			
+
 			if (!python_cast<DrawSheetPtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			o->activate();
-			
-			__PY_NONE_RET;
-			
-			__PYTHON_EXCEPTION_GUARD_END_;
-		}
-		
-		// ------------------------------------------
-		PyObject* DrawSheetBinder::deactivate(PyObject* self, PyObject* args) {
-			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
-			DrawSheetPtr o;
-			
-			if (!python_cast<DrawSheetPtr>(self, &msType, &o))
-				__PY_CONVERR_RET;
-			
-			o->deactivate();
-			
+
 			__PY_NONE_RET;
 
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
+		// ------------------------------------------
+		PyObject* DrawSheetBinder::deactivate(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+
+			DrawSheetPtr o;
+
+			if (!python_cast<DrawSheetPtr>(self, &msType, &o))
+				__PY_CONVERR_RET;
+
+			o->deactivate();
+
+			__PY_NONE_RET;
+
+			__PYTHON_EXCEPTION_GUARD_END_;
+		}
+
 		// ------------------------------------------
 		PyObject* DrawSheetBinder::addDrawOperation(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			DrawSheetPtr o;
-			
+
 			if (!python_cast<DrawSheetPtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			PyObject *dop;
-			
+
 			if (PyArg_ParseTuple(args, "O", &dop)) {
 					// Either it is RenderedImage or RenderedLabel. DrawOperation should extract, Anyway
 					DrawOperation* dopc;
-					
+
 					if (!DrawOperationBinder::extract(dop, dopc))
 						__PY_CONVERR_RET;
-					
+
 					o->addDrawOperation(dopc);
 
 					__PY_NONE_RET;
@@ -142,24 +141,24 @@ namespace Opde {
 
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DrawSheetBinder::removeDrawOperation(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			DrawSheetPtr o;
-			
+
 			if (!python_cast<DrawSheetPtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			PyObject *dop;
-			
+
 			if (PyArg_ParseTuple(args, "O", &dop)) {
 					DrawOperation* dopc;
-					
+
 					if (!DrawOperationBinder::extract(dop, dopc))
 						__PY_CONVERR_RET;
-					
+
 					o->removeDrawOperation(dopc);
 
 					__PY_NONE_RET;
@@ -171,77 +170,74 @@ namespace Opde {
 
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DrawSheetBinder::purge(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			PyObject *result = NULL;
 			DrawSheetPtr o;
-			
+
 			if (!python_cast<DrawSheetPtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
 			/// TODO: Stub. Stupid return fix both
 			return result;
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DrawSheetBinder::setResolutionOverride(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			PyObject *result = NULL;
 			DrawSheetPtr o;
-			
+
 			if (!python_cast<DrawSheetPtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			/// TODO: Stub. Stupid return fix both
 			return result;
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DrawSheetBinder::getClipRect(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			PyObject *result = NULL;
 			DrawSheetPtr o;
-			
+
 			if (!python_cast<DrawSheetPtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			/// TODO: Stub. Stupid return fix both
 			return result;
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
-		
-		
-		// ------------------------------------------
-		PyObject* DrawSheetBinder::getattr(PyObject *self, char *name) {
-			return Py_FindMethod(msMethods, self, name);
-		}
-				
+
 		// ------------------------------------------
 		PyObject* DrawSheetBinder::repr(PyObject *self) {
+#ifdef IS_PY3K
+			return PyBytes_FromFormat("<DrawSheet at %p>", self);
+#else
 			return PyString_FromFormat("<DrawSheet at %p>", self);
+#endif
 		}
-		
+
 		// ------------------------------------------
 		bool DrawSheetBinder::extract(PyObject *object, DrawSheetPtr& sheet) {
 			// The extraction in this way will ONLY work on the object itself.
 			// we can't just hope reinterpret_cast will upcast right
-			
+
 			// to overcome this, we have a casting method embedded in the type tree where needed (so it's transparent here)
-			
+
 			return python_cast<DrawSheetPtr>(object, &msType, &sheet);
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DrawSheetBinder::create(const DrawSheetPtr& sh) {
 			Object* object = construct(&msType);
@@ -261,4 +257,3 @@ namespace Opde {
 
   	} // namespace Python
 } // namespace Opde
-

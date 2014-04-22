@@ -38,14 +38,13 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyTypeObject LinkServiceBinder::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			"opde.services.LinkService",                   // char *tp_name; */
 			sizeof(LinkServiceBinder::Object),  // int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			LinkServiceBinder::dealloc,   // destructor tp_dealloc; */
 			0,			              // printfunc  tp_print;   */
-			LinkServiceBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,  // getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
 			0,			              // reprfunc  tp_repr;    /* __repr__ */
@@ -90,7 +89,7 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
 			LinkServicePtr o;
-			
+
 			if (!python_cast<LinkServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -108,7 +107,7 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected two integer arguments!");
 				return NULL;
 			}
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
@@ -117,16 +116,16 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
 			LinkServicePtr o;
-			
+
 			if (!python_cast<LinkServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			const char* name;
 
 			if (PyArg_ParseTuple(args, "s", &name)) {
 				const int res = o->nameToFlavor(name);
 
-				result = PyInt_FromLong(res);
+				result = PyLong_FromLong(res);
 				return result;
 			} else {
 				// Invalid parameters
@@ -141,7 +140,7 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
 			LinkServicePtr o;
-			
+
 			if (!python_cast<LinkServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -150,7 +149,11 @@ namespace Opde {
 			if (PyArg_ParseTuple(args, "i", &id)) {
 				const std::string& res = o->flavorToName(id);
 
+#ifdef IS_PY3K
+				result = PyBytes_FromString(res.c_str());
+#else
 				result = PyString_FromString(res.c_str());
+#endif
 				return result;
 			} else {
 				// Invalid parameters
@@ -159,14 +162,14 @@ namespace Opde {
 			}
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 
 		// ------------------------------------------
 		PyObject* LinkServiceBinder::getRelation(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
 			LinkServicePtr o;
-			
+
 			if (!python_cast<LinkServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -177,8 +180,13 @@ namespace Opde {
 			}
 
 			// two possibilities here : name or flavor
+#ifdef IS_PY3K
+			if (PyBytes_Check(object)) {
+			    char* str = PyBytes_AsString(object);
+#else
 			if (PyString_Check(object)) {
 			    char* str = PyString_AsString(object);
+#endif
 				RelationPtr rel = o->getRelation(str);
 
                 if (rel.isNull()) {
@@ -187,8 +195,8 @@ namespace Opde {
                     result = RelationBinder::create(rel);
 
 				return result;
-			} else if (PyInt_Check(object)) {
-			    long id = PyInt_AsLong(object);
+			} else if (PyLong_Check(object)) {
+			    long id = PyLong_AsLong(object);
 				RelationPtr rel = o->getRelation(static_cast<int>(id));
 
                 if (rel.isNull()) {
@@ -209,10 +217,10 @@ namespace Opde {
 		PyObject* LinkServiceBinder::getAllLinks(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			LinkServicePtr o;
-			
+
 			if (!python_cast<LinkServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			int flavor = 0, src, dst;
 			PyObject* objflav;
 
@@ -220,11 +228,16 @@ namespace Opde {
 			// if it's a string, we first have to parse the string to get flavor id
 
 			if (PyArg_ParseTuple(args, "Oii", &objflav, &src, &dst)) {
+#ifdef IS_PY3K
+				if (PyBytes_Check(objflav)) {
+					char* str = PyBytes_AsString(objflav);
+#else
 				if (PyString_Check(objflav)) {
 					char* str = PyString_AsString(objflav);
+#endif
 					flavor = o->nameToFlavor(str);
-				} else if (PyInt_Check(objflav)) {
-					flavor = PyInt_AsLong(objflav);
+				} else if (PyLong_Check(objflav)) {
+					flavor = PyLong_AsLong(objflav);
 				} else {
 					PyErr_SetString(PyExc_TypeError, "Invalid type given for flavor: expected string or integer");
 					return NULL;
@@ -244,12 +257,17 @@ namespace Opde {
 		// ------------------------------------------
 		bool LinkServiceBinder::getFlavor(PyObject *src, LinkServicePtr& obj, int& flavor) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+#ifdef IS_PY3K
+			if (PyBytes_Check(src)) {
+				char* str = PyBytes_AsString(src);
+#else
 			if (PyString_Check(src)) {
 				char* str = PyString_AsString(src);
+#endif
 				flavor = obj->nameToFlavor(str);
 				return true;
-			} else if (PyInt_Check(src)) {
-				flavor = PyInt_AsLong(src);
+			} else if (PyLong_Check(src)) {
+				flavor = PyLong_AsLong(src);
 				return true;
 			} else {
 				PyErr_SetString(PyExc_TypeError, "Invalid type given for flavor: expected string or integer");
@@ -257,15 +275,15 @@ namespace Opde {
 			}
 			__PYTHON_EXCEPTION_GUARD_END_RVAL(false);
 		}
-		
+
 		// ------------------------------------------
 		PyObject* LinkServiceBinder::getAllInherited(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			LinkServicePtr o;
-			
+
 			if (!python_cast<LinkServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			int flavor = 0, src, dst;
 			PyObject* objflav;
 
@@ -293,7 +311,7 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// Nearly the same as getAllLinks. Only that it returns PyObject for LinkPtr directly
 			LinkServicePtr o;
-			
+
 			if (!python_cast<LinkServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -321,7 +339,7 @@ namespace Opde {
 		{
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			LinkServicePtr o;
-			
+
 			if (!python_cast<LinkServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -336,7 +354,7 @@ namespace Opde {
 		PyObject* LinkServiceBinder::getFieldsDesc(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			LinkServicePtr o;
-			
+
 			if (!python_cast<LinkServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -356,11 +374,6 @@ namespace Opde {
 			PyErr_SetString(PyExc_TypeError, "Expected a string or integer argument!");
 			return NULL;
 			__PYTHON_EXCEPTION_GUARD_END_;
-		}
-
-		// ------------------------------------------
-		PyObject* LinkServiceBinder::getattr(PyObject *self, char *name) {
-			return Py_FindMethod(msMethods, self, name);
 		}
 
 		// ------------------------------------------
@@ -389,8 +402,7 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyTypeObject LinkBinder::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			msName,                   // char *tp_name; */
 			sizeof(LinkBinder::Object),      // int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
@@ -403,14 +415,14 @@ namespace Opde {
         // ------------------------------------------
 		PyObject* LinkBinder::getattr(PyObject *self, char *name) {
 			LinkPtr o;
-			
+
 			if (!python_cast<LinkPtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
 			if (o.isNull())
 			    // Just return PyNone
 			    __PY_NONE_RET;
-			
+
 
 			if (strcmp(name, "id") == 0) {
 			    return PyLong_FromLong(o->id());
@@ -449,4 +461,3 @@ namespace Opde {
 		}
   	} // namespace Python
 } // namespace Opde
-

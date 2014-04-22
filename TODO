@@ -66,6 +66,7 @@ Pre-0.3 release:
   * remove ODE, we will use in-house physics to comply with the original engine (too sensitive to change)
   * rendering optimizations
   * dev assistant script - find thief/ss2 game files, setup config files accordingly next to opde executable (install-less developement)
+  * Redo the console using draw service to avoid the usage of ogre3d overlays
 
 ----------------------------------
 - Some random side-project ideas -

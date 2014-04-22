@@ -36,22 +36,20 @@ namespace Opde {
 		class RenderedImageBinder : public class_ptr_binder<RenderedImage> {
 			// for msType handling
 			friend class DrawOperationBinder;
-			
+
 			public:
 				static void init(PyObject* module);
 
 				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
-				
 				/// to string - reprfunc conversion
 				static PyObject* repr(PyObject *self);
-				
+
 				/// helper class pointer extractor
 				static bool extract(PyObject *obj, RenderedImage*& tgt);
-				
+
 				// --- Methods ---
-				static PyObject* setDrawSource(PyObject *self, PyObject *args);				
-				
+				static PyObject* setDrawSource(PyObject *self, PyObject *args);
+
 				static PyObject* create(RenderedImage* ds);
 
 			protected:
@@ -63,7 +61,7 @@ namespace Opde {
 
 				/// Method list
 				static PyMethodDef msMethods[];
-				
+
 				static TypeInfo<ClipRect> msRectTypeInfo;
 		};
 

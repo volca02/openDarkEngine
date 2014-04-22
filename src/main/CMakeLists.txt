@@ -142,6 +142,7 @@ if (UNIX)
 
     target_link_libraries( opdeDocGen
         OpenDark
+        ${OGRE_LIBRARIES}
     )
 
     SET_TARGET_PROPERTIES(opdeDocGen PROPERTIES

@@ -39,16 +39,14 @@ namespace Opde
 		const char* opde_PropertyService__doc__ = "PropertyService proxy. Service that manages properties of game objects";
 
 		// ------------------------------------------
-		PyTypeObject PropertyServiceBinder::msType =
-		{
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+		PyTypeObject PropertyServiceBinder::msType = {
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			"opde.services.PropertyService",                   // char *tp_name; */
 			sizeof(PropertyServiceBinder::Object),      /* int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			PropertyServiceBinder::dealloc,   // destructor tp_dealloc; */
 			0,			              // printfunc  tp_print;   */
-			PropertyServiceBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,  // getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
 			0,			              // reprfunc  tp_repr;    /* __repr__ */
@@ -142,7 +140,7 @@ namespace Opde
 		{
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PropertyServicePtr o;
-			
+
 			if (!python_cast<PropertyServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -165,7 +163,7 @@ namespace Opde
 		{
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PropertyServicePtr o;
-			
+
 			if (!python_cast<PropertyServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -188,7 +186,7 @@ namespace Opde
 		{
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PropertyServicePtr o;
-			
+
 			if (!python_cast<PropertyServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -202,7 +200,7 @@ namespace Opde
 			{
 				value = PyObjectToDVariant(Object);
 				o->set(obj_id, propName, propField, value);
-				
+
 				// TODO: should indicate by Py_True/Py_False here
 				__PY_NONE_RET;
 			}
@@ -220,7 +218,7 @@ namespace Opde
 		{
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PropertyServicePtr o;
-			
+
 			if (!python_cast<PropertyServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -253,7 +251,7 @@ namespace Opde
 		{
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PropertyServicePtr o;
-			
+
 			if (!python_cast<PropertyServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -270,7 +268,7 @@ namespace Opde
 		{
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PropertyServicePtr o;
-			
+
 			if (!python_cast<PropertyServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -287,12 +285,6 @@ namespace Opde
 			PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
 			return NULL;
 			__PYTHON_EXCEPTION_GUARD_END_;
-		}
-
-		// ------------------------------------------
-		PyObject* PropertyServiceBinder::getattr(PyObject *self, char *name)
-		{
-			return Py_FindMethod(msMethods, self, name);
 		}
 
 		// ------------------------------------------
@@ -317,4 +309,3 @@ namespace Opde
 	}
 
 } // namespace Opde
-

@@ -73,7 +73,7 @@ namespace Opde {
             const Relation::ObjectIDToLinks& mLinkMap;
             Relation::ObjectIDToLinks::const_iterator mIter, mBegin, mEnd;
 	};
-	
+
 	/// Link query that walks all ancestral objects as well
 	class Relation::InheritedMultiTargetLinkQueryResult : public LinkQueryResult {
 		public:
@@ -82,7 +82,7 @@ namespace Opde {
 				mInheritService = GET_SERVICE(InheritService);
 				mAncestorStack.push(mSrcID);
 			}
-			
+
 			~InheritedMultiTargetLinkQueryResult() {
 				mInheritService.setNull();
 			}
@@ -96,38 +96,38 @@ namespace Opde {
 				assert(!mCurrentIt.isNull());
 				return mCurrentIt->next();
 		        }
-			
+
 		        virtual bool end() const {
 				if (mCurrentIt.isNull())
 					return mAncestorStack.empty();
 				else
 					return mCurrentIt->end() && mAncestorStack.empty();
 		        }
-		
+
 		protected:
 			void pollNextAncestor() {
 				if (mAncestorStack.empty())
 					return;
-			
+
 				int curId = mAncestorStack.top();
-				
-				// ask inherit service for list of ancestors 
+
+				// ask inherit service for list of ancestors
 				InheritQueryResultPtr anci = mInheritService->getSources(curId);
-				
+
 				while (!anci->end()) {
 					const InheritLinkPtr& l = anci->next();
-					
+
 					mAncestorStack.push(l->srcID);
 				}
-				
+
 				// and unroll into the iterator
 				mCurrentIt = mOwner->getAllLinks(curId, mDstID);
-			}	
-		
+			}
+
 			LinkQueryResultPtr mCurrentIt;
 			std::stack<int> mAncestorStack;
 			InheritServicePtr mInheritService;
-			const Relation *mOwner; 
+			const Relation *mOwner;
 			int mSrcID;
 			int mDstID;
 	};
@@ -206,8 +206,6 @@ namespace Opde {
 
 		LOG_VERBOSE("Relation::load : %s link count %d (tag size %d)", lchn.c_str(), link_count, flink->size());
 
-		size_t link_data_count = 0;
-
 		// if the chunk LD exists, and contains at least the data size, load the data size, and set to load data as well
 		bool load_data = false;
 		size_t dsize = 0;
@@ -234,7 +232,7 @@ namespace Opde {
 				}
 
 				// as the last thing, count the data entries
-				link_data_count = (fldata->size() - sizeof(uint32_t)) / dsize;
+				// link_data_count = (fldata->size() - sizeof(uint32_t)) / dsize;
 			}
 		} else {
 			if (!mStorage.isNull())
@@ -327,10 +325,8 @@ namespace Opde {
 		FilePtr flnk = db->createFile(lchn, mLCVMaj, mLCVMin);
 		FilePtr fldt = db->createFile(ldchn, mDCVMaj, mDCVMin);
 
-		uint32_t dtsz = 0;
-
 		if (!mStorage.isNull()) {
-			dtsz = mStorage->getDataSize();
+			// dtsz = mStorage->getDataSize();
 			assert(dtsz > 0);
 		}
 
@@ -477,7 +473,7 @@ namespace Opde {
 
 		return id;
 	}
-	
+
 	// --------------------------------------------------------------------------
 	link_id_t Relation::createWithValue(int from, int to, const DVariant& value)  {
 		// Request an id. First let's see what concreteness we have
@@ -501,7 +497,7 @@ namespace Opde {
 
 		return id;
 	}
-	
+
 	// --------------------------------------------------------------------------
 	void Relation::remove(link_id_t id) {
 		// A waste I smell here. Maybe there will be a difference in Broadcasts later
@@ -575,14 +571,14 @@ namespace Opde {
         LinkQueryResultPtr r(new EmptyLinkQueryResult());
         return r;
 	}
-	
+
 	// --------------------------------------------------------------------------
 	LinkQueryResultPtr Relation::getAllInherited(int src, int dst) const {
 		assert(src != 0); // Source can't be zero
-		
+
 		return LinkQueryResultPtr(new InheritedMultiTargetLinkQueryResult(src, dst, this));
 	}
-	
+
 	// --------------------------------------------------------------------------
 	LinkPtr Relation::getOneLink(int src, int dst) const {
 		LinkQueryResultPtr res = getAllLinks(src, dst);

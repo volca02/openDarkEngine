@@ -28,19 +28,17 @@
 #include  "DTypeDef.h"
 #include  "PropertyService.h"
 
-namespace Opde 
+namespace Opde
 {
-	namespace Python 
+	namespace Python
 	{
 
 		/// Property service python binder
 		class PropertyServiceBinder : public shared_ptr_binder<PropertyServicePtr> {
 			public:
 				static void init(PyObject* module);
-			
-				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
 
+				// --- Python type related methods ---
 				/// creates a python object representation of the property service
 				static PyObject* create();
 
@@ -51,7 +49,7 @@ namespace Opde
 				static PyObject* get(PyObject* self, PyObject* args);
 				static PyObject* getAllPropertyNames(PyObject* self, PyObject* args);
 				static PyObject* getPropertyFieldsDesc(PyObject* self, PyObject* args);
-				
+
 			protected:
 				/// Static type definition for PropertyService
 				static PyTypeObject msType;

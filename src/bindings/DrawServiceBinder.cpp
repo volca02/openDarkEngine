@@ -43,14 +43,13 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyTypeObject DrawServiceBinder::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			"opde.services.DrawService",                   // char *tp_name; */
 			sizeof(DrawServiceBinder::Object),  // int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			DrawServiceBinder::dealloc,   // destructor tp_dealloc; */
 			0,			              // printfunc  tp_print;   */
-			DrawServiceBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,  // getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
 			repr,			              // reprfunc  tp_repr;    /* __repr__ */
@@ -96,78 +95,78 @@ namespace Opde {
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::createSheet(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			DrawServicePtr o;
-			
+
 			if (!python_cast<DrawServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
-			
+
 			// argument - the name of the sheet to create, string
 			const char* sname;
 
 			if (PyArg_ParseTuple(args, "s", &sname)) {
 			    const DrawSheetPtr& i = o->createSheet(sname);
-			    
+
 			    PyObject *o = DrawSheetBinder::create(i);
-				
+
 				return o;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
 				return NULL;
 			}
-		
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::destroySheet(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			PyObject *result = NULL;
 			DrawServicePtr o;
-			
+
 			if (!python_cast<DrawServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
-			
+
 			PyObject *sheet;
 			if (PyArg_ParseTuple(args, "O", &sheet)) {
 				// cast to drawsheet and destroy
 				DrawSheetPtr ds;
-				
+
 				if (!DrawSheetBinder::extract(sheet, ds))
 					__PY_CONVERR_RET;
-				
+
 				o->destroySheet(ds);
 			}
 
 			result = Py_None;
 			Py_INCREF(result);
 			return result;
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::getSheet(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-						
+
 			PyObject *result = NULL;
 			DrawServicePtr o;
-			
+
 			if (!python_cast<DrawServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			// argument - the name of the sheet to create, string
 			const char* sname;
 
 			if (PyArg_ParseTuple(args, "s", &sname)) {
 				const DrawSheetPtr& i = o->getSheet(sname);
-				
+
 				PyObject *o = DrawSheetBinder::create(i);
-				
+
 				result = o;
 				Py_INCREF(result);
 				return result;
@@ -176,115 +175,115 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
 				return NULL;
 			}
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::setActiveSheet(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-						
+
 			DrawServicePtr o;
-			
+
 			if (!python_cast<DrawServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			PyObject *sheet;
 			if (PyArg_ParseTuple(args, "O", &sheet)) {
 				DrawSheetPtr ds;
-				
+
 				if (!DrawSheetBinder::extract(sheet, ds))
 					__PY_CONVERR_RET;
-				
+
 				o->setActiveSheet(ds);
-				
+
 				__PY_NONE_RET;
 			}else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected a DrawSheet as an argument!");
 				return NULL;
 			}
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::createDrawSource(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-						
+
 			DrawServicePtr o;
-			
+
 			if (!python_cast<DrawServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			// argument - the name of the sheet to create, string
 			const char *name, *group;
 
 			if (PyArg_ParseTuple(args, "ss", &name, &group)) {
 				DrawSourcePtr i = o->createDrawSource(name, group);
-				
+
 				PyObject *o = DrawSourceBinder::create(i);
-				
+
 				return o;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected two string arguments!");
 				return NULL;
 			}
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::createRenderedImage(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-						
+
 			PyObject *result = NULL;
 			DrawServicePtr o;
-			
+
 			if (!python_cast<DrawServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			PyObject *ds;
 			if (PyArg_ParseTuple(args, "O", &ds)) {
 				DrawSourcePtr cds;
-				
+
 				if (!DrawSourceBinder::extract(ds, cds))
 					__PY_CONVERR_RET;
-					
+
 				RenderedImage* ri = o->createRenderedImage(cds);
-				
+
 				return RenderedImageBinder::create(ri);
 			}
-			
+
 			return result;
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::createRenderedLabel(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			PyObject *result = NULL;
 			DrawServicePtr o;
-			
+
 			if (!python_cast<DrawServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 
 			PyObject *ds;
 			if (PyArg_ParseTuple(args, "O", &ds)) {
 				FontDrawSourcePtr cds;
-				
+
 				if (!FontDrawSourceBinder::extract(ds, cds))
 					__PY_CONVERR_RET;
-					
+
 				RenderedLabel* ri = o->createRenderedLabel(cds);
-				
+
 				return RenderedLabelBinder::create(ri);
 			}
-			
+
 			return result;
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
@@ -292,105 +291,105 @@ namespace Opde {
 		PyObject* DrawServiceBinder::destroyDrawOperation(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			DrawServicePtr o;
-			
+
 			if (!python_cast<DrawServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			PyObject *dop;
-			
+
 			if (!PyArg_ParseTuple(args, "O", &dop))
 				__PY_BADPARM_RET(1);
-					
-			
+
+
 			DrawOperation* dopc;
-			
+
 			if (!DrawOperationBinder::extract(dop, dopc))
 				__PY_CONVERR_RET;
-			
+
 			o->destroyDrawOperation(dopc);
-			
+
 			__PY_NONE_RET;
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
-		// ------------------------------------------		
+
+		// ------------------------------------------
 		PyObject* DrawServiceBinder::createAtlas(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			DrawServicePtr o;
-			
+
 			if (!python_cast<DrawServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			TextureAtlasPtr a = o->createAtlas();
-			
+
 			return TextureAtlasBinder::create(a);
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::destroyAtlas(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			DrawServicePtr o;
-			
+
 			if (!python_cast<DrawServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			PyObject *atp;
-			
+
 			if (!PyArg_ParseTuple(args, "O", &atp))
 				__PY_BADPARM_RET(1);
-					
-			
+
+
 			TextureAtlasPtr atl;
-			
+
 			if (!TextureAtlasBinder::extract(atp, atl))
 				__PY_CONVERR_RET;
-			
+
 			o->destroyAtlas(atl);
-			
+
 			__PY_NONE_RET;
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		// ------------------------------------------		
+		// ------------------------------------------
 		PyObject* DrawServiceBinder::loadFont(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			DrawServicePtr o;
-			
+
 			if (!python_cast<DrawServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			// name, group
 			PyObject* patlas = NULL;
 			char *name, *group;
 			if (!PyArg_ParseTuple(args, "Oss", &patlas, &name, &group))
 				__PY_BADPARMS_RET;
-			
+
 			TextureAtlasPtr atlas;
-			
+
 			if (!TextureAtlasBinder::extract(patlas, atlas))
 				__PY_BADPARM_RET("atlas");
-			
+
 			FontDrawSourcePtr fds = o->loadFont(atlas, name, group);
-			
+
 			return FontDrawSourceBinder::create(fds);
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::setFontPalette(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			DrawServicePtr o;
-			
+
 			if (!python_cast<DrawServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			int ptype;
 			char *fname;
 			char *group;
-			
+
 			if (!PyArg_ParseTuple(args, "iss", &ptype, &fname, &group))
 				__PY_BADPARMS_RET;
-			
+
 			Ogre::ManualFonFileLoader::PaletteType pt;
 			// validate the ptype
 			switch (ptype) {
@@ -401,25 +400,24 @@ namespace Opde {
 			default:
 				__PY_BADPARM_RET("paltype");
 			}
-			
+
 			// okay! call
 			o->setFontPalette(pt, fname, group);
-			
+
 			__PY_NONE_RET;
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
-		// ------------------------------------------
-		PyObject* DrawServiceBinder::getattr(PyObject *self, char *name) {
-			return Py_FindMethod(msMethods, self, name);
-		}
-				
+
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::repr(PyObject *self) {
+#ifdef IS_PY3K
+			return PyBytes_FromFormat("<DrawService at %p>", self);
+#else
 			return PyString_FromFormat("<DrawService at %p>", self);
+#endif
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DrawServiceBinder::create() {
 			Object* object = construct(&msType);
@@ -434,27 +432,26 @@ namespace Opde {
 		// ------------------------------------------
 		void DrawServiceBinder::init(PyObject* module) {
 			publishType(module, &msType, msName);
-                                
+
 			PyModule_AddIntConstant(module, "PT_DEFAULT", ManualFonFileLoader::ePT_Default);
 			PyModule_AddIntConstant(module, "PT_DEFAULTBOOK", ManualFonFileLoader::ePT_DefaultBook);
 			PyModule_AddIntConstant(module, "PT_PCX", ManualFonFileLoader::ePT_PCX);
 			PyModule_AddIntConstant(module, "PT_EXTERNAL", ManualFonFileLoader::ePT_External);
 		}
 
-		
+
 		// -------------------- Draw Operation --------------------
 		const char* DrawOperationBinder::msName = "DrawOperation";
 
 		// ------------------------------------------
 		PyTypeObject DrawOperationBinder::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			"opde.services.DrawOperation",                   // char *tp_name; */
 			sizeof(DrawOperationBinder::Object),  // int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			DrawOperationBinder::dealloc,   // destructor tp_dealloc; */
 			0,			              // printfunc  tp_print;   */
-			DrawOperationBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,  // getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
 			repr,			              // reprfunc  tp_repr;    /* __repr__ */
@@ -468,7 +465,12 @@ namespace Opde {
 			PyObject_GenericSetAttr,  // setattrofunc tp_setattro; */
 			0,			              // PyBufferProcs *tp_as_buffer; */
 			// for inheritance searches to work we need this
+#ifdef IS_PY3K
+#warning Check for correctness
+			1,	              // long tp_flags; */
+#else
 			Py_TPFLAGS_HAVE_CLASS,	              // long tp_flags; */
+#endif
 			0,			              // char *tp_doc;  */
 			0,			              // traverseproc tp_traverse; */
 			0,			              // inquiry tp_clear; */
@@ -485,19 +487,19 @@ namespace Opde {
 		PyMethodDef DrawOperationBinder::msMethods[] = {
 			{"setPosition", setPosition, METH_VARARGS},
 			{"setZOrder", setZOrder, METH_VARARGS},
-			{"setClipRect", setClipRect, METH_VARARGS},			
+			{"setClipRect", setClipRect, METH_VARARGS},
 			{NULL, NULL}
 		};
-		
+
 		const char* position = "position";
 		const char* zOrder = "zorder";
 		const char* clippingRect = "cliprect";
-		
+
 		const char* positionDoc = "On-Screen Position";
 		const char* zOrderDoc = "Z Order";
 		const char* clippingRectDoc = "Clipping rectangle";
-		
-		
+
+
 		// ------------------------------------------
 		PyGetSetDef DrawOperationBinder::msGetSet[] = {
 			{const_cast<char *>(position), getPPosition, setPPosition, const_cast<char*>(positionDoc), NULL},
@@ -506,28 +508,28 @@ namespace Opde {
 			{NULL}
 		};
 
-		// ------------------------------------------		
+		// ------------------------------------------
 		CastInfo<DrawOperation*> DrawOperationBinder::msCastInfo[] = {
 				{&RenderedImageBinder::msType, &defaultPythonUpcaster<DrawOperation*, RenderedImage*>},
 				{&RenderedLabelBinder::msType, &defaultPythonUpcaster<DrawOperation*, RenderedLabel*>},
 				{NULL}
 		};
-		
+
 		// ------------------------------------------
 		PyObject* DrawOperationBinder::setPosition(PyObject* self, PyObject* args)  {
 			// args: either (x,y) or ((x,y)). The setPPosition expects (x,y) so we have to unwrap the tuple if encountered
 			PyObject *tup;
-			
+
 			// We can't use PyArg_ParseTuple as it terminates on parameter inconsistencies.
 			// instead, we look at the tuple in more detail and decide
 			if (!PyTuple_Check(args))
 					__PY_BADPARMS_RET;
-			
-			int len = PyTuple_Size(args); 
-			
+
+			int len = PyTuple_Size(args);
+
 			if (len == 2) {
 				// use the args direcly, the called func. checks
-				if (setPPosition(self, args, NULL) == 0) { 
+				if (setPPosition(self, args, NULL) == 0) {
 					__PY_NONE_RET;
 				} else { // otherwise return null to indicate a problem
 					return NULL;
@@ -535,11 +537,11 @@ namespace Opde {
 			} else if (len == 1) {
 				// extract the tuple
 				PyObject *tup = PyTuple_GetItem(args, 0);
-				
+
 				if (!PyTuple_Check(tup))
 					__PY_BADPARMS_RET;
-				
-				if (setPPosition(self, tup, NULL) == 0) { 
+
+				if (setPPosition(self, tup, NULL) == 0) {
 					__PY_NONE_RET;
 				} else { // otherwise return null to indicate a problem
 					return NULL;
@@ -548,11 +550,11 @@ namespace Opde {
 				// Not the right type, no sir!
 				__PY_BADPARMS_RET;
 			}
-			
+
 			if (PyArg_ParseTuple(args, "O", &tup)) { // tuple in tuple
-				
-				
-				
+
+
+
 			} else {
 				if (setPPosition(self, args, NULL) == 0) {
 					__PY_NONE_RET;
@@ -574,15 +576,15 @@ namespace Opde {
 		// ------------------------------------------
 		PyObject* DrawOperationBinder::setClipRect(PyObject* self, PyObject* args)  {
 			int len = PyTuple_Size(args);
-			
+
 			if (len != 1)
 				__PY_BADPARMS_RET;
 
 			PyObject *tup = PyTuple_GetItem(args, 0);
-			
+
 			if (!PyTuple_Check(tup))
 				__PY_BADPARMS_RET;
-				
+
 			if (setPClipRect(self, tup, NULL) == 0) { // if succeeded
 				__PY_NONE_RET;
 			} else { // otherwise return null to indicate a problem
@@ -593,151 +595,149 @@ namespace Opde {
 		// ------------------------------------------
 		int DrawOperationBinder::setPPosition(PyObject *self, PyObject *value, void *closure) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			DrawOperation* o = NULL;
-			
+
 			assert(self != NULL);
-			
+
 			if (!python_cast<DrawOperation*>(self, &msType, &o, msCastInfo))
 				__PY_CONVERR_RET_VAL(-1);
-	  
+
 			assert(o != NULL);
-		
+
 			if (value == NULL) {
 				PyErr_SetString(PyExc_TypeError, "Cannot delete the attribute");
 				return -1;
 			}
-			
+
 			// okay, we can proceed with the setting now
-			
-			
+
+
 			PixelCoord pc;
-			
+
 			if (TypeInfo<PixelCoord>::fromPyObject(value, pc)) {
 				o->setPosition(pc);
-                        
+
 				return 0;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected a two integer tuple!");
 				return -1;
 			}
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_RVAL(-1);
 		}
 		// ------------------------------------------
 		int DrawOperationBinder::setPZOrder(PyObject *self, PyObject *value, void *closure) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-                
+
 			DrawOperation* o = NULL;
-			
+
 			if (!python_cast<DrawOperation*>(self, &msType, &o, msCastInfo))
 				__PY_CONVERR_RET_VAL(-1);
-	  
-			
+
+
 			if (value == NULL) {
 				PyErr_SetString(PyExc_TypeError, "Cannot delete the attribute");
 				return -1;
 			}
-			
+
 			int z;
-			
+
 			if (PyArg_ParseTuple(value, "i", &z)) {
 				o->setZOrder(z);
-			
+
 				return 0;
 			} else {
 				// Invalid parameters
 				PyErr_SetString(PyExc_TypeError, "Expected an integer argument!");
 				return -1;
 			}
-					
+
 			__PYTHON_EXCEPTION_GUARD_END_RVAL(-1);
 		}
-		
+
 		// ------------------------------------------
 		int DrawOperationBinder::setPClipRect(PyObject *self, PyObject *value, void *closure) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-                
+
 			DrawOperation* o = NULL;
-			
+
 			if (!python_cast<DrawOperation*>(self, &msType, &o, msCastInfo))
 				__PY_CONVERR_RET_VAL(-1);
-                
+
 			if (value == NULL) {
 				PyErr_SetString(PyExc_TypeError, "Cannot delete the attribute");
 				return -1;
 			}
-			
+
 			ClipRect rect;
 			if (!TypeInfo<ClipRect>::fromPyObject(value, rect)) {
 				PyErr_SetString(PyExc_TypeError, "Expected a 4 integer tuple(left,right,top,bottom)!");
 				return -1;
 			};
-				
+
 			o->setClipRect(rect);
-                        
+
 			return 0;
-			
-					
+
+
 			__PYTHON_EXCEPTION_GUARD_END_RVAL(-1);
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DrawOperationBinder::getPPosition(PyObject *self, void *closure) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			DrawOperation* o = NULL;
-			
+
 			if (!python_cast<DrawOperation*>(self, &msType, &o, msCastInfo))
 				__PY_CONVERR_RET;
-			
+
 			return TypeInfo<PixelCoord>::toPyObject(o->getPosition());
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DrawOperationBinder::getPZOrder(PyObject *self, void *closure) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			DrawOperation* o = NULL;
-			
+
 			if (!python_cast<DrawOperation*>(self, &msType, &o, msCastInfo))
 				__PY_CONVERR_RET;
-			
+
 			return TypeInfo<int>::toPyObject(o->getZOrder());
-			
-			__PYTHON_EXCEPTION_GUARD_END_; 
+
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DrawOperationBinder::getPClipRect(PyObject *self, void *closure) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			DrawOperation* o = NULL;
-			
+
 			if (!python_cast<DrawOperation*>(self, &msType, &o, msCastInfo))
 				__PY_CONVERR_RET;
-			
+
 			return TypeInfo<ClipRect>::toPyObject(o->getClipRect());
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
-		// ------------------------------------------
-		PyObject* DrawOperationBinder::getattr(PyObject *self, char *name) {
-			// TODO: Image/Group name getters?
-			return Py_FindMethod(msMethods, self, name);
-		}
-				
+
 		// ------------------------------------------
 		PyObject* DrawOperationBinder::repr(PyObject *self) {
+#ifdef IS_PY3K
+			return PyBytes_FromFormat("<DrawOperation at %p>", self);
+#else
 			return PyString_FromFormat("<DrawOperation at %p>", self);
+#endif
 		}
-		
+
 		// ------------------------------------------
 		bool DrawOperationBinder::extract(PyObject *object, DrawOperation*& op) {
 			return python_cast<DrawOperation*>(object, &msType, &op, msCastInfo);
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DrawOperationBinder::create(DrawOperation *sh) {
 			Object* object = construct(&msType);
@@ -756,4 +756,3 @@ namespace Opde {
 
   	} // namespace Python
 } // namespace Opde
-

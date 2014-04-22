@@ -36,7 +36,7 @@
 
 #include <OgreRoot.h>
 #include <OgreSceneManager.h>
-#include <OgreOverlayManager.h>
+#include <Overlay/OgreOverlayManager.h>
 
 
 namespace Opde {
@@ -68,7 +68,7 @@ namespace Opde {
 			static GameLoadState* getSingletonPtr();
 		protected:
 			void createTestFontOverlays();
-		
+
 			Ogre::Root *mRoot;
 			Ogre::SceneManager *mSceneMgr;
 			Ogre::OverlayManager *mOverlayMgr;
@@ -79,14 +79,8 @@ namespace Opde {
 
 			bool mFirstTime;
 			bool mLoaded;
-			
-			bool mFontTest;
 
 			Ogre::Overlay* mLoadingOverlay;
-
-			// Temporary for font testing
-			std::vector<std::string> mFontList;
-			Ogre::ManualFonFileLoader* mManualFonLoader;
 
 			// config service
 			ConfigServicePtr mConfigService;

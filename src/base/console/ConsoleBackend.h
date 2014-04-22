@@ -19,7 +19,7 @@
  *
  *
  *	  $Id$
- * 
+ *
  *****************************************************************************/
 
 
@@ -46,7 +46,7 @@ namespace Opde {
 		public:
 			/** A pair - level, message */
 			typedef std::pair<size_t, Ogre::String> Message;
-			
+
 		private:
 			/** Map of the string to the Listeners which handle them */
 			std::map<std::string, ConsoleCommandListener *> mCommandMap;
@@ -94,7 +94,7 @@ namespace Opde {
 			void putMessage(std::string text, size_t level = 2);
 
 			/** Ogre's log listener implementation. Used as a to console logger for the ogre Logging system. This means that one can se the ogre logger to write messages to console too */
-			virtual void messageLogged( const Ogre::String& message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String &logName );
+			virtual void messageLogged( const Ogre::String& message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String &logName, bool &skipThisMessage);
 
 			/** Opde logging method implementation */
 			virtual void logMessage(Logger::LogLevel level, const std::string& msg);
@@ -104,7 +104,7 @@ namespace Opde {
 
 			/** informs the backend a change happened (manually). This is here to aid the console frontend with rendering changes (page changes, scrolling) */
 			void setChanged() { mChanged = true; };
-			
+
 			/** Returns the size of history. In lines. */
 			unsigned int getHistorySize() { return mTextHistory; };
 

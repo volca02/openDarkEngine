@@ -35,14 +35,13 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyTypeObject GUIServiceBinder::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			msName,                   /* char *tp_name; */
 			sizeof(GUIServiceBinder::Object),      /* int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			GUIServiceBinder::dealloc,   /* destructor tp_dealloc; */
 			0,			              /* printfunc  tp_print;   */
-			GUIServiceBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,  // getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
 			0,			              // reprfunc  tp_repr;    /* __repr__ */
@@ -83,62 +82,62 @@ namespace Opde {
 		// ------------------------------------------
 		PyObject* GUIServiceBinder::setActive(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			PyObject *result = NULL;
 			GUIServicePtr o;
-			
+
 			if (!python_cast<GUIServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			PyObject* active;
-			
+
 			if (PyArg_ParseTuple(args, "O", &active)) {
 				o->setActive(PyObject_IsTrue(active)  == 1);
-				
+
 				result = Py_None;
 				Py_INCREF(result);
 			} else {
 				PyErr_SetString(PyExc_TypeError, "Expected a bool parameter!");
 			}
-			
+
 			return result;
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* GUIServiceBinder::setVisible(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
 			GUIServicePtr o;
-			
+
 			if (!python_cast<GUIServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			PyObject* visible;
-			
+
 			if (PyArg_ParseTuple(args, "O", &visible)) {
 				o->setVisible(PyObject_IsTrue(visible)  == 1);
-				
+
 				result = Py_None;
 				Py_INCREF(result);
 			} else {
 				PyErr_SetString(PyExc_TypeError, "Expected a bool parameter!");
 			}
-			
+
 			return result;
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* GUIServiceBinder::getActiveSheet(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			// TODO: Code
 			PyErr_SetString(PyExc_TypeError, "NOT IMPLEMENTED YET");
-		
+
 			return NULL;
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* GUIServiceBinder::setActiveSheet(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
@@ -147,7 +146,7 @@ namespace Opde {
 			return NULL;
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* GUIServiceBinder::createSheet(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
@@ -156,7 +155,7 @@ namespace Opde {
 			return NULL;
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-		
+
 		// ------------------------------------------
 		PyObject* GUIServiceBinder::destroySheet(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
@@ -164,11 +163,6 @@ namespace Opde {
 			PyErr_SetString(PyExc_TypeError, "NOT IMPLEMENTED YET");
 			return NULL;
 			__PYTHON_EXCEPTION_GUARD_END_;
-		}
-		
-		// ------------------------------------------
-		PyObject* GUIServiceBinder::getattr(PyObject *self, char *name) {
-			return Py_FindMethod(msMethods, self, name);
 		}
 
 		// ------------------------------------------
@@ -181,8 +175,8 @@ namespace Opde {
 
 			return (PyObject *)object;
 		}
-		
-		
+
+
 		// ------------------------------------------
 		void GUIServiceBinder::init(PyObject* module) {
 			publishType(module, &msType, msName);
@@ -190,4 +184,3 @@ namespace Opde {
 	}
 
 } // namespace Opde
-

@@ -38,30 +38,28 @@ namespace Opde {
 				static void init(PyObject* module);
 
 				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
-				
 				/// to string - reprfunc conversion
 				static PyObject* repr(PyObject *self);
-				
+
 				// --- Methods ---
-				// Sheet				
+				// Sheet
 				static PyObject* createSheet(PyObject* self, PyObject* args);
 				static PyObject* destroySheet(PyObject* self, PyObject* args);
 				static PyObject* getSheet(PyObject* self, PyObject* args);
 				static PyObject* setActiveSheet(PyObject* self, PyObject* args);
-				
+
 				// various draw sources and rendered objects
 				static PyObject* createDrawSource(PyObject* self, PyObject* args);
 				static PyObject* createRenderedImage(PyObject* self, PyObject* args);
 				static PyObject* createRenderedLabel(PyObject* self, PyObject* args);
 				static PyObject* destroyDrawOperation(PyObject* self, PyObject* args);
-				
+
 				static PyObject* createAtlas(PyObject* self, PyObject* args);
 				static PyObject* destroyAtlas(PyObject* self, PyObject* args);
-				
+
 				static PyObject* loadFont(PyObject* self, PyObject* args);
 				static PyObject* setFontPalette(PyObject* self, PyObject* args);
-				
+
 				static PyObject* create();
 
 			protected:
@@ -74,7 +72,7 @@ namespace Opde {
 				/// Method list
 				static PyMethodDef msMethods[];
 		};
-		
+
 
 		// ClipRect type info
 		template<> struct TypeInfo<ClipRect> : TypeInfoBase<ClipRect> {
@@ -87,48 +85,48 @@ namespace Opde {
 				PyTuple_SetItem(crp, 1, PyLong_FromLong(cr.right)); // Steals reference
 				PyTuple_SetItem(crp, 2, PyLong_FromLong(cr.top)); // Steals reference
 				PyTuple_SetItem(crp, 3, PyLong_FromLong(cr.bottom)); // Steals reference
-				
+
 				return crp;
 			}
-			
+
 			static bool fromPyObject(PyObject* o, ClipRect& cr) {
 				if (!PyTuple_Check(o))
 					return false;
-				
-				int size = PyTuple_GET_SIZE(o);	
-				
-				// empty tuple means no clipping 
+
+				int size = PyTuple_GET_SIZE(o);
+
+				// empty tuple means no clipping
 				if (size == 0) {
 					cr.noClip = true;
 					return true;
 				}
-				
+
 				if (size != 4)
 					return false;
-				
+
 				// Type check all those before setting them
 				PyObject *pl, *pr, *pt, *pb;
 				pl = PyTuple_GetItem(o, 0);
 				pr = PyTuple_GetItem(o, 1);
 				pt = PyTuple_GetItem(o, 2);
 				pb = PyTuple_GetItem(o, 3);
-				
+
 				if (!__PYINTLONG_CHECK(pl) ||
 					!__PYINTLONG_CHECK(pr) ||
 					!__PYINTLONG_CHECK(pt) ||
 					!__PYINTLONG_CHECK(pb) )
 					return false;
-				
+
 				cr.left   = PyLong_AsLong(pl);
 				cr.right  = PyLong_AsLong(pr);
 				cr.top    = PyLong_AsLong(pt);
 				cr.bottom = PyLong_AsLong(pb);
 				cr.noClip = false;
-				
+
 				return true;
 			}
 		};
-		
+
 		//
 		template<> struct TypeInfo<PixelCoord> : TypeInfoBase<PixelCoord> {
 			TypeInfo() : TypeInfoBase<PixelCoord>("PixelCoord", VT_CUSTOM_TYPE) {};
@@ -138,58 +136,56 @@ namespace Opde {
 				PyObject *cp = PyTuple_New(2);
 				PyTuple_SetItem(cp, 0, PyLong_FromLong(pc.first)); // Steals reference
 				PyTuple_SetItem(cp, 1, PyLong_FromLong(pc.second)); // Steals reference
-				
+
 				return cp;
 			}
-			
+
 			static bool fromPyObject(PyObject* o, PixelCoord& pc) {
 				if (!PyTuple_Check(o))
 					return false;
-					
+
 				if (PyTuple_GET_SIZE(o) != 2)
 					return false;
-				
+
 				PyObject *arg = PyTuple_GetItem(o, 0);
-				
+
 				if (!__PYINTLONG_CHECK(arg))
 					return false;
-				
+
 				PyObject *arg1 = PyTuple_GetItem(o, 1);
-				
+
 				if (!__PYINTLONG_CHECK(arg1))
 					return false;
-				
+
 				pc.first  = PyLong_AsLong(arg);
 				pc.second = PyLong_AsLong(arg1);
-								
+
 				return true;
 			}
 		};
-		
-		
-                
+
+
+
         /// forward declaration of the child classes
         class RenderedImageBinder;
         class RenderedLabelBinder;
-        
+
 		/// DrawOperation base class binder
 		class DrawOperationBinder : public class_ptr_binder<DrawOperation> {
 			// For inheritance - msType access
 			friend class RenderedImageBinder;
 			friend class RenderedLabelBinder;
-			
+
 			public:
 				static void init(PyObject* module);
 
 				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
-				
 				/// to string - reprfunc conversion
 				static PyObject* repr(PyObject *self);
-				
+
 				/// helper class pointer extractor
 				static bool extract(PyObject *object, DrawOperation*& op);
-				
+
 				// --- Methods ---
 				static PyObject* setPosition(PyObject *self, PyObject *args);
 				static PyObject* setZOrder(PyObject *self, PyObject *args);
@@ -200,13 +196,13 @@ namespace Opde {
 				static int setPPosition(PyObject *self, PyObject *value, void *closure);
 				static int setPZOrder(PyObject *self, PyObject *value, void *closure);
 				static int setPClipRect(PyObject *self, PyObject *value, void *closure);
-				
-				// -- getters --				
+
+				// -- getters --
 				static PyObject* getPPosition(PyObject *self, void *closure);
 				static PyObject* getPZOrder(PyObject *self, void *closure);
 				static PyObject* getPClipRect(PyObject *self, void *closure);
-				
-				
+
+
 				static PyObject* create(DrawOperation* ds);
 
 			protected:
@@ -218,14 +214,14 @@ namespace Opde {
 
 				/// Method list
 				static PyMethodDef msMethods[];
-				
+
 				/// Getters and setters for field access
 				static PyGetSetDef msGetSet[];
-				
+
 				/// Up-casting helper structures
 				static CastInfo<DrawOperation*> msCastInfo[];
 		};
-		
+
 	}
 }
 

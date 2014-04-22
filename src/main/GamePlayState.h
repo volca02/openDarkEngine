@@ -39,7 +39,7 @@
 #include <OgreMath.h>
 #include <OgreRoot.h>
 #include <OgreSceneManager.h>
-#include <OgreOverlayManager.h>
+#include <Overlay/OgreOverlayManager.h>
 
 
 namespace Opde {

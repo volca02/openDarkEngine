@@ -38,19 +38,18 @@ namespace Opde {
 				static void init(PyObject* module);
 
 				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
-				
+
 				/// to string - reprfunc conversion
 				static PyObject* repr(PyObject *self);
-				
+
 				/// helper class pointer extractor
 				static bool extract(PyObject *obj, TextureAtlasPtr& tgt);
-				
+
 				// methods:
 				static PyObject *createDrawSource(PyObject *self, PyObject *args);
 				static PyObject *getAtlasID(PyObject *self, PyObject *args);
 
-				
+
 				static PyObject* create(const TextureAtlasPtr& ds);
 
 			protected:

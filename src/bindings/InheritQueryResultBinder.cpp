@@ -35,14 +35,13 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyTypeObject InheritQueryResultBinder::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			"opde.services.InheritQueryResult",                   /* char *tp_name; */
 			sizeof(InheritQueryResultBinder::Object),      /* int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			InheritQueryResultBinder::dealloc,   /* destructor tp_dealloc; */
 			0,			              /* printfunc  tp_print;   */
-			InheritQueryResultBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,  // getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
 			repr,			          // reprfunc  tp_repr;    /* __repr__ */
@@ -83,7 +82,7 @@ namespace Opde {
 		// ------------------------------------------
 		PyObject* InheritQueryResultBinder::getNext(PyObject* self) {
 			InheritQueryResultPtr o;
-			
+
 			if (!python_cast<InheritQueryResultPtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -100,13 +99,11 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* InheritQueryResultBinder::repr(PyObject *self) {
+#ifdef IS_PY3K
+			return PyBytes_FromFormat("<InheritQueryResult at %p>", self);
+#else
 			return PyString_FromFormat("<InheritQueryResult at %p>", self);
-		}
-
-
-		// ------------------------------------------
-		PyObject* InheritQueryResultBinder::getattr(PyObject *self, char *name) {
-			return Py_FindMethod(msMethods, self, name);
+#endif
 		}
 
 		// ------------------------------------------
@@ -128,4 +125,3 @@ namespace Opde {
 	}
 
 } // namespace Opde
-

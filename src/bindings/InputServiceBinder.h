@@ -28,9 +28,9 @@
 #include  "DTypeDef.h"
 #include  "InputService.h"
 
-namespace Opde 
+namespace Opde
 {
-	namespace Python 
+	namespace Python
 	{
 
 		/// Input service python binder
@@ -39,11 +39,9 @@ namespace Opde
 				static void init(PyObject* module);
 
 				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
-
 				/// creates a python object representation of the input service
 				static PyObject* create();
-				
+
 				// --- Methods ---
 				static PyObject* createBindContext(PyObject* self, PyObject* args);
 				static PyObject* setBindContext(PyObject* self, PyObject* args);
@@ -51,7 +49,7 @@ namespace Opde
 				static PyObject* registerCommandTrap(PyObject* self, PyObject* args);
 				static PyObject* unregisterCommandTrap(PyObject* self, PyObject* args);
 				static PyObject* setInputMapped(PyObject* self, PyObject* args);
-				
+
 			protected:
 				/// Static type definition for InputService
 				static PyTypeObject msType;

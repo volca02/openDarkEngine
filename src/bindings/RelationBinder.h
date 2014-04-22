@@ -40,8 +40,6 @@ namespace Opde {
 				static void init(PyObject* module);
 
 				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
-
 				/// to string - reprfunc conversion
 				static PyObject* repr(PyObject *self);
 

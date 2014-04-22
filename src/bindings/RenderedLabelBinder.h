@@ -36,24 +36,22 @@ namespace Opde {
 		class RenderedLabelBinder : public class_ptr_binder<RenderedLabel> {
 			// for msType handling
 			friend class DrawOperationBinder;
-			
+
 			public:
 				static void init(PyObject* module);
 
 				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
-				
 				/// to string - reprfunc conversion
 				static PyObject* repr(PyObject *self);
-				
+
 				/// helper class pointer extractor
 				static bool extract(PyObject *obj, RenderedLabel*& tgt);
-				
+
 				// --- Methods ---
 				static PyObject* setLabel(PyObject *self, PyObject *args);
 				static PyObject* addText(PyObject *self, PyObject *args);
-				static PyObject* clearText(PyObject *self, PyObject *args);				
-				
+				static PyObject* clearText(PyObject *self, PyObject *args);
+
 				static PyObject* create(RenderedLabel* ds);
 
 			protected:
@@ -65,7 +63,7 @@ namespace Opde {
 
 				/// Method list
 				static PyMethodDef msMethods[];
-				
+
 				static TypeInfo<ClipRect> msRectTypeInfo;
 		};
 

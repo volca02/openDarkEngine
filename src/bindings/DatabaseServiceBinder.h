@@ -35,22 +35,20 @@ namespace Opde {
 		class DatabaseServiceBinder : public shared_ptr_binder<DatabaseServicePtr> {
 			public:
 				static void init(PyObject* module);
-				
-				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
 
+				// --- Python type related methods ---
 				static PyObject* create();
-				
+
 				// --- Methods ---
 				static PyObject* load(PyObject* self, PyObject* args);
 				static PyObject* mergeLoad(PyObject* self, PyObject* args);
 				static PyObject* recursiveMergeLoad(PyObject* self, PyObject* args);
 				static PyObject* save(PyObject* self, PyObject* args);
 				static PyObject* unload(PyObject* self, PyObject* args);
-				
+
 				static PyObject* setProgressListener(PyObject* self, PyObject* args);
 				static PyObject* unsetProgressListener(PyObject* self, PyObject* args);
-				
+
 			protected:
 				/// Static type definition for DatabaseService
 				static PyTypeObject msType;

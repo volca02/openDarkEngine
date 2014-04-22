@@ -27,14 +27,12 @@
 #include "config.h"
 
 #include <OgreRoot.h>
-#include <OgreOverlayManager.h>
-#include <OgreOverlayElement.h>
+#include <Overlay/OgreOverlayManager.h>
+#include <Overlay/OgreOverlayElement.h>
 
 #include <OIS.h>
 
 #include "ConsoleBackend.h"
-
-
 
 namespace Opde {
 

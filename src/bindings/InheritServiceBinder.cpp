@@ -35,14 +35,13 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyTypeObject InheritServiceBinder::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			"opde.services.InheritService",                   /* char *tp_name; */
 			sizeof(InheritServiceBinder::Object),      /* int tp_basicsize; */
 			0,                        /* int tp_itemsize;       // not used much */
 			InheritServiceBinder::dealloc,   /* destructor tp_dealloc; */
 			0,			              /* printfunc  tp_print;   */
-			InheritServiceBinder::getattr,  /* getattrfunc  tp_getattr; // __getattr__ */
+			0,  /* getattrfunc  tp_getattr; // __getattr__ */
 			0,   					  /* setattrfunc  tp_setattr;  // __setattr__ */
 			0,				          /* cmpfunc  tp_compare;  // __cmp__ */
 			0,			              /* reprfunc  tp_repr;    // __repr__ */
@@ -84,7 +83,7 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
 			InheritServicePtr o;
-			
+
 			if (!python_cast<InheritServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -101,7 +100,7 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected one integer argument!");
 				return NULL;
 			}
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
@@ -110,10 +109,10 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
 			InheritServicePtr o;
-			
+
 			if (!python_cast<InheritServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			int objID;
 
 			if (PyArg_ParseTuple(args, "i", &objID)) {
@@ -134,10 +133,10 @@ namespace Opde {
 		PyObject* InheritServiceBinder::hasTargets(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			InheritServicePtr o;
-			
+
 			if (!python_cast<InheritServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			int objID;
 
 			if (PyArg_ParseTuple(args, "i", &objID)) {
@@ -156,7 +155,7 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
 			InheritServicePtr o;
-			
+
 			if (!python_cast<InheritServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -179,7 +178,7 @@ namespace Opde {
 		PyObject* InheritServiceBinder::setArchetype(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			InheritServicePtr o;
-			
+
 			if (!python_cast<InheritServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -202,7 +201,7 @@ namespace Opde {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			PyObject *result = NULL;
 			InheritServicePtr o;
-			
+
 			if (!python_cast<InheritServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -220,11 +219,6 @@ namespace Opde {
 				return NULL;
 			}
 			__PYTHON_EXCEPTION_GUARD_END_;
-		}
-
-		// ------------------------------------------
-		PyObject* InheritServiceBinder::getattr(PyObject *self, char *name) {
-			return Py_FindMethod(msMethods, self, name);
 		}
 
 		// ------------------------------------------
@@ -252,8 +246,7 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyTypeObject InheritLinkBinder::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			msName,                   /* char *tp_name; */
 			sizeof(InheritLinkBinder::Object),      // int tp_basicsize; */
 			0,                        /* int tp_itemsize;       // not used much */
@@ -269,7 +262,7 @@ namespace Opde {
 			if (!python_cast<InheritLinkPtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
-			if (o.isNull()) 
+			if (o.isNull())
 				// Just return PyNone
 				__PY_NONE_RET;
 
@@ -308,4 +301,3 @@ namespace Opde {
 		}
   	} // namespace Python
 } // namespace Opde
-

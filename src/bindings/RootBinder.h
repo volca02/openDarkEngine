@@ -35,14 +35,12 @@ namespace Opde {
 		class RootBinder : public class_ptr_binder<Opde::Root> {
 			public:
 				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
-
 				/// to string - reprfunc conversion
 				static PyObject* repr(PyObject *self);
 
 				/// creates a python object representation of the Opde::Root object
 				static PyObject* create(Root* root);
-				
+
 				/// Initializes the opde.Root object (type)
 				static void init(PyObject* module);
 
@@ -53,15 +51,15 @@ namespace Opde {
 				static PyObject* loadConfigFile(PyObject *self, PyObject* args);
 				static PyObject* addResourceLocation(PyObject *self, PyObject* args);
 				static PyObject* removeResourceLocation(PyObject *self, PyObject* args);
-				
+
 				static PyObject* bootstrapFinished(PyObject *self, PyObject* args);
-				
+
 				static PyObject* logToFile(PyObject *self, PyObject* args);
 				static PyObject* setLogLevel(PyObject *self, PyObject* args);
-				
+
 				static PyObject* registerCustomScriptLoaders(PyObject *self, PyObject* args);
-				
-				
+
+
 				/* TODO: Need bindings written first
 				static PyObject* getLogger(PyObject *self, PyObject* args);
 				static PyObject* getServiceManager(PyObject *self, PyObject* args);
@@ -69,7 +67,7 @@ namespace Opde {
 
 			protected:
 				static PyTypeObject msType;
-			
+
 				/// Name of the python type
 				static const char* msName;
 

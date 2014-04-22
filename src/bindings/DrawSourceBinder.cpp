@@ -34,14 +34,13 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyTypeObject DrawSourceBinder::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			"opde.services.DrawSource",                   // char *tp_name; */
 			sizeof(DrawSourceBinder::Object),  // int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			DrawSourceBinder::dealloc,   // destructor tp_dealloc; */
 			0,			              // printfunc  tp_print;   */
-			DrawSourceBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,  // getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
 			repr,			              // reprfunc  tp_repr;    /* __repr__ */
@@ -73,21 +72,19 @@ namespace Opde {
 		};
 
 		// ------------------------------------------
-		PyObject* DrawSourceBinder::getattr(PyObject *self, char *name) {
-			// TODO: Image/Group name getters?
-			return Py_FindMethod(msMethods, self, name);
-		}
-				
-		// ------------------------------------------
 		PyObject* DrawSourceBinder::repr(PyObject *self) {
+#ifdef IS_PY3K
+			return PyBytes_FromFormat("<DrawSource at %p>", self);
+#else
 			return PyString_FromFormat("<DrawSource at %p>", self);
+#endif
 		}
-		
+
 		// ------------------------------------------
 		bool DrawSourceBinder::extract(PyObject *obj, DrawSourcePtr& tgt) {
 			return python_cast<DrawSourcePtr>(obj, &msType, &tgt);
 		}
-		
+
 		// ------------------------------------------
 		PyObject* DrawSourceBinder::create(const DrawSourcePtr& sh) {
 			Object* object = construct(&msType);
@@ -107,4 +104,3 @@ namespace Opde {
 
   	} // namespace Python
 } // namespace Opde
-

@@ -34,14 +34,13 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyTypeObject StringIteratorBinder::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			"opde.StringIterator",    /* char *tp_name; */
 			sizeof(StringIteratorBinder::Object),      /* int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			StringIteratorBinder::dealloc,   /* destructor tp_dealloc; */
 			0,			              /* printfunc  tp_print;   */
-			StringIteratorBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,  // getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
 			repr,			          // reprfunc  tp_repr;    /* __repr__ */
@@ -82,7 +81,7 @@ namespace Opde {
 		// ------------------------------------------
 		PyObject* StringIteratorBinder::getNext(PyObject* self) {
 			StringIteratorPtr o;
-			
+
 			if (!python_cast<StringIteratorPtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
 
@@ -92,7 +91,11 @@ namespace Opde {
 			if ((!o.isNull()) && !o->end()) {
 				const std::string& s = o->next();
 
+#ifdef IS_PY3K
+				next = PyBytes_FromString(s.c_str());
+#else
 				next = PyString_FromString(s.c_str());
+#endif
 			}
 
 			return next;
@@ -100,14 +103,13 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* StringIteratorBinder::repr(PyObject *self) {
+#ifdef IS_PY3K
+			return PyBytes_FromFormat("<StringIterator at %p>", self);
+#else
 			return PyString_FromFormat("<StringIterator at %p>", self);
+#endif
 		}
 
-
-		// ------------------------------------------
-		PyObject* StringIteratorBinder::getattr(PyObject *self, char *name) {
-			return Py_FindMethod(msMethods, self, name);
-		}
 
 		// ------------------------------------------
 		PyObject* StringIteratorBinder::create(StringIteratorPtr& strit) {
@@ -128,4 +130,3 @@ namespace Opde {
 	}
 
 } // namespace Opde
-

@@ -37,14 +37,13 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyTypeObject RenderedLabelBinder::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			"opde.services.RenderedLabel",                   // char *tp_name; */
 			sizeof(RenderedLabelBinder::Object),  // int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			RenderedLabelBinder::dealloc,   // destructor tp_dealloc; */
 			0,			              // printfunc  tp_print;   */
-			RenderedLabelBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,  // getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
 			repr,			              // reprfunc  tp_repr;    /* __repr__ */
@@ -58,7 +57,12 @@ namespace Opde {
 			PyObject_GenericSetAttr,  // setattrofunc tp_setattro; */
 			0,			              // PyBufferProcs *tp_as_buffer; */
 			// for inheritance searches to work we need this
+#ifdef IS_PY3K
+#warning Check for correctness
+			1,	              // long tp_flags; */
+#else
 			Py_TPFLAGS_HAVE_CLASS,	              // long tp_flags; */
+#endif
 			0,			              // char *tp_doc;  */
 			0,			              // traverseproc tp_traverse; */
 			0,			              // inquiry tp_clear; */
@@ -70,7 +74,7 @@ namespace Opde {
 			0,                                    // struct memberlist /*  *tp_members; */
             		0,                                    // struct getsetlist /* *tp_getset; */
             		// Base object type - needed for inheritance checks. Here, it is the DrawOperationBinder stub.
-			&DrawOperationBinder::msType          // struct _typeobject *tp_base; 
+			&DrawOperationBinder::msType          // struct _typeobject *tp_base;
 		};
 
 		// ------------------------------------------
@@ -80,79 +84,78 @@ namespace Opde {
 			{"clearText", clearText, METH_NOARGS},
 			{NULL, NULL}
 		};
-		
-		// ------------------------------------------		
+
+		// ------------------------------------------
 		PyObject* RenderedLabelBinder::setLabel(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			RenderedLabel* o;
-			
+
 			if (!python_cast<RenderedLabel*>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			char *text;
 			if (!PyArg_ParseTuple(args, "s", &text))
 				__PY_BADPARMS_RET;
-			
+
 			o->setLabel(text);
-			
-			__PY_NONE_RET;
-			__PYTHON_EXCEPTION_GUARD_END_;
-		}
-		
-		// ------------------------------------------		
-		PyObject* RenderedLabelBinder::addText(PyObject* self, PyObject* args) {
-			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			RenderedLabel* o;
-			
-			PyObject *col;
-			char *text;
-			
-			if (!python_cast<RenderedLabel*>(self, &msType, &o))
-				__PY_CONVERR_RET;
-			
-			if (!PyArg_ParseTuple(args, "sO", &text, &col))
-				__PY_BADPARMS_RET;
-			
-			Ogre::ColourValue cv;
-			
-			if (!TypeInfo<Ogre::ColourValue>::fromPyObject(col, cv))
-				__PY_BADPARM_RET("color");
-			
-			o->addText(text, cv);
-			
-			__PY_NONE_RET;
-			__PYTHON_EXCEPTION_GUARD_END_;
-		}
-		
-		// ------------------------------------------		
-		PyObject* RenderedLabelBinder::clearText(PyObject* self, PyObject* args) {
-			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			RenderedLabel* o;
-			
-			if (!python_cast<RenderedLabel*>(self, &msType, &o))
-				__PY_CONVERR_RET;
-			
-			o->clearText();
-			
+
 			__PY_NONE_RET;
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
-		PyObject* RenderedLabelBinder::getattr(PyObject *self, char *name) {
-			return Py_FindMethod(msMethods, self, name);
+		PyObject* RenderedLabelBinder::addText(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			RenderedLabel* o;
+
+			PyObject *col;
+			char *text;
+
+			if (!python_cast<RenderedLabel*>(self, &msType, &o))
+				__PY_CONVERR_RET;
+
+			if (!PyArg_ParseTuple(args, "sO", &text, &col))
+				__PY_BADPARMS_RET;
+
+			Ogre::ColourValue cv;
+
+			if (!TypeInfo<Ogre::ColourValue>::fromPyObject(col, cv))
+				__PY_BADPARM_RET("color");
+
+			o->addText(text, cv);
+
+			__PY_NONE_RET;
+			__PYTHON_EXCEPTION_GUARD_END_;
 		}
-				
+
+		// ------------------------------------------
+		PyObject* RenderedLabelBinder::clearText(PyObject* self, PyObject* args) {
+			__PYTHON_EXCEPTION_GUARD_BEGIN_;
+			RenderedLabel* o;
+
+			if (!python_cast<RenderedLabel*>(self, &msType, &o))
+				__PY_CONVERR_RET;
+
+			o->clearText();
+
+			__PY_NONE_RET;
+			__PYTHON_EXCEPTION_GUARD_END_;
+		}
+
 		// ------------------------------------------
 		PyObject* RenderedLabelBinder::repr(PyObject *self) {
+#ifdef IS_PY3K
+			return PyBytes_FromFormat("<RenderedLabel at %p>", self);
+#else
 			return PyString_FromFormat("<RenderedLabel at %p>", self);
+#endif
 		}
-		
+
 		// ------------------------------------------
 		bool RenderedLabelBinder::extract(PyObject *obj, RenderedLabel*& tgt) {
 			return python_cast<RenderedLabel*>(obj, &msType, &tgt);
 		}
-		
+
 		// ------------------------------------------
 		PyObject* RenderedLabelBinder::create(RenderedLabel *sh) {
 			Object* object = construct(&msType);
@@ -172,4 +175,3 @@ namespace Opde {
 
   	} // namespace Python
 } // namespace Opde
-

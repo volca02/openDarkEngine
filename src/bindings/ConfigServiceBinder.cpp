@@ -36,14 +36,13 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyTypeObject ConfigServiceBinder::msType = {
-			PyObject_HEAD_INIT(&PyType_Type)
-			0,
+			PyVarObject_HEAD_INIT(&PyType_Type, 0)
 			const_cast<char*>("opde.services.ConfigService"),                   // char *tp_name; */
 			sizeof(ConfigServiceBinder::Object),      // int tp_basicsize; */
 			0,                        // int tp_itemsize;       /* not used much */
 			ConfigServiceBinder::dealloc,   // destructor tp_dealloc; */
 			0,			              // printfunc  tp_print;   */
-			ConfigServiceBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
+			0,  // getattrfunc  tp_getattr; /* __getattr__ */
 			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
 			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
 			repr,		              // reprfunc  tp_repr;    /* __repr__ */
@@ -95,7 +94,7 @@ namespace Opde {
 				"Detects if the given configuration key is defined\n"
 				"@type path: string\n"
 				"@param path: The configuration file name\n";
-				
+
 		const char* opde_ConfigService_setConfigPathOverride__doc__ = "setConfigPathOverride(path)\n"
 				"Sets a path that overrides the normal process of config loading - that means the path given will be the only one config files are loaded from.\n"
 				"@type path: string\n"
@@ -112,11 +111,6 @@ namespace Opde {
 		};
 
 		// ------------------------------------------
-		PyObject* ConfigServiceBinder::getattr(PyObject *self, char *name) {
-			return Py_FindMethod(msMethods, self, name);
-		}
-
-		// ------------------------------------------
 		PyObject* ConfigServiceBinder::create() {
 			Object* object = construct(&msType);
 
@@ -130,12 +124,12 @@ namespace Opde {
 		// ------------------------------------------
 		PyObject* ConfigServiceBinder::setParam(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			ConfigServicePtr o;
-			
+
 			if (!python_cast<ConfigServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			const char* name;
 			const char* value;
 
@@ -146,19 +140,19 @@ namespace Opde {
 				PyErr_SetString(PyExc_TypeError, "Expected two string parameters!");
 				return NULL;
 			}
-			
+
 			__PYTHON_EXCEPTION_GUARD_END_;
 		}
 
 		// ------------------------------------------
 		PyObject* ConfigServiceBinder::getParam(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			
+
 			ConfigServicePtr o;
-			
+
 			if (!python_cast<ConfigServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			const char* name;
 
 			if (PyArg_ParseTuple(args, "s", &name)) {
@@ -177,10 +171,10 @@ namespace Opde {
 		PyObject* ConfigServiceBinder::hasParam(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			ConfigServicePtr o;
-			
+
 			if (!python_cast<ConfigServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			const char* name;
 
 			if (PyArg_ParseTuple(args, "s", &name)) {
@@ -201,10 +195,10 @@ namespace Opde {
 		PyObject* ConfigServiceBinder::loadParams(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			ConfigServicePtr o;
-			
+
 			if (!python_cast<ConfigServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			const char* fname;
 
 			if (PyArg_ParseTuple(args, "s", &fname)) {
@@ -222,10 +216,10 @@ namespace Opde {
 		PyObject* ConfigServiceBinder::setConfigPathOverride(PyObject* self, PyObject* args) {
 			__PYTHON_EXCEPTION_GUARD_BEGIN_;
 			ConfigServicePtr o;
-			
+
 			if (!python_cast<ConfigServicePtr>(self, &msType, &o))
 				__PY_CONVERR_RET;
-			
+
 			const char* path;
 
 			if (PyArg_ParseTuple(args, "s", &path)) {
@@ -247,9 +241,12 @@ namespace Opde {
 
 		// ------------------------------------------
 		PyObject* ConfigServiceBinder::repr(PyObject* self) {
+#ifdef IS_PY3K
+			return PyBytes_FromFormat("<ConfigService at %p>", self);
+#else
 			return PyString_FromFormat("<ConfigService at %p>", self);
+#endif
 		}
 	}
 
 } // namespace Opde
-
