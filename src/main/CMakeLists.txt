@@ -13,7 +13,7 @@ INCLUDE( ${OPDE_SOURCE_DIR}/src/scenemanager/DarkSceneManager.cmake )
 include_directories(
     ${ODE_INCLUDE_DIR}
     ${OGRE_INCLUDE_DIR}
-    ${OIS_INCLUDE_DIR}    
+    ${OIS_INCLUDE_DIR}
     ${OPDE_BINARY_DIR}
     ${OPDE_BASE_INCLUDES}
     ${OPDE_SOURCE_DIR}/src/compat
@@ -27,18 +27,18 @@ include_directories(
 )
 
 IF(SCRIPT_COMPILERS)
-	SET(OPDE_SCRIPT_COMPILER_FILES
-	    DTypeScriptCompiler.cpp
-	    DTypeScriptCompiler.h
-	    PLDefScriptCompiler.cpp
-	    PLDefScriptCompiler.h
-	    DTypeScriptLoader.cpp
-	    DTypeScriptLoader.h
-	    PLDefScriptLoader.cpp
-	    PLDefScriptLoader.h
-	)
+    SET(OPDE_SCRIPT_COMPILER_FILES
+        DTypeScriptCompiler.cpp
+        DTypeScriptCompiler.h
+        PLDefScriptCompiler.cpp
+        PLDefScriptCompiler.h
+        DTypeScriptLoader.cpp
+        DTypeScriptLoader.h
+        PLDefScriptLoader.cpp
+        PLDefScriptLoader.h
+    )
 ELSE(SCRIPT_COMPILERS)
-	SET(OPDE_SCRIPT_COMPILER_FILES)
+    SET(OPDE_SCRIPT_COMPILER_FILES)
 ENDIF(SCRIPT_COMPILERS)
 
 
@@ -61,53 +61,53 @@ add_library (OpenDark SHARED
 )
 
 IF (PYTHON_MODULE)
-	# Library that exposes the OpenDark lib as a python module - for direct python usage
-	PYTHON_ADD_MODULE(opde
-		PyRoot.cpp
-	)
-	
-	target_link_libraries(opde
-    		OpenDark
-		${OGRE_LIBRARIES}
-		${OIS_LIBRARIES}
-		${ODE_LIBRARIES}
-	)
+    # Library that exposes the OpenDark lib as a python module - for direct python usage
+    PYTHON_ADD_MODULE(opde
+        PyRoot.cpp
+    )
 
-	# We need the library to be named *exactly* opde.so/opde.dll in order to find it with python	
-	# So we remove any platform specific library name prefix
-	set_property(TARGET opde PROPERTY PREFIX "")
-	
-	# We install into the python's site-packages dir based on distutils
-	# Thanks to PLPlot for this snippet
-	execute_process(
-		COMMAND
-		${PYTHON_EXECUTABLE} -c "from distutils import sysconfig; print sysconfig.get_python_lib(1,0,prefix='${CMAKE_INSTALL_EXEC_PREFIX}')"
-		OUTPUT_VARIABLE PYTHON_SITE_PACKAGES_DIR
-		OUTPUT_STRIP_TRAILING_WHITESPACE
-	)
-	
-	# Directory name for the module's headers
-	if(USE_RPATH)
-		set_target_properties(
-			opde
-			PROPERTIES
-			INSTALL_RPATH "${LIB_INSTALL_RPATH}"
-			INSTALL_NAME_DIR "${PYTHON_SITE_PACKAGES_DIR}"
-		)
-   	else(USE_RPATH)
-		set_target_properties(
-			opde
-			PROPERTIES
-			INSTALL_NAME_DIR "${PYTHON_SITE_PACKAGES_DIR}"
-		)
-	endif(USE_RPATH)
-	
-	# install directives
-	install(
-		TARGETS opde
-		LIBRARY 
-		DESTINATION ${PYTHON_SITE_PACKAGES_DIR}
-	)
+    target_link_libraries(opde
+        OpenDark
+        ${OGRE_LIBRARIES}
+        ${OIS_LIBRARIES}
+        ${ODE_LIBRARIES}
+    )
+
+    # We need the library to be named *exactly* opde.so/opde.dll in order to find it with python
+    # So we remove any platform specific library name prefix
+    set_property(TARGET opde PROPERTY PREFIX "")
+
+    # We install into the python's site-packages dir based on distutils
+    # Thanks to PLPlot for this snippet
+    execute_process(
+        COMMAND
+        ${PYTHON_EXECUTABLE} -c "from distutils import sysconfig; print sysconfig.get_python_lib(1,0,prefix='${CMAKE_INSTALL_EXEC_PREFIX}')"
+        OUTPUT_VARIABLE PYTHON_SITE_PACKAGES_DIR
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    # Directory name for the module's headers
+    if(USE_RPATH)
+        set_target_properties(
+            opde
+            PROPERTIES
+            INSTALL_RPATH "${LIB_INSTALL_RPATH}"
+            INSTALL_NAME_DIR "${PYTHON_SITE_PACKAGES_DIR}"
+        )
+    else(USE_RPATH)
+        set_target_properties(
+            opde
+            PROPERTIES
+            INSTALL_NAME_DIR "${PYTHON_SITE_PACKAGES_DIR}"
+        )
+    endif(USE_RPATH)
+
+    # install directives
+    install(
+        TARGETS opde
+        LIBRARY
+        DESTINATION ${PYTHON_SITE_PACKAGES_DIR}
+    )
 ENDIF(PYTHON_MODULE)
 
 link_directories(
@@ -149,7 +149,7 @@ if (UNIX)
 endif(UNIX)
 
 # Main executable
-add_executable (opdeMain WIN32 
+add_executable (opdeMain WIN32
     Opde.cpp
     GameStateManager.cpp
     GameState.cpp
@@ -193,4 +193,3 @@ target_link_libraries( opdeScript
 SET_TARGET_PROPERTIES( opdeScript PROPERTIES
   COMPILE_DEFINITIONS "OPDE_EXE_TARGET"
 )
-
