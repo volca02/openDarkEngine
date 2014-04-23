@@ -38,6 +38,7 @@
 #include "ServiceCommon.h"
 #include "ConsoleBackend.h"
 #include "ConsoleFrontend.h"
+#include "OgreZip.h"
 
 #include <OgreRoot.h>
 #include <OgreLogManager.h>
@@ -132,6 +133,9 @@ namespace Opde {
 			/// Factory for case-less filesystem archives
 			/// Factory for case-less filesystem archives
 			Ogre::ArchiveFactory* mDirArchiveFactory;
+
+			/// Factory for Zip archives (Quickfix for ogre 1.9 bug)
+			Ogre::ArchiveFactory* mZipArchiveFactory;
 
 			/// Factory for Crf archives (zip archives with archivename prefix)
 			Ogre::ArchiveFactory* mCrfArchiveFactory;

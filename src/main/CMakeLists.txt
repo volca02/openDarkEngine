@@ -50,6 +50,8 @@ add_library (OpenDark SHARED
     CustomImageCodec.h
     ProxyArchive.cpp
     ProxyArchive.h
+    OgreZip.cpp
+    OgreZip.h
     # and the base lib files
     ${OPDE_BASE_FILES}
     # and service files as well

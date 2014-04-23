@@ -129,9 +129,11 @@ namespace Opde {
 		LOG_INFO("Root: Registering custom archive factories");
 		// register the factories
 		mDirArchiveFactory = new Ogre::CaseLessFileSystemArchiveFactory();
+		mZipArchiveFactory = new Ogre::FixedZipArchiveFactory();
 		mCrfArchiveFactory = new Ogre::CrfArchiveFactory();
 
 		Ogre::ArchiveManager::getSingleton().addArchiveFactory(mDirArchiveFactory);
+		Ogre::ArchiveManager::getSingleton().addArchiveFactory(mZipArchiveFactory);
 		Ogre::ArchiveManager::getSingleton().addArchiveFactory(mCrfArchiveFactory);
 
 		if (serviceMask & SERVICE_RENDERER) {
@@ -204,6 +206,7 @@ namespace Opde {
 
 		delete mDirArchiveFactory;
 		delete mCrfArchiveFactory;
+		delete mZipArchiveFactory;
 
 		// As the last thing - release the logger
 		delete mLogger;
