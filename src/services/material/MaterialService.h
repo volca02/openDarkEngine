@@ -121,9 +121,6 @@ namespace Opde {
 			static const Ogre::String TEMPTEXTURE_RESOURCE_GROUP;
 
 		protected:
-            /// family, texture as a pair
-            typedef std::pair<Ogre::String, Ogre::String> TextureName;
-
 			/// Service initialization
 			bool init();
 
@@ -132,22 +129,22 @@ namespace Opde {
 
 			/// @see Service::bootstrapFinished
 			void bootstrapFinished();
-
+			
 			/// @see Service::shutdown
 			void shutdown();
 
 			/// DB load/unload event callback method
 			// void onDBChange(const DatabaseChangeMsg& m);
-//
-			/** Database load callback
+// 			
+			/** Database load callback 
 			* @see DatabaseListener::onDBLoad */
 			void onDBLoad(const FileGroupPtr& db, uint32_t curmask);
-
-			/** Database save callback
+			
+			/** Database save callback 
 			* @see DatabaseListener::onDBSave */
 			void onDBSave(const FileGroupPtr& db, uint32_t tgtmask);
-
-			/** Database drop callback
+			
+			/** Database drop callback 
 			* @see DatabaseListener::onDBDrop */
 			void onDBDrop(uint32_t dropmask);
 
@@ -160,7 +157,7 @@ namespace Opde {
 			void loadMaterials(const FileGroupPtr& db);
 
 			/** A fail-back method, which construct a default-valued material, if a material script for a certain family/texture was not found */
-			void createStandardMaterial(unsigned int idx, const TextureName &fileName, std::string textureName, std::string resourceGroup);
+			void createStandardMaterial(unsigned int idx, std::string matName, std::string textureName, std::string resourceGroup);
 
 			/** Internal method. Creates skyhack material */
 			void createSkyHackMaterial(const Ogre::String& resourceGroup);
@@ -187,7 +184,7 @@ namespace Opde {
 
 			/** get the material name from it's index
 			* @note name is formed from FAMILY and NAME like this: FAMILY/NAME or NAME (for no-family textures) */
-			TextureName getTextureName(int mat_index);
+			Ogre::String getMaterialName(int mat_index);
 
 			// Texture scale getter (for custom texture overrides)
 			std::pair<float, float> getWRTextureScale(unsigned int idx);
@@ -212,6 +209,7 @@ namespace Opde {
 
 			/// Map of texture dimensions, after user-defined scaling
 			typedef std::map<unsigned int, TextureDimensions2D > TextureDimensionMap;
+
 
 			/// map of the texture sizes (fam/texture -> size). TODO: Evaluate the possibility to always scale to predefined dimensions...
 			TxtScaleMap mTxtScaleMap;
@@ -258,7 +256,7 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask();
-
+			
 			virtual const size_t getSID();
 
 		private:

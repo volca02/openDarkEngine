@@ -153,8 +153,9 @@ namespace Opde {
 
 		for (unsigned int id = 1; id < mTxlistHeader.txt_count; id++) {
 			// Try to find the family for the texture
-			TextureName tn  = getTextureName(id);
-            String path = tn.first + "/" + tn.second;
+			std::string path = getMaterialName(id);
+
+
 			// Resulting material name
 			StringUtil::StrStreamType matName;
 			matName << "@template" << id;
@@ -176,7 +177,7 @@ namespace Opde {
 
 				addWorldMaterialTemplate(id, shadMat);
 			} else { // The material script was not found
-				createStandardMaterial(id, tn, path, resourceGroup);
+				createStandardMaterial(id, matName.str(), path, resourceGroup);
 			}
 			// This is it. Material @templateXX created
 		}
@@ -343,7 +344,7 @@ namespace Opde {
 	//------------------------------------------------------
 	Ogre::StringVectorPtr MaterialService::getAnimTextureNames(const String& basename, const String& resourceGroup) {
 		// split the filename into pieces, find all _*.* that apply
-		LOG_INFO("MaterialService: Searching for anim_txt '%s'", basename.c_str());
+		LOG_INFO("MaterialService: Searching for anim_txt %s", basename.c_str());
 
 		StringVectorPtr v(new StringVector());
 
@@ -508,64 +509,37 @@ namespace Opde {
 
 
 	//-----------------------------------------------------------------------
-	void MaterialService::createStandardMaterial(unsigned int idx, const TextureName &fileName, std::string textureName,
+	void MaterialService::createStandardMaterial(unsigned int idx, std::string matName, std::string textureName,
 	        std::string resourceGroup) {
 		Image tex;
 		bool loaded = false; // indicates we were successful finding the texture
 
-        // Ogre has a bug. it can't find files given path on Arch. For
-        // now, fixing this by doing findResourceLocation instead and
-        // iterating the results...
-        FileInfoListPtr texnames = ResourceGroupManager::getSingleton().findResourceFileInfo(resourceGroup, fileName.second + ".*");
+		StringVectorPtr texnames = ResourceGroupManager::getSingleton().findResourceNames(resourceGroup, textureName
+		        + ".*");
 
-        if (texnames->size() <= 0) {
-            OPDE_EXCEPT(String("Could not find the texture: ") + textureName, " MaterialService::createStandardMaterial");
-        }
+		if (texnames->size() <= 0) {
+			// no results, try the localised version
+			// prev. path + /language/filename
+			String locresname = mConfigService->getLocalisedResourcePath(textureName);
 
-        // TODO: Ogre is broken shit now it seems. filename in fileinfo is relative :(
-		// if (texnames->size() <= 0) {
-		// 	// no results, try the localised version
-		// 	// prev. path + /language/filename
-		// 	String locresname = mConfigService->getLocalisedResourcePath();
+			LOG_INFO("Specified resource (%s) was not found, trying localized version: %s", textureName.c_str(), locresname.c_str());
 
-		// 	LOG_INFO("Specified resource (%s) was not found, trying localized version: %s", textureName.c_str(), locresname.c_str());
-
-		// 	texnames = ResourceGroupManager::getSingleton().findResourceFileInfo(resourceGroup, locresname
-		// 			        + ".*");
-
-        //     if (texnames->size() <= 0) {
-        //         LOG_INFO("Specified resource (%s) was not found in localized: %s", textureName.c_str(), locresname.c_str());
-        //         OPDE_EXCEPT(String("Could not find the texture: ") + textureName, " MaterialService::createStandardMaterial");
-        //     }
-		// }
+			texnames = ResourceGroupManager::getSingleton().findResourceNames(resourceGroup, locresname
+					        + ".*");
+		}
 
 		String txtfile;
 
-        String origPath = Ogre::StringUtil::normalizeFilePath(fileName.first, true);
-
 		// Let's try the extensions from the extensions vector
-		FileInfoList::iterator it = texnames->begin();
+		StringVector::iterator it = texnames->begin();
 
 		for (; it != texnames->end(); it++) { // Try loading every given
 			try {
-                // The texture may not be the desired one
-                // because of that, we compare the path
-                // if it begins with the same chars, it is okay
-                // TODO: HACKY! This is not right. This all fixes an apparent bug in ogre
-                if (!Ogre::StringUtil::startsWith(it->path, origPath))
-                    continue;
-
-                // This shit is completely broken, isn't it?
-                String fullPath = it->path + it->basename;
-
-                LOG_INFO("Resource '%s' was found as %s",
-                         textureName.c_str(),
-                         fullPath.c_str());
-				tex.load(fullPath, resourceGroup);
+				tex.load((*it), resourceGroup);
 
 				TextureManager::getSingleton().loadImage(textureName, resourceGroup, tex, TEX_TYPE_2D, 5, 1.0f);
 
-				txtfile = fullPath;
+				txtfile = (*it);
 
 				loaded = true;
 
@@ -579,7 +553,7 @@ namespace Opde {
 			LOG_ERROR("Image %s was not found, texture will be invalid!", textureName.c_str());
 
 		// Construct a material out of this texture. We'll just clone the material upstairs to enable lmap-txture combinations
-		MaterialPtr shadMat = MaterialManager::getSingleton().create(textureName, resourceGroup);
+		MaterialPtr shadMat = MaterialManager::getSingleton().create(matName, resourceGroup);
 
 		shadMat->setReceiveShadows(true);
 
@@ -707,15 +681,16 @@ namespace Opde {
 
 
 	// ---------------------------------------------------------------------
-    MaterialService::TextureName MaterialService::getTextureName(int mat_index) {
-		TextureName tn;
+	Ogre::String MaterialService::getMaterialName(int mat_index) {
+		std::string path = "";
 		if ((mTextures[mat_index].fam != 0) && ((mTextures[mat_index].fam - 1) < (int) mTxlistHeader.fam_count)) {
-			tn.first = mFamilies[mTextures[mat_index].fam - 1].name;
+			path = mFamilies[mTextures[mat_index].fam - 1].name;
+			path += "/";
 		}
 
-		tn.second = mTextures[mat_index].name; // TODO: Multiplatformness... is it solved by ogre?
+		path += mTextures[mat_index].name; // TODO: Multiplatformness... is it solved by ogre?
 
-		return tn;
+		return path;
 	}
 
 
