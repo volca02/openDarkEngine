@@ -72,8 +72,8 @@ namespace Opde {
 		mZBias(0.0f),
 		mEntity(entity),
 		mNode(node),
-		mEmi(NULL) {
-
+		mEmi(NULL)
+    {
 		mEmi = new EntityMaterialInstance(mEntity);
 		mEmi->setSceneBlending(SBT_TRANSPARENT_ALPHA);
 		// mEmi->setSceneBlending(SBT_MODULATE);
@@ -164,7 +164,7 @@ namespace Opde {
 	/*--------------------- RenderService --------------------*/
 	/*--------------------------------------------------------*/
 	template<> const size_t ServiceImpl<RenderService>::SID = __SERVICE_ID_RENDER;
-	
+
 	RenderService::RenderService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::RenderService >(manager, name),
 			mPropModelName(NULL),
 			mPropPosition(NULL),
@@ -181,7 +181,7 @@ namespace Opde {
 			mRenderAlphaProperty(NULL),
 			mZBiasProperty(NULL),
 			mCurrentSize(0,0) {
-		
+
 		// TODO: This is just plain wrong. This service should be the maintainer of the used scene manager, if any other service needs the direct handle, etc.
 		// The fact is this service is probably game only, and should be the initialiser of graphics as the whole. This will be the
 		// modification that should be done soon in order to let the code look and be nice
@@ -282,14 +282,14 @@ namespace Opde {
 
 		// Initialise and create a default rendering window
 		mRenderWindow = mRoot->initialise( true, "openDarkEngine" );
-		
+
 		// inform all listeners about the current resolution
 		mCurrentSize.fullscreen = mRenderWindow->isFullScreen();
 		mCurrentSize.width = mRenderWindow->getWidth();
 		mCurrentSize.height = mRenderWindow->getHeight();
-				
+
 		broadcastScreenSize();
-		
+
 		// Dark scene manager factory
 		LOG_DEBUG("RenderService::init(): new DarkSceneManagerFactory()");
 		mDarkSMFactory = new DarkSceneManagerFactory();
@@ -325,9 +325,9 @@ namespace Opde {
 		mPropertyService = GET_SERVICE(PropertyService);
 
 		mConfigService = GET_SERVICE(ConfigService);
-		
+
 		Ogre::uint8 mDefaultRenderQueue = mSceneMgr->getRenderQueue()->getDefaultQueueGroup();
-		
+
 		// preset the default render queue according to the RenderQueue
 		EntityMaterialInstance::setBaseRenderQueueGroup(mDefaultRenderQueue);
 
@@ -373,7 +373,7 @@ namespace Opde {
 		mCurrentSize.fullscreen = fullScreen;
 		mCurrentSize.width = width;
 		mCurrentSize.height = height;
-		
+
 		broadcastScreenSize();
 	}
 
@@ -519,11 +519,11 @@ namespace Opde {
 		StringUtil::toUpperCase(iname);
 
 		// if the new name is particle, just set skip and it's done
-		if (iname == FX_PARTICLE_OBJECT_NAME) {
+        if (iname == FX_PARTICLE_OBJECT_NAME) {
 			LOG_VERBOSE("RenderService: Mesh rendering for %d disabled", id);
 			ei->setSkip(true);
 			return;
-		}
+        }
 
 		// name not empty. Prepare new entity, swap, destroy old
 
@@ -655,7 +655,7 @@ namespace Opde {
 
 				break;
 			}
-			
+
 			default: break;
 		}
 	}
@@ -664,7 +664,7 @@ namespace Opde {
 	void RenderService::onObjectMsg(const ObjectServiceMsg& msg) {
 		if (msg.objectID <= 0) // no action for archetypes
 			return;
-		
+
 		switch (msg.type) {
 			case OBJ_CREATE_STARTED   : {
 				// create scenenode, return
@@ -709,7 +709,7 @@ namespace Opde {
 
 				return;
 			}
-			
+
 			default: break; // nothing, ignore
 		}
 	}
@@ -741,7 +741,8 @@ namespace Opde {
 		Ogre::MeshPtr msh = MeshManager::getSingleton().createManual(DEFAULT_RAMP_OBJECT_NAME, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
 		/// Create one submesh
-		SubMesh* sub = msh->createSubMesh("BaseWhite");
+		SubMesh* sub = msh->createSubMesh();
+        sub->setMaterialName("BaseWhite");
 
 		// Not exactly accurate for 1:1:2 side size ratio, but well...
 		const float sqrt13 = 0.577350269f; /* sqrt(1/3) */
@@ -870,7 +871,7 @@ namespace Opde {
 
 		broadcastMessage(msg);
 	}
-	
+
 	//-------------------------- Factory implementation
 	std::string RenderServiceFactory::mName = "RenderService";
 
@@ -884,7 +885,7 @@ namespace Opde {
 	Service* RenderServiceFactory::createInstance(ServiceManager* manager) {
 		return new RenderService(manager, mName);
 	}
-	
+
 	const size_t RenderServiceFactory::getSID() {
 		return RenderService::SID;
 	}
