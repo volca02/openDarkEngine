@@ -115,35 +115,35 @@ void MaterialInstance::setZBias(Ogre::Real zbias) {
 }
 
 MaterialPtr MaterialInstance::getCopyMaterial () {
-  return mCopyMat;
+	return mCopyMat;
 }
 
 void MaterialInstance::createCopyMaterial () {
-  String name;
-  // Avoid name collision
-  do {
-    name = mOriginalMat->getName () + StringConverter::toString (Math::UnitRandom ());
-  } while (MaterialManager::getSingleton ().resourceExists (name));
+	String name;
+	// Avoid name collision
+	do {
+		name = mOriginalMat->getName() + StringConverter::toString (Math::UnitRandom ());
+	} while (MaterialManager::getSingleton ().resourceExists (name));
 
-  mCopyMat = mOriginalMat->clone (name);
+	mCopyMat = mOriginalMat->clone (name);
 
-  Material::TechniqueIterator techniqueIt = mCopyMat->getTechniqueIterator ();
-  while (techniqueIt.hasMoreElements ()) {
-    Technique *t = techniqueIt.getNext ();
-    Technique::PassIterator passIt = t->getPassIterator ();
-    while (passIt.hasMoreElements ()) {
-      passIt.peekNext ()->setDepthWriteEnabled (false);
-      passIt.peekNext ()->setSceneBlending (mSBT);
-      passIt.moveNext ();
-    }
-  }
+	Material::TechniqueIterator techniqueIt = mCopyMat->getTechniqueIterator ();
+	while (techniqueIt.hasMoreElements ()) {
+		Technique *t = techniqueIt.getNext ();
+		Technique::PassIterator passIt = t->getPassIterator ();
+		while (passIt.hasMoreElements ()) {
+			passIt.peekNext ()->setDepthWriteEnabled (false);
+			passIt.peekNext ()->setSceneBlending (mSBT);
+			passIt.moveNext ();
+		}
+	}
 }
 
 void MaterialInstance::clearCopyMaterial () {
-  if (!mCopyMat.isNull ())
-    MaterialManager::getSingleton ().remove (mCopyMat->getName ());
+	if (!mCopyMat.isNull ())
+		MaterialManager::getSingleton ().remove (mCopyMat->getName ());
 
-  mCopyMat.setNull ();
+	mCopyMat.setNull ();
 }
 
 bool MaterialInstance::hasOverrides(void) {

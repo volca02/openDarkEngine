@@ -25,23 +25,13 @@ SubEntityMaterialInstance::~SubEntityMaterialInstance () {
 	mSubEntity->setMaterial(mOriginalMat);
 }
 
-void SubEntityMaterialInstance::setMaterialName (String name) {
-	clearCopyMaterial ();
-
-	mSubEntity->setMaterialName (name);
-
-	initOriginalMaterial ();
-
-	setTransparency (mCurrentTransparency);
-}
-
 void SubEntityMaterialInstance::setTransparency (Real transparency) {
 	MaterialInstance::setTransparency (transparency);
 
 	if (hasOverrides()) {
-		mSubEntity->setMaterialName (mCopyMat->getName ());
+		mSubEntity->setMaterial (mCopyMat);
 	} else {
-		mSubEntity->setMaterialName (mOriginalMat->getName ());
+		mSubEntity->setMaterial (mOriginalMat);
 	}
 }
 
@@ -49,9 +39,9 @@ void SubEntityMaterialInstance::setZBias (Ogre::Real zbias) {
 	MaterialInstance::setZBias (zbias);
 
 	if (hasOverrides()) {
-		mSubEntity->setMaterialName (mCopyMat->getName ());
+		mSubEntity->setMaterial (mCopyMat);
 	} else {
-		mSubEntity->setMaterialName (mOriginalMat->getName ());
+		mSubEntity->setMaterial (mOriginalMat);
 	}
 }
 
