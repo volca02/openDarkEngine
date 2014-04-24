@@ -529,7 +529,7 @@ namespace Opde {
 			static void init(int argc, char **argv);
 
 			/** Initializes the Opde module itself, without the interpretter */
-			static void initModule();
+			static PyObject *initModule();
 
 			/** Finalizes python lang */
 			static void term();

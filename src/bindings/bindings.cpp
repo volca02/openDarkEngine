@@ -231,9 +231,15 @@ namespace Opde {
 #endif
 
 	void PythonLanguage::init(int argc, char **argv) {
+#ifdef IS_PY3K
+		// insert our module into the init tab
+		PyImport_AppendInittab("opde", &initModule);
+#endif
 		Py_Initialize();
 
+#ifndef IS_PY3K
 		initModule();
+#endif
 
 		if (PyErr_Occurred()) {
 			// TODO: Do something useful here, or forget it
@@ -247,7 +253,7 @@ namespace Opde {
 #endif
 	}
 
-	void PythonLanguage::initModule() {
+	PyObject *PythonLanguage::initModule() {
 		msRoot = NULL;
 
 		// Create an Opde module
@@ -276,6 +282,7 @@ namespace Opde {
 		Python::StringIteratorBinder::init(module);
 		Python::DataFieldDescIteratorBinder::init(module);
 		Python::DTypeBinder::init(module);
+		return module;
 	}
 
 	void PythonLanguage::term() {
