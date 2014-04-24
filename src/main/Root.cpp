@@ -191,10 +191,10 @@ namespace Opde {
 			Ogre::CustomImageCodec::shutdown();
 		}
 
+		delete mOverlaySystem;
 		delete mOgreRoot;
 		delete mResourceGroupManager;
 		delete mArchiveManager;
-		delete mOverlaySystem;
 
 		LogListenerList::iterator it = mLogListeners.begin();
 
