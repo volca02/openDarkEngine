@@ -214,8 +214,6 @@ namespace Opde {
 		delete mOgreOpdeLogConnector;
 
 		delete mOgreLogManager;
-
-
 	}
 
 
