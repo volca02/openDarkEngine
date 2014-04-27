@@ -32,9 +32,12 @@
 namespace Ogre {
 
 	// ----------------------------------------------------------------------
-	DarkCamera::DarkCamera(const String& name, SceneManager* sm) : Camera(name, sm), mIsDirty(false) {
+	DarkCamera::DarkCamera(const String& name, SceneManager* sm) :
+        Camera(name, sm),
+        mIsDirty(false),
+        mUpdateID(1)
+    {
 		mBspTree = static_cast<DarkSceneManager*>(mSceneMgr)->getBspTree();
-		mLastFrameNum = -1;
 	}
 
 	// ----------------------------------------------------------------------
@@ -76,10 +79,18 @@ namespace Ogre {
 		unsigned long startTime = Root::getSingleton().getTimer()->getMilliseconds();
 
 		// Clear the cache of visible cells
-		unsigned int frameNum = static_cast<DarkSceneManager*>(mSceneMgr)->mFrameNum;
+        DarkSceneManager* sm = static_cast<DarkSceneManager*>(mSceneMgr);
+		unsigned int frameNum = sm->mFrameNum;
+        unsigned int cellCount = sm->getCellCount();
+        unsigned int portalCount = sm->getPortalCount();
 
-		if (frameNum == mLastFrameNum && !mIsDirty) // nothing to do...
+		if (!mIsDirty) // nothing to do...
 			return;
+
+        // this effectively invalidates the screen space info for all cells/portals
+        ++mUpdateID;
+
+        mRects.startUpdate(sm, mUpdateID);
 
 		// Look for our root cell
 		BspNode* root = mBspTree->findLeaf(getDerivedPosition());
@@ -97,59 +108,27 @@ namespace Ogre {
 
 		PortalFrustum cameraFrustum = PortalFrustum(this);
 
-		root->invalidateScreenRect(frameNum);
+        // invalidate the associated screen rect
+        mRects.invalidateCell(root->getID(), mUpdateID);
 
 		// Root cell gets whole screen visibility
-		root->refreshScreenRect(this, toScreen, cameraFrustum);
+		root->refreshScreenRect(this, mRects, toScreen, cameraFrustum);
 
 		// the view rect is set to fill the screen
-		root->mViewRect.setToScreen();
+        mRects.cell(root->getID()).rect.setToScreen();
 
 		// Root exists. traverse the portal tree
 		BspNodeQueue cell_queue;
 		cell_queue.reserve(1024);
 		cell_queue.push_back(root);
 
-
-		unsigned int currentPos = 0;
 		unsigned int finishedCells = 0;
 
 		mVisibleCells.clear();
 		mVisibleCells.push_back(root);
 
 		while (finishedCells < cell_queue.size()) {
-		    BspNode* cell = NULL;
-
-		    /*
-		    float dist = 1e50;
-
-		    // select the cell with the least available distance from camera (to avoid cell re-evaluations)
-		    for(unsigned int cell_idx = finishedCells; cell_idx < cell_queue.size(); ++cell_idx) {
-				BspNode* c = cell_queue[cell_idx];
-
-				if (c == NULL)
-					continue;
-
-				if (c->getScreenDist() < dist) {
-					dist = c->getScreenDist();
-					currentPos = cell_idx;
-					cell = c;
-				}
-		    }
-
-		    // No matter which cell we'll process, the cell in the current finished position should be processed too
-		    BspNode* s = cell_queue[finishedCells];
-			cell_queue[currentPos] = s;
-			cell_queue[finishedCells] = cell;
-			finishedCells++;
-
-		    if (cell == NULL)
-				break; // no more cells to process
-
-		    */
-
-		    cell = cell_queue[finishedCells++];
-		    currentPos = finishedCells;
+		    BspNode* cell = cell_queue[finishedCells++];
 
 		    if (cell == NULL)
 				continue;
@@ -163,28 +142,34 @@ namespace Ogre {
 		    BspNode::PortalIterator pi = cell->outPortalBegin();
 		    BspNode::PortalIterator pend = cell->outPortalEnd();
 
+            CellRectInfo &ci(mRects.cell(cell->getID()));
+
 		    while (pi != pend) { // for all portals
-				Portal* p = *(pi++);
+				const Portal* p = *(pi++);
+
+                PortalRectInfo &pinfo(mRects.portal(p->getID()));
 
 				// Backface cull
-				if (p->mPortalCull)
+				if (pinfo.portalCull)
 					continue;
 
 				PortalRect tgt;
 				bool changed = false;
 
 				BspNode* target_cell = p->mTarget;
+                CellRectInfo &tgtinfo = mRects.cell(target_cell->getID());
 
-				// Cell was not considered yet this frame, so invalidate the view inside
-				if (target_cell->mFrameNum != frameNum)
-					target_cell->invalidateScreenRect(frameNum);
+				// Be sure to have the cell rect reset if it was invalid
+                if (tgtinfo.updateID != mUpdateID)
+                    tgtinfo.invalidate(mUpdateID);
 
-				if (p->intersectByRect(cell->mViewRect, tgt)) { // Portal visible throught the cell's in-view
-					if (p->unionActualWithRect(tgt)) { // A change in the view happened
-						// only report change if the updated view changed
-						changed = target_cell->updateScreenRect(tgt);
-					}
-				}
+                // is there any intersection?
+                if (pinfo.intersect(ci.rect, tgt))
+                {
+                    if (pinfo.unionActualWith(tgt)) {
+                        changed = tgtinfo.updateScreenRect(tgt);
+                    }
+                }
 
 				// If a change happened, update the queue
 				// Possible situation is that two cells are connected with two portals
@@ -194,28 +179,27 @@ namespace Ogre {
 				// or, in case the cell was in queue already, but moved, the queue position is then > current, and nothing is done
 				if (changed) {
 					// Update the queue
-					if (!target_cell->mInitialized) {
-						target_cell->refreshScreenRect(this, toScreen, cutPlane);
+					if (!tgtinfo.initialized) {
+                        target_cell->refreshScreenRect(this, mRects, toScreen, cutPlane);
 
 						// insert to the top
 						cell_queue.push_back(target_cell);
-						target_cell->mListPosition = cell_queue.size() - 1;
+                        tgtinfo.listPosition = cell_queue.size() - 1;
 
 						mVisibleCells.push_back(target_cell);
 					} else {
 					// move to the top if below current position
-						if (finishedCells > target_cell->mListPosition) {
+						if (finishedCells > tgtinfo.listPosition) {
 							// invalidate the current position, move to the new one
 							cell_queue.push_back(target_cell);
-							cell_queue[target_cell->mListPosition] = NULL; // NULL means a moved item (so we need not reorganize)
-							target_cell->mListPosition = cell_queue.size() - 1;
+							cell_queue[tgtinfo.listPosition] = NULL; // NULL means a moved item (so we need not reorganize)
+							tgtinfo.listPosition = cell_queue.size() - 1;
 						}
 					}
 				} // if changed
 		    } // for all portals
 		}
 
-		mLastFrameNum = frameNum;
 		mIsDirty = false;
 		mCellCount = mVisibleCells.size();
 

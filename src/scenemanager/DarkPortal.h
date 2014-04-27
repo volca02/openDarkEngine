@@ -147,6 +147,99 @@ namespace Ogre {
 	};
 
 
+    /// Screen space bounding rectangle info for cell/portal
+    struct CellRectInfo {
+        CellRectInfo() :
+            updateID(0),
+            rect(PortalRect::EMPTY)
+        {}
+
+        void invalidate(int update) {
+            updateID = update;
+            initialized = false;
+            listPosition = 0; // whatever
+            rect = PortalRect::EMPTY;
+        }
+
+        /** Enlarge the view rect to the cell to accompany the given view rect */
+        inline bool updateScreenRect(const PortalRect& tgt) {
+            // merge the view rect to accompany the new rect
+            if (rect.merge(tgt)) {
+                // if a view changed, reconsider the minimal distance
+                rect.distance = std::min(rect.distance, tgt.distance);
+                return true;
+            }
+
+            return false;
+        };
+
+        unsigned int updateID;
+        bool initialized;
+        unsigned int listPosition;
+        PortalRect rect;
+    };
+
+    /// Screen space bounding rectangle info for cell/portal
+    struct PortalRectInfo {
+        PortalRectInfo() :
+            portalCull(false),
+            screenRect(PortalRect::EMPTY),
+            actualRect(PortalRect::EMPTY)
+        {}
+
+        void invalidate() {
+            portalCull = false;
+            screenRect = PortalRect::EMPTY;
+            actualRect = PortalRect::EMPTY;
+        }
+
+        /**
+         * Intersects the Portals bounding rectangle by the given rectangle, and writes the result to the target parameter
+         */
+        bool intersect(const PortalRect &boundry, PortalRect &target)  {
+            return screenRect.intersect(boundry, target);
+        }
+
+        /**
+         * Union the actual view rectangle with addition rectangle. Returns true on a view change.
+         */
+        bool unionActualWith(PortalRect &addition) {
+            return actualRect.merge(addition);
+        }
+
+        bool portalCull;
+        PortalRect screenRect;
+        PortalRect actualRect;
+    };
+
+    /// forward decl.
+    class DarkSceneManager;
+
+    /// caches screen rects for cells and portals.
+    struct ScreenRectCache {
+    public:
+        void startUpdate(DarkSceneManager* sm, unsigned int update);
+
+        void invalidateCell(unsigned int cell, unsigned int updateID) {
+            cellRects[cell].invalidate(updateID);
+        }
+
+        CellRectInfo &cell(unsigned int id) {
+            return cellRects[id];
+        }
+
+        PortalRectInfo &portal(unsigned int id) {
+            return portalRects[id];
+        }
+
+        unsigned int updateID;
+        typedef std::vector<CellRectInfo> CellRects;
+        typedef std::vector<PortalRectInfo> PortalRects;
+        CellRects cellRects;
+        PortalRects portalRects;
+    };
+
+
 	std::ostream& operator<< (std::ostream& o, PortalRect& r);
 
 	/** A vector of Vertices used for Portal shape definition */
@@ -173,9 +266,6 @@ namespace Ogre {
 			/** Unique portal id */
 			unsigned int mID;
 
-			/** Screen - space bounding rectangle of the portal */
-			PortalRect	mScreenRect;
-
 			/** On-demand (lazy) generated movable object for debug rendering */
 			ManualObject* mMovableObject;
 
@@ -193,9 +283,6 @@ namespace Ogre {
 
 			/** Portal back-face cull - true if should be culled */
 			bool mPortalCull;
-
-			/** Actual view rectangle */
-			PortalRect	mActualRect;
 
 			/** Number of mentions (e.g. nonzero if this portal was reevaluated) */
 			int	mMentions;
@@ -249,7 +336,8 @@ namespace Ogre {
 			* @param cutp Plane to be used to cut the portal (cameras near plane, or better camera's view plane)
 			* @return true if the result is non-empty
 			*/
-			bool refreshScreenRect(const Camera *cam, const Matrix4& toScreen, const Plane &cutp);
+			bool refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
+                                   const Matrix4& toScreen, const Plane &cutp);
 
 			/**
 			* Refreshes screen projection bounding Rectangle
@@ -257,70 +345,8 @@ namespace Ogre {
 			* @param toScreen A precomputed Projection*View matrix matrix4 which is used to project the vertices to screen
 			* @param frust PortalFrustum used to cut away non visible parts of the portal
 			*/
-			void refreshScreenRect(const Camera *cam, const Matrix4& toScreen, const PortalFrustum &frust) {
-				// inverse coords to let the min/max initialize
-				mScreenRect = PortalRect::EMPTY;
-
-				// Erase the actual rect
-				mActualRect = mScreenRect;
-
-				// Backface cull. The portal won't be culled if a vector camera-vertex dotproduct normal will be greater than 0
-				Vector3 camToV0 = mPoints[0] - cam->getDerivedPosition();
-
-				float dotp = camToV0.dotProduct(mPlane.normal);
-
-				mPortalCull = (dotp > 0);
-
-				// skip these expensive operations if we encounter a backface cull
-				if (mPortalCull)
-					return;
-
-				// We also can cull away the portal if it is behind the camera's near plane. Can we? This needs distance calculation with the surrounding sphere
-
-				// We have to cut the Portal using camera's frustum first, as this should solve the to screen projection problems...
-				// the reason is that the coords that are at the back side or near the view point do not get projected right (that is right for our purpose)
-				// it should be sufficient to clip by camera's plane (not near plane, too far away, just the plane that comes throught the camera's origin and has normal == view vector of camera)
-
-				bool didc;
-
-				Portal *onScreen = frust.clipPortal(this, didc);
-
-				// If we have a non-zero cut result
-				if (onScreen) {
-					const PortalPoints& scr_points = onScreen->getPoints();
-
-					PortalPoints::const_iterator it = scr_points.begin();
-					PortalPoints::const_iterator pend = scr_points.end();
-					// project all the vertices to screen space
-					for (; it != pend; it++) {
-						// This is one time-consuming line... I wonder how big eater this line is.
-						Vector3 hcsPosition = toScreen * (*it);
-
-						mScreenRect.enlargeToContain(hcsPosition);
-					}
-
-					// release only if clip produced a new poly
-					if (onScreen != this)
-						delete onScreen;
-				}
-			}
-
-
-
-			/**
-			* Intersects the Portals bounding rectangle by the given rectangle, and writes the result to the target parameter
-			*/
-			bool intersectByRect(PortalRect &boundry, PortalRect &target)  {
-				return mScreenRect.intersect(boundry, target);
-			}
-
-			/**
-			* Union the actual view rectangle with addition rectangle. Returns true on a view change.
-			*/
-			bool unionActualWithRect(PortalRect &addition) {
-				return mActualRect.merge(addition);
-			}
-
+			void refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
+                                   const Matrix4& toScreen, const PortalFrustum &frust);
 			/**
 			* Debugging portal id setter
 			*/

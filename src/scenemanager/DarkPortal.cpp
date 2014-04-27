@@ -34,6 +34,7 @@
 // Helping 'infinity' value for PortalRect coords
 #define INF 100000
 #define F_INF 1E37
+#define MAX_PORTAL_POINTS 128
 
 namespace Ogre {
 	#define POSITION_BINDING 0
@@ -54,6 +55,17 @@ namespace Ogre {
 		return o;
 	}
 
+
+    void ScreenRectCache::startUpdate(DarkSceneManager* sm, unsigned int update) {
+        // see if we have enough room in both screen space rect caches.
+        if (cellRects.size() < sm->getCellCount())
+            cellRects.resize(sm->getCellCount());
+        if (portalRects.size() < sm->getPortalCount())
+            portalRects.resize(sm->getPortalCount());
+        updateID = update;
+    }
+
+
 	// ---------------------------------------------------------------------------------
 	// ----------------- Portal Class implementation -----------------------------------
 	// ---------------------------------------------------------------------------------
@@ -62,11 +74,8 @@ namespace Ogre {
 	// ---------------------------------------------------------------------------------
 	Portal::Portal(unsigned int id, BspNode* source, BspNode* target, Plane plane) :
         mID(id),
-        ConvexPolygon(plane),
-        mScreenRect(PortalRect::EMPTY),
-        mActualRect(PortalRect::EMPTY)
+        ConvexPolygon(plane)
 	{
-		mFrameNum = 0xFFFFF;
 		mMentions = 0;
 
 		mSource = source;
@@ -235,23 +244,22 @@ namespace Ogre {
 	}
 
 	// ---------------------------------------------------------------------------------
-	bool Portal::refreshScreenRect(const Camera *cam, const Matrix4& toScreen, const Plane &cutp) {
+	bool Portal::refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
+                                   const Matrix4& toScreen, const Plane &cutp)
+    {
 		// modified version of the ConvexPolygon::clipByPlane which does two things at once:
 		// cuts by the specified plane, and projects the result to screen (then, updates the rect to contain this point)
+        PortalRectInfo &pi = rects.portal(getID());
+        pi.invalidate();
 
-		mScreenRect = PortalRect::EMPTY;
-		mActualRect = PortalRect::EMPTY;
+		// Backface cull. The portal won't be culled if a vector camera-vertex dotproduct normal will be greater than
+        Vector3 camToV0 = mPoints[0] - cam->getDerivedPosition();
+        float dotp = camToV0.dotProduct(mPlane.normal);
+        pi.portalCull = (dotp > 0);
 
-		// Backface cull. The portal won't be culled if a vector camera-vertex dotproduct normal will be greater than 0
-		Vector3 camToV0 = mPoints[0] - cam->getDerivedPosition();
-
-		float dotp = camToV0.dotProduct(mPlane.normal);
-
-		mPortalCull = (dotp > 0);
-
-		// skip these expensive operations if we encounter a backface cull
-		if (mPortalCull)
-			return false;
+        // skip these expensive operations if we encounter a backface cull
+        if (pi.portalCull)
+            return false;
 
 		// portal points plane cutting and to-screen proj.
 		int positive = 0;
@@ -262,8 +270,10 @@ namespace Ogre {
 		if (pointcount == 0)
 		    return 0;
 
+        assert(pointcount > MAX_PORTAL_POINTS);
+
 		//first we mark the vertices
-		Plane::Side *sides = new Plane::Side[pointcount];
+		Plane::Side sides[MAX_PORTAL_POINTS];
 
 		unsigned int idx;
 
@@ -284,7 +294,6 @@ namespace Ogre {
 		// Now that we have the poly's side classified, we can process it...
 		if (positive == 0) {
 			// we clipped away the whole portal. No need to cut
-			delete[] sides;
 			return false;
 		}
 
@@ -296,7 +305,7 @@ namespace Ogre {
 
 			if (side == Plane::POSITIVE_SIDE) {
 				if (sides[prev] == Plane::POSITIVE_SIDE) {
-					mScreenRect.enlargeToContain(toScreen * mPoints.at(idx));
+					pi.screenRect.enlargeToContain(toScreen * mPoints.at(idx));
 				} else {
 					// calculate a new boundry positioned vertex
 					const Vector3& v1 = mPoints.at(prev);
@@ -306,8 +315,8 @@ namespace Ogre {
 					// the dot product is there for a reason! (As I have a tendency to overlook the difference)
 					float t = cutp.getDistance(v2) / (cutp.normal.dotProduct(dv));
 
-					mScreenRect.enlargeToContain(toScreen * (v2 - (dv * t))); // a new, boundry placed vertex is inserted
-					mScreenRect.enlargeToContain(toScreen * v2);
+					pi.screenRect.enlargeToContain(toScreen * (v2 - (dv * t))); // a new, boundry placed vertex is inserted
+					pi.screenRect.enlargeToContain(toScreen * v2);
 				}
 			} else {
 				if (sides[prev] == Plane::POSITIVE_SIDE) { // if we're going outside
@@ -318,14 +327,59 @@ namespace Ogre {
 
 					float t = cutp.getDistance(v2) / (cutp.normal.dotProduct(dv));
 
-					mScreenRect.enlargeToContain(toScreen * (v2 - (dv * t))); // a new, boundry placed vertex is inserted
+					pi.screenRect.enlargeToContain(toScreen * (v2 - (dv * t))); // a new, boundry placed vertex is inserted
 				}
 			}
 
 			prev = idx;
 		}
 
-		delete[] sides;
 		return true;
 	}
+
+    void Portal::refreshScreenRect(const Camera *cam,  ScreenRectCache &rects,
+                           const Matrix4& toScreen, const PortalFrustum &frust)
+    {
+        PortalRectInfo &pi = rects.portal(getID());
+        pi.invalidate();
+
+        // Backface cull. The portal won't be culled if a vector camera-vertex dotproduct normal will be greater than 0
+        Vector3 camToV0 = mPoints[0] - cam->getDerivedPosition();
+        float dotp = camToV0.dotProduct(mPlane.normal);
+        pi.portalCull = (dotp > 0);
+
+        // skip these expensive operations if we encounter a backface cull
+        if (pi.portalCull)
+            return;
+
+        // We also can cull away the portal if it is behind the camera's near plane. Can we? This needs distance calculation with the surrounding sphere
+
+        // We have to cut the Portal using camera's frustum first, as this should solve the to screen projection problems...
+        // the reason is that the coords that are at the back side or near the view point do not get projected right (that is right for our purpose)
+        // it should be sufficient to clip by camera's plane (not near plane, too far away, just the plane that comes throught the camera's origin and has normal == view vector of camera)
+
+        bool didc;
+
+        Portal *onScreen = frust.clipPortal(this, didc);
+
+        // If we have a non-zero cut result
+        if (onScreen) {
+            const PortalPoints& scr_points = onScreen->getPoints();
+
+            PortalPoints::const_iterator it = scr_points.begin();
+            PortalPoints::const_iterator pend = scr_points.end();
+            // project all the vertices to screen space
+            for (; it != pend; it++) {
+                // This is one time-consuming line... I wonder how big eater this line is.
+                Vector3 hcsPosition = toScreen * (*it);
+
+                pi.screenRect.enlargeToContain(hcsPosition);
+            }
+
+            // release only if clip produced a new poly
+            if (onScreen != this)
+                delete onScreen;
+        }
+    }
+
 } // namespace Ogre

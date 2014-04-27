@@ -42,6 +42,7 @@ namespace Ogre {
         : SceneManager(instanceName),
           mFrameNum(1),
           mPortalCount(0),
+          mCellCount(0),
           mActiveGeometry(NULL)
     {
 		mBspTree = new BspTree(this);
@@ -96,6 +97,7 @@ namespace Ogre {
 		SceneManager::clearScene();
 
 		mPortalCount = 0;
+        mCellCount = 0;
 	}
 
 
@@ -172,6 +174,9 @@ namespace Ogre {
 
 	// ----------------------------------------------------------------------
 	BspNode* DarkSceneManager::createBspNode(int id, int leafID) {
+        if (id >= mCellCount)
+            mCellCount = id + 1;
+
 		BspNode* node = mBspTree->createNode(id, leafID);
 
 		return node;

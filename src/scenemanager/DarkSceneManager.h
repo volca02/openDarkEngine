@@ -163,6 +163,7 @@ namespace Ogre {
 			virtual bool getOption(const String &strKey, void *pDestValue);
 
 			unsigned int getPortalCount() const { return mPortalCount; };
+			unsigned int getCellCount() const { return mCellCount; };
 
 		protected:
 			/// BSP Tree getter
@@ -208,6 +209,9 @@ namespace Ogre {
 
             /// Current portal count
             unsigned int mPortalCount;
+
+            /// maximal encountered bsp node id + 1
+            unsigned int mCellCount;
 
 			/** movables found to be visible */
 			typedef std::set<const MovableObject*> MovablesForRendering;

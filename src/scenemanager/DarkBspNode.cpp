@@ -46,10 +46,8 @@ namespace Ogre {
     //-----------------------------------------------------------------------
     BspNode::BspNode(SceneManager* owner, int id, int leafID, bool isLeaf) :
 			mID(id),
-			mLeafID(leafID),
-			mFrameNum(0x0FFFF),
-			mViewRect(PortalRect::EMPTY) {
-
+			mLeafID(leafID)
+    {
         mOwner = owner;
         mIsLeaf = isLeaf;
 		mSceneNode = NULL;
@@ -58,25 +56,22 @@ namespace Ogre {
 		mCellFragment.fragmentType = SceneQuery::WFT_CUSTOM_GEOMETRY;
 		mCellFragment.geometry = this;
 
-		mInitialized = false;
-
 		mFront = NULL;
 		mBack = NULL;
     }
 
     //-----------------------------------------------------------------------
-    BspNode::BspNode() : mViewRect(PortalRect::EMPTY) {
-		mOwner = NULL;
-		mIsLeaf = false;
-		mSceneNode = NULL;
-
-		// update the fragment as wellBspNode
-		mCellFragment.fragmentType = SceneQuery::WFT_CUSTOM_GEOMETRY;
-		mCellFragment.geometry = this;
-
-		mFront = NULL;
-		mBack = NULL;
-    }
+    BspNode::BspNode() :
+        mOwner(NULL),
+		mIsLeaf(false),
+		mSceneNode(NULL),
+		mFront(NULL),
+		mBack(NULL)
+        {
+            // update the fragment as wellBspNode
+            mCellFragment.fragmentType = SceneQuery::WFT_CUSTOM_GEOMETRY;
+            mCellFragment.geometry = this;
+        }
 
     //-----------------------------------------------------------------------
     BspNode::~BspNode()
@@ -288,7 +283,7 @@ namespace Ogre {
 	void BspNode::blockVision(bool block) {
 		unsigned int mask;
 		unsigned int addition;
-		
+
 		if (!block) {
 			mask = (unsigned int) ~0;
 			addition = CELL_VIS_BLOCK;
@@ -296,7 +291,7 @@ namespace Ogre {
 			mask = (unsigned int) ~CELL_VIS_BLOCK;
 			addition = 0;
 		}
-		
+
 		testAndSetDistributed(CELL_IS_DOORWAY, mask, addition);
 	}
 
@@ -309,24 +304,24 @@ namespace Ogre {
 	void BspNode::_setCellFlags(unsigned int flags) {
 		mCellFlags = flags;
 	}
-	
-	//-------------------------------------------------------------------------	
+
+	//-------------------------------------------------------------------------
 	void BspNode::testAndSetDistributed(unsigned int prereq, unsigned int mask, unsigned int addition) {
 		if (!(mCellFlags & prereq))
 			return;
-			
+
 		unsigned int prev = mCellFlags;
-		
+
 		mCellFlags &= mask;
 		mCellFlags |= addition;
-		
+
 		if (mCellFlags != prev) { // flags changed
 			PortalListConstIterator outPortal_it = mDstPortals.begin();
 			PortalListConstIterator end = mDstPortals.end();
-	
+
 			for (; outPortal_it != end; outPortal_it++) {
 				Portal *out_portal = (*outPortal_it);
-	
+
 				out_portal->getTarget()->testAndSetDistributed(prereq, mask, addition);
 			}
 		}
@@ -334,9 +329,12 @@ namespace Ogre {
 
 
 	//-------------------------------------------------------------------------
-	void BspNode::refreshScreenRect(const Camera* cam, const Matrix4& toScreen, const PortalFrustum& frust) {
-		mInitialized = true;
-
+	void BspNode::refreshScreenRect(const Camera* cam,
+                                    ScreenRectCache &rects,
+                                    const Matrix4& toScreen,
+                                    const PortalFrustum& frust) const
+    {
+        rects.cell(getID()).initialized = true;
 		// Iterate all portals and refresh the view rect of those
 		PortalListConstIterator outPortal_it = mDstPortals.begin();
 		PortalListConstIterator end = mDstPortals.end();
@@ -344,14 +342,20 @@ namespace Ogre {
 		for (; outPortal_it != end; outPortal_it++) {
 			Portal *out_portal = (*outPortal_it);
 
-			out_portal->refreshScreenRect(cam, toScreen, frust);
+			out_portal->refreshScreenRect(cam,
+                                          rects,
+                                          toScreen,
+                                          frust);
 		}
 	}
 
 	//-------------------------------------------------------------------------
-	void BspNode::refreshScreenRect(const Camera* cam, const Matrix4& toScreen, const Plane& cutp) {
-		mInitialized = true;
-
+	void BspNode::refreshScreenRect(const Camera* cam,
+                                    ScreenRectCache &rects,
+                                    const Matrix4& toScreen,
+                                    const Plane& cutp) const
+    {
+        rects.cell(getID()).initialized = true;
 	    // Iterate all portals and refresh the view rect of those
 	    PortalListConstIterator outPortal_it = mDstPortals.begin();
 		PortalListConstIterator end = mDstPortals.end();
@@ -359,7 +363,7 @@ namespace Ogre {
 		for (; outPortal_it != end; outPortal_it++) {
 			Portal *out_portal = (*outPortal_it);
 
-			out_portal->refreshScreenRect(cam, toScreen, cutp);
+			out_portal->refreshScreenRect(cam, rects, toScreen, cutp);
 		}
 	}
 

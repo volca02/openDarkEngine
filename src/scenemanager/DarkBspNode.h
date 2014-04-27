@@ -187,16 +187,20 @@ namespace Ogre {
 		/** sets the plane list for scene queries */
 		void setPlaneList(CellPlaneList& planes, PlanePortalMap& portalmap);
 
-		void refreshScreenRect(const Camera* cam, const Matrix4& toScreen, const PortalFrustum& frust);
-		void refreshScreenRect(const Camera* cam, const Matrix4& toScreen, const Plane& cutp);
+		void refreshScreenRect(const Camera* cam,
+                               ScreenRectCache &rects,
+                               const Matrix4& toScreen,
+                               const PortalFrustum& frust) const;
+
+		void refreshScreenRect(const Camera* cam,
+                               ScreenRectCache &rects,
+                               const Matrix4& toScreen,
+                               const Plane& cutp) const;
 
 		typedef PortalList::iterator PortalIterator;
 
 		PortalIterator outPortalBegin() { return mDstPortals.begin(); };
 		PortalIterator outPortalEnd() { return mDstPortals.end(); };
-
-		// Invalidates the screen projection info (so refreshScreenRect will pass)
-		void invalidateScreenRect(int frameNum) { mInitialized = false; mFrameNum = frameNum; mViewRect = PortalRect::EMPTY; };
 
 		inline int getLeafID(void) const { return mLeafID; };
 
@@ -285,20 +289,8 @@ namespace Ogre {
 		/** A vector of portals leading out of this cell */
 		PortalList mDstPortals;
 
-		/** the last frame number this (leaf) node was rendered. */
-		unsigned int mFrameNum;
-
-		/** Indicates the state of the cell. if the mFrameNum is not actual, the value of this boolean is not valid */
-		bool mInitialized;
-
-		/** Indicates the actual order position of this cell in the ActiveCells list. Invalid if the mFrameNum is not actual */
-		size_t mListPosition;
-
 		/** Cell ID. For Debugging purposes. */
 		unsigned int mCellNum;
-
-		/** Current view rectangle to this cell */
-		PortalRect mViewRect;
 
 		/** cell's plane list for Leaf nodes */
 		CellPlaneList mPlaneList;
@@ -313,22 +305,9 @@ namespace Ogre {
 		/** Cell Flags - fogging, vis blocking, doorways, wireframe settings */
 		unsigned int mCellFlags;
 
-		/** Enlarge the view rect to the cell to accompany the given view rect */
-		inline bool updateScreenRect(const PortalRect& tgt) {
-			// merge the view rect to accompany the new rect
-			if (mViewRect.merge(tgt)) {
-				// if a view changed, reconsider the minimal distance
-				mViewRect.distance = std::min(mViewRect.distance, tgt.distance);
-				return true;
-			}
-
-			return false;
-		};
-
 		public:
 			const IntersectingObjectSet& getObjects(void) const { return mMovables; }
 			const CellPlaneList& getPlaneList() const { return mPlaneList; }
-			float getScreenDist(void) const { return mViewRect.distance; };
     };
 
 }
