@@ -73,42 +73,42 @@ namespace Opde {
 
 	enum DarkJoyStickEvents
 	{
-		joy_axisr = DARK_JOY_EVENT,
-		joy_axisx,
-		joy_axisy,
-		joy_hat_up,
-		joy_hat_down,
-		joy_hat_right,
-		joy_hat_left,
-		joy_1,
-		joy_2,
-		joy_3,
-		joy_4,
-		joy_5,
-		joy_6,
-		joy_7,
-		joy_8,
-		joy_9,
-		joy_10
+		JOY_AXISR = DARK_JOY_EVENT,
+		JOY_AXISX,
+		JOY_AXISY,
+		JOY_HAT_UP,
+		JOY_HAT_DOWN,
+		JOY_HAT_RIGHT,
+		JOY_HAT_LEFT,
+		JOY_1,
+		JOY_2,
+		JOY_3,
+		JOY_4,
+		JOY_5,
+		JOY_6,
+		JOY_7,
+		JOY_8,
+		JOY_9,
+		JOY_10
 	};
 
 	enum DarkMouseEvents
 	{
-		Mouse1 = DARK_MOUSE_EVENT + OIS::MB_Left,
-		Mouse2 = DARK_MOUSE_EVENT + OIS::MB_Right,
-		Mouse3 = DARK_MOUSE_EVENT + OIS::MB_Middle,
-		Mouse4 = DARK_MOUSE_EVENT + OIS::MB_Button3,
-		Mouse5 = DARK_MOUSE_EVENT + OIS::MB_Button4,
-		Mouse6 = DARK_MOUSE_EVENT + OIS::MB_Button5,
-		Mouse7 = DARK_MOUSE_EVENT + OIS::MB_Button6,
-		Mouse8 = DARK_MOUSE_EVENT + OIS::MB_Button7,
-		Mouse_axisx,
-		Mouse_axisy,
-		Mouse_wheel
+		MOUSE1 = DARK_MOUSE_EVENT + OIS::MB_Left,
+		MOUSE2 = DARK_MOUSE_EVENT + OIS::MB_Right,
+		MOUSE3 = DARK_MOUSE_EVENT + OIS::MB_Middle,
+		MOUSE4 = DARK_MOUSE_EVENT + OIS::MB_Button3,
+		MOUSE5 = DARK_MOUSE_EVENT + OIS::MB_Button4,
+		MOUSE6 = DARK_MOUSE_EVENT + OIS::MB_Button5,
+		MOUSE7 = DARK_MOUSE_EVENT + OIS::MB_Button6,
+		MOUSE8 = DARK_MOUSE_EVENT + OIS::MB_Button7,
+		MOUSE_AXISX,
+		MOUSE_AXISY,
+		MOUSE_WHEEL
 	};
 
 	/// Input event
-	typedef struct 
+	typedef struct
 	{
 		InputEventType event;
 		 // unmapped command, or empty
@@ -118,7 +118,7 @@ namespace Opde {
 	} InputEventMsg;
 
 	/// The state of input modifiers
-	typedef enum 
+	typedef enum
 	{
 		/// Shift key modifier
 		IST_SHIFT = 1,
@@ -129,7 +129,7 @@ namespace Opde {
 	} InputModifierState;
 
 	/// The input mode - direct or translated to the commands
-	typedef enum 
+	typedef enum
 	{
 		/// Direct mode
 		IM_DIRECT = 1,
@@ -143,7 +143,7 @@ namespace Opde {
 	typedef OIS::MouseButtonID MouseButtonID;*/
 
 	/// Listener for the direct - unfiltered events. Typically one per application (GUIService for example)
-	class DirectInputListener 
+	class DirectInputListener
 	{
 		public:
 			virtual ~DirectInputListener() {};
@@ -170,7 +170,7 @@ namespace Opde {
 	 * @todo +/without + binding modes - how they differ, how to implement the one with key repeat...
 	 * @todo BND file writing ability (needs cooperation with nonexistent platform service)
 	 */
-	class OPDELIB_EXPORT InputService : public ServiceImpl<InputService>, public OIS::KeyListener, public OIS::MouseListener, public OIS::JoyStickListener, public LoopClient 
+	class OPDELIB_EXPORT InputService : public ServiceImpl<InputService>, public OIS::KeyListener, public OIS::MouseListener, public OIS::JoyStickListener, public LoopClient
 	{
 		public:
 			InputService(ServiceManager *manager, const std::string& name);
@@ -219,8 +219,8 @@ namespace Opde {
 
 			/// Unregisters a command listener by it's name
 			void unregisterCommandTrap(const std::string& command);
-			
-			/** registers a command alias 
+
+			/** registers a command alias
 			* @param alias The alias to use
 			* @param command the command that gets executed when the alias is encountered
 			*/
@@ -241,7 +241,7 @@ namespace Opde {
 			void shutdown();
 
 			void loopStep(float deltaTime);
-			
+
 			/// Processes key repeats, calls processKeyEvent on appropriate delays
 			void processKeyRepeat(float deltaTime);
 
@@ -249,7 +249,7 @@ namespace Opde {
 			void initKeyMap();
 
 			/// Unmaps the string into ois keycode
-			unsigned int mapToOISCode(std::string Key) const;
+			unsigned int mapToOISCode(const std::string &key) const;
 
 			/// registers (int)OIS::KeyCode to textual representation and inverse mappings
 			void registerValidKey(int kc, const std::string& txt);
@@ -268,10 +268,10 @@ namespace Opde {
 
 			/// Logs all available commands
 			void logCommands();
-			
+
 			/// Logs all available variables and their values
 			void logVariables();
-			
+
 			/// Processes the received key event with current mapper, and if it finds a match, sends an event
 			void processKeyEvent(unsigned int keyCode, InputEventType t);
 
@@ -296,10 +296,10 @@ namespace Opde {
 
 			/// Strips a comment (any text after ';' including that character)
 			std::string stripComment(const std::string& cmd);
-			
+
 			/// Defines a new input binding in specified mapper
 			void addBinding(const std::string& keys, const std::string& command, InputEventMapper* mapper);
-			
+
 			/** Gives a command found for the given alias, if any
 			* @param alias The aliased command
 			* @param command the string that gets filled with the dealiased version of the command
@@ -307,7 +307,7 @@ namespace Opde {
 			*/
 			bool dealiasCommand(const std::string& alias, std::string& command);
 
-			
+
 			/// Named context to an event mapper map
 			typedef std::map< std::string, InputEventMapper* > ContextToMapper;
 
@@ -334,7 +334,7 @@ namespace Opde {
 
 			/// Key map
 			KeyMap mKeyMap;
-			
+
 			/// Reverse key map
 			ReverseKeyMap mReverseKeyMap;
 
@@ -350,9 +350,9 @@ namespace Opde {
 
 			/// Current direct listener
 			DirectInputListener* mDirectListener;
-			
+
 			/// Key Repeat: Initial delay (between first and second key repeats)
-			float mInitialDelay; 
+			float mInitialDelay;
 			/// Key Repeat: Repeat delay (between second and latter key repeats)
 			float mRepeatDelay;
 			/// Key Repeat: Current key time
@@ -383,10 +383,10 @@ namespace Opde {
 
 			/// Loop service pointer
 			LoopServicePtr mLoopService;
-			
+
 			/// Non-exclusive input
 			bool mNonExclusive;
-			
+
 			/// Aliases to commands
 			AliasMap mCommandAliases;
 	};
@@ -395,7 +395,7 @@ namespace Opde {
 	typedef shared_ptr<InputService> InputServicePtr;
 
 	/// Factory for the InputService objects
-	class OPDELIB_EXPORT InputServiceFactory : public ServiceFactory 
+	class OPDELIB_EXPORT InputServiceFactory : public ServiceFactory
 	{
 		public:
 			InputServiceFactory();
@@ -407,7 +407,7 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask();
-			
+
 			virtual const size_t getSID();
 		private:
 			static std::string mName;

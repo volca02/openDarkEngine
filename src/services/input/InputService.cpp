@@ -38,14 +38,14 @@ namespace Opde {
     /*-------------------- InputService -------------------*/
     /*-----------------------------------------------------*/
     template<> const size_t ServiceImpl<InputService>::SID = __SERVICE_ID_INPUT;
-    
+
     InputService::InputService(ServiceManager *manager, const std::string& name) :
 			ServiceImpl< Opde::InputService >(manager, name),
 			mInputMode(IM_MAPPED),
 			mDirectListener(NULL),
 			mMouse(NULL),
 			mKeyboard(NULL),
-			mJoystick(NULL) 
+			mJoystick(NULL)
 	{
 
 		// Loop client definition
@@ -61,40 +61,40 @@ namespace Opde {
 		mKeyPressTime = 0.0f;
 		mInitialDelay = 0.4f; // TODO: Read these from the config service
 		mRepeatDelay = 0.3f;
-		
+
 		mNonExclusive = false;
 	}
 
 	//------------------------------------------------------
-	InputService::~InputService() 
+	InputService::~InputService()
 	{
 		ContextToMapper::iterator it = mMappers.begin();
 		for (;it != mMappers.end(); ++it) {
 			delete it->second;
 			it->second = NULL;
 		}
-		
+
 		mMappers.clear();
 		delete mDefaultMapper;
 		mDefaultMapper = NULL;
 		mCurrentMapper = NULL;
-		
 
-		if (mInputSystem) 
+
+		if (mInputSystem)
 		{
-			if( mMouse ) 
+			if( mMouse )
 			{
 				mInputSystem->destroyInputObject( mMouse );
 				mMouse = NULL;
 			}
 
-			if( mKeyboard ) 
+			if( mKeyboard )
 			{
 				mInputSystem->destroyInputObject( mKeyboard );
 				mKeyboard = NULL;
 			}
 
-			if( mJoystick ) 
+			if( mJoystick )
 			{
 				mInputSystem->destroyInputObject( mJoystick );
 				mJoystick = NULL;
@@ -112,7 +112,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void InputService::registerValidKey(int kc, const std::string& txt) 
+	void InputService::registerValidKey(int kc, const std::string& txt)
 	{
 		mKeyMap.insert(make_pair(kc, txt));
 		mReverseKeyMap.insert(make_pair(txt, kc));
@@ -249,48 +249,48 @@ namespace Opde {
 		registerValidKey(KC_GRAVE, "`");
 		registerValidKey(KC_GRAVE | SHIFT_MOD, "~");
 		registerValidKey(KC_SYSRQ, "print_screen");
-		registerValidKey(joy_axisr, "joy_axisr");
-		registerValidKey(joy_axisx, "joy_axisx");
-		registerValidKey(joy_axisy, "joy_axisy");
-		registerValidKey(joy_hat_up, "joy_hatup");
-		registerValidKey(joy_hat_down, "joy_hatdn");
-		registerValidKey(joy_hat_right, "joy_hatrt");
-		registerValidKey(joy_hat_left, "joy_hatlt");
-		registerValidKey(joy_1, "joy1");
-		registerValidKey(joy_2, "joy2");
-		registerValidKey(joy_3, "joy3");
-		registerValidKey(joy_4, "joy4");
-		registerValidKey(joy_5, "joy5");
-		registerValidKey(joy_6, "joy6");
-		registerValidKey(joy_7, "joy7");
-		registerValidKey(joy_8, "joy8");
-		registerValidKey(joy_9, "joy9");
-		registerValidKey(joy_10, "joy10");
-		registerValidKey(Mouse1, "mouse1");
-		registerValidKey(Mouse2, "mouse2");
-		registerValidKey(Mouse3, "mouse3");
-		registerValidKey(Mouse4, "mouse4");
-		registerValidKey(Mouse5, "mouse5");
-		registerValidKey(Mouse6, "mouse6");
-		registerValidKey(Mouse7, "mouse7");
-		registerValidKey(Mouse8, "mouse8");
-		registerValidKey(Mouse_axisx, "mouse_axisx");
-		registerValidKey(Mouse_axisy, "mouse_axisy");
-		registerValidKey(Mouse_wheel, "mouse_wheel");
+		registerValidKey(JOY_AXISR, "joy_axisr");
+		registerValidKey(JOY_AXISX, "joy_axisx");
+		registerValidKey(JOY_AXISY, "joy_axisy");
+		registerValidKey(JOY_HAT_UP, "joy_hatup");
+		registerValidKey(JOY_HAT_DOWN, "joy_hatdn");
+		registerValidKey(JOY_HAT_RIGHT, "joy_hatrt");
+		registerValidKey(JOY_HAT_LEFT, "joy_hatlt");
+		registerValidKey(JOY_1, "joy1");
+		registerValidKey(JOY_2, "joy2");
+		registerValidKey(JOY_3, "joy3");
+		registerValidKey(JOY_4, "joy4");
+		registerValidKey(JOY_5, "joy5");
+		registerValidKey(JOY_6, "joy6");
+		registerValidKey(JOY_7, "joy7");
+		registerValidKey(JOY_8, "joy8");
+		registerValidKey(JOY_9, "joy9");
+		registerValidKey(JOY_10, "joy10");
+		registerValidKey(MOUSE1, "mouse1");
+		registerValidKey(MOUSE2, "mouse2");
+		registerValidKey(MOUSE3, "mouse3");
+		registerValidKey(MOUSE4, "mouse4");
+		registerValidKey(MOUSE5, "mouse5");
+		registerValidKey(MOUSE6, "mouse6");
+		registerValidKey(MOUSE7, "mouse7");
+		registerValidKey(MOUSE8, "mouse8");
+		registerValidKey(MOUSE_AXISX, "mouse_axisx");
+		registerValidKey(MOUSE_AXISY, "mouse_axisy");
+		registerValidKey(MOUSE_WHEEL, "mouse_wheel");
 	}
 
 	//------------------------------------------------------
-	unsigned int InputService::mapToOISCode(std::string key) const
+	unsigned int InputService::mapToOISCode(const std::string &key) const
 	{
-		unsigned int Code;
+		unsigned int code;
 		ReverseKeyMap::const_iterator it = mReverseKeyMap.find(key);
 
 		if (it != mReverseKeyMap.end())
-			Code = it->second;
+			code = it->second;
 		else
-			Code = KC_UNASSIGNED;	//If we get here, then there is a key name that DarkEngine creates that we didn't cover
+			code = KC_UNASSIGNED; // If we get here, then there is a key name that DarkEngine creates that we didn't cover
 
-		return Code;
+		return code;
 	}
 
 	//------------------------------------------------------
@@ -298,20 +298,20 @@ namespace Opde {
 	{
 		if (!mapper)
 			mapper = mCurrentMapper;
-		
+
 		if (!mapper)
 			mapper = mDefaultMapper;
-		
+
 		assert(mapper);
-		
+
 		std::string key = "";
 		unsigned int modifier = 0;
-		
+
 		StringTokenizer bindtok(keys, '+');
-		
+
 		while (!bindtok.end()) {
 			std::string token = bindtok.next();
-			
+
 			if (token == "shift")
 				modifier |= SHIFT_MOD;
 			else if (token == "ctrl")
@@ -327,9 +327,9 @@ namespace Opde {
 				}
 			}
 		}
-		
+
 		const unsigned int code = mapToOISCode(key);
-		
+
 		mapper->bind(code | modifier, command);
 
 		LOG_DEBUG("InputService: (Context %s) bound command '%s' to keyCode %d -'%s'", mapper->getName().c_str(), command.c_str(), code, key.c_str());
@@ -340,9 +340,9 @@ namespace Opde {
 	{
 		std::string cstr;
 		cstr = stripComment(commandStr);
-		
+
 		std::transform(cstr.begin(), cstr.end(), cstr.begin(), ::tolower);	//Lowercase
-		
+
 		WhitespaceStringTokenizer tok(cstr, false);
 
 		std::string command;
@@ -350,10 +350,10 @@ namespace Opde {
 			LOG_ERROR("InputService::processCommand: Empty command string encountered!");
 			return false;
 		}
-	
+
 		// first token can be context if the next is bind
 		InputEventMapper* mpr = findMapperForContext(command);
-		
+
 		if (mpr) {
 			// is the next token bind?
 			if (!tok.pull(command)) {
@@ -361,29 +361,29 @@ namespace Opde {
 				return false;
 			}
 		}
-		
+
 		if(command == "bind")
 		{
-			if (mpr == NULL) 
+			if (mpr == NULL)
 				mpr = mCurrentMapper;
-			
+
 			std::string keycode;
-			
+
 			if (!tok.pull(keycode)) {
 				LOG_ERROR("InputService::processCommand: bind command without keycode!");
 				return false;
 			}
-			
+
 			if (!tok.pull(command)) {
 				LOG_ERROR("InputService::processCommand: bind command without command!");
 				return false;
 			}
 
-			
+
 			addBinding(keycode, command, mpr);
 			return true;
-		} 
-		else if(command == "echo") 
+		}
+		else if(command == "echo")
 		{
 			return tok.next();
 		} else if(command == "set")
@@ -393,10 +393,10 @@ namespace Opde {
 
 			if (!tok.pull(var))
 				return false;
-				
+
 			if (!tok.pull(val))
 				return false;
-				
+
 			setVariable(var, val);
 			return true;
 		} else if (command == "help")
@@ -415,26 +415,26 @@ namespace Opde {
 			loadBNDFile(tok.rest());
 			return true;
 		}
-		
+
 		ListenerMap::iterator it = mCommandTraps.find(command);
 		if (it != mCommandTraps.end()) {
 			InputEventMsg msg;
 			msg.command = command;
 			msg.params = tok.next();
 			msg.event = IET_COMMAND_CALL;
-		
+
 			return callCommandTrap(msg);
 		}
-		
+
 
 		std::string var, val;
 
 		if (!tok.pull(var))
 			return false;
-				
+
 		if (!tok.pull(val))
 			return false;
-				
+
 		setVariable(var, val);
 		return true;
 	}
@@ -450,14 +450,14 @@ namespace Opde {
 		while (!Stream->eof())
 		{
 			std::string Line = Stream->getLine();
-			processCommand(Line);			
-		}	
+			processCommand(Line);
+		}
 
 		return true;
 	}
 
 	//------------------------------------------------------
-	void InputService::createBindContext(const std::string& ctx) 
+	void InputService::createBindContext(const std::string& ctx)
 	{
 		ContextToMapper::const_iterator it = mMappers.find(ctx);
 
@@ -496,7 +496,7 @@ namespace Opde {
 		if (mConfigService->hasParam("nonexclusive"))
 			mNonExclusive = mConfigService->getParam("nonexclusive").toBool();
 
-		if (mNonExclusive) 
+		if (mNonExclusive)
 		{
 #if defined OIS_WIN32_PLATFORM
 			paramList.insert(std::make_pair(std::string("w32_mouse"), std::string("DISCL_FOREGROUND" )));
@@ -522,7 +522,7 @@ namespace Opde {
 #if OIS_VERSION >= 66048
 		if( mInputSystem->getNumberOfDevices(OIS::OISKeyboard) > 0 ) {
 #else
-		if( mInputSystem->numKeyboards() > 0 ) 
+		if( mInputSystem->numKeyboards() > 0 )
 		{
 #endif
 			mKeyboard = static_cast<OIS::Keyboard*>( mInputSystem->createInputObject( OIS::OISKeyboard, true));
@@ -534,7 +534,7 @@ namespace Opde {
 #if OIS_VERSION >= 66048
 		if( mInputSystem->getNumberOfDevices(OIS::OISMouse) > 0 ) {
 #else
-		if( mInputSystem->numMice() > 0 ) 
+		if( mInputSystem->numMice() > 0 )
 		{
 #endif
 			mMouse = static_cast<OIS::Mouse*>( mInputSystem->createInputObject( OIS::OISMouse, true));
@@ -555,7 +555,7 @@ namespace Opde {
 #if OIS_VERSION >= 66048
 		if( mInputSystem->getNumberOfDevices(OIS::OISJoyStick) > 0 ) {
 #else
-		if( mInputSystem->numJoySticks() > 0 ) 
+		if( mInputSystem->numJoySticks() > 0 )
 		{
 #endif
 			mJoystick = static_cast<OIS::JoyStick*>( mInputSystem->createInputObject( OIS::OISJoyStick, true));
@@ -580,7 +580,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void InputService::shutdown() 
+	void InputService::shutdown()
 	{
 		LOG_DEBUG("InputService::shutdown");
 		mConfigService.setNull();
@@ -603,28 +603,28 @@ namespace Opde {
 			return;
 
 		mKeyPressTime += deltaTime;
-		
+
 		assert(mCurrentDelay > 0);
 		assert(mRepeatDelay > 0);
-		
+
 		// see if we overlapped
 		while (mKeyPressTime > mRepeatDelay) {
 			mKeyPressTime -= mCurrentDelay;
 			mCurrentDelay = mRepeatDelay;
-			
+
 			if (mInputMode == IM_MAPPED)
 				processKeyEvent(mCurrentKey, IET_KEYBOARD_HOLD);
 		}
 	}
 
 	//------------------------------------------------------
-	void InputService::setBindContext(const std::string& context) 
+	void InputService::setBindContext(const std::string& context)
 	{
 		InputEventMapper* iemp = findMapperForContext(context);
 
-		if (iemp) 
+		if (iemp)
 			mCurrentMapper = iemp;
-		else 
+		else
 		{
 			mCurrentMapper = mDefaultMapper;
 			LOG_ERROR("InputService::setBindContext: invalid context specified: '%s', setting default context", context.c_str());
@@ -632,7 +632,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	std::string InputService::fillVariables(const std::string& src) const 
+	std::string InputService::fillVariables(const std::string& src) const
 	{
 		// This is quite bad implementation actually.
 		// Should use a StringTokenizer with custom rule ($ and some non-alpha like space etc split).
@@ -658,7 +658,7 @@ namespace Opde {
 			if (var == "")
 				continue;
 
-			if (var.substr(0,1) == "$") 
+			if (var.substr(0,1) == "$")
 			{
 				ValueMap::const_iterator it = mVariables.find(var.substr(1, var.length() - 1));
 
@@ -667,8 +667,8 @@ namespace Opde {
 				else
 					result += var;
 
-			} 
-			else 
+			}
+			else
 				result += var;
 		}
 
@@ -690,14 +690,14 @@ namespace Opde {
 	/// char classifier (is comment)
 	struct IsComment : public std::unary_function<char, bool>
 	{
-		bool operator()(char c) 
+		bool operator()(char c)
 		{
 			return c==';';
 		}
 	};
 
 	//------------------------------------------------------
-	std::string InputService::stripComment(const std::string& cmd) 
+	std::string InputService::stripComment(const std::string& cmd)
 	{
 		IsComment isC;
 
@@ -707,7 +707,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	DVariant InputService::getVariable(const std::string& var) 
+	DVariant InputService::getVariable(const std::string& var)
 	{
 		ValueMap::const_iterator it = mVariables.find(var);
 
@@ -723,19 +723,19 @@ namespace Opde {
 		LOG_DEBUG("InputService::setVariable: '%s' -> %s", var.c_str(), val.toString().c_str());
 		ValueMap::iterator it = mVariables.find(var);
 
-		if (it != mVariables.end()) 
+		if (it != mVariables.end())
 			it->second = val;
-		else 
+		else
 			mVariables.insert(make_pair(var, val));
 	}
 
 	//------------------------------------------------------
-	void InputService::captureInputs() 
+	void InputService::captureInputs()
 	{
-		if( mMouse ) 
+		if( mMouse )
 			mMouse->capture();
 
-		if( mKeyboard ) 
+		if( mKeyboard )
 			mKeyboard->capture();
 
 		if( mJoystick )
@@ -747,35 +747,35 @@ namespace Opde {
 		// Some safety checks
 		if (mInputMode == IM_DIRECT)
 			return;
-	
+
 		if (!mCurrentMapper) {
 			LOG_ERROR("InputService::processKeyEvent: Mapped input, but no mapper set for the current state!");
 			return;
 		}
-	
+
 		if (mKeyboard->isModifierDown(Keyboard::Alt))
 			keyCode |= ALT_MOD;
-		
+
 		if (mKeyboard->isModifierDown(Keyboard::Ctrl))
 			keyCode |= CTRL_MOD;
-		
+
 		if (mKeyboard->isModifierDown(Keyboard::Shift))
 			keyCode |= SHIFT_MOD;
-	
+
 		std::string command;
-	
+
 		if (!mCurrentMapper->unmapEvent(keyCode, command)) {
 			LOG_DEBUG("InputService: Encountered an unmapped key event %d", keyCode);
 			return;
 		}
-	
+
 		InputEventMsg msg;
 		std::pair<string, string> Split = splitCommand(command);
-	
+
 		msg.command = Split.first;
 		msg.params = Split.second;
 		msg.event = t;
-	
+
 		if (command[0] == '+') {
 			if (t == IET_KEYBOARD_PRESS)
 				msg.params = 1.0f;
@@ -784,7 +784,7 @@ namespace Opde {
 			else
 				// no processing for keyboard hold
 				return;
-	
+
 			command = command.substr(1);
 		} else if (command[0] == '-') {
 			if (t == IET_KEYBOARD_PRESS)
@@ -799,7 +799,7 @@ namespace Opde {
 			// no key release for the non-on/off type events
 			return;
 		}
-	
+
 		if (!callCommandTrap(msg)) {
 			LOG_DEBUG("InputService: Key event '%d' (mapped to the command %s) seems to have no trap present", keyCode, msg.command.c_str());
 		}
@@ -826,7 +826,7 @@ namespace Opde {
 			button += DARK_JOY_EVENT;
 
 		std::string command;
-		
+
 		if (!mCurrentMapper->unmapEvent(button, command))
 			return;
 
@@ -837,15 +837,15 @@ namespace Opde {
 		msg.params = split.second;
 		msg.event = event;
 
-		if (command[0] == '+') 
+		if (command[0] == '+')
 		{
 			if (event == IET_MOUSE_PRESS)
 				msg.params = 1.0f;
 			else
 				msg.params = 0.0f;
 			command = command.substr(1);
-		} 
-		else if (command[0] == '-') 
+		}
+		else if (command[0] == '-')
 		{
 			if (event == IET_MOUSE_PRESS)
 				msg.params = 0.0f;
@@ -858,9 +858,9 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	void InputService::registerCommandTrap(const std::string& command, const ListenerPtr& listener) 
+	void InputService::registerCommandTrap(const std::string& command, const ListenerPtr& listener)
 	{
-		if (mCommandTraps.find(command) != mCommandTraps.end()) 
+		if (mCommandTraps.find(command) != mCommandTraps.end())
 		{
 			// Already registered command. LOG an error
 			LOG_ERROR("InputService: The command %s already has a registered trap. Not registering", command.c_str());
@@ -877,22 +877,22 @@ namespace Opde {
 		// Iterate through the trappers, find the ones with this listener ptr, remove
 		ListenerMap::iterator it = mCommandTraps.begin();
 
-		while (it != mCommandTraps.end()) 
+		while (it != mCommandTraps.end())
 		{
 			ListenerMap::iterator pos = it++;
 
-			if (pos->second == listener) 
+			if (pos->second == listener)
 				mCommandTraps.erase(pos);
 		}
 	}
 
 	//------------------------------------------------------
-	void InputService::unregisterCommandTrap(const std::string& command) 
+	void InputService::unregisterCommandTrap(const std::string& command)
 	{
 		// Iterate through the trappers, find the ones with the given command name, remove
 		ListenerMap::iterator it = mCommandTraps.begin();
 
-		while (it != mCommandTraps.end()) 
+		while (it != mCommandTraps.end())
 		{
 			ListenerMap::iterator pos = it++;
 
@@ -900,43 +900,43 @@ namespace Opde {
 				mCommandTraps.erase(pos);
 		}
 	}
-	
+
 	//------------------------------------------------------
 	void InputService::registerCommandAlias(const std::string& alias, const std::string& command) {
 		mCommandAliases[alias] = command;
 	}
-	
+
 	//------------------------------------------------------
 	bool InputService::dealiasCommand(const std::string& alias, std::string& command) {
 		AliasMap::const_iterator it = mCommandAliases.find(alias);
-		
+
 		if (it != mCommandAliases.end()) {
 			command = it->second;
 			return true;
 		}
-		
+
 		return false;
 	}
 
 	//------------------------------------------------------
-	bool InputService::callCommandTrap(InputEventMsg& msg) 
+	bool InputService::callCommandTrap(InputEventMsg& msg)
 	{
 		std::string cmd;
-		
+
 		// see if we found a new candidate
 		if (dealiasCommand(msg.command, cmd)) {
 			std::pair<string, string> split = splitCommand(cmd);
 			msg.command = split.first;
-			
+
 			DVariant param(split.second);
 			msg.params = msg.params.as<float>() * param.as< float >();
 		}
-		
+
 		ListenerMap::const_iterator it = mCommandTraps.find(msg.command);
 
 		LOG_VERBOSE("InputService: Command trap '%s'", msg.command.c_str());
-		
-		if (it != mCommandTraps.end()) 
+
+		if (it != mCommandTraps.end())
 		{
 			(*it->second)(msg);
 			return true;
@@ -946,7 +946,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	bool InputService::hasCommandTrap(const std::string& cmd) 
+	bool InputService::hasCommandTrap(const std::string& cmd)
 	{
 		if (mCommandTraps.find(cmd) != mCommandTraps.end())
 			return true;
@@ -955,7 +955,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	std::pair<std::string, std::string> InputService::splitCommand(const std::string& cmd) const 
+	std::pair<std::string, std::string> InputService::splitCommand(const std::string& cmd) const
 	{
 		WhitespaceStringTokenizer stok(cmd);
 
@@ -970,7 +970,7 @@ namespace Opde {
 		return res;
 	}
 
-	
+
 	//------------------------------------------------------
 	void InputService::logCommands() {
 		ListenerMap::iterator it = mCommandTraps.begin();
@@ -978,7 +978,7 @@ namespace Opde {
 			LOG_INFO("InputService: Command %s", it->first.c_str());
 		}
 	}
-	
+
 	//------------------------------------------------------
 	void InputService::logVariables() {
 		ValueMap::iterator it = mVariables.begin();
@@ -986,19 +986,19 @@ namespace Opde {
 			LOG_INFO("InputService: Variable '%s' value '%s'", it->first.c_str(), it->second.toString().c_str());
 		}
 	}
-	
+
 	//------------------------------------------------------
-	bool InputService::keyPressed(const OIS::KeyEvent &e) 
+	bool InputService::keyPressed(const OIS::KeyEvent &e)
 	{
-		// TODO: We could use a key filter to detect if the key is repeatable 
+		// TODO: We could use a key filter to detect if the key is repeatable
 		mCurrentKey = e.key;
 		mKeyPressTime = 0;
 		mCurrentDelay = mInitialDelay;
 
-		if (mInputMode == IM_DIRECT) {   
-			if (mDirectListener)	// direct event, dispatch to the current listener
+		if (mInputMode == IM_DIRECT) {
+			if (mDirectListener) // direct event, dispatch to the current listener
 				return mDirectListener->keyPressed(e);
-		} else { 
+		} else {
 			processKeyEvent(static_cast<unsigned int>(e.key), IET_KEYBOARD_PRESS);
 		}
 
@@ -1006,27 +1006,27 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	bool InputService::keyReleased(const OIS::KeyEvent &e) 
+	bool InputService::keyReleased(const OIS::KeyEvent &e)
 	{
 		if (e.key == mCurrentKey)
 			mCurrentKey = OIS::KC_UNASSIGNED;
 
-		
-		if (mInputMode == IM_DIRECT) { 
+
+		if (mInputMode == IM_DIRECT) {
 			if (mDirectListener)	// direct event, dispatch to the current listener
 				return mDirectListener->keyReleased(e);
-		} else { 
+		} else {
 			processKeyEvent(static_cast<unsigned int>(e.key), IET_KEYBOARD_RELEASE);
 		}
-		
+
 		return false;
 	}
 
 	//------------------------------------------------------
-	bool InputService::mouseMoved(const OIS::MouseEvent &e) 
+	bool InputService::mouseMoved(const OIS::MouseEvent &e)
 	{
 
-		if (mInputMode == IM_DIRECT) { 
+		if (mInputMode == IM_DIRECT) {
 			if (mDirectListener)	// direct event, dispatch to the current listener
 				return mDirectListener->mouseMoved(e);
 		} else {
@@ -1044,7 +1044,7 @@ namespace Opde {
 		if (mInputMode == IM_DIRECT) {
 			if (mDirectListener)	// direct event, dispatch to the current listener
 				return mDirectListener->mousePressed(e, id);
-		} else { 
+		} else {
 			processJoyMouseEvent((int) id, IET_MOUSE_PRESS);
 		}
 
@@ -1052,10 +1052,10 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	bool InputService::mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id) 
+	bool InputService::mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id)
 	{
 
-		if (mInputMode == IM_DIRECT) { 
+		if (mInputMode == IM_DIRECT) {
 			if (mDirectListener)	// direct event, dispatch to the current listener
 				return mDirectListener->mouseReleased(e, id);
 		} else {
@@ -1071,7 +1071,7 @@ namespace Opde {
 		if((arg.state.mAxes[axis].abs > JoyStick::MIN_AXIS / 10) && (arg.state.mAxes[axis].abs < JoyStick::MAX_AXIS / 10))
 			return true;	//Eat the small axis movements.
 
-		if (mInputMode == IM_DIRECT) { 
+		if (mInputMode == IM_DIRECT) {
 			if (mDirectListener)	// direct event, dispatch to the current listener
 				return mDirectListener->axisMoved(arg, axis);
 		} else {
@@ -1087,8 +1087,8 @@ namespace Opde {
 		if (mInputMode == IM_DIRECT) {
 			if (mDirectListener)	// direct event, dispatch to the current listener
 				return mDirectListener->povMoved(e, pov);
-		} else { 
-		
+		} else {
+
 			// dispatch the key event using the mapper
 		}
 
@@ -1100,7 +1100,7 @@ namespace Opde {
 	{
 		processJoyMouseEvent((int) button, IET_JOYSTICK_PRESS);
 
-		if (mInputMode == IM_DIRECT) { 
+		if (mInputMode == IM_DIRECT) {
 			if (mDirectListener)	// direct event, dispatch to the current listener
 				return mDirectListener->buttonPressed(arg, button);
 		} else {
@@ -1113,7 +1113,7 @@ namespace Opde {
 	//------------------------------------------------------
 	bool InputService::buttonReleased(const JoyStickEvent &arg, int button)
 	{
-		if (mInputMode == IM_DIRECT) { 
+		if (mInputMode == IM_DIRECT) {
 			if (mDirectListener)	// direct event, dispatch to the current listener
 				return mDirectListener->buttonReleased(arg, button);
 		} else {
@@ -1130,7 +1130,7 @@ namespace Opde {
 	{
 	}
 
-	const std::string& InputServiceFactory::getName() 
+	const std::string& InputServiceFactory::getName()
 	{
 		return mName;
 	}
@@ -1139,12 +1139,12 @@ namespace Opde {
 	{
 		return SERVICE_ENGINE;
 	}
-	
+
 	const size_t InputServiceFactory::getSID() {
 		return InputService::SID;
 	}
 
-	Service* InputServiceFactory::createInstance(ServiceManager* manager) 
+	Service* InputServiceFactory::createInstance(ServiceManager* manager)
 	{
 		return new InputService(manager, mName);
 	}
