@@ -53,8 +53,8 @@ namespace Opde {
 		Opde::ConsoleBackend::getSingleton().registerCommandListener("fps", dynamic_cast<ConsoleCommandListener*>(this));
 		Opde::ConsoleBackend::getSingleton().setCommandHint("fps", "Dump FPS stats");
 
-		mRotateSpeed = 36;
-		mMoveSpeed = 50;
+		mRotateSpeed = 500;
+		mMoveSpeed = 25;
 		mRotateYFactor = 1;
 
 		mShadows = false;
@@ -113,7 +113,7 @@ namespace Opde {
 		LOG_INFO("GamePlayState: Starting");
 		PropertyServicePtr ps = GET_SERVICE(PropertyService);
 		Property* posPG = ps->getProperty("Position");
-		
+
 		InputServicePtr inputSrv = GET_SERVICE(InputService);
 		inputSrv->processCommand("bind ` show_console");
 
@@ -194,17 +194,17 @@ namespace Opde {
 
 		TextureAtlas* ta = mDrawService->createAtlas();
 		TextureAtlas* ta1 = mDrawService->createAtlas();
-		
+
 		DrawSource* ds = ta->createDrawSource("access.pcx", "General");
 		// testing what happens when a font is loaded (e.g. where it segv's)
 		mDrawService->setFontPalette(Ogre::ManualFonFileLoader::ePT_PCX, "fontpal.pcx", "General");
 		FontDrawSource* fds = mDrawService->loadFont(ta, "fonts/MAINFONT.FON" , "General");
 		FontDrawSource* fds1 = mDrawService->loadFont(ta, "fonts/MAINAA.FON" , "General");
 		FontDrawSource* fds2 = mDrawService->loadFont(ta, "fonts/keyfonta.FON" , "General");
-		
+
 		ta->build();
 		ta1->build();
-		
+
 		RenderedLabel* rl = mDrawService->createRenderedLabel(fds, "OpenDarkEngine test");
 
 		mRl1 = mDrawService->createRenderedLabel(fds, "TEST 2");
@@ -217,7 +217,7 @@ namespace Opde {
 		ri->setPosition(100, 250);
 
 
-		
+
 		rl->setPosition(250, 100);
 		mRl1->setPosition(0, 0);
 		mRl2->setPosition(0, 12);
@@ -251,7 +251,7 @@ namespace Opde {
 
 		if (mPortalOverlay)
 			mPortalOverlay->hide();
-			
+
 		if (mDebugOverlay)
 			mDebugOverlay->hide();
 		/*mConsole->setActive(false);
@@ -277,13 +277,8 @@ namespace Opde {
 	}
 
 	void GamePlayState::update(unsigned long timePassed) {
-		if (timePassed == 0) {
-			mMoveScale = 0.1f;
-			mRotScale = 0.1f;
-		} else {
-			mMoveScale = mMoveSpeed * timePassed / 1000.0f;
-			mRotScale = mRotateSpeed * timePassed / 1000.0f;
-		}
+        mMoveScale = mMoveSpeed * timePassed / 1000000.0f;
+        mRotScale = mRotateSpeed * timePassed / 1000000.0f;
 
 		// Quick hack. Let the camera move:
 		if (mForward)
@@ -505,9 +500,9 @@ namespace Opde {
 		mRl2->setPosition(e.state.X.abs, e.state.Y.abs + 12);
 		*/
 
-		mRotX -= Degree( e.state.X.rel * 20.00);
+		mRotX -= Degree( e.state.X.rel );
 		// use Y axis invert
-		mRotY -= Degree( e.state.Y.rel * 20.00 * mRotateYFactor);
+		mRotY -= Degree( e.state.Y.rel * mRotateYFactor);
 		return false;
 	}
 
@@ -548,15 +543,15 @@ namespace Opde {
 
 		return true;
 	}
-	
+
 	bool GamePlayState::buttonPressed(const OIS::JoyStickEvent &arg, int button)
 	{
 		return true;
 	}
-	
+
 	bool GamePlayState::buttonReleased(const OIS::JoyStickEvent &arg, int button)
 	{
-		if(button == 0) 
+		if(button == 0)
 			requestTermination();
 		return true;
 	}
@@ -610,4 +605,3 @@ namespace Opde {
 	}
 
 }
-

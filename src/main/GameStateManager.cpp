@@ -151,7 +151,7 @@ namespace Opde {
 			LOG_FATAL("Rotten tomatoes!");
 
 		mConfigService = GET_SERVICE(ConfigService);
-		
+
 		// TODO: Temporary till we come up with a commandline parsing ability
 		mConfigService->setConfigPathOverride(".");
 
@@ -247,15 +247,17 @@ namespace Opde {
 		// Main while-loop
 		unsigned long lTimeCurrentFrame = 0;
 
-		Timer * CentralTimer = mOgreRoot->getTimer();
-		RenderWindow * AutoCreatedWindow = mOgreRoot->getAutoCreatedWindow();
+		Timer * timer = mOgreRoot->getTimer();
+		RenderWindow * window = mOgreRoot->getAutoCreatedWindow();
 
 		while( !mTerminate ) {
 			// Calculate time since last frame and remember current time for next frame
 			mTimeLastFrame = lTimeCurrentFrame;
-			lTimeCurrentFrame = CentralTimer->getMilliseconds();
+			lTimeCurrentFrame = timer->getMicroseconds();
 
-			unsigned long lTimeSinceLastFrame = lTimeCurrentFrame - mTimeLastFrame;
+            unsigned long lTimeSinceLastFrame = 0;
+            if (lTimeCurrentFrame > mTimeLastFrame)
+                lTimeSinceLastFrame = lTimeCurrentFrame - mTimeLastFrame;
 
             // Update current state
 			mStateStack.top()->update( lTimeSinceLastFrame );
@@ -270,7 +272,7 @@ namespace Opde {
 			Ogre::WindowEventUtilities::messagePump();
 
 			//Check if our window has been destroyed
-			if(AutoCreatedWindow->isClosed())
+			if(window->isClosed())
 				break;
 		}
 
