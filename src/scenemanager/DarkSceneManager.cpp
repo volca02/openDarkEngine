@@ -38,7 +38,12 @@
 namespace Ogre {
 
 	// ----------------------------------------------------------------------
-	DarkSceneManager::DarkSceneManager(const String& instanceName) : SceneManager(instanceName), mFrameNum(1), mActiveGeometry(NULL) {
+	DarkSceneManager::DarkSceneManager(const String& instanceName)
+        : SceneManager(instanceName),
+          mFrameNum(1),
+          mPortalCount(0),
+          mActiveGeometry(NULL)
+    {
 		mBspTree = new BspTree(this);
 		mDarkLightFactory = new DarkLightFactory();
 
@@ -89,6 +94,8 @@ namespace Ogre {
 			static_cast<DarkCamera*>(cit->second)->mVisibleCells.clear();
 
 		SceneManager::clearScene();
+
+		mPortalCount = 0;
 	}
 
 
@@ -107,7 +114,8 @@ namespace Ogre {
 
 	// ----------------------------------------------------------------------
 	Portal * DarkSceneManager::createPortal(BspNode* src, BspNode* dst, const Plane& plane) {
-		Portal* p = new Portal(src, dst, plane);
+		unsigned int portalID = mPortalCount++;
+		Portal* p = new Portal(portalID, src, dst, plane);
 
 		mPortals.insert(p);
 
@@ -117,7 +125,8 @@ namespace Ogre {
 
 	// ----------------------------------------------------------------------
 	Portal * DarkSceneManager::createPortal(int srcLeafID, int dstLeafID, const Plane& plane) {
-		Portal* p = new Portal(getBspLeaf(srcLeafID), getBspLeaf(dstLeafID), plane);
+		unsigned int portalID = mPortalCount++;
+		Portal* p = new Portal(portalID, getBspLeaf(srcLeafID), getBspLeaf(dstLeafID), plane);
 
 		mPortals.insert(p);
 

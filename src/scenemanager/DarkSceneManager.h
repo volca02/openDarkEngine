@@ -162,6 +162,8 @@ namespace Ogre {
 			* @param strKey the option name (valid options: StaticBuildTime - unsigned long) */
 			virtual bool getOption(const String &strKey, void *pDestValue);
 
+			unsigned int getPortalCount() const { return mPortalCount; };
+
 		protected:
 			/// BSP Tree getter
 			BspTree* getBspTree(void) { return mBspTree; };
@@ -203,6 +205,9 @@ namespace Ogre {
 
 			/// Count of the lights found for the current frustum
 			unsigned long mLightCount;
+
+            /// Current portal count
+            unsigned int mPortalCount;
 
 			/** movables found to be visible */
 			typedef std::set<const MovableObject*> MovablesForRendering;
