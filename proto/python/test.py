@@ -7,7 +7,6 @@ opderoot.logToFile("opde.log")
 opderoot.setLogLevel(4)
 
 # Setup resources
-opderoot.registerCustomScriptLoaders()
 opderoot.loadResourceConfig("thief1.cfg")
 opderoot.loadConfigFile("opde.cfg")
 
@@ -89,7 +88,7 @@ isrv.setInputMapped(True)
 # A sample mission load
 dbsrv = opde.services.getDatabaseService()
 dbsrv.setProgressListener(databaseProgressUpdate)
-# dbsrv.load("miss1.mis")
+# dbsrv.load("miss1.mis", opde.services.DBM_COMPLETE)
 
 # some on-screen text
 drawsrv = opde.services.getDrawService()
