@@ -27,7 +27,6 @@
 
 using namespace std;
 using namespace Ogre;
-using namespace OIS;
 
 namespace Opde {
 
@@ -35,7 +34,7 @@ namespace Opde {
     /*-------------------- GUIService ---------------------*/
     /*-----------------------------------------------------*/
     template<> const size_t ServiceImpl<GUIService>::SID = __SERVICE_ID_GUI;
-    
+
     GUIService::GUIService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::GUIService >(manager, name),
 			mActive(false),
 			mVisible(false),
@@ -46,7 +45,7 @@ namespace Opde {
 			mRenderServiceListenerID(0),
 			mInputSrv(NULL),
 			mRenderSrv(NULL) {
-				
+
 		mLoopClientDef.id = LOOPCLIENT_ID_GUI;
 		mLoopClientDef.mask = LOOPMODE_GUI;
 		mLoopClientDef.name = mName;
@@ -78,14 +77,14 @@ namespace Opde {
 	// -----------------------------------
 	void GUIService::setVisible(bool visible) {
 		mVisible = visible;
-		
+
 		if (!mVisible) {
 			if (mConsole->isActive())
 				hideConsole();
-			
+
 			setActive(false);
 		}
-		
+
 	}
 
 
@@ -101,7 +100,7 @@ namespace Opde {
 		mDrawSrv = GET_SERVICE(DrawService);
 		mConfigSrv = GET_SERVICE(ConfigService);
 		mLoopSrv = GET_SERVICE(LoopService);
-		
+
         	assert(mRenderSrv->getSceneManager());
 
 		// handler for direct listener
@@ -110,26 +109,26 @@ namespace Opde {
 		// Register as a listener for the resolution changes
 		RenderService::ListenerPtr renderServiceListener(new ClassCallback<RenderServiceMsg, GUIService>(this, &GUIService::onRenderServiceMsg));
 		mRenderServiceListenerID = mRenderSrv->registerListener(renderServiceListener);
-		
+
 		InputService::ListenerPtr showConsoleListener(new ClassCallback<InputEventMsg, GUIService>(this, &GUIService::onShowConsole));
-		
+
 		mInputSrv->registerCommandTrap("show_console", showConsoleListener);
-		
+
 		mLoopSrv->addLoopClient(this);
-		
+
 		// Core rendering sources
 		mConfigSrv->setParamDescription("console_font_name", "Font file name of the base console font used for debugging");
 		mConfigSrv->setParamDescription("console_font_group", "Resource group of the base console font");
-		
+
 		DVariant tmp;
 		mConsoleFontName = "font.fon";
-		
+
 		if (mConfigSrv->getParam("console_font_name", tmp)) {
 			mConsoleFontName = tmp.toString();
 		} else {
 			LOG_ERROR("console_font_name parameter not set, using default '%s'!", mConsoleFontName.c_str());
 		}
-		
+
 		mConsoleFontGroup = "General";
 		if (mConfigSrv->getParam("console_font_group", tmp)) {
 			mConsoleFontGroup = tmp.toString();
@@ -141,7 +140,7 @@ namespace Opde {
 		mCoreAtlas = mDrawSrv->createAtlas();
 		mDrawSrv->setFontPalette(ManualFonFileLoader::ePT_Default);
 		mConsoleFont = mDrawSrv->loadFont(mCoreAtlas, mConsoleFontName, mConsoleFontGroup);
-		
+
 		// create the console.
 		mConsole = new ConsoleGUI(this);
 	}
@@ -154,14 +153,14 @@ namespace Opde {
 
 		if (!mRenderSrv.isNull())
 			mRenderSrv->unregisterListener(mRenderServiceListenerID);
-		
+
 		mLoopSrv->removeLoopClient(this);
-		
+
 		mInputSrv->unregisterCommandTrap("show_console");
-		
+
 		delete mConsole;
 		mConsole = NULL;
-		
+
 		mRenderSrv.setNull();
 		mInputSrv.setNull();
 		mDrawSrv.setNull();
@@ -171,9 +170,9 @@ namespace Opde {
 
 
 	// -----------------------------------
-	bool GUIService::keyPressed( const OIS::KeyEvent &e ) {
+    bool GUIService::keyPressed(const SDL_KeyboardEvent &e) {
 		if (mConsole && mConsole->isActive()) {
-			mConsole->injectKeyPress(e);
+			mConsole->injectKeyPress(e.keysym.sym);
 			return true;
 		} else {
 			// TODO: Inject into the focussed GUI object
@@ -182,58 +181,34 @@ namespace Opde {
 	}
 
 	// -----------------------------------
-	bool GUIService::keyReleased( const OIS::KeyEvent &e ) {
-		return true;
-	}
+    bool GUIService::keyReleased(const SDL_KeyboardEvent &e) {
+        return true;
+    }
 
 	// -----------------------------------
-	bool GUIService::mouseMoved( const OIS::MouseEvent &e ) {
-		return true;
-	}
+    bool GUIService::mouseMoved(const SDL_MouseMotionEvent &e) {
+        return true;
+    }
 
 	// -----------------------------------
-	bool GUIService::mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
-		return true;
-	}
+    bool GUIService::mousePressed(const SDL_MouseButtonEvent &e) {
+        return true;
+    }
 
 	// -----------------------------------
-	bool GUIService::mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
-		return true;
-	}
-
-	// -----------------------------------
-	bool GUIService::povMoved(const OIS::JoyStickEvent &e, int pov)
-	{
-		return false;
-	}
-
-	// -----------------------------------
-	bool GUIService::axisMoved(const OIS::JoyStickEvent &arg, int axis)
-	{
-		return false;
-	}
-
-	// -----------------------------------
-	bool GUIService::buttonPressed(const OIS::JoyStickEvent &arg, int button)
-	{
-		return false;
-	}
-
-	// -----------------------------------
-	bool GUIService::buttonReleased(const OIS::JoyStickEvent &arg, int button)
-	{
-		return false;
-	}
+    bool GUIService::mouseReleased(const SDL_MouseButtonEvent &e) {
+        return true;
+    }
 
 	// -----------------------------------
 	void GUIService::onRenderServiceMsg(const RenderServiceMsg& message) {
 		// Inform the console about the resolution change
 		if (mConsole)
 			mConsole->resolutionChanged(message.size.width, message.size.height);
-		
+
 		// TODO: Inform the GUI components as well?
 	}
-	
+
 	// -----------------------------------
 	void GUIService::onShowConsole(const InputEventMsg& iem) {
 		if (mConsole && mConsole->isActive()) {
@@ -247,15 +222,15 @@ namespace Opde {
 	void GUIService::showConsole() {
 		if (!mConsole)
 			return;
-		
+
 		// backup the previous situation
 		mCBActive = mActive;
 		mCBSheet = mDrawSrv->getActiveSheet();
 		mCBVisible = mVisible;
-		
+
 		// Activate the console
 		mConsole->setActive(true);
-		
+
 		// activate GUI
 		setActive(true);
 		setVisible(true);
@@ -266,15 +241,15 @@ namespace Opde {
 	void GUIService::hideConsole() {
 		if (!mConsole)
 			return;
-		
+
 		mConsole->setActive(false);
-		
+
 		// restore the previous situation
 		mDrawSrv->setActiveSheet(mCBSheet);
 		setActive(mCBActive);
 		setVisible(mCBVisible);
 	}
-	
+
 
 	// -----------------------------------
 	void GUIService::loopStep(float deltaTime) {
@@ -294,7 +269,7 @@ namespace Opde {
 		return mCoreAtlas;
 	}
 
-	
+
 	//-------------------------- Factory implementation
 	std::string GUIServiceFactory::mName = "GUIService";
 

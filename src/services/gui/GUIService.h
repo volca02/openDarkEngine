@@ -57,48 +57,43 @@ namespace Opde {
 			* @param visible If true, the active sheet is set to show(), if false, set to hide()
 			*/
 			void setVisible(bool visible);
-			
+
 			/** Returns the pre-prepared console font. Used to render console and some debug info.
 			*/
 			FontDrawSourcePtr getConsoleFont() const;
-			
-			/** Returns the atlas containing the core render sources - mouse cursor, console font, etc. 
+
+			/** Returns the atlas containing the core render sources - mouse cursor, console font, etc.
 			* Use this to render various debug overlays and stuff like that. */
 			TextureAtlasPtr getCoreAtlas() const;
 
 			/// Hides the console window
 			void hideConsole();
-			
+
 			/// Shows the console window
 			void showConsole();
-			
+
 		protected:
 			// Service initialization related methods
 			bool init();
 
 			void bootstrapFinished();
-			
+
 			void shutdown();
 
 			void onRenderServiceMsg(const RenderServiceMsg& message);
-			
+
 			void onShowConsole(const InputEventMsg& iem);
-			
+
 			/// Loop step event
 			void loopStep(float deltaTime);
-			
+
 			// Input related methods
-			bool keyPressed( const OIS::KeyEvent &e );
-			bool keyReleased( const OIS::KeyEvent &e );
+			virtual bool keyPressed(const SDL_KeyboardEvent &e);
+			virtual bool keyReleased(const SDL_KeyboardEvent &e);
 
-			bool mouseMoved( const OIS::MouseEvent &e );
-			bool mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id );
-			bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id );
-
-			virtual bool povMoved(const OIS::JoyStickEvent &e, int pov);
-			virtual bool axisMoved(const OIS::JoyStickEvent &arg, int axis);
-			virtual bool buttonPressed(const OIS::JoyStickEvent &arg, int button);
-			virtual bool buttonReleased(const OIS::JoyStickEvent &arg, int button);
+			virtual bool mouseMoved(const SDL_MouseMotionEvent &e);
+			virtual bool mousePressed(const SDL_MouseButtonEvent &e);
+			virtual bool mouseReleased(const SDL_MouseButtonEvent &e);
 
 		private:
 			/// Activity indicator
@@ -106,33 +101,33 @@ namespace Opde {
 
 			/// Visibility indicator
 			bool mVisible;
-			
+
 			/// Currently visible sheet
 			DrawSheetPtr mActiveSheet;
-			
+
 			/// Console frontend - GUI render of the console
 			ConsoleGUI* mConsole;
-			
+
 			// --- Console backup ---
 			/// Console Backup - activeness flag
 			bool mCBActive;
-			
+
 			/// Console Backup - visibility flag
 			bool mCBVisible;
-			
+
 			/// Console Backup - prev. active sheet
 			DrawSheetPtr mCBSheet;
-			
+
 			// --- Core rendering ---
 			/// Core rendering atlas. Various overlays, mouse cursor, etc...
 			TextureAtlasPtr mCoreAtlas;
-			
+
 			/// Console font - automatically loaded upon bootstrap finish...
 			FontDrawSourcePtr mConsoleFont;
-			
+
 			/// Console font name
 			std::string mConsoleFontName;
-			
+
 			/// Console font group
 			std::string mConsoleFontGroup;
 
@@ -141,16 +136,16 @@ namespace Opde {
 
 			/// Input service ptr - used for input handling
 			InputServicePtr mInputSrv;
-			
+
 			/// Render service ptr - used for various utilitary needs
 			RenderServicePtr mRenderSrv;
-			
+
 			/// Loop service ptr - used for animation and other things
 			LoopServicePtr mLoopSrv;
 
 			/// Draw service ptr - used for gui rendering itself
 			DrawServicePtr mDrawSrv;
-			
+
 			/// Config service ptr - used for font and cursor settings, etc.
 			ConfigServicePtr mConfigSrv;
 	};
@@ -170,7 +165,7 @@ namespace Opde {
 			virtual const std::string& getName();
 
                         virtual const uint getMask();
-			
+
 			virtual const size_t getSID();
 		private:
 			static std::string mName;

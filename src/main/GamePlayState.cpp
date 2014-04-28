@@ -24,7 +24,6 @@
 #include "config.h"
 
 #include "GamePlayState.h"
-#include "OIS.h"
 #include "GameStateManager.h"
 
 #include "GameLoadState.h"
@@ -40,7 +39,6 @@
 #include <OgreStringConverter.h>
 
 using namespace Ogre;
-using namespace OIS;
 
 namespace Opde {
 
@@ -430,130 +428,72 @@ namespace Opde {
 		}
 	}
 
-	bool GamePlayState::keyPressed( const OIS::KeyEvent &e ) {
-		/*if( e.key == KC_F10 ) {
-			mConsole->setActive(!mConsole->isActive());
-			return true;
-		}
-
-		if (!mConsole->injectKeyPress(e)) {*/
-			if(e.key == KC_W) {
-				mForward = true;
-				return true;
-			} else if(e.key == KC_S) {
-				mBackward = true;
-				return true;
-			} else if(e.key == KC_A) {
-				mLeft = true;
-				return true;
-			} else if(e.key == KC_D) {
-				mRight = true;
-				return true;
-			} else if (e.key == KC_SYSRQ || e.key == KC_F5) {
-				mScreenShot = true;
-				return true;
-			} else if (e.key == KC_O) {
-				mSceneDisplay = true;
-				return true;
-			} else if (e.key == KC_P) {
-				mPortalDisplay = true;
-				return true;
-			} else return true;
-		/* } else {
-			return true;
-		};*/
+	bool GamePlayState::keyPressed(const SDL_KeyboardEvent &e) {
+        if(e.keysym.sym == SDLK_w) {
+            mForward = true;
+            return true;
+        } else if(e.keysym.sym == SDLK_s) {
+            mBackward = true;
+            return true;
+        } else if(e.keysym.sym == SDLK_a) {
+            mLeft = true;
+            return true;
+        } else if(e.keysym.sym == SDLK_d) {
+            mRight = true;
+            return true;
+        } else if (e.keysym.sym == SDLK_PRINTSCREEN || e.keysym.sym == SDLK_F5) {
+            mScreenShot = true;
+            return true;
+        } else if (e.keysym.sym == SDLK_o) {
+            mSceneDisplay = true;
+            return true;
+        } else if (e.keysym.sym == SDLK_p) {
+            mPortalDisplay = true;
+            return true;
+        } else return true;
 	}
 
-	bool GamePlayState::keyReleased( const OIS::KeyEvent &e ) {
-		/*if (!mConsole->isActive()) {*/
-			if(e.key == KC_W) {
-				mForward = false;
-				return true;
-			} else if(e.key == KC_S) {
-				mBackward = false;
-				return true;
-			} else if(e.key == KC_A) {
-				mLeft = false;
-				return true;
-			} else if(e.key == KC_D) {
-				mRight = false;
-				return true;
-			} else	if( e.key == KC_ESCAPE ) {
-        			requestTermination();
-				return true;
-			} else  if (e.key == KC_I) {
-				mShadows = !mShadows;
+    bool GamePlayState::keyReleased(const SDL_KeyboardEvent &e) {
+        if(e.keysym.sym == SDLK_w) {
+            mForward = false;
+            return true;
+        } else if(e.keysym.sym == SDLK_s) {
+            mBackward = false;
+            return true;
+        } else if(e.keysym.sym == SDLK_a) {
+            mLeft = false;
+            return true;
+        } else if(e.keysym.sym == SDLK_d) {
+            mRight = false;
+            return true;
+        } else if(e.keysym.sym == SDLK_ESCAPE) {
+            requestTermination();
+            return true;
+        } else if (e.keysym.sym == SDLK_i) {
+            mShadows = !mShadows;
 
-				if (mShadows)
-					mSceneMgr->setShadowTechnique(SHADOWTYPE_TEXTURE_MODULATIVE);
-				else
-					mSceneMgr->setShadowTechnique(SHADOWTYPE_NONE);
-			}
+            if (mShadows)
+                mSceneMgr->setShadowTechnique(SHADOWTYPE_TEXTURE_MODULATIVE);
+            else
+                mSceneMgr->setShadowTechnique(SHADOWTYPE_NONE);
+        }
 
-			return true;
-		/*} else return true;*/
-	}
+        return true;
+    }
 
-	bool GamePlayState::mouseMoved( const OIS::MouseEvent &e ) {
-		// mRi->setPosition(e.state.X.abs, e.state.Y.abs);
-		/*mRl1->setPosition(e.state.X.abs, e.state.Y.abs);
-		mRl2->setPosition(e.state.X.abs, e.state.Y.abs + 12);
-		*/
-
-		mRotX -= Degree( e.state.X.rel );
+	bool GamePlayState::mouseMoved(const SDL_MouseMotionEvent &e) {
+		mRotX -= Degree( e.xrel );
 		// use Y axis invert
-		mRotY -= Degree( e.state.Y.rel * mRotateYFactor);
+		mRotY -= Degree( e.yrel * mRotateYFactor);
 		return false;
 	}
 
-	bool GamePlayState::mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
+	bool GamePlayState::mousePressed(const SDL_MouseButtonEvent &e) {
 		return false;
 	}
 
-	bool GamePlayState::mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
+	bool GamePlayState::mouseReleased(const SDL_MouseButtonEvent &e) {
 		return false;
-	}
-
-	bool GamePlayState::axisMoved(const OIS::JoyStickEvent &arg, int axis)
-	{
-		return false;
-	}
-
-	bool GamePlayState::povMoved(const OIS::JoyStickEvent &e, int pov)
-	{
-		if ((e.state.mPOV[pov].direction & e.state.mPOV[pov].North) != 0)
-			mForward = true;
-		else
-			mForward = false;
-
-		if ((e.state.mPOV[pov].direction & e.state.mPOV[pov].South) != 0)
-			mBackward = true;
-		else
-			mBackward = false;
-
-		if ((e.state.mPOV[pov].direction & e.state.mPOV[pov].East) != 0)
-			mRight = true;
-		else
-			mRight = false;
-
-		if ((e.state.mPOV[pov].direction & e.state.mPOV[pov].West) != 0)
-			mLeft = true;
-		else
-			mLeft = false;
-
-		return true;
-	}
-
-	bool GamePlayState::buttonPressed(const OIS::JoyStickEvent &arg, int button)
-	{
-		return true;
-	}
-
-	bool GamePlayState::buttonReleased(const OIS::JoyStickEvent &arg, int button)
-	{
-		if(button == 0)
-			requestTermination();
-		return true;
 	}
 
 	void GamePlayState::commandExecuted(std::string command, std::string parameters) {

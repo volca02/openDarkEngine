@@ -14,8 +14,6 @@ link_directories ( ${OGRE_LIB_DIR} )
 add_library (OpdeConsole STATIC
     ConsoleBackend.cpp
     ConsoleBackend.h
-    ConsoleFrontend.cpp
-    ConsoleFrontend.h
     ConsoleCommandListener.cpp
     ConsoleCommandListener.h
 )

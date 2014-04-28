@@ -27,10 +27,10 @@
 
 #include "config.h"
 
-#include <OIS.h>
+#include <SDL2/SDL.h>
 
 namespace Opde {
-	
+
 	/** A game state. Abstract class which is filled with code doing stuff while state is on top of the queue.
 	* It is guranteed, that the state will receive start() on becoming a new top state, suspend() when a new state covers this as new active, resume() when state
 	* becomes active again, and exit() when the state is being removed from the queue.
@@ -40,67 +40,46 @@ namespace Opde {
 		public:
 			/** Constructor */
 			GameState();
-			
+
 			/** Destructor */
 			virtual ~GameState();
-			
+
 			//---------- Events from StateManager for particular events
 			/** Do a state startup. Called if the state becomes the new active game state (added to the state stack) */
 			virtual void start() = 0;
-			
+
 			/** Do a state cleanup. Called when the state is removed from the stack */
-			virtual void exit() = 0; 
-			
+			virtual void exit() = 0;
+
 			/** Do suspend the game state. Called when another state takes the activity */
 			virtual void suspend() = 0;
-			
+
 			/** Do a state resume. Called when the state becomes active again, being not covered by another state */
-			virtual void resume() = 0; 
-			
+			virtual void resume() = 0;
+
 			/** Update the state, given timePassed time since last update call */
 			virtual void update(unsigned long timePassed) = 0;
-			
+
 			//---------- input events related methods
-			
-			/** Keyboard key was pressed event. */
-			virtual bool keyPressed( const OIS::KeyEvent &e ) = 0;
-			
-			/** Keyboard key was released event. */
-			virtual bool keyReleased( const OIS::KeyEvent &e ) = 0;
+			virtual bool keyPressed(const SDL_KeyboardEvent &e) = 0;
+			virtual bool keyReleased(const SDL_KeyboardEvent &e) = 0;
 
-			/** Mouse moved event. */
-			virtual bool mouseMoved( const OIS::MouseEvent &e ) = 0;
-			
-			/** Mouse button was pressed event. */
-			virtual bool mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id ) = 0;
-			
-			/** Mouse button was released event. */
-			virtual bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) = 0;
-			
-			/** Joystick POV moved event. */
-			virtual bool povMoved(const OIS::JoyStickEvent &e, int pov) = 0;
+			virtual bool mouseMoved(const SDL_MouseMotionEvent &e) = 0;
+			virtual bool mousePressed(const SDL_MouseButtonEvent &e) = 0;
+			virtual bool mouseReleased(const SDL_MouseButtonEvent &e) = 0;
 
-			/** Joystick axis moved event. */
-			virtual bool axisMoved(const OIS::JoyStickEvent &arg, int axis) = 0;
-
-			/** Joystick button pressed event. */
-			virtual bool buttonPressed(const OIS::JoyStickEvent &arg, int button) = 0;
-
-			/** Joystick button released event. */
-			virtual bool buttonReleased(const OIS::JoyStickEvent &arg, int button) = 0;
-			
 			//---------- StateManager related methods
-			
+
 			/** Request the StateManager to push in a new state */
 			void pushState(GameState* state);
-			
+
 			/** Request the StateManager to pop a state */
 			void popState();
-			
-			/** Request the StateManager to terminate */ 
+
+			/** Request the StateManager to terminate */
 			void requestTermination();
-	};	
-	
+	};
+
 }
 
 #endif

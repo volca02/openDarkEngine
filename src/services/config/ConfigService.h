@@ -53,14 +53,15 @@ namespace Opde {
 
 			/** Sets a description for the specified parameter. */
 			void setParamDescription(const std::string& param, const std::string& value);
-			
+
 			/** Set a parameter */
 			void setParam(const std::string& param, const std::string& value);
 
 			/** get a parameter
 			* @param param The parameter name
+			* @param dflt The DVariant default value, if not found
 			* @return The parameter value, or Empty DVariant if the parameter was not found */
-			DVariant getParam(const std::string& param);
+			DVariant getParam(const std::string& param, const DVariant &dflt = DVariant());
 
 			/** get a parameter
 			* @param param The parameter name
@@ -71,14 +72,14 @@ namespace Opde {
 			/** determine an existence of a parameter */
 			bool hasParam(const std::string& param);
 
-			/** Injects the settings from a specified cfg file. 
-			 * This function uses PlatformService to obtain two possible config file paths. It then loads global followed by local 
+			/** Injects the settings from a specified cfg file.
+			 * This function uses PlatformService to obtain two possible config file paths. It then loads global followed by local
 			 * version of the config file mentioned.
 			 * @note If ConfigPathOverride is set (via setConfigPathOverride), then that path is solely used to populate the configuration
 			 * @param cfgfile The name of the config file (without path)
 			 * @return true if config was loaded from at least one of the paths, false otherwise */
 			bool loadParams(const std::string& cfgfile);
-			
+
 			/** Sets an override for the config file loading paths. Used to enable debugging without installation, etc.
 			 */
 			void setConfigPathOverride(const std::string& cfgpath);
@@ -103,7 +104,7 @@ namespace Opde {
 
 			/** Helper method that logs all the config parameters with descriptions to LOG */
 			void logAllParameters();
-			
+
 		protected:
 			/** initializes the service. Tries to load opde.cfg */
 			bool init();
@@ -114,12 +115,12 @@ namespace Opde {
 
 		private:
 			typedef std::map< std::string, std::string > Parameters;
-            
+
 			Parameters mParameters;
 			Parameters mConfigKeyDescriptions;
-			
+
 			PlatformServicePtr mPlatformService;
-			
+
 			/// If set, the hierarchical loading from global+local is not used, this path is used instead
 			std::string mConfigPathOverride;
 	};
@@ -140,7 +141,7 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask();
-			
+
 			virtual const size_t getSID();
 		private:
 			static std::string mName;

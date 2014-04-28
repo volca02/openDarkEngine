@@ -26,8 +26,6 @@
 
 #include "config.h"
 
-#include <OIS.h>
-
 #include "ConsoleBackend.h"
 #include "DrawService.h"
 #include "InputService.h"
@@ -37,7 +35,7 @@
 namespace Opde {
 	/// forward decl.
 	class GUIService;
-	
+
 	class OPDELIB_EXPORT ConsoleGUI {
 		public:
 			ConsoleGUI(GUIService* owner);
@@ -46,7 +44,7 @@ namespace Opde {
 			/** Injects an ois keyboard event into the console
 			* @return true if the keyboard event was consumed, false otherwise (Console not visible)
 			*/
-			bool injectKeyPress(const OIS::KeyEvent &e);
+			bool injectKeyPress(unsigned int keycode);
 
 			void setActive(bool active);
 
@@ -57,7 +55,7 @@ namespace Opde {
 
 			/// Used to rebuild the console according to the new resolution
 			void resolutionChanged(size_t width, size_t height);
-			
+
 		private:
 			bool mIsActive;
 
@@ -71,7 +69,7 @@ namespace Opde {
 			TextureAtlasPtr mAtlas;
 			DrawServicePtr mDrawSrv;
 			InputServicePtr mInputSrv;
-			
+
 			RenderedRect* mConsoleBackground;
 			RenderedRect* mCommandLineBackground;
 			RenderedLabel* mConsoleText;

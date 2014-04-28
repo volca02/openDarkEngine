@@ -54,6 +54,7 @@
 #include <OgreRoot.h>
 #include <OgreWindowEventUtilities.h>
 #include <OgreConfigFile.h>
+#include <SDL2/SDL_timer.h>
 
 using namespace Ogre;
 
@@ -248,7 +249,8 @@ namespace Opde {
 		unsigned long lTimeCurrentFrame = 0;
 
 		Timer * timer = mOgreRoot->getTimer();
-		RenderWindow * window = mOgreRoot->getAutoCreatedWindow();
+
+#warning TODO: Replace this code with propper loop manager code.
 
 		while( !mTerminate ) {
 			// Calculate time since last frame and remember current time for next frame
@@ -259,11 +261,11 @@ namespace Opde {
             if (lTimeCurrentFrame > mTimeLastFrame)
                 lTimeSinceLastFrame = lTimeCurrentFrame - mTimeLastFrame;
 
+            // manually pull input events
+            mInputService->pollEvents(lTimeSinceLastFrame / 1000000.0f);
+
             // Update current state
 			mStateStack.top()->update( lTimeSinceLastFrame );
-
-			// InputService::captureInputs()
-			mInputService->captureInputs();
 
 			// Render next frame
 			mOgreRoot->renderOneFrame();
@@ -271,9 +273,17 @@ namespace Opde {
 			// Deal with platform specific issues
 			Ogre::WindowEventUtilities::messagePump();
 
-			//Check if our window has been destroyed
-			if(window->isClosed())
-				break;
+			unsigned long lAfterRender = timer->getMicroseconds();
+            // sleep till the end of maximal fps, for now hardcoded at
+            // 300
+
+            unsigned long diff = lAfterRender - lTimeCurrentFrame;
+
+            // 300 FPS == 3333 useconds each
+            if (diff < 3333) {
+                // coarse sleep, we don't have microsecond sleep here...
+                SDL_Delay((3333-diff)/1000);
+            }
 		}
 
         while (!mStateStack.empty()) {
@@ -330,75 +340,38 @@ namespace Opde {
 		mInputService->setDirectListener(this);
 	}
 
-	bool GameStateManager::keyPressed( const OIS::KeyEvent &e ) {
+	bool GameStateManager::keyPressed(const SDL_KeyboardEvent &e) {
 		if (!mStateStack.empty()) {
 			mStateStack.top()->keyPressed(e);
 		}
 		return false;
 	}
 
-	bool GameStateManager::keyReleased( const OIS::KeyEvent &e ) {
+	bool GameStateManager::keyReleased(const SDL_KeyboardEvent &e) {
 		if (!mStateStack.empty()) {
 			mStateStack.top()->keyReleased(e);
 		}
 		return false;
 	}
 
-	bool GameStateManager::mouseMoved( const OIS::MouseEvent &e ) {
+	bool GameStateManager::mouseMoved(const SDL_MouseMotionEvent &e) {
 		if (!mStateStack.empty()) {
 			mStateStack.top()->mouseMoved(e);
 		}
 		return false;
 	}
 
-	bool GameStateManager::mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
+	bool GameStateManager::mousePressed(const SDL_MouseButtonEvent &e) {
 		if (!mStateStack.empty()) {
-			mStateStack.top()->mousePressed(e, id);
+			mStateStack.top()->mousePressed(e);
 		}
 		return false;
 	}
 
-	bool GameStateManager::mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
+	bool GameStateManager::mouseReleased(const SDL_MouseButtonEvent &e) {
 		if (!mStateStack.empty()) {
-			mStateStack.top()->mouseReleased(e, id);
+			mStateStack.top()->mouseReleased(e);
 		}
 		return false;
 	}
-
-	bool GameStateManager::povMoved(const OIS::JoyStickEvent &e, int pov)
-	{
-		if (!mStateStack.empty())
-		{
-			mStateStack.top()->povMoved(e, pov);
-		}
-		return false;
-	}
-
-	bool GameStateManager::axisMoved(const OIS::JoyStickEvent &arg, int axis)
-	{
-		if (!mStateStack.empty())
-		{
-			mStateStack.top()->axisMoved(arg, axis);
-		}
-		return false;
-	}
-
-	bool GameStateManager::buttonPressed(const OIS::JoyStickEvent &arg, int button)
-	{
-		if (!mStateStack.empty())
-		{
-			mStateStack.top()->buttonPressed(arg, button);
-		}
-		return false;
-	}
-
-	bool GameStateManager::buttonReleased(const OIS::JoyStickEvent &arg, int button)
-	{
-		if (!mStateStack.empty())
-		{
-			mStateStack.top()->buttonReleased(arg, button);
-		}
-		return false;
-	}
-
 }

@@ -38,8 +38,8 @@ namespace Opde {
 	/*-------------------- ConfigService -----------------*/
 	/*----------------------------------------------------*/
 	template<> const size_t ServiceImpl<ConfigService>::SID = __SERVICE_ID_CONFIG;
-	
-	ConfigService::ConfigService(ServiceManager *manager, const std::string& name) : ServiceImpl<ConfigService>(manager, name), 
+
+	ConfigService::ConfigService(ServiceManager *manager, const std::string& name) : ServiceImpl<ConfigService>(manager, name),
 			mConfigPathOverride("") {
 	}
 
@@ -52,7 +52,7 @@ namespace Opde {
 		mPlatformService = GET_SERVICE(PlatformService);
 		return true;
 	}
-	
+
 	//------------------------------------------------------
 	void ConfigService::shutdown() {
 		mPlatformService.setNull();
@@ -62,7 +62,7 @@ namespace Opde {
 	void ConfigService::setParamDescription(const std::string& param, const std::string& desc) {
 		mConfigKeyDescriptions[param] = desc;
 	}
-    
+
 	//------------------------------------------------------
 	void ConfigService::setParam(const std::string& param, const std::string& value) {
 		Parameters::iterator it = mParameters.find(param);
@@ -75,20 +75,21 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	DVariant ConfigService::getParam(const std::string& param) {
+	DVariant ConfigService::getParam(const std::string& param, const DVariant &dflt)
+    {
 		Parameters::const_iterator it = mParameters.find(param);
 
 		Parameters::const_iterator dit = mConfigKeyDescriptions.find(param);
-		
+
 		// warn if param has no desc specified
 		if (dit == mConfigKeyDescriptions.end()) {
 			LOG_ERROR("ConfigService: Warning: Config key '%s' has no description specified", param.c_str());
 		}
-        	
+
 		if (it != mParameters.end()) {
 			return DVariant(it->second);
 		} else {
-			return DVariant();
+			return dflt;
 		}
 	}
 
@@ -122,19 +123,19 @@ namespace Opde {
     		return loadFromFile(mConfigPathOverride + mPlatformService->getDirectorySeparator() + cfgfile);
     	} else {
     	 	// first the global config is loaded
-    		bool globalok = loadFromFile(mPlatformService->getGlobalConfigPath() 
-    				+ mPlatformService->getDirectorySeparator() 
+    		bool globalok = loadFromFile(mPlatformService->getGlobalConfigPath()
+    				+ mPlatformService->getDirectorySeparator()
     				+ cfgfile);
-    		
+
     		// then overriden by local one
     		bool userok = loadFromFile(mPlatformService->getUserConfigPath() \
     				+ mPlatformService->getDirectorySeparator()
     				+ cfgfile);
-    		
+
     		return userok || globalok;
     	}
     }
-    
+
     //------------------------------------------------------
     void ConfigService::setConfigPathOverride(const std::string& cfgpath) {
     	mConfigPathOverride = cfgpath;
@@ -181,9 +182,9 @@ namespace Opde {
 	//------------------------------------------------------
 	void ConfigService::logAllParameters() {
 		Parameters::const_iterator dit = mConfigKeyDescriptions.begin();
-		
+
 		LOG_INFO("ConfigService: Configuration parameters:");
-		
+
 		while (dit != mConfigKeyDescriptions.end()) {
 			LOG_INFO("ConfigService:\t%s - %s", dit->first.c_str(), dit->second.c_str());
 		}
@@ -193,7 +194,7 @@ namespace Opde {
 	bool ConfigService::loadFromFile(const std::string& cfgfile) {
 		try  {  // load a few options
 			LOG_INFO("ConfigService: Loading config file from '%s'", cfgfile.c_str());
-			
+
 			Ogre::ConfigFile cf;
 			cf.load(cfgfile);
 
@@ -218,7 +219,7 @@ namespace Opde {
 			// Guess the file didn't exist
 		}
 	}
-	
+
 	//-------------------------- Factory implementation
 	std::string ConfigServiceFactory::mName = "ConfigService";
 
@@ -232,7 +233,7 @@ namespace Opde {
 	const uint ConfigServiceFactory::getMask() {
 		return SERVICE_CORE;
 	}
-	
+
 	const size_t ConfigServiceFactory::getSID() {
 		return ConfigService::SID;
 	}

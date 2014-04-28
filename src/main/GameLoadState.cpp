@@ -25,7 +25,6 @@
 
 #include "config.h"
 
-#include "OIS.h"
 #include "GameStateManager.h"
 #include "GameLoadState.h"
 #include "GamePlayState.h"
@@ -133,12 +132,13 @@ namespace Opde {
 		mFirstTime = false;
 	}
 
-	bool GameLoadState::keyPressed( const OIS::KeyEvent &e ) {
+
+	bool GameLoadState::keyPressed(const SDL_KeyboardEvent &e) {
 		return false;
 	}
 
-	bool GameLoadState::keyReleased( const OIS::KeyEvent &e ) {
-		if( e.key == OIS::KC_ESCAPE ) {
+	bool GameLoadState::keyReleased(const SDL_KeyboardEvent &e) {
+		if( e.keysym.sym == SDLK_ESCAPE ) {
         		// requestTermination();
 			if (mLoaded)
 				popState();
@@ -146,35 +146,15 @@ namespace Opde {
 		return false;
 	}
 
-	bool GameLoadState::mouseMoved( const OIS::MouseEvent &e ) {
+	bool GameLoadState::mouseMoved(const SDL_MouseMotionEvent &e) {
 		return false;
 	}
 
-	bool GameLoadState::mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
+	bool GameLoadState::mousePressed(const SDL_MouseButtonEvent &e) {
 		return false;
 	}
 
-	bool GameLoadState::mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id ) {
-		return false;
-	}
-
-	bool GameLoadState::povMoved(const OIS::JoyStickEvent &e, int pov)
-	{
-		return false;
-	}
-
-	bool GameLoadState::axisMoved(const OIS::JoyStickEvent &arg, int axis)
-	{
-		return false;
-	}
-
-	bool GameLoadState::buttonPressed(const OIS::JoyStickEvent &arg, int button)
-	{
-		return false;
-	}
-
-	bool GameLoadState::buttonReleased(const OIS::JoyStickEvent &arg, int button)
-	{
+	bool GameLoadState::mouseReleased(const SDL_MouseButtonEvent &e) {
 		return false;
 	}
 

@@ -37,7 +37,6 @@
 #include "OpdeServiceManager.h"
 #include "ServiceCommon.h"
 #include "ConsoleBackend.h"
-#include "ConsoleFrontend.h"
 #include "OgreZip.h"
 
 #include <OgreRoot.h>

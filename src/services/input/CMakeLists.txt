@@ -3,7 +3,6 @@ INCLUDE(${OPDE_SOURCE_DIR}/src/base/Base.cmake)
 
 include_directories ( 
     ${OGRE_INCLUDE_DIR} 
-    ${OIS_INCLUDE_DIR} 
     ${OPDE_BINARY_DIR}   
     ${OPDE_BASE_INCLUDES}
     ${OPDE_SOURCE_DIR}/src/scenemanager
@@ -12,7 +11,6 @@ include_directories (
 
 link_directories ( 
     ${OGRE_LIB_DIR}
-    ${OIS_LIB_DIR}
     ${OPDE_SOURCE_DIR}/src/base/servicemanager
 )
 

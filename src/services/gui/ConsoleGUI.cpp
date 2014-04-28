@@ -29,12 +29,9 @@
 
 #include "OpdeException.h"
 
-#include <OIS.h>
 #include <string.h>
 
-
 using namespace Ogre;
-using namespace OIS;
 using namespace std;
 
 // some maximal line count for the console...
@@ -48,7 +45,7 @@ namespace Opde {
 		mFont = mOwner->getConsoleFont();
 		// Core atlas that should be used to render core gui
 		mAtlas = mOwner->getCoreAtlas();
-		
+
 		mConsoleColors.push_back(ColourValue::Red);
 		mConsoleColors.push_back(ColourValue(1.0f,0.7f,0.7f));
 		mConsoleColors.push_back(ColourValue::White);
@@ -56,31 +53,31 @@ namespace Opde {
 		mConsoleColors.push_back(ColourValue(0.8f,0.8f,0.5f));
 		mConsoleColors.push_back(ColourValue(0.8f,0.8f,0.3f));
 		mConsoleColors.push_back(ColourValue::Blue);
-		
+
 		assert(!mFont.isNull());
-		
+
 		mDrawSrv = GET_SERVICE(DrawService);
 		mInputSrv = GET_SERVICE(InputService);
-		
+
 		mConsoleBackend = ConsoleBackend::getSingletonPtr();
 
 		mPosition = -1; // follow
-		
+
 		// TODO: Create a grey transparent rectangle below the text (needs work in draw service)
-		
+
 		mConsoleBackground = mDrawSrv->createRenderedRect(mAtlas);
 		// mConsoleBackground->setColour(ColourValue(0.5f, 0.5f, 0.5f, 0.5f));
 		mConsoleBackground->setColour(ColourValue(0.0f, 0.0f, 0.0f));
 		mConsoleBackground->setZOrder(1);
-		
+
 		mCommandLineBackground = mDrawSrv->createRenderedRect(mAtlas);
 		mCommandLineBackground->setColour(ColourValue(0.95f, 0.75f, 0.55f, 0.75f));
 		mCommandLineBackground->setZOrder(1);
-		
+
 		mConsoleText = mDrawSrv->createRenderedLabel(mFont, "");
 		mCommandLine = mDrawSrv->createRenderedLabel(mFont, ">");
 		mConsoleSheet = mDrawSrv->createSheet("CONSOLE_SHEET");
-		
+
 		mConsoleText->setZOrder(2);
 		mCommandLine->setZOrder(2);
 
@@ -91,10 +88,10 @@ namespace Opde {
 		mConsoleSheet->addDrawOperation(mCommandLine);
 
 		mPosition = 0;
-		
+
 		// pull out the current resolution from render service
 		RenderServicePtr rs = GET_SERVICE(RenderService);
-		
+
 		const RenderWindowSize& rws = rs->getCurrentScreenSize();
 		resolutionChanged(rws.width, rws.height);
 	}
@@ -108,69 +105,73 @@ namespace Opde {
 		mDrawSrv->destroyRenderedRect(mConsoleBackground);
 		mConsoleBackground = NULL;
 		mDrawSrv->destroySheet(mConsoleSheet);
-		
+
 		mConsoleSheet.setNull();
-		
+
 		mDrawSrv.setNull();
 	}
 
 	void ConsoleGUI::setActive(bool active) {
 		mIsActive = active;
-		
+
 		if (mIsActive)
 			mDrawSrv->setActiveSheet(mConsoleSheet);
 	}
 
-	bool ConsoleGUI::injectKeyPress(const OIS::KeyEvent &e) {
+	bool ConsoleGUI::injectKeyPress(unsigned int keycode) {
 		if (!mIsActive)
 			return false;
 
-		if (e.key == KC_ESCAPE) {
+		if (keycode == SDLK_ESCAPE) {
 			mOwner->hideConsole();
-		} else if (e.key == KC_RETURN) {
+		} else if (keycode == SDLK_RETURN) {
 			// add the command to the log...
 			mConsoleBackend->putMessage(">" + mCommand, 6);
 			// and execute
 			DVariant result = mInputSrv->processCommand(mCommand);
-			
+
 			if (!result.toBool())
 				mConsoleBackend->putMessage("Invalid command or parameters", 1);
-				
+
 			mCommand = "";
-		} else if (e.key == KC_BACK) {
+		} else if (keycode == SDLK_BACKSPACE) {
 			mCommand = mCommand.substr(0, mCommand.length()-1);
-		} else if (e.key == KC_PGUP) {
+		} else if (keycode == SDLK_PAGEUP) {
 			if (mPosition >= SCROLL_LINES)
 				mPosition -= SCROLL_LINES; // let two lines be the same
 			else if (mPosition < 0) {
 				mPosition = mConsoleBackend->getHistorySize();
-				
+
 				mPosition = std::max(0, mPosition - (SCROLL_LINES + SCROLL_LINES + 1));
 			} else
 				mPosition = 0;
-			
+
 			mConsoleBackend->setChanged();
-		} else if (e.key == KC_PGDOWN) {
+		} else if (keycode == SDLK_PAGEDOWN) {
 			if (mPosition >= 0)
 				mPosition += SCROLL_LINES;
-			
+
 			// if at the end, set follow
 			if ((unsigned int)(mPosition) > mConsoleBackend->getHistorySize() - SCROLL_LINES)
 				mPosition = -1;
-				
+
 			mConsoleBackend->setChanged();
-		} else if (e.key == KC_END) {
+		} else if (keycode == SDLK_END) {
 			mPosition = -1;
 			mConsoleBackend->setChanged();
-		}else if (e.key == KC_HOME) {
+		}else if (keycode == SDLK_HOME) {
 			mPosition = 0;
 			mConsoleBackend->setChanged();
 		}
 		else {
+            // not a char key?
+            if (keycode & (1 << 30))
+                return true;
+
 			string allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ,./:;'-_+=[]{}()| \"\t";
-			
+
 			char key[2];
-			key[0]  = (char)(e.text);
+			key[0]  = (char)(keycode);
 			key[1] = 0;
 
 			if (allowed.find(key) != string::npos)
@@ -202,7 +203,7 @@ namespace Opde {
 					size_t level = it->first;
 					if (level >= mConsoleColors.size())
 						level = mConsoleColors.size() - 1;
-					
+
 					mConsoleText->addText(it->second, mConsoleColors[level]);
 					mConsoleText->addText("\n", Ogre::ColourValue::White);
 				}
@@ -211,7 +212,7 @@ namespace Opde {
 			mConsoleSheet->deactivate();
 		}
 	}
-	
+
 	/// recalculates the number of visible lines based on the current screen size and some limit
 	void ConsoleGUI::resolutionChanged(size_t width, size_t height) {
 		// some default positioning
@@ -219,21 +220,21 @@ namespace Opde {
 		size_t screenLines = (height / mFont->getHeight()) - 1;
 		if (screenLines > CONSOLE_LINES)
 			screenLines = CONSOLE_LINES;
-		
+
 		// maximal console width
 		size_t screenColumns = (width / mFont->getWidth());
-		
+
 		mTextClipRect.top = 0;
 		mTextClipRect.left = 0;
 		mTextClipRect.right = screenColumns * mFont->getWidth();
 		mTextClipRect.bottom = (screenLines - 1) * mFont->getHeight();
 		mTextClipRect.noClip = false;
-		
+
 		// background rect
 		mConsoleBackground->setPosition(mTextClipRect.left, mTextClipRect.top);
 		mConsoleBackground->setWidth(mTextClipRect.right);
 		mConsoleBackground->setHeight((screenLines - 1) * mFont->getHeight());
-		
+
 		mCmdLineClipRect.top = mTextClipRect.bottom;
 		mCmdLineClipRect.left = mTextClipRect.left;
 		mCmdLineClipRect.right = mTextClipRect.right;
@@ -243,10 +244,10 @@ namespace Opde {
 		mCommandLineBackground->setPosition(mCmdLineClipRect.left, mCmdLineClipRect.top);
 		mCommandLineBackground->setWidth(mCmdLineClipRect.right);
 		mCommandLineBackground->setHeight(mFont->getHeight());
-		
+
 		mConsoleText->setPosition(mTextClipRect.left, mTextClipRect.top);
 		mCommandLine->setPosition(mCmdLineClipRect.left, mCmdLineClipRect.top);
-		
+
 		mConsoleText->setClipRect(mTextClipRect);
 		mCommandLine->setClipRect(mCmdLineClipRect);
 	}

@@ -40,6 +40,9 @@
 #include "ObjectService.h"
 #include "EntityMaterialInstance.h"
 
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
+
 #include <OgreEntity.h>
 #include <OgreLight.h>
 #include <OgreSceneNode.h>
@@ -66,10 +69,17 @@ namespace Opde {
 		unsigned int height;
 		/// The new window is fullscreen (or windowed)
 		bool fullscreen;
+		/// Display id, or -1 if not found
+		int display;
 		// TODO: Pixelformat
-		
-		RenderWindowSize() : width(0), height(0), fullscreen(false) {};
-		RenderWindowSize(unsigned int w, unsigned int h, bool fs = false) : width(w), height(h), fullscreen(fs) {};
+
+		RenderWindowSize()
+			: width(0), height(0), fullscreen(false), display(-1)
+		{}
+
+		RenderWindowSize(unsigned int w, unsigned int h, bool fs = false)
+			: width(w), height(h), fullscreen(fs), display(-1)
+		{}
 	};
 
 	/// Render service message (Used to signalize a change in the renderer setup)
@@ -184,12 +194,14 @@ namespace Opde {
 
 			/** Internal method that returns entity info for a given object ID, or NULL if such does not exist */
 			EntityInfo* _getEntityInfo(int oid);
-			
+
 			inline const RenderWindowSize& getCurrentScreenSize() const { return mCurrentSize; };
 
 		protected:
 
 			virtual bool init();
+            virtual void initSDLWindow();
+            virtual void initOgreWindow();
 			virtual void bootstrapFinished();
 			virtual void shutdown();
 
@@ -236,7 +248,7 @@ namespace Opde {
 
 			/// prepares the object service structures used by renderer service
 			void createProperties();
-			
+
 			/// broadcasts the new windows size
 			void broadcastScreenSize();
 
@@ -309,11 +321,12 @@ namespace Opde {
 			RenderTypeProperty* mRenderTypeProperty;
 			RenderAlphaProperty* mRenderAlphaProperty;
 			ZBiasProperty* mZBiasProperty;
-		
+
 			Ogre::uint8 mDefaultRenderQueue;
 
 		private:
 			RenderWindowSize mCurrentSize;
+            SDL_Window * mSDLWindow;
 	};
 
 	/// Shared pointer to Link service
@@ -331,7 +344,7 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const unsigned int getMask() { return SERVICE_PROPERTY_LISTENER | SERVICE_RENDERER; };
-			
+
 			virtual const size_t getSID();
 
 		private:

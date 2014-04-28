@@ -29,7 +29,6 @@
 
 #include "GameState.h"
 #include "OpdeSingleton.h"
-#include "ConsoleFrontend.h"
 #include "ConsoleCommandListener.h"
 #include "LinkCommon.h"
 #include "ConfigService.h"
@@ -56,15 +55,12 @@ namespace Opde {
 
 			virtual void update(unsigned long timePassed);
 
-			virtual bool keyPressed( const OIS::KeyEvent &e );
-			virtual bool keyReleased( const OIS::KeyEvent &e );
-			virtual bool mouseMoved( const OIS::MouseEvent &e );
-			virtual bool mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id );
-			virtual bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id );
-			virtual bool povMoved(const OIS::JoyStickEvent &e, int pov);
-			virtual bool axisMoved(const OIS::JoyStickEvent &arg, int axis);
-			virtual bool buttonPressed(const OIS::JoyStickEvent &arg, int button);
-			virtual bool buttonReleased(const OIS::JoyStickEvent &arg, int button);
+			bool keyPressed(const SDL_KeyboardEvent &e);
+			bool keyReleased(const SDL_KeyboardEvent &e);
+
+			bool mouseMoved(const SDL_MouseMotionEvent &e);
+			bool mousePressed(const SDL_MouseButtonEvent &e);
+			bool mouseReleased(const SDL_MouseButtonEvent &e);
 
 			virtual void commandExecuted(std::string command, std::string parameters);
 
@@ -117,8 +113,6 @@ namespace Opde {
 			Ogre::Overlay* mPortalOverlay;
 
 			Ogre::RenderWindow* mWindow;
-
-			ConsoleFrontend* mConsole;
 
 			int mNumScreenShots;
 			// config service

@@ -29,10 +29,6 @@
 
 #include "OpdeCommon.h"
 
-#include <OISMouse.h>
-#include <OISKeyboard.h>
-#include <OISInputManager.h>
-
 #include <OgreRenderWindow.h>
 
 #include <stack>
@@ -76,28 +72,21 @@ namespace Opde {
 			/** Initialize the state manager, then run the loop with the given state. Initializes ogre, resources, input system, etc.
 			* @return true if game should procede, false otherwise */
 			bool run();
-			
+
 			inline void setDesiredMissionName(const std::string& name) { mMissionName = name; };
-			
+
 		protected:
 			/** Loads the resources from the resources.cfg */
 			void setupResources(void);
 
-			/** Setup the OIS input system. */
 			void setupInputSystem();
 
-			bool keyPressed( const OIS::KeyEvent &e );
-			bool keyReleased( const OIS::KeyEvent &e );
+			bool keyPressed(const SDL_KeyboardEvent &e);
+			bool keyReleased(const SDL_KeyboardEvent &e);
 
-			bool mouseMoved( const OIS::MouseEvent &e );
-			bool mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id );
-			bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id );
-
-			virtual bool povMoved(const OIS::JoyStickEvent &e, int pov);
-			virtual bool axisMoved(const OIS::JoyStickEvent &arg, int axis);
-			virtual bool buttonPressed(const OIS::JoyStickEvent &arg, int button);
-			virtual bool buttonReleased(const OIS::JoyStickEvent &arg, int button);
-
+			bool mouseMoved(const SDL_MouseMotionEvent &e);
+			bool mousePressed(const SDL_MouseButtonEvent &e);
+			bool mouseReleased(const SDL_MouseButtonEvent &e);
 
 			typedef std::stack<GameState*> StateStack;
 
@@ -113,7 +102,7 @@ namespace Opde {
 			///  Stderr logger
 			ConsoleBackend* mConsoleBackend;
 
-			/// Opde::root 
+			/// Opde::root
 			Opde::Root *mRoot;
 			Ogre::Root *mOgreRoot;
 
@@ -125,10 +114,10 @@ namespace Opde {
 
 			/// Type of the game (t1,t2,ss2)
 			std::string mGameType;
-			
+
 			/// requested mission file name
 			std::string mMissionName;
-			
+
 			/// Service manager ref
 			ServiceManager* mServiceMgr;
 	};

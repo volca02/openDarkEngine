@@ -30,6 +30,8 @@
 #include "logger.h"
 #include "ServiceCommon.h"
 
+#include <SDL2/SDL_syswm.h>
+
 #include <OgreRoot.h>
 #include <OgreStringConverter.h>
 #include <OgreMeshManager.h>
@@ -165,23 +167,25 @@ namespace Opde {
 	/*--------------------------------------------------------*/
 	template<> const size_t ServiceImpl<RenderService>::SID = __SERVICE_ID_RENDER;
 
-	RenderService::RenderService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::RenderService >(manager, name),
-			mPropModelName(NULL),
-			mPropPosition(NULL),
-			mPropScale(NULL),
-			mRoot(NULL),
-			mSceneMgr(NULL),
-			mRenderWindow(NULL),
-			mDarkSMFactory(NULL),
-			mDefaultCamera(NULL),
-			mLoopService(NULL),
-			mEditorMode(false),
-			mHasRefsProperty(NULL),
-			mRenderTypeProperty(NULL),
-			mRenderAlphaProperty(NULL),
-			mZBiasProperty(NULL),
-			mCurrentSize(0,0) {
-
+	RenderService::RenderService(ServiceManager *manager, const std::string& name) :
+        ServiceImpl< Opde::RenderService >(manager, name),
+        mPropModelName(NULL),
+        mPropPosition(NULL),
+        mPropScale(NULL),
+        mRoot(NULL),
+        mSceneMgr(NULL),
+        mRenderWindow(NULL),
+        mDarkSMFactory(NULL),
+        mDefaultCamera(NULL),
+        mLoopService(NULL),
+        mEditorMode(false),
+        mHasRefsProperty(NULL),
+        mRenderTypeProperty(NULL),
+        mRenderAlphaProperty(NULL),
+        mZBiasProperty(NULL),
+        mCurrentSize(0,0),
+        mSDLWindow(NULL)
+    {
 		// TODO: This is just plain wrong. This service should be the maintainer of the used scene manager, if any other service needs the direct handle, etc.
 		// The fact is this service is probably game only, and should be the initialiser of graphics as the whole. This will be the
 		// modification that should be done soon in order to let the code look and be nice
@@ -271,22 +275,29 @@ namespace Opde {
 
 	// --------------------------------------------------------------------------
 	bool RenderService::init() {
-		// TODO: These can be gathered from the config file. Usage of the config service would be a nice thing to do
-		if( !mRoot->restoreConfig() ) {
-			// If there is no config file, show the configuration dialog
-			if( !mRoot->showConfigDialog() ) {
-				LOG_ERROR("RenderService::init: The renderer setup was canceled. Application termination in progress.");
-				return false;
-			}
-		}
+		mConfigService = GET_SERVICE(ConfigService);
 
-		// Initialise and create a default rendering window
-		mRenderWindow = mRoot->initialise( true, "openDarkEngine" );
+        mConfigService->setParamDescription("fullscren", "Toggles display to fullscreen/window");
+        mConfigService->setParamDescription("window_width", "Desired game's window/fullscreen width");
+        mConfigService->setParamDescription("window_height", "Desired game's window/fullscreen height");
+        mConfigService->setParamDescription("display", "Display id (for multi-screen systems)");
 
-		// inform all listeners about the current resolution
-		mCurrentSize.fullscreen = mRenderWindow->isFullScreen();
-		mCurrentSize.width = mRenderWindow->getWidth();
-		mCurrentSize.height = mRenderWindow->getHeight();
+        // get screen resolution from opde.cfg
+        mCurrentSize.fullscreen = mConfigService->getParam("fullscreen", false).toBool();
+        mCurrentSize.width   = mConfigService->getParam("window_width", 0).toUInt();
+        mCurrentSize.height  = mConfigService->getParam("window_height", 0).toUInt();
+        mCurrentSize.display = mConfigService->getParam("display", -1).toInt();
+
+        LOG_INFO("RenderService: initializing SDL");
+
+        initSDLWindow();
+
+#warning DESTROY mSDLWindow
+
+        LOG_INFO("RenderService: initializing OGRE Window");
+
+        // initialize ogre window and render system...
+        initOgreWindow();
 
 		broadcastScreenSize();
 
@@ -324,8 +335,6 @@ namespace Opde {
 
 		mPropertyService = GET_SERVICE(PropertyService);
 
-		mConfigService = GET_SERVICE(ConfigService);
-
 		Ogre::uint8 mDefaultRenderQueue = mSceneMgr->getRenderQueue()->getDefaultQueueGroup();
 
 		// preset the default render queue according to the RenderQueue
@@ -334,6 +343,107 @@ namespace Opde {
 		return true;
     }
 
+	// --------------------------------------------------------------------------
+    void RenderService::initSDLWindow() {
+        int res = SDL_Init(SDL_INIT_EVERYTHING);
+        if (res != 0) {
+            OPDE_EXCEPT(String("SDL Initialization error: ") + SDL_GetError(),
+                        "RenderService::initSDLWindow");
+        }
+
+        // try to reach propper display and resolution
+        if (mCurrentSize.fullscreen || (!mCurrentSize.width || !mCurrentSize.height)) {
+            // first validate the selected display
+            int dispCount = SDL_GetNumVideoDisplays();
+
+            if (dispCount < 0)
+                OPDE_EXCEPT(String("SDL can't get display count. Error: ") + SDL_GetError(),
+                            "RenderService::initSDLWindow");
+
+            if (mCurrentSize.display < 0)
+                mCurrentSize.display = 0;
+
+            if (mCurrentSize.display >= dispCount) {
+                LOG_ERROR("Obsolete/invalid display number specified in config, ignoring");
+                mCurrentSize.display = 0;
+            }
+
+            // now try to gather the desktop resolution
+            SDL_DisplayMode mode;
+            res = SDL_GetDesktopDisplayMode(mCurrentSize.display, &mode);
+
+            if (res)
+                OPDE_EXCEPT(String("SDL can't get current video mode. Error: ") + SDL_GetError(),
+                            "RenderService::initSDLWindow");
+
+            mCurrentSize.width = mode.w;
+            mCurrentSize.height = mode.h;
+            mCurrentSize.fullscreen = true;
+        }
+
+        // based on the settings, try to set the resolution.
+        LOG_INFO("RenderService: Requested%s window %dx%d",
+                 mCurrentSize.fullscreen ? " fullscreen" : " ",
+                 mCurrentSize.width,
+                 mCurrentSize.height);
+
+        int flags = SDL_WINDOW_OPENGL|SDL_WINDOW_SHOWN;
+
+        if (mCurrentSize.fullscreen)
+            flags |= SDL_WINDOW_FULLSCREEN;
+
+        mSDLWindow = SDL_CreateWindow(
+                     "openDarkEngine",
+                     SDL_WINDOWPOS_UNDEFINED,
+                     SDL_WINDOWPOS_UNDEFINED,
+                     mCurrentSize.width,
+                     mCurrentSize.height,
+                     flags);
+
+        if (mSDLWindow == NULL)
+            OPDE_EXCEPT("Can't create SDL window", "RenderService::initSDLWindow");
+    }
+
+    // --------------------------------------------------------------------------
+    void RenderService::initOgreWindow() {
+        // where do I find this?
+        if (mRoot->getAvailableRenderers().size() < 1)
+            OPDE_EXCEPT("Failed to initialize RenderSystem", "RenderService::initOgre");
+        mRoot->setRenderSystem(mRoot->getAvailableRenderers()[0]);
+        mRoot->initialise(false);
+
+        Ogre::NameValuePairList params;
+        // PARTS COPIED FROM https://github.com/TTimo/es_core/
+        // this has to be done in platform specific way...
+
+        SDL_SysWMinfo sysInfo;
+        SDL_VERSION( &sysInfo.version );
+        if ( SDL_GetWindowWMInfo(mSDLWindow, &sysInfo ) <= 0 )
+        {
+            OPDE_EXCEPT("Can't create SDL GL context", "RenderService::initSDLWindow");
+        }
+
+#ifdef __WINDOWS__
+        params["parentWindowHandle"] = Ogre::StringConverter::toString(sysInfo.info.win.window);
+#elif __LINUX__
+        params["parentWindowHandle"] = Ogre::StringConverter::toString(sysInfo.info.x11.window);
+#elif __APPLE__
+#error  Nobody tried this yet.
+        params["externalGLControl"] = "1";
+        params["externalWindowHandle"] = OSX_cocoa_view(mSDLWindow);
+        params["macAPI"] = "cocoa";
+        params["macAPICocoaUseNSView"] = "true";
+#endif
+
+        mRenderWindow = mRoot->createRenderWindow(
+            "openDarkEngine",
+            mCurrentSize.width,
+            mCurrentSize.height,
+            mCurrentSize.fullscreen,
+            &params);
+
+        mRenderWindow->setVisible(true);
+    }
 
 	// --------------------------------------------------------------------------
 	Ogre::Root* RenderService::getOgreRoot() {
@@ -890,4 +1000,3 @@ namespace Opde {
 		return RenderService::SID;
 	}
 }
-

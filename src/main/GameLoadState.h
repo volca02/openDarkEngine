@@ -53,16 +53,12 @@ namespace Opde {
 
 			virtual void update(unsigned long timePassed);
 
+			bool keyPressed(const SDL_KeyboardEvent &e);
+			bool keyReleased(const SDL_KeyboardEvent &e);
 
-			virtual bool keyPressed( const OIS::KeyEvent &e );
-			virtual bool keyReleased( const OIS::KeyEvent &e );
-			virtual bool mouseMoved( const OIS::MouseEvent &e );
-			virtual bool mousePressed( const OIS::MouseEvent &e, OIS::MouseButtonID id );
-			virtual bool mouseReleased( const OIS::MouseEvent &e, OIS::MouseButtonID id );
-			virtual bool povMoved(const OIS::JoyStickEvent &e, int pov);
-			virtual bool axisMoved(const OIS::JoyStickEvent &arg, int axis);
-			virtual bool buttonPressed(const OIS::JoyStickEvent &arg, int button);
-			virtual bool buttonReleased(const OIS::JoyStickEvent &arg, int button);
+			bool mouseMoved(const SDL_MouseMotionEvent &e);
+			bool mousePressed(const SDL_MouseButtonEvent &e);
+			bool mouseReleased(const SDL_MouseButtonEvent &e);
 
 			static GameLoadState& getSingleton();
 			static GameLoadState* getSingletonPtr();

@@ -13,7 +13,6 @@ INCLUDE( ${OPDE_SOURCE_DIR}/src/scenemanager/DarkSceneManager.cmake )
 include_directories(
     ${ODE_INCLUDE_DIR}
     ${OGRE_INCLUDE_DIR}
-    ${OIS_INCLUDE_DIR}
     ${OPDE_BINARY_DIR}
     ${OPDE_BASE_INCLUDES}
     ${OPDE_SOURCE_DIR}/src/compat
@@ -71,8 +70,8 @@ IF (PYTHON_MODULE)
     target_link_libraries(opde
         OpenDark
         ${OGRE_LIBRARIES}
-        ${OIS_LIBRARIES}
         ${ODE_LIBRARIES}
+        ${SDL2_LIBRARIES}
     )
 
     # We need the library to be named *exactly* opde.so/opde.dll in order to find it with python
@@ -121,7 +120,7 @@ link_directories(
 target_link_libraries( OpenDark
     LINK_PRIVATE
     ${OGRE_LIBRARIES}
-    ${OIS_LIBRARIES}
+    ${SDL2_LIBRARIES}
     ${ODE_LIBRARIES}
     ${FREEIMAGE_LIBRARIES}
     ${OPDE_PYTHON_LIBRARIES}
@@ -168,8 +167,8 @@ add_executable (opdeMain WIN32
 target_link_libraries( opdeMain
     OpenDark
     ${OGRE_LIBRARIES}
-    ${OIS_LIBRARIES}
     ${ODE_LIBRARIES}
+    ${SDL2_LIBRARIES}
 )
 
 SET_TARGET_PROPERTIES( opdeMain PROPERTIES
@@ -189,9 +188,9 @@ add_executable (opdeScript
 target_link_libraries( opdeScript
     OpenDark
     ${OGRE_LIBRARIES}
-    ${OIS_LIBRARIES}
     ${ODE_LIBRARIES}
     ${OPDE_PYTHON_LIBRARIES}
+    ${SDL2_LIBRARIES}
 )
 
 SET_TARGET_PROPERTIES( opdeScript PROPERTIES
