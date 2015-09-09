@@ -36,9 +36,9 @@ namespace Opde {
 	/// char classifier (is Space)
 	struct IsChar : public std::unary_function<char, bool> {
 		IsChar(char c) : mChar(c) {};
-		IsChar(IsChar& b) : mChar(b.mChar) {};
+		IsChar(const IsChar& b) : mChar(b.mChar) {};
 
-		bool operator()(char c) {
+		bool operator()(char c) const {
 			return c == mChar;
 		}
 
