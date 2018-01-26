@@ -98,7 +98,7 @@ namespace Ogre {
 	}
 
 	// -------------------------------------------------------
-	bool ProxyArchive::exists(const String& filename) {
+	bool ProxyArchive::exists(const String& filename) const {
 		String un;
 
 		if (untransformName(filename, un))
@@ -108,7 +108,7 @@ namespace Ogre {
 	}
 
 	// -------------------------------------------------------
-	StringVectorPtr ProxyArchive::find(const String& pattern, bool recursive , bool dirs) {
+	StringVectorPtr ProxyArchive::find(const String& pattern, bool recursive , bool dirs) const {
 		/// have to list all infos, filter those which fit
 		StringVectorPtr lst = list(recursive, dirs);
 
@@ -129,7 +129,7 @@ namespace Ogre {
 	}
 
 	// -------------------------------------------------------
-	FileInfoListPtr ProxyArchive::listFileInfo(bool recursive, bool dirs) {
+	FileInfoListPtr ProxyArchive::listFileInfo(bool recursive, bool dirs) const {
 		return listFileInfoImpl(recursive, dirs);
 	}
 
@@ -162,7 +162,7 @@ namespace Ogre {
 	}
 
 	// -------------------------------------------------------
-	StringVectorPtr ProxyArchive::list(bool recursive , bool dirs) {
+	StringVectorPtr ProxyArchive::list(bool recursive , bool dirs) const {
 		/// have to list all infos, filter those which fit
 		StringVectorPtr lst = mArchive->list(recursive, dirs);
 

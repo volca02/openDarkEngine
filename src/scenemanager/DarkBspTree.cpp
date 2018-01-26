@@ -41,7 +41,7 @@ $Id$
 #include <OgreLogManager.h>
 #include <OgreSceneManagerEnumerator.h>
 #include <OgreIteratorWrappers.h>
-
+#include <OgreNode.h>
 
 namespace Ogre {
 
@@ -405,4 +405,3 @@ namespace Ogre {
 		std::stable_sort(destList.begin(), destList.end(), SceneManager::lightLess());
 	}
 }
-

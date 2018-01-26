@@ -62,17 +62,17 @@ namespace Ogre {
 			virtual DataStreamPtr open(const String& filename, bool readOnly) const;
 
 			/// lists the contents of the archive. transformed.
-			virtual StringVectorPtr list(bool recursive = true, bool dirs = false);
+			virtual StringVectorPtr list(bool recursive = true, bool dirs = false) const;
 
 			/// lists the contents of the archive. transformed, in the FileInfo structures.
-			virtual FileInfoListPtr listFileInfo(bool recursive = true, bool dirs = false);
+			virtual FileInfoListPtr listFileInfo(bool recursive = true, bool dirs = false) const;
 
 			/// performs a pattern match find on the archive files
 			virtual StringVectorPtr find(const String& pattern, bool recursive = true,
-			bool dirs = false);
+			bool dirs = false) const;
 
 			/// Searches for the given name, untransforming it first
-			virtual bool exists(const String& filename);
+			virtual bool exists(const String& filename) const;
 
 			/** Searches for files that match the given pattern
 			* @see find
@@ -83,7 +83,7 @@ namespace Ogre {
 			/// reports case sensitiveness of this proxy archive
 			virtual bool isCaseSensitive(void) const = 0;
 
-			time_t getModifiedTime(const String& filename) {return 0;};
+			time_t getModifiedTime(const String& filename) const {return 0;};
 
 		protected:
 			/// This implements a const version of listFileInfo, as ogre is inconsistent in the const modifier usage...

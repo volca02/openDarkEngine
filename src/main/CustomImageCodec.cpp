@@ -27,6 +27,7 @@
 #include <OgreString.h>
 #include <OgreException.h>
 #include <OgreLogManager.h>
+#include <OgreDataStream.h>
 
 #define _TRANSPARENT_PAL_INDEX 0
 

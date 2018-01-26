@@ -73,7 +73,7 @@ namespace Opde {
 		if (mEnumType != value.type())
 			throw(runtime_error("Type violation of the enumeration type"));
 
-		mValMap.insert(make_pair<string, DVariant>(key, value));
+		mValMap.insert(make_pair(key, value));
 	}
 
 	//------------------------------------

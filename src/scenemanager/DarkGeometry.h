@@ -25,6 +25,8 @@
 #ifndef __DARKGEOMETRY_H
 #define __DARKGEOMETRY_H
 
+#include <OgreHardwareBuffer.h>
+#include <OgreRenderOperation.h>
 #include "config.h"
 
 #include "DarkBspPrerequisites.h"

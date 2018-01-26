@@ -38,7 +38,7 @@ IF (NOT CMAKE_BUILD_TYPE)
 ENDIF (NOT CMAKE_BUILD_TYPE)
 
 # Option to build in the debugging code
-OPTION(GLOBAL_DEBUG 
+OPTION(GLOBAL_DEBUG
     "Build the debugging code"
     OFF)
 
@@ -51,9 +51,9 @@ OPTION(GENERATE_NSIS
 OPTION(GENERATE_DOC
     "Generate documentation"
     OFF)
-    
+
 # Option to build in the debugging code
-OPTION(PROFILING 
+OPTION(PROFILING
     "Build the sources with profiling support (Only Debug build type)"
     OFF)
 
@@ -92,7 +92,7 @@ MARK_AS_ADVANCED(OPDE_FULL_DATA_INSTALL_DIR)
 IF (PROFILING)
     IF(CMAKE_COMPILER_IS_GNUCXX)
     SET(PROFILER "-pg") # GCC only profiler option
-    ENDIF(CMAKE_COMPILER_IS_GNUCXX) 
+    ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 ELSE (PROFILING)
     SET(PROFILER "")
 ENDIF (PROFILING)
@@ -144,7 +144,7 @@ IF(CMAKE_COMPILER_IS_MSVC)
 ENDIF(CMAKE_COMPILER_IS_MSVC)
 
 # Various modules used for library path detections.
-SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 # Global debug option test. Sets the DEBUG flag in the config.h
 IF(GLOBAL_DEBUG)
@@ -205,7 +205,7 @@ ENDIF(SDL2_FOUND)
 
 FIND_PACKAGE(PythonLibs REQUIRED)
 SET(OPDE_PYTHON_LIBRARIES optimized ${PYTHON_LIBRARIES} debug ${PYTHON_DEBUG_LIBRARIES})
-    
+
 # Aditional libraries - deps of the python lib
 IF(UNIX)
     INCLUDE(PythonDeps.cmake)
@@ -239,7 +239,7 @@ IF (GENERATE_DOC)
 	ELSE(DOXYGEN_EXECUTABLE)
 		MESSAGE("Doxygen not found")
 	ENDIF(DOXYGEN_EXECUTABLE)
-	
+
 	IF(TEXI2HTML)
 		MESSAGE(STATUS "Texi2html Found OK")
 	ELSE(TEXI2HTML)
@@ -251,13 +251,13 @@ IF (GENERATE_DOC)
 	ELSE(DOT)
 		MESSAGE("Dot not found")
 	ENDIF(DOT)
-	
+
 	IF(EPYDOC)
 		MESSAGE(STATUS "Epydoc Found OK")
 	ELSE(EPYDOC)
 		MESSAGE("Epydoc not found")
 	ENDIF(EPYDOC)
-	
+
 	# See if we have all the dependencies for DOC_DEPS_SATISFIED
 	IF (DOXYGEN_EXECUTABLE AND TEXI2HTML AND DOT AND EPYDOC)
 		SET(DOC_DEPS_SATISFIED ON)
@@ -290,11 +290,11 @@ IF (GENERATE_DOC AND DOC_DEPS_SATISFIED)
     # Generate the doxyfile from the template file
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
                       ${CMAKE_BINARY_DIR}/Doxyfile)
-    
+
     # Now prepare the python doc. generator
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/writedoc.py.in
                       ${CMAKE_BINARY_DIR}/writedoc.py)
-    
+
     # doxygen make target
     IF (DOXYGEN_EXECUTABLE)
     	ADD_CUSTOM_TARGET(doc ALL
@@ -310,8 +310,8 @@ IF (GENERATE_DOC AND DOC_DEPS_SATISFIED)
 	# Create a dirctory for the python docs...
     file(WRITE ${CMAKE_BINARY_DIR}/doc/python/html/temp.txt "This file should be deleted before installation. It is only here to force the creation of the python doc. folder")
     file(REMOVE ${CMAKE_BINARY_DIR}/doc/python/html/temp.txt)
-       
-        
+
+
     # generates the Python docs.
     ADD_CUSTOM_TARGET(pydoc ALL
     	DEPENDS opdeScript
@@ -319,7 +319,7 @@ IF (GENERATE_DOC AND DOC_DEPS_SATISFIED)
 	COMMENT "Building Python API documentation" VERBATIM
 #	SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/writedoc.py.in
     )
- 
+
     MARK_AS_ADVANCED(MANUAL_BUILDER)
     # on win32 we use the buildmanual.bat, otherwise we use the buildmanual.sh
     IF(WIN32)
@@ -327,7 +327,7 @@ IF (GENERATE_DOC AND DOC_DEPS_SATISFIED)
     ELSE(WIN32)
        	SET(MANUAL_BUILDER "/bin/sh" "${CMAKE_CURRENT_SOURCE_DIR}/doc/src/buildmanual.sh")
     ENDIF(WIN32)
-    
+
     # generates the Developers manual
     ADD_CUSTOM_TARGET(manual ALL
         COMMAND ${MANUAL_BUILDER} ${CMAKE_CURRENT_SOURCE_DIR}/doc/src/ ${CMAKE_BINARY_DIR}/doc/manual/
@@ -338,7 +338,7 @@ IF (GENERATE_DOC AND DOC_DEPS_SATISFIED)
     # Copy various common files (style.css so far)
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/style.css
                       ${CMAKE_BINARY_DIR}/doc/style.css)
-    
+
     # TODO: property/link docs (maybe part of the writedoc.py?)
 
     # Install directives for the documentation
@@ -353,15 +353,15 @@ IF (GENERATE_NSIS)
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/installer/opde-win.in
                       ${CMAKE_BINARY_DIR}/installer/opde-win.nsi @ONLY)
         MESSAGE(STATUS "Installer script was generated in ${CMAKE_BINARY_DIR}/installer.")
-ENDIF (GENERATE_NSIS)        
+ENDIF (GENERATE_NSIS)
 
 # Optional testing local install (not automatic, use "make fake_install")
-ADD_CUSTOM_TARGET(fake_install 
-    "${CMAKE_COMMAND}" 
+ADD_CUSTOM_TARGET(fake_install
+    "${CMAKE_COMMAND}"
     -D CMAKE_INSTALL_PREFIX:string=${CMAKE_CURRENT_BINARY_DIR}/fake_install/${CMAKE_INSTALL_PREFIX}
-    -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_install.cmake" 
-#    DEPENDS opdeMain OpenDark ${OPDE_DOC_INST_DEPS} 
-) 
+    -P "${CMAKE_CURRENT_BINARY_DIR}/cmake_install.cmake"
+#    DEPENDS opdeMain OpenDark ${OPDE_DOC_INST_DEPS}
+)
 
 MESSAGE(STATUS "Your configuration seems to be OK!")
 
