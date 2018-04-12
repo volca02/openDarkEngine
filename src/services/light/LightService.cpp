@@ -161,6 +161,11 @@ namespace Opde {
 	}
 
 
+    Ogre::TexturePtr LightService::getAtlasTexture(size_t idx) {
+        return mAtlasList->getAtlas(idx)->getTexture();
+    }
+
+
 	//------------------------------------------------------------------------------------
 	void LightService::atlasLightMaps() {
 		// atlas all the cells

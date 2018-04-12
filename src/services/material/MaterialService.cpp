@@ -312,15 +312,15 @@ namespace Opde {
 
 		mat->setReceiveShadows(true);
 
-		StringUtil::StrStreamType lightmapName;
+		Ogre::StringStream lightmapName;
 		lightmapName << "@lightmap" << tag;
 
 		Pass *shadPass = mat->getTechnique(0)->getPass(0);
 
 		if (shadPass->getNumTextureUnitStates() <= 1) {
 			// Lightmap texture is added here
-			TextureUnitState* tex = shadPass->createTextureUnitState(lightmapName.str());
-
+			TextureUnitState* tex = shadPass->createTextureUnitState();
+            tex->setTexture(mLightService->getAtlasTexture(tag));
 
 			// Blend
 			tex->setColourOperation(LBO_MODULATE);
