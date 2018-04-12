@@ -31,7 +31,7 @@
 #include <OgreTechnique.h>
 #include <OgrePass.h>
 #include <OgreRoot.h>
-
+#include <OgreNode.h>
 
 using namespace Ogre;
 
@@ -91,12 +91,12 @@ namespace Opde {
 		mQuadList.clear();
 
 		for (DrawOperationMap::iterator it = mDrawOpMap.begin(); it != iend; ++it) {
-			DrawOperation* op = it->second; 
-			
+			DrawOperation* op = it->second;
+
 			// rebuild the drawop if needed
 			if (op->isDirty())
 				op->rebuild();
-			
+
 			// visit!
 			it->second->visitDrawBuffer(this);
 		}
@@ -186,7 +186,7 @@ namespace Opde {
 		if (mParent) {
 			return mParent->queryLights();
 		} else {
-			static Ogre::LightList emptyLightList; 
+			static Ogre::LightList emptyLightList;
 			return emptyLightList;
 		}
 	};
@@ -202,7 +202,7 @@ namespace Opde {
 
 		if (mQuadCount == 0)
 			return;
-		
+
 		if (!mVertexData) {
 			// no vertex data, let's reallocate some!
 			mVertexData = new Ogre::VertexData();
@@ -335,8 +335,7 @@ namespace Opde {
 		delete mIndexData;
 		mIndexData = NULL;
 
-		mBuffer.setNull();
+		mBuffer.reset();
 	};
 
 }
-

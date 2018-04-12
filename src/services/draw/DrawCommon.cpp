@@ -37,8 +37,8 @@ namespace Opde {
 	
 	//------------------------------------------------------	
 	DrawSourceBase::DrawSourceBase() : mMaterial(), mTexture(), mSourceID(0) {
-		mMaterial.setNull();
-		mTexture.setNull();
+		mMaterial.reset();
+		mTexture.reset();
 
 		mPixelSize.width = 0;
 		mPixelSize.height = 0;
@@ -88,7 +88,7 @@ namespace Opde {
 		loadImage(name, group);
 		
 		// if there was an external material specified then assign now
-		if (!extMaterial.isNull())
+		if (extMaterial)
 			mMaterial = extMaterial;
 	}
 	

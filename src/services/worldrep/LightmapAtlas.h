@@ -204,7 +204,7 @@ namespace Opde {
 			Ogre::HardwarePixelBufferSharedPtr mAtlas;
 
 			/** The name of the resulting resource */
-			Ogre::StringUtil::StrStreamType mName;
+			Ogre::String mName;
 
 			/** A vector containing Free Space rectangles left in the Atlas */
 			FreeSpaceInfo* mFreeSpace;
@@ -291,6 +291,8 @@ namespace Opde {
 
 			/** Sets the maximum atlas size */
 			static void setMaxSize(int Size) {mMaxSize = Size;};
+
+            Ogre::TexturePtr getTexture() { return mTex; }
 	};
 
 
@@ -348,6 +350,11 @@ namespace Opde {
 					(*atlases)->setLightIntensity(id, value);
 				}
 			};
+
+
+            LightAtlas* getAtlas(int idx) {
+                return mList.at(idx);
+            }
 
 			/// console command listener
 			virtual void commandExecuted(std::string command, std::string parameters);

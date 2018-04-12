@@ -27,6 +27,7 @@
 #include <OgreString.h>
 #include <OgreException.h>
 #include <OgreLogManager.h>
+#include <OgreDataStream.h>
 
 #define _TRANSPARENT_PAL_INDEX 0
 
@@ -188,7 +189,7 @@ namespace Ogre {
 			imgData->size = dstPitch * imgData->height;
 
 			// Bind output buffer
-			output.bind(new MemoryDataStream(imgData->size));
+			output.reset(new MemoryDataStream(imgData->size));
 
 			uchar* pSrc;
 			uchar* pDst = output->getPtr();

@@ -60,6 +60,7 @@
 #include "ManualBinFileLoader.h"
 #include "ManualFonFileLoader.h"
 #include "ProxyArchive.h"
+#include "OgreFixedZip.h"
 #include "logger.h"
 #include "OpdeException.h"
 #include "stdlog.h"
@@ -88,8 +89,7 @@ namespace Opde {
 			mDirArchiveFactory(NULL),
 			mCrfArchiveFactory(NULL),
 			mResourceGroupManager(NULL),
-			mArchiveManager(NULL),
-            mOverlaySystem(NULL)
+			mArchiveManager(NULL)
     {
 		mLogger = new Logger();
 
@@ -128,11 +128,11 @@ namespace Opde {
 		LOG_INFO("Root: Registering custom archive factories");
 		// register the factories
 		mDirArchiveFactory = new Ogre::CaseLessFileSystemArchiveFactory();
-		mZipArchiveFactory = new Ogre::FixedZipArchiveFactory();
+        mZipArchiveFactory = new Ogre::FixedZipArchiveFactory();
 		mCrfArchiveFactory = new Ogre::CrfArchiveFactory();
 
 		Ogre::ArchiveManager::getSingleton().addArchiveFactory(mDirArchiveFactory);
-		Ogre::ArchiveManager::getSingleton().addArchiveFactory(mZipArchiveFactory);
+        Ogre::ArchiveManager::getSingleton().addArchiveFactory(mZipArchiveFactory);
 		Ogre::ArchiveManager::getSingleton().addArchiveFactory(mCrfArchiveFactory);
 
 		if (serviceMask & SERVICE_RENDERER) {
@@ -140,11 +140,6 @@ namespace Opde {
 			// if custom image hooks are to be included, setup now
 			Ogre::CustomImageCodec::startup();
 		}
-
-		LOG_INFO("Root: Creating overlay system");
-
-		mOverlaySystem = new Ogre::OverlaySystem();
-#warning do this: m_pSceneMgr->addRenderQueueListener(pOverlaySystem);
 
 		LOG_INFO("Root: Creating console backend");
 
@@ -190,7 +185,6 @@ namespace Opde {
 			Ogre::CustomImageCodec::shutdown();
 		}
 
-		delete mOverlaySystem;
 		delete mOgreRoot;
 		delete mResourceGroupManager;
 		delete mArchiveManager;
@@ -205,7 +199,7 @@ namespace Opde {
 
 		delete mDirArchiveFactory;
 		delete mCrfArchiveFactory;
-		delete mZipArchiveFactory;
+        delete mZipArchiveFactory;
 
 		// As the last thing - release the logger
 		delete mLogger;

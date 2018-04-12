@@ -49,8 +49,10 @@ add_library (OpenDark SHARED
     CustomImageCodec.h
     ProxyArchive.cpp
     ProxyArchive.h
-    OgreZip.cpp
-    OgreZip.h
+# This is here because of this change:  dc38d2dcf502b6a3c21202573c6f2c3320a0687a 
+# that broken fully qualified file names in zip archives. It's fixed in recent ogre ONLY if OGRE_RESOURCEMANAGER_STRICT is defined (hint: not the case in aur package on arch)
+    OgreFixedZip.cpp
+    OgreFixedZip.h
     # and the base lib files
     ${OPDE_BASE_FILES}
     # and service files as well

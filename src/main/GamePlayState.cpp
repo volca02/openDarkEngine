@@ -35,7 +35,6 @@
 #include "TextureAtlas.h"
 
 #include <OgreRenderWindow.h>
-#include <OgreOverlayElement.h>
 #include <OgreStringConverter.h>
 
 using namespace Ogre;
@@ -44,7 +43,7 @@ namespace Opde {
 
 	template<> GamePlayState* Singleton<GamePlayState>::ms_Singleton = 0;
 
-	GamePlayState::GamePlayState() : mSceneMgr(NULL), mToLoadScreen(true), mDebugOverlay(NULL), mPortalOverlay(NULL) {
+	GamePlayState::GamePlayState() : mSceneMgr(NULL), mToLoadScreen(true) {
 		/// Register as a command listener, so we can load different levels
 		Opde::ConsoleBackend::getSingleton().registerCommandListener("load", dynamic_cast<ConsoleCommandListener*>(this));
 		Opde::ConsoleBackend::getSingleton().setCommandHint("load", "Loads a specified mission file");
@@ -88,16 +87,6 @@ namespace Opde {
 		mNumScreenShots = 0;
 
 		mRoot = Ogre::Root::getSingletonPtr();
-		mOverlayMgr = OverlayManager::getSingletonPtr();
-
-		/*mConsole = new ConsoleFrontend();
-		mConsole->setActive(false);*/
-
-		mDebugOverlay = OverlayManager::getSingleton().getByName("Opde/DebugOverlay");
-
-		// Portal stats overlay
-		mPortalOverlay = OverlayManager::getSingleton().getByName("Opde/OpdeDebugOverlay");
-
 		mShadows = true;
 
 		StartingPointObjID = 0;
@@ -167,11 +156,7 @@ namespace Opde {
 		if (mConfigService->hasParam("debug")) {
 			if (mConfigService->getParam("debug") == true) {
 				// debug overlay
-				mDebugOverlay->show();
-
-				// Portal stats overlay
-				mPortalOverlay->show();
-
+                // TODO
 				mDebug = true;
 			}
 		}
@@ -247,11 +232,6 @@ namespace Opde {
 		// std::cerr << mCamera->getPosition() << std::endl;
 		// std::cerr << mCamera->getDirection() << std::endl;
 
-		if (mPortalOverlay)
-			mPortalOverlay->hide();
-
-		if (mDebugOverlay)
-			mDebugOverlay->hide();
 		/*mConsole->setActive(false);
 		mConsole->update(1); // to hide the console while exiting
 		*/
@@ -333,36 +313,6 @@ namespace Opde {
 		if (mDebug) {
 			// update stats when necessary
 			try {
-
-				// Temporary: Debug Overlay
-				static String currFps = "Current FPS: ";
-				static String avgFps = "Average FPS: ";
-				static String bestFps = "Best FPS: ";
-				static String worstFps = "Worst FPS: ";
-				static String tris = "Triangle Count: ";
-				static String batches = "Batch Count: ";
-
-				OverlayElement* guiAvg = OverlayManager::getSingleton().getOverlayElement("Opde/AverageFps");
-				OverlayElement* guiCurr = OverlayManager::getSingleton().getOverlayElement("Opde/CurrFps");
-				OverlayElement* guiBest = OverlayManager::getSingleton().getOverlayElement("Opde/BestFps");
-				OverlayElement* guiWorst = OverlayManager::getSingleton().getOverlayElement("Opde/WorstFps");
-
-				const RenderTarget::FrameStats& stats = mWindow->getStatistics();
-
-				guiAvg->setCaption(avgFps + StringConverter::toString(stats.avgFPS));
-				guiCurr->setCaption(currFps + StringConverter::toString(stats.lastFPS));
-				guiBest->setCaption(bestFps + StringConverter::toString(stats.bestFPS)
-				+" "+StringConverter::toString(stats.bestFrameTime)+" ms");
-				guiWorst->setCaption(worstFps + StringConverter::toString(stats.worstFPS)
-				+" "+StringConverter::toString(stats.worstFrameTime)+" ms");
-
-				OverlayElement* guiTris = OverlayManager::getSingleton().getOverlayElement("Opde/NumTris");
-				guiTris->setCaption(tris + StringConverter::toString(stats.triangleCount));
-
-				OverlayElement* guiBatches = OverlayManager::getSingleton().getOverlayElement("Opde/NumBatches");
-				guiBatches->setCaption(batches + StringConverter::toString(stats.batchCount));
-
-				// OverlayElement* guiDbg = OverlayManager::getSingleton().getOverlayElement("Core/DebugText");
 			}
 			catch(...)
 			{
@@ -371,55 +321,6 @@ namespace Opde {
 
 			// update the portal statistics
 			try {
-				// Volca: I've disabled the timing reports, they need a patch of SM to work
-				OverlayElement* guibc = OverlayManager::getSingleton().getOverlayElement("Opde/BackCulls");
-				OverlayElement* guiep = OverlayManager::getSingleton().getOverlayElement("Opde/EvalPorts");
-				OverlayElement* guirc = OverlayManager::getSingleton().getOverlayElement("Opde/RendCells");
-				OverlayElement* guitt = OverlayManager::getSingleton().getOverlayElement("Opde/TravTime");
-				OverlayElement* guisr = OverlayManager::getSingleton().getOverlayElement("Opde/StaticRenderTime");
-				OverlayElement* guivo = OverlayManager::getSingleton().getOverlayElement("Opde/VisibleObjectsTime");
-				OverlayElement* guill = OverlayManager::getSingleton().getOverlayElement("Opde/LightListTime");
-				OverlayElement* guilc = OverlayManager::getSingleton().getOverlayElement("Opde/LightCount");
-				OverlayElement* guisg = OverlayManager::getSingleton().getOverlayElement("Opde/SceneGraphTime");
-
-				// Temporary: Debug Overlay
-				static String sbc = "Backface culls: ";
-				static String sep = "Evaluated portals: ";
-				static String src = "Rendered cells: ";
-				static String stt = "Traversal Time: ";
-				static String ssr = "Static Build Time: ";
-				static String vot = "Visible obj. Time: ";
-				static String llt = "Light list. Time: ";
-				static String lcs = "Light count : ";
-				static String sgt = "Scene graph Time: ";
-
-				uint bculls = 0, eports = 0, rendc = 0, travtm = 0;
-
-				unsigned long statbt, fvot, lltime, sgtime, lcnt;
-
-				mSceneMgr->getOption("BackfaceCulls", &bculls);
-
-				// mSceneMgr->getOption("CellsRendered", &rendc);
-				mSceneMgr->getOption("EvaluatedPortals", &eports);
-				// mSceneMgr->getOption("TraversalTime", &travtm);
-				mSceneMgr->getOption("StaticBuildTime", &statbt);
-				mSceneMgr->getOption("FindVisibleObjectsTime", &fvot);
-				mSceneMgr->getOption("LightListTime", &lltime);
-				mSceneMgr->getOption("LightCount", &lcnt);
-				mSceneMgr->getOption("SceneGraphTime", &sgtime);
-
-				travtm = static_cast<DarkCamera*>(mCamera)->getTraversalTime();
-				rendc = static_cast<DarkCamera*>(mCamera)->getVisibleCellCount();
-
-				guibc->setCaption(sbc + StringConverter::toString(bculls));
-				guiep->setCaption(sep + StringConverter::toString(eports));
-				guirc->setCaption(src + StringConverter::toString(rendc));
-				guitt->setCaption(stt + StringConverter::toString(travtm) + " ms");
-				guisr->setCaption(ssr + StringConverter::toString(statbt) + " ms");
-				guivo->setCaption(vot + StringConverter::toString(fvot) + " ms");
-				guill->setCaption(llt + StringConverter::toString(lltime) + " ms");
-				guilc->setCaption(lcs + StringConverter::toString(lcnt));
-				guisg->setCaption(sgt + StringConverter::toString(sgtime) + " ms");
 			}
 			catch(...)
 			{

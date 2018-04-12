@@ -453,7 +453,7 @@ namespace Ogre {
 		// Ambient col is self illum times transparency
 		RGBA diffuseCol = ColourValue(mColour.r, mColour.g, mColour.b, 1.0f - mTrans).getAsRGBA();
 
-		if (mSkeleton.isNull())
+		if (!mSkeleton)
 			OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "No skeleton given prior to build!", "SubMeshFiller::build");
 
 		mSubMesh->operationType = RenderOperation::OT_TRIANGLE_LIST;

@@ -21,6 +21,8 @@
  *
  *****************************************************************************/
 
+#include <iostream>
+
 #include "File.h"
 #include "FileGroup.h"
 #include "integers.h"
@@ -40,21 +42,21 @@ void usage(const char* message = NULL) {
 int typePhysVersion(const char* fname) {
 	DarkFileGroup* gr = NULL;
 	int rcode = 0;
-	
+
 	try {
 		FilePtr src = FilePtr(new StdFile(fname, File::FILE_R));
 		gr = new DarkFileGroup(src);
-	
+
 		FilePtr chunk = gr->getFile("PHYS_SYSTEM");
-	
+
 		uint32_t ver;
 		chunk->readElem(&ver, sizeof(uint32_t));
-	
+
 		std::cerr << gr->getName() << ":" << ver << std::endl;
 	} catch (...) {
 		rcode = 1;
 	}
-	
+
 	delete gr;
 	return rcode;
 }

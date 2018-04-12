@@ -37,7 +37,6 @@
 #include "OpdeServiceManager.h"
 #include "ServiceCommon.h"
 #include "ConsoleBackend.h"
-#include "OgreZip.h"
 
 #include <OgreRoot.h>
 #include <OgreLogManager.h>
@@ -145,9 +144,6 @@ namespace Opde {
 
 			// list of all service factories (for deletion in destructor)
 			ServiceFactoryList mServiceFactories;
-
-			// Overlay system module pointer
-			Ogre::OverlaySystem* mOverlaySystem;
 	};
 
 } // namespace Opde

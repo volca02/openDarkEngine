@@ -52,7 +52,7 @@ namespace Opde {
 				mAtlas(),
 				mFreeSpace(NULL),
 				mSize(1) {
-		mName << "@lightmap" << idx; // so we can find the atlas by number in the returned AtlasInfo
+		mName = "@lightmap" + idx; // so we can find the atlas by number in the returned AtlasInfo
 
 		mFreeSpace = new FreeSpaceInfo(0,0,mSize,mSize);
 
@@ -66,9 +66,9 @@ namespace Opde {
 		// TODO: for_each(lightmaps.begin(), lightmaps.end(), delete lmap);
 		delete mFreeSpace;
 
-        if (!mTex.isNull()) {
-			TextureManager::getSingleton().remove(mName.str());
-			mTex.setNull();
+        if (mTex) {
+			TextureManager::getSingleton().remove(mName);
+			mTex.reset();
 		}
 
         // delete all the lmaps.
@@ -183,14 +183,14 @@ namespace Opde {
 			return true;
 
 		// (re)create the texture
-		if (!mTex.isNull()) {
-			TextureManager::getSingleton().remove(mName.str());
-			mTex.setNull();
+		if (mTex) {
+			TextureManager::getSingleton().remove(mName);
+			mTex.reset();
 		}
 
 		// We place the lightmaps into a separate resource group for easy unloading
 		mTex = TextureManager::getSingleton().createManual(
-			mName.str(), MaterialService::TEMPTEXTURE_RESOURCE_GROUP,
+			mName, MaterialService::TEMPTEXTURE_RESOURCE_GROUP,
 			TEX_TYPE_2D, mSize, mSize, 0, PF_X8R8G8B8,
 			TU_DYNAMIC_WRITE_ONLY);
 

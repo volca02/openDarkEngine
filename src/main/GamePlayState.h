@@ -38,7 +38,6 @@
 #include <OgreMath.h>
 #include <OgreRoot.h>
 #include <OgreSceneManager.h>
-#include <Overlay/OgreOverlayManager.h>
 
 
 namespace Opde {
@@ -72,7 +71,6 @@ namespace Opde {
 		protected:
 			Ogre::Root *mRoot;
 			Ogre::SceneManager *mSceneMgr;
-			Ogre::OverlayManager *mOverlayMgr;
 			Ogre::Camera *mCamera;
 			Ogre::Viewport *mViewport;
 
@@ -107,10 +105,6 @@ namespace Opde {
 			Ogre::Vector3 mTranslateVector;
 
 			int mSceneDetailIndex;
-
-			// Debug overlay, Temporary
-			Ogre::Overlay* mDebugOverlay;
-			Ogre::Overlay* mPortalOverlay;
 
 			Ogre::RenderWindow* mWindow;
 

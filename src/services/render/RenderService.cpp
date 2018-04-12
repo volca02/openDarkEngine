@@ -308,7 +308,7 @@ namespace Opde {
 		// Register
 		Root::getSingleton().addSceneManagerFactory(mDarkSMFactory);
 
-		mSceneMgr = mRoot->createSceneManager(ST_INTERIOR, "DarkSceneManager");
+		mSceneMgr = mRoot->createSceneManager("DarkSceneManager", "DarkSceneManager");
 
 		// mSceneMgr->setShadowTechnique(SHADOWTYPE_TEXTURE_MODULATIVE);
 		mSceneMgr->setShadowTechnique(SHADOWTYPE_NONE);
@@ -829,7 +829,7 @@ namespace Opde {
 		// 1. The default texture - Jorge (recreated to be nearly the same visually)
 		TexturePtr jorgeTex = TextureManager::getSingleton().getByName("jorge.png");
 
-		if (jorgeTex.isNull()) {
+		if (!jorgeTex) {
 			DataStreamPtr stream(new MemoryDataStream(JORGE_TEXTURE_PNG, JORGE_TEXTURE_PNG_SIZE, false));
 
 			Image img;

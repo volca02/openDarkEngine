@@ -94,7 +94,7 @@ namespace Opde {
 			mReverseMap.erase(rit);
 			mReverseMap.insert(std::make_pair(value.toString(), objID));
 
-			assert(res.second);
+			assert(rit->second);
 
 			return true;
 		}

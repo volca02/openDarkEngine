@@ -176,6 +176,9 @@ namespace Opde {
 			/// Returns the atlas index for cell id and it's polygon id
 			size_t getAtlasForCellPolygon(size_t cellID, size_t faceID);
 
+            /// Returns atlas texture for the given atlas index
+            Ogre::TexturePtr getAtlasTexture(size_t idx);
+
 		protected:
 			/// Service initialization
 			bool init();

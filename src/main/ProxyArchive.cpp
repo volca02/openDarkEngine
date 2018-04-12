@@ -54,16 +54,17 @@ namespace Ogre {
 
 		while (it != lst->end()) {
 			const FileInfo& fi = *it++;
-			std::string tn = transformName(fi.filename);
+            const std::string &fullName = fi.filename;
+			std::string tn = transformName(fullName);
 			StringUtil::toLowerCase(tn);
 			// insert into the map
 			std::pair<NameTable::iterator, bool> result =
-				mExtToIntNames.insert(std::make_pair(tn, fi.filename));
+				mExtToIntNames.insert(std::make_pair(tn, fullName));
 
 			// see if the result is ok, except if not
 			if (!result.second)
 				OGRE_EXCEPT(Exception::ERR_DUPLICATE_ITEM,
-					"Archive '" + mName + "' contains duplicities : " + fi.filename,
+					"Archive '" + mName + "' contains duplicities : " + fullName,
 					"ProxyArchive::load");
 		}
 	}
@@ -98,7 +99,7 @@ namespace Ogre {
 	}
 
 	// -------------------------------------------------------
-	bool ProxyArchive::exists(const String& filename) {
+	bool ProxyArchive::exists(const String& filename) const {
 		String un;
 
 		if (untransformName(filename, un))
@@ -108,7 +109,7 @@ namespace Ogre {
 	}
 
 	// -------------------------------------------------------
-	StringVectorPtr ProxyArchive::find(const String& pattern, bool recursive , bool dirs) {
+	StringVectorPtr ProxyArchive::find(const String& pattern, bool recursive, bool dirs) const {
 		/// have to list all infos, filter those which fit
 		StringVectorPtr lst = list(recursive, dirs);
 
@@ -129,7 +130,7 @@ namespace Ogre {
 	}
 
 	// -------------------------------------------------------
-	FileInfoListPtr ProxyArchive::listFileInfo(bool recursive, bool dirs) {
+	FileInfoListPtr ProxyArchive::listFileInfo(bool recursive, bool dirs) const {
 		return listFileInfoImpl(recursive, dirs);
 	}
 
@@ -162,7 +163,7 @@ namespace Ogre {
 	}
 
 	// -------------------------------------------------------
-	StringVectorPtr ProxyArchive::list(bool recursive , bool dirs) {
+	StringVectorPtr ProxyArchive::list(bool recursive, bool dirs) const {
 		/// have to list all infos, filter those which fit
 		StringVectorPtr lst = mArchive->list(recursive, dirs);
 
