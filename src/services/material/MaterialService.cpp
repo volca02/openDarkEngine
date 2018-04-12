@@ -193,7 +193,7 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void MaterialService::addWorldMaterialTemplate(unsigned int idx, const Ogre::MaterialPtr& material) {
-		assert(!material.isNull());
+		assert(material);
 
 		mTemplateMaterials.insert(make_pair(idx, material));
 
@@ -344,7 +344,7 @@ namespace Opde {
 	//------------------------------------------------------
 	Ogre::StringVectorPtr MaterialService::getAnimTextureNames(const String& basename, const String& resourceGroup) {
 		// split the filename into pieces, find all _*.* that apply
-		LOG_INFO("MaterialService: Searching for anim_txt %s", basename.c_str());
+		LOG_INFO("MaterialService: Searching for anim_txt '%s'", basename.c_str());
 
 		StringVectorPtr v(new StringVector());
 
@@ -362,7 +362,7 @@ namespace Opde {
 			goOn = false;
 			String newname = name + '_' + StringConverter::toString(order++) + '.' + ext;
 
-			LOG_DEBUG("MaterialService: anim_txt trying %s", newname.c_str());
+			LOG_DEBUG("MaterialService: anim_txt trying '%s'", newname.c_str());
 
 			if (ResourceGroupManager::getSingleton().resourceExists(resourceGroup, newname)) {
 				goOn = true;
@@ -513,9 +513,10 @@ namespace Opde {
 	        std::string resourceGroup) {
 		Image tex;
 		bool loaded = false; // indicates we were successful finding the texture
+		LOG_INFO("MaterialService: Searching for '%s' in '%s'", textureName.c_str(), resourceGroup.c_str());
 
-		StringVectorPtr texnames = ResourceGroupManager::getSingleton().findResourceNames(resourceGroup, textureName
-		        + ".*");
+		StringVectorPtr texnames = ResourceGroupManager::getSingleton()
+                                   .findResourceNames(resourceGroup, textureName + ".*");
 
 		if (texnames->size() <= 0) {
 			// no results, try the localised version
@@ -708,12 +709,12 @@ namespace Opde {
 
 		MaterialPtr shadMat = getWorldMaterialInstance(texture, tag);
 
-		if (shadMat.isNull()) {
+		if (!shadMat) {
 			LOG_ERROR("MaterialService: getWRMaterialInstance did not find material for %u[%d] - overriding to Jorge", texture, tag);
 
 			shadMat = getWorldMaterialInstance(JORGE_TEXTURE_ID, tag);
 
-			if (shadMat.isNull()) {
+			if (!shadMat) {
 				// TODO: Exception?
 				LOG_FATAL("MaterialService: getWRMaterialInstance did not find jorge for 0[%d] - this is Fatal and will probably crash", tag);
 			}
@@ -751,7 +752,7 @@ namespace Opde {
 		mat_textures = getAnimTextureNames(baseTextureName, resourceGroup);
 
 		// if we have anim. textures:
-		if (!mat_textures.isNull() && mat_textures->size() > 1) {
+		if (mat_textures && mat_textures->size() > 1) {
 			// convert to String* array
 			size_t size = mat_textures->size();
 

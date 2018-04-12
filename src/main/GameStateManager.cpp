@@ -161,7 +161,6 @@ namespace Opde {
 		// override the config setting
 		mConfigService->setParam("game_type", mGameType);
 
-
 		// To be sure it exists, and because this is just a testing code
 		// and to remove the need to parse scripts,
 		// we create the data-less Relation PlayerFactory here

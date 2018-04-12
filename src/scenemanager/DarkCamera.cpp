@@ -136,8 +136,6 @@ namespace Ogre {
 		    if (cell->isVisBlocked())
 				continue;
 
-		    assert(cell->mInitialized && cell->mFrameNum == frameNum);
-
 		    // (Re-)evaluate the vision through all portals. If some of those changed, add the cells to the queue (or move those to top if already present)
 		    BspNode::PortalIterator pi = cell->outPortalBegin();
 		    BspNode::PortalIterator pend = cell->outPortalEnd();

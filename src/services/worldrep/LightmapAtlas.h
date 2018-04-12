@@ -204,7 +204,7 @@ namespace Opde {
 			Ogre::HardwarePixelBufferSharedPtr mAtlas;
 
 			/** The name of the resulting resource */
-			Ogre::StringUtil::StrStreamType mName;
+			Ogre::String mName;
 
 			/** A vector containing Free Space rectangles left in the Atlas */
 			FreeSpaceInfo* mFreeSpace;

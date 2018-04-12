@@ -177,10 +177,11 @@ namespace Opde {
 	DarkLight* LightService::_produceLight(const LightTableEntry& entry, size_t id, bool dynamic) {
 		String lname = String("Light") + (dynamic ? 'D' : 'S') + StringConverter::toString(id);
 
-		DarkLight* l =  static_cast<DarkLight*>(mSceneMgr->createLight(lname));
-
+        SceneNode* ln = mSceneMgr->createSceneNode(lname);
+		DarkLight* l = static_cast<DarkLight*>(mSceneMgr->createLight(lname));
+        ln->attachObject(l);
 		// set the parameters
-		l->setPosition(entry.pos.x, entry.pos.y, entry.pos.z);
+		ln->setPosition(entry.pos.x, entry.pos.y, entry.pos.z);
 
 		if (entry.cone_inner < 0) {
 			l->setType(Light::LT_POINT);

@@ -15,7 +15,7 @@ MaterialInstance::MaterialInstance () {
 	mCurrentTransparency = 0.0f;
 	mCurrentZBias = 0.0f;
 
-	mCopyMat.setNull ();
+	mCopyMat.reset();
 
 	mSBT = SBT_TRANSPARENT_ALPHA;
 }
@@ -27,7 +27,7 @@ MaterialInstance::~MaterialInstance () {
 void MaterialInstance::setSceneBlending (SceneBlendType sbt) {
   mSBT = sbt;
 
-  if (!mCopyMat.isNull ()) {
+  if (mCopyMat) {
     Material::TechniqueIterator techniqueIt = mCopyMat->getTechniqueIterator ();
     while (techniqueIt.hasMoreElements ()) {
       Technique *t = techniqueIt.getNext ();
@@ -45,8 +45,8 @@ void MaterialInstance::setTransparency (Real transparency) {
     if (mCurrentTransparency > 1.0f)
       mCurrentTransparency = 1.0f;
 
-    if (mCopyMat.isNull ()) {
-      createCopyMaterial ();
+    if (!mCopyMat) {
+      createCopyMaterial();
     }
 
     unsigned short i = 0, j;
@@ -94,8 +94,8 @@ void MaterialInstance::setZBias(Ogre::Real zbias) {
 	mCurrentZBias = zbias;
 
 	if (mCurrentZBias != 0.0f) {
-		if (mCopyMat.isNull ()) {
-			createCopyMaterial ();
+		if (!mCopyMat) {
+			createCopyMaterial();
 		}
 
 		Material::TechniqueIterator techniqueIt = mCopyMat->getTechniqueIterator ();
@@ -130,7 +130,7 @@ void MaterialInstance::createCopyMaterial () {
 	Material::TechniqueIterator techniqueIt = mCopyMat->getTechniqueIterator ();
 	while (techniqueIt.hasMoreElements ()) {
 		Technique *t = techniqueIt.getNext ();
-		Technique::PassIterator passIt = t->getPassIterator ();
+		Technique::PassIterator passIt = t->getPassIterator();
 		while (passIt.hasMoreElements ()) {
 			passIt.peekNext ()->setDepthWriteEnabled (false);
 			passIt.peekNext ()->setSceneBlending (mSBT);
@@ -140,10 +140,10 @@ void MaterialInstance::createCopyMaterial () {
 }
 
 void MaterialInstance::clearCopyMaterial () {
-	if (!mCopyMat.isNull ())
-		MaterialManager::getSingleton ().remove (mCopyMat->getName ());
+	if (mCopyMat)
+		MaterialManager::getSingleton().remove(mCopyMat->getName ());
 
-	mCopyMat.setNull ();
+	mCopyMat.reset();
 }
 
 bool MaterialInstance::hasOverrides(void) {

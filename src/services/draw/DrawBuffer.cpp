@@ -335,7 +335,7 @@ namespace Opde {
 		delete mIndexData;
 		mIndexData = NULL;
 
-		mBuffer.setNull();
+		mBuffer.reset();
 	};
 
 }

@@ -203,7 +203,7 @@ namespace Opde {
 		
 		LOG_INFO("TextureAtlas: (%s) Creating atlas with dimensions %d x %d", mAtlasName.c_str(), mAtlasSize.width, mAtlasSize.height);
 
-		if (mTexture.isNull())
+		if (!mTexture)
 			prepareResources();
 		// TODO: Reallocate the texture here if needed!
 		
@@ -307,9 +307,9 @@ namespace Opde {
 		mAtlasAllocation = new FreeSpaceInfo(0,0,mAtlasSize.width, mAtlasSize.height);
 		
 		// destroy the old invalid texture
-		if (!mTexture.isNull()) {
+		if (mTexture) {
 			Ogre::TextureManager::getSingleton().remove(mTexture->getName());
-			mTexture.setNull();
+			mTexture.reset();
 		}
 	}
 
@@ -343,7 +343,7 @@ namespace Opde {
 	
 	//------------------------------------------------------
 	void TextureAtlas::dropResources() {
-		if (!mTexture.isNull()) {
+		if (mTexture) {
 			Ogre::TextureUnitState* tus = mMaterial->getTechnique(0)->getPass(0)->getTextureUnitState(mTexture->getName());
 			
 			if (tus) {
@@ -352,7 +352,7 @@ namespace Opde {
 			}
 			
 			Ogre::TextureManager::getSingleton().remove(mTexture->getName());
-			mTexture.setNull();
+			mTexture.reset();
 		}
 	}
 

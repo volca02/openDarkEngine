@@ -42,11 +42,11 @@ namespace Opde {
 			ServiceImpl< Opde::InputService >(manager, name),
 			mInputMode(IM_MAPPED),
 			mDirectListener(NULL),
-            mCurrentKey(SDLK_UNKNOWN),
-            mCurrentMods(0),
-            mKeyPressTime(0.0f),
             mInitialDelay(0.4f), // TODO: Read these from the config service
             mRepeatDelay(0.3f),
+            mKeyPressTime(0.0f),
+            mCurrentKey(SDLK_UNKNOWN),
+            mCurrentMods(0),
             mNonExclusive(false)
 	{
 		// Loop client definition

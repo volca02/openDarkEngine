@@ -326,8 +326,7 @@ namespace Opde {
 		FilePtr fldt = db->createFile(ldchn, mDCVMaj, mDCVMin);
 
 		if (!mStorage.isNull()) {
-			// dtsz = mStorage->getDataSize();
-			assert(dtsz > 0);
+			assert(mStorage->getDataSize() > 0);
 		}
 
 		// mmh. Rather always write the fake size. It seems to always be present

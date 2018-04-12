@@ -28,14 +28,21 @@ THE SOFTWARE.
 */
 #include "OgreStableHeaders.h"
 
+/** 
+THIS IS HERE BECAUSE OF THE BREAKING CHANGE IN OGRE THAT THEY DID FOR SOME OBSCURE REASON
+THAT REMOVED PATHS FROM FILENAMES WHICH SHOULD BE FULLY QUALIFIED!
+
+Changed minimally to be part of opde, but otherwise only fixed
+*/
+
 #if OGRE_NO_ZIP_ARCHIVE == 0
 
-#include "OgreZip.h"
+#include "OgreFixedZip.h"
 
-#include "OgreLogManager.h"
-#include "OgreException.h"
-#include "OgreStringVector.h"
-#include "OgreRoot.h"
+#include <OgreLogManager.h>
+#include <OgreException.h>
+#include <OgreStringVector.h>
+#include <OgreRoot.h>
 
 #include <zzip/zzip.h>
 #include <zzip/plugin.h>
@@ -169,11 +176,11 @@ namespace Ogre {
 		zzip_dir_stat(mZzipDir, lookUpFileName.c_str(), &zstat, ZZIP_CASEINSENSITIVE);
 
         // Construct & return stream
-        return DataStreamPtr(OGRE_NEW ZipDataStream(lookUpFileName, zzipFile, static_cast<size_t>(zstat.st_size)));
+        return DataStreamPtr(OGRE_NEW FixedZipDataStream(lookUpFileName, zzipFile, static_cast<size_t>(zstat.st_size)));
 
     }
 	//---------------------------------------------------------------------
-	DataStreamPtr FixedZipArchive::create(const String& filename) const
+	DataStreamPtr FixedZipArchive::create(const String& filename)
 	{
 		OGRE_EXCEPT(Exception::ERR_NOT_IMPLEMENTED,
 			"Modification of zipped archives is not supported",
@@ -181,16 +188,16 @@ namespace Ogre {
 
 	}
 	//---------------------------------------------------------------------
-	void FixedZipArchive::remove(const String& filename) const
+	void FixedZipArchive::remove(const String& filename)
 	{
 	}
     //-----------------------------------------------------------------------
-    StringVectorPtr FixedZipArchive::list(bool recursive, bool dirs)
+    StringVectorPtr FixedZipArchive::list(bool recursive, bool dirs) const
     {
 		OGRE_LOCK_AUTO_MUTEX;
         StringVectorPtr ret = StringVectorPtr(OGRE_NEW_T(StringVector, MEMCATEGORY_GENERAL)(), SPFM_DELETE_T);
 
-        FileInfoList::iterator i, iend;
+        FileInfoList::const_iterator i, iend;
         iend = mFileList.end();
         for (i = mFileList.begin(); i != iend; ++i)
             if ((dirs == (i->compressedSize == size_t (-1))) &&
@@ -200,7 +207,7 @@ namespace Ogre {
         return ret;
     }
     //-----------------------------------------------------------------------
-    FileInfoListPtr FixedZipArchive::listFileInfo(bool recursive, bool dirs)
+    FileInfoListPtr FixedZipArchive::listFileInfo(bool recursive, bool dirs) const
     {
 		OGRE_LOCK_AUTO_MUTEX;
         FileInfoList* fil = OGRE_NEW_T(FileInfoList, MEMCATEGORY_GENERAL)();
@@ -214,7 +221,7 @@ namespace Ogre {
         return FileInfoListPtr(fil, SPFM_DELETE_T);
     }
     //-----------------------------------------------------------------------
-    StringVectorPtr FixedZipArchive::find(const String& pattern, bool recursive, bool dirs)
+    StringVectorPtr FixedZipArchive::find(const String& pattern, bool recursive, bool dirs) const
     {
 		OGRE_LOCK_AUTO_MUTEX;
         StringVectorPtr ret = StringVectorPtr(OGRE_NEW_T(StringVector, MEMCATEGORY_GENERAL)(), SPFM_DELETE_T);
@@ -223,7 +230,7 @@ namespace Ogre {
                           (pattern.find ('\\') != String::npos);
 		bool wildCard = pattern.find("*") != String::npos;
 
-        FileInfoList::iterator i, iend;
+        FileInfoList::const_iterator i, iend;
         iend = mFileList.end();
         for (i = mFileList.begin(); i != iend; ++i)
             if ((dirs == (i->compressedSize == size_t (-1))) &&
@@ -265,7 +272,7 @@ namespace Ogre {
 		}
 	};
 	//-----------------------------------------------------------------------
-	bool FixedZipArchive::exists(const String& filename)
+	bool FixedZipArchive::exists(const String& filename) const
 	{
 		OGRE_LOCK_AUTO_MUTEX;
 		String cleanName = filename;
@@ -278,7 +285,7 @@ namespace Ogre {
 		return std::find_if (mFileList.begin(), mFileList.end(), std::bind2nd<FileNameCompare>(FileNameCompare(), cleanName)) != mFileList.end();
 	}
 	//---------------------------------------------------------------------
-	time_t FixedZipArchive::getModifiedTime(const String& filename)
+	time_t FixedZipArchive::getModifiedTime(const String& filename) const
 	{
 		// Zziplib doesn't yet support getting the modification time of individual files
 		// so just check the mod time of the zip itself
@@ -310,24 +317,24 @@ namespace Ogre {
     //-----------------------------------------------------------------------
     //-----------------------------------------------------------------------
     //-----------------------------------------------------------------------
-    ZipDataStream::ZipDataStream(ZZIP_FILE* zzipFile, size_t uncompressedSize)
+    FixedZipDataStream::FixedZipDataStream(ZZIP_FILE* zzipFile, size_t uncompressedSize)
         : mZzipFile(zzipFile)
     {
 		mSize = uncompressedSize;
     }
     //-----------------------------------------------------------------------
-    ZipDataStream::ZipDataStream(const String& name, ZZIP_FILE* zzipFile, size_t uncompressedSize)
+    FixedZipDataStream::FixedZipDataStream(const String& name, ZZIP_FILE* zzipFile, size_t uncompressedSize)
         :DataStream(name), mZzipFile(zzipFile)
     {
 		mSize = uncompressedSize;
     }
     //-----------------------------------------------------------------------
-	ZipDataStream::~ZipDataStream()
+	FixedZipDataStream::~FixedZipDataStream()
 	{
 		close();
 	}
     //-----------------------------------------------------------------------
-    size_t ZipDataStream::read(void* buf, size_t count)
+    size_t FixedZipDataStream::read(void* buf, size_t count)
     {
 		size_t was_avail = mCache.read(buf, count);
 		zzip_ssize_t r = 0;
@@ -339,20 +346,20 @@ namespace Ogre {
 				String msg = zzip_strerror_of(dir);
 				OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR,
 					mName+" - error from zziplib: "+msg,
-					"ZipDataStream::read");
+					"FixedZipDataStream::read");
 			}
 			mCache.cacheData((char*)buf + was_avail, (size_t)r);
 		}
 		return was_avail + (size_t)r;
     }
 	//---------------------------------------------------------------------
-	size_t ZipDataStream::write(void* buf, size_t count)
+	size_t FixedZipDataStream::write(const void* buf, size_t count)
 	{
 		// not supported
 		return 0;
 	}
     //-----------------------------------------------------------------------
-    void ZipDataStream::skip(long count)
+    void FixedZipDataStream::skip(long count)
     {
         long was_avail = static_cast<long>(mCache.avail());
 		if (count > 0)
@@ -367,7 +374,7 @@ namespace Ogre {
 		}
     }
     //-----------------------------------------------------------------------
-    void ZipDataStream::seek( size_t pos )
+    void FixedZipDataStream::seek( size_t pos )
     {
 		zzip_off_t newPos = static_cast<zzip_off_t>(pos);
 		zzip_off_t prevPos = static_cast<zzip_off_t>(tell());
@@ -384,7 +391,7 @@ namespace Ogre {
 		}
     }
     //-----------------------------------------------------------------------
-    size_t ZipDataStream::tell(void) const
+    size_t FixedZipDataStream::tell(void) const
     {
 		zzip_off_t pos = zzip_tell(mZzipFile);
 		if (pos<0)
@@ -392,12 +399,12 @@ namespace Ogre {
 		return static_cast<size_t>(pos) - mCache.avail();
     }
     //-----------------------------------------------------------------------
-    bool ZipDataStream::eof(void) const
+    bool FixedZipDataStream::eof(void) const
     {
         return (tell() >= mSize);
     }
     //-----------------------------------------------------------------------
-    void ZipDataStream::close(void)
+    void FixedZipDataStream::close(void)
     {
 		if (mZzipFile != 0)
 		{

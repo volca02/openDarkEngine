@@ -53,32 +53,32 @@ namespace Ogre {
 			virtual ~ProxyArchive(void);
 
 			/// performs the archive load. Scans the archive for filenames, builds the reverse transform table
-			virtual void load(void);
+			void load(void) override;
 
 			/// Unloads the archive, clears the transform map
-			virtual void unload(void);
+			void unload(void) override;
 
 			/// opens a resource stream, unmapping the name first
-			virtual DataStreamPtr open(const String& filename, bool readOnly) const;
+			DataStreamPtr open(const String& filename, bool readOnly) const override;
 
 			/// lists the contents of the archive. transformed.
-			virtual StringVectorPtr list(bool recursive = true, bool dirs = false) const;
+			StringVectorPtr list(bool recursive = true, bool dirs = false) const override;
 
 			/// lists the contents of the archive. transformed, in the FileInfo structures.
-			virtual FileInfoListPtr listFileInfo(bool recursive = true, bool dirs = false) const;
+			FileInfoListPtr listFileInfo(bool recursive = true, bool dirs = false) const override;
 
 			/// performs a pattern match find on the archive files
-			virtual StringVectorPtr find(const String& pattern, bool recursive = true,
-			bool dirs = false) const;
+			StringVectorPtr find(const String& pattern, bool recursive = true,
+                                 bool dirs = false) const override;
 
 			/// Searches for the given name, untransforming it first
-			virtual bool exists(const String& filename) const;
+			bool exists(const String& filename) const override;
 
 			/** Searches for files that match the given pattern
 			* @see find
 			*/
 			virtual FileInfoListPtr findFileInfo(const String& pattern,
-				bool recursive = true, bool dirs = false) const;
+				bool recursive = true, bool dirs = false) const  override;
 
 			/// reports case sensitiveness of this proxy archive
 			virtual bool isCaseSensitive(void) const = 0;
@@ -113,10 +113,10 @@ namespace Ogre {
 			CaseLessFileSystemArchive(const String& name, const String& archType, bool readOnly);
 			~CaseLessFileSystemArchive(void);
 
-			bool isCaseSensitive(void) const;
+			bool isCaseSensitive(void) const override;
 
 		protected:
-			String transformName(const std::string& name) const;
+			String transformName(const std::string& name) const override;
 
 	};
 
@@ -126,10 +126,10 @@ namespace Ogre {
 			CRFArchive(const String& name, const String& archType, bool readOnly);
 			~CRFArchive(void);
 
-			bool isCaseSensitive(void) const;
+			bool isCaseSensitive(void) const override;
 
 		protected:
-			String transformName(const std::string& name) const;
+			String transformName(const std::string& name) const override;
 
 			String mFilePart;
 	};

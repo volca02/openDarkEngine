@@ -162,7 +162,7 @@ namespace Opde {
 
 	//------------------------------------------------------
 	void WorldRepService::unload() {
-		mIndexes.setNull();
+		mIndexes.reset();
 
 		mSceneMgr->destroyGeometry("LEVEL_GEOMETRY");
 

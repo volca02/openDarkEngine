@@ -144,9 +144,6 @@ namespace Opde {
 
 			// list of all service factories (for deletion in destructor)
 			ServiceFactoryList mServiceFactories;
-
-			// Overlay system module pointer
-			Ogre::OverlaySystem* mOverlaySystem;
 	};
 
 } // namespace Opde
