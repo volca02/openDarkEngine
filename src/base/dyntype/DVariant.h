@@ -310,18 +310,44 @@ template <> Ogre::Quaternion DVariant::as<Ogre::Quaternion>() const;
 
 /// Type traits for template to DVariant conversions and various interactions
 /// (serialization, etc.)
-template <typename T> struct OPDELIB_EXPORT DVariantTypeTraits {
-    DVariant::Type getType() { return DVariant::DV_INVALID; };
+template <typename T> struct DVariantTypeTraits {
+    static const DVariant::Type type = DVariant::DV_INVALID;
 };
 
-// various template specializations for the common types
-template <> DVariant::Type DVariantTypeTraits<bool>::getType();
-template <> DVariant::Type DVariantTypeTraits<float>::getType();
-template <> DVariant::Type DVariantTypeTraits<int32_t>::getType();
-template <> DVariant::Type DVariantTypeTraits<uint32_t>::getType();
-template <> DVariant::Type DVariantTypeTraits<std::string>::getType();
-template <> DVariant::Type DVariantTypeTraits<Vector3>::getType();
-template <> DVariant::Type DVariantTypeTraits<Quaternion>::getType();
+template<>
+struct DVariantTypeTraits<bool> {
+    static const DVariant::Type type = DVariant::DV_BOOL;
+};
+
+template<>
+struct DVariantTypeTraits<float> {
+    static const DVariant::Type type = DVariant::DV_FLOAT;
+};
+
+template<>
+struct DVariantTypeTraits<int32_t> {
+    static const DVariant::Type type = DVariant::DV_INT;
+};
+
+template<>
+struct DVariantTypeTraits<uint32_t> {
+    static const DVariant::Type type = DVariant::DV_UINT;
+};
+
+template<>
+struct DVariantTypeTraits<std::string> {
+    static const DVariant::Type type = DVariant::DV_STRING;
+};
+
+template<>
+struct DVariantTypeTraits<Vector3> {
+    static const DVariant::Type type = DVariant::DV_VECTOR;
+};
+
+template<>
+struct DVariantTypeTraits<Quaternion> {
+    static const DVariant::Type type = DVariant::DV_QUATERNION;
+};
 
 /// Map of string -> DVariant values
 typedef std::map<std::string, DVariant> DVariantStringMap;

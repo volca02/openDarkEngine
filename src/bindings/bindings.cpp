@@ -23,7 +23,6 @@
  *****************************************************************************/
 
 #include "bindings.h"
-#include "DTypeBinder.h"
 #include "DataFieldDescIteratorBinder.h"
 #include "Root.h"
 #include "RootBinder.h"
@@ -283,8 +282,7 @@ PyObject *PythonLanguage::initModule() {
     Python::RootBinder::init(module);
 
     Python::StringIteratorBinder::init(module);
-    Python::DataFieldDescIteratorBinder::init(module);
-    Python::DTypeBinder::init(module);
+    Python::DataFieldsBinder::init(module);
     return module;
 }
 

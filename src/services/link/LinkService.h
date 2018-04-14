@@ -146,7 +146,7 @@ public:
      * name was specified
      * @see Relation::getFieldDescIterator
      */
-    DataFieldDescIteratorPtr getFieldDescIterator(int flavor);
+    const DataFields &getFieldDesc(int flavor);
 
 protected:
     bool init();

@@ -88,16 +88,16 @@ public:
      * @param leafID the id of the cell (leaf) - if >=0 then this BSP node is
      * marked as leaf, and is registered as a cell with ID leafID
      */
-    BspNode *createBspNode(int id, int leafID = -1);
+    BspNode *createBspNode(unsigned id, int leafID = -1);
 
     /** gets a BSP node by id */
-    BspNode *getBspNode(int id);
+    BspNode *getBspNode(unsigned id);
 
     /** gets a BSP Leaf node by leaf id */
     BspNode *getBspLeaf(int leafID);
 
     /** sets new root bsp node */
-    void setRootBspNode(int id);
+    void setRootBspNode(unsigned id);
 
     /// Specialized version of SceneNode creation. Creates DarkSceneNode
     /// instances

@@ -21,6 +21,8 @@
  *
  *****************************************************************************/
 
+#include <iostream>
+
 #include "config.h"
 
 #include "GameStateManager.h"

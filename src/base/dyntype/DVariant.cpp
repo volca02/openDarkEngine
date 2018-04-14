@@ -817,25 +817,4 @@ template <> Ogre::Quaternion DVariant::as<Ogre::Quaternion>() const {
     return toQuaternion();
 }
 
-template <> DVariant::Type DVariantTypeTraits<bool>::getType() {
-    return DVariant::DV_BOOL;
-};
-template <> DVariant::Type DVariantTypeTraits<float>::getType() {
-    return DVariant::DV_FLOAT;
-};
-template <> DVariant::Type DVariantTypeTraits<int32_t>::getType() {
-    return DVariant::DV_INT;
-};
-template <> DVariant::Type DVariantTypeTraits<uint32_t>::getType() {
-    return DVariant::DV_UINT;
-};
-template <> DVariant::Type DVariantTypeTraits<std::string>::getType() {
-    return DVariant::DV_STRING;
-};
-template <> DVariant::Type DVariantTypeTraits<Vector3>::getType() {
-    return DVariant::DV_VECTOR;
-};
-template <> DVariant::Type DVariantTypeTraits<Quaternion>::getType() {
-    return DVariant::DV_QUATERNION;
-};
 } // namespace Opde

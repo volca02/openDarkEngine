@@ -26,12 +26,97 @@
 
 #include "config.h"
 
-#include "DTypeDef.h"
 #include "DVariant.h"
 #include "File.h"
 #include "Iterator.h"
 
 namespace Opde {
+
+/** Type aware variant based enumeration definition. Used for enumeration and
+   bitfields.
+        @note For bitfields, the base type must be DV_UINT
+        @note No check on multiple keys with the same values is made */
+class DEnum {
+private:
+    typedef std::map<std::string, DVariant> StrValMap;
+
+    StrValMap mValMap;
+
+    DVariant::Type mEnumType;
+
+    bool mBitField;
+
+    std::string mName;
+
+public:
+    DEnum(const std::string &name, DVariant::Type enumType, bool bitfield);
+
+    ~DEnum();
+
+    /** Insert a field definition inside the Enum
+     * @note It is not adviced to modify enumerations on other times than
+     * creation as this could confuse other pieces of code */
+    void insert(const std::string &key, const DVariant &value);
+
+    /** get the symbol text by the enumeration value */
+    const std::string &symbol(const DVariant &val) const;
+
+    /** get the value by the symbol text */
+    const DVariant &value(const std::string &symbol) const;
+
+    /** Enumeration field. A single field that is either checked or not, and has
+     * a specific value */
+    struct EnumField {
+        EnumField(std::string _k, const DVariant &_v, bool _c)
+            : checked(_c), key(_k), value(_v){};
+
+        /** True if the field is enabled or the value is selected in case of
+         * non-bitfield enumerations */
+        bool checked;
+        /** The field name (key) */
+        std::string key;
+        /** value of the field */
+        const DVariant &value;
+    };
+
+    /** Enumeration of the fields. */
+    typedef std::list<EnumField> EnumFieldList;
+
+    /** Gets the field list for the enumeration given the field value
+     * @note For bitfields, multiple can be checked==true, for Enumeration, one
+     * will (if there is only a single key for any value) */
+    EnumFieldList getFieldList(const DVariant &val) const;
+
+    /** Returns true if the Enumeration is a bitfield */
+    inline bool isBitfield() const { return mBitField; };
+
+    /** Returns the name of this enumeration */
+    const std::string &getName(void) { return mName; };
+};
+
+/// A unified unstructured field list description structure
+struct DataFieldDesc {
+    DataFieldDesc() {};
+    DataFieldDesc(const std::string &name, const std::string &label, int size,
+                  DVariant::Type type, DEnum *enumerator = nullptr)
+        : name(name), label(label), size(size), type(type),
+          enumerator(enumerator) {}
+
+    /// Name of the field
+    std::string name;
+    /// Label of the field - readable
+    std::string label;
+    /// Size of the field. -1 for variable-sized fields (strings)
+    int size;
+    /// Type of the field
+    DVariant::Type type;
+    /// Enumerator of the allowed values (either enum or bitfield type). NULL
+    /// means this field is not enumerated
+    DEnum *enumerator;
+};
+
+typedef std::vector<DataFieldDesc> DataFields;
+
 /** @brief Storage for data (Interface). This class is used as a backend for
  * either property or link storage, and provides data these classes. This
  * storage can be overriden to suit better for particular data handling to be
@@ -165,7 +250,7 @@ public:
      * @return The data fields description iterator, preferably in the order
      * sored
      */
-    virtual DataFieldDescIteratorPtr getFieldDescIterator(void) = 0;
+    virtual const DataFields &getFieldDesc(void) = 0;
 
     /** Data size getter
      * @return Data size, if available. 0 otherwise */
@@ -175,105 +260,6 @@ public:
 /// Shared pointer to data storage
 typedef shared_ptr<DataStorage> DataStoragePtr;
 
-/// Internal: Implementation of field desc. for iterator over DTypeDef
-class OPDELIB_EXPORT DTypeDefFieldDesc {
-public:
-    DTypeDefFieldDesc(const DTypeDefPtr &type);
-
-    DataFieldDescIteratorPtr getIterator();
-
-protected:
-    DataFieldDescList mDataFieldDescList;
-};
-
-/** Structured data implementation of the DataStorage. Should only be used as a
- * temporary solution or as a storage for properties for custom tools  */
-class OPDELIB_EXPORT StructuredDataStorage : public DataStorage {
-public:
-    StructuredDataStorage(const DTypeDefPtr &type, bool useDataCache);
-
-    /** @see DataStorage::create */
-    virtual bool create(int objID);
-
-    /** @see DataStorage::destroy */
-    virtual bool destroy(int objID);
-
-    /** @see DataStorage::has */
-    virtual bool has(int objID);
-
-    /** @see DataStorage::clone */
-    virtual bool clone(int srcID, int dstID);
-
-    /** @see DataStorage::getField */
-    virtual bool getField(int objID, const std::string &field,
-                          DVariant &target);
-
-    /** @see DataStorage::setField */
-    virtual bool setField(int objID, const std::string &field,
-                          const DVariant &value);
-
-    /** @see DataStorage::writeToFile */
-    virtual bool writeToFile(FilePtr &file, int objID, bool sizeStored);
-
-    /** @see DataStorage::readFromFile */
-    virtual bool readFromFile(FilePtr &file, int objID, bool sizeStored);
-
-    /** @see DataStorage::clear */
-    virtual void clear();
-
-    /** @see DataStorage::isEmpty */
-    virtual bool isEmpty();
-
-    /** @see DataStorage::getAllStoredObjects */
-    virtual IntIteratorPtr getAllStoredObjects();
-
-    /** @see DataStorage::getFieldDescIterator */
-    virtual DataFieldDescIteratorPtr getFieldDescIterator(void);
-
-    /** @see DataStorage::getDataSize */
-    virtual size_t getDataSize(void);
-
-protected:
-    /** core data creation routine. Returns a pointer to newly created or
-     * already existed data data for the objID */
-    virtual DTypePtr _create(int objID);
-
-    /// Internal getter for data
-    DTypePtr getDataForObject(int objID);
-
-    /// Stores objectID -> Data
-    typedef std::map<int, DTypePtr> DataMap;
-
-    /// Data store instance
-    DataMap mDataMap;
-
-    /// Type definition for the stored properties
-    DTypeDefPtr mTypeDef;
-
-    /// Data cache usage indicator (field conversion speedup)
-    bool mUseDataCache;
-
-    typedef MapKeyIterator<DataMap, int> DataKeyIterator;
-
-    class EmptyIntIterator : public IntIterator {
-    public:
-        EmptyIntIterator() : mZero(0){};
-
-        const int &next() {
-            assert(false);
-
-            return mZero;
-        };
-
-        bool end() const { return true; };
-
-    protected:
-        int mZero;
-    };
-
-    /// Field description pre-prepared iterator
-    DTypeDefFieldDesc mFieldDesc;
-};
 } // namespace Opde
 
 #endif // __PROPERTYSTORAGE_H

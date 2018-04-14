@@ -27,7 +27,6 @@
 #include "config.h"
 
 #include "BitArray.h"
-#include "DTypeDef.h"
 #include "DataStorage.h"
 #include "FileGroup.h"
 #include "NonCopyable.h"
@@ -182,7 +181,7 @@ public:
      * @todo It should be decided if it is guaranteed to have this iterator in a
      * storable quality - if it could be used to load/save data.
      */
-    DataFieldDescIteratorPtr getFieldDescIterator(void);
+    const DataFields &getFieldDesc(void);
 
     /** Grows the property to allow the storage of minID to maxID object id's
      */

@@ -27,8 +27,6 @@
 
 #include "bindings.h"
 
-#include "DTypeDef.h"
-#include "binary/BinaryService.h"
 #include "link/LinkService.h"
 
 namespace Opde {

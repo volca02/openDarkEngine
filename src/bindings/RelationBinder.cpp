@@ -23,7 +23,6 @@
  *****************************************************************************/
 
 #include "RelationBinder.h"
-#include "DTypeBinder.h"
 #include "DataFieldDescIteratorBinder.h"
 #include "LinkQueryResultBinder.h"
 #include "LinkServiceBinder.h"
@@ -274,8 +273,8 @@ PyObject *RelationBinder::getFieldsDesc(PyObject *self, PyObject *args) {
         __PY_CONVERR_RET;
 
     // wrap the returned StringIterator into StringIteratorBinder, return
-    DataFieldDescIteratorPtr res = o->getFieldDescIterator();
-    return DataFieldDescIteratorBinder::create(res);
+    const DataFields& res = o->getFieldDesc();
+    return DataFieldsBinder::create(res);
 
     __PYTHON_EXCEPTION_GUARD_END_;
 }

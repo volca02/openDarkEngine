@@ -25,6 +25,8 @@
 #ifndef __BINDINGS_H
 #define __BINDINGS_H
 
+#include <utility>
+
 // this has to be the first one - _POSIX_C_SOURCE crazyness...
 #include <Python.h>
 
@@ -396,7 +398,7 @@ template <class C> struct CastInfo {
      * @todo It should be possible to templatize the casting method and
      * reference it
      */
-    typedef C (*CastMethod)(PyObject *obj);
+    typedef C *(*CastMethod)(PyObject *obj);
     CastMethod caster;
 };
 
@@ -405,9 +407,9 @@ template <typename T> struct ObjectBase { PyObject_HEAD T mInstance; };
 
 /// Upcaster for python side class inheritance resolution for non-smartptr
 /// objects
-template <class P, class C> P defaultPythonUpcaster(PyObject *obj) {
+template <class P, class C> P *defaultPythonUpcaster(PyObject *obj) {
     ObjectBase<C> *mywrap = reinterpret_cast<ObjectBase<C> *>(obj);
-    return static_cast<P>(mywrap->mInstance);
+    return reinterpret_cast<P*>(&mywrap->mInstance);
 }
 
 /** helper function to get user data from Python's Object
@@ -433,7 +435,7 @@ bool python_cast(PyObject *obj, PyTypeObject *type, T *target,
                 // do we have a match?
                 if (ot == current->type) {
                     // yep. Cast using the upcaster
-                    *target = current->caster(obj);
+                    *target = *current->caster(obj);
                     return true;
                 }
             }
@@ -444,6 +446,40 @@ bool python_cast(PyObject *obj, PyTypeObject *type, T *target,
 
     *target = reinterpret_cast<ObjectBase<T> *>(obj)->mInstance;
     return true;
+}
+
+/** helper function to get user data ptr from Python's Object
+ * @param obj The source object to extract
+ * @param typ The type object of our type
+ * @param target Pointer to Type instance. Filled with the pointer to the
+ * instance in the object
+ * @param castInfo The optional structure containing casting methods for
+ * conversion casts */
+template <typename T>
+T *python_cast(PyObject *obj, PyTypeObject *type,
+               CastInfo<T> *castInfo = NULL) {
+    // reinterpret cast is not a correct operation on subclasses
+    // so we need the type info to agree
+
+    // we can try searching the cast info for subtypes if those differ
+    PyTypeObject *ot = obj->ob_type;
+
+    if (ot != type) {
+        CastInfo<T> *current = castInfo;
+        if (current != NULL) {
+            for (; current->type != NULL; ++current) {
+                // do we have a match?
+                if (ot == current->type) {
+                    // yep. Cast using the upcaster
+                    return current->caster(obj);
+                }
+            }
+        }
+
+        return nullptr;
+    }
+
+    return &reinterpret_cast<ObjectBase<T> *>(obj)->mInstance;
 }
 
 // Conversion error for simplicity
@@ -482,15 +518,16 @@ protected:
                             const char *name);
 };
 
-/// A template that binds sharedptr typed classes
-template <typename T> class shared_ptr_binder : public PythonPublishedType {
+template<typename T>
+class object_binder : public PythonPublishedType {
 public:
     /// A python object type
     typedef ObjectBase<T> Object;
 
 protected:
     /// A sort-of constructor method. To be used to create a new NULL Object*
-    static Object *construct(PyTypeObject *type) {
+    template<typename...ArgsT>
+    static Object *construct(PyTypeObject *type, ArgsT&&...args) {
         Object *object;
 
         object = PyObject_New(Object, type);
@@ -499,9 +536,8 @@ protected:
         // Allocated, but not initialized). If we try to assign into it, we'll
         // segfault. Because of that, we have to do placed new to initialize the
         // object
-        if (object != NULL) {
-            // Here, tidy!
-            ::new (&object->mInstance) T();
+        if (object != nullptr) {
+            ::new (&object->mInstance) T(std::forward<ArgsT>(args)...);
         }
 
         return object;
@@ -513,14 +549,38 @@ protected:
         // cast the object to T::Object
         Object *o = reinterpret_cast<Object *>(self);
 
-        // Decreases the shared_ptr counter
-        o->mInstance.reset();
-
         // Call the destructor to clean up
         (&o->mInstance)->~T();
 
         // Finally delete the object
         PyObject_Del(self);
+    }
+};
+
+
+/// A template that binds sharedptr typed classes
+template <typename T> class shared_ptr_binder : public object_binder<T> {
+public:
+    /// A python object type
+    using Object = typename object_binder<T>::Object;
+
+protected:
+    /// A sort-of constructor method. To be used to create a new NULL Object*
+    static Object *construct(PyTypeObject *type) {
+        return object_binder<T>::construct(type);
+    }
+
+    /// Destructor for the python object. Safely decreases the reference to the
+    /// shared_ptr. To be used in msType
+    static void dealloc(PyObject *self) {
+        // cast the object to T::Object
+        Object *o = reinterpret_cast<Object *>(self);
+
+        // Decreases the shared_ptr counter (just to be sure here, dtor does
+        // that to)
+        o->mInstance.reset();
+
+        object_binder<T>::dealloc(self);
     }
 };
 

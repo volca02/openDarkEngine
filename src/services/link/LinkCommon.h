@@ -24,18 +24,18 @@
 #ifndef __LINKCOMMON_H
 #define __LINKCOMMON_H
 
-#include "DTypeDef.h"
 #include "Iterator.h"
 #include "SharedPtr.h"
 #include "compat.h"
 #include "integers.h"
 
 namespace Opde {
+
 /// Link ID type. 32bit number at least...
 typedef unsigned int link_id_t;
 
-struct LinkStruct { // sLink-like, but this one contains id as well. Size: Fixed
-                    // to 14 bytes
+/// sLink-like, but this one contains id as well. Size: Fixed to 14 bytes
+struct LinkStruct {
     uint32_t id;
     int32_t src;
     int32_t dest;

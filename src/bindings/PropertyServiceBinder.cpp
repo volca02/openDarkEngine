@@ -277,8 +277,8 @@ PyObject *PropertyServiceBinder::getPropertyFieldsDesc(PyObject *self,
 
     if (PyArg_ParseTuple(args, "s", &propName)) {
         // wrap the returned StringIterator into StringIteratorBinder, return
-        DataFieldDescIteratorPtr res = o->getFieldDescIterator(propName);
-        return DataFieldDescIteratorBinder::create(res);
+        const DataFields& res = o->getFieldDesc(propName);
+        return DataFieldsBinder::create(res);
     }
 
     // Invalid parameters
@@ -291,7 +291,7 @@ PyObject *PropertyServiceBinder::getPropertyFieldsDesc(PyObject *self,
 void PropertyServiceBinder::init(PyObject *module) {
     publishType(module, &msType, msName);
 
-    DataFieldDescIteratorBinder::init(module);
+    DataFieldsBinder::init(module);
 }
 
 // ------------------------------------------

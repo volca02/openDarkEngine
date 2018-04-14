@@ -25,9 +25,8 @@
 #ifndef __LINKSERVICEBINDER_H
 #define __LINKSERVICEBINDER_H
 
-#include "DTypeBinder.h"
-#include "DTypeDef.h"
-#include "binary/BinaryService.h"
+#include "bindings.h"
+
 #include "link/LinkService.h"
 
 namespace Opde {

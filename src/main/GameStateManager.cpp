@@ -32,7 +32,6 @@
 #include "stdlog.h"
 
 // All the services
-#include "binary/BinaryService.h"
 #include "config/ConfigService.h"
 #include "database/DatabaseService.h"
 #include "draw/DrawService.h"

@@ -27,7 +27,6 @@
 #include "config.h"
 
 #include "BitArray.h"
-#include "DTypeDef.h"
 #include "DataStorage.h"
 #include "FileGroup.h"
 #include "LinkCommon.h"
@@ -102,10 +101,9 @@ public:
     /** Creates a new link, returning it's ID
      * @param from The source object ID of this link
      * @param to The destination obect ID of this link
-     * @note This version of createLink does initialize the Link data with zero
-     * values, if the DTypeDefPtr.isNull() is not true. This is not always the
-     * requested bahavior. Use createWithValues to initialize the date upon
-     * creation
+     * @note This version of createLink does initialize the Link data with default
+     * values. This is not always the requested bahavior.
+     * Use createWithValues to initialize the date upon creation.
      * @return the id of the newly created link (The concreteness of the link is
      * autodetected given the from and to values (both < 0 - non concrete,
      * otherwise concrete))
@@ -121,7 +119,7 @@ public:
      * @param dataValues The data values to inject into the link data upon
      * creation (key->value)
      * @note This version of link creation does initialize the Link data with
-     * predefined map of values
+     * predefined map of values.
      * @return the id of the newly created link (The concreteness of the link is
      * autodetected given the from and to values (both < 0 - non concrete,
      * otherwise concrete))
@@ -216,7 +214,7 @@ public:
      * @todo It should be decided if it is guaranteed to have this iterator in a
      * storable quality - if it could be used to load/save data.
      */
-    DataFieldDescIteratorPtr getFieldDescIterator(void);
+    const DataFields &getFieldDesc(void);
 
 protected:
     class MultiTargetLinkQueryResult;

@@ -35,6 +35,7 @@
 #include "Vector3.h"
 
 namespace Opde {
+
 /// Data serializer - used to fill the values of data based on File contents,
 /// and the other way round
 class OPDELIB_EXPORT Serializer : public NonCopyable {
@@ -53,7 +54,7 @@ public:
 };
 
 /// Default template implementation of the serializer
-template <typename T> class OPDELIB_EXPORT TypeSerializer : public Serializer {
+template <typename T> class TypeSerializer : public Serializer {
 public:
     virtual void serialize(FilePtr &dest, const void *valuePtr) {
         dest->writeElem(valuePtr, sizeof(T));
@@ -68,48 +69,45 @@ public:
 
 /// Fixed size string serializer - serializes first N characters of given string
 /// pointer
-class OPDELIB_EXPORT FixedStringSerializer : public Serializer {
+template<size_t LenT>
+class FixedStringSerializer : public Serializer {
 public:
+    static_assert(LenT > 0);
+
     // contructor
-    FixedStringSerializer(size_t strLen) : mStrLen(strLen) {
-        assert(strLen <= 1024);
-    };
+    FixedStringSerializer() {};
 
     /// destructor
-    virtual ~FixedStringSerializer(){};
+    virtual ~FixedStringSerializer() {};
 
     /// serializes the data into the specified fileptr
     virtual void serialize(FilePtr &dest, const void *valuePtr) {
         // prepare a fixed char array for the write
-        char copyStr[1024];
+        char copyStr[LenT];
 
         const std::string *str = static_cast<const std::string *>(valuePtr);
         size_t strsz = str->length();
 
-        if (strsz > mStrLen)
-            strsz = mStrLen;
+        if (strsz > LenT)
+            strsz = LenT;
 
         str->copy(copyStr, strsz);
-        copyStr[std::min(strsz, mStrLen - 1)] = '\0';
+        copyStr[std::min(strsz, LenT - 1)] = '\0';
 
-        dest->write(copyStr, mStrLen);
+        dest->write(copyStr, LenT);
     };
 
     /// deserializes the data from the specified fileptr
     virtual void deserialize(FilePtr &src, void *valuePtr) {
         // read the buf, fill the dest str with it
-        char copyStr[1024];
-
-        src->read(copyStr, mStrLen);
-
-        *static_cast<std::string *>(valuePtr) = copyStr;
+        char copyStr[LenT + 1];
+        src->read(copyStr, LenT);
+        copyStr[LenT] = '\0';
+        static_cast<std::string *>(valuePtr)->assign(copyStr);
     }
 
     /// Returns the stored size of the type
-    virtual size_t getStoredSize(const void *valuePtr) { return mStrLen; }
-
-protected:
-    size_t mStrLen;
+    virtual size_t getStoredSize(const void *valuePtr) { return LenT; }
 };
 
 // specializations for various special types

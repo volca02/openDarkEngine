@@ -168,7 +168,7 @@ Camera *DarkSceneManager::createCamera(const String &name) {
 }
 
 // ----------------------------------------------------------------------
-BspNode *DarkSceneManager::createBspNode(int id, int leafID) {
+BspNode *DarkSceneManager::createBspNode(unsigned id, int leafID) {
     if (id >= mCellCount)
         mCellCount = id + 1;
 
@@ -178,7 +178,9 @@ BspNode *DarkSceneManager::createBspNode(int id, int leafID) {
 }
 
 // ----------------------------------------------------------------------
-BspNode *DarkSceneManager::getBspNode(int id) { return mBspTree->getNode(id); }
+BspNode *DarkSceneManager::getBspNode(unsigned id) {
+    return mBspTree->getNode(id);
+}
 
 // ----------------------------------------------------------------------
 BspNode *DarkSceneManager::getBspLeaf(int leafID) {
@@ -186,7 +188,9 @@ BspNode *DarkSceneManager::getBspLeaf(int leafID) {
 }
 
 // ----------------------------------------------------------------------
-void DarkSceneManager::setRootBspNode(int id) { mBspTree->setRootNode(id); }
+void DarkSceneManager::setRootBspNode(unsigned id) {
+    mBspTree->setRootNode(id);
+}
 
 // ----------------------------------------------------------------------
 SceneNode *DarkSceneManager::createSceneNode(void) {

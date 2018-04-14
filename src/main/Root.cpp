@@ -37,7 +37,6 @@
 #include "OpdeServiceManager.h"
 
 // Services
-#include "binary/BinaryService.h"
 #include "database/DatabaseService.h"
 #include "draw/DrawService.h"
 #include "game/GameService.h"
@@ -306,7 +305,6 @@ void Root::removeResourceLocation(const std::string &name,
 // -------------------------------------------------------
 void Root::registerServiceFactories() {
     mServiceFactories.push_back(new WorldRepServiceFactory());
-    mServiceFactories.push_back(new BinaryServiceFactory());
     mServiceFactories.push_back(new GameServiceFactory());
     mServiceFactories.push_back(new PhysicsServiceFactory());
     mServiceFactories.push_back(new ConfigServiceFactory());

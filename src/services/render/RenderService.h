@@ -319,7 +319,6 @@ protected:
 
     // Database listener handle related (For render params chunk)
     // DatabaseServicePtr mDatabaseService;
-    // BinaryServicePtr mBinaryService;
 
     /** Object id to scene node (only concrete objects)
      * This map stores the base scenenode for the object. Object have this

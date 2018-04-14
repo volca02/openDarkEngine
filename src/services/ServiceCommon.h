@@ -155,28 +155,4 @@ service listeners
 // ---------------------------------------------
 #define SIM_PRIORITY_INPUT 1
 
-/*
-// Forward declarations. anything service related here to shorten the
-compilation time (in combination with header inclusion removal...) class
-BinaryService; class CameraService; class ConfigService; class DatabaseService;
-class DrawService;
-class GameService;
-class GuiService;
-class InheritService;
-class InputService;
-class LightService;
-class LinkService;
-class LoopService;
-class MaterialService;
-class ObjectService;
-class PhysicsService;
-class PlatformService;
-class PlayerService;
-class PropertyService;
-class RenderService;
-class RoomService;
-class ScriptService;
-class SimService;
-class WorldRepService;
-*/
 #endif

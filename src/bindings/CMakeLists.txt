@@ -37,8 +37,6 @@ add_library(OpdePython OBJECT
     DrawSheetBinder.h
     DrawSourceBinder.cpp
     DrawSourceBinder.h
-    DTypeBinder.cpp
-    DTypeBinder.h
     FontDrawSourceBinder.cpp
     FontDrawSourceBinder.h
     GUIServiceBinder.cpp

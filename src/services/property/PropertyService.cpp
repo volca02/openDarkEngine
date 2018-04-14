@@ -24,7 +24,6 @@
 
 #include "PropertyService.h"
 #include "ServiceCommon.h"
-#include "binary/BinaryService.h"
 #include "logger.h"
 
 using namespace std;
@@ -263,19 +262,20 @@ bool PropertyService::get(int obj_id, const std::string &propName,
 }
 
 // --------------------------------------------------------------------------
-DataFieldDescIteratorPtr
-PropertyService::getFieldDescIterator(const std::string &propName) {
+const DataFields &
+PropertyService::getFieldDesc(const std::string &propName) {
     Property *prop = getProperty(propName);
 
     if (prop != NULL) {
-        return prop->getFieldDescIterator();
+        return prop->getFieldDesc();
     }
 
     LOG_ERROR("Invalid or undefined property name '%s' on call to "
               "PropertyService::getFieldDescIterator",
               propName.c_str());
-    return DataFieldDescIteratorPtr(
-        NULL); // NULL iterator, no fun for the caller
+
+    static const DataFields fields;
+    return fields;
 }
 
 // --------------------------------------------------------------------------

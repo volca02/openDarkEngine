@@ -28,49 +28,28 @@
 
 #include "DataStorage.h"
 
-#include "DTypeDef.h"
 #include "DVariant.h"
 #include "File.h"
 #include "Iterator.h"
 #include "Serializer.h"
 
 namespace Opde {
-/// iterator over a single DataFieldDesc element. Useful for single-fielded
-/// properties, such as varstr properties
-class SingleFieldDescIterator : public DataFieldDescIterator {
-public:
-    SingleFieldDescIterator(const DataFieldDesc &desc)
-        : mDesc(desc), mEnd(false){};
-
-    virtual const DataFieldDesc &next() {
-        assert(!mEnd);
-        mEnd = true;
-        return mDesc;
-    };
-
-    virtual bool end() const { return mEnd; };
-
-protected:
-    const DataFieldDesc &mDesc;
-    bool mEnd;
-};
 
 /** Common ancestor template for all the single value data storages (with fixed
  * length data) */
-template <typename T>
-class OPDELIB_EXPORT SingleFieldDataStorage : public DataStorage {
+template <typename T, typename SerT = TypeSerializer<T>>
+class SingleFieldDataStorage : public DataStorage {
 public:
-    explicit SingleFieldDataStorage(DEnum *enm) {
-        mSerializer = new TypeSerializer<T>();
-        mFieldDesc.enumerator = enm;
-        mFieldDesc.name = "";
-        mFieldDesc.size = sizeof(T);
-
-        DVariantTypeTraits<T> tt;
-        mFieldDesc.type = tt.getType();
+    explicit SingleFieldDataStorage(DEnum *enm) : mFieldDesc(), mSerializer() {
+        DataFieldDesc fieldDesc;
+        fieldDesc.enumerator = enm;
+        fieldDesc.name = "";
+        fieldDesc.size = sizeof(T);
+        fieldDesc.type = DVariantTypeTraits<T>::type;
+        mFieldDesc.push_back(fieldDesc);
     };
 
-    virtual ~SingleFieldDataStorage() { delete mSerializer; }
+    virtual ~SingleFieldDataStorage() { }
 
     /** @see DataStorage::create */
     virtual bool create(int objID) {
@@ -149,14 +128,14 @@ public:
         if (it != mDataMap.end()) {
             const T &dta = it->second;
 
-            uint32_t size = mSerializer->getStoredSize(&dta);
+            uint32_t size = mSerializer.getStoredSize(&dta);
 
             // Write the size if requested
             if (sizeStored)
                 file->writeElem(&size, sizeof(uint32_t));
 
             // write the data itself
-            mSerializer->serialize(file, &dta);
+            mSerializer.serialize(file, &dta);
 
             return true;
         }
@@ -178,7 +157,7 @@ public:
 
             T dta;
 
-            mSerializer->deserialize(file, &dta);
+            mSerializer.deserialize(file, &dta);
 
             _create(objID, dta);
 
@@ -214,17 +193,17 @@ public:
     };
 
     /** @see DataStorage::getFieldDescIterator */
-    virtual DataFieldDescIteratorPtr getFieldDescIterator(void) {
-        return DataFieldDescIteratorPtr(
-            new SingleFieldDescIterator(mFieldDesc));
+    const DataFields &getFieldDesc(void) override {
+        return mFieldDesc;
     }
 
     /** @see DataStorage::getDataSize */
     virtual size_t getDataSize(void) { return sizeof(T); }
 
 protected:
-    /// Empty constructor - for special case overrides
-    explicit SingleFieldDataStorage(){};
+    explicit SingleFieldDataStorage(const DataFieldDesc &fieldDesc)
+        : mFieldDesc(1, fieldDesc), mSerializer()
+    {}
 
     /// Converts from variant to the internal storage type. Should be overrided,
     /// or reimplemented by explicit specialization
@@ -238,11 +217,11 @@ protected:
 
     /// Bool prop. storage is a single-field construct. This is the field desc
     /// for the field
-    DataFieldDesc mFieldDesc;
+    DataFields mFieldDesc;
 
     typedef MapKeyIterator<DataMap, int> DataMapKeyIterator;
 
-    Serializer *mSerializer;
+    SerT mSerializer;
 };
 
 // Various simple single-fielded data storages (it could be done more easily
@@ -269,7 +248,7 @@ class OPDELIB_EXPORT StringDataStorage
 public:
     StringDataStorage(DEnum *enm = NULL)
         : SingleFieldDataStorage<std::string>(enm) {
-        mFieldDesc.size = -1; // override needed
+        mFieldDesc[0].size = -1; // override needed
     }
 
     /** @see DataStorage::getDataSize */
@@ -281,19 +260,15 @@ public:
 
 /// Fixed size string data storage template.
 template <int Len>
-class FixedStringDataStorage : public SingleFieldDataStorage<std::string> {
+class FixedStringDataStorage
+    : public SingleFieldDataStorage<std::string, FixedStringSerializer<Len>> {
+    using Parent =
+        SingleFieldDataStorage<std::string, FixedStringSerializer<Len>>;
+
 public:
     FixedStringDataStorage(DEnum *enm = NULL)
-        : SingleFieldDataStorage<std::string>(enm) {
-        mSerializer = new FixedStringSerializer(Len);
-
-        mFieldDesc.enumerator = enm;
-        mFieldDesc.name = "";
-        mFieldDesc.size = Len;
-
-        DVariantTypeTraits<std::string> tt;
-        mFieldDesc.type = tt.getType();
-    }
+        : Parent(DataFieldDesc{"", "", Len,
+                               DVariantTypeTraits<std::string>::type}) {}
 };
 
 } // namespace Opde

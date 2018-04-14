@@ -23,7 +23,6 @@
 
 #include "LinkService.h"
 #include "ServiceCommon.h"
-#include "binary/BinaryService.h"
 #include "logger.h"
 
 using namespace std;
@@ -96,8 +95,6 @@ void LinkService::load(const FileGroupPtr &db, const BitArray &objMask) {
       As we do not know if something was already initialised or not, we just
       request mapping and see if it goes or not
     */
-    // BinaryServicePtr bs = GET_SERVICE(DatabaseService);
-
     FilePtr rels = db->getFile("Relations");
 
     int count = rels->size() / 32;
@@ -360,15 +357,16 @@ StringIteratorPtr LinkService::getAllLinkNames() {
 }
 
 // --------------------------------------------------------------------------
-DataFieldDescIteratorPtr LinkService::getFieldDescIterator(int flavor) {
+const DataFields &LinkService::getFieldDesc(int flavor) {
     // find relation
     RelationIDMap::const_iterator it = mRelationIDMap.find(flavor);
 
     if (it != mRelationIDMap.end()) {
         // dedicate to the given relation
-        return it->second->getFieldDescIterator();
+        return it->second->getFieldDesc();
     } else {
-        return DataFieldDescIteratorPtr(NULL);
+        static const DataFields empty;
+        return empty;
     }
 }
 

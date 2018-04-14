@@ -32,9 +32,16 @@ namespace Opde {
 
 namespace Python {
 
-/// Data field description list iterator binder
-class DataFieldDescIteratorBinder
-    : public shared_ptr_binder<DataFieldDescIteratorPtr> {
+struct DataFieldsWithPosition {
+    DataFieldsWithPosition(const DataFields *fields)
+        : fields(fields), iter(fields->begin()) {}
+
+    const DataFields *fields = nullptr;
+    DataFields::const_iterator iter;
+};
+
+/// Data field description list as an iterator binder
+class DataFieldsBinder : public object_binder<DataFieldsWithPosition> {
 public:
     static void init(PyObject *module);
 
@@ -43,7 +50,7 @@ public:
     static PyObject *repr(PyObject *self);
 
     /// creates a python object representation of the inherit query result
-    static PyObject *create(const DataFieldDescIteratorPtr &result);
+    static PyObject *create(const DataFields &result);
 
 protected:
     /// Return self as iterator with a increased ref count.

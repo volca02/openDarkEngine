@@ -114,7 +114,7 @@ public:
      * name was specified
      * @see Property::getFieldDescIterator
      */
-    DataFieldDescIteratorPtr getFieldDescIterator(const std::string &propName);
+    const DataFields &getFieldDesc(const std::string &propName);
 
     /** A notification that object was destroyed (removes all properties of the
      * obj. ID)

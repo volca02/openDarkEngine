@@ -22,9 +22,7 @@
  *****************************************************************************/
 
 #include "Relation.h"
-#include "DTypeDef.h"
 #include "LinkCommon.h"
-#include "binary/BinaryService.h"
 #include "inherit/InheritService.h"
 #include "integers.h"
 #include "logger.h"
@@ -624,11 +622,12 @@ void Relation::objectDestroyed(int id) {
 }
 
 // --------------------------------------------------------------------------
-DataFieldDescIteratorPtr Relation::getFieldDescIterator(void) {
+const DataFields &Relation::getFieldDesc(void) {
     if (mStorage) {
-        return mStorage->getFieldDescIterator();
+        return mStorage->getFieldDesc();
     } else {
-        return DataFieldDescIteratorPtr(new EmptyDataFieldDescListIterator());
+        static const DataFields empty;
+        return empty;
     }
 }
 

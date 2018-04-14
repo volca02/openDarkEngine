@@ -290,8 +290,8 @@ void Property::onPropertyModification(const InheritValueChangeMsg &msg) {
 void Property::objectDestroyed(int id) { removeProperty(id); }
 
 // --------------------------------------------------------------------------
-DataFieldDescIteratorPtr Property::getFieldDescIterator(void) {
-    return mPropertyStorage->getFieldDescIterator();
+const DataFields &Property::getFieldDesc(void) {
+    return mPropertyStorage->getFieldDesc();
 }
 
 // --------------------------------------------------------------------------

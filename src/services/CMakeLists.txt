@@ -47,8 +47,6 @@ ELSE(UNIX)
 ENDIF(UNIX)
 
 add_library (OpdeServices OBJECT
-    binary/BinaryService.cpp
-    binary/BinaryService.h
     camera/CameraService.cpp
     camera/CameraService.h
     config/ConfigService.cpp

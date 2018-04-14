@@ -30,7 +30,6 @@
 
 #include "DataStorage.h"
 
-#include "DTypeDef.h"
 #include "DVariant.h"
 #include "File.h"
 #include "Iterator.h"
@@ -196,13 +195,10 @@ public:
             if (sizeStored)
                 file->writeElem(&size, sizeof(uint32_t));
 
-            DataFieldDescIteratorPtr dit = getFieldDescIterator();
+            const auto &fields = getFieldDesc();
 
-            while (!dit->end()) {
-                const DataFieldDesc &d = dit->next();
-
-                TypeHelperBasePtr thb = mTypeHelpers[d.name];
-
+            for(const auto &field : fields) {
+                TypeHelperBasePtr thb = mTypeHelpers[field.name];
                 thb->getSerializer()->serialize(file, thb->getFieldPtr(dta));
             }
 
@@ -227,13 +223,9 @@ public:
             T dta;
 
             // iterate over the fields
-            DataFieldDescIteratorPtr dit = getFieldDescIterator();
-
-            while (!dit->end()) {
-                const DataFieldDesc &d = dit->next();
-
-                TypeHelperBasePtr thb = mTypeHelpers[d.name];
-
+            const auto &fields = getFieldDesc();
+            for(const auto &field : fields) {
+                TypeHelperBasePtr thb = mTypeHelpers[field.name];
                 thb->getSerializer()->deserialize(file, thb->getFieldPtr(dta));
             }
 
@@ -271,9 +263,8 @@ public:
     };
 
     /** @see DataStorage::getFieldDescIterator */
-    virtual DataFieldDescIteratorPtr getFieldDescIterator(void) {
-        return DataFieldDescIteratorPtr(
-            new DataFieldDescListIterator(mFieldDescList));
+    virtual const DataFields &getFieldDesc(void) {
+        return mFieldDesc;
     }
 
     /** @see DataStorage::getDataSize */
@@ -333,17 +324,15 @@ protected:
     void field(const std::string &name, FT T::*fieldPtr, DEnum *enumer = NULL,
                FieldGetter getter = NULL, FieldSetter setter = NULL) {
         // insert into the field def array.
-        DVariantTypeTraits<FT> traits;
-
         DataFieldDesc fd;
 
         fd.name = name;
         fd.label = name;
         fd.size = sizeof(FT);
         fd.enumerator = enumer;
-        fd.type = traits.getType();
+        fd.type = DVariantTypeTraits<FT>::type;
 
-        mFieldDescList.push_back(fd);
+        mFieldDesc.push_back(fd);
 
         if (getter == NULL)
             getter = &StructDataStorage::defaultFieldGetter;
@@ -370,7 +359,7 @@ protected:
     /// Holder of data values
     DataMap mDataMap;
 
-    DataFieldDescList mFieldDescList;
+    DataFields mFieldDesc;
 
     typedef MapKeyIterator<DataMap, int> DataMapKeyIterator;
 

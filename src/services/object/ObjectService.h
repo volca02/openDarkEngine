@@ -237,9 +237,6 @@ protected:
     /// Creates built-in resources - DonorType property, SymbolicName property
     void createBuiltinResources();
 
-    /// Converts the properties orientation to quaternion
-    static Ogre::Quaternion toOrientation(PropertyDataPtr &posdata);
-
     /// A stack of id's
     typedef std::stack<int> ObjectIDStack;
 

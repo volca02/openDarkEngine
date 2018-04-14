@@ -24,62 +24,9 @@
 #ifndef __PROPERTYCOMMON_H
 #define __PROPERTYCOMMON_H
 
-#include "DTypeDef.h"
-#include "File.h"
 #include "compat.h"
 
 namespace Opde {
-/** @brief Property data holder
- * @deprecated We now have common data storage for both link and data, and extra
- * layer of abstraction using DataStorage class
- */
-class PropertyData : public DType {
-    friend class Property;
-
-public:
-    /** Constructor. Constructs new data buffer, filled with zeros */
-    PropertyData(int id, const DTypeDefPtr &type, bool useCache = false)
-        : DType(type, useCache), mID(id){};
-
-    /** Constructor - loads data from FilePtr
-     * @param id The object ID
-     * @param type The DTypeDef pointer to use (type definition)
-     * @param file The File pointer (FilePtr) to load data from
-     * @param _size the size of the data to be loaded
-     * */
-    PropertyData(int id, const DTypeDefPtr &type, FilePtr file, int _size,
-                 bool useCache = false)
-        : DType(type, file, _size, useCache), mID(id){};
-
-    /** Constructor - takes object id and data instance
-     * @param id The object ID
-     * @param data The Data instance to copy the data from */
-    PropertyData(int id, const DTypePtr &data, bool useCache = false)
-        : DType(*data, useCache), mID(id){};
-
-    /** PropertyData cloning constructor
-     * @param id The object ID
-     * @param data The Data instance to copy the data from */
-    PropertyData(int id, const PropertyData &data, bool useCache = false)
-        : DType(data, useCache), mID(id){};
-
-    /** Destructor */
-    ~PropertyData(){};
-
-    inline int id() { return mID; };
-
-protected:
-    /// object holder ID
-    int mID;
-};
-
-/// Shared pointer to property data
-typedef shared_ptr<PropertyData> PropertyDataPtr;
-
-/// Supportive PropertyData comparison operator for sets and maps
-inline bool operator<(const PropertyDataPtr &a, const PropertyDataPtr &b) {
-    return a->id() < b->id();
-}
 
 /// Property change types
 enum PropertyChangeType {

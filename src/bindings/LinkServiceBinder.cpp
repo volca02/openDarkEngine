@@ -374,8 +374,8 @@ PyObject *LinkServiceBinder::getFieldsDesc(PyObject *self, PyObject *args) {
             return NULL;
 
         // wrap the returned StringIterator into StringIteratorBinder, return
-        DataFieldDescIteratorPtr res = o->getFieldDescIterator(flavor);
-        return DataFieldDescIteratorBinder::create(res);
+        const DataFields& res = o->getFieldDesc(flavor);
+        return DataFieldsBinder::create(res);
     }
 
     // Invalid parameters

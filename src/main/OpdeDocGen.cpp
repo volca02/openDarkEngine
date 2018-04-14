@@ -21,9 +21,10 @@
  *
  *****************************************************************************/
 
+#include <iostream>
+
 #include "config.h"
 
-#include "DTypeDef.h"
 #include "DVariant.h"
 #include "OpdeException.h"
 #include "Root.h"
@@ -254,12 +255,7 @@ protected:
                << endl;
 
             // TODO: spit all the property fields with descriptions
-            DataFieldDescIteratorPtr dfi = pg->getFieldDescIterator();
-
-            // iterate
-            while (!dfi->end()) {
-                const DataFieldDesc &df = dfi->next();
-
+            for (const DataFieldDesc &df : pg->getFieldDesc()) {
                 fo << df.name << " & " << DVariant::typeToString(df.type)
                    << " & " << df.size << " & ";
 

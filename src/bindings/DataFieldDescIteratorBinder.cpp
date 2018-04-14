@@ -23,7 +23,6 @@
  *****************************************************************************/
 
 #include "DataFieldDescIteratorBinder.h"
-#include "DTypeDef.h"
 #include "PythonStruct.h"
 #include "bindings.h"
 
@@ -47,15 +46,15 @@ public:
 template <> const char *PythonStruct<DataFieldDesc>::msName = "DataFieldDesc";
 
 // -------------------- Data field desc iterator --------------------
-const char *DataFieldDescIteratorBinder::msName = "DataFieldDescIterator";
+const char *DataFieldsBinder::msName = "DataFieldDescIterator";
 
 // ------------------------------------------
-PyTypeObject DataFieldDescIteratorBinder::msType = {
+PyTypeObject DataFieldsBinder::msType = {
     PyVarObject_HEAD_INIT(&PyType_Type,
-                          0) "opde.DataFieldDescIterator", // char *tp_name; */
-    sizeof(DataFieldDescIteratorBinder::Object), /* int tp_basicsize; */
+                          0) "opde.DataFieldsIterator", // char *tp_name; */
+    sizeof(DataFieldsBinder::Object), /* int tp_basicsize; */
     0, // int tp_itemsize;       /* not used much */
-    DataFieldDescIteratorBinder::dealloc, // destructor tp_dealloc; */
+    DataFieldsBinder::dealloc, // destructor tp_dealloc; */
     0,                                    // printfunc  tp_print;   */
     0,                       // getattrfunc  tp_getattr; /* __getattr__ */
     0,                       // setattrfunc  tp_setattr;  /* __setattr__ */
@@ -84,57 +83,53 @@ PyTypeObject DataFieldDescIteratorBinder::msType = {
 };
 
 // ------------------------------------------
-PyMethodDef DataFieldDescIteratorBinder::msMethods[] = {
+PyMethodDef DataFieldsBinder::msMethods[] = {
     {NULL, NULL},
 };
 
 // ------------------------------------------
-PyObject *DataFieldDescIteratorBinder::getIterObject(PyObject *self) {
+PyObject *DataFieldsBinder::getIterObject(PyObject *self) {
     Py_INCREF(self);
     return self;
 }
 
 // ------------------------------------------
-PyObject *DataFieldDescIteratorBinder::getNext(PyObject *self) {
-    DataFieldDescIteratorPtr o;
+PyObject *DataFieldsBinder::getNext(PyObject *self) {
+    DataFieldsWithPosition *o =
+        python_cast<DataFieldsWithPosition>(self, &msType);
 
-    if (!python_cast<DataFieldDescIteratorPtr>(self, &msType, &o))
+    if (!o)
         __PY_CONVERR_RET;
 
     // Get returnable object, advance to next.
     PyObject *next = NULL;
 
-    if (o && !o->end()) {
-        const DataFieldDesc &d = o->next();
-        next = DataFieldDescBinder::create(d);
+    if (o->iter != o->fields->end()) {
+        const auto &obj = *o->iter++;
+        next = DataFieldDescBinder::create(obj);
     }
 
     return next;
 }
 
 // ------------------------------------------
-PyObject *DataFieldDescIteratorBinder::repr(PyObject *self) {
+PyObject *DataFieldsBinder::repr(PyObject *self) {
 #ifdef IS_PY3K
-    return PyBytes_FromFormat("<DataFieldDescIterator at %p>", self);
+    return PyBytes_FromFormat("<DataFieldsIterator at %p>", self);
 #else
-    return PyString_FromFormat("<DataFieldDescIterator at %p>", self);
+    return PyString_FromFormat("<DataFieldsIterator at %p>", self);
 #endif
 }
 
 // ------------------------------------------
 PyObject *
-DataFieldDescIteratorBinder::create(const DataFieldDescIteratorPtr &result) {
-    Object *object = construct(&msType);
-
-    if (object != NULL) {
-        object->mInstance = result;
-    }
-
+DataFieldsBinder::create(const DataFields &result) {
+    Object *object = construct(&msType, &result);
     return (PyObject *)object;
 }
 
 // ------------------------------------------
-void DataFieldDescIteratorBinder::init(PyObject *module) {
+void DataFieldsBinder::init(PyObject *module) {
     publishType(module, &msType, msName);
     DataFieldDescBinder::init(module);
 }
