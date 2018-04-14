@@ -39,9 +39,8 @@
 #include <OgreTextureManager.h>
 #include <OgreTextureUnitState.h>
 
-// lg palette for default - moved to external definition file for readability
-// reasons...
-#include <draw/LGPalette.h>
+// lg palette for default
+#include "LGPalette.h"
 
 using namespace std;
 using namespace Ogre;
@@ -62,7 +61,7 @@ DrawService::DrawService(ServiceManager *manager, const std::string &name)
       mDrawOpID(0), mDrawSourceID(0), mViewport(NULL), mCurrentPalette(NULL),
       mWidth(1), mHeight(1) {
 
-    mCurrentPalette = msDefaultPalette;
+    mCurrentPalette = sLGPalette;
 }
 
 //------------------------------------------------------
@@ -290,13 +289,13 @@ void DrawService::loadFonFile(const std::string &name, const std::string &group,
         LOG_DEBUG("DrawService: Font is antialiased");
         if (header.Palette !=
             0) // 0 == use current, otherwise we'll use the default one
-            curpalette = msAAPalette;
+            curpalette = sAAPalette;
         // these are inverted! At least it seems so.
     } else {
         LOG_DEBUG("DrawService: Font 8Bit with palette");
         if (header.Palette !=
             0) // 0 == use current, otherwise we'll use the default one
-            curpalette = msDefaultPalette;
+            curpalette = sLGPalette;
     }
 
     size_t nchars = header.LastChar - header.FirstChar + 1;
@@ -734,9 +733,9 @@ void DrawService::destroyAtlas(const TextureAtlasPtr &atlas) {
 
 //------------------------------------------------------
 void DrawService::freeCurrentPal() {
-    if (mCurrentPalette != msDefaultPalette) {
+    if (mCurrentPalette != sLGPalette) {
         delete[] mCurrentPalette;
-        mCurrentPalette = msDefaultPalette;
+        mCurrentPalette = sLGPalette;
     }
 }
 

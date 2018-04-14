@@ -48,8 +48,10 @@ bool operator==(const DarkFragmentBuilder::VertexDefinition &a,
 // -----------------------------------------------------------------------
 // ------------------------- DarkGeometry --------------------------------
 // -----------------------------------------------------------------------
-DarkGeometry::DarkGeometry(const String &name, uint8 defaultRenderQueueID)
-    : mName(name), mDefaultRenderQueueID(defaultRenderQueueID), mBuilt(false) {}
+DarkGeometry::DarkGeometry(const String &name, size_t cellCount,
+                           uint8 defaultRenderQueueID)
+    : mName(name), mDefaultRenderQueueID(defaultRenderQueueID), mBuilt(false),
+      mCellCount(cellCount) {}
 
 // -----------------------------------------------------------------
 DarkGeometry::~DarkGeometry() {
@@ -68,9 +70,6 @@ DarkGeometry::~DarkGeometry() {
 
     mSubGeometryMap.clear();
 }
-
-// -----------------------------------------------------------------
-void DarkGeometry::setCellCount(size_t cellCount) { mCellCount = cellCount; }
 
 // -----------------------------------------------------------------
 DarkSubGeometry *

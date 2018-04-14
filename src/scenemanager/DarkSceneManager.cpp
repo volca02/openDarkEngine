@@ -603,7 +603,7 @@ Entity *DarkSceneManager::createEntity(const String &entityName,
 }
 
 //-----------------------------------------------------------------------
-DarkGeometry *DarkSceneManager::createGeometry(const String &geomName) {
+DarkGeometry *DarkSceneManager::createGeometry(const String &geomName, size_t numCells) {
     DarkGeometryMap::iterator it = mDarkGeometryMap.find(geomName);
 
     if (it != mDarkGeometryMap.end()) {
@@ -611,7 +611,7 @@ DarkGeometry *DarkSceneManager::createGeometry(const String &geomName) {
     }
 
     DarkGeometry *geom =
-        new DarkGeometry(geomName, RENDER_QUEUE_WORLD_GEOMETRY_1);
+        new DarkGeometry(geomName, numCells, RENDER_QUEUE_WORLD_GEOMETRY_1);
 
     mDarkGeometryMap.insert(make_pair(geomName, geom));
 

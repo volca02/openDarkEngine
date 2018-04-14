@@ -383,13 +383,6 @@ struct OPDELIB_EXPORT DrawSourceLess {
 /// A font character type
 typedef uint16_t FontCharType;
 
-/// A single RGBA color
-struct RGBAQuad {
-    uint8_t red;
-    uint8_t green;
-    uint8_t blue;
-    uint8_t alpha;
-};
 
 typedef enum { DPF_MONO, DPF_8BIT, DPF_RGBA } DarkPixelFormat;
 

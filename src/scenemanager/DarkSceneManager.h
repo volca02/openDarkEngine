@@ -158,7 +158,7 @@ public:
 
     // TODO: The DarkGeometry should probably have a factory
     /** Creates an instance of static geometry */
-    DarkGeometry *createGeometry(const String &geomName);
+    DarkGeometry *createGeometry(const String &geomName, size_t numCells);
 
     /** destroys an instance of static geometry */
     void destroyGeometry(const String &name);

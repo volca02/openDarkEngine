@@ -42,13 +42,12 @@ class DarkFragment;
 class OPDELIB_EXPORT DarkGeometry {
 public:
     /// Constructor
-    DarkGeometry(const String &name, uint8 defaultRenderQueueID);
+    DarkGeometry(const String &name, 
+                 size_t cellCount,
+                 uint8 defaultRenderQueueID);
 
     /// Destructor
     ~DarkGeometry();
-
-    /// sets the cell count. Has to be done before submitting the fragments
-    void setCellCount(size_t cellCount);
 
     /// Notifies the DarkGeometry to update it's contents based on visible areas
     void updateFromCamera(const DarkCamera *cam);
@@ -258,7 +257,7 @@ protected:
 
 /** A geometry container for a single material. The geometry of the level is
  * split into these per material it is rendered with */
-class OPDELIB_EXPORT DarkSubGeometry : public Renderable {
+class __attribute__ ((visibility("hidden"))) DarkSubGeometry : public Renderable {
     friend class DarkGeometry;
     friend class DarkFragment;
 

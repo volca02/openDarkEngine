@@ -5,7 +5,6 @@ include_directories(
     ${OPDE_BINARY_DIR}
     ${OPDE_BASE_INCLUDES}
     ${OPDE_SOURCE_DIR}/src/base
-    ${OPDE_SOURCE_DIR}/src/base/Dark
     ${OPDE_SOURCE_DIR}/src/base/console
     ${OPDE_SOURCE_DIR}/src/base/compat
     ${OPDE_SOURCE_DIR}/src/base/dyntype
@@ -25,6 +24,8 @@ add_library (OpdeBase OBJECT
     OpdeException.cpp
     OpdeException.h
     OpdeSingleton.h
+    LGPalette.h
+    LGPalette.cpp
     Plane.h
     PrioritizedMessageSource.h
     Quaternion.h
@@ -38,13 +39,6 @@ add_library (OpdeBase OBJECT
     console/ConsoleCommandListener.cpp
     console/ConsoleCommandListener.h
     DarkCommon.h
-    Dark/DarkDBDefs.h
-    Dark/DarkDBLinkDefs.h
-    Dark/DarkDBPropDefs.h
-    Dark/DarkTypes.h
-    Dark/fon.h
-    Dark/lgcolors.h
-    Dark/utils.h
     dyntype/DataStorage.cpp
     dyntype/DataStorage.h
     dyntype/DTHelpers.h

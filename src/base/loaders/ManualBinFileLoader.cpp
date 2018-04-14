@@ -28,7 +28,7 @@
 #include "File.h"
 #include "FileCompat.h"
 #include "ManualBinFileLoader.h"
-#include "lgcolors.h"
+#include "LGPalette.h"
 
 // #include "MaterialService.h"
 
@@ -1611,9 +1611,9 @@ MaterialPtr ObjectMeshLoader::createPalMaterial(String &matname, int palindex) {
 
     // set the material color from the lg system color table
     tus->setColourOperationEx(LBX_SOURCE1, LBS_MANUAL, LBS_CURRENT,
-                              ColourValue(lg_system_colors[palindex][0],
-                                          lg_system_colors[palindex][1],
-                                          lg_system_colors[palindex][2]));
+                              ColourValue(sLGPalette[palindex].red,
+                                          sLGPalette[palindex].green,
+                                          sLGPalette[palindex].blue));
 
     // tus->setColourOperation(LBO_REPLACE);
 

@@ -8,7 +8,6 @@ include_directories(
     ${OPDE_SOURCE_DIR}/src/scenemanager
     ${OPDE_SOURCE_DIR}/src/main
     ${OPDE_SOURCE_DIR}/src/base
-    ${OPDE_SOURCE_DIR}/src/base/Dark
     ${OPDE_SOURCE_DIR}/src/base/console
     ${OPDE_SOURCE_DIR}/src/base/compat
     ${OPDE_SOURCE_DIR}/src/base/dyntype

@@ -25,6 +25,7 @@
 #define __FONTDRAWSOURCE_H
 
 #include "DrawCommon.h"
+#include "RGBAQuad.h"
 #include "SharedPtr.h"
 #include "TextureAtlas.h"
 

@@ -67,7 +67,6 @@ add_library (OpdeServices OBJECT
     draw/DrawSheet.h
     draw/FontDrawSource.cpp
     draw/FontDrawSource.h
-    draw/LGPalette.h
     draw/RenderedImage.cpp
     draw/RenderedImage.h
     draw/RenderedLabel.cpp

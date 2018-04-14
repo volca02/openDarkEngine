@@ -216,8 +216,7 @@ void WorldRepService::loadFromChunk(FilePtr &wrChunk, size_t lightSize) {
     LOG_DEBUG("WorldRepService: Loading Cells");
 
     mWorldGeometry = mSceneMgr->createGeometry(
-        "LEVEL_GEOMETRY"); // will be deleted on clear_scene
-    mWorldGeometry->setCellCount(header.numCells);
+        "LEVEL_GEOMETRY", header.numCells); // will be deleted on clear_scene
 
     for (uint32_t i = 0; i < mNumCells; i++) {
         mCells[i] = new WRCell(this, mWorldGeometry);

@@ -279,9 +279,8 @@ private:
     AtlasList mAtlasesForRebuild;
 
     static const RGBAQuad msMonoPalette[2];
-    static RGBAQuad msDefaultPalette[256];
-    static RGBAQuad msAAPalette[256];
 
+    // TODO(volca): use std::array or similar here. No naked pointers
     RGBAQuad *mCurrentPalette;
 
     DrawSourceList mDrawSources;

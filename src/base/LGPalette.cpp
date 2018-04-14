@@ -21,13 +21,11 @@
  *
  *****************************************************************************/
 
-// Converted from logcolors.h by Tom N' Harris
-
-#ifndef __LGPALETTE_H
-#define __LGPALETTE_H
+#include "LGPalette.h"
 
 namespace Opde {
-RGBAQuad DrawService::msDefaultPalette[256] = {
+
+RGBAQuad sLGPalette[256] = {
     {0, 0, 0, 0},         {221, 221, 221, 255}, {182, 182, 182, 255},
     {150, 150, 150, 255}, {124, 124, 124, 255}, {102, 102, 102, 255},
     {84, 84, 84, 255},    {69, 69, 69, 255},    {57, 57, 57, 255},
@@ -115,7 +113,7 @@ RGBAQuad DrawService::msDefaultPalette[256] = {
     {0, 0, 255, 255},     {0, 0, 255, 255},     {255, 0, 255, 255},
     {0, 0, 0, 255}};
 
-RGBAQuad DrawService::msAAPalette[256] = {
+RGBAQuad sAAPalette[256] = {
     {255, 255, 255, 255}, {238, 238, 238, 255}, {221, 221, 221, 255},
     {204, 204, 204, 255}, {187, 187, 187, 255}, {170, 170, 170, 255},
     {153, 153, 153, 255}, {136, 136, 136, 255}, {119, 119, 119, 255},
@@ -204,4 +202,3 @@ RGBAQuad DrawService::msAAPalette[256] = {
     {255, 255, 255, 255}};
 } // namespace Opde
 
-#endif
