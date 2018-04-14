@@ -276,11 +276,9 @@ protected:
         typedef FT T::*StructField;
 
         TypeHelper(StructField fieldPtr, FieldGetter getter, FieldSetter setter)
-            : TypeHelperBase(getter, setter), mField(fieldPtr) {
-            mSerializer = new TypeSerializer<FT>();
-        };
+            : TypeHelperBase(getter, setter), mField(fieldPtr) {}
 
-        virtual ~TypeHelper() { delete mSerializer; };
+        virtual ~TypeHelper() { }
 
         virtual void toField(T &data, const DVariant &val) {
             data.*mField = val.as<FT>();
@@ -290,7 +288,7 @@ protected:
             val = DVariant(data.*mField);
         };
 
-        virtual Serializer *getSerializer() { return mSerializer; }
+        virtual Serializer *getSerializer() { return &mSerializer; }
 
         virtual void *getFieldPtr(T &data) { return &(data.*mField); };
 
@@ -299,8 +297,7 @@ protected:
         };
 
     protected:
-        Serializer *mSerializer;
-
+        TypeSerializer<FT> mSerializer;
         StructField mField;
     };
 
