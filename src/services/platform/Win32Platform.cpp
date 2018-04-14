@@ -32,11 +32,11 @@ namespace Opde {
 	/*----------------------------------------------------*/
 	Win32Platform::Win32Platform(PlatformService* owner) : Platform(owner) {
 	}
-	
+
 	//------------------------------------------------------
 	Win32Platform::~Win32Platform() {
 	}
-	
+
 	//------------------------------------------------------
 	std::string Win32Platform::getGlobalConfigPath() const {
 		// TODO: CODE
@@ -50,7 +50,7 @@ namespace Opde {
 	}
 
 	//------------------------------------------------------
-	std::string ApplePlatform::getDirectorySeparator() const {
+	std::string Win32Patform::getDirectorySeparator() const {
 		return "\\";
 	}
 }

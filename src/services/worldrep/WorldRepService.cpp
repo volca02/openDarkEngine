@@ -27,7 +27,7 @@
 
 #include "ServiceCommon.h"
 #include "WorldRepService.h"
-#include "ConfigService.h"
+#include "config/ConfigService.h"
 #include "WRTypes.h"
 
 #include "DarkBspNode.h"
@@ -49,7 +49,7 @@ namespace Opde {
 	/*----------------- WorldRep Service -----------------*/
 	/*----------------------------------------------------*/
 	template<> const size_t ServiceImpl<WorldRepService>::SID = __SERVICE_ID_WORLDREP;
-	
+
 	WorldRepService::WorldRepService(ServiceManager *manager, const std::string& name) :
 		ServiceImpl< Opde::WorldRepService >(manager, name), mNumCells(0) {
 		// ResourceGroupManager::getSingleton().setWorldResourceGroupName(TEMPTEXTURE_RESOURCE_GROUP);
@@ -61,7 +61,7 @@ namespace Opde {
 		mRenderService
 		        = GET_SERVICE(RenderService);
 
-		if (mRenderService.isNull()) {
+		if (!mRenderService) {
 			LOG_ERROR("RenderService instance was not found. Fatal");
 			return false;
 		}
@@ -88,10 +88,10 @@ namespace Opde {
 	//------------------------------------------------------
 	void WorldRepService::shutdown() {
 		mDatabaseService->unregisterListener(this);
-		mDatabaseService.setNull();
+		mDatabaseService.reset();
 		clearData();
 
-		mRenderService.setNull();
+		mRenderService.reset();
 	}
 
 	//------------------------------------------------------
@@ -102,10 +102,10 @@ namespace Opde {
 	//------------------------------------------------------
 	void WorldRepService::onDBLoad(const FileGroupPtr& db, uint32_t curmask) {
 		LOG_INFO("WorldRepService::onDBLoad called.");
-		
+
 		if (!(curmask & DBM_MIS_DATA))
 			return;
-		
+
 		// If there is some scene already, clear it
 		clearData();
 
@@ -125,13 +125,13 @@ namespace Opde {
 
 		loadFromChunk(wrChunk, lightSize);
 	}
-	
+
 	//------------------------------------------------------
 	void WorldRepService::onDBSave(const FileGroupPtr& db, uint32_t tgtmask) {
 		LOG_INFO("WorldRepService::onDBSave called.");
 		// TODO: Stub
 	}
-	
+
 	//------------------------------------------------------
 	void WorldRepService::onDBDrop(uint32_t dropmask) {
 		LOG_INFO("WorldRepService::onDBDrop called.");
@@ -146,7 +146,7 @@ namespace Opde {
 		return;
 		FilePtr skyChunk = db->getFile("SKYMODE");
 
-		if (!skyChunk.isNull()) { // Thief1 sky. Thief2 has NewSky. Will need to make a custom scene node for this.
+		if (skyChunk) { // Thief1 sky. Thief2 has NewSky. Will need to make a custom scene node for this.
 			uint32_t skyMode;
 
 			skyChunk->readElem(&skyMode, sizeof(skyMode), 1);
@@ -212,7 +212,7 @@ namespace Opde {
 		mCells = new WRCell*[header.numCells];
 
 		LOG_DEBUG("WorldRepService: Loading Cells");
-		
+
 		mWorldGeometry = mSceneMgr->createGeometry("LEVEL_GEOMETRY"); // will be deleted on clear_scene
 		mWorldGeometry->setCellCount(header.numCells);
 
@@ -229,14 +229,14 @@ namespace Opde {
 		}
 
 		LOG_DEBUG("WorldRepService: Loading Extra planes");
-		
+
 		// -- Load the extra planes
 		wrChunk->read(&mExtraPlaneCount, sizeof(uint32_t));
 
 		mExtraPlanes = new Plane[mExtraPlaneCount];
 		for (size_t i = 0; i < mExtraPlaneCount; ++i)
 			*wrChunk >> mExtraPlanes[i];
-		
+
 		// --------------------------------------------------------------------------------
 		// -- Load and process the BSP tree
 		LOG_DEBUG("WorldRepService: Loading BSP");
@@ -392,7 +392,7 @@ namespace Opde {
 	const uint WorldRepServiceFactory::getMask() {
 		return SERVICE_DATABASE_LISTENER | SERVICE_RENDERER | SERVICE_ENGINE;
 	}
-	
+
 	const size_t WorldRepServiceFactory::getSID() {
 		return WorldRepService::SID;
 	}

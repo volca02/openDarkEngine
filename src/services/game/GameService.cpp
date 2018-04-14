@@ -30,50 +30,52 @@ using namespace std;
 
 namespace Opde {
 
-	/*----------------------------------------------------*/
-	/*-------------------- GameService -------------------*/
-	/*----------------------------------------------------*/
-	template<> const size_t ServiceImpl<GameService>::SID = __SERVICE_ID_GAME;
-	
-	GameService::GameService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::GameService >(manager, name) {
-	}
+/*----------------------------------------------------*/
+/*-------------------- GameService -------------------*/
+/*----------------------------------------------------*/
+template<> const size_t ServiceImpl<GameService>::SID = __SERVICE_ID_GAME;
 
-	//------------------------------------------------------
-	bool GameService::init() {
-	    mDbService = GET_SERVICE(DatabaseService);
+GameService::GameService(ServiceManager* manager, const std::string& name)
+        : ServiceImpl<Opde::GameService>(manager, name)
+{
+}
 
-		return (!mDbService.isNull());
-	}
+//------------------------------------------------------
+bool GameService::init() {
+    mDbService = GET_SERVICE(DatabaseService);
 
-	//------------------------------------------------------
-	GameService::~GameService() {
-	}
+    return mDbService.get();
+}
 
-	//------------------------------------------------------
-	void GameService::load(const std::string& filename) {
-		mDbService->load(filename, DBM_COMPLETE);
-	}
+//------------------------------------------------------
+GameService::~GameService() {
+}
 
-	//-------------------------- Factory implementation
-	std::string GameServiceFactory::mName = "GameService";
+//------------------------------------------------------
+void GameService::load(const std::string& filename) {
+    mDbService->load(filename, DBM_COMPLETE);
+}
 
-	GameServiceFactory::GameServiceFactory() : ServiceFactory() {
-	};
+//-------------------------- Factory implementation
+std::string GameServiceFactory::mName = "GameService";
 
-	const std::string& GameServiceFactory::getName() {
-		return mName;
-	}
+GameServiceFactory::GameServiceFactory() : ServiceFactory() {
+};
 
-	const uint GameServiceFactory::getMask() {
-		return SERVICE_ENGINE;
-	}
+const std::string& GameServiceFactory::getName() {
+    return mName;
+}
 
-	const size_t GameServiceFactory::getSID() {
-		return GameService::SID;
-	}
+const uint GameServiceFactory::getMask() {
+    return SERVICE_ENGINE;
+}
 
-	Service* GameServiceFactory::createInstance(ServiceManager* manager) {
-		return new GameService(manager, mName);
-	}
+const size_t GameServiceFactory::getSID() {
+    return GameService::SID;
+}
+
+Service* GameServiceFactory::createInstance(ServiceManager* manager) {
+    return new GameService(manager, mName);
+}
 
 }

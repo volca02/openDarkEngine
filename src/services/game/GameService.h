@@ -29,7 +29,7 @@
 
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
-#include "DatabaseService.h"
+#include "database/DatabaseService.h"
 #include "FileGroup.h"
 #include "SharedPtr.h"
 
@@ -67,8 +67,8 @@ namespace Opde {
 
 			virtual const std::string& getName();
 
-			virtual const uint getMask(); 
-			
+			virtual const uint getMask();
+
 			virtual const size_t getSID();
 		private:
 			static std::string mName;

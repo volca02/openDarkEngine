@@ -29,14 +29,8 @@ THE SOFTWARE.
 #ifndef __FixedZip_H__
 #define __FixedZip_H__
 
-#include "OgrePrerequisites.h"
-
-#include "OgreArchive.h"
-#include "OgreArchiveFactory.h"
-#if OGRE_THREAD_SUPPORT
-#include "Threading/OgreThreadHeaders.h"
-#endif
-#include "OgreHeaderPrefix.h"
+#include <OgreArchive.h>
+#include <OgreArchiveFactory.h>
 
 // Forward declaration for zziplib to avoid header file dependency.
 typedef struct zzip_dir     ZZIP_DIR;
@@ -57,7 +51,7 @@ namespace Ogre {
         This archive format supports all archives compressed in the standard
         zip format, including iD pk3 files.
     */
-    class _OgreExport FixedZipArchive : public Archive
+    class FixedZipArchive : public Archive
     {
     protected:
         /// Handle to root zip file
@@ -66,10 +60,9 @@ namespace Ogre {
         void checkZzipError(int zzipError, const String& operation) const;
         /// File list (since zziplib seems to only allow scanning of dir tree once)
         FileInfoList mFileList;
-        /// A pointer to file io alternative implementation 
+        /// A pointer to file io alternative implementation
         zzip_plugin_io_handlers* mPluginIo;
 
-        OGRE_AUTO_MUTEX;
     public:
         FixedZipArchive(const String& name, const String& archType, zzip_plugin_io_handlers* pluginIo = NULL);
         ~FixedZipArchive();
@@ -112,14 +105,14 @@ namespace Ogre {
     };
 
     /** Specialisation of ArchiveFactory for Zip files. */
-    class _OgrePrivate FixedZipArchiveFactory : public ArchiveFactory
+    class FixedZipArchiveFactory : public ArchiveFactory
     {
     public:
         virtual ~FixedZipArchiveFactory() {}
         /// @copydoc FactoryObj::getType
         const String& getType(void) const;
         /// @copydoc FactoryObj::createInstance
-        Archive *createInstance( const String& name, bool readOnly ) 
+        Archive *createInstance( const String& name, bool readOnly )
         {
             if(!readOnly)
                 return NULL;
@@ -131,7 +124,7 @@ namespace Ogre {
     };
 
     /** Specialisation of FixedZipArchiveFactory for embedded Zip files. */
-    class _OgreExport EmbeddedFixedZipArchiveFactory : public FixedZipArchiveFactory
+    class EmbeddedFixedZipArchiveFactory : public FixedZipArchiveFactory
     {
     protected:
         /// A static pointer to file io alternative implementation for the embedded files
@@ -142,22 +135,22 @@ namespace Ogre {
         /// @copydoc FactoryObj::getType
         const String& getType(void) const;
         /// @copydoc ArchiveFactory::createInstance
-        Archive *createInstance( const String& name, bool readOnly ) 
+        Archive *createInstance( const String& name, bool readOnly )
         {
             FixedZipArchive * resFixedZipArchive = OGRE_NEW FixedZipArchive(name, "EmbeddedFZip", mPluginIo);
             return resFixedZipArchive;
         }
-        
+
         /** a function type to decrypt embedded zip file
         @param pos pos in file
         @param buf current buffer to decrypt
         @param len - length of buffer
         @return success
-        */  
+        */
         typedef bool (*DecryptEmbeddedZipFileFunc)(size_t pos, void* buf, size_t len);
 
         /// Add an embedded file to the embedded file list
-        static void addEmbbeddedFile(const String& name, const uint8 * fileData, 
+        static void addEmbbeddedFile(const String& name, const uint8 * fileData,
                         size_t fileSize, DecryptEmbeddedZipFileFunc decryptFunc);
 
         /// Remove an embedded file to the embedded file list
@@ -166,7 +159,7 @@ namespace Ogre {
     };
 
     /** Specialisation of DataStream to handle streaming data from zip archives. */
-    class _OgrePrivate FixedZipDataStream : public DataStream
+    class FixedZipDataStream : public DataStream
     {
     protected:
         ZZIP_FILE* mZzipFile;
@@ -200,7 +193,5 @@ namespace Ogre {
     /** @} */
 
 }
-
-#include "OgreHeaderSuffix.h"
 
 #endif

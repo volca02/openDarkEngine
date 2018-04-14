@@ -34,15 +34,15 @@
 
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
-#include "ObjectService.h"
+#include "object/ObjectService.h"
 #include "ServiceCommon.h"
 #include "SharedPtr.h"
 
-#include "InputService.h"
-#include "ObjectService.h"
-#include "LinkService.h"
-#include "PhysicsService.h"
-#include "SimService.h"
+#include "input/InputService.h"
+#include "object/ObjectService.h"
+#include "link/LinkService.h"
+#include "physics/PhysicsService.h"
+#include "sim/SimService.h"
 
 namespace Opde {
 
@@ -51,25 +51,25 @@ namespace Opde {
 	class OPDELIB_EXPORT PlayerService : public ServiceImpl<PlayerService>, public SimListener {
 		public:
 			PlayerService(ServiceManager *manager, const std::string& name);
-			
+
 			virtual ~PlayerService();
-			
+
 			int getPlayerObject();
-			
+
 			void handleCameraAttachment(int objID);
-			
+
 			virtual void simStep(float simTime, float delta);
-			
+
 			size_t getPlayerHeadSubModel(void) const;
-			
+
 			/** Returns the state of the creepOn modifier (slower movement speed) */
 			bool getCreepOn(void) const { return mCreepOn; };
-			
+
 		protected:
 			bool init();
 			void bootstrapFinished();
 			void shutdown();
-			
+
 			void onInputForward(const InputEventMsg& msg);
 			void onInputSidestep(const InputEventMsg& msg);
 			void onInputCreepOn(const InputEventMsg& msg);
@@ -102,7 +102,7 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask();
-			
+
 			virtual const size_t getSID();
 		private:
 			static std::string mName;

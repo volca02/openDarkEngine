@@ -27,10 +27,10 @@
 #include "config.h"
 
 #include "ConsoleBackend.h"
-#include "DrawService.h"
-#include "InputService.h"
-#include "FontDrawSource.h"
-#include "TextureAtlas.h"
+#include "draw/DrawService.h"
+#include "input/InputService.h"
+#include "draw/FontDrawSource.h"
+#include "draw/TextureAtlas.h"
 
 namespace Opde {
 	/// forward decl.

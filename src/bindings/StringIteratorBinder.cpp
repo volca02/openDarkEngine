@@ -88,7 +88,7 @@ namespace Opde {
 			// Get returnable object, advance to next.
 			PyObject* next = NULL;
 
-			if ((!o.isNull()) && !o->end()) {
+			if (o && !o->end()) {
 				const std::string& s = o->next();
 
 #ifdef IS_PY3K

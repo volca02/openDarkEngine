@@ -23,7 +23,7 @@
  *****************************************************************************/
 
 #include "RenderService.h"
-#include "PropertyService.h"
+#include "property/PropertyService.h"
 #include "SingleFieldDataStorage.h"
 #include "ZBiasProperty.h"
 
@@ -79,4 +79,3 @@ namespace Opde {
 		ei->setZBias(bias);
 	};
 };
-

@@ -24,6 +24,8 @@
 #ifndef __OPDESERVICEMANAGER_H
 #define __OPDESERVICEMANAGER_H
 
+#include <memory>
+
 #include "config.h"
 
 #include "OpdeServiceFactory.h"
@@ -34,63 +36,63 @@
 
 namespace Opde {
 
-	/** Central manager for the Services. Each service must have the ServiceFactory implemented, and must implement Service class.
-	* @see ServiceFactory
-	* @see Service
-	* @note Two phases exist in the service manager. Bootstrap and normal run. Bootstrap phase is used to initialize services without any dependencies
-	* @note Services are guaranteed to receive calls in this order: Constructor, init(), bootstrapFinished()
-	* @todo Introduce a quicker way of getting service - use service IDs instead of Names
-	*/
-	class OPDELIB_EXPORT ServiceManager : public Singleton<ServiceManager>, public NonCopyable {
-		private:
-			typedef SimpleArray<ServiceFactory*> ServiceFactoryMap;
-			typedef SimpleArray<ServicePtr> ServiceInstanceMap;
+/** Central manager for the Services. Each service must have the ServiceFactory implemented, and must implement Service class.
+ * @see ServiceFactory
+ * @see Service
+ * @note Two phases exist in the service manager. Bootstrap and normal run. Bootstrap phase is used to initialize services without any dependencies
+ * @note Services are guaranteed to receive calls in this order: Constructor, init(), bootstrapFinished()
+ * @todo Introduce a quicker way of getting service - use service IDs instead of Names
+ */
+class OPDELIB_EXPORT ServiceManager : public Singleton<ServiceManager>, public NonCopyable {
+  private:
+    typedef SimpleArray<ServiceFactory*> ServiceFactoryMap;
+    typedef SimpleArray<ServicePtr> ServiceInstanceMap;
 
-			ServiceFactoryMap mServiceFactories;
-			ServiceInstanceMap mServiceInstances;
+    ServiceFactoryMap mServiceFactories;
+    ServiceInstanceMap mServiceInstances;
 
-			bool mBootstrapFinished;
+    bool mBootstrapFinished;
 
-			ServiceFactory* findFactory(size_t sid);
-			ServicePtr findService(size_t sid);
-			ServicePtr createInstance(size_t sid);
+    ServiceFactory* findFactory(size_t sid);
+    ServicePtr findService(size_t sid);
+    ServicePtr createInstance(size_t sid);
 
-			const uint mGlobalServiceMask;
-			
-			static const uint msMaxServiceSID;
+    const uint mGlobalServiceMask;
 
-		public:
-			ServiceManager(uint serviceMask);
+    static const uint msMaxServiceSID;
 
-			/// Destructor. Deletes all registered factories
-			~ServiceManager(void);
+  public:
+    ServiceManager(uint serviceMask);
 
-			// Singleton related
-			static ServiceManager& getSingleton(void);
-			static ServiceManager* getSingletonPtr(void);
+    /// Destructor. Deletes all registered factories
+    ~ServiceManager(void);
 
-			/** Registration for the services */
-			void addServiceFactory(ServiceFactory* factory);
+    // Singleton related
+    static ServiceManager& getSingleton(void);
+    static ServiceManager* getSingletonPtr(void);
 
-			/** Returns the service, named name, pointer.
-			* @param name The service type name (The name returned by the ServiceFactory)
-			* @see ServiceFactory
-			*/
-			ServicePtr getService(size_t sid);
+    /** Registration for the services */
+    void addServiceFactory(ServiceFactory* factory);
 
-			/** Mass creation of services. All services which will have nonzero binary and operation with the factorie's service mask will be created.
-			* Typical usage: Creation of listeners
-			* @param mask The mask to use */
-			void createByMask(uint mask);
+    /** Returns the service, named name, pointer.
+     * @param name The service type name (The name returned by the ServiceFactory)
+     * @see ServiceFactory
+     */
+    ServicePtr getService(size_t sid);
 
-			/** Inform the services that bootstraping has finished
-			*/
-			void bootstrapFinished();
-	};
+    /** Mass creation of services. All services which will have nonzero binary and operation with the factorie's service mask will be created.
+     * Typical usage: Creation of listeners
+     * @param mask The mask to use */
+    void createByMask(uint mask);
+
+    /** Inform the services that bootstraping has finished
+     */
+    void bootstrapFinished();
+};
 
 
 // Shortcut to service getter... Once all services are given a unique ID as well, we can redo this to getServiceByID(ID_##__sname__) or alike
-#define GET_SERVICE(__sname__) static_pointer_cast<__sname__>(ServiceManager::getSingleton().getService(__sname__::SID));
+#define GET_SERVICE(__sname__) std::static_pointer_cast<__sname__>(ServiceManager::getSingleton().getService(__sname__::SID));
 
 }
 

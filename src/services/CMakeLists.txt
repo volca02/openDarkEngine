@@ -1,54 +1,180 @@
-###### Basic Services - background for others ######
-# binary service, handling data definitions
-add_subdirectory(binary)
+# A monolith object library for all services
+include_directories(
+    ${OPDE_BINARY_DIR}
+    ${ODE_INCLUDE_DIR}
+    ${OGRE_INCLUDE_DIR}
+    ${OPDE_BINARY_DIR}
+    ${OPDE_BASE_INCLUDES}
+    ${PYTHON_INCLUDE_PATH}
+    ${OPDE_SOURCE_DIR}/src/base
+    ${OPDE_SOURCE_DIR}/src/base/Dark
+    ${OPDE_SOURCE_DIR}/src/base/console
+    ${OPDE_SOURCE_DIR}/src/base/dyntype
+    ${OPDE_SOURCE_DIR}/src/base/file
+    ${OPDE_SOURCE_DIR}/src/base/loaders
+    ${OPDE_SOURCE_DIR}/src/base/logger
+    ${OPDE_SOURCE_DIR}/src/base/servicemanager
+    ${OPDE_SOURCE_DIR}/src/bindings
+    ${OPDE_SOURCE_DIR}/src/compat
+    ${OPDE_SOURCE_DIR}/src/services
+    ${OPDE_SOURCE_DIR}/src/scenemanager
+)
 
-# Config service, handling game options
-add_subdirectory(config)
+SET(PLATFORM_SOURCES
+    platform/PlatformService.cpp
+    platform/PlatformService.h
+    platform/Platform.cpp
+    platform/Platform.h
+)
 
+# OS Specific code follows. Example: OS X could have a specific condition here
+IF(UNIX)
+    IF(APPLE)
+        # Apple specific platform
+        # LIST(APPEND PLATFORM_SOURCES platform/ApplePlatform.cpp platform/ApplePlatform.h)
+        MESSAGE(FATAL_ERROR "Apple platform currently unsupported! Please consider helping us by providing the platform specific code!")
+    ELSE(APPLE)
+        # Generic unix platform
+        LIST(APPEND PLATFORM_SOURCES platform/UnixPlatform.cpp platform/UnixPlatform.h)
+	ENDIF(APPLE)
+ELSE(UNIX)
+	IF(WIN32)
+        LIST(APPEND PLATFORM_SOURCES platform/Win32Platform.cpp platform/Win32Platform.h)
+	ELSE(WIN32)
+		MESSAGE(FATAL_ERROR "Unknown platform encountered! Please consider helping us by providing your platform specific code!")
+	ENDIF(WIN32)
+ENDIF(UNIX)
 
-
-###### Object system services ######
-# Link service, handling links
-add_subdirectory(link)
-
-# Inheritance service, handling inheritance of goodies (Properties, really) across the object tree 
-add_subdirectory(inherit)
-
-# Property service, handling game object properties (value sets)
-add_subdirectory(property)
-
-# Object service. Handles objects (creation, deletion, MP addition and removal, MP queries)
-add_subdirectory(object)
-
-
-
-###### Property realization services ######
-# Renderer service
-add_subdirectory(render)
-
-
-
-###### Miscelenaous services ######
-# WorldRep service, Handling world geometry loading
-add_subdirectory(worldrep)
-
-# Game service, handling the high game states
-add_subdirectory(game)
-
-# Physics service, handling the physics
-add_subdirectory(physics)
-
-# Dark Database handling service
-add_subdirectory(database)
-
-# Input management service
-add_subdirectory(input)
-
-# Loop service. The main loop code run by the main.cpp
-add_subdirectory(loop)
-
-# GUI service. Handles gui and overlays
-add_subdirectory(gui)
-
-# Script service. Script execution and object scripts
-add_subdirectory(script)
+add_library (OpdeServices OBJECT
+    binary/BinaryService.cpp
+    binary/BinaryService.h
+    camera/CameraService.cpp
+    camera/CameraService.h
+    config/ConfigService.cpp
+    config/ConfigService.h
+    database/DatabaseService.cpp
+    database/DatabaseService.h
+    draw/DrawBuffer.cpp
+    draw/DrawBuffer.h
+    draw/DrawCommon.cpp
+    draw/DrawCommon.h
+    draw/DrawOperation.cpp
+    draw/DrawOperation.h
+    draw/DrawService.cpp
+    draw/DrawService.h
+    draw/DrawSheet.cpp
+    draw/DrawSheet.h
+    draw/FontDrawSource.cpp
+    draw/FontDrawSource.h
+    draw/LGPalette.h
+    draw/RenderedImage.cpp
+    draw/RenderedImage.h
+    draw/RenderedLabel.cpp
+    draw/RenderedLabel.h
+    draw/RenderedRect.cpp
+    draw/RenderedRect.h
+    draw/TextureAtlas.cpp
+    draw/TextureAtlas.h
+    game/GameService.cpp
+    game/GameService.h
+    gui/ConsoleGUI.cpp
+    gui/ConsoleGUI.h
+    gui/GUIService.cpp
+    gui/GUIService.h
+    inherit/ArchetypeInheritor.cpp
+    inherit/ArchetypeInheritor.h
+    inherit/CachedInheritor.cpp
+    inherit/CachedInheritor.h
+    inherit/InheritCommon.h
+    inherit/InheritService.cpp
+    inherit/InheritService.h
+    inherit/NeverInheritor.cpp
+    inherit/NeverInheritor.h
+    input/InputEventMapper.cpp
+    input/InputEventMapper.h
+    input/InputService.cpp
+    input/InputService.h
+    light/LightService.cpp
+    light/LightService.h
+    link/LinkCommon.h
+    link/LinkService.cpp
+    link/LinkService.h
+    link/Relation.cpp
+    link/Relation.h
+    loop/LoopService.cpp
+    loop/LoopService.h
+    material/MaterialService.cpp
+    material/MaterialService.h
+    object/ObjectService.cpp
+    object/ObjectService.h
+    object/PositionPropertyStorage.cpp
+    object/PositionPropertyStorage.h
+    object/SymNamePropertyStorage.cpp
+    object/SymNamePropertyStorage.h
+    physics/PhysBSPModel.cpp
+    physics/PhysBSPModel.h
+    physics/PhysCommon.cpp
+    physics/PhysCommon.h
+    physics/PhysControls.h
+    physics/PhysicsService.cpp
+    physics/PhysicsService.h
+    physics/PhysModel.cpp
+    physics/PhysModel.h
+    physics/PhysModels.cpp
+    physics/PhysModels.h
+    physics/PhysOBBModel.cpp
+    physics/PhysOBBModel.h
+    physics/PhysSphereModel.cpp
+    physics/PhysSphereModel.h
+    ${PLATFORM_SOURCES}
+    player/PlayerService.cpp
+    player/PlayerService.h
+    property/PropertyCommon.h
+    property/Property.cpp
+    property/Property.h
+    property/PropertyService.cpp
+    property/PropertyService.h
+    render/EntityMaterialInstance.cpp
+    render/EntityMaterialInstance.h
+    render/HasRefsProperty.cpp
+    render/HasRefsProperty.h
+    render/jorge.h
+    render/MaterialInstance.cpp
+    render/MaterialInstance.h
+    render/ModelNameProperty.cpp
+    render/ModelNameProperty.h
+    render/ModelScaleProperty.cpp
+    render/ModelScaleProperty.h
+    render/RenderAlphaProperty.cpp
+    render/RenderAlphaProperty.h
+    render/RenderedProperty.cpp
+    render/RenderedProperty.h
+    render/RenderService.cpp
+    render/RenderService.h
+    render/RenderTypeProperty.cpp
+    render/RenderTypeProperty.h
+    render/SubEntityMaterialInstance.cpp
+    render/SubEntityMaterialInstance.h
+    render/ZBiasProperty.cpp
+    render/ZBiasProperty.h
+    room/RoomCommon.h
+    room/Room.cpp
+    room/Room.h
+    room/RoomPortal.cpp
+    room/RoomPortal.h
+    room/RoomService.cpp
+    room/RoomService.h
+    script/ScriptService.cpp
+    script/ScriptService.h
+    ServiceCommon.h
+    sim/SimService.cpp
+    sim/SimService.h
+    worldrep/LightmapAtlas.cpp
+    worldrep/LightmapAtlas.h
+    worldrep/WorldRepService.cpp
+    worldrep/WorldRepService.h
+    worldrep/WRCell.cpp
+    worldrep/WRCell.h
+    worldrep/WRCommon.h
+    worldrep/WRTypes.h
+)

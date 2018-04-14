@@ -29,7 +29,7 @@
 #include "GameLoadState.h"
 #include "GamePlayState.h"
 
-#include "GameService.h"
+#include "game/GameService.h"
 
 #include "logger.h"
 

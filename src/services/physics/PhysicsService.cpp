@@ -49,7 +49,7 @@ namespace Opde {
 	{
 		mDbService = GET_SERVICE(DatabaseService);
 
-		if(mDbService.isNull())
+		if(!mDbService)
 			return false;
 
 		// create world

@@ -21,7 +21,7 @@
  *
  *****************************************************************************/
 
-/*! 
+/*!
   \file InheritCommon.h
   \brief Common declarations for the inherit service
   \ingroup InheritService
@@ -31,7 +31,7 @@
 #define __INHERITORCOMMON_H
 
 #include "SharedPtr.h"
-#include "LinkService.h"
+#include "link/LinkService.h"
 
 namespace Opde {
 	// Forward declaration
@@ -82,7 +82,7 @@ namespace Opde {
 
             /// default destructor
 			virtual ~Inheritor() {};
-		
+
 			/** Returns true if the objID has true 'implements' record */
 			virtual bool getImplements(int objID) const = 0;
 
@@ -122,7 +122,7 @@ namespace Opde {
 
 			/// Used upon total cleanout of the database
 			virtual void clear() = 0;
-			
+
 			/// grows the internal tables of the inheritor to allow the storage of data about defined object range
 			virtual void grow(int minID, int maxID) {/**/};
 
@@ -163,7 +163,7 @@ namespace Opde {
 	class InheritorFactory {
 		public:
 			InheritorFactory() {};
-			
+
 			virtual ~InheritorFactory() {};
 
 			virtual std::string getName() const = 0;

@@ -38,89 +38,89 @@
 #include "GameState.h"
 #include "ConsoleBackend.h"
 #include "OpdeServiceManager.h"
-#include "ConfigService.h"
-#include "InputService.h"
+#include "config/ConfigService.h"
+#include "input/InputService.h"
 #include "DVariant.h"
 
 namespace Opde {
 
-	/** The game state manager. A temporary piece of code that enables opde testing.
-	* @warning This code is here only for testing purposes, and will go away later on
-	*/
-	class GameStateManager : public Singleton<GameStateManager>, public DirectInputListener {
-        public:
-            GameStateManager(const std::string& GameType);
-            ~GameStateManager();
+/** The game state manager. A temporary piece of code that enables opde testing.
+ * @warning This code is here only for testing purposes, and will go away later on
+ */
+class GameStateManager : public Singleton<GameStateManager>, public DirectInputListener {
+public:
+    GameStateManager(const std::string& GameType);
+    ~GameStateManager();
 
-            // Singleton related
-            static GameStateManager& getSingleton(void);
-            static GameStateManager* getSingletonPtr(void);
+    // Singleton related
+    static GameStateManager& getSingleton(void);
+    static GameStateManager* getSingletonPtr(void);
 
-			/// Terminates the execution of the game loop
-			void terminate();
+    /// Terminates the execution of the game loop
+    void terminate();
 
-			/** Pushes a new state to the stack, and calls start() on this new state
-			* If the stack was not empty before, suspend() is called on previous top
-			*/
-			void pushState(GameState* state);
+    /** Pushes a new state to the stack, and calls start() on this new state
+     * If the stack was not empty before, suspend() is called on previous top
+     */
+    void pushState(GameState* state);
 
-			/** Pops the topmost state from stack, if possible. Calls exit() on such state
-			*
-			*/
-			void popState();
+    /** Pops the topmost state from stack, if possible. Calls exit() on such state
+     *
+     */
+    void popState();
 
-			/** Initialize the state manager, then run the loop with the given state. Initializes ogre, resources, input system, etc.
-			* @return true if game should procede, false otherwise */
-			bool run();
+    /** Initialize the state manager, then run the loop with the given state. Initializes ogre, resources, input system, etc.
+     * @return true if game should procede, false otherwise */
+    bool run();
 
-			inline void setDesiredMissionName(const std::string& name) { mMissionName = name; };
+    inline void setDesiredMissionName(const std::string& name) { mMissionName = name; };
 
-		protected:
-			/** Loads the resources from the resources.cfg */
-			void setupResources(void);
+protected:
+    /** Loads the resources from the resources.cfg */
+    void setupResources(void);
 
-			void setupInputSystem();
+    void setupInputSystem();
 
-			bool keyPressed(const SDL_KeyboardEvent &e);
-			bool keyReleased(const SDL_KeyboardEvent &e);
+    bool keyPressed(const SDL_KeyboardEvent &e);
+    bool keyReleased(const SDL_KeyboardEvent &e);
 
-			bool mouseMoved(const SDL_MouseMotionEvent &e);
-			bool mousePressed(const SDL_MouseButtonEvent &e);
-			bool mouseReleased(const SDL_MouseButtonEvent &e);
+    bool mouseMoved(const SDL_MouseMotionEvent &e);
+    bool mousePressed(const SDL_MouseButtonEvent &e);
+    bool mouseReleased(const SDL_MouseButtonEvent &e);
 
-			typedef std::stack<GameState*> StateStack;
+    typedef std::stack<GameState*> StateStack;
 
-			/// Stack of the game states
-			StateStack mStateStack;
+    /// Stack of the game states
+    StateStack mStateStack;
 
-			/// the game loop should end if true
-			bool	mTerminate;
+    /// the game loop should end if true
+    bool	mTerminate;
 
-			/// last frame's time
-			unsigned long mTimeLastFrame;
+    /// last frame's time
+    unsigned long mTimeLastFrame;
 
-			///  Stderr logger
-			ConsoleBackend* mConsoleBackend;
+    ///  Stderr logger
+    ConsoleBackend* mConsoleBackend;
 
-			/// Opde::root
-			Opde::Root *mRoot;
-			Ogre::Root *mOgreRoot;
+    /// Opde::root
+    Opde::Root *mRoot;
+    Ogre::Root *mOgreRoot;
 
-			/// config service reference
-			ConfigServicePtr mConfigService;
+    /// config service reference
+    ConfigServicePtr mConfigService;
 
-			/// input service reference
-			InputServicePtr mInputService;
+    /// input service reference
+    InputServicePtr mInputService;
 
-			/// Type of the game (t1,t2,ss2)
-			std::string mGameType;
+    /// Type of the game (t1,t2,ss2)
+    std::string mGameType;
 
-			/// requested mission file name
-			std::string mMissionName;
+    /// requested mission file name
+    std::string mMissionName;
 
-			/// Service manager ref
-			ServiceManager* mServiceMgr;
-	};
+    /// Service manager ref
+    ServiceManager* mServiceMgr;
+};
 
 }
 

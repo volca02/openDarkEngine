@@ -39,7 +39,7 @@ namespace Opde {
 	/*-------------------- ScriptService -------------------*/
 	/*------------------------------------------------------*/
 	template<> const size_t ServiceImpl<ScriptService>::SID = __SERVICE_ID_SCRIPT;
-	
+
 	ScriptService::ScriptService(ServiceManager* manager, const std::string& name) : ServiceImpl< Opde::ScriptService >(manager, name) {
 
 	};
@@ -59,7 +59,7 @@ namespace Opde {
 		// TODO: Compiled code v.s. code to compile (.py / .pyc)
 
 		// TODO: Group name for scripts! (Using default for now)
-		Ogre::DataStreamPtr fdata = Ogre::ResourceGroupManager::getSingleton().openResource(filename, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, true);
+		Ogre::DataStreamPtr fdata = Ogre::ResourceGroupManager::getSingleton().openResource(filename, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
 		const Ogre::String& text = fdata->getAsString();
 
 		// Now run the script using python
@@ -124,7 +124,7 @@ namespace Opde {
 	/*-----------------------------------------------------*/
 	ObjectScriptModule::ObjectScriptModule(std::string& name) {
 	}
-            
+
 	//------------------------------------
 	ObjectScriptModule::~ObjectScriptModule() {
 	}

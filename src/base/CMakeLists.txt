@@ -1,21 +1,88 @@
-# $Id$
-
-INCLUDE(${OPDE_SOURCE_DIR}/src/base/Base.cmake)
-
 include_directories(
+    ${OPDE_BINARY_DIR}
     ${ODE_INCLUDE_DIR}
     ${OGRE_INCLUDE_DIR}
     ${OPDE_BINARY_DIR}
     ${OPDE_BASE_INCLUDES}
+    ${OPDE_SOURCE_DIR}/src/base
     ${OPDE_SOURCE_DIR}/src/base/Dark
+    ${OPDE_SOURCE_DIR}/src/base/console
+    ${OPDE_SOURCE_DIR}/src/base/dyntype
+    ${OPDE_SOURCE_DIR}/src/base/file
+    ${OPDE_SOURCE_DIR}/src/base/loaders
+    ${OPDE_SOURCE_DIR}/src/base/logger
+    ${OPDE_SOURCE_DIR}/src/base/servicemanager
+    ${OPDE_SOURCE_DIR}/src/compat
 )
 
-include_directories(
-    ${OPDE_BINARY_DIR}
+add_library (OpdeBase OBJECT
+    Array.h
+    BitArray.h
+    Callback.h
+    MessageSource.h
+    NonCopyable.h
+    OpdeException.cpp
+    OpdeException.h
+    OpdeSingleton.h
+    Plane.h
+    PrioritizedMessageSource.h
+    Quaternion.h
+    SharedPtr.h
+    StringTokenizer.h
+    ValueChangeRequest.h
+    Vector2.h
+    Vector3.h
+    console/ConsoleBackend.cpp
+    console/ConsoleBackend.h
+    console/ConsoleCommandListener.cpp
+    console/ConsoleCommandListener.h
+    DarkCommon.h
+    Dark/DarkDBDefs.h
+    Dark/DarkDBLinkDefs.h
+    Dark/DarkDBPropDefs.h
+    Dark/DarkTypes.h
+    Dark/fon.h
+    Dark/lgcolors.h
+    Dark/utils.h
+    dyntype/DataStorage.cpp
+    dyntype/DataStorage.h
+    dyntype/DTHelpers.h
+    dyntype/DTypeDef.cpp
+    dyntype/DTypeDef.h
+    dyntype/DVariant.cpp
+    dyntype/DVariant.h
+    dyntype/Serializer.cpp
+    dyntype/Serializer.h
+    dyntype/SingleFieldDataStorage.h
+    dyntype/StructDataStorage.h
+    file/darkdb.cpp
+    file/darkdb.h
+    file/FileCompat.cpp
+    file/FileCompat.h
+    file/File.cpp
+    file/FileGroup.cpp
+    file/FileGroup.h
+    file/File.h
+    FreeSpaceInfo.h
+    Iterator.h
+    loaders/BinFormat.h
+    loaders/FonFormat.cpp
+    loaders/FonFormat.h
+    loaders/ManualBinFileLoader.cpp
+    loaders/ManualBinFileLoader.h
+    loaders/ManualFonFileLoader.cpp
+    loaders/ManualFonFileLoader.h
+    logger/filelog.cpp
+    logger/filelog.h
+    logger/logger.cpp
+    logger/logger.h
+    logger/OgreOpdeLogConnector.cpp
+    logger/OgreOpdeLogConnector.h
+    logger/stdlog.cpp
+    logger/stdlog.h
+    servicemanager/OpdeService.cpp
+    servicemanager/OpdeServiceFactory.h
+    servicemanager/OpdeService.h
+    servicemanager/OpdeServiceManager.cpp
+    servicemanager/OpdeServiceManager.h
 )
-
-IF(STATIC_LIBS)
-    add_library ( OpdeBase STATIC
-        ${OPDE_BASE_FILES} # As in the Base.cmake
-    )
-ENDIF(STATIC_LIBS)

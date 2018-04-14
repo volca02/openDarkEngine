@@ -23,7 +23,7 @@
  *****************************************************************************/
 
 #include "RenderService.h"
-#include "PropertyService.h"
+#include "property/PropertyService.h"
 #include "SingleFieldDataStorage.h"
 #include "HasRefsProperty.h"
 
@@ -89,4 +89,3 @@ namespace Opde {
 		}
 	};
 };
-

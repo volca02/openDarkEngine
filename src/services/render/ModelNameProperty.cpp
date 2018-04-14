@@ -23,7 +23,7 @@
  *****************************************************************************/
 
 #include "RenderService.h"
-#include "PropertyService.h"
+#include "property/PropertyService.h"
 #include "SingleFieldDataStorage.h"
 #include "ModelNameProperty.h"
 
@@ -77,4 +77,3 @@ namespace Opde {
 		mOwner->setObjectModel(oid, name);
 	};
 };
-

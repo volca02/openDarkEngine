@@ -29,7 +29,7 @@
 
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
-#include "LoopService.h"
+#include "loop/LoopService.h"
 #include "SharedPtr.h"
 #include "ValueChangeRequest.h"
 
@@ -174,7 +174,7 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask();
-			
+
 			virtual const size_t getSID();
 		private:
 			static std::string mName;

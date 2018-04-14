@@ -32,9 +32,9 @@
 
 #include "config.h"
 #include "File.h"
-#include "DatabaseService.h"
-#include "LightService.h"
-#include "ConfigService.h"
+#include "database/DatabaseService.h"
+#include "light/LightService.h"
+#include "config/ConfigService.h"
 
 namespace Opde {
 	// --- Following are family and txlist chunk structures shamelessly ripped from Telliamed's code.
@@ -129,22 +129,22 @@ namespace Opde {
 
 			/// @see Service::bootstrapFinished
 			void bootstrapFinished();
-			
+
 			/// @see Service::shutdown
 			void shutdown();
 
 			/// DB load/unload event callback method
 			// void onDBChange(const DatabaseChangeMsg& m);
-// 			
-			/** Database load callback 
+//
+			/** Database load callback
 			* @see DatabaseListener::onDBLoad */
 			void onDBLoad(const FileGroupPtr& db, uint32_t curmask);
-			
-			/** Database save callback 
+
+			/** Database save callback
 			* @see DatabaseListener::onDBSave */
 			void onDBSave(const FileGroupPtr& db, uint32_t tgtmask);
-			
-			/** Database drop callback 
+
+			/** Database drop callback
 			* @see DatabaseListener::onDBDrop */
 			void onDBDrop(uint32_t dropmask);
 
@@ -256,7 +256,7 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask();
-			
+
 			virtual const size_t getSID();
 
 		private:

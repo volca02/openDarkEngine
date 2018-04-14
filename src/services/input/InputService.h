@@ -37,9 +37,9 @@
 #include "DVariant.h"
 #include "InputEventMapper.h"
 #include "Callback.h"
-#include "ConfigService.h"
-#include "RenderService.h"
-#include "LoopService.h"
+#include "config/ConfigService.h"
+#include "render/RenderService.h"
+#include "loop/LoopService.h"
 
 #include <deque>
 

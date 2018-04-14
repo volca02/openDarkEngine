@@ -30,86 +30,86 @@ using namespace Ogre;
 
 namespace Opde {
 
-	/*----------------------------------------------------*/
-	/*-------------------- RenderedRect ------------------*/
-	/*----------------------------------------------------*/
-	RenderedRect::RenderedRect(DrawService* owner, DrawOperation::ID id, const TextureAtlasPtr& atlas) :
-			DrawOperation(owner, id), mAtlas(atlas) {
-		
-		mVertexColourDS = atlas->getVertexColourDrawSource();
-		
-		mDrawQuad.texCoords.left = mVertexColourDS->transformX(0);
-		mDrawQuad.texCoords.right = mVertexColourDS->transformX(1.0f);
-		mDrawQuad.texCoords.top = mVertexColourDS->transformY(0);
-		mDrawQuad.texCoords.bottom = mVertexColourDS->transformY(1.0f);
+/*----------------------------------------------------*/
+/*-------------------- RenderedRect ------------------*/
+/*----------------------------------------------------*/
+RenderedRect::RenderedRect(DrawService* owner, DrawOperation::ID id, const TextureAtlasPtr& atlas) :
+    DrawOperation(owner, id), mAtlas(atlas) {
 
-		mDrawQuad.color = ColourValue(1.0f, 1.0f, 1.0f);
-		
-		mInClip = true;
-		
-		mPixelSize.width = 0;
-		mPixelSize.height = 0;
+    mVertexColourDS = atlas->getVertexColourDrawSource();
 
-		// to be sure we are up-to-date
-		_markDirty();
-	}
+    mDrawQuad.texCoords.left = mVertexColourDS->transformX(0);
+    mDrawQuad.texCoords.right = mVertexColourDS->transformX(1.0f);
+    mDrawQuad.texCoords.top = mVertexColourDS->transformY(0);
+    mDrawQuad.texCoords.bottom = mVertexColourDS->transformY(1.0f);
 
-	//------------------------------------------------------
-	RenderedRect::~RenderedRect() {
-		mVertexColourDS.setNull();
-	}
-	
-	//------------------------------------------------------
-	void RenderedRect::visitDrawBuffer(DrawBuffer* db) {
-		// are we in the clip area?
-		if (mInClip)
-			db->_queueDrawQuad(&mDrawQuad);
-	}
+    mDrawQuad.color = ColourValue(1.0f, 1.0f, 1.0f);
 
-	//------------------------------------------------------
-	DrawSourceBasePtr RenderedRect::getDrawSourceBase() {
-		return static_pointer_cast<DrawSourceBase>(mVertexColourDS);
-	}
+    mInClip = true;
 
-	//------------------------------------------------------
-	void RenderedRect::setColour(const Ogre::ColourValue &col) {
-		mDrawQuad.color = col;
-		_markDirty();
-	}
-	
-	
-	//------------------------------------------------------
-	void RenderedRect::setWidth(size_t width) {
-		mPixelSize.width = width;
-		_markDirty();
-	}
-	
-	//------------------------------------------------------
-	void RenderedRect::setHeight(size_t height) {
-		mPixelSize.height = height;
-		_markDirty();
-	}
-	
-	//------------------------------------------------------
-	void RenderedRect::setSize(const PixelSize& size) {
-		mPixelSize = size;
-		_markDirty();
-	}
-	
-	//------------------------------------------------------
-	void RenderedRect::_rebuild() {
-		mDrawQuad.texCoords.left = mVertexColourDS->transformX(0);
-		mDrawQuad.texCoords.right = mVertexColourDS->transformX(1.0f);
-		mDrawQuad.texCoords.top = mVertexColourDS->transformY(0);
-		mDrawQuad.texCoords.bottom = mVertexColourDS->transformY(1.0f);
-		
-		mDrawQuad.positions.left   = mActiveSheet->convertToScreenSpaceX(mPosition.first);
-		mDrawQuad.positions.right  = mActiveSheet->convertToScreenSpaceX(mPosition.first + mPixelSize.width);
-		mDrawQuad.positions.top    = mActiveSheet->convertToScreenSpaceY(mPosition.second);
-		mDrawQuad.positions.bottom = mActiveSheet->convertToScreenSpaceY(mPosition.second + mPixelSize.height);
-		mDrawQuad.depth = mActiveSheet->convertToScreenSpaceZ(mZOrder);
+    mPixelSize.width = 0;
+    mPixelSize.height = 0;
 
-		mInClip = mClipOnScreen.clip(mDrawQuad);
-	}
+    // to be sure we are up-to-date
+    _markDirty();
+}
+
+//------------------------------------------------------
+RenderedRect::~RenderedRect() {
+    mVertexColourDS.reset();
+}
+
+//------------------------------------------------------
+void RenderedRect::visitDrawBuffer(DrawBuffer* db) {
+    // are we in the clip area?
+    if (mInClip)
+        db->_queueDrawQuad(&mDrawQuad);
+}
+
+//------------------------------------------------------
+DrawSourceBasePtr RenderedRect::getDrawSourceBase() {
+    return static_pointer_cast<DrawSourceBase>(mVertexColourDS);
+}
+
+//------------------------------------------------------
+void RenderedRect::setColour(const Ogre::ColourValue &col) {
+    mDrawQuad.color = col;
+    _markDirty();
+}
+
+
+//------------------------------------------------------
+void RenderedRect::setWidth(size_t width) {
+    mPixelSize.width = width;
+    _markDirty();
+}
+
+//------------------------------------------------------
+void RenderedRect::setHeight(size_t height) {
+    mPixelSize.height = height;
+    _markDirty();
+}
+
+//------------------------------------------------------
+void RenderedRect::setSize(const PixelSize& size) {
+    mPixelSize = size;
+    _markDirty();
+}
+
+//------------------------------------------------------
+void RenderedRect::_rebuild() {
+    mDrawQuad.texCoords.left = mVertexColourDS->transformX(0);
+    mDrawQuad.texCoords.right = mVertexColourDS->transformX(1.0f);
+    mDrawQuad.texCoords.top = mVertexColourDS->transformY(0);
+    mDrawQuad.texCoords.bottom = mVertexColourDS->transformY(1.0f);
+
+    mDrawQuad.positions.left   = mActiveSheet->convertToScreenSpaceX(mPosition.first);
+    mDrawQuad.positions.right  = mActiveSheet->convertToScreenSpaceX(mPosition.first + mPixelSize.width);
+    mDrawQuad.positions.top    = mActiveSheet->convertToScreenSpaceY(mPosition.second);
+    mDrawQuad.positions.bottom = mActiveSheet->convertToScreenSpaceY(mPosition.second + mPixelSize.height);
+    mDrawQuad.depth = mActiveSheet->convertToScreenSpaceZ(mZOrder);
+
+    mInClip = mClipOnScreen.clip(mDrawQuad);
+}
 
 }

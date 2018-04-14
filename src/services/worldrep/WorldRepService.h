@@ -33,11 +33,11 @@
 #include "WRTypes.h"
 #include "WRCell.h"
 #include "integers.h"
-#include "DatabaseService.h"
-#include "RenderService.h"
+#include "database/DatabaseService.h"
+#include "render/RenderService.h"
 #include "Callback.h"
 #include "DarkSceneManager.h"
-#include "LightService.h"
+#include "light/LightService.h"
 
 #include <OgreHardwareBufferManager.h>
 #include <OgreDefaultHardwareBufferManager.h>
@@ -71,15 +71,15 @@ namespace Opde {
 			virtual void bootstrapFinished();
 			void shutdown();
 
-			/** Database load callback 
+			/** Database load callback
 			* @see DatabaseListener::onDBLoad */
 			void onDBLoad(const FileGroupPtr& db, uint32_t curmask);
-			
-			/** Database save callback 
+
+			/** Database save callback
 			* @see DatabaseListener::onDBSave */
 			void onDBSave(const FileGroupPtr& db, uint32_t tgtmask);
-			
-			/** Database drop callback 
+
+			/** Database drop callback
 			* @see DatabaseListener::onDBDrop */
 			void onDBDrop(uint32_t dropmask);
 

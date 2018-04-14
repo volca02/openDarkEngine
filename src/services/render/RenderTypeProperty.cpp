@@ -23,7 +23,7 @@
  *****************************************************************************/
 
 #include "RenderService.h"
-#include "PropertyService.h"
+#include "property/PropertyService.h"
 #include "SingleFieldDataStorage.h"
 #include "RenderTypeProperty.h"
 
@@ -36,22 +36,22 @@ namespace Opde {
 	/*--------------------------------------------------------*/
 	/*-------------------- RenderTypeProperty ----------------*/
 	/*--------------------------------------------------------*/
-	RenderTypeProperty::RenderTypeProperty(RenderService* rs, PropertyService* owner) : 
+	RenderTypeProperty::RenderTypeProperty(RenderService* rs, PropertyService* owner) :
 			RenderedProperty(rs, owner, "RenderType", "RenderTyp", "always") {
 
-		
+
 		mEnum = new DEnum("RenderType", DVariant::DV_UINT, false);
-		
+
 		mEnum->insert("Normal", RENDER_TYPE_NORMAL);
 		mEnum->insert("Not Rendered", RENDER_TYPE_NOT_RENDERED);
 		mEnum->insert("No Lightmap", RENDER_TYPE_NO_LIGHTMAP);
 		mEnum->insert("Editor Only", RENDER_TYPE_EDITOR_ONLY);
-		
+
 		mPropertyStorage = DataStoragePtr(new UIntDataStorage(mEnum));
-		
+
 		// TODO: Check the version
 		setChunkVersions(2, 4);
-		
+
 		mSceneMgr = rs->getSceneManager();
 	};
 
@@ -66,7 +66,7 @@ namespace Opde {
 
 		if (!get(oid, "", val))
 			OPDE_EXCEPT("Property not defined for object.", "RenderTypeProperty::addProperty");
-		
+
 		setRenderType(oid, val.toUInt());
 	};
 
@@ -94,4 +94,3 @@ namespace Opde {
 		ei->setRenderType(renderType);
 	};
 };
-

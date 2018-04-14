@@ -33,12 +33,12 @@
 #include "File.h"
 #include "FileCompat.h"
 #include "DarkLight.h"
-#include "LightmapAtlas.h"
+#include "worldrep/LightmapAtlas.h"
 #include "DarkCommon.h"
-#include "WRTypes.h"
+#include "worldrep/WRTypes.h"
 #include "OpdeServiceManager.h"
 #include "Array.h"
-#include "RenderService.h"
+#include "render/RenderService.h"
 
 #include <OgreVector2.h>
 
@@ -56,7 +56,7 @@ namespace Opde {
 				brightness.y = brightness.x;
 				brightness.z = brightness.x;
 			}
-			
+
 			*tag >> cone_inner >> cone_outer >> radius;
 		};
 
@@ -237,7 +237,7 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask();
-			
+
 			virtual const size_t getSID();
 		private:
 			static std::string mName;

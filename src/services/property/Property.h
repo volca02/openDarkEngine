@@ -33,7 +33,7 @@
 #include "FileGroup.h"
 #include "OpdeException.h"
 #include "logger.h"
-#include "InheritService.h"
+#include "inherit/InheritService.h"
 #include "DataStorage.h"
 #include "BitArray.h"
 

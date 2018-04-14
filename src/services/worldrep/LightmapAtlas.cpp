@@ -29,7 +29,7 @@
 #include "ConsoleBackend.h"
 #include "WRCommon.h"
 #include "OpdeException.h"
-#include "MaterialService.h"
+#include "material/MaterialService.h"
 
 using namespace Ogre;
 

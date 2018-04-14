@@ -30,10 +30,10 @@
 #include "GameState.h"
 #include "OpdeSingleton.h"
 #include "ConsoleCommandListener.h"
-#include "LinkCommon.h"
-#include "ConfigService.h"
-#include "LinkService.h"
-#include "DrawService.h"
+#include "link/LinkCommon.h"
+#include "config/ConfigService.h"
+#include "link/LinkService.h"
+#include "draw/DrawService.h"
 
 #include <OgreMath.h>
 #include <OgreRoot.h>
@@ -42,88 +42,88 @@
 
 namespace Opde {
 
-	class GamePlayState : public Singleton<GamePlayState>, public GameState, public ConsoleCommandListener {
-		public:
-			GamePlayState();
-			virtual ~GamePlayState();
+class GamePlayState : public Singleton<GamePlayState>, public GameState, public ConsoleCommandListener {
+public:
+    GamePlayState();
+    virtual ~GamePlayState();
 
-			virtual void start();
-			virtual void exit();
-			virtual void suspend();
-			virtual void resume();
+    virtual void start();
+    virtual void exit();
+    virtual void suspend();
+    virtual void resume();
 
-			virtual void update(unsigned long timePassed);
+    virtual void update(unsigned long timePassed);
 
-			bool keyPressed(const SDL_KeyboardEvent &e);
-			bool keyReleased(const SDL_KeyboardEvent &e);
+    bool keyPressed(const SDL_KeyboardEvent &e);
+    bool keyReleased(const SDL_KeyboardEvent &e);
 
-			bool mouseMoved(const SDL_MouseMotionEvent &e);
-			bool mousePressed(const SDL_MouseButtonEvent &e);
-			bool mouseReleased(const SDL_MouseButtonEvent &e);
+    bool mouseMoved(const SDL_MouseMotionEvent &e);
+    bool mousePressed(const SDL_MouseButtonEvent &e);
+    bool mouseReleased(const SDL_MouseButtonEvent &e);
 
-			virtual void commandExecuted(std::string command, std::string parameters);
+    virtual void commandExecuted(std::string command, std::string parameters);
 
-			virtual void bootstrapFinished();
-			void onLinkPlayerFactoryMsg(const LinkChangeMsg& msg);
+    virtual void bootstrapFinished();
+    void onLinkPlayerFactoryMsg(const LinkChangeMsg& msg);
 
-			static GamePlayState& getSingleton();
-			static GamePlayState* getSingletonPtr();
-		protected:
-			Ogre::Root *mRoot;
-			Ogre::SceneManager *mSceneMgr;
-			Ogre::Camera *mCamera;
-			Ogre::Viewport *mViewport;
+    static GamePlayState& getSingleton();
+    static GamePlayState* getSingletonPtr();
+protected:
+    Ogre::Root *mRoot;
+    Ogre::SceneManager *mSceneMgr;
+    Ogre::Camera *mCamera;
+    Ogre::Viewport *mViewport;
 
-			// Movements:
-			bool mForward;
-			bool mBackward;
-			bool mLeft;
-			bool mRight;
+    // Movements:
+    bool mForward;
+    bool mBackward;
+    bool mLeft;
+    bool mRight;
 
-			// Screenshot requested
-			bool mScreenShot;
+    // Screenshot requested
+    bool mScreenShot;
 
-			// Shadows toggle
-			bool mShadows;
+    // Shadows toggle
+    bool mShadows;
 
-			// Mode display - Solid, wireframe
-			bool mSceneDisplay;
+    // Mode display - Solid, wireframe
+    bool mSceneDisplay;
 
-			// Display portal meshes
-			bool mPortalDisplay;
+    // Display portal meshes
+    bool mPortalDisplay;
 
-			// debug enabled
-			bool mDebug;
+    // debug enabled
+    bool mDebug;
 
-			bool mToLoadScreen;
+    bool mToLoadScreen;
 
-			Ogre::Radian mRotX, mRotY;
-			float mMoveScale;
-			Ogre::Degree mRotScale;
-			Ogre::Real mMoveSpeed, mRotateYFactor;
-			Ogre::Degree mRotateSpeed;
-			Ogre::Vector3 mTranslateVector;
+    Ogre::Radian mRotX, mRotY;
+    float mMoveScale;
+    Ogre::Degree mRotScale;
+    Ogre::Real mMoveSpeed, mRotateYFactor;
+    Ogre::Degree mRotateSpeed;
+    Ogre::Vector3 mTranslateVector;
 
-			int mSceneDetailIndex;
+    int mSceneDetailIndex;
 
-			Ogre::RenderWindow* mWindow;
+    Ogre::RenderWindow* mWindow;
 
-			int mNumScreenShots;
-			// config service
-			ConfigServicePtr mConfigService;
+    int mNumScreenShots;
+    // config service
+    ConfigServicePtr mConfigService;
 
-			RenderedLabel *mRl1, *mRl2;
-	private:
-			/// Direct link to the player factory relation
-			RelationPtr mPlayerFactoryRelation;
-			/// Handle to the link service
-			LinkServicePtr mLinkService;
-			int StartingPointObjID;
-			/// Link (Relation player factory) listener registration ID
-			Relation::ListenerID mPlayerFactoryListenerID;
+    RenderedLabel *mRl1, *mRl2;
+private:
+    /// Direct link to the player factory relation
+    RelationPtr mPlayerFactoryRelation;
+    /// Handle to the link service
+    LinkServicePtr mLinkService;
+    int StartingPointObjID;
+    /// Link (Relation player factory) listener registration ID
+    Relation::ListenerID mPlayerFactoryListenerID;
 
-			DrawServicePtr mDrawService;
-	};
+    DrawServicePtr mDrawService;
+};
 }
 
 #endif

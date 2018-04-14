@@ -23,7 +23,7 @@
  *****************************************************************************/
 
 #include "RenderService.h"
-#include "PropertyService.h"
+#include "property/PropertyService.h"
 #include "SingleFieldDataStorage.h"
 #include "ModelScaleProperty.h"
 
@@ -86,4 +86,3 @@ namespace Opde {
 		ei->setScale(scale);
 	};
 };
-

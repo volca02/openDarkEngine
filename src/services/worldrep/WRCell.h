@@ -35,7 +35,7 @@
 #include "DarkBspNode.h"
 #include "DarkSceneManager.h"
 #include "DarkGeometry.h"
-#include "MaterialService.h"
+#include "material/MaterialService.h"
 
 #include <OgreMaterial.h>
 #include <OgreStaticFaceGroup.h>
@@ -95,9 +95,9 @@ namespace Opde {
 
 			/** Inserts a new vertex into the manual object. Calculates all the UV values needed
 			* @deprecated For moving towards the geometry by buffers */
-			void insertTexturedVertex(Ogre::ManualObject *manual, int faceNum, const Vector3& pos, 
+			void insertTexturedVertex(Ogre::ManualObject *manual, int faceNum, const Vector3& pos,
 					const std::pair< Ogre::uint, Ogre::uint >& dimensions, Ogre::Vector3 origin);
-					
+
 			// Finds the unwrapping shifts (in multiple of 64.0f)
 			void findLightmapShifts(Ogre::Vector2& tgt, Ogre::Vector2 origin);
 

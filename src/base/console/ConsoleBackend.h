@@ -35,7 +35,7 @@
 
 #include "ConsoleCommandListener.h"
 
-#include "logger.h"
+#include "logger/logger.h"
 #include "OpdeSingleton.h"
 
 namespace Opde {

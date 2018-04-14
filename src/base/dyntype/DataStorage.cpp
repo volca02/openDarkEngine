@@ -18,7 +18,7 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *		$Id$
+ *      $Id$
  *
  *****************************************************************************/
 
@@ -28,244 +28,247 @@
 using namespace std;
 
 namespace Opde {
-	// --------------------------------------------------------------------------
-	// --------------- Various utility classes ----------------------------------
-	// --------------------------------------------------------------------------
-	DTypeDefFieldDesc::DTypeDefFieldDesc(const DTypeDefPtr& type) {
-		// prepare the list
-		DTypeDef::const_iterator it = type->begin();
-		
-		while (it != type->end()) {
-			const DTypeDef::FieldDef& fd = *(it++);
-			
-			DataFieldDesc dfd;
-			dfd.name = fd.name;
-			dfd.size = fd.type->size();
-			dfd.type = fd.type->getDataType();
-			dfd.enumerator = fd.type->getEnum().ptr();
-			
-			mDataFieldDescList.push_back(dfd);
-		}
-	}
-	
-	DataFieldDescIteratorPtr DTypeDefFieldDesc::getIterator() {
-		return DataFieldDescIteratorPtr(new DataFieldDescListIterator(mDataFieldDescList));
-	}
-	
-	
-	// --------------------------------------------------------------------------
-	// ---------------------------- Data Storage --------------------------------
-	// --------------------------------------------------------------------------
-	bool DataStorage::createWithValues(int objID, const DVariantStringMap& dataValues) {
-		if (!create(objID))
-			return false;
-		
-		DVariantStringMap::const_iterator end = dataValues.end();
-		DVariantStringMap::const_iterator it = dataValues.begin(); 
 
-		for (; it != end; ++it) {
-			setField(objID, it->first, it->second);
-		}
-		
-		return true;
-	}
-	
-	// --------------------------------------------------------------------------
-	bool DataStorage::createWithValue(int objID, const DVariant& value) {
-		if (!create(objID))
-			return false;
-		
-		return setField(objID, "", value);
-	}
-	
-	// --------------------------------------------------------------------------
-	// --------------- Structured Data Storage (DType based) --------------------
-	// --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// --------------- Various utility classes ----------------------------------
+// --------------------------------------------------------------------------
+DTypeDefFieldDesc::DTypeDefFieldDesc(const DTypeDefPtr& type) {
+    // prepare the list
+    DTypeDef::const_iterator it = type->begin();
 
-	StructuredDataStorage::StructuredDataStorage(const DTypeDefPtr& type, bool useDataCache) : 
-		mTypeDef(type), 
-		mUseDataCache(useDataCache),
-		mFieldDesc(type) {
-	}
-	
-	// --------------------------------------------------------------------------
-	bool StructuredDataStorage::isEmpty() {
-		return mDataMap.empty();
-	}
+    while (it != type->end()) {
+        const DTypeDef::FieldDef& fd = *(it++);
 
-	// --------------------------------------------------------------------------
-	void StructuredDataStorage::clear() {
-		mDataMap.clear();
-	}
+        DataFieldDesc dfd;
+        dfd.name = fd.name;
+        dfd.size = fd.type->size();
+        dfd.type = fd.type->getDataType();
+        dfd.enumerator = fd.type->getEnum().get();
 
-	// --------------------------------------------------------------------------
-	bool StructuredDataStorage::readFromFile(FilePtr& file, int objID, bool sizeStored) {
-		DTypePtr pd = getDataForObject(objID);
-		
-		if (pd.isNull()) {
-			uint32_t size;
-			
-			// Read the size
-			if (sizeStored)
-				file->readElem(&size, sizeof(uint32_t));
-			else
-				size = mTypeDef->size();
-			
-			// compare sizes
-			if (size != mTypeDef->size())
-				LOG_ERROR("Data size mismatch: %d definition, %d file source", mTypeDef->size(), size);
-			
-			// create a new data
-			pd = _create(objID);
+        mDataFieldDescList.push_back(dfd);
+    }
+}
 
-			pd->read(file, size);
-			
-			mDataMap.insert(std::make_pair(objID, pd));
-			
-			return true;
-		} else {
-			// still have to at least skip the data
-			uint32_t size;
-			
-			// Read the size
-			file->readElem(&size, sizeof(uint32_t));
-			
-			file->seek(size, File::FSEEK_CUR);
-			
-			LOG_ERROR("Data already defined for object %d", objID);
-		}
-		
-		return false;
-	}
+DataFieldDescIteratorPtr DTypeDefFieldDesc::getIterator() {
+    return DataFieldDescIteratorPtr(new DataFieldDescListIterator(mDataFieldDescList));
+}
 
-	// --------------------------------------------------------------------------
-	bool StructuredDataStorage::writeToFile(FilePtr& file, int objID, bool sizeStored)	{
-		DTypePtr pd = getDataForObject(objID);
-		
-		if (!pd.isNull()) {
-			uint32_t size = pd->size();
-			
-			// Write the size
-			if (sizeStored)
-				file->writeElem(&size, sizeof(uint32_t));
-			
-			// write the data itself
-			pd->serialize(file);
-			
-			return true;
-		}
-		
-		return false;
-	}
 
-	// --------------------------------------------------------------------------
-	bool StructuredDataStorage::setField(int objID, const std::string& field, const DVariant& value) {
-		DTypePtr pd = getDataForObject(objID);
-		
-		if (!pd.isNull()) {
-			// delegate to pd to set the field
-			pd->set(field, value);
-			
-			return true;
-		}
-		
-		return false;
-	}
+// --------------------------------------------------------------------------
+// ---------------------------- Data Storage --------------------------------
+// --------------------------------------------------------------------------
+bool DataStorage::createWithValues(int objID, const DVariantStringMap& dataValues) {
+    if (!create(objID))
+        return false;
 
-	// --------------------------------------------------------------------------
-	bool StructuredDataStorage::getField(int objID, const std::string& field, DVariant& target) {
-		DTypePtr pd = getDataForObject(objID);
-		
-		if (!pd.isNull()) {
-			// delegate to pd to get the field val.
-			// TODO: Faster using a pass by reference construct?
-			target = pd->get(field);
-			
-			return true;
-		}
-		
-		return false;
-	}
+    DVariantStringMap::const_iterator end = dataValues.end();
+    DVariantStringMap::const_iterator it = dataValues.begin();
 
-	// --------------------------------------------------------------------------	
-	bool StructuredDataStorage::has(int objID) {
-		DataMap::iterator it = mDataMap.find(objID);
-		
-		return (it != mDataMap.end());
-	}
-	
-	// --------------------------------------------------------------------------	
-	bool StructuredDataStorage::clone(int srcID, int dstID) {
-		// clone prop data
-		if (!has(srcID) || has(dstID))
-			return false;
-			
-		DTypePtr pd = getDataForObject(srcID);
-		
-		DTypePtr nd(new DType(*pd, mUseDataCache));
-		
-		// insert into map for the new object
-		std::pair<DataMap::iterator, bool> res  = mDataMap.insert(std::make_pair(dstID, nd));
-			
-		return res.second;
-	}
+    for (; it != end; ++it) {
+        setField(objID, it->first, it->second);
+    }
 
-	// --------------------------------------------------------------------------
-	bool StructuredDataStorage::destroy(int objID) {
-		DataMap::iterator it = mDataMap.find(objID);
-		
-		if (it != mDataMap.end()) {
-			mDataMap.erase(it);
-			return true;
-		}
-		
-		return false;
-	}
+    return true;
+}
 
-	// --------------------------------------------------------------------------
-	bool StructuredDataStorage::create(int objID) {
-		return !(_create(objID).isNull());
-	}
-	
-	// --------------------------------------------------------------------------
-	DTypePtr StructuredDataStorage::_create(int objID) {
-		DataMap::iterator it = mDataMap.find(objID);
-		
-		if (it == mDataMap.end()) {
-			DTypePtr propd(new DType(mTypeDef, mUseDataCache));
-			
-			mDataMap.insert(std::make_pair(objID, propd));
-			
-			return propd;
-		}
-		
-		return it->second;
-	}
+// --------------------------------------------------------------------------
+bool DataStorage::createWithValue(int objID, const DVariant& value) {
+    if (!create(objID))
+        return false;
 
-	// --------------------------------------------------------------------------	
-	IntIteratorPtr StructuredDataStorage::getAllStoredObjects() {
-		return IntIteratorPtr(new DataKeyIterator(mDataMap));
-	}
-	
-	// --------------------------------------------------------------------------
-	DTypePtr StructuredDataStorage::getDataForObject(int objID) {
-		DataMap::iterator it = mDataMap.find(objID);
-		
-		if (it != mDataMap.end()) {
-			return it->second;
-		} else {
-			return DTypePtr();
-		}
-	}
-	
-	// --------------------------------------------------------------------------
-	DataFieldDescIteratorPtr StructuredDataStorage::getFieldDescIterator(void) {
-		// return our pre-prepared field desc iterator
-		return mFieldDesc.getIterator();
-	}
-	
-	// --------------------------------------------------------------------------
-	size_t StructuredDataStorage::getDataSize(void) {
-		return mTypeDef->size();
-	}
+    return setField(objID, "", value);
+}
+
+// --------------------------------------------------------------------------
+// --------------- Structured Data Storage (DType based) --------------------
+// --------------------------------------------------------------------------
+
+StructuredDataStorage::StructuredDataStorage(const DTypeDefPtr& type, bool useDataCache) :
+    mTypeDef(type),
+    mUseDataCache(useDataCache),
+    mFieldDesc(type) {
+}
+
+// --------------------------------------------------------------------------
+bool StructuredDataStorage::isEmpty() {
+    return mDataMap.empty();
+}
+
+// --------------------------------------------------------------------------
+void StructuredDataStorage::clear() {
+    mDataMap.clear();
+}
+
+// --------------------------------------------------------------------------
+bool StructuredDataStorage::readFromFile(FilePtr& file, int objID, bool sizeStored) {
+    DTypePtr pd = getDataForObject(objID);
+
+    if (!pd) {
+        uint32_t size;
+
+        // Read the size
+        if (sizeStored)
+            file->readElem(&size, sizeof(uint32_t));
+        else
+            size = mTypeDef->size();
+
+        // compare sizes
+        if (size != mTypeDef->size())
+            LOG_ERROR("Data size mismatch: %d definition, %d file source", mTypeDef->size(), size);
+
+        // create a new data
+        pd = _create(objID);
+
+        pd->read(file, size);
+
+        mDataMap.insert(std::make_pair(objID, pd));
+
+        return true;
+    } else {
+        // still have to at least skip the data
+        uint32_t size;
+
+        // Read the size
+        file->readElem(&size, sizeof(uint32_t));
+
+        file->seek(size, File::FSEEK_CUR);
+
+        LOG_ERROR("Data already defined for object %d", objID);
+    }
+
+    return false;
+}
+
+// --------------------------------------------------------------------------
+bool StructuredDataStorage::writeToFile(FilePtr& file, int objID, bool sizeStored)  {
+    DTypePtr pd = getDataForObject(objID);
+
+    if (pd) {
+        uint32_t size = pd->size();
+
+        // Write the size
+        if (sizeStored)
+            file->writeElem(&size, sizeof(uint32_t));
+
+        // write the data itself
+        pd->serialize(file);
+
+        return true;
+    }
+
+    return false;
+}
+
+// --------------------------------------------------------------------------
+bool StructuredDataStorage::setField(int objID,
+                                     const std::string& field,
+                                     const DVariant& value)
+{
+    DTypePtr pd = getDataForObject(objID);
+
+    if (!pd)
+        return false;
+
+    // delegate to pd to set the field
+    pd->set(field, value);
+    return true;
+}
+
+// --------------------------------------------------------------------------
+bool StructuredDataStorage::getField(int objID,
+                                     const std::string& field,
+                                     DVariant& target)
+{
+    DTypePtr pd = getDataForObject(objID);
+
+    if (!pd)
+        return false;
+
+    // delegate to pd to get the field val.
+    // TODO: Faster using a pass by reference construct?
+    target = pd->get(field);
+    return true;
+}
+
+// --------------------------------------------------------------------------
+bool StructuredDataStorage::has(int objID) {
+    DataMap::iterator it = mDataMap.find(objID);
+
+    return (it != mDataMap.end());
+}
+
+// --------------------------------------------------------------------------
+bool StructuredDataStorage::clone(int srcID, int dstID) {
+    // clone prop data
+    if (!has(srcID) || has(dstID))
+        return false;
+
+    DTypePtr pd = getDataForObject(srcID);
+
+    DTypePtr nd(new DType(*pd, mUseDataCache));
+
+    // insert into map for the new object
+    std::pair<DataMap::iterator, bool> res  = mDataMap.insert(std::make_pair(dstID, nd));
+
+    return res.second;
+}
+
+// --------------------------------------------------------------------------
+bool StructuredDataStorage::destroy(int objID) {
+    DataMap::iterator it = mDataMap.find(objID);
+
+    if (it != mDataMap.end()) {
+        mDataMap.erase(it);
+        return true;
+    }
+
+    return false;
+}
+
+// --------------------------------------------------------------------------
+bool StructuredDataStorage::create(int objID) {
+    return !!_create(objID);
+}
+
+// --------------------------------------------------------------------------
+DTypePtr StructuredDataStorage::_create(int objID) {
+    DataMap::iterator it = mDataMap.find(objID);
+
+    if (it == mDataMap.end()) {
+        DTypePtr propd(new DType(mTypeDef, mUseDataCache));
+
+        mDataMap.insert(std::make_pair(objID, propd));
+
+        return propd;
+    }
+
+    return it->second;
+}
+
+// --------------------------------------------------------------------------
+IntIteratorPtr StructuredDataStorage::getAllStoredObjects() {
+    return IntIteratorPtr(new DataKeyIterator(mDataMap));
+}
+
+// --------------------------------------------------------------------------
+DTypePtr StructuredDataStorage::getDataForObject(int objID) {
+    DataMap::iterator it = mDataMap.find(objID);
+
+    if (it != mDataMap.end()) {
+        return it->second;
+    } else {
+        return DTypePtr();
+    }
+}
+
+// --------------------------------------------------------------------------
+DataFieldDescIteratorPtr StructuredDataStorage::getFieldDescIterator(void) {
+    // return our pre-prepared field desc iterator
+    return mFieldDesc.getIterator();
+}
+
+// --------------------------------------------------------------------------
+size_t StructuredDataStorage::getDataSize(void) {
+    return mTypeDef->size();
+}
 }

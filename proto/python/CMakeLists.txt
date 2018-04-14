@@ -1,9 +1,4 @@
-# Nothing interesting now. Will compile the python module after finished
-#
-# $Id$
-
 INCLUDE( ${OPDE_SOURCE_DIR}/src/services/Services.cmake )
-INCLUDE( ${OPDE_SOURCE_DIR}/src/base/Base.cmake )
 
 include_directories(
     ${ODE_INCLUDE_DIR}
@@ -23,9 +18,9 @@ add_executable(pytest
     test.h
 )
 
-
 target_link_libraries(pytest
-    OpenDark
+    $<TARGET_OBJECTS:OpenDark>
+    $<TARGET_OBJECTS:OpenDarkPython>
     ${OPDE_PYTHON_LIBRARIES}
     ${OGRE_LIBRARIES}
 )

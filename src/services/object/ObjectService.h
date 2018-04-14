@@ -30,12 +30,12 @@
 
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
-#include "DatabaseService.h"
+#include "database/DatabaseService.h"
 #include "MessageSource.h"
 
-#include "LinkService.h"
-#include "InheritService.h"
-#include "PropertyService.h"
+#include "link/LinkService.h"
+#include "inherit/InheritService.h"
+#include "property/PropertyService.h"
 
 #include "SymNamePropertyStorage.h"
 #include "PositionPropertyStorage.h"
@@ -166,15 +166,15 @@ namespace Opde {
 
 			void shutdown();
 
-			/** Database load callback 
+			/** Database load callback
 			* @see DatabaseListener::onDBLoad */
 			void onDBLoad(const FileGroupPtr& db, uint32_t curmask);
-			
-			/** Database save callback 
+
+			/** Database save callback
 			* @see DatabaseListener::onDBSave */
 			void onDBSave(const FileGroupPtr& db, uint32_t tgtmask);
-			
-			/** Database drop callback 
+
+			/** Database drop callback
 			* @see DatabaseListener::onDBDrop */
 			void onDBDrop(uint32_t dropmask);
 
@@ -276,7 +276,7 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask();
-			
+
 			virtual const size_t getSID();
 
 		private:

@@ -1,7 +1,8 @@
 add_subdirectory(base)
 add_subdirectory(services)
 add_subdirectory(scenemanager)
-add_subdirectory(tools)
+# TODO: Build from main/CMakeLists.txt instead
+# add_subdirectory(tools)
 add_subdirectory(main)
 
 # Must find a way to add headers only...

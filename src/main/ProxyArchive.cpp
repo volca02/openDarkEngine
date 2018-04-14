@@ -22,11 +22,11 @@
  *****************************************************************************/
 
 #include "ProxyArchive.h"
+#include "OgreFixedZip.h"
 
 #include <OgreException.h>
 #include <OgreString.h>
 #include <OgreFileSystem.h>
-#include <OgreZip.h>
 
 namespace Ogre {
 	// -------------------------------------------------------
@@ -332,7 +332,7 @@ namespace Ogre {
 
 		mFilePart += '/';
 
-		mArchive = new Ogre::ZipArchive(mName, mType);
+		mArchive = new Ogre::FixedZipArchive(mName, mType);
 	}
 
 	// -------------------------------------------------------

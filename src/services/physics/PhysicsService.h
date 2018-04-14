@@ -29,7 +29,7 @@
 
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
-#include "DatabaseService.h"
+#include "database/DatabaseService.h"
 #include "FileGroup.h"
 #include "SharedPtr.h"
 #include "PhysModels.h"
@@ -39,52 +39,52 @@
 #include <ode/ode.h>
 
 namespace Opde {
-	
-	
+
+
 	/** @brief Physics service - service handling physics (STUB)
 	*/
 	class OPDELIB_EXPORT PhysicsService : public ServiceImpl<PhysicsService>, public DatabaseListener {
 		public:
 			/** Constructor */
 			PhysicsService(ServiceManager *manager, const std::string& name);
-			
+
 			/** Destructor */
 			virtual ~PhysicsService();
 
 			/** Returns true if the given object has physics
 			 * @param objID the object id
-			 * @return true if the object is physical 
+			 * @return true if the object is physical
 			 */
 			bool objHasPhysics(int objID);
-			
+
 			/** Returns the count of submodels of the specified object
 			 * @param objID the object id
 			 * @return count, or zero if the object does not have any physics
 			 */
 			size_t getSubModelCount(int objID);
-			
-			/** Returns the position of given submodel if exists 
+
+			/** Returns the position of given submodel if exists
 			 * @param objId the object id
 			 * @param submdl the submodel id
 			 * @return Position if the given submodel exists, otherwise Vector3::ZERO */
 			const Vector3& getSubModelPosition(int objId, size_t submdl);
-			
+
 			/** Returns the orientation of given submodel if exists
 			 * @param objId the object id
 			 * @param submdl the submodel id
 			 * @return Orientation if the given submodel exists, otherwise Quaternion::IDENTITY */
 			const Quaternion& getSubModelOrientation(int objId, size_t submdl);
-			
+
 			/** Sets the given submodel orientation
 			 * @param objId the object id
 			 * @param submdl the submodel id
 			 * @param rot the rotation to set
 			 * @return true if the value was set */
 			void setSubModelOrientation(int objId, size_t submdl, const Quaternion& rot);
-			
+
 		protected:
 			bool init();
-			
+
 			virtual void onDBLoad(const FileGroupPtr& db, uint32_t curmask);
 			virtual void onDBSave(const FileGroupPtr& db, uint32_t tgtmask);
 			virtual void onDBDrop(uint32_t dropmask);
@@ -93,10 +93,10 @@ namespace Opde {
 
 			/// Current version of the physics tag
 			unsigned int mPhysVersion;
-			
+
 			//Dark World
 			dWorldID dDarkWorldID;
-			
+
 			/// Collection of all the physical models
 			PhysModels mPhysModels;
 	};
@@ -116,8 +116,8 @@ namespace Opde {
 
 			virtual const std::string& getName();
 
-			virtual const uint getMask(); 
-			
+			virtual const uint getMask();
+
 			virtual const size_t getSID();
 		private:
 			static std::string mName;

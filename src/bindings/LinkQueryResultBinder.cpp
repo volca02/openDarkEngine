@@ -28,100 +28,100 @@
 
 namespace Opde {
 
-	namespace Python {
+namespace Python {
 
-		// -------------------- Link Query result --------------------
-		const char* LinkQueryResultBinder::msName = "LinkQueryResult";
+// -------------------- Link Query result --------------------
+const char* LinkQueryResultBinder::msName = "LinkQueryResult";
 
-		// ------------------------------------------
-		PyTypeObject LinkQueryResultBinder::msType = {
-			PyVarObject_HEAD_INIT(&PyType_Type, 0)
-			"opde.services.LinkQueryResult",   // char *tp_name; */
-			sizeof(LinkQueryResultBinder::Object),      // int tp_basicsize; */
-			0,                        // int tp_itemsize;       /* not used much */
-			LinkQueryResultBinder::dealloc,   // destructor tp_dealloc; */
-			0,			              // printfunc  tp_print;   */
-			0,  // getattrfunc  tp_getattr; /* __getattr__ */
-			0,   					  // setattrfunc  tp_setattr;  /* __setattr__ */
-			0,				          // cmpfunc  tp_compare;  /* __cmp__ */
-			repr,			          // reprfunc  tp_repr;    /* __repr__ */
-			0,				          // PyNumberMethods *tp_as_number; */
-			0,                        // PySequenceMethods *tp_as_sequence; */
-			0,                        // PyMappingMethods *tp_as_mapping; */
-			0,			              // hashfunc tp_hash;     /* __hash__ */
-			0,                        // ternaryfunc tp_call;  /* __call__ */
-			0,			              // reprfunc tp_str;      /* __str__ */
-			PyObject_GenericGetAttr,  // getattrofunc tp_getattro; */
-			0,			              // setattrofunc tp_setattro; */
-			0,			              // PyBufferProcs *tp_as_buffer; */
-			Py_TPFLAGS_DEFAULT,       // long tp_flags; */
-			0,			              // char *tp_doc;  */
-			0,			              // traverseproc tp_traverse; */
-			0,			              // inquiry tp_clear; */
-			0,			              // richcmpfunc tp_richcompare; */
-			0,			              // long tp_weaklistoffset; */
-			getIterObject,            // getiterfunc tp_iter; */
-			getNext,	              // iternextfunc tp_iternext; */
-			msMethods,	              // struct PyMethodDef *tp_methods; */
-			0,			              // struct memberlist *tp_members; */
-			0,			              // struct getsetlist *tp_getset; */
-		};
+// ------------------------------------------
+PyTypeObject LinkQueryResultBinder::msType = {
+    PyVarObject_HEAD_INIT(&PyType_Type, 0)
+    "opde.services.LinkQueryResult",   // char *tp_name; */
+    sizeof(LinkQueryResultBinder::Object),      // int tp_basicsize; */
+    0,                        // int tp_itemsize;       /* not used much */
+    LinkQueryResultBinder::dealloc,   // destructor tp_dealloc; */
+    0,                        // printfunc  tp_print;   */
+    0,  // getattrfunc  tp_getattr; /* __getattr__ */
+    0,                        // setattrfunc  tp_setattr;  /* __setattr__ */
+    0,                        // cmpfunc  tp_compare;  /* __cmp__ */
+    repr,                     // reprfunc  tp_repr;    /* __repr__ */
+    0,                        // PyNumberMethods *tp_as_number; */
+    0,                        // PySequenceMethods *tp_as_sequence; */
+    0,                        // PyMappingMethods *tp_as_mapping; */
+    0,                        // hashfunc tp_hash;     /* __hash__ */
+    0,                        // ternaryfunc tp_call;  /* __call__ */
+    0,                        // reprfunc tp_str;      /* __str__ */
+    PyObject_GenericGetAttr,  // getattrofunc tp_getattro; */
+    0,                        // setattrofunc tp_setattro; */
+    0,                        // PyBufferProcs *tp_as_buffer; */
+    Py_TPFLAGS_DEFAULT,       // long tp_flags; */
+    0,                        // char *tp_doc;  */
+    0,                        // traverseproc tp_traverse; */
+    0,                        // inquiry tp_clear; */
+    0,                        // richcmpfunc tp_richcompare; */
+    0,                        // long tp_weaklistoffset; */
+    getIterObject,            // getiterfunc tp_iter; */
+    getNext,                  // iternextfunc tp_iternext; */
+    msMethods,                // struct PyMethodDef *tp_methods; */
+    0,                        // struct memberlist *tp_members; */
+    0,                        // struct getsetlist *tp_getset; */
+};
 
-		// ------------------------------------------
-		PyMethodDef LinkQueryResultBinder::msMethods[] = {
-			{NULL, NULL},
-		};
+// ------------------------------------------
+PyMethodDef LinkQueryResultBinder::msMethods[] = {
+    {NULL, NULL},
+};
 
 
-		// ------------------------------------------
-		PyObject* LinkQueryResultBinder::getIterObject(PyObject* self) {
-			Py_INCREF(self);
-			return self;
-		}
+// ------------------------------------------
+PyObject* LinkQueryResultBinder::getIterObject(PyObject* self) {
+    Py_INCREF(self);
+    return self;
+}
 
-		// ------------------------------------------
-		PyObject* LinkQueryResultBinder::getNext(PyObject* self) {
-			LinkQueryResultPtr o;
+// ------------------------------------------
+PyObject* LinkQueryResultBinder::getNext(PyObject* self) {
+    LinkQueryResultPtr o;
 
-			if (!python_cast<LinkQueryResultPtr>(self, &msType, &o))
-				__PY_CONVERR_RET;
+    if (!python_cast<LinkQueryResultPtr>(self, &msType, &o))
+        __PY_CONVERR_RET;
 
-			// Get returnable object, advance to next.
-			PyObject* next = NULL;
+    // Get returnable object, advance to next.
+    PyObject* next = NULL;
 
-			if ((!o.isNull()) && !o->end()) {
-				LinkPtr l = o->next();
-				next = LinkBinder::create(l);
-			}
+    if (o && !o->end()) {
+        LinkPtr l = o->next();
+        next = LinkBinder::create(l);
+    }
 
-			return next;
-		}
+    return next;
+}
 
-		// ------------------------------------------
-		PyObject* LinkQueryResultBinder::repr(PyObject *self) {
+// ------------------------------------------
+PyObject* LinkQueryResultBinder::repr(PyObject *self) {
 #ifdef IS_PY3K
-			return PyBytes_FromFormat("<LinkQueryResult at %p>", self);
+    return PyBytes_FromFormat("<LinkQueryResult at %p>", self);
 #else
-			return PyString_FromFormat("<LinkQueryResult at %p>", self);
+    return PyString_FromFormat("<LinkQueryResult at %p>", self);
 #endif
-		}
+}
 
-		// ------------------------------------------
-		PyObject* LinkQueryResultBinder::create(const LinkQueryResultPtr& result) {
-			Object* object = construct(&msType);
+// ------------------------------------------
+PyObject* LinkQueryResultBinder::create(const LinkQueryResultPtr& result) {
+    Object* object = construct(&msType);
 
-			if (object != NULL) {
-				object->mInstance = result;
-			}
+    if (object != NULL) {
+        object->mInstance = result;
+    }
 
-			return (PyObject *)object;
-		}
+    return (PyObject *)object;
+}
 
-		// ------------------------------------------
-		void LinkQueryResultBinder::init(PyObject* module) {
-			publishType(module, &msType, msName);
-		}
+// ------------------------------------------
+void LinkQueryResultBinder::init(PyObject* module) {
+    publishType(module, &msType, msName);
+}
 
-	}
+}
 
 } // namespace Opde

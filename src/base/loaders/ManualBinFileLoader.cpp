@@ -30,13 +30,14 @@
 #include "BinFormat.h"
 #include "lgcolors.h"
 
-#include "MaterialService.h"
+// #include "MaterialService.h"
 
 #include <OgreStringConverter.h>
 #include <OgreMaterial.h>
 #include <OgreMaterialManager.h>
 #include <OgreTechnique.h>
 #include <OgreSubMesh.h>
+#include <OgreSkeleton.h>
 #include <OgreHardwareBufferManager.h>
 #include <OgreLogManager.h>
 #include <OgreSkeletonManager.h>
@@ -700,7 +701,7 @@ namespace Ogre {
 				if ((mVersion != 3) && (mVersion != 4))
 					OGRE_EXCEPT(Exception::ERR_INTERNAL_ERROR, "Unsupported object mesh version : " + StringConverter::toString(mVersion),"ObjectMeshLoader::ObjectMeshLoader");
 
-				mMaterialService = GET_SERVICE(MaterialService);
+//				mMaterialService = GET_SERVICE(MaterialService);
 			};
 
 			~ObjectMeshLoader() {
@@ -774,7 +775,7 @@ namespace Ogre {
 
 			SkeletonPtr mSkeleton;
 
-			MaterialServicePtr mMaterialService;
+//			MaterialServicePtr mMaterialService;
 
 			// maximal slot ID, used for extra materials, which are not unmapped to slots
 			unsigned int mMaxSlot;

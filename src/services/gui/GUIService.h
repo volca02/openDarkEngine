@@ -31,10 +31,10 @@
 #include "ServiceCommon.h"
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
-#include "InputService.h"
-#include "DrawService.h"
-#include "ConfigService.h"
-#include "ConsoleGUI.h"
+#include "input/InputService.h"
+#include "draw/DrawService.h"
+#include "config/ConfigService.h"
+#include "gui/ConsoleGUI.h"
 
 namespace Opde {
 

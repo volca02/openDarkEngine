@@ -1,9 +1,4 @@
-# Nothing interesting now. Will compile the python module after finished
-#
-# $Id$
-
-INCLUDE( ${OPDE_SOURCE_DIR}/src/services/Services.cmake )
-INCLUDE( ${OPDE_SOURCE_DIR}/src/base/Base.cmake )
+INCLUDE(${OPDE_SOURCE_DIR}/src/services/Services.cmake)
 
 include_directories(
     ${ODE_INCLUDE_DIR}
@@ -14,45 +9,71 @@ include_directories(
     ${PYTHON_INCLUDE_PATH}
     ${OPDE_SOURCE_DIR}/src/scenemanager
     ${OPDE_SOURCE_DIR}/src/main
+    ${OPDE_SOURCE_DIR}/src/base
+    ${OPDE_SOURCE_DIR}/src/base/Dark
+    ${OPDE_SOURCE_DIR}/src/base/console
+    ${OPDE_SOURCE_DIR}/src/base/dyntype
+    ${OPDE_SOURCE_DIR}/src/base/file
+    ${OPDE_SOURCE_DIR}/src/base/loaders
+    ${OPDE_SOURCE_DIR}/src/base/logger
+    ${OPDE_SOURCE_DIR}/src/base/servicemanager
+    ${OPDE_SOURCE_DIR}/src/scenemanager
+    ${OPDE_SOURCE_DIR}/src/main
+    ${OPDE_SOURCE_DIR}/src/compat
+    ${OPDE_SOURCE_DIR}/src/bindings
 )
 
-IF(STATIC_LIBS)
-    add_library(OpdePyLib SHARED
-        bindings.cpp 
-        bindings.h
-        ServiceBinder.cpp
-        ServiceBinder.h
-        ConfigServiceBinder.cpp
-        ConfigServiceBinder.h
-        LinkServiceBinder.cpp
-        LinkServiceBinder.h
-        RelationBinder.cpp
-        RelationBinder.h
-        LinkQueryResultBinder.cpp
-        LinkQueryResultBinder.h
-        PropertyServiceBinder.cpp
-        PropertyServiceBinder.h
-        DTypeBinder.cpp
-        DTypeBinder.h
-        LoopServiceBinder.cpp
-        LoopServiceBinder.h
-        InputServiceBinder.cpp
-        InputServiceBinder.h
-        GUIServiceBinder.cpp
-        GUIServiceBinder.h
-        DatabaseServiceBinder.cpp
-        DatabaseServiceBinder.h
-        PythonStruct.h
-        RootBinder.cpp
-        RootBinder.h
-        StringIteratorBinder.cpp
-        StringIteratorBinder.h
-        ObjectServiceBinder.cpp
-        ObjectServiceBinder.h
-    )
-
-    target_link_libraries(OpdePyLib
-        ${OPDE_PYTHON_LIBRARIES}
-        OpenDark
-    )
-ENDIF(STATIC_LIBS)
+add_library(OpdePython OBJECT
+    bindings.cpp
+    bindings.h
+    ConfigServiceBinder.cpp
+    ConfigServiceBinder.h
+    DatabaseServiceBinder.cpp
+    DatabaseServiceBinder.h
+    DataFieldDescIteratorBinder.cpp
+    DataFieldDescIteratorBinder.h
+    DrawServiceBinder.cpp
+    DrawServiceBinder.h
+    DrawSheetBinder.cpp
+    DrawSheetBinder.h
+    DrawSourceBinder.cpp
+    DrawSourceBinder.h
+    DTypeBinder.cpp
+    DTypeBinder.h
+    FontDrawSourceBinder.cpp
+    FontDrawSourceBinder.h
+    GUIServiceBinder.cpp
+    GUIServiceBinder.h
+    InheritQueryResultBinder.cpp
+    InheritQueryResultBinder.h
+    InheritServiceBinder.cpp
+    InheritServiceBinder.h
+    InputServiceBinder.cpp
+    InputServiceBinder.h
+    LinkQueryResultBinder.cpp
+    LinkQueryResultBinder.h
+    LinkServiceBinder.cpp
+    LinkServiceBinder.h
+    LoopServiceBinder.cpp
+    LoopServiceBinder.h
+    ObjectServiceBinder.cpp
+    ObjectServiceBinder.h
+    PropertyServiceBinder.cpp
+    PropertyServiceBinder.h
+    PythonCallback.h
+    PythonStruct.h
+    RelationBinder.cpp
+    RelationBinder.h
+    RenderedImageBinder.cpp
+    RenderedImageBinder.h
+    RenderedLabelBinder.cpp
+    RenderedLabelBinder.h
+    RootBinder.cpp
+    RootBinder.h
+    ServiceBinder.cpp
+    ServiceBinder.h
+    StringIteratorBinder.cpp
+    StringIteratorBinder.h
+    TextureAtlasBinder.cpp
+    TextureAtlasBinder.h
+)

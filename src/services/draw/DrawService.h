@@ -38,7 +38,7 @@
 #include "RenderedRect.h"
 #include "TextureAtlas.h"
 
-#include "RenderService.h"
+#include "render/RenderService.h"
 
 #include <OgreViewport.h>
 #include <OgreRenderQueueListener.h>
@@ -83,7 +83,7 @@ namespace Opde {
 			 * @param sheet The sheet to display (or none if the parameter is NULL)
 			 */
 			void setActiveSheet(const DrawSheetPtr& sheet);
-			
+
 			/** Gets the currently active sheet */
 			inline const DrawSheetPtr& getActiveSheet() const { return mActiveSheet; };
 
@@ -93,13 +93,13 @@ namespace Opde {
 			 * @return the draw source usable for draw operations
 			 */
 			DrawSourcePtr createDrawSource(const std::string& img, const std::string& group);
-			
+
 			/** Creates a rendered image (e.g. a sprite)
 			 * @param draw The image source for this operation
 			 */
 			RenderedImage* createRenderedImage(const DrawSourcePtr& draw);
-			
-			/** Destroys a rendered image. For convenience. Calls destroyDrawOperation 
+
+			/** Destroys a rendered image. For convenience. Calls destroyDrawOperation
 			 */
 			void destroyRenderedImage(RenderedImage* ri);
 
@@ -109,22 +109,22 @@ namespace Opde {
 			 */
 			RenderedLabel* createRenderedLabel(const FontDrawSourcePtr& fds, const std::string& label = "");
 
-			/** Destroys a rendered label. For convenience. Calls destroyDrawOperation 
+			/** Destroys a rendered label. For convenience. Calls destroyDrawOperation
 			 */
 			void destroyRenderedLabel(RenderedLabel* rl);
-			
+
 			/** Creates a rendered rectangle (e.g. a colour only rectangle render)
 			 * @param atlas The atlas for this operation
 			 * @note The redered rectangle still uses a texture (namely the vertex colour texture).
 			 * !That texture is used to group the rendering operations together in one buffer to ensure
-			 * !correct transparency/alpha handling. 
+			 * !correct transparency/alpha handling.
 			 */
 			RenderedRect* createRenderedRect(const TextureAtlasPtr& atlas);
 
-			/** Destroys a rendered rectangle. For convenience. Calls destroyDrawOperation 
+			/** Destroys a rendered rectangle. For convenience. Calls destroyDrawOperation
 			 */
 			void destroyRenderedRect(RenderedRect* rr);
-			
+
 			/** Destroys the specified draw operation (any ancestor)
 			 * @param dop The draw operation to destroy
 			 */
@@ -143,11 +143,11 @@ namespace Opde {
 			/** Converts the given coordinate to the screen space x coordinate
 			 */
 			Ogre::Real convertToScreenSpaceX(int x, size_t width) const;
-			
+
 			/** Converts the given coordinate to the screen space y coordinates
 			 */
 			Ogre::Real convertToScreenSpaceY(int y, size_t height) const;
-			
+
 			/** Converts the given coordinate to the screen space y coordinates
 			 * @param z the depth in 0 - MAX_Z_VALUE range
 			 * @return Real number describing the depth
@@ -175,28 +175,28 @@ namespace Opde {
 			 * in further font loading operations.
 			 */
 			void setFontPalette(Ogre::ManualFonFileLoader::PaletteType paltype, const Ogre::String& fname = "", const Ogre::String& group = "");
-			
+
 			/** Getter for the current actual pixel width of the screen
 			 * @todo Once the resolution handling is ok, rewrite to use mWidth instead (the same for height)
 			*/
 			inline size_t getActualWidth() const { /*return mWidth;*/ return mViewport->getActualWidth(); };
-			
+
 			/// Getter for the current actual pixel height of the screen
 			inline size_t getActualHeight() const { /*return mHeight;*/ return mViewport->getActualHeight(); };
-			
-			/** registers a draw source ID as a holder of a image name and resource group name combination 
+
+			/** registers a draw source ID as a holder of a image name and resource group name combination
 			*/
 			void registerDrawSource(const DrawSourcePtr& ds, const Ogre::String& img, const Ogre::String& group);
-			
+
 			/// unregisters a draw source from the resource name to draw source mapping
 			void unregisterDrawSource(const DrawSourcePtr& ds);
-			
+
 		protected:
 			// Service related:
 			bool init();
 			void bootstrapFinished();
 			void shutdown();
-			
+
 			void clear();
 
 			/// Loads the LG's fon file and populates the given font instance with it's glyphs
@@ -215,13 +215,13 @@ namespace Opde {
 
 			/// frees the currently used font palette
 			void freeCurrentPal();
-			
+
 			/// Callback from render service - resolution changed on the render window
 			void onRenderServiceMsg(const RenderServiceMsg& msg);
-			
+
 			/// Finalizes the creation of object
 			void postCreate(DrawOperation* dop);
-			
+
 			Ogre::String getResourcePath(const Ogre::String& res, const Ogre::String& grp);
 
 			typedef std::map<std::string, DrawSheetPtr> SheetMap;
@@ -259,14 +259,14 @@ namespace Opde {
 			RGBAQuad* mCurrentPalette;
 
 			DrawSourceList mDrawSources;
-			
+
 			RenderServicePtr mRenderService;
-			
+
 			TextureAtlasMap mAtlasMap;
-			
+
 			size_t mWidth;
 			size_t mHeight;
-			
+
 			MessageSource<RenderServiceMsg>::ListenerID mRenderServiceCallBackID;
 		};
 
@@ -286,7 +286,7 @@ namespace Opde {
 			virtual const std::string& getName();
 
 			virtual const uint getMask();
-			
+
 			virtual const size_t getSID();
 		private:
 			static std::string mName;

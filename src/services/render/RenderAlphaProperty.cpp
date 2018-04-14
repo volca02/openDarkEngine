@@ -23,7 +23,7 @@
  *****************************************************************************/
 
 #include "RenderService.h"
-#include "PropertyService.h"
+#include "property/PropertyService.h"
 #include "SingleFieldDataStorage.h"
 #include "RenderAlphaProperty.h"
 
@@ -88,4 +88,3 @@ namespace Opde {
 		ei->setAlpha(alpha);
 	};
 };
-

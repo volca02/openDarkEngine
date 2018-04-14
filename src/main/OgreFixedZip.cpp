@@ -28,14 +28,12 @@ THE SOFTWARE.
 */
 #include "OgreStableHeaders.h"
 
-/** 
+/**
 THIS IS HERE BECAUSE OF THE BREAKING CHANGE IN OGRE THAT THEY DID FOR SOME OBSCURE REASON
 THAT REMOVED PATHS FROM FILENAMES WHICH SHOULD BE FULLY QUALIFIED!
 
 Changed minimally to be part of opde, but otherwise only fixed
 */
-
-#if OGRE_NO_ZIP_ARCHIVE == 0
 
 #include "OgreFixedZip.h"
 
@@ -93,7 +91,6 @@ namespace Ogre {
     //-----------------------------------------------------------------------
     void FixedZipArchive::load()
     {
-		OGRE_LOCK_AUTO_MUTEX;
         if (!mZzipDir)
         {
             zzip_error_t zzipError;
@@ -130,7 +127,6 @@ namespace Ogre {
     //-----------------------------------------------------------------------
     void FixedZipArchive::unload()
     {
-		OGRE_LOCK_AUTO_MUTEX;
         if (mZzipDir)
         {
             zzip_dir_close(mZzipDir);
@@ -143,7 +139,6 @@ namespace Ogre {
 	DataStreamPtr FixedZipArchive::open(const String& filename, bool readOnly) const
     {
 		// zziplib is not threadsafe
-		OGRE_LOCK_AUTO_MUTEX;
         String lookUpFileName = filename;
 
         // Format not used here (always binary)
@@ -194,7 +189,6 @@ namespace Ogre {
     //-----------------------------------------------------------------------
     StringVectorPtr FixedZipArchive::list(bool recursive, bool dirs) const
     {
-		OGRE_LOCK_AUTO_MUTEX;
         StringVectorPtr ret = StringVectorPtr(OGRE_NEW_T(StringVector, MEMCATEGORY_GENERAL)(), SPFM_DELETE_T);
 
         FileInfoList::const_iterator i, iend;
@@ -209,7 +203,6 @@ namespace Ogre {
     //-----------------------------------------------------------------------
     FileInfoListPtr FixedZipArchive::listFileInfo(bool recursive, bool dirs) const
     {
-		OGRE_LOCK_AUTO_MUTEX;
         FileInfoList* fil = OGRE_NEW_T(FileInfoList, MEMCATEGORY_GENERAL)();
         FileInfoList::const_iterator i, iend;
         iend = mFileList.end();
@@ -223,7 +216,6 @@ namespace Ogre {
     //-----------------------------------------------------------------------
     StringVectorPtr FixedZipArchive::find(const String& pattern, bool recursive, bool dirs) const
     {
-		OGRE_LOCK_AUTO_MUTEX;
         StringVectorPtr ret = StringVectorPtr(OGRE_NEW_T(StringVector, MEMCATEGORY_GENERAL)(), SPFM_DELETE_T);
         // If pattern contains a directory name, do a full match
         bool full_match = (pattern.find ('/') != String::npos) ||
@@ -245,7 +237,6 @@ namespace Ogre {
 	FileInfoListPtr FixedZipArchive::findFileInfo(const String& pattern,
         bool recursive, bool dirs) const
     {
-		OGRE_LOCK_AUTO_MUTEX;
         FileInfoListPtr ret = FileInfoListPtr(OGRE_NEW_T(FileInfoList, MEMCATEGORY_GENERAL)(), SPFM_DELETE_T);
         // If pattern contains a directory name, do a full match
         bool full_match = (pattern.find ('/') != String::npos) ||
@@ -274,7 +265,6 @@ namespace Ogre {
 	//-----------------------------------------------------------------------
 	bool FixedZipArchive::exists(const String& filename) const
 	{
-		OGRE_LOCK_AUTO_MUTEX;
 		String cleanName = filename;
 		if(filename.rfind("/") != String::npos)
 		{
@@ -672,5 +662,3 @@ namespace Ogre {
         EmbeddedFixedZipArchiveFactory_mFileNameToIndexMap->erase(name);
     }
 }
-
-#endif

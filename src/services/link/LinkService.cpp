@@ -23,407 +23,407 @@
 
 
 #include "LinkService.h"
-#include "BinaryService.h"
+#include "binary/BinaryService.h"
 #include "logger.h"
 #include "ServiceCommon.h"
 
 using namespace std;
 
 namespace Opde {
-	/// helper string iterator over map keys
-	class RelationNameMapKeyIterator : public StringIterator {
-		public:
-			RelationNameMapKeyIterator(LinkService::RelationNameMap& relationMap) :
-                            mRelationMap(relationMap) {
-				mIter = mRelationMap.begin();
-				mEnd = mRelationMap.end();
-            }
+/// helper string iterator over map keys
+class RelationNameMapKeyIterator : public StringIterator {
+public:
+    RelationNameMapKeyIterator(LinkService::RelationNameMap& relationMap) :
+        mRelationMap(relationMap) {
+        mIter = mRelationMap.begin();
+        mEnd = mRelationMap.end();
+    }
 
-            virtual const std::string& next() {
-				assert(!end());
+    virtual const std::string& next() {
+        assert(!end());
 
-				const std::string& s = mIter->first;
+        const std::string& s = mIter->first;
 
-				++mIter;
+        ++mIter;
 
-				return s;
-            }
+        return s;
+    }
 
-            virtual bool end() const {
-                return (mIter == mEnd);
-            }
+    virtual bool end() const {
+        return (mIter == mEnd);
+    }
 
-        protected:
-			LinkService::RelationNameMap::iterator mIter, mEnd;
-            LinkService::RelationNameMap& mRelationMap;
-	};
+protected:
+    LinkService::RelationNameMap::iterator mIter, mEnd;
+    LinkService::RelationNameMap& mRelationMap;
+};
 
-	/*----------------------------------------------------*/
-	/*-------------------- LinkService -------------------*/
-	/*----------------------------------------------------*/
-	template<> const size_t ServiceImpl<LinkService>::SID = __SERVICE_ID_LINK;
-	
-	LinkService::LinkService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::LinkService >(manager, name), mDatabaseService(NULL) {
-	}
+/*----------------------------------------------------*/
+/*-------------------- LinkService -------------------*/
+/*----------------------------------------------------*/
+template<> const size_t ServiceImpl<LinkService>::SID = __SERVICE_ID_LINK;
 
-	//------------------------------------------------------
-	LinkService::~LinkService() {
-		mRelationNameMap.clear();
-		mRelationIDMap.clear();
-		mNameToFlavor.clear();
-		mFlavorToName.clear();
-	}
+LinkService::LinkService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::LinkService >(manager, name), mDatabaseService(NULL) {
+}
 
-	//------------------------------------------------------
-	bool LinkService::init() {
-	    return true;
-	}
+//------------------------------------------------------
+LinkService::~LinkService() {
+    mRelationNameMap.clear();
+    mRelationIDMap.clear();
+    mNameToFlavor.clear();
+    mFlavorToName.clear();
+}
 
-	//------------------------------------------------------
-	void LinkService::bootstrapFinished() {
-		// Ensure link listeners are created
-		mServiceManager->createByMask(SERVICE_LINK_LISTENER);
+//------------------------------------------------------
+bool LinkService::init() {
+    return true;
+}
 
-		mDatabaseService = GET_SERVICE(DatabaseService);
-	}
+//------------------------------------------------------
+void LinkService::bootstrapFinished() {
+    // Ensure link listeners are created
+    mServiceManager->createByMask(SERVICE_LINK_LISTENER);
 
-	//------------------------------------------------------
-	void LinkService::shutdown() {
-		mDatabaseService.setNull();
-	}
+    mDatabaseService = GET_SERVICE(DatabaseService);
+}
 
-	//------------------------------------------------------
-	void LinkService::load(const FileGroupPtr& db, const BitArray& objMask) {
-		LOG_INFO("LinkService: Loading link definitions from file group '%s'", db->getName().c_str());
+//------------------------------------------------------
+void LinkService::shutdown() {
+    mDatabaseService.reset();
+}
 
-		// First, try to build the Relation Name -> flavor and reverse records
-		/*
-		The Relations chunk should be present, and the same for all File Groups
-		As we do not know if something was already initialised or not, we just request mapping and see if it goes or not
-		*/
-		// BinaryServicePtr bs = GET_SERVICE(DatabaseService);
+//------------------------------------------------------
+void LinkService::load(const FileGroupPtr& db, const BitArray& objMask) {
+    LOG_INFO("LinkService: Loading link definitions from file group '%s'", db->getName().c_str());
 
-		FilePtr rels = db->getFile("Relations");
+    // First, try to build the Relation Name -> flavor and reverse records
+    /*
+      The Relations chunk should be present, and the same for all File Groups
+      As we do not know if something was already initialised or not, we just request mapping and see if it goes or not
+    */
+    // BinaryServicePtr bs = GET_SERVICE(DatabaseService);
 
-		int count = rels->size() / 32;
+    FilePtr rels = db->getFile("Relations");
 
-		LOG_DEBUG("LinkService: Loading Relations map (%d items - %d size)", count, rels->size());
+    int count = rels->size() / 32;
 
-		for (int i = 1; i <= count; i++) {
-			char text[32];
+    LOG_DEBUG("LinkService: Loading Relations map (%d items - %d size)", count, rels->size());
 
-			rels->read(text, 32);
+    for (int i = 1; i <= count; i++) {
+        char text[32];
 
-			std::string stxt = text;
+        rels->read(text, 32);
 
-			if (stxt.substr(0,1) == "~")
-				OPDE_EXCEPT("Conflicting name. Character ~ is reserved for inverse relations. Conflicting name : " + stxt, "LinkService::_load");
+        std::string stxt = text;
 
-			// Look for relation with the specified Name
+        if (stxt.substr(0,1) == "~")
+            OPDE_EXCEPT("Conflicting name. Character ~ is reserved for inverse relations. Conflicting name : " + stxt, "LinkService::_load");
 
-			// TODO: Look for the relation name. Have to find it.
-			RelationNameMap::iterator rnit = mRelationNameMap.find(text);
+        // Look for relation with the specified Name
 
-			if (rnit == mRelationNameMap.end()) {
-				LOG_ERROR("LinkService::_load: Could not find relation %s predefined. Skipping", text);
-				continue;
-			}
+        // TODO: Look for the relation name. Have to find it.
+        RelationNameMap::iterator rnit = mRelationNameMap.find(text);
 
-			RelationPtr rel = rnit->second;
+        if (rnit == mRelationNameMap.end()) {
+            LOG_ERROR("LinkService::_load: Could not find relation %s predefined. Skipping", text);
+            continue;
+        }
 
-			// Request the mapping to ID
-			if (!requestRelationFlavorMap(i, text, rel))
-				OPDE_EXCEPT(string("Could not map relation ") + text + " to flavor. Name/ID conflict", "LinkService::_load");
+        RelationPtr rel = rnit->second;
 
-			LOG_DEBUG("Mapped relation %s to flavor %d", text, i);
+        // Request the mapping to ID
+        if (!requestRelationFlavorMap(i, text, rel))
+            OPDE_EXCEPT(string("Could not map relation ") + text + " to flavor. Name/ID conflict", "LinkService::_load");
 
-			std::string inverse = "~" + stxt;
+        LOG_DEBUG("Mapped relation %s to flavor %d", text, i);
 
-			// --- Assign the inverse relation as well here:
-			rnit = mRelationNameMap.find(inverse);
+        std::string inverse = "~" + stxt;
 
-			if (rnit == mRelationNameMap.end())
-				OPDE_EXCEPT(string("Could not find inverse relation ") + inverse + " predefined. Could not continue", "LinkService::_load");
+        // --- Assign the inverse relation as well here:
+        rnit = mRelationNameMap.find(inverse);
 
-			RelationPtr irel = rnit->second;
+        if (rnit == mRelationNameMap.end())
+            OPDE_EXCEPT(string("Could not find inverse relation ") + inverse + " predefined. Could not continue", "LinkService::_load");
 
-			// Request the mapping to ID
-			if (!requestRelationFlavorMap(-i, inverse, irel))
-				OPDE_EXCEPT(string("Could not map inverse relation ") + inverse + " to flavor. Name/ID conflict", "LinkService::_load");
+        RelationPtr irel = rnit->second;
 
-			LOG_DEBUG("Mapped relation pair %s, %s to flavor %d, %d", text, inverse.c_str(), i, -i);
+        // Request the mapping to ID
+        if (!requestRelationFlavorMap(-i, inverse, irel))
+            OPDE_EXCEPT(string("Could not map inverse relation ") + inverse + " to flavor. Name/ID conflict", "LinkService::_load");
 
-			// TODO: request relation ID map, must not fail
+        LOG_DEBUG("Mapped relation pair %s, %s to flavor %d, %d", text, inverse.c_str(), i, -i);
 
-			// Now load the data of the relation
-			LOG_DEBUG("Loading relation %s", text);
+        // TODO: request relation ID map, must not fail
 
-			try {
-				rel->load(db, objMask); // only normal relation is loaded. Inverse is mapped automatically
-			} catch (BasicException &e) {
-				LOG_FATAL("LinkService: Caught a fatal exception while loading Relation %s : %s", text, e.getDetails().c_str() );
-			}
-		}
-	}
+        // Now load the data of the relation
+        LOG_DEBUG("Loading relation %s", text);
 
-	//------------------------------------------------------
-	void LinkService::save(const FileGroupPtr& db, uint saveMask) {
-		// Iterates through all the relations. Writes the name into the Relations file, and writes the relation's data using relation->save(db, saveMask) call
+        try {
+            rel->load(db, objMask); // only normal relation is loaded. Inverse is mapped automatically
+        } catch (BasicException &e) {
+            LOG_FATAL("LinkService: Caught a fatal exception while loading Relation %s : %s", text, e.getDetails().c_str() );
+        }
+    }
+}
 
-		// I do not want to have gaps in the relations indexing, which is implicit given the record order
-		int order = 1;
+//------------------------------------------------------
+void LinkService::save(const FileGroupPtr& db, uint saveMask) {
+    // Iterates through all the relations. Writes the name into the Relations file, and writes the relation's data using relation->save(db, saveMask) call
 
-		FilePtr rels = db->createFile("Relations", mRelVMaj, mRelVMin);
+    // I do not want to have gaps in the relations indexing, which is implicit given the record order
+    int order = 1;
 
-		RelationIDMap::iterator it = mRelationIDMap.begin();
+    FilePtr rels = db->createFile("Relations", mRelVMaj, mRelVMin);
 
-		for (; it != mRelationIDMap.end(); ++it, ++order) {
-			if (order != it->first)
-				OPDE_EXCEPT("Index order mismatch, could not continue...", "LinkService::save");
+    RelationIDMap::iterator it = mRelationIDMap.begin();
 
-			// Write the relation's name
-			char title[32];
+    for (; it != mRelationIDMap.end(); ++it, ++order) {
+        if (order != it->first)
+            OPDE_EXCEPT("Index order mismatch, could not continue...", "LinkService::save");
 
-			// get the name, and write
-			const std::string& rname = it->second->getName();
+        // Write the relation's name
+        char title[32];
 
-			rname.copy(title, 32 - 1);
+        // get the name, and write
+        const std::string& rname = it->second->getName();
 
-			// write
-			rels->write(title, 32);
+        rname.copy(title, 32 - 1);
 
-			// write the relation
-			it->second->save(db, saveMask);
-		}
-	}
+        // write
+        rels->write(title, 32);
 
-	//------------------------------------------------------
-	int LinkService::nameToFlavor(const std::string& name) {
-		NameToFlavor::const_iterator it = mNameToFlavor.find(name);
+        // write the relation
+        it->second->save(db, saveMask);
+    }
+}
 
-		if (it != mNameToFlavor.end()) {
-			return it->second;
-		} else {
-			LOG_ERROR("LinkService: Relation not found : %s", name.c_str());
-			return 0; // just return 0, so no exception will be thrown
-		}
-	}
+//------------------------------------------------------
+int LinkService::nameToFlavor(const std::string& name) {
+    NameToFlavor::const_iterator it = mNameToFlavor.find(name);
 
-	//------------------------------------------------------
-	std::string LinkService::flavorToName(int flavor) {
-		FlavorToName::const_iterator it = mFlavorToName.find(flavor);
+    if (it != mNameToFlavor.end()) {
+        return it->second;
+    } else {
+        LOG_ERROR("LinkService: Relation not found : %s", name.c_str());
+        return 0; // just return 0, so no exception will be thrown
+    }
+}
 
-		if (it != mFlavorToName.end()) {
-			return it->second;
-		} else {
-			LOG_ERROR("LinkService: Relation not found by flavor : %d", flavor);
-			return ""; // just return empty string
-		}
-	}
+//------------------------------------------------------
+std::string LinkService::flavorToName(int flavor) {
+    FlavorToName::const_iterator it = mFlavorToName.find(flavor);
 
-	//------------------------------------------------------
-	RelationPtr LinkService::createRelation(const std::string& name, const DataStoragePtr& stor, bool hidden) {
-		if (name.substr(0,1) == "~")
-			OPDE_EXCEPT("Name conflict: Relation can't use ~ character as the first one, it's reserved for inverse relations. Conflicting name: " + name, "LinkService::createRelation");
+    if (it != mFlavorToName.end()) {
+        return it->second;
+    } else {
+        LOG_ERROR("LinkService: Relation not found by flavor : %d", flavor);
+        return ""; // just return empty string
+    }
+}
 
-		std::string inverse = "~" + name;
+//------------------------------------------------------
+RelationPtr LinkService::createRelation(const std::string& name, const DataStoragePtr& stor, bool hidden) {
+    if (name.substr(0,1) == "~")
+        OPDE_EXCEPT("Name conflict: Relation can't use ~ character as the first one, it's reserved for inverse relations. Conflicting name: " + name, "LinkService::createRelation");
 
-		RelationPtr nr(new Relation(name, stor, false, hidden));
-		RelationPtr nrinv(new Relation(inverse, stor, true, hidden));
+    std::string inverse = "~" + name;
 
-		// Assign inverse relations...
-		nr->setInverseRelation(nrinv.ptr());
-		nrinv->setInverseRelation(nr.ptr());
+    RelationPtr nr(new Relation(name, stor, false, hidden));
+    RelationPtr nrinv(new Relation(inverse, stor, true, hidden));
 
-		// insert both
-		std::pair<RelationNameMap::iterator, bool> res = mRelationNameMap.insert(make_pair(name, nr));
+    // Assign inverse relations...
+    nr->setInverseRelation(nrinv.get());
+    nrinv->setInverseRelation(nr.get());
 
-		if (!res.second)
-			OPDE_EXCEPT("Failed to insert new instance of Relation named " + name, "LinkService::createRelation");
+    // insert both
+    std::pair<RelationNameMap::iterator, bool> res = mRelationNameMap.insert(make_pair(name, nr));
 
-		// Inverse relation now
-		res = mRelationNameMap.insert(make_pair(inverse, nrinv));
+    if (!res.second)
+        OPDE_EXCEPT("Failed to insert new instance of Relation named " + name, "LinkService::createRelation");
 
-		if (!res.second)
-			OPDE_EXCEPT("Failed to insert new instance of Relation", "LinkService::createRelation");
+    // Inverse relation now
+    res = mRelationNameMap.insert(make_pair(inverse, nrinv));
 
-		LOG_VERBOSE("LinkService::createRelation: Succesfully created Relation pair '%s'", name.c_str());
+    if (!res.second)
+        OPDE_EXCEPT("Failed to insert new instance of Relation", "LinkService::createRelation");
 
-		return nr;
-	}
-
+    LOG_VERBOSE("LinkService::createRelation: Succesfully created Relation pair '%s'", name.c_str());
 
+    return nr;
+}
+
 
-	//------------------------------------------------------
-	void LinkService::clear() {
-		// clear all the mappings
-		mRelationIDMap.clear();
-		mFlavorToName.clear();
-		mNameToFlavor.clear();
 
-		// clear all the relations
-		RelationNameMap::iterator it = mRelationNameMap.begin();
-
-		for (; it != mRelationNameMap.end(); ++it ) {
-			//  request clear on the relation
-			it->second->clear();
-		}
-	}
+//------------------------------------------------------
+void LinkService::clear() {
+    // clear all the mappings
+    mRelationIDMap.clear();
+    mFlavorToName.clear();
+    mNameToFlavor.clear();
 
-	//------------------------------------------------------
-	LinkQueryResultPtr LinkService::getAllLinks(int flavor, int src, int dst) const {
-		// find the relation with the specified flavor.
-		//If none such found, return empty iterator
-		RelationIDMap::const_iterator it = mRelationIDMap.find(flavor);
+    // clear all the relations
+    RelationNameMap::iterator it = mRelationNameMap.begin();
+
+    for (; it != mRelationNameMap.end(); ++it ) {
+        //  request clear on the relation
+        it->second->clear();
+    }
+}
 
-		if (it != mRelationIDMap.end()) {
-			// dedicate to the given relation
-			return it->second->getAllLinks(src, dst);
-		} else {
-			return LinkQueryResultPtr(new EmptyLinkQueryResult());
-		}
-	}
+//------------------------------------------------------
+LinkQueryResultPtr LinkService::getAllLinks(int flavor, int src, int dst) const {
+    // find the relation with the specified flavor.
+    //If none such found, return empty iterator
+    RelationIDMap::const_iterator it = mRelationIDMap.find(flavor);
 
-	//------------------------------------------------------
-	LinkQueryResultPtr LinkService::getAllInherited(int flavor, int src, int dst) const {
-		// find the relation with the specified flavor.
-		//If none such found, return empty iterator
-		RelationIDMap::const_iterator it = mRelationIDMap.find(flavor);
+    if (it != mRelationIDMap.end()) {
+        // dedicate to the given relation
+        return it->second->getAllLinks(src, dst);
+    } else {
+        return LinkQueryResultPtr(new EmptyLinkQueryResult());
+    }
+}
 
-		if (it != mRelationIDMap.end()) {
-			// dedicate to the given relation
-			return it->second->getAllInherited(src, dst);
-		} else {
-			return LinkQueryResultPtr(new EmptyLinkQueryResult());
-		}
-	}
+//------------------------------------------------------
+LinkQueryResultPtr LinkService::getAllInherited(int flavor, int src, int dst) const {
+    // find the relation with the specified flavor.
+    //If none such found, return empty iterator
+    RelationIDMap::const_iterator it = mRelationIDMap.find(flavor);
 
+    if (it != mRelationIDMap.end()) {
+        // dedicate to the given relation
+        return it->second->getAllInherited(src, dst);
+    } else {
+        return LinkQueryResultPtr(new EmptyLinkQueryResult());
+    }
+}
 
-	//------------------------------------------------------
-	LinkPtr LinkService::getOneLink(int flavor, int src, int dst) const {
-		// find the relation with the specified flavor.
-		//If none such found, return NULL link
-		RelationIDMap::const_iterator it = mRelationIDMap.find(flavor);
 
-		if (it != mRelationIDMap.end()) {
-			// dedicate to the given relation
-			return it->second->getOneLink(src, dst);
-		} else {
-			return LinkPtr(NULL);
-		}
-	}
+//------------------------------------------------------
+LinkPtr LinkService::getOneLink(int flavor, int src, int dst) const {
+    // find the relation with the specified flavor.
+    //If none such found, return NULL link
+    RelationIDMap::const_iterator it = mRelationIDMap.find(flavor);
 
-	//------------------------------------------------------
-	LinkPtr LinkService::getLink(link_id_t id) const {
-		// get relation flavor from link id
-		int flavor = LINK_ID_FLAVOR(id);
+    if (it != mRelationIDMap.end()) {
+        // dedicate to the given relation
+        return it->second->getOneLink(src, dst);
+    } else {
+        return LinkPtr(NULL);
+    }
+}
 
-		// find relation
-		RelationIDMap::const_iterator it = mRelationIDMap.find(flavor);
+//------------------------------------------------------
+LinkPtr LinkService::getLink(link_id_t id) const {
+    // get relation flavor from link id
+    int flavor = LINK_ID_FLAVOR(id);
 
-		if (it != mRelationIDMap.end()) {
-			// dedicate to the given relation
-			return it->second->getLink(id);
-		} else {
-			return LinkPtr(NULL);
-		}
-	}
-
-
-	// --------------------------------------------------------------------------
-	StringIteratorPtr LinkService::getAllLinkNames() {
-		return StringIteratorPtr(new RelationNameMapKeyIterator(mRelationNameMap));
-	}
-
-	// --------------------------------------------------------------------------
-	DataFieldDescIteratorPtr LinkService::getFieldDescIterator(int flavor) {
-		// find relation
-		RelationIDMap::const_iterator it = mRelationIDMap.find(flavor);
-
-		if (it != mRelationIDMap.end()) {
-			// dedicate to the given relation
-			return it->second->getFieldDescIterator();
-		} else {
-			return DataFieldDescIteratorPtr(NULL);
-		}
-	}
-
-	//------------------------------------------------------
-	bool LinkService::requestRelationFlavorMap(int id, const std::string& name, RelationPtr& rel) {
-		std::pair<FlavorToName::iterator, bool> res1 = mFlavorToName.insert(make_pair(id, name));
-
-		if (!res1.second) {
-			if (res1.first->second != name)
-				return false;
-		}
-
-		std::pair<NameToFlavor::iterator, bool> res2 = mNameToFlavor.insert(make_pair(name, id));
-
-		if (!res2.second) {
-			if (res2.first->second != id)
-				return false;
-		}
-
-		std::pair<RelationIDMap::iterator, bool> res3 = mRelationIDMap.insert(make_pair(id, rel));
-
-		if (!res3.second) { // failed to map the relation's instance to the ID
-			if (res3.first->second != rel)
-				return false;
-		}
-
-		rel->setID(id);
-
-		return true;
-	}
-
-	//------------------------------------------------------
-	RelationPtr LinkService::getRelation(const std::string& name) {
-		RelationNameMap::iterator rnit = mRelationNameMap.find(name);
-
-		if (rnit == mRelationNameMap.end())
-			return RelationPtr(); // return NULL pointer
-		else
-			return rnit->second;
-	}
-
-	//------------------------------------------------------
-	RelationPtr LinkService::getRelation(int flavor) {
-		RelationIDMap::iterator rnit = mRelationIDMap.find(flavor);
-
-		if (rnit == mRelationIDMap.end())
-			return RelationPtr(); // return NULL pointer
-		else
-			return rnit->second;
-	}
-
-	//------------------------------------------------------
-	void LinkService::objectDestroyed(int id) {
-		RelationIDMap::iterator it = mRelationIDMap.begin();
-
-		for (; it != mRelationIDMap.end();++it)
-			it->second->objectDestroyed(id); // Will call the opposing relation ~ as well
-	}
-
-	//-------------------------- Factory implementation
-	std::string LinkServiceFactory::mName = "LinkService";
-
-	LinkServiceFactory::LinkServiceFactory() : ServiceFactory() {
-	};
-
-	const std::string& LinkServiceFactory::getName() {
-		return mName;
-	}
-
-	Service* LinkServiceFactory::createInstance(ServiceManager* manager) {
-		return new LinkService(manager, mName);
-	}
-
-	const uint LinkServiceFactory::getMask() {
-	    return SERVICE_DATABASE_LISTENER | SERVICE_CORE;
-	}
-	
-	const size_t LinkServiceFactory::getSID() {
-		return LinkService::SID;
-	}
+    // find relation
+    RelationIDMap::const_iterator it = mRelationIDMap.find(flavor);
+
+    if (it != mRelationIDMap.end()) {
+        // dedicate to the given relation
+        return it->second->getLink(id);
+    } else {
+        return LinkPtr(NULL);
+    }
+}
+
+
+// --------------------------------------------------------------------------
+StringIteratorPtr LinkService::getAllLinkNames() {
+    return StringIteratorPtr(new RelationNameMapKeyIterator(mRelationNameMap));
+}
+
+// --------------------------------------------------------------------------
+DataFieldDescIteratorPtr LinkService::getFieldDescIterator(int flavor) {
+    // find relation
+    RelationIDMap::const_iterator it = mRelationIDMap.find(flavor);
+
+    if (it != mRelationIDMap.end()) {
+        // dedicate to the given relation
+        return it->second->getFieldDescIterator();
+    } else {
+        return DataFieldDescIteratorPtr(NULL);
+    }
+}
+
+//------------------------------------------------------
+bool LinkService::requestRelationFlavorMap(int id, const std::string& name, RelationPtr& rel) {
+    std::pair<FlavorToName::iterator, bool> res1 = mFlavorToName.insert(make_pair(id, name));
+
+    if (!res1.second) {
+        if (res1.first->second != name)
+            return false;
+    }
+
+    std::pair<NameToFlavor::iterator, bool> res2 = mNameToFlavor.insert(make_pair(name, id));
+
+    if (!res2.second) {
+        if (res2.first->second != id)
+            return false;
+    }
+
+    std::pair<RelationIDMap::iterator, bool> res3 = mRelationIDMap.insert(make_pair(id, rel));
+
+    if (!res3.second) { // failed to map the relation's instance to the ID
+        if (res3.first->second != rel)
+            return false;
+    }
+
+    rel->setID(id);
+
+    return true;
+}
+
+//------------------------------------------------------
+RelationPtr LinkService::getRelation(const std::string& name) {
+    RelationNameMap::iterator rnit = mRelationNameMap.find(name);
+
+    if (rnit == mRelationNameMap.end())
+        return RelationPtr(); // return NULL pointer
+    else
+        return rnit->second;
+}
+
+//------------------------------------------------------
+RelationPtr LinkService::getRelation(int flavor) {
+    RelationIDMap::iterator rnit = mRelationIDMap.find(flavor);
+
+    if (rnit == mRelationIDMap.end())
+        return RelationPtr(); // return NULL pointer
+    else
+        return rnit->second;
+}
+
+//------------------------------------------------------
+void LinkService::objectDestroyed(int id) {
+    RelationIDMap::iterator it = mRelationIDMap.begin();
+
+    for (; it != mRelationIDMap.end();++it)
+        it->second->objectDestroyed(id); // Will call the opposing relation ~ as well
+}
+
+//-------------------------- Factory implementation
+std::string LinkServiceFactory::mName = "LinkService";
+
+LinkServiceFactory::LinkServiceFactory() : ServiceFactory() {
+};
+
+const std::string& LinkServiceFactory::getName() {
+    return mName;
+}
+
+Service* LinkServiceFactory::createInstance(ServiceManager* manager) {
+    return new LinkService(manager, mName);
+}
+
+const uint LinkServiceFactory::getMask() {
+    return SERVICE_DATABASE_LISTENER | SERVICE_CORE;
+}
+
+const size_t LinkServiceFactory::getSID() {
+    return LinkService::SID;
+}
 
 }

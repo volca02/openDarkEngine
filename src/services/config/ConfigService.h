@@ -30,7 +30,7 @@
 
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
-#include "PlatformService.h"
+#include "platform/PlatformService.h"
 #include "FileGroup.h"
 #include "SharedPtr.h"
 #include "DVariant.h"

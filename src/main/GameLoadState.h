@@ -30,7 +30,7 @@
 #include "GameState.h"
 #include "OpdeSingleton.h"
 #include "FileGroup.h"
-#include "WorldRepService.h"
+#include "worldrep/WorldRepService.h"
 #include "OpdeServiceManager.h"
 #include "ManualFonFileLoader.h"
 
@@ -41,46 +41,46 @@
 
 namespace Opde {
 
-	class GameLoadState : public Singleton<GameLoadState>, public GameState {
-		public:
-			GameLoadState();
-			virtual ~GameLoadState();
+class GameLoadState : public Singleton<GameLoadState>, public GameState {
+public:
+    GameLoadState();
+    virtual ~GameLoadState();
 
-			virtual void start();
-			virtual void exit();
-			virtual void suspend();
-			virtual void resume();
+    virtual void start();
+    virtual void exit();
+    virtual void suspend();
+    virtual void resume();
 
-			virtual void update(unsigned long timePassed);
+    virtual void update(unsigned long timePassed);
 
-			bool keyPressed(const SDL_KeyboardEvent &e);
-			bool keyReleased(const SDL_KeyboardEvent &e);
+    bool keyPressed(const SDL_KeyboardEvent &e);
+    bool keyReleased(const SDL_KeyboardEvent &e);
 
-			bool mouseMoved(const SDL_MouseMotionEvent &e);
-			bool mousePressed(const SDL_MouseButtonEvent &e);
-			bool mouseReleased(const SDL_MouseButtonEvent &e);
+    bool mouseMoved(const SDL_MouseMotionEvent &e);
+    bool mousePressed(const SDL_MouseButtonEvent &e);
+    bool mouseReleased(const SDL_MouseButtonEvent &e);
 
-			static GameLoadState& getSingleton();
-			static GameLoadState* getSingletonPtr();
-		protected:
-			void createTestFontOverlays();
+    static GameLoadState& getSingleton();
+    static GameLoadState* getSingletonPtr();
+protected:
+    void createTestFontOverlays();
 
-			Ogre::Root *mRoot;
-			Ogre::SceneManager *mSceneMgr;
-			Ogre::OverlayManager *mOverlayMgr;
-			Ogre::Camera *mCamera;
-			Ogre::Viewport *mViewport;
+    Ogre::Root *mRoot;
+    Ogre::SceneManager *mSceneMgr;
+    Ogre::OverlayManager *mOverlayMgr;
+    Ogre::Camera *mCamera;
+    Ogre::Viewport *mViewport;
 
-			ServiceManager* mServiceMgr;
+    ServiceManager* mServiceMgr;
 
-			bool mFirstTime;
-			bool mLoaded;
+    bool mFirstTime;
+    bool mLoaded;
 
-			Ogre::Overlay* mLoadingOverlay;
+    Ogre::Overlay* mLoadingOverlay;
 
-			// config service
-			ConfigServicePtr mConfigService;
-	};
+    // config service
+    ConfigServicePtr mConfigService;
+};
 }
 
 #endif

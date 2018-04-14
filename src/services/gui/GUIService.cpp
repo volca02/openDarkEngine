@@ -30,266 +30,266 @@ using namespace Ogre;
 
 namespace Opde {
 
-    /*-----------------------------------------------------*/
-    /*-------------------- GUIService ---------------------*/
-    /*-----------------------------------------------------*/
-    template<> const size_t ServiceImpl<GUIService>::SID = __SERVICE_ID_GUI;
+/*-----------------------------------------------------*/
+/*-------------------- GUIService ---------------------*/
+/*-----------------------------------------------------*/
+template<> const size_t ServiceImpl<GUIService>::SID = __SERVICE_ID_GUI;
 
-    GUIService::GUIService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::GUIService >(manager, name),
-			mActive(false),
-			mVisible(false),
-			mActiveSheet(),
-			mConsole(NULL),
-			mCoreAtlas(NULL),
-			mConsoleFont(NULL),
-			mRenderServiceListenerID(0),
-			mInputSrv(NULL),
-			mRenderSrv(NULL) {
+GUIService::GUIService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::GUIService >(manager, name),
+    mActive(false),
+    mVisible(false),
+    mActiveSheet(),
+    mConsole(NULL),
+    mCoreAtlas(NULL),
+    mConsoleFont(NULL),
+    mRenderServiceListenerID(0),
+    mInputSrv(NULL),
+    mRenderSrv(NULL) {
 
-		mLoopClientDef.id = LOOPCLIENT_ID_GUI;
-		mLoopClientDef.mask = LOOPMODE_GUI;
-		mLoopClientDef.name = mName;
-		mLoopClientDef.priority = LOOPCLIENT_PRIORITY_GUI;
-	}
+    mLoopClientDef.id = LOOPCLIENT_ID_GUI;
+    mLoopClientDef.mask = LOOPMODE_GUI;
+    mLoopClientDef.name = mName;
+    mLoopClientDef.priority = LOOPCLIENT_PRIORITY_GUI;
+}
 
-	// -----------------------------------
-	GUIService::~GUIService() {
-		delete mConsole;
-	}
+// -----------------------------------
+GUIService::~GUIService() {
+    delete mConsole;
+}
 
-	// -----------------------------------
-	void GUIService::setActive(bool active) {
-		/* What do we do here?
-			if set to true, we set direct input mode and show cursor
-			if set to false, we set mapped input mode and hide the cursor
-		*/
-		assert(!mInputSrv.isNull());
+// -----------------------------------
+void GUIService::setActive(bool active) {
+    /* What do we do here?
+       if set to true, we set direct input mode and show cursor
+       if set to false, we set mapped input mode and hide the cursor
+    */
+    assert(!mInputSrv.isNull());
 
-		if (active) {
-			mInputSrv->setInputMode(IM_DIRECT);
-		} else {
-			mInputSrv->setInputMode(IM_MAPPED);
-		}
-
-		mActive = active;
-	}
-
-	// -----------------------------------
-	void GUIService::setVisible(bool visible) {
-		mVisible = visible;
-
-		if (!mVisible) {
-			if (mConsole->isActive())
-				hideConsole();
-
-			setActive(false);
-		}
-
-	}
-
-
-	// -----------------------------------
-	bool GUIService::init() {
-		return true;
-	}
-
-	// -----------------------------------
-	void GUIService::bootstrapFinished() {
-		mInputSrv = GET_SERVICE(InputService);
-		mRenderSrv = GET_SERVICE(RenderService);
-		mDrawSrv = GET_SERVICE(DrawService);
-		mConfigSrv = GET_SERVICE(ConfigService);
-		mLoopSrv = GET_SERVICE(LoopService);
-
-        	assert(mRenderSrv->getSceneManager());
-
-		// handler for direct listener
-		mInputSrv->setDirectListener(this);
-
-		// Register as a listener for the resolution changes
-		RenderService::ListenerPtr renderServiceListener(new ClassCallback<RenderServiceMsg, GUIService>(this, &GUIService::onRenderServiceMsg));
-		mRenderServiceListenerID = mRenderSrv->registerListener(renderServiceListener);
-
-		InputService::ListenerPtr showConsoleListener(new ClassCallback<InputEventMsg, GUIService>(this, &GUIService::onShowConsole));
-
-		mInputSrv->registerCommandTrap("show_console", showConsoleListener);
-
-		mLoopSrv->addLoopClient(this);
-
-		// Core rendering sources
-		mConfigSrv->setParamDescription("console_font_name", "Font file name of the base console font used for debugging");
-		mConfigSrv->setParamDescription("console_font_group", "Resource group of the base console font");
-
-		DVariant tmp;
-		mConsoleFontName = "font.fon";
-
-		if (mConfigSrv->getParam("console_font_name", tmp)) {
-			mConsoleFontName = tmp.toString();
-		} else {
-			LOG_ERROR("console_font_name parameter not set, using default '%s'!", mConsoleFontName.c_str());
-		}
-
-		mConsoleFontGroup = "General";
-		if (mConfigSrv->getParam("console_font_group", tmp)) {
-			mConsoleFontGroup = tmp.toString();
-		} else {
-			LOG_ERROR("console_font_group parameter not set, using default '%s'!", mConsoleFontGroup.c_str());
-		}
-
-		// TODO: Do we need palette for the console font?
-		mCoreAtlas = mDrawSrv->createAtlas();
-		mDrawSrv->setFontPalette(ManualFonFileLoader::ePT_Default);
-		mConsoleFont = mDrawSrv->loadFont(mCoreAtlas, mConsoleFontName, mConsoleFontGroup);
-
-		// create the console.
-		mConsole = new ConsoleGUI(this);
-	}
-
-	// -----------------------------------
-	void GUIService::shutdown() {
-		if (!mInputSrv.isNull()) {
-			mInputSrv->unsetDirectListener();
-		}
-
-		if (!mRenderSrv.isNull())
-			mRenderSrv->unregisterListener(mRenderServiceListenerID);
-
-		mLoopSrv->removeLoopClient(this);
-
-		mInputSrv->unregisterCommandTrap("show_console");
-
-		delete mConsole;
-		mConsole = NULL;
-
-		mRenderSrv.setNull();
-		mInputSrv.setNull();
-		mDrawSrv.setNull();
-		mConfigSrv.setNull();
-		mLoopSrv.setNull();
-	}
-
-
-	// -----------------------------------
-    bool GUIService::keyPressed(const SDL_KeyboardEvent &e) {
-		if (mConsole && mConsole->isActive()) {
-			mConsole->injectKeyPress(e.keysym.sym);
-			return true;
-		} else {
-			// TODO: Inject into the focussed GUI object
-			return true;
-		}
-	}
-
-	// -----------------------------------
-    bool GUIService::keyReleased(const SDL_KeyboardEvent &e) {
-        return true;
+    if (active) {
+        mInputSrv->setInputMode(IM_DIRECT);
+    } else {
+        mInputSrv->setInputMode(IM_MAPPED);
     }
 
-	// -----------------------------------
-    bool GUIService::mouseMoved(const SDL_MouseMotionEvent &e) {
-        return true;
+    mActive = active;
+}
+
+// -----------------------------------
+void GUIService::setVisible(bool visible) {
+    mVisible = visible;
+
+    if (!mVisible) {
+        if (mConsole->isActive())
+            hideConsole();
+
+        setActive(false);
     }
 
-	// -----------------------------------
-    bool GUIService::mousePressed(const SDL_MouseButtonEvent &e) {
-        return true;
+}
+
+
+// -----------------------------------
+bool GUIService::init() {
+    return true;
+}
+
+// -----------------------------------
+void GUIService::bootstrapFinished() {
+    mInputSrv = GET_SERVICE(InputService);
+    mRenderSrv = GET_SERVICE(RenderService);
+    mDrawSrv = GET_SERVICE(DrawService);
+    mConfigSrv = GET_SERVICE(ConfigService);
+    mLoopSrv = GET_SERVICE(LoopService);
+
+    assert(mRenderSrv->getSceneManager());
+
+    // handler for direct listener
+    mInputSrv->setDirectListener(this);
+
+    // Register as a listener for the resolution changes
+    RenderService::ListenerPtr renderServiceListener(new ClassCallback<RenderServiceMsg, GUIService>(this, &GUIService::onRenderServiceMsg));
+    mRenderServiceListenerID = mRenderSrv->registerListener(renderServiceListener);
+
+    InputService::ListenerPtr showConsoleListener(new ClassCallback<InputEventMsg, GUIService>(this, &GUIService::onShowConsole));
+
+    mInputSrv->registerCommandTrap("show_console", showConsoleListener);
+
+    mLoopSrv->addLoopClient(this);
+
+    // Core rendering sources
+    mConfigSrv->setParamDescription("console_font_name", "Font file name of the base console font used for debugging");
+    mConfigSrv->setParamDescription("console_font_group", "Resource group of the base console font");
+
+    DVariant tmp;
+    mConsoleFontName = "font.fon";
+
+    if (mConfigSrv->getParam("console_font_name", tmp)) {
+        mConsoleFontName = tmp.toString();
+    } else {
+        LOG_ERROR("console_font_name parameter not set, using default '%s'!", mConsoleFontName.c_str());
     }
 
-	// -----------------------------------
-    bool GUIService::mouseReleased(const SDL_MouseButtonEvent &e) {
-        return true;
+    mConsoleFontGroup = "General";
+    if (mConfigSrv->getParam("console_font_group", tmp)) {
+        mConsoleFontGroup = tmp.toString();
+    } else {
+        LOG_ERROR("console_font_group parameter not set, using default '%s'!", mConsoleFontGroup.c_str());
     }
 
-	// -----------------------------------
-	void GUIService::onRenderServiceMsg(const RenderServiceMsg& message) {
-		// Inform the console about the resolution change
-		if (mConsole)
-			mConsole->resolutionChanged(message.size.width, message.size.height);
+    // TODO: Do we need palette for the console font?
+    mCoreAtlas = mDrawSrv->createAtlas();
+    mDrawSrv->setFontPalette(ManualFonFileLoader::ePT_Default);
+    mConsoleFont = mDrawSrv->loadFont(mCoreAtlas, mConsoleFontName, mConsoleFontGroup);
 
-		// TODO: Inform the GUI components as well?
-	}
+    // create the console.
+    mConsole = new ConsoleGUI(this);
+}
 
-	// -----------------------------------
-	void GUIService::onShowConsole(const InputEventMsg& iem) {
-		if (mConsole && mConsole->isActive()) {
-			hideConsole();
-		} else {
-			showConsole();
-		}
-	}
+// -----------------------------------
+void GUIService::shutdown() {
+    if (mInputSrv) {
+        mInputSrv->unsetDirectListener();
+    }
 
-	// -----------------------------------
-	void GUIService::showConsole() {
-		if (!mConsole)
-			return;
+    if (mRenderSrv)
+        mRenderSrv->unregisterListener(mRenderServiceListenerID);
 
-		// backup the previous situation
-		mCBActive = mActive;
-		mCBSheet = mDrawSrv->getActiveSheet();
-		mCBVisible = mVisible;
+    mLoopSrv->removeLoopClient(this);
 
-		// Activate the console
-		mConsole->setActive(true);
+    mInputSrv->unregisterCommandTrap("show_console");
 
-		// activate GUI
-		setActive(true);
-		setVisible(true);
-	}
+    delete mConsole;
+    mConsole = NULL;
+
+    mRenderSrv.reset();
+    mInputSrv.reset();
+    mDrawSrv.reset();
+    mConfigSrv.reset();
+    mLoopSrv.reset();
+}
 
 
-	// -----------------------------------
-	void GUIService::hideConsole() {
-		if (!mConsole)
-			return;
+// -----------------------------------
+bool GUIService::keyPressed(const SDL_KeyboardEvent &e) {
+    if (mConsole && mConsole->isActive()) {
+        mConsole->injectKeyPress(e.keysym.sym);
+        return true;
+    } else {
+        // TODO: Inject into the focussed GUI object
+        return true;
+    }
+}
 
-		mConsole->setActive(false);
+// -----------------------------------
+bool GUIService::keyReleased(const SDL_KeyboardEvent &e) {
+    return true;
+}
 
-		// restore the previous situation
-		mDrawSrv->setActiveSheet(mCBSheet);
-		setActive(mCBActive);
-		setVisible(mCBVisible);
-	}
+// -----------------------------------
+bool GUIService::mouseMoved(const SDL_MouseMotionEvent &e) {
+    return true;
+}
+
+// -----------------------------------
+bool GUIService::mousePressed(const SDL_MouseButtonEvent &e) {
+    return true;
+}
+
+// -----------------------------------
+bool GUIService::mouseReleased(const SDL_MouseButtonEvent &e) {
+    return true;
+}
+
+// -----------------------------------
+void GUIService::onRenderServiceMsg(const RenderServiceMsg& message) {
+    // Inform the console about the resolution change
+    if (mConsole)
+        mConsole->resolutionChanged(message.size.width, message.size.height);
+
+    // TODO: Inform the GUI components as well?
+}
+
+// -----------------------------------
+void GUIService::onShowConsole(const InputEventMsg& iem) {
+    if (mConsole && mConsole->isActive()) {
+        hideConsole();
+    } else {
+        showConsole();
+    }
+}
+
+// -----------------------------------
+void GUIService::showConsole() {
+    if (!mConsole)
+        return;
+
+    // backup the previous situation
+    mCBActive = mActive;
+    mCBSheet = mDrawSrv->getActiveSheet();
+    mCBVisible = mVisible;
+
+    // Activate the console
+    mConsole->setActive(true);
+
+    // activate GUI
+    setActive(true);
+    setVisible(true);
+}
 
 
-	// -----------------------------------
-	void GUIService::loopStep(float deltaTime) {
-		// hmm. console update here
-		if (mConsole)
-			mConsole->update(deltaTime * 1000);
-	}
+// -----------------------------------
+void GUIService::hideConsole() {
+    if (!mConsole)
+        return;
 
-	// -----------------------------------
-	FontDrawSourcePtr GUIService::getConsoleFont() const {
-		return mConsoleFont;
-	}
+    mConsole->setActive(false);
 
-
-	// -----------------------------------
-	TextureAtlasPtr GUIService::getCoreAtlas() const {
-		return mCoreAtlas;
-	}
+    // restore the previous situation
+    mDrawSrv->setActiveSheet(mCBSheet);
+    setActive(mCBActive);
+    setVisible(mCBVisible);
+}
 
 
-	//-------------------------- Factory implementation
-	std::string GUIServiceFactory::mName = "GUIService";
+// -----------------------------------
+void GUIService::loopStep(float deltaTime) {
+    // hmm. console update here
+    if (mConsole)
+        mConsole->update(deltaTime * 1000);
+}
 
-	GUIServiceFactory::GUIServiceFactory() : ServiceFactory() {
-	};
+// -----------------------------------
+FontDrawSourcePtr GUIService::getConsoleFont() const {
+    return mConsoleFont;
+}
 
-	const std::string& GUIServiceFactory::getName() {
-		return mName;
-	}
 
-	const uint GUIServiceFactory::getMask() {
-		return SERVICE_RENDERER;
-	}
+// -----------------------------------
+TextureAtlasPtr GUIService::getCoreAtlas() const {
+    return mCoreAtlas;
+}
 
-	const size_t GUIServiceFactory::getSID() {
-		return GUIService::SID;
-	}
 
-	Service* GUIServiceFactory::createInstance(ServiceManager* manager) {
-		return new GUIService(manager, mName);
-	}
+//-------------------------- Factory implementation
+std::string GUIServiceFactory::mName = "GUIService";
+
+GUIServiceFactory::GUIServiceFactory() : ServiceFactory() {
+};
+
+const std::string& GUIServiceFactory::getName() {
+    return mName;
+}
+
+const uint GUIServiceFactory::getMask() {
+    return SERVICE_RENDERER;
+}
+
+const size_t GUIServiceFactory::getSID() {
+    return GUIService::SID;
+}
+
+Service* GUIServiceFactory::createInstance(ServiceManager* manager) {
+    return new GUIService(manager, mName);
+}
 
 }

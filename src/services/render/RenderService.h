@@ -31,13 +31,13 @@
 #include "ServiceCommon.h"
 #include "OpdeServiceManager.h"
 #include "OpdeService.h"
-#include "PropertyService.h"
+#include "property/PropertyService.h"
 #include "SharedPtr.h"
 #include "ManualBinFileLoader.h"
 #include "DarkSceneManager.h"
 #include "MessageSource.h"
-#include "LoopService.h"
-#include "ObjectService.h"
+#include "loop/LoopService.h"
+#include "object/ObjectService.h"
 #include "EntityMaterialInstance.h"
 
 #include <SDL2/SDL.h>
