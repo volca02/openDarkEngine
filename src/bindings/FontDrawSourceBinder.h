@@ -25,8 +25,9 @@
 #ifndef __FONTDRAWSOURCEBINDER_H
 #define __FONTDRAWSOURCEBINDER_H
 
-#include "FontDrawSource.h"
 #include "bindings.h"
+
+#include "draw/FontDrawSource.h"
 
 namespace Opde {
 

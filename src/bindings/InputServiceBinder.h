@@ -27,8 +27,7 @@
 
 #include "bindings.h"
 
-#include "DTypeDef.h"
-#include "InputService.h"
+#include "input/InputService.h"
 
 namespace Opde {
 namespace Python {

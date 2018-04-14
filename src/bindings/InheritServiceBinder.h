@@ -27,7 +27,7 @@
 
 #include "bindings.h"
 
-#include "InheritService.h"
+#include "inherit/InheritService.h"
 
 namespace Opde {
 

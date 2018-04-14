@@ -27,10 +27,10 @@
 
 #include "bindings.h"
 
-#include "BinaryService.h"
 #include "DTypeDef.h"
-#include "LinkService.h"
-#include "Relation.h"
+#include "binary/BinaryService.h"
+#include "link/LinkService.h"
+#include "link/Relation.h"
 
 namespace Opde {
 

@@ -22,10 +22,12 @@
  *
  *****************************************************************************/
 
+#include "bindings.h"
+
 #include "DrawSheetBinder.h"
 #include "DrawServiceBinder.h"
-#include "DrawSheet.h"
-#include "bindings.h"
+
+#include "draw/DrawSheet.h"
 
 namespace Opde {
 

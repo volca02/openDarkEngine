@@ -26,7 +26,7 @@
 #define __DATAFIELDDESCITERATORBINDER_H
 
 #include "bindings.h"
-#include "InheritService.h"
+#include "inherit/InheritService.h"
 
 namespace Opde {
 

@@ -25,8 +25,9 @@
 #ifndef __OBJECTSERVICEBINDER_H
 #define __OBJECTSERVICEBINDER_H
 
-#include "ObjectService.h"
 #include "bindings.h"
+
+#include "object/ObjectService.h"
 
 namespace Opde {
 namespace Python {

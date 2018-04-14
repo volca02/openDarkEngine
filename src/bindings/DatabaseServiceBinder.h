@@ -27,7 +27,7 @@
 
 #include "bindings.h"
 
-#include "DatabaseService.h"
+#include "database/DatabaseService.h"
 
 namespace Opde {
 

@@ -27,8 +27,7 @@
 
 #include "bindings.h"
 
-#include "DTypeDef.h"
-#include "LoopService.h"
+#include "loop/LoopService.h"
 
 namespace Opde {
 namespace Python {

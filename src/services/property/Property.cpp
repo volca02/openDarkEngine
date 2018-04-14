@@ -87,19 +87,6 @@ void Property::shutdown() {
 }
 
 // --------------------------------------------------------------------------
-void Property::setPropertyStorage(const DataStoragePtr &newStorage) {
-    // see if we had any data in the current
-    if (!mPropertyStorage->isEmpty()) {
-        LOG_ERROR(
-            "Property storage replacement for %s: Previous property storage "
-            "had some data. This could mean something bad could happen...",
-            mName.c_str());
-    }
-
-    mPropertyStorage = newStorage;
-}
-
-// --------------------------------------------------------------------------
 void Property::load(const FileGroupPtr &db, const BitArray &objMask) {
     // Open the chunk specified by "P$" + mChunkName
     FilePtr fprop;

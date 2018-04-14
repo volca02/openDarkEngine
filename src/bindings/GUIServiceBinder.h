@@ -27,7 +27,7 @@
 
 #include "bindings.h"
 
-#include "GUIService.h"
+#include "gui/GUIService.h"
 
 namespace Opde {
 

@@ -25,8 +25,9 @@
 #ifndef __DRAWSOURCEBINDER_H
 #define __DRAWSOURCEBINDER_H
 
-#include "DrawCommon.h"
 #include "bindings.h"
+
+#include "draw/DrawCommon.h"
 
 namespace Opde {
 

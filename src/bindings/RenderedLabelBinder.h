@@ -25,8 +25,9 @@
 #ifndef __RENDEREDLABELBINDER_H
 #define __RENDEREDLABELBINDER_H
 
-#include "RenderedLabel.h"
 #include "bindings.h"
+
+#include "draw/RenderedLabel.h"
 
 namespace Opde {
 

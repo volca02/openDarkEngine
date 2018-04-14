@@ -1,5 +1,0 @@
-LIST(APPEND OPDE_SERVICE_SOURCES ${OPDE_SOURCE_DIR}/src/services/link/LinkService.cpp)
-LIST(APPEND OPDE_SERVICE_SOURCES ${OPDE_SOURCE_DIR}/src/services/link/Relation.cpp)
-LIST(APPEND OPDE_SERVICE_HEADERS ${OPDE_SOURCE_DIR}/src/services/link/LinkCommon.h)
-LIST(APPEND OPDE_SERVICE_HEADERS ${OPDE_SOURCE_DIR}/src/services/link/LinkService.h)
-LIST(APPEND OPDE_SERVICE_HEADERS ${OPDE_SOURCE_DIR}/src/services/link/Relation.h)

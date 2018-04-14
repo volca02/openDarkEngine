@@ -25,8 +25,9 @@
 #ifndef __TEXTUREATLASBINDER_H
 #define __TEXTUREATLASBINDER_H
 
-#include "TextureAtlas.h"
 #include "bindings.h"
+
+#include "draw/TextureAtlas.h"
 
 namespace Opde {
 

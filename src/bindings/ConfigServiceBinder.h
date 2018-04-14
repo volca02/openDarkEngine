@@ -27,7 +27,7 @@
 
 #include "bindings.h"
 
-#include "ConfigService.h"
+#include "config/ConfigService.h"
 
 
 namespace Opde {

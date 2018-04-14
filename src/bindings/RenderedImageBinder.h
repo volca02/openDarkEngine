@@ -25,8 +25,9 @@
 #ifndef __RENDEREDIMAGEBINDER_H
 #define __RENDEREDIMAGEBINDER_H
 
-#include "RenderedImage.h"
 #include "bindings.h"
+
+#include "draw/RenderedImage.h"
 
 namespace Opde {
 

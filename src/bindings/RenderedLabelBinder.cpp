@@ -25,8 +25,8 @@
 #include "RenderedLabelBinder.h"
 #include "DrawServiceBinder.h"
 #include "DrawSourceBinder.h"
-#include "RenderedLabel.h"
 #include "bindings.h"
+#include "draw/RenderedLabel.h"
 
 namespace Opde {
 

@@ -27,8 +27,7 @@
 
 #include "bindings.h"
 
-#include "BinaryService.h"
-#include "DrawService.h"
+#include "draw/DrawService.h"
 
 namespace Opde {
 

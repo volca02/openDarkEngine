@@ -25,8 +25,9 @@
 #ifndef __DRAWSHEETBINDER_H
 #define __DRAWSHEETBINDER_H
 
-#include "DrawSheet.h"
 #include "bindings.h"
+
+#include "draw/DrawSheet.h"
 
 namespace Opde {
 

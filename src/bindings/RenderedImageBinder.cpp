@@ -25,8 +25,8 @@
 #include "RenderedImageBinder.h"
 #include "DrawServiceBinder.h"
 #include "DrawSourceBinder.h"
-#include "RenderedImage.h"
 #include "bindings.h"
+#include "draw/RenderedImage.h"
 
 namespace Opde {
 

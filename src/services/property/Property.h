@@ -82,12 +82,6 @@ public:
     /// Gets the builtin flag
     inline bool getBuiltin() { return mBuiltin; };
 
-    /** Property storage setter
-     * @param newStorage The new storage for properties
-     * @warning This should not be used while the property holds some data
-     */
-    virtual void setPropertyStorage(const DataStoragePtr &newStorage);
-
     /// Name getter. Returns the name of this property
     const std::string &getName() { return mName; };
 

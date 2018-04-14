@@ -27,8 +27,7 @@
 
 #include "bindings.h"
 
-#include "DTypeDef.h"
-#include "PropertyService.h"
+#include "property/PropertyService.h"
 
 namespace Opde {
 namespace Python {

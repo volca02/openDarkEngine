@@ -1,5 +1,3 @@
-INCLUDE(${OPDE_SOURCE_DIR}/src/services/Services.cmake)
-
 include_directories(
     ${ODE_INCLUDE_DIR}
     ${OGRE_INCLUDE_DIR}
@@ -22,6 +20,7 @@ include_directories(
     ${OPDE_SOURCE_DIR}/src/main
     ${OPDE_SOURCE_DIR}/src/compat
     ${OPDE_SOURCE_DIR}/src/bindings
+    ${OPDE_SOURCE_DIR}/src/services
 )
 
 add_library(OpdePython OBJECT

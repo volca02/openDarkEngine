@@ -23,7 +23,6 @@
  *****************************************************************************/
 
 #include "DrawServiceBinder.h"
-#include "DrawSheet.h"
 #include "DrawSheetBinder.h"
 #include "DrawSourceBinder.h"
 #include "FontDrawSourceBinder.h"
@@ -31,6 +30,7 @@
 #include "RenderedLabelBinder.h"
 #include "TextureAtlasBinder.h"
 #include "bindings.h"
+#include "draw/DrawSheet.h"
 
 using Ogre::ManualFonFileLoader;
 
