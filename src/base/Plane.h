@@ -28,8 +28,7 @@
 #include <OgrePlane.h>
 
 namespace Opde {
-	typedef Ogre::Plane Plane;
+typedef Ogre::Plane Plane;
 }
 
 #endif
-

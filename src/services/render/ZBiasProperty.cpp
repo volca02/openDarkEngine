@@ -22,60 +22,61 @@
  *
  *****************************************************************************/
 
-#include "RenderService.h"
-#include "property/PropertyService.h"
-#include "SingleFieldDataStorage.h"
 #include "ZBiasProperty.h"
+#include "RenderService.h"
+#include "SingleFieldDataStorage.h"
+#include "property/PropertyService.h"
 
 namespace Opde {
-	/*--------------------------------------------------------*/
-	/*-------------------- RenderAlphaProperty ----------------*/
-	/*--------------------------------------------------------*/
-	ZBiasProperty::ZBiasProperty(RenderService* rs, PropertyService* owner) :
-			RenderedProperty(rs, owner, "RendererZBias", "Z-Bias", "always") {
+/*--------------------------------------------------------*/
+/*-------------------- RenderAlphaProperty ----------------*/
+/*--------------------------------------------------------*/
+ZBiasProperty::ZBiasProperty(RenderService *rs, PropertyService *owner)
+    : RenderedProperty(rs, owner, "RendererZBias", "Z-Bias", "always") {
 
-		mPropertyStorage = DataStoragePtr(new UIntDataStorage(NULL));
+    mPropertyStorage = DataStoragePtr(new UIntDataStorage(NULL));
 
-		setChunkVersions(2, 4);
+    setChunkVersions(2, 4);
 
-		mSceneMgr = rs->getSceneManager();
-	};
-
-	// --------------------------------------------------------------------------
-	ZBiasProperty::~ZBiasProperty(void) {
-	};
-
-	// --------------------------------------------------------------------------
-	void ZBiasProperty::addProperty(int oid) {
-		DVariant val;
-
-		if (!get(oid, "", val))
-			OPDE_EXCEPT("Property not defined for object.", "RenderAlphaProperty::addProperty");
-
-		setZBias(oid, val.toUInt());
-	};
-
-	// --------------------------------------------------------------------------
-	void ZBiasProperty::removeProperty(int oid) {
-		// reinit to 0 - no bias
-		setZBias(oid, 0);
-	};
-
-	// --------------------------------------------------------------------------
-	void ZBiasProperty::setPropertySource(int oid, int effid) {
-		// re-read the property
-		addProperty(oid);
-	};
-
-	// --------------------------------------------------------------------------
-	void ZBiasProperty::valueChanged(int oid, const std::string& field, const DVariant& value) {
-		// just call the setter
-		setZBias(oid, value.toUInt());
-	};
-
-	// --------------------------------------------------------------------------
-	void ZBiasProperty::setZBias(int oid, uint32_t bias) {
-		EntityInfo* ei = getEntityInfo(oid);
-		ei->setZBias(bias);
-	};
+    mSceneMgr = rs->getSceneManager();
 };
+
+// --------------------------------------------------------------------------
+ZBiasProperty::~ZBiasProperty(void){};
+
+// --------------------------------------------------------------------------
+void ZBiasProperty::addProperty(int oid) {
+    DVariant val;
+
+    if (!get(oid, "", val))
+        OPDE_EXCEPT("Property not defined for object.",
+                    "RenderAlphaProperty::addProperty");
+
+    setZBias(oid, val.toUInt());
+};
+
+// --------------------------------------------------------------------------
+void ZBiasProperty::removeProperty(int oid) {
+    // reinit to 0 - no bias
+    setZBias(oid, 0);
+};
+
+// --------------------------------------------------------------------------
+void ZBiasProperty::setPropertySource(int oid, int effid) {
+    // re-read the property
+    addProperty(oid);
+};
+
+// --------------------------------------------------------------------------
+void ZBiasProperty::valueChanged(int oid, const std::string &field,
+                                 const DVariant &value) {
+    // just call the setter
+    setZBias(oid, value.toUInt());
+};
+
+// --------------------------------------------------------------------------
+void ZBiasProperty::setZBias(int oid, uint32_t bias) {
+    EntityInfo *ei = getEntityInfo(oid);
+    ei->setZBias(bias);
+};
+}; // namespace Opde

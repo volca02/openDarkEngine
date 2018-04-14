@@ -22,8 +22,8 @@
  *****************************************************************************/
 
 #include "PlayerService.h"
-#include "logger.h"
 #include "ServiceCommon.h"
+#include "logger.h"
 
 using namespace std;
 using namespace Ogre;
@@ -36,24 +36,17 @@ namespace Opde {
 /*----------------------------------------------------*/
 /*-------------------- PlayerService -----------------*/
 /*----------------------------------------------------*/
-template<> const size_t ServiceImpl<PlayerService>::SID = __SERVICE_ID_PLAYER;
+template <> const size_t ServiceImpl<PlayerService>::SID = __SERVICE_ID_PLAYER;
 
-PlayerService::PlayerService(ServiceManager *manager, const std::string& name) :
-    ServiceImpl<PlayerService>(manager, name),
-    mForwardMovement(0.0f),
-    mSideMovement(0.0f),
-    mCreepOn(false) {
-
-}
+PlayerService::PlayerService(ServiceManager *manager, const std::string &name)
+    : ServiceImpl<PlayerService>(manager, name), mForwardMovement(0.0f),
+      mSideMovement(0.0f), mCreepOn(false) {}
 
 //------------------------------------------------------
-PlayerService::~PlayerService() {
-}
+PlayerService::~PlayerService() {}
 
 //------------------------------------------------------
-int PlayerService::getPlayerObject() {
-    return mPlayerObjID;
-}
+int PlayerService::getPlayerObject() { return mPlayerObjID; }
 
 //------------------------------------------------------
 void PlayerService::handleCameraAttachment(int objID) {
@@ -62,23 +55,28 @@ void PlayerService::handleCameraAttachment(int objID) {
 }
 
 //------------------------------------------------------
-bool PlayerService::init() {
-    return true;
-}
+bool PlayerService::init() { return true; }
 
 //------------------------------------------------------
 void PlayerService::bootstrapFinished() {
-    mObjSrv = GET_SERVICE(ObjectService); // what for?
-    mInputSrv = GET_SERVICE(InputService); // for input handling
-    mLinkSrv = GET_SERVICE(LinkService); // for playerfactory relation
+    mObjSrv = GET_SERVICE(ObjectService);   // what for?
+    mInputSrv = GET_SERVICE(InputService);  // for input handling
+    mLinkSrv = GET_SERVICE(LinkService);    // for playerfactory relation
     mPhysSrv = GET_SERVICE(PhysicsService); // for axis/velocity controls
-    mSimSrv = GET_SERVICE(SimService); // for input to physics updates
+    mSimSrv = GET_SERVICE(SimService);      // for input to physics updates
 
-    mPlayerFactoryRelation = mLinkSrv->createRelation("PlayerFactory", DataStoragePtr(NULL), false);
+    mPlayerFactoryRelation =
+        mLinkSrv->createRelation("PlayerFactory", DataStoragePtr(NULL), false);
 
-    InputService::ListenerPtr forwardListener(new ClassCallback<InputEventMsg, PlayerService>(this, &PlayerService::onInputForward));
-    InputService::ListenerPtr sidestepListener(new ClassCallback<InputEventMsg, PlayerService>(this, &PlayerService::onInputSidestep));
-    InputService::ListenerPtr creeponListener(new ClassCallback<InputEventMsg, PlayerService>(this, &PlayerService::onInputCreepOn));
+    InputService::ListenerPtr forwardListener(
+        new ClassCallback<InputEventMsg, PlayerService>(
+            this, &PlayerService::onInputForward));
+    InputService::ListenerPtr sidestepListener(
+        new ClassCallback<InputEventMsg, PlayerService>(
+            this, &PlayerService::onInputSidestep));
+    InputService::ListenerPtr creeponListener(
+        new ClassCallback<InputEventMsg, PlayerService>(
+            this, &PlayerService::onInputCreepOn));
 
     mInputSrv->registerCommandTrap("forward", forwardListener);
     mInputSrv->registerCommandTrap("sidestep", sidestepListener);
@@ -110,7 +108,8 @@ void PlayerService::bootstrapFinished() {
     mInputSrv->registerCommandAlias("look_up", "zlook 1.0");
     mInputSrv->registerCommandAlias("look_down", "zlook -1.0");
 
-    /* Input service commands handled here (* implemented, - not implemented yet):
+    /* Input service commands handled here (* implemented, - not implemented
+     yet):
      * forward
      * sidestep
      - zlook
@@ -152,18 +151,19 @@ void PlayerService::shutdown() {
 }
 
 //------------------------------------------------------
-void PlayerService::onInputForward(const InputEventMsg& msg) {
-    // TODO: Hmm. Original dark posts +value on keyon, -value on keyoff. This allows key combinations
+void PlayerService::onInputForward(const InputEventMsg &msg) {
+    // TODO: Hmm. Original dark posts +value on keyon, -value on keyoff. This
+    // allows key combinations
     mForwardMovement = msg.params.toFloat();
 }
 
 //------------------------------------------------------
-void PlayerService::onInputSidestep(const InputEventMsg& msg) {
+void PlayerService::onInputSidestep(const InputEventMsg &msg) {
     mSideMovement = msg.params.toFloat();
 }
 
 //------------------------------------------------------
-void PlayerService::onInputCreepOn(const InputEventMsg& msg) {
+void PlayerService::onInputCreepOn(const InputEventMsg &msg) {
     mCreepOn = msg.params.toBool();
 }
 
@@ -180,22 +180,22 @@ void PlayerService::simStep(float simTime, float delta) {
     // Control the objects velocity via phys axis controls
     /*
       if (forward != 0) {
-      mPhysSrv->startAxisVelocityControl(mPlayerObjID, PhysicsService::AXIS_X, forward * delta);
-      } else {
-      mPhysSrv->stopAxisVelocityControl(mPlayerObjID, PhysicsService::AXIS_X);
+      mPhysSrv->startAxisVelocityControl(mPlayerObjID, PhysicsService::AXIS_X,
+      forward * delta); } else { mPhysSrv->stopAxisVelocityControl(mPlayerObjID,
+      PhysicsService::AXIS_X);
       }
 
       if (sidestep != 0) {
-      mPhysSrv->startAxisVelocityControl(mPlayerObjID, PhysicsService::AXIS_Y, sidestep * delta);
-      } else {
+      mPhysSrv->startAxisVelocityControl(mPlayerObjID, PhysicsService::AXIS_Y,
+      sidestep * delta); } else {
       mPhysSrv->stopAxisVelocityControl(mPlayerObjID, PhysicsService::AXIS_Y);
       }
     */
 
     // take the current heading vector, apply the displacement
     // This is the current view direction...
-    // const Quaternion& ori = mPhysSrv->getSubModelOrientation(mPlayerObjID, PLAYER_HEAD_SUBMDL);
-
+    // const Quaternion& ori = mPhysSrv->getSubModelOrientation(mPlayerObjID,
+    // PLAYER_HEAD_SUBMDL);
 
     // mPhysSrv->set
 }
@@ -208,23 +208,16 @@ size_t PlayerService::getPlayerHeadSubModel(void) const {
 //-------------------------- Factory implementation
 std::string PlayerServiceFactory::mName = "PlayerService";
 
-PlayerServiceFactory::PlayerServiceFactory() : ServiceFactory() {
-};
+PlayerServiceFactory::PlayerServiceFactory() : ServiceFactory(){};
 
-const std::string& PlayerServiceFactory::getName() {
-    return mName;
-}
+const std::string &PlayerServiceFactory::getName() { return mName; }
 
-const uint PlayerServiceFactory::getMask() {
-    return SERVICE_ENGINE;
-}
+const uint PlayerServiceFactory::getMask() { return SERVICE_ENGINE; }
 
-const size_t PlayerServiceFactory::getSID() {
-    return PlayerService::SID;
-}
+const size_t PlayerServiceFactory::getSID() { return PlayerService::SID; }
 
-Service* PlayerServiceFactory::createInstance(ServiceManager* manager) {
+Service *PlayerServiceFactory::createInstance(ServiceManager *manager) {
     return new PlayerService(manager, mName);
 }
 
-}
+} // namespace Opde

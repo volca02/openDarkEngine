@@ -25,49 +25,49 @@
 #ifndef __RENDEREDLABELBINDER_H
 #define __RENDEREDLABELBINDER_H
 
-#include "bindings.h"
 #include "RenderedLabel.h"
+#include "bindings.h"
 
 namespace Opde {
 
-	namespace Python {
+namespace Python {
 
-		/// RenderedLabel python binder
-		class RenderedLabelBinder : public class_ptr_binder<RenderedLabel> {
-			// for msType handling
-			friend class DrawOperationBinder;
+/// RenderedLabel python binder
+class RenderedLabelBinder : public class_ptr_binder<RenderedLabel> {
+    // for msType handling
+    friend class DrawOperationBinder;
 
-			public:
-				static void init(PyObject* module);
+public:
+    static void init(PyObject *module);
 
-				// --- Python type related methods ---
-				/// to string - reprfunc conversion
-				static PyObject* repr(PyObject *self);
+    // --- Python type related methods ---
+    /// to string - reprfunc conversion
+    static PyObject *repr(PyObject *self);
 
-				/// helper class pointer extractor
-				static bool extract(PyObject *obj, RenderedLabel*& tgt);
+    /// helper class pointer extractor
+    static bool extract(PyObject *obj, RenderedLabel *&tgt);
 
-				// --- Methods ---
-				static PyObject* setLabel(PyObject *self, PyObject *args);
-				static PyObject* addText(PyObject *self, PyObject *args);
-				static PyObject* clearText(PyObject *self, PyObject *args);
+    // --- Methods ---
+    static PyObject *setLabel(PyObject *self, PyObject *args);
+    static PyObject *addText(PyObject *self, PyObject *args);
+    static PyObject *clearText(PyObject *self, PyObject *args);
 
-				static PyObject* create(RenderedLabel* ds);
+    static PyObject *create(RenderedLabel *ds);
 
-			protected:
-				/// Static type definition
-				static PyTypeObject msType;
+protected:
+    /// Static type definition
+    static PyTypeObject msType;
 
-				/// Name of the python type
-				static const char* msName;
+    /// Name of the python type
+    static const char *msName;
 
-				/// Method list
-				static PyMethodDef msMethods[];
+    /// Method list
+    static PyMethodDef msMethods[];
 
-				static TypeInfo<ClipRect> msRectTypeInfo;
-		};
+    static TypeInfo<ClipRect> msRectTypeInfo;
+};
 
-	}
-}
+} // namespace Python
+} // namespace Opde
 
 #endif

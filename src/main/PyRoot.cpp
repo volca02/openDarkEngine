@@ -24,6 +24,4 @@
 #include <Python.h>
 #include <bindings.h>
 
-PyMODINIT_FUNC initopde(void) {
-	Opde::PythonLanguage::initModule();
-}
+PyMODINIT_FUNC initopde(void) { Opde::PythonLanguage::initModule(); }

@@ -21,34 +21,31 @@
  *
  *****************************************************************************/
 
-
-#include "config.h"
 #include "bindings.h"
+#include "config.h"
 
 #include "GameStateManager.h"
 #include "OpdeException.h"
 
-
 #include <OgreException.h>
-
 
 using namespace Opde;
 
-int main(int argc, char**argv)
-{
-	std::string scriptName = "";
-	
-	if (argc >= 2)
-		scriptName = argv[1];
-	
-	if (scriptName != "") {
-		PythonLanguage::init(argc - 1, &argv[1]);
-		PythonLanguage::runScript(scriptName.c_str());
-		PythonLanguage::term();
-	} else {
-		std::cerr << "opdeScript: Script name epected as a parameter!" << std::endl;
-		return 1;
-	}
-	
-	return 0;
+int main(int argc, char **argv) {
+    std::string scriptName = "";
+
+    if (argc >= 2)
+        scriptName = argv[1];
+
+    if (scriptName != "") {
+        PythonLanguage::init(argc - 1, &argv[1]);
+        PythonLanguage::runScript(scriptName.c_str());
+        PythonLanguage::term();
+    } else {
+        std::cerr << "opdeScript: Script name epected as a parameter!"
+                  << std::endl;
+        return 1;
+    }
+
+    return 0;
 }

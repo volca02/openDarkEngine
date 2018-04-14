@@ -27,57 +27,59 @@
 #include "InheritService.h"
 
 namespace Opde {
-		/** Never Inheritor. This inheritor never inherits. Always uses only the existing self value for any object ID */
-		class NeverInheritor : public Inheritor {
-				public:
-					/// Constructor
-					NeverInheritor(const InheritorFactory* fac, InheritService* is);
+/** Never Inheritor. This inheritor never inherits. Always uses only the
+ * existing self value for any object ID */
+class NeverInheritor : public Inheritor {
+public:
+    /// Constructor
+    NeverInheritor(const InheritorFactory *fac, InheritService *is);
 
-					/// Destructor
-					~NeverInheritor();
+    /// Destructor
+    ~NeverInheritor();
 
-					/// @see Inheritor::setImplements
-					virtual void setImplements(int objID, bool impl);
+    /// @see Inheritor::setImplements
+    virtual void setImplements(int objID, bool impl);
 
-					/// @see Inheritor::getImplements
-					virtual bool getImplements(int objID) const;
+    /// @see Inheritor::getImplements
+    virtual bool getImplements(int objID) const;
 
-					/// @see Inheritor::getEffectiveID
-					virtual int getEffectiveID(int srcID) const;
+    /// @see Inheritor::getEffectiveID
+    virtual int getEffectiveID(int srcID) const;
 
-					/// @see Inheritor::validate
-                    virtual bool validate(int srcID, int dstID, unsigned int priority) const;
+    /// @see Inheritor::validate
+    virtual bool validate(int srcID, int dstID, unsigned int priority) const;
 
-					/// @see Inheritor::valueChanged
-					virtual void valueChanged(int objID, const std::string& field, const DVariant& value);
+    /// @see Inheritor::valueChanged
+    virtual void valueChanged(int objID, const std::string &field,
+                              const DVariant &value);
 
-					/// @see Inheritor::clear
-                    virtual void clear();
+    /// @see Inheritor::clear
+    virtual void clear();
 
-				protected:
-					/// InheritService reference
-					InheritService* mInheritService;
+protected:
+    /// InheritService reference
+    InheritService *mInheritService;
 
- 					/// Map of implementing object IDs - id->true means object implements the inherited property
-					typedef std::map <int, bool> ImplementsMap;
+    /// Map of implementing object IDs - id->true means object implements the
+    /// inherited property
+    typedef std::map<int, bool> ImplementsMap;
 
-					ImplementsMap mImplements;
-			};
+    ImplementsMap mImplements;
+};
 
+/** Never inheritor factory. The inheritor produced is named "never" and will,
+ * as the name suggests, never inherit. */
+class NeverInheritorFactory : public InheritorFactory {
+public:
+    NeverInheritorFactory();
 
-        /** Never inheritor factory. The inheritor produced is named "never" and will, as the name suggests,
-         * never inherit. */
-		class NeverInheritorFactory : public InheritorFactory {
-				public:
-					NeverInheritorFactory();
+    virtual std::string getName() const;
 
-					virtual std::string getName() const;
+    Inheritor *createInstance(InheritService *is) const;
 
-					Inheritor* createInstance(InheritService* is) const;
-
-                protected:
-                    static std::string mName;
-			};
-	}
+protected:
+    static std::string mName;
+};
+} // namespace Opde
 
 #endif

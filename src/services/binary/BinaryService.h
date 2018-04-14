@@ -28,112 +28,123 @@
 #include "config.h"
 
 #include "ConsoleCommandListener.h"
-#include "OpdeServiceManager.h"
-#include "OpdeService.h"
 #include "DTypeDef.h"
+#include "OpdeService.h"
+#include "OpdeServiceManager.h"
 #include "SharedPtr.h"
 
 #define BINARY_GROUP_SEPARATOR '/'
 namespace Opde {
 
-	/** @brief Binary service - a catalogue of binary structure definitions.
-	*
-	* This service is responsible for storing the definitions of the dynamic binary templates.
-	*/
-	class OPDELIB_EXPORT BinaryService : public ServiceImpl<BinaryService>, public ConsoleCommandListener {
-		public:
-			/** Initializes the Service */
-			BinaryService(ServiceManager* manager, const std::string& name);
+/** @brief Binary service - a catalogue of binary structure definitions.
+ *
+ * This service is responsible for storing the definitions of the dynamic binary
+ * templates.
+ */
+class OPDELIB_EXPORT BinaryService : public ServiceImpl<BinaryService>,
+                                     public ConsoleCommandListener {
+public:
+    /** Initializes the Service */
+    BinaryService(ServiceManager *manager, const std::string &name);
 
-			/** Destructs the BinaryService instance, and unallocates the data, if any. */
-			virtual ~BinaryService();
+    /** Destructs the BinaryService instance, and unallocates the data, if any.
+     */
+    virtual ~BinaryService();
 
-			/** Add a type definition to a certain group (or global, if group=="")
-			* @param def The type definition to insert (the used name is taken from it)
-			* @note Do release() the def if you do not intend to further use it once registered here
-			*/
-			void addType(const std::string& group, const DTypeDefPtr& def);
+    /** Add a type definition to a certain group (or global, if group=="")
+     * @param def The type definition to insert (the used name is taken from it)
+     * @note Do release() the def if you do not intend to further use it once
+     * registered here
+     */
+    void addType(const std::string &group, const DTypeDefPtr &def);
 
-			/** Add a enumeration definition to a certain group (or global, if group=="") */
-			void addEnum(const std::string& group, const std::string& name, const DEnumPtr& enm);
+    /** Add a enumeration definition to a certain group (or global, if
+     * group=="") */
+    void addEnum(const std::string &group, const std::string &name,
+                 const DEnumPtr &enm);
 
-			/** Add a type definition to the global definitions
-			* @param def The type definition to insert (the used name is taken from it)
-			* @see addType(const std::string&,DTypeDef)
-			*/
-			inline void addType(const DTypeDefPtr& def) { addType("", def); };
+    /** Add a type definition to the global definitions
+     * @param def The type definition to insert (the used name is taken from it)
+     * @see addType(const std::string&,DTypeDef)
+     */
+    inline void addType(const DTypeDefPtr &def) { addType("", def); };
 
-			/** Add a type definition to the global definitions */
-			inline void addEnum(const std::string& name, const DEnumPtr& enm) { addEnum("", name, enm); };
+    /** Add a type definition to the global definitions */
+    inline void addEnum(const std::string &name, const DEnumPtr &enm) {
+        addEnum("", name, enm);
+    };
 
-			/** get the type definition of a type.
-			* @param name The type name, in form "Name" or "Group/Name"
-			* @note You have to release the typedef once you stop using it
-			* @throw BasicException if path contains multiple separators */
-			DTypeDefPtr getType(const std::string& name) const;
+    /** get the type definition of a type.
+     * @param name The type name, in form "Name" or "Group/Name"
+     * @note You have to release the typedef once you stop using it
+     * @throw BasicException if path contains multiple separators */
+    DTypeDefPtr getType(const std::string &name) const;
 
-			/** get the type definition of a type.
-			* @param name The type name
-			* @note You have to release the typedef once you stop using it */
-			DTypeDefPtr getType(const std::string& group, const std::string& name) const;
+    /** get the type definition of a type.
+     * @param name The type name
+     * @note You have to release the typedef once you stop using it */
+    DTypeDefPtr getType(const std::string &group,
+                        const std::string &name) const;
 
-			/** get the type definition of a type.
-			* @param name The enum name, in form "Name" or "Group/Name"
-			* @note You have to release the typedef once you stop using it */
-			DEnumPtr getEnum(const std::string& name) const;
+    /** get the type definition of a type.
+     * @param name The enum name, in form "Name" or "Group/Name"
+     * @note You have to release the typedef once you stop using it */
+    DEnumPtr getEnum(const std::string &name) const;
 
-			/** get the type definition of a type.
-			* @param name The enum name
-			* @note You have to release the typedef once you stop using it */
-			DEnumPtr getEnum(const std::string& group, const std::string& name) const;
+    /** get the type definition of a type.
+     * @param name The enum name
+     * @note You have to release the typedef once you stop using it */
+    DEnumPtr getEnum(const std::string &group, const std::string &name) const;
 
-			/** clear the definitions, leaving groups empty */
-			void clear();
+    /** clear the definitions, leaving groups empty */
+    void clear();
 
-			/** clear all the definitions and groups */
-			void clearAll();
+    /** clear all the definitions and groups */
+    void clearAll();
 
-			virtual void commandExecuted(std::string command, std::string parameters);
+    virtual void commandExecuted(std::string command, std::string parameters);
 
-		protected:
-            bool init();
+protected:
+    bool init();
 
-			/** Split the path to groups - name
-			* @note if not possible(no path separator), the first is "" and second the source string
-			* @throw BasicException if more than one separator is present */
-			std::pair<std::string, std::string> splitPath(const std::string& path) const;
+    /** Split the path to groups - name
+     * @note if not possible(no path separator), the first is "" and second the
+     * source string
+     * @throw BasicException if more than one separator is present */
+    std::pair<std::string, std::string>
+    splitPath(const std::string &path) const;
 
-			typedef std::map<std::string, DTypeDefPtr> TypeMap;
-			typedef std::map<std::string, TypeMap> TypeGroups;
+    typedef std::map<std::string, DTypeDefPtr> TypeMap;
+    typedef std::map<std::string, TypeMap> TypeGroups;
 
-			typedef std::map<std::string, DEnumPtr> EnumMap;
-			typedef std::map<std::string, EnumMap> EnumGroups;
+    typedef std::map<std::string, DEnumPtr> EnumMap;
+    typedef std::map<std::string, EnumMap> EnumGroups;
 
-			TypeGroups mTypeGroups;
-			EnumGroups mEnumGroups;
-	};
+    TypeGroups mTypeGroups;
+    EnumGroups mEnumGroups;
+};
 
-	/// Shared pointer to binary service
-	typedef shared_ptr<BinaryService> BinaryServicePtr;
+/// Shared pointer to binary service
+typedef shared_ptr<BinaryService> BinaryServicePtr;
 
-	/// Factory for the binary service
-	class OPDELIB_EXPORT BinaryServiceFactory : public ServiceFactory {
-		public:
-			BinaryServiceFactory();
-			~BinaryServiceFactory() {};
+/// Factory for the binary service
+class OPDELIB_EXPORT BinaryServiceFactory : public ServiceFactory {
+public:
+    BinaryServiceFactory();
+    ~BinaryServiceFactory(){};
 
-			/** Creates a BinaryService instance */
-			Service* createInstance(ServiceManager* manager);
+    /** Creates a BinaryService instance */
+    Service *createInstance(ServiceManager *manager);
 
-			virtual const std::string& getName();
+    virtual const std::string &getName();
 
-			virtual const uint getMask();
+    virtual const uint getMask();
 
-			virtual const size_t getSID();
-		private:
-			static std::string mName;
-	};
-}
+    virtual const size_t getSID();
 
+private:
+    static std::string mName;
+};
+} // namespace Opde
 
 #endif

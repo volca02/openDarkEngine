@@ -26,73 +26,75 @@
 
 #include "config.h"
 
-#include <map>
-#include "SharedPtr.h"
 #include "Callback.h"
+#include "SharedPtr.h"
+#include <map>
 
 namespace Opde {
 
-    /** Prioritized Message Source - a message source doing callbacks in a deterministic order
-    * M stands for the message type sent
-    */
-    template <typename M> class PrioritizedMessageSource {
-		public:
-            //virtual ~PrioritizedMessageSource() {};
-		
-			typedef int Priority;
+/** Prioritized Message Source - a message source doing callbacks in a
+ * deterministic order M stands for the message type sent
+ */
+template <typename M> class PrioritizedMessageSource {
+public:
+    // virtual ~PrioritizedMessageSource() {};
 
-			typedef Callback< M > Listener;
-			typedef shared_ptr< Listener >  ListenerPtr;
+    typedef int Priority;
 
-		protected:
-		    /// A set of listeners
-			typedef typename std::multimap< int, ListenerPtr > Listeners;
+    typedef Callback<M> Listener;
+    typedef shared_ptr<Listener> ListenerPtr;
 
-			/// Listeners for the link changes
-			Listeners mListeners;
+protected:
+    /// A set of listeners
+    typedef typename std::multimap<int, ListenerPtr> Listeners;
 
-			/// Sends a message to all listeners
-			virtual void broadcastMessage(const M& msg) {
-				typename Listeners::iterator it = mListeners.begin();
+    /// Listeners for the link changes
+    Listeners mListeners;
 
-				for (; it != mListeners.end(); ++it) {
-					// Use the callback functor to fire the callback
-					(*it->second)(msg);
-				}
-			}
+    /// Sends a message to all listeners
+    virtual void broadcastMessage(const M &msg) {
+        typename Listeners::iterator it = mListeners.begin();
 
-		public:
-			PrioritizedMessageSource() {};
-			virtual ~PrioritizedMessageSource() { mListeners.clear(); };
+        for (; it != mListeners.end(); ++it) {
+            // Use the callback functor to fire the callback
+            (*it->second)(msg);
+        }
+    }
 
-			/** Registers a listener.
-			* @param listener A pointer to L
-			* @note The same pointer has to be supplied to the unregisterListener in order to succeed with unregistration
-			*/
-			void registerListener(const ListenerPtr& listener, Priority priority) {
-				mListeners.insert(std::make_pair(priority, listener));
-			}
+public:
+    PrioritizedMessageSource(){};
+    virtual ~PrioritizedMessageSource() { mListeners.clear(); };
 
-			/** Unregisters a listener.
-			* @param listener ID returned by the registerListener call
-			* @note The pointer has to be the same as the one supplied to the registerListener
-			*/
-			void unregisterListener(const ListenerPtr& listener) {
-				// If priority was a member of Callback, then this would be find(prio);
-				typename Listeners::iterator it = mListeners.begin();
+    /** Registers a listener.
+     * @param listener A pointer to L
+     * @note The same pointer has to be supplied to the unregisterListener in
+     * order to succeed with unregistration
+     */
+    void registerListener(const ListenerPtr &listener, Priority priority) {
+        mListeners.insert(std::make_pair(priority, listener));
+    }
 
-				while (it != mListeners.end()) {
+    /** Unregisters a listener.
+     * @param listener ID returned by the registerListener call
+     * @note The pointer has to be the same as the one supplied to the
+     * registerListener
+     */
+    void unregisterListener(const ListenerPtr &listener) {
+        // If priority was a member of Callback, then this would be find(prio);
+        typename Listeners::iterator it = mListeners.begin();
 
-					if (it->second == listener) {
-						typename Listeners::iterator rem = it++;
-						mListeners.erase(rem);
-					} else {
-						it++;
-					}
-				}
-			}
-	};
+        while (it != mListeners.end()) {
 
-}
+            if (it->second == listener) {
+                typename Listeners::iterator rem = it++;
+                mListeners.erase(rem);
+            } else {
+                it++;
+            }
+        }
+    }
+};
+
+} // namespace Opde
 
 #endif

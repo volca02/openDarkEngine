@@ -25,48 +25,48 @@
 #ifndef __DRAWSHEETBINDER_H
 #define __DRAWSHEETBINDER_H
 
-#include "bindings.h"
 #include "DrawSheet.h"
+#include "bindings.h"
 
 namespace Opde {
 
-	namespace Python {
+namespace Python {
 
-		/// DrawSheet python binder
-		class DrawSheetBinder : public shared_ptr_binder<DrawSheetPtr> {
-			public:
-				static void init(PyObject* module);
+/// DrawSheet python binder
+class DrawSheetBinder : public shared_ptr_binder<DrawSheetPtr> {
+public:
+    static void init(PyObject *module);
 
-				// --- Python type related methods ---
-				/// to string - reprfunc conversion
-				static PyObject* repr(PyObject *self);
+    // --- Python type related methods ---
+    /// to string - reprfunc conversion
+    static PyObject *repr(PyObject *self);
 
-				/// helper class pointer extractor
-				static bool extract(PyObject *object, DrawSheetPtr& sheet);
+    /// helper class pointer extractor
+    static bool extract(PyObject *object, DrawSheetPtr &sheet);
 
-				// --- Methods ---
-				static PyObject* activate(PyObject* self, PyObject* args);
-				static PyObject* deactivate(PyObject* self, PyObject* args);
-				static PyObject* addDrawOperation(PyObject* self, PyObject* args);
-				static PyObject* removeDrawOperation(PyObject* self, PyObject* args);
-				static PyObject* purge(PyObject* self, PyObject* args);
-				static PyObject* setResolutionOverride(PyObject* self, PyObject* args);
-				static PyObject* getClipRect(PyObject* self, PyObject* args);
+    // --- Methods ---
+    static PyObject *activate(PyObject *self, PyObject *args);
+    static PyObject *deactivate(PyObject *self, PyObject *args);
+    static PyObject *addDrawOperation(PyObject *self, PyObject *args);
+    static PyObject *removeDrawOperation(PyObject *self, PyObject *args);
+    static PyObject *purge(PyObject *self, PyObject *args);
+    static PyObject *setResolutionOverride(PyObject *self, PyObject *args);
+    static PyObject *getClipRect(PyObject *self, PyObject *args);
 
-				static PyObject* create(const DrawSheetPtr& ds);
+    static PyObject *create(const DrawSheetPtr &ds);
 
-			protected:
-				/// Static type definition
-				static PyTypeObject msType;
+protected:
+    /// Static type definition
+    static PyTypeObject msType;
 
-				/// Name of the python type
-				static const char* msName;
+    /// Name of the python type
+    static const char *msName;
 
-				/// Method list
-				static PyMethodDef msMethods[];
-		};
+    /// Method list
+    static PyMethodDef msMethods[];
+};
 
-	}
-}
+} // namespace Python
+} // namespace Opde
 
 #endif

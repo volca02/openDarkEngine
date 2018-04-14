@@ -25,51 +25,53 @@
 #ifndef __RELATIONBINDER_H
 #define __RELATIONBINDER_H
 
-#include  "DTypeDef.h"
-#include  "BinaryService.h"
-#include  "LinkService.h"
-#include  "Relation.h"
+#include "bindings.h"
+
+#include "BinaryService.h"
+#include "DTypeDef.h"
+#include "LinkService.h"
+#include "Relation.h"
 
 namespace Opde {
 
-	namespace Python {
+namespace Python {
 
-		/// Link relation python binder
-		class RelationBinder : public shared_ptr_binder<RelationPtr> {
-			public:
-				static void init(PyObject* module);
+/// Link relation python binder
+class RelationBinder : public shared_ptr_binder<RelationPtr> {
+public:
+    static void init(PyObject *module);
 
-				// --- Python type related methods ---
-				/// to string - reprfunc conversion
-				static PyObject* repr(PyObject *self);
+    // --- Python type related methods ---
+    /// to string - reprfunc conversion
+    static PyObject *repr(PyObject *self);
 
-				/// creates a python object representation of the relation
-				static PyObject* create(const RelationPtr& relation);
+    /// creates a python object representation of the relation
+    static PyObject *create(const RelationPtr &relation);
 
-				// --- Methods ---
-				static PyObject* getID(PyObject* self, PyObject* args);
-				static PyObject* getName(PyObject* self, PyObject* args);
-				static PyObject* remove(PyObject* self, PyObject* args);
-				static PyObject* createLink(PyObject* self, PyObject* args);
-				static PyObject* getLinkField(PyObject* self, PyObject* args);
-				static PyObject* setLinkField(PyObject* self, PyObject* args);
+    // --- Methods ---
+    static PyObject *getID(PyObject *self, PyObject *args);
+    static PyObject *getName(PyObject *self, PyObject *args);
+    static PyObject *remove(PyObject *self, PyObject *args);
+    static PyObject *createLink(PyObject *self, PyObject *args);
+    static PyObject *getLinkField(PyObject *self, PyObject *args);
+    static PyObject *setLinkField(PyObject *self, PyObject *args);
 
-				static PyObject* getAllLinks(PyObject* self, PyObject* args);
-				static PyObject* getOneLink(PyObject* self, PyObject* args);
+    static PyObject *getAllLinks(PyObject *self, PyObject *args);
+    static PyObject *getOneLink(PyObject *self, PyObject *args);
 
-				static PyObject* getFieldsDesc(PyObject* self, PyObject* args);
+    static PyObject *getFieldsDesc(PyObject *self, PyObject *args);
 
-			protected:
-				/// Static type definition for LinkService
-				static PyTypeObject msType;
+protected:
+    /// Static type definition for LinkService
+    static PyTypeObject msType;
 
-				/// Name of the python type
-				static const char* msName;
+    /// Name of the python type
+    static const char *msName;
 
-				/// Method list
-				static PyMethodDef msMethods[];
-		};
-	}
-}
+    /// Method list
+    static PyMethodDef msMethods[];
+};
+} // namespace Python
+} // namespace Opde
 
 #endif

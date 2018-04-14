@@ -21,59 +21,58 @@
  *
  *****************************************************************************/
 
-
 #ifndef __GAMESERVICE_H
 #define __GAMESERVICE_H
 
 #include "config.h"
 
-#include "OpdeServiceManager.h"
-#include "OpdeService.h"
-#include "database/DatabaseService.h"
 #include "FileGroup.h"
+#include "OpdeService.h"
+#include "OpdeServiceManager.h"
 #include "SharedPtr.h"
+#include "database/DatabaseService.h"
 
 namespace Opde {
 
-	/** @brief Game service - service defining game states (Temporary code. Will be filled with a high level state management - screens)
-	* @todo Deprecate this or put it to a good use. Decide the fate...
-	*/
-	class OPDELIB_EXPORT GameService : public ServiceImpl<GameService> {
-		public:
-			GameService(ServiceManager *manager, const std::string& name);
-			virtual ~GameService();
+/** @brief Game service - service defining game states (Temporary code. Will be
+ * filled with a high level state management - screens)
+ * @todo Deprecate this or put it to a good use. Decide the fate...
+ */
+class OPDELIB_EXPORT GameService : public ServiceImpl<GameService> {
+public:
+    GameService(ServiceManager *manager, const std::string &name);
+    virtual ~GameService();
 
-			/// Loads a game database using the database service
-			void load(const std::string& filename);
+    /// Loads a game database using the database service
+    void load(const std::string &filename);
 
-		protected:
-			bool init();
+protected:
+    bool init();
 
-			DatabaseServicePtr mDbService;
-	};
+    DatabaseServicePtr mDbService;
+};
 
-	/// Shared pointer to game service
-	typedef shared_ptr<GameService> GameServicePtr;
+/// Shared pointer to game service
+typedef shared_ptr<GameService> GameServicePtr;
 
+/// Factory for the GameService objects
+class OPDELIB_EXPORT GameServiceFactory : public ServiceFactory {
+public:
+    GameServiceFactory();
+    ~GameServiceFactory(){};
 
-	/// Factory for the GameService objects
-	class OPDELIB_EXPORT GameServiceFactory : public ServiceFactory {
-		public:
-			GameServiceFactory();
-			~GameServiceFactory() {};
+    /** Creates a GameService instance */
+    Service *createInstance(ServiceManager *manager);
 
-			/** Creates a GameService instance */
-			Service* createInstance(ServiceManager* manager);
+    virtual const std::string &getName();
 
-			virtual const std::string& getName();
+    virtual const uint getMask();
 
-			virtual const uint getMask();
+    virtual const size_t getSID();
 
-			virtual const size_t getSID();
-		private:
-			static std::string mName;
-	};
-}
-
+private:
+    static std::string mName;
+};
+} // namespace Opde
 
 #endif

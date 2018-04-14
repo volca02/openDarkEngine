@@ -25,41 +25,43 @@
 #ifndef __DTYPEBINDER_H
 #define __DTYPEBINDER_H
 
-#include  "DTypeDef.h"
+#include "bindings.h"
+
+#include "DTypeDef.h"
 
 namespace Opde {
 
-	namespace Python {
+namespace Python {
 
-		/// DType python binder
-		class DTypeBinder : public shared_ptr_binder<DTypePtr> {
-			public:
-				// --- Python type related methods ---
-				static PyObject* create(const DTypePtr& type);
+/// DType python binder
+class DTypeBinder : public shared_ptr_binder<DTypePtr> {
+public:
+    // --- Python type related methods ---
+    static PyObject *create(const DTypePtr &type);
 
-				/// Extracts a DTypePtr from the PyObject*, checking type
-				static bool extract(PyObject* object, DTypePtr& target);
+    /// Extracts a DTypePtr from the PyObject*, checking type
+    static bool extract(PyObject *object, DTypePtr &target);
 
-				// --- Methods ---
-				/// setter for values
-				static PyObject* set(PyObject* self, PyObject* args);
-				/// getter for values
-				static PyObject* get(PyObject* self, PyObject* args);
+    // --- Methods ---
+    /// setter for values
+    static PyObject *set(PyObject *self, PyObject *args);
+    /// getter for values
+    static PyObject *get(PyObject *self, PyObject *args);
 
-				/// Initializes the type - exposes it in the module
-				static void init(PyObject* module);
+    /// Initializes the type - exposes it in the module
+    static void init(PyObject *module);
 
-			protected:
-				/// Static type definition for LinkService
-				static PyTypeObject msType;
+protected:
+    /// Static type definition for LinkService
+    static PyTypeObject msType;
 
-				/// Name of the python type
-				static const char* msName;
+    /// Name of the python type
+    static const char *msName;
 
-				/// Method list
-				static PyMethodDef msMethods[];
-		};
-	}
-}
+    /// Method list
+    static PyMethodDef msMethods[];
+};
+} // namespace Python
+} // namespace Opde
 
 #endif

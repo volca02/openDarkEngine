@@ -25,45 +25,44 @@
 #ifndef __TEXTUREATLASBINDER_H
 #define __TEXTUREATLASBINDER_H
 
-#include "bindings.h"
 #include "TextureAtlas.h"
+#include "bindings.h"
 
 namespace Opde {
 
-	namespace Python {
+namespace Python {
 
-		/// TextureAtlas python binder
-		class TextureAtlasBinder : public shared_ptr_binder<TextureAtlasPtr> {
-			public:
-				static void init(PyObject* module);
+/// TextureAtlas python binder
+class TextureAtlasBinder : public shared_ptr_binder<TextureAtlasPtr> {
+public:
+    static void init(PyObject *module);
 
-				// --- Python type related methods ---
+    // --- Python type related methods ---
 
-				/// to string - reprfunc conversion
-				static PyObject* repr(PyObject *self);
+    /// to string - reprfunc conversion
+    static PyObject *repr(PyObject *self);
 
-				/// helper class pointer extractor
-				static bool extract(PyObject *obj, TextureAtlasPtr& tgt);
+    /// helper class pointer extractor
+    static bool extract(PyObject *obj, TextureAtlasPtr &tgt);
 
-				// methods:
-				static PyObject *createDrawSource(PyObject *self, PyObject *args);
-				static PyObject *getAtlasID(PyObject *self, PyObject *args);
+    // methods:
+    static PyObject *createDrawSource(PyObject *self, PyObject *args);
+    static PyObject *getAtlasID(PyObject *self, PyObject *args);
 
+    static PyObject *create(const TextureAtlasPtr &ds);
 
-				static PyObject* create(const TextureAtlasPtr& ds);
+protected:
+    /// Static type definition
+    static PyTypeObject msType;
 
-			protected:
-				/// Static type definition
-				static PyTypeObject msType;
+    /// Name of the python type
+    static const char *msName;
 
-				/// Name of the python type
-				static const char* msName;
+    /// Method list
+    static PyMethodDef msMethods[];
+};
 
-				/// Method list
-				static PyMethodDef msMethods[];
-		};
-
-	}
-}
+} // namespace Python
+} // namespace Opde
 
 #endif

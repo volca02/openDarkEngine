@@ -22,16 +22,16 @@
  *
  *****************************************************************************/
 
-#include "config.h"
-#include "ServiceCommon.h"
 #include "ObjectService.h"
+#include "ServiceCommon.h"
+#include "config.h"
 #include "config/ConfigService.h"
 #include "logger.h"
 
 #include "render/RenderService.h"
 
-#include <OgreStringConverter.h>
 #include <OgreMath.h>
+#include <OgreStringConverter.h>
 
 using namespace std;
 using namespace Ogre;
@@ -40,22 +40,17 @@ namespace Opde {
 /*------------------------------------------------------*/
 /*-------------------- ObjectService -------------------*/
 /*------------------------------------------------------*/
-template<> const size_t ServiceImpl<ObjectService>::SID = __SERVICE_ID_OBJECT;
+template <> const size_t ServiceImpl<ObjectService>::SID = __SERVICE_ID_OBJECT;
 
-ObjectService::ObjectService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::ObjectService >(manager, name),
-    mAllocatedObjects(),
-    mDatabaseService(NULL),
-    mObjVecVerMaj(0), // Seems to be the same for all versions
-    mObjVecVerMin(2),
-    mSceneMgr(NULL),
-    mSymNameStorage(NULL),
-    mPositionStorage(NULL) {
-}
+ObjectService::ObjectService(ServiceManager *manager, const std::string &name)
+    : ServiceImpl<Opde::ObjectService>(manager, name), mAllocatedObjects(),
+      mDatabaseService(NULL),
+      mObjVecVerMaj(0), // Seems to be the same for all versions
+      mObjVecVerMin(2), mSceneMgr(NULL), mSymNameStorage(NULL),
+      mPositionStorage(NULL) {}
 
 //------------------------------------------------------
-ObjectService::~ObjectService() {
-}
-
+ObjectService::~ObjectService() {}
 
 //------------------------------------------------------
 int ObjectService::create(int archetype) {
@@ -77,15 +72,10 @@ int ObjectService::beginCreate(int archetype) {
 }
 
 //------------------------------------------------------
-void ObjectService::endCreate(int objID) {
-    _endCreateObject(objID);
-}
+void ObjectService::endCreate(int objID) { _endCreateObject(objID); }
 
 //------------------------------------------------------
-bool ObjectService::exists(int objID) {
-    return mAllocatedObjects[objID];
-}
-
+bool ObjectService::exists(int objID) { return mAllocatedObjects[objID]; }
 
 //------------------------------------------------------
 Vector3 ObjectService::position(int objID) {
@@ -105,7 +95,6 @@ Quaternion ObjectService::orientation(int objID) {
         return res.toQuaternion();
     } else
         return Quaternion::IDENTITY;
-
 }
 
 //------------------------------------------------------
@@ -119,12 +108,14 @@ std::string ObjectService::getName(int objID) {
 }
 
 //------------------------------------------------------
-void ObjectService::setName(int objID, const std::string& name) {
+void ObjectService::setName(int objID, const std::string &name) {
     // First look if the name is used
     int prevusage = named(name);
 
     if (mSymNameStorage->nameUsed(name) != 0 && prevusage != objID) {
-        LOG_ERROR("ObjectService::setName: Tried to set name '%s' to object %d which was alredy used by object %d", name.c_str(), objID, prevusage);
+        LOG_ERROR("ObjectService::setName: Tried to set name '%s' to object %d "
+                  "which was alredy used by object %d",
+                  name.c_str(), objID, prevusage);
         return;
     }
 
@@ -132,12 +123,13 @@ void ObjectService::setName(int objID, const std::string& name) {
 }
 
 //------------------------------------------------------
-int ObjectService::named(const std::string& name) {
+int ObjectService::named(const std::string &name) {
     return mSymNameStorage->objectNamed(name);
 }
 
 //------------------------------------------------------
-void ObjectService::teleport(int id, const Vector3& pos, const Quaternion& ori, bool relative) {
+void ObjectService::teleport(int id, const Vector3 &pos, const Quaternion &ori,
+                             bool relative) {
     // First look if we exist
     if (relative) {
         Vector3 _pos = position(id) + pos;
@@ -151,9 +143,11 @@ void ObjectService::teleport(int id, const Vector3& pos, const Quaternion& ori, 
 }
 
 //------------------------------------------------------
-int ObjectService::addMetaProperty(int id, const std::string& mpName) {
+int ObjectService::addMetaProperty(int id, const std::string &mpName) {
     if (!exists(id)) {
-        LOG_DEBUG("ObjectService::addMetaProperty: Adding MP '%s' on invalid object %d", mpName.c_str(), id);
+        LOG_DEBUG("ObjectService::addMetaProperty: Adding MP '%s' on invalid "
+                  "object %d",
+                  mpName.c_str(), id);
         return 0;
     }
 
@@ -161,7 +155,9 @@ int ObjectService::addMetaProperty(int id, const std::string& mpName) {
     int mpid = named(mpName);
 
     if (mpid == 0) {
-        LOG_DEBUG("ObjectService::addMetaProperty: Adding invalid MP '%s' to object %d", mpName.c_str(), id);
+        LOG_DEBUG("ObjectService::addMetaProperty: Adding invalid MP '%s' to "
+                  "object %d",
+                  mpName.c_str(), id);
         return 0;
     }
 
@@ -172,9 +168,11 @@ int ObjectService::addMetaProperty(int id, const std::string& mpName) {
 }
 
 //------------------------------------------------------
-int ObjectService::removeMetaProperty(int id, const std::string& mpName) {
+int ObjectService::removeMetaProperty(int id, const std::string &mpName) {
     if (!exists(id)) {
-        LOG_DEBUG("ObjectService::removeMetaProperty: Removing MP '%s' on invalid object %d", mpName.c_str(), id);
+        LOG_DEBUG("ObjectService::removeMetaProperty: Removing MP '%s' on "
+                  "invalid object %d",
+                  mpName.c_str(), id);
         return 0;
     }
 
@@ -182,7 +180,9 @@ int ObjectService::removeMetaProperty(int id, const std::string& mpName) {
     int mpid = named(mpName);
 
     if (mpid == 0) {
-        LOG_DEBUG("ObjectService::removeMetaProperty: Removing invalid MP '%s' to object %d", mpName.c_str(), id);
+        LOG_DEBUG("ObjectService::removeMetaProperty: Removing invalid MP '%s' "
+                  "to object %d",
+                  mpName.c_str(), id);
         return 0;
     }
 
@@ -193,7 +193,7 @@ int ObjectService::removeMetaProperty(int id, const std::string& mpName) {
 }
 
 //------------------------------------------------------
-bool ObjectService::hasMetaProperty(int id, const std::string& mpName) {
+bool ObjectService::hasMetaProperty(int id, const std::string &mpName) {
     if (!exists(id))
         return false;
 
@@ -209,8 +209,10 @@ bool ObjectService::hasMetaProperty(int id, const std::string& mpName) {
 
 //------------------------------------------------------
 void ObjectService::grow(int minID, int maxID) {
-    LOG_DEBUG("ObjectService::grow: Growing id pool to %d - %d (old size %d-%d)", minID, maxID,
-              mAllocatedObjects.getMinIndex(), mAllocatedObjects.getMaxIndex());
+    LOG_DEBUG(
+        "ObjectService::grow: Growing id pool to %d - %d (old size %d-%d)",
+        minID, maxID, mAllocatedObjects.getMinIndex(),
+        mAllocatedObjects.getMaxIndex());
 
     // grow the allocated objects to have enough room for new object flags
     mAllocatedObjects.grow(minID, maxID);
@@ -232,24 +234,27 @@ bool ObjectService::init() {
     return true;
 }
 
-
 //------------------------------------------------------
 void ObjectService::createBuiltinResources() {
     mPropertyService = GET_SERVICE(PropertyService);
 
     // DonorType property (single integer property, built in):
     DataStoragePtr stor(new IntDataStorage(NULL));
-    mPropDonorType = mPropertyService->createProperty("DonorType", "DonorType", "never", stor);
+    mPropDonorType = mPropertyService->createProperty("DonorType", "DonorType",
+                                                      "never", stor);
     // version of the property tag
     mPropDonorType->setChunkVersions(2, 4);
 
     // symbolic name builtin property
     mSymNameStorage = SymNamePropertyStoragePtr(new SymNamePropertyStorage());
-    mPropSymName = mPropertyService->createProperty("SymbolicName", "SymName", "never", mSymNameStorage);
+    mPropSymName = mPropertyService->createProperty("SymbolicName", "SymName",
+                                                    "never", mSymNameStorage);
     mPropSymName->setChunkVersions(2, 17);
 
-    mPositionStorage = PositionPropertyStoragePtr(new PositionPropertyStorage());
-    mPropPosition = mPropertyService->createProperty("Position", "Position", "never", mPositionStorage);
+    mPositionStorage =
+        PositionPropertyStoragePtr(new PositionPropertyStorage());
+    mPropPosition = mPropertyService->createProperty("Position", "Position",
+                                                     "never", mPositionStorage);
     mPropPosition->setChunkVersions(2, 65558);
 }
 
@@ -282,12 +287,13 @@ void ObjectService::shutdown() {
 }
 
 //------------------------------------------------------
-void ObjectService::onDBLoad(const FileGroupPtr& db, uint32_t curmask) {
+void ObjectService::onDBLoad(const FileGroupPtr &db, uint32_t curmask) {
     LOG_INFO("ObjectService::onDBLoad called.");
 
     uint loadMask = 0x00;
 
-    // curtype contains the database's FILE_TYPE value. We use it to decide what to load
+    // curtype contains the database's FILE_TYPE value. We use it to decide what
+    // to load
     if (curmask & DBM_OBJTREE_CONCRETE)
         loadMask |= 0x02;
 
@@ -299,12 +305,13 @@ void ObjectService::onDBLoad(const FileGroupPtr& db, uint32_t curmask) {
 }
 
 //------------------------------------------------------
-void ObjectService::onDBSave(const FileGroupPtr& db, uint32_t tgtmask) {
+void ObjectService::onDBSave(const FileGroupPtr &db, uint32_t tgtmask) {
     LOG_INFO("ObjectService::onDBSave called.");
 
     uint saveMask = 0x00;
 
-    // curtype contains the database's FILE_TYPE value. We use it to decide what to load
+    // curtype contains the database's FILE_TYPE value. We use it to decide what
+    // to load
     if (tgtmask & DBM_OBJTREE_CONCRETE)
         saveMask |= 0x02;
 
@@ -323,7 +330,8 @@ void ObjectService::onDBDrop(uint32_t dropmask) {
 
     uint mask = 0x00;
 
-    // curtype contains the database's FILE_TYPE value. We use it to decide what to load
+    // curtype contains the database's FILE_TYPE value. We use it to decide what
+    // to load
     if (dropmask & DBM_OBJTREE_CONCRETE)
         mask |= 0x02;
 
@@ -334,11 +342,12 @@ void ObjectService::onDBDrop(uint32_t dropmask) {
         _clear(mask);
 }
 
-
 //------------------------------------------------------
-void ObjectService::_load(const FileGroupPtr& db, uint loadMask) {
-    LOG_VERBOSE("ObjectService::_load Called on %s with %d", db->getName().c_str(), loadMask);
-    // Load min, max obj id, then the rest of the FilePtr as a bitmap data. Those then are unpacked to ease the use
+void ObjectService::_load(const FileGroupPtr &db, uint loadMask) {
+    LOG_VERBOSE("ObjectService::_load Called on %s with %d",
+                db->getName().c_str(), loadMask);
+    // Load min, max obj id, then the rest of the FilePtr as a bitmap data.
+    // Those then are unpacked to ease the use
 
     int32_t minID, maxID;
 
@@ -360,14 +369,16 @@ void ObjectService::_load(const FileGroupPtr& db, uint loadMask) {
     // Calculate the objvec bitmap size
     size_t bsize = f->size() - 2 * sizeof(int32_t);
 
-    unsigned char* bitmap = new unsigned char[bsize + 1];
+    unsigned char *bitmap = new unsigned char[bsize + 1];
 
-    for (size_t idx = 0; idx <= bsize; idx++) // fill the whole buf with zeros, even the padding at the end
+    for (size_t idx = 0; idx <= bsize;
+         idx++) // fill the whole buf with zeros, even the padding at the end
         bitmap[idx] = 0;
 
     f->read(bitmap, bsize);
 
-    // bit array going to be used to merge the objects (from file, and those in mem)
+    // bit array going to be used to merge the objects (from file, and those in
+    // mem)
     BitArray fileObjs(bitmap, bsize, minID, maxID);
 
     // grow the system to allow the stored objects to flow in
@@ -383,12 +394,14 @@ void ObjectService::_load(const FileGroupPtr& db, uint loadMask) {
     /*
       - The damn GAM file only contains negative object ID's -
 
-      * Now this would not be a problem, if there was no default room introduced, with id 1
-      * Now I don't want to do any dirty handling of this issue, so all code has to be prepared for this
+      * Now this would not be a problem, if there was no default room
+      introduced, with id 1
+      * Now I don't want to do any dirty handling of this issue, so all code has
+      to be prepared for this
       */
 
     // Processes all the new ID's
-    for(id = minID; id < maxID ; ++id) {
+    for (id = minID; id < maxID; ++id) {
         if (fileObjs[id]) {
             LOG_VERBOSE("ObjectService: Found object ID %d", id);
 
@@ -406,16 +419,23 @@ void ObjectService::_load(const FileGroupPtr& db, uint loadMask) {
     // Now, inform link service and property service (let them load)
     try {
         mPropertyService->load(db, fileObjs);
-    } catch (BasicException& e) {
-        LOG_FATAL("ObjectService: Exception while loading properties from mission database : %s", e.getDetails().c_str());
+    } catch (BasicException &e) {
+        LOG_FATAL("ObjectService: Exception while loading properties from "
+                  "mission database : %s",
+                  e.getDetails().c_str());
     }
 
     mDatabaseService->fineStep(1);
 
     try {
-        mLinkService->load(db, mAllocatedObjects); // will load MP links if those exist as well, causing inherited properties to emerge
-    } catch (BasicException& e) {
-        LOG_FATAL("ObjectService: Exception while loading links from mission database : %s", e.getDetails().c_str());
+        mLinkService->load(
+            db,
+            mAllocatedObjects); // will load MP links if those exist as well,
+                                // causing inherited properties to emerge
+    } catch (BasicException &e) {
+        LOG_FATAL("ObjectService: Exception while loading links from mission "
+                  "database : %s",
+                  e.getDetails().c_str());
     }
 
     mDatabaseService->fineStep(1);
@@ -429,8 +449,7 @@ void ObjectService::_load(const FileGroupPtr& db, uint loadMask) {
         // TNH's purge bad object's that is
     }
 
-
-    for(id = minID; id < maxID ; ++id) {
+    for (id = minID; id < maxID; ++id) {
         if (fileObjs[id])
             _endCreateObject(id);
     }
@@ -484,12 +503,14 @@ void ObjectService::_clear(uint clearMask) {
 }
 
 //------------------------------------------------------
-void ObjectService::_save(const FileGroupPtr& db, uint saveMask) {
+void ObjectService::_save(const FileGroupPtr &db, uint saveMask) {
     // only some values should be saved -
     // concrete objects or archetypes
-    BitArray objmask(mAllocatedObjects.getMinIndex(), mAllocatedObjects.getMaxIndex());
+    BitArray objmask(mAllocatedObjects.getMinIndex(),
+                     mAllocatedObjects.getMaxIndex());
 
-    for (int id = mAllocatedObjects.getMinIndex(); id < mAllocatedObjects.getMaxIndex(); ++id) {
+    for (int id = mAllocatedObjects.getMinIndex();
+         id < mAllocatedObjects.getMaxIndex(); ++id) {
         DVariant v;
 
         if (mAllocatedObjects[id]) { // only gamesys object have donortype...
@@ -497,7 +518,8 @@ void ObjectService::_save(const FileGroupPtr& db, uint saveMask) {
                 if (saveMask & 0x01) // has donortype, was archetype requested?
                     objmask[id] = true; // yep, so include this object
             } else {
-                if (saveMask & 0x02) // has no donortype, was concrete requested?
+                if (saveMask &
+                    0x02) // has no donortype, was concrete requested?
                     objmask[id] = true; // yep, include this obj
             }
         }
@@ -510,7 +532,7 @@ void ObjectService::_save(const FileGroupPtr& db, uint saveMask) {
 
     size_t siz = objmask.getByteSize();
 
-    char* buf = new char[siz];
+    char *buf = new char[siz];
 
     objmask.fillBuffer(buf);
 
@@ -528,18 +550,22 @@ void ObjectService::_save(const FileGroupPtr& db, uint saveMask) {
 //------------------------------------------------------
 void ObjectService::_beginCreateObject(int objID, int archetypeID) {
     // We'll inform property service and link service
-    // NOTE: Those properties which aren't archetype->concrete inherited will be copied
-    // TODO: Links of some kind should be copied as well (particle attachment, targetting obj). Rules?! To be tested in-game with no game db backup
+    // NOTE: Those properties which aren't archetype->concrete inherited will be
+    // copied
+    // TODO: Links of some kind should be copied as well (particle attachment,
+    // targetting obj). Rules?! To be tested in-game with no game db backup
     _prepareForObject(objID);
 
     if (!exists(archetypeID)) {
-        OPDE_EXCEPT("Given archetype ID does not exist!", "ObjectService::_beginCreateObject");
+        OPDE_EXCEPT("Given archetype ID does not exist!",
+                    "ObjectService::_beginCreateObject");
     }
 
     // Use inherit service to set archetype for the new object
     mInheritService->setArchetype(objID, archetypeID);
 
-    // TODO: Copy the uninheritable properties (i.e. ask each special property to do it's work)
+    // TODO: Copy the uninheritable properties (i.e. ask each special property
+    // to do it's work)
 }
 
 //------------------------------------------------------
@@ -560,7 +586,8 @@ void ObjectService::_endCreateObject(int objID) {
 //------------------------------------------------------
 void ObjectService::_destroyObject(int objID) {
     if (mAllocatedObjects[objID]) {
-        // Inform LinkService and PropertyService (those are somewhat slaves of ours. Other services need to listen)
+        // Inform LinkService and PropertyService (those are somewhat slaves of
+        // ours. Other services need to listen)
         mLinkService->objectDestroyed(objID);
         mPropertyService->objectDestroyed(objID);
 
@@ -610,7 +637,8 @@ int ObjectService::getFreeID(bool archetype) {
             // wanted a new id, let's grow for them!
             grow(idx - 256, mAllocatedObjects.getMaxIndex());
 
-            LOG_INFO("ObjectService: Beware: Grew archetype id's by 256 to %d", mAllocatedObjects.getMinIndex());
+            LOG_INFO("ObjectService: Beware: Grew archetype id's by 256 to %d",
+                     mAllocatedObjects.getMinIndex());
             return idx;
         }
     } else {
@@ -625,7 +653,8 @@ int ObjectService::getFreeID(bool archetype) {
             // wanted a new id, let's grow for them!
             grow(mAllocatedObjects.getMinIndex(), idx + 256);
 
-            LOG_INFO("ObjectService: Beware: Grew concrete id's by 256 to %d", mAllocatedObjects.getMinIndex());
+            LOG_INFO("ObjectService: Beware: Grew concrete id's by 256 to %d",
+                     mAllocatedObjects.getMinIndex());
             return idx;
         }
     }
@@ -668,14 +697,11 @@ void ObjectService::resetMinMaxID() {
 //-------------------------- Factory implementation
 std::string ObjectServiceFactory::mName = "ObjectService";
 
-ObjectServiceFactory::ObjectServiceFactory() : ServiceFactory() {
-};
+ObjectServiceFactory::ObjectServiceFactory() : ServiceFactory(){};
 
-const std::string& ObjectServiceFactory::getName() {
-    return mName;
-}
+const std::string &ObjectServiceFactory::getName() { return mName; }
 
-Service* ObjectServiceFactory::createInstance(ServiceManager* manager) {
+Service *ObjectServiceFactory::createInstance(ServiceManager *manager) {
     return new ObjectService(manager, mName);
 }
 
@@ -683,8 +709,6 @@ const uint ObjectServiceFactory::getMask() {
     return SERVICE_DATABASE_LISTENER | SERVICE_CORE;
 }
 
-const size_t ObjectServiceFactory::getSID() {
-    return ObjectService::SID;
-}
+const size_t ObjectServiceFactory::getSID() { return ObjectService::SID; }
 
-}
+} // namespace Opde

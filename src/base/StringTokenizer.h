@@ -22,7 +22,6 @@
  *
  *****************************************************************************/
 
-
 #ifndef __STRINGTOKENIZER_H
 #define __STRINGTOKENIZER_H
 
@@ -33,183 +32,175 @@
 #include <string>
 
 namespace Opde {
-	/// char classifier (is Space)
-	struct IsChar : public std::unary_function<char, bool> {
-		IsChar(char c) : mChar(c) {};
-		IsChar(const IsChar& b) : mChar(b.mChar) {};
+/// char classifier (is Space)
+struct IsChar : public std::unary_function<char, bool> {
+    IsChar(char c) : mChar(c){};
+    IsChar(const IsChar &b) : mChar(b.mChar){};
 
-		bool operator()(char c) const {
-			return c == mChar;
-		}
+    bool operator()(char c) const { return c == mChar; }
 
-		char mChar;
-	};
+    char mChar;
+};
 
-	/** An universal string tokenizer. Splits the text using given IsChar instance
-	*/
-	class StringTokenizer {
-		public:
-			/** Constructor
-			* @param src the string to tokenize
-			* @param splitter the splitter instance to use
-			* @param eatEmpty if true, eats consecutive separators, not returning empty strings on such ocasions
-			*/
-			StringTokenizer(const std::string& src, IsChar splitter, bool eatEmpty = true) : mStr(src), mIsChar(splitter), mEatEmpty(eatEmpty) {
-				mCurPos = mStr.begin();
-			};
-			
-			/** Constructor
-			* @param src the string to tokenize
-			* @param splitter the splitter instance to use
-			* @param eatEmpty if true, eats consecutive separators, not returning empty strings on such ocasions
-			*/
-			StringTokenizer(const std::string& src, char splitchar, bool eatEmpty = true) : mStr(src), mIsChar(splitchar), mEatEmpty(eatEmpty) {
-				mCurPos = mStr.begin();
-			};
+/** An universal string tokenizer. Splits the text using given IsChar instance
+ */
+class StringTokenizer {
+public:
+    /** Constructor
+     * @param src the string to tokenize
+     * @param splitter the splitter instance to use
+     * @param eatEmpty if true, eats consecutive separators, not returning empty
+     * strings on such ocasions
+     */
+    StringTokenizer(const std::string &src, IsChar splitter,
+                    bool eatEmpty = true)
+        : mStr(src), mIsChar(splitter), mEatEmpty(eatEmpty) {
+        mCurPos = mStr.begin();
+    };
 
-			/// Returns next token, or empty string if no token is available
-			std::string next() {
-				std::string::const_iterator tok_end;
+    /** Constructor
+     * @param src the string to tokenize
+     * @param splitter the splitter instance to use
+     * @param eatEmpty if true, eats consecutive separators, not returning empty
+     * strings on such ocasions
+     */
+    StringTokenizer(const std::string &src, char splitchar,
+                    bool eatEmpty = true)
+        : mStr(src), mIsChar(splitchar), mEatEmpty(eatEmpty) {
+        mCurPos = mStr.begin();
+    };
 
-				if (mCurPos != mStr.end()) {
+    /// Returns next token, or empty string if no token is available
+    std::string next() {
+        std::string::const_iterator tok_end;
 
-					if (mEatEmpty) {
-						while (mIsChar(*mCurPos))
-							++mCurPos;
+        if (mCurPos != mStr.end()) {
 
-					} else { // Or I'll end up with empty token on second
-						if (mIsChar(*mCurPos))
-							++mCurPos;
-					}
+            if (mEatEmpty) {
+                while (mIsChar(*mCurPos))
+                    ++mCurPos;
 
-					tok_end = std::find_if(mCurPos, mStr.end(), mIsChar);
+            } else { // Or I'll end up with empty token on second
+                if (mIsChar(*mCurPos))
+                    ++mCurPos;
+            }
 
-					if (mCurPos < tok_end) {
-						std::string toRet = std::string(mCurPos, tok_end);
-						mCurPos = tok_end;
-						return toRet;
-					}
-				}
+            tok_end = std::find_if(mCurPos, mStr.end(), mIsChar);
 
-				// Failback to empty string
-				return std::string("");
-			};
+            if (mCurPos < tok_end) {
+                std::string toRet = std::string(mCurPos, tok_end);
+                mCurPos = tok_end;
+                return toRet;
+            }
+        }
 
-			/// Returns true if no token is available
-			bool end() const {
-				return mCurPos == mStr.end();
-			};
+        // Failback to empty string
+        return std::string("");
+    };
 
-			/// Returns the rest of the string
-			std::string rest() {
-				return std::string(mCurPos, mStr.end());
-			}
+    /// Returns true if no token is available
+    bool end() const { return mCurPos == mStr.end(); };
 
-			/** Pulls one string into the target
-			* @param target The string to be filled with next token
-			* @return true if sucessful, false if end encountered */			
-			bool pull(std::string& target) {
-				if (end())
-					return false;
-					
-				target = next();
-				return true;
-			}
+    /// Returns the rest of the string
+    std::string rest() { return std::string(mCurPos, mStr.end()); }
 
-		protected:
-			const std::string& mStr;
-			IsChar mIsChar;
-			bool mEatEmpty;
+    /** Pulls one string into the target
+     * @param target The string to be filled with next token
+     * @return true if sucessful, false if end encountered */
+    bool pull(std::string &target) {
+        if (end())
+            return false;
 
-			std::string::const_iterator mCurPos;
-	};
+        target = next();
+        return true;
+    }
 
+protected:
+    const std::string &mStr;
+    IsChar mIsChar;
+    bool mEatEmpty;
 
-	/** @brief Whitespace String tokenizer - splits given string on whitespaces, optionally watching for double quotes */
-	class WhitespaceStringTokenizer {
-		protected:
-			/// char classifier (is Space)
-			struct IsSpace : public std::unary_function<char, bool> {
-				bool operator()(char c) {
-					return (isspace(c) != 0);
-				}
-			};
+    std::string::const_iterator mCurPos;
+};
 
-			/// char classifier (is Quote)
-			struct IsQuote : public std::unary_function<char, bool> {
-				bool operator()(char c) {
-					return (c == '\"');
-				}
-			};
+/** @brief Whitespace String tokenizer - splits given string on whitespaces,
+ * optionally watching for double quotes */
+class WhitespaceStringTokenizer {
+protected:
+    /// char classifier (is Space)
+    struct IsSpace : public std::unary_function<char, bool> {
+        bool operator()(char c) { return (isspace(c) != 0); }
+    };
 
-		public:
-			WhitespaceStringTokenizer(const std::string& src, bool ignoreQuotes = true) : mIgnoreQuotes(ignoreQuotes), mStr(src) {
-				mCurPos = mStr.begin();
-			};
+    /// char classifier (is Quote)
+    struct IsQuote : public std::unary_function<char, bool> {
+        bool operator()(char c) { return (c == '\"'); }
+    };
 
-			/// Returns next token, or empty string if no token is available
-			std::string next() {
-				// We tokenize a hardcoded way - all spaces, except those which are in quotes, are splitters
-				std::string::const_iterator tok_end;
-				std::string::const_iterator strend = mStr.end();
-	
-				bool canEnd = false;
+public:
+    WhitespaceStringTokenizer(const std::string &src, bool ignoreQuotes = true)
+        : mIgnoreQuotes(ignoreQuotes), mStr(src) {
+        mCurPos = mStr.begin();
+    };
 
-				if (mCurPos != strend) {
-					while (mIsSpaceP(*mCurPos)) // eat all the spaces
-						++mCurPos;
+    /// Returns next token, or empty string if no token is available
+    std::string next() {
+        // We tokenize a hardcoded way - all spaces, except those which are in
+        // quotes, are splitters
+        std::string::const_iterator tok_end;
+        std::string::const_iterator strend = mStr.end();
 
-					// Look if the current char is quote. if it is, split on quotes
-					if (mIsQuoteP(*mCurPos) && !mIgnoreQuotes) {
-							tok_end = std::find_if(++mCurPos, strend, mIsQuoteP);
-					} else {
-							tok_end = std::find_if(mCurPos, strend, mIsSpaceP);
-							// we can tolerate end here
-							canEnd = true;
-					}
+        bool canEnd = false;
 
-					if (tok_end != strend || canEnd) {
-						std::string toRet(mCurPos, tok_end);
-						mCurPos = tok_end;
-						return toRet;
-					}
-				}
+        if (mCurPos != strend) {
+            while (mIsSpaceP(*mCurPos)) // eat all the spaces
+                ++mCurPos;
 
-				// Failback to empty string
-				return std::string("");
-			};
+            // Look if the current char is quote. if it is, split on quotes
+            if (mIsQuoteP(*mCurPos) && !mIgnoreQuotes) {
+                tok_end = std::find_if(++mCurPos, strend, mIsQuoteP);
+            } else {
+                tok_end = std::find_if(mCurPos, strend, mIsSpaceP);
+                // we can tolerate end here
+                canEnd = true;
+            }
 
-			/// Returns true if no token is available
-			bool end() const {
-				return mCurPos == mStr.end();
-			};
+            if (tok_end != strend || canEnd) {
+                std::string toRet(mCurPos, tok_end);
+                mCurPos = tok_end;
+                return toRet;
+            }
+        }
 
-			/// Returns the rest of the string
-			std::string rest() {
-				return std::string(mCurPos, mStr.end());
-			}
+        // Failback to empty string
+        return std::string("");
+    };
 
-			/** Pulls one string into the target
-			* @param target The string to be filled with next token
-			* @return true if sucessful, false if end encountered */			
-			bool pull(std::string& target) {
-				if (end())
-					return false;
-					
-				target = next();
-				return true;
-			}
+    /// Returns true if no token is available
+    bool end() const { return mCurPos == mStr.end(); };
 
+    /// Returns the rest of the string
+    std::string rest() { return std::string(mCurPos, mStr.end()); }
 
-		protected:
-			bool mIgnoreQuotes;
-			const std::string& mStr;
-			IsSpace mIsSpaceP;
-			IsQuote mIsQuoteP;
+    /** Pulls one string into the target
+     * @param target The string to be filled with next token
+     * @return true if sucessful, false if end encountered */
+    bool pull(std::string &target) {
+        if (end())
+            return false;
 
-			std::string::const_iterator mCurPos;
-	};
-}
+        target = next();
+        return true;
+    }
 
+protected:
+    bool mIgnoreQuotes;
+    const std::string &mStr;
+    IsSpace mIsSpaceP;
+    IsQuote mIsQuoteP;
+
+    std::string::const_iterator mCurPos;
+};
+} // namespace Opde
 
 #endif

@@ -22,11 +22,11 @@
  *
  *****************************************************************************/
 
-#include "ServiceCommon.h"
 #include "InputService.h"
 #include "OpdeException.h"
-#include "logger.h"
+#include "ServiceCommon.h"
 #include "StringTokenizer.h"
+#include "logger.h"
 
 using namespace std;
 using namespace Ogre;
@@ -36,19 +36,14 @@ namespace Opde {
 /*-----------------------------------------------------*/
 /*-------------------- InputService -------------------*/
 /*-----------------------------------------------------*/
-template<> const size_t ServiceImpl<InputService>::SID = __SERVICE_ID_INPUT;
+template <> const size_t ServiceImpl<InputService>::SID = __SERVICE_ID_INPUT;
 
-InputService::InputService(ServiceManager *manager, const std::string& name) :
-    ServiceImpl< Opde::InputService >(manager, name),
-    mInputMode(IM_MAPPED),
-    mDirectListener(NULL),
-    mInitialDelay(0.4f), // TODO: Read these from the config service
-    mRepeatDelay(0.3f),
-    mKeyPressTime(0.0f),
-    mCurrentKey(SDLK_UNKNOWN),
-    mCurrentMods(0),
-    mNonExclusive(false)
-{
+InputService::InputService(ServiceManager *manager, const std::string &name)
+    : ServiceImpl<Opde::InputService>(manager, name), mInputMode(IM_MAPPED),
+      mDirectListener(NULL),
+      mInitialDelay(0.4f), // TODO: Read these from the config service
+      mRepeatDelay(0.3f), mKeyPressTime(0.0f), mCurrentKey(SDLK_UNKNOWN),
+      mCurrentMods(0), mNonExclusive(false) {
     // Loop client definition
     mLoopClientDef.id = LOOPCLIENT_ID_INPUT;
     mLoopClientDef.mask = LOOPMODE_INPUT;
@@ -60,10 +55,9 @@ InputService::InputService(ServiceManager *manager, const std::string& name) :
 }
 
 //------------------------------------------------------
-InputService::~InputService()
-{
+InputService::~InputService() {
     ContextToMapper::iterator it = mMappers.begin();
-    for (;it != mMappers.end(); ++it) {
+    for (; it != mMappers.end(); ++it) {
         delete it->second;
         it->second = NULL;
     }
@@ -73,7 +67,6 @@ InputService::~InputService()
     mDefaultMapper = NULL;
     mCurrentMapper = NULL;
 
-
     if (mLoopService)
         mLoopService->removeLoopClient(this);
 
@@ -81,15 +74,13 @@ InputService::~InputService()
 }
 
 //------------------------------------------------------
-void InputService::registerValidKey(int kc, const std::string& txt)
-{
+void InputService::registerValidKey(int kc, const std::string &txt) {
     mKeyMap.insert(make_pair(kc, txt));
     mReverseKeyMap.insert(make_pair(txt, kc));
 }
 
 //------------------------------------------------------
-void InputService::initKeyMap()
-{
+void InputService::initKeyMap() {
     registerValidKey(SDLK_ESCAPE, "esc");
 
     registerValidKey(SDLK_1, "1");
@@ -249,23 +240,24 @@ void InputService::initKeyMap()
 }
 
 //------------------------------------------------------
-unsigned int InputService::mapToKeyCode(const std::string &key) const
-{
+unsigned int InputService::mapToKeyCode(const std::string &key) const {
     unsigned int code;
     ReverseKeyMap::const_iterator it = mReverseKeyMap.find(key);
 
     if (it != mReverseKeyMap.end())
         code = it->second;
     else
-        // If we get here, then there is a key name that DarkEngine creates that we didn't cover
+        // If we get here, then there is a key name that DarkEngine creates that
+        // we didn't cover
         code = SDLK_UNKNOWN;
 
     return code;
 }
 
 //------------------------------------------------------
-void InputService::addBinding(const std::string& keys, const std::string& command, InputEventMapper* mapper)
-{
+void InputService::addBinding(const std::string &keys,
+                              const std::string &command,
+                              InputEventMapper *mapper) {
     if (!mapper)
         mapper = mCurrentMapper;
 
@@ -292,7 +284,9 @@ void InputService::addBinding(const std::string& keys, const std::string& comman
             if (key == "")
                 key = token;
             else {
-                LOG_ERROR("InputService::addBinding: Invalid key combination %s", keys.c_str());
+                LOG_ERROR(
+                    "InputService::addBinding: Invalid key combination %s",
+                    keys.c_str());
                 return;
             }
         }
@@ -302,27 +296,30 @@ void InputService::addBinding(const std::string& keys, const std::string& comman
 
     mapper->bind(code | modifier, command);
 
-    LOG_DEBUG("InputService: (Context %s) bound command '%s' to keyCode %d -'%s'", mapper->getName().c_str(), command.c_str(), code, key.c_str());
+    LOG_DEBUG(
+        "InputService: (Context %s) bound command '%s' to keyCode %d -'%s'",
+        mapper->getName().c_str(), command.c_str(), code, key.c_str());
 }
 
 //------------------------------------------------------
-DVariant InputService::processCommand(const std::string& commandStr)
-{
+DVariant InputService::processCommand(const std::string &commandStr) {
     std::string cstr;
     cstr = stripComment(commandStr);
 
-    std::transform(cstr.begin(), cstr.end(), cstr.begin(), ::tolower);	//Lowercase
+    std::transform(cstr.begin(), cstr.end(), cstr.begin(),
+                   ::tolower); // Lowercase
 
     WhitespaceStringTokenizer tok(cstr, false);
 
     std::string command;
     if (!tok.pull(command)) {
-        LOG_ERROR("InputService::processCommand: Empty command string encountered!");
+        LOG_ERROR(
+            "InputService::processCommand: Empty command string encountered!");
         return false;
     }
 
     // first token can be context if the next is bind
-    InputEventMapper* mpr = findMapperForContext(command);
+    InputEventMapper *mpr = findMapperForContext(command);
 
     if (mpr) {
         // is the next token bind?
@@ -332,32 +329,29 @@ DVariant InputService::processCommand(const std::string& commandStr)
         }
     }
 
-    if(command == "bind")
-    {
+    if (command == "bind") {
         if (mpr == NULL)
             mpr = mCurrentMapper;
 
         std::string keycode;
 
         if (!tok.pull(keycode)) {
-            LOG_ERROR("InputService::processCommand: bind command without keycode!");
+            LOG_ERROR(
+                "InputService::processCommand: bind command without keycode!");
             return false;
         }
 
         if (!tok.pull(command)) {
-            LOG_ERROR("InputService::processCommand: bind command without command!");
+            LOG_ERROR(
+                "InputService::processCommand: bind command without command!");
             return false;
         }
 
-
         addBinding(keycode, command, mpr);
         return true;
-    }
-    else if(command == "echo")
-    {
+    } else if (command == "echo") {
         return tok.next();
-    } else if(command == "set")
-    {
+    } else if (command == "set") {
         // must have two more tokens
         std::string var, val;
 
@@ -369,18 +363,15 @@ DVariant InputService::processCommand(const std::string& commandStr)
 
         setVariable(var, val);
         return true;
-    } else if (command == "help")
-    {
+    } else if (command == "help") {
         // list all commands registered
         logCommands();
         return true;
-    } else if (command == "show")
-    {
+    } else if (command == "show") {
         // list all commands registered
         logVariables();
         return true;
-    } else if (command == "loadbnd")
-    {
+    } else if (command == "loadbnd") {
         // load bnd file
         loadBNDFile(tok.rest());
         return true;
@@ -396,7 +387,6 @@ DVariant InputService::processCommand(const std::string& commandStr)
         return callCommandTrap(msg);
     }
 
-
     std::string var, val;
 
     if (!tok.pull(var))
@@ -410,15 +400,16 @@ DVariant InputService::processCommand(const std::string& commandStr)
 }
 
 //------------------------------------------------------
-bool InputService::loadBNDFile(const std::string& fname)
-{
-    if(Ogre::ResourceGroupManager::getSingleton().resourceExists(ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, fname) == false)
+bool InputService::loadBNDFile(const std::string &fname) {
+    if (Ogre::ResourceGroupManager::getSingleton().resourceExists(
+            ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, fname) == false)
         return false;
 
-    Ogre::DataStreamPtr Stream = Ogre::ResourceGroupManager::getSingleton().openResource(fname, ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
+    Ogre::DataStreamPtr Stream =
+        Ogre::ResourceGroupManager::getSingleton().openResource(
+            fname, ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
 
-    while (!Stream->eof())
-    {
+    while (!Stream->eof()) {
         std::string Line = Stream->getLine();
         processCommand(Line);
     }
@@ -427,25 +418,26 @@ bool InputService::loadBNDFile(const std::string& fname)
 }
 
 //------------------------------------------------------
-void InputService::createBindContext(const std::string& ctx)
-{
+void InputService::createBindContext(const std::string &ctx) {
     ContextToMapper::const_iterator it = mMappers.find(ctx);
 
     if (it == mMappers.end()) {
-        InputEventMapper* mapper = new InputEventMapper(this, ctx);
+        InputEventMapper *mapper = new InputEventMapper(this, ctx);
         mMappers.insert(make_pair(ctx, mapper));
     } else {
-        LOG_ERROR("InputService::createBindContext: Context already exists: %s", ctx.c_str());
+        LOG_ERROR("InputService::createBindContext: Context already exists: %s",
+                  ctx.c_str());
     }
 }
 
 //------------------------------------------------------
-bool InputService::init()
-{
+bool InputService::init() {
     mConfigService = GET_SERVICE(ConfigService);
     mRenderService = GET_SERVICE(RenderService);
 
-    mConfigService->setParamDescription("nonexclusive", "Enables non-exclusive input (Mouse and keyboard won't be blocked)");
+    mConfigService->setParamDescription(
+        "nonexclusive",
+        "Enables non-exclusive input (Mouse and keyboard won't be blocked)");
 
     mRenderWindow = mRenderService->getRenderWindow();
 
@@ -466,24 +458,19 @@ bool InputService::init()
 }
 
 //------------------------------------------------------
-void InputService::bootstrapFinished()
-{
+void InputService::bootstrapFinished() {
     // So the services will be able to catch up
     ServiceManager::getSingleton().createByMask(SERVICE_INPUT_LISTENER);
 }
 
 //------------------------------------------------------
-void InputService::shutdown()
-{
+void InputService::shutdown() {
     LOG_DEBUG("InputService::shutdown");
     mConfigService.reset();
 }
 
 //------------------------------------------------------
-void InputService::loopStep(float deltaTime)
-{
-    pollEvents(deltaTime);
-}
+void InputService::loopStep(float deltaTime) { pollEvents(deltaTime); }
 
 //------------------------------------------------------
 void InputService::processKeyRepeat(float deltaTime) {
@@ -506,24 +493,24 @@ void InputService::processKeyRepeat(float deltaTime) {
 }
 
 //------------------------------------------------------
-void InputService::setBindContext(const std::string& context)
-{
-    InputEventMapper* iemp = findMapperForContext(context);
+void InputService::setBindContext(const std::string &context) {
+    InputEventMapper *iemp = findMapperForContext(context);
 
     if (iemp)
         mCurrentMapper = iemp;
-    else
-    {
+    else {
         mCurrentMapper = mDefaultMapper;
-        LOG_ERROR("InputService::setBindContext: invalid context specified: '%s', setting default context", context.c_str());
+        LOG_ERROR("InputService::setBindContext: invalid context specified: "
+                  "'%s', setting default context",
+                  context.c_str());
     }
 }
 
 //------------------------------------------------------
-std::string InputService::fillVariables(const std::string& src) const
-{
+std::string InputService::fillVariables(const std::string &src) const {
     // This is quite bad implementation actually.
-    // Should use a StringTokenizer with custom rule ($ and some non-alpha like space etc split).
+    // Should use a StringTokenizer with custom rule ($ and some non-alpha like
+    // space etc split).
 
     WhitespaceStringTokenizer st(src);
 
@@ -534,8 +521,7 @@ std::string InputService::fillVariables(const std::string& src) const
 
     bool first = true;
 
-    while (!st.end())
-    {
+    while (!st.end()) {
         if (!first)
             result += " ";
 
@@ -546,17 +532,16 @@ std::string InputService::fillVariables(const std::string& src) const
         if (var == "")
             continue;
 
-        if (var.substr(0,1) == "$")
-        {
-            ValueMap::const_iterator it = mVariables.find(var.substr(1, var.length() - 1));
+        if (var.substr(0, 1) == "$") {
+            ValueMap::const_iterator it =
+                mVariables.find(var.substr(1, var.length() - 1));
 
             if (it != mVariables.end())
                 result += it->second.toString();
             else
                 result += var;
 
-        }
-        else
+        } else
             result += var;
     }
 
@@ -564,8 +549,7 @@ std::string InputService::fillVariables(const std::string& src) const
 }
 
 //------------------------------------------------------
-InputEventMapper* InputService::findMapperForContext(const std::string& ctx)
-{
+InputEventMapper *InputService::findMapperForContext(const std::string &ctx) {
     ContextToMapper::const_iterator it = mMappers.find(ctx);
 
     if (it != mMappers.end())
@@ -576,17 +560,12 @@ InputEventMapper* InputService::findMapperForContext(const std::string& ctx)
 
 //------------------------------------------------------
 /// char classifier (is comment)
-struct IsComment : public std::unary_function<char, bool>
-{
-    bool operator()(char c)
-    {
-        return c==';';
-    }
+struct IsComment : public std::unary_function<char, bool> {
+    bool operator()(char c) { return c == ';'; }
 };
 
 //------------------------------------------------------
-std::string InputService::stripComment(const std::string& cmd)
-{
+std::string InputService::stripComment(const std::string &cmd) {
     IsComment isC;
 
     string::const_iterator it = find_if(cmd.begin(), cmd.end(), isC);
@@ -595,8 +574,7 @@ std::string InputService::stripComment(const std::string& cmd)
 }
 
 //------------------------------------------------------
-DVariant InputService::getVariable(const std::string& var)
-{
+DVariant InputService::getVariable(const std::string &var) {
     ValueMap::const_iterator it = mVariables.find(var);
 
     if (it != mVariables.end())
@@ -606,9 +584,9 @@ DVariant InputService::getVariable(const std::string& var)
 }
 
 //------------------------------------------------------
-void InputService::setVariable(const std::string& var, const DVariant& val)
-{
-    LOG_DEBUG("InputService::setVariable: '%s' -> %s", var.c_str(), val.toString().c_str());
+void InputService::setVariable(const std::string &var, const DVariant &val) {
+    LOG_DEBUG("InputService::setVariable: '%s' -> %s", var.c_str(),
+              val.toString().c_str());
     ValueMap::iterator it = mVariables.find(var);
 
     if (it != mVariables.end())
@@ -618,13 +596,15 @@ void InputService::setVariable(const std::string& var, const DVariant& val)
 }
 
 //------------------------------------------------------
-void InputService::processKeyEvent(SDL_Keycode keyCode, unsigned int modifiers, InputEventType t) {
+void InputService::processKeyEvent(SDL_Keycode keyCode, unsigned int modifiers,
+                                   InputEventType t) {
     // Some safety checks
     if (mInputMode == IM_DIRECT)
         return;
 
     if (!mCurrentMapper) {
-        LOG_ERROR("InputService::processKeyEvent: Mapped input, but no mapper set for the current state!");
+        LOG_ERROR("InputService::processKeyEvent: Mapped input, but no mapper "
+                  "set for the current state!");
         return;
     }
 
@@ -641,7 +621,8 @@ void InputService::processKeyEvent(SDL_Keycode keyCode, unsigned int modifiers, 
         code |= CTRL_MOD;
 
     if (!mCurrentMapper->unmapEvent(keyCode, command)) {
-        LOG_DEBUG("InputService: Encountered an unmapped key event %d", keyCode);
+        LOG_DEBUG("InputService: Encountered an unmapped key event %d",
+                  keyCode);
         return;
     }
 
@@ -677,20 +658,21 @@ void InputService::processKeyEvent(SDL_Keycode keyCode, unsigned int modifiers, 
     }
 
     if (!callCommandTrap(msg)) {
-        LOG_DEBUG("InputService: Key event '%d' (mapped to the command %s) seems to have no trap present", keyCode, msg.command.c_str());
+        LOG_DEBUG("InputService: Key event '%d' (mapped to the command %s) "
+                  "seems to have no trap present",
+                  keyCode, msg.command.c_str());
     }
 }
 
-
 //------------------------------------------------------
-void InputService::processMouseEvent(unsigned int id, InputEventType event)
-{
+void InputService::processMouseEvent(unsigned int id, InputEventType event) {
     // Some safety checks
     if (mInputMode == IM_DIRECT)
         return;
 
     if (!mCurrentMapper) {
-        LOG_ERROR("InputService::processKeyEvent: Mapped input, but no mapper set for the current state!");
+        LOG_ERROR("InputService::processKeyEvent: Mapped input, but no mapper "
+                  "set for the current state!");
         return;
     }
 
@@ -710,16 +692,13 @@ void InputService::processMouseEvent(unsigned int id, InputEventType event)
     msg.params = split.second;
     msg.event = event;
 
-    if (command[0] == '+')
-    {
+    if (command[0] == '+') {
         if (event == IET_MOUSE_PRESS)
             msg.params = 1.0f;
         else
             msg.params = 0.0f;
         command = command.substr(1);
-    }
-    else if (command[0] == '-')
-    {
+    } else if (command[0] == '-') {
         if (event == IET_MOUSE_PRESS)
             msg.params = 0.0f;
         else
@@ -731,27 +710,28 @@ void InputService::processMouseEvent(unsigned int id, InputEventType event)
 }
 
 //------------------------------------------------------
-void InputService::registerCommandTrap(const std::string& command, const ListenerPtr& listener)
-{
-    if (mCommandTraps.find(command) != mCommandTraps.end())
-    {
+void InputService::registerCommandTrap(const std::string &command,
+                                       const ListenerPtr &listener) {
+    if (mCommandTraps.find(command) != mCommandTraps.end()) {
         // Already registered command. LOG an error
-        LOG_ERROR("InputService: The command %s already has a registered trap. Not registering", command.c_str());
+        LOG_ERROR("InputService: The command %s already has a registered trap. "
+                  "Not registering",
+                  command.c_str());
         return;
     } else {
-        LOG_INFO("InputService: The command '%s' is now registered", command.c_str());
+        LOG_INFO("InputService: The command '%s' is now registered",
+                 command.c_str());
         mCommandTraps.insert(make_pair(command, listener));
     }
 }
 
 //------------------------------------------------------
-void InputService::unregisterCommandTrap(const ListenerPtr& listener)
-{
-    // Iterate through the trappers, find the ones with this listener ptr, remove
+void InputService::unregisterCommandTrap(const ListenerPtr &listener) {
+    // Iterate through the trappers, find the ones with this listener ptr,
+    // remove
     ListenerMap::iterator it = mCommandTraps.begin();
 
-    while (it != mCommandTraps.end())
-    {
+    while (it != mCommandTraps.end()) {
         ListenerMap::iterator pos = it++;
 
         if (pos->second == listener)
@@ -760,13 +740,12 @@ void InputService::unregisterCommandTrap(const ListenerPtr& listener)
 }
 
 //------------------------------------------------------
-void InputService::unregisterCommandTrap(const std::string& command)
-{
-    // Iterate through the trappers, find the ones with the given command name, remove
+void InputService::unregisterCommandTrap(const std::string &command) {
+    // Iterate through the trappers, find the ones with the given command name,
+    // remove
     ListenerMap::iterator it = mCommandTraps.begin();
 
-    while (it != mCommandTraps.end())
-    {
+    while (it != mCommandTraps.end()) {
         ListenerMap::iterator pos = it++;
 
         if (pos->first == command)
@@ -775,7 +754,8 @@ void InputService::unregisterCommandTrap(const std::string& command)
 }
 
 //------------------------------------------------------
-void InputService::registerCommandAlias(const std::string& alias, const std::string& command) {
+void InputService::registerCommandAlias(const std::string &alias,
+                                        const std::string &command) {
     mCommandAliases[alias] = command;
 }
 
@@ -783,10 +763,8 @@ void InputService::registerCommandAlias(const std::string& alias, const std::str
 void InputService::pollEvents(float deltaTime) {
     // Process SDL queue
     SDL_Event event;
-    while(SDL_PollEvent(&event))
-    {
-        switch(event.type)
-        {
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
         case SDL_KEYDOWN:
             keyPressed(event.key);
             break;
@@ -812,12 +790,13 @@ void InputService::pollEvents(float deltaTime) {
 
     // Process the key repeat (but only for exclusive input)
     if (!mNonExclusive)
-        processKeyRepeat(deltaTime/1000.0f); // loop time is in
+        processKeyRepeat(deltaTime / 1000.0f); // loop time is in
     // milis
 }
 
 //------------------------------------------------------
-bool InputService::dealiasCommand(const std::string& alias, std::string& command) {
+bool InputService::dealiasCommand(const std::string &alias,
+                                  std::string &command) {
     AliasMap::const_iterator it = mCommandAliases.find(alias);
 
     if (it != mCommandAliases.end()) {
@@ -829,8 +808,7 @@ bool InputService::dealiasCommand(const std::string& alias, std::string& command
 }
 
 //------------------------------------------------------
-bool InputService::callCommandTrap(InputEventMsg& msg)
-{
+bool InputService::callCommandTrap(InputEventMsg &msg) {
     std::string cmd;
 
     // see if we found a new candidate
@@ -839,15 +817,14 @@ bool InputService::callCommandTrap(InputEventMsg& msg)
         msg.command = split.first;
 
         DVariant param(split.second);
-        msg.params = msg.params.as<float>() * param.as< float >();
+        msg.params = msg.params.as<float>() * param.as<float>();
     }
 
     ListenerMap::const_iterator it = mCommandTraps.find(msg.command);
 
     LOG_VERBOSE("InputService: Command trap '%s'", msg.command.c_str());
 
-    if (it != mCommandTraps.end())
-    {
+    if (it != mCommandTraps.end()) {
         (*it->second)(msg);
         return true;
     }
@@ -856,8 +833,7 @@ bool InputService::callCommandTrap(InputEventMsg& msg)
 }
 
 //------------------------------------------------------
-bool InputService::hasCommandTrap(const std::string& cmd)
-{
+bool InputService::hasCommandTrap(const std::string &cmd) {
     if (mCommandTraps.find(cmd) != mCommandTraps.end())
         return true;
 
@@ -865,8 +841,8 @@ bool InputService::hasCommandTrap(const std::string& cmd)
 }
 
 //------------------------------------------------------
-std::pair<std::string, std::string> InputService::splitCommand(const std::string& cmd) const
-{
+std::pair<std::string, std::string>
+InputService::splitCommand(const std::string &cmd) const {
     WhitespaceStringTokenizer stok(cmd);
 
     std::pair<std::string, std::string> res = make_pair("", "");
@@ -880,11 +856,10 @@ std::pair<std::string, std::string> InputService::splitCommand(const std::string
     return res;
 }
 
-
 //------------------------------------------------------
 void InputService::logCommands() {
     ListenerMap::iterator it = mCommandTraps.begin();
-    for (;it!=mCommandTraps.end(); ++it) {
+    for (; it != mCommandTraps.end(); ++it) {
         LOG_INFO("InputService: Command %s", it->first.c_str());
     }
 }
@@ -892,14 +867,14 @@ void InputService::logCommands() {
 //------------------------------------------------------
 void InputService::logVariables() {
     ValueMap::iterator it = mVariables.begin();
-    for (;it!=mVariables.end(); ++it) {
-        LOG_INFO("InputService: Variable '%s' value '%s'", it->first.c_str(), it->second.toString().c_str());
+    for (; it != mVariables.end(); ++it) {
+        LOG_INFO("InputService: Variable '%s' value '%s'", it->first.c_str(),
+                 it->second.toString().c_str());
     }
 }
 
 //------------------------------------------------------
-bool InputService::keyPressed(const SDL_KeyboardEvent &e)
-{
+bool InputService::keyPressed(const SDL_KeyboardEvent &e) {
     // does the key have a character representation?
     if (!(e.keysym.sym & (1 << 30))) {
         mCurrentKey = e.keysym.sym;
@@ -920,8 +895,7 @@ bool InputService::keyPressed(const SDL_KeyboardEvent &e)
 }
 
 //------------------------------------------------------
-bool InputService::keyReleased(const SDL_KeyboardEvent &e)
-{
+bool InputService::keyReleased(const SDL_KeyboardEvent &e) {
     if (e.keysym.sym == mCurrentKey) {
         mCurrentKey = SDLK_CLEAR;
         mCurrentMods = 0;
@@ -938,8 +912,7 @@ bool InputService::keyReleased(const SDL_KeyboardEvent &e)
 }
 
 //------------------------------------------------------
-bool InputService::mouseMoved(const SDL_MouseMotionEvent &e)
-{
+bool InputService::mouseMoved(const SDL_MouseMotionEvent &e) {
 
     if (mInputMode == IM_DIRECT) {
         if (mDirectListener) // direct event, dispatch to the current listener
@@ -952,8 +925,7 @@ bool InputService::mouseMoved(const SDL_MouseMotionEvent &e)
 }
 
 //------------------------------------------------------
-bool InputService::mousePressed(const SDL_MouseButtonEvent &e)
-{
+bool InputService::mousePressed(const SDL_MouseButtonEvent &e) {
     if (mInputMode == IM_DIRECT) {
         if (mDirectListener) // direct event, dispatch to the current listener
             return mDirectListener->mousePressed(e);
@@ -965,8 +937,7 @@ bool InputService::mousePressed(const SDL_MouseButtonEvent &e)
 }
 
 //------------------------------------------------------
-bool InputService::mouseReleased(const SDL_MouseButtonEvent &e)
-{
+bool InputService::mouseReleased(const SDL_MouseButtonEvent &e) {
     if (mInputMode == IM_DIRECT) {
         if (mDirectListener) // direct event, dispatch to the current listener
             return mDirectListener->mouseReleased(e);
@@ -980,26 +951,15 @@ bool InputService::mouseReleased(const SDL_MouseButtonEvent &e)
 //-------------------------- Factory implementation
 std::string InputServiceFactory::mName = "InputService";
 
-InputServiceFactory::InputServiceFactory() : ServiceFactory()
-{
-}
+InputServiceFactory::InputServiceFactory() : ServiceFactory() {}
 
-const std::string& InputServiceFactory::getName()
-{
-    return mName;
-}
+const std::string &InputServiceFactory::getName() { return mName; }
 
-const uint InputServiceFactory::getMask()
-{
-    return SERVICE_ENGINE;
-}
+const uint InputServiceFactory::getMask() { return SERVICE_ENGINE; }
 
-const size_t InputServiceFactory::getSID() {
-    return InputService::SID;
-}
+const size_t InputServiceFactory::getSID() { return InputService::SID; }
 
-Service* InputServiceFactory::createInstance(ServiceManager* manager)
-{
+Service *InputServiceFactory::createInstance(ServiceManager *manager) {
     return new InputService(manager, mName);
 }
-}
+} // namespace Opde

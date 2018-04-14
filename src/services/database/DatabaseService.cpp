@@ -21,13 +21,13 @@
  *
  *****************************************************************************/
 
-#include "ServiceCommon.h"
 #include "DatabaseService.h"
 #include "OpdeException.h"
+#include "ServiceCommon.h"
 #include "logger.h"
 
-#include <OgreTimer.h>
 #include <OgreResourceGroupManager.h>
+#include <OgreTimer.h>
 
 using namespace std;
 using namespace Ogre;
@@ -37,15 +37,13 @@ namespace Opde {
 /*--------------------------------------------------------*/
 /*-------------------- DatabaseService -------------------*/
 /*--------------------------------------------------------*/
-template<> const size_t ServiceImpl<DatabaseService>::SID = __SERVICE_ID_DATABASE;
+template <>
+const size_t ServiceImpl<DatabaseService>::SID = __SERVICE_ID_DATABASE;
 
-DatabaseService::DatabaseService(ServiceManager *manager, const std::string& name) :
-    ServiceImpl<DatabaseService>(manager, name),
-    mCurDB(NULL),
-    mProgressListener(NULL),
-    mTimer(NULL) {
-
-}
+DatabaseService::DatabaseService(ServiceManager *manager,
+                                 const std::string &name)
+    : ServiceImpl<DatabaseService>(manager, name), mCurDB(NULL),
+      mProgressListener(NULL), mTimer(NULL) {}
 
 //------------------------------------------------------
 bool DatabaseService::init() {
@@ -56,13 +54,12 @@ bool DatabaseService::init() {
 }
 
 //------------------------------------------------------
-DatabaseService::~DatabaseService() {
-    delete mTimer;
-}
+DatabaseService::~DatabaseService() { delete mTimer; }
 
 //------------------------------------------------------
-void DatabaseService::load(const std::string& filename, uint32_t loadMask) {
-    LOG_DEBUG("DatabaseService::load - Loading requested file %s", filename.c_str());
+void DatabaseService::load(const std::string &filename, uint32_t loadMask) {
+    LOG_DEBUG("DatabaseService::load - Loading requested file %s",
+              filename.c_str());
 
     mLoadingStatus.reset();
 
@@ -76,40 +73,49 @@ void DatabaseService::load(const std::string& filename, uint32_t loadMask) {
 }
 
 //------------------------------------------------------
-void DatabaseService::recursiveMergeLoad(const std::string& filename, uint32_t loadMask) {
+void DatabaseService::recursiveMergeLoad(const std::string &filename,
+                                         uint32_t loadMask) {
     // load the database, but see for the parents first
-    LOG_INFO("DatabaseService::recursiveMergeLoad - Loading file %s", filename.c_str());
+    LOG_INFO("DatabaseService::recursiveMergeLoad - Loading file %s",
+             filename.c_str());
 
     FileGroupPtr db = getDBFileNamed(filename);
 
-    // the coarse count is lifted every call to ensure all the databases are counted
+    // the coarse count is lifted every call to ensure all the databases are
+    // counted
     mLoadingStatus.totalCoarse += mListeners.size();
 
     uint32_t ft = getFileType(db);
 
-    const char* parentDbTag = getParentDBTagName(ft);
+    const char *parentDbTag = getParentDBTagName(ft);
 
     if (parentDbTag != NULL) {
         // load the parent first
         // but filter out any bits overriden by overlay database
-        // this is to ensure that .sav data will be loaded instead of .mis, for example
+        // this is to ensure that .sav data will be loaded instead of .mis, for
+        // example
 
         std::string parentFile = loadFileNameFromTag(db, parentDbTag);
 
-        LOG_INFO("DatabaseService::recursiveMergeLoad - Recursing to file %s", parentFile.c_str());
+        LOG_INFO("DatabaseService::recursiveMergeLoad - Recursing to file %s",
+                 parentFile.c_str());
         recursiveMergeLoad(parentFile, loadMask & ~ft);
     }
 
-    LOG_INFO("DatabaseService::recursiveMergeLoad - Recurse end. Loading file %s", filename.c_str());
+    LOG_INFO(
+        "DatabaseService::recursiveMergeLoad - Recurse end. Loading file %s",
+        filename.c_str());
     broadcastOnDBLoad(db, ft & loadMask);
 }
 
 //------------------------------------------------------
-void DatabaseService::mergeLoad(const std::string& filename, uint32_t loadMask) {
+void DatabaseService::mergeLoad(const std::string &filename,
+                                uint32_t loadMask) {
     FileGroupPtr db = getDBFileNamed(filename);
     uint32_t ft = getFileType(db);
 
-    LOG_DEBUG("DatabaseService::mergeLoad - Merge load of file %s", filename.c_str());
+    LOG_DEBUG("DatabaseService::mergeLoad - Merge load of file %s",
+              filename.c_str());
 
     mLoadingStatus.reset();
     mLoadingStatus.totalCoarse += mListeners.size();
@@ -120,13 +126,14 @@ void DatabaseService::mergeLoad(const std::string& filename, uint32_t loadMask) 
 }
 
 //------------------------------------------------------
-void DatabaseService::save(const std::string& filename, uint32_t saveMask) {
+void DatabaseService::save(const std::string &filename, uint32_t saveMask) {
     // just prepare the progress and delegate to the broadcast
     FilePtr fp = FilePtr(new StdFile(filename, File::FILE_RW));
 
     FileGroupPtr tgtdb = FileGroupPtr(new DarkFileGroup());
 
-    LOG_DEBUG("DatabaseService::save - Save to file %s, mask %X", filename.c_str(), saveMask);
+    LOG_DEBUG("DatabaseService::save - Save to file %s, mask %X",
+              filename.c_str(), saveMask);
 
     mLoadingStatus.reset();
     mLoadingStatus.totalCoarse += mListeners.size();
@@ -134,7 +141,9 @@ void DatabaseService::save(const std::string& filename, uint32_t saveMask) {
     broadcastOnDBSave(tgtdb, saveMask);
 
     // And write the saveMask as FILE_TYPE
-    FilePtr fpf = tgtdb->createFile("FILE_TYPE", 0, 1); // The version is fixed, really. Nothing to invent here
+    FilePtr fpf = tgtdb->createFile(
+        "FILE_TYPE", 0,
+        1); // The version is fixed, really. Nothing to invent here
     fpf->writeElem(&saveMask, sizeof(uint32_t));
 
     // And Write!
@@ -154,9 +163,12 @@ void DatabaseService::unload(uint32_t dropMask) {
 }
 
 //------------------------------------------------------
-FileGroupPtr DatabaseService::getDBFileNamed(const std::string& filename) {
-    // TODO: Group of of the resource through the configuration service, once written
-    Ogre::DataStreamPtr stream = Ogre::ResourceGroupManager::getSingleton().openResource(filename, ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
+FileGroupPtr DatabaseService::getDBFileNamed(const std::string &filename) {
+    // TODO: Group of of the resource through the configuration service, once
+    // written
+    Ogre::DataStreamPtr stream =
+        Ogre::ResourceGroupManager::getSingleton().openResource(
+            filename, ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME);
     FilePtr fp(new OgreFile(stream));
 
     return FileGroupPtr(new DarkFileGroup(fp));
@@ -177,12 +189,13 @@ void DatabaseService::fineStep(int count) {
 }
 
 //------------------------------------------------------
-void DatabaseService::registerListener(DatabaseListener* listener, size_t priority) {
+void DatabaseService::registerListener(DatabaseListener *listener,
+                                       size_t priority) {
     mListeners.insert(std::make_pair(priority, listener));
 }
 
 //------------------------------------------------------
-void DatabaseService::unregisterListener(DatabaseListener* listener) {
+void DatabaseService::unregisterListener(DatabaseListener *listener) {
     Listeners::iterator it = mListeners.begin();
 
     while (it != mListeners.end()) {
@@ -197,7 +210,7 @@ void DatabaseService::unregisterListener(DatabaseListener* listener) {
 }
 
 //------------------------------------------------------
-uint32_t DatabaseService::getFileType(const FileGroupPtr& db) {
+uint32_t DatabaseService::getFileType(const FileGroupPtr &db) {
     // TODO: load FILE_TYPE for the first parameter
     FilePtr fttag = db->getFile("FILE_TYPE");
 
@@ -206,7 +219,6 @@ uint32_t DatabaseService::getFileType(const FileGroupPtr& db) {
         LOG_FATAL("Database file did not contain FILE_TYPE tag");
         return 0;
     }
-
 
     if (fttag->size() < sizeof(uint32_t)) {
         // TODO: Exception, rather
@@ -222,7 +234,7 @@ uint32_t DatabaseService::getFileType(const FileGroupPtr& db) {
 }
 
 //------------------------------------------------------
-const char* DatabaseService::getParentDBTagName(uint32_t fileType) {
+const char *DatabaseService::getParentDBTagName(uint32_t fileType) {
     // fixed for now
     if (fileType == DBM_FILETYPE_SAV)
         return "MIS_FILE";
@@ -234,14 +246,15 @@ const char* DatabaseService::getParentDBTagName(uint32_t fileType) {
 }
 
 //------------------------------------------------------
-std::string DatabaseService::loadFileNameFromTag(const Opde::FileGroupPtr& db, const char* tagname) {
+std::string DatabaseService::loadFileNameFromTag(const Opde::FileGroupPtr &db,
+                                                 const char *tagname) {
     FilePtr fdm = db->getFile(tagname);
 
     size_t gft_size = fdm->size();
 
     std::string res;
 
-    char* data = NULL;
+    char *data = NULL;
 
     data = new char[gft_size + 1];
     data[0] = 0x0;
@@ -253,12 +266,12 @@ std::string DatabaseService::loadFileNameFromTag(const Opde::FileGroupPtr& db, c
 
     delete[] data;
 
-
     return res;
 }
 
 //------------------------------------------------------
-void DatabaseService::broadcastOnDBLoad(const FileGroupPtr& db, uint32_t curmask) {
+void DatabaseService::broadcastOnDBLoad(const FileGroupPtr &db,
+                                        uint32_t curmask) {
     Listeners::iterator it = mListeners.begin();
 
     for (; it != mListeners.end(); ++it) {
@@ -269,7 +282,8 @@ void DatabaseService::broadcastOnDBLoad(const FileGroupPtr& db, uint32_t curmask
 
         unsigned long now = mTimer->getMilliseconds();
 
-        LOG_INFO("DatabaseService: Operation took %f seconds", (float)(now-sttime) / 1000);
+        LOG_INFO("DatabaseService: Operation took %f seconds",
+                 (float)(now - sttime) / 1000);
 
         // recalculate the status
         mLoadingStatus.currentCoarse++;
@@ -284,7 +298,8 @@ void DatabaseService::broadcastOnDBLoad(const FileGroupPtr& db, uint32_t curmask
 }
 
 //------------------------------------------------------
-void DatabaseService::broadcastOnDBSave(const FileGroupPtr& db, uint32_t tgtmask) {
+void DatabaseService::broadcastOnDBSave(const FileGroupPtr &db,
+                                        uint32_t tgtmask) {
     Listeners::iterator it = mListeners.begin();
 
     for (; it != mListeners.end(); ++it) {
@@ -295,7 +310,8 @@ void DatabaseService::broadcastOnDBSave(const FileGroupPtr& db, uint32_t tgtmask
 
         unsigned long now = mTimer->getMilliseconds();
 
-        LOG_INFO("DatabaseService: Operation took %f seconds", (float)(now-sttime) / 1000);
+        LOG_INFO("DatabaseService: Operation took %f seconds",
+                 (float)(now - sttime) / 1000);
 
         // recalculate the status
         mLoadingStatus.currentCoarse++;
@@ -321,7 +337,8 @@ void DatabaseService::broadcastOnDBDrop(uint32_t dropmask) {
 
         unsigned long now = mTimer->getMilliseconds();
 
-        LOG_INFO("DatabaseService: Operation took %f seconds", (float)(now-sttime) / 1000);
+        LOG_INFO("DatabaseService: Operation took %f seconds",
+                 (float)(now - sttime) / 1000);
 
         // recalculate the status
         mLoadingStatus.currentCoarse++;
@@ -338,23 +355,16 @@ void DatabaseService::broadcastOnDBDrop(uint32_t dropmask) {
 //-------------------------- Factory implementation
 std::string DatabaseServiceFactory::mName = "DatabaseService";
 
-DatabaseServiceFactory::DatabaseServiceFactory() : ServiceFactory() {
-};
+DatabaseServiceFactory::DatabaseServiceFactory() : ServiceFactory(){};
 
-const std::string& DatabaseServiceFactory::getName() {
-    return mName;
-}
+const std::string &DatabaseServiceFactory::getName() { return mName; }
 
-const uint DatabaseServiceFactory::getMask() {
-    return SERVICE_CORE;
-}
+const uint DatabaseServiceFactory::getMask() { return SERVICE_CORE; }
 
-const size_t DatabaseServiceFactory::getSID() {
-    return DatabaseService::SID;
-}
+const size_t DatabaseServiceFactory::getSID() { return DatabaseService::SID; }
 
-Service* DatabaseServiceFactory::createInstance(ServiceManager* manager) {
+Service *DatabaseServiceFactory::createInstance(ServiceManager *manager) {
     return new DatabaseService(manager, mName);
 }
 
-}
+} // namespace Opde

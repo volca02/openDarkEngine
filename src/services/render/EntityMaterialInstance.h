@@ -7,10 +7,10 @@ $Id$
 TODO: This is here to let us support:
     * Per object transparency (Property RenderAlpha)
     * Self light objects - needs more work (per material, etc)
-    * Full bright objects - f.e. this is how original dark indicates object to be frobbed
+    * Full bright objects - f.e. this is how original dark indicates object to
+be frobbed
     * OTHERS?
 */
-
 
 #ifndef __ENTITYMATERIALINSTANCE_H__
 #define __ENTITYMATERIALINSTANCE_H__
@@ -22,7 +22,8 @@ TODO: This is here to let us support:
 /** Iterator to traverse the SubEntityMaterialInstance's.
  * @author Kencho.
  */
-typedef Ogre::VectorIterator<std::vector<SubEntityMaterialInstance *> > SubEntityMaterialInstancesIterator;
+typedef Ogre::VectorIterator<std::vector<SubEntityMaterialInstance *>>
+    SubEntityMaterialInstancesIterator;
 
 /** An instance of a full Entity material.
  * This is like a hub for all the underlying SubEntities material instances.
@@ -31,53 +32,61 @@ typedef Ogre::VectorIterator<std::vector<SubEntityMaterialInstance *> > SubEntit
  * @author Kencho
  */
 class EntityMaterialInstance {
-// Methods ====================================================================================
-  public:
-    /** Constructor. 
+    // Methods
+    // ====================================================================================
+public:
+    /** Constructor.
      * Initialises the list of SubEntities' material instances.
      * @param e The entity this material instance will affect to.
-     * @note This will create material instances for all the underlying SubEntities.
+     * @note This will create material instances for all the underlying
+     * SubEntities.
      */
-    EntityMaterialInstance (Ogre::Entity *e);
+    EntityMaterialInstance(Ogre::Entity *e);
     /** Destructor.
      * Destroys all the underlying SubEntityMaterialInstances.
      */
-    ~EntityMaterialInstance ();
+    ~EntityMaterialInstance();
 
     /** Sets the scene blending method for all the SubEntities.
      * @param sbt The desired SceneBlendType.
      * @see SubEntityMaterialInstance::setSceneBlending().
      */
-    void setSceneBlending (Ogre::SceneBlendType sbt);
+    void setSceneBlending(Ogre::SceneBlendType sbt);
 
-    /** Changes the whole Entity transparency, through all the underlying SubEntityMaterialInstances.
+    /** Changes the whole Entity transparency, through all the underlying
+     * SubEntityMaterialInstances.
      * @param transparency New transparency.
      * @see SubEntityMaterialInstance::setTransparency().
      */
-    void setTransparency (Ogre::Real transparency);
+    void setTransparency(Ogre::Real transparency);
 
     /** Returns an iterator to traverse all the underlying MaterialInstances.
      * @return The SubEntityMaterialInstances iterator.
      */
-    SubEntityMaterialInstancesIterator getSubEntityMaterialInstancesIterator ();
-    
-    /** Sets a new entity to handle by this class, preserving the previous values
-    */
-	void setEntity(Ogre::Entity *e);
-  
-	/** Z-Bias override. Used for SS2 billboards the most, but present in T2 as well
-	*/
-	void setZBias(size_t zbias);
-	
-	/// Initializes the render queue base. Must be done prior to usage of this class
-	static void setBaseRenderQueueGroup(Ogre::uint8 baseRQ);
-  protected:
-	void prepareSEMIs();
-	void destroySEMIs();
+    SubEntityMaterialInstancesIterator getSubEntityMaterialInstancesIterator();
 
-// Attributes =================================================================================
-	Ogre::Entity* mEntity;
-	
+    /** Sets a new entity to handle by this class, preserving the previous
+     * values
+     */
+    void setEntity(Ogre::Entity *e);
+
+    /** Z-Bias override. Used for SS2 billboards the most, but present in T2 as
+     * well
+     */
+    void setZBias(size_t zbias);
+
+    /// Initializes the render queue base. Must be done prior to usage of this
+    /// class
+    static void setBaseRenderQueueGroup(Ogre::uint8 baseRQ);
+
+protected:
+    void prepareSEMIs();
+    void destroySEMIs();
+
+    // Attributes
+    // =================================================================================
+    Ogre::Entity *mEntity;
+
     /** List of SubEntities' material instances.
      */
     std::vector<SubEntityMaterialInstance *> mSEMIs;
@@ -85,18 +94,18 @@ class EntityMaterialInstance {
      * @see SubEntityMaterialInstance::mCurrentTransparency.
      */
     Ogre::Real mCurrentTransparency;
-    
+
     /** Keeps the current ZBias value.
-   */
+     */
     size_t mZBias;
-    
+
     // Default render queue group - must be set using setBaseRenderQueueGroup!
-    static Ogre::uint8 msBaseRenderQueueGroup; 
-    
+    static Ogre::uint8 msBaseRenderQueueGroup;
+
     /// Keeps the original render queue group
     Ogre::uint8 mOriginalRenderQueueGroup;
-  
-	Ogre::SceneBlendType mSceneBlendType;
+
+    Ogre::SceneBlendType mSceneBlendType;
 };
 
 #endif // __ENTITYMATERIALINSTANCE_H__

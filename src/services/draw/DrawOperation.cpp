@@ -21,130 +21,130 @@
  *
  *****************************************************************************/
 
-#include "DrawService.h"
 #include "DrawOperation.h"
+#include "DrawService.h"
 #include "DrawSheet.h"
 
 namespace Opde {
 
-	/*----------------------------------------------------*/
-	/*-------------------- 	DrawOperation ----------------*/
-	/*----------------------------------------------------*/
-	DrawOperation::DrawOperation(DrawService* owner, DrawOperation::ID id) :
-			mID(id),
-			mOwner(owner),
-			mActiveSheet(NULL),
-			mPosition(0,0),
-			mZOrder(0),
-			mIsDirty(false) {
-		// nothing to do besides this
-	};
+/*----------------------------------------------------*/
+/*-------------------- 	DrawOperation ----------------*/
+/*----------------------------------------------------*/
+DrawOperation::DrawOperation(DrawService *owner, DrawOperation::ID id)
+    : mID(id), mOwner(owner), mActiveSheet(NULL), mPosition(0, 0), mZOrder(0),
+      mIsDirty(false){
+          // nothing to do besides this
+      };
 
-	//------------------------------------------------------
-	DrawOperation::~DrawOperation() {
-		// at least break the circle (but clear should've been called anyway)
-		mUsingSheets.clear();
-	};
+//------------------------------------------------------
+DrawOperation::~DrawOperation() {
+    // at least break the circle (but clear should've been called anyway)
+    mUsingSheets.clear();
+};
 
-	//------------------------------------------------------
-	void DrawOperation::visitDrawBuffer(DrawBuffer* db) {
-		// empty. To be overridden by ancestor to do the rendering (via DrawBuffer::_queueDrawQuad)
-	};
+//------------------------------------------------------
+void DrawOperation::visitDrawBuffer(DrawBuffer *db){
+    // empty. To be overridden by ancestor to do the rendering (via
+    // DrawBuffer::_queueDrawQuad)
+};
 
-	//------------------------------------------------------
-	void DrawOperation::onSheetRegister(DrawSheet* sheet) {
-		mUsingSheets.insert(sheet);
-	};
+//------------------------------------------------------
+void DrawOperation::onSheetRegister(DrawSheet *sheet) {
+    mUsingSheets.insert(sheet);
+};
 
-	//------------------------------------------------------
-	void DrawOperation::onSheetUnregister(DrawSheet* sheet) {
-		mUsingSheets.erase(sheet);
-	};
+//------------------------------------------------------
+void DrawOperation::onSheetUnregister(DrawSheet *sheet) {
+    mUsingSheets.erase(sheet);
+};
 
-	//------------------------------------------------------
-	void DrawOperation::_sourceChanged(const DrawSourcePtr& old) {
-		for (DrawSheetSet::iterator it = mUsingSheets.begin(); it != mUsingSheets.end(); ++it) {
-				(*it)->_sourceChanged(this, old);
-		}
-		
-		// Texture didn't change, be sure to invalidate at least
-		if (old->getSourceID() == getDrawSourceBase()->getSourceID()) {
-			_markDirty();
-		}
-	}
-	
-	//------------------------------------------------------
-	void DrawOperation::_markDirty() {
-		mIsDirty = true;
-		
-		for (DrawSheetSet::iterator it = mUsingSheets.begin(); it != mUsingSheets.end(); ++it) {
-			(*it)->_markDirty(this);
-		}
-	}
+//------------------------------------------------------
+void DrawOperation::_sourceChanged(const DrawSourcePtr &old) {
+    for (DrawSheetSet::iterator it = mUsingSheets.begin();
+         it != mUsingSheets.end(); ++it) {
+        (*it)->_sourceChanged(this, old);
+    }
 
-	//------------------------------------------------------
-	void DrawOperation::setPosition(int x, int y) {
-		mPosition.first = x;
-		mPosition.second = y;
-
-		_markDirty();
-	}
-	
-	//------------------------------------------------------
-	void DrawOperation::setPosition(const PixelCoord& pos) {
-		mPosition = pos;
-		
-		_markDirty();
-	}
-
-	//------------------------------------------------------
-	void DrawOperation::setZOrder(int z) {
-		mZOrder = z;
-
-		_markDirty();
-	}
-	
-	//------------------------------------------------------
-	void DrawOperation::rebuild() {
-		// update the clip rect -> on screen projection
-		if (mActiveSheet) {
-			mActiveSheet->convertClipToScreen(mClipRect, mClipOnScreen);
-		} else {
-			mClipOnScreen.noClip = true;
-		}
-
-		_rebuild();
-		mIsDirty = false;
-	}
-	
-	//------------------------------------------------------
-	void DrawOperation::_notifyActiveSheet(DrawSheet* actsh) {
-		mActiveSheet = actsh;
-		
-		// need rebuild thanks to different sheet dimensions, etc.
-		_markDirty();
-	}
-
-	//------------------------------------------------------
-	void DrawOperation::_rebuild() {
-		// nothing
-	}
-	
-	//------------------------------------------------------
-	void DrawOperation::clear() {
-		// remove from all sheets left
-		for (DrawSheetSet::iterator it = mUsingSheets.begin(); it != mUsingSheets.end(); ++it) {
-			(*it)->_removeDrawOperation(this);
-		}
-
-		mUsingSheets.clear();
-	}
-	
-	//------------------------------------------------------
-	void DrawOperation::setClipRect(const ClipRect& cr) {
-		mClipRect = cr;
-
-		_markDirty();
-	}
-	
+    // Texture didn't change, be sure to invalidate at least
+    if (old->getSourceID() == getDrawSourceBase()->getSourceID()) {
+        _markDirty();
+    }
 }
+
+//------------------------------------------------------
+void DrawOperation::_markDirty() {
+    mIsDirty = true;
+
+    for (DrawSheetSet::iterator it = mUsingSheets.begin();
+         it != mUsingSheets.end(); ++it) {
+        (*it)->_markDirty(this);
+    }
+}
+
+//------------------------------------------------------
+void DrawOperation::setPosition(int x, int y) {
+    mPosition.first = x;
+    mPosition.second = y;
+
+    _markDirty();
+}
+
+//------------------------------------------------------
+void DrawOperation::setPosition(const PixelCoord &pos) {
+    mPosition = pos;
+
+    _markDirty();
+}
+
+//------------------------------------------------------
+void DrawOperation::setZOrder(int z) {
+    mZOrder = z;
+
+    _markDirty();
+}
+
+//------------------------------------------------------
+void DrawOperation::rebuild() {
+    // update the clip rect -> on screen projection
+    if (mActiveSheet) {
+        mActiveSheet->convertClipToScreen(mClipRect, mClipOnScreen);
+    } else {
+        mClipOnScreen.noClip = true;
+    }
+
+    _rebuild();
+    mIsDirty = false;
+}
+
+//------------------------------------------------------
+void DrawOperation::_notifyActiveSheet(DrawSheet *actsh) {
+    mActiveSheet = actsh;
+
+    // need rebuild thanks to different sheet dimensions, etc.
+    _markDirty();
+}
+
+//------------------------------------------------------
+void DrawOperation::_rebuild() {
+    // nothing
+}
+
+//------------------------------------------------------
+void DrawOperation::clear() {
+    // remove from all sheets left
+    for (DrawSheetSet::iterator it = mUsingSheets.begin();
+         it != mUsingSheets.end(); ++it) {
+        (*it)->_removeDrawOperation(this);
+    }
+
+    mUsingSheets.clear();
+}
+
+//------------------------------------------------------
+void DrawOperation::setClipRect(const ClipRect &cr) {
+    mClipRect = cr;
+
+    _markDirty();
+}
+
+} // namespace Opde

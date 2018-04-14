@@ -21,71 +21,69 @@
  *
  *****************************************************************************/
 
-
 #ifndef __ROOMPORTAL_H
 #define __ROOMPORTAL_H
 
+#include "Array.h"
+#include "File.h"
+#include "RoomCommon.h"
+#include "SharedPtr.h"
 #include "config.h"
 #include "integers.h"
-#include "SharedPtr.h"
-#include "RoomCommon.h"
-#include "File.h"
-#include "Array.h"
 
-#include "Vector3.h"
 #include "Plane.h"
+#include "Vector3.h"
 
 namespace Opde {
-	/** @brief A room portal. Room portals connect two Room instances (doorways)
-	*/
-	class OPDELIB_EXPORT RoomPortal {
-		public:
-			RoomPortal(RoomService* owner);
-			~RoomPortal();
-			
-			/// reads the room portal from the specified file
-			void read(const FilePtr& sf);
-			
-			/// writes the room portal into the specified file
-			void write(const FilePtr& sf);
-			
-			bool isInside(const Vector3& point);
-			
-			/// getter for the room that is the target of this portal
-			inline Room* getFarRoom() const { return mDestRoom; };
-			
-			/// getter for the room that is the source for this portal
-			inline Room* getNearRoom() const { return mSrcRoom; };
+/** @brief A room portal. Room portals connect two Room instances (doorways)
+ */
+class OPDELIB_EXPORT RoomPortal {
+public:
+    RoomPortal(RoomService *owner);
+    ~RoomPortal();
 
-		private:
-			void clear();
-			
-			/// Owner service
-			RoomService* mOwner;
-			/// Portal ID
-			int32_t  mID;
-			/// The index of this portal in the room's portal list
-			uint32_t  mIndex;
-			/// Plane this portal lies on 
-			Plane mPlane;
-			/// Number of portal edges
-			uint32_t  mEdgeCount;
-			/// Plane list - planes that make up the portal
-			SimpleArray<Plane> mEdges; 
-			// Source and destination rooms
-			/// room number this portal goes to
-			Room*     mDestRoom;      
-			/// the source room number
-			Room*     mSrcRoom;
-			/// center point of the portal. (should not be in solid space)
-			Vector3 mCenter;
-			/// portal ID on the other side of this portal
-			int32_t  mDestPortal;
-	};
+    /// reads the room portal from the specified file
+    void read(const FilePtr &sf);
 
-	/// Shared pointer to a room portal instance
-	typedef shared_ptr<RoomPortal> RoomPortalPtr;
-}
+    /// writes the room portal into the specified file
+    void write(const FilePtr &sf);
 
+    bool isInside(const Vector3 &point);
+
+    /// getter for the room that is the target of this portal
+    inline Room *getFarRoom() const { return mDestRoom; };
+
+    /// getter for the room that is the source for this portal
+    inline Room *getNearRoom() const { return mSrcRoom; };
+
+private:
+    void clear();
+
+    /// Owner service
+    RoomService *mOwner;
+    /// Portal ID
+    int32_t mID;
+    /// The index of this portal in the room's portal list
+    uint32_t mIndex;
+    /// Plane this portal lies on
+    Plane mPlane;
+    /// Number of portal edges
+    uint32_t mEdgeCount;
+    /// Plane list - planes that make up the portal
+    SimpleArray<Plane> mEdges;
+    // Source and destination rooms
+    /// room number this portal goes to
+    Room *mDestRoom;
+    /// the source room number
+    Room *mSrcRoom;
+    /// center point of the portal. (should not be in solid space)
+    Vector3 mCenter;
+    /// portal ID on the other side of this portal
+    int32_t mDestPortal;
+};
+
+/// Shared pointer to a room portal instance
+typedef shared_ptr<RoomPortal> RoomPortalPtr;
+} // namespace Opde
 
 #endif

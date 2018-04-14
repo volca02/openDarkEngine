@@ -22,33 +22,31 @@
  *
  *****************************************************************************/
 
-
 #ifndef __APPLEPLATFORM_H
 #define __APPLEPLATFORM_H
 
 #include "config.h"
 
-#include "OpdeServiceManager.h"
 #include "OpdeService.h"
+#include "OpdeServiceManager.h"
 #include "Platform.h"
 
 namespace Opde {
 
-	/** @brief Apple platform. Apple OS specific platform handling code.
-	*/
-	class OPDELIB_EXPORT ApplePlatform : public Platform {
-		public:
-			ApplePlatform(PlatformService* owner);
-			virtual ~ApplePlatform();
-			
-			virtual std::string getGlobalConfigPath() const;
+/** @brief Apple platform. Apple OS specific platform handling code.
+ */
+class OPDELIB_EXPORT ApplePlatform : public Platform {
+public:
+    ApplePlatform(PlatformService *owner);
+    virtual ~ApplePlatform();
 
-			virtual std::string getUserConfigPath() const;
+    virtual std::string getGlobalConfigPath() const;
 
-			virtual std::string getDirectorySeparator() const;
-	};
+    virtual std::string getUserConfigPath() const;
 
-}
+    virtual std::string getDirectorySeparator() const;
+};
 
+} // namespace Opde
 
 #endif

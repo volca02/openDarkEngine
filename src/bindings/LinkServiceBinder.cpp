@@ -22,52 +22,52 @@
  *
  *****************************************************************************/
 
-#include "bindings.h"
 #include "LinkServiceBinder.h"
-#include "RelationBinder.h"
-#include "LinkQueryResultBinder.h"
-#include "StringIteratorBinder.h"
 #include "DataFieldDescIteratorBinder.h"
+#include "LinkQueryResultBinder.h"
+#include "RelationBinder.h"
+#include "StringIteratorBinder.h"
+#include "bindings.h"
 
 namespace Opde {
 
 namespace Python {
 
 // -------------------- Link Service --------------------
-const char* LinkServiceBinder::msName = "LinkService";
+const char *LinkServiceBinder::msName = "LinkService";
 
 // ------------------------------------------
 PyTypeObject LinkServiceBinder::msType = {
-    PyVarObject_HEAD_INIT(&PyType_Type, 0)
-    "opde.services.LinkService",                   // char *tp_name; */
-    sizeof(LinkServiceBinder::Object),  // int tp_basicsize; */
-    0,                        // int tp_itemsize;       /* not used much */
-    LinkServiceBinder::dealloc,   // destructor tp_dealloc; */
-    0,                        // printfunc  tp_print;   */
-    0,  // getattrfunc  tp_getattr; /* __getattr__ */
-    0,                        // setattrfunc  tp_setattr;  /* __setattr__ */
-    0,                        // cmpfunc  tp_compare;  /* __cmp__ */
-    0,                        // reprfunc  tp_repr;    /* __repr__ */
-    0,                        // PyNumberMethods *tp_as_number; */
-    0,                        // PySequenceMethods *tp_as_sequence; */
-    0,                        // PyMappingMethods *tp_as_mapping; */
-    0,                        // hashfunc tp_hash;     /* __hash__ */
-    0,                        // ternaryfunc tp_call;  /* __call__ */
-    0,                        // reprfunc tp_str;      /* __str__ */
-    PyObject_GenericGetAttr,  // getattrofunc tp_getattro; */
-    0,                        // setattrofunc tp_setattro; */
-    0,                        // PyBufferProcs *tp_as_buffer; */
-    0,                        // long tp_flags; */
-    0,                        // char *tp_doc;  */
-    0,                        // traverseproc tp_traverse; */
-    0,                        // inquiry tp_clear; */
-    0,                        // richcmpfunc tp_richcompare; */
-    0,                        // long tp_weaklistoffset; */
-    0,                        // getiterfunc tp_iter; */
-    0,                        // iternextfunc tp_iternext; */
-    msMethods,                // struct PyMethodDef *tp_methods; */
-    0,                        // struct memberlist *tp_members; */
-    0,                        // struct getsetlist *tp_getset; */
+    PyVarObject_HEAD_INIT(&PyType_Type,
+                          0) "opde.services.LinkService", // char *tp_name; */
+    sizeof(LinkServiceBinder::Object), // int tp_basicsize; */
+    0,                          // int tp_itemsize;       /* not used much */
+    LinkServiceBinder::dealloc, // destructor tp_dealloc; */
+    0,                          // printfunc  tp_print;   */
+    0,                          // getattrfunc  tp_getattr; /* __getattr__ */
+    0,                          // setattrfunc  tp_setattr;  /* __setattr__ */
+    0,                          // cmpfunc  tp_compare;  /* __cmp__ */
+    0,                          // reprfunc  tp_repr;    /* __repr__ */
+    0,                          // PyNumberMethods *tp_as_number; */
+    0,                          // PySequenceMethods *tp_as_sequence; */
+    0,                          // PyMappingMethods *tp_as_mapping; */
+    0,                          // hashfunc tp_hash;     /* __hash__ */
+    0,                          // ternaryfunc tp_call;  /* __call__ */
+    0,                          // reprfunc tp_str;      /* __str__ */
+    PyObject_GenericGetAttr,    // getattrofunc tp_getattro; */
+    0,                          // setattrofunc tp_setattro; */
+    0,                          // PyBufferProcs *tp_as_buffer; */
+    0,                          // long tp_flags; */
+    0,                          // char *tp_doc;  */
+    0,                          // traverseproc tp_traverse; */
+    0,                          // inquiry tp_clear; */
+    0,                          // richcmpfunc tp_richcompare; */
+    0,                          // long tp_weaklistoffset; */
+    0,                          // getiterfunc tp_iter; */
+    0,                          // iternextfunc tp_iternext; */
+    msMethods,                  // struct PyMethodDef *tp_methods; */
+    0,                          // struct memberlist *tp_members; */
+    0,                          // struct getsetlist *tp_getset; */
 };
 
 // ------------------------------------------
@@ -85,7 +85,7 @@ PyMethodDef LinkServiceBinder::msMethods[] = {
 };
 
 // ------------------------------------------
-PyObject* LinkServiceBinder::setChunkVersion(PyObject* self, PyObject* args) {
+PyObject *LinkServiceBinder::setChunkVersion(PyObject *self, PyObject *args) {
     __PYTHON_EXCEPTION_GUARD_BEGIN_;
     PyObject *result = NULL;
     LinkServicePtr o;
@@ -112,7 +112,7 @@ PyObject* LinkServiceBinder::setChunkVersion(PyObject* self, PyObject* args) {
 }
 
 // ------------------------------------------
-PyObject* LinkServiceBinder::nameToFlavor(PyObject* self, PyObject* args) {
+PyObject *LinkServiceBinder::nameToFlavor(PyObject *self, PyObject *args) {
     __PYTHON_EXCEPTION_GUARD_BEGIN_;
     PyObject *result = NULL;
     LinkServicePtr o;
@@ -120,7 +120,7 @@ PyObject* LinkServiceBinder::nameToFlavor(PyObject* self, PyObject* args) {
     if (!python_cast<LinkServicePtr>(self, &msType, &o))
         __PY_CONVERR_RET;
 
-    const char* name;
+    const char *name;
 
     if (PyArg_ParseTuple(args, "s", &name)) {
         const int res = o->nameToFlavor(name);
@@ -136,7 +136,7 @@ PyObject* LinkServiceBinder::nameToFlavor(PyObject* self, PyObject* args) {
 }
 
 // ------------------------------------------
-PyObject* LinkServiceBinder::flavorToName(PyObject* self, PyObject* args) {
+PyObject *LinkServiceBinder::flavorToName(PyObject *self, PyObject *args) {
     __PYTHON_EXCEPTION_GUARD_BEGIN_;
     PyObject *result = NULL;
     LinkServicePtr o;
@@ -147,7 +147,7 @@ PyObject* LinkServiceBinder::flavorToName(PyObject* self, PyObject* args) {
     int id;
 
     if (PyArg_ParseTuple(args, "i", &id)) {
-        const std::string& res = o->flavorToName(id);
+        const std::string &res = o->flavorToName(id);
 
 #ifdef IS_PY3K
         result = PyBytes_FromString(res.c_str());
@@ -163,9 +163,8 @@ PyObject* LinkServiceBinder::flavorToName(PyObject* self, PyObject* args) {
     __PYTHON_EXCEPTION_GUARD_END_;
 }
 
-
 // ------------------------------------------
-PyObject* LinkServiceBinder::getRelation(PyObject* self, PyObject* args) {
+PyObject *LinkServiceBinder::getRelation(PyObject *self, PyObject *args) {
     __PYTHON_EXCEPTION_GUARD_BEGIN_;
     PyObject *result = NULL;
     LinkServicePtr o;
@@ -173,291 +172,296 @@ PyObject* LinkServiceBinder::getRelation(PyObject* self, PyObject* args) {
     if (!python_cast<LinkServicePtr>(self, &msType, &o))
         __PY_CONVERR_RET;
 
-    PyObject* object;
+    PyObject *object;
     if (!PyArg_ParseTuple(args, "O", &object)) {
-        PyErr_SetString(PyExc_TypeError, "Expected an integer or string argument!");
+        PyErr_SetString(PyExc_TypeError,
+                        "Expected an integer or string argument!");
         return NULL;
     }
 
     // two possibilities here : name or flavor
 #ifdef IS_PY3K
     if (PyBytes_Check(object)) {
-        char* str = PyBytes_AsString(object);
+        char *str = PyBytes_AsString(object);
 #else
-        if (PyString_Check(object)) {
-            char* str = PyString_AsString(object);
+    if (PyString_Check(object)) {
+        char *str = PyString_AsString(object);
 #endif
-            RelationPtr rel = o->getRelation(str);
+        RelationPtr rel = o->getRelation(str);
 
-            if (!rel) {
-                PyErr_Format(PyExc_ValueError, "Relation not found by name %s", str);
-            } else
-                result = RelationBinder::create(rel);
+        if (!rel) {
+            PyErr_Format(PyExc_ValueError, "Relation not found by name %s",
+                         str);
+        } else
+            result = RelationBinder::create(rel);
 
-            return result;
-        } else if (PyLong_Check(object)) {
-            long id = PyLong_AsLong(object);
-            RelationPtr rel = o->getRelation(static_cast<int>(id));
+        return result;
+    } else if (PyLong_Check(object)) {
+        long id = PyLong_AsLong(object);
+        RelationPtr rel = o->getRelation(static_cast<int>(id));
 
-            if (!rel) {
-                PyErr_Format(PyExc_ValueError, "Relation not found by id %ld", id);
-            } else
-                result = RelationBinder::create(rel);
+        if (!rel) {
+            PyErr_Format(PyExc_ValueError, "Relation not found by id %ld", id);
+        } else
+            result = RelationBinder::create(rel);
 
-            return result;
+        return result;
+    } else {
+        // Invalid parameters
+        PyErr_SetString(PyExc_TypeError,
+                        "Expected an integer or string argument!");
+        return NULL;
+    }
+    __PYTHON_EXCEPTION_GUARD_END_;
+}
+
+// ------------------------------------------
+PyObject *LinkServiceBinder::getAllLinks(PyObject *self, PyObject *args) {
+    __PYTHON_EXCEPTION_GUARD_BEGIN_;
+    LinkServicePtr o;
+
+    if (!python_cast<LinkServicePtr>(self, &msType, &o))
+        __PY_CONVERR_RET;
+
+    int flavor = 0, src, dst;
+    PyObject *objflav;
+
+    // let the third parameter be either string or integer
+    // if it's a string, we first have to parse the string to get flavor id
+
+    if (PyArg_ParseTuple(args, "Oii", &objflav, &src, &dst)) {
+#ifdef IS_PY3K
+        if (PyBytes_Check(objflav)) {
+            char *str = PyBytes_AsString(objflav);
+#else
+        if (PyString_Check(objflav)) {
+            char *str = PyString_AsString(objflav);
+#endif
+            flavor = o->nameToFlavor(str);
+        } else if (PyLong_Check(objflav)) {
+            flavor = PyLong_AsLong(objflav);
         } else {
-            // Invalid parameters
-            PyErr_SetString(PyExc_TypeError, "Expected an integer or string argument!");
+            PyErr_SetString(
+                PyExc_TypeError,
+                "Invalid type given for flavor: expected string or integer");
             return NULL;
         }
-        __PYTHON_EXCEPTION_GUARD_END_;
+
+        LinkQueryResultPtr res = o->getAllLinks(flavor, src, dst);
+
+        return LinkQueryResultBinder::create(res);
+    } else {
+        // Invalid parameters
+        PyErr_SetString(PyExc_TypeError,
+                        "Expected three parameters: flavor, src and dst!");
+        return NULL;
+    }
+    __PYTHON_EXCEPTION_GUARD_END_;
+}
+
+// ------------------------------------------
+bool LinkServiceBinder::getFlavor(PyObject *src, LinkServicePtr &obj,
+                                  int &flavor) {
+    __PYTHON_EXCEPTION_GUARD_BEGIN_;
+#ifdef IS_PY3K
+    if (PyBytes_Check(src)) {
+        char *str = PyBytes_AsString(src);
+#else
+    if (PyString_Check(src)) {
+        char *str = PyString_AsString(src);
+#endif
+        flavor = obj->nameToFlavor(str);
+        return true;
+    } else if (PyLong_Check(src)) {
+        flavor = PyLong_AsLong(src);
+        return true;
+    } else {
+        PyErr_SetString(
+            PyExc_TypeError,
+            "Invalid type given for flavor: expected string or integer");
+        return false;
+    }
+    __PYTHON_EXCEPTION_GUARD_END_RVAL(false);
+}
+
+// ------------------------------------------
+PyObject *LinkServiceBinder::getAllInherited(PyObject *self, PyObject *args) {
+    __PYTHON_EXCEPTION_GUARD_BEGIN_;
+    LinkServicePtr o;
+
+    if (!python_cast<LinkServicePtr>(self, &msType, &o))
+        __PY_CONVERR_RET;
+
+    int flavor = 0, src, dst;
+    PyObject *objflav;
+
+    // let the third parameter be either string or integer
+    // if it's a string, we first have to parse the string to get flavor id
+
+    if (PyArg_ParseTuple(args, "Oii", &objflav, &src, &dst)) {
+        if (!getFlavor(objflav, o, flavor))
+            return NULL;
+
+        LinkQueryResultPtr res = o->getAllInherited(flavor, src, dst);
+
+        return LinkQueryResultBinder::create(res);
+    } else {
+        // Invalid parameters
+        PyErr_SetString(PyExc_TypeError,
+                        "Expected three parameters: flavor, src and dst!");
+        return NULL;
+    }
+    __PYTHON_EXCEPTION_GUARD_END_;
+}
+
+// ------------------------------------------
+PyObject *LinkServiceBinder::getOneLink(PyObject *self, PyObject *args) {
+    __PYTHON_EXCEPTION_GUARD_BEGIN_;
+    // Nearly the same as getAllLinks. Only that it returns PyObject for LinkPtr
+    // directly
+    LinkServicePtr o;
+
+    if (!python_cast<LinkServicePtr>(self, &msType, &o))
+        __PY_CONVERR_RET;
+
+    int flavor = 0, src, dst;
+    PyObject *objflav;
+
+    if (PyArg_ParseTuple(args, "Oii", &objflav, &src, &dst)) {
+        if (!getFlavor(objflav, o, flavor))
+            return NULL;
+
+        LinkPtr res = o->getOneLink(flavor, src, dst);
+        return LinkBinder::create(res);
+    } else {
+        // Invalid parameters
+        PyErr_SetString(
+            PyExc_TypeError,
+            "Expected three integer parameters: flavor, src and dst!");
+        return NULL;
+    }
+    __PYTHON_EXCEPTION_GUARD_END_;
+}
+
+// ------------------------------------------
+PyObject *LinkServiceBinder::getAllLinkNames(PyObject *self, PyObject *args) {
+    __PYTHON_EXCEPTION_GUARD_BEGIN_;
+    LinkServicePtr o;
+
+    if (!python_cast<LinkServicePtr>(self, &msType, &o))
+        __PY_CONVERR_RET;
+
+    // wrap the returned StringIterator into StringIteratorBinder, return
+    StringIteratorPtr res = o->getAllLinkNames();
+
+    return StringIteratorBinder::create(res);
+    __PYTHON_EXCEPTION_GUARD_END_;
+}
+
+// ------------------------------------------
+PyObject *LinkServiceBinder::getFieldsDesc(PyObject *self, PyObject *args) {
+    __PYTHON_EXCEPTION_GUARD_BEGIN_;
+    LinkServicePtr o;
+
+    if (!python_cast<LinkServicePtr>(self, &msType, &o))
+        __PY_CONVERR_RET;
+
+    PyObject *objflav;
+    int flavor = 0;
+
+    if (PyArg_ParseTuple(args, "O", &objflav)) {
+        if (!getFlavor(objflav, o, flavor))
+            return NULL;
+
+        // wrap the returned StringIterator into StringIteratorBinder, return
+        DataFieldDescIteratorPtr res = o->getFieldDescIterator(flavor);
+        return DataFieldDescIteratorBinder::create(res);
     }
 
-    // ------------------------------------------
-    PyObject* LinkServiceBinder::getAllLinks(PyObject* self, PyObject* args) {
-        __PYTHON_EXCEPTION_GUARD_BEGIN_;
-        LinkServicePtr o;
+    // Invalid parameters
+    PyErr_SetString(PyExc_TypeError, "Expected a string or integer argument!");
+    return NULL;
+    __PYTHON_EXCEPTION_GUARD_END_;
+}
 
-        if (!python_cast<LinkServicePtr>(self, &msType, &o))
-            __PY_CONVERR_RET;
+// ------------------------------------------
+PyObject *LinkServiceBinder::create() {
+    Object *object = construct(&msType);
 
-        int flavor = 0, src, dst;
-        PyObject* objflav;
+    if (object != NULL) {
+        object->mInstance = GET_SERVICE(LinkService);
+    }
 
-        // let the third parameter be either string or integer
-        // if it's a string, we first have to parse the string to get flavor id
+    return (PyObject *)object;
+}
 
-        if (PyArg_ParseTuple(args, "Oii", &objflav, &src, &dst)) {
-#ifdef IS_PY3K
-            if (PyBytes_Check(objflav)) {
-                char* str = PyBytes_AsString(objflav);
-#else
-                if (PyString_Check(objflav)) {
-                    char* str = PyString_AsString(objflav);
-#endif
-                    flavor = o->nameToFlavor(str);
-                } else if (PyLong_Check(objflav)) {
-                    flavor = PyLong_AsLong(objflav);
-                } else {
-                    PyErr_SetString(PyExc_TypeError, "Invalid type given for flavor: expected string or integer");
-                    return NULL;
-                }
+// ------------------------------------------
+void LinkServiceBinder::init(PyObject *module) {
+    publishType(module, &msType, msName);
 
-                LinkQueryResultPtr res = o->getAllLinks(flavor, src, dst);
+    LinkBinder::init(module);
+    LinkQueryResultBinder::init(module);
+    RelationBinder::init(module);
+}
 
-                return LinkQueryResultBinder::create(res);
-            } else {
-                // Invalid parameters
-                PyErr_SetString(PyExc_TypeError, "Expected three parameters: flavor, src and dst!");
-                return NULL;
-            }
-            __PYTHON_EXCEPTION_GUARD_END_;
-        }
+// -------------------- Link --------------------
+const char *LinkBinder::msName = "Link";
 
-        // ------------------------------------------
-        bool LinkServiceBinder::getFlavor(PyObject *src, LinkServicePtr& obj, int& flavor) {
-            __PYTHON_EXCEPTION_GUARD_BEGIN_;
-#ifdef IS_PY3K
-            if (PyBytes_Check(src)) {
-                char* str = PyBytes_AsString(src);
-#else
-                if (PyString_Check(src)) {
-                    char* str = PyString_AsString(src);
-#endif
-                    flavor = obj->nameToFlavor(str);
-                    return true;
-                } else if (PyLong_Check(src)) {
-                    flavor = PyLong_AsLong(src);
-                    return true;
-                } else {
-                    PyErr_SetString(PyExc_TypeError, "Invalid type given for flavor: expected string or integer");
-                    return false;
-                }
-                __PYTHON_EXCEPTION_GUARD_END_RVAL(false);
-            }
+// ------------------------------------------
+PyTypeObject LinkBinder::msType = {
+    PyVarObject_HEAD_INIT(&PyType_Type, 0) msName, // char *tp_name; */
+    sizeof(LinkBinder::Object),                    // int tp_basicsize; */
+    0,                   // int tp_itemsize;       /* not used much */
+    LinkBinder::dealloc, // destructor tp_dealloc; */
+    0,                   // printfunc  tp_print;   */
+    LinkBinder::getattr, // getattrfunc  tp_getattr; /* __getattr__ */
+};
 
-            // ------------------------------------------
-            PyObject* LinkServiceBinder::getAllInherited(PyObject* self, PyObject* args) {
-                __PYTHON_EXCEPTION_GUARD_BEGIN_;
-                LinkServicePtr o;
+// ------------------------------------------
+PyObject *LinkBinder::getattr(PyObject *self, char *name) {
+    LinkPtr o;
 
-                if (!python_cast<LinkServicePtr>(self, &msType, &o))
-                    __PY_CONVERR_RET;
+    if (!python_cast<LinkPtr>(self, &msType, &o))
+        __PY_CONVERR_RET;
 
-                int flavor = 0, src, dst;
-                PyObject* objflav;
+    if (!o)
+        // Just return PyNone
+        __PY_NONE_RET;
 
-                // let the third parameter be either string or integer
-                // if it's a string, we first have to parse the string to get flavor id
+    if (strcmp(name, "id") == 0) {
+        return PyLong_FromLong(o->id());
+    } else if (strcmp(name, "src") == 0) {
+        return PyLong_FromLong(o->src());
+    } else if (strcmp(name, "dst") == 0) {
+        return PyLong_FromLong(o->dst());
+    } else if (strcmp(name, "flavor") == 0) {
+        return PyLong_FromLong(o->flavor());
+    } else {
+        PyErr_SetString(PyExc_TypeError, "Unknown attribute specified!");
+    }
 
-                if (PyArg_ParseTuple(args, "Oii", &objflav, &src, &dst)) {
-                    if (!getFlavor(objflav, o, flavor))
-                        return NULL;
+    return NULL;
+}
 
-                    LinkQueryResultPtr res = o->getAllInherited(flavor, src, dst);
+// ------------------------------------------
+PyObject *LinkBinder::create(LinkPtr &link) {
+    if (!link) {
+        PyErr_SetString(PyExc_TypeError, "Null link binding!");
+        return NULL;
+    }
 
-                    return LinkQueryResultBinder::create(res);
-                } else {
-                    // Invalid parameters
-                    PyErr_SetString(PyExc_TypeError, "Expected three parameters: flavor, src and dst!");
-                    return NULL;
-                }
-                __PYTHON_EXCEPTION_GUARD_END_;
-            }
+    Object *object = construct(&msType);
 
+    if (object != NULL) {
+        object->mInstance = link;
+    }
 
-            // ------------------------------------------
-            PyObject* LinkServiceBinder::getOneLink(PyObject* self, PyObject* args) {
-                __PYTHON_EXCEPTION_GUARD_BEGIN_;
-                // Nearly the same as getAllLinks. Only that it returns PyObject for LinkPtr directly
-                LinkServicePtr o;
+    return (PyObject *)object;
+}
 
-                if (!python_cast<LinkServicePtr>(self, &msType, &o))
-                    __PY_CONVERR_RET;
-
-                int flavor = 0, src, dst;
-                PyObject* objflav;
-
-                if (PyArg_ParseTuple(args, "Oii", &objflav, &src, &dst)) {
-                    if (!getFlavor(objflav, o, flavor))
-                        return NULL;
-
-                    LinkPtr res = o->getOneLink(flavor, src, dst);
-                    return LinkBinder::create(res);
-                }
-                else
-                {
-                    // Invalid parameters
-                    PyErr_SetString(PyExc_TypeError, "Expected three integer parameters: flavor, src and dst!");
-                    return NULL;
-                }
-                __PYTHON_EXCEPTION_GUARD_END_;
-            }
-
-            // ------------------------------------------
-            PyObject* LinkServiceBinder::getAllLinkNames(PyObject* self, PyObject* args)
-            {
-                __PYTHON_EXCEPTION_GUARD_BEGIN_;
-                LinkServicePtr o;
-
-                if (!python_cast<LinkServicePtr>(self, &msType, &o))
-                    __PY_CONVERR_RET;
-
-                // wrap the returned StringIterator into StringIteratorBinder, return
-                StringIteratorPtr res = o->getAllLinkNames();
-
-                return StringIteratorBinder::create(res);
-                __PYTHON_EXCEPTION_GUARD_END_;
-            }
-
-            // ------------------------------------------
-            PyObject* LinkServiceBinder::getFieldsDesc(PyObject* self, PyObject* args) {
-                __PYTHON_EXCEPTION_GUARD_BEGIN_;
-                LinkServicePtr o;
-
-                if (!python_cast<LinkServicePtr>(self, &msType, &o))
-                    __PY_CONVERR_RET;
-
-                PyObject* objflav;
-                int flavor = 0;
-
-                if (PyArg_ParseTuple(args, "O", &objflav)) {
-                    if (!getFlavor(objflav, o, flavor))
-                        return NULL;
-
-                    // wrap the returned StringIterator into StringIteratorBinder, return
-                    DataFieldDescIteratorPtr res = o->getFieldDescIterator(flavor);
-                    return DataFieldDescIteratorBinder::create(res);
-                }
-
-                // Invalid parameters
-                PyErr_SetString(PyExc_TypeError, "Expected a string or integer argument!");
-                return NULL;
-                __PYTHON_EXCEPTION_GUARD_END_;
-            }
-
-            // ------------------------------------------
-            PyObject* LinkServiceBinder::create() {
-                Object* object = construct(&msType);
-
-                if (object != NULL) {
-                    object->mInstance = GET_SERVICE(LinkService);
-                }
-
-                return (PyObject *)object;
-            }
-
-            // ------------------------------------------
-            void LinkServiceBinder::init(PyObject* module) {
-                publishType(module, &msType, msName);
-
-                LinkBinder::init(module);
-                LinkQueryResultBinder::init(module);
-                RelationBinder::init(module);
-            }
-
-
-            // -------------------- Link --------------------
-            const char* LinkBinder::msName = "Link";
-
-            // ------------------------------------------
-            PyTypeObject LinkBinder::msType = {
-                PyVarObject_HEAD_INIT(&PyType_Type, 0)
-                msName,                   // char *tp_name; */
-                sizeof(LinkBinder::Object),      // int tp_basicsize; */
-                0,                        // int tp_itemsize;       /* not used much */
-                LinkBinder::dealloc,   // destructor tp_dealloc; */
-                0,			              // printfunc  tp_print;   */
-                LinkBinder::getattr,  // getattrfunc  tp_getattr; /* __getattr__ */
-            };
-
-
-            // ------------------------------------------
-            PyObject* LinkBinder::getattr(PyObject *self, char *name) {
-                LinkPtr o;
-
-                if (!python_cast<LinkPtr>(self, &msType, &o))
-                    __PY_CONVERR_RET;
-
-                if (!o)
-                    // Just return PyNone
-                    __PY_NONE_RET;
-
-
-                if (strcmp(name, "id") == 0) {
-                    return PyLong_FromLong(o->id());
-                } else if (strcmp(name, "src") == 0) {
-                    return PyLong_FromLong(o->src());
-                } else if (strcmp(name, "dst") == 0) {
-                    return PyLong_FromLong(o->dst());
-                } else if (strcmp(name, "flavor") == 0) {
-                    return PyLong_FromLong(o->flavor());
-                } else {
-                    PyErr_SetString(PyExc_TypeError, "Unknown attribute specified!");
-                }
-
-                return NULL;
-            }
-
-            // ------------------------------------------
-            PyObject* LinkBinder::create(LinkPtr& link) {
-                if (!link) {
-                    PyErr_SetString(PyExc_TypeError, "Null link binding!");
-                    return NULL;
-                }
-
-                Object* object = construct(&msType);
-
-                if (object != NULL) {
-                    object->mInstance = link;
-                }
-
-                return (PyObject *)object;
-            }
-
-            // ------------------------------------------
-            void LinkBinder::init(PyObject* module) {
-                publishType(module, &msType, msName);
-            }
-        } // namespace Python
-    } // namespace Opde
+// ------------------------------------------
+void LinkBinder::init(PyObject *module) {
+    publishType(module, &msType, msName);
+}
+} // namespace Python
+} // namespace Opde

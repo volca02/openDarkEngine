@@ -27,33 +27,33 @@
 
 #include "GameStateManager.h"
 #include "OpdeException.h"
+#include "filelog.h"
 #include "logger.h"
 #include "stdlog.h"
-#include "filelog.h"
 
 // All the services
-#include "worldrep/WorldRepService.h"
 #include "binary/BinaryService.h"
-#include "game/GameService.h"
 #include "config/ConfigService.h"
-#include "link/LinkService.h"
-#include "property/PropertyService.h"
-#include "inherit/InheritService.h"
-#include "render/RenderService.h"
 #include "database/DatabaseService.h"
+#include "draw/DrawService.h"
+#include "game/GameService.h"
+#include "inherit/InheritService.h"
 #include "input/InputService.h"
+#include "link/LinkService.h"
 #include "loop/LoopService.h"
 #include "object/ObjectService.h"
-#include "draw/DrawService.h"
+#include "property/PropertyService.h"
+#include "render/RenderService.h"
+#include "worldrep/WorldRepService.h"
 
 #include "GameLoadState.h"
 #include "GamePlayState.h"
 
 #include "ProxyArchive.h"
 
+#include <OgreConfigFile.h>
 #include <OgreRoot.h>
 #include <OgreWindowEventUtilities.h>
-#include <OgreConfigFile.h>
 #include <SDL2/SDL_timer.h>
 
 using namespace Ogre;
@@ -61,16 +61,11 @@ using namespace Ogre;
 namespace Opde {
 
 // The instance owner
-template<> GameStateManager* Singleton<GameStateManager>::ms_Singleton = 0;
+template <> GameStateManager *Singleton<GameStateManager>::ms_Singleton = 0;
 
-GameStateManager::GameStateManager(const std::string& GameType) :
-    mStateStack(),
-    mTerminate(false),
-    mConsoleBackend(NULL),
-    mRoot(NULL),
-    mConfigService(NULL),
-    mInputService(NULL),
-    mServiceMgr(NULL) {
+GameStateManager::GameStateManager(const std::string &GameType)
+    : mStateStack(), mTerminate(false), mConsoleBackend(NULL), mRoot(NULL),
+      mConfigService(NULL), mInputService(NULL), mServiceMgr(NULL) {
     mGameType = GameType;
 
     mRoot = new Opde::Root(SERVICE_ALL, "opde.log");
@@ -87,7 +82,7 @@ GameStateManager::~GameStateManager() {
     mConfigService.reset();
 
     while (!mStateStack.empty()) {
-        GameState* state = mStateStack.top();
+        GameState *state = mStateStack.top();
         mStateStack.pop();
 
         state->exit();
@@ -96,20 +91,19 @@ GameStateManager::~GameStateManager() {
     delete mRoot;
 }
 
-GameStateManager& GameStateManager::getSingleton(void) {
-    assert( ms_Singleton );  return ( *ms_Singleton );
+GameStateManager &GameStateManager::getSingleton(void) {
+    assert(ms_Singleton);
+    return (*ms_Singleton);
 }
 
-GameStateManager* GameStateManager::getSingletonPtr(void) {
+GameStateManager *GameStateManager::getSingletonPtr(void) {
     return ms_Singleton;
 }
 
 //------------------ Main implementation ------------------
-void GameStateManager::terminate() {
-    mTerminate = true;
-}
+void GameStateManager::terminate() { mTerminate = true; }
 
-void GameStateManager::pushState(GameState* state) {
+void GameStateManager::pushState(GameState *state) {
     if (!mStateStack.empty()) {
         mStateStack.top()->exit();
     }
@@ -121,7 +115,7 @@ void GameStateManager::pushState(GameState* state) {
 
 void GameStateManager::popState() {
     if (!mStateStack.empty()) {
-        GameState* old = mStateStack.top();
+        GameState *old = mStateStack.top();
 
         mStateStack.pop();
 
@@ -130,13 +124,14 @@ void GameStateManager::popState() {
         if (!mStateStack.empty()) { // There is another state in the stack
             // mStateStack.top()->start();
         } else {
-            // mTerminate = true; // Terminate automatically if this state was the last?
+            // mTerminate = true; // Terminate automatically if this state was
+            // the last?
         }
     } else {
-        OPDE_EXCEPT("State stack was empty, nothing could be done.","StateManager::popState");
+        OPDE_EXCEPT("State stack was empty, nothing could be done.",
+                    "StateManager::popState");
     }
 }
-
 
 bool GameStateManager::run() {
     // Initialize opde logger and console backend
@@ -181,36 +176,38 @@ bool GameStateManager::run() {
 
     if (!mConfigService->hasParam("mission")) // Failback
     {
-        if((mGameType == "SS2") || (mGameType == "ss2"))
+        if ((mGameType == "SS2") || (mGameType == "ss2"))
             mConfigService->setParam("mission", "earth.mis");
         else
             mConfigService->setParam("mission", "miss1.mis");
     }
 
     int MaxAtlasSize = 512;
-    if (mConfigService->hasParam("MaxAtlasSize"))
-    {
+    if (mConfigService->hasParam("MaxAtlasSize")) {
         MaxAtlasSize = mConfigService->getParam("MaxAtlasSize").toInt();
-        MaxAtlasSize = 1 << (int)(log((double)MaxAtlasSize)	/ log((double) 2));	//Make sure it is a exponent of two
-        if((MaxAtlasSize < 128)  || (MaxAtlasSize > 4096))
+        MaxAtlasSize =
+            1 << (int)(log((double)MaxAtlasSize) /
+                       log((double)2)); // Make sure it is a exponent of two
+        if ((MaxAtlasSize < 128) || (MaxAtlasSize > 4096))
             MaxAtlasSize = 512;
     }
     LOG_INFO("Max Atlas Size : %d", MaxAtlasSize);
     LightAtlas::setMaxSize(MaxAtlasSize);
 
-    // TODO: Remove this temporary nonsense. In fact. Remove the whole class this method is in!
-    GamePlayState* ps = new GamePlayState();
-    GameLoadState* ls = new GameLoadState();
+    // TODO: Remove this temporary nonsense. In fact. Remove the whole class
+    // this method is in!
+    GamePlayState *ps = new GamePlayState();
+    GameLoadState *ls = new GameLoadState();
 
     // Set default mipmap level (NB some APIs ignore this)
     TextureManager::getSingleton().setDefaultNumMipmaps(5);
 
     setupInputSystem();
 
-    /* a not bulletproof but possibly useful processing of the mission config parameter:
-     * The parameter is split to path and mission file name
-     * the path goes to the default resource group (if not already in)
-     * the name is then loaded
+    /* a not bulletproof but possibly useful processing of the mission config
+     * parameter: The parameter is split to path and mission file name the path
+     * goes to the default resource group (if not already in) the name is then
+     * loaded
      */
     if (mConfigService->hasParam("mission")) {
         DVariant mis = mConfigService->getParam("mission");
@@ -220,12 +217,15 @@ bool GameStateManager::run() {
 
         StringUtil::splitFilename(mis.toString(), fname, path);
 
-        LOG_INFO("GameStateManager: Adding %s resource path. Will load mission %s", path.c_str(), fname.c_str());
+        LOG_INFO(
+            "GameStateManager: Adding %s resource path. Will load mission %s",
+            path.c_str(), fname.c_str());
 
         // now look if we need the path added into general
         /* Commented for now, causes problems for some reason...
            if (path != "")
-           mRoot->addResourceLocation(path, "Dir", ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, false);
+           mRoot->addResourceLocation(path, "Dir",
+           ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, false);
         */
         LOG_INFO("GameStateManager: Mission name set to %s", fname.c_str());
 
@@ -247,12 +247,13 @@ bool GameStateManager::run() {
     // Main while-loop
     unsigned long lTimeCurrentFrame = 0;
 
-    Timer * timer = mOgreRoot->getTimer();
+    Timer *timer = mOgreRoot->getTimer();
 
 #warning TODO: Replace this code with propper loop manager code.
 
-    while( !mTerminate ) {
-        // Calculate time since last frame and remember current time for next frame
+    while (!mTerminate) {
+        // Calculate time since last frame and remember current time for next
+        // frame
         mTimeLastFrame = lTimeCurrentFrame;
         lTimeCurrentFrame = timer->getMicroseconds();
 
@@ -264,7 +265,7 @@ bool GameStateManager::run() {
         mInputService->pollEvents(lTimeSinceLastFrame / 1000000.0f);
 
         // Update current state
-        mStateStack.top()->update( lTimeSinceLastFrame );
+        mStateStack.top()->update(lTimeSinceLastFrame);
 
         // Render next frame
         mOgreRoot->renderOneFrame();
@@ -281,12 +282,12 @@ bool GameStateManager::run() {
         // 300 FPS == 3333 useconds each
         if (diff < 3333) {
             // coarse sleep, we don't have microsecond sleep here...
-            SDL_Delay((3333-diff)/1000);
+            SDL_Delay((3333 - diff) / 1000);
         }
     }
 
     while (!mStateStack.empty()) {
-        GameState* state = mStateStack.top();
+        GameState *state = mStateStack.top();
         mStateStack.pop();
 
         state->exit();
@@ -304,19 +305,15 @@ void GameStateManager::setupResources(void) {
     // Load resource paths from config file
     String configName = "resources.cfg", GameType = "Default";
 
-    //Load the resources according to the game type, if game type not specified, load the default
-    if((mGameType == "T1") || (mGameType == "t1"))
-    {
+    // Load the resources according to the game type, if game type not
+    // specified, load the default
+    if ((mGameType == "T1") || (mGameType == "t1")) {
         configName = "thief1.cfg";
         GameType = "Thief TDP/G";
-    }
-    else if((mGameType == "T2") || (mGameType == "t2"))
-    {
+    } else if ((mGameType == "T2") || (mGameType == "t2")) {
         configName = "thief2.cfg";
         GameType = "Thief II TMA";
-    }
-    else if((mGameType == "SS2") || (mGameType == "ss2"))
-    {
+    } else if ((mGameType == "SS2") || (mGameType == "ss2")) {
         configName = "shock2.cfg";
         GameType = "System Shock 2";
     }
@@ -373,4 +370,4 @@ bool GameStateManager::mouseReleased(const SDL_MouseButtonEvent &e) {
     }
     return false;
 }
-}
+} // namespace Opde

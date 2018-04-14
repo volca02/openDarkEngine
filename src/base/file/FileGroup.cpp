@@ -29,15 +29,13 @@ namespace Opde {
 /*----------------------------------------------------*/
 /*-------------------- FileGroup ---------------------*/
 /*----------------------------------------------------*/
-FileGroup::FileGroup(FilePtr& source) : mSrcFile(source) {
-}
+FileGroup::FileGroup(FilePtr &source) : mSrcFile(source) {}
 
 //------------------------------------
-FileGroup::FileGroup() : mSrcFile(NULL) {};
+FileGroup::FileGroup() : mSrcFile(NULL){};
 
 //------------------------------------
-FileGroup::~FileGroup() {
-}
+FileGroup::~FileGroup() {}
 
 std::string FileGroup::getName() {
     if (mSrcFile)
@@ -49,7 +47,7 @@ std::string FileGroup::getName() {
 /*--------------------------------------------------------*/
 /*-------------------- DarkFileGroup ---------------------*/
 /*--------------------------------------------------------*/
-DarkFileGroup::DarkFileGroup(FilePtr& source) : FileGroup(source), mFiles() {
+DarkFileGroup::DarkFileGroup(FilePtr &source) : FileGroup(source), mFiles() {
     if (mSrcFile) {
         // Read the header and stuff from the source file
         _initSource();
@@ -57,9 +55,7 @@ DarkFileGroup::DarkFileGroup(FilePtr& source) : FileGroup(source), mFiles() {
 }
 
 //------------------------------------
-DarkFileGroup::DarkFileGroup() : FileGroup() {
-
-}
+DarkFileGroup::DarkFileGroup() : FileGroup() {}
 
 //------------------------------------
 DarkFileGroup::~DarkFileGroup() {
@@ -81,8 +77,12 @@ void DarkFileGroup::_initSource() {
     mSrcFile->readElem(&mHeader.dead_beef, 4);
 
     // Sanity check
-    if (mHeader.dead_beef != 0x0EFBEADDE) // Little endian encoded. would be 0xDEADBEEF on big-endian, etc.
-        OPDE_FILEEXCEPT(FILE_OTHER_ERROR, "Supplied file is not a Dark database file. Dead beef mismatch", "DarkFileGroup::_initSource()");
+    if (mHeader.dead_beef != 0x0EFBEADDE) // Little endian encoded. would be
+                                          // 0xDEADBEEF on big-endian, etc.
+        OPDE_FILEEXCEPT(
+            FILE_OTHER_ERROR,
+            "Supplied file is not a Dark database file. Dead beef mismatch",
+            "DarkFileGroup::_initSource()");
 
     // The inventory is the next thing to load
     mSrcFile->seek(mHeader.inv_offset);
@@ -92,7 +92,7 @@ void DarkFileGroup::_initSource() {
     // The count of chunks
     mSrcFile->readElem(&chunkCount, sizeof(uint32_t), 1);
 
-    DarkDBInvItem* inventory = new DarkDBInvItem[chunkCount];
+    DarkDBInvItem *inventory = new DarkDBInvItem[chunkCount];
 
     readInventory(inventory, chunkCount);
 
@@ -105,10 +105,13 @@ void DarkFileGroup::_initSource() {
         readChunkHeader(&ch.header);
 
         if (strncmp(ch.header.name, inventory[idx].name, 12) != 0)
-            OPDE_EXCEPT(string("Inventory chunk name mismatch: ") + ch.header.name + "-" + inventory[idx].name,
-					    "DarkFileGroup::_initSource");
+            OPDE_EXCEPT(string("Inventory chunk name mismatch: ") +
+                            ch.header.name + "-" + inventory[idx].name,
+                        "DarkFileGroup::_initSource");
 
-        ch.file = FilePtr(new FilePart(inventory[idx].name, File::FILE_R, mSrcFile, inventory[idx].offset + sizeof(ch.header), inventory[idx].length));
+        ch.file = FilePtr(new FilePart(
+            inventory[idx].name, File::FILE_R, mSrcFile,
+            inventory[idx].offset + sizeof(ch.header), inventory[idx].length));
 
         mFiles.insert(make_pair(std::string(inventory[idx].name), ch));
     }
@@ -117,7 +120,7 @@ void DarkFileGroup::_initSource() {
 }
 
 //------------------------------------
-void DarkFileGroup::readInventory(DarkDBInvItem* inventory, uint count) {
+void DarkFileGroup::readInventory(DarkDBInvItem *inventory, uint count) {
     assert(!mSrcFile.isNull());
 
     for (uint i = 0; i < count; i++) {
@@ -126,7 +129,8 @@ void DarkFileGroup::readInventory(DarkDBInvItem* inventory, uint count) {
 }
 
 //------------------------------------
-void DarkFileGroup::writeInventory(FilePtr& dest, DarkDBInvItem* inventory, uint count) {
+void DarkFileGroup::writeInventory(FilePtr &dest, DarkDBInvItem *inventory,
+                                   uint count) {
     assert(!dest.isNull());
 
     for (uint i = 0; i < count; i++) {
@@ -134,40 +138,43 @@ void DarkFileGroup::writeInventory(FilePtr& dest, DarkDBInvItem* inventory, uint
     }
 }
 
-
 //------------------------------------
-void DarkFileGroup::readChunkHeader(DarkDBChunkHeader* hdr) {
+void DarkFileGroup::readChunkHeader(DarkDBChunkHeader *hdr) {
     assert(!mSrcFile.isNull());
 
     *mSrcFile >> *hdr;
 }
 
 //------------------------------------
-void DarkFileGroup::writeChunkHeader(FilePtr& dest, const DarkDBChunkHeader& hdr) {
+void DarkFileGroup::writeChunkHeader(FilePtr &dest,
+                                     const DarkDBChunkHeader &hdr) {
     assert(!dest.isNull());
 
     *dest << hdr;
 }
 
 //------------------------------------
-bool DarkFileGroup::hasFile(const std::string& name) const {
+bool DarkFileGroup::hasFile(const std::string &name) const {
     ChunkMap::const_iterator it = mFiles.find(name);
 
     return (it != mFiles.end());
 }
 
 //------------------------------------
-const DarkDBChunkHeader& DarkFileGroup::getFileHeader(const std::string& name) {
+const DarkDBChunkHeader &DarkFileGroup::getFileHeader(const std::string &name) {
     ChunkMap::iterator it = mFiles.find(name);
 
     if (it != mFiles.end())
         return it->second.header;
     else
-        OPDE_FILEEXCEPT(FILE_OP_FAILED, string("File named ") + name + " was not found in this FileGroup", "DarkFileGroup::getFile");
+        OPDE_FILEEXCEPT(FILE_OP_FAILED,
+                        string("File named ") + name +
+                            " was not found in this FileGroup",
+                        "DarkFileGroup::getFile");
 }
 
 //------------------------------------
-FilePtr DarkFileGroup::getFile(const std::string& name) {
+FilePtr DarkFileGroup::getFile(const std::string &name) {
     string sname;
     sname = name.substr(0, 11);
 
@@ -177,16 +184,22 @@ FilePtr DarkFileGroup::getFile(const std::string& name) {
         it->second.file->seek(0);
         return it->second.file;
     } else
-        OPDE_FILEEXCEPT(FILE_OP_FAILED, string("File named ") + sname + " was not found in this FileGroup", "DarkFileGroup::getFile");
+        OPDE_FILEEXCEPT(FILE_OP_FAILED,
+                        string("File named ") + sname +
+                            " was not found in this FileGroup",
+                        "DarkFileGroup::getFile");
 }
 
 //------------------------------------
-FilePtr DarkFileGroup::createFile(const std::string& name, uint32_t ver_maj, uint32_t ver_min) {
+FilePtr DarkFileGroup::createFile(const std::string &name, uint32_t ver_maj,
+                                  uint32_t ver_min) {
     // look if the file map contained a file of that name before
     ChunkMap::iterator it = mFiles.find(name);
 
     if (it != mFiles.end()) {
-        OPDE_FILEEXCEPT(FILE_OTHER_ERROR, string("Chunk already exists : ") + name, "DarkFileGroup::createFile");
+        OPDE_FILEEXCEPT(FILE_OTHER_ERROR,
+                        string("Chunk already exists : ") + name,
+                        "DarkFileGroup::createFile");
     }
 
     Chunk ch;
@@ -199,7 +212,7 @@ FilePtr DarkFileGroup::createFile(const std::string& name, uint32_t ver_maj, uin
     memset(ch.header.name, 0, 12);
     name.copy(ch.header.name, 11);
 
-    MemoryFile* newfile = new MemoryFile(name, File::FILE_RW);
+    MemoryFile *newfile = new MemoryFile(name, File::FILE_RW);
 
     ch.file = FilePtr(newfile);
 
@@ -209,18 +222,20 @@ FilePtr DarkFileGroup::createFile(const std::string& name, uint32_t ver_maj, uin
 }
 
 //------------------------------------
-void DarkFileGroup::deleteFile(const std::string& name) {
+void DarkFileGroup::deleteFile(const std::string &name) {
     ChunkMap::iterator it = mFiles.find(name);
 
     if (it != mFiles.end()) {
         mFiles.erase(it);
     } else {
-        OPDE_EXCEPT(string("File requested for deletion was not found : ") + name, "DarkFileGroup::deleteFile");
+        OPDE_EXCEPT(string("File requested for deletion was not found : ") +
+                        name,
+                    "DarkFileGroup::deleteFile");
     }
 }
 
 //------------------------------------
-void DarkFileGroup::write(FilePtr& dest) {
+void DarkFileGroup::write(FilePtr &dest) {
     /*
       First, calculate the inventory offset, it is:
       Size of the main header. + size of all chunks (including the chunk header)
@@ -232,10 +247,9 @@ void DarkFileGroup::write(FilePtr& dest) {
 
     uint32_t chunkcount = 0;
 
-    for (; it!=mFiles.end(); it++, chunkcount++) {
+    for (; it != mFiles.end(); it++, chunkcount++) {
         inv_offset += sizeof(DarkDBChunkHeader) + it->second.file->size();
     }
-
 
     // Write the header
     mHeader.inv_offset = inv_offset;
@@ -253,10 +267,9 @@ void DarkFileGroup::write(FilePtr& dest) {
     mSrcFile->write(&mHeader.zeros, 256);
     mSrcFile->writeElem(&mHeader.dead_beef, 4);
 
-
     it = mFiles.begin();
 
-    DarkDBInvItem* inventory = new DarkDBInvItem[chunkcount];
+    DarkDBInvItem *inventory = new DarkDBInvItem[chunkcount];
 
     // Write the chunks
     for (int pos = 0; it != mFiles.end(); it++, pos++) {
@@ -287,8 +300,6 @@ FileGroup::const_iterator DarkFileGroup::begin() const {
 }
 
 //------------------------------------
-FileGroup::const_iterator DarkFileGroup::end() const {
-    return mFiles.end();
-}
+FileGroup::const_iterator DarkFileGroup::end() const { return mFiles.end(); }
 
-}
+} // namespace Opde

@@ -21,109 +21,115 @@
  *
  *****************************************************************************/
 
-
 #ifndef __DRAWBUFFER_H
 #define __DRAWBUFFER_H
 
 #include "DrawCommon.h"
 #include "DrawOperation.h"
 
-#include <OgreRenderable.h>
 #include <OgreMaterial.h>
 #include <OgreMovableObject.h>
+#include <OgreRenderable.h>
 
 namespace Opde {
 
-	/** A single renderable representing all drawn quads for particular rendered settings combination (DrawSheet stores N of these for N materials) */
-	class OPDELIB_EXPORT DrawBuffer : public Ogre::Renderable {
-		public:
-			/** Constructor
-			 * @param materialName The name of the material to use for rendering. The constructor will look for the specified material and if it does not find it, it will create a new one
-			 */
-			DrawBuffer(const Ogre::MaterialPtr& material);
+/** A single renderable representing all drawn quads for particular rendered
+ * settings combination (DrawSheet stores N of these for N materials) */
+class OPDELIB_EXPORT DrawBuffer : public Ogre::Renderable {
+public:
+    /** Constructor
+     * @param materialName The name of the material to use for rendering. The
+     * constructor will look for the specified material and if it does not find
+     * it, it will create a new one
+     */
+    DrawBuffer(const Ogre::MaterialPtr &material);
 
-			/// Destructor
-			virtual ~DrawBuffer();
+    /// Destructor
+    virtual ~DrawBuffer();
 
-			/// Adds a render operation to the buffer
-			void addDrawOperation(DrawOperation* op);
+    /// Adds a render operation to the buffer
+    void addDrawOperation(DrawOperation *op);
 
-			/// Removes a render operation from the buffer
-			void removeDrawOperation(DrawOperation* op);
+    /// Removes a render operation from the buffer
+    void removeDrawOperation(DrawOperation *op);
 
-			/** A draw operation changed, queue an update
-			 * @note The parameter is just a hint, the whole buffer is rebuilt
-			 * @note If the draw op. would stay the same length, we could introduce ibo and vbo pos markers to the quads (smart updates)
-			 */
-			void queueUpdate(DrawOperation* drawOp);
+    /** A draw operation changed, queue an update
+     * @note The parameter is just a hint, the whole buffer is rebuilt
+     * @note If the draw op. would stay the same length, we could introduce ibo
+     * and vbo pos markers to the quads (smart updates)
+     */
+    void queueUpdate(DrawOperation *drawOp);
 
-			/// is dirty (needs update) getter
-			inline bool isDirty() const { return mIsDirty; };
-			
-			/// manually marks this buffer as dirty - informs it that it needs a rebuild
-			inline void markDirty() { mIsDirty = true; };
+    /// is dirty (needs update) getter
+    inline bool isDirty() const { return mIsDirty; };
 
-			/// Does a forced update (ignoring isDirty state)
-			void update();
+    /// manually marks this buffer as dirty - informs it that it needs a rebuild
+    inline void markDirty() { mIsDirty = true; };
 
-			/// Called by DrawOperation::visitDrawBuffer, this method queues the quads emited by the operation for sorting and rendering
-			void _queueDrawQuad(const DrawQuad* dq);
+    /// Does a forced update (ignoring isDirty state)
+    void update();
 
-			/// Called by sheet on setActive to inform the buffer is now rendered within a different sheet (this also means we'll have to rebuild usually)
-			void _parentChanged(DrawSheet* parent);
+    /// Called by DrawOperation::visitDrawBuffer, this method queues the quads
+    /// emited by the operation for sorting and rendering
+    void _queueDrawQuad(const DrawQuad *dq);
 
-			//--- Renderable mandatory ---
-			const Ogre::MaterialPtr& getMaterial(void) const;
+    /// Called by sheet on setActive to inform the buffer is now rendered within
+    /// a different sheet (this also means we'll have to rebuild usually)
+    void _parentChanged(DrawSheet *parent);
 
-			void getRenderOperation(Ogre::RenderOperation&);
+    //--- Renderable mandatory ---
+    const Ogre::MaterialPtr &getMaterial(void) const;
 
-			void getWorldTransforms(Ogre::Matrix4*) const;
+    void getRenderOperation(Ogre::RenderOperation &);
 
-			Ogre::Real getSquaredViewDepth(const Ogre::Camera*) const;
+    void getWorldTransforms(Ogre::Matrix4 *) const;
 
-			const Ogre::LightList& getLights() const;
+    Ogre::Real getSquaredViewDepth(const Ogre::Camera *) const;
 
-			const Ogre::Quaternion& getWorldOrientation(void) const;
+    const Ogre::LightList &getLights() const;
 
-			const Ogre::Vector3& getWorldPosition(void) const;
+    const Ogre::Quaternion &getWorldOrientation(void) const;
 
+    const Ogre::Vector3 &getWorldPosition(void) const;
 
-			inline Ogre::uint8 getRenderQueueID() const { return mRenderQueueID; };
+    inline Ogre::uint8 getRenderQueueID() const { return mRenderQueueID; };
 
-			inline bool isDirty() { return mIsDirty; };
-			
-			/// returns true if this buffer contains no rendered objects
-			inline bool isEmpty() { return mQuadList.size() == 0; };
-			
-		protected:
-			/// (re)builds the VBO according to the mQuadList
-			void buildBuffer();
+    inline bool isDirty() { return mIsDirty; };
 
-			/// destroys the rendering buffers
-			void destroyBuffers();
+    /// returns true if this buffer contains no rendered objects
+    inline bool isEmpty() { return mQuadList.size() == 0; };
 
-			DrawOperationMap mDrawOpMap;
-			DrawQuadList mQuadList;
+protected:
+    /// (re)builds the VBO according to the mQuadList
+    void buildBuffer();
 
-			Ogre::MaterialPtr mMaterial;
-			bool mIsDirty;
-			bool mIsUpdating;
+    /// destroys the rendering buffers
+    void destroyBuffers();
 
-			Ogre::HardwareVertexBufferSharedPtr mBuffer;
-			Ogre::VertexData* mVertexData;
-			Ogre::IndexData* mIndexData;
+    DrawOperationMap mDrawOpMap;
+    DrawQuadList mQuadList;
 
-			/// This is the reserved quad count, not the rendered quad count (which is less usually)
-			size_t mQuadCount;
+    Ogre::MaterialPtr mMaterial;
+    bool mIsDirty;
+    bool mIsUpdating;
 
-			Ogre::uint8 mRenderQueueID;
+    Ogre::HardwareVertexBufferSharedPtr mBuffer;
+    Ogre::VertexData *mVertexData;
+    Ogre::IndexData *mIndexData;
 
-			/// Parent sheet - the one currently displaying the buffer
-			DrawSheet* mParent;
-	};
+    /// This is the reserved quad count, not the rendered quad count (which is
+    /// less usually)
+    size_t mQuadCount;
 
-	/// Draw buffer map for all render op. combinations (indexed with texture source ID)
-	typedef std::map<DrawSource::ID, DrawBuffer*> DrawBufferMap;
-}
+    Ogre::uint8 mRenderQueueID;
+
+    /// Parent sheet - the one currently displaying the buffer
+    DrawSheet *mParent;
+};
+
+/// Draw buffer map for all render op. combinations (indexed with texture source
+/// ID)
+typedef std::map<DrawSource::ID, DrawBuffer *> DrawBufferMap;
+} // namespace Opde
 
 #endif

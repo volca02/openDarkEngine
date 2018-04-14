@@ -21,7 +21,6 @@
  *
  *****************************************************************************/
 
-
 #ifndef __DRAWSHEET_H
 #define __DRAWSHEET_H
 
@@ -30,125 +29,133 @@
 #include <OgreRenderQueue.h>
 
 namespace Opde {
-	// forward decl.
-	class DrawService;
-	
-	/** A 2D rendering sheet. Represents one visible screen.
-	 * Stores rendering operations, can queue itself for rendering to ogre.
-	 * Uses DrawBuffer for render op. storage */
-	class OPDELIB_EXPORT DrawSheet : public Ogre::MovableObject {
-		public:
-			/// Constructor
-			DrawSheet(DrawService* owner, const std::string& sheetName);
+// forward decl.
+class DrawService;
 
-			/// Destructor
-			~DrawSheet();
+/** A 2D rendering sheet. Represents one visible screen.
+ * Stores rendering operations, can queue itself for rendering to ogre.
+ * Uses DrawBuffer for render op. storage */
+class OPDELIB_EXPORT DrawSheet : public Ogre::MovableObject {
+public:
+    /// Constructor
+    DrawSheet(DrawService *owner, const std::string &sheetName);
 
-			/// Activates the sheet, prepares it for rendering
-			void activate();
+    /// Destructor
+    ~DrawSheet();
 
-			/// Deactivates the sheet
-			void deactivate();
+    /// Activates the sheet, prepares it for rendering
+    void activate();
 
-			/// Adds a draw operation to be rendered on this sheet
-			void addDrawOperation(DrawOperation* drawOp);
+    /// Deactivates the sheet
+    void deactivate();
 
-			/// Removes the draw operation from this sheet.
-			void removeDrawOperation(DrawOperation* toRemove);
+    /// Adds a draw operation to be rendered on this sheet
+    void addDrawOperation(DrawOperation *drawOp);
 
-			/// Called when a draw source changed for given operation 
-			void _sourceChanged(DrawOperation* op, const DrawSourcePtr& oldsrc);
-			
-			/** Does the core removal of draw operation, without any notification
-			 * @note Internal, use removeDrawOperation instead
-			*/
-			void _removeDrawOperation(DrawOperation* toRemove);
+    /// Removes the draw operation from this sheet.
+    void removeDrawOperation(DrawOperation *toRemove);
 
-			/// Internal: Marks a certain draw operation dirty in this sheet. Called internally on a DrawOp. change
-			void _markDirty(DrawOperation* drawOp);
+    /// Called when a draw source changed for given operation
+    void _sourceChanged(DrawOperation *op, const DrawSourcePtr &oldsrc);
 
-			/// Will remove all Buffers with zero Draw operations
-			void purge();
+    /** Does the core removal of draw operation, without any notification
+     * @note Internal, use removeDrawOperation instead
+     */
+    void _removeDrawOperation(DrawOperation *toRemove);
 
-			//--- MovableObject mandatory ---
-			const Ogre::String& getMovableType() const;
-			const Ogre::AxisAlignedBox& getBoundingBox() const;
-			Ogre::Real getBoundingRadius() const;
-			void visitRenderables(Ogre::Renderable::Visitor* vis, bool debugRenderables);
+    /// Internal: Marks a certain draw operation dirty in this sheet. Called
+    /// internally on a DrawOp. change
+    void _markDirty(DrawOperation *drawOp);
 
-			bool isVisible() const;
+    /// Will remove all Buffers with zero Draw operations
+    void purge();
 
-			/// Called to ensure all the DrawBuffers are current and reflect the requested state
-			void rebuildBuffers();
-			
-			/** Sets a resolution override for this sheet.
-			 * @param override specifies whether to use the override or not (and use the real screen resolution) 
-			 * @param width the width to use in overriden state
-			 * @param height the height to use in the overriden state*/
-			void setResolutionOverride(bool override, size_t width = 0, size_t height = 0);
+    //--- MovableObject mandatory ---
+    const Ogre::String &getMovableType() const;
+    const Ogre::AxisAlignedBox &getBoundingBox() const;
+    Ogre::Real getBoundingRadius() const;
+    void visitRenderables(Ogre::Renderable::Visitor *vis,
+                          bool debugRenderables);
 
-			/** Converts the given coordinate to the screen space x coordinate
-			 */
-			Ogre::Real convertToScreenSpaceX(int x) const;
-			
-			/** Converts the given coordinate to the screen space y coordinates
-			 */
-			Ogre::Real convertToScreenSpaceY(int y) const;
-			
-			/** Converts the given coordinate to the screen space y coordinates
-			 * @param z the depth in 0 - MAX_Z_VALUE range
-			 * @return Real number describing the depth
-			 */
-			Ogre::Real convertToScreenSpaceZ(int z) const;
-			
-			/** Informs this sheet the viewport resolution changed. Internal, do not use explicitly (use setResolutionOverride instead).
-			 */
-			void _setResolution(size_t width, size_t height);
-			
-			/** Creates a clip rectangle with the specified screen coordinates.
-			*/
-			void convertClipToScreen(const ClipRect& cr, ScreenRect& tgt) const;
-			
-			/** Queues all the Renderables into appropriate RenderQueueGroups
-			 */
-			void queueRenderables(Ogre::RenderQueue* rq);
-			
-			/** Clears all data present in the sheet
-			  */
-			void clear();
-			
-		protected:
-			DrawBuffer* getBufferForOperation(DrawOperation* drawOp, bool autoCreate = false);
+    bool isVisible() const;
 
-			DrawBuffer* getBufferForSourceID(DrawSourceBase::ID id);
-			
-			/// this does the rendering - updates the render queue with the buffers to display
-			void _updateRenderQueue(Ogre::RenderQueue* queue);
-			
-			/// marks all buffers as dirty
-			void markBuffersDirty(); 
+    /// Called to ensure all the DrawBuffers are current and reflect the
+    /// requested state
+    void rebuildBuffers();
 
-			/// All draw buffers for the sheet as map
-			DrawBufferMap mDrawBufferMap;
+    /** Sets a resolution override for this sheet.
+     * @param override specifies whether to use the override or not (and use the
+     * real screen resolution)
+     * @param width the width to use in overriden state
+     * @param height the height to use in the overriden state*/
+    void setResolutionOverride(bool override, size_t width = 0,
+                               size_t height = 0);
 
-			/// True if this sheet is rendered
-			bool mActive;
+    /** Converts the given coordinate to the screen space x coordinate
+     */
+    Ogre::Real convertToScreenSpaceX(int x) const;
 
-			/// All draw operations on this sheet
-			DrawOperationMap mDrawOpMap;
+    /** Converts the given coordinate to the screen space y coordinates
+     */
+    Ogre::Real convertToScreenSpaceY(int y) const;
 
-			/// Sheet name
-			std::string mSheetName;
-			
-			/// onwer of this sheet
-			DrawService* mOwner;
-			
-			/// screen resolution override for this sheet
-			bool mResOverride;
-			
-			/// Resolution of the screen (either updated or overriden)
-			size_t mWidth, mHeight;
-	};
-}
+    /** Converts the given coordinate to the screen space y coordinates
+     * @param z the depth in 0 - MAX_Z_VALUE range
+     * @return Real number describing the depth
+     */
+    Ogre::Real convertToScreenSpaceZ(int z) const;
+
+    /** Informs this sheet the viewport resolution changed. Internal, do not use
+     * explicitly (use setResolutionOverride instead).
+     */
+    void _setResolution(size_t width, size_t height);
+
+    /** Creates a clip rectangle with the specified screen coordinates.
+     */
+    void convertClipToScreen(const ClipRect &cr, ScreenRect &tgt) const;
+
+    /** Queues all the Renderables into appropriate RenderQueueGroups
+     */
+    void queueRenderables(Ogre::RenderQueue *rq);
+
+    /** Clears all data present in the sheet
+     */
+    void clear();
+
+protected:
+    DrawBuffer *getBufferForOperation(DrawOperation *drawOp,
+                                      bool autoCreate = false);
+
+    DrawBuffer *getBufferForSourceID(DrawSourceBase::ID id);
+
+    /// this does the rendering - updates the render queue with the buffers to
+    /// display
+    void _updateRenderQueue(Ogre::RenderQueue *queue);
+
+    /// marks all buffers as dirty
+    void markBuffersDirty();
+
+    /// All draw buffers for the sheet as map
+    DrawBufferMap mDrawBufferMap;
+
+    /// True if this sheet is rendered
+    bool mActive;
+
+    /// All draw operations on this sheet
+    DrawOperationMap mDrawOpMap;
+
+    /// Sheet name
+    std::string mSheetName;
+
+    /// onwer of this sheet
+    DrawService *mOwner;
+
+    /// screen resolution override for this sheet
+    bool mResOverride;
+
+    /// Resolution of the screen (either updated or overriden)
+    size_t mWidth, mHeight;
+};
+} // namespace Opde
 
 #endif

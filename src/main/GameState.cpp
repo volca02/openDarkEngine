@@ -27,24 +27,19 @@
 #include "GameStateManager.h"
 
 namespace Opde {
-	
-	GameState::GameState() {
-		
-	}
-	
-	GameState::~GameState() {
-	}
-	
-	void GameState::pushState(GameState* state) {
-		GameStateManager::getSingleton().pushState(state);
-	}
-	
-	void GameState::popState() {
-		GameStateManager::getSingleton().popState();
-	}
-	
-	void GameState::requestTermination() {
-		GameStateManager::getSingleton().terminate();
-	}
-	
+
+GameState::GameState() {}
+
+GameState::~GameState() {}
+
+void GameState::pushState(GameState *state) {
+    GameStateManager::getSingleton().pushState(state);
 }
+
+void GameState::popState() { GameStateManager::getSingleton().popState(); }
+
+void GameState::requestTermination() {
+    GameStateManager::getSingleton().terminate();
+}
+
+} // namespace Opde

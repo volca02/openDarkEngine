@@ -27,30 +27,26 @@ using namespace std;
 
 namespace Opde {
 
-	/*----------------------------------------------------*/
-	/*--------------------- ApplePlatform ----------------*/
-	/*----------------------------------------------------*/
-	ApplePlatform::ApplePlatform(PlatformService* owner) : Platform(owner) {
-	}
-	
-	//------------------------------------------------------
-	ApplePlatform::~ApplePlatform() {
-	}
-	
-	//------------------------------------------------------
-	std::string ApplePlatform::getGlobalConfigPath() const {
-		// TODO: CODE
-		return "/Invalid/";
-	}
+/*----------------------------------------------------*/
+/*--------------------- ApplePlatform ----------------*/
+/*----------------------------------------------------*/
+ApplePlatform::ApplePlatform(PlatformService *owner) : Platform(owner) {}
 
-	//------------------------------------------------------
-	std::string ApplePlatform::getUserConfigPath() const {
-		// TODO: CODE
-		return "/Invalid/";
-	}
+//------------------------------------------------------
+ApplePlatform::~ApplePlatform() {}
 
-	//------------------------------------------------------
-	std::string ApplePlatform::getDirectorySeparator() const {
-		return "/";
-	}
+//------------------------------------------------------
+std::string ApplePlatform::getGlobalConfigPath() const {
+    // TODO: CODE
+    return "/Invalid/";
 }
+
+//------------------------------------------------------
+std::string ApplePlatform::getUserConfigPath() const {
+    // TODO: CODE
+    return "/Invalid/";
+}
+
+//------------------------------------------------------
+std::string ApplePlatform::getDirectorySeparator() const { return "/"; }
+} // namespace Opde

@@ -29,32 +29,31 @@
 
 namespace Opde {
 
-	/** An abstract callback functor definition. */
-	template <class M> class Callback {
-		public:
-			virtual void operator ()(const M& msg) = 0;
-			
-			virtual ~Callback() {};
-	};
+/** An abstract callback functor definition. */
+template <class M> class Callback {
+public:
+    virtual void operator()(const M &msg) = 0;
 
-    /** A callback definition for a class method. One parameter callback implementation. 
-	* The template parameter I is the instance class */
-    template <class MSG, class I> class ClassCallback : public Callback<MSG> {
-		public:
-			typedef void (I::*Method)(const MSG& msg);
+    virtual ~Callback(){};
+};
 
-			ClassCallback(I* instance, Method method) : mInstance(instance), mMethod(method) {};
+/** A callback definition for a class method. One parameter callback
+ * implementation. The template parameter I is the instance class */
+template <class MSG, class I> class ClassCallback : public Callback<MSG> {
+public:
+    typedef void (I::*Method)(const MSG &msg);
 
-			virtual ~ClassCallback() {};
+    ClassCallback(I *instance, Method method)
+        : mInstance(instance), mMethod(method){};
 
-			virtual void operator ()(const MSG& msg) {
-				(*mInstance.*mMethod)(msg);
-			}
+    virtual ~ClassCallback(){};
 
-		protected:
-			I* mInstance;
-			Method mMethod;
-    };
-}
+    virtual void operator()(const MSG &msg) { (*mInstance.*mMethod)(msg); }
+
+protected:
+    I *mInstance;
+    Method mMethod;
+};
+} // namespace Opde
 
 #endif

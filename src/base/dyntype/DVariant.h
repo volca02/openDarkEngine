@@ -27,301 +27,304 @@
 
 #include "config.h"
 
-#include <stdexcept>
-#include "integers.h"
-#include "Vector3.h"
-#include "Quaternion.h"
 #include "OpdeException.h"
+#include "Quaternion.h"
+#include "Vector3.h"
+#include "integers.h"
+#include <stdexcept>
 
 #include <OgreQuaternion.h>
 
 using Ogre::Quaternion;
 
 namespace Opde {
-	/** a variant class. This is a class that stores a value of a certain type. */
-	class OPDELIB_EXPORT DVariant {
-		public:
-			/** Type specifier */
-			typedef enum {
-				/** Invalid type */
-				DV_INVALID	= 0,
-				/** Bool type */
-				DV_BOOL		= 1,
-				/** Float type */
-				DV_FLOAT	= 2,
-				/** Int type */
-				DV_INT		= 3,
-				/** Unsigned int type */
-				DV_UINT		= 4,
-				// Shared pointer types start here:
-				/** String type. Shared */
-				DV_STRING	= 5,
-				/** Vector type. Shared */
-				DV_VECTOR	= 6,
-				/** Quaternion type. Shared */
-				DV_QUATERNION = 7
-			} Type;
+/** a variant class. This is a class that stores a value of a certain type. */
+class OPDELIB_EXPORT DVariant {
+public:
+    /** Type specifier */
+    typedef enum {
+        /** Invalid type */
+        DV_INVALID = 0,
+        /** Bool type */
+        DV_BOOL = 1,
+        /** Float type */
+        DV_FLOAT = 2,
+        /** Int type */
+        DV_INT = 3,
+        /** Unsigned int type */
+        DV_UINT = 4,
+        // Shared pointer types start here:
+        /** String type. Shared */
+        DV_STRING = 5,
+        /** Vector type. Shared */
+        DV_VECTOR = 6,
+        /** Quaternion type. Shared */
+        DV_QUATERNION = 7
+    } Type;
 
-			/** Construct an invalid, empty DVariant instance. */
-			DVariant();
+    /** Construct an invalid, empty DVariant instance. */
+    DVariant();
 
-			/** Construct a DVariant instance. Set a value from the pointer target val, if val is not NULL */
-			DVariant(Type t, void *val = 0);
+    /** Construct a DVariant instance. Set a value from the pointer target val,
+     * if val is not NULL */
+    DVariant(Type t, void *val = 0);
 
-			/** construct a new variant type using a string value converted to the type t as value
-			* @param t Type to use
-			* @param txtval Textual value for the new variant to use
-			*/
-			DVariant(Type t, const std::string& txtval);
+    /** construct a new variant type using a string value converted to the type
+     * t as value
+     * @param t Type to use
+     * @param txtval Textual value for the new variant to use
+     */
+    DVariant(Type t, const std::string &txtval);
 
-			/** Copy constructor
-			* @param b The variant to copy the value from
-			* @note If the source variant is shared valued, only pointer to private data is copied, and reference is incremented */
-			DVariant(const DVariant& b);
+    /** Copy constructor
+     * @param b The variant to copy the value from
+     * @note If the source variant is shared valued, only pointer to private
+     * data is copied, and reference is incremented */
+    DVariant(const DVariant &b);
 
-			/** Bool constructor
-			* @param val The value to use */
-			DVariant(bool val);
+    /** Bool constructor
+     * @param val The value to use */
+    DVariant(bool val);
 
-			/** float constructor
-			* @param val The value to use */
-			DVariant(float val);
+    /** float constructor
+     * @param val The value to use */
+    DVariant(float val);
 
-			/** Int constructor
-			* @param val The value to use */
-			DVariant(int val);
+    /** Int constructor
+     * @param val The value to use */
+    DVariant(int val);
 
-			/** Unsigned int constructor
-			* @param val The value to use */
-			DVariant(uint val);
+    /** Unsigned int constructor
+     * @param val The value to use */
+    DVariant(uint val);
 
-			/** String constructor. Construct a string variant with the length of the input char array up-to 'length' bytes
-			* @param text The value to use
-			* @param length The limiting length of the source char array */
-			DVariant(const char* text, int length = -1);
+    /** String constructor. Construct a string variant with the length of the
+     * input char array up-to 'length' bytes
+     * @param text The value to use
+     * @param length The limiting length of the source char array */
+    DVariant(const char *text, int length = -1);
 
-			/** String constructor.
-			* @param text the source string to copy value from */
-			DVariant(const std::string& text);
+    /** String constructor.
+     * @param text the source string to copy value from */
+    DVariant(const std::string &text);
 
-			/** Vector3 constructor.
-			* @param x the X part of the vector
-			* @param y the Y part of the vector
-			* @param z the Z part of the vector */
-			DVariant(float x, float y, float z);
-			
-			/** Quaternion constructor.
-			* @param x the X part of the quaternion
-			* @param y the Y part of the quaternion
-			* @param z the Z part of the quaternion 
-			* @param w the W part of the quaternion */
-			DVariant(float x, float y, float z, float w);
+    /** Vector3 constructor.
+     * @param x the X part of the vector
+     * @param y the Y part of the vector
+     * @param z the Z part of the vector */
+    DVariant(float x, float y, float z);
 
-			/** Vector3 constructor.
-			* @param vec the source vector to copy value from */
-			DVariant(const Vector3& vec);
+    /** Quaternion constructor.
+     * @param x the X part of the quaternion
+     * @param y the Y part of the quaternion
+     * @param z the Z part of the quaternion
+     * @param w the W part of the quaternion */
+    DVariant(float x, float y, float z, float w);
 
-			/** Quaternion constructor.
-			* @param ori the source orientation quaternion to copy value from */
-			DVariant(const Quaternion& ori);
+    /** Vector3 constructor.
+     * @param vec the source vector to copy value from */
+    DVariant(const Vector3 &vec);
 
-			/** Destructor */
-			virtual ~DVariant();
+    /** Quaternion constructor.
+     * @param ori the source orientation quaternion to copy value from */
+    DVariant(const Quaternion &ori);
 
-			/** returns a char* containing the type name */
-			const char* typeString() const;
+    /** Destructor */
+    virtual ~DVariant();
 
-			/** returns a char* containing the type name for the specified type */
-			static const char* typeToString(Type t);
+    /** returns a char* containing the type name */
+    const char *typeString() const;
 
-			/** converts the inner value to string, if possible.
-			* @throw runtime_error if not convertible */
-			operator std::string() const;
+    /** returns a char* containing the type name for the specified type */
+    static const char *typeToString(Type t);
 
-			/** converts the inner value to string, if possible.
-			* @throw runtime_error if not convertible */
-			std::string toString() const;
+    /** converts the inner value to string, if possible.
+     * @throw runtime_error if not convertible */
+    operator std::string() const;
 
-			/** converts the inner value to Int, if possible.
-			* @throw runtime_error if not convertible */
-			int toInt() const;
+    /** converts the inner value to string, if possible.
+     * @throw runtime_error if not convertible */
+    std::string toString() const;
 
-			/** converts the inner value to Unsigned Int, if possible.
-			* @throw runtime_error if not convertible */
-			uint toUInt() const;
+    /** converts the inner value to Int, if possible.
+     * @throw runtime_error if not convertible */
+    int toInt() const;
 
-			/** converts the inner value to float, if possible.
-			* @throw runtime_error if not convertible */
-			float toFloat() const;
+    /** converts the inner value to Unsigned Int, if possible.
+     * @throw runtime_error if not convertible */
+    uint toUInt() const;
 
-			/** converts the inner value to bool, if possible.
-			* @throw runtime_error if not convertible */
-			bool toBool() const;
+    /** converts the inner value to float, if possible.
+     * @throw runtime_error if not convertible */
+    float toFloat() const;
 
-			/** converts the inner value to Vector3, if possible.
-			* @throw runtime_error if not convertible */
-			Vector3 toVector() const;
+    /** converts the inner value to bool, if possible.
+     * @throw runtime_error if not convertible */
+    bool toBool() const;
 
-			/** converts the inner value to Quaternion, if possible.
-			* @throw runtime_error if not convertible */
-			Quaternion toQuaternion() const;
+    /** converts the inner value to Vector3, if possible.
+     * @throw runtime_error if not convertible */
+    Vector3 toVector() const;
 
-			/** Asignment operator. Shared pointers are released if needed */
-			const DVariant& operator =(const DVariant& b);
+    /** converts the inner value to Quaternion, if possible.
+     * @throw runtime_error if not convertible */
+    Quaternion toQuaternion() const;
 
-			/** Asignment operator */
-			const DVariant& operator =(bool b);
-			/** Asignment operator */
-			const DVariant& operator =(int i);
-			/** Asignment operator */
-			const DVariant& operator =(uint u);
-			/** Asignment operator */
-			const DVariant& operator =(float f);
-			/** Asignment operator */
-			const DVariant& operator =(const char* s);
-			/** Asignment operator */
-			const DVariant& operator =(const std::string& s);
-			/** Asignment operator */
-			const DVariant& operator =(const Vector3& v);
-			/** Asignment operator */
-			const DVariant& operator =(const Quaternion& v);
+    /** Asignment operator. Shared pointers are released if needed */
+    const DVariant &operator=(const DVariant &b);
 
+    /** Asignment operator */
+    const DVariant &operator=(bool b);
+    /** Asignment operator */
+    const DVariant &operator=(int i);
+    /** Asignment operator */
+    const DVariant &operator=(uint u);
+    /** Asignment operator */
+    const DVariant &operator=(float f);
+    /** Asignment operator */
+    const DVariant &operator=(const char *s);
+    /** Asignment operator */
+    const DVariant &operator=(const std::string &s);
+    /** Asignment operator */
+    const DVariant &operator=(const Vector3 &v);
+    /** Asignment operator */
+    const DVariant &operator=(const Quaternion &v);
 
-			/** Type identifier. Returns the Type of the variant's value */
-			Type type() const;
+    /** Type identifier. Returns the Type of the variant's value */
+    Type type() const;
 
-			/** Comparison operator. Comapares equality of the values.
-			* Tries to convert the values to see if the values match even if those do not have the same type */
-			inline bool operator ==(const DVariant &b) const {
-				return compare(b);
-			}
+    /** Comparison operator. Comapares equality of the values.
+     * Tries to convert the values to see if the values match even if those do
+     * not have the same type */
+    inline bool operator==(const DVariant &b) const { return compare(b); }
 
-			/** Comparison operator. Comapares non-equality of the values. @see operator==()*/
-			inline bool operator !=(const DVariant &b) const {
-				return !compare(b);
-			}
+    /** Comparison operator. Comapares non-equality of the values. @see
+     * operator==()*/
+    inline bool operator!=(const DVariant &b) const { return !compare(b); }
 
-			/** Base shared type for DVariant */
-			class SharedBase {
-				public:
-					SharedBase() {};
-					virtual ~SharedBase() {};
+    /** Base shared type for DVariant */
+    class SharedBase {
+    public:
+        SharedBase(){};
+        virtual ~SharedBase(){};
 
-					virtual SharedBase * clone() = 0;
-			};
+        virtual SharedBase *clone() = 0;
+    };
 
-			/// convertion operation with target type specified as template parameter (e.g.: dv.as<int>());
-			template<typename T> T as() const {
-				OPDE_EXCEPT("Invalid DVariant as<>() cast", "DVariant::as<T>()");
-			}
+    /// convertion operation with target type specified as template parameter
+    /// (e.g.: dv.as<int>());
+    template <typename T> T as() const {
+        OPDE_EXCEPT("Invalid DVariant as<>() cast", "DVariant::as<T>()");
+    }
 
-			/** Templated shared type for DVariant. Holds values for the shared types (string,vector) */
-			template <typename T> class Shared : public SharedBase {
-				public:
-					/// Constructor
-					Shared(const T& _data) : SharedBase(), data(_data) {};
+    /** Templated shared type for DVariant. Holds values for the shared types
+     * (string,vector) */
+    template <typename T> class Shared : public SharedBase {
+    public:
+        /// Constructor
+        Shared(const T &_data) : SharedBase(), data(_data){};
 
-					/// Copy constructor from same-typed shared
-					Shared(const Shared<T>& src) : SharedBase(), data(src.data) {};
+        /// Copy constructor from same-typed shared
+        Shared(const Shared<T> &src) : SharedBase(), data(src.data){};
 
-					virtual ~Shared() {}
+        virtual ~Shared() {}
 
-					virtual SharedBase * clone() {
-						SharedBase* copy = new Shared<T>(data);
+        virtual SharedBase *clone() {
+            SharedBase *copy = new Shared<T>(data);
 
-						return copy;
-					};
+            return copy;
+        };
 
-					T data;
-			};
+        T data;
+    };
 
-			/** Private data holder. Holds either shared or non-shared value */
-			struct Private {
-				union Data {
-					bool	dbool;
-					float	dfloat;
-					int 	dint;
-					uint	duint;
-					SharedBase* shared;
-				} data;
+    /** Private data holder. Holds either shared or non-shared value */
+    struct Private {
+        union Data {
+            bool dbool;
+            float dfloat;
+            int dint;
+            uint duint;
+            SharedBase *shared;
+        } data;
 
-				Type type : 31;
-				unsigned int isShared : 1;
-			};
-			
-			
-			// A const invalid dvariant. Can be used as a shortcut to be able to return const dvariant references
-			static const DVariant INVALID;
+        Type type : 31;
+        unsigned int isShared : 1;
+    };
 
-		protected:
-			/** Helper conversion routine : Vector3 from string
-			* Takes comma separated values (first 3, ignoring any further text)
-			* @param str The string to be parsed
-			* @throw runtime_error if unsupported format is encountered */
-			static Vector3 StringToVector(const std::string& str);
+    // A const invalid dvariant. Can be used as a shortcut to be able to return
+    // const dvariant references
+    static const DVariant INVALID;
 
-			/** Helper conversion routine : Quaternion from string
-			* Takes comma separated values (first 4 - w,x,y,z, ignoring any further text)
-			* @param str The string to be parsed
-			* @throw runtime_error if unsupported format is encountered */
-			static Quaternion StringToQuaternion(const std::string& str);
+protected:
+    /** Helper conversion routine : Vector3 from string
+     * Takes comma separated values (first 3, ignoring any further text)
+     * @param str The string to be parsed
+     * @throw runtime_error if unsupported format is encountered */
+    static Vector3 StringToVector(const std::string &str);
 
-			/** Helper conversion routine : int from String
-			* @param str the string to be parsed
-			* @note Understands the 0xNUMBER hexadecimal format */
-			static int StringToInt(const std::string& str);
+    /** Helper conversion routine : Quaternion from string
+     * Takes comma separated values (first 4 - w,x,y,z, ignoring any further
+     * text)
+     * @param str The string to be parsed
+     * @throw runtime_error if unsupported format is encountered */
+    static Quaternion StringToQuaternion(const std::string &str);
 
-			/** Helper conversion routine : uint from String
-			* @param str the string to be parsed
-			* @note Understands the 0xNUMBER hexadecimal format */
-			static uint StringToUInt(const std::string& str);
+    /** Helper conversion routine : int from String
+     * @param str the string to be parsed
+     * @note Understands the 0xNUMBER hexadecimal format */
+    static int StringToInt(const std::string &str);
 
-			/** Helper conversion routine : Bool from String
-			* Converts 1,yes,true to true, 0,no,false to false (ignoring case)
-			* @throw runtime_error if unsupported text is encountered */
-			static bool StringToBool(const std::string& str);
+    /** Helper conversion routine : uint from String
+     * @param str the string to be parsed
+     * @note Understands the 0xNUMBER hexadecimal format */
+    static uint StringToUInt(const std::string &str);
 
-			/** Helper conversion routine : Float from String
-			* @throw runtime_error if unsupported text is encountered */
-			static float StringToFloat(const std::string& str);
+    /** Helper conversion routine : Bool from String
+     * Converts 1,yes,true to true, 0,no,false to false (ignoring case)
+     * @throw runtime_error if unsupported text is encountered */
+    static bool StringToBool(const std::string &str);
 
-			/** Cast the shared data to a specified type
-			* @return reference to the type T if possible. */
-			template <typename T> T& shared_cast() const;
+    /** Helper conversion routine : Float from String
+     * @throw runtime_error if unsupported text is encountered */
+    static float StringToFloat(const std::string &str);
 
-			/** The comparison function. Is called by == and != operators */
-			bool compare(const DVariant &b) const;
+    /** Cast the shared data to a specified type
+     * @return reference to the type T if possible. */
+    template <typename T> T &shared_cast() const;
 
-			/** The data holder */
-			Private mPrivate;
-	};
+    /** The comparison function. Is called by == and != operators */
+    bool compare(const DVariant &b) const;
 
-	template<> bool DVariant::as<bool>() const;
-	template<> float DVariant::as<float>() const;
-	template<> int DVariant::as<int>() const;
-	template<> uint DVariant::as<uint>() const;
-	template<> std::string DVariant::as<std::string>() const;
-	template<> Vector3 DVariant::as<Vector3>() const;
-	template<> Ogre::Quaternion DVariant::as<Ogre::Quaternion>() const;
+    /** The data holder */
+    Private mPrivate;
+};
 
-	/// Type traits for template to DVariant conversions and various interactions (serialization, etc.)
-	template<typename T> struct OPDELIB_EXPORT DVariantTypeTraits {
-		DVariant::Type getType() {
-			return DVariant::DV_INVALID;
-		};
-	};
+template <> bool DVariant::as<bool>() const;
+template <> float DVariant::as<float>() const;
+template <> int DVariant::as<int>() const;
+template <> uint DVariant::as<uint>() const;
+template <> std::string DVariant::as<std::string>() const;
+template <> Vector3 DVariant::as<Vector3>() const;
+template <> Ogre::Quaternion DVariant::as<Ogre::Quaternion>() const;
 
-	// various template specializations for the common types
-	template<> DVariant::Type DVariantTypeTraits<bool>::getType();
-	template<> DVariant::Type DVariantTypeTraits<float>::getType();
-	template<> DVariant::Type DVariantTypeTraits<int32_t>::getType();
-	template<> DVariant::Type DVariantTypeTraits<uint32_t>::getType();
-	template<> DVariant::Type DVariantTypeTraits<std::string>::getType();
-	template<> DVariant::Type DVariantTypeTraits<Vector3>::getType();
-	template<> DVariant::Type DVariantTypeTraits<Quaternion>::getType();
-	
-	/// Map of string -> DVariant values
-	typedef std::map<std::string, DVariant> DVariantStringMap;
-}
+/// Type traits for template to DVariant conversions and various interactions
+/// (serialization, etc.)
+template <typename T> struct OPDELIB_EXPORT DVariantTypeTraits {
+    DVariant::Type getType() { return DVariant::DV_INVALID; };
+};
+
+// various template specializations for the common types
+template <> DVariant::Type DVariantTypeTraits<bool>::getType();
+template <> DVariant::Type DVariantTypeTraits<float>::getType();
+template <> DVariant::Type DVariantTypeTraits<int32_t>::getType();
+template <> DVariant::Type DVariantTypeTraits<uint32_t>::getType();
+template <> DVariant::Type DVariantTypeTraits<std::string>::getType();
+template <> DVariant::Type DVariantTypeTraits<Vector3>::getType();
+template <> DVariant::Type DVariantTypeTraits<Quaternion>::getType();
+
+/// Map of string -> DVariant values
+typedef std::map<std::string, DVariant> DVariantStringMap;
+} // namespace Opde
 
 #endif

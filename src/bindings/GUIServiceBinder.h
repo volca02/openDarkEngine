@@ -25,40 +25,42 @@
 #ifndef __GUISERVICEBINDER_H
 #define __GUISERVICEBINDER_H
 
-#include  "GUIService.h"
+#include "bindings.h"
+
+#include "GUIService.h"
 
 namespace Opde {
 
-	namespace Python {
+namespace Python {
 
-		/// GUI service python binder
-		class GUIServiceBinder : public shared_ptr_binder<GUIServicePtr> {
-			public:
-				static void init(PyObject* module);
+/// GUI service python binder
+class GUIServiceBinder : public shared_ptr_binder<GUIServicePtr> {
+public:
+    static void init(PyObject *module);
 
-				// --- Python type related methods ---
-				static PyObject* create();
+    // --- Python type related methods ---
+    static PyObject *create();
 
-				// --- Methods ---
-				static PyObject* setActive(PyObject* self, PyObject* args);
-				static PyObject* setVisible(PyObject* self, PyObject* args);
-				static PyObject* getActiveSheet(PyObject* self, PyObject* args);
-				static PyObject* setActiveSheet(PyObject* self, PyObject* args);
-				static PyObject* createSheet(PyObject* self, PyObject* args);
-				static PyObject* destroySheet(PyObject* self, PyObject* args);
+    // --- Methods ---
+    static PyObject *setActive(PyObject *self, PyObject *args);
+    static PyObject *setVisible(PyObject *self, PyObject *args);
+    static PyObject *getActiveSheet(PyObject *self, PyObject *args);
+    static PyObject *setActiveSheet(PyObject *self, PyObject *args);
+    static PyObject *createSheet(PyObject *self, PyObject *args);
+    static PyObject *destroySheet(PyObject *self, PyObject *args);
 
-			protected:
-				/// Static type definition for GUIService
-				static PyTypeObject msType;
+protected:
+    /// Static type definition for GUIService
+    static PyTypeObject msType;
 
-				/// Name of the python type
-				static const char* msName;
+    /// Name of the python type
+    static const char *msName;
 
-				/// Method list
-				static PyMethodDef msMethods[];
-		};
+    /// Method list
+    static PyMethodDef msMethods[];
+};
 
-	}
-}
+} // namespace Python
+} // namespace Opde
 
 #endif

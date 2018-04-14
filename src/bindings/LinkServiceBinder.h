@@ -25,67 +25,67 @@
 #ifndef __LINKSERVICEBINDER_H
 #define __LINKSERVICEBINDER_H
 
-#include  "DTypeDef.h"
-#include  "BinaryService.h"
-#include  "LinkService.h"
-#include  "DTypeBinder.h"
+#include "BinaryService.h"
+#include "DTypeBinder.h"
+#include "DTypeDef.h"
+#include "LinkService.h"
 
 namespace Opde {
 
-	namespace Python {
+namespace Python {
 
-		/// Link service python binder
-		class LinkServiceBinder : public shared_ptr_binder<LinkServicePtr> {
-			public:
-				static void init(PyObject* module);
+/// Link service python binder
+class LinkServiceBinder : public shared_ptr_binder<LinkServicePtr> {
+public:
+    static void init(PyObject *module);
 
-				// --- Python type related methods ---
-				static PyObject* create();
+    // --- Python type related methods ---
+    static PyObject *create();
 
-				// --- Methods ---
-				static PyObject* setChunkVersion(PyObject* self, PyObject* args);
-				static PyObject* nameToFlavor(PyObject* self, PyObject* args);
-				static PyObject* flavorToName(PyObject* self, PyObject* args);
-				static PyObject* getRelation(PyObject* self, PyObject* args);
-				static PyObject* getAllLinks(PyObject* self, PyObject* args);
-				static PyObject* getAllInherited(PyObject* self, PyObject* args);
-				static PyObject* getOneLink(PyObject* self, PyObject* args);
-				static PyObject* getAllLinkNames(PyObject* self, PyObject* args);
-				static PyObject* getFieldsDesc(PyObject* self, PyObject* args);
+    // --- Methods ---
+    static PyObject *setChunkVersion(PyObject *self, PyObject *args);
+    static PyObject *nameToFlavor(PyObject *self, PyObject *args);
+    static PyObject *flavorToName(PyObject *self, PyObject *args);
+    static PyObject *getRelation(PyObject *self, PyObject *args);
+    static PyObject *getAllLinks(PyObject *self, PyObject *args);
+    static PyObject *getAllInherited(PyObject *self, PyObject *args);
+    static PyObject *getOneLink(PyObject *self, PyObject *args);
+    static PyObject *getAllLinkNames(PyObject *self, PyObject *args);
+    static PyObject *getFieldsDesc(PyObject *self, PyObject *args);
 
-			protected:
-				static bool getFlavor(PyObject *src, LinkServicePtr& obj, int& flavor);
+protected:
+    static bool getFlavor(PyObject *src, LinkServicePtr &obj, int &flavor);
 
-				/// Static type definition for LinkService
-				static PyTypeObject msType;
+    /// Static type definition for LinkService
+    static PyTypeObject msType;
 
-				/// Name of the python type
-				static const char* msName;
+    /// Name of the python type
+    static const char *msName;
 
-				/// Method list
-				static PyMethodDef msMethods[];
-		};
+    /// Method list
+    static PyMethodDef msMethods[];
+};
 
-		// -------------------------------
-		/// Link class binder. The methods are converted to read-only attributes
-		class LinkBinder : public shared_ptr_binder<LinkPtr> {
-		    public:
-				static void init(PyObject* module);
+// -------------------------------
+/// Link class binder. The methods are converted to read-only attributes
+class LinkBinder : public shared_ptr_binder<LinkPtr> {
+public:
+    static void init(PyObject *module);
 
-				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
+    // --- Python type related methods ---
+    static PyObject *getattr(PyObject *self, char *name);
 
-				static PyObject* create(LinkPtr& link);
+    static PyObject *create(LinkPtr &link);
 
-            protected:
-				/// Static type definition for LinkService
-				static PyTypeObject msType;
+protected:
+    /// Static type definition for LinkService
+    static PyTypeObject msType;
 
-				/// Name of the python type
-				static const char* msName;
-		};
+    /// Name of the python type
+    static const char *msName;
+};
 
-	}
-}
+} // namespace Python
+} // namespace Opde
 
 #endif

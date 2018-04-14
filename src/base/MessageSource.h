@@ -26,64 +26,66 @@
 
 #include "config.h"
 
-#include "SharedPtr.h"
+#include <map>
+
 #include "Callback.h"
+#include "SharedPtr.h"
 
 namespace Opde {
 
-    /** Message Source - a message sending class template.
-    * M stands for the message type sended
-    */
-    template <typename M> class MessageSource {
-		public:
-			typedef size_t ListenerID;
-			typedef Callback<M> Listener;
-			typedef shared_ptr< Listener >  ListenerPtr;
+/** Message Source - a message sending class template.
+ * M stands for the message type sended
+ */
+template <typename M> class MessageSource {
+public:
+    typedef size_t ListenerID;
+    typedef Callback<M> Listener;
+    typedef shared_ptr<Listener> ListenerPtr;
 
-		protected:
-			ListenerID mCurrent;
+protected:
+    ListenerID mCurrent;
 
-			/// A set of listeners
-			typedef typename std::map< ListenerID, ListenerPtr > Listeners;
+    /// A set of listeners
+    typedef typename std::map<ListenerID, ListenerPtr> Listeners;
 
-			/// Listeners for the link changes
-			Listeners mListeners;
+    /// Listeners for the link changes
+    Listeners mListeners;
 
-			/// Sends a message to all listeners
-			void broadcastMessage(const M& msg) {
-				typename Listeners::iterator it = mListeners.begin();
+    /// Sends a message to all listeners
+    void broadcastMessage(const M &msg) {
+        typename Listeners::iterator it = mListeners.begin();
 
-				for (; it != mListeners.end(); ++it) {
-					// Use the callback functor to fire the callback
-					(*it->second)(msg);
-				}
-			}
+        for (; it != mListeners.end(); ++it) {
+            // Use the callback functor to fire the callback
+            (*it->second)(msg);
+        }
+    }
 
-		public:
-			MessageSource() : mCurrent(0) {};
-			~MessageSource() { mListeners.clear(); };
+public:
+    MessageSource() : mCurrent(0){};
+    ~MessageSource() { mListeners.clear(); };
 
-			/** Registers a listener.
-			* @param listener A pointer to L
-			* @return ID of the listener to be used for unregisterListener call
-			*/
-			ListenerID registerListener(const ListenerPtr& listener) {
-				mListeners.insert(std::make_pair(mCurrent, listener));
-				return mCurrent++;
-			}
+    /** Registers a listener.
+     * @param listener A pointer to L
+     * @return ID of the listener to be used for unregisterListener call
+     */
+    ListenerID registerListener(const ListenerPtr &listener) {
+        mListeners.insert(std::make_pair(mCurrent, listener));
+        return mCurrent++;
+    }
 
-			/** Unregisters a listener.
-			* @param id ID returned by the registerListener call
-			*/
-			void unregisterListener(ListenerID id) {
-				typename Listeners::iterator it = mListeners.find(id);
+    /** Unregisters a listener.
+     * @param id ID returned by the registerListener call
+     */
+    void unregisterListener(ListenerID id) {
+        typename Listeners::iterator it = mListeners.find(id);
 
-				if (it != mListeners.end()) {
-					mListeners.erase(it);
-				}
-			}
-	};
+        if (it != mListeners.end()) {
+            mListeners.erase(it);
+        }
+    }
+};
 
-}
+} // namespace Opde
 
 #endif

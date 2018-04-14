@@ -25,27 +25,24 @@
 #include "config.h"
 
 #include <iostream>
-#include <sstream>
 #include <list>
+#include <sstream>
 
-#include "OpdeServiceManager.h"
-#include "OpdeService.h"
 #include "OpdeException.h"
+#include "OpdeService.h"
+#include "OpdeServiceManager.h"
 #include "logger.h"
 
 using namespace std;
 
 namespace Opde {
 
-template<> ServiceManager* Singleton<ServiceManager>::ms_Singleton = 0;
+template <> ServiceManager *Singleton<ServiceManager>::ms_Singleton = 0;
 const uint ServiceManager::msMaxServiceSID = 128;
 
-ServiceManager::ServiceManager(uint serviceMask) :
-    mServiceFactories(),
-    mServiceInstances(),
-    mBootstrapFinished(false),
-    mGlobalServiceMask(serviceMask)
-{
+ServiceManager::ServiceManager(uint serviceMask)
+    : mServiceFactories(), mServiceInstances(), mBootstrapFinished(false),
+      mGlobalServiceMask(serviceMask) {
     mServiceInstances.grow(msMaxServiceSID);
     mServiceFactories.grow(msMaxServiceSID);
 
@@ -63,10 +60,12 @@ ServiceManager::~ServiceManager() {
 
     // Shutdown loop. Resolver for some possible problems
     for (size_t idx = 0; idx < mServiceInstances.size(); ++idx) {
-        ServicePtr& sp = mServiceInstances[idx];
+        ServicePtr &sp = mServiceInstances[idx];
 
         if (sp) {
-            LOG_INFO("ServiceManager: * Shutting down service '%s' with ref. count %d", sp->getName().c_str(), sp.use_count());
+            LOG_INFO("ServiceManager: * Shutting down service '%s' with ref. "
+                     "count %d",
+                     sp->getName().c_str(), sp.use_count());
             sp->shutdown();
         }
     }
@@ -74,10 +73,12 @@ ServiceManager::~ServiceManager() {
     LOG_INFO("ServiceManager: Releasing all services");
 
     for (size_t idx = 0; idx < mServiceInstances.size(); ++idx) {
-        ServicePtr& sp = mServiceInstances[idx];
+        ServicePtr &sp = mServiceInstances[idx];
 
         if (sp) {
-            LOG_INFO("ServiceManager: * Releasing service '%s' with ref. count %d", sp->getName().c_str(), sp.use_count());
+            LOG_INFO(
+                "ServiceManager: * Releasing service '%s' with ref. count %d",
+                sp->getName().c_str(), sp.use_count());
             sp.reset();
         }
     }
@@ -88,31 +89,35 @@ ServiceManager::~ServiceManager() {
     mServiceFactories.clear();
 }
 
-ServiceManager& ServiceManager::getSingleton(void) {
-    assert( ms_Singleton );  return ( *ms_Singleton );
+ServiceManager &ServiceManager::getSingleton(void) {
+    assert(ms_Singleton);
+    return (*ms_Singleton);
 }
 
-ServiceManager* ServiceManager::getSingletonPtr(void) {
-    return ms_Singleton;
-}
-
+ServiceManager *ServiceManager::getSingletonPtr(void) { return ms_Singleton; }
 
 //------------------ Main implementation ------------------
-void ServiceManager::addServiceFactory(ServiceFactory* factory) {
-    LOG_INFO("ServiceManager: Registered service factory for %s (%d - mask %X)", factory->getName().c_str(), factory->getSID(), factory->getMask());
+void ServiceManager::addServiceFactory(ServiceFactory *factory) {
+    LOG_INFO("ServiceManager: Registered service factory for %s (%d - mask %X)",
+             factory->getName().c_str(), factory->getSID(), factory->getMask());
 
     size_t fsid = factory->getSID();
 
     if (fsid > msMaxServiceSID)
-        OPDE_EXCEPT("ServiceFactory SID beyond maximum for " + factory->getName(), "ServiceManager::addServiceFactory");
+        OPDE_EXCEPT("ServiceFactory SID beyond maximum for " +
+                        factory->getName(),
+                    "ServiceManager::addServiceFactory");
 
     if (mServiceFactories[fsid] != NULL)
-        OPDE_EXCEPT("ServiceFactory SID already taken by " + mServiceFactories[fsid]->getName() + " could not issue it to " + factory->getName(), "ServiceManager::addServiceFactory");
+        OPDE_EXCEPT("ServiceFactory SID already taken by " +
+                        mServiceFactories[fsid]->getName() +
+                        " could not issue it to " + factory->getName(),
+                    "ServiceManager::addServiceFactory");
 
     mServiceFactories[fsid] = factory;
 }
 
-ServiceFactory* ServiceManager::findFactory(size_t sid) {
+ServiceFactory *ServiceManager::findFactory(size_t sid) {
     return mServiceFactories[sid];
 }
 
@@ -121,30 +126,39 @@ ServicePtr ServiceManager::findService(size_t sid) {
 }
 
 ServicePtr ServiceManager::createInstance(size_t sid) {
-    ServiceFactory* factory = mServiceFactories[sid];
+    ServiceFactory *factory = mServiceFactories[sid];
 
     if (factory != NULL) { // Found a factory for the Service name
         size_t fsid = factory->getSID();
         assert(fsid == sid);
 
-        LOG_INFO("ServiceManager: Creating service %s (%d)", factory->getName().c_str(), sid);
+        LOG_INFO("ServiceManager: Creating service %s (%d)",
+                 factory->getName().c_str(), sid);
 
         if (!(factory->getMask() & mGlobalServiceMask))
-            OPDE_EXCEPT("Creation of service " + factory->getName() + " was not permitted by mask. Please consult OPDE log for details", "ServiceManager::createInstance");
+            OPDE_EXCEPT("Creation of service " + factory->getName() +
+                            " was not permitted by mask. Please consult OPDE "
+                            "log for details",
+                        "ServiceManager::createInstance");
 
         ServicePtr ns(factory->createInstance(this));
 
-        if(mServiceInstances[fsid])
-            LOG_INFO("ServiceManager: Service already created?! (%s (%d))", factory->getName().c_str(), sid);
+        if (mServiceInstances[fsid])
+            LOG_INFO("ServiceManager: Service already created?! (%s (%d))",
+                     factory->getName().c_str(), sid);
 
         assert(mServiceInstances[fsid].isNull());
         mServiceInstances[fsid] = ns;
 
         if (!ns->init()) {
-            OPDE_EXCEPT("Initialization of service " + factory->getName() + " failed. Fatal. Please consult OPDE log for details", "ServiceManager::createInstance");
+            OPDE_EXCEPT(
+                "Initialization of service " + factory->getName() +
+                    " failed. Fatal. Please consult OPDE log for details",
+                "ServiceManager::createInstance");
         }
 
-        if (mBootstrapFinished) // Bootstrap already over, call the after-bootstrap init too
+        if (mBootstrapFinished) // Bootstrap already over, call the
+                                // after-bootstrap init too
             ns->bootstrapFinished();
 
         return ns;
@@ -162,20 +176,23 @@ ServicePtr ServiceManager::getService(size_t sid) {
     if (service)
         return service;
     else {
-        LOG_DEBUG("ServiceManager: Service instance for %d not found, will create.", sid);
+        LOG_DEBUG(
+            "ServiceManager: Service instance for %d not found, will create.",
+            sid);
         return createInstance(sid);
     }
 }
 
 void ServiceManager::createByMask(uint mask) {
     for (size_t idx = 0; idx < mServiceInstances.size(); ++idx) {
-        ServiceFactory* factory = mServiceFactories[idx];
+        ServiceFactory *factory = mServiceFactories[idx];
 
         if (!factory)
             continue;
 
         // if the mask fits and the service is permitted by global service mask
-        if ((factory->getMask() & mask) && (factory->getMask() & mGlobalServiceMask)) {
+        if ((factory->getMask() & mask) &&
+            (factory->getMask() & mGlobalServiceMask)) {
             ServicePtr service = getService(factory->getSID());
         }
     }
@@ -185,16 +202,16 @@ void ServiceManager::bootstrapFinished() {
     if (mBootstrapFinished) // just do this once
         return;
 
-    // Here's a catch: The services can create other services while bootstrapping
-    // process is performed. That means the service map can be modified,
-    // and so it's not guaranteed that the bootstrap will be called on those.
-    // For a fix, we set the mBootstrapFinished flag in advance, which means
-    // createInstance will also bootstrap
+    // Here's a catch: The services can create other services while
+    // bootstrapping process is performed. That means the service map can be
+    // modified, and so it's not guaranteed that the bootstrap will be called on
+    // those. For a fix, we set the mBootstrapFinished flag in advance, which
+    // means createInstance will also bootstrap
 
     std::list<ServicePtr> toBootstrap;
 
-    for (size_t idx = 0; idx < mServiceInstances.size() ; ++idx ) {
-        ServicePtr& sp = mServiceInstances[idx];
+    for (size_t idx = 0; idx < mServiceInstances.size(); ++idx) {
+        ServicePtr &sp = mServiceInstances[idx];
 
         if (sp)
             toBootstrap.push_back(sp);
@@ -204,10 +221,11 @@ void ServiceManager::bootstrapFinished() {
 
     std::list<ServicePtr>::iterator tit = toBootstrap.begin();
 
-    for (; tit != toBootstrap.end() ; ++tit ) {
-        LOG_DEBUG("ServiceManager: Bootstrap finished: informing %s", (*tit)->getName().c_str());
+    for (; tit != toBootstrap.end(); ++tit) {
+        LOG_DEBUG("ServiceManager: Bootstrap finished: informing %s",
+                  (*tit)->getName().c_str());
         (*tit)->bootstrapFinished();
     };
 }
 
-}
+} // namespace Opde

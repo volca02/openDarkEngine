@@ -19,9 +19,9 @@
  *
  *
  *		$Id$
- * 
+ *
  *****************************************************************************/
- 
+
 #ifndef __FILELOG_H
 #define __FILELOG_H
 
@@ -30,19 +30,19 @@
 #include "logger.h"
 
 #include <fstream>
-  
+
 namespace Opde {
 
-	/** Log listener, writing the logging messsages to a file */
-	class OPDELIB_EXPORT FileLog : public LogListener {
-		protected:
-			std::ofstream ofile;
-			
-		public:
-			FileLog(const std::string& fname);
-			virtual ~FileLog();
-			virtual void logMessage(Logger::LogLevel level, const std::string& msg);
-	};
-}
+/** Log listener, writing the logging messsages to a file */
+class OPDELIB_EXPORT FileLog : public LogListener {
+protected:
+    std::ofstream ofile;
+
+public:
+    FileLog(const std::string &fname);
+    virtual ~FileLog();
+    virtual void logMessage(Logger::LogLevel level, const std::string &msg);
+};
+} // namespace Opde
 
 #endif

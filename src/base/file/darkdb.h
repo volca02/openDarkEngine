@@ -20,58 +20,57 @@
  *	  $Id$
  *
  *****************************************************************************/
- 
-// Dark Database structural parts. Taken from Telliamed's DarkUtils (thanks Telliamed!)
- 
+
+// Dark Database structural parts. Taken from Telliamed's DarkUtils (thanks
+// Telliamed!)
+
 #ifndef __DARKDB_H
 #define __DARKDB_H
 
 #include "integers.h"
 
 namespace Opde {
-	// Forward decl.
-	class File;
-	
-	/*
-	* Header of Dark Engine's tag-file database.
-	*/
-	struct DarkDBHeader {
-		uint32_t	inv_offset;		// Offset to inventory TOC from top of header
-		uint32_t	zero;
-		uint32_t	one;
-		uint8_t		zeros[256];
-		uint32_t	dead_beef;		// 0xEFBEADDE (damn little-endian)
-	};
+// Forward decl.
+class File;
 
-	File& operator<<(File& st, const DarkDBHeader& h);
-	File& operator>>(File& st, DarkDBHeader& h);
-
-	
-	/*
-	* Item in chunk index.
-	*/
-	struct DarkDBInvItem {
-		char		name[12];
-		uint32_t	offset;
-		uint32_t	length;
-	};
-	
-	File& operator<<(File& st, const DarkDBInvItem& h);
-	File& operator>>(File& st, DarkDBInvItem& h);
-	
-	/*
-	* Universal chunk header.
-	*/
-	struct DarkDBChunkHeader {
-		char	name[12];
-		uint32_t	version_high;
-		uint32_t	version_low;
-		uint32_t	zero;
-	};
-
-	
-	File& operator<<(File& st, const DarkDBChunkHeader& h);
-	File& operator>>(File& st, DarkDBChunkHeader& h);
+/*
+ * Header of Dark Engine's tag-file database.
+ */
+struct DarkDBHeader {
+    uint32_t inv_offset; // Offset to inventory TOC from top of header
+    uint32_t zero;
+    uint32_t one;
+    uint8_t zeros[256];
+    uint32_t dead_beef; // 0xEFBEADDE (damn little-endian)
 };
+
+File &operator<<(File &st, const DarkDBHeader &h);
+File &operator>>(File &st, DarkDBHeader &h);
+
+/*
+ * Item in chunk index.
+ */
+struct DarkDBInvItem {
+    char name[12];
+    uint32_t offset;
+    uint32_t length;
+};
+
+File &operator<<(File &st, const DarkDBInvItem &h);
+File &operator>>(File &st, DarkDBInvItem &h);
+
+/*
+ * Universal chunk header.
+ */
+struct DarkDBChunkHeader {
+    char name[12];
+    uint32_t version_high;
+    uint32_t version_low;
+    uint32_t zero;
+};
+
+File &operator<<(File &st, const DarkDBChunkHeader &h);
+File &operator>>(File &st, DarkDBChunkHeader &h);
+}; // namespace Opde
 
 #endif

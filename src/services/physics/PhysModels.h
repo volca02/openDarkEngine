@@ -27,46 +27,46 @@
 #include "File.h"
 
 namespace Opde {
-	class PhysicsService;
-	class PhysModel;
-	
-	/** @brief Collection of physics models. Contains two lists - Stationary and Moving. Used to contain all the physics models in the mission.
-	*/
-	class OPDELIB_EXPORT PhysModels {
-		public:
-			PhysModels(PhysicsService* owner);
-			
-			/** Get physics model by object ID, if present.
-			* @param objid Object ID 
-			* @return PhysModel* pointer if exists, NULL otherwise */
-			PhysModel* get(int objid) const;
-			
-			/** Read all the object phys models from specified tag */
-			void read(const FilePtr& tag, unsigned int physVersion);
-			
-			/** Write all the object phys models to a specified tag */
-			void write(const FilePtr& tag, unsigned int physVersion);
-			
-			/** clear the collection, remove all the objects */
-			void clear(void);
-			
-			/** Adds the model to the list of stationary models */
-			void addToStationary(PhysModel* mdl);
-			
-			/** @return true if the given object is stationary */
-			bool isStationary(int objid);
-		private:
-			typedef std::map<int, PhysModel*> IDModelMap;
-			typedef std::set<int> IDSet;
-			
-			IDModelMap mModels;
-			IDSet mStationaryObjects;
-			
-			
-			/// Owning service of this object
-			PhysicsService* mOwner;
-	};
-}
+class PhysicsService;
+class PhysModel;
 
+/** @brief Collection of physics models. Contains two lists - Stationary and
+ * Moving. Used to contain all the physics models in the mission.
+ */
+class OPDELIB_EXPORT PhysModels {
+public:
+    PhysModels(PhysicsService *owner);
+
+    /** Get physics model by object ID, if present.
+     * @param objid Object ID
+     * @return PhysModel* pointer if exists, NULL otherwise */
+    PhysModel *get(int objid) const;
+
+    /** Read all the object phys models from specified tag */
+    void read(const FilePtr &tag, unsigned int physVersion);
+
+    /** Write all the object phys models to a specified tag */
+    void write(const FilePtr &tag, unsigned int physVersion);
+
+    /** clear the collection, remove all the objects */
+    void clear(void);
+
+    /** Adds the model to the list of stationary models */
+    void addToStationary(PhysModel *mdl);
+
+    /** @return true if the given object is stationary */
+    bool isStationary(int objid);
+
+private:
+    typedef std::map<int, PhysModel *> IDModelMap;
+    typedef std::set<int> IDSet;
+
+    IDModelMap mModels;
+    IDSet mStationaryObjects;
+
+    /// Owning service of this object
+    PhysicsService *mOwner;
+};
+} // namespace Opde
 
 #endif

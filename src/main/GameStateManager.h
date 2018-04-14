@@ -21,7 +21,6 @@
  *
  *****************************************************************************/
 
-
 #ifndef __GAMESTATEMANAGER_H
 #define __GAMESTATEMANAGER_H
 
@@ -33,28 +32,30 @@
 
 #include <stack>
 
-#include "Root.h"
-#include "OpdeSingleton.h"
-#include "GameState.h"
 #include "ConsoleBackend.h"
+#include "DVariant.h"
+#include "GameState.h"
 #include "OpdeServiceManager.h"
+#include "OpdeSingleton.h"
+#include "Root.h"
 #include "config/ConfigService.h"
 #include "input/InputService.h"
-#include "DVariant.h"
 
 namespace Opde {
 
 /** The game state manager. A temporary piece of code that enables opde testing.
- * @warning This code is here only for testing purposes, and will go away later on
+ * @warning This code is here only for testing purposes, and will go away later
+ * on
  */
-class GameStateManager : public Singleton<GameStateManager>, public DirectInputListener {
+class GameStateManager : public Singleton<GameStateManager>,
+                         public DirectInputListener {
 public:
-    GameStateManager(const std::string& GameType);
+    GameStateManager(const std::string &GameType);
     ~GameStateManager();
 
     // Singleton related
-    static GameStateManager& getSingleton(void);
-    static GameStateManager* getSingletonPtr(void);
+    static GameStateManager &getSingleton(void);
+    static GameStateManager *getSingletonPtr(void);
 
     /// Terminates the execution of the game loop
     void terminate();
@@ -62,18 +63,22 @@ public:
     /** Pushes a new state to the stack, and calls start() on this new state
      * If the stack was not empty before, suspend() is called on previous top
      */
-    void pushState(GameState* state);
+    void pushState(GameState *state);
 
-    /** Pops the topmost state from stack, if possible. Calls exit() on such state
+    /** Pops the topmost state from stack, if possible. Calls exit() on such
+     * state
      *
      */
     void popState();
 
-    /** Initialize the state manager, then run the loop with the given state. Initializes ogre, resources, input system, etc.
+    /** Initialize the state manager, then run the loop with the given state.
+     * Initializes ogre, resources, input system, etc.
      * @return true if game should procede, false otherwise */
     bool run();
 
-    inline void setDesiredMissionName(const std::string& name) { mMissionName = name; };
+    inline void setDesiredMissionName(const std::string &name) {
+        mMissionName = name;
+    };
 
 protected:
     /** Loads the resources from the resources.cfg */
@@ -88,19 +93,19 @@ protected:
     bool mousePressed(const SDL_MouseButtonEvent &e);
     bool mouseReleased(const SDL_MouseButtonEvent &e);
 
-    typedef std::stack<GameState*> StateStack;
+    typedef std::stack<GameState *> StateStack;
 
     /// Stack of the game states
     StateStack mStateStack;
 
     /// the game loop should end if true
-    bool	mTerminate;
+    bool mTerminate;
 
     /// last frame's time
     unsigned long mTimeLastFrame;
 
     ///  Stderr logger
-    ConsoleBackend* mConsoleBackend;
+    ConsoleBackend *mConsoleBackend;
 
     /// Opde::root
     Opde::Root *mRoot;
@@ -119,9 +124,9 @@ protected:
     std::string mMissionName;
 
     /// Service manager ref
-    ServiceManager* mServiceMgr;
+    ServiceManager *mServiceMgr;
 };
 
-}
+} // namespace Opde
 
 #endif

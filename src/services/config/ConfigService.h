@@ -22,131 +22,141 @@
  *
  *****************************************************************************/
 
-
 #ifndef __CONFIGSERVICE_H
 #define __CONFIGSERVICE_H
 
 #include "config.h"
 
-#include "OpdeServiceManager.h"
-#include "OpdeService.h"
-#include "platform/PlatformService.h"
-#include "FileGroup.h"
-#include "SharedPtr.h"
 #include "DVariant.h"
+#include "FileGroup.h"
+#include "OpdeService.h"
+#include "OpdeServiceManager.h"
+#include "SharedPtr.h"
+#include "platform/PlatformService.h"
 
 namespace Opde {
 
-	/** @brief config service
-	*/
-	class OPDELIB_EXPORT ConfigService : public ServiceImpl<ConfigService> {
-		public:
-			typedef enum {
-				GAME_TYPE_INVALID = 0,
-				GAME_TYPE_T1,
-				GAME_TYPE_T2,
-				GAME_TYPE_SS2
-			} GameType;
+/** @brief config service
+ */
+class OPDELIB_EXPORT ConfigService : public ServiceImpl<ConfigService> {
+public:
+    typedef enum {
+        GAME_TYPE_INVALID = 0,
+        GAME_TYPE_T1,
+        GAME_TYPE_T2,
+        GAME_TYPE_SS2
+    } GameType;
 
-			ConfigService(ServiceManager *manager, const std::string& name);
-			virtual ~ConfigService();
+    ConfigService(ServiceManager *manager, const std::string &name);
+    virtual ~ConfigService();
 
-			/** Sets a description for the specified parameter. */
-			void setParamDescription(const std::string& param, const std::string& value);
+    /** Sets a description for the specified parameter. */
+    void setParamDescription(const std::string &param,
+                             const std::string &value);
 
-			/** Set a parameter */
-			void setParam(const std::string& param, const std::string& value);
+    /** Set a parameter */
+    void setParam(const std::string &param, const std::string &value);
 
-			/** get a parameter
-			* @param param The parameter name
-			* @param dflt The DVariant default value, if not found
-			* @return The parameter value, or Empty DVariant if the parameter was not found */
-			DVariant getParam(const std::string& param, const DVariant &dflt = DVariant());
+    /** get a parameter
+     * @param param The parameter name
+     * @param dflt The DVariant default value, if not found
+     * @return The parameter value, or Empty DVariant if the parameter was not
+     * found */
+    DVariant getParam(const std::string &param,
+                      const DVariant &dflt = DVariant());
 
-			/** get a parameter
-			* @param param The parameter name
-			* @param tgt The DVariant instance to fill if successful (will not overwrite if no param found)
-			* @return true if parameter was changed */
-			bool getParam(const std::string& param, DVariant& tgt);
+    /** get a parameter
+     * @param param The parameter name
+     * @param tgt The DVariant instance to fill if successful (will not
+     * overwrite if no param found)
+     * @return true if parameter was changed */
+    bool getParam(const std::string &param, DVariant &tgt);
 
-			/** determine an existence of a parameter */
-			bool hasParam(const std::string& param);
+    /** determine an existence of a parameter */
+    bool hasParam(const std::string &param);
 
-			/** Injects the settings from a specified cfg file.
-			 * This function uses PlatformService to obtain two possible config file paths. It then loads global followed by local
-			 * version of the config file mentioned.
-			 * @note If ConfigPathOverride is set (via setConfigPathOverride), then that path is solely used to populate the configuration
-			 * @param cfgfile The name of the config file (without path)
-			 * @return true if config was loaded from at least one of the paths, false otherwise */
-			bool loadParams(const std::string& cfgfile);
+    /** Injects the settings from a specified cfg file.
+     * This function uses PlatformService to obtain two possible config file
+     * paths. It then loads global followed by local version of the config file
+     * mentioned.
+     * @note If ConfigPathOverride is set (via setConfigPathOverride), then that
+     * path is solely used to populate the configuration
+     * @param cfgfile The name of the config file (without path)
+     * @return true if config was loaded from at least one of the paths, false
+     * otherwise */
+    bool loadParams(const std::string &cfgfile);
 
-			/** Sets an override for the config file loading paths. Used to enable debugging without installation, etc.
-			 */
-			void setConfigPathOverride(const std::string& cfgpath);
+    /** Sets an override for the config file loading paths. Used to enable
+     * debugging without installation, etc.
+     */
+    void setConfigPathOverride(const std::string &cfgpath);
 
-			/** returns the set game type. This should normally be the cam.cfg's game dark/game shock, but we also need to differentiate t1/t2
-			* @note Uses the game_type = t1/t2/ss2 config key */
-			GameType getGameType();
+    /** returns the set game type. This should normally be the cam.cfg's game
+     * dark/game shock, but we also need to differentiate t1/t2
+     * @note Uses the game_type = t1/t2/ss2 config key */
+    GameType getGameType();
 
-			/** Language, as parsed from the install.cfg file
-			 * @todo Parse the install.cfg - now we read it from opde.cfg
-			 * @return Language name string (to be used with localized resource version reader code)
-			 * */
-			std::string getLanguage();
+    /** Language, as parsed from the install.cfg file
+     * @todo Parse the install.cfg - now we read it from opde.cfg
+     * @return Language name string (to be used with localized resource version
+     * reader code)
+     * */
+    std::string getLanguage();
 
-			/** Prepares a localized resource path out of given path.
-			 * What it does is that it takes the language setting, splits the origPath
-			 * into path and filename, and concatenates the language to the path
-			 * @param origPath The original path to process
-			 * @return The modified path with language string added to the path's end
-			 */
-			std::string getLocalisedResourcePath(const std::string& origPath);
+    /** Prepares a localized resource path out of given path.
+     * What it does is that it takes the language setting, splits the origPath
+     * into path and filename, and concatenates the language to the path
+     * @param origPath The original path to process
+     * @return The modified path with language string added to the path's end
+     */
+    std::string getLocalisedResourcePath(const std::string &origPath);
 
-			/** Helper method that logs all the config parameters with descriptions to LOG */
-			void logAllParameters();
+    /** Helper method that logs all the config parameters with descriptions to
+     * LOG */
+    void logAllParameters();
 
-		protected:
-			/** initializes the service. Tries to load opde.cfg */
-			bool init();
-			void shutdown();
+protected:
+    /** initializes the service. Tries to load opde.cfg */
+    bool init();
+    void shutdown();
 
-			/** Loads additional parameters from the specified file name */
-			bool loadFromFile(const std::string& cfgfile);
+    /** Loads additional parameters from the specified file name */
+    bool loadFromFile(const std::string &cfgfile);
 
-		private:
-			typedef std::map< std::string, std::string > Parameters;
+private:
+    typedef std::map<std::string, std::string> Parameters;
 
-			Parameters mParameters;
-			Parameters mConfigKeyDescriptions;
+    Parameters mParameters;
+    Parameters mConfigKeyDescriptions;
 
-			PlatformServicePtr mPlatformService;
+    PlatformServicePtr mPlatformService;
 
-			/// If set, the hierarchical loading from global+local is not used, this path is used instead
-			std::string mConfigPathOverride;
-	};
+    /// If set, the hierarchical loading from global+local is not used, this
+    /// path is used instead
+    std::string mConfigPathOverride;
+};
 
-	/// Shared pointer to Config service
-	typedef shared_ptr<ConfigService> ConfigServicePtr;
+/// Shared pointer to Config service
+typedef shared_ptr<ConfigService> ConfigServicePtr;
 
+/// Factory for the ConfigService objects
+class OPDELIB_EXPORT ConfigServiceFactory : public ServiceFactory {
+public:
+    ConfigServiceFactory();
+    ~ConfigServiceFactory(){};
 
-	/// Factory for the ConfigService objects
-	class OPDELIB_EXPORT ConfigServiceFactory : public ServiceFactory {
-		public:
-			ConfigServiceFactory();
-			~ConfigServiceFactory() {};
+    /** Creates a ConfigService instance */
+    Service *createInstance(ServiceManager *manager);
 
-			/** Creates a ConfigService instance */
-			Service* createInstance(ServiceManager* manager);
+    virtual const std::string &getName();
 
-			virtual const std::string& getName();
+    virtual const uint getMask();
 
-			virtual const uint getMask();
+    virtual const size_t getSID();
 
-			virtual const size_t getSID();
-		private:
-			static std::string mName;
-	};
-}
-
+private:
+    static std::string mName;
+};
+} // namespace Opde
 
 #endif

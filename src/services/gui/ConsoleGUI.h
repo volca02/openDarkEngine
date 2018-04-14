@@ -28,58 +28,59 @@
 
 #include "ConsoleBackend.h"
 #include "draw/DrawService.h"
-#include "input/InputService.h"
 #include "draw/FontDrawSource.h"
 #include "draw/TextureAtlas.h"
+#include "input/InputService.h"
 
 namespace Opde {
-	/// forward decl.
-	class GUIService;
+/// forward decl.
+class GUIService;
 
-	class OPDELIB_EXPORT ConsoleGUI {
-		public:
-			ConsoleGUI(GUIService* owner);
-			~ConsoleGUI();
+class OPDELIB_EXPORT ConsoleGUI {
+public:
+    ConsoleGUI(GUIService *owner);
+    ~ConsoleGUI();
 
-			/** Injects an ois keyboard event into the console
-			* @return true if the keyboard event was consumed, false otherwise (Console not visible)
-			*/
-			bool injectKeyPress(unsigned int keycode);
+    /** Injects an ois keyboard event into the console
+     * @return true if the keyboard event was consumed, false otherwise (Console
+     * not visible)
+     */
+    bool injectKeyPress(unsigned int keycode);
 
-			void setActive(bool active);
+    void setActive(bool active);
 
-			inline bool isActive() const { return mIsActive; };
+    inline bool isActive() const { return mIsActive; };
 
-			/** Frame update method. Call every time frame update happens */
-			void update(int timems);
+    /** Frame update method. Call every time frame update happens */
+    void update(int timems);
 
-			/// Used to rebuild the console according to the new resolution
-			void resolutionChanged(size_t width, size_t height);
+    /// Used to rebuild the console according to the new resolution
+    void resolutionChanged(size_t width, size_t height);
 
-		private:
-			bool mIsActive;
+private:
+    bool mIsActive;
 
-			Ogre::String mCommand;
+    Ogre::String mCommand;
 
-			int mPosition;
+    int mPosition;
 
-			ConsoleBackend* mConsoleBackend;
-			GUIService* mOwner;
-			FontDrawSourcePtr mFont;
-			TextureAtlasPtr mAtlas;
-			DrawServicePtr mDrawSrv;
-			InputServicePtr mInputSrv;
+    ConsoleBackend *mConsoleBackend;
+    GUIService *mOwner;
+    FontDrawSourcePtr mFont;
+    TextureAtlasPtr mAtlas;
+    DrawServicePtr mDrawSrv;
+    InputServicePtr mInputSrv;
 
-			RenderedRect* mConsoleBackground;
-			RenderedRect* mCommandLineBackground;
-			RenderedLabel* mConsoleText;
-			RenderedLabel* mCommandLine;
-			DrawSheetPtr mConsoleSheet;
-			ClipRect mTextClipRect;
-			ClipRect mCmdLineClipRect;
-			std::vector<Ogre::ColourValue> mConsoleColors;
-	};
+    RenderedRect *mConsoleBackground;
+    RenderedRect *mCommandLineBackground;
+    RenderedLabel *mConsoleText;
+    RenderedLabel *mCommandLine;
+    DrawSheetPtr mConsoleSheet;
+    ClipRect mTextClipRect;
+    ClipRect mCmdLineClipRect;
+    std::vector<Ogre::ColourValue> mConsoleColors;
+};
 
-}
+} // namespace Opde
 
 #endif

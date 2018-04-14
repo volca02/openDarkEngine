@@ -15,7 +15,8 @@
  *
  *	  You should have received a copy of the GNU General Public License
  *	  along with this program; if not, write to the Free Software
- *	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA	02111-1307	USA
+ *	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+ *02111-1307	USA
  *
  *	  $Id$
  *
@@ -23,7 +24,8 @@
 
 /**
  @file CustomImageCodec.h
- @brief A custom image codec. This class hooks into the Ogre::Codec, providing transparency for palletized images (extensions .pcx, .gif)
+ @brief A custom image codec. This class hooks into the Ogre::Codec, providing
+ transparency for palletized images (extensions .pcx, .gif)
 */
 
 #ifndef __CUSTOMIMAGECODEC_H
@@ -31,54 +33,58 @@
 
 #include "config.h"
 
-#include<OgreCodec.h>
-#include<OgreImageCodec.h>
+#include <OgreCodec.h>
+#include <OgreImageCodec.h>
 
 namespace Ogre {
 
-	// Interface cloned from Ogre::FreeImageCodec
+// Interface cloned from Ogre::FreeImageCodec
 
-	/// Custom image codec providing transparency for pallete index 0 on 8bit palletized images of .PCX and .GIF formats
-	class OPDELIB_EXPORT CustomImageCodec : public ImageCodec {
-		private:
-			String mType;
-			unsigned int mFreeImageType;
+/// Custom image codec providing transparency for pallete index 0 on 8bit
+/// palletized images of .PCX and .GIF formats
+class OPDELIB_EXPORT CustomImageCodec : public ImageCodec {
+private:
+    String mType;
+    unsigned int mFreeImageType;
 
-			typedef std::list<ImageCodec*> RegisteredCodecList;
-			static RegisteredCodecList msCodecList;
+    typedef std::list<ImageCodec *> RegisteredCodecList;
+    static RegisteredCodecList msCodecList;
 
-			// Hooks. These are the previous codecs registered for the given extensions
-			static CodecList msReplacedCodecs;
+    // Hooks. These are the previous codecs registered for the given extensions
+    static CodecList msReplacedCodecs;
 
-			static bool msGIFFound;
-			static bool msPCXFound;
+    static bool msGIFFound;
+    static bool msPCXFound;
 
-		public:
-			CustomImageCodec(const String& type, unsigned int fiType);
-			~CustomImageCodec();
+public:
+    CustomImageCodec(const String &type, unsigned int fiType);
+    ~CustomImageCodec();
 
-			/// A void implementation if code, throwing OGRE_EXCEPTION
-			DataStreamPtr encode(MemoryDataStreamPtr& input, CodecDataPtr& pData) const;
+    /// A void implementation if code, throwing OGRE_EXCEPTION
+    DataStreamPtr encode(MemoryDataStreamPtr &input, CodecDataPtr &pData) const;
 
-			/// A void implementation if codeToFile, throwing
-			/// OGRE_EXCEPTION
-			void encodeToFile(MemoryDataStreamPtr& input, const String& outFileName, CodecDataPtr& pData) const;
+    /// A void implementation if codeToFile, throwing
+    /// OGRE_EXCEPTION
+    void encodeToFile(MemoryDataStreamPtr &input, const String &outFileName,
+                      CodecDataPtr &pData) const;
 
-			/// @copydoc Codec::decode
-			DecodeResult decode(DataStreamPtr& input) const;
+    /// @copydoc Codec::decode
+    DecodeResult decode(DataStreamPtr &input) const;
 
-			/// Type getter
-			virtual String getType() const;
+    /// Type getter
+    virtual String getType() const;
 
-			/// Static method to startup FreeImage and register the FreeImage codecs
-			static void startup(void);
+    /// Static method to startup FreeImage and register the FreeImage codecs
+    static void startup(void);
 
-			/// Static method to shutdown FreeImage and unregister the FreeImage codecs
-			static void shutdown(void);
+    /// Static method to shutdown FreeImage and unregister the FreeImage codecs
+    static void shutdown(void);
 
-			String magicNumberToFileExt(const char *magicNumberPtr, size_t maxbytes) const {return "";};
-	};
+    String magicNumberToFileExt(const char *magicNumberPtr,
+                                size_t maxbytes) const {
+        return "";
+    };
+};
 
-
-} // Ogre Namespace
+} // namespace Ogre
 #endif

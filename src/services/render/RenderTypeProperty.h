@@ -22,51 +22,51 @@
  *
  *****************************************************************************/
 
-
 #ifndef __RENDERTYPEPROPERTY_H
 #define __RENDERTYPEPROPERTY_H
 
 #include "RenderedProperty.h"
 
 namespace Opde {
-	// Internal rendertype constants
+// Internal rendertype constants
 
-	extern const unsigned int RENDER_TYPE_NORMAL;
-	extern const unsigned int RENDER_TYPE_NOT_RENDERED;
-	extern const unsigned int RENDER_TYPE_NO_LIGHTMAP;
-	extern const unsigned int RENDER_TYPE_EDITOR_ONLY;
-	
+extern const unsigned int RENDER_TYPE_NORMAL;
+extern const unsigned int RENDER_TYPE_NOT_RENDERED;
+extern const unsigned int RENDER_TYPE_NO_LIGHTMAP;
+extern const unsigned int RENDER_TYPE_EDITOR_ONLY;
 
-	/** a RenderType property implementation using rendered property handler.
-	* Uses simple unsigned integer data storage with an enumeration. Defaults to 0 - Normal. Inherits always.
-	*/
-	class RenderTypeProperty : public RenderedProperty {
-		public:
-			/// constructor
-			RenderTypeProperty(RenderService* rs, PropertyService* owner);
+/** a RenderType property implementation using rendered property handler.
+ * Uses simple unsigned integer data storage with an enumeration. Defaults to 0
+ * - Normal. Inherits always.
+ */
+class RenderTypeProperty : public RenderedProperty {
+public:
+    /// constructor
+    RenderTypeProperty(RenderService *rs, PropertyService *owner);
 
-			/// destructor
-			virtual ~RenderTypeProperty(void);
-			
-		protected:
-			/// @see ActiveProperty::addProperty
-			void addProperty(int oid);
-			
-			/// @see ActiveProperty::removeProperty
-			void removeProperty(int oid);
-			
-			/// @see ActiveProperty::setPropertySource
-			void setPropertySource(int oid, int effid);
-			
-			/// @see ActiveProperty::valueChanged
-			void valueChanged(int oid, const std::string& field, const DVariant& value);
+    /// destructor
+    virtual ~RenderTypeProperty(void);
 
-			/// core setter method. Called from other methods to set the rendertype value
-			void setRenderType(int oid, uint32_t renderType);
-			
-			Ogre::SceneManager* mSceneMgr;
-			DEnum* mEnum;
-	};
+protected:
+    /// @see ActiveProperty::addProperty
+    void addProperty(int oid);
+
+    /// @see ActiveProperty::removeProperty
+    void removeProperty(int oid);
+
+    /// @see ActiveProperty::setPropertySource
+    void setPropertySource(int oid, int effid);
+
+    /// @see ActiveProperty::valueChanged
+    void valueChanged(int oid, const std::string &field, const DVariant &value);
+
+    /// core setter method. Called from other methods to set the rendertype
+    /// value
+    void setRenderType(int oid, uint32_t renderType);
+
+    Ogre::SceneManager *mSceneMgr;
+    DEnum *mEnum;
 };
+}; // namespace Opde
 
 #endif

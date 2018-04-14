@@ -23,225 +23,239 @@
 
 /**
  @file LightService.h
- @brief A light service implementation. Anything related to lighting is resolved here.
+ @brief A light service implementation. Anything related to lighting is resolved
+ here.
  */
 
 #ifndef __LIGHTSERVICE_H
 #define __LIGHTSERVICE_H
 
-#include "config.h"
+#include "Array.h"
+#include "DarkCommon.h"
+#include "DarkLight.h"
 #include "File.h"
 #include "FileCompat.h"
-#include "DarkLight.h"
-#include "worldrep/LightmapAtlas.h"
-#include "DarkCommon.h"
-#include "worldrep/WRTypes.h"
 #include "OpdeServiceManager.h"
-#include "Array.h"
+#include "config.h"
 #include "render/RenderService.h"
+#include "worldrep/LightmapAtlas.h"
+#include "worldrep/WRTypes.h"
 
 #include <OgreVector2.h>
 
 using Ogre::DarkLight;
 
 namespace Opde {
-	struct  LightTableEntry {
-		LightTableEntry(const FilePtr& tag, bool rgb) {
-			*tag >> pos >> rot;
+struct LightTableEntry {
+    LightTableEntry(const FilePtr &tag, bool rgb) {
+        *tag >> pos >> rot;
 
-			if (rgb) {
-				*tag >> brightness;
-			} else {
-				*tag >> brightness.x;
-				brightness.y = brightness.x;
-				brightness.z = brightness.x;
-			}
+        if (rgb) {
+            *tag >> brightness;
+        } else {
+            *tag >> brightness.x;
+            brightness.y = brightness.x;
+            brightness.z = brightness.x;
+        }
 
-			*tag >> cone_inner >> cone_outer >> radius;
-		};
+        *tag >> cone_inner >> cone_outer >> radius;
+    };
 
-		Vector3 pos; // 12
-		Vector3 rot; // 12 - 24
-		Vector3 brightness; // 4 - 28
-		float cone_inner; // 4 - 32 - TODO: This is cos(alpha), not radians!
-		float cone_outer; // 4 - 36
-		float radius; // 4 - 40
-	};
+    Vector3 pos;        // 12
+    Vector3 rot;        // 12 - 24
+    Vector3 brightness; // 4 - 28
+    float cone_inner;   // 4 - 32 - TODO: This is cos(alpha), not radians!
+    float cone_outer;   // 4 - 36
+    float radius;       // 4 - 40
+};
 
+class LightService;
 
-	class LightService;
+/// class holding all the light info loaded for a single cell.
+/// Constructed/destructed using LightService
+class LightsForCell {
+    friend class LightService;
 
-	/// class holding all the light info loaded for a single cell. Constructed/destructed using LightService
-	class LightsForCell {
-		friend class LightService;
+public:
+    /** Constructor
+     * @param file The tag to load from
+     * @param light_size The size of the pixel in bytes (1=>grayscale lmaps,
+     * 2=>16 bit rgb lmaps)
+     */
+    LightsForCell(const FilePtr &file, size_t num_anim_lights,
+                  size_t num_textured, size_t light_size,
+                  WRPolygonTexturing *face_infos);
+    ~LightsForCell();
 
-		public:
-			/** Constructor
-			 * @param file The tag to load from
-			 * @param light_size The size of the pixel in bytes (1=>grayscale lmaps, 2=>16 bit rgb lmaps)
-			 */
-			LightsForCell(const FilePtr& file, size_t num_anim_lights,
-					size_t num_textured, size_t light_size, WRPolygonTexturing* face_infos);
-			~LightsForCell();
+    void atlasLightMaps(LightAtlasList *atlas);
 
-			void atlasLightMaps(LightAtlasList* atlas);
+    const WRLightInfo &getLightInfo(size_t face_id);
 
-			const WRLightInfo& getLightInfo(size_t face_id);
+    size_t getAtlasForPolygon(size_t face_id);
 
-			size_t getAtlasForPolygon(size_t face_id);
+    int countBits(uint32_t src);
 
-			int countBits(uint32_t src);
+    /** Maps the given UV to the atlas UV */
+    Ogre::Vector2 mapUV(size_t face_id, const Ogre::Vector2 &original);
 
-			/** Maps the given UV to the atlas UV */
-			Ogre::Vector2 mapUV(size_t face_id, const Ogre::Vector2& original);
+protected:
+    /** animated lights map (e.g. bit to object number mapping) - count is to be
+     * found in the header */
+    int16_t *anim_map; // index by bit num, and ya get the object number the
+                       // animated lightmap belongs to
 
-		protected:
+    WRLightInfo *lm_infos;
 
+    // Lightmaps:
+    // The count of lightmaps per face index
+    uint8_t *lmcounts;
+    uint8_t ***lmaps; // poly number, lmap number --> pointer to data (may be 2
+                      // bytes per pixel)
 
-			/** animated lights map (e.g. bit to object number mapping) - count is to be found in the header */
-			int16_t *anim_map; // index by bit num, and ya get the object number the animated lightmap belongs to
+    // objects that are in this leaf when loaded (we may skip this if we add it
+    // some other way in system) (Maybe it's only a light list affecting our
+    // cell)
+    uint32_t light_count;
+    uint16_t *light_indices; // the object index number
 
-			WRLightInfo *lm_infos;
+    /* Array referencing the lightmaps inserted into the atlas */
+    LightMap **lightMaps;
 
-			// Lightmaps:
-			// The count of lightmaps per face index
-			uint8_t* lmcounts;
-			uint8_t* **lmaps; // poly number, lmap number --> pointer to data (may be 2 bytes per pixel)
+    /** Size of the lightmap element */
+    size_t mLightSize;
 
-			// objects that are in this leaf when loaded (we may skip this if we add it some other way in system) (Maybe it's only a light list affecting our cell)
-			uint32_t light_count;
-			uint16_t *light_indices; // the object index number
+    /** Textured polygon count of the cell this structure is associated with */
+    size_t mNumTextured;
 
-			/* Array referencing the lightmaps inserted into the atlas */
-			LightMap** lightMaps;
+    /** Count of anim lights in the cell */
+    size_t mNumAnimLights;
 
-			/** Size of the lightmap element */
-			size_t mLightSize;
+    /** Borrowed reference to face infos, used to determine the texture of
+     * polygon */
+    WRPolygonTexturing *mFaceInfos;
 
-			/** Textured polygon count of the cell this structure is associated with */
-			size_t mNumTextured;
+    bool mAtlased;
+};
 
-			/** Count of anim lights in the cell */
-			size_t mNumAnimLights;
+/// shared_ptr to LightsForCell
+typedef shared_ptr<LightsForCell> LightsForCellPtr;
 
-			/** Borrowed reference to face infos, used to determine the texture of polygon */
-			WRPolygonTexturing* mFaceInfos;
+/** @brief Light Service - service which handles lights - Brush lights, static
+ * lights, anim lights and dynamic lights. Lights are compiled into a list when
+ * the portalization is done, and then obtain a list index (id). This is
+ * referenced by animlights and probably dynamic lights as well, when there is a
+ * request to change the brightness/position. Static lights don't respond to
+ * Light/Spotlight property changes, as those properties (although exposed by
+ * this service) are Dromed side only. */
+class OPDELIB_EXPORT LightService : public ServiceImpl<LightService> {
+public:
+    /** Constructor
+     * @param manager The ServiceManager that created this service
+     * @param name The name this service should have (For Debugging/Logging)
+     */
+    LightService(ServiceManager *manager, const std::string &name);
 
-			bool mAtlased;
-	};
+    /// Destructor
+    virtual ~LightService();
 
-	/// shared_ptr to LightsForCell
-	typedef shared_ptr<LightsForCell> LightsForCellPtr;
+    /// Sets the size, in bytes, of the pixel size of the lightmaps
+    void setLightPixelSize(size_t size);
 
-	/** @brief Light Service - service which handles lights - Brush lights, static lights, anim lights and dynamic lights.
-	 * Lights are compiled into a list when the portalization is done, and then obtain a list index (id). This is referenced by
-	 * animlights and probably dynamic lights as well, when there is a request to change the brightness/position. Static lights
-	 * don't respond to Light/Spotlight property changes, as those properties (although exposed by this service) are Dromed side
-	 * only. */
-	class OPDELIB_EXPORT LightService : public ServiceImpl<LightService> {
-		public:
-			/** Constructor
-			 * @param manager The ServiceManager that created this service
-			 * @param name The name this service should have (For Debugging/Logging)
-			 */
-			LightService(ServiceManager *manager, const std::string& name);
+    /** Loads the light definitions for the given cell from the current position
+     * of the tag file
+     */
+    LightsForCellPtr
+    _loadLightDefinitionsForCell(size_t cellID, const FilePtr &tag,
+                                 size_t num_anim_lights, size_t num_textured,
+                                 WRPolygonTexturing *face_infos);
 
-			/// Destructor
-			virtual ~LightService();
+    /** loads the light definition table from the specified file.
+     * @note this method is internal, used by WorldRepService when loading the
+     * WR tag file */
+    void _loadTableFromTagFile(const FilePtr &tag);
 
-			/// Sets the size, in bytes, of the pixel size of the lightmaps
-			void setLightPixelSize(size_t size);
+    /** @return the light for the given light id (not object id). Used when
+     * connecting the light with the cells it affects (see WorldRepService) */
+    DarkLight *getLightForID(int id);
 
-			/** Loads the light definitions for the given cell from the current position of the tag file
-			 */
-			LightsForCellPtr _loadLightDefinitionsForCell(size_t cellID, const FilePtr& tag, size_t num_anim_lights,
-			        size_t num_textured, WRPolygonTexturing* face_infos);
+    /** Prepares the light service after loading - atlasses the lightmaps,
+     * creates lights and attaches them to the BSP leaves */
+    void build();
 
-			/** loads the light definition table from the specified file.
-			 * @note this method is internal, used by WorldRepService when loading the WR tag file */
-			void _loadTableFromTagFile(const FilePtr& tag);
+    /** removes all the stored lights, cleans the atlases, etc. */
+    void clear();
 
-			/** @return the light for the given light id (not object id). Used when connecting the light with the cells it affects (see WorldRepService) */
-			DarkLight* getLightForID(int id);
+    /** Lightmap info getter */
+    const WRLightInfo &getLightInfo(size_t cellID, size_t faceID);
 
-			/** Prepares the light service after loading - atlasses the lightmaps, creates lights and attaches them to the BSP leaves */
-			void build();
+    /// Returns the atlas index for cell id and it's polygon id
+    size_t getAtlasForCellPolygon(size_t cellID, size_t faceID);
 
-			/** removes all the stored lights, cleans the atlases, etc. */
-			void clear();
+    /// Returns atlas texture for the given atlas index
+    Ogre::TexturePtr getAtlasTexture(size_t idx);
 
-			/** Lightmap info getter */
-			const WRLightInfo& getLightInfo(size_t cellID, size_t faceID);
+protected:
+    /// Service initialization
+    bool init();
 
-			/// Returns the atlas index for cell id and it's polygon id
-			size_t getAtlasForCellPolygon(size_t cellID, size_t faceID);
+    /// puts all the read light maps into atlases
+    void atlasLightMaps();
 
-            /// Returns atlas texture for the given atlas index
-            Ogre::TexturePtr getAtlasTexture(size_t idx);
+    /// produces a light (by creating it using the scene manager)
+    DarkLight *_produceLight(const LightTableEntry &entry, size_t id,
+                             bool dynamic);
 
-		protected:
-			/// Service initialization
-			bool init();
+    /// Lists of all light map atlases
+    LightAtlasList *mAtlasList;
 
-			/// puts all the read light maps into atlases
-			void atlasLightMaps();
+    typedef std::map<size_t, LightsForCellPtr> CellLightInfoMap;
 
-			/// produces a light (by creating it using the scene manager)
-			DarkLight* _produceLight(const LightTableEntry& entry, size_t id, bool dynamic);
+    /// contains a pointer to light per cell
+    CellLightInfoMap mLightsForCell;
 
-			/// Lists of all light map atlases
-			LightAtlasList* mAtlasList;
+    // Version of the lightmap - either 1 or 2 - directly means the stored
+    // lightmap pixel size as well
+    size_t mLightPixelSize;
 
-			typedef std::map<size_t, LightsForCellPtr> CellLightInfoMap;
+    /// count of the static lights, as read from the tag
+    size_t mStaticLightCount;
 
-			/// contains a pointer to light per cell
-			CellLightInfoMap mLightsForCell;
+    /// count of the dynamic lights, as read from the tag
+    size_t mDynamicLightCount;
 
-			// Version of the lightmap - either 1 or 2 - directly means the stored lightmap pixel size as well
-			size_t mLightPixelSize;
+    // and the tables of the lights (indexed by the light id)
 
-			/// count of the static lights, as read from the tag
-			size_t mStaticLightCount;
+    /// table of lights.
+    SimpleArray<DarkLight *> mLights;
 
-			/// count of the dynamic lights, as read from the tag
-			size_t mDynamicLightCount;
+    /// ref to the render service
+    RenderServicePtr mRenderService;
 
-			// and the tables of the lights (indexed by the light id)
+    /// scene manager ref (for light management). DarkSceneManager expected
+    Ogre::SceneManager *mSceneMgr;
+};
 
-			/// table of lights.
-			SimpleArray<DarkLight*> mLights;
+/// Shared pointer to light service
+typedef shared_ptr<LightService> LightServicePtr;
 
-			/// ref to the render service
-			RenderServicePtr mRenderService;
+/// Factory for the LightService objects
+class OPDELIB_EXPORT LightServiceFactory : public ServiceFactory {
+public:
+    LightServiceFactory();
+    ~LightServiceFactory(){};
 
-			/// scene manager ref (for light management). DarkSceneManager expected
-			Ogre::SceneManager* mSceneMgr;
-	};
+    /** Creates a LightService instance */
+    Service *createInstance(ServiceManager *manager);
 
+    virtual const std::string &getName();
 
-	/// Shared pointer to light service
-	typedef shared_ptr<LightService> LightServicePtr;
+    virtual const uint getMask();
 
+    virtual const size_t getSID();
 
-	/// Factory for the LightService objects
-	class OPDELIB_EXPORT LightServiceFactory: public ServiceFactory {
-		public:
-			LightServiceFactory();
-			~LightServiceFactory() {
-			}
-			;
-
-			/** Creates a LightService instance */
-			Service* createInstance(ServiceManager* manager);
-
-			virtual const std::string& getName();
-
-			virtual const uint getMask();
-
-			virtual const size_t getSID();
-		private:
-			static std::string mName;
-	};
-}
+private:
+    static std::string mName;
+};
+} // namespace Opde
 
 #endif

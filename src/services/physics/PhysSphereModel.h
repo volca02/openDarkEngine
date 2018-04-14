@@ -27,15 +27,14 @@
 #include "PhysModel.h"
 
 namespace Opde {
-	/** @brief Spherical physics model.
-	* Model that is consisted of a sphere.
-	*/
-	class OPDELIB_EXPORT PhysSphereModel : public PhysModel {
-		public:
-			PhysSphereModel(int objid);
-			~PhysSphereModel();
-	};
-}
-
+/** @brief Spherical physics model.
+ * Model that is consisted of a sphere.
+ */
+class OPDELIB_EXPORT PhysSphereModel : public PhysModel {
+public:
+    PhysSphereModel(int objid);
+    ~PhysSphereModel();
+};
+} // namespace Opde
 
 #endif

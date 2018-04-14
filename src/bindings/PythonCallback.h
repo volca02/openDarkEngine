@@ -27,49 +27,52 @@
 
 #include "Callback.h"
 
-namespace Opde 
-{
-	/// Python callback template. MSG marks the message sent, C the converter that is a functor - converts the message to PyObject* as required
-	/// @note Please catch exceptions upon construction. There is no way to pas PyErr directly!
-	template<typename MSG, typename C> class PythonCallback : public Callback<MSG> {
-		public:
-			PythonCallback(PyObject* callable) : mCallable(callable), mConverter() { 
-				if (!PyCallable_Check(mCallable))  
-					// WOULD BE: PyErr_SetString(PyExc_TypeError, "Python callback can't be constructed on non-callable!");
-					OPDE_EXCEPT("Python callback can't be constructed on non-callable!", "PythonCallback::PythonCallback");
-				
-				Py_INCREF(mCallable); 
-			};
-			
-			~PythonCallback() { 
-				Py_DECREF(mCallable);
-			};
-			
-			virtual void operator ()(const MSG& msg) {
-				PyObject* py_msg = mConverter(msg);
-				
-				// Call the pyobject
-				PyObject* args; 
-				args = PyTuple_New(1);
-				
-				PyTuple_SetItem(args, 0, py_msg); // Steals reference
-				
-				PyObject* rslt = PyObject_CallObject(mCallable, args);
-				
-				if (rslt) { 
-				    // To be sure no leak happened
-					Py_DECREF(rslt);
-				}
-				
-				__PY_HANDLE_PYTHON_ERROR; // converts python side error to PythonException
-					
-				Py_DECREF(args);
-			}
-			
-		protected:
-			PyObject* mCallable;
-			C mConverter;
-	};
-}
+namespace Opde {
+/// Python callback template. MSG marks the message sent, C the converter that
+/// is a functor - converts the message to PyObject* as required
+/// @note Please catch exceptions upon construction. There is no way to pas
+/// PyErr directly!
+template <typename MSG, typename C>
+class PythonCallback : public Callback<MSG> {
+public:
+    PythonCallback(PyObject *callable) : mCallable(callable), mConverter() {
+        if (!PyCallable_Check(mCallable))
+            // WOULD BE: PyErr_SetString(PyExc_TypeError, "Python callback can't
+            // be constructed on non-callable!");
+            OPDE_EXCEPT("Python callback can't be constructed on non-callable!",
+                        "PythonCallback::PythonCallback");
+
+        Py_INCREF(mCallable);
+    };
+
+    ~PythonCallback() { Py_DECREF(mCallable); };
+
+    virtual void operator()(const MSG &msg) {
+        PyObject *py_msg = mConverter(msg);
+
+        // Call the pyobject
+        PyObject *args;
+        args = PyTuple_New(1);
+
+        PyTuple_SetItem(args, 0, py_msg); // Steals reference
+
+        PyObject *rslt = PyObject_CallObject(mCallable, args);
+
+        if (rslt) {
+            // To be sure no leak happened
+            Py_DECREF(rslt);
+        }
+
+        __PY_HANDLE_PYTHON_ERROR; // converts python side error to
+                                  // PythonException
+
+        Py_DECREF(args);
+    }
+
+protected:
+    PyObject *mCallable;
+    C mConverter;
+};
+} // namespace Opde
 
 #endif

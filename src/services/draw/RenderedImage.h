@@ -21,7 +21,6 @@
  *
  *****************************************************************************/
 
-
 #ifndef __RENDEREDIMAGE_H
 #define __RENDEREDIMAGE_H
 
@@ -31,32 +30,34 @@
 #include <OgreVector3.h>
 
 namespace Opde {
-	/** Rendered image. A single image on-screen rectangle utilising a single bitmap image source (be it atlassed or not). */
-	class RenderedImage : public DrawOperation {
-		public:
-			RenderedImage(DrawService* owner, DrawOperation::ID id, const DrawSourcePtr& ds);
-			
-			virtual ~RenderedImage();
+/** Rendered image. A single image on-screen rectangle utilising a single bitmap
+ * image source (be it atlassed or not). */
+class RenderedImage : public DrawOperation {
+public:
+    RenderedImage(DrawService *owner, DrawOperation::ID id,
+                  const DrawSourcePtr &ds);
 
-			void visitDrawBuffer(DrawBuffer* db);
-			
-			virtual DrawSourceBasePtr getDrawSourceBase();
-			
-			void setDrawSource(const DrawSourcePtr& nsrc);
+    virtual ~RenderedImage();
 
-		protected:
-			/// override that updates the image and marks dirty
-			void _rebuild();
-			
-			void _setNewDrawSource();
-			
-			DrawQuad mDrawQuad;
-			
-			bool mInClip;
-			
-			DrawSourcePtr mDrawSource;
-	};
+    void visitDrawBuffer(DrawBuffer *db);
 
+    virtual DrawSourceBasePtr getDrawSourceBase();
+
+    void setDrawSource(const DrawSourcePtr &nsrc);
+
+protected:
+    /// override that updates the image and marks dirty
+    void _rebuild();
+
+    void _setNewDrawSource();
+
+    DrawQuad mDrawQuad;
+
+    bool mInClip;
+
+    DrawSourcePtr mDrawSource;
 };
+
+}; // namespace Opde
 
 #endif

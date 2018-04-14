@@ -25,41 +25,43 @@
 #ifndef __DATABASESERVICEBINDER_H
 #define __DATABASESERVICEBINDER_H
 
-#include  "DatabaseService.h"
+#include "bindings.h"
+
+#include "DatabaseService.h"
 
 namespace Opde {
 
-	namespace Python {
+namespace Python {
 
-		/// Database python binder
-		class DatabaseServiceBinder : public shared_ptr_binder<DatabaseServicePtr> {
-			public:
-				static void init(PyObject* module);
+/// Database python binder
+class DatabaseServiceBinder : public shared_ptr_binder<DatabaseServicePtr> {
+public:
+    static void init(PyObject *module);
 
-				// --- Python type related methods ---
-				static PyObject* create();
+    // --- Python type related methods ---
+    static PyObject *create();
 
-				// --- Methods ---
-				static PyObject* load(PyObject* self, PyObject* args);
-				static PyObject* mergeLoad(PyObject* self, PyObject* args);
-				static PyObject* recursiveMergeLoad(PyObject* self, PyObject* args);
-				static PyObject* save(PyObject* self, PyObject* args);
-				static PyObject* unload(PyObject* self, PyObject* args);
+    // --- Methods ---
+    static PyObject *load(PyObject *self, PyObject *args);
+    static PyObject *mergeLoad(PyObject *self, PyObject *args);
+    static PyObject *recursiveMergeLoad(PyObject *self, PyObject *args);
+    static PyObject *save(PyObject *self, PyObject *args);
+    static PyObject *unload(PyObject *self, PyObject *args);
 
-				static PyObject* setProgressListener(PyObject* self, PyObject* args);
-				static PyObject* unsetProgressListener(PyObject* self, PyObject* args);
+    static PyObject *setProgressListener(PyObject *self, PyObject *args);
+    static PyObject *unsetProgressListener(PyObject *self, PyObject *args);
 
-			protected:
-				/// Static type definition for DatabaseService
-				static PyTypeObject msType;
+protected:
+    /// Static type definition for DatabaseService
+    static PyTypeObject msType;
 
-				/// Name of the python type
-				static const char* msName;
+    /// Name of the python type
+    static const char *msName;
 
-				/// Method list
-				static PyMethodDef msMethods[];
-		};
-	}
-}
+    /// Method list
+    static PyMethodDef msMethods[];
+};
+} // namespace Python
+} // namespace Opde
 
 #endif

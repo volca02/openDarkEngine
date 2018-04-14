@@ -21,7 +21,6 @@
  *
  *****************************************************************************/
 
-
 #ifndef __SERVICECOMMON_H
 #define __SERVICECOMMON_H
 
@@ -66,11 +65,15 @@ This file contains some global definitions common to all services
 // --------------------------------------
 
 /*
-To be used by service factories getMask() if the service want's to be a listener of particular service.
-This does not do the registration of the listener itself, but will guarantee the service is constructed prior to data manipulations.
-ServiceManager::createByMask() is used to create all the services given the mask before data manipulation takes place (typically in service's constructor).
+To be used by service factories getMask() if the service want's to be a listener
+of particular service. This does not do the registration of the listener itself,
+but will guarantee the service is constructed prior to data manipulations.
+ServiceManager::createByMask() is used to create all the services given the mask
+before data manipulation takes place (typically in service's constructor).
 
-The lower word of this 32bit unsigned integer is targetted at listener masking. The upper word is used for service ranges (core services, rendering services, game engine services)
+The lower word of this 32bit unsigned integer is targetted at listener masking.
+The upper word is used for service ranges (core services, rendering services,
+game engine services)
 
 
 I just hope we won't run out of mask bits! :D
@@ -81,9 +84,11 @@ I just hope we won't run out of mask bits! :D
 
 // Core services, fundamental
 #define SERVICE_CORE 0x00010000
-// Services related to rendering (dropping out these will cause no graphics to be displayed, no renderer window displayed)
+// Services related to rendering (dropping out these will cause no graphics to
+// be displayed, no renderer window displayed)
 #define SERVICE_RENDERER 0x00020000
-// Services related to engine work (dropping these will result in the engine doing nothing)
+// Services related to engine work (dropping these will result in the engine
+// doing nothing)
 #define SERVICE_ENGINE 0x00040000
 
 /// Link listener mask
@@ -101,14 +106,14 @@ I just hope we won't run out of mask bits! :D
 /// Input service listener mask
 #define SERVICE_INPUT_LISTENER 0x0010
 
-
-
 // ----------------------------------------
 // --- Dark Database loading priorities ---
 // ----------------------------------------
 /*
-The database service handles mission/gam/savegame database files (both loading and saving). Because there is some loading order needed to be done, here is the place to specify all the
-priorities (not necessary unique) for the database service listeners
+The database service handles mission/gam/savegame database files (both loading
+and saving). Because there is some loading order needed to be done, here is the
+place to specify all the priorities (not necessary unique) for the database
+service listeners
 */
 
 // First, materials are loaded
@@ -123,14 +128,12 @@ priorities (not necessary unique) for the database service listeners
 // And script modules are initialized
 #define DBP_SCRIPT 25
 
-
 // ---------------------------------------------
 // --- Loop modes id's and client priorities ---
 // ---------------------------------------------
 #define LOOPMODE_INPUT 1
 #define LOOPMODE_RENDER 2
 #define LOOPMODE_GUI 4
-
 
 // Loop client ids and priorities
 #define LOOPCLIENT_ID_INPUT 1
@@ -147,18 +150,15 @@ priorities (not necessary unique) for the database service listeners
 // Renderer last
 #define LOOPCLIENT_PRIORITY_RENDERER 1024
 
-
 // ---------------------------------------------
 // --- Sim service priority list ---------------
 // ---------------------------------------------
 #define SIM_PRIORITY_INPUT 1
 
 /*
-// Forward declarations. anything service related here to shorten the compilation time (in combination with header inclusion removal...)
-class BinaryService;
-class CameraService;
-class ConfigService;
-class DatabaseService;
+// Forward declarations. anything service related here to shorten the
+compilation time (in combination with header inclusion removal...) class
+BinaryService; class CameraService; class ConfigService; class DatabaseService;
 class DrawService;
 class GameService;
 class GuiService;

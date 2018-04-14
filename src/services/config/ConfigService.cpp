@@ -23,8 +23,8 @@
 
 #include "ConfigService.h"
 #include "OpdeException.h"
-#include "logger.h"
 #include "ServiceCommon.h"
+#include "logger.h"
 
 #include <OgreConfigFile.h>
 #include <OgreException.h>
@@ -37,15 +37,13 @@ namespace Opde {
 /*----------------------------------------------------*/
 /*-------------------- ConfigService -----------------*/
 /*----------------------------------------------------*/
-template<> const size_t ServiceImpl<ConfigService>::SID = __SERVICE_ID_CONFIG;
+template <> const size_t ServiceImpl<ConfigService>::SID = __SERVICE_ID_CONFIG;
 
-ConfigService::ConfigService(ServiceManager *manager, const std::string& name) : ServiceImpl<ConfigService>(manager, name),
-    mConfigPathOverride("") {
-}
+ConfigService::ConfigService(ServiceManager *manager, const std::string &name)
+    : ServiceImpl<ConfigService>(manager, name), mConfigPathOverride("") {}
 
 //------------------------------------------------------
-ConfigService::~ConfigService() {
-}
+ConfigService::~ConfigService() {}
 
 //------------------------------------------------------
 bool ConfigService::init() {
@@ -54,17 +52,17 @@ bool ConfigService::init() {
 }
 
 //------------------------------------------------------
-void ConfigService::shutdown() {
-    mPlatformService.reset();
-}
+void ConfigService::shutdown() { mPlatformService.reset(); }
 
 //------------------------------------------------------
-void ConfigService::setParamDescription(const std::string& param, const std::string& desc) {
+void ConfigService::setParamDescription(const std::string &param,
+                                        const std::string &desc) {
     mConfigKeyDescriptions[param] = desc;
 }
 
 //------------------------------------------------------
-void ConfigService::setParam(const std::string& param, const std::string& value) {
+void ConfigService::setParam(const std::string &param,
+                             const std::string &value) {
     Parameters::iterator it = mParameters.find(param);
 
     if (it != mParameters.end()) {
@@ -75,15 +73,17 @@ void ConfigService::setParam(const std::string& param, const std::string& value)
 }
 
 //------------------------------------------------------
-DVariant ConfigService::getParam(const std::string& param, const DVariant &dflt)
-{
+DVariant ConfigService::getParam(const std::string &param,
+                                 const DVariant &dflt) {
     Parameters::const_iterator it = mParameters.find(param);
 
     Parameters::const_iterator dit = mConfigKeyDescriptions.find(param);
 
     // warn if param has no desc specified
     if (dit == mConfigKeyDescriptions.end()) {
-        LOG_ERROR("ConfigService: Warning: Config key '%s' has no description specified", param.c_str());
+        LOG_ERROR("ConfigService: Warning: Config key '%s' has no description "
+                  "specified",
+                  param.c_str());
     }
 
     if (it != mParameters.end()) {
@@ -94,7 +94,7 @@ DVariant ConfigService::getParam(const std::string& param, const DVariant &dflt)
 }
 
 //------------------------------------------------------
-bool ConfigService::getParam(const std::string& param, DVariant& tgt) {
+bool ConfigService::getParam(const std::string &param, DVariant &tgt) {
     Parameters::const_iterator it = mParameters.find(param);
 
     if (it != mParameters.end()) {
@@ -106,7 +106,7 @@ bool ConfigService::getParam(const std::string& param, DVariant& tgt) {
 }
 
 //------------------------------------------------------
-bool ConfigService::hasParam(const std::string& param) {
+bool ConfigService::hasParam(const std::string &param) {
     Parameters::const_iterator it = mParameters.find(param);
 
     if (it != mParameters.end()) {
@@ -117,27 +117,29 @@ bool ConfigService::hasParam(const std::string& param) {
 }
 
 //------------------------------------------------------
-bool ConfigService::loadParams(const std::string& cfgfile) {
+bool ConfigService::loadParams(const std::string &cfgfile) {
     // do we have an override set?
     if (mConfigPathOverride != "") {
-        return loadFromFile(mConfigPathOverride + mPlatformService->getDirectorySeparator() + cfgfile);
+        return loadFromFile(mConfigPathOverride +
+                            mPlatformService->getDirectorySeparator() +
+                            cfgfile);
     } else {
         // first the global config is loaded
-        bool globalok = loadFromFile(mPlatformService->getGlobalConfigPath()
-                                     + mPlatformService->getDirectorySeparator()
-                                     + cfgfile);
+        bool globalok =
+            loadFromFile(mPlatformService->getGlobalConfigPath() +
+                         mPlatformService->getDirectorySeparator() + cfgfile);
 
         // then overriden by local one
-        bool userok = loadFromFile(mPlatformService->getUserConfigPath() \
-                                   + mPlatformService->getDirectorySeparator()
-                                   + cfgfile);
+        bool userok =
+            loadFromFile(mPlatformService->getUserConfigPath() +
+                         mPlatformService->getDirectorySeparator() + cfgfile);
 
         return userok || globalok;
     }
 }
 
 //------------------------------------------------------
-void ConfigService::setConfigPathOverride(const std::string& cfgpath) {
+void ConfigService::setConfigPathOverride(const std::string &cfgpath) {
     mConfigPathOverride = cfgpath;
 }
 
@@ -171,12 +173,14 @@ std::string ConfigService::getLanguage() {
 }
 
 //------------------------------------------------------
-std::string ConfigService::getLocalisedResourcePath(const std::string& origPath) {
+std::string
+ConfigService::getLocalisedResourcePath(const std::string &origPath) {
     std::string path, fname;
 
     StringUtil::splitFilename(origPath, fname, path);
 
-    return path + getLanguage() + mPlatformService->getDirectorySeparator() + fname;
+    return path + getLanguage() + mPlatformService->getDirectorySeparator() +
+           fname;
 }
 
 //------------------------------------------------------
@@ -186,21 +190,22 @@ void ConfigService::logAllParameters() {
     LOG_INFO("ConfigService: Configuration parameters:");
 
     while (dit != mConfigKeyDescriptions.end()) {
-        LOG_INFO("ConfigService:\t%s - %s", dit->first.c_str(), dit->second.c_str());
+        LOG_INFO("ConfigService:\t%s - %s", dit->first.c_str(),
+                 dit->second.c_str());
     }
 }
 
 //------------------------------------------------------
-bool ConfigService::loadFromFile(const std::string& cfgfile) {
-    try  {  // load a few options
-        LOG_INFO("ConfigService: Loading config file from '%s'", cfgfile.c_str());
+bool ConfigService::loadFromFile(const std::string &cfgfile) {
+    try { // load a few options
+        LOG_INFO("ConfigService: Loading config file from '%s'",
+                 cfgfile.c_str());
 
         Ogre::ConfigFile cf;
         cf.load(cfgfile);
 
         // Get the iterator over values - no section
         ConfigFile::SettingsIterator it = cf.getSettingsIterator();
-
 
         while (it.hasMoreElements()) {
             std::string key = it.peekNextKey();
@@ -212,8 +217,7 @@ bool ConfigService::loadFromFile(const std::string& cfgfile) {
         }
 
         return true;
-    }
-    catch (Ogre::Exception e) {
+    } catch (Ogre::Exception e) {
         LOG_ERROR("Config file '%s' was not found", cfgfile.c_str());
         return false;
         // Guess the file didn't exist
@@ -223,23 +227,16 @@ bool ConfigService::loadFromFile(const std::string& cfgfile) {
 //-------------------------- Factory implementation
 std::string ConfigServiceFactory::mName = "ConfigService";
 
-ConfigServiceFactory::ConfigServiceFactory() : ServiceFactory() {
-};
+ConfigServiceFactory::ConfigServiceFactory() : ServiceFactory(){};
 
-const std::string& ConfigServiceFactory::getName() {
-    return mName;
-}
+const std::string &ConfigServiceFactory::getName() { return mName; }
 
-const uint ConfigServiceFactory::getMask() {
-    return SERVICE_CORE;
-}
+const uint ConfigServiceFactory::getMask() { return SERVICE_CORE; }
 
-const size_t ConfigServiceFactory::getSID() {
-    return ConfigService::SID;
-}
+const size_t ConfigServiceFactory::getSID() { return ConfigService::SID; }
 
-Service* ConfigServiceFactory::createInstance(ServiceManager* manager) {
+Service *ConfigServiceFactory::createInstance(ServiceManager *manager) {
     return new ConfigService(manager, mName);
 }
 
-}
+} // namespace Opde

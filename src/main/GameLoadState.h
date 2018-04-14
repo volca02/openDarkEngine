@@ -21,23 +21,21 @@
  *
  *****************************************************************************/
 
-
 #ifndef __GAMELOADSTATE_H
 #define __GAMELOADSTATE_H
 
 #include "config.h"
 
-#include "GameState.h"
-#include "OpdeSingleton.h"
 #include "FileGroup.h"
-#include "worldrep/WorldRepService.h"
-#include "OpdeServiceManager.h"
+#include "GameState.h"
 #include "ManualFonFileLoader.h"
+#include "OpdeServiceManager.h"
+#include "OpdeSingleton.h"
+#include "worldrep/WorldRepService.h"
 
 #include <OgreRoot.h>
 #include <OgreSceneManager.h>
 #include <Overlay/OgreOverlayManager.h>
-
 
 namespace Opde {
 
@@ -60,8 +58,9 @@ public:
     bool mousePressed(const SDL_MouseButtonEvent &e);
     bool mouseReleased(const SDL_MouseButtonEvent &e);
 
-    static GameLoadState& getSingleton();
-    static GameLoadState* getSingletonPtr();
+    static GameLoadState &getSingleton();
+    static GameLoadState *getSingletonPtr();
+
 protected:
     void createTestFontOverlays();
 
@@ -71,16 +70,16 @@ protected:
     Ogre::Camera *mCamera;
     Ogre::Viewport *mViewport;
 
-    ServiceManager* mServiceMgr;
+    ServiceManager *mServiceMgr;
 
     bool mFirstTime;
     bool mLoaded;
 
-    Ogre::Overlay* mLoadingOverlay;
+    Ogre::Overlay *mLoadingOverlay;
 
     // config service
     ConfigServicePtr mConfigService;
 };
-}
+} // namespace Opde
 
 #endif

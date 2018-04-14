@@ -28,8 +28,7 @@
 #include <OgreVector3.h>
 
 namespace Opde {
-	typedef Ogre::Vector3 Vector3;
+typedef Ogre::Vector3 Vector3;
 }
 
 #endif
-

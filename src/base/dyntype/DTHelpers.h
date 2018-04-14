@@ -21,50 +21,51 @@
  *		$Id$
  *
  *****************************************************************************/
- 
+
 #ifndef __DTHELPERS_H
 #define __DTHELPERS_H
 
 /*
-This file contains various dynamic datatype helpers, such as those for byte swapping
+This file contains various dynamic datatype helpers, such as those for byte
+swapping
 */
 
 namespace Opde {
-	void swap_any(void* src, void* tgt, size_t size) {
-		char *csrc = reinterpret_cast<char*>(src);
-		char *cdest = reinterpret_cast<char*>(tgt);
-		
-		size_t pos;
-		
-		for (pos = 0; pos < size; ++pos) {
-			cdest[size - pos - 1] = csrc[pos];
-		}
-	}
-	
-	// Following are the actual data manipulation routines to be used:
-#ifdef __OPDE_BIG_ENDIAN
-	template<typename T> void writeLE(void* tgt, T src) {
-		swap_any(&src, tgt, sizeof(T));
-	}
-	
-	template<typename T> T readLE(void* src) {
-		T res;
-		
-		swap_any(&src, &res, sizeof(T));
-		
-		return res;
-	}
-#else
-	template<typename T> void writeLE(void* tgt, T src) {
-		// no swapping
-		*(reinterpret_cast<T*>(tgt)) = src;
-	}
-	
-	template<typename T> T readLE(void* src) {
-		// no swapping
-		return *(reinterpret_cast<T*>(src));
-	}
-#endif
+void swap_any(void *src, void *tgt, size_t size) {
+    char *csrc = reinterpret_cast<char *>(src);
+    char *cdest = reinterpret_cast<char *>(tgt);
+
+    size_t pos;
+
+    for (pos = 0; pos < size; ++pos) {
+        cdest[size - pos - 1] = csrc[pos];
+    }
 }
+
+// Following are the actual data manipulation routines to be used:
+#ifdef __OPDE_BIG_ENDIAN
+template <typename T> void writeLE(void *tgt, T src) {
+    swap_any(&src, tgt, sizeof(T));
+}
+
+template <typename T> T readLE(void *src) {
+    T res;
+
+    swap_any(&src, &res, sizeof(T));
+
+    return res;
+}
+#else
+template <typename T> void writeLE(void *tgt, T src) {
+    // no swapping
+    *(reinterpret_cast<T *>(tgt)) = src;
+}
+
+template <typename T> T readLE(void *src) {
+    // no swapping
+    return *(reinterpret_cast<T *>(src));
+}
+#endif
+} // namespace Opde
 
 #endif // __DTHELPERS_H

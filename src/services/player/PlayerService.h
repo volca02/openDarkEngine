@@ -32,82 +32,84 @@
 
 #include "config.h"
 
-#include "OpdeServiceManager.h"
 #include "OpdeService.h"
-#include "object/ObjectService.h"
+#include "OpdeServiceManager.h"
 #include "ServiceCommon.h"
 #include "SharedPtr.h"
+#include "object/ObjectService.h"
 
 #include "input/InputService.h"
-#include "object/ObjectService.h"
 #include "link/LinkService.h"
+#include "object/ObjectService.h"
 #include "physics/PhysicsService.h"
 #include "sim/SimService.h"
 
 namespace Opde {
 
-	/** @brief Player service. Service that handles the player object (and input)
-	*/
-	class OPDELIB_EXPORT PlayerService : public ServiceImpl<PlayerService>, public SimListener {
-		public:
-			PlayerService(ServiceManager *manager, const std::string& name);
+/** @brief Player service. Service that handles the player object (and input)
+ */
+class OPDELIB_EXPORT PlayerService : public ServiceImpl<PlayerService>,
+                                     public SimListener {
+public:
+    PlayerService(ServiceManager *manager, const std::string &name);
 
-			virtual ~PlayerService();
+    virtual ~PlayerService();
 
-			int getPlayerObject();
+    int getPlayerObject();
 
-			void handleCameraAttachment(int objID);
+    void handleCameraAttachment(int objID);
 
-			virtual void simStep(float simTime, float delta);
+    virtual void simStep(float simTime, float delta);
 
-			size_t getPlayerHeadSubModel(void) const;
+    size_t getPlayerHeadSubModel(void) const;
 
-			/** Returns the state of the creepOn modifier (slower movement speed) */
-			bool getCreepOn(void) const { return mCreepOn; };
+    /** Returns the state of the creepOn modifier (slower movement speed) */
+    bool getCreepOn(void) const { return mCreepOn; };
 
-		protected:
-			bool init();
-			void bootstrapFinished();
-			void shutdown();
+protected:
+    bool init();
+    void bootstrapFinished();
+    void shutdown();
 
-			void onInputForward(const InputEventMsg& msg);
-			void onInputSidestep(const InputEventMsg& msg);
-			void onInputCreepOn(const InputEventMsg& msg);
-		private:
-			/// Object service ptr
-			ObjectServicePtr mObjSrv;
-			InputServicePtr mInputSrv;
-			LinkServicePtr mLinkSrv;
-			int mPlayerObjID;
-			RelationPtr mPlayerFactoryRelation;
-			PhysicsServicePtr mPhysSrv;
-			SimServicePtr mSimSrv;
-			float mForwardMovement;
-			float mSideMovement;
-			bool mCreepOn;
-	};
+    void onInputForward(const InputEventMsg &msg);
+    void onInputSidestep(const InputEventMsg &msg);
+    void onInputCreepOn(const InputEventMsg &msg);
 
-	/// Shared pointer to Player service
-	typedef shared_ptr<PlayerService> PlayerServicePtr;
+private:
+    /// Object service ptr
+    ObjectServicePtr mObjSrv;
+    InputServicePtr mInputSrv;
+    LinkServicePtr mLinkSrv;
+    int mPlayerObjID;
+    RelationPtr mPlayerFactoryRelation;
+    PhysicsServicePtr mPhysSrv;
+    SimServicePtr mSimSrv;
+    float mForwardMovement;
+    float mSideMovement;
+    bool mCreepOn;
+};
 
-	/// Factory for the PlayerService objects
-	class OPDELIB_EXPORT PlayerServiceFactory : public ServiceFactory {
-		public:
-			PlayerServiceFactory();
-			~PlayerServiceFactory() {};
+/// Shared pointer to Player service
+typedef shared_ptr<PlayerService> PlayerServicePtr;
 
-			/** Creates a PlayerService instance */
-			Service* createInstance(ServiceManager* manager);
+/// Factory for the PlayerService objects
+class OPDELIB_EXPORT PlayerServiceFactory : public ServiceFactory {
+public:
+    PlayerServiceFactory();
+    ~PlayerServiceFactory(){};
 
-			virtual const std::string& getName();
+    /** Creates a PlayerService instance */
+    Service *createInstance(ServiceManager *manager);
 
-			virtual const uint getMask();
+    virtual const std::string &getName();
 
-			virtual const size_t getSID();
-		private:
-			static std::string mName;
-	};
-}
+    virtual const uint getMask();
 
+    virtual const size_t getSID();
+
+private:
+    static std::string mName;
+};
+} // namespace Opde
 
 #endif

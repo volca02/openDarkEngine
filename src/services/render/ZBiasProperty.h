@@ -22,7 +22,6 @@
  *
  *****************************************************************************/
 
-
 #ifndef __ZBIASPROPERTY_H
 #define __ZBIASPROPERTY_H
 
@@ -30,36 +29,37 @@
 
 namespace Opde {
 
-	/** a Z-Bias property implementation using rendered property handler.
-	* Controls the rendering bias of the object (for Z-Fightning avoidance). SS2/T2 only.
-	* Uses simple unsigned int data storage. Defaults to 0 - No bias. The stored bias is in bits. Inherits always.
-	*/
-	class ZBiasProperty : public RenderedProperty {
-		public:
-			/// constructor
-			ZBiasProperty(RenderService* rs, PropertyService* owner);
+/** a Z-Bias property implementation using rendered property handler.
+ * Controls the rendering bias of the object (for Z-Fightning avoidance). SS2/T2
+ * only. Uses simple unsigned int data storage. Defaults to 0 - No bias. The
+ * stored bias is in bits. Inherits always.
+ */
+class ZBiasProperty : public RenderedProperty {
+public:
+    /// constructor
+    ZBiasProperty(RenderService *rs, PropertyService *owner);
 
-			/// destructor
-			virtual ~ZBiasProperty(void);
-			
-		protected:
-			/// @see ActiveProperty::addProperty
-			void addProperty(int oid);
-			
-			/// @see ActiveProperty::removeProperty
-			void removeProperty(int oid);
-			
-			/// @see ActiveProperty::setPropertySource
-			void setPropertySource(int oid, int effid);
-			
-			/// @see ActiveProperty::valueChanged
-			void valueChanged(int oid, const std::string& field, const DVariant& value);
+    /// destructor
+    virtual ~ZBiasProperty(void);
 
-			/// core setter method. Called from other methods to set the hasrefs value
-			void setZBias(int oid, uint32_t bias);
-			
-			Ogre::SceneManager* mSceneMgr;
-	};
+protected:
+    /// @see ActiveProperty::addProperty
+    void addProperty(int oid);
+
+    /// @see ActiveProperty::removeProperty
+    void removeProperty(int oid);
+
+    /// @see ActiveProperty::setPropertySource
+    void setPropertySource(int oid, int effid);
+
+    /// @see ActiveProperty::valueChanged
+    void valueChanged(int oid, const std::string &field, const DVariant &value);
+
+    /// core setter method. Called from other methods to set the hasrefs value
+    void setZBias(int oid, uint32_t bias);
+
+    Ogre::SceneManager *mSceneMgr;
 };
+}; // namespace Opde
 
 #endif

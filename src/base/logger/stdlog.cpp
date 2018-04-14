@@ -21,18 +21,18 @@
  *	  $Id$
  *
  *****************************************************************************/
- 
+
 #include "stdlog.h"
 #include <iostream>
 
-
 namespace Opde {
-	
-	StdLog::StdLog() {};
-	
-	StdLog::~StdLog() {};
-		
-	void StdLog::logMessage(Logger::LogLevel level, const std::string& msg) {
-		std::cerr << "LOG [" << Logger::getSingleton().getLogLevelStr(level).c_str() << "] : " << msg << std::endl;
-	}
+
+StdLog::StdLog(){};
+
+StdLog::~StdLog(){};
+
+void StdLog::logMessage(Logger::LogLevel level, const std::string &msg) {
+    std::cerr << "LOG [" << Logger::getSingleton().getLogLevelStr(level).c_str()
+              << "] : " << msg << std::endl;
 }
+} // namespace Opde

@@ -22,49 +22,49 @@
  *
  *****************************************************************************/
 
-#include "bindings.h"
 #include "InheritServiceBinder.h"
 #include "InheritQueryResultBinder.h"
+#include "bindings.h"
 
 namespace Opde {
 
 namespace Python {
 
 // -------------------- Inherit Service --------------------
-const char* InheritServiceBinder::msName = "InheritService";
+const char *InheritServiceBinder::msName = "InheritService";
 
 // ------------------------------------------
 PyTypeObject InheritServiceBinder::msType = {
-    PyVarObject_HEAD_INIT(&PyType_Type, 0)
-    "opde.services.InheritService",                   /* char *tp_name; */
-    sizeof(InheritServiceBinder::Object),      /* int tp_basicsize; */
-    0,                        /* int tp_itemsize;       // not used much */
-    InheritServiceBinder::dealloc,   /* destructor tp_dealloc; */
-    0,                        /* printfunc  tp_print;   */
-    0,  /* getattrfunc  tp_getattr; // __getattr__ */
-    0,                        /* setattrfunc  tp_setattr;  // __setattr__ */
-    0,                        /* cmpfunc  tp_compare;  // __cmp__ */
-    0,                        /* reprfunc  tp_repr;    // __repr__ */
-    0,                        /* PyNumberMethods *tp_as_number; */
-    0,                        /* PySequenceMethods *tp_as_sequence; */
-    0,                        /* PyMappingMethods *tp_as_mapping; */
-    0,                        /* hashfunc tp_hash;     // __hash__ */
-    0,                        /* ternaryfunc tp_call;  // __call__ */
-    0,                        /* reprfunc tp_str;      // __str__ */
-    PyObject_GenericGetAttr,  // getattrofunc tp_getattro; */
-    0,                        /* setattrofunc tp_setattro; */
-    0,                        /* PyBufferProcs *tp_as_buffer; */
-    0,                        /* long tp_flags; */
-    0,                        /* char *tp_doc;  */
-    0,                        /* traverseproc tp_traverse; */
-    0,                        /* inquiry tp_clear; */
-    0,                        /* richcmpfunc tp_richcompare; */
-    0,                        /* long tp_weaklistoffset; */
-    0,                        /* getiterfunc tp_iter; */
-    0,                        /* iternextfunc tp_iternext; */
-    msMethods,                /* struct PyMethodDef *tp_methods; */
-    0,                        /* struct memberlist *tp_members; */
-    0,                        /* struct getsetlist *tp_getset; */
+    PyVarObject_HEAD_INIT(
+        &PyType_Type, 0) "opde.services.InheritService", /* char *tp_name; */
+    sizeof(InheritServiceBinder::Object),                /* int tp_basicsize; */
+    0,                             /* int tp_itemsize;       // not used much */
+    InheritServiceBinder::dealloc, /* destructor tp_dealloc; */
+    0,                             /* printfunc  tp_print;   */
+    0,                             /* getattrfunc  tp_getattr; // __getattr__ */
+    0,                       /* setattrfunc  tp_setattr;  // __setattr__ */
+    0,                       /* cmpfunc  tp_compare;  // __cmp__ */
+    0,                       /* reprfunc  tp_repr;    // __repr__ */
+    0,                       /* PyNumberMethods *tp_as_number; */
+    0,                       /* PySequenceMethods *tp_as_sequence; */
+    0,                       /* PyMappingMethods *tp_as_mapping; */
+    0,                       /* hashfunc tp_hash;     // __hash__ */
+    0,                       /* ternaryfunc tp_call;  // __call__ */
+    0,                       /* reprfunc tp_str;      // __str__ */
+    PyObject_GenericGetAttr, // getattrofunc tp_getattro; */
+    0,                       /* setattrofunc tp_setattro; */
+    0,                       /* PyBufferProcs *tp_as_buffer; */
+    0,                       /* long tp_flags; */
+    0,                       /* char *tp_doc;  */
+    0,                       /* traverseproc tp_traverse; */
+    0,                       /* inquiry tp_clear; */
+    0,                       /* richcmpfunc tp_richcompare; */
+    0,                       /* long tp_weaklistoffset; */
+    0,                       /* getiterfunc tp_iter; */
+    0,                       /* iternextfunc tp_iternext; */
+    msMethods,               /* struct PyMethodDef *tp_methods; */
+    0,                       /* struct memberlist *tp_members; */
+    0,                       /* struct getsetlist *tp_getset; */
 };
 
 // ------------------------------------------
@@ -79,7 +79,7 @@ PyMethodDef InheritServiceBinder::msMethods[] = {
 };
 
 // ------------------------------------------
-PyObject* InheritServiceBinder::getSources(PyObject* self, PyObject* args) {
+PyObject *InheritServiceBinder::getSources(PyObject *self, PyObject *args) {
     __PYTHON_EXCEPTION_GUARD_BEGIN_;
     PyObject *result = NULL;
     InheritServicePtr o;
@@ -105,7 +105,7 @@ PyObject* InheritServiceBinder::getSources(PyObject* self, PyObject* args) {
 }
 
 // ------------------------------------------
-PyObject* InheritServiceBinder::getTargets(PyObject* self, PyObject* args) {
+PyObject *InheritServiceBinder::getTargets(PyObject *self, PyObject *args) {
     __PYTHON_EXCEPTION_GUARD_BEGIN_;
     PyObject *result = NULL;
     InheritServicePtr o;
@@ -130,7 +130,7 @@ PyObject* InheritServiceBinder::getTargets(PyObject* self, PyObject* args) {
 }
 
 // ------------------------------------------
-PyObject* InheritServiceBinder::hasTargets(PyObject* self, PyObject* args) {
+PyObject *InheritServiceBinder::hasTargets(PyObject *self, PyObject *args) {
     __PYTHON_EXCEPTION_GUARD_BEGIN_;
     InheritServicePtr o;
 
@@ -149,9 +149,8 @@ PyObject* InheritServiceBinder::hasTargets(PyObject* self, PyObject* args) {
     __PYTHON_EXCEPTION_GUARD_END_;
 }
 
-
 // ------------------------------------------
-PyObject* InheritServiceBinder::getArchetype(PyObject* self, PyObject* args) {
+PyObject *InheritServiceBinder::getArchetype(PyObject *self, PyObject *args) {
     __PYTHON_EXCEPTION_GUARD_BEGIN_;
     PyObject *result = NULL;
     InheritServicePtr o;
@@ -175,7 +174,7 @@ PyObject* InheritServiceBinder::getArchetype(PyObject* self, PyObject* args) {
 }
 
 // ------------------------------------------
-PyObject* InheritServiceBinder::setArchetype(PyObject* self, PyObject* args) {
+PyObject *InheritServiceBinder::setArchetype(PyObject *self, PyObject *args) {
     __PYTHON_EXCEPTION_GUARD_BEGIN_;
     InheritServicePtr o;
 
@@ -197,7 +196,7 @@ PyObject* InheritServiceBinder::setArchetype(PyObject* self, PyObject* args) {
 }
 
 // ------------------------------------------
-PyObject* InheritServiceBinder::inheritsFrom(PyObject* self, PyObject* args) {
+PyObject *InheritServiceBinder::inheritsFrom(PyObject *self, PyObject *args) {
     __PYTHON_EXCEPTION_GUARD_BEGIN_;
     PyObject *result = NULL;
     InheritServicePtr o;
@@ -222,8 +221,8 @@ PyObject* InheritServiceBinder::inheritsFrom(PyObject* self, PyObject* args) {
 }
 
 // ------------------------------------------
-PyObject* InheritServiceBinder::create() {
-    Object* object = construct(&msType);
+PyObject *InheritServiceBinder::create() {
+    Object *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = GET_SERVICE(InheritService);
@@ -233,31 +232,28 @@ PyObject* InheritServiceBinder::create() {
 }
 
 // ------------------------------------------
-void InheritServiceBinder::init(PyObject* module) {
+void InheritServiceBinder::init(PyObject *module) {
     publishType(module, &msType, msName);
 
     InheritLinkBinder::init(module);
     InheritQueryResultBinder::init(module);
 }
 
-
 // -------------------- Link --------------------
-const char* InheritLinkBinder::msName = "InheritLink";
+const char *InheritLinkBinder::msName = "InheritLink";
 
 // ------------------------------------------
 PyTypeObject InheritLinkBinder::msType = {
-    PyVarObject_HEAD_INIT(&PyType_Type, 0)
-    msName,                   /* char *tp_name; */
-    sizeof(InheritLinkBinder::Object),      // int tp_basicsize; */
-    0,                        /* int tp_itemsize;       // not used much */
-    InheritLinkBinder::dealloc,   /* destructor tp_dealloc; */
-    0,			              /* printfunc  tp_print;   */
-    InheritLinkBinder::getattr,  /* getattrfunc  tp_getattr; // __getattr__ */
+    PyVarObject_HEAD_INIT(&PyType_Type, 0) msName, /* char *tp_name; */
+    sizeof(InheritLinkBinder::Object),             // int tp_basicsize; */
+    0,                          /* int tp_itemsize;       // not used much */
+    InheritLinkBinder::dealloc, /* destructor tp_dealloc; */
+    0,                          /* printfunc  tp_print;   */
+    InheritLinkBinder::getattr, /* getattrfunc  tp_getattr; // __getattr__ */
 };
 
-
 // ------------------------------------------
-PyObject* InheritLinkBinder::getattr(PyObject *self, char *name) {
+PyObject *InheritLinkBinder::getattr(PyObject *self, char *name) {
     InheritLinkPtr o;
     if (!python_cast<InheritLinkPtr>(self, &msType, &o))
         __PY_CONVERR_RET;
@@ -280,13 +276,13 @@ PyObject* InheritLinkBinder::getattr(PyObject *self, char *name) {
 }
 
 // ------------------------------------------
-PyObject* InheritLinkBinder::create(InheritLinkPtr& link) {
+PyObject *InheritLinkBinder::create(InheritLinkPtr &link) {
     if (!link) {
         PyErr_SetString(PyExc_TypeError, "Null link binding!");
         return NULL;
     }
 
-    Object* object = construct(&msType);
+    Object *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = link;
@@ -296,7 +292,7 @@ PyObject* InheritLinkBinder::create(InheritLinkPtr& link) {
 }
 
 // ------------------------------------------
-void InheritLinkBinder::init(PyObject* module) {
+void InheritLinkBinder::init(PyObject *module) {
     publishType(module, &msType, msName);
 }
 } // namespace Python

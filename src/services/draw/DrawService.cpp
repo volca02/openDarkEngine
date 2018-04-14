@@ -21,25 +21,26 @@
  *
  *****************************************************************************/
 
-#include "config.h"
-#include "integers.h"
 #include "DrawService.h"
+#include "FonFormat.h"
 #include "OpdeException.h"
 #include "ServiceCommon.h"
-#include "render/RenderService.h"
-#include "TextureAtlas.h"
-#include "FonFormat.h"
 #include "StringTokenizer.h"
+#include "TextureAtlas.h"
+#include "config.h"
+#include "integers.h"
+#include "render/RenderService.h"
 
-#include <OgreTexture.h>
-#include <OgreTechnique.h>
-#include <OgrePass.h>
-#include <OgreTextureUnitState.h>
-#include <OgreTextureManager.h>
 #include <OgreMaterial.h>
 #include <OgreMaterialManager.h>
+#include <OgrePass.h>
+#include <OgreTechnique.h>
+#include <OgreTexture.h>
+#include <OgreTextureManager.h>
+#include <OgreTextureUnitState.h>
 
-// lg palette for default - moved to external definition file for readability reasons...
+// lg palette for default - moved to external definition file for readability
+// reasons...
 #include <draw/LGPalette.h>
 
 using namespace std;
@@ -48,35 +49,27 @@ using namespace Ogre;
 namespace Opde {
 
 const int DrawService::MAX_Z_VALUE = 1024;
-const RGBAQuad DrawService::msMonoPalette[2] = {{0,0,0,0}, {255,255,255,255}};
+const RGBAQuad DrawService::msMonoPalette[2] = {{0, 0, 0, 0},
+                                                {255, 255, 255, 255}};
 
 /*----------------------------------------------------*/
 /*-------------------- DrawService -------------------*/
 /*----------------------------------------------------*/
-template<> const size_t ServiceImpl<DrawService>::SID = __SERVICE_ID_DRAW;
+template <> const size_t ServiceImpl<DrawService>::SID = __SERVICE_ID_DRAW;
 
-DrawService::DrawService(ServiceManager *manager, const std::string& name) : ServiceImpl<DrawService>(manager, name),
-    mSheetMap(),
-    mActiveSheet(NULL),
-    mDrawOpID(0),
-    mDrawSourceID(0),
-    mViewport(NULL),
-    mCurrentPalette(NULL),
-    mWidth(1),
-    mHeight(1) {
+DrawService::DrawService(ServiceManager *manager, const std::string &name)
+    : ServiceImpl<DrawService>(manager, name), mSheetMap(), mActiveSheet(NULL),
+      mDrawOpID(0), mDrawSourceID(0), mViewport(NULL), mCurrentPalette(NULL),
+      mWidth(1), mHeight(1) {
 
     mCurrentPalette = msDefaultPalette;
 }
 
 //------------------------------------------------------
-DrawService::~DrawService() {
-    clear();
-}
+DrawService::~DrawService() { clear(); }
 
 //------------------------------------------------------
-bool DrawService::init() {
-    return true;
-}
+bool DrawService::init() { return true; }
 
 //------------------------------------------------------
 void DrawService::bootstrapFinished() {
@@ -91,10 +84,9 @@ void DrawService::bootstrapFinished() {
     mSceneManager->addRenderQueueListener(this);
 
     mRenderServiceCallBackID =
-        mRenderService->registerListener(
-                RenderService::ListenerPtr(
-                        new ClassCallback<RenderServiceMsg, DrawService>(this, &DrawService::onRenderServiceMsg))
-        );
+        mRenderService->registerListener(RenderService::ListenerPtr(
+            new ClassCallback<RenderServiceMsg, DrawService>(
+                this, &DrawService::onRenderServiceMsg)));
 }
 
 //------------------------------------------------------
@@ -121,7 +113,7 @@ void DrawService::clear() {
     // destroy all draw operations left
     for (size_t idx = 0; idx < mDrawOperations.size(); ++idx) {
         // delete
-        DrawOperation* dop = mDrawOperations[idx];
+        DrawOperation *dop = mDrawOperations[idx];
 
         if (dop != NULL)
             dop->clear();
@@ -148,7 +140,7 @@ void DrawService::clear() {
 }
 
 //------------------------------------------------------
-DrawSheetPtr DrawService::createSheet(const std::string& sheetName) {
+DrawSheetPtr DrawService::createSheet(const std::string &sheetName) {
     assert(!sheetName.empty());
 
     SheetMap::iterator it = mSheetMap.find(sheetName);
@@ -163,11 +155,11 @@ DrawSheetPtr DrawService::createSheet(const std::string& sheetName) {
 };
 
 //------------------------------------------------------
-void DrawService::destroySheet(const DrawSheetPtr& sheet) {
+void DrawService::destroySheet(const DrawSheetPtr &sheet) {
     // find it in the map, remove, then delete
     SheetMap::iterator it = mSheetMap.begin();
 
-    while(it != mSheetMap.end()) {
+    while (it != mSheetMap.end()) {
 
         if (it->second == sheet) {
             SheetMap::iterator cur = it++;
@@ -186,7 +178,7 @@ void DrawService::destroySheet(const DrawSheetPtr& sheet) {
 }
 
 //------------------------------------------------------
-DrawSheetPtr DrawService::getSheet(const std::string& sheetName) const {
+DrawSheetPtr DrawService::getSheet(const std::string &sheetName) const {
     SheetMap::const_iterator it = mSheetMap.find(sheetName);
 
     if (it != mSheetMap.end())
@@ -196,7 +188,7 @@ DrawSheetPtr DrawService::getSheet(const std::string& sheetName) const {
 }
 
 //------------------------------------------------------
-void DrawService::setActiveSheet(const DrawSheetPtr& sheet) {
+void DrawService::setActiveSheet(const DrawSheetPtr &sheet) {
     if (mActiveSheet != sheet) {
         if (mActiveSheet)
             mActiveSheet->deactivate();
@@ -209,9 +201,11 @@ void DrawService::setActiveSheet(const DrawSheetPtr& sheet) {
 }
 
 //------------------------------------------------------
-void DrawService::renderQueueStarted(uint8 queueGroupId, const String& invocation, bool& skipThisInvocation) {
+void DrawService::renderQueueStarted(uint8 queueGroupId,
+                                     const String &invocation,
+                                     bool &skipThisInvocation) {
     // Clear Z buffer to be ready to render overlayed meshes and stuff
-    if(queueGroupId == RENDER_QUEUE_BACKGROUND) {
+    if (queueGroupId == RENDER_QUEUE_BACKGROUND) {
         // and rebuild the atlasses as needed
         rebuildAtlases();
 
@@ -221,8 +215,9 @@ void DrawService::renderQueueStarted(uint8 queueGroupId, const String& invocatio
             mActiveSheet->queueRenderables(mSceneManager->getRenderQueue());
         }
 
-    } else if(queueGroupId == RENDER_QUEUE_OVERLAY) {
-        Ogre::Root::getSingleton().getRenderSystem()->clearFrameBuffer(Ogre::FBT_DEPTH);
+    } else if (queueGroupId == RENDER_QUEUE_OVERLAY) {
+        Ogre::Root::getSingleton().getRenderSystem()->clearFrameBuffer(
+            Ogre::FBT_DEPTH);
     }
 }
 
@@ -239,16 +234,18 @@ void DrawService::rebuildAtlases() {
 }
 
 //------------------------------------------------------
-void DrawService::renderQueueEnded(uint8 queueGroupId, const String& invocation, bool& skipThisInvocation) {
-
-}
+void DrawService::renderQueueEnded(uint8 queueGroupId, const String &invocation,
+                                   bool &skipThisInvocation) {}
 
 //------------------------------------------------------
-FontDrawSourcePtr DrawService::loadFont(const TextureAtlasPtr& atlas, const std::string& name, const std::string& group) {
+FontDrawSourcePtr DrawService::loadFont(const TextureAtlasPtr &atlas,
+                                        const std::string &name,
+                                        const std::string &group) {
     // load the font according to the specs
     FontDrawSourcePtr nfs(new FontDrawSource(atlas, name));
 
-    // Fonts are added as pointers to the atlas. It's safe, font removes itself from atlas upon destruction
+    // Fonts are added as pointers to the atlas. It's safe, font removes itself
+    // from atlas upon destruction
     atlas->_addFont(nfs.get());
 
     // now we'll load the glyphs from the file
@@ -258,29 +255,32 @@ FontDrawSourcePtr DrawService::loadFont(const TextureAtlasPtr& atlas, const std:
 }
 
 //------------------------------------------------------
-void DrawService::loadFonFile(const std::string& name, const std::string& group, FontDrawSourcePtr fon) {
+void DrawService::loadFonFile(const std::string &name, const std::string &group,
+                              FontDrawSourcePtr fon) {
     DarkFontHeader header;
 
-    Ogre::DataStreamPtr Stream = Ogre::ResourceGroupManager::getSingleton().openResource(name, group, true, NULL);
+    Ogre::DataStreamPtr Stream =
+        Ogre::ResourceGroupManager::getSingleton().openResource(name, group,
+                                                                true, NULL);
     FilePtr fontFile(new OgreFile(Stream));
 
-    fontFile->readElem(&header.Format,2); // 0
-    fontFile->readElem(&header.Unknown,1); // 2
-    fontFile->readElem(&header.Palette,1); // 3
-    fontFile->readElem(&header.Zeros1, 1, 32); // 4
-    fontFile->readElem(&header.FirstChar, 2); // 36
-    fontFile->readElem(&header.LastChar, 2); // 38
-    fontFile->readElem(&header.Zeros2, 1, 32); // 40
-    fontFile->readElem(&header.WidthOffset, 4); // 72
+    fontFile->readElem(&header.Format, 2);       // 0
+    fontFile->readElem(&header.Unknown, 1);      // 2
+    fontFile->readElem(&header.Palette, 1);      // 3
+    fontFile->readElem(&header.Zeros1, 1, 32);   // 4
+    fontFile->readElem(&header.FirstChar, 2);    // 36
+    fontFile->readElem(&header.LastChar, 2);     // 38
+    fontFile->readElem(&header.Zeros2, 1, 32);   // 40
+    fontFile->readElem(&header.WidthOffset, 4);  // 72
     fontFile->readElem(&header.BitmapOffset, 4); // 76
-    fontFile->readElem(&header.RowWidth, 2); // 80
-    fontFile->readElem(&header.NumRows, 2); // 82
+    fontFile->readElem(&header.RowWidth, 2);     // 80
+    fontFile->readElem(&header.NumRows, 2);      // 82
 
     LOG_DEBUG("DrawService: Loading font '%s'", name.c_str());
 
     // what format do we have?
     DarkPixelFormat dpf = DPF_8BIT;
-    const RGBAQuad* curpalette = mCurrentPalette;
+    const RGBAQuad *curpalette = mCurrentPalette;
 
     if (header.Format == 0) {
         dpf = DPF_MONO;
@@ -288,18 +288,20 @@ void DrawService::loadFonFile(const std::string& name, const std::string& group,
         LOG_DEBUG("DrawService: Font is monochromatic");
     } else if (header.Format == 0x0CCCC) {
         LOG_DEBUG("DrawService: Font is antialiased");
-        if (header.Palette != 0) // 0 == use current, otherwise we'll use the default one
+        if (header.Palette !=
+            0) // 0 == use current, otherwise we'll use the default one
             curpalette = msAAPalette;
         // these are inverted! At least it seems so.
     } else {
         LOG_DEBUG("DrawService: Font 8Bit with palette");
-        if (header.Palette != 0) // 0 == use current, otherwise we'll use the default one
+        if (header.Palette !=
+            0) // 0 == use current, otherwise we'll use the default one
             curpalette = msDefaultPalette;
     }
 
     size_t nchars = header.LastChar - header.FirstChar + 1;
 
-    uint16_t* columns = new uint16_t[nchars + 1];
+    uint16_t *columns = new uint16_t[nchars + 1];
 
     // seek to the char column specs
     fontFile->seek(header.WidthOffset, File::FSEEK_BEG);
@@ -316,13 +318,14 @@ void DrawService::loadFonFile(const std::string& name, const std::string& group,
 
     // load the characters
     for (FontCharType n = 0; n < nchars; ++n) {
-        assert(columns[n+1] >= columns[n]);
+        assert(columns[n + 1] >= columns[n]);
 
         // span is columns[chr] to columns[chr+1]
-        size_t width = columns[n+1] - columns[n];
+        size_t width = columns[n + 1] - columns[n];
         PixelSize ps(width, header.NumRows);
 
-        fon->addGlyph(n + header.FirstChar, ps, dpf, header.RowWidth, bitmap, columns[n], curpalette);
+        fon->addGlyph(n + header.FirstChar, ps, dpf, header.RowWidth, bitmap,
+                      columns[n], curpalette);
     }
 
     delete[] bitmap;
@@ -330,9 +333,10 @@ void DrawService::loadFonFile(const std::string& name, const std::string& group,
     LOG_INFO("DrawService: Loaded font '%s'", name.c_str());
 }
 
-
 //------------------------------------------------------
-void DrawService::setFontPalette(Ogre::ManualFonFileLoader::PaletteType paltype, const Ogre::String& fname, const Ogre::String& group) {
+void DrawService::setFontPalette(Ogre::ManualFonFileLoader::PaletteType paltype,
+                                 const Ogre::String &fname,
+                                 const Ogre::String &group) {
     switch (paltype) {
     case ManualFonFileLoader::ePT_Default:
         freeCurrentPal();
@@ -346,18 +350,22 @@ void DrawService::setFontPalette(Ogre::ManualFonFileLoader::PaletteType paltype,
         break;
     default:
         freeCurrentPal();
-        LOG_ERROR("DrawService: Invalid type for palette specified (not loading '%s'). Using default palette instead.", fname.c_str());
+        LOG_ERROR("DrawService: Invalid type for palette specified (not "
+                  "loading '%s'). Using default palette instead.",
+                  fname.c_str());
     }
 }
 
 //------------------------------------------------------
-void DrawService::registerDrawSource(const DrawSourcePtr& ds, const Ogre::String& img, const Ogre::String& group) {
+void DrawService::registerDrawSource(const DrawSourcePtr &ds,
+                                     const Ogre::String &img,
+                                     const Ogre::String &group) {
     // TODO: Code
     mResourceMap.insert(std::make_pair(getResourcePath(img, group), ds));
 }
 
 //------------------------------------------------------
-void DrawService::unregisterDrawSource(const DrawSourcePtr& ds) {
+void DrawService::unregisterDrawSource(const DrawSourcePtr &ds) {
     ResourceDrawSourceMap::iterator it = mResourceMap.begin();
 
     while (it != mResourceMap.end()) {
@@ -373,20 +381,23 @@ void DrawService::unregisterDrawSource(const DrawSourcePtr& ds) {
 }
 
 //------------------------------------------------------
-void DrawService::loadPaletteFromPCX(const Ogre::String& fname, const Ogre::String& group) {
-    // Code written by patryn, reused here for the new font rendering pipeline support
-    // Open the file
+void DrawService::loadPaletteFromPCX(const Ogre::String &fname,
+                                     const Ogre::String &group) {
+    // Code written by patryn, reused here for the new font rendering pipeline
+    // support Open the file
     Ogre::DataStreamPtr stream;
     FilePtr paletteFile;
 
     freeCurrentPal();
 
     try {
-        stream = Ogre::ResourceGroupManager::getSingleton().openResource(fname, group, true);
+        stream = Ogre::ResourceGroupManager::getSingleton().openResource(
+            fname, group, true);
         paletteFile = FilePtr(new OgreFile(stream));
-    } catch(Ogre::FileNotFoundException) {
+    } catch (Ogre::FileNotFoundException) {
         // Could not find resource, use the default table
-        LOG_ERROR("DrawService: Specified palette file not found - using default palette!");
+        LOG_ERROR("DrawService: Specified palette file not found - using "
+                  "default palette!");
         return;
     }
 
@@ -398,9 +409,12 @@ void DrawService::loadPaletteFromPCX(const Ogre::String& fname, const Ogre::Stri
     paletteFile->seek(2);
     paletteFile->read(&enc, 1);
 
-    if (manuf != 0x0A || enc != 0x01) { // Invalid file, does not seem like a PCX at all
+    if (manuf != 0x0A ||
+        enc != 0x01) { // Invalid file, does not seem like a PCX at all
         freeCurrentPal();
-        LOG_ERROR("DrawService: invalid palette file specified (%s) - seems not to be a PCX file!", fname.c_str());
+        LOG_ERROR("DrawService: invalid palette file specified (%s) - seems "
+                  "not to be a PCX file!",
+                  fname.c_str());
         return;
     }
 
@@ -411,7 +425,8 @@ void DrawService::loadPaletteFromPCX(const Ogre::String& fname, const Ogre::Stri
     uint8_t padding;
     paletteFile->readElem(&padding, 1);
 
-    if((bpp == 8) && (padding == 0x0C)) { //Make sure it is an 8bpp and a valid PCX
+    if ((bpp == 8) &&
+        (padding == 0x0C)) { // Make sure it is an 8bpp and a valid PCX
         // Byte sized structures - endianness always ok
         for (unsigned int i = 0; i < 256; i++) {
             paletteFile->read(&mCurrentPalette[i].red, 1);
@@ -421,7 +436,9 @@ void DrawService::loadPaletteFromPCX(const Ogre::String& fname, const Ogre::Stri
         }
     } else {
         freeCurrentPal();
-        LOG_ERROR("DrawService: Invalid palette file (%s) specified - not 8 BPP or invalid Padding!", fname.c_str());
+        LOG_ERROR("DrawService: Invalid palette file (%s) specified - not 8 "
+                  "BPP or invalid Padding!",
+                  fname.c_str());
         return;
     }
 
@@ -429,8 +446,10 @@ void DrawService::loadPaletteFromPCX(const Ogre::String& fname, const Ogre::Stri
 }
 
 //------------------------------------------------------
-void DrawService::loadPaletteExternal(const Ogre::String& fname, const Ogre::String& group) {
-    // Code written by patryn, reused here for the new font rendering pipeline support
+void DrawService::loadPaletteExternal(const Ogre::String &fname,
+                                      const Ogre::String &group) {
+    // Code written by patryn, reused here for the new font rendering pipeline
+    // support
     ExternalPaletteHeader paletteHeader;
     uint16_t count;
     unsigned int i;
@@ -442,11 +461,13 @@ void DrawService::loadPaletteExternal(const Ogre::String& fname, const Ogre::Str
     FilePtr paletteFile;
 
     try {
-        stream = Ogre::ResourceGroupManager::getSingleton().openResource(fname, group, true);
+        stream = Ogre::ResourceGroupManager::getSingleton().openResource(
+            fname, group, true);
         paletteFile = FilePtr(new OgreFile(stream));
-    } catch(Ogre::FileNotFoundException) {
+    } catch (Ogre::FileNotFoundException) {
         // Could not find resource, use the default table
-        LOG_ERROR("DrawService: Specified palette file not found - using default palette!");
+        LOG_ERROR("DrawService: Specified palette file not found - using "
+                  "default palette!");
         return;
     }
 
@@ -462,7 +483,8 @@ void DrawService::loadPaletteExternal(const Ogre::String& fname, const Ogre::Str
     if (paletteHeader.RiffSig == 0x46464952) {
         if (paletteHeader.PSig1 != 0x204C4150) {
             freeCurrentPal();
-            LOG_ERROR("DrawService: Invalid external palette signature (%s)!", fname.c_str());
+            LOG_ERROR("DrawService: Invalid external palette signature (%s)!",
+                      fname.c_str());
             return;
         }
 
@@ -471,20 +493,23 @@ void DrawService::loadPaletteExternal(const Ogre::String& fname, const Ogre::Str
         if (count > 256)
             count = 256;
 
-        for (i = 0; i < count; i++)
-        {
+        for (i = 0; i < count; i++) {
             paletteFile->read(&mCurrentPalette[i].blue, 1);
             paletteFile->read(&mCurrentPalette[i].green, 1);
             paletteFile->read(&mCurrentPalette[i].red, 1);
             paletteFile->read(&mCurrentPalette[i].alpha, 1);
-            mCurrentPalette[i].alpha = i == 0 ? 0 : 255; // alpha read from file is most probably bogus, so we're just skipping it
+            mCurrentPalette[i].alpha =
+                i == 0 ? 0 : 255; // alpha read from file is most probably
+                                  // bogus, so we're just skipping it
         }
     } else if (paletteHeader.RiffSig == 0x4353414A) {
         paletteFile->seek(0); // it is a text file JASC!
         std::string line = paletteFile->getLine();
 
         if (line != "JASC-PAL") {
-            LOG_ERROR("Not a RIFF nor JASC-PAL file although is seemed so (%s). Defaulting the palette.", fname.c_str());
+            LOG_ERROR("Not a RIFF nor JASC-PAL file although is seemed so "
+                      "(%s). Defaulting the palette.",
+                      fname.c_str());
             freeCurrentPal();
             return;
         }
@@ -500,13 +525,16 @@ void DrawService::loadPaletteExternal(const Ogre::String& fname, const Ogre::Str
         if (count > 256)
             count = 256;
 
-        for (i = 0; i < count; i++)	{
+        for (i = 0; i < count; i++) {
             line = paletteFile->getLine();
             WhitespaceStringTokenizer toker(line, true);
 
-            mCurrentPalette[i].red   = Ogre::StringConverter::parseUnsignedInt(toker.next());
-            mCurrentPalette[i].green = Ogre::StringConverter::parseUnsignedInt(toker.next());
-            mCurrentPalette[i].blue  = Ogre::StringConverter::parseUnsignedInt(toker.next());
+            mCurrentPalette[i].red =
+                Ogre::StringConverter::parseUnsignedInt(toker.next());
+            mCurrentPalette[i].green =
+                Ogre::StringConverter::parseUnsignedInt(toker.next());
+            mCurrentPalette[i].blue =
+                Ogre::StringConverter::parseUnsignedInt(toker.next());
             mCurrentPalette[i].alpha = i == 0 ? 0 : 255;
         }
     } else {
@@ -523,7 +551,8 @@ void DrawService::loadPaletteExternal(const Ogre::String& fname, const Ogre::Str
 }
 
 //------------------------------------------------------
-DrawSourcePtr DrawService::createDrawSource(const std::string& img, const std::string& group) {
+DrawSourcePtr DrawService::createDrawSource(const std::string &img,
+                                            const std::string &group) {
     Ogre::String pth = getResourcePath(img, group);
 
     ResourceDrawSourceMap::iterator it = mResourceMap.find(pth);
@@ -532,10 +561,13 @@ DrawSourcePtr DrawService::createDrawSource(const std::string& img, const std::s
         return it->second;
 
     // First we load the image.
-    TexturePtr tex = Ogre::TextureManager::getSingleton().load(img, group, TEX_TYPE_2D, 1);
+    TexturePtr tex =
+        Ogre::TextureManager::getSingleton().load(img, group, TEX_TYPE_2D, 1);
 
     MaterialPtr mat = Ogre::MaterialManager::getSingleton().create(img, group);
-    TextureUnitState* tus = mat->getTechnique(0)->getPass(0)->createTextureUnitState(tex->getName());
+    TextureUnitState *tus =
+        mat->getTechnique(0)->getPass(0)->createTextureUnitState(
+            tex->getName());
 
     tus->setTextureFiltering(Ogre::FO_NONE, Ogre::FO_NONE, Ogre::FO_NONE);
 
@@ -556,9 +588,9 @@ DrawSourcePtr DrawService::createDrawSource(const std::string& img, const std::s
 }
 
 //------------------------------------------------------
-RenderedImage* DrawService::createRenderedImage(const DrawSourcePtr& draw) {
+RenderedImage *DrawService::createRenderedImage(const DrawSourcePtr &draw) {
     DrawOperation::ID opID = getNewDrawOperationID();
-    RenderedImage* ri = new RenderedImage(this, opID, draw);
+    RenderedImage *ri = new RenderedImage(this, opID, draw);
 
     // register so we'll be able to remove it
     mDrawOperations[opID] = ri;
@@ -569,14 +601,15 @@ RenderedImage* DrawService::createRenderedImage(const DrawSourcePtr& draw) {
 }
 
 //------------------------------------------------------
-void DrawService::destroyRenderedImage(RenderedImage* ri) {
+void DrawService::destroyRenderedImage(RenderedImage *ri) {
     destroyDrawOperation(ri);
 }
 
 //------------------------------------------------------
-RenderedLabel* DrawService::createRenderedLabel(const FontDrawSourcePtr& fds, const std::string& label) {
+RenderedLabel *DrawService::createRenderedLabel(const FontDrawSourcePtr &fds,
+                                                const std::string &label) {
     DrawOperation::ID opID = getNewDrawOperationID();
-    RenderedLabel* rl = new RenderedLabel(this, opID, fds, label);
+    RenderedLabel *rl = new RenderedLabel(this, opID, fds, label);
 
     // register so we'll be able to remove it
     mDrawOperations[opID] = rl;
@@ -587,14 +620,14 @@ RenderedLabel* DrawService::createRenderedLabel(const FontDrawSourcePtr& fds, co
 }
 
 //------------------------------------------------------
-void DrawService::destroyRenderedLabel(RenderedLabel* rl) {
+void DrawService::destroyRenderedLabel(RenderedLabel *rl) {
     destroyDrawOperation(rl);
 }
 
 //------------------------------------------------------
-RenderedRect* DrawService::createRenderedRect(const TextureAtlasPtr& atlas) {
+RenderedRect *DrawService::createRenderedRect(const TextureAtlasPtr &atlas) {
     DrawOperation::ID opID = getNewDrawOperationID();
-    RenderedRect* rr = new RenderedRect(this, opID, atlas);
+    RenderedRect *rr = new RenderedRect(this, opID, atlas);
 
     // register so we'll be able to remove it
     mDrawOperations[opID] = rr;
@@ -605,7 +638,7 @@ RenderedRect* DrawService::createRenderedRect(const TextureAtlasPtr& atlas) {
 }
 
 //------------------------------------------------------
-void DrawService::destroyRenderedRect(RenderedRect* rr) {
+void DrawService::destroyRenderedRect(RenderedRect *rr) {
     destroyDrawOperation(rr);
 }
 
@@ -632,7 +665,7 @@ size_t DrawService::getNewDrawOperationID() {
 }
 
 //------------------------------------------------------
-void DrawService::destroyDrawOperation(DrawOperation* dop) {
+void DrawService::destroyDrawOperation(DrawOperation *dop) {
     DrawOperation::ID id = dop->getID();
     mDrawOperations[id] = NULL;
     // recycle the id for reuse
@@ -651,7 +684,6 @@ Ogre::Real DrawService::convertToScreenSpaceX(int x, size_t width) const {
     return res;
 }
 
-
 //------------------------------------------------------
 Ogre::Real DrawService::convertToScreenSpaceY(int y, size_t height) const {
     Ogre::Real res = y;
@@ -663,7 +695,8 @@ Ogre::Real DrawService::convertToScreenSpaceY(int y, size_t height) const {
 
 //------------------------------------------------------
 Ogre::Real DrawService::convertToScreenSpaceZ(int z) const {
-    Ogre::Real depth = mRenderSystem->getMaximumDepthInputValue() - mRenderSystem->getMinimumDepthInputValue();
+    Ogre::Real depth = mRenderSystem->getMaximumDepthInputValue() -
+                       mRenderSystem->getMinimumDepthInputValue();
 
     if (z < 0)
         z = 0;
@@ -671,12 +704,12 @@ Ogre::Real DrawService::convertToScreenSpaceZ(int z) const {
     if (z > MAX_Z_VALUE)
         z = MAX_Z_VALUE;
 
-    return mRenderSystem->getMaximumDepthInputValue() - (z * depth / MAX_Z_VALUE);
+    return mRenderSystem->getMaximumDepthInputValue() -
+           (z * depth / MAX_Z_VALUE);
 }
 
-
 //------------------------------------------------------
-void DrawService::_queueAtlasForRebuild(TextureAtlas* atlas) {
+void DrawService::_queueAtlasForRebuild(TextureAtlas *atlas) {
     mAtlasesForRebuild.insert(atlas);
 }
 
@@ -691,14 +724,13 @@ TextureAtlasPtr DrawService::createAtlas() {
 }
 
 //------------------------------------------------------
-void DrawService::destroyAtlas(const TextureAtlasPtr& atlas) {
+void DrawService::destroyAtlas(const TextureAtlasPtr &atlas) {
     /* TODO: INVALID:
        mFreeIDs.push(atlas->getAtlasID());
        delete atlas;
     */
     LOG_INFO("DrawService::destroyAtlas ignored");
 }
-
 
 //------------------------------------------------------
 void DrawService::freeCurrentPal() {
@@ -709,15 +741,15 @@ void DrawService::freeCurrentPal() {
 }
 
 //------------------------------------------------------
-void DrawService::onRenderServiceMsg(const RenderServiceMsg& msg) {
+void DrawService::onRenderServiceMsg(const RenderServiceMsg &msg) {
     mWidth = msg.size.width;
     mHeight = msg.size.height;
 
     // inform all sheets...
     SheetMap::iterator it = mSheetMap.begin();
 
-    while(it != mSheetMap.end()) {
-        const DrawSheetPtr& sht = (it++)->second;
+    while (it != mSheetMap.end()) {
+        const DrawSheetPtr &sht = (it++)->second;
 
         sht->_setResolution(mWidth, mHeight);
     }
@@ -729,30 +761,24 @@ void DrawService::postCreate(DrawOperation *dop) {
 }
 
 //------------------------------------------------------
-Ogre::String DrawService::getResourcePath(const Ogre::String& res, const Ogre::String& grp) {
+Ogre::String DrawService::getResourcePath(const Ogre::String &res,
+                                          const Ogre::String &grp) {
     return grp + ':' + res;
 }
 
 //-------------------------- Factory implementation
 std::string DrawServiceFactory::mName = "DrawService";
 
-DrawServiceFactory::DrawServiceFactory() : ServiceFactory() {
-};
+DrawServiceFactory::DrawServiceFactory() : ServiceFactory(){};
 
-const std::string& DrawServiceFactory::getName() {
-    return mName;
-}
+const std::string &DrawServiceFactory::getName() { return mName; }
 
-const uint DrawServiceFactory::getMask() {
-    return SERVICE_ENGINE;
-}
+const uint DrawServiceFactory::getMask() { return SERVICE_ENGINE; }
 
-const size_t DrawServiceFactory::getSID() {
-    return DrawService::SID;
-}
+const size_t DrawServiceFactory::getSID() { return DrawService::SID; }
 
-Service* DrawServiceFactory::createInstance(ServiceManager* manager) {
+Service *DrawServiceFactory::createInstance(ServiceManager *manager) {
     return new DrawService(manager, mName);
 }
 
-}
+} // namespace Opde

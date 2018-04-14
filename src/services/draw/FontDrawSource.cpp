@@ -21,9 +21,8 @@
  *
  *****************************************************************************/
 
-
-#include "DrawCommon.h"
 #include "FontDrawSource.h"
+#include "DrawCommon.h"
 #include "OpdeException.h"
 #include "TextureAtlas.h"
 
@@ -31,12 +30,10 @@ namespace Opde {
 /*----------------------------------------------------*/
 /*------------------- FontDrawSource -----------------*/
 /*----------------------------------------------------*/
-FontDrawSource::FontDrawSource(const TextureAtlasPtr& container, const std::string& name) :
-    mContainer(container),
-    mName(name),
-    mMaxHeight(0),
-    mMaxWidth(0),
-    mBuilt(false) {
+FontDrawSource::FontDrawSource(const TextureAtlasPtr &container,
+                               const std::string &name)
+    : mContainer(container), mName(name), mMaxHeight(0), mMaxWidth(0),
+      mBuilt(false) {
     // INTENTIONALLY LEFT BLANK
 }
 
@@ -58,7 +55,9 @@ FontDrawSource::~FontDrawSource() {
 }
 
 //------------------------------------------------------
-void FontDrawSource::addGlyph(FontCharType chr, const PixelSize& dimensions, DarkPixelFormat pf, size_t rowlen, void* data, size_t pxoffset, const RGBAQuad* palette) {
+void FontDrawSource::addGlyph(FontCharType chr, const PixelSize &dimensions,
+                              DarkPixelFormat pf, size_t rowlen, void *data,
+                              size_t pxoffset, const RGBAQuad *palette) {
     assert(!mBuilt);
 
     // Register the new glyph.
@@ -72,10 +71,16 @@ void FontDrawSource::addGlyph(FontCharType chr, const PixelSize& dimensions, Dar
 
     // TODO: Fill the image, dimensions, atlas ref. etc.
     switch (pf) {
-    case DPF_MONO : populateImageFromMono(ds, dimensions, rowlen, data, pxoffset, palette); break;
-    case DPF_8BIT : populateImageFrom8BitPal(ds, dimensions, rowlen, data, pxoffset, palette); break;
+    case DPF_MONO:
+        populateImageFromMono(ds, dimensions, rowlen, data, pxoffset, palette);
+        break;
+    case DPF_8BIT:
+        populateImageFrom8BitPal(ds, dimensions, rowlen, data, pxoffset,
+                                 palette);
+        break;
     default:
-        OPDE_EXCEPT("Invalid pixel format supplied", "FontDrawSource::addGlyph");
+        OPDE_EXCEPT("Invalid pixel format supplied",
+                    "FontDrawSource::addGlyph");
     }
 
     // copy the dimensions
@@ -90,7 +95,7 @@ DrawSourcePtr FontDrawSource::getGlyph(FontCharType chr) {
 
     GlyphMap::iterator it = mRepresentedGlyphs.find(chr);
 
-    if (it!=mRepresentedGlyphs.end())
+    if (it != mRepresentedGlyphs.end())
         return it->second;
 
     return DrawSourcePtr(NULL);
@@ -112,12 +117,12 @@ void FontDrawSource::build() {
 }
 
 //------------------------------------------------------
-PixelSize FontDrawSource::calculateTextSize(const std::string& text) {
+PixelSize FontDrawSource::calculateTextSize(const std::string &text) {
     std::string::const_iterator cit = text.begin();
     std::string::const_iterator cend = text.end();
 
     size_t x = 0, y = 0;
-    PixelSize sz(0,0);
+    PixelSize sz(0, 0);
 
     while (cit != cend) {
         const unsigned char chr = *cit++;
@@ -159,30 +164,35 @@ PixelSize FontDrawSource::calculateTextSize(const std::string& text) {
 }
 
 //------------------------------------------------------
-void FontDrawSource::populateImageFromMono(const DrawSourcePtr& dsp, const PixelSize& dimensions, size_t rowlen, void* data, size_t pxoffset, const RGBAQuad* pal) {
+void FontDrawSource::populateImageFromMono(const DrawSourcePtr &dsp,
+                                           const PixelSize &dimensions,
+                                           size_t rowlen, void *data,
+                                           size_t pxoffset,
+                                           const RGBAQuad *pal) {
     // We'll use the first two records in the pal for conversion.
     // first we take the number of the bits to process
     size_t cr = 0;
     size_t pixelcount = dimensions.getPixelArea();
 
     // Target data - 32 bit unsigned per pixel
-    uint32_t* pixels = new uint32_t[pixelcount];
+    uint32_t *pixels = new uint32_t[pixelcount];
     // current pixel pointer on the destination buffer
-    uint32_t* pixpos = pixels;
+    uint32_t *pixpos = pixels;
 
     memset(pixels, 0, pixelcount * 4);
 
     // current pixel pointer on the source buffer
-    unsigned char* srcdta = reinterpret_cast<unsigned char*>(data);
+    unsigned char *srcdta = reinterpret_cast<unsigned char *>(data);
 
     // we have the row length to skip each row...
     for (cr = 0; cr < dimensions.height; ++cr) {
         size_t y = pxoffset;
 
         for (size_t x = 0; x < dimensions.width; ++x, ++pixpos, ++y) {
-            size_t idx = (srcdta[y / 8]>>(7 - (y % 8))) & 0x1;
+            size_t idx = (srcdta[y / 8] >> (7 - (y % 8))) & 0x1;
 
-            *pixpos = pal[idx].blue | (pal[idx].green << 8) | (pal[idx].red << 16) | (pal[idx].alpha << 24);
+            *pixpos = pal[idx].blue | (pal[idx].green << 8) |
+                      (pal[idx].red << 16) | (pal[idx].alpha << 24);
         }
 
         // next scan line
@@ -190,39 +200,48 @@ void FontDrawSource::populateImageFromMono(const DrawSourcePtr& dsp, const Pixel
     }
 
     // we have the image data ready, now we'll populate image with it
-    dsp->getImage()->loadDynamicImage(reinterpret_cast<Ogre::uchar*>(pixels), dimensions.width, dimensions.height, 1, Ogre::PF_A8R8G8B8, false);
+    dsp->getImage()->loadDynamicImage(reinterpret_cast<Ogre::uchar *>(pixels),
+                                      dimensions.width, dimensions.height, 1,
+                                      Ogre::PF_A8R8G8B8, false);
     dsp->setSourcePixmapPointer(pixels);
 }
 
 //------------------------------------------------------
-void FontDrawSource::populateImageFrom8BitPal(const DrawSourcePtr& dsp, const PixelSize& dimensions, size_t rowlen, void* data, size_t pxoffset, const RGBAQuad* pal) {
+void FontDrawSource::populateImageFrom8BitPal(const DrawSourcePtr &dsp,
+                                              const PixelSize &dimensions,
+                                              size_t rowlen, void *data,
+                                              size_t pxoffset,
+                                              const RGBAQuad *pal) {
     // We'll use the first two records in the pal for conversion.
     // first we take the number of the bits to process
     size_t cr = 0;
     size_t pixelcount = dimensions.getPixelArea();
 
     // Target data - 32 bit unsigned per pixel
-    uint32_t* pixels = new uint32_t[pixelcount];
+    uint32_t *pixels = new uint32_t[pixelcount];
     // current pixel pointer on the destination buffer
-    uint32_t* pixpos = pixels;
+    uint32_t *pixpos = pixels;
 
     // current pixel pointer on the source buffer
-    unsigned char* srcdta = reinterpret_cast<unsigned char*>(data);
+    unsigned char *srcdta = reinterpret_cast<unsigned char *>(data);
 
     // we have the row length to skip each row...
     for (cr = 0; cr < dimensions.height; ++cr) {
         for (size_t x = 0; x < dimensions.width; ++x, ++pixpos) {
             size_t idx = srcdta[x + pxoffset];
 
-            *pixpos = pal[idx].blue | (pal[idx].green << 8) | (pal[idx].red << 16) | (pal[idx].alpha << 24);
+            *pixpos = pal[idx].blue | (pal[idx].green << 8) |
+                      (pal[idx].red << 16) | (pal[idx].alpha << 24);
         }
 
         srcdta += rowlen;
     }
 
     // we have the image data ready, now we'll populate image with it
-    dsp->getImage()->loadDynamicImage(reinterpret_cast<Ogre::uchar*>(pixels), dimensions.width, dimensions.height, 1, Ogre::PF_A8R8G8B8, true);
+    dsp->getImage()->loadDynamicImage(reinterpret_cast<Ogre::uchar *>(pixels),
+                                      dimensions.width, dimensions.height, 1,
+                                      Ogre::PF_A8R8G8B8, true);
     dsp->setSourcePixmapPointer(pixels);
 }
 
-};
+}; // namespace Opde

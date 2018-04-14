@@ -21,16 +21,13 @@
  *		$Id$
  *
  *****************************************************************************/
- 
+
 #include "ConsoleCommandListener.h"
 
 #include <string>
 
 namespace Opde {
-	
-ConsoleCommandListener::~ConsoleCommandListener(void) {
-}
 
-};
+ConsoleCommandListener::~ConsoleCommandListener(void) {}
 
-
+}; // namespace Opde

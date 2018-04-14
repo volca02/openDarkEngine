@@ -22,7 +22,6 @@
  *
  *****************************************************************************/
 
-
 #ifndef __RENDERALPHAPROPERTY_H
 #define __RENDERALPHAPROPERTY_H
 
@@ -30,36 +29,38 @@
 
 namespace Opde {
 
-	/** a RenderAlpha property implementation using rendered property handler.
-	* Controls the transparency of the object
-	* Uses simple unsigned float data storage. Defaults to 1.0 - No transparency. Inherits always.
-	*/
-	class RenderAlphaProperty : public RenderedProperty {
-		public:
-			/// constructor
-			RenderAlphaProperty(RenderService* rs, PropertyService* owner);
+/** a RenderAlpha property implementation using rendered property handler.
+ * Controls the transparency of the object
+ * Uses simple unsigned float data storage. Defaults to 1.0 - No transparency.
+ * Inherits always.
+ */
+class RenderAlphaProperty : public RenderedProperty {
+public:
+    /// constructor
+    RenderAlphaProperty(RenderService *rs, PropertyService *owner);
 
-			/// destructor
-			virtual ~RenderAlphaProperty(void);
-			
-		protected:
-			/// @see ActiveProperty::addProperty
-			void addProperty(int oid);
-			
-			/// @see ActiveProperty::removeProperty
-			void removeProperty(int oid);
-			
-			/// @see ActiveProperty::setPropertySource
-			void setPropertySource(int oid, int effid);
-			
-			/// @see ActiveProperty::valueChanged
-			void valueChanged(int oid, const std::string& field, const DVariant& value);
+    /// destructor
+    virtual ~RenderAlphaProperty(void);
 
-			/// core setter method. Called from other methods to set the render alpha value
-			void setAlpha(int oid, float alpha);
-			
-			Ogre::SceneManager* mSceneMgr;
-	};
+protected:
+    /// @see ActiveProperty::addProperty
+    void addProperty(int oid);
+
+    /// @see ActiveProperty::removeProperty
+    void removeProperty(int oid);
+
+    /// @see ActiveProperty::setPropertySource
+    void setPropertySource(int oid, int effid);
+
+    /// @see ActiveProperty::valueChanged
+    void valueChanged(int oid, const std::string &field, const DVariant &value);
+
+    /// core setter method. Called from other methods to set the render alpha
+    /// value
+    void setAlpha(int oid, float alpha);
+
+    Ogre::SceneManager *mSceneMgr;
 };
+}; // namespace Opde
 
 #endif

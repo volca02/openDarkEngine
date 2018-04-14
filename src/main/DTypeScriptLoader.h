@@ -21,7 +21,7 @@
  *		$Id$
  *
  *****************************************************************************/
- 
+
 #ifndef __DTYPESCRIPTLOADER_H
 #define __DTYPESCRIPTLOADER_H
 
@@ -35,34 +35,38 @@
 
 namespace Opde {
 
-	/** Loader for .dtype files. Registers itself as a ScriptLoader in the ResourceGroupManager. Automatically parses all encountered *.dtype files. */
-	class OPDELIB_EXPORT DTypeScriptLoader : public Ogre::ScriptLoader {
-		public:
-			/** Constructor. Registers itself as a ScriptLoader to ResourceGroupManager */
-			DTypeScriptLoader();
-			
-			/** Destructor. Unegisters itself from ResourceGroupManager */
-			virtual	~DTypeScriptLoader();
-			
-			/** Patterns that are this kind of script. 
-			* @return "*.dtype" */
-			const Ogre::StringVector& getScriptPatterns(void) const;
-			
-			/** Called when dtype script is found. Calls DTypeScriptCompiler::parseScript */
- 			void parseScript(Ogre::DataStreamPtr &stream, const Ogre::String &groupName);
-			
-			/** Loading order. 
-			@return 1 and this should be less than all scripts requiring the binary definitions */
-			Ogre::Real getLoadingOrder(void) const;
-			
- 		protected:
-			/** Used compiler */
-			DTypeScriptCompiler* mDTypeCompiler;
-			
-			/** The patterns that are dtype */
-			Ogre::StringVector mScriptPatterns;
-	};
-}
+/** Loader for .dtype files. Registers itself as a ScriptLoader in the
+ * ResourceGroupManager. Automatically parses all encountered *.dtype files. */
+class OPDELIB_EXPORT DTypeScriptLoader : public Ogre::ScriptLoader {
+public:
+    /** Constructor. Registers itself as a ScriptLoader to ResourceGroupManager
+     */
+    DTypeScriptLoader();
+
+    /** Destructor. Unegisters itself from ResourceGroupManager */
+    virtual ~DTypeScriptLoader();
+
+    /** Patterns that are this kind of script.
+     * @return "*.dtype" */
+    const Ogre::StringVector &getScriptPatterns(void) const;
+
+    /** Called when dtype script is found. Calls
+     * DTypeScriptCompiler::parseScript */
+    void parseScript(Ogre::DataStreamPtr &stream,
+                     const Ogre::String &groupName);
+
+    /** Loading order.
+    @return 1 and this should be less than all scripts requiring the binary
+    definitions */
+    Ogre::Real getLoadingOrder(void) const;
+
+protected:
+    /** Used compiler */
+    DTypeScriptCompiler *mDTypeCompiler;
+
+    /** The patterns that are dtype */
+    Ogre::StringVector mScriptPatterns;
+};
+} // namespace Opde
 
 #endif
-

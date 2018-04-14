@@ -27,37 +27,35 @@
 using namespace std;
 
 namespace Opde {
-    /*--------------------------------------------------------*/
-    /*--------------------- NeverInheritor -------------------*/
-	/*--------------------------------------------------------*/
-    ArchetypeInheritor::ArchetypeInheritor(const InheritorFactory* fac, InheritService* is) : CachedInheritor(fac, is) {
-    };
+/*--------------------------------------------------------*/
+/*--------------------- NeverInheritor -------------------*/
+/*--------------------------------------------------------*/
+ArchetypeInheritor::ArchetypeInheritor(const InheritorFactory *fac,
+                                       InheritService *is)
+    : CachedInheritor(fac, is){};
 
-    //------------------------------------------------------
-    ArchetypeInheritor::~ArchetypeInheritor() {
-    }
+//------------------------------------------------------
+ArchetypeInheritor::~ArchetypeInheritor() {}
 
-    //------------------------------------------------------
-    bool ArchetypeInheritor::validate(int srcID, int dstID, unsigned int priority) const {
-        // only inherit if target is < 0
-        if (dstID < 0)
-            return true;
+//------------------------------------------------------
+bool ArchetypeInheritor::validate(int srcID, int dstID,
+                                  unsigned int priority) const {
+    // only inherit if target is < 0
+    if (dstID < 0)
+        return true;
 
-        return false;
-    }
-
-    //------------------------------------------------------- Never Inheritor Factory:
-    string ArchetypeInheritorFactory::mName = "archetype";
-
-    ArchetypeInheritorFactory::ArchetypeInheritorFactory() {
-    }
-
-	string ArchetypeInheritorFactory::getName() const {
-	    return mName;
-	}
-
-	Inheritor* ArchetypeInheritorFactory::createInstance(InheritService* is) const {
-	    return new ArchetypeInheritor(this, is);
-	}
+    return false;
 }
 
+//------------------------------------------------------- Never Inheritor
+//Factory:
+string ArchetypeInheritorFactory::mName = "archetype";
+
+ArchetypeInheritorFactory::ArchetypeInheritorFactory() {}
+
+string ArchetypeInheritorFactory::getName() const { return mName; }
+
+Inheritor *ArchetypeInheritorFactory::createInstance(InheritService *is) const {
+    return new ArchetypeInheritor(this, is);
+}
+} // namespace Opde

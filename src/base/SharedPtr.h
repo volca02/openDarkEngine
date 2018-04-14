@@ -31,8 +31,7 @@
 
 namespace Opde {
 
-template<typename T>
-using shared_ptr = std::shared_ptr<T>;
+template <typename T> using shared_ptr = std::shared_ptr<T>;
 
 } // namespace Opde
 

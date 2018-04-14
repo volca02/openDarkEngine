@@ -28,66 +28,73 @@
 
 using namespace Opde;
 
-void usage(const char* message = NULL) {
+void usage(const char *message = NULL) {
     if (message)
-	std::cerr << message << std::endl;
+        std::cerr << message << std::endl;
 
     std::cout << "chunk FILE [CHUNK OUTFILE]" << std::endl
-	      << "  FILE - the dark database file to read" << std::endl
-	      << "  CHUNK - the chunk name to extract" << std::endl
-	      << "  OUTFILE - the file that the chunk is written into" << std::endl
-	      << "  with just the first argument, the program lists the chunks contained: CHUNK_NAME SIZE VERSION" << std::endl;
+              << "  FILE - the dark database file to read" << std::endl
+              << "  CHUNK - the chunk name to extract" << std::endl
+              << "  OUTFILE - the file that the chunk is written into"
+              << std::endl
+              << "  with just the first argument, the program lists the chunks "
+                 "contained: CHUNK_NAME SIZE VERSION"
+              << std::endl;
 
     exit(1);
 }
 
-void listChunks(FileGroup* gr) {
-	FileGroup::const_iterator itr = gr->begin();
+void listChunks(FileGroup *gr) {
+    FileGroup::const_iterator itr = gr->begin();
 
-	for (;itr != gr->end(); itr++) {
-		const DarkDBChunkHeader& head = itr->second.header;
+    for (; itr != gr->end(); itr++) {
+        const DarkDBChunkHeader &head = itr->second.header;
 
-		printf("%-12s %8ld %4d.%d\n", itr->first.c_str(), itr->second.file->size(), head.version_high, head.version_low);
-	}
+        printf("%-12s %8ld %4d.%d\n", itr->first.c_str(),
+               itr->second.file->size(), head.version_high, head.version_low);
+    }
 }
 
-int main(int argc, char* argv[]) {
-	bool display = false;  // only list the chunks
+int main(int argc, char *argv[]) {
+    bool display = false; // only list the chunks
 
-	if (argc < 2) {
-		usage("Not enough parameters specified.");
-	}
+    if (argc < 2) {
+        usage("Not enough parameters specified.");
+    }
 
-	if (strcmp(argv[1],"--help") == 0 || strcmp(argv[1],"-?") == 0 || strcmp(argv[1],"/?") == 0) {
-		usage();
-	}
+    if (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-?") == 0 ||
+        strcmp(argv[1], "/?") == 0) {
+        usage();
+    }
 
-	if (argc == 2) {
-		display = true;
-	} else if (argc == 3) {
-		usage("Output file not specified or invalid commandline parameters");
-	}
+    if (argc == 2) {
+        display = true;
+    } else if (argc == 3) {
+        usage("Output file not specified or invalid commandline parameters");
+    }
 
-	try {
-		FilePtr src = FilePtr(new StdFile(argv[1], File::FILE_R));
-		DarkFileGroup* gr = new DarkFileGroup(src);
+    try {
+        FilePtr src = FilePtr(new StdFile(argv[1], File::FILE_R));
+        DarkFileGroup *gr = new DarkFileGroup(src);
 
-		if (!display) {
-			FilePtr chunk = gr->getFile(argv[2]);
+        if (!display) {
+            FilePtr chunk = gr->getFile(argv[2]);
 
-			StdFile dest(argv[3], File::FILE_W);
+            StdFile dest(argv[3], File::FILE_W);
 
-			chunk->writeToFile(dest);
-		} else {
-			listChunks(gr);
-		}
+            chunk->writeToFile(dest);
+        } else {
+            listChunks(gr);
+        }
 
-		delete gr;
-	} catch (FileException &e) {
-		std::cerr << "File exception occured trying to extract the chunk : " << e.getDetails() << std::endl;
-	} catch (BasicException &e) {
-		std::cerr << "Exception occured trying to extract the chunk : " << e.getDetails() << std::endl;
-	}
+        delete gr;
+    } catch (FileException &e) {
+        std::cerr << "File exception occured trying to extract the chunk : "
+                  << e.getDetails() << std::endl;
+    } catch (BasicException &e) {
+        std::cerr << "Exception occured trying to extract the chunk : "
+                  << e.getDetails() << std::endl;
+    }
 
-	return 0;
+    return 0;
 }

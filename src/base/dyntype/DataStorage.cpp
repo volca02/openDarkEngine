@@ -32,12 +32,12 @@ namespace Opde {
 // --------------------------------------------------------------------------
 // --------------- Various utility classes ----------------------------------
 // --------------------------------------------------------------------------
-DTypeDefFieldDesc::DTypeDefFieldDesc(const DTypeDefPtr& type) {
+DTypeDefFieldDesc::DTypeDefFieldDesc(const DTypeDefPtr &type) {
     // prepare the list
     DTypeDef::const_iterator it = type->begin();
 
     while (it != type->end()) {
-        const DTypeDef::FieldDef& fd = *(it++);
+        const DTypeDef::FieldDef &fd = *(it++);
 
         DataFieldDesc dfd;
         dfd.name = fd.name;
@@ -50,14 +50,15 @@ DTypeDefFieldDesc::DTypeDefFieldDesc(const DTypeDefPtr& type) {
 }
 
 DataFieldDescIteratorPtr DTypeDefFieldDesc::getIterator() {
-    return DataFieldDescIteratorPtr(new DataFieldDescListIterator(mDataFieldDescList));
+    return DataFieldDescIteratorPtr(
+        new DataFieldDescListIterator(mDataFieldDescList));
 }
-
 
 // --------------------------------------------------------------------------
 // ---------------------------- Data Storage --------------------------------
 // --------------------------------------------------------------------------
-bool DataStorage::createWithValues(int objID, const DVariantStringMap& dataValues) {
+bool DataStorage::createWithValues(int objID,
+                                   const DVariantStringMap &dataValues) {
     if (!create(objID))
         return false;
 
@@ -72,7 +73,7 @@ bool DataStorage::createWithValues(int objID, const DVariantStringMap& dataValue
 }
 
 // --------------------------------------------------------------------------
-bool DataStorage::createWithValue(int objID, const DVariant& value) {
+bool DataStorage::createWithValue(int objID, const DVariant &value) {
     if (!create(objID))
         return false;
 
@@ -83,24 +84,19 @@ bool DataStorage::createWithValue(int objID, const DVariant& value) {
 // --------------- Structured Data Storage (DType based) --------------------
 // --------------------------------------------------------------------------
 
-StructuredDataStorage::StructuredDataStorage(const DTypeDefPtr& type, bool useDataCache) :
-    mTypeDef(type),
-    mUseDataCache(useDataCache),
-    mFieldDesc(type) {
-}
+StructuredDataStorage::StructuredDataStorage(const DTypeDefPtr &type,
+                                             bool useDataCache)
+    : mTypeDef(type), mUseDataCache(useDataCache), mFieldDesc(type) {}
 
 // --------------------------------------------------------------------------
-bool StructuredDataStorage::isEmpty() {
-    return mDataMap.empty();
-}
+bool StructuredDataStorage::isEmpty() { return mDataMap.empty(); }
 
 // --------------------------------------------------------------------------
-void StructuredDataStorage::clear() {
-    mDataMap.clear();
-}
+void StructuredDataStorage::clear() { mDataMap.clear(); }
 
 // --------------------------------------------------------------------------
-bool StructuredDataStorage::readFromFile(FilePtr& file, int objID, bool sizeStored) {
+bool StructuredDataStorage::readFromFile(FilePtr &file, int objID,
+                                         bool sizeStored) {
     DTypePtr pd = getDataForObject(objID);
 
     if (!pd) {
@@ -114,7 +110,8 @@ bool StructuredDataStorage::readFromFile(FilePtr& file, int objID, bool sizeStor
 
         // compare sizes
         if (size != mTypeDef->size())
-            LOG_ERROR("Data size mismatch: %d definition, %d file source", mTypeDef->size(), size);
+            LOG_ERROR("Data size mismatch: %d definition, %d file source",
+                      mTypeDef->size(), size);
 
         // create a new data
         pd = _create(objID);
@@ -140,7 +137,8 @@ bool StructuredDataStorage::readFromFile(FilePtr& file, int objID, bool sizeStor
 }
 
 // --------------------------------------------------------------------------
-bool StructuredDataStorage::writeToFile(FilePtr& file, int objID, bool sizeStored)  {
+bool StructuredDataStorage::writeToFile(FilePtr &file, int objID,
+                                        bool sizeStored) {
     DTypePtr pd = getDataForObject(objID);
 
     if (pd) {
@@ -160,10 +158,8 @@ bool StructuredDataStorage::writeToFile(FilePtr& file, int objID, bool sizeStore
 }
 
 // --------------------------------------------------------------------------
-bool StructuredDataStorage::setField(int objID,
-                                     const std::string& field,
-                                     const DVariant& value)
-{
+bool StructuredDataStorage::setField(int objID, const std::string &field,
+                                     const DVariant &value) {
     DTypePtr pd = getDataForObject(objID);
 
     if (!pd)
@@ -175,10 +171,8 @@ bool StructuredDataStorage::setField(int objID,
 }
 
 // --------------------------------------------------------------------------
-bool StructuredDataStorage::getField(int objID,
-                                     const std::string& field,
-                                     DVariant& target)
-{
+bool StructuredDataStorage::getField(int objID, const std::string &field,
+                                     DVariant &target) {
     DTypePtr pd = getDataForObject(objID);
 
     if (!pd)
@@ -208,7 +202,8 @@ bool StructuredDataStorage::clone(int srcID, int dstID) {
     DTypePtr nd(new DType(*pd, mUseDataCache));
 
     // insert into map for the new object
-    std::pair<DataMap::iterator, bool> res  = mDataMap.insert(std::make_pair(dstID, nd));
+    std::pair<DataMap::iterator, bool> res =
+        mDataMap.insert(std::make_pair(dstID, nd));
 
     return res.second;
 }
@@ -226,9 +221,7 @@ bool StructuredDataStorage::destroy(int objID) {
 }
 
 // --------------------------------------------------------------------------
-bool StructuredDataStorage::create(int objID) {
-    return !!_create(objID);
-}
+bool StructuredDataStorage::create(int objID) { return !!_create(objID); }
 
 // --------------------------------------------------------------------------
 DTypePtr StructuredDataStorage::_create(int objID) {
@@ -268,7 +261,5 @@ DataFieldDescIteratorPtr StructuredDataStorage::getFieldDescIterator(void) {
 }
 
 // --------------------------------------------------------------------------
-size_t StructuredDataStorage::getDataSize(void) {
-    return mTypeDef->size();
-}
-}
+size_t StructuredDataStorage::getDataSize(void) { return mTypeDef->size(); }
+} // namespace Opde

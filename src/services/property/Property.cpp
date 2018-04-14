@@ -30,22 +30,20 @@ using namespace std;
 namespace Opde {
 
 // --------------------------------------------------------------------------
-Property::Property(PropertyService* owner, const std::string& name, const std::string& chunk_name,
-                   const DataStoragePtr& storage, std::string inheritorName) :
-    mName(name),
-    mChunkName(chunk_name),
-    mVerMaj(1),
-    mVerMin(1),
-    mPropertyStorage(NULL),
-    mOwner(owner),
-    mBuiltin(false) {
+Property::Property(PropertyService *owner, const std::string &name,
+                   const std::string &chunk_name, const DataStoragePtr &storage,
+                   std::string inheritorName)
+    : mName(name), mChunkName(chunk_name), mVerMaj(1), mVerMin(1),
+      mPropertyStorage(NULL), mOwner(owner), mBuiltin(false) {
 
     // Find the inheritor by the name, and assign too
     mInheritService = GET_SERVICE(InheritService);
     mInheritor = mInheritService->createInheritor(inheritorName);
 
     // And as a final step, register as inheritor listener
-    Inheritor::ListenerPtr cil(new ClassCallback<InheritValueChangeMsg, Property>(this, &Property::onInheritChange));
+    Inheritor::ListenerPtr cil(
+        new ClassCallback<InheritValueChangeMsg, Property>(
+            this, &Property::onInheritChange));
 
     mInheritorListenerID = mInheritor->registerListener(cil);
 
@@ -54,35 +52,32 @@ Property::Property(PropertyService* owner, const std::string& name, const std::s
 }
 
 // --------------------------------------------------------------------------
-Property::Property(PropertyService* owner, const std::string& name, const std::string& chunk_name,
-                   std::string inheritorName) :
-    mName(name),
-    mChunkName(chunk_name),
-    mVerMaj(1),
-    mVerMin(1),
-    mPropertyStorage(NULL),
-    mOwner(owner),
-    mBuiltin(false) {
+Property::Property(PropertyService *owner, const std::string &name,
+                   const std::string &chunk_name, std::string inheritorName)
+    : mName(name), mChunkName(chunk_name), mVerMaj(1), mVerMin(1),
+      mPropertyStorage(NULL), mOwner(owner), mBuiltin(false) {
 
     // Find the inheritor by the name, and assign too
     mInheritService = GET_SERVICE(InheritService);
     mInheritor = mInheritService->createInheritor(inheritorName);
 
     // And as a final step, register as inheritor listener
-    Inheritor::ListenerPtr cil(new ClassCallback<InheritValueChangeMsg, Property>(this, &Property::onInheritChange));
+    Inheritor::ListenerPtr cil(
+        new ClassCallback<InheritValueChangeMsg, Property>(
+            this, &Property::onInheritChange));
 
     mInheritorListenerID = mInheritor->registerListener(cil);
 }
 
 // --------------------------------------------------------------------------
-Property::~Property() {
-}
+Property::~Property() {}
 
 // --------------------------------------------------------------------------
 void Property::shutdown() {
     clear();
 
-    // have to unregister here to break shared_ptr dependencies (properties are not shared_ptr handled)
+    // have to unregister here to break shared_ptr dependencies (properties are
+    // not shared_ptr handled)
     if (mInheritor) {
         mInheritor->unregisterListener(mInheritorListenerID);
         mInheritService->destroyInheritor(mInheritor);
@@ -92,17 +87,20 @@ void Property::shutdown() {
 }
 
 // --------------------------------------------------------------------------
-void Property::setPropertyStorage(const DataStoragePtr& newStorage) {
+void Property::setPropertyStorage(const DataStoragePtr &newStorage) {
     // see if we had any data in the current
     if (!mPropertyStorage->isEmpty()) {
-        LOG_ERROR("Property storage replacement for %s: Previous property storage had some data. This could mean something bad could happen...", mName.c_str());
+        LOG_ERROR(
+            "Property storage replacement for %s: Previous property storage "
+            "had some data. This could mean something bad could happen...",
+            mName.c_str());
     }
 
     mPropertyStorage = newStorage;
 }
 
 // --------------------------------------------------------------------------
-void Property::load(const FileGroupPtr& db, const BitArray& objMask) {
+void Property::load(const FileGroupPtr &db, const BitArray &objMask) {
     // Open the chunk specified by "P$" + mChunkName
     FilePtr fprop;
 
@@ -115,10 +113,14 @@ void Property::load(const FileGroupPtr& db, const BitArray& objMask) {
 
         // compare the versions, log differences
         if (hdr.version_high != mVerMaj || hdr.version_low != mVerMin) {
-            LOG_ERROR("Property %s version mismatch : %d.%d expected, %d.%d encountered", pchn.c_str(), mVerMaj, mVerMin, hdr.version_high, hdr.version_low);
+            LOG_ERROR("Property %s version mismatch : %d.%d expected, %d.%d "
+                      "encountered",
+                      pchn.c_str(), mVerMaj, mVerMin, hdr.version_high,
+                      hdr.version_low);
         }
     } catch (BasicException) {
-        LOG_ERROR("Property::load : Could not find the property chunk %s", pchn.c_str());
+        LOG_ERROR("Property::load : Could not find the property chunk %s",
+                  pchn.c_str());
         return;
     }
 
@@ -144,14 +146,15 @@ void Property::load(const FileGroupPtr& db, const BitArray& objMask) {
         if (mPropertyStorage->readFromFile(fprop, id, true)) {
             _addProperty(id);
         } else {
-            LOG_ERROR("There was an error loading property %s for object %d. Property was not loaded", mName.c_str(), id);
+            LOG_ERROR("There was an error loading property %s for object %d. "
+                      "Property was not loaded",
+                      mName.c_str(), id);
         }
     }
 }
 
-
 // --------------------------------------------------------------------------
-void Property::save(const FileGroupPtr& db, const BitArray& objMask) {
+void Property::save(const FileGroupPtr &db, const BitArray &objMask) {
     // Open the chunk specified by "P$" + mChunkName
     FilePtr fprop;
 
@@ -160,7 +163,8 @@ void Property::save(const FileGroupPtr& db, const BitArray& objMask) {
     try {
         fprop = db->createFile(pchn, mVerMaj, mVerMin);
     } catch (BasicException) {
-        LOG_FATAL("Property::save : Could not create property chunk %s", pchn.c_str());
+        LOG_FATAL("Property::save : Could not create property chunk %s",
+                  pchn.c_str());
         return;
     }
 
@@ -175,7 +179,9 @@ void Property::save(const FileGroupPtr& db, const BitArray& objMask) {
             continue;
 
         if (!mPropertyStorage->writeToFile(fprop, id, true))
-            LOG_ERROR("There was an error writing property %s for object %d. Property was not loaded", mName.c_str(), id);
+            LOG_ERROR("There was an error writing property %s for object %d. "
+                      "Property was not loaded",
+                      mName.c_str(), id);
     }
 }
 
@@ -212,7 +218,6 @@ bool Property::removeProperty(int obj_id) {
     }
 
     return false;
-
 }
 
 // --------------------------------------------------------------------------
@@ -225,8 +230,7 @@ bool Property::cloneProperty(int obj_id, int src_id) {
         had = true;
     }
 
-
-    if (mPropertyStorage->clone(src_id, obj_id))  {
+    if (mPropertyStorage->clone(src_id, obj_id)) {
         // went ok, the target now includes the property didn't previously
         if (!had)
             _addProperty(obj_id);
@@ -238,7 +242,7 @@ bool Property::cloneProperty(int obj_id, int src_id) {
 }
 
 // --------------------------------------------------------------------------
-bool Property::set(int id, const std::string& field, const DVariant& value) {
+bool Property::set(int id, const std::string &field, const DVariant &value) {
     if (mPropertyStorage->setField(id, field, value)) {
         mInheritor->valueChanged(id, field, value);
 
@@ -249,7 +253,7 @@ bool Property::set(int id, const std::string& field, const DVariant& value) {
 }
 
 // --------------------------------------------------------------------------
-bool Property::get(int id, const std::string& field, DVariant& target) {
+bool Property::get(int id, const std::string &field, DVariant &target) {
     int effID = _getEffectiveObject(id);
     return mPropertyStorage->getField(effID, field, target);
 }
@@ -260,12 +264,13 @@ void Property::_addProperty(int objID) {
 }
 
 // --------------------------------------------------------------------------
-void Property::onInheritChange(const InheritValueChangeMsg& msg) {
+void Property::onInheritChange(const InheritValueChangeMsg &msg) {
     // Consult the inheritor value change, and build a property change message
     onPropertyModification(msg);
 
-    /* The broadcast of the property change is not done directly in the methods above but here.
-       The reason for this is that only the inheritor knows the real character of the change, and the objects that the change inflicted
+    /* The broadcast of the property change is not done directly in the methods
+       above but here. The reason for this is that only the inheritor knows the
+       real character of the change, and the objects that the change inflicted
     */
 
     PropertyChangeMsg pmsg;
@@ -278,7 +283,8 @@ void Property::onInheritChange(const InheritValueChangeMsg& msg) {
     case INH_VAL_CHANGED: // property changed inherit value
         pmsg.change = PROP_CHANGED;
         break;
-    case INH_VAL_REMOVED: // property does not exist any more on the object (and not inherited)
+    case INH_VAL_REMOVED: // property does not exist any more on the object (and
+                          // not inherited)
         pmsg.change = PROP_REMOVED;
         break;
     default:
@@ -289,14 +295,12 @@ void Property::onInheritChange(const InheritValueChangeMsg& msg) {
 }
 
 // --------------------------------------------------------------------------
-void Property::onPropertyModification(const InheritValueChangeMsg& msg) {
+void Property::onPropertyModification(const InheritValueChangeMsg &msg) {
     // nothing at all
 }
 
 // --------------------------------------------------------------------------
-void Property::objectDestroyed(int id) {
-    removeProperty(id);
-}
+void Property::objectDestroyed(int id) { removeProperty(id); }
 
 // --------------------------------------------------------------------------
 DataFieldDescIteratorPtr Property::getFieldDescIterator(void) {
@@ -312,13 +316,13 @@ void Property::grow(int minID, int maxID) {
 // --------------------------------------------------------------------------
 // ----------- ActiveProperty -----------------------------------------------
 // --------------------------------------------------------------------------
-ActiveProperty::ActiveProperty(PropertyService* owner, const std::string& name,
-                               const std::string& chunk_name, std::string inheritorName) :
-    Property(owner, name, chunk_name, inheritorName) {
-};
+ActiveProperty::ActiveProperty(PropertyService *owner, const std::string &name,
+                               const std::string &chunk_name,
+                               std::string inheritorName)
+    : Property(owner, name, chunk_name, inheritorName){};
 
 // --------------------------------------------------------------------------
-void ActiveProperty::onPropertyModification(const InheritValueChangeMsg& msg) {
+void ActiveProperty::onPropertyModification(const InheritValueChangeMsg &msg) {
     // we only handle concretes here
     if (msg.objectID <= 0)
         return;
@@ -331,14 +335,16 @@ void ActiveProperty::onPropertyModification(const InheritValueChangeMsg& msg) {
     case INH_VAL_CHANGED: // property changed inherit value
         removeProperty(msg.objectID);
         break;
-    case INH_VAL_REMOVED: // property does not exist any more on the object (and not inherited)
+    case INH_VAL_REMOVED: // property does not exist any more on the object (and
+                          // not inherited)
         setPropertySource(msg.objectID, msg.srcID);
         break;
-    case INH_VAL_FIELD_CHANGED: // property changed a value, affecting the given object
+    case INH_VAL_FIELD_CHANGED: // property changed a value, affecting the given
+                                // object
         valueChanged(msg.objectID, msg.field, msg.value);
         break;
     default:
         return;
     }
 }
-}
+} // namespace Opde

@@ -22,67 +22,69 @@
  *
  *****************************************************************************/
 
-#include "RenderService.h"
-#include "property/PropertyService.h"
-#include "SingleFieldDataStorage.h"
 #include "ModelScaleProperty.h"
+#include "RenderService.h"
+#include "SingleFieldDataStorage.h"
+#include "property/PropertyService.h"
 
 namespace Opde {
-	/*--------------------------------------------------------*/
-	/*-------------------- ModelScaleProperty ----------------*/
-	/*--------------------------------------------------------*/
-	ModelScaleProperty::ModelScaleProperty(RenderService* rs, PropertyService* owner) :
-			RenderedProperty(rs, owner, "ModelScale", "Scale", "always") {
+/*--------------------------------------------------------*/
+/*-------------------- ModelScaleProperty ----------------*/
+/*--------------------------------------------------------*/
+ModelScaleProperty::ModelScaleProperty(RenderService *rs,
+                                       PropertyService *owner)
+    : RenderedProperty(rs, owner, "ModelScale", "Scale", "always") {
 
-		mPropertyStorage = DataStoragePtr(new Vector3DataStorage(NULL));
+    mPropertyStorage = DataStoragePtr(new Vector3DataStorage(NULL));
 
-		// TODO: Check the version
-		setChunkVersions(2, 12);
+    // TODO: Check the version
+    setChunkVersions(2, 12);
 
-		mSceneMgr = rs->getSceneManager();
-	};
-
-	// --------------------------------------------------------------------------
-	ModelScaleProperty::~ModelScaleProperty(void) {
-	};
-
-	// --------------------------------------------------------------------------
-	void ModelScaleProperty::addProperty(int oid) {
-		DVariant val;
-
-		if (!get(oid, "", val))
-			OPDE_EXCEPT("Property not defined for object.", "ModelScaleProperty::addProperty");
-
-		setScale(oid, val.toVector());
-	};
-
-	// --------------------------------------------------------------------------
-	void ModelScaleProperty::removeProperty(int oid) {
-		// reinit to 1.0 - no scaling
-		setScale(oid, Vector3(1.0f, 1.0f, 1.0f));
-	};
-
-	// --------------------------------------------------------------------------
-	void ModelScaleProperty::setPropertySource(int oid, int effid) {
-		// re-read the property
-		addProperty(oid);
-	};
-
-	// --------------------------------------------------------------------------
-	void ModelScaleProperty::valueChanged(int oid, const std::string& field, const DVariant& value) {
-		// just call the setter
-		setScale(oid, value.toVector());
-	};
-
-	// --------------------------------------------------------------------------
-	void ModelScaleProperty::setScale(int oid, const Vector3& scale) {
-		EntityInfo* ei = getEntityInfo(oid);
-
-		// Bugfix for zero sized scale. Dunno why those appear, but anyway
-		// this helps...
-		if ( (scale.x == 0) || (scale.y == 0) || (scale.z == 0))
-			return;
-
-		ei->setScale(scale);
-	};
+    mSceneMgr = rs->getSceneManager();
 };
+
+// --------------------------------------------------------------------------
+ModelScaleProperty::~ModelScaleProperty(void){};
+
+// --------------------------------------------------------------------------
+void ModelScaleProperty::addProperty(int oid) {
+    DVariant val;
+
+    if (!get(oid, "", val))
+        OPDE_EXCEPT("Property not defined for object.",
+                    "ModelScaleProperty::addProperty");
+
+    setScale(oid, val.toVector());
+};
+
+// --------------------------------------------------------------------------
+void ModelScaleProperty::removeProperty(int oid) {
+    // reinit to 1.0 - no scaling
+    setScale(oid, Vector3(1.0f, 1.0f, 1.0f));
+};
+
+// --------------------------------------------------------------------------
+void ModelScaleProperty::setPropertySource(int oid, int effid) {
+    // re-read the property
+    addProperty(oid);
+};
+
+// --------------------------------------------------------------------------
+void ModelScaleProperty::valueChanged(int oid, const std::string &field,
+                                      const DVariant &value) {
+    // just call the setter
+    setScale(oid, value.toVector());
+};
+
+// --------------------------------------------------------------------------
+void ModelScaleProperty::setScale(int oid, const Vector3 &scale) {
+    EntityInfo *ei = getEntityInfo(oid);
+
+    // Bugfix for zero sized scale. Dunno why those appear, but anyway
+    // this helps...
+    if ((scale.x == 0) || (scale.y == 0) || (scale.z == 0))
+        return;
+
+    ei->setScale(scale);
+};
+}; // namespace Opde

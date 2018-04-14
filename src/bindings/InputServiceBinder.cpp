@@ -22,280 +22,274 @@
  *
  *****************************************************************************/
 
-#include "bindings.h"
 #include "InputServiceBinder.h"
 #include "PythonCallback.h"
 #include "PythonStruct.h"
+#include "bindings.h"
 
-namespace Opde
-{
+namespace Opde {
 
-	namespace Python
-	{
+namespace Python {
 
-        // InputEventType type info
-		template<> struct TypeInfo<InputEventType> {
-			VariableType type;
-			const char* typeName;
+// InputEventType type info
+template <> struct TypeInfo<InputEventType> {
+    VariableType type;
+    const char *typeName;
 
-			TypeInfo() : type(VT_CUSTOM_TYPE), typeName("InputEventType") {};
-			virtual ~TypeInfo() {};
+    TypeInfo() : type(VT_CUSTOM_TYPE), typeName("InputEventType"){};
+    virtual ~TypeInfo(){};
 
-			virtual PyObject* toPyObject(InputEventType val) const {
-				return PyLong_FromLong(val);
-			}
-		};
+    virtual PyObject *toPyObject(InputEventType val) const {
+        return PyLong_FromLong(val);
+    }
+};
 
-		class PythonInputMessage : public PythonStruct<InputEventMsg> {
-			public:
-				static void init() {
-					field("event", &InputEventMsg::event);
-					field("command", &InputEventMsg::command);
-					field("params", &InputEventMsg::params);
-					// Todo: Expose the InputEventType string repr. to Dict of the module (need PyOBject* param)
-				}
-		};
+class PythonInputMessage : public PythonStruct<InputEventMsg> {
+public:
+    static void init() {
+        field("event", &InputEventMsg::event);
+        field("command", &InputEventMsg::command);
+        field("params", &InputEventMsg::params);
+        // Todo: Expose the InputEventType string repr. to Dict of the module
+        // (need PyOBject* param)
+    }
+};
 
-		template<> const char* PythonStruct<InputEventMsg>::msName = "InputEventMsg";
+template <> const char *PythonStruct<InputEventMsg>::msName = "InputEventMsg";
 
-		class PythonInputMessageConverter {
-			public:
-				PyObject* operator()(const InputEventMsg& ev) {
-					PyObject* result = PythonInputMessage::create(ev);
-					return result;
-				}
-		};
+class PythonInputMessageConverter {
+public:
+    PyObject *operator()(const InputEventMsg &ev) {
+        PyObject *result = PythonInputMessage::create(ev);
+        return result;
+    }
+};
 
+typedef PythonCallback<InputEventMsg, PythonInputMessageConverter>
+    PythonInputCallback;
+typedef shared_ptr<PythonInputCallback> PythonInputCallbackPtr;
 
-		typedef PythonCallback<InputEventMsg, PythonInputMessageConverter> PythonInputCallback;
-		typedef shared_ptr<PythonInputCallback> PythonInputCallbackPtr;
+// -------------------- Input Service --------------------
+const char *InputServiceBinder::msName = "InputService";
 
-		// -------------------- Input Service --------------------
-		const char* InputServiceBinder::msName = "InputService";
+// ------------------------------------------
+PyTypeObject InputServiceBinder::msType = {
+    PyVarObject_HEAD_INIT(&PyType_Type,
+                          0) "opde.services.InputService", // char *tp_name; */
+    sizeof(InputServiceBinder::Object), // int tp_basicsize; */
+    0,                           // int tp_itemsize;       /* not used much */
+    InputServiceBinder::dealloc, // destructor tp_dealloc; */
+    0,                           // printfunc  tp_print;   */
+    0,                           // getattrfunc  tp_getattr; /* __getattr__ */
+    0,                           // setattrfunc  tp_setattr;  /* __setattr__ */
+    0,                           // cmpfunc  tp_compare;  /* __cmp__ */
+    0,                           // reprfunc  tp_repr;    /* __repr__ */
+    0,                           // PyNumberMethods *tp_as_number; */
+    0,                           // PySequenceMethods *tp_as_sequence; */
+    0,                           // PyMappingMethods *tp_as_mapping; */
+    0,                           // hashfunc tp_hash;     /* __hash__ */
+    0,                           // ternaryfunc tp_call;  /* __call__ */
+    0,                           // reprfunc tp_str;      /* __str__ */
+    PyObject_GenericGetAttr,     // getattrofunc tp_getattro; */
+    0,                           // setattrofunc tp_setattro; */
+    0,                           // PyBufferProcs *tp_as_buffer; */
+    0,                           // long tp_flags; */
+    0,                           // char *tp_doc;  */
+    0,                           // traverseproc tp_traverse; */
+    0,                           // inquiry tp_clear; */
+    0,                           // richcmpfunc tp_richcompare; */
+    0,                           // long tp_weaklistoffset; */
+    0,                           // getiterfunc tp_iter; */
+    0,                           // iternextfunc tp_iternext; */
+    msMethods,                   // struct PyMethodDef *tp_methods; */
+    0,                           // struct memberlist *tp_members; */
+    0,                           // struct getsetlist *tp_getset; */
+};
 
-		// ------------------------------------------
-		PyTypeObject InputServiceBinder::msType = {
-			PyVarObject_HEAD_INIT(&PyType_Type, 0)
-			"opde.services.InputService",		// char *tp_name; */
-			sizeof(InputServiceBinder::Object), // int tp_basicsize; */
-			0,									// int tp_itemsize;       /* not used much */
-			InputServiceBinder::dealloc,		// destructor tp_dealloc; */
-			0,									// printfunc  tp_print;   */
-			0,		// getattrfunc  tp_getattr; /* __getattr__ */
-			0,								// setattrfunc  tp_setattr;  /* __setattr__ */
-			0,									// cmpfunc  tp_compare;  /* __cmp__ */
-			0,									// reprfunc  tp_repr;    /* __repr__ */
-			0,									// PyNumberMethods *tp_as_number; */
-			0,									// PySequenceMethods *tp_as_sequence; */
-			0,									// PyMappingMethods *tp_as_mapping; */
-			0,									// hashfunc tp_hash;     /* __hash__ */
-			0,									// ternaryfunc tp_call;  /* __call__ */
-			0,									// reprfunc tp_str;      /* __str__ */
-			PyObject_GenericGetAttr,  			// getattrofunc tp_getattro; */
-			0,									// setattrofunc tp_setattro; */
-			0,									// PyBufferProcs *tp_as_buffer; */
-			0,									// long tp_flags; */
-			0,									// char *tp_doc;  */
-			0,									// traverseproc tp_traverse; */
-			0,									// inquiry tp_clear; */
-			0,									// richcmpfunc tp_richcompare; */
-			0,									// long tp_weaklistoffset; */
-			0,									// getiterfunc tp_iter; */
-			0,									// iternextfunc tp_iternext; */
-			msMethods,							// struct PyMethodDef *tp_methods; */
-			0,									// struct memberlist *tp_members; */
-			0,									// struct getsetlist *tp_getset; */
-		};
+// ------------------------------------------
+PyMethodDef InputServiceBinder::msMethods[] = {
+    {"createBindContext", createBindContext, METH_VARARGS},
+    {"setBindContext", setBindContext, METH_VARARGS},
+    {"command", command, METH_VARARGS},
+    {"registerCommandTrap", registerCommandTrap, METH_VARARGS},
+    {"unregisterCommandTrap", unregisterCommandTrap, METH_VARARGS},
+    {"setInputMapped", setInputMapped, METH_VARARGS},
+    {NULL, NULL},
+};
 
-		// ------------------------------------------
-		PyMethodDef InputServiceBinder::msMethods[] =
-		{
-		    {"createBindContext", createBindContext, METH_VARARGS},
-		    {"setBindContext", setBindContext, METH_VARARGS},
-		    {"command", command, METH_VARARGS},
-		    {"registerCommandTrap", registerCommandTrap, METH_VARARGS},
-		    {"unregisterCommandTrap", unregisterCommandTrap, METH_VARARGS},
-		    {"setInputMapped", setInputMapped, METH_VARARGS},
-		    {NULL, NULL},
-		};
+// ------------------------------------------
+PyObject *InputServiceBinder::createBindContext(PyObject *self,
+                                                PyObject *args) {
+    __PYTHON_EXCEPTION_GUARD_BEGIN_;
+    PyObject *result = NULL;
+    InputServicePtr o;
 
+    if (!python_cast<InputServicePtr>(self, &msType, &o))
+        __PY_CONVERR_RET;
 
-		// ------------------------------------------
-		PyObject* InputServiceBinder::createBindContext(PyObject* self, PyObject* args)
-		{
-			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			PyObject *result = NULL;
-			InputServicePtr o;
+    char *name;
 
-			if (!python_cast<InputServicePtr>(self, &msType, &o))
-				__PY_CONVERR_RET;
+    if (PyArg_ParseTuple(args, "s", &name)) {
+        o->createBindContext(name);
 
-			char* name;
+        __PY_NONE_RET;
+    } else {
+        PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
+    }
 
-			if (PyArg_ParseTuple(args, "s", &name)) {
-			    o->createBindContext(name);
+    return result;
+    __PYTHON_EXCEPTION_GUARD_END_;
+}
 
-			    __PY_NONE_RET;
-			} else {
-				PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
-			}
+// ------------------------------------------
+PyObject *InputServiceBinder::setBindContext(PyObject *self, PyObject *args) {
+    __PYTHON_EXCEPTION_GUARD_BEGIN_;
+    PyObject *result = NULL;
+    InputServicePtr o;
 
-			return result;
-			__PYTHON_EXCEPTION_GUARD_END_;
-		}
+    if (!python_cast<InputServicePtr>(self, &msType, &o))
+        __PY_CONVERR_RET;
 
-		// ------------------------------------------
-		PyObject* InputServiceBinder::setBindContext(PyObject* self, PyObject* args)
-		{
-			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			PyObject *result = NULL;
-			InputServicePtr o;
+    char *name;
 
-			if (!python_cast<InputServicePtr>(self, &msType, &o))
-				__PY_CONVERR_RET;
+    if (PyArg_ParseTuple(args, "s", &name)) {
+        o->setBindContext(name);
 
-			char* name;
+        __PY_NONE_RET;
+    } else {
+        PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
+    }
 
-			if (PyArg_ParseTuple(args, "s", &name)) {
-				o->setBindContext(name);
+    return result;
+    __PYTHON_EXCEPTION_GUARD_END_;
+}
 
-				__PY_NONE_RET;
-			} else {
-				PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
-			}
+// ------------------------------------------
+PyObject *InputServiceBinder::command(PyObject *self, PyObject *args) {
+    __PYTHON_EXCEPTION_GUARD_BEGIN_;
+    PyObject *result = NULL;
+    InputServicePtr o;
 
-			return result;
-			__PYTHON_EXCEPTION_GUARD_END_;
-		}
+    if (!python_cast<InputServicePtr>(self, &msType, &o))
+        __PY_CONVERR_RET;
 
-		// ------------------------------------------
-		PyObject* InputServiceBinder::command(PyObject* self, PyObject* args)
-		{
-			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			PyObject *result = NULL;
-			InputServicePtr o;
+    char *command;
 
-			if (!python_cast<InputServicePtr>(self, &msType, &o))
-				__PY_CONVERR_RET;
+    if (PyArg_ParseTuple(args, "s", &command)) {
+        std::string Command = command;
+        o->processCommand(Command);
 
-			char* command;
+        __PY_NONE_RET;
+    } else {
+        PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
+    }
 
-			if (PyArg_ParseTuple(args, "s", &command))
-			{
-				std::string Command = command;
-			    o->processCommand(Command);
+    return result;
+    __PYTHON_EXCEPTION_GUARD_END_;
+}
 
-			    __PY_NONE_RET;
-			} else {
-				PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
-			}
+// ------------------------------------------
+PyObject *InputServiceBinder::registerCommandTrap(PyObject *self,
+                                                  PyObject *args) {
+    __PYTHON_EXCEPTION_GUARD_BEGIN_;
+    PyObject *result = NULL;
+    InputServicePtr o;
 
-			return result;
-			__PYTHON_EXCEPTION_GUARD_END_;
-		}
+    if (!python_cast<InputServicePtr>(self, &msType, &o))
+        __PY_CONVERR_RET;
 
-		// ------------------------------------------
-		PyObject* InputServiceBinder::registerCommandTrap(PyObject* self, PyObject* args)
-		{
-			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			PyObject *result = NULL;
-			InputServicePtr o;
+    char *name;
+    PyObject *callable;
 
-			if (!python_cast<InputServicePtr>(self, &msType, &o))
-				__PY_CONVERR_RET;
+    if (PyArg_ParseTuple(args, "sO", &name, &callable)) {
+        try {
+            InputService::ListenerPtr pcp(new PythonInputCallback(callable));
 
-			char* name;
-			PyObject* callable;
+            // call the is to register the command trap
+            o->registerCommandTrap(name, pcp);
 
-			if (PyArg_ParseTuple(args, "sO", &name, &callable)) {
-				try {
-					InputService::ListenerPtr pcp(new PythonInputCallback(callable));
+            __PY_NONE_RET;
+        } catch (BasicException) {
+            PyErr_SetString(
+                PyExc_TypeError,
+                "Error setting a callback, is the given argument a callable?");
+            return NULL;
+        }
+    } else {
+        PyErr_SetString(PyExc_TypeError,
+                        "Expected a string and callable parameters!");
+    }
 
-					// call the is to register the command trap
-					o->registerCommandTrap(name, pcp);
+    return result;
+    __PYTHON_EXCEPTION_GUARD_END_;
+}
 
-					__PY_NONE_RET;
-				} catch (BasicException) {
-					PyErr_SetString(PyExc_TypeError, "Error setting a callback, is the given argument a callable?");
-					return NULL;
-				}
-			} else {
-					PyErr_SetString(PyExc_TypeError, "Expected a string and callable parameters!");
-			}
+// ------------------------------------------
+PyObject *InputServiceBinder::unregisterCommandTrap(PyObject *self,
+                                                    PyObject *args) {
+    __PYTHON_EXCEPTION_GUARD_BEGIN_;
+    InputServicePtr o;
 
-			return result;
-			__PYTHON_EXCEPTION_GUARD_END_;
-		}
+    if (!python_cast<InputServicePtr>(self, &msType, &o))
+        __PY_CONVERR_RET;
 
-		// ------------------------------------------
-		PyObject* InputServiceBinder::unregisterCommandTrap(PyObject* self, PyObject* args)
-		{
-			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			InputServicePtr o;
+    char *name;
 
-			if (!python_cast<InputServicePtr>(self, &msType, &o))
-				__PY_CONVERR_RET;
+    if (PyArg_ParseTuple(args, "s", &name)) {
+        o->unregisterCommandTrap(name);
 
-			char* name;
+        __PY_NONE_RET;
+    } else {
+        PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
+        return NULL;
+    }
 
-			if (PyArg_ParseTuple(args, "s", &name)) {
-				o->unregisterCommandTrap(name);
+    __PYTHON_EXCEPTION_GUARD_END_;
+}
 
-				__PY_NONE_RET;
-			} else {
-					PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");
-					return NULL;
-			}
+// ------------------------------------------
+PyObject *InputServiceBinder::setInputMapped(PyObject *self, PyObject *args) {
+    __PYTHON_EXCEPTION_GUARD_BEGIN_;
+    InputServicePtr o;
 
-			__PYTHON_EXCEPTION_GUARD_END_;
-		}
+    if (!python_cast<InputServicePtr>(self, &msType, &o))
+        __PY_CONVERR_RET;
 
-		// ------------------------------------------
-		PyObject* InputServiceBinder::setInputMapped(PyObject* self, PyObject* args)
-		{
-			__PYTHON_EXCEPTION_GUARD_BEGIN_;
-			InputServicePtr o;
+    PyObject *mapped;
 
-			if (!python_cast<InputServicePtr>(self, &msType, &o))
-				__PY_CONVERR_RET;
+    if (PyArg_ParseTuple(args, "O", &mapped)) {
+        bool cmap;
 
-			PyObject *mapped;
+        if (!TypeInfo<bool>::fromPyObject(mapped, cmap))
+            __PY_BADPARMS_RET;
 
-			if (PyArg_ParseTuple(args, "O", &mapped)) {
-				bool cmap;
+        o->setInputMode(cmap ? IM_MAPPED : IM_DIRECT);
 
-				if (!TypeInfo<bool>::fromPyObject(mapped, cmap))
-					__PY_BADPARMS_RET;
+        __PY_NONE_RET;
+    } else {
+        PyErr_SetString(PyExc_TypeError, "Expected a bool parameter!");
+        return NULL;
+    }
 
-				o->setInputMode(cmap ? IM_MAPPED : IM_DIRECT);
+    __PYTHON_EXCEPTION_GUARD_END_;
+}
 
-				__PY_NONE_RET;
-			} else {
-					PyErr_SetString(PyExc_TypeError, "Expected a bool parameter!");
-					return NULL;
-			}
+// ------------------------------------------
+PyObject *InputServiceBinder::create() {
+    Object *object = construct(&msType);
 
-			__PYTHON_EXCEPTION_GUARD_END_;
-		}
+    if (object != NULL) {
+        object->mInstance = GET_SERVICE(InputService);
+    }
+    return (PyObject *)object;
+}
 
-		// ------------------------------------------
-		PyObject* InputServiceBinder::create()
-		{
-			Object* object = construct(&msType);
+// ------------------------------------------
+void InputServiceBinder::init(PyObject *module) {
+    PythonInputMessage::init();
 
-			if (object != NULL)
-			{
-				object->mInstance = GET_SERVICE(InputService);
-			}
-			return (PyObject *)object;
-		}
-
-		// ------------------------------------------
-		void InputServiceBinder::init(PyObject* module) {
-			PythonInputMessage::init();
-
-			publishType(module, &msType, msName);
-		}
-	}
+    publishType(module, &msType, msName);
+}
+} // namespace Python
 
 } // namespace Opde

@@ -22,7 +22,6 @@
  *
  *****************************************************************************/
 
-
 #ifndef __HASREFSPROPERTY_H
 #define __HASREFSPROPERTY_H
 
@@ -30,36 +29,36 @@
 
 namespace Opde {
 
-	/** a HasRefs implementation using rendered property handler.
-	* Uses simple bool data storage. Defaults to true. Inherits always.
-	* When set to false, the given object has NO rendered effect in the scene.
-	*/
-	class HasRefsProperty : public RenderedProperty {
-		public:
-			/// constructor
-			HasRefsProperty(RenderService* rs, PropertyService* owner);
+/** a HasRefs implementation using rendered property handler.
+ * Uses simple bool data storage. Defaults to true. Inherits always.
+ * When set to false, the given object has NO rendered effect in the scene.
+ */
+class HasRefsProperty : public RenderedProperty {
+public:
+    /// constructor
+    HasRefsProperty(RenderService *rs, PropertyService *owner);
 
-			/// destructor
-			virtual ~HasRefsProperty(void);
+    /// destructor
+    virtual ~HasRefsProperty(void);
 
-		protected:
-			/// @see ActiveProperty::addProperty
-			void addProperty(int oid);
-			
-			/// @see ActiveProperty::removeProperty
-			void removeProperty(int oid);
-			
-			/// @see ActiveProperty::setPropertySource
-			void setPropertySource(int oid, int effid);
-			
-			/// @see ActiveProperty::valueChanged
-			void valueChanged(int oid, const std::string& field, const DVariant& value);
+protected:
+    /// @see ActiveProperty::addProperty
+    void addProperty(int oid);
 
-			/// core setter method. Called from other methods to set the hasrefs value
-			void setHasRefs(int oid, bool hasRefs);
-			
-			Ogre::SceneManager* mSceneMgr;
-	};
+    /// @see ActiveProperty::removeProperty
+    void removeProperty(int oid);
+
+    /// @see ActiveProperty::setPropertySource
+    void setPropertySource(int oid, int effid);
+
+    /// @see ActiveProperty::valueChanged
+    void valueChanged(int oid, const std::string &field, const DVariant &value);
+
+    /// core setter method. Called from other methods to set the hasrefs value
+    void setHasRefs(int oid, bool hasRefs);
+
+    Ogre::SceneManager *mSceneMgr;
 };
+}; // namespace Opde
 
 #endif

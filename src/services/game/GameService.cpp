@@ -21,7 +21,6 @@
  *
  *****************************************************************************/
 
-
 #include "GameService.h"
 #include "OpdeException.h"
 #include "ServiceCommon.h"
@@ -33,12 +32,10 @@ namespace Opde {
 /*----------------------------------------------------*/
 /*-------------------- GameService -------------------*/
 /*----------------------------------------------------*/
-template<> const size_t ServiceImpl<GameService>::SID = __SERVICE_ID_GAME;
+template <> const size_t ServiceImpl<GameService>::SID = __SERVICE_ID_GAME;
 
-GameService::GameService(ServiceManager* manager, const std::string& name)
-        : ServiceImpl<Opde::GameService>(manager, name)
-{
-}
+GameService::GameService(ServiceManager *manager, const std::string &name)
+    : ServiceImpl<Opde::GameService>(manager, name) {}
 
 //------------------------------------------------------
 bool GameService::init() {
@@ -48,34 +45,26 @@ bool GameService::init() {
 }
 
 //------------------------------------------------------
-GameService::~GameService() {
-}
+GameService::~GameService() {}
 
 //------------------------------------------------------
-void GameService::load(const std::string& filename) {
+void GameService::load(const std::string &filename) {
     mDbService->load(filename, DBM_COMPLETE);
 }
 
 //-------------------------- Factory implementation
 std::string GameServiceFactory::mName = "GameService";
 
-GameServiceFactory::GameServiceFactory() : ServiceFactory() {
-};
+GameServiceFactory::GameServiceFactory() : ServiceFactory(){};
 
-const std::string& GameServiceFactory::getName() {
-    return mName;
-}
+const std::string &GameServiceFactory::getName() { return mName; }
 
-const uint GameServiceFactory::getMask() {
-    return SERVICE_ENGINE;
-}
+const uint GameServiceFactory::getMask() { return SERVICE_ENGINE; }
 
-const size_t GameServiceFactory::getSID() {
-    return GameService::SID;
-}
+const size_t GameServiceFactory::getSID() { return GameService::SID; }
 
-Service* GameServiceFactory::createInstance(ServiceManager* manager) {
+Service *GameServiceFactory::createInstance(ServiceManager *manager) {
     return new GameService(manager, mName);
 }
 
-}
+} // namespace Opde

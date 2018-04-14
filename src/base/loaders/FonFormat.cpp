@@ -27,99 +27,100 @@
 #include "File.h"
 
 namespace Opde {
-	File& operator<<(File& st, const DarkFontHeader& h) {
-		st << h.Format << h.Unknown << h.Palette;
-		st.write(&h.Zeros1, sizeof(h.Zeros1));
-		st << h.FirstChar << h.LastChar;
-		st.write(&h.Zeros2, sizeof(h.Zeros2));
-		st << h.WidthOffset << h.BitmapOffset << h.RowWidth << h.NumRows;
-		
-		return st;
-	}
-	
-	File& operator>>(File& st, DarkFontHeader& h) {
-		st >> h.Format >> h.Unknown >> h.Palette;
-		st.read(&h.Zeros1, sizeof(h.Zeros1));
-		st >> h.FirstChar >> h.LastChar;
-		st.read(&h.Zeros2, sizeof(h.Zeros2));
-		st >> h.WidthOffset >> h.BitmapOffset >> h.RowWidth >> h.NumRows;
-		
-		return st;
-	}
-	
-	File& operator<<(File& st, const ExternalPaletteHeader& h) {
-		st << h.RiffSig << h.RiffLength << h.PSig1 << h.PSig2 << h.Length;
-		
-		return st;
-	}
-	
-	File& operator>>(File& st, ExternalPaletteHeader& h) {
-		st >> h.RiffSig >> h.RiffLength >> h.PSig1 >> h.PSig2 >> h.Length;
-		
-		return st;
-	}
-	
-	File& operator<<(File& st, const BITMAPFILEHEADER& h) {
-		st << h.bfType << h.bfSize << h.bfReserved1 << h.bfReserved2 << h.bfOffBits;
-		
-		return st;
-	}
-	
-	File& operator>>(File& st, BITMAPFILEHEADER& h) {
-		st >> h.bfType >> h.bfSize >> h.bfReserved1 >> h.bfReserved2 >> h.bfOffBits;
-		
-		return st;
-	}
-	
-	File& operator<<(File& st, const BitmapInfoHeader& h) {
-		st << h.biSize << h.biWidth << h.biHeight << h.biPlanes << h.biBitCount << h.biCompression
-			<< h.biSizeImage << h.biXPelsPerMeter << h.biYPelsPerMeter << h.biClrUsed << h.biClrImportant;
-		
-		return st;
-	}
-	
-	File& operator>>(File& st, BitmapInfoHeader& h) {
-		st >> h.biSize >> h.biWidth >> h.biHeight >> h.biPlanes >> h.biBitCount >> h.biCompression
-			>> h.biSizeImage >> h.biXPelsPerMeter >> h.biYPelsPerMeter >> h.biClrUsed >> h.biClrImportant;
-		
-		return st;
-	}
-	
-	File& operator<<(File& st, const RGBQuad& h) {
-		st << h.rgbBlue << h.rgbGreen << h.rgbRed << h.rgbReserved;
-		
-		return st;
-	}
-	
-	File& operator>>(File& st, RGBQuad& h) {
-		st >> h.rgbBlue >> h.rgbGreen >> h.rgbRed >> h.rgbReserved;
-		
-		return st;
-	}
-	
-	File& operator<<(File& st, const BitmapInfo& h) {
-		st << h.bmiHeader;
-		
-		return st;
-	}
-	
-	File& operator>>(File& st, BitmapInfo& h) {
-		st >> h.bmiHeader;
-		
-		return st;
-	}
-	
-	File& operator<<(File& st, const RGBTriple& h) {
-		st << h.rgbtBlue << h.rgbtGreen << h.rgbtRed;
-		
-		return st;
-	}
-	
-	File& operator>>(File& st, RGBTriple& h) {
-		st >> h.rgbtBlue >> h.rgbtGreen >> h.rgbtRed;
-		
-		return st;
-	}
-	
+File &operator<<(File &st, const DarkFontHeader &h) {
+    st << h.Format << h.Unknown << h.Palette;
+    st.write(&h.Zeros1, sizeof(h.Zeros1));
+    st << h.FirstChar << h.LastChar;
+    st.write(&h.Zeros2, sizeof(h.Zeros2));
+    st << h.WidthOffset << h.BitmapOffset << h.RowWidth << h.NumRows;
+
+    return st;
 }
 
+File &operator>>(File &st, DarkFontHeader &h) {
+    st >> h.Format >> h.Unknown >> h.Palette;
+    st.read(&h.Zeros1, sizeof(h.Zeros1));
+    st >> h.FirstChar >> h.LastChar;
+    st.read(&h.Zeros2, sizeof(h.Zeros2));
+    st >> h.WidthOffset >> h.BitmapOffset >> h.RowWidth >> h.NumRows;
+
+    return st;
+}
+
+File &operator<<(File &st, const ExternalPaletteHeader &h) {
+    st << h.RiffSig << h.RiffLength << h.PSig1 << h.PSig2 << h.Length;
+
+    return st;
+}
+
+File &operator>>(File &st, ExternalPaletteHeader &h) {
+    st >> h.RiffSig >> h.RiffLength >> h.PSig1 >> h.PSig2 >> h.Length;
+
+    return st;
+}
+
+File &operator<<(File &st, const BITMAPFILEHEADER &h) {
+    st << h.bfType << h.bfSize << h.bfReserved1 << h.bfReserved2 << h.bfOffBits;
+
+    return st;
+}
+
+File &operator>>(File &st, BITMAPFILEHEADER &h) {
+    st >> h.bfType >> h.bfSize >> h.bfReserved1 >> h.bfReserved2 >> h.bfOffBits;
+
+    return st;
+}
+
+File &operator<<(File &st, const BitmapInfoHeader &h) {
+    st << h.biSize << h.biWidth << h.biHeight << h.biPlanes << h.biBitCount
+       << h.biCompression << h.biSizeImage << h.biXPelsPerMeter
+       << h.biYPelsPerMeter << h.biClrUsed << h.biClrImportant;
+
+    return st;
+}
+
+File &operator>>(File &st, BitmapInfoHeader &h) {
+    st >> h.biSize >> h.biWidth >> h.biHeight >> h.biPlanes >> h.biBitCount >>
+        h.biCompression >> h.biSizeImage >> h.biXPelsPerMeter >>
+        h.biYPelsPerMeter >> h.biClrUsed >> h.biClrImportant;
+
+    return st;
+}
+
+File &operator<<(File &st, const RGBQuad &h) {
+    st << h.rgbBlue << h.rgbGreen << h.rgbRed << h.rgbReserved;
+
+    return st;
+}
+
+File &operator>>(File &st, RGBQuad &h) {
+    st >> h.rgbBlue >> h.rgbGreen >> h.rgbRed >> h.rgbReserved;
+
+    return st;
+}
+
+File &operator<<(File &st, const BitmapInfo &h) {
+    st << h.bmiHeader;
+
+    return st;
+}
+
+File &operator>>(File &st, BitmapInfo &h) {
+    st >> h.bmiHeader;
+
+    return st;
+}
+
+File &operator<<(File &st, const RGBTriple &h) {
+    st << h.rgbtBlue << h.rgbtGreen << h.rgbtRed;
+
+    return st;
+}
+
+File &operator>>(File &st, RGBTriple &h) {
+    st >> h.rgbtBlue >> h.rgbtGreen >> h.rgbtRed;
+
+    return st;
+}
+
+} // namespace Opde

@@ -25,41 +25,41 @@
 #ifndef __DRAWSOURCEBINDER_H
 #define __DRAWSOURCEBINDER_H
 
-#include "bindings.h"
 #include "DrawCommon.h"
+#include "bindings.h"
 
 namespace Opde {
 
-	namespace Python {
+namespace Python {
 
-		/// DrawSource python binder
-		class DrawSourceBinder : public shared_ptr_binder<DrawSourcePtr> {
-			public:
-				static void init(PyObject* module);
+/// DrawSource python binder
+class DrawSourceBinder : public shared_ptr_binder<DrawSourcePtr> {
+public:
+    static void init(PyObject *module);
 
-				// --- Python type related methods ---
-				/// to string - reprfunc conversion
-				static PyObject* repr(PyObject *self);
+    // --- Python type related methods ---
+    /// to string - reprfunc conversion
+    static PyObject *repr(PyObject *self);
 
-				/// helper class pointer extractor
-				static bool extract(PyObject *obj, DrawSourcePtr& tgt);
+    /// helper class pointer extractor
+    static bool extract(PyObject *obj, DrawSourcePtr &tgt);
 
-				// no methods here
+    // no methods here
 
-				static PyObject* create(const DrawSourcePtr& ds);
+    static PyObject *create(const DrawSourcePtr &ds);
 
-			protected:
-				/// Static type definition
-				static PyTypeObject msType;
+protected:
+    /// Static type definition
+    static PyTypeObject msType;
 
-				/// Name of the python type
-				static const char* msName;
+    /// Name of the python type
+    static const char *msName;
 
-				/// Method list
-				static PyMethodDef msMethods[];
-		};
+    /// Method list
+    static PyMethodDef msMethods[];
+};
 
-	}
-}
+} // namespace Python
+} // namespace Opde
 
 #endif

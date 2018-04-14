@@ -20,55 +20,55 @@
  *	  $Id$
  *
  *****************************************************************************/
- 
+
 #include "darkdb.h"
 #include "File.h"
 
 using namespace std;
 
 namespace Opde {
-	File& operator<<(File& st, const DarkDBHeader& h) {
-		st << h.inv_offset << h.zero << h.one;
-		st.write(&h.zeros, sizeof(h.zeros));
-		st << h.dead_beef;
-		
-		return st;
-	}
-	
-        File& operator>>(File& st, DarkDBHeader& h) {
-		st >> h.inv_offset >> h.zero >> h.one;
-		st.read(&h.zeros, sizeof(h.zeros));
-		st >> h.dead_beef;
-		
-		return st;
-	}
+File &operator<<(File &st, const DarkDBHeader &h) {
+    st << h.inv_offset << h.zero << h.one;
+    st.write(&h.zeros, sizeof(h.zeros));
+    st << h.dead_beef;
 
-	File& operator<<(File& st, const DarkDBInvItem& h) {
-		st.write(&h.name, sizeof(h.name));
-		st << h.offset << h.length;
-		
-		return st;
-	}
-	
-	File& operator>>(File& st, DarkDBInvItem& h) {
-		st.read(&h.name, sizeof(h.name));
-		st >> h.offset >> h.length;
-		
-		return st;
-	}
-
-	File& operator<<(File& st, const DarkDBChunkHeader& h) {
-		st.write(&h.name, sizeof(h.name));
-		st << h.version_high << h.version_low << h.zero;
-		
-		return st;
-	}
-	
-	File& operator>>(File& st, DarkDBChunkHeader& h) {
-		st.read(&h.name, sizeof(h.name));
-		st >> h.version_high >> h.version_low >> h.zero;
-		
-		return st;
-	}
-	
+    return st;
 }
+
+File &operator>>(File &st, DarkDBHeader &h) {
+    st >> h.inv_offset >> h.zero >> h.one;
+    st.read(&h.zeros, sizeof(h.zeros));
+    st >> h.dead_beef;
+
+    return st;
+}
+
+File &operator<<(File &st, const DarkDBInvItem &h) {
+    st.write(&h.name, sizeof(h.name));
+    st << h.offset << h.length;
+
+    return st;
+}
+
+File &operator>>(File &st, DarkDBInvItem &h) {
+    st.read(&h.name, sizeof(h.name));
+    st >> h.offset >> h.length;
+
+    return st;
+}
+
+File &operator<<(File &st, const DarkDBChunkHeader &h) {
+    st.write(&h.name, sizeof(h.name));
+    st << h.version_high << h.version_low << h.zero;
+
+    return st;
+}
+
+File &operator>>(File &st, DarkDBChunkHeader &h) {
+    st.read(&h.name, sizeof(h.name));
+    st >> h.version_high >> h.version_low >> h.zero;
+
+    return st;
+}
+
+} // namespace Opde

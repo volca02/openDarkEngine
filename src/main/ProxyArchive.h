@@ -15,7 +15,8 @@
  *
  *	  You should have received a copy of the GNU General Public License
  *	  along with this program; if not, write to the Free Software
- *	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA	02111-1307	USA
+ *	  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+ *02111-1307	USA
  *
  *	  $Id$
  *
@@ -31,137 +32,152 @@
 
 namespace Ogre {
 
-	/** Proxy archive, which performs name transforms and delegates to underlying archive instance.
-	* There are couple different possible usages for this archive class:
-	* 1. A case insensitive filesystem archive on *nix systems
-	* 2. A ZIP file handler which includes the FNAME.ZIP as FNAME/ in all names of the archive
-	* 3. Other
-	*
-	*
-	* In Opde, this class is used to mask the fact about the resource's source (crf file or not), and
-	* make ogre's file system archive case insensitive on *nix systems.
-	*
-	* @todo The final piece of puzzle will be a class that autoloads crf files as resources \
-	*	for the predefined group, and a resource listener that allows duplicate resource names in some way
-	*/
-	class OPDELIB_EXPORT ProxyArchive : public Archive {
-		public:
-			/// constructor
-			ProxyArchive(const String& name, const String& archType, bool readOnly);
+/** Proxy archive, which performs name transforms and delegates to underlying
+ *archive instance. There are couple different possible usages for this archive
+ *class:
+ * 1. A case insensitive filesystem archive on *nix systems
+ * 2. A ZIP file handler which includes the FNAME.ZIP as FNAME/ in all names of
+ *the archive
+ * 3. Other
+ *
+ *
+ * In Opde, this class is used to mask the fact about the resource's source (crf
+ *file or not), and make ogre's file system archive case insensitive on *nix
+ *systems.
+ *
+ * @todo The final piece of puzzle will be a class that autoloads crf files as
+ *resources \ for the predefined group, and a resource listener that allows
+ *duplicate resource names in some way
+ */
+class OPDELIB_EXPORT ProxyArchive : public Archive {
+public:
+    /// constructor
+    ProxyArchive(const String &name, const String &archType, bool readOnly);
 
-			/// destructor
-			virtual ~ProxyArchive(void);
+    /// destructor
+    virtual ~ProxyArchive(void);
 
-			/// performs the archive load. Scans the archive for filenames, builds the reverse transform table
-			void load(void) override;
+    /// performs the archive load. Scans the archive for filenames, builds the
+    /// reverse transform table
+    void load(void) override;
 
-			/// Unloads the archive, clears the transform map
-			void unload(void) override;
+    /// Unloads the archive, clears the transform map
+    void unload(void) override;
 
-			/// opens a resource stream, unmapping the name first
-			DataStreamPtr open(const String& filename, bool readOnly) const override;
+    /// opens a resource stream, unmapping the name first
+    DataStreamPtr open(const String &filename, bool readOnly) const override;
 
-			/// lists the contents of the archive. transformed.
-			StringVectorPtr list(bool recursive = true, bool dirs = false) const override;
+    /// lists the contents of the archive. transformed.
+    StringVectorPtr list(bool recursive = true,
+                         bool dirs = false) const override;
 
-			/// lists the contents of the archive. transformed, in the FileInfo structures.
-			FileInfoListPtr listFileInfo(bool recursive = true, bool dirs = false) const override;
-
-			/// performs a pattern match find on the archive files
-			StringVectorPtr find(const String& pattern, bool recursive = true,
+    /// lists the contents of the archive. transformed, in the FileInfo
+    /// structures.
+    FileInfoListPtr listFileInfo(bool recursive = true,
                                  bool dirs = false) const override;
 
-			/// Searches for the given name, untransforming it first
-			bool exists(const String& filename) const override;
+    /// performs a pattern match find on the archive files
+    StringVectorPtr find(const String &pattern, bool recursive = true,
+                         bool dirs = false) const override;
 
-			/** Searches for files that match the given pattern
-			* @see find
-			*/
-			virtual FileInfoListPtr findFileInfo(const String& pattern,
-				bool recursive = true, bool dirs = false) const  override;
+    /// Searches for the given name, untransforming it first
+    bool exists(const String &filename) const override;
 
-			/// reports case sensitiveness of this proxy archive
-			virtual bool isCaseSensitive(void) const = 0;
+    /** Searches for files that match the given pattern
+     * @see find
+     */
+    virtual FileInfoListPtr findFileInfo(const String &pattern,
+                                         bool recursive = true,
+                                         bool dirs = false) const override;
 
-			time_t getModifiedTime(const String& filename) const {return 0;};
+    /// reports case sensitiveness of this proxy archive
+    virtual bool isCaseSensitive(void) const = 0;
 
-		protected:
-			/// This implements a const version of listFileInfo, as ogre is inconsistent in the const modifier usage...
-			FileInfoListPtr listFileInfoImpl(bool recursive = true, bool dirs = false) const;
+    time_t getModifiedTime(const String &filename) const { return 0; };
 
-			/// performs the forward transform on a single name
-			virtual String transformName(const String& name) const = 0;
+protected:
+    /// This implements a const version of listFileInfo, as ogre is inconsistent
+    /// in the const modifier usage...
+    FileInfoListPtr listFileInfoImpl(bool recursive = true,
+                                     bool dirs = false) const;
 
-			/// performs an inverse transform on a single name, turning internal name from the external one
-			virtual bool untransformName(const String& name, String& unt) const;
+    /// performs the forward transform on a single name
+    virtual String transformName(const String &name) const = 0;
 
-			/** compares if the given filename matches the pattern
-			* By default, this does case insensitive filename match on the untransformed name
-			*/
-			virtual bool match(const String& pattern, const String& name) const;
+    /// performs an inverse transform on a single name, turning internal name
+    /// from the external one
+    virtual bool untransformName(const String &name, String &unt) const;
 
-			typedef std::map<std::string, std::string> NameTable;
+    /** compares if the given filename matches the pattern
+     * By default, this does case insensitive filename match on the
+     * untransformed name
+     */
+    virtual bool match(const String &pattern, const String &name) const;
 
-			NameTable mExtToIntNames;
+    typedef std::map<std::string, std::string> NameTable;
 
-			Archive* mArchive;
-	};
+    NameTable mExtToIntNames;
 
-	/// Lowercase transforming file system archive
-	class CaseLessFileSystemArchive : public ProxyArchive {
-		public:
-			CaseLessFileSystemArchive(const String& name, const String& archType, bool readOnly);
-			~CaseLessFileSystemArchive(void);
+    Archive *mArchive;
+};
 
-			bool isCaseSensitive(void) const override;
+/// Lowercase transforming file system archive
+class CaseLessFileSystemArchive : public ProxyArchive {
+public:
+    CaseLessFileSystemArchive(const String &name, const String &archType,
+                              bool readOnly);
+    ~CaseLessFileSystemArchive(void);
 
-		protected:
-			String transformName(const std::string& name) const override;
+    bool isCaseSensitive(void) const override;
 
-	};
+protected:
+    String transformName(const std::string &name) const override;
+};
 
-	/// Zip archive wrapper that prefixes the file names with the name without extesion (fam.crf -> fam/*)
-	class CRFArchive : public ProxyArchive {
-		public:
-			CRFArchive(const String& name, const String& archType, bool readOnly);
-			~CRFArchive(void);
+/// Zip archive wrapper that prefixes the file names with the name without
+/// extesion (fam.crf -> fam/*)
+class CRFArchive : public ProxyArchive {
+public:
+    CRFArchive(const String &name, const String &archType, bool readOnly);
+    ~CRFArchive(void);
 
-			bool isCaseSensitive(void) const override;
+    bool isCaseSensitive(void) const override;
 
-		protected:
-			String transformName(const std::string& name) const override;
+protected:
+    String transformName(const std::string &name) const override;
 
-			String mFilePart;
-	};
+    String mFilePart;
+};
 
-	// Factories, so we can actually use these
+// Factories, so we can actually use these
 
-	class OPDELIB_EXPORT CaseLessFileSystemArchiveFactory : public ArchiveFactory { // what a title!
-		public:
-			virtual ~CaseLessFileSystemArchiveFactory() {}
+class OPDELIB_EXPORT CaseLessFileSystemArchiveFactory
+    : public ArchiveFactory { // what a title!
+public:
+    virtual ~CaseLessFileSystemArchiveFactory() {}
 
-			const String& getType(void) const;
+    const String &getType(void) const;
 
-			Archive* createInstance(const String& name, bool readOnly) {
-				return new CaseLessFileSystemArchive(name, "Dir", readOnly);
-			}
+    Archive *createInstance(const String &name, bool readOnly) {
+        return new CaseLessFileSystemArchive(name, "Dir", readOnly);
+    }
 
-			void destroyInstance( Archive* arch) { delete arch; }
-	};
+    void destroyInstance(Archive *arch) { delete arch; }
+};
 
-	class CrfArchiveFactory : public ArchiveFactory {
-		public:
-			virtual ~CrfArchiveFactory() {}
+class CrfArchiveFactory : public ArchiveFactory {
+public:
+    virtual ~CrfArchiveFactory() {}
 
-			const String& getType(void) const;
+    const String &getType(void) const;
 
-			Archive* createInstance(const String& name, bool readOnly) {
-				return new CRFArchive(name, "Crf", readOnly);
-			}
+    Archive *createInstance(const String &name, bool readOnly) {
+        return new CRFArchive(name, "Crf", readOnly);
+    }
 
-			void destroyInstance( Archive* arch) { delete arch; }
-	};
+    void destroyInstance(Archive *arch) { delete arch; }
+};
 
-}
+} // namespace Ogre
 
 #endif

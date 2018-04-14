@@ -22,107 +22,125 @@
  *
  *****************************************************************************/
 
-
 #ifndef __consolebackend_h
 #define __consolebackend_h
 
 #include "config.h"
 
-#include <string>
 #include <map>
+#include <string>
 
 #include "OgreLogManager.h"
 
 #include "ConsoleCommandListener.h"
 
-#include "logger/logger.h"
 #include "OpdeSingleton.h"
+#include "logger/logger.h"
 
 namespace Opde {
 
-	/** Backend class, used for commands processing, and console text memmory
-	* A singleton class, used to insert texts to console and to call Command Listeners */
-	class OPDELIB_EXPORT ConsoleBackend : public Singleton<ConsoleBackend>, public Ogre::LogListener, public Opde::LogListener {
-		public:
-			/** A pair - level, message */
-			typedef std::pair<size_t, Ogre::String> Message;
+/** Backend class, used for commands processing, and console text memmory
+ * A singleton class, used to insert texts to console and to call Command
+ * Listeners */
+class OPDELIB_EXPORT ConsoleBackend : public Singleton<ConsoleBackend>,
+                                      public Ogre::LogListener,
+                                      public Opde::LogListener {
+public:
+    /** A pair - level, message */
+    typedef std::pair<size_t, Ogre::String> Message;
 
-		private:
-			/** Map of the string to the Listeners which handle them */
-			std::map<std::string, ConsoleCommandListener *> mCommandMap;
+private:
+    /** Map of the string to the Listeners which handle them */
+    std::map<std::string, ConsoleCommandListener *> mCommandMap;
 
-			/** Map of the string to the Listeners which handle them */
-			std::map<std::string, std::string> mHintMap;
+    /** Map of the string to the Listeners which handle them */
+    std::map<std::string, std::string> mHintMap;
 
-			/** Command accelerator - tab completion map*/
-			std::map<std::string, std::set<std::string> > mCompletionMap;
+    /** Command accelerator - tab completion map*/
+    std::map<std::string, std::set<std::string>> mCompletionMap;
 
-			/** Console texts list */
-			std::deque< Message > mMessages;
+    /** Console texts list */
+    std::deque<Message> mMessages;
 
-			/** Internal method for adding text rows */
-			void addText(std::string text, size_t level = 2);
+    /** Internal method for adding text rows */
+    void addText(std::string text, size_t level = 2);
 
-			/** Indicates true if the console text / scroll changed till last time and should be redrawn */
-			bool mChanged;
+    /** Indicates true if the console text / scroll changed till last time and
+     * should be redrawn */
+    bool mChanged;
 
-			unsigned int mTextHistory;
-		public:
-			/** constructor */
-			ConsoleBackend(unsigned int text_history = 1000);
+    unsigned int mTextHistory;
 
-			/** destructor */
-			~ConsoleBackend();
+public:
+    /** constructor */
+    ConsoleBackend(unsigned int text_history = 1000);
 
-			/** Will register the command Command with the ConsoleCommandListener listener
-			* @note When the command is already registered, the listener will be reregistered, allowing this to be called in the constructors */
-			void registerCommandListener(std::string Command, ConsoleCommandListener *listener);
+    /** destructor */
+    ~ConsoleBackend();
 
-			/** Register a help (or a short description) for a command
-			* @param command Command name
-			* @param hint Hint text
-			*/
-			void setCommandHint(std::string command, std::string hint);
+    /** Will register the command Command with the ConsoleCommandListener
+     * listener
+     * @note When the command is already registered, the listener will be
+     * reregistered, allowing this to be called in the constructors */
+    void registerCommandListener(std::string Command,
+                                 ConsoleCommandListener *listener);
 
-			/** execute the command, given on the commandline. Will tokenize by " " to find the first word, try to find that word as a command, and if sucessfull, will execute the commandListener's method commandExecuted */
-			void executeCommand(std::string Command);
+    /** Register a help (or a short description) for a command
+     * @param command Command name
+     * @param hint Hint text
+     */
+    void setCommandHint(std::string command, std::string hint);
 
-			/** Will puts a tab completion message, or just complete the command if only one candidate is found */
-			std::string tabComplete(std::string Text);
+    /** execute the command, given on the commandline. Will tokenize by " " to
+     * find the first word, try to find that word as a command, and if
+     * sucessfull, will execute the commandListener's method commandExecuted */
+    void executeCommand(std::string Command);
 
-			/* Writes a simple message to the console */
-			void putMessage(std::string text, size_t level = 2);
+    /** Will puts a tab completion message, or just complete the command if only
+     * one candidate is found */
+    std::string tabComplete(std::string Text);
 
-			/** Ogre's log listener implementation. Used as a to console logger for the ogre Logging system. This means that one can se the ogre logger to write messages to console too */
-			virtual void messageLogged( const Ogre::String& message, Ogre::LogMessageLevel lml, bool maskDebug, const Ogre::String &logName, bool &skipThisMessage);
+    /* Writes a simple message to the console */
+    void putMessage(std::string text, size_t level = 2);
 
-			/** Opde logging method implementation */
-			virtual void logMessage(Logger::LogLevel level, const std::string& msg);
+    /** Ogre's log listener implementation. Used as a to console logger for the
+     * ogre Logging system. This means that one can se the ogre logger to write
+     * messages to console too */
+    virtual void messageLogged(const Ogre::String &message,
+                               Ogre::LogMessageLevel lml, bool maskDebug,
+                               const Ogre::String &logName,
+                               bool &skipThisMessage);
 
-			/** Returns true, if the console text was changed from last time, and resets the indicator - asking twice will return true,false */
-			bool getChanged();
+    /** Opde logging method implementation */
+    virtual void logMessage(Logger::LogLevel level, const std::string &msg);
 
-			/** informs the backend a change happened (manually). This is here to aid the console frontend with rendering changes (page changes, scrolling) */
-			void setChanged() { mChanged = true; };
+    /** Returns true, if the console text was changed from last time, and resets
+     * the indicator - asking twice will return true,false */
+    bool getChanged();
 
-			/** Returns the size of history. In lines. */
-			unsigned int getHistorySize() { return mTextHistory; };
+    /** informs the backend a change happened (manually). This is here to aid
+     * the console frontend with rendering changes (page changes, scrolling) */
+    void setChanged() { mChanged = true; };
 
-			/** Scroll the view window a defined number of lines */
-			void scroll(int lines);
+    /** Returns the size of history. In lines. */
+    unsigned int getHistorySize() { return mTextHistory; };
 
-			/** Pulls a set of messages out of the memory of messages.
-			@param linenum The start line to load. -1 means we will pull up to #lines from end of the vector
-			@param lines the maximal count of lines to load
-			*/
-			void pullMessages(std::vector<ConsoleBackend::Message>& target, int pos, unsigned int lines);
+    /** Scroll the view window a defined number of lines */
+    void scroll(int lines);
 
-			// Singleton stuff
-			static ConsoleBackend& getSingleton(void);
-			static ConsoleBackend* getSingletonPtr(void);
-	};
+    /** Pulls a set of messages out of the memory of messages.
+    @param linenum The start line to load. -1 means we will pull up to #lines
+    from end of the vector
+    @param lines the maximal count of lines to load
+    */
+    void pullMessages(std::vector<ConsoleBackend::Message> &target, int pos,
+                      unsigned int lines);
 
-}
+    // Singleton stuff
+    static ConsoleBackend &getSingleton(void);
+    static ConsoleBackend *getSingletonPtr(void);
+};
 
+} // namespace Opde
 
 #endif

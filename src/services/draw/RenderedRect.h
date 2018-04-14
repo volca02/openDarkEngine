@@ -21,7 +21,6 @@
  *
  *****************************************************************************/
 
-
 #ifndef __RENDEREDRECT_H
 #define __RENDEREDRECT_H
 
@@ -31,47 +30,48 @@
 #include <OgreVector3.h>
 
 namespace Opde {
-	/** Rendered rectangle. A single on-screen rectangle with a specified colour. */
-	class RenderedRect : public DrawOperation {
-		public:
-			RenderedRect(DrawService* owner, DrawOperation::ID id, const TextureAtlasPtr& atlas);
-			
-			virtual ~RenderedRect();
+/** Rendered rectangle. A single on-screen rectangle with a specified colour. */
+class RenderedRect : public DrawOperation {
+public:
+    RenderedRect(DrawService *owner, DrawOperation::ID id,
+                 const TextureAtlasPtr &atlas);
 
-			void visitDrawBuffer(DrawBuffer* db);
-			
-			virtual DrawSourceBasePtr getDrawSourceBase();
+    virtual ~RenderedRect();
 
-			/// sets a new colour of the rect
-			void setColour(const Ogre::ColourValue &col);
-			
-			/// sets a new width of the rect.
-			void setWidth(size_t width);
-			
-			/// sets a new height of the rect.
-			void setHeight(size_t height);
-			
-			/// sets a new size of the rect (both width and height)
-			void setSize(const PixelSize& size);
-		protected:
-			/// override that updates the image and marks dirty
-			void _rebuild();
-			
-			void _setNewDrawSource();
-			
-			DrawQuad mDrawQuad;
-			
-			bool mInClip;
-			
-			TextureAtlasPtr mAtlas;
-	
-			DrawSourcePtr mVertexColourDS;
-			
-		private:
-			PixelSize mPixelSize;
-			
-	};
+    void visitDrawBuffer(DrawBuffer *db);
 
+    virtual DrawSourceBasePtr getDrawSourceBase();
+
+    /// sets a new colour of the rect
+    void setColour(const Ogre::ColourValue &col);
+
+    /// sets a new width of the rect.
+    void setWidth(size_t width);
+
+    /// sets a new height of the rect.
+    void setHeight(size_t height);
+
+    /// sets a new size of the rect (both width and height)
+    void setSize(const PixelSize &size);
+
+protected:
+    /// override that updates the image and marks dirty
+    void _rebuild();
+
+    void _setNewDrawSource();
+
+    DrawQuad mDrawQuad;
+
+    bool mInClip;
+
+    TextureAtlasPtr mAtlas;
+
+    DrawSourcePtr mVertexColourDS;
+
+private:
+    PixelSize mPixelSize;
 };
+
+}; // namespace Opde
 
 #endif

@@ -25,42 +25,42 @@
 #ifndef __INPUTSERVICEBINDER_H
 #define __INPUTSERVICEBINDER_H
 
-#include  "DTypeDef.h"
-#include  "InputService.h"
+#include "bindings.h"
 
-namespace Opde
-{
-	namespace Python
-	{
+#include "DTypeDef.h"
+#include "InputService.h"
 
-		/// Input service python binder
-		class InputServiceBinder : public shared_ptr_binder<InputServicePtr> {
-			public:
-				static void init(PyObject* module);
+namespace Opde {
+namespace Python {
 
-				// --- Python type related methods ---
-				/// creates a python object representation of the input service
-				static PyObject* create();
+/// Input service python binder
+class InputServiceBinder : public shared_ptr_binder<InputServicePtr> {
+public:
+    static void init(PyObject *module);
 
-				// --- Methods ---
-				static PyObject* createBindContext(PyObject* self, PyObject* args);
-				static PyObject* setBindContext(PyObject* self, PyObject* args);
-				static PyObject* command(PyObject* self, PyObject* args);
-				static PyObject* registerCommandTrap(PyObject* self, PyObject* args);
-				static PyObject* unregisterCommandTrap(PyObject* self, PyObject* args);
-				static PyObject* setInputMapped(PyObject* self, PyObject* args);
+    // --- Python type related methods ---
+    /// creates a python object representation of the input service
+    static PyObject *create();
 
-			protected:
-				/// Static type definition for InputService
-				static PyTypeObject msType;
+    // --- Methods ---
+    static PyObject *createBindContext(PyObject *self, PyObject *args);
+    static PyObject *setBindContext(PyObject *self, PyObject *args);
+    static PyObject *command(PyObject *self, PyObject *args);
+    static PyObject *registerCommandTrap(PyObject *self, PyObject *args);
+    static PyObject *unregisterCommandTrap(PyObject *self, PyObject *args);
+    static PyObject *setInputMapped(PyObject *self, PyObject *args);
 
-				/// Name of the python type
-				static const char* msName;
+protected:
+    /// Static type definition for InputService
+    static PyTypeObject msType;
 
-				/// Method list
-				static PyMethodDef msMethods[];
-		};
-	}
-}
+    /// Name of the python type
+    static const char *msName;
 
-#endif	// __INPUTSERVICEBINDER_H
+    /// Method list
+    static PyMethodDef msMethods[];
+};
+} // namespace Python
+} // namespace Opde
+
+#endif // __INPUTSERVICEBINDER_H

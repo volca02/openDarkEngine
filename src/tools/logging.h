@@ -20,16 +20,17 @@
  *	  $Id$
  *
  *****************************************************************************/
- 
+
 #ifndef logging_h
 #define logging_h
 
-#ifdef _MSC_VER 
-#pragma warning( disable : 4996 )
+#ifdef _MSC_VER
+#pragma warning(disable : 4996)
 #endif
 
 //////////////////// logging mumbo - jumbo
-const char* LOG_LEVEL_STRINGS[5] = {"FATAL","ERROR","INFO ","DEBUG", "ALL  "};
+const char *LOG_LEVEL_STRINGS[5] = {"FATAL", "ERROR", "INFO ", "DEBUG",
+                                    "ALL  "};
 
 #define LOG_VERBOSE 4
 #define LOG_DEBUG 3
@@ -40,23 +41,24 @@ const char* LOG_LEVEL_STRINGS[5] = {"FATAL","ERROR","INFO ","DEBUG", "ALL  "};
 long loglevel = LOG_ERROR;
 
 void log(long level, const char *fmt, ...) {
-	if (level > loglevel)
-		return;
-	
-	// to filter out those which do not fit in the table of strings describing level
-	if (level > LOG_VERBOSE)
-		level = LOG_VERBOSE;
-	if (level < 0)
-		level = 0;
-	
-	va_list argptr;
-	char result[255];
-	
-	va_start(argptr, fmt);
-	vsnprintf(result, 255, fmt, argptr);
-	va_end(argptr);
-	
-	printf("Log (%s) : %s\n", LOG_LEVEL_STRINGS[level], result);
+    if (level > loglevel)
+        return;
+
+    // to filter out those which do not fit in the table of strings describing
+    // level
+    if (level > LOG_VERBOSE)
+        level = LOG_VERBOSE;
+    if (level < 0)
+        level = 0;
+
+    va_list argptr;
+    char result[255];
+
+    va_start(argptr, fmt);
+    vsnprintf(result, 255, fmt, argptr);
+    va_end(argptr);
+
+    printf("Log (%s) : %s\n", LOG_LEVEL_STRINGS[level], result);
 }
 
 #define log_fatal(...) log(LOG_ERROR, __VA_ARGS__)

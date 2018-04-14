@@ -22,36 +22,34 @@
  *
  *****************************************************************************/
 
-
 #ifndef __UNIXPLATFORM_H
 #define __UNIXPLATFORM_H
 
 #include "config.h"
 
-#include "OpdeServiceManager.h"
 #include "OpdeService.h"
+#include "OpdeServiceManager.h"
 #include "Platform.h"
 
 namespace Opde {
 
-	/** @brief Unix platform. Unix/Linux (Posix OS) specific platform handling code.
-	*/
-	class OPDELIB_EXPORT UnixPlatform : public Platform {
-		public:
-			UnixPlatform(PlatformService* owner);
-			virtual ~UnixPlatform();
+/** @brief Unix platform. Unix/Linux (Posix OS) specific platform handling code.
+ */
+class OPDELIB_EXPORT UnixPlatform : public Platform {
+public:
+    UnixPlatform(PlatformService *owner);
+    virtual ~UnixPlatform();
 
-			virtual std::string getGlobalConfigPath() const;
+    virtual std::string getGlobalConfigPath() const;
 
-			virtual std::string getUserConfigPath() const;
+    virtual std::string getUserConfigPath() const;
 
-			virtual std::string getDirectorySeparator() const;
+    virtual std::string getDirectorySeparator() const;
 
-		private:
-			static const std::string msOpdeHomeDirName;
-	};
+private:
+    static const std::string msOpdeHomeDirName;
+};
 
-}
-
+} // namespace Opde
 
 #endif

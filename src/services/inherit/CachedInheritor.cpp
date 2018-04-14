@@ -27,199 +27,203 @@
 using namespace std;
 
 namespace Opde {
-    /*---------------------------------------------------------*/
-    /*--------------------- CachedInheritor -------------------*/
-	/*---------------------------------------------------------*/
-    CachedInheritor::CachedInheritor(const InheritorFactory* fac, InheritService* is) : Inheritor(fac), mInheritService(is) {
-		InheritService::ListenerPtr callback(new
-			ClassCallback<InheritChangeMsg, CachedInheritor>(this, &CachedInheritor::onInheritMsg));
+/*---------------------------------------------------------*/
+/*--------------------- CachedInheritor -------------------*/
+/*---------------------------------------------------------*/
+CachedInheritor::CachedInheritor(const InheritorFactory *fac,
+                                 InheritService *is)
+    : Inheritor(fac), mInheritService(is) {
+    InheritService::ListenerPtr callback(
+        new ClassCallback<InheritChangeMsg, CachedInheritor>(
+            this, &CachedInheritor::onInheritMsg));
 
-		mListenerID = mInheritService->registerListener(callback);
-    };
+    mListenerID = mInheritService->registerListener(callback);
+};
 
-    //------------------------------------------------------
-    CachedInheritor::~CachedInheritor() {
-        mInheritService->unregisterListener(mListenerID);
+//------------------------------------------------------
+CachedInheritor::~CachedInheritor() {
+    mInheritService->unregisterListener(mListenerID);
+}
+
+//------------------------------------------------------
+void CachedInheritor::setImplements(int objID, bool impl) {
+    bool oldval = mImplements.setBit(objID, impl);
+
+    // Did we change something?
+    if (oldval != impl) {
+        refresh(objID); // refresh the object ID and all the inheritance targets
     }
+}
 
-    //------------------------------------------------------
-	void CachedInheritor::setImplements(int objID, bool impl) {
-		bool oldval = mImplements.setBit(objID, impl);
-	    
-        // Did we change something?
-        if (oldval != impl) {
-            refresh(objID); // refresh the object ID and all the inheritance targets
-        }
-	}
+//------------------------------------------------------
+bool CachedInheritor::getImplements(int objID) const {
+    return mImplements[objID];
+}
 
-	//------------------------------------------------------
-	bool CachedInheritor::getImplements(int objID) const {
-	    return mImplements[objID];
-	}
+//------------------------------------------------------
+int CachedInheritor::getEffectiveID(int srcID) const {
+    return mEffObjMap[srcID];
+}
 
-    //------------------------------------------------------
-    int CachedInheritor::getEffectiveID(int srcID) const {
-        return mEffObjMap[srcID];
-    }
+//------------------------------------------------------
+bool CachedInheritor::setEffectiveID(int srcID, int effID) {
+    int prev = mEffObjMap[srcID];
+    mEffObjMap[srcID] = effID;
 
-    //------------------------------------------------------
-    bool CachedInheritor::setEffectiveID(int srcID, int effID) {
-    	int prev = mEffObjMap[srcID];
-		mEffObjMap[srcID] = effID;
-		
-		return prev != effID;
-    }
+    return prev != effID;
+}
 
-    //------------------------------------------------------
-    bool CachedInheritor::unsetEffectiveID(int srcID) {
-        return setEffectiveID(srcID, 0);
-    }
+//------------------------------------------------------
+bool CachedInheritor::unsetEffectiveID(int srcID) {
+    return setEffectiveID(srcID, 0);
+}
 
-    //------------------------------------------------------
-    bool CachedInheritor::refresh(int objID) {
-        // First, get the old effective ID
-        int oldEffID = getEffectiveID(objID);
+//------------------------------------------------------
+bool CachedInheritor::refresh(int objID) {
+    // First, get the old effective ID
+    int oldEffID = getEffectiveID(objID);
 
-        // Let's vote for a new effective object ID
-        InheritQueryResultPtr sources = mInheritService->getSources(objID);
+    // Let's vote for a new effective object ID
+    InheritQueryResultPtr sources = mInheritService->getSources(objID);
 
-        int maxPrio = -1; // no inheritance indicator itself
-        int newEffID = 0; // Detected new effective ID
+    int maxPrio = -1; // no inheritance indicator itself
+    int newEffID = 0; // Detected new effective ID
 
-        int niter = 0;
-        InheritLinkPtr effective(NULL);
+    int niter = 0;
+    InheritLinkPtr effective(NULL);
 
-		// If self-implements
-        if (getImplements(objID)) {
-			// self, because prop on object masks any inherited prop, be it mp or archetype
-			newEffID = objID; 
-		} else {
-			// does not self-implement...
-			// now for each of the sources, find the one with the max. priority that still implements.
-			// Some logic to accept the self assigned is also present
-			while (!sources->end()) {
-				InheritLinkPtr il = sources->next();
-				++niter;
+    // If self-implements
+    if (getImplements(objID)) {
+        // self, because prop on object masks any inherited prop, be it mp or
+        // archetype
+        newEffID = objID;
+    } else {
+        // does not self-implement...
+        // now for each of the sources, find the one with the max. priority that
+        // still implements. Some logic to accept the self assigned is also
+        // present
+        while (!sources->end()) {
+            InheritLinkPtr il = sources->next();
+            ++niter;
 
-				int effID = getEffectiveID(il->srcID); // look for the effective ID of the source
+            int effID = getEffectiveID(
+                il->srcID); // look for the effective ID of the source
 
-				/*
-				validate and compare to the maximal. If priority is greater,
-				we have a new winner (but only if it validates and the source has some effective ID)
-				*/
-				// Comparing the priority to signed int...
-				if (validate(il->srcID, il->dstID, il->priority) && (il->priority > maxPrio) && (effID != 0)) {
-					effective = il;
-					maxPrio = il->priority;
-					newEffID = effID;
-				}
-			}
-		}
-
-        
-
-        if (newEffID != 0)  {
-            if (setEffectiveID(objID, newEffID)) {
-                // Broadcast the change to a new ID
-                InheritValueChangeMsg msg;
-
-                if (oldEffID != 0) {
-                    msg.change = INH_VAL_CHANGED;
-                } else {
-                    msg.change = INH_VAL_ADDED;
-                }
-
-
-                msg.objectID = objID;
-                msg.srcID = newEffID;
-
-				LOG_VERBOSE("Inheritance change happened on %d (new src %d, old src %d)", objID, newEffID, oldEffID);
-                broadcastMessage(msg);
+            /*
+            validate and compare to the maximal. If priority is greater,
+            we have a new winner (but only if it validates and the source has
+            some effective ID)
+            */
+            // Comparing the priority to signed int...
+            if (validate(il->srcID, il->dstID, il->priority) &&
+                (il->priority > maxPrio) && (effID != 0)) {
+                effective = il;
+                maxPrio = il->priority;
+                newEffID = effID;
             }
         }
-        else
-            if (unsetEffectiveID(objID)) {
-                InheritValueChangeMsg msg;
+    }
 
-                msg.change = INH_VAL_REMOVED;
+    if (newEffID != 0) {
+        if (setEffectiveID(objID, newEffID)) {
+            // Broadcast the change to a new ID
+            InheritValueChangeMsg msg;
 
-                msg.objectID = objID;
-                msg.srcID = 0;
-
-
-				LOG_VERBOSE("Inheritance removal happened on %d (old src %d)", objID, oldEffID);
-                broadcastMessage(msg);
+            if (oldEffID != 0) {
+                msg.change = INH_VAL_CHANGED;
+            } else {
+                msg.change = INH_VAL_ADDED;
             }
 
-        // If there was a change, propagate
-        if (newEffID != oldEffID) {
-            InheritQueryResultPtr targets = mInheritService->getTargets(objID);
+            msg.objectID = objID;
+            msg.srcID = newEffID;
 
-            while (!targets->end()) {
-                InheritLinkPtr il = targets->next();
-
-                refresh(il->dstID); // refresh the target object
-            }
+            LOG_VERBOSE(
+                "Inheritance change happened on %d (new src %d, old src %d)",
+                objID, newEffID, oldEffID);
+            broadcastMessage(msg);
         }
-		return false;
-    }
+    } else if (unsetEffectiveID(objID)) {
+        InheritValueChangeMsg msg;
 
-    //------------------------------------------------------
-    bool CachedInheritor::validate(int srcID, int dstID, unsigned int priority) const {
-        return true;
-    }
-
-    //------------------------------------------------------
-    void CachedInheritor::onInheritMsg(const InheritChangeMsg& msg) {
-        if (msg.change == INH_CLEARED_ALL) {
-			clear();
-			return;
-        }
-        
-    	// Received an even about inheritance change. Must refresh target object of such change
-        refresh(msg.dstID);
-    }
-    
-    //------------------------------------------------------
-    void CachedInheritor::grow(int minID, int maxID) {
-    	mEffObjMap.grow(minID, maxID);
-    	mImplements.grow(minID, maxID);
-    }
-
-    //------------------------------------------------------
-    void CachedInheritor::clear() {
-        mEffObjMap.clear();
-        mImplements.clear();
-    }
-
-
-	//------------------------------------------------------
-	void CachedInheritor::valueChanged(int objID, const std::string& field, const DVariant& value) {
-		// TODO: search for all inheriting objects, broadcast for each
-		InheritValueChangeMsg msg;
-
-		msg.change = INH_VAL_FIELD_CHANGED;
+        msg.change = INH_VAL_REMOVED;
 
         msg.objectID = objID;
         msg.srcID = 0;
-		msg.field = field;
-		msg.value = value;
 
+        LOG_VERBOSE("Inheritance removal happened on %d (old src %d)", objID,
+                    oldEffID);
         broadcastMessage(msg);
-	}
-
-    //------------------------------------------------------- Cached Inheritor Factory:
-    string CachedInheritorFactory::mName = "always";
-
-    CachedInheritorFactory::CachedInheritorFactory() {
     }
 
-	string CachedInheritorFactory::getName() const {
-	    return mName;
-	}
+    // If there was a change, propagate
+    if (newEffID != oldEffID) {
+        InheritQueryResultPtr targets = mInheritService->getTargets(objID);
 
-	Inheritor* CachedInheritorFactory::createInstance(InheritService* is) const {
-	    return new CachedInheritor(this, is);
-	}
+        while (!targets->end()) {
+            InheritLinkPtr il = targets->next();
+
+            refresh(il->dstID); // refresh the target object
+        }
+    }
+    return false;
 }
 
+//------------------------------------------------------
+bool CachedInheritor::validate(int srcID, int dstID,
+                               unsigned int priority) const {
+    return true;
+}
+
+//------------------------------------------------------
+void CachedInheritor::onInheritMsg(const InheritChangeMsg &msg) {
+    if (msg.change == INH_CLEARED_ALL) {
+        clear();
+        return;
+    }
+
+    // Received an even about inheritance change. Must refresh target object of
+    // such change
+    refresh(msg.dstID);
+}
+
+//------------------------------------------------------
+void CachedInheritor::grow(int minID, int maxID) {
+    mEffObjMap.grow(minID, maxID);
+    mImplements.grow(minID, maxID);
+}
+
+//------------------------------------------------------
+void CachedInheritor::clear() {
+    mEffObjMap.clear();
+    mImplements.clear();
+}
+
+//------------------------------------------------------
+void CachedInheritor::valueChanged(int objID, const std::string &field,
+                                   const DVariant &value) {
+    // TODO: search for all inheriting objects, broadcast for each
+    InheritValueChangeMsg msg;
+
+    msg.change = INH_VAL_FIELD_CHANGED;
+
+    msg.objectID = objID;
+    msg.srcID = 0;
+    msg.field = field;
+    msg.value = value;
+
+    broadcastMessage(msg);
+}
+
+//------------------------------------------------------- Cached Inheritor
+//Factory:
+string CachedInheritorFactory::mName = "always";
+
+CachedInheritorFactory::CachedInheritorFactory() {}
+
+string CachedInheritorFactory::getName() const { return mName; }
+
+Inheritor *CachedInheritorFactory::createInstance(InheritService *is) const {
+    return new CachedInheritor(this, is);
+}
+} // namespace Opde

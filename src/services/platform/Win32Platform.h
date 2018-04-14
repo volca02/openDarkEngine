@@ -22,33 +22,31 @@
  *
  *****************************************************************************/
 
-
 #ifndef __WIN32PLATFORM_H
 #define __WIN32PLATFORM_H
 
 #include "config.h"
 
-#include "OpdeServiceManager.h"
 #include "OpdeService.h"
+#include "OpdeServiceManager.h"
 #include "Platform.h"
 
 namespace Opde {
 
-	/** @brief Win32 platform. Windows specific platform handling code.
-	*/
-	class OPDELIB_EXPORT Win32Platform : public Platform {
-		public:
-			Win32Platform(PlatformService* owner);
-			virtual ~Win32Platform();
-			
-			virtual std::string getGlobalConfigPath() const;
+/** @brief Win32 platform. Windows specific platform handling code.
+ */
+class OPDELIB_EXPORT Win32Platform : public Platform {
+public:
+    Win32Platform(PlatformService *owner);
+    virtual ~Win32Platform();
 
-			virtual std::string getUserConfigPath() const;
+    virtual std::string getGlobalConfigPath() const;
 
-			virtual std::string getDirectorySeparator() const;
-	};
+    virtual std::string getUserConfigPath() const;
 
-}
+    virtual std::string getDirectorySeparator() const;
+};
 
+} // namespace Opde
 
 #endif

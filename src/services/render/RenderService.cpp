@@ -24,58 +24,51 @@
 
 #include "RenderService.h"
 
-#include "property/PropertyService.h"
 #include "object/ObjectService.h"
+#include "property/PropertyService.h"
 
-#include "logger.h"
 #include "ServiceCommon.h"
+#include "logger.h"
 
 #include <SDL2/SDL_syswm.h>
 
+#include <OgreAnimation.h>
+#include <OgreBone.h>
+#include <OgreException.h>
+#include <OgreMaterialManager.h>
+#include <OgreMeshManager.h>
+#include <OgreNode.h>
+#include <OgreRenderWindow.h>
 #include <OgreRoot.h>
 #include <OgreStringConverter.h>
-#include <OgreMeshManager.h>
-#include <OgreMaterialManager.h>
-#include <OgreRenderWindow.h>
-#include <OgreBone.h>
-#include <OgreNode.h>
-#include <OgreStringConverter.h>
-#include <OgreAnimation.h>
-#include <OgreWindowEventUtilities.h>
-#include <OgreException.h>
 #include <OgreViewport.h>
+#include <OgreWindowEventUtilities.h>
 
 // Jorge texture png
 #include "jorge.h"
 
 #include "HasRefsProperty.h"
-#include "RenderTypeProperty.h"
-#include "RenderAlphaProperty.h"
-#include "ZBiasProperty.h"
-#include "ModelScaleProperty.h"
 #include "ModelNameProperty.h"
+#include "ModelScaleProperty.h"
+#include "RenderAlphaProperty.h"
+#include "RenderTypeProperty.h"
+#include "ZBiasProperty.h"
 
 using namespace std;
 using namespace Ogre;
 
 namespace Opde {
-const char* DEFAULT_RAMP_OBJECT_NAME = "DefaultRamp";
-const char* FX_PARTICLE_OBJECT_NAME =	"FX_PARTICLE";
+const char *DEFAULT_RAMP_OBJECT_NAME = "DefaultRamp";
+const char *FX_PARTICLE_OBJECT_NAME = "FX_PARTICLE";
 
 /*--------------------------------------------------------*/
 /*--------------------- EntityInfo -----------------------*/
 /*--------------------------------------------------------*/
-EntityInfo::EntityInfo(Ogre::SceneManager* man, Ogre::Entity* entity, Ogre::SceneNode* node) :
-    mSceneMgr(man),
-    mRenderType(RENDER_TYPE_NORMAL),
-    mHasRefs(true),
-    mSkip(false),
-    mAlpha(1.0f),
-    mZBias(0.0f),
-    mEntity(entity),
-    mNode(node),
-    mEmi(NULL)
-{
+EntityInfo::EntityInfo(Ogre::SceneManager *man, Ogre::Entity *entity,
+                       Ogre::SceneNode *node)
+    : mSceneMgr(man), mRenderType(RENDER_TYPE_NORMAL), mHasRefs(true),
+      mSkip(false), mAlpha(1.0f), mZBias(0.0f), mEntity(entity), mNode(node),
+      mEmi(NULL) {
     mEmi = new EntityMaterialInstance(mEntity);
     mEmi->setSceneBlending(SBT_TRANSPARENT_ALPHA);
     // mEmi->setSceneBlending(SBT_MODULATE);
@@ -124,12 +117,10 @@ void EntityInfo::setZBias(size_t bias) {
 };
 
 // --------------------------------------------------------------------------
-void EntityInfo::setScale(const Vector3& scale) {
-    mNode->setScale(scale);
-};
+void EntityInfo::setScale(const Vector3 &scale) { mNode->setScale(scale); };
 
 // --------------------------------------------------------------------------
-void EntityInfo::setEntity(Ogre::Entity* entity) {
+void EntityInfo::setEntity(Ogre::Entity *entity) {
     if (mEntity == entity)
         return;
 
@@ -165,31 +156,20 @@ void EntityInfo::refreshVisibility() {
 /*--------------------------------------------------------*/
 /*--------------------- RenderService --------------------*/
 /*--------------------------------------------------------*/
-template<> const size_t ServiceImpl<RenderService>::SID = __SERVICE_ID_RENDER;
+template <> const size_t ServiceImpl<RenderService>::SID = __SERVICE_ID_RENDER;
 
-RenderService::RenderService(ServiceManager *manager, const std::string& name) :
-    ServiceImpl< Opde::RenderService >(manager, name),
-    mPropModelName(NULL),
-    mPropPosition(NULL),
-    mPropScale(NULL),
-    mRoot(NULL),
-    mSceneMgr(NULL),
-    mRenderWindow(NULL),
-    mDarkSMFactory(NULL),
-    mDefaultCamera(NULL),
-    mLoopService(NULL),
-    mEditorMode(false),
-    mHasRefsProperty(NULL),
-    mRenderTypeProperty(NULL),
-    mRenderAlphaProperty(NULL),
-    mZBiasProperty(NULL),
-    mCurrentSize(0,0),
-    mSDLWindow(NULL)
-{
-    // TODO: This is just plain wrong. This service should be the maintainer of the used scene manager, if any other service needs the direct handle, etc.
-    // The fact is this service is probably game only, and should be the initialiser of graphics as the whole. This will be the
-    // modification that should be done soon in order to let the code look and be nice
-    // FIX!
+RenderService::RenderService(ServiceManager *manager, const std::string &name)
+    : ServiceImpl<Opde::RenderService>(manager, name), mPropModelName(NULL),
+      mPropPosition(NULL), mPropScale(NULL), mRoot(NULL), mSceneMgr(NULL),
+      mRenderWindow(NULL), mDarkSMFactory(NULL), mDefaultCamera(NULL),
+      mLoopService(NULL), mEditorMode(false), mHasRefsProperty(NULL),
+      mRenderTypeProperty(NULL), mRenderAlphaProperty(NULL),
+      mZBiasProperty(NULL), mCurrentSize(0, 0), mSDLWindow(NULL) {
+    // TODO: This is just plain wrong. This service should be the maintainer of
+    // the used scene manager, if any other service needs the direct handle,
+    // etc. The fact is this service is probably game only, and should be the
+    // initialiser of graphics as the whole. This will be the modification that
+    // should be done soon in order to let the code look and be nice FIX!
     mRoot = Root::getSingletonPtr();
     mManualBinFileLoader = new ManualBinFileLoader();
 
@@ -263,7 +243,6 @@ void RenderService::shutdown() {
         mPropScale = NULL;
     }
 
-
     if (mLoopService) {
         mLoopService->removeLoopClient(this);
         mLoopService.reset();
@@ -277,15 +256,20 @@ void RenderService::shutdown() {
 bool RenderService::init() {
     mConfigService = GET_SERVICE(ConfigService);
 
-    mConfigService->setParamDescription("fullscren", "Toggles display to fullscreen/window");
-    mConfigService->setParamDescription("window_width", "Desired game's window/fullscreen width");
-    mConfigService->setParamDescription("window_height", "Desired game's window/fullscreen height");
-    mConfigService->setParamDescription("display", "Display id (for multi-screen systems)");
+    mConfigService->setParamDescription("fullscren",
+                                        "Toggles display to fullscreen/window");
+    mConfigService->setParamDescription(
+        "window_width", "Desired game's window/fullscreen width");
+    mConfigService->setParamDescription(
+        "window_height", "Desired game's window/fullscreen height");
+    mConfigService->setParamDescription(
+        "display", "Display id (for multi-screen systems)");
 
     // get screen resolution from opde.cfg
-    mCurrentSize.fullscreen = mConfigService->getParam("fullscreen", false).toBool();
-    mCurrentSize.width   = mConfigService->getParam("window_width", 0).toUInt();
-    mCurrentSize.height  = mConfigService->getParam("window_height", 0).toUInt();
+    mCurrentSize.fullscreen =
+        mConfigService->getParam("fullscreen", false).toBool();
+    mCurrentSize.width = mConfigService->getParam("window_width", 0).toUInt();
+    mCurrentSize.height = mConfigService->getParam("window_height", 0).toUInt();
     mCurrentSize.display = mConfigService->getParam("display", -1).toInt();
 
     LOG_INFO("RenderService: initializing SDL");
@@ -308,7 +292,8 @@ bool RenderService::init() {
     // Register
     Root::getSingleton().addSceneManagerFactory(mDarkSMFactory);
 
-    mSceneMgr = mRoot->createSceneManager("DarkSceneManager", "DarkSceneManager");
+    mSceneMgr =
+        mRoot->createSceneManager("DarkSceneManager", "DarkSceneManager");
 
     // mSceneMgr->setShadowTechnique(SHADOWTYPE_TEXTURE_MODULATIVE);
     mSceneMgr->setShadowTechnique(SHADOWTYPE_NONE);
@@ -317,14 +302,15 @@ bool RenderService::init() {
     mSceneMgr->setAmbientLight(ColourValue(0.08, 0.08, 0.08));
 
     // Next step. We create a default camera in the mRenderWindow
-    mDefaultCamera = mSceneMgr->createCamera( "MainCamera" );
+    mDefaultCamera = mSceneMgr->createCamera("MainCamera");
 
     mDefaultCamera->setCastShadows(true);
 
     // aspect derived from screen aspect (to avoid stretching)
-    mDefaultCamera->setAspectRatio(Real(mRenderWindow->getWidth()) / Real(mRenderWindow->getHeight()));
+    mDefaultCamera->setAspectRatio(Real(mRenderWindow->getWidth()) /
+                                   Real(mRenderWindow->getHeight()));
 
-    mRenderWindow->addViewport( mDefaultCamera );
+    mRenderWindow->addViewport(mDefaultCamera);
 
     // Last step: Get the loop service and register as a listener
     mLoopService = GET_SERVICE(LoopService);
@@ -335,7 +321,8 @@ bool RenderService::init() {
 
     mPropertyService = GET_SERVICE(PropertyService);
 
-    Ogre::uint8 mDefaultRenderQueue = mSceneMgr->getRenderQueue()->getDefaultQueueGroup();
+    Ogre::uint8 mDefaultRenderQueue =
+        mSceneMgr->getRenderQueue()->getDefaultQueueGroup();
 
     // preset the default render queue according to the RenderQueue
     EntityMaterialInstance::setBaseRenderQueueGroup(mDefaultRenderQueue);
@@ -352,19 +339,22 @@ void RenderService::initSDLWindow() {
     }
 
     // try to reach propper display and resolution
-    if (mCurrentSize.fullscreen || (!mCurrentSize.width || !mCurrentSize.height)) {
+    if (mCurrentSize.fullscreen ||
+        (!mCurrentSize.width || !mCurrentSize.height)) {
         // first validate the selected display
         int dispCount = SDL_GetNumVideoDisplays();
 
         if (dispCount < 0)
-            OPDE_EXCEPT(String("SDL can't get display count. Error: ") + SDL_GetError(),
+            OPDE_EXCEPT(String("SDL can't get display count. Error: ") +
+                            SDL_GetError(),
                         "RenderService::initSDLWindow");
 
         if (mCurrentSize.display < 0)
             mCurrentSize.display = 0;
 
         if (mCurrentSize.display >= dispCount) {
-            LOG_ERROR("Obsolete/invalid display number specified in config, ignoring");
+            LOG_ERROR("Obsolete/invalid display number specified in config, "
+                      "ignoring");
             mCurrentSize.display = 0;
         }
 
@@ -373,7 +363,8 @@ void RenderService::initSDLWindow() {
         res = SDL_GetDesktopDisplayMode(mCurrentSize.display, &mode);
 
         if (res)
-            OPDE_EXCEPT(String("SDL can't get current video mode. Error: ") + SDL_GetError(),
+            OPDE_EXCEPT(String("SDL can't get current video mode. Error: ") +
+                            SDL_GetError(),
                         "RenderService::initSDLWindow");
 
         mCurrentSize.width = mode.w;
@@ -383,22 +374,17 @@ void RenderService::initSDLWindow() {
 
     // based on the settings, try to set the resolution.
     LOG_INFO("RenderService: Requested%s window %dx%d",
-             mCurrentSize.fullscreen ? " fullscreen" : " ",
-             mCurrentSize.width,
+             mCurrentSize.fullscreen ? " fullscreen" : " ", mCurrentSize.width,
              mCurrentSize.height);
 
-    int flags = SDL_WINDOW_OPENGL|SDL_WINDOW_SHOWN;
+    int flags = SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN;
 
     if (mCurrentSize.fullscreen)
         flags |= SDL_WINDOW_FULLSCREEN;
 
-    mSDLWindow = SDL_CreateWindow(
-            "openDarkEngine",
-            SDL_WINDOWPOS_UNDEFINED,
-            SDL_WINDOWPOS_UNDEFINED,
-            mCurrentSize.width,
-            mCurrentSize.height,
-            flags);
+    mSDLWindow = SDL_CreateWindow("openDarkEngine", SDL_WINDOWPOS_UNDEFINED,
+                                  SDL_WINDOWPOS_UNDEFINED, mCurrentSize.width,
+                                  mCurrentSize.height, flags);
 
     if (mSDLWindow == NULL)
         OPDE_EXCEPT("Can't create SDL window", "RenderService::initSDLWindow");
@@ -408,7 +394,8 @@ void RenderService::initSDLWindow() {
 void RenderService::initOgreWindow() {
     // where do I find this?
     if (mRoot->getAvailableRenderers().size() < 1)
-        OPDE_EXCEPT("Failed to initialize RenderSystem", "RenderService::initOgre");
+        OPDE_EXCEPT("Failed to initialize RenderSystem",
+                    "RenderService::initOgre");
     mRoot->setRenderSystem(mRoot->getAvailableRenderers()[0]);
     mRoot->initialise(false);
 
@@ -417,18 +404,20 @@ void RenderService::initOgreWindow() {
     // this has to be done in platform specific way...
 
     SDL_SysWMinfo sysInfo;
-    SDL_VERSION( &sysInfo.version );
-    if ( SDL_GetWindowWMInfo(mSDLWindow, &sysInfo ) <= 0 )
-    {
-        OPDE_EXCEPT("Can't create SDL GL context", "RenderService::initSDLWindow");
+    SDL_VERSION(&sysInfo.version);
+    if (SDL_GetWindowWMInfo(mSDLWindow, &sysInfo) <= 0) {
+        OPDE_EXCEPT("Can't create SDL GL context",
+                    "RenderService::initSDLWindow");
     }
 
 #ifdef __WINDOWS__
-    params["parentWindowHandle"] = Ogre::StringConverter::toString(sysInfo.info.win.window);
+    params["parentWindowHandle"] =
+        Ogre::StringConverter::toString(sysInfo.info.win.window);
 #elif __LINUX__
-    params["parentWindowHandle"] = Ogre::StringConverter::toString(sysInfo.info.x11.window);
+    params["parentWindowHandle"] =
+        Ogre::StringConverter::toString(sysInfo.info.x11.window);
 #elif __APPLE__
-#error  Nobody tried this yet.
+#error Nobody tried this yet.
     params["externalGLControl"] = "1";
     params["externalWindowHandle"] = OSX_cocoa_view(mSDLWindow);
     params["macAPI"] = "cocoa";
@@ -436,46 +425,42 @@ void RenderService::initOgreWindow() {
 #endif
 
     mRenderWindow = mRoot->createRenderWindow(
-            "openDarkEngine",
-            mCurrentSize.width,
-            mCurrentSize.height,
-            mCurrentSize.fullscreen,
-            &params);
+        "openDarkEngine", mCurrentSize.width, mCurrentSize.height,
+        mCurrentSize.fullscreen, &params);
 
     mRenderWindow->setVisible(true);
 }
 
 // --------------------------------------------------------------------------
-Ogre::Root* RenderService::getOgreRoot() {
+Ogre::Root *RenderService::getOgreRoot() {
     assert(mRoot);
     return mRoot;
 }
 
 // --------------------------------------------------------------------------
-Ogre::SceneManager* RenderService::getSceneManager() {
+Ogre::SceneManager *RenderService::getSceneManager() {
     assert(mSceneMgr);
     return mSceneMgr;
 }
 
 // --------------------------------------------------------------------------
-Ogre::RenderWindow* RenderService::getRenderWindow() {
+Ogre::RenderWindow *RenderService::getRenderWindow() {
     assert(mRenderWindow);
     return mRenderWindow;
 }
 
 // --------------------------------------------------------------------------
-Ogre::Viewport* RenderService::getDefaultViewport() {
+Ogre::Viewport *RenderService::getDefaultViewport() {
     assert(mDefaultCamera);
     return mDefaultCamera->getViewport();
 }
 
 // --------------------------------------------------------------------------
-Ogre::Camera* RenderService::getDefaultCamera() {
-    return mDefaultCamera;
-}
+Ogre::Camera *RenderService::getDefaultCamera() { return mDefaultCamera; }
 
 // --------------------------------------------------------------------------
-void RenderService::setScreenSize(bool fullScreen, unsigned int width, unsigned int height) {
+void RenderService::setScreenSize(bool fullScreen, unsigned int width,
+                                  unsigned int height) {
     assert(mRenderWindow);
 
     mRenderWindow->setFullscreen(fullScreen, width, height);
@@ -501,8 +486,8 @@ void RenderService::setWorldVisible(bool visible) {
 
 // --------------------------------------------------------------------------
 void RenderService::bootstrapFinished() {
-    // Property Service should have created us automatically through service masks.
-    // So we can register as a link service listener
+    // Property Service should have created us automatically through service
+    // masks. So we can register as a link service listener
     LOG_INFO("RenderService::bootstrapFinished()");
 
     // create the properties the render service uses (built-in)
@@ -513,11 +498,13 @@ void RenderService::bootstrapFinished() {
     mPropPosition = mPropertyService->getProperty("Position");
 
     if (mPropPosition == NULL)
-        OPDE_EXCEPT("Could not get Position property. Not defined. Fatal", "RenderService::bootstrapFinished");
+        OPDE_EXCEPT("Could not get Position property. Not defined. Fatal",
+                    "RenderService::bootstrapFinished");
 
     // listener to the position property to control the scenenode
     Property::ListenerPtr cposc(
-			new ClassCallback<PropertyChangeMsg, RenderService>(this, &RenderService::onPropPositionMsg));
+        new ClassCallback<PropertyChangeMsg, RenderService>(
+            this, &RenderService::onPropPositionMsg));
 
     mPropPositionListenerID = mPropPosition->registerListener(cposc);
 
@@ -526,7 +513,8 @@ void RenderService::bootstrapFinished() {
 
     // Listener to object messages
     ObjectService::ListenerPtr objlist(
-			new ClassCallback<ObjectServiceMsg, RenderService>(this, &RenderService::onObjectMsg));
+        new ClassCallback<ObjectServiceMsg, RenderService>(
+            this, &RenderService::onObjectMsg));
 
     mObjSystemListenerID = mObjectService->registerListener(objlist);
 
@@ -541,23 +529,30 @@ void RenderService::loopStep(float deltaTime) {
 }
 
 // --------------------------------------------------------------------------
-void RenderService::prepareMesh(const Ogre::String& name) {
+void RenderService::prepareMesh(const Ogre::String &name) {
     String fname = name + ".mesh";
 
     if (!Ogre::MeshManager::getSingleton().resourceExists(fname)) {
         // Undefine in advance, so there will be no clash
         Ogre::MeshManager::getSingleton().remove(fname);
         // If it is not found
-        LOG_DEBUG("RenderService::prepareMesh: Mesh definition for %s not found, loading manually from .bin file...", name.c_str());
+        LOG_DEBUG("RenderService::prepareMesh: Mesh definition for %s not "
+                  "found, loading manually from .bin file...",
+                  name.c_str());
         // do a create
 
         try {
-            Ogre::MeshPtr mesh1 = Ogre::MeshManager::getSingleton().create(fname, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                                                                           true, mManualBinFileLoader);
+            Ogre::MeshPtr mesh1 = Ogre::MeshManager::getSingleton().create(
+                fname, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                true, mManualBinFileLoader);
         } catch (FileNotFoundException) {
-            LOG_ERROR("RenderService::prepareMesh: Could not find the requested model %s", name.c_str());
+            LOG_ERROR("RenderService::prepareMesh: Could not find the "
+                      "requested model %s",
+                      name.c_str());
         } catch (Opde::FileException) {
-            LOG_ERROR("RenderService::prepareMesh: Could not load the requested model %s", name.c_str());
+            LOG_ERROR("RenderService::prepareMesh: Could not load the "
+                      "requested model %s",
+                      name.c_str());
         }
     }
 }
@@ -566,22 +561,25 @@ void RenderService::prepareMesh(const Ogre::String& name) {
 void RenderService::createObjectModel(int id) {
     Ogre::String idstr = StringConverter::toString(id);
 
-    Entity *ent = mSceneMgr->createEntity( "Object" + idstr, DEFAULT_RAMP_OBJECT_NAME);
+    Entity *ent =
+        mSceneMgr->createEntity("Object" + idstr, DEFAULT_RAMP_OBJECT_NAME);
 
     // bind the ent to the node of the obj.
-    SceneNode* node = NULL;
+    SceneNode *node = NULL;
 
     try {
         node = getSceneNode(id);
     } catch (BasicException) {
-        LOG_ERROR("RenderService: Could not get the sceneNode for object %d! Not attaching object model!", id);
+        LOG_ERROR("RenderService: Could not get the sceneNode for object %d! "
+                  "Not attaching object model!",
+                  id);
         mSceneMgr->destroyEntity(ent);
         return;
     }
 
     assert(node != NULL);
 
-    SceneNode* enode = mSceneMgr->createSceneNode("ObjMesh" + idstr);
+    SceneNode *enode = mSceneMgr->createSceneNode("ObjMesh" + idstr);
     enode->setPosition(Vector3::ZERO);
     enode->setOrientation(Quaternion::IDENTITY);
     node->addChild(enode);
@@ -611,16 +609,20 @@ void RenderService::removeObjectModel(int id) {
 }
 
 // --------------------------------------------------------------------------
-void RenderService::setObjectModel(int id, const std::string& name) {
-    EntityInfo* ei = _getEntityInfo(id);
+void RenderService::setObjectModel(int id, const std::string &name) {
+    EntityInfo *ei = _getEntityInfo(id);
 
-    LOG_VERBOSE("RenderService::setObjectModel: Object model for %d - setting to %s", id, name.c_str());
+    LOG_VERBOSE(
+        "RenderService::setObjectModel: Object model for %d - setting to %s",
+        id, name.c_str());
 
     prepareMesh(name);
 
     // if there was an error finding the entity info, the object does not exist
     if (!ei) {
-        LOG_VERBOSE("RenderService: Object model could not be set for %d, object not found", id);
+        LOG_VERBOSE("RenderService: Object model could not be set for %d, "
+                    "object not found",
+                    id);
         return;
     }
 
@@ -643,11 +645,13 @@ void RenderService::setObjectModel(int id, const std::string& name) {
 
     // load the new entity, set it as the current in the entity info
     try {
-        ent = mSceneMgr->createEntity( "Object" + idstr + name, name + ".mesh");
-    } catch (Ogre::Exception& e) {
+        ent = mSceneMgr->createEntity("Object" + idstr + name, name + ".mesh");
+    } catch (Ogre::Exception &e) {
         // TODO: This could also be handled by not setting the new entity at all
-        LOG_ERROR("RenderService: Could not load model %s for obj %d : %s", name.c_str(), id, e.getFullDescription().c_str());
-        ent = mSceneMgr->createEntity( "Object" + idstr + "Ramp", DEFAULT_RAMP_OBJECT_NAME);
+        LOG_ERROR("RenderService: Could not load model %s for obj %d : %s",
+                  name.c_str(), id, e.getFullDescription().c_str());
+        ent = mSceneMgr->createEntity("Object" + idstr + "Ramp",
+                                      DEFAULT_RAMP_OBJECT_NAME);
     }
 
     prepareEntity(ent);
@@ -660,7 +664,7 @@ void RenderService::setObjectModel(int id, const std::string& name) {
 }
 
 // --------------------------------------------------------------------------
-void RenderService::prepareEntity(Ogre::Entity* e) {
+void RenderService::prepareEntity(Ogre::Entity *e) {
     e->_initialise(true);
 
     e->setCastShadows(true);
@@ -672,7 +676,7 @@ void RenderService::prepareEntity(Ogre::Entity* e) {
         Skeleton::BoneIterator bi = e->getSkeleton()->getBoneIterator();
 
         while (bi.hasMoreElements()) {
-            Bone* n = bi.getNext();
+            Bone *n = bi.getNext();
 
             n->setManuallyControlled(true);
         }
@@ -689,10 +693,9 @@ void RenderService::clear() {
     mObjectToNode.clear();
 }
 
-
 // --------------------------------------------------------------------------
 void RenderService::attachCameraToObject(int objID) {
-    SceneNode* sn = getSceneNode(objID);
+    SceneNode *sn = getSceneNode(objID);
 
     if (sn) {
         sn->attachObject(mDefaultCamera);
@@ -702,13 +705,13 @@ void RenderService::attachCameraToObject(int objID) {
 // --------------------------------------------------------------------------
 void RenderService::detachCamera() {
     if (mDefaultCamera->isAttached()) {
-        SceneNode* sn = mDefaultCamera->getParentSceneNode();
+        SceneNode *sn = mDefaultCamera->getParentSceneNode();
         sn->detachObject(mDefaultCamera);
     }
 }
 
 // --------------------------------------------------------------------------
-EntityInfo* RenderService::_getEntityInfo(int oid) {
+EntityInfo *RenderService::_getEntityInfo(int oid) {
     ObjectEntityMap::iterator it = mEntityMap.find(oid);
 
     if (it != mEntityMap.end()) {
@@ -721,7 +724,7 @@ EntityInfo* RenderService::_getEntityInfo(int oid) {
 // --------------------------------------------------------------------------
 // ---- Scene Node handling routines ----------------------------------------
 // --------------------------------------------------------------------------
-Ogre::SceneNode* RenderService::getSceneNode(int objID) {
+Ogre::SceneNode *RenderService::getSceneNode(int objID) {
     if (objID > 0) {
         ObjectToNode::iterator snit = mObjectToNode.find(objID);
 
@@ -732,21 +735,23 @@ Ogre::SceneNode* RenderService::getSceneNode(int objID) {
 
     // Throwing exceptions is not a good idea
     return NULL;
-    // OPDE_EXCEPT("Could not find scenenode for object. Does object exist?", "ObjectService::getSceneNodeForObject");
+    // OPDE_EXCEPT("Could not find scenenode for object. Does object exist?",
+    // "ObjectService::getSceneNodeForObject");
 }
 
 // --------------------------------------------------------------------------
-void RenderService::onPropPositionMsg(const PropertyChangeMsg& msg) {
+void RenderService::onPropPositionMsg(const PropertyChangeMsg &msg) {
     // Update the scene node's position and orientation
     if (msg.objectID <= 0) // no action for archetypes
         return;
 
     switch (msg.change) {
-    case PROP_ADDED   :
-    case PROP_CHANGED : {
+    case PROP_ADDED:
+    case PROP_CHANGED: {
         try {
-            // Find the scene node by it's object id, and update the position and orientation
-            Ogre::SceneNode* node = getSceneNode(msg.objectID);
+            // Find the scene node by it's object id, and update the position
+            // and orientation
+            Ogre::SceneNode *node = getSceneNode(msg.objectID);
 
             if (node == NULL)
                 return;
@@ -759,31 +764,34 @@ void RenderService::onPropPositionMsg(const PropertyChangeMsg& msg) {
             node->setPosition(pos.toVector());
             node->setOrientation(ori.toQuaternion());
 
-        } catch (BasicException& e) {
-            LOG_ERROR("RenderService: Exception while setting position of object: %s", e.getDetails().c_str());
+        } catch (BasicException &e) {
+            LOG_ERROR(
+                "RenderService: Exception while setting position of object: %s",
+                e.getDetails().c_str());
         }
 
         break;
     }
 
-    default: break;
+    default:
+        break;
     }
 }
 
 // --------------------------------------------------------------------------
-void RenderService::onObjectMsg(const ObjectServiceMsg& msg) {
+void RenderService::onObjectMsg(const ObjectServiceMsg &msg) {
     if (msg.objectID <= 0) // no action for archetypes
         return;
 
     switch (msg.type) {
-    case OBJ_CREATE_STARTED   : {
+    case OBJ_CREATE_STARTED: {
         // create scenenode, return
         std::string nodeName("Object");
 
         nodeName += Ogre::StringConverter::toString(msg.objectID);
 
         // Use render service to create a scene node for the object
-        Ogre::SceneNode* snode = mSceneMgr->createSceneNode(nodeName);
+        Ogre::SceneNode *snode = mSceneMgr->createSceneNode(nodeName);
 
         assert(snode != NULL);
 
@@ -798,7 +806,7 @@ void RenderService::onObjectMsg(const ObjectServiceMsg& msg) {
         return;
     }
 
-    case OBJ_DESTROYED : {
+    case OBJ_DESTROYED: {
         // destroy all the entities/lights attached, then the scenenode
         // Light and spotlight are removed because of property removal,
         // TODO: no modelName -> default model (mesh) for the object
@@ -811,7 +819,7 @@ void RenderService::onObjectMsg(const ObjectServiceMsg& msg) {
         // find the SN, destroy if found
         ObjectToNode::iterator oit = mObjectToNode.find(msg.objectID);
 
-        if (oit!=mObjectToNode.end()) {
+        if (oit != mObjectToNode.end()) {
             std::string nodeName("Object");
             nodeName += Ogre::StringConverter::toString(msg.objectID);
             mSceneMgr->destroySceneNode(oit->second->getName());
@@ -820,7 +828,8 @@ void RenderService::onObjectMsg(const ObjectServiceMsg& msg) {
         return;
     }
 
-    default: break; // nothing, ignore
+    default:
+        break; // nothing, ignore
     }
 }
 
@@ -830,13 +839,14 @@ void RenderService::prepareHardcodedMedia() {
     TexturePtr jorgeTex = TextureManager::getSingleton().getByName("jorge.png");
 
     if (!jorgeTex) {
-        DataStreamPtr stream(new MemoryDataStream(JORGE_TEXTURE_PNG, JORGE_TEXTURE_PNG_SIZE, false));
+        DataStreamPtr stream(new MemoryDataStream(
+            JORGE_TEXTURE_PNG, JORGE_TEXTURE_PNG_SIZE, false));
 
         Image img;
         img.load(stream, "png");
         jorgeTex = TextureManager::getSingleton().loadImage(
-                "jorge.png", ResourceGroupManager::INTERNAL_RESOURCE_GROUP_NAME,
-                img, TEX_TYPE_2D);
+            "jorge.png", ResourceGroupManager::INTERNAL_RESOURCE_GROUP_NAME,
+            img, TEX_TYPE_2D);
     }
 
     // 2. The default geometric shape - White Ramp
@@ -846,54 +856,42 @@ void RenderService::prepareHardcodedMedia() {
 
 // --------------------------------------------------------------------------
 void RenderService::createRampMesh() {
-    // Code copied from Ogre3D wiki, and modified (Thanks to the original author for saving my time!)
+    // Code copied from Ogre3D wiki, and modified (Thanks to the original author
+    // for saving my time!)
     /// Create the mesh via the MeshManager
-    Ogre::MeshPtr msh = MeshManager::getSingleton().createManual(DEFAULT_RAMP_OBJECT_NAME, ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    Ogre::MeshPtr msh = MeshManager::getSingleton().createManual(
+        DEFAULT_RAMP_OBJECT_NAME,
+        ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
     /// Create one submesh
-    SubMesh* sub = msh->createSubMesh();
+    SubMesh *sub = msh->createSubMesh();
     sub->setMaterialName("BaseWhite");
 
     // Not exactly accurate for 1:1:2 side size ratio, but well...
     const float sqrt13 = 0.577350269f; /* sqrt(1/3) */
 
     const size_t nVertices = 6;
-    const size_t vbufCount = 3*2*nVertices;
+    const size_t vbufCount = 3 * 2 * nVertices;
 
     float vertices[vbufCount] = {
-        -2.0,-1.0,-1.0,	//0 position
-        sqrt13,sqrt13,sqrt13,
-        -2.0, 1.0,-1.0, //1 position
-        sqrt13,-sqrt13,sqrt13,
-        -2.0, 1.0, 1.0, //2 position
-        sqrt13,-sqrt13,-sqrt13,
-        -2.0,-1.0, 1.0, //3 position
-        sqrt13,sqrt13,-sqrt13,
-        2.0, 1.0, -0.3,  //4 position
-        -sqrt13,-sqrt13,sqrt13,
-        2.0,-1.0, -0.3,  //5 position
-        -sqrt13,sqrt13,sqrt13
-    };
+        -2.0,    -1.0,    -1.0,                      // 0 position
+        sqrt13,  sqrt13,  sqrt13,  -2.0, 1.0,  -1.0, // 1 position
+        sqrt13,  -sqrt13, sqrt13,  -2.0, 1.0,  1.0,  // 2 position
+        sqrt13,  -sqrt13, -sqrt13, -2.0, -1.0, 1.0,  // 3 position
+        sqrt13,  sqrt13,  -sqrt13, 2.0,  1.0,  -0.3, // 4 position
+        -sqrt13, -sqrt13, sqrt13,  2.0,  -1.0, -0.3, // 5 position
+        -sqrt13, sqrt13,  sqrt13};
 
     const size_t ibufCount = 24;
-    unsigned short faces[ibufCount] = {
-        0,1,2,
-        0,2,3,
-        5,1,0,
-        5,4,1,
-        5,3,2,
-        5,2,4,
-        1,4,2,
-        5,0,3
-    };
-
+    unsigned short faces[ibufCount] = {0, 1, 2, 0, 2, 3, 5, 1, 0, 5, 4, 1,
+                                       5, 3, 2, 5, 2, 4, 1, 4, 2, 5, 0, 3};
 
     /// Create vertex data structure for 8 vertices shared between submeshes
     msh->sharedVertexData = new VertexData();
     msh->sharedVertexData->vertexCount = nVertices;
 
     /// Create declaration (memory format) of vertex data
-    VertexDeclaration* decl = msh->sharedVertexData->vertexDeclaration;
+    VertexDeclaration *decl = msh->sharedVertexData->vertexDeclaration;
     size_t offset = 0;
     // 1st buffer
     decl->addElement(0, offset, VET_FLOAT3, VES_POSITION);
@@ -905,21 +903,21 @@ void RenderService::createRampMesh() {
     /// and bytes per vertex (offset)
     HardwareVertexBufferSharedPtr vbuf =
         HardwareBufferManager::getSingleton().createVertexBuffer(
-                offset, msh->sharedVertexData->vertexCount, HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+            offset, msh->sharedVertexData->vertexCount,
+            HardwareBuffer::HBU_STATIC_WRITE_ONLY);
 
     /// Upload the vertex data to the card
     vbuf->writeData(0, vbuf->getSizeInBytes(), vertices, true);
 
     /// Set vertex buffer binding so buffer 0 is bound to our vertex buffer
-    VertexBufferBinding* bind = msh->sharedVertexData->vertexBufferBinding;
+    VertexBufferBinding *bind = msh->sharedVertexData->vertexBufferBinding;
     bind->setBinding(0, vbuf);
 
     /// Allocate index buffer of the requested number of vertices (ibufCount)
-    HardwareIndexBufferSharedPtr ibuf = HardwareBufferManager::getSingleton().
-                                        createIndexBuffer(
-                                                HardwareIndexBuffer::IT_16BIT,
-                                                ibufCount,
-                                                HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+    HardwareIndexBufferSharedPtr ibuf =
+        HardwareBufferManager::getSingleton().createIndexBuffer(
+            HardwareIndexBuffer::IT_16BIT, ibufCount,
+            HardwareBuffer::HBU_STATIC_WRITE_ONLY);
 
     /// Upload the index data to the card
     ibuf->writeData(0, ibuf->getSizeInBytes(), faces, true);
@@ -931,7 +929,7 @@ void RenderService::createRampMesh() {
     sub->indexData->indexStart = 0;
 
     /// Set bounding information (for culling)
-    msh->_setBounds(AxisAlignedBox(-2,-1,-1,2,1,1));
+    msh->_setBounds(AxisAlignedBox(-2, -1, -1, 2, 1, 1));
     msh->_setBoundingSphereRadius(Math::Sqrt(6));
 
     /// Notify Mesh object that it has been loaded
@@ -949,7 +947,8 @@ void RenderService::createProperties() {
     mPropertyService->registerProperty(mPropModelName);
 
     // RenderAlpha property - single float prop
-    mRenderAlphaProperty = new RenderAlphaProperty(this, mPropertyService.get());
+    mRenderAlphaProperty =
+        new RenderAlphaProperty(this, mPropertyService.get());
     mPropertyService->registerProperty(mRenderAlphaProperty);
 
     // HasRefs - single bool prop
@@ -961,7 +960,8 @@ void RenderService::createProperties() {
     mPropertyService->registerProperty(mRenderTypeProperty);
 
     // ZBias - z bias for depth fighting avoidance
-    if (mConfigService->getGameType() > ConfigService::GAME_TYPE_T1) { // only t1 does not have ZBIAS
+    if (mConfigService->getGameType() >
+        ConfigService::GAME_TYPE_T1) { // only t1 does not have ZBIAS
         mZBiasProperty = new ZBiasProperty(this, mPropertyService.get());
         mPropertyService->registerProperty(mZBiasProperty);
     }
@@ -970,7 +970,6 @@ void RenderService::createProperties() {
     mPropScale = new ModelScaleProperty(this, mPropertyService.get());
     mPropertyService->registerProperty(mPropScale);
 }
-
 
 // --------------------------------------------------------------------------
 void RenderService::broadcastScreenSize() {
@@ -985,18 +984,13 @@ void RenderService::broadcastScreenSize() {
 //-------------------------- Factory implementation
 std::string RenderServiceFactory::mName = "RenderService";
 
-RenderServiceFactory::RenderServiceFactory() : ServiceFactory() {
-};
+RenderServiceFactory::RenderServiceFactory() : ServiceFactory(){};
 
-const std::string& RenderServiceFactory::getName() {
-    return mName;
-}
+const std::string &RenderServiceFactory::getName() { return mName; }
 
-Service* RenderServiceFactory::createInstance(ServiceManager* manager) {
+Service *RenderServiceFactory::createInstance(ServiceManager *manager) {
     return new RenderService(manager, mName);
 }
 
-const size_t RenderServiceFactory::getSID() {
-    return RenderService::SID;
-}
-}
+const size_t RenderServiceFactory::getSID() { return RenderService::SID; }
+} // namespace Opde

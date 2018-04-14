@@ -25,33 +25,32 @@
  * @brief A various utility methods for File class usage
  */
 
-
 #ifndef __FILECOMPAT_H
 #define __FILECOMPAT_H
 
-#include "config.h"
 #include "File.h"
-#include "Vector2.h"
-#include "Vector3.h"
 #include "Plane.h"
 #include "Quaternion.h"
+#include "Vector2.h"
+#include "Vector3.h"
+#include "config.h"
 
 namespace Opde {
-	// Vector2
-	File& operator<<(File& st, const Vector2& val);
-	File& operator>>(File& st, Vector2& val);
-	
-	// Vector3
-	File& operator<<(File& st, const Vector3& val);	
-	File& operator>>(File& st, Vector3& val);
-	
-	// Plane
-	File& operator<<(File& st, const Plane& val);
-	File& operator>>(File& st, Plane& val);
-	
-	// Quaternion
-	File& operator<<(File& st, const Quaternion& val);
-	File& operator>>(File& st, Quaternion& val);
-}
+// Vector2
+File &operator<<(File &st, const Vector2 &val);
+File &operator>>(File &st, Vector2 &val);
+
+// Vector3
+File &operator<<(File &st, const Vector3 &val);
+File &operator>>(File &st, Vector3 &val);
+
+// Plane
+File &operator<<(File &st, const Plane &val);
+File &operator>>(File &st, Plane &val);
+
+// Quaternion
+File &operator<<(File &st, const Quaternion &val);
+File &operator>>(File &st, Quaternion &val);
+} // namespace Opde
 
 #endif

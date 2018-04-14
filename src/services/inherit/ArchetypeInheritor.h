@@ -29,32 +29,33 @@
 #include "InheritService.h"
 
 namespace Opde {
-		/** Archetype Inheritor. This inheritor only inherits to destination objects having ID < 0 */
-		class ArchetypeInheritor : public CachedInheritor {
-				public:
-					/// Constructor
-					ArchetypeInheritor(const InheritorFactory* fac, InheritService* is);
+/** Archetype Inheritor. This inheritor only inherits to destination objects
+ * having ID < 0 */
+class ArchetypeInheritor : public CachedInheritor {
+public:
+    /// Constructor
+    ArchetypeInheritor(const InheritorFactory *fac, InheritService *is);
 
-					/// Destructor
-					~ArchetypeInheritor();
+    /// Destructor
+    ~ArchetypeInheritor();
 
-                    virtual bool validate(int srcID, int dstID, unsigned int priority) const;
-			};
+    virtual bool validate(int srcID, int dstID, unsigned int priority) const;
+};
 
+/** Archetype inheritor factory. The inheritor produced is named "archetype" and
+ * will, as the name suggests, inherit for archetypes (excluding concrete
+ * objects). */
+class ArchetypeInheritorFactory : public InheritorFactory {
+public:
+    ArchetypeInheritorFactory();
 
-        /** Archetype inheritor factory. The inheritor produced is named "archetype" and will, as the name suggests,
-         * inherit for archetypes (excluding concrete objects). */
-		class ArchetypeInheritorFactory : public InheritorFactory {
-				public:
-					ArchetypeInheritorFactory();
+    virtual std::string getName() const;
 
-					virtual std::string getName() const;
+    Inheritor *createInstance(InheritService *is) const;
 
-					Inheritor* createInstance(InheritService* is) const;
-
-                protected:
-                    static std::string mName;
-			};
-	}
+protected:
+    static std::string mName;
+};
+} // namespace Opde
 
 #endif

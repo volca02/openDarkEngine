@@ -26,32 +26,43 @@
 
 namespace Opde {
 
-	/** A value + bool pair used to store requests of particular value (request for setting change).
-	 * A typical usage is a within value change method that modifies a value that should be persistent
-	 * for a defined period of time (one cycle iteration).
-	 */
-	template<typename T> class ValueChangeRequest {
-		public:
-			/// Constructor
-			ValueChangeRequest() : mValue() { mRequested = false; };
+/** A value + bool pair used to store requests of particular value (request for
+ * setting change). A typical usage is a within value change method that
+ * modifies a value that should be persistent for a defined period of time (one
+ * cycle iteration).
+ */
+template <typename T> class ValueChangeRequest {
+public:
+    /// Constructor
+    ValueChangeRequest() : mValue() { mRequested = false; };
 
-			/// A request application method. Call this to set the new desired value
-			void set(T newVal) { mValue = mValue; mRequested = true; };
+    /// A request application method. Call this to set the new desired value
+    void set(T newVal) {
+        mValue = mValue;
+        mRequested = true;
+    };
 
-			/** Sets the reference target with the new value if request happened
-			 * @param tgt The target for the value change
-			 * @return true uf value change happened
-			 */
-			bool getIfReq(T& tgt) { if (mRequested) { tgt = mValue; mRequested = false; return true; }; return false; };
+    /** Sets the reference target with the new value if request happened
+     * @param tgt The target for the value change
+     * @return true uf value change happened
+     */
+    bool getIfReq(T &tgt) {
+        if (mRequested) {
+            tgt = mValue;
+            mRequested = false;
+            return true;
+        };
+        return false;
+    };
 
-			/// getter for the requested value
-			T requestedVal() { return mValue; };
+    /// getter for the requested value
+    T requestedVal() { return mValue; };
 
-		protected:
-			T mValue;
-			bool mRequested;
-	};
+protected:
+    T mValue;
+    bool mRequested;
+};
 
-}
+} // namespace Opde
 
 #endif

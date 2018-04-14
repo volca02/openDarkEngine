@@ -21,8 +21,8 @@
  *
  *****************************************************************************/
 
-#include "ServiceCommon.h"
 #include "GUIService.h"
+#include "ServiceCommon.h"
 #include "StringTokenizer.h"
 
 using namespace std;
@@ -33,18 +33,13 @@ namespace Opde {
 /*-----------------------------------------------------*/
 /*-------------------- GUIService ---------------------*/
 /*-----------------------------------------------------*/
-template<> const size_t ServiceImpl<GUIService>::SID = __SERVICE_ID_GUI;
+template <> const size_t ServiceImpl<GUIService>::SID = __SERVICE_ID_GUI;
 
-GUIService::GUIService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::GUIService >(manager, name),
-    mActive(false),
-    mVisible(false),
-    mActiveSheet(),
-    mConsole(NULL),
-    mCoreAtlas(NULL),
-    mConsoleFont(NULL),
-    mRenderServiceListenerID(0),
-    mInputSrv(NULL),
-    mRenderSrv(NULL) {
+GUIService::GUIService(ServiceManager *manager, const std::string &name)
+    : ServiceImpl<Opde::GUIService>(manager, name), mActive(false),
+      mVisible(false), mActiveSheet(), mConsole(NULL), mCoreAtlas(NULL),
+      mConsoleFont(NULL), mRenderServiceListenerID(0), mInputSrv(NULL),
+      mRenderSrv(NULL) {
 
     mLoopClientDef.id = LOOPCLIENT_ID_GUI;
     mLoopClientDef.mask = LOOPMODE_GUI;
@@ -53,9 +48,7 @@ GUIService::GUIService(ServiceManager *manager, const std::string& name) : Servi
 }
 
 // -----------------------------------
-GUIService::~GUIService() {
-    delete mConsole;
-}
+GUIService::~GUIService() { delete mConsole; }
 
 // -----------------------------------
 void GUIService::setActive(bool active) {
@@ -84,14 +77,10 @@ void GUIService::setVisible(bool visible) {
 
         setActive(false);
     }
-
 }
-
 
 // -----------------------------------
-bool GUIService::init() {
-    return true;
-}
+bool GUIService::init() { return true; }
 
 // -----------------------------------
 void GUIService::bootstrapFinished() {
@@ -107,18 +96,26 @@ void GUIService::bootstrapFinished() {
     mInputSrv->setDirectListener(this);
 
     // Register as a listener for the resolution changes
-    RenderService::ListenerPtr renderServiceListener(new ClassCallback<RenderServiceMsg, GUIService>(this, &GUIService::onRenderServiceMsg));
-    mRenderServiceListenerID = mRenderSrv->registerListener(renderServiceListener);
+    RenderService::ListenerPtr renderServiceListener(
+        new ClassCallback<RenderServiceMsg, GUIService>(
+            this, &GUIService::onRenderServiceMsg));
+    mRenderServiceListenerID =
+        mRenderSrv->registerListener(renderServiceListener);
 
-    InputService::ListenerPtr showConsoleListener(new ClassCallback<InputEventMsg, GUIService>(this, &GUIService::onShowConsole));
+    InputService::ListenerPtr showConsoleListener(
+        new ClassCallback<InputEventMsg, GUIService>(
+            this, &GUIService::onShowConsole));
 
     mInputSrv->registerCommandTrap("show_console", showConsoleListener);
 
     mLoopSrv->addLoopClient(this);
 
     // Core rendering sources
-    mConfigSrv->setParamDescription("console_font_name", "Font file name of the base console font used for debugging");
-    mConfigSrv->setParamDescription("console_font_group", "Resource group of the base console font");
+    mConfigSrv->setParamDescription(
+        "console_font_name",
+        "Font file name of the base console font used for debugging");
+    mConfigSrv->setParamDescription("console_font_group",
+                                    "Resource group of the base console font");
 
     DVariant tmp;
     mConsoleFontName = "font.fon";
@@ -126,20 +123,23 @@ void GUIService::bootstrapFinished() {
     if (mConfigSrv->getParam("console_font_name", tmp)) {
         mConsoleFontName = tmp.toString();
     } else {
-        LOG_ERROR("console_font_name parameter not set, using default '%s'!", mConsoleFontName.c_str());
+        LOG_ERROR("console_font_name parameter not set, using default '%s'!",
+                  mConsoleFontName.c_str());
     }
 
     mConsoleFontGroup = "General";
     if (mConfigSrv->getParam("console_font_group", tmp)) {
         mConsoleFontGroup = tmp.toString();
     } else {
-        LOG_ERROR("console_font_group parameter not set, using default '%s'!", mConsoleFontGroup.c_str());
+        LOG_ERROR("console_font_group parameter not set, using default '%s'!",
+                  mConsoleFontGroup.c_str());
     }
 
     // TODO: Do we need palette for the console font?
     mCoreAtlas = mDrawSrv->createAtlas();
     mDrawSrv->setFontPalette(ManualFonFileLoader::ePT_Default);
-    mConsoleFont = mDrawSrv->loadFont(mCoreAtlas, mConsoleFontName, mConsoleFontGroup);
+    mConsoleFont =
+        mDrawSrv->loadFont(mCoreAtlas, mConsoleFontName, mConsoleFontGroup);
 
     // create the console.
     mConsole = new ConsoleGUI(this);
@@ -168,7 +168,6 @@ void GUIService::shutdown() {
     mLoopSrv.reset();
 }
 
-
 // -----------------------------------
 bool GUIService::keyPressed(const SDL_KeyboardEvent &e) {
     if (mConsole && mConsole->isActive()) {
@@ -181,27 +180,19 @@ bool GUIService::keyPressed(const SDL_KeyboardEvent &e) {
 }
 
 // -----------------------------------
-bool GUIService::keyReleased(const SDL_KeyboardEvent &e) {
-    return true;
-}
+bool GUIService::keyReleased(const SDL_KeyboardEvent &e) { return true; }
 
 // -----------------------------------
-bool GUIService::mouseMoved(const SDL_MouseMotionEvent &e) {
-    return true;
-}
+bool GUIService::mouseMoved(const SDL_MouseMotionEvent &e) { return true; }
 
 // -----------------------------------
-bool GUIService::mousePressed(const SDL_MouseButtonEvent &e) {
-    return true;
-}
+bool GUIService::mousePressed(const SDL_MouseButtonEvent &e) { return true; }
 
 // -----------------------------------
-bool GUIService::mouseReleased(const SDL_MouseButtonEvent &e) {
-    return true;
-}
+bool GUIService::mouseReleased(const SDL_MouseButtonEvent &e) { return true; }
 
 // -----------------------------------
-void GUIService::onRenderServiceMsg(const RenderServiceMsg& message) {
+void GUIService::onRenderServiceMsg(const RenderServiceMsg &message) {
     // Inform the console about the resolution change
     if (mConsole)
         mConsole->resolutionChanged(message.size.width, message.size.height);
@@ -210,7 +201,7 @@ void GUIService::onRenderServiceMsg(const RenderServiceMsg& message) {
 }
 
 // -----------------------------------
-void GUIService::onShowConsole(const InputEventMsg& iem) {
+void GUIService::onShowConsole(const InputEventMsg &iem) {
     if (mConsole && mConsole->isActive()) {
         hideConsole();
     } else {
@@ -236,7 +227,6 @@ void GUIService::showConsole() {
     setVisible(true);
 }
 
-
 // -----------------------------------
 void GUIService::hideConsole() {
     if (!mConsole)
@@ -250,7 +240,6 @@ void GUIService::hideConsole() {
     setVisible(mCBVisible);
 }
 
-
 // -----------------------------------
 void GUIService::loopStep(float deltaTime) {
     // hmm. console update here
@@ -259,37 +248,24 @@ void GUIService::loopStep(float deltaTime) {
 }
 
 // -----------------------------------
-FontDrawSourcePtr GUIService::getConsoleFont() const {
-    return mConsoleFont;
-}
-
+FontDrawSourcePtr GUIService::getConsoleFont() const { return mConsoleFont; }
 
 // -----------------------------------
-TextureAtlasPtr GUIService::getCoreAtlas() const {
-    return mCoreAtlas;
-}
-
+TextureAtlasPtr GUIService::getCoreAtlas() const { return mCoreAtlas; }
 
 //-------------------------- Factory implementation
 std::string GUIServiceFactory::mName = "GUIService";
 
-GUIServiceFactory::GUIServiceFactory() : ServiceFactory() {
-};
+GUIServiceFactory::GUIServiceFactory() : ServiceFactory(){};
 
-const std::string& GUIServiceFactory::getName() {
-    return mName;
-}
+const std::string &GUIServiceFactory::getName() { return mName; }
 
-const uint GUIServiceFactory::getMask() {
-    return SERVICE_RENDERER;
-}
+const uint GUIServiceFactory::getMask() { return SERVICE_RENDERER; }
 
-const size_t GUIServiceFactory::getSID() {
-    return GUIService::SID;
-}
+const size_t GUIServiceFactory::getSID() { return GUIService::SID; }
 
-Service* GUIServiceFactory::createInstance(ServiceManager* manager) {
+Service *GUIServiceFactory::createInstance(ServiceManager *manager) {
     return new GUIService(manager, mName);
 }
 
-}
+} // namespace Opde

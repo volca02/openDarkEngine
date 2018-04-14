@@ -22,155 +22,161 @@
  *
  *****************************************************************************/
 
-
 #ifndef __GUISERVICE_H
 #define __GUISERVICE_H
 
 #include "config.h"
 
-#include "ServiceCommon.h"
-#include "OpdeServiceManager.h"
 #include "OpdeService.h"
-#include "input/InputService.h"
-#include "draw/DrawService.h"
+#include "OpdeServiceManager.h"
+#include "ServiceCommon.h"
 #include "config/ConfigService.h"
+#include "draw/DrawService.h"
 #include "gui/ConsoleGUI.h"
+#include "input/InputService.h"
 
 namespace Opde {
 
-	/** @brief GUI service - service which handles user interfaces
-	  * @note This class also handles console and show_console input command */
-	class OPDELIB_EXPORT GUIService : public ServiceImpl<GUIService>, public DirectInputListener, public LoopClient {
-		public:
-			GUIService(ServiceManager *manager, const std::string& name);
-			virtual ~GUIService();
+/** @brief GUI service - service which handles user interfaces
+ * @note This class also handles console and show_console input command */
+class OPDELIB_EXPORT GUIService : public ServiceImpl<GUIService>,
+                                  public DirectInputListener,
+                                  public LoopClient {
+public:
+    GUIService(ServiceManager *manager, const std::string &name);
+    virtual ~GUIService();
 
-			/** Set's the activeness state for GUI.
-			* Either GUI gets input, or the mapped way for input is realized. @see InputService
-			* @note if active, cursor is shown, hidden otherwise.
-			* @param active If true, the GUI is active, cursor is shown, and all inputs go into GUI.
-			*/
-			void setActive(bool active);
+    /** Set's the activeness state for GUI.
+     * Either GUI gets input, or the mapped way for input is realized. @see
+     * InputService
+     * @note if active, cursor is shown, hidden otherwise.
+     * @param active If true, the GUI is active, cursor is shown, and all inputs
+     * go into GUI.
+     */
+    void setActive(bool active);
 
-			/** Sets the visibility state of the gui. Note: This differs from activeness in that Active
-			* GUI can be Invisible and the other way round.
-			* @param visible If true, the active sheet is set to show(), if false, set to hide()
-			*/
-			void setVisible(bool visible);
+    /** Sets the visibility state of the gui. Note: This differs from activeness
+     * in that Active GUI can be Invisible and the other way round.
+     * @param visible If true, the active sheet is set to show(), if false, set
+     * to hide()
+     */
+    void setVisible(bool visible);
 
-			/** Returns the pre-prepared console font. Used to render console and some debug info.
-			*/
-			FontDrawSourcePtr getConsoleFont() const;
+    /** Returns the pre-prepared console font. Used to render console and some
+     * debug info.
+     */
+    FontDrawSourcePtr getConsoleFont() const;
 
-			/** Returns the atlas containing the core render sources - mouse cursor, console font, etc.
-			* Use this to render various debug overlays and stuff like that. */
-			TextureAtlasPtr getCoreAtlas() const;
+    /** Returns the atlas containing the core render sources - mouse cursor,
+     * console font, etc. Use this to render various debug overlays and stuff
+     * like that. */
+    TextureAtlasPtr getCoreAtlas() const;
 
-			/// Hides the console window
-			void hideConsole();
+    /// Hides the console window
+    void hideConsole();
 
-			/// Shows the console window
-			void showConsole();
+    /// Shows the console window
+    void showConsole();
 
-		protected:
-			// Service initialization related methods
-			bool init();
+protected:
+    // Service initialization related methods
+    bool init();
 
-			void bootstrapFinished();
+    void bootstrapFinished();
 
-			void shutdown();
+    void shutdown();
 
-			void onRenderServiceMsg(const RenderServiceMsg& message);
+    void onRenderServiceMsg(const RenderServiceMsg &message);
 
-			void onShowConsole(const InputEventMsg& iem);
+    void onShowConsole(const InputEventMsg &iem);
 
-			/// Loop step event
-			void loopStep(float deltaTime);
+    /// Loop step event
+    void loopStep(float deltaTime);
 
-			// Input related methods
-			virtual bool keyPressed(const SDL_KeyboardEvent &e);
-			virtual bool keyReleased(const SDL_KeyboardEvent &e);
+    // Input related methods
+    virtual bool keyPressed(const SDL_KeyboardEvent &e);
+    virtual bool keyReleased(const SDL_KeyboardEvent &e);
 
-			virtual bool mouseMoved(const SDL_MouseMotionEvent &e);
-			virtual bool mousePressed(const SDL_MouseButtonEvent &e);
-			virtual bool mouseReleased(const SDL_MouseButtonEvent &e);
+    virtual bool mouseMoved(const SDL_MouseMotionEvent &e);
+    virtual bool mousePressed(const SDL_MouseButtonEvent &e);
+    virtual bool mouseReleased(const SDL_MouseButtonEvent &e);
 
-		private:
-			/// Activity indicator
-			bool mActive;
+private:
+    /// Activity indicator
+    bool mActive;
 
-			/// Visibility indicator
-			bool mVisible;
+    /// Visibility indicator
+    bool mVisible;
 
-			/// Currently visible sheet
-			DrawSheetPtr mActiveSheet;
+    /// Currently visible sheet
+    DrawSheetPtr mActiveSheet;
 
-			/// Console frontend - GUI render of the console
-			ConsoleGUI* mConsole;
+    /// Console frontend - GUI render of the console
+    ConsoleGUI *mConsole;
 
-			// --- Console backup ---
-			/// Console Backup - activeness flag
-			bool mCBActive;
+    // --- Console backup ---
+    /// Console Backup - activeness flag
+    bool mCBActive;
 
-			/// Console Backup - visibility flag
-			bool mCBVisible;
+    /// Console Backup - visibility flag
+    bool mCBVisible;
 
-			/// Console Backup - prev. active sheet
-			DrawSheetPtr mCBSheet;
+    /// Console Backup - prev. active sheet
+    DrawSheetPtr mCBSheet;
 
-			// --- Core rendering ---
-			/// Core rendering atlas. Various overlays, mouse cursor, etc...
-			TextureAtlasPtr mCoreAtlas;
+    // --- Core rendering ---
+    /// Core rendering atlas. Various overlays, mouse cursor, etc...
+    TextureAtlasPtr mCoreAtlas;
 
-			/// Console font - automatically loaded upon bootstrap finish...
-			FontDrawSourcePtr mConsoleFont;
+    /// Console font - automatically loaded upon bootstrap finish...
+    FontDrawSourcePtr mConsoleFont;
 
-			/// Console font name
-			std::string mConsoleFontName;
+    /// Console font name
+    std::string mConsoleFontName;
 
-			/// Console font group
-			std::string mConsoleFontGroup;
+    /// Console font group
+    std::string mConsoleFontGroup;
 
-			/// Render service listener ID (for resolution changes)
-			RenderService::ListenerID mRenderServiceListenerID;
+    /// Render service listener ID (for resolution changes)
+    RenderService::ListenerID mRenderServiceListenerID;
 
-			/// Input service ptr - used for input handling
-			InputServicePtr mInputSrv;
+    /// Input service ptr - used for input handling
+    InputServicePtr mInputSrv;
 
-			/// Render service ptr - used for various utilitary needs
-			RenderServicePtr mRenderSrv;
+    /// Render service ptr - used for various utilitary needs
+    RenderServicePtr mRenderSrv;
 
-			/// Loop service ptr - used for animation and other things
-			LoopServicePtr mLoopSrv;
+    /// Loop service ptr - used for animation and other things
+    LoopServicePtr mLoopSrv;
 
-			/// Draw service ptr - used for gui rendering itself
-			DrawServicePtr mDrawSrv;
+    /// Draw service ptr - used for gui rendering itself
+    DrawServicePtr mDrawSrv;
 
-			/// Config service ptr - used for font and cursor settings, etc.
-			ConfigServicePtr mConfigSrv;
-	};
+    /// Config service ptr - used for font and cursor settings, etc.
+    ConfigServicePtr mConfigSrv;
+};
 
-	/// Shared pointer to a GUI service
-	typedef shared_ptr<GUIService> GUIServicePtr;
+/// Shared pointer to a GUI service
+typedef shared_ptr<GUIService> GUIServicePtr;
 
-	/// Factory for the GUIService objects
-	class OPDELIB_EXPORT GUIServiceFactory : public ServiceFactory {
-		public:
-			GUIServiceFactory();
-			~GUIServiceFactory() {};
+/// Factory for the GUIService objects
+class OPDELIB_EXPORT GUIServiceFactory : public ServiceFactory {
+public:
+    GUIServiceFactory();
+    ~GUIServiceFactory(){};
 
-			/** Creates a GUIService instance */
-			Service* createInstance(ServiceManager* manager);
+    /** Creates a GUIService instance */
+    Service *createInstance(ServiceManager *manager);
 
-			virtual const std::string& getName();
+    virtual const std::string &getName();
 
-                        virtual const uint getMask();
+    virtual const uint getMask();
 
-			virtual const size_t getSID();
-		private:
-			static std::string mName;
-	};
-}
+    virtual const size_t getSID();
 
+private:
+    static std::string mName;
+};
+} // namespace Opde
 
 #endif

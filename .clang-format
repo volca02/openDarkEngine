@@ -1,0 +1,6 @@
+BasedOnStyle: LLVM
+AlignAfterOpenBracket: Align
+IndentWidth: '4'
+Standard: Cpp11
+UseTab: Never
+AccessModifierOffset: -4

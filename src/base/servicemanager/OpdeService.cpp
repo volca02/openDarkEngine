@@ -27,8 +27,4 @@
 #include "OpdeService.h"
 #include "logger.h"
 
-namespace Opde {
-
-	
-
-}
+namespace Opde {}

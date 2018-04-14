@@ -23,43 +23,46 @@
  *****************************************************************************/
 
 #ifndef __DATAFIELDDESCITERATORBINDER_H
-#define	__DATAFIELDDESCITERATORBINDER_H
+#define __DATAFIELDDESCITERATORBINDER_H
 
-#include  "InheritService.h"
+#include "bindings.h"
+#include "InheritService.h"
 
 namespace Opde {
 
-	namespace Python {
+namespace Python {
 
-		/// Data field description list iterator binder
-		class DataFieldDescIteratorBinder : public shared_ptr_binder<DataFieldDescIteratorPtr> {
-			public:
-				static void init(PyObject* module);
+/// Data field description list iterator binder
+class DataFieldDescIteratorBinder
+    : public shared_ptr_binder<DataFieldDescIteratorPtr> {
+public:
+    static void init(PyObject *module);
 
-				// --- Python type related methods ---
-				/// to string - reprfunc conversion
-				static PyObject* repr(PyObject *self);
+    // --- Python type related methods ---
+    /// to string - reprfunc conversion
+    static PyObject *repr(PyObject *self);
 
-				/// creates a python object representation of the inherit query result
-				static PyObject* create(const DataFieldDescIteratorPtr& result);
+    /// creates a python object representation of the inherit query result
+    static PyObject *create(const DataFieldDescIteratorPtr &result);
 
-			protected:
-				/// Return self as iterator with a increased ref count.
-				static PyObject* getIterObject(PyObject* self);
+protected:
+    /// Return self as iterator with a increased ref count.
+    static PyObject *getIterObject(PyObject *self);
 
-				/// Returns current object, advances to next object (or returns NULL if at end)
-				static PyObject* getNext(PyObject* self);
+    /// Returns current object, advances to next object (or returns NULL if at
+    /// end)
+    static PyObject *getNext(PyObject *self);
 
-				/// Static type definition for InheritQueryResult
-				static PyTypeObject msType;
+    /// Static type definition for InheritQueryResult
+    static PyTypeObject msType;
 
-				/// Name of the python type
-				static const char* msName;
+    /// Name of the python type
+    static const char *msName;
 
-				/// Method list
-				static PyMethodDef msMethods[];
-		};
-	}
-}
+    /// Method list
+    static PyMethodDef msMethods[];
+};
+} // namespace Python
+} // namespace Opde
 
 #endif

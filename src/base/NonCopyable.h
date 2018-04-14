@@ -21,7 +21,7 @@
  *    $Id$
  *
  *****************************************************************************/
- 
+
 #ifndef __OPDENONCOPYABLE_H
 #define __OPDENONCOPYABLE_H
 
@@ -30,17 +30,17 @@
 #include <cassert>
 
 namespace Opde {
-	
-	/// Non copyable class. Inherit to make class not copyable
-	class OPDELIB_EXPORT NonCopyable {
-		public:
-			NonCopyable() {};
-			
-		private:
-			NonCopyable(const NonCopyable& b);
-			void operator =(const NonCopyable& b);
-	};
 
-}
+/// Non copyable class. Inherit to make class not copyable
+class OPDELIB_EXPORT NonCopyable {
+public:
+    NonCopyable(){};
+
+private:
+    NonCopyable(const NonCopyable &b);
+    void operator=(const NonCopyable &b);
+};
+
+} // namespace Opde
 
 #endif

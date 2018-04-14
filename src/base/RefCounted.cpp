@@ -20,34 +20,29 @@
  *	  $Id$
  *
  *****************************************************************************/
- 
+
 #include "RefCounted.h"
 
 namespace Opde {
-	
-	/*------------------------------------------------------*/
-	/*------------------------- RefCounted -----------------*/
-	/*------------------------------------------------------*/
-	RefCounted::RefCounted() : mReferences ( 1 ) {};
-	
-	//------------------------------------
-	void RefCounted::addRef() {
-		mReferences++;
-	}
 
-	//------------------------------------
-	void RefCounted::release() {
-		if ( --mReferences <= 0 ) { 
-			delete this;
-		}
-		
-	}
-	
-	//------------------------------------
-	bool RefCounted::isRef() const {
-		return mReferences > 0;
-	}
-	
-	//------------------------------------
-	RefCounted::~RefCounted() {};
+/*------------------------------------------------------*/
+/*------------------------- RefCounted -----------------*/
+/*------------------------------------------------------*/
+RefCounted::RefCounted() : mReferences(1){};
+
+//------------------------------------
+void RefCounted::addRef() { mReferences++; }
+
+//------------------------------------
+void RefCounted::release() {
+    if (--mReferences <= 0) {
+        delete this;
+    }
 }
+
+//------------------------------------
+bool RefCounted::isRef() const { return mReferences > 0; }
+
+//------------------------------------
+RefCounted::~RefCounted(){};
+} // namespace Opde

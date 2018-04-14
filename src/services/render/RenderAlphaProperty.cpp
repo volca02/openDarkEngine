@@ -22,69 +22,71 @@
  *
  *****************************************************************************/
 
-#include "RenderService.h"
-#include "property/PropertyService.h"
-#include "SingleFieldDataStorage.h"
 #include "RenderAlphaProperty.h"
+#include "RenderService.h"
+#include "SingleFieldDataStorage.h"
+#include "property/PropertyService.h"
 
 namespace Opde {
-	/*--------------------------------------------------------*/
-	/*-------------------- RenderAlphaProperty ----------------*/
-	/*--------------------------------------------------------*/
-	RenderAlphaProperty::RenderAlphaProperty(RenderService* rs, PropertyService* owner) :
-			RenderedProperty(rs, owner, "RenderAlpha", "RenderAlp", "always") {
+/*--------------------------------------------------------*/
+/*-------------------- RenderAlphaProperty ----------------*/
+/*--------------------------------------------------------*/
+RenderAlphaProperty::RenderAlphaProperty(RenderService *rs,
+                                         PropertyService *owner)
+    : RenderedProperty(rs, owner, "RenderAlpha", "RenderAlp", "always") {
 
-		mPropertyStorage = DataStoragePtr(new FloatDataStorage(NULL));
+    mPropertyStorage = DataStoragePtr(new FloatDataStorage(NULL));
 
-		// TODO: Check the version
-		setChunkVersions(2, 65540);
+    // TODO: Check the version
+    setChunkVersions(2, 65540);
 
-		mSceneMgr = rs->getSceneManager();
-	};
-
-	// --------------------------------------------------------------------------
-	RenderAlphaProperty::~RenderAlphaProperty(void) {
-	};
-
-	// --------------------------------------------------------------------------
-	void RenderAlphaProperty::addProperty(int oid) {
-		DVariant val;
-
-		if (!get(oid, "", val))
-			OPDE_EXCEPT("Property not defined for object.", "RenderAlphaProperty::addProperty");
-
-		setAlpha(oid, val.toFloat());
-	};
-
-	// --------------------------------------------------------------------------
-	void RenderAlphaProperty::removeProperty(int oid) {
-		// reinit to 1.0 - no transparency
-		setAlpha(oid, 1.0f);
-	};
-
-	// --------------------------------------------------------------------------
-	void RenderAlphaProperty::setPropertySource(int oid, int effid) {
-		// re-read the property
-		addProperty(oid);
-	};
-
-	// --------------------------------------------------------------------------
-	void RenderAlphaProperty::valueChanged(int oid, const std::string& field, const DVariant& value) {
-		// just call the setter
-		setAlpha(oid, value.toFloat());
-	};
-
-	// --------------------------------------------------------------------------
-	void RenderAlphaProperty::setAlpha(int oid, float alpha) {
-		EntityInfo* ei = getEntityInfo(oid);
-		// clamp to 0-1
-		if (alpha < 0.0f)
-			alpha = 0.0f;
-
-		if (alpha > 1.0f)
-			alpha = 1.0f;
-
-		// and set the alpha on the entity
-		ei->setAlpha(alpha);
-	};
+    mSceneMgr = rs->getSceneManager();
 };
+
+// --------------------------------------------------------------------------
+RenderAlphaProperty::~RenderAlphaProperty(void){};
+
+// --------------------------------------------------------------------------
+void RenderAlphaProperty::addProperty(int oid) {
+    DVariant val;
+
+    if (!get(oid, "", val))
+        OPDE_EXCEPT("Property not defined for object.",
+                    "RenderAlphaProperty::addProperty");
+
+    setAlpha(oid, val.toFloat());
+};
+
+// --------------------------------------------------------------------------
+void RenderAlphaProperty::removeProperty(int oid) {
+    // reinit to 1.0 - no transparency
+    setAlpha(oid, 1.0f);
+};
+
+// --------------------------------------------------------------------------
+void RenderAlphaProperty::setPropertySource(int oid, int effid) {
+    // re-read the property
+    addProperty(oid);
+};
+
+// --------------------------------------------------------------------------
+void RenderAlphaProperty::valueChanged(int oid, const std::string &field,
+                                       const DVariant &value) {
+    // just call the setter
+    setAlpha(oid, value.toFloat());
+};
+
+// --------------------------------------------------------------------------
+void RenderAlphaProperty::setAlpha(int oid, float alpha) {
+    EntityInfo *ei = getEntityInfo(oid);
+    // clamp to 0-1
+    if (alpha < 0.0f)
+        alpha = 0.0f;
+
+    if (alpha > 1.0f)
+        alpha = 1.0f;
+
+    // and set the alpha on the entity
+    ei->setAlpha(alpha);
+};
+}; // namespace Opde

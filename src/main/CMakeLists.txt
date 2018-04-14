@@ -14,6 +14,7 @@ include_directories(
     ${OPDE_SOURCE_DIR}/src/base
     ${OPDE_SOURCE_DIR}/src/base/Dark
     ${OPDE_SOURCE_DIR}/src/base/console
+    ${OPDE_SOURCE_DIR}/src/base/compat
     ${OPDE_SOURCE_DIR}/src/base/dyntype
     ${OPDE_SOURCE_DIR}/src/base/file
     ${OPDE_SOURCE_DIR}/src/base/loaders

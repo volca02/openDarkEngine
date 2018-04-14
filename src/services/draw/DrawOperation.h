@@ -21,114 +21,121 @@
  *
  *****************************************************************************/
 
-
 #ifndef __DRAWOPERATION_H
 #define __DRAWOPERATION_H
 
 #include "DrawCommon.h"
 #include <OgreString.h>
 
-
 namespace Opde {
-	// Forward decls.
-	class DrawService;
-	class DrawBuffer;
-	class DrawSheet;
+// Forward decls.
+class DrawService;
+class DrawBuffer;
+class DrawSheet;
 
-	/** A single 2D draw operation (Bitmap draw for example). Internally this explodes to N vertices stored in the VBO of choice (via DrawBuffer) - For building itself into a VBO, this produces N DrawQuads. */
-	class OPDELIB_EXPORT DrawOperation {
-		public:
-			/// ID type of this operation
-			typedef size_t ID;
+/** A single 2D draw operation (Bitmap draw for example). Internally this
+ * explodes to N vertices stored in the VBO of choice (via DrawBuffer) - For
+ * building itself into a VBO, this produces N DrawQuads. */
+class OPDELIB_EXPORT DrawOperation {
+public:
+    /// ID type of this operation
+    typedef size_t ID;
 
-			DrawOperation(DrawService* owner, ID id);
+    DrawOperation(DrawService *owner, ID id);
 
-			virtual ~DrawOperation();
+    virtual ~DrawOperation();
 
-			inline ID getID() const { return mID; };
+    inline ID getID() const { return mID; };
 
-			/// Called by DrawBuffer to get the Quads queued for rendering. Fill this method to get the rendering done (via DrawBuffer::_queueDrawQuad())
-			virtual void visitDrawBuffer(DrawBuffer* db);
+    /// Called by DrawBuffer to get the Quads queued for rendering. Fill this
+    /// method to get the rendering done (via DrawBuffer::_queueDrawQuad())
+    virtual void visitDrawBuffer(DrawBuffer *db);
 
-			/// Called by sheet when the operation is added to a sheet. Default implementation adds the sheet to the sheet set.
-			virtual void onSheetRegister(DrawSheet* sheet);
+    /// Called by sheet when the operation is added to a sheet. Default
+    /// implementation adds the sheet to the sheet set.
+    virtual void onSheetRegister(DrawSheet *sheet);
 
-			/// Called by sheet when the operation is removed from a sheet. Default implementation adds the sheet to the sheet set.
-			virtual void onSheetUnregister(DrawSheet* sheet);
+    /// Called by sheet when the operation is removed from a sheet. Default
+    /// implementation adds the sheet to the sheet set.
+    virtual void onSheetUnregister(DrawSheet *sheet);
 
-			/// Position setter with separate x,y parameters (for convenience)
-			void setPosition(int x, int y);
-			
-			/// position setter via PixelCoord reference
-			void setPosition(const PixelCoord& pos);
-			
-			/// Position getter
-			const PixelCoord& getPosition() const { return mPosition; };
+    /// Position setter with separate x,y parameters (for convenience)
+    void setPosition(int x, int y);
 
-			/// Sets the Z order of the rendered image
-			void setZOrder(int z);
-			
-			/// Z order getter
-			int getZOrder() const { return mZOrder; };
+    /// position setter via PixelCoord reference
+    void setPosition(const PixelCoord &pos);
 
-			/// Sets a new clipping rectangle
-			void setClipRect(const ClipRect& cr);
-			
-			/// Clip rect const. ref getter
-			const ClipRect& getClipRect() const { return mClipRect; };
-			
-			virtual DrawSourceBasePtr getDrawSourceBase() = 0;
+    /// Position getter
+    const PixelCoord &getPosition() const { return mPosition; };
 
-			/// Dirtiness detector. Dirty operations need rebuild() call before using for display
-			inline bool isDirty() { return mIsDirty; };
+    /// Sets the Z order of the rendered image
+    void setZOrder(int z);
 
-			/// On a change this is to be called
-			void rebuild();
-			
-			/// Notifies this draw operation the active sheet changed
-			void _notifyActiveSheet(DrawSheet* actsh);
-			
-			virtual void clear();
-			
-		protected:
-			/// On change updater - marks all using sheets as dirty
-			virtual void _markDirty();
+    /// Z order getter
+    int getZOrder() const { return mZOrder; };
 
-			/// Rebuilds the buffers
-			virtual void _rebuild();
-			
-			/// To be called when the draw source is changing
-			void _sourceChanged(const DrawSourcePtr& old);
+    /// Sets a new clipping rectangle
+    void setClipRect(const ClipRect &cr);
 
-			const ID mID;
+    /// Clip rect const. ref getter
+    const ClipRect &getClipRect() const { return mClipRect; };
 
-			DrawService* mOwner;
+    virtual DrawSourceBasePtr getDrawSourceBase() = 0;
 
-			// Should have used weak_ptr here to avoid circles (DrawSheet::clear should handle this though) 
-			typedef std::set<DrawSheet*> DrawSheetSet;
+    /// Dirtiness detector. Dirty operations need rebuild() call before using
+    /// for display
+    inline bool isDirty() { return mIsDirty; };
 
-			/// Sheets using this draw op
-			DrawSheetSet mUsingSheets;
-			
-			/// Sheet which is now displaying the op
-			DrawSheet* mActiveSheet;
+    /// On a change this is to be called
+    void rebuild();
 
-			PixelCoord mPosition;
+    /// Notifies this draw operation the active sheet changed
+    void _notifyActiveSheet(DrawSheet *actsh);
 
-			int mZOrder;
+    virtual void clear();
 
-			/// Clip rectangle in pixel coordinates
-			ClipRect mClipRect;
-			
-			/// clip rectangle after transforming via owning sheet to 0-1 coordinate range on screen. 
-			ScreenRect mClipOnScreen;
-			
-			// is the operation dirty? True means it needs to be rebuilt in order to produce valid quads
-			bool mIsDirty;
-	};
+protected:
+    /// On change updater - marks all using sheets as dirty
+    virtual void _markDirty();
 
-	/// Map of all draw operations by it's ID
-	typedef std::map<DrawOperation::ID, DrawOperation*> DrawOperationMap;
-}
+    /// Rebuilds the buffers
+    virtual void _rebuild();
+
+    /// To be called when the draw source is changing
+    void _sourceChanged(const DrawSourcePtr &old);
+
+    const ID mID;
+
+    DrawService *mOwner;
+
+    // Should have used weak_ptr here to avoid circles (DrawSheet::clear should
+    // handle this though)
+    typedef std::set<DrawSheet *> DrawSheetSet;
+
+    /// Sheets using this draw op
+    DrawSheetSet mUsingSheets;
+
+    /// Sheet which is now displaying the op
+    DrawSheet *mActiveSheet;
+
+    PixelCoord mPosition;
+
+    int mZOrder;
+
+    /// Clip rectangle in pixel coordinates
+    ClipRect mClipRect;
+
+    /// clip rectangle after transforming via owning sheet to 0-1 coordinate
+    /// range on screen.
+    ScreenRect mClipOnScreen;
+
+    // is the operation dirty? True means it needs to be rebuilt in order to
+    // produce valid quads
+    bool mIsDirty;
+};
+
+/// Map of all draw operations by it's ID
+typedef std::map<DrawOperation::ID, DrawOperation *> DrawOperationMap;
+} // namespace Opde
 
 #endif

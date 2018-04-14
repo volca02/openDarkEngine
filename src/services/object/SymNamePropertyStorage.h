@@ -21,43 +21,42 @@
  *
  *****************************************************************************/
 
-
 #ifndef __SYMNAMEPROPERTYSTORAGE_H
 #define __SYMNAMEPROPERTYSTORAGE_H
 
 #include "SingleFieldDataStorage.h"
 
 namespace Opde {
-	
-	/** A Bi-Directional unique string Symbolic name storage for symbolic names. Overrides the StringPropertyStorage. */
-	class SymNamePropertyStorage : public StringDataStorage {
-		protected:
-			typedef std::map<std::string, int> ReverseNameMap;
-			
-			ReverseNameMap mReverseMap;
 
-		public:
-			SymNamePropertyStorage();
-			virtual ~SymNamePropertyStorage();
-			
-			virtual bool destroy(int objID);
-			
-			virtual bool setField(int objID, const std::string& field, const DVariant& value);
-			
-			virtual bool _create(int objID, const std::string& text);
-			
-			virtual void clear();
-			
-			/// Reverse mapper. Get's id of object named 'name'
-			int objectNamed(const std::string& name);
-			
-			/// Tester for name usage
-			bool nameUsed(const std::string& name);
-	};
+/** A Bi-Directional unique string Symbolic name storage for symbolic names.
+ * Overrides the StringPropertyStorage. */
+class SymNamePropertyStorage : public StringDataStorage {
+protected:
+    typedef std::map<std::string, int> ReverseNameMap;
 
-	typedef shared_ptr<SymNamePropertyStorage> SymNamePropertyStoragePtr;
+    ReverseNameMap mReverseMap;
+
+public:
+    SymNamePropertyStorage();
+    virtual ~SymNamePropertyStorage();
+
+    virtual bool destroy(int objID);
+
+    virtual bool setField(int objID, const std::string &field,
+                          const DVariant &value);
+
+    virtual bool _create(int objID, const std::string &text);
+
+    virtual void clear();
+
+    /// Reverse mapper. Get's id of object named 'name'
+    int objectNamed(const std::string &name);
+
+    /// Tester for name usage
+    bool nameUsed(const std::string &name);
 };
 
+typedef shared_ptr<SymNamePropertyStorage> SymNamePropertyStoragePtr;
+}; // namespace Opde
+
 #endif
-
-

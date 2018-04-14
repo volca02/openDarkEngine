@@ -25,144 +25,142 @@
 
 #include "config.h"
 
-#include "GameStateManager.h"
 #include "GameLoadState.h"
 #include "GamePlayState.h"
+#include "GameStateManager.h"
 
 #include "game/GameService.h"
 
 #include "logger.h"
 
+#include <OgreFontManager.h>
 #include <OgreOverlay.h>
 #include <OgreTextAreaOverlayElement.h>
-#include <OgreFontManager.h>
 
 using namespace Ogre;
 
 namespace Opde {
 
-	template<> GameLoadState* Singleton<GameLoadState>::ms_Singleton = 0;
+template <> GameLoadState *Singleton<GameLoadState>::ms_Singleton = 0;
 
-	GameLoadState::GameLoadState() : mSceneMgr(NULL), mOverlayMgr(NULL), mLoaded(false) {
-		mRoot = Ogre::Root::getSingletonPtr();
-		mOverlayMgr = OverlayManager::getSingletonPtr();
-		mServiceMgr = ServiceManager::getSingletonPtr();
+GameLoadState::GameLoadState()
+    : mSceneMgr(NULL), mOverlayMgr(NULL), mLoaded(false) {
+    mRoot = Ogre::Root::getSingletonPtr();
+    mOverlayMgr = OverlayManager::getSingletonPtr();
+    mServiceMgr = ServiceManager::getSingletonPtr();
 
-		mConfigService = GET_SERVICE(ConfigService);
-	}
+    mConfigService = GET_SERVICE(ConfigService);
+}
 
-    GameLoadState::~GameLoadState() {
+GameLoadState::~GameLoadState() {}
+
+void GameLoadState::start() {
+    DVariant fnttst;
+
+    LOG_INFO("LoadState: Starting");
+
+    mSceneMgr = mRoot->getSceneManager("DarkSceneManager");
+
+    mSceneMgr->clearSpecialCaseRenderQueues();
+    mSceneMgr->addSpecialCaseRenderQueue(RENDER_QUEUE_OVERLAY);
+    mSceneMgr->setSpecialCaseRenderQueueMode(SceneManager::SCRQM_INCLUDE);
+
+    RenderServicePtr renderSrv = GET_SERVICE(RenderService);
+
+    mCamera = renderSrv->getDefaultCamera();
+    mViewport = renderSrv->getDefaultViewport();
+
+    // display loading... message
+    // TODO: replace with DrawService code...
+    // mLoadingOverlay =
+    // OverlayManager::getSingleton().getByName("Opde/LoadOverlay");
+
+    // Create a panel
+    // mLoadingOverlay->show();
+
+    LOG_INFO("LoadState: Started");
+
+    mLoaded = false;
+    mFirstTime = true;
+}
+
+void GameLoadState::exit() {
+    LOG_INFO("LoadState: Exiting");
+    // TODO: Replace with drawservice code mLoadingOverlay->hide();
+
+    LOG_INFO("LoadState: Exited");
+
+    if (mLoaded) {
+        pushState(GamePlayState::getSingletonPtr());
+    }
+}
+
+void GameLoadState::suspend() { LOG_INFO("LoadState: Suspend?!"); }
+
+void GameLoadState::resume() {
+    LOG_INFO("LoadState: Resume?!");
+    mLoaded = false;
+    mFirstTime = true;
+}
+
+void GameLoadState::update(unsigned long timePassed) {
+    if (!mFirstTime && !mLoaded) {
+        unsigned long start_ms =
+            Ogre::Root::getSingleton().getTimer()->getMilliseconds();
+
+        // TODO: Replace with draw service
+        /*			OverlayElement* guiLdr =
+           OverlayManager::getSingleton().getOverlayElement("Opde/LoadPanel/Description");
+                    guiLdr->setCaption("Loading, please wait...");*/
+
+        mRoot->renderOneFrame();
+
+        GameServicePtr gsvc = GET_SERVICE(GameService);
+
+        std::string misFile = mConfigService->getParam("mission");
+
+        gsvc->load(misFile);
+
+        mLoaded = true;
+
+        //		guiLdr->setCaption("Loaded, press ESC...");
+
+        LOG_INFO("Loading took %10.2f seconds",
+                 (Ogre::Root::getSingleton().getTimer()->getMilliseconds() -
+                  start_ms) /
+                     1000.0f);
+
+        popState(); // Hardcoded, so no escape key is needed
     }
 
-	void GameLoadState::start() {
-		DVariant fnttst;
-
-		LOG_INFO("LoadState: Starting");
-
-		mSceneMgr = mRoot->getSceneManager( "DarkSceneManager" );
-
-		mSceneMgr->clearSpecialCaseRenderQueues();
-		mSceneMgr->addSpecialCaseRenderQueue(RENDER_QUEUE_OVERLAY);
-		mSceneMgr->setSpecialCaseRenderQueueMode(SceneManager::SCRQM_INCLUDE);
-
-		RenderServicePtr renderSrv = GET_SERVICE(RenderService);
-
-		mCamera = renderSrv->getDefaultCamera();
-		mViewport = renderSrv->getDefaultViewport();
-
-		// display loading... message
-		// TODO: replace with DrawService code...
-        // mLoadingOverlay = OverlayManager::getSingleton().getByName("Opde/LoadOverlay");
-
-		// Create a panel
-		// mLoadingOverlay->show();
-
-		LOG_INFO("LoadState: Started");
-
-		mLoaded = false;
-		mFirstTime = true;
-	}
-
-	void GameLoadState::exit() {
-	    LOG_INFO("LoadState: Exiting");
-		// TODO: Replace with drawservice code mLoadingOverlay->hide();
-
-		LOG_INFO("LoadState: Exited");
-
-		if (mLoaded) {
-			pushState(GamePlayState::getSingletonPtr());
-		}
-	}
-
-	void GameLoadState::suspend() {
-	    LOG_INFO("LoadState: Suspend?!");
-	}
-
-	void GameLoadState::resume() {
-	    LOG_INFO("LoadState: Resume?!");
-	    mLoaded = false;
-	    mFirstTime = true;
-	}
-
-	void GameLoadState::update(unsigned long timePassed) {
-		if (!mFirstTime && !mLoaded) {
-			unsigned long start_ms = Ogre::Root::getSingleton().getTimer()->getMilliseconds();
-
-            // TODO: Replace with draw service
-            /*			OverlayElement* guiLdr = OverlayManager::getSingleton().getOverlayElement("Opde/LoadPanel/Description");
-                        guiLdr->setCaption("Loading, please wait...");*/
-
-			mRoot->renderOneFrame();
-
-			GameServicePtr gsvc = GET_SERVICE(GameService);
-
-			std::string misFile = mConfigService->getParam("mission");
-
-			gsvc->load(misFile);
-
-			mLoaded = true;
-
-            //		guiLdr->setCaption("Loaded, press ESC...");
-
-			LOG_INFO("Loading took %10.2f seconds", (Ogre::Root::getSingleton().getTimer()->getMilliseconds() - start_ms) / 1000.0f);
-
-			popState(); // Hardcoded, so no escape key is needed
-		}
-
-		mFirstTime = false;
-	}
-
-
-	bool GameLoadState::keyPressed(const SDL_KeyboardEvent &e) {
-		return false;
-	}
-
-	bool GameLoadState::keyReleased(const SDL_KeyboardEvent &e) {
-		if( e.keysym.sym == SDLK_ESCAPE ) {
-        		// requestTermination();
-			if (mLoaded)
-				popState();
-    		}
-		return false;
-	}
-
-	bool GameLoadState::mouseMoved(const SDL_MouseMotionEvent &e) {
-		return false;
-	}
-
-	bool GameLoadState::mousePressed(const SDL_MouseButtonEvent &e) {
-		return false;
-	}
-
-	bool GameLoadState::mouseReleased(const SDL_MouseButtonEvent &e) {
-		return false;
-	}
-
-	GameLoadState& GameLoadState::getSingleton() {
-		assert(ms_Singleton); return *ms_Singleton;
-	}
-
-	GameLoadState* GameLoadState::getSingletonPtr() {
-		return ms_Singleton;
-	}
+    mFirstTime = false;
 }
+
+bool GameLoadState::keyPressed(const SDL_KeyboardEvent &e) { return false; }
+
+bool GameLoadState::keyReleased(const SDL_KeyboardEvent &e) {
+    if (e.keysym.sym == SDLK_ESCAPE) {
+        // requestTermination();
+        if (mLoaded)
+            popState();
+    }
+    return false;
+}
+
+bool GameLoadState::mouseMoved(const SDL_MouseMotionEvent &e) { return false; }
+
+bool GameLoadState::mousePressed(const SDL_MouseButtonEvent &e) {
+    return false;
+}
+
+bool GameLoadState::mouseReleased(const SDL_MouseButtonEvent &e) {
+    return false;
+}
+
+GameLoadState &GameLoadState::getSingleton() {
+    assert(ms_Singleton);
+    return *ms_Singleton;
+}
+
+GameLoadState *GameLoadState::getSingletonPtr() { return ms_Singleton; }
+} // namespace Opde

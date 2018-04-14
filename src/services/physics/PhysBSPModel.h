@@ -27,15 +27,16 @@
 #include "PhysModel.h"
 
 namespace Opde {
-	/** @brief BSP based physics model - models that were handled via BSP in original implementation.
-	* @note There are two approaches to do collision detection with this - either use the polygon soap directly or produce the needed model in manual loader.
-	*/
-	class OPDELIB_EXPORT PhysBSPModel : public PhysModel {
-		public:
-			PhysBSPModel(int objid);
-			~PhysBSPModel();
-	};
-}
-
+/** @brief BSP based physics model - models that were handled via BSP in
+ * original implementation.
+ * @note There are two approaches to do collision detection with this - either
+ * use the polygon soap directly or produce the needed model in manual loader.
+ */
+class OPDELIB_EXPORT PhysBSPModel : public PhysModel {
+public:
+    PhysBSPModel(int objid);
+    ~PhysBSPModel();
+};
+} // namespace Opde
 
 #endif

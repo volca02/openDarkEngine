@@ -22,28 +22,28 @@
  *
  *****************************************************************************/
 
-
 #ifndef __CAMERASERVICE_H
 #define __CAMERASERVICE_H
 
 #include "config.h"
 
-#include "SharedPtr.h"
-#include "OpdeServiceManager.h"
 #include "OpdeService.h"
+#include "OpdeServiceManager.h"
+#include "SharedPtr.h"
 #include "input/InputService.h"
-#include "render/RenderService.h"
 #include "physics/PhysicsService.h"
-#include "sim/SimService.h"
 #include "player/PlayerService.h"
+#include "render/RenderService.h"
+#include "sim/SimService.h"
 
 namespace Opde {
 
 /** @brief camera service. Service that handles in-game camera
  */
-class OPDELIB_EXPORT CameraService : public ServiceImpl<CameraService>, public SimListener {
-  public:
-    CameraService(ServiceManager *manager, const std::string& name);
+class OPDELIB_EXPORT CameraService : public ServiceImpl<CameraService>,
+                                     public SimListener {
+public:
+    CameraService(ServiceManager *manager, const std::string &name);
     virtual ~CameraService();
 
     /** Attaches camera to an object. Does not allow freelook
@@ -55,7 +55,8 @@ class OPDELIB_EXPORT CameraService : public ServiceImpl<CameraService>, public S
     bool dynamicAttach(int objID);
 
     /** Returns (conditionally) the camera to the player object.
-     * Camera is only returned if it is currently attached to the object specified by the parameter
+     * Camera is only returned if it is currently attached to the object
+     * specified by the parameter
      * @param curObjID The current object to which camera is attached
      * @return true on success, false on failure */
     bool cameraReturn(int objID);
@@ -68,8 +69,7 @@ class OPDELIB_EXPORT CameraService : public ServiceImpl<CameraService>, public S
     virtual void simUnPaused();
     virtual void simStep(float simTime, float delta);
 
-
-  protected:
+protected:
     bool init();
     void bootstrapFinished();
     void shutdown();
@@ -77,26 +77,30 @@ class OPDELIB_EXPORT CameraService : public ServiceImpl<CameraService>, public S
     // input listeners
 
     /// Input callback. Called upon mouse left/right (X axis) movement
-    void onMTurn(const InputEventMsg& iem);
+    void onMTurn(const InputEventMsg &iem);
 
     /// Input callback. Called upon mouse up/down (Y axis) movement
-    void onMLook(const InputEventMsg& iem);
+    void onMLook(const InputEventMsg &iem);
 
     // schedules a camera rotation. The given values are not scaled by time
     void appendCameraRotation(float horizontal, float vertical);
 
-    /** Updates the camera position and orientation based on the submodel specified
+    /** Updates the camera position and orientation based on the submodel
+     * specified
      * @param objId the object id
      * @param submdl the sub-model number
-     * @return true if the update was done, false if the parameters are invalid */
+     * @return true if the update was done, false if the parameters are invalid
+     */
     bool updateCameraFromSubObject(int objId, size_t submdl);
 
-    /** Handles the object attachment details - effects, hasrefs property handling, player service handling.
+    /** Handles the object attachment details - effects, hasrefs property
+     * handling, player service handling.
      * @param objID the object to attach to
-     * @param dynamic Controls the dynamicity aspect of the attachment. If true, the camera can control the object's rotation */
+     * @param dynamic Controls the dynamicity aspect of the attachment. If true,
+     * the camera can control the object's rotation */
     void handleAttachment(int objID, bool dynamic);
 
-  private:
+private:
     /// Input service ptr
     InputServicePtr mInputSrv;
 
@@ -118,7 +122,8 @@ class OPDELIB_EXPORT CameraService : public ServiceImpl<CameraService>, public S
     /// object we're attached to, or zero if none
     int mAttachmentObject;
 
-    /// true means we allow the camera to rotate the object (no meaning if no attachment is done)
+    /// true means we allow the camera to rotate the object (no meaning if no
+    /// attachment is done)
     bool mDynamicAttach;
 
     /// Physics service for camera updates
@@ -130,35 +135,35 @@ class OPDELIB_EXPORT CameraService : public ServiceImpl<CameraService>, public S
     /// Property service handle (For hasrefs, etc)
     PropertyServicePtr mPropertySrv;
 
-    /// Hasrefs property that is used to hide the object camera is currently attached to
-    Property* mHasRefsProperty;
+    /// Hasrefs property that is used to hide the object camera is currently
+    /// attached to
+    Property *mHasRefsProperty;
 
     /// Camera that we use
-    Ogre::Camera* mCamera;
+    Ogre::Camera *mCamera;
 };
 
 /// Shared pointer to Camera service
 typedef shared_ptr<CameraService> CameraServicePtr;
 
-
 /// Factory for the CameraService objects
 class OPDELIB_EXPORT CameraServiceFactory : public ServiceFactory {
-  public:
+public:
     CameraServiceFactory();
-    ~CameraServiceFactory() {};
+    ~CameraServiceFactory(){};
 
     /** Creates a CameraService instance */
-    Service* createInstance(ServiceManager* manager);
+    Service *createInstance(ServiceManager *manager);
 
-    virtual const std::string& getName();
+    virtual const std::string &getName();
 
     virtual const uint getMask();
 
     virtual const size_t getSID();
-  private:
+
+private:
     static std::string mName;
 };
-}
-
+} // namespace Opde
 
 #endif

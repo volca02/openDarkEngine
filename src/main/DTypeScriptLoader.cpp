@@ -20,7 +20,7 @@
  *	  $Id$
  *
  *****************************************************************************/
- 
+
 #include "DTypeScriptLoader.h"
 #include <OgreDataStream.h>
 #include <OgreResourceGroupManager.h>
@@ -29,31 +29,28 @@ using namespace Ogre;
 
 namespace Opde {
 
-	DTypeScriptLoader::DTypeScriptLoader() : mScriptPatterns() {
-		mDTypeCompiler = new DTypeScriptCompiler();
-		
-		mScriptPatterns.push_back("*.dtype");
-		ResourceGroupManager::getSingleton()._registerScriptLoader(this);
-	}
-			
-	DTypeScriptLoader::~DTypeScriptLoader() {
-		ResourceGroupManager::getSingleton()._unregisterScriptLoader(this);
-		
-		delete mDTypeCompiler;
-	}
-		
-	const StringVector& DTypeScriptLoader::getScriptPatterns(void) const {
-		return mScriptPatterns;
-	}
-		
- 	void DTypeScriptLoader::parseScript(DataStreamPtr &stream, const String &groupName) {
-		mDTypeCompiler->parseScript(stream, groupName);
-	}
-	
-	Real DTypeScriptLoader::getLoadingOrder(void) const {
-		return 1;
-	}
-			
- 	
+DTypeScriptLoader::DTypeScriptLoader() : mScriptPatterns() {
+    mDTypeCompiler = new DTypeScriptCompiler();
+
+    mScriptPatterns.push_back("*.dtype");
+    ResourceGroupManager::getSingleton()._registerScriptLoader(this);
 }
 
+DTypeScriptLoader::~DTypeScriptLoader() {
+    ResourceGroupManager::getSingleton()._unregisterScriptLoader(this);
+
+    delete mDTypeCompiler;
+}
+
+const StringVector &DTypeScriptLoader::getScriptPatterns(void) const {
+    return mScriptPatterns;
+}
+
+void DTypeScriptLoader::parseScript(DataStreamPtr &stream,
+                                    const String &groupName) {
+    mDTypeCompiler->parseScript(stream, groupName);
+}
+
+Real DTypeScriptLoader::getLoadingOrder(void) const { return 1; }
+
+} // namespace Opde

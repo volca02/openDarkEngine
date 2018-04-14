@@ -22,40 +22,39 @@
  *
  *****************************************************************************/
 
-
 #ifndef __PLATFORM_H
 #define __PLATFORM_H
 
 #include "config.h"
 
-#include "OpdeServiceManager.h"
 #include "OpdeService.h"
+#include "OpdeServiceManager.h"
 #include "PlatformService.h"
 
 namespace Opde {
 
-	/** @brief A platform. OS specific piece of code used to handle configuration and data paths.
-	*/
-	class OPDELIB_EXPORT Platform {
-		public:
-			Platform(PlatformService* owner);
-			virtual ~Platform();
-			
-			/// Getter for system-wide configuration directory
-			virtual std::string getGlobalConfigPath() const = 0;
-			
-			/// Getter for user-specific configuration directory
-			virtual std::string getUserConfigPath() const = 0;
-			
-			/// Returns the directory separator string for the platform
-			virtual std::string getDirectorySeparator() const = 0;
+/** @brief A platform. OS specific piece of code used to handle configuration
+ * and data paths.
+ */
+class OPDELIB_EXPORT Platform {
+public:
+    Platform(PlatformService *owner);
+    virtual ~Platform();
 
-		protected:
-			/// Owner service
-			PlatformService *mOwner;
-	};
+    /// Getter for system-wide configuration directory
+    virtual std::string getGlobalConfigPath() const = 0;
 
-}
+    /// Getter for user-specific configuration directory
+    virtual std::string getUserConfigPath() const = 0;
 
+    /// Returns the directory separator string for the platform
+    virtual std::string getDirectorySeparator() const = 0;
+
+protected:
+    /// Owner service
+    PlatformService *mOwner;
+};
+
+} // namespace Opde
 
 #endif

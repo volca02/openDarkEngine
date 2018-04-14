@@ -35,57 +35,58 @@ using namespace Opde;
 #define WIN32_LEAN_AND_MEAN
 #include "windows.h"
 
-INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT )
-{
-	std::string scmd(strCmdLine);
+INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT) {
+    std::string scmd(strCmdLine);
 
-	// split on space, find if we have two arguments or just one
-	WhitespaceStringTokenizer wst(scmd, false); // false == obey the quotes
+    // split on space, find if we have two arguments or just one
+    WhitespaceStringTokenizer wst(scmd, false); // false == obey the quotes
 
-	std::string GameType = wst.next();
+    std::string GameType = wst.next();
 
-	std::string missionName = "";
+    std::string missionName = "";
 
-	if (!wst.end())
-		missionName = wst.next();
+    if (!wst.end())
+        missionName = wst.next();
 #else
-int main(int argc, char**argv)
-{
-	std::string GameType = "";
-	std::string missionName = "";
-	
-	if (argc >= 2)
-	    GameType = argv[1];
-	    
-	if (argc >= 3)
-	    missionName = argv[2];
+int main(int argc, char **argv) {
+    std::string GameType = "";
+    std::string missionName = "";
+
+    if (argc >= 2)
+        GameType = argv[1];
+
+    if (argc >= 3)
+        missionName = argv[2];
 #endif
 
     // Create application object
-    GameStateManager* man = NULL;
+    GameStateManager *man = NULL;
 
     try {
-    	man = new GameStateManager(GameType);
+        man = new GameStateManager(GameType);
 
-    	// if we have a mission name, supply
-    	if (missionName != "")
-			man->setDesiredMissionName(missionName);
-			
-		man->run();
-    } catch( Ogre::Exception& e ) {
+        // if we have a mission name, supply
+        if (missionName != "")
+            man->setDesiredMissionName(missionName);
+
+        man->run();
+    } catch (Ogre::Exception &e) {
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-        MessageBox( NULL, e.getFullDescription().c_str(), "An exception has occured!", MB_OK | MB_ICONERROR | MB_TASKMODAL);
+        MessageBox(NULL, e.getFullDescription().c_str(),
+                   "An exception has occured!",
+                   MB_OK | MB_ICONERROR | MB_TASKMODAL);
 #else
-        std::cerr << "An exception has occured: " <<
-            e.getFullDescription().c_str() << std::endl;
+        std::cerr << "An exception has occured: "
+                  << e.getFullDescription().c_str() << std::endl;
 #endif
 
-    } catch( BasicException& e ) {
+    } catch (BasicException &e) {
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-        MessageBox( NULL, e.getDetails().c_str(), "An exception has occured!", MB_OK | MB_ICONERROR | MB_TASKMODAL);
+        MessageBox(NULL, e.getDetails().c_str(), "An exception has occured!",
+                   MB_OK | MB_ICONERROR | MB_TASKMODAL);
 #else
-        std::cerr << "An exception has occured: " <<
-            e.getDetails().c_str() << std::endl;
+        std::cerr << "An exception has occured: " << e.getDetails().c_str()
+                  << std::endl;
 #endif
     }
 

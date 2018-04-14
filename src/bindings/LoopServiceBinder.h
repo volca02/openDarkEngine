@@ -25,44 +25,44 @@
 #ifndef __LOOPSERVICEBINDER_H
 #define __LOOPSERVICEBINDER_H
 
-#include  "DTypeDef.h"
-#include  "LoopService.h"
+#include "bindings.h"
 
-namespace Opde 
-{
-	namespace Python 
-	{
+#include "DTypeDef.h"
+#include "LoopService.h"
 
-		/// Loop service python binder
-		class LoopServiceBinder : public shared_ptr_binder<LoopServicePtr> {
-			public:
-				static void init(PyObject* module);
-			
-				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
+namespace Opde {
+namespace Python {
 
-				/// creates a python object representation of the relation
-				static PyObject* create();
+/// Loop service python binder
+class LoopServiceBinder : public shared_ptr_binder<LoopServicePtr> {
+public:
+    static void init(PyObject *module);
 
-				// --- Methods ---
-				static PyObject* run(PyObject* self, PyObject* args);
-				static PyObject* step(PyObject* self, PyObject* args);
-				static PyObject* requestLoopMode(PyObject* self, PyObject* args);
-				static PyObject* requestTermination(PyObject* self, PyObject* args);
-				static PyObject* debugOneFrame(PyObject* self, PyObject* args);
-				static PyObject* getLastFrameTime(PyObject* self, PyObject* args);
-				
-			protected:
-				/// Static type definition for LoopService
-				static PyTypeObject msType;
+    // --- Python type related methods ---
+    static PyObject *getattr(PyObject *self, char *name);
 
-				/// Name of the python type
-				static const char* msName;
+    /// creates a python object representation of the relation
+    static PyObject *create();
 
-				/// Method list
-				static PyMethodDef msMethods[];
-		};
-	}
-}
+    // --- Methods ---
+    static PyObject *run(PyObject *self, PyObject *args);
+    static PyObject *step(PyObject *self, PyObject *args);
+    static PyObject *requestLoopMode(PyObject *self, PyObject *args);
+    static PyObject *requestTermination(PyObject *self, PyObject *args);
+    static PyObject *debugOneFrame(PyObject *self, PyObject *args);
+    static PyObject *getLastFrameTime(PyObject *self, PyObject *args);
 
-#endif	// __LOOPSERVICEBINDER_H
+protected:
+    /// Static type definition for LoopService
+    static PyTypeObject msType;
+
+    /// Name of the python type
+    static const char *msName;
+
+    /// Method list
+    static PyMethodDef msMethods[];
+};
+} // namespace Python
+} // namespace Opde
+
+#endif // __LOOPSERVICEBINDER_H

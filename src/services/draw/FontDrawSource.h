@@ -21,7 +21,6 @@
  *
  *****************************************************************************/
 
-
 #ifndef __FONTDRAWSOURCE_H
 #define __FONTDRAWSOURCE_H
 
@@ -30,88 +29,104 @@
 #include "TextureAtlas.h"
 
 #include <OgreImage.h>
-#include <OgreTexture.h>
 #include <OgreMaterial.h>
+#include <OgreTexture.h>
 
 namespace Opde {
-	class TextureAtlas;
+class TextureAtlas;
 
-	/// A structure that holds a Font definition ready for usage (as numerous DrawSourcePtrs)
-	class FontDrawSource {
-		public:
-			/** A font definition constructor
-			* @param container The rendering atlas */
-			FontDrawSource(const TextureAtlasPtr& container, const std::string& name);
-			
-			/// Destructor. Removes itself from the owner atlas
-			~FontDrawSource();
+/// A structure that holds a Font definition ready for usage (as numerous
+/// DrawSourcePtrs)
+class FontDrawSource {
+public:
+    /** A font definition constructor
+     * @param container The rendering atlas */
+    FontDrawSource(const TextureAtlasPtr &container, const std::string &name);
 
-			/** Adds a glyph definition
-			* @param chr The character represented by this definition
-			* @param dimensions the final dimensions of the glyph
-			* @param pf The pixelformat of the source
-			* @param rowlen the length of one row in bytes (e.g. the byte skip count to get to next row)
-			* @param data The linear buffer pointer to the pixel data in the specified format 
-			* @param pxoffset The offset in pixels for every scanline
-			* @param palette The palette to use for color conversion */
-			void addGlyph(FontCharType chr, const PixelSize& dimensions, DarkPixelFormat pf, size_t rowlen, void* data, size_t pxoffset, const RGBAQuad* palette = NULL);
+    /// Destructor. Removes itself from the owner atlas
+    ~FontDrawSource();
 
-			/** Retrieves a glyph as a draw source for rendering usage */
-			DrawSourcePtr getGlyph(FontCharType chr);
+    /** Adds a glyph definition
+     * @param chr The character represented by this definition
+     * @param dimensions the final dimensions of the glyph
+     * @param pf The pixelformat of the source
+     * @param rowlen the length of one row in bytes (e.g. the byte skip count to
+     * get to next row)
+     * @param data The linear buffer pointer to the pixel data in the specified
+     * format
+     * @param pxoffset The offset in pixels for every scanline
+     * @param palette The palette to use for color conversion */
+    void addGlyph(FontCharType chr, const PixelSize &dimensions,
+                  DarkPixelFormat pf, size_t rowlen, void *data,
+                  size_t pxoffset, const RGBAQuad *palette = NULL);
 
-			/// Returns the maximal width of any glyph from this font
-			inline size_t getWidth() { return mMaxWidth; };
+    /** Retrieves a glyph as a draw source for rendering usage */
+    DrawSourcePtr getGlyph(FontCharType chr);
 
-			/// Reurns the maximal height of any glyph from this font
-			inline size_t getHeight() { return mMaxHeight; };
+    /// Returns the maximal width of any glyph from this font
+    inline size_t getWidth() { return mMaxWidth; };
 
-			/// Built indicator - After font build operation, this returns true. @see build()
-			inline bool isBuilt() { return mBuilt; };
+    /// Reurns the maximal height of any glyph from this font
+    inline size_t getHeight() { return mMaxHeight; };
 
-			/** Builds the font - this means that the font is complete and won't change any more, and informs us it's ready for atlassing. This method will queue all the glyphs in the owning atlas for atlassing. */
-			void build();
+    /// Built indicator - After font build operation, this returns true. @see
+    /// build()
+    inline bool isBuilt() { return mBuilt; };
 
-			/// Returns the owning atlas of this font draw source 
-			inline const TextureAtlasPtr& getAtlas() { return mContainer; };
-			
-			/** Calculates a width and height of the given text string.
-			 *  The resulting size is of a unclipped, newline respecting text
-			 */ 
-			PixelSize calculateTextSize(const std::string& text);
-						
-			
-		protected:
-			/** populates the Image in the drawsource with a RGB conversion of the supplied 1Bit mono image
-			 *  @note uses the first two records in the specified pallette for conversion
-			 */
-			void populateImageFromMono(const DrawSourcePtr& dsp, const PixelSize& dimensions, size_t rowlen, void* data, size_t pxoffset, const RGBAQuad* pal);
+    /** Builds the font - this means that the font is complete and won't change
+     * any more, and informs us it's ready for atlassing. This method will queue
+     * all the glyphs in the owning atlas for atlassing. */
+    void build();
 
-			/** populates the Image in the drawsource with a RGB conversion of the supplied 8Bit palletized image
-			 *  @note uses the records in the specified pallette for conversion
-			 */
-			void populateImageFrom8BitPal(const DrawSourcePtr& dsp, const PixelSize& dimensions, size_t rowlen, void* data, size_t pxoffset, const RGBAQuad* pal);
+    /// Returns the owning atlas of this font draw source
+    inline const TextureAtlasPtr &getAtlas() { return mContainer; };
 
-			/// The map from character to the drawing source it represents
-			typedef std::map<FontCharType, DrawSourcePtr> GlyphMap;
+    /** Calculates a width and height of the given text string.
+     *  The resulting size is of a unclipped, newline respecting text
+     */
+    PixelSize calculateTextSize(const std::string &text);
 
-			/// Containing atlas
-			TextureAtlasPtr mContainer;
+protected:
+    /** populates the Image in the drawsource with a RGB conversion of the
+     * supplied 1Bit mono image
+     *  @note uses the first two records in the specified pallette for
+     * conversion
+     */
+    void populateImageFromMono(const DrawSourcePtr &dsp,
+                               const PixelSize &dimensions, size_t rowlen,
+                               void *data, size_t pxoffset,
+                               const RGBAQuad *pal);
 
-			/// The map of the glyphs this font containts
-			GlyphMap mRepresentedGlyphs;
+    /** populates the Image in the drawsource with a RGB conversion of the
+     * supplied 8Bit palletized image
+     *  @note uses the records in the specified pallette for conversion
+     */
+    void populateImageFrom8BitPal(const DrawSourcePtr &dsp,
+                                  const PixelSize &dimensions, size_t rowlen,
+                                  void *data, size_t pxoffset,
+                                  const RGBAQuad *pal);
 
-			/// Name of this font
-			std::string mName;
+    /// The map from character to the drawing source it represents
+    typedef std::map<FontCharType, DrawSourcePtr> GlyphMap;
 
-			/// Maximal height detected
-			size_t mMaxHeight;
+    /// Containing atlas
+    TextureAtlasPtr mContainer;
 
-			/// Maximal width detected
-			size_t mMaxWidth;
+    /// The map of the glyphs this font containts
+    GlyphMap mRepresentedGlyphs;
 
-			/// Built flag (finalization indicator)
-			bool mBuilt;
-	};
+    /// Name of this font
+    std::string mName;
+
+    /// Maximal height detected
+    size_t mMaxHeight;
+
+    /// Maximal width detected
+    size_t mMaxWidth;
+
+    /// Built flag (finalization indicator)
+    bool mBuilt;
 };
+}; // namespace Opde
 
 #endif

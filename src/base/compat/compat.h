@@ -19,30 +19,29 @@
  *
  *****************************************************************************/
 
-#ifndef __INTEGERS_H
-#define __INTEGERS_H
+#ifndef __COMPAT_H
+#define __COMPAT_H
 
-#include "config.h"
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#define M_PI_2 1.57079632679489661923
 
-#ifndef HAVE_INTTYPES_H
-// Try to use VC++ types
-	typedef unsigned __int64 uint64_t;
-	typedef unsigned __int32 uint32_t;
-	typedef unsigned __int16 uint16_t;
-	typedef unsigned __int8 uint8_t;
-	typedef __int64 int64_t;
-	typedef __int32 int32_t;
-	typedef __int16 int16_t;
-	typedef __int8 int8_t;
-#else
-	#include <inttypes.h>
+// Disable typedef struct warnings
+#pragma warning(disable : 4091)
+
 #endif
 
-namespace Opde {
+#ifndef _MSC_VER
+#define strnicmp strncasecmp
+#define stricmp strcasecmp
+#define _wcsnicmp wcsncasecmp
+#define _wcsicmp wcscasecmp
+#define ltoa(i, s, n) snprintf(s, n, "%ld", i)
+#define _ultoa(i, s, n) snprintf(s, n, "%lu", i)
+#endif
+
 #ifndef uint
- typedef unsigned int uint;
-#endif
-}
-
+typedef unsigned int uint;
 #endif
 
+#endif

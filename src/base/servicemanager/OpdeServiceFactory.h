@@ -21,48 +21,49 @@
  *		$Id$
  *
  *****************************************************************************/
- 
+
 #ifndef __OPDESERVICEFACTORY_H
 #define __OPDESERVICEFACTORY_H
 
 #include "config.h"
 
+#include "OpdeServiceManager.h"
 #include "compat.h"
 #include <string>
-#include "OpdeServiceManager.h"
 
 namespace Opde {
 
-	// Volca: I like the Ogre's approach to factories. This is quite simmilar
-	
-	// forward declaration
-	class ServiceManager;
-	class Service;
-		
-	/** Code base for the service factories. Implement the methods with the Service Factory you're implementing. */
-	class OPDELIB_EXPORT ServiceFactory {
-		public:
-			ServiceFactory() {  };
-			virtual ~ServiceFactory() {	};
-		
-			/** Creates and returns a new instance of the service. 
-			* @todo Do I NEED named services? I think not. */
-			virtual Service* createInstance(ServiceManager* manager) = 0;
-			
-			/** Get the name of the created objects. What object this factory creates? */
-			virtual const std::string& getName() = 0;
-			
-			/** Gets the Service ID of the created services. */
-			virtual const size_t getSID() = 0;
-			
-			/** Get the mask of the service.
-			* Masks are freely chosen bitmaps that describe what the requirements/capabilities of the service are.
-			* Bitmasks are used to automatically initialize listeners and filter the used services.
-			* @returns The bitmask of the service */
-			virtual const uint getMask() = 0;
-			
-	};
-}
+// Volca: I like the Ogre's approach to factories. This is quite simmilar
 
+// forward declaration
+class ServiceManager;
+class Service;
+
+/** Code base for the service factories. Implement the methods with the Service
+ * Factory you're implementing. */
+class OPDELIB_EXPORT ServiceFactory {
+public:
+    ServiceFactory(){};
+    virtual ~ServiceFactory(){};
+
+    /** Creates and returns a new instance of the service.
+     * @todo Do I NEED named services? I think not. */
+    virtual Service *createInstance(ServiceManager *manager) = 0;
+
+    /** Get the name of the created objects. What object this factory creates?
+     */
+    virtual const std::string &getName() = 0;
+
+    /** Gets the Service ID of the created services. */
+    virtual const size_t getSID() = 0;
+
+    /** Get the mask of the service.
+     * Masks are freely chosen bitmaps that describe what the
+     * requirements/capabilities of the service are. Bitmasks are used to
+     * automatically initialize listeners and filter the used services.
+     * @returns The bitmask of the service */
+    virtual const uint getMask() = 0;
+};
+} // namespace Opde
 
 #endif

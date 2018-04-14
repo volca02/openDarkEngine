@@ -21,7 +21,6 @@
  *
  *****************************************************************************/
 
-
 #ifndef __POSITIONPROPERTYSTORAGE_H
 #define __POSITIONPROPERTYSTORAGE_H
 
@@ -29,22 +28,20 @@
 
 namespace Opde {
 
-	typedef struct {
-	    Vector3 position;
-	    uint32_t cell;
-	    Quaternion facing;
-	} sPositionProp;
+typedef struct {
+    Vector3 position;
+    uint32_t cell;
+    Quaternion facing;
+} sPositionProp;
 
-	/** Position property storage */
-	class PositionPropertyStorage : public StructDataStorage<sPositionProp> {
-		public:
-			PositionPropertyStorage();
-			virtual ~PositionPropertyStorage();
-	};
-
-	typedef shared_ptr<PositionPropertyStorage> PositionPropertyStoragePtr;
+/** Position property storage */
+class PositionPropertyStorage : public StructDataStorage<sPositionProp> {
+public:
+    PositionPropertyStorage();
+    virtual ~PositionPropertyStorage();
 };
 
+typedef shared_ptr<PositionPropertyStorage> PositionPropertyStoragePtr;
+}; // namespace Opde
+
 #endif
-
-

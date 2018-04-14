@@ -28,80 +28,85 @@
 #include "FreeSpaceInfo.h"
 
 namespace Opde {
-	// Forward decl.
-	class DrawService;
-	class FontDrawSource;
+// Forward decl.
+class DrawService;
+class FontDrawSource;
 
-	/** Texture atlas for DrawSource grouping. Textures created within this atlas are
-	 * grouped together into a single rendering call when used as a source for draw operations, resulting
-	 * in better performance.
-	 */
-	class TextureAtlas : public DrawSourceBase {
-		public:
-			/** Constructor. Creates a new atlas for texture storage */
-			TextureAtlas(DrawService* owner, DrawSource::ID id);
+/** Texture atlas for DrawSource grouping. Textures created within this atlas
+ * are grouped together into a single rendering call when used as a source for
+ * draw operations, resulting in better performance.
+ */
+class TextureAtlas : public DrawSourceBase {
+public:
+    /** Constructor. Creates a new atlas for texture storage */
+    TextureAtlas(DrawService *owner, DrawSource::ID id);
 
-			/** destructor */
-			~TextureAtlas();
+    /** destructor */
+    ~TextureAtlas();
 
-			/** Creates an atlased draw source */
-			DrawSourcePtr createDrawSource(const Ogre::String& imgName, const Ogre::String& groupName);
+    /** Creates an atlased draw source */
+    DrawSourcePtr createDrawSource(const Ogre::String &imgName,
+                                   const Ogre::String &groupName);
 
-			/** Adds a font instance (to be filled with glyphs afterwards) to this atlas
-			 * @note You probably don't want to use this. You'll want to use DrawService::loadFont instead */
-			void _addFont(FontDrawSource* fdsp);
-			
-			/** Removes the specified font from the atlas */
-			void _removeFont(FontDrawSource* fdsp);
+    /** Adds a font instance (to be filled with glyphs afterwards) to this atlas
+     * @note You probably don't want to use this. You'll want to use
+     * DrawService::loadFont instead */
+    void _addFont(FontDrawSource *fdsp);
 
-			/** returns this Atlase's source ID */
-			inline DrawSource::ID getAtlasID() const { return mAtlasID; };
+    /** Removes the specified font from the atlas */
+    void _removeFont(FontDrawSource *fdsp);
 
-			/** Internal tool to allow external addition of draw sources. Used by font code. */
-			void _addDrawSource(const DrawSourcePtr& ds);
-			
-			/** Internal tool to allow removal of draw sources */
-			void _removeDrawSource(const DrawSourcePtr& ds);
+    /** returns this Atlase's source ID */
+    inline DrawSource::ID getAtlasID() const { return mAtlasID; };
 
-			/** Builds the atlas. Locks it for further additions, makes it useable */
-			void build();
-			
-			/// Owner getter
-			inline DrawService* getOwner() const { return mOwner; };
-			
-			/// Returns a draw source for vertex colour rendering (2x2 white pixels)
-			const DrawSourcePtr& getVertexColourDrawSource() const { return mVertexColour; };
+    /** Internal tool to allow external addition of draw sources. Used by font
+     * code. */
+    void _addDrawSource(const DrawSourcePtr &ds);
 
-		protected:
-			void enlarge(size_t area);
+    /** Internal tool to allow removal of draw sources */
+    void _removeDrawSource(const DrawSourcePtr &ds);
 
-			void markDirty();
-			
-			void prepareResources();
-			
-			void dropResources();
+    /** Builds the atlas. Locks it for further additions, makes it useable */
+    void build();
 
-			DrawService* mOwner;
+    /// Owner getter
+    inline DrawService *getOwner() const { return mOwner; };
 
-			DrawSource::ID mAtlasID;
+    /// Returns a draw source for vertex colour rendering (2x2 white pixels)
+    const DrawSourcePtr &getVertexColourDrawSource() const {
+        return mVertexColour;
+    };
 
-			typedef std::list<DrawSourcePtr> DrawSourceList;
-			typedef std::list<FontDrawSource*> FontSet;
+protected:
+    void enlarge(size_t area);
 
-			DrawSourceList mMyDrawSources;
-			FontSet mMyFonts;
+    void markDirty();
 
-			FreeSpaceInfo* mAtlasAllocation;
+    void prepareResources();
 
-			bool mIsDirty; // TODO: Replace by mIsBuilt
+    void dropResources();
 
-			PixelSize mAtlasSize;
+    DrawService *mOwner;
 
-			Ogre::String mAtlasName; // atlas texture name
-			
-			/// Used with vertex colour (texture less) rendering
-			DrawSourcePtr mVertexColour;
-	};
+    DrawSource::ID mAtlasID;
+
+    typedef std::list<DrawSourcePtr> DrawSourceList;
+    typedef std::list<FontDrawSource *> FontSet;
+
+    DrawSourceList mMyDrawSources;
+    FontSet mMyFonts;
+
+    FreeSpaceInfo *mAtlasAllocation;
+
+    bool mIsDirty; // TODO: Replace by mIsBuilt
+
+    PixelSize mAtlasSize;
+
+    Ogre::String mAtlasName; // atlas texture name
+
+    /// Used with vertex colour (texture less) rendering
+    DrawSourcePtr mVertexColour;
 };
+}; // namespace Opde
 
 #endif

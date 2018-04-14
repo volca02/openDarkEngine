@@ -24,19 +24,17 @@
 
 /**
  @file DarkCommon.h
- @brief Common data types used throughout the entire engine. Here, these are mainly used for disk access.
+ @brief Common data types used throughout the entire engine. Here, these are
+ mainly used for disk access.
  */
-
 
 #ifndef __DARKCOMMON_H
 #define __DARKCOMMON_H
 
+#include "File.h"
 #include "config.h"
 #include "integers.h"
-#include "File.h"
 
-namespace Opde {
-	
-}
+namespace Opde {}
 
 #endif

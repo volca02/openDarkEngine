@@ -21,22 +21,22 @@
  *		$Id$
  *
  *****************************************************************************/
- 
+
 #ifndef __STDLOG_H
 #define __STDLOG_H
 
 #include "config.h"
 #include "logger.h"
-  
+
 namespace Opde {
 
-	/** Log listener, writing the logging messages to std::cerr */
-	class OPDELIB_EXPORT StdLog : public LogListener {
-		public:
-			StdLog();
-			virtual ~StdLog();
-			virtual void logMessage(Logger::LogLevel level, const std::string& msg);
-	};
-}
+/** Log listener, writing the logging messages to std::cerr */
+class OPDELIB_EXPORT StdLog : public LogListener {
+public:
+    StdLog();
+    virtual ~StdLog();
+    virtual void logMessage(Logger::LogLevel level, const std::string &msg);
+};
+} // namespace Opde
 
 #endif

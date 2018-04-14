@@ -25,43 +25,46 @@
 #ifndef __STRINGITERATORBINDER_H
 #define __STRINGITERATORBINDER_H
 
+#include "bindings.h"
+
 #include "Iterator.h"
 
 namespace Opde {
 
-	namespace Python {
+namespace Python {
 
-		/// String iterator python binder. Iterable
-		class StringIteratorBinder : public shared_ptr_binder<StringIteratorPtr> {
-			public:
-				static void init(PyObject* module);
-			
-				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
+/// String iterator python binder. Iterable
+class StringIteratorBinder : public shared_ptr_binder<StringIteratorPtr> {
+public:
+    static void init(PyObject *module);
 
-				/// to string - reprfunc conversion
-				static PyObject* repr(PyObject *self);
+    // --- Python type related methods ---
+    static PyObject *getattr(PyObject *self, char *name);
 
-				/// creates a python object representation of the string iterator
-				static PyObject* create(StringIteratorPtr& strit);
+    /// to string - reprfunc conversion
+    static PyObject *repr(PyObject *self);
 
-			protected:
-				/// Return self as iterator with a increased ref count.
-				static PyObject* getIterObject(PyObject* self);
-				
-				/// Returns current object, advances to next object (or returns NULL if at end)
-				static PyObject* getNext(PyObject* self);
-			
-				/// Static type definition for String Iterator
-				static PyTypeObject msType;
+    /// creates a python object representation of the string iterator
+    static PyObject *create(StringIteratorPtr &strit);
 
-				/// Name of the python type
-				static const char* msName;
+protected:
+    /// Return self as iterator with a increased ref count.
+    static PyObject *getIterObject(PyObject *self);
 
-				/// Method list
-				static PyMethodDef msMethods[];
-		};
-	}
-}
+    /// Returns current object, advances to next object (or returns NULL if at
+    /// end)
+    static PyObject *getNext(PyObject *self);
+
+    /// Static type definition for String Iterator
+    static PyTypeObject msType;
+
+    /// Name of the python type
+    static const char *msName;
+
+    /// Method list
+    static PyMethodDef msMethods[];
+};
+} // namespace Python
+} // namespace Opde
 
 #endif

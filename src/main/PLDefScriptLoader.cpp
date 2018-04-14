@@ -31,31 +31,28 @@ using namespace Ogre;
 
 namespace Opde {
 
-	PLDefScriptLoader::PLDefScriptLoader() : mScriptPatterns() {
-		mPLDefCompiler = new PLDefScriptCompiler();
-		
-		mScriptPatterns.push_back("*.pldef");
-		ResourceGroupManager::getSingleton()._registerScriptLoader(this);
-	}
-			
-	PLDefScriptLoader::~PLDefScriptLoader() {
-		ResourceGroupManager::getSingleton()._unregisterScriptLoader(this);
-		
-		delete mPLDefCompiler;
-	}
-		
-	const StringVector& PLDefScriptLoader::getScriptPatterns(void) const {
-		return mScriptPatterns;
-	}
-		
- 	void PLDefScriptLoader::parseScript(DataStreamPtr &stream, const String &groupName) {
-		mPLDefCompiler->parseScript(stream, groupName);
-	}
-	
-	Real PLDefScriptLoader::getLoadingOrder(void) const {
-		return 2;
-	}
-			
- 	
+PLDefScriptLoader::PLDefScriptLoader() : mScriptPatterns() {
+    mPLDefCompiler = new PLDefScriptCompiler();
+
+    mScriptPatterns.push_back("*.pldef");
+    ResourceGroupManager::getSingleton()._registerScriptLoader(this);
 }
 
+PLDefScriptLoader::~PLDefScriptLoader() {
+    ResourceGroupManager::getSingleton()._unregisterScriptLoader(this);
+
+    delete mPLDefCompiler;
+}
+
+const StringVector &PLDefScriptLoader::getScriptPatterns(void) const {
+    return mScriptPatterns;
+}
+
+void PLDefScriptLoader::parseScript(DataStreamPtr &stream,
+                                    const String &groupName) {
+    mPLDefCompiler->parseScript(stream, groupName);
+}
+
+Real PLDefScriptLoader::getLoadingOrder(void) const { return 2; }
+
+} // namespace Opde

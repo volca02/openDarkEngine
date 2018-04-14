@@ -21,13 +21,12 @@
  *
  *****************************************************************************/
 
-
 #include "RoomService.h"
-#include "Room.h"
 #include "OpdeException.h"
+#include "Room.h"
+#include "RoomPortal.h"
 #include "ServiceCommon.h"
 #include "logger.h"
-#include "RoomPortal.h"
 
 using namespace std;
 
@@ -36,24 +35,20 @@ namespace Opde {
 /*----------------------------------------------------*/
 /*-------------------- RoomService -------------------*/
 /*----------------------------------------------------*/
-template<> const size_t ServiceImpl<RoomService>::SID = __SERVICE_ID_ROOM;
+template <> const size_t ServiceImpl<RoomService>::SID = __SERVICE_ID_ROOM;
 
-RoomService::RoomService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::RoomService >(manager, name), mRoomsOk(false) {
-}
-
-//------------------------------------------------------
-RoomService::~RoomService() {
-    clear();
-}
+RoomService::RoomService(ServiceManager *manager, const std::string &name)
+    : ServiceImpl<Opde::RoomService>(manager, name), mRoomsOk(false) {}
 
 //------------------------------------------------------
-Room* RoomService::getRoomByID(int32_t id) {
-    return mRoomsByID[id];
-}
+RoomService::~RoomService() { clear(); }
 
 //------------------------------------------------------
-Room* RoomService::findObjRoom(size_t idset, int objID, const Vector3& pos) {
-    Room* r = roomFromPoint(pos);
+Room *RoomService::getRoomByID(int32_t id) { return mRoomsByID[id]; }
+
+//------------------------------------------------------
+Room *RoomService::findObjRoom(size_t idset, int objID, const Vector3 &pos) {
+    Room *r = roomFromPoint(pos);
 
     if (r) {
         // re-assign the object
@@ -65,13 +60,13 @@ Room* RoomService::findObjRoom(size_t idset, int objID, const Vector3& pos) {
 }
 
 //------------------------------------------------------
-Room* RoomService::roomFromPoint(const Vector3& pos) {
+Room *RoomService::roomFromPoint(const Vector3 &pos) {
     // iterate through all rooms....
     RoomsByID::iterator it, end = mRoomsByID.end();
 
     for (it = mRoomsByID.begin(); it != end; ++it) {
         // are we there?
-        Room* r = it->second;
+        Room *r = it->second;
 
         if (r->isInside(pos))
             return r;
@@ -81,9 +76,9 @@ Room* RoomService::roomFromPoint(const Vector3& pos) {
 }
 
 //------------------------------------------------------
-void RoomService::updateObjRoom(size_t idset, int objID, const Vector3& pos) {
+void RoomService::updateObjRoom(size_t idset, int objID, const Vector3 &pos) {
     // suppose we have a room?
-    Room* r = getCurrentObjRoom(idset, objID);
+    Room *r = getCurrentObjRoom(idset, objID);
 
     if (!r) {
         r = findObjRoom(idset, objID, pos);
@@ -98,10 +93,10 @@ void RoomService::updateObjRoom(size_t idset, int objID, const Vector3& pos) {
         return;
 
     // nope. propagate to other via portals?
-    RoomPortal* rp = r->getPortalForPoint(pos);
+    RoomPortal *rp = r->getPortalForPoint(pos);
 
     if (rp) {
-        Room* newRoom = rp->getFarRoom();
+        Room *newRoom = rp->getFarRoom();
 
         // Also not in the dest room?
         if (!newRoom->isInside(pos)) {
@@ -114,13 +109,12 @@ void RoomService::updateObjRoom(size_t idset, int objID, const Vector3& pos) {
         _attachObjRoom(idset, objID, newRoom);
     }
 
-    // TODO: Else the object is lost in transition, maybe we should detach from current room?
+    // TODO: Else the object is lost in transition, maybe we should detach from
+    // current room?
 }
 
 //------------------------------------------------------
-bool RoomService::init() {
-    return true;
-}
+bool RoomService::init() { return true; }
 
 //------------------------------------------------------
 void RoomService::bootstrapFinished() {
@@ -147,7 +141,7 @@ void RoomService::clear() {
 }
 
 //------------------------------------------------------
-void RoomService::onDBLoad(const FileGroupPtr& db, uint32_t curmask) {
+void RoomService::onDBLoad(const FileGroupPtr &db, uint32_t curmask) {
     LOG_INFO("RoomService::onDBLoad called.");
 
     if (!(curmask & DBM_OBJTREE_CONCRETE)) // May not be it but seems to fit
@@ -157,7 +151,9 @@ void RoomService::onDBLoad(const FileGroupPtr& db, uint32_t curmask) {
     clear();
 
     if (!db->hasFile("ROOM_DB")) {
-        LOG_FATAL("RoomService: Database '%d' should contain ROOM_DB by mask, but doesn't", db->getName().c_str());
+        LOG_FATAL("RoomService: Database '%d' should contain ROOM_DB by mask, "
+                  "but doesn't",
+                  db->getName().c_str());
         return;
     }
 
@@ -170,7 +166,8 @@ void RoomService::onDBLoad(const FileGroupPtr& db, uint32_t curmask) {
     *rdb >> roomsOk;
 
     if (!roomsOk) {
-        LOG_ERROR("RoomService: Database '%d' had RoomOK false", db->getName().c_str());
+        LOG_ERROR("RoomService: Database '%d' had RoomOK false",
+                  db->getName().c_str());
         mRoomsOk = false;
         return;
     }
@@ -188,10 +185,11 @@ void RoomService::onDBLoad(const FileGroupPtr& db, uint32_t curmask) {
     for (size_t rn = 0; rn < count; ++rn)
         mRooms[rn] = new Room(this);
 
-    // then we load - the two phase construction enables us to link rooms and room portals together directly...
+    // then we load - the two phase construction enables us to link rooms and
+    // room portals together directly...
     for (size_t rn = 0; rn < count; ++rn) {
         LOG_DEBUG("RoomService: Loading room %d", rn);
-        Room* r = mRooms[rn];
+        Room *r = mRooms[rn];
         assert(r != NULL);
         r->read(rdb);
         mRoomsByID[r->getRoomID()] = r;
@@ -199,7 +197,7 @@ void RoomService::onDBLoad(const FileGroupPtr& db, uint32_t curmask) {
 }
 
 //------------------------------------------------------
-void RoomService::onDBSave(const FileGroupPtr& db, uint32_t tgtmask) {
+void RoomService::onDBSave(const FileGroupPtr &db, uint32_t tgtmask) {
     LOG_INFO("RoomService::onDBSave called.");
 
     if (!(tgtmask & DBM_MIS_DATA))
@@ -233,21 +231,23 @@ void RoomService::onDBDrop(uint32_t dropmask) {
 }
 
 //------------------------------------------------------
-void RoomService::_attachObjRoom(size_t idset, int objID, Room* room) {
+void RoomService::_attachObjRoom(size_t idset, int objID, Room *room) {
     assert(room);
-    LOG_VERBOSE("RoomService: IDset %u Object %d attaching (new room %d)", idset, objID, (int)room->getRoomID());
+    LOG_VERBOSE("RoomService: IDset %u Object %d attaching (new room %d)",
+                idset, objID, (int)room->getRoomID());
     room->attachObj(idset, objID);
     setCurrentObjRoom(idset, objID, room);
     // TODO: listener notification
 }
 
 //------------------------------------------------------
-void RoomService::_detachObjRoom(size_t idset, int objID, Room* current) {
+void RoomService::_detachObjRoom(size_t idset, int objID, Room *current) {
     if (!current)
         current = getCurrentObjRoom(idset, objID);
 
     if (current) {
-        LOG_VERBOSE("RoomService: IDset %u Object %d detaching (old room %d)", idset, objID, (int)current->getRoomID());
+        LOG_VERBOSE("RoomService: IDset %u Object %d detaching (old room %d)",
+                    idset, objID, (int)current->getRoomID());
 
         current->detachObj(idset, objID);
 
@@ -259,7 +259,7 @@ void RoomService::_detachObjRoom(size_t idset, int objID, Room* current) {
 }
 
 //------------------------------------------------------
-Room* RoomService::getCurrentObjRoom(size_t idset, int objID) const {
+Room *RoomService::getCurrentObjRoom(size_t idset, int objID) const {
     // get the idset in question
     if (mIDSets.size() > idset) {
         RoomsByID::const_iterator it = mIDSets[idset].find(objID);
@@ -272,7 +272,7 @@ Room* RoomService::getCurrentObjRoom(size_t idset, int objID) const {
 }
 
 //------------------------------------------------------
-void RoomService::setCurrentObjRoom(size_t idset, int objID, Room* room) {
+void RoomService::setCurrentObjRoom(size_t idset, int objID, Room *room) {
     // ensure the idset exists
     if (mIDSets.size() <= idset) {
         mIDSets.resize(idset + 1);
@@ -284,23 +284,16 @@ void RoomService::setCurrentObjRoom(size_t idset, int objID, Room* room) {
 //-------------------------- Factory implementation
 std::string RoomServiceFactory::mName = "RoomService";
 
-RoomServiceFactory::RoomServiceFactory() : ServiceFactory() {
-}
+RoomServiceFactory::RoomServiceFactory() : ServiceFactory() {}
 
-const std::string& RoomServiceFactory::getName() {
-    return mName;
-}
+const std::string &RoomServiceFactory::getName() { return mName; }
 
-const uint RoomServiceFactory::getMask() {
-    return SERVICE_ENGINE;
-}
+const uint RoomServiceFactory::getMask() { return SERVICE_ENGINE; }
 
-const size_t RoomServiceFactory::getSID() {
-    return RoomService::SID;
-}
+const size_t RoomServiceFactory::getSID() { return RoomService::SID; }
 
-Service* RoomServiceFactory::createInstance(ServiceManager* manager) {
+Service *RoomServiceFactory::createInstance(ServiceManager *manager) {
     return new RoomService(manager, mName);
 }
 
-}
+} // namespace Opde

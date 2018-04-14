@@ -22,58 +22,57 @@
  *
  *****************************************************************************/
 
-#include "RenderService.h"
-#include "property/PropertyService.h"
-#include "SingleFieldDataStorage.h"
 #include "ModelNameProperty.h"
+#include "RenderService.h"
+#include "SingleFieldDataStorage.h"
+#include "property/PropertyService.h"
 
 namespace Opde {
-	/*--------------------------------------------------------*/
-	/*-------------------- ModelNameProperty -----------------*/
-	/*--------------------------------------------------------*/
-	ModelNameProperty::ModelNameProperty(RenderService* rs, PropertyService* owner) :
-			RenderedProperty(rs, owner, "ModelName", "ModelName", "always") {
+/*--------------------------------------------------------*/
+/*-------------------- ModelNameProperty -----------------*/
+/*--------------------------------------------------------*/
+ModelNameProperty::ModelNameProperty(RenderService *rs, PropertyService *owner)
+    : RenderedProperty(rs, owner, "ModelName", "ModelName", "always") {
 
-		mPropertyStorage = DataStoragePtr(new FixedStringDataStorage<16>(NULL));
+    mPropertyStorage = DataStoragePtr(new FixedStringDataStorage<16>(NULL));
 
-		setChunkVersions(2, 16);
+    setChunkVersions(2, 16);
 
-		mSceneMgr = rs->getSceneManager();
-	};
-
-	// --------------------------------------------------------------------------
-	ModelNameProperty::~ModelNameProperty(void) {
-	};
-
-	// --------------------------------------------------------------------------
-	void ModelNameProperty::addProperty(int oid) {
-		DVariant val;
-
-		if (!get(oid, "", val))
-			OPDE_EXCEPT("Property not defined for object.", "ModelNameProperty::addProperty");
-
-		setModel(oid, val.toString());
-	};
-
-	// --------------------------------------------------------------------------
-	void ModelNameProperty::removeProperty(int oid) {
-		setModel(oid, "");
-	};
-
-	// --------------------------------------------------------------------------
-	void ModelNameProperty::setPropertySource(int oid, int effid) {
-		// re-read the property
-		addProperty(oid);
-	};
-
-	// --------------------------------------------------------------------------
-	void ModelNameProperty::valueChanged(int oid, const std::string& field, const DVariant& value) {
-		// just call the setter
-		setModel(oid, value.toString());
-	};
-
-	// --------------------------------------------------------------------------
-	void ModelNameProperty::setModel(int oid, const std::string& name) {
-		mOwner->setObjectModel(oid, name);
-	};
+    mSceneMgr = rs->getSceneManager();
 };
+
+// --------------------------------------------------------------------------
+ModelNameProperty::~ModelNameProperty(void){};
+
+// --------------------------------------------------------------------------
+void ModelNameProperty::addProperty(int oid) {
+    DVariant val;
+
+    if (!get(oid, "", val))
+        OPDE_EXCEPT("Property not defined for object.",
+                    "ModelNameProperty::addProperty");
+
+    setModel(oid, val.toString());
+};
+
+// --------------------------------------------------------------------------
+void ModelNameProperty::removeProperty(int oid) { setModel(oid, ""); };
+
+// --------------------------------------------------------------------------
+void ModelNameProperty::setPropertySource(int oid, int effid) {
+    // re-read the property
+    addProperty(oid);
+};
+
+// --------------------------------------------------------------------------
+void ModelNameProperty::valueChanged(int oid, const std::string &field,
+                                     const DVariant &value) {
+    // just call the setter
+    setModel(oid, value.toString());
+};
+
+// --------------------------------------------------------------------------
+void ModelNameProperty::setModel(int oid, const std::string &name) {
+    mOwner->setObjectModel(oid, name);
+};
+}; // namespace Opde

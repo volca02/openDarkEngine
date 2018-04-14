@@ -25,42 +25,41 @@
 #ifndef __FONTDRAWSOURCEBINDER_H
 #define __FONTDRAWSOURCEBINDER_H
 
-#include "bindings.h"
 #include "FontDrawSource.h"
+#include "bindings.h"
 
 namespace Opde {
 
-	namespace Python {
+namespace Python {
 
-		/// FontDrawSource python binder
-		class FontDrawSourceBinder : public shared_ptr_binder<FontDrawSourcePtr> {
-			public:
-				static void init(PyObject* module);
+/// FontDrawSource python binder
+class FontDrawSourceBinder : public shared_ptr_binder<FontDrawSourcePtr> {
+public:
+    static void init(PyObject *module);
 
-				// --- Python type related methods ---
-				/// to string - reprfunc conversion
-				static PyObject* repr(PyObject *self);
+    // --- Python type related methods ---
+    /// to string - reprfunc conversion
+    static PyObject *repr(PyObject *self);
 
-				/// helper class pointer extractor
-				static bool extract(PyObject *obj, FontDrawSourcePtr& tgt);
+    /// helper class pointer extractor
+    static bool extract(PyObject *obj, FontDrawSourcePtr &tgt);
 
-				// no methods here
+    // no methods here
 
+    static PyObject *create(const FontDrawSourcePtr &ds);
 
-				static PyObject* create(const FontDrawSourcePtr& ds);
+protected:
+    /// Static type definition
+    static PyTypeObject msType;
 
-			protected:
-				/// Static type definition
-				static PyTypeObject msType;
+    /// Name of the python type
+    static const char *msName;
 
-				/// Name of the python type
-				static const char* msName;
+    /// Method list
+    static PyMethodDef msMethods[];
+};
 
-				/// Method list
-				static PyMethodDef msMethods[];
-		};
-
-	}
-}
+} // namespace Python
+} // namespace Opde
 
 #endif

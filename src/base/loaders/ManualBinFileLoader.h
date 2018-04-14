@@ -27,20 +27,21 @@
 
 #include "config.h"
 
-#include <OgreResourceManager.h>
 #include "OgreMesh.h"
+#include <OgreResourceManager.h>
 
 namespace Ogre {
 
-	/** ManualResourceLoader for BIN meshes. Used to load BIN meshes as Ogre::Mesh instances */
-	class OPDELIB_EXPORT ManualBinFileLoader : public ManualResourceLoader {
-		public:
-			ManualBinFileLoader();
-			virtual ~ManualBinFileLoader();
-			
-			virtual void loadResource(Resource* resource);
-	};
-	
-}
+/** ManualResourceLoader for BIN meshes. Used to load BIN meshes as Ogre::Mesh
+ * instances */
+class OPDELIB_EXPORT ManualBinFileLoader : public ManualResourceLoader {
+public:
+    ManualBinFileLoader();
+    virtual ~ManualBinFileLoader();
+
+    virtual void loadResource(Resource *resource);
+};
+
+} // namespace Ogre
 
 #endif

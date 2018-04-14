@@ -21,7 +21,6 @@
  *
  *****************************************************************************/
 
-
 #ifndef __SINGLEDATASTORAGE_H
 #define __SINGLEDATASTORAGE_H
 
@@ -36,261 +35,267 @@
 #include "Serializer.h"
 
 namespace Opde {
-	/// iterator over a single DataFieldDesc element. Useful for single-fielded properties, such as varstr properties
-	class SingleFieldDescIterator : public DataFieldDescIterator {
-	    public:
-            SingleFieldDescIterator(const DataFieldDesc& desc) : mDesc(desc), mEnd(false) {};
+/// iterator over a single DataFieldDesc element. Useful for single-fielded
+/// properties, such as varstr properties
+class SingleFieldDescIterator : public DataFieldDescIterator {
+public:
+    SingleFieldDescIterator(const DataFieldDesc &desc)
+        : mDesc(desc), mEnd(false){};
+
+    virtual const DataFieldDesc &next() {
+        assert(!mEnd);
+        mEnd = true;
+        return mDesc;
+    };
 
-            virtual const DataFieldDesc& next() { assert(!mEnd); mEnd = true; return mDesc; };
+    virtual bool end() const { return mEnd; };
 
-            virtual bool end() const { return mEnd; };
+protected:
+    const DataFieldDesc &mDesc;
+    bool mEnd;
+};
 
-        protected:
-            const DataFieldDesc& mDesc;
-            bool mEnd;
-	};
+/** Common ancestor template for all the single value data storages (with fixed
+ * length data) */
+template <typename T>
+class OPDELIB_EXPORT SingleFieldDataStorage : public DataStorage {
+public:
+    explicit SingleFieldDataStorage(DEnum *enm) {
+        mSerializer = new TypeSerializer<T>();
+        mFieldDesc.enumerator = enm;
+        mFieldDesc.name = "";
+        mFieldDesc.size = sizeof(T);
 
-	/** Common ancestor template for all the single value data storages (with fixed length data) */
-	template<typename T> class OPDELIB_EXPORT SingleFieldDataStorage : public DataStorage {
-		public:
-			explicit SingleFieldDataStorage(DEnum* enm) {
-				mSerializer = new TypeSerializer<T>();
-				mFieldDesc.enumerator = enm;
-				mFieldDesc.name = "";
-				mFieldDesc.size = sizeof(T);
+        DVariantTypeTraits<T> tt;
+        mFieldDesc.type = tt.getType();
+    };
 
-				DVariantTypeTraits<T> tt;
-				mFieldDesc.type = tt.getType();
-			};
+    virtual ~SingleFieldDataStorage() { delete mSerializer; }
 
-			virtual ~SingleFieldDataStorage() {
-				delete mSerializer;
-			}
+    /** @see DataStorage::create */
+    virtual bool create(int objID) {
+        // call _create to handle the creation, with the default value
+        return _create(objID, T());
+    }
 
-			/** @see DataStorage::create */
-			virtual bool create(int objID) {
-				// call _create to handle the creation, with the default value
-				return _create(objID, T());
-			}
+    /** @see DataStorage::destroy */
+    virtual bool destroy(int objID) {
+        typename DataMap::iterator it = mDataMap.find(objID);
 
-			/** @see DataStorage::destroy */
-			virtual bool destroy(int objID) {
-				typename DataMap::iterator it = mDataMap.find(objID);
+        if (it != mDataMap.end()) {
+            mDataMap.erase(it);
 
-				if (it != mDataMap.end()) {
-					mDataMap.erase(it);
+            // true, erase went ok
+            return true;
+        }
 
-					// true, erase went ok
-					return true;
-				}
+        return false;
+    }
 
-				return false;
-			}
+    /** @see DataStorage::has */
+    virtual bool has(int objID) {
+        typename DataMap::iterator it = mDataMap.find(objID);
 
-			/** @see DataStorage::has */
-			virtual bool has(int objID) {
-				typename DataMap::iterator it = mDataMap.find(objID);
+        return (it != mDataMap.end());
+    }
 
-				return (it != mDataMap.end());
-			}
+    /** @see DataStorage::clone */
+    virtual bool clone(int srcID, int dstID) {
+        typename DataMap::iterator it = mDataMap.find(srcID);
 
-			/** @see DataStorage::clone */
-			virtual bool clone(int srcID, int dstID) {
-				typename DataMap::iterator it = mDataMap.find(srcID);
+        if (it != mDataMap.end()) {
+            return _create(dstID, it->second);
+        }
 
-				if (it != mDataMap.end()) {
-					return _create(dstID, it->second);
-				}
+        return false;
+    }
 
-				return false;
-			}
+    /** @see DataStorage::getField */
+    virtual bool getField(int objID, const std::string &field,
+                          DVariant &target) {
+        assert(field == "");
 
-			/** @see DataStorage::getField */
-			virtual bool getField(int objID, const std::string& field, DVariant& target) {
-				assert(field=="");
+        typename DataMap::iterator it = mDataMap.find(objID);
 
-				typename DataMap::iterator it = mDataMap.find(objID);
+        if (it != mDataMap.end()) {
+            target = it->second;
 
-				if (it != mDataMap.end()) {
-					target = it->second;
+            return true;
+        }
 
-					return true;
-				}
+        return false;
+    }
 
-				return false;
-			}
+    /** @see DataStorage::setField */
+    virtual bool setField(int objID, const std::string &field,
+                          const DVariant &value) {
+        assert(field == "");
 
-			/** @see DataStorage::setField */
-			virtual bool setField(int objID, const std::string& field, const DVariant& value) {
-				assert(field=="");
+        typename DataMap::iterator it = mDataMap.find(objID);
 
-				typename DataMap::iterator it = mDataMap.find(objID);
+        if (it != mDataMap.end()) {
+            it->second = fromVariant(value);
 
-				if (it != mDataMap.end()) {
-					it->second = fromVariant(value);
+            return true;
+        }
 
-					return true;
-				}
+        return false;
+    }
 
-				return false;
-			}
+    /** @see DataStorage::writeToFile */
+    virtual bool writeToFile(FilePtr &file, int objID, bool sizeStored) {
+        typename DataMap::iterator it = mDataMap.find(objID);
 
-			/** @see DataStorage::writeToFile */
-			virtual bool writeToFile(FilePtr& file, int objID, bool sizeStored) {
-				typename DataMap::iterator it = mDataMap.find(objID);
+        if (it != mDataMap.end()) {
+            const T &dta = it->second;
 
-				if (it != mDataMap.end()) {
-					const T& dta = it->second;
+            uint32_t size = mSerializer->getStoredSize(&dta);
 
-					uint32_t size = mSerializer->getStoredSize(&dta);
+            // Write the size if requested
+            if (sizeStored)
+                file->writeElem(&size, sizeof(uint32_t));
 
-					// Write the size if requested
-					if (sizeStored)
-						file->writeElem(&size, sizeof(uint32_t));
+            // write the data itself
+            mSerializer->serialize(file, &dta);
 
-					// write the data itself
-					mSerializer->serialize(file, &dta);
+            return true;
+        }
 
-					return true;
-				}
+        return false;
+    }
 
-				return false;
-			}
+    /** @see DataStorage::readFromFile */
+    virtual bool readFromFile(FilePtr &file, int objID, bool sizeStored) {
+        typename DataMap::iterator it = mDataMap.find(objID);
 
-			/** @see DataStorage::readFromFile */
-			virtual bool readFromFile(FilePtr& file, int objID, bool sizeStored) {
-				typename DataMap::iterator it = mDataMap.find(objID);
+        if (it == mDataMap.end()) {
+            uint32_t size = sizeof(T);
 
-				if (it == mDataMap.end()) {
-					uint32_t size = sizeof(T);
+            if (sizeStored)
+                file->readElem(&size, sizeof(uint32_t));
 
-					if (sizeStored)
-						file->readElem(&size, sizeof(uint32_t));
+            // assert(size == sizeof(T));
 
-					// assert(size == sizeof(T));
+            T dta;
 
-					T dta;
+            mSerializer->deserialize(file, &dta);
 
-					mSerializer->deserialize(file, &dta);
+            _create(objID, dta);
 
-					_create(objID, dta);
+            return true;
+        } else {
+            // skip the data...
+            uint32_t size;
 
-					return true;
-				} else {
-					// skip the data...
-					uint32_t size;
+            file->readElem(&size, sizeof(uint32_t));
+            file->seek(size, File::FSEEK_CUR);
+        }
 
-					file->readElem(&size, sizeof(uint32_t));
-					file->seek(size, File::FSEEK_CUR);
-				}
+        return false;
+    }
 
-				return false;
-			}
+    /** @see DataStorage::clear */
+    virtual void clear() { mDataMap.clear(); }
 
-			/** @see DataStorage::clear */
-			virtual void clear() {
-				mDataMap.clear();
-			}
+    /** @see DataStorage::isEmpty */
+    virtual bool isEmpty() { return mDataMap.empty(); }
 
-			/** @see DataStorage::isEmpty */
-			virtual bool isEmpty() {
-				return mDataMap.empty();
-			}
+    /** @see DataStorage::getAllStoredObjects */
+    virtual IntIteratorPtr getAllStoredObjects() {
+        return IntIteratorPtr(new DataMapKeyIterator(mDataMap));
+    }
 
-			/** @see DataStorage::getAllStoredObjects */
-			virtual IntIteratorPtr getAllStoredObjects() {
-				return IntIteratorPtr(new DataMapKeyIterator(mDataMap));
-			}
+    /** Core Data creation routine */
+    virtual bool _create(int objID, const T &val) {
+        std::pair<typename DataMap::iterator, bool> res =
+            mDataMap.insert(std::make_pair(objID, val));
 
-			/** Core Data creation routine */
-			virtual bool _create(int objID, const T& val) {
-				std::pair<typename DataMap::iterator, bool> res
-					= mDataMap.insert(std::make_pair(objID, val));
+        return res.second;
+    };
 
-				return res.second;
-			};
+    /** @see DataStorage::getFieldDescIterator */
+    virtual DataFieldDescIteratorPtr getFieldDescIterator(void) {
+        return DataFieldDescIteratorPtr(
+            new SingleFieldDescIterator(mFieldDesc));
+    }
 
-			/** @see DataStorage::getFieldDescIterator */
-			virtual DataFieldDescIteratorPtr getFieldDescIterator(void) {
-				return DataFieldDescIteratorPtr(new SingleFieldDescIterator(mFieldDesc));
-			}
+    /** @see DataStorage::getDataSize */
+    virtual size_t getDataSize(void) { return sizeof(T); }
 
-			/** @see DataStorage::getDataSize */
-			virtual size_t getDataSize(void) {
-				return sizeof(T);
-			}
+protected:
+    /// Empty constructor - for special case overrides
+    explicit SingleFieldDataStorage(){};
 
-		protected:
-			/// Empty constructor - for special case overrides
-			explicit SingleFieldDataStorage() {
-			};
+    /// Converts from variant to the internal storage type. Should be overrided,
+    /// or reimplemented by explicit specialization
+    virtual T fromVariant(const DVariant &v) const { return v.as<T>(); }
 
+    /// Data map
+    typedef typename std::map<int, T> DataMap;
 
-			/// Converts from variant to the internal storage type. Should be overrided, or reimplemented by explicit specialization
-			virtual T fromVariant(const DVariant& v) const {
-				return v.as<T>();
-			}
+    /// Holder of data values
+    DataMap mDataMap;
 
-			/// Data map
-			typedef typename std::map<int, T> DataMap;
+    /// Bool prop. storage is a single-field construct. This is the field desc
+    /// for the field
+    DataFieldDesc mFieldDesc;
 
-			/// Holder of data values
-			DataMap mDataMap;
+    typedef MapKeyIterator<DataMap, int> DataMapKeyIterator;
 
-			/// Bool prop. storage is a single-field construct. This is the field desc for the field
-			DataFieldDesc mFieldDesc;
+    Serializer *mSerializer;
+};
 
-			typedef MapKeyIterator<DataMap, int> DataMapKeyIterator;
+// Various simple single-fielded data storages (it could be done more easily
+// through some data definition structures):
 
-			Serializer* mSerializer;
-	};
+/// Boolean (4 byte) data storage
+typedef SingleFieldDataStorage<bool> BoolDataStorage;
 
-	// Various simple single-fielded data storages (it could be done more easily through some data definition structures):
+/// Float (4 byte) data storage
+typedef SingleFieldDataStorage<float> FloatDataStorage;
 
-	/// Boolean (4 byte) data storage
-	typedef SingleFieldDataStorage<bool> BoolDataStorage;
+/// int (4 byte) data storage
+typedef SingleFieldDataStorage<int32_t> IntDataStorage;
 
-	/// Float (4 byte) data storage
-	typedef SingleFieldDataStorage<float> FloatDataStorage;
+/// unsigned int (4 byte) data storage
+typedef SingleFieldDataStorage<uint32_t> UIntDataStorage;
 
-	/// int (4 byte) data storage
-	typedef SingleFieldDataStorage<int32_t> IntDataStorage;
+/// Vector3 data storage
+typedef SingleFieldDataStorage<Vector3> Vector3DataStorage;
 
-	/// unsigned int (4 byte) data storage
-	typedef SingleFieldDataStorage<uint32_t> UIntDataStorage;
+/// Variable length string data storage
+class OPDELIB_EXPORT StringDataStorage
+    : public SingleFieldDataStorage<std::string> {
+public:
+    StringDataStorage(DEnum *enm = NULL)
+        : SingleFieldDataStorage<std::string>(enm) {
+        mFieldDesc.size = -1; // override needed
+    }
 
-	/// Vector3 data storage
-	typedef SingleFieldDataStorage<Vector3> Vector3DataStorage;
+    /** @see DataStorage::getDataSize */
+    virtual size_t getDataSize(void) {
+        OPDE_EXCEPT("StringDataStorage::getDataSize",
+                    "Invalid call - string length is variable");
+    }
+};
 
-	/// Variable length string data storage
-	class OPDELIB_EXPORT StringDataStorage : public SingleFieldDataStorage<std::string> {
-		public:
-			StringDataStorage(DEnum* enm = NULL) : SingleFieldDataStorage<std::string>(enm) {
-				mFieldDesc.size = -1; // override needed
-			}
+/// Fixed size string data storage template.
+template <int Len>
+class FixedStringDataStorage : public SingleFieldDataStorage<std::string> {
+public:
+    FixedStringDataStorage(DEnum *enm = NULL)
+        : SingleFieldDataStorage<std::string>(enm) {
+        mSerializer = new FixedStringSerializer(Len);
 
-			/** @see DataStorage::getDataSize */
-			virtual size_t getDataSize(void) {
-				OPDE_EXCEPT("StringDataStorage::getDataSize", "Invalid call - string length is variable");
-			}
-	};
+        mFieldDesc.enumerator = enm;
+        mFieldDesc.name = "";
+        mFieldDesc.size = Len;
 
-	/// Fixed size string data storage template.
-	template<int Len> class FixedStringDataStorage : public SingleFieldDataStorage<std::string> {
-		public:
-			FixedStringDataStorage(DEnum* enm = NULL) : SingleFieldDataStorage<std::string>(enm) {
-				mSerializer = new FixedStringSerializer(Len);
+        DVariantTypeTraits<std::string> tt;
+        mFieldDesc.type = tt.getType();
+    }
+};
 
-				mFieldDesc.enumerator = enm;
-				mFieldDesc.name = "";
-				mFieldDesc.size = Len;
-
-				DVariantTypeTraits<std::string> tt;
-				mFieldDesc.type = tt.getType();
-			}
-
-	};
-
-}
+} // namespace Opde
 
 #endif // __PROPERTYSTORAGE_H

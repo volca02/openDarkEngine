@@ -25,41 +25,45 @@
 #ifndef __INHERITQUERYRESULYBINDER_H
 #define __INHERITQUERYRESULYBINDER_H
 
-#include  "InheritService.h"
+#include "bindings.h"
+
+#include "InheritService.h"
 
 namespace Opde {
 
-	namespace Python {
+namespace Python {
 
-		/// Inherit query result python binder. Iterable
-		/// @todo Candidate for a template - Opde::Iterator binder
-		class InheritQueryResultBinder : public shared_ptr_binder<InheritQueryResultPtr> {
-			public:
-				static void init(PyObject* module);
+/// Inherit query result python binder. Iterable
+/// @todo Candidate for a template - Opde::Iterator binder
+class InheritQueryResultBinder
+    : public shared_ptr_binder<InheritQueryResultPtr> {
+public:
+    static void init(PyObject *module);
 
-				// --- Python type related methods ---
-				/// to string - reprfunc conversion
-				static PyObject* repr(PyObject *self);
+    // --- Python type related methods ---
+    /// to string - reprfunc conversion
+    static PyObject *repr(PyObject *self);
 
-				/// creates a python object representation of the inherit query result
-				static PyObject* create(const InheritQueryResultPtr& result);
+    /// creates a python object representation of the inherit query result
+    static PyObject *create(const InheritQueryResultPtr &result);
 
-			protected:
-				/// Return self as iterator with a increased ref count.
-				static PyObject* getIterObject(PyObject* self);
-				/// Returns current object, advances to next object (or returns NULL if at end)
-				static PyObject* getNext(PyObject* self);
+protected:
+    /// Return self as iterator with a increased ref count.
+    static PyObject *getIterObject(PyObject *self);
+    /// Returns current object, advances to next object (or returns NULL if at
+    /// end)
+    static PyObject *getNext(PyObject *self);
 
-				/// Static type definition for InheritQueryResult
-				static PyTypeObject msType;
+    /// Static type definition for InheritQueryResult
+    static PyTypeObject msType;
 
-				/// Name of the python type
-				static const char* msName;
+    /// Name of the python type
+    static const char *msName;
 
-				/// Method list
-				static PyMethodDef msMethods[];
-		};
-	}
-}
+    /// Method list
+    static PyMethodDef msMethods[];
+};
+} // namespace Python
+} // namespace Opde
 
 #endif

@@ -21,28 +21,28 @@
  *
  *****************************************************************************/
 
-
 #ifndef __GAMEPLAYSTATE_H
 #define __GAMEPLAYSTATE_H
 
 #include "config.h"
 
+#include "ConsoleCommandListener.h"
 #include "GameState.h"
 #include "OpdeSingleton.h"
-#include "ConsoleCommandListener.h"
-#include "link/LinkCommon.h"
 #include "config/ConfigService.h"
-#include "link/LinkService.h"
 #include "draw/DrawService.h"
+#include "link/LinkCommon.h"
+#include "link/LinkService.h"
 
 #include <OgreMath.h>
 #include <OgreRoot.h>
 #include <OgreSceneManager.h>
 
-
 namespace Opde {
 
-class GamePlayState : public Singleton<GamePlayState>, public GameState, public ConsoleCommandListener {
+class GamePlayState : public Singleton<GamePlayState>,
+                      public GameState,
+                      public ConsoleCommandListener {
 public:
     GamePlayState();
     virtual ~GamePlayState();
@@ -64,10 +64,11 @@ public:
     virtual void commandExecuted(std::string command, std::string parameters);
 
     virtual void bootstrapFinished();
-    void onLinkPlayerFactoryMsg(const LinkChangeMsg& msg);
+    void onLinkPlayerFactoryMsg(const LinkChangeMsg &msg);
 
-    static GamePlayState& getSingleton();
-    static GamePlayState* getSingletonPtr();
+    static GamePlayState &getSingleton();
+    static GamePlayState *getSingletonPtr();
+
 protected:
     Ogre::Root *mRoot;
     Ogre::SceneManager *mSceneMgr;
@@ -106,13 +107,14 @@ protected:
 
     int mSceneDetailIndex;
 
-    Ogre::RenderWindow* mWindow;
+    Ogre::RenderWindow *mWindow;
 
     int mNumScreenShots;
     // config service
     ConfigServicePtr mConfigService;
 
     RenderedLabel *mRl1, *mRl2;
+
 private:
     /// Direct link to the player factory relation
     RelationPtr mPlayerFactoryRelation;
@@ -124,6 +126,6 @@ private:
 
     DrawServicePtr mDrawService;
 };
-}
+} // namespace Opde
 
 #endif

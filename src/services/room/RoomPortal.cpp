@@ -21,88 +21,79 @@
  *
  *****************************************************************************/
 
-
 #include "RoomPortal.h"
+#include "FileCompat.h"
 #include "Room.h"
 #include "RoomService.h"
-#include "FileCompat.h"
 
 namespace Opde {
-	/*----------------------------------------------------*/
-	/*--------------------- RoomPortal -------------------*/
-	/*----------------------------------------------------*/
-	RoomPortal::RoomPortal(RoomService* owner) :
-			mOwner(owner) {
-		
-	}
-	
-	//------------------------------------------------------
-	RoomPortal::~RoomPortal() {
-		clear();
-	}
-	
-	//------------------------------------------------------
-	void RoomPortal::read(const FilePtr& sf) {
-		*sf >> mID >> mIndex >> mPlane >> mEdgeCount;
-		// planes that define edges
-		
-		mEdges.grow(mEdgeCount);
-		
-		for (size_t i = 0; i < mEdgeCount;++i) {
-			*sf >> mEdges[i];
-		}
-		
-		// room ID's to be linked
-		int32_t src_room, dest_room;
-		
-		*sf >> src_room >> dest_room;
-		
-		// link through room service
-		mSrcRoom = mOwner->getRoomByID(src_room);
-		mDestRoom = mOwner->getRoomByID(dest_room);
-		
-		*sf >> mCenter;
-		*sf >> mDestPortal;
-	}
-	
-	//------------------------------------------------------
-	void RoomPortal::write(const FilePtr& sf) {
-		*sf << mID << mIndex << mPlane << mEdgeCount;
+/*----------------------------------------------------*/
+/*--------------------- RoomPortal -------------------*/
+/*----------------------------------------------------*/
+RoomPortal::RoomPortal(RoomService *owner) : mOwner(owner) {}
 
-		// planes that define edges
-		for (size_t i = 0; i < mEdgeCount;++i) {
-			*sf << mEdges[i];
-		}
-		
-		*sf << mSrcRoom->getRoomID() << mDestRoom->getRoomID();
-		*sf << mCenter;
-		*sf << mDestPortal;
-	}
-	
-	//------------------------------------------------------
-	bool RoomPortal::isInside(const Vector3& point) {
-		// iterate over all the planes. Have to have positive side
-		for (size_t i = 0; i < mEdgeCount;++i) {
-			if (mEdges[i].getSide(point) == Plane::NEGATIVE_SIDE)
-				return false;
-		}
-		
-		return true;
-	}
-	
-	//------------------------------------------------------
-	void RoomPortal::clear() {
-		mID = 0;
-		mIndex = 0;
-		mPlane = Plane();
-		mEdgeCount = 0;
-		mEdges.clear();
-		mSrcRoom = NULL;
-		mDestRoom = NULL;
-		mCenter = Vector3::ZERO;
-		mDestPortal = 0;
-		
-	}
+//------------------------------------------------------
+RoomPortal::~RoomPortal() { clear(); }
+
+//------------------------------------------------------
+void RoomPortal::read(const FilePtr &sf) {
+    *sf >> mID >> mIndex >> mPlane >> mEdgeCount;
+    // planes that define edges
+
+    mEdges.grow(mEdgeCount);
+
+    for (size_t i = 0; i < mEdgeCount; ++i) {
+        *sf >> mEdges[i];
+    }
+
+    // room ID's to be linked
+    int32_t src_room, dest_room;
+
+    *sf >> src_room >> dest_room;
+
+    // link through room service
+    mSrcRoom = mOwner->getRoomByID(src_room);
+    mDestRoom = mOwner->getRoomByID(dest_room);
+
+    *sf >> mCenter;
+    *sf >> mDestPortal;
 }
 
+//------------------------------------------------------
+void RoomPortal::write(const FilePtr &sf) {
+    *sf << mID << mIndex << mPlane << mEdgeCount;
 
+    // planes that define edges
+    for (size_t i = 0; i < mEdgeCount; ++i) {
+        *sf << mEdges[i];
+    }
+
+    *sf << mSrcRoom->getRoomID() << mDestRoom->getRoomID();
+    *sf << mCenter;
+    *sf << mDestPortal;
+}
+
+//------------------------------------------------------
+bool RoomPortal::isInside(const Vector3 &point) {
+    // iterate over all the planes. Have to have positive side
+    for (size_t i = 0; i < mEdgeCount; ++i) {
+        if (mEdges[i].getSide(point) == Plane::NEGATIVE_SIDE)
+            return false;
+    }
+
+    return true;
+}
+
+//------------------------------------------------------
+void RoomPortal::clear() {
+    mID = 0;
+    mIndex = 0;
+    mPlane = Plane();
+    mEdgeCount = 0;
+    mEdges.clear();
+    mSrcRoom = NULL;
+    mDestRoom = NULL;
+    mCenter = Vector3::ZERO;
+    mDestPortal = 0;
+}
+} // namespace Opde

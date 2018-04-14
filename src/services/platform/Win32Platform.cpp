@@ -27,30 +27,26 @@ using namespace std;
 
 namespace Opde {
 
-	/*----------------------------------------------------*/
-	/*--------------------- Win32Platform ----------------*/
-	/*----------------------------------------------------*/
-	Win32Platform::Win32Platform(PlatformService* owner) : Platform(owner) {
-	}
+/*----------------------------------------------------*/
+/*--------------------- Win32Platform ----------------*/
+/*----------------------------------------------------*/
+Win32Platform::Win32Platform(PlatformService *owner) : Platform(owner) {}
 
-	//------------------------------------------------------
-	Win32Platform::~Win32Platform() {
-	}
+//------------------------------------------------------
+Win32Platform::~Win32Platform() {}
 
-	//------------------------------------------------------
-	std::string Win32Platform::getGlobalConfigPath() const {
-		// TODO: CODE
-		return "\\Invalid\\";
-	}
-
-	//------------------------------------------------------
-	std::string Win32Platform::getUserConfigPath() const {
-		// TODO: CODE
-		return "\\Invalid\\";
-	}
-
-	//------------------------------------------------------
-	std::string Win32Patform::getDirectorySeparator() const {
-		return "\\";
-	}
+//------------------------------------------------------
+std::string Win32Platform::getGlobalConfigPath() const {
+    // TODO: CODE
+    return "\\Invalid\\";
 }
+
+//------------------------------------------------------
+std::string Win32Platform::getUserConfigPath() const {
+    // TODO: CODE
+    return "\\Invalid\\";
+}
+
+//------------------------------------------------------
+std::string Win32Patform::getDirectorySeparator() const { return "\\"; }
+} // namespace Opde

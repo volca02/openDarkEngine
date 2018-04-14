@@ -21,7 +21,6 @@
  *
  *****************************************************************************/
 
-
 #ifndef __STRUCTDATASTORAGE_H
 #define __STRUCTDATASTORAGE_H
 
@@ -39,340 +38,344 @@
 
 namespace Opde {
 
-	/** Common ancestor template for all the struct based data storages. Template parameter is the struct name.
-	 * To use this, one must expose all the fields of the struct using the field method (which registers the field in all internal structures)
-	*/
-	template<typename T> class OPDELIB_EXPORT StructDataStorage : public DataStorage {
-		protected:
-			// forward decl
-			struct TypeHelperBase;
-
-			typedef shared_ptr<TypeHelperBase> TypeHelperBasePtr;
-
-			/** Field setter member pointer - called when setting a value on certain field
-			 * @param field The field name
-			 * @param data The struct instance to set value for
-			 * @param value the new desired value
-			 * @return true if setting was successful, false otherwise
-			 */
-
-			typedef bool (StructDataStorage::*FieldSetter)(const TypeHelperBasePtr& helper, T& data, const DVariant& value);
-			/** Field getter member pointer - called when setting a value on certain field
-			 * @param field The field name
-			 * @param data The struct instance to set value for
-			 * @param value the target DVariant instance ref to fill with value
-			 * @return true if getting was successful, false otherwise
-			 */
-			typedef bool (StructDataStorage::*FieldGetter)(const TypeHelperBasePtr& helper, const T& data, DVariant& value);
-
-			/// Type helper (for easy struct field manipulation)
-			class TypeHelperBase : public NonCopyable {
-				public:
-					TypeHelperBase(FieldGetter _getter, FieldSetter _setter) : mGetter(_getter), mSetter(_setter) {
-					};
-					
-					virtual ~TypeHelperBase() {};
-
-					/// sets the struct's field with the given value
-					virtual void toField(T& data, const DVariant& val) = 0;
+/** Common ancestor template for all the struct based data storages. Template
+ * parameter is the struct name. To use this, one must expose all the fields of
+ * the struct using the field method (which registers the field in all internal
+ * structures)
+ */
+template <typename T>
+class OPDELIB_EXPORT StructDataStorage : public DataStorage {
+protected:
+    // forward decl
+    struct TypeHelperBase;
+
+    typedef shared_ptr<TypeHelperBase> TypeHelperBasePtr;
+
+    /** Field setter member pointer - called when setting a value on certain
+     * field
+     * @param field The field name
+     * @param data The struct instance to set value for
+     * @param value the new desired value
+     * @return true if setting was successful, false otherwise
+     */
+
+    typedef bool (StructDataStorage::*FieldSetter)(
+        const TypeHelperBasePtr &helper, T &data, const DVariant &value);
+    /** Field getter member pointer - called when setting a value on certain
+     * field
+     * @param field The field name
+     * @param data The struct instance to set value for
+     * @param value the target DVariant instance ref to fill with value
+     * @return true if getting was successful, false otherwise
+     */
+    typedef bool (StructDataStorage::*FieldGetter)(
+        const TypeHelperBasePtr &helper, const T &data, DVariant &value);
+
+    /// Type helper (for easy struct field manipulation)
+    class TypeHelperBase : public NonCopyable {
+    public:
+        TypeHelperBase(FieldGetter _getter, FieldSetter _setter)
+            : mGetter(_getter), mSetter(_setter){};
+
+        virtual ~TypeHelperBase(){};
+
+        /// sets the struct's field with the given value
+        virtual void toField(T &data, const DVariant &val) = 0;
+
+        /// sets the variant with the value from the struct's field
+        virtual void fromField(const T &data, DVariant &val) = 0;
+
+        /// serializer getter
+        virtual Serializer *getSerializer() = 0;
+
+        /// getter access method
+        FieldGetter getter() { return mGetter; };
+
+        /// setter access method
+        FieldSetter setter() { return mSetter; };
+
+        /// field of given struct mem. pointer getter
+        virtual void *getFieldPtr(T &data) = 0;
+
+        /// field of given struct const mem. pointer getter
+        virtual const void *getFieldPtr(const T &data) const = 0;
+
+    protected:
+        FieldGetter mGetter;
+        FieldSetter mSetter;
+    };
 
-					/// sets the variant with the value from the struct's field
-					virtual void fromField(const T& data, DVariant& val) = 0;
+    typedef std::map<std::string, TypeHelperBasePtr> TypeHelperMap;
 
-					/// serializer getter
-					virtual Serializer* getSerializer() = 0;
+    TypeHelperMap mTypeHelpers;
 
-					/// getter access method
-					FieldGetter getter() { return mGetter; };
+public:
+    /** @see DataStorage::create */
+    virtual bool create(int objID) {
+        // call _create to handle the creation, with the default value
+        return _create(objID, T());
+    }
 
-					/// setter access method
-					FieldSetter setter() { return mSetter; };
+    /** @see DataStorage::destroy */
+    virtual bool destroy(int objID) {
+        typename DataMap::iterator it = mDataMap.find(objID);
 
-					/// field of given struct mem. pointer getter
-					virtual void* getFieldPtr(T& data) = 0;
+        if (it != mDataMap.end()) {
+            mDataMap.erase(it);
 
-					/// field of given struct const mem. pointer getter
-					virtual const void* getFieldPtr(const T& data) const = 0;
+            // true, erase went ok
+            return true;
+        }
 
-				protected:
-					FieldGetter mGetter;
-					FieldSetter mSetter;
-			};
+        return false;
+    }
 
-			typedef std::map<std::string, TypeHelperBasePtr> TypeHelperMap;
+    /** @see DataStorage::has */
+    virtual bool has(int objID) {
+        typename DataMap::iterator it = mDataMap.find(objID);
 
-			TypeHelperMap mTypeHelpers;
+        return (it != mDataMap.end());
+    }
 
-		public:
-			/** @see DataStorage::create */
-			virtual bool create(int objID) {
-				// call _create to handle the creation, with the default value
-				return _create(objID, T());
-			}
+    /** @see DataStorage::clone */
+    virtual bool clone(int srcID, int dstID) {
+        typename DataMap::iterator it = mDataMap.find(srcID);
 
-			/** @see DataStorage::destroy */
-			virtual bool destroy(int objID) {
-				typename DataMap::iterator it = mDataMap.find(objID);
+        if (it != mDataMap.end()) {
+            return _create(dstID, it->second);
+        }
 
-				if (it != mDataMap.end()) {
-					mDataMap.erase(it);
+        return false;
+    }
 
-					// true, erase went ok
-					return true;
-				}
+    /** @see DataStorage::getField */
+    virtual bool getField(int objID, const std::string &field,
+                          DVariant &target) {
+        typename DataMap::iterator it = mDataMap.find(objID);
 
-				return false;
-			}
+        if (it != mDataMap.end()) {
+            typename TypeHelperMap::iterator tit = mTypeHelpers.find(field);
 
-			/** @see DataStorage::has */
-			virtual bool has(int objID) {
-				typename DataMap::iterator it = mDataMap.find(objID);
+            if (tit != mTypeHelpers.end()) {
+                return (*this.*(tit->second->getter()))(tit->second, it->second,
+                                                        target);
+            }
+        }
 
-				return (it != mDataMap.end());
-			}
+        return false;
+    }
 
-			/** @see DataStorage::clone */
-			virtual bool clone(int srcID, int dstID) {
-				typename DataMap::iterator it = mDataMap.find(srcID);
+    /** @see DataStorage::setField */
+    virtual bool setField(int objID, const std::string &field,
+                          const DVariant &value) {
+        typename DataMap::iterator it = mDataMap.find(objID);
 
-				if (it != mDataMap.end()) {
-					return _create(dstID, it->second);
-				}
+        if (it != mDataMap.end()) {
 
-				return false;
-			}
+            typename TypeHelperMap::iterator tit = mTypeHelpers.find(field);
 
-			/** @see DataStorage::getField */
-			virtual bool getField(int objID, const std::string& field, DVariant& target) {
-				typename DataMap::iterator it = mDataMap.find(objID);
+            if (tit != mTypeHelpers.end()) {
+                return (*this.*(tit->second->setter()))(tit->second, it->second,
+                                                        value);
+            }
+        }
 
-				if (it != mDataMap.end()) {
-					typename TypeHelperMap::iterator tit = mTypeHelpers.find(field);
+        return false;
+    }
 
-					if (tit != mTypeHelpers.end()) {
-						return (*this.*(tit->second->getter()))(tit->second, it->second, target);
-					}
-				}
+    /** @see DataStorage::writeToFile */
+    virtual bool writeToFile(FilePtr &file, int objID, bool sizeStored) {
+        typename DataMap::iterator it = mDataMap.find(objID);
 
-				return false;
-			}
+        if (it != mDataMap.end()) {
+            const T &dta = it->second;
 
-			/** @see DataStorage::setField */
-			virtual bool setField(int objID, const std::string& field, const DVariant& value) {
-				typename DataMap::iterator it = mDataMap.find(objID);
+            uint32_t size = mStoredSize;
 
-				if (it != mDataMap.end()) {
+            // Write the size if requested
+            if (sizeStored)
+                file->writeElem(&size, sizeof(uint32_t));
 
-					typename TypeHelperMap::iterator tit = mTypeHelpers.find(field);
+            DataFieldDescIteratorPtr dit = getFieldDescIterator();
 
-					if (tit != mTypeHelpers.end()) {
-						return (*this.*(tit->second->setter()))(tit->second, it->second, value);
-					}
-				}
+            while (!dit->end()) {
+                const DataFieldDesc &d = dit->next();
 
-				return false;
-			}
+                TypeHelperBasePtr thb = mTypeHelpers[d.name];
 
-			/** @see DataStorage::writeToFile */
-			virtual bool writeToFile(FilePtr& file, int objID, bool sizeStored) {
-				typename DataMap::iterator it = mDataMap.find(objID);
+                thb->getSerializer()->serialize(file, thb->getFieldPtr(dta));
+            }
 
-				if (it != mDataMap.end()) {
-					const T& dta = it->second;
+            return true;
+        }
 
-					uint32_t size = mStoredSize;
+        return false;
+    }
 
-					// Write the size if requested
-					if (sizeStored)
-						file->writeElem(&size, sizeof(uint32_t));
+    /** @see DataStorage::readFromFile */
+    virtual bool readFromFile(FilePtr &file, int objID, bool sizeStored) {
+        typename DataMap::iterator it = mDataMap.find(objID);
 
-					DataFieldDescIteratorPtr dit = getFieldDescIterator();
+        if (it == mDataMap.end()) {
+            uint32_t size = sizeof(T);
 
-					while (!dit->end()) {
-						const DataFieldDesc& d = dit->next();
+            if (sizeStored)
+                file->readElem(&size, sizeof(uint32_t));
 
-						TypeHelperBasePtr thb = mTypeHelpers[d.name];
+            assert(size == mStoredSize);
 
-						thb->getSerializer()->serialize(file, thb->getFieldPtr(dta));
-					}
+            T dta;
 
+            // iterate over the fields
+            DataFieldDescIteratorPtr dit = getFieldDescIterator();
 
-					return true;
-				}
+            while (!dit->end()) {
+                const DataFieldDesc &d = dit->next();
 
-				return false;
-			}
+                TypeHelperBasePtr thb = mTypeHelpers[d.name];
 
-			/** @see DataStorage::readFromFile */
-			virtual bool readFromFile(FilePtr& file, int objID, bool sizeStored) {
-				typename DataMap::iterator it = mDataMap.find(objID);
+                thb->getSerializer()->deserialize(file, thb->getFieldPtr(dta));
+            }
 
-				if (it == mDataMap.end()) {
-					uint32_t size = sizeof(T);
+            _create(objID, dta);
 
-					if (sizeStored)
-						file->readElem(&size, sizeof(uint32_t));
+            return true;
+        } else {
+            // skip the data...
+            uint32_t size;
 
-					assert(size == mStoredSize);
+            file->readElem(&size, sizeof(uint32_t));
+            file->seek(size, File::FSEEK_CUR);
+        }
 
-					T dta;
+        return false;
+    }
 
-					// iterate over the fields
-					DataFieldDescIteratorPtr dit = getFieldDescIterator();
+    /** @see DataStorage::clear */
+    virtual void clear() { mDataMap.clear(); }
 
-					while (!dit->end()) {
-						const DataFieldDesc& d = dit->next();
+    /** @see DataStorage::isEmpty */
+    virtual bool isEmpty() { return mDataMap.empty(); }
 
-						TypeHelperBasePtr thb = mTypeHelpers[d.name];
+    /** @see DataStorage::getAllStoredObjects */
+    virtual IntIteratorPtr getAllStoredObjects() {
+        return IntIteratorPtr(new DataMapKeyIterator(mDataMap));
+    }
 
-						thb->getSerializer()->deserialize(file, thb->getFieldPtr(dta));
-					}
+    /** Core Data creation routine */
+    virtual bool _create(int objID, const T &val) {
+        std::pair<typename DataMap::iterator, bool> res =
+            mDataMap.insert(std::make_pair(objID, val));
 
-					_create(objID, dta);
+        return res.second;
+    };
 
-					return true;
-				} else {
-					// skip the data...
-					uint32_t size;
+    /** @see DataStorage::getFieldDescIterator */
+    virtual DataFieldDescIteratorPtr getFieldDescIterator(void) {
+        return DataFieldDescIteratorPtr(
+            new DataFieldDescListIterator(mFieldDescList));
+    }
 
-					file->readElem(&size, sizeof(uint32_t));
-					file->seek(size, File::FSEEK_CUR);
-				}
+    /** @see DataStorage::getDataSize */
+    virtual size_t getDataSize(void) { return sizeof(T); }
 
-				return false;
-			}
+protected:
+    template <typename FT> class TypeHelper : public TypeHelperBase {
+    public:
+        typedef FT T::*StructField;
 
-			/** @see DataStorage::clear */
-			virtual void clear() {
-				mDataMap.clear();
-			}
+        TypeHelper(StructField fieldPtr, FieldGetter getter, FieldSetter setter)
+            : TypeHelperBase(getter, setter), mField(fieldPtr) {
+            mSerializer = new TypeSerializer<FT>();
+        };
 
-			/** @see DataStorage::isEmpty */
-			virtual bool isEmpty() {
-				return mDataMap.empty();
-			}
+        virtual ~TypeHelper() { delete mSerializer; };
 
-			/** @see DataStorage::getAllStoredObjects */
-			virtual IntIteratorPtr getAllStoredObjects() {
-				return IntIteratorPtr(new DataMapKeyIterator(mDataMap));
-			}
+        virtual void toField(T &data, const DVariant &val) {
+            data.*mField = val.as<FT>();
+        }
 
-			/** Core Data creation routine */
-			virtual bool _create(int objID, const T& val) {
-				std::pair<typename DataMap::iterator, bool> res
-					= mDataMap.insert(std::make_pair(objID, val));
+        virtual void fromField(const T &data, DVariant &val) {
+            val = DVariant(data.*mField);
+        };
 
-				return res.second;
-			};
+        virtual Serializer *getSerializer() { return mSerializer; }
 
-			/** @see DataStorage::getFieldDescIterator */
-			virtual DataFieldDescIteratorPtr getFieldDescIterator(void) {
-				return DataFieldDescIteratorPtr(new DataFieldDescListIterator(mFieldDescList));
-			}
+        virtual void *getFieldPtr(T &data) { return &(data.*mField); };
 
-			/** @see DataStorage::getDataSize */
-			virtual size_t getDataSize(void) {
-				return sizeof(T);
-			}
+        virtual const void *getFieldPtr(const T &data) const {
+            return &(data.*mField);
+        };
 
-		protected:
+    protected:
+        Serializer *mSerializer;
 
-			template<typename FT> class TypeHelper : public TypeHelperBase {
-				public:
-					typedef FT T::*StructField;
+        StructField mField;
+    };
 
-					TypeHelper(StructField fieldPtr, FieldGetter getter, FieldSetter setter) : TypeHelperBase(getter, setter), mField(fieldPtr) {
-						mSerializer = new TypeSerializer<FT>();
-					};
+    // --- default field handlers ---
 
-					virtual ~TypeHelper() {
-						delete mSerializer;
-					};
+    /// Default field setter. Used when no other specified
+    bool defaultFieldSetter(const TypeHelperBasePtr &helper, T &data,
+                            const DVariant &value) {
+        helper->toField(data, value);
+        return true;
+    }
 
-					virtual void toField(T& data, const DVariant& val) {
-						data.*mField = val.as<FT>();
-					}
+    /// Default field getter. Used when no other specified
+    bool defaultFieldGetter(const TypeHelperBasePtr &helper, const T &data,
+                            DVariant &value) {
+        helper->fromField(data, value);
+        return true;
+    }
 
-					virtual void fromField(const T& data, DVariant& val) {
-						val = DVariant(data.*mField);
-					};
+    template <typename FT>
+    void field(const std::string &name, FT T::*fieldPtr, DEnum *enumer = NULL,
+               FieldGetter getter = NULL, FieldSetter setter = NULL) {
+        // insert into the field def array.
+        DVariantTypeTraits<FT> traits;
 
-					virtual Serializer* getSerializer() {
-						return mSerializer;
-					}
+        DataFieldDesc fd;
 
-					virtual void* getFieldPtr(T& data) { return &(data.*mField); };
+        fd.name = name;
+        fd.label = name;
+        fd.size = sizeof(FT);
+        fd.enumerator = enumer;
+        fd.type = traits.getType();
 
-					virtual const void* getFieldPtr(const T& data) const { return &(data.*mField); };
-				protected:
-					Serializer* mSerializer;
+        mFieldDescList.push_back(fd);
 
-					StructField mField;
-			};
+        if (getter == NULL)
+            getter = &StructDataStorage::defaultFieldGetter;
 
-			// --- default field handlers ---
+        if (setter == NULL)
+            setter = &StructDataStorage::defaultFieldSetter;
 
-			/// Default field setter. Used when no other specified
-			bool defaultFieldSetter(const TypeHelperBasePtr& helper, T& data, const DVariant& value) {
-				helper->toField(data, value);
-				return true;
-			}
+        // data manipulation helper
+        TypeHelperBasePtr thb(new TypeHelper<FT>(fieldPtr, getter, setter));
+        mTypeHelpers[name] = thb;
 
-			/// Default field getter. Used when no other specified
-			bool defaultFieldGetter(const TypeHelperBasePtr& helper, const T& data, DVariant& value) {
-				helper->fromField(data, value);
-				return true;
-			}
+        mStoredSize += thb->getSerializer()->getStoredSize(0);
+    };
 
-			template<typename FT> void field(const std::string& name, FT T::* fieldPtr, DEnum* enumer = NULL,
-					FieldGetter getter = NULL,
-					FieldSetter setter = NULL) {
-				// insert into the field def array.
-				DVariantTypeTraits<FT> traits;
+    explicit StructDataStorage() {
+        mStoredSize = 0; // incremented in field method.
+    };
 
-				DataFieldDesc fd;
+    virtual ~StructDataStorage() {}
 
-				fd.name = name;
-				fd.label = name;
-				fd.size = sizeof(FT);
-				fd.enumerator = enumer;
-				fd.type = traits.getType();
+    /// Data map
+    typedef typename std::map<int, T> DataMap;
 
-				mFieldDescList.push_back(fd);
+    /// Holder of data values
+    DataMap mDataMap;
 
-				if (getter == NULL)
-					getter = &StructDataStorage::defaultFieldGetter;
+    DataFieldDescList mFieldDescList;
 
-				if (setter == NULL)
-					setter = &StructDataStorage::defaultFieldSetter;
+    typedef MapKeyIterator<DataMap, int> DataMapKeyIterator;
 
-				// data manipulation helper
-				TypeHelperBasePtr thb(new TypeHelper<FT>(fieldPtr, getter, setter));
-				mTypeHelpers[name] = thb;
-
-				mStoredSize += thb->getSerializer()->getStoredSize(0);
-			};
-
-			explicit StructDataStorage() {
-				mStoredSize = 0; // incremented in field method.
-			};
-
-			virtual ~StructDataStorage() {
-			}
-
-			/// Data map
-			typedef typename std::map<int, T> DataMap;
-
-			/// Holder of data values
-			DataMap mDataMap;
-
-			DataFieldDescList mFieldDescList;
-
-			typedef MapKeyIterator<DataMap, int> DataMapKeyIterator;
-
-			size_t mStoredSize;
-	};
-}
+    size_t mStoredSize;
+};
+} // namespace Opde
 
 #endif
-

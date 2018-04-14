@@ -22,105 +22,97 @@
  *****************************************************************************/
 
 #include "PlatformService.h"
-#include "logger.h"
 #include "ServiceCommon.h"
+#include "logger.h"
 
 #ifdef WIN32
 #include "Win32Platform.h"
 #else
-#  ifdef UNIX
+#ifdef UNIX
 #include "UnixPlatform.h"
-#  else
-#    ifdef APPLE
+#else
+#ifdef APPLE
 #include "ApplePlatform.h"
-#    else
-#      error Unknown platform!
-#    endif
-#  endif
-#endif 
+#else
+#error Unknown platform!
+#endif
+#endif
+#endif
 
 using namespace std;
 
 namespace Opde {
 
-	/*----------------------------------------------------*/
-	/*-------------------- PlatformService ---------------*/
-	/*----------------------------------------------------*/
-	template<> const size_t ServiceImpl<PlatformService>::SID = __SERVICE_ID_PLATFORM;
-	
-	PlatformService::PlatformService(ServiceManager *manager, const std::string& name) : 
-			ServiceImpl<PlatformService>(manager, name) {
+/*----------------------------------------------------*/
+/*-------------------- PlatformService ---------------*/
+/*----------------------------------------------------*/
+template <>
+const size_t ServiceImpl<PlatformService>::SID = __SERVICE_ID_PLATFORM;
+
+PlatformService::PlatformService(ServiceManager *manager,
+                                 const std::string &name)
+    : ServiceImpl<PlatformService>(manager, name) {
 #ifdef WIN32
-		mPlatform = new Win32Platform(this);
+    mPlatform = new Win32Platform(this);
 #else
-#  ifdef UNIX
-		mPlatform = new UnixPlatform(this);
-#  else
-#    ifdef APPLE
-		mPlatform = new ApplePlatform(this);
-#    else
-#      error Unknown platform!
-#    endif
-#  endif
-#endif 
-	}
-	
-	//------------------------------------------------------
-	PlatformService::~PlatformService() {
-		delete mPlatform;
-	}
-	
-	//------------------------------------------------------
-	std::string PlatformService::getGlobalConfigPath() const {
-		return mPlatform->getGlobalConfigPath();
-	}
-				
-	//------------------------------------------------------
-	std::string PlatformService::getUserConfigPath() const {
-		return mPlatform->getUserConfigPath();
-	}
-	
-	//------------------------------------------------------
-	std::string PlatformService::getDirectorySeparator() const {
-		return mPlatform->getDirectorySeparator();
-	}
-	
-	//------------------------------------------------------
-	bool PlatformService::init() {
-		LOG_INFO("PlatformService: Global config path : '%s'", getGlobalConfigPath().c_str());
-		LOG_INFO("PlatformService: User config path   : '%s'", getUserConfigPath().c_str());
-		return true;
-	}
-	
-	//------------------------------------------------------
-	void PlatformService::bootstrapFinished() {
-	}
-	
-	//------------------------------------------------------
-	void PlatformService::shutdown() {
-	}
-	
-	
-	//-------------------------- Factory implementation
-	std::string PlatformServiceFactory::mName = "PlatformService";
-
-	PlatformServiceFactory::PlatformServiceFactory() : ServiceFactory() {
-	};
-
-	const std::string& PlatformServiceFactory::getName() {
-		return mName;
-	}
-
-	const uint PlatformServiceFactory::getMask() {
-		return SERVICE_CORE;
-	}
-	
-	const size_t PlatformServiceFactory::getSID() {
-		return PlatformService::SID;
-	}
-
-	Service* PlatformServiceFactory::createInstance(ServiceManager* manager) {
-		return new PlatformService(manager, mName);
-	}
-
+#ifdef UNIX
+    mPlatform = new UnixPlatform(this);
+#else
+#ifdef APPLE
+    mPlatform = new ApplePlatform(this);
+#else
+#error Unknown platform!
+#endif
+#endif
+#endif
 }
+
+//------------------------------------------------------
+PlatformService::~PlatformService() { delete mPlatform; }
+
+//------------------------------------------------------
+std::string PlatformService::getGlobalConfigPath() const {
+    return mPlatform->getGlobalConfigPath();
+}
+
+//------------------------------------------------------
+std::string PlatformService::getUserConfigPath() const {
+    return mPlatform->getUserConfigPath();
+}
+
+//------------------------------------------------------
+std::string PlatformService::getDirectorySeparator() const {
+    return mPlatform->getDirectorySeparator();
+}
+
+//------------------------------------------------------
+bool PlatformService::init() {
+    LOG_INFO("PlatformService: Global config path : '%s'",
+             getGlobalConfigPath().c_str());
+    LOG_INFO("PlatformService: User config path   : '%s'",
+             getUserConfigPath().c_str());
+    return true;
+}
+
+//------------------------------------------------------
+void PlatformService::bootstrapFinished() {}
+
+//------------------------------------------------------
+void PlatformService::shutdown() {}
+
+//-------------------------- Factory implementation
+std::string PlatformServiceFactory::mName = "PlatformService";
+
+PlatformServiceFactory::PlatformServiceFactory() : ServiceFactory(){};
+
+const std::string &PlatformServiceFactory::getName() { return mName; }
+
+const uint PlatformServiceFactory::getMask() { return SERVICE_CORE; }
+
+const size_t PlatformServiceFactory::getSID() { return PlatformService::SID; }
+
+Service *PlatformServiceFactory::createInstance(ServiceManager *manager) {
+    return new PlatformService(manager, mName);
+}
+
+} // namespace Opde

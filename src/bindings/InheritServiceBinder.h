@@ -25,61 +25,63 @@
 #ifndef __INHERITSERVICEBINDER_H
 #define __INHERITSERVICEBINDER_H
 
-#include  "InheritService.h"
+#include "bindings.h"
+
+#include "InheritService.h"
 
 namespace Opde {
 
-	namespace Python {
+namespace Python {
 
-		/// Inherit service python binder
-		class InheritServiceBinder : public shared_ptr_binder<InheritServicePtr> {
-			public:
-				static void init(PyObject* module);
+/// Inherit service python binder
+class InheritServiceBinder : public shared_ptr_binder<InheritServicePtr> {
+public:
+    static void init(PyObject *module);
 
-				// --- Python type related methods ---
-				static PyObject* create();
+    // --- Python type related methods ---
+    static PyObject *create();
 
-				// --- Methods ---
-				static PyObject* getSources(PyObject* self, PyObject* args);
-				static PyObject* getTargets(PyObject* self, PyObject* args);
-				static PyObject* hasTargets(PyObject* self, PyObject* args);
-				static PyObject* getArchetype(PyObject* self, PyObject* args);
-				static PyObject* setArchetype(PyObject* self, PyObject* args);
-				// metaprop handling is already binded in ObjectService
-				static PyObject* inheritsFrom(PyObject* self, PyObject* args);
+    // --- Methods ---
+    static PyObject *getSources(PyObject *self, PyObject *args);
+    static PyObject *getTargets(PyObject *self, PyObject *args);
+    static PyObject *hasTargets(PyObject *self, PyObject *args);
+    static PyObject *getArchetype(PyObject *self, PyObject *args);
+    static PyObject *setArchetype(PyObject *self, PyObject *args);
+    // metaprop handling is already binded in ObjectService
+    static PyObject *inheritsFrom(PyObject *self, PyObject *args);
 
+protected:
+    /// Static type definition for LinkService
+    static PyTypeObject msType;
 
-			protected:
-				/// Static type definition for LinkService
-				static PyTypeObject msType;
+    /// Name of the python type
+    static const char *msName;
 
-				/// Name of the python type
-				static const char* msName;
+    /// Method list
+    static PyMethodDef msMethods[];
+};
 
-				/// Method list
-				static PyMethodDef msMethods[];
-		};
+// -------------------------------
+/// Inherit link struct binder. The attributes are exposed as read only to
+/// python
+class InheritLinkBinder : public shared_ptr_binder<InheritLinkPtr> {
+public:
+    static void init(PyObject *module);
 
-		// -------------------------------
-		/// Inherit link struct binder. The attributes are exposed as read only to python
-		class InheritLinkBinder : public shared_ptr_binder<InheritLinkPtr> {
-			public:
-				static void init(PyObject* module);
+    // --- Python type related methods ---
+    static PyObject *getattr(PyObject *self, char *name);
 
-				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
+    static PyObject *create(InheritLinkPtr &link);
 
-				static PyObject* create(InheritLinkPtr& link);
+protected:
+    /// Static type definition for LinkService
+    static PyTypeObject msType;
 
-			protected:
-				/// Static type definition for LinkService
-				static PyTypeObject msType;
+    /// Name of the python type
+    static const char *msName;
+};
 
-				/// Name of the python type
-				static const char* msName;
-		};
-
-	}
-}
+} // namespace Python
+} // namespace Opde
 
 #endif

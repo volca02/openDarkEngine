@@ -22,7 +22,6 @@
  *
  *****************************************************************************/
 
-
 #ifndef __MODELNAMEPROPERTY_H
 #define __MODELNAMEPROPERTY_H
 
@@ -30,36 +29,37 @@
 
 namespace Opde {
 
-	/** a ModelName property implementation.
-	* Controls the object's model (Mesh).
-	* Uses Fixed String. Defaults to built in Ramp mesh. Inherits always.
-	*/
-	class ModelNameProperty : public RenderedProperty {
-		public:
-			/// constructor
-			ModelNameProperty(RenderService* rs, PropertyService* owner);
+/** a ModelName property implementation.
+ * Controls the object's model (Mesh).
+ * Uses Fixed String. Defaults to built in Ramp mesh. Inherits always.
+ */
+class ModelNameProperty : public RenderedProperty {
+public:
+    /// constructor
+    ModelNameProperty(RenderService *rs, PropertyService *owner);
 
-			/// destructor
-			virtual ~ModelNameProperty(void);
-			
-		protected:
-			/// @see ActiveProperty::addProperty
-			void addProperty(int oid);
-			
-			/// @see ActiveProperty::removeProperty
-			void removeProperty(int oid);
-			
-			/// @see ActiveProperty::setPropertySource
-			void setPropertySource(int oid, int effid);
-			
-			/// @see ActiveProperty::valueChanged
-			void valueChanged(int oid, const std::string& field, const DVariant& value);
+    /// destructor
+    virtual ~ModelNameProperty(void);
 
-			/// core setter method. Called from other methods to set the model name value
-			void setModel(int oid, const std::string& name);
-			
-			Ogre::SceneManager* mSceneMgr;
-	};
+protected:
+    /// @see ActiveProperty::addProperty
+    void addProperty(int oid);
+
+    /// @see ActiveProperty::removeProperty
+    void removeProperty(int oid);
+
+    /// @see ActiveProperty::setPropertySource
+    void setPropertySource(int oid, int effid);
+
+    /// @see ActiveProperty::valueChanged
+    void valueChanged(int oid, const std::string &field, const DVariant &value);
+
+    /// core setter method. Called from other methods to set the model name
+    /// value
+    void setModel(int oid, const std::string &name);
+
+    Ogre::SceneManager *mSceneMgr;
 };
+}; // namespace Opde
 
 #endif

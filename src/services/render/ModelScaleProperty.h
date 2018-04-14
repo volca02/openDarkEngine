@@ -22,7 +22,6 @@
  *
  *****************************************************************************/
 
-
 #ifndef __MODELSCALEPROPERTY_H
 #define __MODELSCALEPROPERTY_H
 
@@ -30,36 +29,36 @@
 
 namespace Opde {
 
-	/** a ModelScale property implementation using rendered property handler.
-	* Controls the scale of the object
-	* Uses Vector3. Defaults to 1.0,1.0,1.0 - No scale. Inherits always.
-	*/
-	class ModelScaleProperty : public RenderedProperty {
-		public:
-			/// constructor
-			ModelScaleProperty(RenderService* rs, PropertyService* owner);
+/** a ModelScale property implementation using rendered property handler.
+ * Controls the scale of the object
+ * Uses Vector3. Defaults to 1.0,1.0,1.0 - No scale. Inherits always.
+ */
+class ModelScaleProperty : public RenderedProperty {
+public:
+    /// constructor
+    ModelScaleProperty(RenderService *rs, PropertyService *owner);
 
-			/// destructor
-			virtual ~ModelScaleProperty(void);
-			
-		protected:
-			/// @see ActiveProperty::addProperty
-			void addProperty(int oid);
-			
-			/// @see ActiveProperty::removeProperty
-			void removeProperty(int oid);
-			
-			/// @see ActiveProperty::setPropertySource
-			void setPropertySource(int oid, int effid);
-			
-			/// @see ActiveProperty::valueChanged
-			void valueChanged(int oid, const std::string& field, const DVariant& value);
+    /// destructor
+    virtual ~ModelScaleProperty(void);
 
-			/// core setter method. Called from other methods to set the scale value
-			void setScale(int oid, const Vector3& scale);
-			
-			Ogre::SceneManager* mSceneMgr;
-	};
+protected:
+    /// @see ActiveProperty::addProperty
+    void addProperty(int oid);
+
+    /// @see ActiveProperty::removeProperty
+    void removeProperty(int oid);
+
+    /// @see ActiveProperty::setPropertySource
+    void setPropertySource(int oid, int effid);
+
+    /// @see ActiveProperty::valueChanged
+    void valueChanged(int oid, const std::string &field, const DVariant &value);
+
+    /// core setter method. Called from other methods to set the scale value
+    void setScale(int oid, const Vector3 &scale);
+
+    Ogre::SceneManager *mSceneMgr;
 };
+}; // namespace Opde
 
 #endif

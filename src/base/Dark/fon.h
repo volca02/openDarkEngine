@@ -26,28 +26,26 @@
 
 #include "utils.h"
 
-struct fon_head
-{
-	uint16	format;		/* 1 - anti-aliased, 0xCCCC - 8bpp, else - 1bpp */
-	uint8	unknown1;	/* set to 10 if format is 1 */
-	uint8	palette;	/* 0 - use current, 1 - standard */
-	uint8	zero1[32];
-	sint16	first_char;
-	sint16	last_char;
-	uint8	zero2[32];
-	uint32	width_offset;
-	uint32	bm_offset;
-	uint16	row_width;	/* in bytes */
-	uint16	num_rows;
+struct fon_head {
+    uint16 format;  /* 1 - anti-aliased, 0xCCCC - 8bpp, else - 1bpp */
+    uint8 unknown1; /* set to 10 if format is 1 */
+    uint8 palette;  /* 0 - use current, 1 - standard */
+    uint8 zero1[32];
+    sint16 first_char;
+    sint16 last_char;
+    uint8 zero2[32];
+    uint32 width_offset;
+    uint32 bm_offset;
+    uint16 row_width; /* in bytes */
+    uint16 num_rows;
 };
 
-struct char_info
-{
-	sint16	code;
-	uint16	column;
-	uint16	width;
-	uint16	height;
-	sint32	x,y;
+struct char_info {
+    sint16 code;
+    uint16 column;
+    uint16 width;
+    uint16 height;
+    sint32 x, y;
 };
 
 #endif

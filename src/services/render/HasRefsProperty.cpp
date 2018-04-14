@@ -22,70 +22,71 @@
  *
  *****************************************************************************/
 
-#include "RenderService.h"
-#include "property/PropertyService.h"
-#include "SingleFieldDataStorage.h"
 #include "HasRefsProperty.h"
+#include "RenderService.h"
+#include "SingleFieldDataStorage.h"
+#include "property/PropertyService.h"
 
 namespace Opde {
-	/*--------------------------------------------------------*/
-	/*--------------------- HasRefsProperty ------------------*/
-	/*--------------------------------------------------------*/
-	HasRefsProperty::HasRefsProperty(RenderService* rs, PropertyService* owner) :
-			RenderedProperty(rs, owner, "HasRefs", "HasRefs", "always") {
-		mPropertyStorage = DataStoragePtr(new BoolDataStorage(NULL));
+/*--------------------------------------------------------*/
+/*--------------------- HasRefsProperty ------------------*/
+/*--------------------------------------------------------*/
+HasRefsProperty::HasRefsProperty(RenderService *rs, PropertyService *owner)
+    : RenderedProperty(rs, owner, "HasRefs", "HasRefs", "always") {
+    mPropertyStorage = DataStoragePtr(new BoolDataStorage(NULL));
 
-		setChunkVersions(2, 4);
+    setChunkVersions(2, 4);
 
-		mSceneMgr = rs->getSceneManager();
-	};
-
-	// --------------------------------------------------------------------------
-	HasRefsProperty::~HasRefsProperty(void) {
-	};
-
-	// --------------------------------------------------------------------------
-	void HasRefsProperty::addProperty(int oid) {
-		// nothing special needed here. Just initialize the value of the hasrefs to the data value
-		// as hasRefs is inherited, just use our methods
-		DVariant val(false);
-
-		if (!get(oid, "", val))
-			OPDE_EXCEPT("Property not defined for object.", "HasRefsProperty::addProperty");
-
-		setHasRefs(oid, val.toBool());
-	};
-
-	// --------------------------------------------------------------------------
-	void HasRefsProperty::removeProperty(int oid) {
-		// reinit to true - the object's default
-		setHasRefs(oid, true);
-	};
-
-	// --------------------------------------------------------------------------
-	void HasRefsProperty::setPropertySource(int oid, int effid) {
-		// re-read the property
-		addProperty(oid);
-	};
-
-	// --------------------------------------------------------------------------
-	void HasRefsProperty::valueChanged(int oid, const std::string& field, const DVariant& value) {
-		// just call the setter
-		setHasRefs(oid, value.toBool());
-	};
-
-	// --------------------------------------------------------------------------
-	void HasRefsProperty::setHasRefs(int oid, bool hasRefs) {
-		// EntityInfo* ei = getEntityInfo(oid);
-		// ei->setHasRefs(hasRefs);
-		Ogre::SceneNode* sn = getSceneNode(oid);
-
-		if (hasRefs) {
-		    if (!sn->getParentSceneNode())
-                mSceneMgr->getRootSceneNode()->addChild(sn);
-		} else {
-		    if (sn->getParentSceneNode())
-                mSceneMgr->getRootSceneNode()->removeChild(sn);
-		}
-	};
+    mSceneMgr = rs->getSceneManager();
 };
+
+// --------------------------------------------------------------------------
+HasRefsProperty::~HasRefsProperty(void){};
+
+// --------------------------------------------------------------------------
+void HasRefsProperty::addProperty(int oid) {
+    // nothing special needed here. Just initialize the value of the hasrefs to
+    // the data value as hasRefs is inherited, just use our methods
+    DVariant val(false);
+
+    if (!get(oid, "", val))
+        OPDE_EXCEPT("Property not defined for object.",
+                    "HasRefsProperty::addProperty");
+
+    setHasRefs(oid, val.toBool());
+};
+
+// --------------------------------------------------------------------------
+void HasRefsProperty::removeProperty(int oid) {
+    // reinit to true - the object's default
+    setHasRefs(oid, true);
+};
+
+// --------------------------------------------------------------------------
+void HasRefsProperty::setPropertySource(int oid, int effid) {
+    // re-read the property
+    addProperty(oid);
+};
+
+// --------------------------------------------------------------------------
+void HasRefsProperty::valueChanged(int oid, const std::string &field,
+                                   const DVariant &value) {
+    // just call the setter
+    setHasRefs(oid, value.toBool());
+};
+
+// --------------------------------------------------------------------------
+void HasRefsProperty::setHasRefs(int oid, bool hasRefs) {
+    // EntityInfo* ei = getEntityInfo(oid);
+    // ei->setHasRefs(hasRefs);
+    Ogre::SceneNode *sn = getSceneNode(oid);
+
+    if (hasRefs) {
+        if (!sn->getParentSceneNode())
+            mSceneMgr->getRootSceneNode()->addChild(sn);
+    } else {
+        if (sn->getParentSceneNode())
+            mSceneMgr->getRootSceneNode()->removeChild(sn);
+    }
+};
+}; // namespace Opde

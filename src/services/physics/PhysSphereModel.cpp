@@ -21,22 +21,17 @@
  *
  *****************************************************************************/
 
-
 #include "PhysSphereModel.h"
-#include "logger.h"
 #include "File.h"
+#include "logger.h"
 
 namespace Opde {
-	/*----------------------------------------------------*/
-	/*-------------------- PhysSphereModel ---------------*/
-	/*----------------------------------------------------*/
-	PhysSphereModel::PhysSphereModel(int objid): PhysModel(objid) {
+/*----------------------------------------------------*/
+/*-------------------- PhysSphereModel ---------------*/
+/*----------------------------------------------------*/
+PhysSphereModel::PhysSphereModel(int objid) : PhysModel(objid) {}
 
-	}
+//------------------------------------------------------
+PhysSphereModel::~PhysSphereModel() {}
 
-	//------------------------------------------------------
-	PhysSphereModel::~PhysSphereModel() {
-		
-	}
-
-}
+} // namespace Opde

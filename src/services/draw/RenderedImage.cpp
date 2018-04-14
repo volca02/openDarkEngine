@@ -22,73 +22,78 @@
  *****************************************************************************/
 
 #include "RenderedImage.h"
-#include "DrawService.h"
 #include "DrawBuffer.h"
 #include "DrawCommon.h"
+#include "DrawService.h"
 
 using namespace Ogre;
 
 namespace Opde {
 
-	/*----------------------------------------------------*/
-	/*-------------------- RenderedImage -----------------*/
-	/*----------------------------------------------------*/
-	RenderedImage::RenderedImage(DrawService* owner, DrawOperation::ID id, const DrawSourcePtr& ds) :
-			DrawOperation(owner, id), mDrawSource(ds) {
-		mDrawQuad.texCoords.left = ds->transformX(0);
-		mDrawQuad.texCoords.right = ds->transformX(1.0f);
-		mDrawQuad.texCoords.top = ds->transformY(0);
-		mDrawQuad.texCoords.bottom = ds->transformY(1.0f);
+/*----------------------------------------------------*/
+/*-------------------- RenderedImage -----------------*/
+/*----------------------------------------------------*/
+RenderedImage::RenderedImage(DrawService *owner, DrawOperation::ID id,
+                             const DrawSourcePtr &ds)
+    : DrawOperation(owner, id), mDrawSource(ds) {
+    mDrawQuad.texCoords.left = ds->transformX(0);
+    mDrawQuad.texCoords.right = ds->transformX(1.0f);
+    mDrawQuad.texCoords.top = ds->transformY(0);
+    mDrawQuad.texCoords.bottom = ds->transformY(1.0f);
 
-		mDrawQuad.color = ColourValue(1.0f, 1.0f, 1.0f);
-		
-		mInClip = true;
+    mDrawQuad.color = ColourValue(1.0f, 1.0f, 1.0f);
 
-		// to be sure we are up-to-date
-		_markDirty();
-	}
+    mInClip = true;
 
-	//------------------------------------------------------
-	RenderedImage::~RenderedImage() {
-		// nothing
-	}
-	
-	//------------------------------------------------------
-	void RenderedImage::visitDrawBuffer(DrawBuffer* db) {
-		// are we in the clip area?
-		if (mInClip)
-			db->_queueDrawQuad(&mDrawQuad);
-	}
-
-	//------------------------------------------------------
-	DrawSourceBasePtr RenderedImage::getDrawSourceBase() {
-		return static_pointer_cast<DrawSourceBase>(mDrawSource);
-	}
-
-	//------------------------------------------------------
-	void RenderedImage::setDrawSource(const DrawSourcePtr& nsrc) {
-		DrawSourcePtr olds = mDrawSource;
-		mDrawSource = nsrc;
-		
-		_sourceChanged(olds);
-	}
-	
-	//------------------------------------------------------
-	void RenderedImage::_rebuild() {
-		const PixelSize& ps = mDrawSource->getPixelSize();
-
-		mDrawQuad.texCoords.left = mDrawSource->transformX(0);
-		mDrawQuad.texCoords.right = mDrawSource->transformX(1.0f);
-		mDrawQuad.texCoords.top = mDrawSource->transformY(0);
-		mDrawQuad.texCoords.bottom = mDrawSource->transformY(1.0f);
-		
-		mDrawQuad.positions.left   = mActiveSheet->convertToScreenSpaceX(mPosition.first);
-		mDrawQuad.positions.right  = mActiveSheet->convertToScreenSpaceX(mPosition.first + ps.width);
-		mDrawQuad.positions.top    = mActiveSheet->convertToScreenSpaceY(mPosition.second);
-		mDrawQuad.positions.bottom = mActiveSheet->convertToScreenSpaceY(mPosition.second + ps.height);
-		mDrawQuad.depth = mActiveSheet->convertToScreenSpaceZ(mZOrder);
-
-		mInClip = mClipOnScreen.clip(mDrawQuad);
-	}
-
+    // to be sure we are up-to-date
+    _markDirty();
 }
+
+//------------------------------------------------------
+RenderedImage::~RenderedImage() {
+    // nothing
+}
+
+//------------------------------------------------------
+void RenderedImage::visitDrawBuffer(DrawBuffer *db) {
+    // are we in the clip area?
+    if (mInClip)
+        db->_queueDrawQuad(&mDrawQuad);
+}
+
+//------------------------------------------------------
+DrawSourceBasePtr RenderedImage::getDrawSourceBase() {
+    return static_pointer_cast<DrawSourceBase>(mDrawSource);
+}
+
+//------------------------------------------------------
+void RenderedImage::setDrawSource(const DrawSourcePtr &nsrc) {
+    DrawSourcePtr olds = mDrawSource;
+    mDrawSource = nsrc;
+
+    _sourceChanged(olds);
+}
+
+//------------------------------------------------------
+void RenderedImage::_rebuild() {
+    const PixelSize &ps = mDrawSource->getPixelSize();
+
+    mDrawQuad.texCoords.left = mDrawSource->transformX(0);
+    mDrawQuad.texCoords.right = mDrawSource->transformX(1.0f);
+    mDrawQuad.texCoords.top = mDrawSource->transformY(0);
+    mDrawQuad.texCoords.bottom = mDrawSource->transformY(1.0f);
+
+    mDrawQuad.positions.left =
+        mActiveSheet->convertToScreenSpaceX(mPosition.first);
+    mDrawQuad.positions.right =
+        mActiveSheet->convertToScreenSpaceX(mPosition.first + ps.width);
+    mDrawQuad.positions.top =
+        mActiveSheet->convertToScreenSpaceY(mPosition.second);
+    mDrawQuad.positions.bottom =
+        mActiveSheet->convertToScreenSpaceY(mPosition.second + ps.height);
+    mDrawQuad.depth = mActiveSheet->convertToScreenSpaceZ(mZOrder);
+
+    mInClip = mClipOnScreen.clip(mDrawQuad);
+}
+
+} // namespace Opde

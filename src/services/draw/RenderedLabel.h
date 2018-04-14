@@ -21,7 +21,6 @@
  *
  *****************************************************************************/
 
-
 #ifndef __RENDEREDLABEL_H
 #define __RENDEREDLABEL_H
 
@@ -32,51 +31,55 @@
 
 namespace Opde {
 
-	/** Rendered label. This class represents single font text area, possibly wrapped and coloured. */
-	class RenderedLabel : public DrawOperation {
-		public:
-			RenderedLabel(DrawService* owner, DrawOperation::ID id, const FontDrawSourcePtr fds, const std::string& label);
-			
-			virtual ~RenderedLabel();
+/** Rendered label. This class represents single font text area, possibly
+ * wrapped and coloured. */
+class RenderedLabel : public DrawOperation {
+public:
+    RenderedLabel(DrawService *owner, DrawOperation::ID id,
+                  const FontDrawSourcePtr fds, const std::string &label);
 
-			void visitDrawBuffer(DrawBuffer* db);
+    virtual ~RenderedLabel();
 
-			/// A shortcut to call clear+addText(label);
-			void setLabel(const std::string& label);
+    void visitDrawBuffer(DrawBuffer *db);
 
-			/// Adds a segment of text with a given color
-			void addText(const std::string& text, const Ogre::ColourValue& colour);
-			
-			/// Clears all the text from the label
-			void clearText();
-			
-			DrawSourceBasePtr getDrawSourceBase();
+    /// A shortcut to call clear+addText(label);
+    void setLabel(const std::string &label);
 
-		protected:
-			struct TextSegment {
-				Ogre::ColourValue colour;
-				std::string text;
-			};
-			
-			typedef std::list< TextSegment > SegmentList;
-			
-			/// Rebuilds the label - makes new glyph instances
-			void _rebuild();
+    /// Adds a segment of text with a given color
+    void addText(const std::string &text, const Ogre::ColourValue &colour);
 
-			/// Frees all allocated instances stored in the quad list, then clears the quad list itself
-			void freeQuadList();
-			
-			void fillQuad(int x, int y, const unsigned char chr, DrawSourcePtr ds, DrawQuad& dq);
+    /// Clears all the text from the label
+    void clearText();
 
-			typedef std::list<DrawQuad*> DrawQuadList;
+    DrawSourceBasePtr getDrawSourceBase();
 
-			DrawQuadList mDrawQuadList;
+protected:
+    struct TextSegment {
+        Ogre::ColourValue colour;
+        std::string text;
+    };
 
-			FontDrawSourcePtr mFontSource;
+    typedef std::list<TextSegment> SegmentList;
 
-			SegmentList mText; 
-	};
+    /// Rebuilds the label - makes new glyph instances
+    void _rebuild();
 
+    /// Frees all allocated instances stored in the quad list, then clears the
+    /// quad list itself
+    void freeQuadList();
+
+    void fillQuad(int x, int y, const unsigned char chr, DrawSourcePtr ds,
+                  DrawQuad &dq);
+
+    typedef std::list<DrawQuad *> DrawQuadList;
+
+    DrawQuadList mDrawQuadList;
+
+    FontDrawSourcePtr mFontSource;
+
+    SegmentList mText;
 };
+
+}; // namespace Opde
 
 #endif

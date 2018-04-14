@@ -21,11 +21,11 @@
  *
  *****************************************************************************/
 
-#include "ServiceCommon.h"
 #include "InputService.h"
 #include "OpdeException.h"
-#include "logger.h"
+#include "ServiceCommon.h"
 #include "StringTokenizer.h"
+#include "logger.h"
 
 #include <OgreResourceGroupManager.h>
 #include <cctype>
@@ -34,30 +34,31 @@ using namespace std;
 
 namespace Opde {
 
-	/*---------------------------------------------------*/
-	/*-------------------- InputEventMapper -------------*/
-	/*---------------------------------------------------*/
-	InputEventMapper::InputEventMapper(InputService* is, const std::string name) : mInputService(is), mName(name) {
-		assert(mInputService != NULL);
-	}
-
-	//------------------------------------------------------
-	InputEventMapper::~InputEventMapper() {
-	}
-
-	//------------------------------------------------------
-	bool InputEventMapper::unmapEvent(unsigned int code, std::string& unmapped) const {
-		CodeToCommandMap::const_iterator it = mCodeToCommand.find(code);
-
-		if (it != mCodeToCommand.end()) {
-			unmapped = it->second;
-			return true;
-		} else
-			return false;
-	}
-
-	//------------------------------------------------------
-	void InputEventMapper::bind(unsigned int code, const std::string& command) {
-		mCodeToCommand[code] = command;
-	}
+/*---------------------------------------------------*/
+/*-------------------- InputEventMapper -------------*/
+/*---------------------------------------------------*/
+InputEventMapper::InputEventMapper(InputService *is, const std::string name)
+    : mInputService(is), mName(name) {
+    assert(mInputService != NULL);
 }
+
+//------------------------------------------------------
+InputEventMapper::~InputEventMapper() {}
+
+//------------------------------------------------------
+bool InputEventMapper::unmapEvent(unsigned int code,
+                                  std::string &unmapped) const {
+    CodeToCommandMap::const_iterator it = mCodeToCommand.find(code);
+
+    if (it != mCodeToCommand.end()) {
+        unmapped = it->second;
+        return true;
+    } else
+        return false;
+}
+
+//------------------------------------------------------
+void InputEventMapper::bind(unsigned int code, const std::string &command) {
+    mCodeToCommand[code] = command;
+}
+} // namespace Opde

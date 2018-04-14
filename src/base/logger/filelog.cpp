@@ -28,24 +28,24 @@
 #include <stdio.h>
 #include <string>
 
-#ifdef _MSC_VER 
-#pragma warning( disable : 4996 )
+#ifdef _MSC_VER
+#pragma warning(disable : 4996)
 #endif
 
 namespace Opde {
 
-	FileLog::FileLog(const std::string& fname) : ofile(fname.c_str(), std::ios::out) {
-		if (!ofile.is_open())
-			OPDE_EXCEPT("Could not create output log file", "FileLog::FileLog");
-	};
+FileLog::FileLog(const std::string &fname)
+    : ofile(fname.c_str(), std::ios::out) {
+    if (!ofile.is_open())
+        OPDE_EXCEPT("Could not create output log file", "FileLog::FileLog");
+};
 
-	FileLog::~FileLog() {
-		ofile.close();
-	};
+FileLog::~FileLog() { ofile.close(); };
 
-	void FileLog::logMessage(Logger::LogLevel level, const std::string& msg) {
-		// Put in the severity/log level too
-		ofile <<  "LOG [" << Logger::getSingleton().getLogLevelStr(level) << "] : " << msg << std::endl;
-		ofile.flush();
-	}
+void FileLog::logMessage(Logger::LogLevel level, const std::string &msg) {
+    // Put in the severity/log level too
+    ofile << "LOG [" << Logger::getSingleton().getLogLevelStr(level)
+          << "] : " << msg << std::endl;
+    ofile.flush();
 }
+} // namespace Opde

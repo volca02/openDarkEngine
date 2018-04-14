@@ -25,42 +25,42 @@
 #ifndef __PROPERTYSERVICEBINDER_H
 #define __PROPERTYSERVICEBINDER_H
 
-#include  "DTypeDef.h"
-#include  "PropertyService.h"
+#include "bindings.h"
 
-namespace Opde
-{
-	namespace Python
-	{
+#include "DTypeDef.h"
+#include "PropertyService.h"
 
-		/// Property service python binder
-		class PropertyServiceBinder : public shared_ptr_binder<PropertyServicePtr> {
-			public:
-				static void init(PyObject* module);
+namespace Opde {
+namespace Python {
 
-				// --- Python type related methods ---
-				/// creates a python object representation of the property service
-				static PyObject* create();
+/// Property service python binder
+class PropertyServiceBinder : public shared_ptr_binder<PropertyServicePtr> {
+public:
+    static void init(PyObject *module);
 
-				// --- Methods ---
-				static PyObject* has(PyObject* self, PyObject* args);
-				static PyObject* owns(PyObject* self, PyObject* args);
-				static PyObject* set(PyObject* self, PyObject* args);
-				static PyObject* get(PyObject* self, PyObject* args);
-				static PyObject* getAllPropertyNames(PyObject* self, PyObject* args);
-				static PyObject* getPropertyFieldsDesc(PyObject* self, PyObject* args);
+    // --- Python type related methods ---
+    /// creates a python object representation of the property service
+    static PyObject *create();
 
-			protected:
-				/// Static type definition for PropertyService
-				static PyTypeObject msType;
+    // --- Methods ---
+    static PyObject *has(PyObject *self, PyObject *args);
+    static PyObject *owns(PyObject *self, PyObject *args);
+    static PyObject *set(PyObject *self, PyObject *args);
+    static PyObject *get(PyObject *self, PyObject *args);
+    static PyObject *getAllPropertyNames(PyObject *self, PyObject *args);
+    static PyObject *getPropertyFieldsDesc(PyObject *self, PyObject *args);
 
-				/// Name of the python type
-				static const char* msName;
+protected:
+    /// Static type definition for PropertyService
+    static PyTypeObject msType;
 
-				/// Method list
-				static PyMethodDef msMethods[];
-		};
-	}
-}
+    /// Name of the python type
+    static const char *msName;
 
-#endif	// __PROPERTYSERVICEBINDER_H
+    /// Method list
+    static PyMethodDef msMethods[];
+};
+} // namespace Python
+} // namespace Opde
+
+#endif // __PROPERTYSERVICEBINDER_H

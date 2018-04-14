@@ -22,33 +22,34 @@
  *
  *****************************************************************************/
 
-
 #ifndef __RENDEREDPROPERTY_H
 #define __RENDEREDPROPERTY_H
 
 #include "property/Property.h"
 
 namespace Opde {
-	// forward decl
-	class RenderService;
-	class EntityInfo;
+// forward decl
+class RenderService;
+class EntityInfo;
 
-	/// An ancestor to all classes that handle a certain aspect of rendering through a certain property
-	class RenderedProperty : public ActiveProperty {
-		public:
-			RenderedProperty(RenderService* rs, PropertyService* owner, const std::string& name,
-							const std::string& chunk_name, std::string inheritorName);
+/// An ancestor to all classes that handle a certain aspect of rendering through
+/// a certain property
+class RenderedProperty : public ActiveProperty {
+public:
+    RenderedProperty(RenderService *rs, PropertyService *owner,
+                     const std::string &name, const std::string &chunk_name,
+                     std::string inheritorName);
 
-		protected:
-			// render service reference pointer
-			RenderService* mOwner;
+protected:
+    // render service reference pointer
+    RenderService *mOwner;
 
-			// shortcut getter for the entity info of a particular object
-			EntityInfo* getEntityInfo(int oid);
+    // shortcut getter for the entity info of a particular object
+    EntityInfo *getEntityInfo(int oid);
 
-			// shortcut to the scenenode of the object
-			Ogre::SceneNode* getSceneNode(int oid);
-	};
+    // shortcut to the scenenode of the object
+    Ogre::SceneNode *getSceneNode(int oid);
 };
+}; // namespace Opde
 
 #endif

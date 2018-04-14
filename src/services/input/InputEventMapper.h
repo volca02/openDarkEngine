@@ -21,50 +21,49 @@
  *
  *****************************************************************************/
 
-
 #ifndef __INPUTCONTEXTMAPPER_H
 #define __INPUTCONTEXTMAPPER_H
 
 #include "SharedPtr.h"
 
-#include <string>
 #include <map>
+#include <string>
 
 namespace Opde {
-	class InputService;
+class InputService;
 
-	/** @brief Input Event Mapper - Manages bindings in a specific context
-	* This class remaps input events to text commands according to the bindings.
-	*/
-	class InputEventMapper {
-		public:
-			InputEventMapper(InputService* is, const std::string name);
-			virtual ~InputEventMapper();
+/** @brief Input Event Mapper - Manages bindings in a specific context
+ * This class remaps input events to text commands according to the bindings.
+ */
+class InputEventMapper {
+public:
+    InputEventMapper(InputService *is, const std::string name);
+    virtual ~InputEventMapper();
 
-			/** Unmaps an event to a command.
-			* @param event The event to unmap
-			* @param unmapped the command that this event is mapped to
-			* @return true if a command was found for the event, false otherwise */
-			bool unmapEvent(unsigned int code, std::string& unmapped) const;
-			
-			/** binds the specified keycode to a specified command string */
-			void bind(unsigned int code, const std::string& command);
-			
-			/** returns the name of this mapper */
-			const std::string& getName() const { return mName; };
-		protected:
-			typedef std::map<unsigned int, std::string> CodeToCommandMap;
+    /** Unmaps an event to a command.
+     * @param event The event to unmap
+     * @param unmapped the command that this event is mapped to
+     * @return true if a command was found for the event, false otherwise */
+    bool unmapEvent(unsigned int code, std::string &unmapped) const;
 
-			/// Map of command
-			CodeToCommandMap mCodeToCommand;
-			
-			/// The input service owner of this event mapper
-			InputService* mInputService;
-			
-			/// Name of this mapper
-			std::string mName;
-	};
-}
+    /** binds the specified keycode to a specified command string */
+    void bind(unsigned int code, const std::string &command);
 
+    /** returns the name of this mapper */
+    const std::string &getName() const { return mName; };
+
+protected:
+    typedef std::map<unsigned int, std::string> CodeToCommandMap;
+
+    /// Map of command
+    CodeToCommandMap mCodeToCommand;
+
+    /// The input service owner of this event mapper
+    InputService *mInputService;
+
+    /// Name of this mapper
+    std::string mName;
+};
+} // namespace Opde
 
 #endif

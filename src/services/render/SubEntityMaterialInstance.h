@@ -16,46 +16,47 @@ $Id$
  * @see MaterialInstance.
  */
 class SubEntityMaterialInstance : public MaterialInstance {
-// Attributes =================================================================================
-  public:
-  protected:
+    // Attributes
+    // =================================================================================
+public:
+protected:
     /** Reference to the affected SubEntity.
      */
     Ogre::SubEntity *mSubEntity;
-// Methods ====================================================================================
-  public:
+    // Methods
+    // ====================================================================================
+public:
     /** Constructor.
      * Initialises references and parameters.
      * @param se The SubEntity this SubEntityMaterialInstance works on.
      */
-    SubEntityMaterialInstance (Ogre::SubEntity *se);
+    SubEntityMaterialInstance(Ogre::SubEntity *se);
     /** Destructor.
      * @note Destroys the copy material if needed.
      */
-    virtual ~SubEntityMaterialInstance ();
+    virtual ~SubEntityMaterialInstance();
 
     /** Changes this instance transparency.
-     * @param transparency The new transparency. Values will be clamped to [0..1].
-     * @note This changes transparency. A value of 0 means full opacity, while 1 means full
-     *       transparency (invisible)
-     * @note If transparency equals 0, it will use the original material instead of the copy
-     *       (the copy is mandatory transparent, and thus might be slower than the original).
+     * @param transparency The new transparency. Values will be clamped to
+     * [0..1].
+     * @note This changes transparency. A value of 0 means full opacity, while 1
+     * means full transparency (invisible)
+     * @note If transparency equals 0, it will use the original material instead
+     * of the copy (the copy is mandatory transparent, and thus might be slower
+     * than the original).
      * @see MaterialInstance::setTransparency().
      */
-    void setTransparency (Ogre::Real transparency);
+    void setTransparency(Ogre::Real transparency);
 
     /** Changes this instance's z-bias setting.
-    */
-    void setZBias (Ogre::Real zbias);
+     */
+    void setZBias(Ogre::Real zbias);
 
-
-  protected:
+protected:
     /** Initialises the reference to the original material from the SubEntity's.
      * @see MaterialInstance::initOriginalMaterial().
      */
-    void initOriginalMaterial ();
-
-
+    void initOriginalMaterial();
 };
 
 #endif // __SUBENTITYMATERIALINSTANCE_H__

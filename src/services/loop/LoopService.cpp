@@ -21,9 +21,9 @@
  *
  *****************************************************************************/
 
-#include "ServiceCommon.h"
 #include "LoopService.h"
 #include "OpdeException.h"
+#include "ServiceCommon.h"
 #include "logger.h"
 
 using namespace std;
@@ -32,8 +32,8 @@ namespace Opde {
 /*-------------------------------------------------*/
 /*-------------------- LoopMode -------------------*/
 /*-------------------------------------------------*/
-LoopMode::LoopMode(const LoopModeDefinition& def, LoopService* owner) : mLoopModeDef(def), mOwner(owner), mDebugNextFrame(false) {
-}
+LoopMode::LoopMode(const LoopModeDefinition &def, LoopService *owner)
+    : mLoopModeDef(def), mOwner(owner), mDebugNextFrame(false) {}
 
 //------------------------------------------------------
 void LoopMode::loopModeStarted() {
@@ -42,7 +42,7 @@ void LoopMode::loopModeStarted() {
     while (it != mLoopClients.end()) {
         it->second->loopModeStarted(mLoopModeDef);
 
-		++it;
+        ++it;
     }
 }
 
@@ -53,9 +53,8 @@ void LoopMode::loopModeEnded() {
     while (it != mLoopClients.end()) {
         it->second->loopModeEnded(mLoopModeDef);
 
-		++it;
+        ++it;
     }
-
 }
 
 //------------------------------------------------------
@@ -70,7 +69,7 @@ void LoopMode::loopStep(float deltaTime) {
     while (it != mLoopClients.end()) {
         unsigned long stTime = mOwner->getCurrentTime();
 
-        LoopClient* client = it->second;
+        LoopClient *client = it->second;
 
         it++;
 
@@ -78,82 +77,87 @@ void LoopMode::loopStep(float deltaTime) {
 
         if (debugFrame) {
             unsigned long stepTime = mOwner->getCurrentTime() - stTime;
-            LOG_INFO("LoopMode(%s) : Client %d (%s) : Used %ld ms", getLoopModeName().c_str(), corder, client->getLoopClientSpecification().name.c_str(), stepTime);
+            LOG_INFO("LoopMode(%s) : Client %d (%s) : Used %ld ms",
+                     getLoopModeName().c_str(), corder,
+                     client->getLoopClientSpecification().name.c_str(),
+                     stepTime);
         }
 
         corder++;
     }
-
 }
 
 //------------------------------------------------------
-void LoopMode::removeLoopClient(LoopClient* client) {
-	LoopClientMap::iterator it = mLoopClients.find(client->getPriority());
+void LoopMode::removeLoopClient(LoopClient *client) {
+    LoopClientMap::iterator it = mLoopClients.find(client->getPriority());
 
-	while (it != mLoopClients.end()) {
-	    if (it->second == client) {
+    while (it != mLoopClients.end()) {
+        if (it->second == client) {
             LoopClientMap::iterator rem = it++;
 
             mLoopClients.erase(rem);
-	    } else {
+        } else {
             it++;
-	    }
-	}
+        }
+    }
 }
 
 /*---------------------------------------------------*/
 /*-------------------- LoopClient -------------------*/
 /*---------------------------------------------------*/
-LoopClient::~LoopClient() {
-}
+LoopClient::~LoopClient() {}
 
-void LoopClient::loopModeStarted(const LoopModeDefinition& loopMode) {
-}
+void LoopClient::loopModeStarted(const LoopModeDefinition &loopMode) {}
 
-void LoopClient::loopModeEnded(const LoopModeDefinition& loopMode) {
-}
+void LoopClient::loopModeEnded(const LoopModeDefinition &loopMode) {}
 
 /*----------------------------------------------------*/
 /*-------------------- LoopService -------------------*/
 /*----------------------------------------------------*/
-template<> const size_t ServiceImpl<LoopService>::SID = __SERVICE_ID_LOOP;
+template <> const size_t ServiceImpl<LoopService>::SID = __SERVICE_ID_LOOP;
 
-LoopService::LoopService(ServiceManager *manager, const std::string& name) : ServiceImpl< Opde::LoopService >(manager, name),
-    mTerminationRequested(false), mNewLoopMode(NULL), mNewModeRequested(false), mLastFrameTime(0),
-    mDebugOneFrame(false) {
+LoopService::LoopService(ServiceManager *manager, const std::string &name)
+    : ServiceImpl<Opde::LoopService>(manager, name),
+      mTerminationRequested(false), mNewLoopMode(NULL),
+      mNewModeRequested(false), mLastFrameTime(0), mDebugOneFrame(false) {
 
     mActiveMode.reset();
 }
 
 //------------------------------------------------------
-LoopService::~LoopService() {
-}
+LoopService::~LoopService() {}
 
 //------------------------------------------------------
 bool LoopService::init() {
     // We use the Ogre::Root for timing, so it has to be defined.
-    // I could use render service for that, but it could create a circular reference
-    // (not likely, loop clients are weak pointers in fact, but anyway)
+    // I could use render service for that, but it could create a circular
+    // reference (not likely, loop clients are weak pointers in fact, but
+    // anyway)
     mRoot = Ogre::Root::getSingletonPtr();
     return true;
 }
 
 //------------------------------------------------------
-void LoopService::createLoopMode(const LoopModeDefinition& modeDef) {
-    LOG_DEBUG("LoopService::createLoopMode: Creating new loop mode '%s'", modeDef.name.c_str());
+void LoopService::createLoopMode(const LoopModeDefinition &modeDef) {
+    LOG_DEBUG("LoopService::createLoopMode: Creating new loop mode '%s'",
+              modeDef.name.c_str());
 
     // First, look if the ID is not already reserved
     LoopModeIDMap::const_iterator it = mLoopModes.find(modeDef.id);
 
     if (it != mLoopModes.end()) {
-        LOG_ERROR("LoopService::createLoopMode: Loop mode ID %llX already reserved by '%s'", modeDef.id, it->second->getLoopModeName().c_str());
+        LOG_ERROR("LoopService::createLoopMode: Loop mode ID %llX already "
+                  "reserved by '%s'",
+                  modeDef.id, it->second->getLoopModeName().c_str());
         return;
     }
 
     LoopModeNameMap::const_iterator it1 = mLoopNamedModes.find(modeDef.name);
 
     if (it1 != mLoopNamedModes.end()) {
-        LOG_ERROR("LoopService::createLoopMode: Loop mode name %s already reserved by '%s'", modeDef.name.c_str(), it->second->getLoopModeName().c_str());
+        LOG_ERROR("LoopService::createLoopMode: Loop mode name %s already "
+                  "reserved by '%s'",
+                  modeDef.name.c_str(), it->second->getLoopModeName().c_str());
         return;
     }
 
@@ -162,7 +166,8 @@ void LoopService::createLoopMode(const LoopModeDefinition& modeDef) {
     mLoopModes[modeDef.id] = mode;
     mLoopNamedModes[modeDef.name] = mode;
 
-    // Loop mode created. Loop over already inserted clients and register them as well.
+    // Loop mode created. Loop over already inserted clients and register them
+    // as well.
     LoopClientList::const_iterator cit = mLoopClients.begin();
     for (; cit != mLoopClients.end(); ++cit) {
         mode->addLoopClient(*cit);
@@ -170,12 +175,13 @@ void LoopService::createLoopMode(const LoopModeDefinition& modeDef) {
 }
 
 //------------------------------------------------------
-void LoopService::addLoopClient(LoopClient* client) {
-    LOG_INFO("LoopService: Adding a new loop client %s", client->getLoopClientSpecification().name.c_str());
+void LoopService::addLoopClient(LoopClient *client) {
+    LOG_INFO("LoopService: Adding a new loop client %s",
+             client->getLoopClientSpecification().name.c_str());
     // iterate through the loop modes. If the mask complies, add the client
     LoopModeIDMap::const_iterator it = mLoopModes.begin();
 
-    while( it != mLoopModes.end())  {
+    while (it != mLoopModes.end()) {
         if (it->second->getLoopMask() & client->getLoopMask()) {
             it->second->addLoopClient(client);
         }
@@ -187,19 +193,18 @@ void LoopService::addLoopClient(LoopClient* client) {
 }
 
 //------------------------------------------------------
-void LoopService::removeLoopClient(LoopClient* client) {
+void LoopService::removeLoopClient(LoopClient *client) {
     // iterate through the loop modes. If the mask complies, add the client
     LoopModeIDMap::const_iterator it = mLoopModes.begin();
 
-    while( it != mLoopModes.end())  {
-        // The worst thing that could happen is that there was no client in that loop
-        // So no removal was done.
+    while (it != mLoopModes.end()) {
+        // The worst thing that could happen is that there was no client in that
+        // loop So no removal was done.
         it->second->removeLoopClient(client);
 
         it++;
     }
 }
-
 
 //------------------------------------------------------
 bool LoopService::requestLoopMode(LoopModeID newLoopMode) {
@@ -215,7 +220,7 @@ bool LoopService::requestLoopMode(LoopModeID newLoopMode) {
 }
 
 //------------------------------------------------------
-bool LoopService::requestLoopMode(const std::string& name) {
+bool LoopService::requestLoopMode(const std::string &name) {
     LoopModeNameMap::const_iterator it = mLoopNamedModes.find(name);
 
     if (it != mLoopNamedModes.end()) {
@@ -233,7 +238,6 @@ void LoopService::requestTermination() {
     mTerminationRequested = true;
 }
 
-
 //------------------------------------------------------
 void LoopService::run() {
 
@@ -244,7 +248,8 @@ void LoopService::run() {
     }
 
     if (!mActiveMode) {
-        LOG_FATAL("LoopService::run: No loop mode set prior to run(). Terminating");
+        LOG_FATAL(
+            "LoopService::run: No loop mode set prior to run(). Terminating");
         return;
     }
 
@@ -260,7 +265,6 @@ void LoopService::run() {
         unsigned long lFrameStart = getCurrentTime();
         unsigned long deltaTime = lFrameStart - mLastFrameTime;
 
-
         mActiveMode->loopStep(deltaTime);
 
         if (mNewModeRequested) {
@@ -271,7 +275,9 @@ void LoopService::run() {
             if (mNewLoopMode) {
                 setLoopMode(mNewLoopMode);
             } else {
-                LOG_FATAL("LoopService::run: The new requested loop mode is invalid (NULL mode pointer encountered). Terminating");
+                LOG_FATAL(
+                    "LoopService::run: The new requested loop mode is invalid "
+                    "(NULL mode pointer encountered). Terminating");
                 mTerminationRequested = true;
             }
 
@@ -282,7 +288,9 @@ void LoopService::run() {
         mLastFrameLength = getCurrentTime() - mLastFrameTime;
 
         if (debugFrame) {
-            LOG_FATAL("---- One frame timings end. Total frame time: %d ms ----", mLastFrameLength);
+            LOG_FATAL(
+                "---- One frame timings end. Total frame time: %d ms ----",
+                mLastFrameLength);
         }
         mLastFrameTime = lFrameStart;
     }
@@ -307,41 +315,31 @@ void LoopService::step() {
 }
 
 //------------------------------------------------------
-void LoopService::setLoopMode(const LoopModePtr& newMode) {
-    LOG_INFO("LoopService: Setting loop mode %s", mNewLoopMode->getLoopModeName().c_str());
+void LoopService::setLoopMode(const LoopModePtr &newMode) {
+    LOG_INFO("LoopService: Setting loop mode %s",
+             mNewLoopMode->getLoopModeName().c_str());
     mActiveMode = mNewLoopMode;
 }
 
 //------------------------------------------------------
-void LoopService::debugOneFrame() {
-    mDebugOneFrame = true;
-}
+void LoopService::debugOneFrame() { mDebugOneFrame = true; }
 
 //------------------------------------------------------
-unsigned long LoopService::getLastFrameTime() {
-    return mLastFrameLength;
-}
+unsigned long LoopService::getLastFrameTime() { return mLastFrameLength; }
 
 //-------------------------- Factory implementation
 std::string LoopServiceFactory::mName = "LoopService";
 
-LoopServiceFactory::LoopServiceFactory() : ServiceFactory() {
-};
+LoopServiceFactory::LoopServiceFactory() : ServiceFactory(){};
 
-const std::string& LoopServiceFactory::getName() {
-    return mName;
-}
+const std::string &LoopServiceFactory::getName() { return mName; }
 
-const uint LoopServiceFactory::getMask() {
-    return SERVICE_ENGINE;
-}
+const uint LoopServiceFactory::getMask() { return SERVICE_ENGINE; }
 
-const size_t LoopServiceFactory::getSID() {
-    return LoopService::SID;
-}
+const size_t LoopServiceFactory::getSID() { return LoopService::SID; }
 
-Service* LoopServiceFactory::createInstance(ServiceManager* manager) {
+Service *LoopServiceFactory::createInstance(ServiceManager *manager) {
     return new LoopService(manager, mName);
 }
 
-}
+} // namespace Opde

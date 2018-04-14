@@ -27,37 +27,33 @@
 using namespace std;
 
 namespace Opde {
-	const std::string UnixPlatform::msOpdeHomeDirName = ".opde";
+const std::string UnixPlatform::msOpdeHomeDirName = ".opde";
 
-	/*----------------------------------------------------*/
-	/*--------------------- UnixPlatform ----------------*/
-	/*----------------------------------------------------*/
-	UnixPlatform::UnixPlatform(PlatformService* owner) : Platform(owner) {
-	}
-	
-	//------------------------------------------------------
-	UnixPlatform::~UnixPlatform() {
-	}
+/*----------------------------------------------------*/
+/*--------------------- UnixPlatform ----------------*/
+/*----------------------------------------------------*/
+UnixPlatform::UnixPlatform(PlatformService *owner) : Platform(owner) {}
 
-	//------------------------------------------------------
-	std::string UnixPlatform::getGlobalConfigPath() const {
-		// global config path is hardcoded at compile time
-		// it is the location of share/opde directory...
-		// for the share directory location, we have a config time define
-		return OPDE_SHARE_DIR;
-	}
+//------------------------------------------------------
+UnixPlatform::~UnixPlatform() {}
 
-	//------------------------------------------------------
-	std::string UnixPlatform::getUserConfigPath() const {
-		// local config path is based on the user's home directory
-		// respectively the .opde directory inside it
-		std::string home = getenv("HOME");
-
-		return home + getDirectorySeparator() + msOpdeHomeDirName;
-	}
-
-	//------------------------------------------------------
-	std::string UnixPlatform::getDirectorySeparator() const {
-		return "/";
-	}
+//------------------------------------------------------
+std::string UnixPlatform::getGlobalConfigPath() const {
+    // global config path is hardcoded at compile time
+    // it is the location of share/opde directory...
+    // for the share directory location, we have a config time define
+    return OPDE_SHARE_DIR;
 }
+
+//------------------------------------------------------
+std::string UnixPlatform::getUserConfigPath() const {
+    // local config path is based on the user's home directory
+    // respectively the .opde directory inside it
+    std::string home = getenv("HOME");
+
+    return home + getDirectorySeparator() + msOpdeHomeDirName;
+}
+
+//------------------------------------------------------
+std::string UnixPlatform::getDirectorySeparator() const { return "/"; }
+} // namespace Opde

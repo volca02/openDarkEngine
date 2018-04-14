@@ -25,42 +25,45 @@
 #ifndef __CONFIGSERVICEBINDER_H
 #define __CONFIGSERVICEBINDER_H
 
-#include  "ConfigService.h"
+#include "bindings.h"
+
+#include "ConfigService.h"
+
 
 namespace Opde {
 
-	namespace Python {
+namespace Python {
 
-		/// Config service python binder
-		class ConfigServiceBinder : public shared_ptr_binder<ConfigServicePtr> {
-			public:
-				static void init(PyObject* module);
+/// Config service python binder
+class ConfigServiceBinder : public shared_ptr_binder<ConfigServicePtr> {
+public:
+    static void init(PyObject *module);
 
-				// --- Python type related methods ---
-				/// to string - reprfunc conversion
-				static PyObject* repr(PyObject *self);
+    // --- Python type related methods ---
+    /// to string - reprfunc conversion
+    static PyObject *repr(PyObject *self);
 
-				static PyObject* create();
+    static PyObject *create();
 
-				// --- Methods ---
+    // --- Methods ---
 
-				static PyObject* setParam(PyObject* self, PyObject* args);
-				static PyObject* getParam(PyObject* self, PyObject* args);
-				static PyObject* hasParam(PyObject* self, PyObject* args);
-				static PyObject* loadParams(PyObject* self, PyObject* args);
-				static PyObject* setConfigPathOverride(PyObject* self, PyObject* args);
+    static PyObject *setParam(PyObject *self, PyObject *args);
+    static PyObject *getParam(PyObject *self, PyObject *args);
+    static PyObject *hasParam(PyObject *self, PyObject *args);
+    static PyObject *loadParams(PyObject *self, PyObject *args);
+    static PyObject *setConfigPathOverride(PyObject *self, PyObject *args);
 
-			protected:
-				/// Static type definition for ConfigService
-				static PyTypeObject msType;
+protected:
+    /// Static type definition for ConfigService
+    static PyTypeObject msType;
 
-				/// Name of the python type
-				static const char* msName;
+    /// Name of the python type
+    static const char *msName;
 
-				/// Method list
-				static PyMethodDef msMethods[];
-		};
-	}
-}
+    /// Method list
+    static PyMethodDef msMethods[];
+};
+} // namespace Python
+} // namespace Opde
 
 #endif

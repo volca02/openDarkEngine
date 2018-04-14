@@ -28,33 +28,34 @@
 #include "bindings.h"
 
 namespace Opde {
-	namespace Python {
+namespace Python {
 
-		/** A Service interface for python. Manages a module "opde.services".
-		* Exposes getters for services. Each getter is named exactly the same as the service itself.
-		* @note When creating a new service, remember to expose it here
-		*/
-		class ServiceBinder {
-			public:
-				static PyObject* init(PyObject* container);
+/** A Service interface for python. Manages a module "opde.services".
+ * Exposes getters for services. Each getter is named exactly the same as the
+ * service itself.
+ * @note When creating a new service, remember to expose it here
+ */
+class ServiceBinder {
+public:
+    static PyObject *init(PyObject *container);
 
-				static PyObject* getConfigService(PyObject* self, PyObject* args);
-				static PyObject* getLinkService(PyObject* self, PyObject* args);
-				static PyObject* getPropertyService(PyObject* self, PyObject* args);
-				static PyObject* getLoopService(PyObject* self, PyObject* args);
-				static PyObject* getInputService(PyObject* self, PyObject* args);
-				static PyObject* getDrawService(PyObject* self, PyObject* args);
-				static PyObject* getGUIService(PyObject* self, PyObject* args);
-				static PyObject* getDatabaseService(PyObject* self, PyObject* args);
-				static PyObject* getObjectService(PyObject* self, PyObject* args);
-				static PyObject* getInheritService(PyObject* self, PyObject* args);
+    static PyObject *getConfigService(PyObject *self, PyObject *args);
+    static PyObject *getLinkService(PyObject *self, PyObject *args);
+    static PyObject *getPropertyService(PyObject *self, PyObject *args);
+    static PyObject *getLoopService(PyObject *self, PyObject *args);
+    static PyObject *getInputService(PyObject *self, PyObject *args);
+    static PyObject *getDrawService(PyObject *self, PyObject *args);
+    static PyObject *getGUIService(PyObject *self, PyObject *args);
+    static PyObject *getDatabaseService(PyObject *self, PyObject *args);
+    static PyObject *getObjectService(PyObject *self, PyObject *args);
+    static PyObject *getInheritService(PyObject *self, PyObject *args);
 
-				static PyMethodDef msMethods[];
-			protected:
-				static const char* msName;
-		};
-	}
-}
+    static PyMethodDef msMethods[];
 
+protected:
+    static const char *msName;
+};
+} // namespace Python
+} // namespace Opde
 
 #endif

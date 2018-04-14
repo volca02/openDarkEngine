@@ -25,47 +25,47 @@
 #ifndef __RENDEREDIMAGEBINDER_H
 #define __RENDEREDIMAGEBINDER_H
 
-#include "bindings.h"
 #include "RenderedImage.h"
+#include "bindings.h"
 
 namespace Opde {
 
-	namespace Python {
+namespace Python {
 
-		/// RenderedImage python binder
-		class RenderedImageBinder : public class_ptr_binder<RenderedImage> {
-			// for msType handling
-			friend class DrawOperationBinder;
+/// RenderedImage python binder
+class RenderedImageBinder : public class_ptr_binder<RenderedImage> {
+    // for msType handling
+    friend class DrawOperationBinder;
 
-			public:
-				static void init(PyObject* module);
+public:
+    static void init(PyObject *module);
 
-				// --- Python type related methods ---
-				/// to string - reprfunc conversion
-				static PyObject* repr(PyObject *self);
+    // --- Python type related methods ---
+    /// to string - reprfunc conversion
+    static PyObject *repr(PyObject *self);
 
-				/// helper class pointer extractor
-				static bool extract(PyObject *obj, RenderedImage*& tgt);
+    /// helper class pointer extractor
+    static bool extract(PyObject *obj, RenderedImage *&tgt);
 
-				// --- Methods ---
-				static PyObject* setDrawSource(PyObject *self, PyObject *args);
+    // --- Methods ---
+    static PyObject *setDrawSource(PyObject *self, PyObject *args);
 
-				static PyObject* create(RenderedImage* ds);
+    static PyObject *create(RenderedImage *ds);
 
-			protected:
-				/// Static type definition
-				static PyTypeObject msType;
+protected:
+    /// Static type definition
+    static PyTypeObject msType;
 
-				/// Name of the python type
-				static const char* msName;
+    /// Name of the python type
+    static const char *msName;
 
-				/// Method list
-				static PyMethodDef msMethods[];
+    /// Method list
+    static PyMethodDef msMethods[];
 
-				static TypeInfo<ClipRect> msRectTypeInfo;
-		};
+    static TypeInfo<ClipRect> msRectTypeInfo;
+};
 
-	}
-}
+} // namespace Python
+} // namespace Opde
 
 #endif

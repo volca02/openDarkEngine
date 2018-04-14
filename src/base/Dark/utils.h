@@ -25,12 +25,12 @@
 #ifndef DARK_UTILS_H
 #define DARK_UTILS_H
 
-#define UNUSED(v)	/* v */
+#define UNUSED(v) /* v */
 
 #include "integers.h"
 
 namespace Dark {
-	
+
 typedef uint64_t uint64;
 typedef int64_t sint64;
 typedef uint32_t uint32;
@@ -41,21 +41,22 @@ typedef uint8_t uint8;
 typedef int8_t sint8;
 
 /* Isn't it great how everyone can invent their own boolean data type? */
-typedef unsigned long	Boolean;
+typedef unsigned long Boolean;
 
 #ifdef __cplusplus
-inline uint64 make_ll(uint32 h, uint32 l)
-{
-	return (((uint64)h<<32)&((uint64)0xFFFFFFFF<<32))|((uint64)l&0xFFFFFFFF);
+inline uint64 make_ll(uint32 h, uint32 l) {
+    return (((uint64)h << 32) & ((uint64)0xFFFFFFFF << 32)) |
+           ((uint64)l & 0xFFFFFFFF);
 }
 #else
-#define make_ll(__h,__l)	\
-		((((uint64)(__h)<<32)&((uint64)0xFFFFFFFF<<32))|((uint64)(__l)&0xFFFFFFFF))
+#define make_ll(__h, __l)                                                      \
+    ((((uint64)(__h) << 32) & ((uint64)0xFFFFFFFF << 32)) |                    \
+     ((uint64)(__l)&0xFFFFFFFF))
 #endif
 
 // Till we get rid of the headers - Stop warnings about the zero sized arrays
 // Dark headers are not used anymore - // #pragma warning (disable : 4200)
 
-}
+} // namespace Dark
 
 #endif

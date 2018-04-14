@@ -25,21 +25,21 @@
 #define __PHYSCONTROLS_H
 
 namespace Opde {
-	/** @brief Physics controls. Represents the controls placed on an object physics.
-	* Three different controls are possible:
-	* * Axis Velocity (In local space of the object)
-	* * Velocity (World side velocity - i.e. rotated by object's facing to get world oriented)
-	* * Rotational Velocity
-	*/
-	class OPDELIB_EXPORT PhysControls {
-		public:
-			PhysControls();
-			~PhysControls();
-			
-			void read(const FilePtr& sf);
-			void write(const FilePtr& sf);
-	};
-};
+/** @brief Physics controls. Represents the controls placed on an object
+ * physics. Three different controls are possible:
+ * * Axis Velocity (In local space of the object)
+ * * Velocity (World side velocity - i.e. rotated by object's facing to get
+ * world oriented)
+ * * Rotational Velocity
+ */
+class OPDELIB_EXPORT PhysControls {
+public:
+    PhysControls();
+    ~PhysControls();
 
+    void read(const FilePtr &sf);
+    void write(const FilePtr &sf);
+};
+}; // namespace Opde
 
 #endif

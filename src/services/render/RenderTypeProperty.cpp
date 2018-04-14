@@ -22,75 +22,75 @@
  *
  *****************************************************************************/
 
-#include "RenderService.h"
-#include "property/PropertyService.h"
-#include "SingleFieldDataStorage.h"
 #include "RenderTypeProperty.h"
+#include "RenderService.h"
+#include "SingleFieldDataStorage.h"
+#include "property/PropertyService.h"
 
 namespace Opde {
-	const unsigned int RENDER_TYPE_NORMAL = 0;
-	const unsigned int RENDER_TYPE_NOT_RENDERED = 1;
-	const unsigned int RENDER_TYPE_NO_LIGHTMAP = 2;
-	const unsigned int RENDER_TYPE_EDITOR_ONLY = 3;
+const unsigned int RENDER_TYPE_NORMAL = 0;
+const unsigned int RENDER_TYPE_NOT_RENDERED = 1;
+const unsigned int RENDER_TYPE_NO_LIGHTMAP = 2;
+const unsigned int RENDER_TYPE_EDITOR_ONLY = 3;
 
-	/*--------------------------------------------------------*/
-	/*-------------------- RenderTypeProperty ----------------*/
-	/*--------------------------------------------------------*/
-	RenderTypeProperty::RenderTypeProperty(RenderService* rs, PropertyService* owner) :
-			RenderedProperty(rs, owner, "RenderType", "RenderTyp", "always") {
+/*--------------------------------------------------------*/
+/*-------------------- RenderTypeProperty ----------------*/
+/*--------------------------------------------------------*/
+RenderTypeProperty::RenderTypeProperty(RenderService *rs,
+                                       PropertyService *owner)
+    : RenderedProperty(rs, owner, "RenderType", "RenderTyp", "always") {
 
+    mEnum = new DEnum("RenderType", DVariant::DV_UINT, false);
 
-		mEnum = new DEnum("RenderType", DVariant::DV_UINT, false);
+    mEnum->insert("Normal", RENDER_TYPE_NORMAL);
+    mEnum->insert("Not Rendered", RENDER_TYPE_NOT_RENDERED);
+    mEnum->insert("No Lightmap", RENDER_TYPE_NO_LIGHTMAP);
+    mEnum->insert("Editor Only", RENDER_TYPE_EDITOR_ONLY);
 
-		mEnum->insert("Normal", RENDER_TYPE_NORMAL);
-		mEnum->insert("Not Rendered", RENDER_TYPE_NOT_RENDERED);
-		mEnum->insert("No Lightmap", RENDER_TYPE_NO_LIGHTMAP);
-		mEnum->insert("Editor Only", RENDER_TYPE_EDITOR_ONLY);
+    mPropertyStorage = DataStoragePtr(new UIntDataStorage(mEnum));
 
-		mPropertyStorage = DataStoragePtr(new UIntDataStorage(mEnum));
+    // TODO: Check the version
+    setChunkVersions(2, 4);
 
-		// TODO: Check the version
-		setChunkVersions(2, 4);
-
-		mSceneMgr = rs->getSceneManager();
-	};
-
-	// --------------------------------------------------------------------------
-	RenderTypeProperty::~RenderTypeProperty(void) {
-		delete mEnum;
-	};
-
-	// --------------------------------------------------------------------------
-	void RenderTypeProperty::addProperty(int oid) {
-		DVariant val;
-
-		if (!get(oid, "", val))
-			OPDE_EXCEPT("Property not defined for object.", "RenderTypeProperty::addProperty");
-
-		setRenderType(oid, val.toUInt());
-	};
-
-	// --------------------------------------------------------------------------
-	void RenderTypeProperty::removeProperty(int oid) {
-		// reinit to true - the object's default
-		setRenderType(oid, 0);
-	};
-
-	// --------------------------------------------------------------------------
-	void RenderTypeProperty::setPropertySource(int oid, int effid) {
-		// re-read the property
-		addProperty(oid);
-	};
-
-	// --------------------------------------------------------------------------
-	void RenderTypeProperty::valueChanged(int oid, const std::string& field, const DVariant& value) {
-		// just call the setter
-		setRenderType(oid, value.toUInt());
-	};
-
-	// --------------------------------------------------------------------------
-	void RenderTypeProperty::setRenderType(int oid, uint32_t renderType) {
-		EntityInfo* ei = getEntityInfo(oid);
-		ei->setRenderType(renderType);
-	};
+    mSceneMgr = rs->getSceneManager();
 };
+
+// --------------------------------------------------------------------------
+RenderTypeProperty::~RenderTypeProperty(void) { delete mEnum; };
+
+// --------------------------------------------------------------------------
+void RenderTypeProperty::addProperty(int oid) {
+    DVariant val;
+
+    if (!get(oid, "", val))
+        OPDE_EXCEPT("Property not defined for object.",
+                    "RenderTypeProperty::addProperty");
+
+    setRenderType(oid, val.toUInt());
+};
+
+// --------------------------------------------------------------------------
+void RenderTypeProperty::removeProperty(int oid) {
+    // reinit to true - the object's default
+    setRenderType(oid, 0);
+};
+
+// --------------------------------------------------------------------------
+void RenderTypeProperty::setPropertySource(int oid, int effid) {
+    // re-read the property
+    addProperty(oid);
+};
+
+// --------------------------------------------------------------------------
+void RenderTypeProperty::valueChanged(int oid, const std::string &field,
+                                      const DVariant &value) {
+    // just call the setter
+    setRenderType(oid, value.toUInt());
+};
+
+// --------------------------------------------------------------------------
+void RenderTypeProperty::setRenderType(int oid, uint32_t renderType) {
+    EntityInfo *ei = getEntityInfo(oid);
+    ei->setRenderType(renderType);
+};
+}; // namespace Opde

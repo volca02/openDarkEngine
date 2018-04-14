@@ -25,52 +25,50 @@
 #ifndef __OBJECTSERVICEBINDER_H
 #define __OBJECTSERVICEBINDER_H
 
-#include  "bindings.h"
-#include  "ObjectService.h"
+#include "ObjectService.h"
+#include "bindings.h"
 
-namespace Opde 
-{
-	namespace Python 
-	{
+namespace Opde {
+namespace Python {
 
-		/// Object service python binder
-		class ObjectServiceBinder : public shared_ptr_binder<ObjectServicePtr> {
-			public:
-				static void init(PyObject* module);
+/// Object service python binder
+class ObjectServiceBinder : public shared_ptr_binder<ObjectServicePtr> {
+public:
+    static void init(PyObject *module);
 
-				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
+    // --- Python type related methods ---
+    static PyObject *getattr(PyObject *self, char *name);
 
-				/// creates a python object representation of the ObjectService
-				static PyObject* create();
-				
-				// --- Methods ---
-				// named differently to avoid mixing with the prev. create method
-				static PyObject* objectCreate(PyObject* self, PyObject* args);
-				static PyObject* beginCreate(PyObject* self, PyObject* args);
-				static PyObject* endCreate(PyObject* self, PyObject* args);
-				static PyObject* exists(PyObject* self, PyObject* args);
-				static PyObject* position(PyObject* self, PyObject* args);
-				static PyObject* orientation(PyObject* self, PyObject* args);
-				static PyObject* getName(PyObject* self, PyObject* args);
-				static PyObject* setName(PyObject* self, PyObject* args);
-				static PyObject* named(PyObject* self, PyObject* args);
-				static PyObject* teleport(PyObject* self, PyObject* args);
-				static PyObject* addMetaProperty(PyObject* self, PyObject* args);
-				static PyObject* removeMetaProperty(PyObject* self, PyObject* args);
-				static PyObject* hasMetaProperty(PyObject* self, PyObject* args);
-				
-			protected:
-				/// Static type definition for ObjectService
-				static PyTypeObject msType;
+    /// creates a python object representation of the ObjectService
+    static PyObject *create();
 
-				/// Name of the python type
-				static const char* msName;
+    // --- Methods ---
+    // named differently to avoid mixing with the prev. create method
+    static PyObject *objectCreate(PyObject *self, PyObject *args);
+    static PyObject *beginCreate(PyObject *self, PyObject *args);
+    static PyObject *endCreate(PyObject *self, PyObject *args);
+    static PyObject *exists(PyObject *self, PyObject *args);
+    static PyObject *position(PyObject *self, PyObject *args);
+    static PyObject *orientation(PyObject *self, PyObject *args);
+    static PyObject *getName(PyObject *self, PyObject *args);
+    static PyObject *setName(PyObject *self, PyObject *args);
+    static PyObject *named(PyObject *self, PyObject *args);
+    static PyObject *teleport(PyObject *self, PyObject *args);
+    static PyObject *addMetaProperty(PyObject *self, PyObject *args);
+    static PyObject *removeMetaProperty(PyObject *self, PyObject *args);
+    static PyObject *hasMetaProperty(PyObject *self, PyObject *args);
 
-				/// Method list
-				static PyMethodDef msMethods[];
-		};
-	}
-}
+protected:
+    /// Static type definition for ObjectService
+    static PyTypeObject msType;
 
-#endif	// __OBJECTSERVICEBINDER_H
+    /// Name of the python type
+    static const char *msName;
+
+    /// Method list
+    static PyMethodDef msMethods[];
+};
+} // namespace Python
+} // namespace Opde
+
+#endif // __OBJECTSERVICEBINDER_H

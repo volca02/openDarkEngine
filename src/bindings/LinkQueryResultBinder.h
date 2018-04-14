@@ -25,44 +25,47 @@
 #ifndef __LINKQUERYRESULYBINDER_H
 #define __LINKQUERYRESULYBINDER_H
 
-#include  "DTypeDef.h"
-#include  "BinaryService.h"
-#include  "LinkService.h"
+#include "bindings.h"
+
+#include "BinaryService.h"
+#include "DTypeDef.h"
+#include "LinkService.h"
 
 namespace Opde {
 
-	namespace Python {
+namespace Python {
 
-		/// Link query result python binder. Iterable
-		class LinkQueryResultBinder : public shared_ptr_binder<LinkQueryResultPtr> {
-			public:
-				static void init(PyObject* module);
-			
-				// --- Python type related methods ---
-				static PyObject* getattr(PyObject *self, char *name);
+/// Link query result python binder. Iterable
+class LinkQueryResultBinder : public shared_ptr_binder<LinkQueryResultPtr> {
+public:
+    static void init(PyObject *module);
 
-				/// to string - reprfunc conversion
-				static PyObject* repr(PyObject *self);
+    // --- Python type related methods ---
+    static PyObject *getattr(PyObject *self, char *name);
 
-				/// creates a python object representation of the link query result
-				static PyObject* create(const LinkQueryResultPtr& result);
+    /// to string - reprfunc conversion
+    static PyObject *repr(PyObject *self);
 
-			protected:
-				/// Return self as iterator with a increased ref count.
-				static PyObject* getIterObject(PyObject* self);
-				/// Returns current object, advances to next object (or returns NULL if at end)
-				static PyObject* getNext(PyObject* self);
-			
-				/// Static type definition for LinkQueryResult
-				static PyTypeObject msType;
+    /// creates a python object representation of the link query result
+    static PyObject *create(const LinkQueryResultPtr &result);
 
-				/// Name of the python type
-				static const char* msName;
+protected:
+    /// Return self as iterator with a increased ref count.
+    static PyObject *getIterObject(PyObject *self);
+    /// Returns current object, advances to next object (or returns NULL if at
+    /// end)
+    static PyObject *getNext(PyObject *self);
 
-				/// Method list
-				static PyMethodDef msMethods[];
-		};
-	}
-}
+    /// Static type definition for LinkQueryResult
+    static PyTypeObject msType;
+
+    /// Name of the python type
+    static const char *msName;
+
+    /// Method list
+    static PyMethodDef msMethods[];
+};
+} // namespace Python
+} // namespace Opde
 
 #endif

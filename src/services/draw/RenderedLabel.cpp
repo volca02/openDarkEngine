@@ -22,8 +22,8 @@
  *****************************************************************************/
 
 #include "RenderedLabel.h"
-#include "DrawService.h"
 #include "DrawBuffer.h"
+#include "DrawService.h"
 #include "TextureAtlas.h"
 
 using namespace Ogre;
@@ -33,19 +33,19 @@ namespace Opde {
 /*----------------------------------------------------*/
 /*-------------------- RenderedLabel -----------------*/
 /*----------------------------------------------------*/
-RenderedLabel::RenderedLabel(DrawService* owner, DrawOperation::ID id, const FontDrawSourcePtr fds, const std::string& label) :
-    DrawOperation(owner, id), mFontSource(fds), mText() {
+RenderedLabel::RenderedLabel(DrawService *owner, DrawOperation::ID id,
+                             const FontDrawSourcePtr fds,
+                             const std::string &label)
+    : DrawOperation(owner, id), mFontSource(fds), mText() {
 
     rebuild();
 }
 
 //------------------------------------------------------
-RenderedLabel::~RenderedLabel() {
-    freeQuadList();
-}
+RenderedLabel::~RenderedLabel() { freeQuadList(); }
 
 //------------------------------------------------------
-void RenderedLabel::setLabel(const std::string& label) {
+void RenderedLabel::setLabel(const std::string &label) {
     clearText();
     addText(label, Ogre::ColourValue::White);
 
@@ -53,7 +53,8 @@ void RenderedLabel::setLabel(const std::string& label) {
 }
 
 //------------------------------------------------------
-void RenderedLabel::addText(const std::string& text, const Ogre::ColourValue& colour) {
+void RenderedLabel::addText(const std::string &text,
+                            const Ogre::ColourValue &colour) {
     TextSegment seg;
     seg.colour = colour;
     seg.text = text;
@@ -83,7 +84,7 @@ void RenderedLabel::_rebuild() {
     // TODO: Reuse of quads if the quad count does not change, etc.
     while (it != end) {
         // for each segment
-        TextSegment& ts = *it++;
+        TextSegment &ts = *it++;
 
         std::string::iterator cit = ts.text.begin();
         std::string::iterator cend = ts.text.end();
@@ -115,12 +116,14 @@ void RenderedLabel::_rebuild() {
 
                 // if clipping produced some non-empty result
                 if (mClipOnScreen.clip(dq)) {
-                    // the quad is queued (by making a dynamically allocated copy)
-                    DrawQuad* toStore = new DrawQuad(dq);
+                    // the quad is queued (by making a dynamically allocated
+                    // copy)
+                    DrawQuad *toStore = new DrawQuad(dq);
                     mDrawQuadList.push_back(toStore);
                 }
             } else {
-                x += mFontSource->getWidth(); // move the maximal width (maybe 1px would be better?)
+                x += mFontSource->getWidth(); // move the maximal width (maybe
+                                              // 1px would be better?)
             }
         }
     }
@@ -139,7 +142,7 @@ void RenderedLabel::freeQuadList() {
 }
 
 //------------------------------------------------------
-void RenderedLabel::visitDrawBuffer(DrawBuffer* db) {
+void RenderedLabel::visitDrawBuffer(DrawBuffer *db) {
     DrawQuadList::iterator it = mDrawQuadList.begin();
     DrawQuadList::iterator end = mDrawQuadList.end();
 
@@ -154,17 +157,22 @@ DrawSourceBasePtr RenderedLabel::getDrawSourceBase() {
 }
 
 //------------------------------------------------------
-void RenderedLabel::fillQuad(int x, int y, const unsigned char chr, DrawSourcePtr ds, DrawQuad& dq) {
-    const PixelSize& ps = ds->getPixelSize();
+void RenderedLabel::fillQuad(int x, int y, const unsigned char chr,
+                             DrawSourcePtr ds, DrawQuad &dq) {
+    const PixelSize &ps = ds->getPixelSize();
     assert(mActiveSheet);
 
-    dq.positions.left    = mActiveSheet->convertToScreenSpaceX(mPosition.first + x);
-    dq.positions.right   = mActiveSheet->convertToScreenSpaceX(mPosition.first + x + ps.width);
-    dq.positions.top     = mActiveSheet->convertToScreenSpaceY(mPosition.second + y);
-    dq.positions.bottom  = mActiveSheet->convertToScreenSpaceY(mPosition.second + y + ps.height);
+    dq.positions.left =
+        mActiveSheet->convertToScreenSpaceX(mPosition.first + x);
+    dq.positions.right =
+        mActiveSheet->convertToScreenSpaceX(mPosition.first + x + ps.width);
+    dq.positions.top =
+        mActiveSheet->convertToScreenSpaceY(mPosition.second + y);
+    dq.positions.bottom =
+        mActiveSheet->convertToScreenSpaceY(mPosition.second + y + ps.height);
     dq.depth = mActiveSheet->convertToScreenSpaceZ(mZOrder);
 
     ds->fillTexCoords(dq.texCoords);
 }
 
-}
+} // namespace Opde

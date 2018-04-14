@@ -22,8 +22,8 @@
  *****************************************************************************/
 
 #include "CameraService.h"
-#include "logger.h"
 #include "ServiceCommon.h"
+#include "logger.h"
 
 using namespace std;
 using namespace Ogre;
@@ -33,20 +33,15 @@ namespace Opde {
 /*----------------------------------------------------*/
 /*-------------------- CameraService -----------------*/
 /*----------------------------------------------------*/
-template<> const size_t ServiceImpl<CameraService>::SID = __SERVICE_ID_CAMERA;
+template <> const size_t ServiceImpl<CameraService>::SID = __SERVICE_ID_CAMERA;
 
-CameraService::CameraService(ServiceManager *manager, const std::string& name) :
-    ServiceImpl<CameraService>(manager, name),
-    mHorizontalRot(0),
-    mVerticalRot(0),
-    mPaused(false),
-    mAttachmentObject(0),
-    mDynamicAttach(false) {
-}
+CameraService::CameraService(ServiceManager *manager, const std::string &name)
+    : ServiceImpl<CameraService>(manager, name), mHorizontalRot(0),
+      mVerticalRot(0), mPaused(false), mAttachmentObject(0),
+      mDynamicAttach(false) {}
 
 //------------------------------------------------------
-CameraService::~CameraService() {
-}
+CameraService::~CameraService() {}
 
 //------------------------------------------------------
 bool CameraService::staticAttach(int objID) {
@@ -93,16 +88,15 @@ void CameraService::simPaused() {
 }
 
 //------------------------------------------------------
-void CameraService::simUnPaused() {
-    mPaused = false;
-}
+void CameraService::simUnPaused() { mPaused = false; }
 
 //------------------------------------------------------
 void CameraService::simStep(float simTime, float delta) {
     if (mPaused)
         return;
 
-    // TODO: Handle rotation controlled/not controlled physics flags on the target object!
+    // TODO: Handle rotation controlled/not controlled physics flags on the
+    // target object!
 
     // scale
     Vector2 rotation(mHorizontalRot, mVerticalRot);
@@ -123,14 +117,17 @@ void CameraService::simStep(float simTime, float delta) {
         //
         // rotate the player object
         // TODO: rotate the camera
-        // this is not as easy as it looks. We should take physics into consideration...
+        // this is not as easy as it looks. We should take physics into
+        // consideration...
 
-        // the player should have some sub-objects present - we only rotate submodel 0
-        // e.g.:
+        // the player should have some sub-objects present - we only rotate
+        // submodel 0 e.g.:
 
-        // first rotate the head sub-object accordingly to the accumulated values
+        // first rotate the head sub-object accordingly to the accumulated
+        // values
         /* TODO:
-           Ogre::Quaternion rot = mPhysicsService->getSubModelRotation(mPlayerObject, 0, rot);
+           Ogre::Quaternion rot =
+           mPhysicsService->getSubModelRotation(mPlayerObject, 0, rot);
            // TODO: multiply by delta
            rot.yaw(rotation.x);
            rot.pitch(rotation.y);
@@ -142,13 +139,11 @@ void CameraService::simStep(float simTime, float delta) {
 
     // reset the rotation indicators
     mHorizontalRot = 0;
-    mVerticalRot   = 0;
+    mVerticalRot = 0;
 }
 
 //------------------------------------------------------
-bool CameraService::init() {
-    return true;
-}
+bool CameraService::init() { return true; }
 
 //------------------------------------------------------
 void CameraService::bootstrapFinished() {
@@ -168,8 +163,12 @@ void CameraService::bootstrapFinished() {
        - joyxaxis
     */
 
-    InputService::ListenerPtr mturnListener(new ClassCallback<InputEventMsg, CameraService>(this, &CameraService::onMTurn));
-    InputService::ListenerPtr mlookListener(new ClassCallback<InputEventMsg, CameraService>(this, &CameraService::onMLook));
+    InputService::ListenerPtr mturnListener(
+        new ClassCallback<InputEventMsg, CameraService>(
+            this, &CameraService::onMTurn));
+    InputService::ListenerPtr mlookListener(
+        new ClassCallback<InputEventMsg, CameraService>(
+            this, &CameraService::onMLook));
 
     mInputSrv->registerCommandTrap("mturn", mturnListener);
     mInputSrv->registerCommandTrap("mlook", mlookListener);
@@ -183,7 +182,8 @@ void CameraService::bootstrapFinished() {
     mCamera->setFixedYawAxis(true, Vector3::UNIT_Z);
     // TODO: Need to check this value...
     mCamera->setFOVy(Degree(60));
-    // TODO: what the heck is the variable user_camera_offset and how does it interfere with this code?
+    // TODO: what the heck is the variable user_camera_offset and how does it
+    // interfere with this code?
 
     mHasRefsProperty = mPropertySrv->getProperty("HasRefs");
 }
@@ -202,7 +202,7 @@ void CameraService::shutdown() {
 }
 
 //------------------------------------------------------
-void CameraService::onMTurn(const InputEventMsg& iem) {
+void CameraService::onMTurn(const InputEventMsg &iem) {
     // check for the event type
     if (iem.event != IET_MOUSE_MOVE)
         return;
@@ -211,8 +211,8 @@ void CameraService::onMTurn(const InputEventMsg& iem) {
     // we are interested in:
     //  * mouse_sensitivity
     //  * mouse_invert
-    const DVariant& msens     = mInputSrv->getVariable("mouse_sensitivity");
-    const DVariant& minvert   = mInputSrv->getVariable("mouse_invert");
+    const DVariant &msens = mInputSrv->getVariable("mouse_sensitivity");
+    const DVariant &minvert = mInputSrv->getVariable("mouse_invert");
 
     // schedule a turn on the object in question
     float rot = iem.params.toFloat() * msens.toFloat();
@@ -223,7 +223,7 @@ void CameraService::onMTurn(const InputEventMsg& iem) {
 }
 
 //------------------------------------------------------
-void CameraService::onMLook(const InputEventMsg& iem) {
+void CameraService::onMLook(const InputEventMsg &iem) {
     // check for the event type
     if (iem.event != IET_MOUSE_MOVE)
         return;
@@ -235,8 +235,8 @@ void CameraService::onMLook(const InputEventMsg& iem) {
         return;
 
     // freelook enabled, rotate the view
-    const DVariant& msens     = mInputSrv->getVariable("mouse_sensitivity");
-    const DVariant& minvert   = mInputSrv->getVariable("mouse_invert");
+    const DVariant &msens = mInputSrv->getVariable("mouse_sensitivity");
+    const DVariant &minvert = mInputSrv->getVariable("mouse_invert");
 
     float rot = iem.params.toFloat() * msens.toFloat();
     if (minvert.toBool())
@@ -263,8 +263,9 @@ bool CameraService::updateCameraFromSubObject(int objId, size_t submdl) {
     if (smc <= submdl)
         return false;
 
-    const Vector3& pos = mPhysicsService->getSubModelPosition(objId, submdl);
-    const Quaternion& rot = mPhysicsService->getSubModelOrientation(objId, submdl);
+    const Vector3 &pos = mPhysicsService->getSubModelPosition(objId, submdl);
+    const Quaternion &rot =
+        mPhysicsService->getSubModelOrientation(objId, submdl);
 
     mCamera->setPosition(pos);
     mCamera->setOrientation(rot);
@@ -290,23 +291,16 @@ void CameraService::handleAttachment(int objID, bool dynamic) {
 //-------------------------- Factory implementation
 std::string CameraServiceFactory::mName = "CameraService";
 
-CameraServiceFactory::CameraServiceFactory() : ServiceFactory() {
-};
+CameraServiceFactory::CameraServiceFactory() : ServiceFactory(){};
 
-const std::string& CameraServiceFactory::getName() {
-    return mName;
-}
+const std::string &CameraServiceFactory::getName() { return mName; }
 
-const uint CameraServiceFactory::getMask() {
-    return SERVICE_RENDERER;
-}
+const uint CameraServiceFactory::getMask() { return SERVICE_RENDERER; }
 
-const size_t CameraServiceFactory::getSID() {
-    return CameraService::SID;
-}
+const size_t CameraServiceFactory::getSID() { return CameraService::SID; }
 
-Service* CameraServiceFactory::createInstance(ServiceManager* manager) {
+Service *CameraServiceFactory::createInstance(ServiceManager *manager) {
     return new CameraService(manager, mName);
 }
 
-}
+} // namespace Opde

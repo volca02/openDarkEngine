@@ -25,16 +25,12 @@
 
 namespace Opde {
 
-	PositionPropertyStorage::PositionPropertyStorage() {
-	    field("position", &sPositionProp::position);
-	    field("cell", &sPositionProp::cell);
-	    field("facing", &sPositionProp::facing);
-	};
-
-	PositionPropertyStorage::~PositionPropertyStorage() {
-	};
-
+PositionPropertyStorage::PositionPropertyStorage() {
+    field("position", &sPositionProp::position);
+    field("cell", &sPositionProp::cell);
+    field("facing", &sPositionProp::facing);
 };
 
+PositionPropertyStorage::~PositionPropertyStorage(){};
 
-
+}; // namespace Opde

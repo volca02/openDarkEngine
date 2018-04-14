@@ -22,67 +22,67 @@
  *
  *****************************************************************************/
 
-
 #ifndef __PLATFORMSERVICE_H
 #define __PLATFORMSERVICE_H
 
 #include "config.h"
 
-#include "OpdeServiceManager.h"
 #include "OpdeService.h"
+#include "OpdeServiceManager.h"
 #include "SharedPtr.h"
 
 namespace Opde {
-	// Forward decl.
-	class Platform;
+// Forward decl.
+class Platform;
 
-	/** @brief Platform service. Service that gives the engine an abstracted way to work with various OSes and 
-	 * File Systems they introduce. Wrapper around Platform class implementation
-	*/
-	class OPDELIB_EXPORT PlatformService : public ServiceImpl<PlatformService> {
-		public:
-			PlatformService(ServiceManager *manager, const std::string& name);
-			virtual ~PlatformService();
-			
-			/// @see Platform::getGlobalConfigPath
-			std::string getGlobalConfigPath() const;
-			
-			/// @see Platform::getUserConfigPath
-			std::string getUserConfigPath() const;
-			
-			/// @see Platform::getDirectorySeparator
-			std::string getDirectorySeparator() const;
-			
-		protected:
-			bool init();
-			void bootstrapFinished();
-			void shutdown();
-			
-		private:
-			Platform *mPlatform;
-	};
+/** @brief Platform service. Service that gives the engine an abstracted way to
+ * work with various OSes and File Systems they introduce. Wrapper around
+ * Platform class implementation
+ */
+class OPDELIB_EXPORT PlatformService : public ServiceImpl<PlatformService> {
+public:
+    PlatformService(ServiceManager *manager, const std::string &name);
+    virtual ~PlatformService();
 
-	/// Shared pointer to Platform service
-	typedef shared_ptr<PlatformService> PlatformServicePtr;
+    /// @see Platform::getGlobalConfigPath
+    std::string getGlobalConfigPath() const;
 
-	/// Factory for the PlatformService objects
-	class OPDELIB_EXPORT PlatformServiceFactory : public ServiceFactory {
-		public:
-			PlatformServiceFactory();
-			~PlatformServiceFactory() {};
+    /// @see Platform::getUserConfigPath
+    std::string getUserConfigPath() const;
 
-			/** Creates a PlatformService instance */
-			Service* createInstance(ServiceManager* manager);
+    /// @see Platform::getDirectorySeparator
+    std::string getDirectorySeparator() const;
 
-			virtual const std::string& getName();
+protected:
+    bool init();
+    void bootstrapFinished();
+    void shutdown();
 
-			virtual const uint getMask();
-			
-			virtual const size_t getSID();
-		private:
-			static std::string mName;
-	};
-}
+private:
+    Platform *mPlatform;
+};
 
+/// Shared pointer to Platform service
+typedef shared_ptr<PlatformService> PlatformServicePtr;
+
+/// Factory for the PlatformService objects
+class OPDELIB_EXPORT PlatformServiceFactory : public ServiceFactory {
+public:
+    PlatformServiceFactory();
+    ~PlatformServiceFactory(){};
+
+    /** Creates a PlatformService instance */
+    Service *createInstance(ServiceManager *manager);
+
+    virtual const std::string &getName();
+
+    virtual const uint getMask();
+
+    virtual const size_t getSID();
+
+private:
+    static std::string mName;
+};
+} // namespace Opde
 
 #endif

@@ -27,8 +27,7 @@
 #include <OgreQuaternion.h>
 
 namespace Opde {
-	typedef Ogre::Quaternion Quaternion;
+typedef Ogre::Quaternion Quaternion;
 }
 
 #endif
-

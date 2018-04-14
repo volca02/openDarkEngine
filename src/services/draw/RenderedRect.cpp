@@ -22,9 +22,9 @@
  *****************************************************************************/
 
 #include "RenderedRect.h"
-#include "DrawService.h"
 #include "DrawBuffer.h"
 #include "DrawCommon.h"
+#include "DrawService.h"
 
 using namespace Ogre;
 
@@ -33,8 +33,9 @@ namespace Opde {
 /*----------------------------------------------------*/
 /*-------------------- RenderedRect ------------------*/
 /*----------------------------------------------------*/
-RenderedRect::RenderedRect(DrawService* owner, DrawOperation::ID id, const TextureAtlasPtr& atlas) :
-    DrawOperation(owner, id), mAtlas(atlas) {
+RenderedRect::RenderedRect(DrawService *owner, DrawOperation::ID id,
+                           const TextureAtlasPtr &atlas)
+    : DrawOperation(owner, id), mAtlas(atlas) {
 
     mVertexColourDS = atlas->getVertexColourDrawSource();
 
@@ -55,12 +56,10 @@ RenderedRect::RenderedRect(DrawService* owner, DrawOperation::ID id, const Textu
 }
 
 //------------------------------------------------------
-RenderedRect::~RenderedRect() {
-    mVertexColourDS.reset();
-}
+RenderedRect::~RenderedRect() { mVertexColourDS.reset(); }
 
 //------------------------------------------------------
-void RenderedRect::visitDrawBuffer(DrawBuffer* db) {
+void RenderedRect::visitDrawBuffer(DrawBuffer *db) {
     // are we in the clip area?
     if (mInClip)
         db->_queueDrawQuad(&mDrawQuad);
@@ -77,7 +76,6 @@ void RenderedRect::setColour(const Ogre::ColourValue &col) {
     _markDirty();
 }
 
-
 //------------------------------------------------------
 void RenderedRect::setWidth(size_t width) {
     mPixelSize.width = width;
@@ -91,7 +89,7 @@ void RenderedRect::setHeight(size_t height) {
 }
 
 //------------------------------------------------------
-void RenderedRect::setSize(const PixelSize& size) {
+void RenderedRect::setSize(const PixelSize &size) {
     mPixelSize = size;
     _markDirty();
 }
@@ -103,13 +101,17 @@ void RenderedRect::_rebuild() {
     mDrawQuad.texCoords.top = mVertexColourDS->transformY(0);
     mDrawQuad.texCoords.bottom = mVertexColourDS->transformY(1.0f);
 
-    mDrawQuad.positions.left   = mActiveSheet->convertToScreenSpaceX(mPosition.first);
-    mDrawQuad.positions.right  = mActiveSheet->convertToScreenSpaceX(mPosition.first + mPixelSize.width);
-    mDrawQuad.positions.top    = mActiveSheet->convertToScreenSpaceY(mPosition.second);
-    mDrawQuad.positions.bottom = mActiveSheet->convertToScreenSpaceY(mPosition.second + mPixelSize.height);
+    mDrawQuad.positions.left =
+        mActiveSheet->convertToScreenSpaceX(mPosition.first);
+    mDrawQuad.positions.right =
+        mActiveSheet->convertToScreenSpaceX(mPosition.first + mPixelSize.width);
+    mDrawQuad.positions.top =
+        mActiveSheet->convertToScreenSpaceY(mPosition.second);
+    mDrawQuad.positions.bottom = mActiveSheet->convertToScreenSpaceY(
+        mPosition.second + mPixelSize.height);
     mDrawQuad.depth = mActiveSheet->convertToScreenSpaceZ(mZOrder);
 
     mInClip = mClipOnScreen.clip(mDrawQuad);
 }
 
-}
+} // namespace Opde

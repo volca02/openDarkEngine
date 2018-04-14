@@ -25,29 +25,32 @@
 #include "RenderedProperty.h"
 #include "RenderService.h"
 
-
 namespace Opde {
-	RenderedProperty::RenderedProperty(RenderService* rs, PropertyService* owner, const std::string& name, 
-			const std::string& chunk_name, std::string inheritorName) : 
-		ActiveProperty(owner, name, chunk_name,  inheritorName), mOwner(rs) {};
+RenderedProperty::RenderedProperty(RenderService *rs, PropertyService *owner,
+                                   const std::string &name,
+                                   const std::string &chunk_name,
+                                   std::string inheritorName)
+    : ActiveProperty(owner, name, chunk_name, inheritorName), mOwner(rs){};
 
-	EntityInfo* RenderedProperty::getEntityInfo(int oid) {
-		EntityInfo* ei = mOwner->_getEntityInfo(oid);
-		assert(ei);
+EntityInfo *RenderedProperty::getEntityInfo(int oid) {
+    EntityInfo *ei = mOwner->_getEntityInfo(oid);
+    assert(ei);
 
-		if (ei == NULL)
-			OPDE_EXCEPT("EntityInfo not found for object", "RenderedProperty::getEntityInfo");
+    if (ei == NULL)
+        OPDE_EXCEPT("EntityInfo not found for object",
+                    "RenderedProperty::getEntityInfo");
 
-		return ei;
-	};
-	
-	Ogre::SceneNode* RenderedProperty::getSceneNode(int oid) {
-		Ogre::SceneNode* sn = mOwner->getSceneNode(oid);
-		assert(sn);
-
-		if (sn == NULL)
-			OPDE_EXCEPT("SceneNode not found for object", "RenderedProperty::getSceneNode");
-
-		return sn;
-	};
+    return ei;
 };
+
+Ogre::SceneNode *RenderedProperty::getSceneNode(int oid) {
+    Ogre::SceneNode *sn = mOwner->getSceneNode(oid);
+    assert(sn);
+
+    if (sn == NULL)
+        OPDE_EXCEPT("SceneNode not found for object",
+                    "RenderedProperty::getSceneNode");
+
+    return sn;
+};
+}; // namespace Opde

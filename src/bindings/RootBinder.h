@@ -25,56 +25,58 @@
 #ifndef __ROOTBINDER_H
 #define __ROOTBINDER_H
 
-#include  "Root.h"
+#include "bindings.h"
+
+#include "Root.h"
 
 namespace Opde {
 
-	namespace Python {
+namespace Python {
 
-		/// Opde::Root python binder
-		class RootBinder : public class_ptr_binder<Opde::Root> {
-			public:
-				// --- Python type related methods ---
-				/// to string - reprfunc conversion
-				static PyObject* repr(PyObject *self);
+/// Opde::Root python binder
+class RootBinder : public class_ptr_binder<Opde::Root> {
+public:
+    // --- Python type related methods ---
+    /// to string - reprfunc conversion
+    static PyObject *repr(PyObject *self);
 
-				/// creates a python object representation of the Opde::Root object
-				static PyObject* create(Root* root);
+    /// creates a python object representation of the Opde::Root object
+    static PyObject *create(Root *root);
 
-				/// Initializes the opde.Root object (type)
-				static void init(PyObject* module);
+    /// Initializes the opde.Root object (type)
+    static void init(PyObject *module);
 
-				// methods:
-				static PyObject* loadResourceConfig(PyObject *self, PyObject* args);
-				static PyObject* loadDTypeScript(PyObject *self, PyObject* args);
-				static PyObject* loadPLDefScript(PyObject *self, PyObject* args);
-				static PyObject* loadConfigFile(PyObject *self, PyObject* args);
-				static PyObject* addResourceLocation(PyObject *self, PyObject* args);
-				static PyObject* removeResourceLocation(PyObject *self, PyObject* args);
+    // methods:
+    static PyObject *loadResourceConfig(PyObject *self, PyObject *args);
+    static PyObject *loadDTypeScript(PyObject *self, PyObject *args);
+    static PyObject *loadPLDefScript(PyObject *self, PyObject *args);
+    static PyObject *loadConfigFile(PyObject *self, PyObject *args);
+    static PyObject *addResourceLocation(PyObject *self, PyObject *args);
+    static PyObject *removeResourceLocation(PyObject *self, PyObject *args);
 
-				static PyObject* bootstrapFinished(PyObject *self, PyObject* args);
+    static PyObject *bootstrapFinished(PyObject *self, PyObject *args);
 
-				static PyObject* logToFile(PyObject *self, PyObject* args);
-				static PyObject* setLogLevel(PyObject *self, PyObject* args);
+    static PyObject *logToFile(PyObject *self, PyObject *args);
+    static PyObject *setLogLevel(PyObject *self, PyObject *args);
 
-				static PyObject* registerCustomScriptLoaders(PyObject *self, PyObject* args);
+    static PyObject *registerCustomScriptLoaders(PyObject *self,
+                                                 PyObject *args);
 
+    /* TODO: Need bindings written first
+    static PyObject* getLogger(PyObject *self, PyObject* args);
+    static PyObject* getServiceManager(PyObject *self, PyObject* args);
+    */
 
-				/* TODO: Need bindings written first
-				static PyObject* getLogger(PyObject *self, PyObject* args);
-				static PyObject* getServiceManager(PyObject *self, PyObject* args);
-				*/
+protected:
+    static PyTypeObject msType;
 
-			protected:
-				static PyTypeObject msType;
+    /// Name of the python type
+    static const char *msName;
 
-				/// Name of the python type
-				static const char* msName;
-
-				/// Method list
-				static PyMethodDef msMethods[];
-		};
-	}
-}
+    /// Method list
+    static PyMethodDef msMethods[];
+};
+} // namespace Python
+} // namespace Opde
 
 #endif
