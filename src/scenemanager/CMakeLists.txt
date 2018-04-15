@@ -1,6 +1,7 @@
 include_directories(
     ${OGRE_INCLUDE_DIR}
     ${OPDE_BINARY_DIR}
+    ${OPDE_SOURCE_DIR}/src/base
 )
 
 link_directories (

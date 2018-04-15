@@ -49,7 +49,7 @@ namespace Ogre {
  * bounding rectangle. It is ment as a Ogre::Rect replacement, because that one
  * uses Real as a base type, which is slower to use
  */
-struct OPDELIB_EXPORT PortalRect {
+struct PortalRect {
     /// Static screen width size half
     static int sScreenWidth2;
     /// Static screen height size half
@@ -249,19 +249,11 @@ typedef Ogre::PolygonPoints PortalPoints;
  * @note Please note that the direction of the plane's normal has to comply with
  * the portals vertex order derived normal. Also note that no check that the
  * points actualy lie on the plane is done. */
-class OPDELIB_EXPORT Portal
-    : public ConvexPolygon { // , public SimpleRenderable
+class Portal : public ConvexPolygon {
     friend class DarkCamera;
     friend class PortalFrustum;
 
 protected:
-    /* The SimpleRenderable methods override. */
-    void getWorldTransforms(Matrix4 *xform) const;
-    const Quaternion &getWorldOrientation(void) const;
-    const Vector3 &getWorldPosition(void) const;
-
-    void refreshPortalRenderable();
-
     /** Unique portal id */
     unsigned int mID;
 
@@ -306,6 +298,9 @@ public:
     /** Copy ctor */
     Portal(const Portal &src);
 
+    /** Move ctor */
+    Portal(Portal &&src);
+
     /** Returns the target DarkSceneNode for this portal */
     BspNode *getTarget() const;
 
@@ -317,7 +312,7 @@ public:
 
     /** Returns true if the portal is backface-culled for viewer on position pos
      */
-    bool isBackfaceCulledFor(Vector3 pos) {
+    bool isBackfaceCulledFor(Vector3 pos) const {
         Vector3 pos2p = mPoints[0] - pos;
 
         float dotp = pos2p.dotProduct(mPlane.normal);
@@ -326,7 +321,7 @@ public:
     }
 
     /** Returns a distance this portal has from a given point */
-    Real getDistanceFrom(Vector3 pos) {
+    Real getDistanceFrom(Vector3 pos) const {
         Vector3 diff = (pos - mCenter);
         return diff.length();
     }

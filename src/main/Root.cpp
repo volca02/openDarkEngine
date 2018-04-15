@@ -63,6 +63,7 @@
 #include "ProxyArchive.h"
 #include "logger.h"
 #include "stdlog.h"
+#include "tracer.h"
 
 namespace Opde {
 // -------------------------------------------------------

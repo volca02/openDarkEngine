@@ -156,8 +156,8 @@ public:
     }
 
     /** refreshes the maximal allocatable area for this node/leaf.
-    Non-leaf nodes get the maximum as the maximum of the areas of the children
-  */
+        Non-leaf nodes get the maximum as the maximum of the areas of the children
+    */
     void refreshMaxArea() {
         if (mIsLeaf) {
             mMaxArea = w * h;

@@ -49,7 +49,7 @@ const PortalRect PortalRect::SCREEN = PortalRect(0, 1024, 0, 768);
 int PortalRect::sScreenWidth2 = 512;
 int PortalRect::sScreenHeight2 = 384;
 
-// ---------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 std::ostream &operator<<(std::ostream &o, PortalRect &r) {
     o << "RECT [top:" << r.top << ", left:" << r.left
       << ", bottom: " << r.bottom << ", right:" << r.right << "]";
@@ -65,14 +65,14 @@ void ScreenRectCache::startUpdate(DarkSceneManager *sm, unsigned int update) {
     updateID = update;
 }
 
-// ---------------------------------------------------------------------------------
-// ----------------- Portal Class implementation
-// -----------------------------------
-// ---------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// ----------------- Portal Class implementation -------------------------------
+// -----------------------------------------------------------------------------
 
-// ---------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 Portal::Portal(unsigned int id, BspNode *source, BspNode *target, Plane plane)
-    : mID(id), ConvexPolygon(plane) {
+    : ConvexPolygon(plane), mID(id), mMentions(0)
+{
     mMentions = 0;
 
     mSource = source;
@@ -86,76 +86,46 @@ Portal::Portal(unsigned int id, BspNode *source, BspNode *target, Plane plane)
     // though) mRenderOp.vertexData = NULL;
 }
 
-// ---------------------------------------------------------------------------------
-Portal::~Portal() {
+// -----------------------------------------------------------------------------
+Portal::~Portal()
+{
     /*if (mRenderOp.vertexData)
             delete mRenderOp.vertexData;*/
 
     detach();
 }
 
-// ---------------------------------------------------------------------------------
-Portal::Portal(const Portal &src) : ConvexPolygon(src) {
+// -----------------------------------------------------------------------------
+Portal::Portal(const Portal &src) : ConvexPolygon(src)
+{
     this->mTarget = src.getTarget();
     this->mSource = src.getSource();
 }
 
-// ---------------------------------------------------------------------------------
-BspNode *Portal::getTarget() const { return mTarget; }
-
-// ---------------------------------------------------------------------------------
-BspNode *Portal::getSource() const { return mSource; }
-
-// ---------------------------------------------------------------------------------
-void Portal::refreshPortalRenderable() {
-    // delete the previous
-    /*		if (mRenderOp.vertexData)
-                            delete mRenderOp.vertexData;
-
-                    mRenderOp.vertexData = new VertexData();
-
-                    mRenderOp.indexData = 0;
-                    mRenderOp.vertexData->vertexCount = mPoints.size() + 1;
-                    mRenderOp.vertexData->vertexStart = 0;
-                    mRenderOp.operationType = RenderOperation::OT_LINE_LIST;
-                    mRenderOp.useIndexes = false;
-
-                    VertexDeclaration* decl =
-       mRenderOp.vertexData->vertexDeclaration; VertexBufferBinding* bind =
-       mRenderOp.vertexData->vertexBufferBinding;
-
-                    decl->addElement(POSITION_BINDING, 0, VET_FLOAT3,
-       VES_POSITION);
-
-
-                    HardwareVertexBufferSharedPtr vbuf =
-                            HardwareBufferManager::getSingleton().createVertexBuffer(
-                            decl->getVertexSize(POSITION_BINDING),
-                            mRenderOp.vertexData->vertexCount,
-                            HardwareBuffer::HBU_STATIC_WRITE_ONLY);
-
-                    // Bind buffer
-                    bind->setBinding(POSITION_BINDING, vbuf);
-
-                    // set basic white material
-                    this->setMaterial("BaseWhiteNoLighting");
-
-                    float* pPos =
-       static_cast<float*>(vbuf->lock(HardwareBuffer::HBL_DISCARD));
-
-                    // Throw in the vertices (no. 0 goes twice - 1. and last)
-                    for (unsigned int x = 0; x <= mPoints.size(); x++) {
-                            Vector3 v = mPoints.at(x % mPoints.size());
-                            (*pPos++) = v.x;
-                            (*pPos++) = v.y;
-                            (*pPos++) = v.z;
-                    }
-
-                    vbuf->unlock();
-                    */
+/** Move ctor */
+Portal::Portal(Portal &&src)
+    : ConvexPolygon(std::move(src))
+{
+    mID = src.mID;
+    mMovableObject = src.mMovableObject;
+    mTarget = src.mTarget;
+    mSource = src.mSource;
+    mFrameNum = src.mFrameNum;
+    mPortalID = src.mPortalID;
+    mPortalCull = src.mPortalCull;
+    mMentions = src.mMentions;
+    mCenter = src.mCenter;
+    mRadius = src.mRadius;
 }
 
-// ---------------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+BspNode *Portal::getTarget() const { return mTarget; }
+
+// -----------------------------------------------------------------------------
+BspNode *Portal::getSource() const { return mSource; }
+
+// -----------------------------------------------------------------------------
 void Portal::refreshBoundingVolume() {
 
     unsigned int pointcount = mPoints.size();
@@ -187,53 +157,38 @@ void Portal::refreshBoundingVolume() {
     }
 
     mRadius = sqrt(radius);
-
-    // Refresh the portal renderable too.
-    refreshPortalRenderable();
 }
 
-// ---------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 void Portal::setPortalID(int id) { mPortalID = id; }
 
-// ---------------------------------------------------------------------------------
-void Portal::attach() {
+// -----------------------------------------------------------------------------
+void Portal::attach()
+{
     mSource->attachOutgoingPortal(this);
     mTarget->attachIncommingPortal(this);
 }
 
-// ---------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 void Portal::detach() {
     mSource->detachPortal(this);
     mTarget->detachPortal(this);
 }
 
-// ---------------------------------------------------------------------------------
-void Portal::getWorldTransforms(Matrix4 *xform) const {
-    // return identity matrix to prevent parent transforms
-    *xform = Matrix4::IDENTITY;
-}
-
-// ---------------------------------------------------------------------------------
-const Quaternion &Portal::getWorldOrientation(void) const {
-    return Quaternion::IDENTITY;
-}
-
-// ---------------------------------------------------------------------------------
-const Vector3 &Portal::getWorldPosition(void) const { return Vector3::ZERO; }
-
-// ---------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 Real Portal::getSquaredViewDepth(const Camera *cam) const {
     Vector3 dist = cam->getDerivedPosition() - mCenter;
 
     return dist.squaredLength();
 }
 
-// ---------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 Real Portal::getBoundingRadius(void) const { return mRadius; }
 
-// ---------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 bool Portal::refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
-                               const Matrix4 &toScreen, const Plane &cutp) {
+                               const Matrix4 &toScreen, const Plane &cutp)
+{
     // modified version of the ConvexPolygon::clipByPlane which does two things
     // at once: cuts by the specified plane, and projects the result to screen
     // (then, updates the rect to contain this point)
@@ -341,7 +296,8 @@ bool Portal::refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
 
 void Portal::refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
                                const Matrix4 &toScreen,
-                               const PortalFrustum &frust) {
+                               const PortalFrustum &frust)
+{
     PortalRectInfo &pi = rects.portal(getID());
     pi.invalidate();
 
@@ -355,6 +311,7 @@ void Portal::refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
     if (pi.portalCull)
         return;
 
+
     // We also can cull away the portal if it is behind the camera's near plane.
     // Can we? This needs distance calculation with the surrounding sphere
 
@@ -365,28 +322,41 @@ void Portal::refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
     // camera's plane (not near plane, too far away, just the plane that comes
     // throught the camera's origin and has normal == view vector of camera)
 
-    bool didc;
+    int cl = frust.getPortalClassification(*this);
 
-    Portal *onScreen = frust.clipPortal(this, didc);
+    // no onscreen
+    if (cl == -1)
+        return;
+
+    // all onscreen
+    if (cl == 1) {
+        for (const auto &point : mPoints) {
+            // This is one time-consuming line... I wonder how big eater this
+            // line is.
+            Vector3 hcsPosition = toScreen * point;
+            pi.screenRect.enlargeToContain(hcsPosition);
+        }
+
+        return;
+    }
+
+    // NOTE: This is a bit costly, but it's only done once per frame/camera
+    // most of the other portal projections use the other method with cut plane
+
+    // need to clip. Costly...
+    auto onScreen = frust.clipPortal(*this);
 
     // If we have a non-zero cut result
     if (onScreen) {
         const PortalPoints &scr_points = onScreen->getPoints();
 
-        PortalPoints::const_iterator it = scr_points.begin();
-        PortalPoints::const_iterator pend = scr_points.end();
         // project all the vertices to screen space
-        for (; it != pend; it++) {
+        for (const auto &point : scr_points) {
             // This is one time-consuming line... I wonder how big eater this
             // line is.
-            Vector3 hcsPosition = toScreen * (*it);
-
+            Vector3 hcsPosition = toScreen * point;
             pi.screenRect.enlargeToContain(hcsPosition);
         }
-
-        // release only if clip produced a new poly
-        if (onScreen != this)
-            delete onScreen;
     }
 }
 

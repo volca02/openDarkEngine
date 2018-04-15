@@ -31,6 +31,9 @@
 #include "DarkSceneNode.h"
 #include "OgreIteratorWrappers.h"
 
+#include "tracer.h"
+
+
 #include <OgreEntity.h>
 #include <OgreRoot.h>
 #include <OgreTimer.h>
@@ -134,6 +137,7 @@ Portal *DarkSceneManager::createPortal(int srcLeafID, int dstLeafID,
 
 // ----------------------------------------------------------------------
 void DarkSceneManager::_updateSceneGraph(Camera *cam) {
+    TRACE_METHOD;
     // The cam should be updated with the current cell list
     // TODO: Specialize here. Only update the part of the world visible by the
     // camera
@@ -231,6 +235,8 @@ void DarkSceneManager::_notifyObjectDetached(const MovableObject *mov) {
 void DarkSceneManager::_findVisibleObjects(
     Camera *cam, VisibleObjectsBoundsInfo *visibleBounds,
     bool onlyShadowCasters) {
+
+    TRACE_METHOD;
     unsigned long startt = Root::getSingleton().getTimer()->getMilliseconds();
 
     // Clear the render queue first
@@ -252,13 +258,9 @@ void DarkSceneManager::_findVisibleObjects(
 
     // clear the current visibility list
     DarkCamera *dcam = static_cast<DarkCamera *>(cam);
-    BspNodeList::iterator it = dcam->mVisibleCells.begin();
-    BspNodeList::iterator end = dcam->mVisibleCells.end();
 
     // Insert all movables that are visible according to the parameters
-    while (it != end) {
-        BspNode *node = *(it++);
-
+    for (BspNode *node : dcam->mVisibleCells) {
         // insert the movables of this cell to the movables for rendering
         const BspNode::IntersectingObjectSet &objects = node->getObjects();
         BspNode::IntersectingObjectSet::const_iterator oi, oiend;
@@ -362,6 +364,7 @@ void DarkSceneManager::queueLightForUpdate(Light *l) {
 
 //-----------------------------------------------------------------------
 void DarkSceneManager::_queueLightForUpdate(Light *l) {
+    TRACE_METHOD;
     mLightsForUpdate.insert(static_cast<DarkLight *>(l));
 }
 
@@ -381,6 +384,7 @@ void DarkSceneManager::destroyAllGeometries(void) {
 
 //-----------------------------------------------------------------------
 void DarkSceneManager::updateDirtyLights() {
+    TRACE_METHOD;
     LightSet::iterator it = mLightsForUpdate.begin();
     LightSet::iterator end = mLightsForUpdate.end();
 
@@ -395,6 +399,7 @@ void DarkSceneManager::updateDirtyLights() {
 
 //-----------------------------------------------------------------------
 void DarkSceneManager::findLightsAffectingFrustum(const Camera *camera) {
+    TRACE_METHOD;
     unsigned long startt = Root::getSingleton().getTimer()->getMilliseconds();
 
     // Collect lights from visible cells
@@ -412,16 +417,11 @@ void DarkSceneManager::findLightsAffectingFrustum(const Camera *camera) {
     }
 
     // Transfer into mTestLightInfos
-    std::set<Light *>::iterator lit = lightSet.begin();
-    std::set<Light *>::iterator lend = lightSet.end();
-
     mTestLightInfos.clear();
     mTestLightInfos.reserve(lightSet.size());
 
-    while (lit != lend) {
+    for (Light *light: lightSet) {
         LightInfo lightInfo;
-
-        Light *light = *(lit++);
 
         lightInfo.light = light;
         lightInfo.type = light->getType();
@@ -505,6 +505,7 @@ void DarkSceneManager::findLightsAffectingFrustum(const Camera *camera) {
 //-----------------------------------------------------------------------
 void DarkSceneManager::_populateLightList(const Vector3 &position, Real radius,
                                           LightList &destList) {
+    TRACE_METHOD;
     /* It's a pity we don't get a movable object here,
     since that would mean we'd save one BSP tree traversal per MovableObject
     light list population.

@@ -31,6 +31,8 @@ add_library (OpdeBase OBJECT
     Quaternion.h
     SharedPtr.h
     StringTokenizer.h
+    tracer.cpp
+    tracer.h
     ValueChangeRequest.h
     Vector2.h
     Vector3.h

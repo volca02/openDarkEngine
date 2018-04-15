@@ -30,6 +30,8 @@
 #include "OgreRoot.h"
 #include "OgreTimer.h"
 
+#include "tracer.h"
+
 namespace Ogre {
 
 // ----------------------------------------------------------------------
@@ -73,6 +75,8 @@ const BspNodeList &DarkCamera::_getVisibleNodes(void) const {
 
 // ----------------------------------------------------------------------
 void DarkCamera::updateVisibleCellList() const {
+    TRACE_METHOD;
+
     unsigned long startTime =
         Root::getSingleton().getTimer()->getMilliseconds();
 
@@ -126,6 +130,7 @@ void DarkCamera::updateVisibleCellList() const {
     mVisibleCells.clear();
     mVisibleCells.push_back(root);
 
+    TRACE_SCOPE_OBJ(CELL_ITER, this);
     while (finishedCells < cell_queue.size()) {
         BspNode *cell = cell_queue[finishedCells++];
 
@@ -138,14 +143,10 @@ void DarkCamera::updateVisibleCellList() const {
         // (Re-)evaluate the vision through all portals. If some of those
         // changed, add the cells to the queue (or move those to top if already
         // present)
-        BspNode::PortalIterator pi = cell->outPortalBegin();
-        BspNode::PortalIterator pend = cell->outPortalEnd();
 
         CellRectInfo &ci(mRects.cell(cell->getID()));
 
-        while (pi != pend) { // for all portals
-            const Portal *p = *(pi++);
-
+        for (const Portal * p : cell->outPortals()) { // for all portals
             PortalRectInfo &pinfo(mRects.portal(p->getID()));
 
             // Backface cull

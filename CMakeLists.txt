@@ -61,6 +61,11 @@ OPTION(PROFILING
     "Build the sources with profiling support (Only Debug build type)"
     OFF)
 
+# Option to build in the debugging code
+OPTION(FRAME_PROFILER
+    "Build in support for frame profiling (will log frame profiling events)"
+    OFF)
+
 # Option to build all the libs as static (defunct - linking problems)
 # OPTION(STATIC_LIBS
 #    "Build the libs as static (defunct)"

@@ -5,6 +5,8 @@
 
 #cmakedefine OPDE_DEBUG
 
+#cmakedefine FRAME_PROFILER
+
 #define OPDE_VER_MAJOR ${OPDE_VER_MAJOR}
 #define OPDE_VER_MINOR ${OPDE_VER_MINOR}
 #define OPDE_VER_PATCH ${OPDE_VER_PATCH}

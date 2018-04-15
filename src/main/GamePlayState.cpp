@@ -304,15 +304,6 @@ void GamePlayState::update(unsigned long timePassed) {
         mSceneDisplay = false;
     }
 
-    if (mPortalDisplay) {
-        // reuse
-        mSceneMgr->getOption("ShowPortals", &mPortalDisplay);
-        mPortalDisplay = !mPortalDisplay;
-        mSceneMgr->setOption("ShowPortals", &mPortalDisplay);
-
-        mPortalDisplay = false;
-    }
-
     if (mScreenShot) {
         char tmp[20];
         sprintf(tmp, "screenshot_%d.png", ++mNumScreenShots);
@@ -321,22 +312,6 @@ void GamePlayState::update(unsigned long timePassed) {
         w->writeContentsToFile(tmp);
 
         mScreenShot = false;
-    }
-
-    // mConsole->update(timePassed);
-
-    if (mDebug) {
-        // update stats when necessary
-        try {
-        } catch (...) {
-            // ignore
-        }
-
-        // update the portal statistics
-        try {
-        } catch (...) {
-            // ignore
-        }
     }
 }
 
@@ -359,11 +334,8 @@ bool GamePlayState::keyPressed(const SDL_KeyboardEvent &e) {
     } else if (e.keysym.sym == SDLK_o) {
         mSceneDisplay = true;
         return true;
-    } else if (e.keysym.sym == SDLK_p) {
-        mPortalDisplay = true;
-        return true;
-    } else
-        return true;
+    } 
+    return true;
 }
 
 bool GamePlayState::keyReleased(const SDL_KeyboardEvent &e) {

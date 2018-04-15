@@ -51,7 +51,7 @@ private:
 public:
     // construct a new Frustum out of a camera and a Portal (which has been
     // clipped as needed previously)
-    PortalFrustum(const Camera *cam, Portal *poly);
+    PortalFrustum(const Camera *cam, const Portal &poly);
 
     // new frustum, based solely on camera... This is the variant we use to
     // start rendering... each portal is then rendered using frustum constructed
@@ -60,7 +60,7 @@ public:
 
     // Constructs the portalfrustum from a positional point and a portal to look
     // through
-    PortalFrustum(const Vector3 &point, Portal *poly);
+    PortalFrustum(const Vector3 &point, const Portal &poly);
 
     // Constructs an N sided portal frustum as an aproximation of cone with
     // inner angle ang
@@ -77,14 +77,15 @@ public:
                      0 intersects
                      1 all inside
     */
-    int getPortalClassification(Portal *src) const;
+    int getPortalClassification(const Portal &src) const;
 
     /**
      * Clips the ginven Portal by frustum planes.
      * returns a Portal pointer (not necesi necessarily an new one), or NULL if
      * clipped away
      */
-    Portal *clipPortal(Portal *src, bool &didClip) const;
+    std::unique_ptr<Portal> clipPortal(const Portal &src) const;
+
 };
 
 } // namespace Ogre

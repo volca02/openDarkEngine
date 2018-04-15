@@ -33,9 +33,9 @@ namespace Ogre {
 /*---------------------------------------------------------*/
 // construct a new Frustum out of a camera and a Portal (which has been clipped
 // as needed previously)
-PortalFrustum::PortalFrustum(const Camera *cam, Portal *poly) {
+PortalFrustum::PortalFrustum(const Camera *cam, const Portal &poly) {
     // we create a new frustum planes using a 3*Vector3 constructor
-    const PortalPoints &pnts = poly->getPoints();
+    const PortalPoints &pnts = poly.getPoints();
 
     if (pnts.size() < 3)
         // we have a degenerated poly!!!
@@ -46,24 +46,22 @@ PortalFrustum::PortalFrustum(const Camera *cam, Portal *poly) {
     planes.clear();
 
     // should we check whether the normal is faced to the center of the poly?
-    PortalPoints::const_iterator previous = pnts.end()--;
+    PortalPoints::const_iterator endpt = pnts.end();
+    auto prev = *--endpt;
 
-    PortalPoints::const_iterator it = pnts.begin();
-    PortalPoints::const_iterator pend = pnts.end();
-
-    for (; it != pend; it++) {
+    for (const auto &point : pnts) {
         Plane plane;
 
-        plane.redefine(*previous, *it,
-                       cam_pos); // Dunno why, the constructor was failing to
-                                 // intialize the values directly...
+        // Dunno why, the constructor was failing to
+        // intialize the values directly...
+        plane.redefine(prev, point, cam_pos);
 
         planes.push_back(plane);
-        previous = it;
+        prev = point;
     }
 
     // add the poly's self plane as well (near plane, sort of)
-    planes.push_back(poly->getPlane());
+    planes.push_back(poly.getPlane());
 }
 
 /*---------------------------------------------------------*/
@@ -79,9 +77,9 @@ PortalFrustum::PortalFrustum(const Camera *cam) {
 }
 
 /*---------------------------------------------------------*/
-PortalFrustum::PortalFrustum(const Vector3 &point, Portal *poly) {
+PortalFrustum::PortalFrustum(const Vector3 &point, const Portal &poly) {
     // we create a new frustum planes using a 3*Vector3 constructor
-    const PortalPoints &pnts = poly->getPoints();
+    const PortalPoints &pnts = poly.getPoints();
 
     if (pnts.size() < 3)
         // we have a degenerated poly!!!
@@ -90,20 +88,16 @@ PortalFrustum::PortalFrustum(const Vector3 &point, Portal *poly) {
     planes.clear();
 
     // should we check whether the normal is faced to the center of the poly?
-    PortalPoints::const_iterator previous = pnts.end();
+    PortalPoints::const_iterator endpt = pnts.end();
+    auto prev = *--endpt;
 
-    --previous;
-
-    PortalPoints::const_iterator it = pnts.begin();
-    PortalPoints::const_iterator pend = pnts.end();
-
-    for (; it != pend; it++) {
+    for (const auto &point : pnts) {
         Plane plane;
 
-        plane.redefine(*previous, *it, point);
+        plane.redefine(prev, point, point);
 
         planes.push_back(plane);
-        previous = it;
+        prev = point;
     }
 }
 /*---------------------------------------------------------*/
@@ -156,19 +150,16 @@ void PortalFrustum::addPlane(const Plane &a) { planes.push_back(a); }
 const FrustumPlanes &PortalFrustum::getPlanes() const { return planes; }
 
 /*---------------------------------------------------------*/
-int PortalFrustum::getPortalClassification(Portal *src) const {
+int PortalFrustum::getPortalClassification(const Portal &src) const {
     // test the absolute distance of the Portal center to each plane.
     // if it is equal or smaller than radius, we intersect
     // otherwise if the distance is below zero, we are away, then end up
     // immedietally telling so
-    const Vector3 center = src->mCenter;
-    float radius = src->mRadius;
+    const Vector3 center = src.mCenter;
+    float radius = src.mRadius;
 
-    FrustumPlanes::const_iterator it = planes.begin();
-    FrustumPlanes::const_iterator pend = planes.end();
-
-    for (; it != pend; it++) {
-        float dist = it->getDistance(center);
+    for (const auto &plane : planes) {
+        float dist = plane.getDistance(center);
 
         if (fabs(dist) < radius) // intersection
             return 0;
@@ -182,33 +173,31 @@ int PortalFrustum::getPortalClassification(Portal *src) const {
 }
 
 /*---------------------------------------------------------*/
-Portal *PortalFrustum::clipPortal(Portal *src, bool &didClip) const {
+std::unique_ptr<Portal> PortalFrustum::clipPortal(const Portal &src) const {
     // todo: test if the bounding box (sphere) is completely: inside/outside, or
     // intersecting. todo: only clip the poly if intersecting.
 
     int cl = getPortalClassification(src);
 
+    std::unique_ptr<Portal> new_poly(new Portal(src));
+
     if (cl == 1) // all inside
-        return src;
+        return new_poly;
 
     if (cl == -1) // all outside
-        return NULL;
-
-    Portal *new_poly = new Portal(*src);
+        return nullptr;
 
     // The poly intersects with its bounding volume, so clip it using all planes
     // we have
-    FrustumPlanes::const_iterator it = planes.begin();
-    FrustumPlanes::const_iterator pend = planes.end();
-
-    for (; it != pend; it++) {
-        if (new_poly->clipByPlane(*it, didClip) <= 2) {
+    for (const auto &plane : planes) {
+        bool ignore;
+        if (new_poly->clipByPlane(plane, ignore) <= 2) {
             // was totally clipped away
-            delete new_poly;
-            return NULL;
+            return nullptr;
         }
     }
 
     return new_poly;
 }
+
 } // namespace Ogre

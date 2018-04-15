@@ -27,6 +27,8 @@
 #include "DarkBspTree.h"
 #include "DarkSceneManager.h"
 
+#include "tracer.h"
+
 namespace Ogre {
 
 // -----------------------------------------------------------
@@ -62,6 +64,7 @@ void DarkLight::_notifyAttached(Node *parent, bool isTagPoint) {
 
 // -----------------------------------------------------------
 void DarkLight::_updateAffectedCells(void) {
+    TRACE_METHOD;
     // Because there is no way that would inform us about a change of
     // parameters, I just ignore
     if (!mNeedsUpdate)
@@ -107,9 +110,6 @@ void DarkLight::_updateAffectedCells(void) {
             // traverse with that frustum
             Real rad = getAttenuationRange();
 
-            BspNode::PortalIterator pit = rootNode->outPortalBegin();
-            BspNode::PortalIterator pend = rootNode->outPortalEnd();
-
             PortalFrustum *slf = NULL;
 
             // Create a frustum for the spotlight (Reduces the portals which are
@@ -120,40 +120,35 @@ void DarkLight::_updateAffectedCells(void) {
                                         getSpotlightOuterAngle(), 4);
             }
 
-            for (; pit != pend; ++pit) {
+            for (const Portal *p : rootNode->outPortals()) {
                 // Backface cull...
-                if ((*pit)->isBackfaceCulledFor(position))
+                if (p->isBackfaceCulledFor(position))
                     continue;
 
-                if ((*pit)->getDistanceFrom(position) > rad && rad > 0)
+                if (p->getDistanceFrom(position) > rad && rad > 0)
                     continue;
 
                 // TODO: Create a test mission that shows off if the cone is
                 // detected right (N portals, one in spotlight's cone)
                 if (lt == Light::LT_SPOTLIGHT) {
                     // Spotlight...
-                    bool didc = false;
-
                     // Cut the portal with the Spotlight's frustum
-                    Portal *cut = slf->clipPortal(*pit, didc);
+                    std::unique_ptr<Portal> cut(slf->clipPortal(*p));
 
-                    if (cut != NULL) {
+                    if (cut) {
                         // create a portalFrustum to traverse with
                         // For spotlight, it covers the intersection of the
                         // light's aproximated cone and the portal
-                        PortalFrustum f = PortalFrustum(position, cut);
+                        PortalFrustum f = PortalFrustum(position, *cut);
 
-                        _traversePortalTree(f, cut, rootNode, 0);
-
-                        if (didc)
-                            delete cut;
+                        _traversePortalTree(f, cut.get(), rootNode, 0);
                     }
                 } else {
                     // create a portalFrustum to traverse with
                     // For POINT light, it covers the whole portal
-                    PortalFrustum f = PortalFrustum(position, *pit);
+                    PortalFrustum f = PortalFrustum(position, *p);
 
-                    _traversePortalTree(f, *pit, rootNode, 0);
+                    _traversePortalTree(f, p, rootNode, 0);
                 }
             }
 
@@ -193,8 +188,9 @@ void DarkLight::affectsCell(BspNode *leaf) {
 }
 
 // -----------------------------------------------------------
-void DarkLight::_traversePortalTree(PortalFrustum &frust, Portal *p,
+void DarkLight::_traversePortalTree(PortalFrustum &frust, const Portal *p,
                                     BspNode *srcCell, Real dist) {
+    TRACE_METHOD;
     BspNode *tgt = p->getTarget();
     Vector3 pos = getDerivedPosition();
     Real radius = getAttenuationRange();
@@ -202,15 +198,12 @@ void DarkLight::_traversePortalTree(PortalFrustum &frust, Portal *p,
     if (tgt != NULL) {
         mAffectedCells.insert(tgt);
 
-        BspNode::PortalIterator pit = tgt->outPortalBegin();
-        BspNode::PortalIterator pend = tgt->outPortalEnd();
-
-        for (; pit != pend; ++pit) {
+        for (const Portal *p : tgt->outPortals()) {
             // If facing towards the light
-            if ((*pit)->isBackfaceCulledFor(pos))
+            if (p->isBackfaceCulledFor(pos))
                 continue;
 
-            Real cdist = (*pit)->getDistanceFrom(pos);
+            Real cdist = p->getDistanceFrom(pos);
 
             if (cdist < 0)
                 continue;
@@ -223,24 +216,19 @@ void DarkLight::_traversePortalTree(PortalFrustum &frust, Portal *p,
                 continue;
 
             // and not going back to the source cell (X->n->X traversal)
-            if (srcCell == (*pit)->getTarget())
+            if (srcCell == p->getTarget())
                 continue;
-
-            bool didc = false;
 
             // TODO: The frustum could be constructable directly from frustum
             // and portal This would mean no additional needed steps besides
             // constructing a new frustum
-            Portal *cut = frust.clipPortal(*pit, didc);
+            std::unique_ptr<Portal> cut(frust.clipPortal(*p));
 
-            if (cut != NULL) {
+            if (cut) {
                 // create a portalFrustum to traverse with
-                PortalFrustum f = PortalFrustum(pos, cut);
+                PortalFrustum f = PortalFrustum(pos, *cut);
 
-                _traversePortalTree(f, *pit, tgt, cdist);
-
-                if (didc)
-                    delete cut;
+                _traversePortalTree(f, p, tgt, cdist);
             }
         }
     }

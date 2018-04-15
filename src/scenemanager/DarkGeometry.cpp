@@ -122,13 +122,9 @@ void DarkGeometry::updateFromCamera(const DarkCamera *cam) {
 
     for (; nit != endit; ++nit) {
         BspNode *node = *nit;
+
         /// add dynamic lights from the leaf to our light list
-        BspNode::LightIterator lit = node->dynamicLightsBegin();
-        BspNode::LightIterator lend = node->dynamicLightsEnd();
-
-        while (lit != lend) {
-            Light *l = *lit++;
-
+        for (Light *l : node->dynamicLights()) {
             // if it is new to the set, insert into list
             if (slights.insert(l).second)
                 mLightList.push_back(l);

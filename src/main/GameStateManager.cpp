@@ -50,6 +50,8 @@
 
 #include "ProxyArchive.h"
 
+#include "tracer.h"
+
 #include <OgreConfigFile.h>
 #include <OgreRoot.h>
 #include <OgreWindowEventUtilities.h>
@@ -195,8 +197,8 @@ bool GameStateManager::run() {
 
     // TODO: Remove this temporary nonsense. In fact. Remove the whole class
     // this method is in!
-    GamePlayState *ps = new GamePlayState();
-    GameLoadState *ls = new GameLoadState();
+    std::unique_ptr<GamePlayState> ps(new GamePlayState());
+    std::unique_ptr<GameLoadState> ls(new GameLoadState());
 
     // Set default mipmap level (NB some APIs ignore this)
     TextureManager::getSingleton().setDefaultNumMipmaps(5);
@@ -240,7 +242,7 @@ bool GameStateManager::run() {
     LOG_INFO("GameStateManager: State");
 
     // Push the initial state
-    pushState(ls);
+    pushState(ls.get());
 
     // Run the game loop
     // Main while-loop
@@ -248,9 +250,14 @@ bool GameStateManager::run() {
 
     Timer *timer = mOgreRoot->getTimer();
 
+    std::unique_ptr<Opde::Tracer> tracer(new Opde::Tracer(timer));
+
 #warning TODO: Replace this code with propper loop manager code.
 
     while (!mTerminate) {
+        TRACE_POINT(FRAME_START);
+        TRACE_FRAME_BEGIN;
+
         // Calculate time since last frame and remember current time for next
         // frame
         mTimeLastFrame = lTimeCurrentFrame;
@@ -260,17 +267,29 @@ bool GameStateManager::run() {
         if (lTimeCurrentFrame > mTimeLastFrame)
             lTimeSinceLastFrame = lTimeCurrentFrame - mTimeLastFrame;
 
-        // manually pull input events
-        mInputService->pollEvents(lTimeSinceLastFrame / 1000000.0f);
+        {
+            TRACE_SCOPE(INPUT_HANDLING);
+            // manually pull input events
+            mInputService->pollEvents(lTimeSinceLastFrame / 1000000.0f);
+        }
 
-        // Update current state
-        mStateStack.top()->update(lTimeSinceLastFrame);
+        {
+            TRACE_SCOPE(STATE_UPDATE);
+            // Update current state
+            mStateStack.top()->update(lTimeSinceLastFrame);
+        }
 
-        // Render next frame
-        mOgreRoot->renderOneFrame();
+        {
+            TRACE_SCOPE(RENDER_ONE_FRAME);
+            // Render next frame
+            mOgreRoot->renderOneFrame();
+        }
 
-        // Deal with platform specific issues
-        Ogre::WindowEventUtilities::messagePump();
+        {
+            TRACE_SCOPE(MESSAGE_PUMP);
+            // Deal with platform specific issues
+            Ogre::WindowEventUtilities::messagePump();
+        }
 
         unsigned long lAfterRender = timer->getMicroseconds();
         // sleep till the end of maximal fps, for now hardcoded at
@@ -280,9 +299,12 @@ bool GameStateManager::run() {
 
         // 300 FPS == 3333 useconds each
         if (diff < 3333) {
+            TRACE_SCOPE(FRAME_LIMITER)
             // coarse sleep, we don't have microsecond sleep here...
             SDL_Delay((3333 - diff) / 1000);
         }
+
+        TRACE_POINT(FRAME_END);
     }
 
     while (!mStateStack.empty()) {
@@ -291,9 +313,6 @@ bool GameStateManager::run() {
 
         state->exit();
     }
-
-    delete ps;
-    delete ls;
 
     return true;
 }

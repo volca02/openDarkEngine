@@ -218,22 +218,16 @@ public:
     void refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
                            const Matrix4 &toScreen, const Plane &cutp) const;
 
-    typedef PortalList::iterator PortalIterator;
 
-    PortalIterator outPortalBegin() { return mDstPortals.begin(); };
-    PortalIterator outPortalEnd() { return mDstPortals.end(); };
+    const PortalList &outPortals() const { return mDstPortals; };
 
     inline int getLeafID(void) const { return mLeafID; };
 
     /// set of affecting lights for this cell (leaf only)
     typedef std::set<DarkLight *> AffectingLights;
-    typedef AffectingLights::iterator LightIterator;
 
-    LightIterator lightsBegin() { return mAffectingLights.begin(); };
-    LightIterator lightsEnd() { return mAffectingLights.end(); };
-
-    LightIterator dynamicLightsBegin() { return mDynamicLights.begin(); };
-    LightIterator dynamicLightsEnd() { return mDynamicLights.end(); };
+    const AffectingLights &affectingLights() const { return mAffectingLights; }
+    const AffectingLights &dynamicLights() const { return mDynamicLights; }
 
     // VisBlocking code follows
     void blockVision(bool block);

@@ -62,6 +62,16 @@ public:
     /** copy constructor */
     ConvexPolygon(const ConvexPolygon &src);
 
+    /** move constructor */
+    ConvexPolygon(ConvexPolygon &&src)
+        : mPoints(std::move(src.mPoints)), mPlane(std::move(src.mPlane)) {}
+
+    ConvexPolygon &operator=(ConvexPolygon &&src) {
+        mPoints = std::move(src.mPoints);
+        mPlane  = std::move(src.mPlane);
+        return *this;
+    }
+
     /** adds a vertex to the polygon definition */
     void addPoint(float x, float y, float z);
 
