@@ -27,7 +27,6 @@
 #include "config.h"
 
 #include "Callback.h"
-#include "DarkSceneManager.h"
 #include "Ogre.h"
 #include "OpdeService.h"
 #include "OpdeServiceManager.h"
@@ -48,6 +47,12 @@
 
 // The name of the group that stores the built textures and materials
 #define TEMPTEXTURE_RESOURCE_GROUP "WrTextures"
+
+namespace Ogre {
+
+class DarkSceneManager;
+
+} // namespace Ogre
 
 namespace Opde {
 
@@ -117,15 +122,6 @@ protected:
 
     /** Cell count from header */
     uint32_t mNumCells;
-
-    /// -- The vertex and index buffers
-    Ogre::VertexData *mVertexData;
-
-    /// system-memory buffer
-    Ogre::HardwareIndexBufferSharedPtr mIndexes;
-
-    /// Face groups
-    Ogre::StaticFaceGroup *mFaceGroups;
 
     /// Database service
     DatabaseServicePtr mDatabaseService;

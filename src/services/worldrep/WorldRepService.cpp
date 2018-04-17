@@ -32,6 +32,7 @@
 
 #include "DarkBspNode.h"
 #include "DarkSceneManager.h"
+#include "DarkGeometry.h"
 
 #include "File.h"
 #include "FileCompat.h"
@@ -164,10 +165,7 @@ void WorldRepService::setSkyBox(const FileGroupPtr &db) {
 
 //------------------------------------------------------
 void WorldRepService::unload() {
-    mIndexes.reset();
-
     mSceneMgr->destroyGeometry("LEVEL_GEOMETRY");
-
     clearData();
 }
 

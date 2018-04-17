@@ -32,7 +32,6 @@
 
 #include "Array.h"
 #include "DarkCommon.h"
-#include "DarkLight.h"
 #include "File.h"
 #include "FileCompat.h"
 #include "OpdeServiceManager.h"
@@ -42,6 +41,10 @@
 #include "worldrep/WRTypes.h"
 
 #include <OgreVector2.h>
+
+namespace Ogre {
+class DarkLight;
+} // namespace Ogre
 
 using Ogre::DarkLight;
 

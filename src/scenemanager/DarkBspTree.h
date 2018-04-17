@@ -104,6 +104,9 @@ public:
     /** Listener's callback - flushes light list */
     virtual void objectDestroyed(MovableObject *movable);
 
+    unsigned int getPortalCount() const;
+    unsigned int getCellCount() const;
+
 protected:
     void findLeafsForSphereFromNode(BspNode *node, BspNodeList &destList,
                                     const Vector3 &pos, Real radius);

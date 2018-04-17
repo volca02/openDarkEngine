@@ -44,6 +44,7 @@ class OPDELIB_EXPORT DarkSceneManager : public SceneManager {
     // So we don't need to expose getBspTree() method to public
     friend class DarkCamera;
     friend class DarkLight;
+    friend class DarkLightFactory;
 
 public:
     /// Constructor
@@ -177,7 +178,7 @@ public:
      * long) */
     virtual bool getOption(const String &strKey, void *pDestValue);
 
-    unsigned int getPortalCount() const { return mPortalCount; };
+    unsigned int getPortalCount() const { return mPortals.size(); };
     unsigned int getCellCount() const { return mCellCount; };
 
 protected:
@@ -221,9 +222,6 @@ protected:
 
     /// Count of the lights found for the current frustum
     unsigned long mLightCount;
-
-    /// Current portal count
-    unsigned int mPortalCount;
 
     /// maximal encountered bsp node id + 1
     unsigned int mCellCount;

@@ -29,16 +29,17 @@
 #include "config.h"
 
 #include "DarkBspPrerequisites.h"
+#include "DarkPortalTraversal.h"
 #include <OgreLight.h>
 
 namespace Ogre {
 
 /** Specialized version of Ogre::Light that caches cells it affects */
-class OPDELIB_EXPORT DarkLight : public Light {
+class DarkLight : public Light {
 public:
-    DarkLight();
+    DarkLight(BspTree* tree);
 
-    DarkLight(const String &name);
+    DarkLight(BspTree* tree, const String &name);
 
     ~DarkLight();
 
@@ -70,27 +71,21 @@ public:
     bool isDynamic() const { return mIsDynamic; };
 
 protected:
-    /// Traverses the portal tree taking the given portal as the starting point
-    /// (root), inserts encountered cells into mAffectedCells
-    void _traversePortalTree(PortalFrustum &frust, const Portal *p,
-                             BspNode *srcCell, Real dist);
-
-    BspNodeSet mAffectedCells;
-
     bool mNeedsUpdate;
+    DarkPortalTraversal mTraversal;
 
     /// true for dynamic lights - those which update their sphere of influence
     /// dynamically
     bool mIsDynamic;
 };
 
-class OPDELIB_EXPORT DarkLightFactory : public MovableObjectFactory {
+class DarkLightFactory : public MovableObjectFactory {
 protected:
     MovableObject *createInstanceImpl(const String &name,
                                       const NameValuePairList *params);
 
 public:
-    DarkLightFactory(){};
+    DarkLightFactory(DarkSceneManager *sm) : mSceneMgr(sm) {};
     ~DarkLightFactory(){};
 
     static const String FACTORY_TYPE_NAME;
@@ -98,6 +93,9 @@ public:
     const String &getType(void) const;
 
     virtual void destroyInstance(MovableObject *obj);
+
+private:
+    DarkSceneManager *mSceneMgr;
 };
 }; // namespace Ogre
 

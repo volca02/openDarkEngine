@@ -24,7 +24,7 @@
 #ifndef __STRUCTDATASTORAGE_H
 #define __STRUCTDATASTORAGE_H
 
-#include <map>
+#include <unordered_map>
 
 #include "config.h"
 
@@ -43,7 +43,7 @@ namespace Opde {
  * structures)
  */
 template <typename T>
-class OPDELIB_EXPORT StructDataStorage : public DataStorage {
+class StructDataStorage : public DataStorage {
 protected:
     // forward decl
     struct TypeHelperBase;
@@ -74,9 +74,9 @@ protected:
     class TypeHelperBase : public NonCopyable {
     public:
         TypeHelperBase(FieldGetter _getter, FieldSetter _setter)
-            : mGetter(_getter), mSetter(_setter){};
+            : mGetter(_getter), mSetter(_setter) {}
 
-        virtual ~TypeHelperBase(){};
+        virtual ~TypeHelperBase() {}
 
         /// sets the struct's field with the given value
         virtual void toField(T &data, const DVariant &val) = 0;
@@ -104,7 +104,7 @@ protected:
         FieldSetter mSetter;
     };
 
-    typedef std::map<std::string, TypeHelperBasePtr> TypeHelperMap;
+    typedef std::unordered_map<std::string, TypeHelperBasePtr> TypeHelperMap;
 
     TypeHelperMap mTypeHelpers;
 
@@ -319,7 +319,8 @@ protected:
 
     template <typename FT>
     void field(const std::string &name, FT T::*fieldPtr, DEnum *enumer = NULL,
-               FieldGetter getter = NULL, FieldSetter setter = NULL) {
+               FieldGetter getter = NULL, FieldSetter setter = NULL)
+    {
         // insert into the field def array.
         DataFieldDesc fd;
 

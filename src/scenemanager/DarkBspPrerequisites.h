@@ -41,9 +41,9 @@ namespace Ogre {
 // Pre-declaring all the scene manager classes
 class BspNode;
 
-typedef std::set<BspNode *> BspNodeSet;
+typedef std::unordered_set<BspNode *> BspNodeSet;
 typedef std::vector<BspNode *> BspNodeQueue;
-typedef std::list<BspNode *> BspNodeList;
+typedef std::vector<BspNode *> BspNodeList;
 
 class BspTree;
 class PortalFrustum;

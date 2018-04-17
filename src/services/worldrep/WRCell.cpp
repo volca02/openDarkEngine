@@ -22,6 +22,7 @@
  *****************************************************************************/
 
 #include "WRCell.h"
+
 #include "OgreException.h"
 #include "OgreManualObject.h"
 #include "OgreMaterial.h"
@@ -34,6 +35,11 @@
 #include "WorldRepService.h"
 #include "light/LightService.h"
 #include "logger.h"
+
+#include "DarkBspNode.h"
+#include "DarkGeometry.h"
+#include "DarkPortal.h"
+#include "DarkSceneManager.h"
 
 using namespace Ogre;
 

@@ -294,6 +294,12 @@ void BspTree::objectDestroyed(MovableObject *movable) {
     flushLightCacheForMovable(movable);
 }
 
+
+
+//-----------------------------------------------------------------------
+unsigned int BspTree::getPortalCount() const { return mOwner->getPortalCount(); }
+unsigned int BspTree::getCellCount() const { return mOwner->getCellCount(); }
+
 //-----------------------------------------------------------------------
 void BspTree::flushLightCacheForMovable(const MovableObject *movable) {
     mMovableLightsCache.erase(movable);
@@ -385,4 +391,6 @@ void BspTree::populateLightListForMovable(const MovableObject *movable,
     std::stable_sort(destList.begin(), destList.end(),
                      SceneManager::lightLess());
 }
+
+
 } // namespace Ogre

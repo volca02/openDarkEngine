@@ -21,6 +21,8 @@ add_library (DarkSceneManager OBJECT
     DarkPortal.h
     DarkPortalFrustum.cpp
     DarkPortalFrustum.h
+    DarkPortalTraversal.cpp
+    DarkPortalTraversal.h
     DarkCamera.cpp
     DarkCamera.h
     DarkSceneManager.cpp

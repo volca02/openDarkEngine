@@ -62,6 +62,16 @@ struct WRCellHeader {    // SIZE: 31
 
     uint8_t numPlanes; // plane count
     uint8_t mediaType; // air == 1, water == 2 [TNH]
+
+    /* Cell flags
+     * 0-1 (1,2) wireframe
+     *   2 (  4) ?
+     *   3 (  8) blocks vision (doors)
+     *   4 ( 16) can block vision (set on open doorways)
+     *   5 ( 32) ?
+     *   6 ( 64) FOG
+     *   7 (128) ?
+     */
     uint8_t
         cellFlags; // bit 6 is set in fog cells. bits 3+4 are set in doorways,
                    // probably for vision blocking  [TNH]. bit 1 - wireframe

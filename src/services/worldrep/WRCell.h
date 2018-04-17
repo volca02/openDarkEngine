@@ -30,15 +30,18 @@
 #include "LightmapAtlas.h"
 #include "WRTypes.h"
 
-#include "DarkBspNode.h"
-#include "DarkGeometry.h"
-#include "DarkPortal.h"
-#include "DarkSceneManager.h"
 #include "material/MaterialService.h"
+
+#include "DarkBspNode.h"
 
 #include <OgreMaterial.h>
 #include <OgreSceneNode.h>
 #include <OgreStaticFaceGroup.h>
+
+namespace Ogre {
+class DarkGeometry;
+class DarkSceneManager;
+} // namespace Ogre
 
 namespace Opde {
 class WorldRepService;

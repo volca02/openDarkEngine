@@ -102,7 +102,8 @@ PortalFrustum::PortalFrustum(const Vector3 &point, const Portal &poly) {
 }
 /*---------------------------------------------------------*/
 PortalFrustum::PortalFrustum(const Vector3 &point, const Vector3 &direction,
-                             Radian ang, size_t sides) {
+                             Radian ang, size_t sides)
+{
     // The planes will be generated as a cone approximation
 
     // An up vector to be used

@@ -80,7 +80,7 @@ public:
     };
 
     /** Enumeration of the fields. */
-    typedef std::list<EnumField> EnumFieldList;
+    typedef std::vector<EnumField> EnumFieldList;
 
     /** Gets the field list for the enumeration given the field value
      * @note For bitfields, multiple can be checked==true, for Enumeration, one
@@ -126,7 +126,7 @@ typedef std::vector<DataFieldDesc> DataFields;
  * @note The objID, object id referenced here has the meaning of a ID of any
  * kind appropriate - game object id for Properties, Link id for links.
  */
-class OPDELIB_EXPORT DataStorage {
+class DataStorage {
 public:
     virtual ~DataStorage(){};
 

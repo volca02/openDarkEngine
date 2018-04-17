@@ -293,7 +293,7 @@ void BspNode::testAndSetDistributed(unsigned int prereq, unsigned int mask,
 }
 
 //-------------------------------------------------------------------------
-void BspNode::refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
+void BspNode::refreshScreenRect(const Vector3 &vpos, ScreenRectCache &rects,
                                 const Matrix4 &toScreen,
                                 const PortalFrustum &frust) const {
     rects.cell(getID()).initialized = true;
@@ -304,12 +304,12 @@ void BspNode::refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
     for (; outPortal_it != end; outPortal_it++) {
         Portal *out_portal = (*outPortal_it);
 
-        out_portal->refreshScreenRect(cam, rects, toScreen, frust);
+        out_portal->refreshScreenRect(vpos, rects, toScreen, frust);
     }
 }
 
 //-------------------------------------------------------------------------
-void BspNode::refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
+void BspNode::refreshScreenRect(const Vector3 &vpos, ScreenRectCache &rects,
                                 const Matrix4 &toScreen,
                                 const Plane &cutp) const {
     rects.cell(getID()).initialized = true;
@@ -320,7 +320,7 @@ void BspNode::refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
     for (; outPortal_it != end; outPortal_it++) {
         Portal *out_portal = (*outPortal_it);
 
-        out_portal->refreshScreenRect(cam, rects, toScreen, cutp);
+        out_portal->refreshScreenRect(vpos, rects, toScreen, cutp);
     }
 }
 

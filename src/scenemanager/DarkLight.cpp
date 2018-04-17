@@ -32,13 +32,16 @@
 namespace Ogre {
 
 // -----------------------------------------------------------
-DarkLight::DarkLight() : Light() {
-    mNeedsUpdate = true;
-    mIsDynamic = false;
+DarkLight::DarkLight(BspTree *tree)
+    : Light(), mTraversal(tree), mNeedsUpdate(true), mIsDynamic(false)
+{
 }
 
 // -----------------------------------------------------------
-DarkLight::DarkLight(const String &name) : Light(name) { mNeedsUpdate = true; }
+DarkLight::DarkLight(BspTree *tree, const String &name)
+    : Light(name), mTraversal(tree), mNeedsUpdate(true), mIsDynamic(false)
+{
+}
 
 // -----------------------------------------------------------
 DarkLight::~DarkLight() { _clearAffectedCells(); }
@@ -65,14 +68,13 @@ void DarkLight::_notifyAttached(Node *parent, bool isTagPoint) {
 // -----------------------------------------------------------
 void DarkLight::_updateAffectedCells(void) {
     TRACE_METHOD;
+
     // Because there is no way that would inform us about a change of
     // parameters, I just ignore
     if (!mNeedsUpdate)
         return;
 
     mNeedsUpdate = false;
-
-    Vector3 position = getDerivedPosition();
 
     // only dynamic lights are allowed inside. Static lights have the affected
     // BSP leaves hard-coded.
@@ -94,144 +96,85 @@ void DarkLight::_updateAffectedCells(void) {
 
     BspTree *t = static_cast<DarkSceneManager *>(mManager)->getBspTree();
 
-    // Vector3 position = getPosition();
+    static const Vector3 sDirections[6] = {
+        Vector3::UNIT_X,
+        Vector3::NEGATIVE_UNIT_X,
+        Vector3::UNIT_Y,
+        Vector3::NEGATIVE_UNIT_Y,
+        Vector3::UNIT_Z,
+        Vector3::NEGATIVE_UNIT_Z
+    };
 
-    BspNode *rootNode = t->findLeaf(position);
+    static const Vector3 sScale(1.0, 1.0, 1.0);
+    Vector3 position = getDerivedPosition();
 
-    if (rootNode != NULL) {
-        mAffectedCells.insert(rootNode);
+    // We're in the world
+    // Update the cell list
+    LightTypes lt = getType();
 
-        // We're in the world
-        // Update the cell list
-        LightTypes lt = getType();
+    if (lt == Light::LT_POINT) {
+        // omni/point light. Create frustum for every portal in reach,
+        // traverse with that frustum
+        Real rad = getAttenuationRange();
 
-        if (lt == Light::LT_POINT || lt == Light::LT_SPOTLIGHT) {
-            // omni/point light. Create frustum for every portal in reach,
-            // traverse with that frustum
-            Real rad = getAttenuationRange();
+        // For all 6 sides of the view cube of the light
+        for (unsigned dir = 0; dir < 6; ++dir) {
+            // traverse the scene in this direction
+            // TODO: What is the rotation of the frustum planes? It may be incorrect!
+            auto direction = sDirections[dir];
 
-            PortalFrustum *slf = NULL;
+            PortalFrustum frustum(position, direction,
+                                  Radian(Math::HALF_PI), 4);
 
-            // Create a frustum for the spotlight (Reduces the portals which are
-            // affected)
-            if (lt == Light::LT_SPOTLIGHT) {
-                // More planes, more processing (4 should be good aproximation)
-                slf = new PortalFrustum(position, getDirection(),
-                                        getSpotlightOuterAngle(), 4);
-            }
-
-            for (const Portal *p : rootNode->outPortals()) {
-                // Backface cull...
-                if (p->isBackfaceCulledFor(position))
-                    continue;
-
-                if (p->getDistanceFrom(position) > rad && rad > 0)
-                    continue;
-
-                // TODO: Create a test mission that shows off if the cone is
-                // detected right (N portals, one in spotlight's cone)
-                if (lt == Light::LT_SPOTLIGHT) {
-                    // Spotlight...
-                    // Cut the portal with the Spotlight's frustum
-                    std::unique_ptr<Portal> cut(slf->clipPortal(*p));
-
-                    if (cut) {
-                        // create a portalFrustum to traverse with
-                        // For spotlight, it covers the intersection of the
-                        // light's aproximated cone and the portal
-                        PortalFrustum f = PortalFrustum(position, *cut);
-
-                        _traversePortalTree(f, cut.get(), rootNode, 0);
-                    }
-                } else {
-                    // create a portalFrustum to traverse with
-                    // For POINT light, it covers the whole portal
-                    PortalFrustum f = PortalFrustum(position, *p);
-
-                    _traversePortalTree(f, p, rootNode, 0);
-                }
-            }
-
-            // Delete the spotlight's frustum if it was used
-            delete slf;
-
-        } else {
-            // Nothing to do, directional lights are not supported
+            // view matrix to transform to view space. has to be created from position and direction
+            Matrix4 viewM;
+            viewM.makeTransform(position, sScale, Quaternion(Radian(0), direction));
+            /* TODO: PERSPECTIVE projection matrix, 90 degrees. Can be fixed, probably
+            const Matrix4 &projM = getProjectionMatrix(); 
+            Matrix4 toScreen = projM * viewM;
+            mTraveral.traverse(position, toScreen, cutPlane, frustum, false);
+            */
         }
+    } else if (lt == Light::LT_SPOTLIGHT) {
+        auto direction = getDirection();
+
+        // More planes, more processing (4 should be good aproximation)
+        PortalFrustum frustum(position, getDirection(), getSpotlightOuterAngle(), 4);
+
+        Plane cutPlane(position, direction,
+                       position + direction * 0.01f);
+
+        /* TODO:
+        // view matrix - depends on position and view direction
+        const Matrix4 &viewM = getViewMatrix();
+        // projection matrix. Could be parametrized by outer angle of the spotlight
+        const Matrix4 &projM = getProjectionMatrix();
+        Matrix4 toScreen = projM * viewM;
+
+        mTraveral.traverse(position, toScreen, cutPlane, frustum);*/
+    } else {
+        // Nothing to do, directional lights are not supported
     }
 
     // After the cell list has been built, inform the affected cells
-    BspNodeSet::iterator it = mAffectedCells.begin();
-    BspNodeSet::iterator end = mAffectedCells.end();
-
-    for (; it != end; ++it) {
-        (*it)->addAffectingLight(this);
+    for (BspNode *n : mTraversal.visibleCells()) {
+        n->addAffectingLight(this);
     }
 }
 
 // -----------------------------------------------------------
 void DarkLight::_clearAffectedCells(void) {
-    BspNodeSet::iterator it = mAffectedCells.begin();
-    BspNodeSet::iterator end = mAffectedCells.end();
-
-    for (; it != end; ++it) {
-        (*it)->removeAffectingLight(this);
+    for (BspNode *n : mTraversal.visibleCells()) {
+        n->removeAffectingLight(this);
     }
 
-    mAffectedCells.clear();
+    mTraversal.clear();
 }
 
 // -----------------------------------------------------------
 void DarkLight::affectsCell(BspNode *leaf) {
-    mAffectedCells.insert(leaf);
+    mTraversal.addCell(leaf);
     leaf->addAffectingLight(this);
-}
-
-// -----------------------------------------------------------
-void DarkLight::_traversePortalTree(PortalFrustum &frust, const Portal *p,
-                                    BspNode *srcCell, Real dist) {
-    TRACE_METHOD;
-    BspNode *tgt = p->getTarget();
-    Vector3 pos = getDerivedPosition();
-    Real radius = getAttenuationRange();
-
-    if (tgt != NULL) {
-        mAffectedCells.insert(tgt);
-
-        for (const Portal *p : tgt->outPortals()) {
-            // If facing towards the light
-            if (p->isBackfaceCulledFor(pos))
-                continue;
-
-            Real cdist = p->getDistanceFrom(pos);
-
-            if (cdist < 0)
-                continue;
-
-            if (cdist < dist)
-                continue;
-
-            // and not too far to reach
-            if (cdist > radius)
-                continue;
-
-            // and not going back to the source cell (X->n->X traversal)
-            if (srcCell == p->getTarget())
-                continue;
-
-            // TODO: The frustum could be constructable directly from frustum
-            // and portal This would mean no additional needed steps besides
-            // constructing a new frustum
-            std::unique_ptr<Portal> cut(frust.clipPortal(*p));
-
-            if (cut) {
-                // create a portalFrustum to traverse with
-                PortalFrustum f = PortalFrustum(pos, *cut);
-
-                _traversePortalTree(f, p, tgt, cdist);
-            }
-        }
-    }
 }
 
 // -----------------------------------------------------------
@@ -267,7 +210,7 @@ MovableObject *
 DarkLightFactory::createInstanceImpl(const String &name,
                                      const NameValuePairList *params) {
 
-    return new DarkLight(name);
+    return new DarkLight(mSceneMgr->getBspTree(), name);
 }
 
 } // namespace Ogre

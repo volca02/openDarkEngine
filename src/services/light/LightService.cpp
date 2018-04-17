@@ -25,6 +25,10 @@
 #include "OpdeServiceManager.h"
 #include "ServiceCommon.h"
 
+#include "DarkLight.h"
+#include "DarkBspNode.h"
+#include "DarkSceneManager.h"
+
 using namespace std;
 using namespace Ogre;
 

@@ -219,7 +219,7 @@ class DarkSceneManager;
 /// caches screen rects for cells and portals.
 struct ScreenRectCache {
 public:
-    void startUpdate(DarkSceneManager *sm, unsigned int update);
+    void startUpdate(size_t portalCount, size_t cellCount, unsigned int update);
 
     void invalidateCell(unsigned int cell, unsigned int updateID) {
         cellRects[cell].invalidate(updateID);
@@ -266,18 +266,8 @@ protected:
     /** source Cell for this Portal */
     BspNode *mSource;
 
-    /** Helping value, used to determine the validity of the Portal's screen
-     * rectangle */
-    unsigned int mFrameNum;
-
     /** for debugging - portal id (e.g. order number) */
     int mPortalID;
-
-    /** Portal back-face cull - true if should be culled */
-    bool mPortalCull;
-
-    /** Number of mentions (e.g. nonzero if this portal was reevaluated) */
-    int mMentions;
 
     /** Portal's center vertex */
     Vector3 mCenter;
@@ -302,10 +292,10 @@ public:
     Portal(Portal &&src);
 
     /** Returns the target DarkSceneNode for this portal */
-    BspNode *getTarget() const;
+    inline BspNode *getTarget() const { return mTarget; }
 
     /** Returns the source DarkSceneNode for this portal */
-    BspNode *getSource() const;
+    inline BspNode *getSource() const { return mSource; }
 
     /** Refresh the center and radius bounding sphere parameters */
     void refreshBoundingVolume();
@@ -335,7 +325,7 @@ public:
      * better camera's view plane)
      * @return true if the result is non-empty
      */
-    bool refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
+    bool refreshScreenRect(const Vector3 &vpos, ScreenRectCache &rects,
                            const Matrix4 &toScreen, const Plane &cutp);
 
     /**
@@ -346,7 +336,7 @@ public:
      * @param frust PortalFrustum used to cut away non visible parts of the
      * portal
      */
-    void refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
+    void refreshScreenRect(const Vector3 &vpos, ScreenRectCache &rects,
                            const Matrix4 &toScreen, const PortalFrustum &frust);
     /**
      * Debugging portal id setter

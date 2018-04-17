@@ -56,12 +56,14 @@ std::ostream &operator<<(std::ostream &o, PortalRect &r) {
     return o;
 }
 
-void ScreenRectCache::startUpdate(DarkSceneManager *sm, unsigned int update) {
+void ScreenRectCache::startUpdate(size_t portalCount, size_t cellCount,
+                                  unsigned int update)
+{
     // see if we have enough room in both screen space rect caches.
-    if (cellRects.size() < sm->getCellCount())
-        cellRects.resize(sm->getCellCount());
-    if (portalRects.size() < sm->getPortalCount())
-        portalRects.resize(sm->getPortalCount());
+    if (cellRects.size() < cellCount)
+        cellRects.resize(cellCount);
+    if (portalRects.size() < portalCount)
+        portalRects.resize(portalCount);
     updateID = update;
 }
 
@@ -71,10 +73,8 @@ void ScreenRectCache::startUpdate(DarkSceneManager *sm, unsigned int update) {
 
 // -----------------------------------------------------------------------------
 Portal::Portal(unsigned int id, BspNode *source, BspNode *target, Plane plane)
-    : ConvexPolygon(plane), mID(id), mMentions(0)
+    : ConvexPolygon(plane), mID(id)
 {
-    mMentions = 0;
-
     mSource = source;
     mTarget = target;
 
@@ -110,20 +110,10 @@ Portal::Portal(Portal &&src)
     mMovableObject = src.mMovableObject;
     mTarget = src.mTarget;
     mSource = src.mSource;
-    mFrameNum = src.mFrameNum;
     mPortalID = src.mPortalID;
-    mPortalCull = src.mPortalCull;
-    mMentions = src.mMentions;
     mCenter = src.mCenter;
     mRadius = src.mRadius;
 }
-
-
-// -----------------------------------------------------------------------------
-BspNode *Portal::getTarget() const { return mTarget; }
-
-// -----------------------------------------------------------------------------
-BspNode *Portal::getSource() const { return mSource; }
 
 // -----------------------------------------------------------------------------
 void Portal::refreshBoundingVolume() {
@@ -186,7 +176,7 @@ Real Portal::getSquaredViewDepth(const Camera *cam) const {
 Real Portal::getBoundingRadius(void) const { return mRadius; }
 
 // -----------------------------------------------------------------------------
-bool Portal::refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
+bool Portal::refreshScreenRect(const Vector3 &vpos, ScreenRectCache &rects,
                                const Matrix4 &toScreen, const Plane &cutp)
 {
     // modified version of the ConvexPolygon::clipByPlane which does two things
@@ -197,7 +187,7 @@ bool Portal::refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
 
     // Backface cull. The portal won't be culled if a vector camera-vertex
     // dotproduct normal will be greater than
-    Vector3 camToV0 = mPoints[0] - cam->getDerivedPosition();
+    Vector3 camToV0 = mPoints[0] - vpos;
     float dotp = camToV0.dotProduct(mPlane.normal);
     pi.portalCull = (dotp > 0);
 
@@ -294,7 +284,7 @@ bool Portal::refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
     return true;
 }
 
-void Portal::refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
+void Portal::refreshScreenRect(const Vector3 &vpos, ScreenRectCache &rects,
                                const Matrix4 &toScreen,
                                const PortalFrustum &frust)
 {
@@ -303,7 +293,7 @@ void Portal::refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
 
     // Backface cull. The portal won't be culled if a vector camera-vertex
     // dotproduct normal will be greater than 0
-    Vector3 camToV0 = mPoints[0] - cam->getDerivedPosition();
+    Vector3 camToV0 = mPoints[0] - vpos;
     float dotp = camToV0.dotProduct(mPlane.normal);
     pi.portalCull = (dotp > 0);
 

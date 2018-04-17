@@ -31,6 +31,7 @@
 #include "DarkBspPrerequisites.h"
 // need this for screen rects.
 #include "DarkPortal.h"
+#include "DarkPortalTraversal.h"
 
 #include <OgreCamera.h>
 
@@ -48,10 +49,12 @@ public:
     virtual void _notifyMoved(void);
 
     /// internal method used to retrieve the visible node list
-    const BspNodeList &_getVisibleNodes(void) const;
+    const BspNodeSet &_getVisibleNodes(void) const;
 
-    unsigned long getTraversalTime(void) const { return mTraversalTime; };
-    unsigned long getVisibleCellCount(void) const { return mCellCount; };
+    void clearVisibleCells();
+
+    unsigned long getTraversalTime(void) const { return mTraversalTime; }
+    unsigned long getVisibleCellCount(void) const { return mCellCount; }
 
 protected:
     /// The camera's position has changed and need's a recalc (overriden from
@@ -65,14 +68,11 @@ protected:
     // The BSP tree used to update the visible cells
     BspTree *mBspTree;
 
-    mutable BspNodeList mVisibleCells;
-
+    // used to populate the visible cell list
+    mutable DarkPortalTraversal mTraversal;
     mutable unsigned long mTraversalTime;
     mutable unsigned int mCellCount;
     mutable bool mIsDirty;
-
-    mutable ScreenRectCache mRects;
-    mutable unsigned int mUpdateID;
 };
 
 }; // namespace Ogre

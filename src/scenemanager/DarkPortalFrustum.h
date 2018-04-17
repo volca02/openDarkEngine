@@ -85,7 +85,6 @@ public:
      * clipped away
      */
     std::unique_ptr<Portal> clipPortal(const Portal &src) const;
-
 };
 
 } // namespace Ogre

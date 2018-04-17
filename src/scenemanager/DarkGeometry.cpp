@@ -96,12 +96,7 @@ DarkGeometry::getSubGeometryForMaterial(const MaterialPtr &mat,
 void DarkGeometry::queueForRendering(RenderQueue *queue) {
     assert(mBuilt);
 
-    DarkSubGeometryList::iterator it = mVisibleSubGeometries.begin();
-    DarkSubGeometryList::iterator end = mVisibleSubGeometries.end();
-
-    while (it != end) {
-        DarkSubGeometry *sg = *it++;
-
+    for (DarkSubGeometry *sg : mVisibleSubGeometries) {
         queue->addRenderable(sg, sg->getRenderQueueID());
     }
 }
@@ -113,18 +108,12 @@ void DarkGeometry::updateFromCamera(const DarkCamera *cam) {
     // 1. populate the list of dynamic lights
     std::set<Light *> slights;
 
-    const BspNodeList &nodeList = cam->_getVisibleNodes();
-
-    BspNodeList::const_iterator nit = nodeList.begin();
-    BspNodeList::const_iterator endit = nodeList.end();
-
     mLightList.clear();
 
-    for (; nit != endit; ++nit) {
-        BspNode *node = *nit;
+    for (BspNode *n : cam->_getVisibleNodes()) {
 
         /// add dynamic lights from the leaf to our light list
-        for (Light *l : node->dynamicLights()) {
+        for (Light *l : n->dynamicLights()) {
             // if it is new to the set, insert into list
             if (slights.insert(l).second)
                 mLightList.push_back(l);
@@ -158,10 +147,8 @@ void DarkGeometry::build(void) {
 
     mVisibleSubGeometries.clear();
 
-    for (; it != end; ++it) {
-        DarkSubGeometry *sg = it->second;
-
-        sg->build();
+    for (auto gp : mSubGeometryMap) {
+        gp.second->build();
     }
 
     mBuilt = true;
@@ -261,11 +248,6 @@ size_t DarkSubGeometry::updateFromCamera(const DarkCamera *cam) {
     // first, clear the IBUF
     HardwareIndexBufferSharedPtr ibuf = mRenderOp.indexData->indexBuffer;
 
-    const BspNodeList &nodeList = cam->_getVisibleNodes();
-
-    BspNodeList::const_iterator nit = nodeList.begin();
-    BspNodeList::const_iterator endit = nodeList.end();
-
     uint32 indices = 0;
 
     // clear the affecting lights for our geometry (normally only dynamic lights
@@ -278,9 +260,9 @@ size_t DarkSubGeometry::updateFromCamera(const DarkCamera *cam) {
         uint16 *pidx =
             static_cast<uint16 *>(ibuf->lock(HardwareBuffer::HBL_DISCARD));
 
-        for (; nit != endit; ++nit) {
+        for (BspNode * n : cam->_getVisibleNodes()) {
             uint16 size = 0;
-            DarkFragment *frag = mFragmentList[(*nit)->getLeafID()];
+            DarkFragment *frag = mFragmentList[n->getLeafID()];
 
             if (frag) {
                 size = frag->cacheIndices(pidx, m16BitIndices);
@@ -293,9 +275,9 @@ size_t DarkSubGeometry::updateFromCamera(const DarkCamera *cam) {
         uint32 *pidx = static_cast<unsigned int *>(
             ibuf->lock(HardwareBuffer::HBL_DISCARD));
 
-        for (; nit != endit; ++nit) {
+        for (BspNode * n : cam->_getVisibleNodes()) {
             uint32 size = 0;
-            DarkFragment *frag = mFragmentList[(*nit)->getLeafID()];
+            DarkFragment *frag = mFragmentList[n->getLeafID()];
 
             if (frag) {
                 size = frag->cacheIndices(pidx, m16BitIndices);

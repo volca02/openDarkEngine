@@ -42,10 +42,10 @@ namespace Ogre {
 
 // ----------------------------------------------------------------------
 DarkSceneManager::DarkSceneManager(const String &instanceName)
-    : SceneManager(instanceName), mFrameNum(1), mPortalCount(0), mCellCount(0),
+    : SceneManager(instanceName), mFrameNum(1), mCellCount(0),
       mActiveGeometry(NULL) {
     mBspTree = new BspTree(this);
-    mDarkLightFactory = new DarkLightFactory();
+    mDarkLightFactory = new DarkLightFactory(this);
 
     Root::getSingleton().addMovableObjectFactory(mDarkLightFactory);
 }
@@ -90,11 +90,10 @@ void DarkSceneManager::clearScene(void) {
     CameraList::iterator cit = mCameras.begin();
 
     for (; cit != mCameras.end(); ++cit)
-        static_cast<DarkCamera *>(cit->second)->mVisibleCells.clear();
+        static_cast<DarkCamera *>(cit->second)->clearVisibleCells();
 
     SceneManager::clearScene();
 
-    mPortalCount = 0;
     mCellCount = 0;
 }
 
@@ -113,7 +112,7 @@ void DarkSceneManager::destroyPortal(Portal *portal) {
 // ----------------------------------------------------------------------
 Portal *DarkSceneManager::createPortal(BspNode *src, BspNode *dst,
                                        const Plane &plane) {
-    unsigned int portalID = mPortalCount++;
+    unsigned int portalID = mPortals.size();
     Portal *p = new Portal(portalID, src, dst, plane);
 
     mPortals.insert(p);
@@ -125,7 +124,7 @@ Portal *DarkSceneManager::createPortal(BspNode *src, BspNode *dst,
 // ----------------------------------------------------------------------
 Portal *DarkSceneManager::createPortal(int srcLeafID, int dstLeafID,
                                        const Plane &plane) {
-    unsigned int portalID = mPortalCount++;
+    unsigned int portalID = mPortals.size();
     Portal *p = new Portal(portalID, getBspLeaf(srcLeafID),
                            getBspLeaf(dstLeafID), plane);
 
@@ -260,7 +259,7 @@ void DarkSceneManager::_findVisibleObjects(
     DarkCamera *dcam = static_cast<DarkCamera *>(cam);
 
     // Insert all movables that are visible according to the parameters
-    for (BspNode *node : dcam->mVisibleCells) {
+    for (BspNode *node : dcam->_getVisibleNodes()) {
         // insert the movables of this cell to the movables for rendering
         const BspNode::IntersectingObjectSet &objects = node->getObjects();
         BspNode::IntersectingObjectSet::const_iterator oi, oiend;
@@ -385,12 +384,8 @@ void DarkSceneManager::destroyAllGeometries(void) {
 //-----------------------------------------------------------------------
 void DarkSceneManager::updateDirtyLights() {
     TRACE_METHOD;
-    LightSet::iterator it = mLightsForUpdate.begin();
-    LightSet::iterator end = mLightsForUpdate.end();
 
-    while (it != end) {
-        DarkLight *l = *(it++);
-
+    for (DarkLight *l : mLightsForUpdate) {
         l->_updateAffectedCells();
     }
 
@@ -407,12 +402,8 @@ void DarkSceneManager::findLightsAffectingFrustum(const Camera *camera) {
 
     const DarkCamera *dcam = static_cast<const DarkCamera *>(camera);
 
-    BspNodeList::const_iterator it = dcam->mVisibleCells.begin();
-    BspNodeList::const_iterator end = dcam->mVisibleCells.end();
 
-    while (it != end) {
-        BspNode *n = *(it++);
-
+    for (BspNode *n : dcam->_getVisibleNodes()) {
         lightSet.insert(n->mAffectingLights.begin(), n->mAffectingLights.end());
     }
 

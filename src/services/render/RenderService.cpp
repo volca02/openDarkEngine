@@ -24,6 +24,8 @@
 
 #include "RenderService.h"
 
+#include "DarkSceneManager.h"
+
 #include "object/ObjectService.h"
 #include "property/PropertyService.h"
 

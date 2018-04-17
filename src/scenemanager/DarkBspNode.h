@@ -211,11 +211,11 @@ public:
     /** sets the plane list for scene queries */
     void setPlaneList(CellPlaneList &planes, PlanePortalMap &portalmap);
 
-    void refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
+    void refreshScreenRect(const Vector3 &vpos, ScreenRectCache &rects,
                            const Matrix4 &toScreen,
                            const PortalFrustum &frust) const;
 
-    void refreshScreenRect(const Camera *cam, ScreenRectCache &rects,
+    void refreshScreenRect(const Vector3 &vpos, ScreenRectCache &rects,
                            const Matrix4 &toScreen, const Plane &cutp) const;
 
 

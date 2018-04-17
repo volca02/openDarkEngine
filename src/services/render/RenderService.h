@@ -27,7 +27,6 @@
 
 #include "config.h"
 
-#include "DarkSceneManager.h"
 #include "EntityMaterialInstance.h"
 #include "ManualBinFileLoader.h"
 #include "MessageSource.h"
@@ -45,6 +44,11 @@
 #include <OgreEntity.h>
 #include <OgreLight.h>
 #include <OgreSceneNode.h>
+
+namespace Ogre {
+class DarkSceneManager;
+class DarkSceneManagerFactory;
+} // namespace Ogre
 
 namespace Opde {
 // forward decls.
