@@ -28,15 +28,13 @@
 #include "config.h"
 
 #include "OpdeService.h"
-#include "OpdeServiceManager.h"
-#include "SharedPtr.h"
-#include "input/InputService.h"
-#include "physics/PhysicsService.h"
-#include "player/PlayerService.h"
-#include "render/RenderService.h"
+#include "ServiceCommon.h"
 #include "sim/SimService.h"
 
 namespace Opde {
+
+struct InputEventMsg;
+class Property;
 
 /** @brief camera service. Service that handles in-game camera
  */

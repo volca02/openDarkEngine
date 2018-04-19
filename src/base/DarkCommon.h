@@ -31,10 +31,24 @@
 #ifndef __DARKCOMMON_H
 #define __DARKCOMMON_H
 
-#include "File.h"
-#include "config.h"
-#include "integers.h"
+#include <memory>
 
-namespace Opde {}
+namespace Opde {
+
+typedef size_t MessageListenerID;
+
+/// Palette type specifier
+enum PaletteType {
+    ePT_Default = 0, /// Default palette
+    ePT_DefaultBook, /// Palette from accompanying BOOK.PCX
+    ePT_PCX,         /// PCX file palette
+    ePT_External     /// External palette
+};
+
+class File;
+
+using FilePtr = std::shared_ptr<File>;
+
+}
 
 #endif

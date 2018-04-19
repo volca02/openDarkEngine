@@ -37,8 +37,8 @@ public:
     NonCopyable(){};
 
 private:
-    NonCopyable(const NonCopyable &b);
-    void operator=(const NonCopyable &b);
+    NonCopyable(const NonCopyable &b) = delete;
+    void operator=(const NonCopyable &b) = delete;
 };
 
 } // namespace Opde

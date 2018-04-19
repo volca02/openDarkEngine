@@ -357,36 +357,36 @@ void MaterialService::prepareMaterialInstance(MaterialPtr &mat,
 }
 
 //------------------------------------------------------
-Ogre::StringVectorPtr
+Ogre::StringVector
 MaterialService::getAnimTextureNames(const String &basename,
-                                     const String &resourceGroup) {
+                                     const String &resourceGroup)
+{
     // split the filename into pieces, find all _*.* that apply
     LOG_INFO("MaterialService: Searching for anim_txt '%s'", basename.c_str());
 
-    StringVectorPtr v(new StringVector());
+    StringVector v;
 
     String name, ext;
 
     StringUtil::splitBaseFilename(basename, name, ext);
 
     // we suppose the original exists
-    v->push_back(basename);
+    v.push_back(basename);
 
     size_t order = 1;
-    bool goOn = true;
 
-    while (goOn) {
-        goOn = false;
+    while (true) {
         String newname =
             name + '_' + StringConverter::toString(order++) + '.' + ext;
 
         LOG_DEBUG("MaterialService: anim_txt trying '%s'", newname.c_str());
 
-        if (ResourceGroupManager::getSingleton().resourceExists(resourceGroup,
-                                                                newname)) {
-            goOn = true;
-            v->push_back(newname);
+        if (!ResourceGroupManager::getSingleton().resourceExists(resourceGroup,
+                                                                 newname)) {
+            break;
         }
+
+        v.push_back(newname);
     }
 
     return v;
@@ -800,28 +800,23 @@ Ogre::TextureUnitState *MaterialService::createAnimatedTextureState(
     // Texture unit state for the main texture...
     TextureUnitState *tus = pass->createTextureUnitState(baseTextureName);
 
-    StringVectorPtr mat_textures;
-
     // if if was found, then we'll proceed by enumerating all the resources with
     // the same name, but with _NUMBER
-    mat_textures = getAnimTextureNames(baseTextureName, resourceGroup);
+    auto mat_textures = getAnimTextureNames(baseTextureName, resourceGroup);
 
     // if we have anim. textures:
-    if (mat_textures && mat_textures->size() > 1) {
+    if (mat_textures.size() > 1) {
         // convert to String* array
-        size_t size = mat_textures->size();
+        size_t size = mat_textures.size();
 
-        String *sarray = new String[size];
+        std::unique_ptr<String[]> sarray(new String[size]);
 
-        size_t s = 0;
-        for (StringVector::iterator it = mat_textures->begin(); s < size;
-             ++it, ++s) {
-            sarray[s] = *it;
+        size_t i = 0;
+        for (const String &s : mat_textures) {
+            sarray[i++] = s;
         }
 
-        tus->setAnimatedTextureName(sarray, size, size / fps);
-
-        delete[] sarray;
+        tus->setAnimatedTextureName(sarray.get(), size, size / fps);
     }
 
     return tus;

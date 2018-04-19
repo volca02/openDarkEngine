@@ -21,9 +21,14 @@
  *
  *****************************************************************************/
 
+#include "ServiceCommon.h"
+
+#include "File.h"
+
 #include "LightService.h"
 #include "OpdeServiceManager.h"
-#include "ServiceCommon.h"
+#include "render/RenderService.h"
+#include "worldrep/WRTypes.h"
 
 #include "DarkLight.h"
 #include "DarkBspNode.h"
@@ -33,6 +38,26 @@ using namespace std;
 using namespace Ogre;
 
 namespace Opde {
+
+
+/*----------------------------------------------------*/
+/*------------------- LightTableEntry ----------------*/
+/*----------------------------------------------------*/
+LightTableEntry::LightTableEntry(const FilePtr &tag, bool rgb) {
+    *tag >> pos >> rot;
+
+    if (rgb) {
+        *tag >> brightness;
+    } else {
+        *tag >> brightness.x;
+        brightness.y = brightness.x;
+        brightness.z = brightness.x;
+    }
+
+    *tag >> cone_inner >> cone_outer >> radius;
+};
+
+
 /*----------------------------------------------------*/
 /*-------------------- LightService ------------------*/
 /*----------------------------------------------------*/

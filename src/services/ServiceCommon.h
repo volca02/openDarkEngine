@@ -24,8 +24,9 @@
 #ifndef __SERVICECOMMON_H
 #define __SERVICECOMMON_H
 
-// just to be sure we load it
-#include "config.h"
+#include <memory>
+
+#include "DarkCommon.h"
 
 /*
 This file contains some global definitions common to all services
@@ -154,5 +155,61 @@ service listeners
 // --- Sim service priority list ---------------
 // ---------------------------------------------
 #define SIM_PRIORITY_INPUT 1
+
+// ---------------------------------------------
+// --- Forward declarations, including Ptrs ----
+// ---------------------------------------------
+namespace Opde {
+
+class ServiceManager;
+
+// Services
+class CameraService;
+class ConfigService;
+class DatabaseService;
+class DrawService;
+class GameService;
+class GUIService;
+class InheritService;
+class InputService;
+class LightService;
+class LinkService;
+class LoopService;
+class MaterialService;
+class ObjectService;
+class PhysicsService;
+class PlatformService;
+class PlayerService;
+class PropertyService;
+class RenderService;
+class RoomService;
+class ScriptService;
+class SimService;
+class WorldRepService;
+
+using CameraServicePtr = std::shared_ptr<CameraService>;
+using ConfigServicePtr = std::shared_ptr<ConfigService>;
+using DatabaseServicePtr = std::shared_ptr<DatabaseService>;
+using DrawServicePtr = std::shared_ptr<DrawService>;
+using GameServicePtr = std::shared_ptr<GameService>;
+using GUIServicePtr = std::shared_ptr<GUIService>;
+using InheritServicePtr = std::shared_ptr<InheritService>;
+using InputServicePtr = std::shared_ptr<InputService>;
+using LightServicePtr = std::shared_ptr<LightService>;
+using LinkServicePtr = std::shared_ptr<LinkService>;
+using LoopServicePtr = std::shared_ptr<LoopService>;
+using MaterialServicePtr = std::shared_ptr<MaterialService>;
+using ObjectServicePtr = std::shared_ptr<ObjectService>;
+using PhysicsServicePtr = std::shared_ptr<PhysicsService>;
+using PlatformServicePtr = std::shared_ptr<PlatformService>;
+using PlayerServicePtr = std::shared_ptr<PlayerService>;
+using PropertyServicePtr = std::shared_ptr<PropertyService>;
+using RenderServicePtr = std::shared_ptr<RenderService>;
+using RoomServicePtr = std::shared_ptr<RoomService>;
+using ScriptServicePtr = std::shared_ptr<ScriptService>;
+using SimServicePtr = std::shared_ptr<SimService>;
+using WorldRepServicePtr = std::shared_ptr<WorldRepService>;
+
+} // namespace Opde
 
 #endif

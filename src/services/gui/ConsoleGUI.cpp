@@ -27,6 +27,10 @@
 #include "gui/GUIService.h"
 #include "render/RenderService.h"
 
+#include "draw/DrawSheet.h"
+#include "draw/RenderedLabel.h"
+#include "draw/RenderedRect.h"
+
 #include "OpdeException.h"
 
 #include <string.h>

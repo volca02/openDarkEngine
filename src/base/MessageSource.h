@@ -29,6 +29,7 @@
 #include <map>
 
 #include "Callback.h"
+#include "DarkCommon.h"
 #include "SharedPtr.h"
 
 namespace Opde {
@@ -38,7 +39,7 @@ namespace Opde {
  */
 template <typename M> class MessageSource {
 public:
-    typedef size_t ListenerID;
+    using ListenerID = MessageListenerID;
     typedef Callback<M> Listener;
     typedef shared_ptr<Listener> ListenerPtr;
 

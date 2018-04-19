@@ -30,6 +30,8 @@
 #ifndef __MATERIALSERVICE_H
 #define __MATERIALSERVICE_H
 
+#include <OgreStringVector.h>
+
 #include "File.h"
 #include "config.h"
 #include "config/ConfigService.h"
@@ -203,9 +205,8 @@ protected:
      * Eng_3/GOO.PCX, Eng_3/GOO_1.PCX Eng_3/GOO_2.PCX Eng_3/GOO_3.PCX strings
      * (as found in ss2's fam.crf)
      * */
-    Ogre::StringVectorPtr
-    getAnimTextureNames(const Ogre::String &basename,
-                        const Ogre::String &resourceGroup);
+    Ogre::StringVector getAnimTextureNames(const Ogre::String &basename,
+                                           const Ogre::String &resourceGroup);
 
     /** get the material name from it's index
      * @note name is formed from FAMILY and NAME like this: FAMILY/NAME or NAME

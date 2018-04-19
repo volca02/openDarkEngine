@@ -21,16 +21,6 @@
  *
  *****************************************************************************/
 
-#include "DrawService.h"
-#include "FonFormat.h"
-#include "OpdeException.h"
-#include "ServiceCommon.h"
-#include "StringTokenizer.h"
-#include "TextureAtlas.h"
-#include "config.h"
-#include "integers.h"
-#include "render/RenderService.h"
-
 #include <OgreMaterial.h>
 #include <OgreMaterialManager.h>
 #include <OgrePass.h>
@@ -38,6 +28,24 @@
 #include <OgreTexture.h>
 #include <OgreTextureManager.h>
 #include <OgreTextureUnitState.h>
+#include <OgreViewport.h>
+
+#include "DarkCommon.h"
+#include "OpdeServiceManager.h"
+#include "DrawService.h"
+#include "DrawSheet.h"
+#include "DrawOperation.h"
+#include "RenderedImage.h"
+#include "RenderedLabel.h"
+#include "RenderedRect.h"
+#include "FonFormat.h"
+#include "OpdeException.h"
+#include "StringTokenizer.h"
+#include "TextureAtlas.h"
+#include "config.h"
+#include "integers.h"
+#include "render/RenderService.h"
+#include "ManualFonFileLoader.h"
 
 // lg palette for default
 #include "LGPalette.h"
@@ -333,18 +341,18 @@ void DrawService::loadFonFile(const std::string &name, const std::string &group,
 }
 
 //------------------------------------------------------
-void DrawService::setFontPalette(Ogre::ManualFonFileLoader::PaletteType paltype,
+void DrawService::setFontPalette(PaletteType paltype,
                                  const Ogre::String &fname,
                                  const Ogre::String &group) {
     switch (paltype) {
-    case ManualFonFileLoader::ePT_Default:
+    case ePT_Default:
         freeCurrentPal();
         break;
-    case ManualFonFileLoader::ePT_DefaultBook:
-    case ManualFonFileLoader::ePT_PCX:
+    case ePT_DefaultBook:
+    case ePT_PCX:
         loadPaletteFromPCX(fname, group);
         break;
-    case ManualFonFileLoader::ePT_External:
+    case ePT_External:
         loadPaletteExternal(fname, group);
         break;
     default:
@@ -354,6 +362,18 @@ void DrawService::setFontPalette(Ogre::ManualFonFileLoader::PaletteType paltype,
                   fname.c_str());
     }
 }
+
+
+//------------------------------------------------------
+size_t DrawService::getActualWidth() const {
+    return mViewport->getActualWidth();
+};
+
+//------------------------------------------------------
+size_t DrawService::getActualHeight() const {
+    return mViewport->getActualHeight();
+};
+
 
 //------------------------------------------------------
 void DrawService::registerDrawSource(const DrawSourcePtr &ds,

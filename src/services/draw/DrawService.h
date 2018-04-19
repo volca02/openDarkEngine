@@ -24,30 +24,30 @@
 #ifndef __DRAWSERVICE_H
 #define __DRAWSERVICE_H
 
-#include "config.h"
-
 #include "Array.h"
-#include "DrawSheet.h"
-#include "ManualFonFileLoader.h"
+#include "DrawOperation.h"
 #include "OpdeService.h"
-#include "OpdeServiceManager.h"
-#include "RenderedImage.h"
-#include "RenderedLabel.h"
-#include "RenderedRect.h"
-#include "SharedPtr.h"
-#include "TextureAtlas.h"
-
-#include "render/RenderService.h"
+#include "RGBAQuad.h"
+#include "ServiceCommon.h"
+#include "OpdeServiceFactory.h"
 
 #include <OgreRenderQueueListener.h>
-#include <OgreViewport.h>
-
 #include <stack>
 
 namespace Opde {
+
 // Forward decl.
 class TextureAtlas;
 class FontDrawSource;
+class DrawSheet;
+class DrawOperation;
+class RenderedImage;
+class RenderedLabel;
+class RenderedRect;
+class RenderServiceMsg;
+
+using DrawSheetPtr = std::shared_ptr<DrawSheet>;
+using TextureAtlasPtr = std::shared_ptr<TextureAtlas>;
 
 /** @brief Draw Service - 2D rendering service.
  * @author volca
@@ -186,7 +186,7 @@ public:
     /** supplies the palette info - needed for 8Bit palletized font color loads.
      * The specified palette is then used in further font loading operations.
      */
-    void setFontPalette(Ogre::ManualFonFileLoader::PaletteType paltype,
+    void setFontPalette(PaletteType paltype,
                         const Ogre::String &fname = "",
                         const Ogre::String &group = "");
 
@@ -194,14 +194,10 @@ public:
      * @todo Once the resolution handling is ok, rewrite to use mWidth instead
      * (the same for height)
      */
-    inline size_t getActualWidth() const { /*return mWidth;*/
-        return mViewport->getActualWidth();
-    };
+    size_t getActualWidth() const;
 
     /// Getter for the current actual pixel height of the screen
-    inline size_t getActualHeight() const { /*return mHeight;*/
-        return mViewport->getActualHeight();
-    };
+    size_t getActualHeight() const;
 
     /** registers a draw source ID as a holder of a image name and resource
      * group name combination
@@ -292,7 +288,7 @@ private:
     size_t mWidth;
     size_t mHeight;
 
-    MessageSource<RenderServiceMsg>::ListenerID mRenderServiceCallBackID;
+    MessageListenerID mRenderServiceCallBackID;
 };
 
 /// Shared pointer to the draw service

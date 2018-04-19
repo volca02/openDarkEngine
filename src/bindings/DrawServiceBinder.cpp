@@ -26,6 +26,8 @@
 #include "DrawSheetBinder.h"
 #include "DrawSourceBinder.h"
 #include "FontDrawSourceBinder.h"
+#include "ManualFonFileLoader.h"
+#include "OpdeServiceManager.h"
 #include "RenderedImageBinder.h"
 #include "RenderedLabelBinder.h"
 #include "TextureAtlasBinder.h"
@@ -389,20 +391,20 @@ PyObject *DrawServiceBinder::setFontPalette(PyObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "iss", &ptype, &fname, &group))
         __PY_BADPARMS_RET;
 
-    Ogre::ManualFonFileLoader::PaletteType pt;
+    Opde::PaletteType pt;
     // validate the ptype
     switch (ptype) {
-    case (int)ManualFonFileLoader::ePT_Default:
-        pt = ManualFonFileLoader::ePT_Default;
+    case (int)ePT_Default:
+        pt = ePT_Default;
         break;
-    case (int)ManualFonFileLoader::ePT_DefaultBook:
-        pt = ManualFonFileLoader::ePT_DefaultBook;
+    case (int)ePT_DefaultBook:
+        pt = ePT_DefaultBook;
         break;
-    case (int)ManualFonFileLoader::ePT_PCX:
-        pt = ManualFonFileLoader::ePT_PCX;
+    case (int)ePT_PCX:
+        pt = ePT_PCX;
         break;
-    case (int)ManualFonFileLoader::ePT_External:
-        pt = ManualFonFileLoader::ePT_External;
+    case (int)ePT_External:
+        pt = ePT_External;
         break;
     default:
         __PY_BADPARM_RET("paltype");
@@ -441,12 +443,12 @@ void DrawServiceBinder::init(PyObject *module) {
     publishType(module, &msType, msName);
 
     PyModule_AddIntConstant(module, "PT_DEFAULT",
-                            ManualFonFileLoader::ePT_Default);
+                            ePT_Default);
     PyModule_AddIntConstant(module, "PT_DEFAULTBOOK",
-                            ManualFonFileLoader::ePT_DefaultBook);
-    PyModule_AddIntConstant(module, "PT_PCX", ManualFonFileLoader::ePT_PCX);
+                            ePT_DefaultBook);
+    PyModule_AddIntConstant(module, "PT_PCX", ePT_PCX);
     PyModule_AddIntConstant(module, "PT_EXTERNAL",
-                            ManualFonFileLoader::ePT_External);
+                            ePT_External);
 }
 
 // -------------------- Draw Operation --------------------

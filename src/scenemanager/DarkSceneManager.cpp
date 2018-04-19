@@ -30,9 +30,9 @@
 #include "DarkPortal.h"
 #include "DarkSceneNode.h"
 #include "OgreIteratorWrappers.h"
+#include "DarkLight.h"
 
 #include "tracer.h"
-
 
 #include <OgreEntity.h>
 #include <OgreRoot.h>
@@ -42,26 +42,21 @@ namespace Ogre {
 
 // ----------------------------------------------------------------------
 DarkSceneManager::DarkSceneManager(const String &instanceName)
-    : SceneManager(instanceName), mFrameNum(1), mCellCount(0),
-      mActiveGeometry(NULL) {
-    mBspTree = new BspTree(this);
-    mDarkLightFactory = new DarkLightFactory(this);
-
-    Root::getSingleton().addMovableObjectFactory(mDarkLightFactory);
+    : SceneManager(instanceName),
+      mFrameNum(1),
+      mCellCount(0),
+      mActiveGeometry(NULL),
+      mBspTree(new BspTree(this)),
+      mDarkLightFactory(new DarkLightFactory(this))
+{
+    Root::getSingleton().addMovableObjectFactory(mDarkLightFactory.get());
 }
 
 // ----------------------------------------------------------------------
 DarkSceneManager::~DarkSceneManager() {
     // Just to be sure
     clearScene();
-
-    // Delete the bsp tree
-    delete mBspTree;
-
-    Root::getSingleton().removeMovableObjectFactory(mDarkLightFactory);
-
-    // and the factory for darklights
-    delete mDarkLightFactory;
+    Root::getSingleton().removeMovableObjectFactory(mDarkLightFactory.get());
 }
 
 // ----------------------------------------------------------------------
@@ -218,14 +213,14 @@ SceneNode *DarkSceneManager::createSceneNode(const String &name) {
 // ----------------------------------------------------------------------
 void DarkSceneManager::_notifyObjectMoved(const MovableObject *mov,
                                           const Vector3 &pos) {
-    if (mBspTree != NULL) {
+    if (mBspTree) {
         mBspTree->_notifyObjectMoved(mov, pos);
     }
 }
 
 //-----------------------------------------------------------------------
 void DarkSceneManager::_notifyObjectDetached(const MovableObject *mov) {
-    if (mBspTree != NULL) {
+    if (mBspTree) {
         mBspTree->_notifyObjectDetached(mov);
     }
 }
@@ -369,16 +364,7 @@ void DarkSceneManager::_queueLightForUpdate(Light *l) {
 
 //-----------------------------------------------------------------------
 void DarkSceneManager::destroyAllGeometries(void) {
-    DarkGeometryMap::iterator it = mDarkGeometryMap.begin();
-
-    while (it != mDarkGeometryMap.end()) {
-        DarkGeometryMap::iterator it2 = it++;
-
-        DarkGeometry *g = it2->second;
-        mDarkGeometryMap.erase(it2);
-
-        delete g;
-    }
+    mDarkGeometryMap.clear();
 }
 
 //-----------------------------------------------------------------------
@@ -593,7 +579,7 @@ Entity *DarkSceneManager::createEntity(const String &entityName,
                                        const String &meshName) {
     Entity *e = SceneManager::createEntity(entityName, meshName);
 
-    e->setListener(mBspTree);
+    e->setListener(mBspTree.get());
 
     return e;
 }
@@ -603,26 +589,19 @@ DarkGeometry *DarkSceneManager::createGeometry(const String &geomName, size_t nu
     DarkGeometryMap::iterator it = mDarkGeometryMap.find(geomName);
 
     if (it != mDarkGeometryMap.end()) {
-        return it->second;
+        return it->second.get();
     }
 
-    DarkGeometry *geom =
-        new DarkGeometry(geomName, numCells, RENDER_QUEUE_WORLD_GEOMETRY_1);
-
-    mDarkGeometryMap.insert(make_pair(geomName, geom));
-
-    return geom;
+    return mDarkGeometryMap
+        .insert(std::make_pair(
+            geomName, std::unique_ptr<DarkGeometry>(new DarkGeometry(
+                          geomName, numCells, RENDER_QUEUE_WORLD_GEOMETRY_1))))
+        .first->second.get();
 }
 
 //-----------------------------------------------------------------------
 void DarkSceneManager::destroyGeometry(const String &name) {
-    DarkGeometryMap::iterator it = mDarkGeometryMap.find(name);
-
-    if (it != mDarkGeometryMap.end()) {
-        DarkGeometry *g = it->second;
-        mDarkGeometryMap.erase(it);
-        delete g;
-    }
+    mDarkGeometryMap.erase(name);
 }
 
 //-----------------------------------------------------------------------
@@ -630,11 +609,10 @@ DarkGeometry *DarkSceneManager::getGeometry(const String &name) {
     DarkGeometryMap::iterator it = mDarkGeometryMap.find(name);
 
     if (it != mDarkGeometryMap.end()) {
-        return it->second;
+        return it->second.get();
     }
 
-    // TODO: The damned NULL/Exception throw dilema all over again
-    return NULL;
+    return nullptr;
 }
 
 //-----------------------------------------------------------------------

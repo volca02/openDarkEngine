@@ -25,6 +25,7 @@
 #include "DrawBuffer.h"
 #include "DrawCommon.h"
 #include "DrawService.h"
+#include "DrawSheet.h"
 
 using namespace Ogre;
 

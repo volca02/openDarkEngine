@@ -24,6 +24,7 @@
 #include "RenderedLabel.h"
 #include "DrawBuffer.h"
 #include "DrawService.h"
+#include "DrawSheet.h"
 #include "TextureAtlas.h"
 
 using namespace Ogre;

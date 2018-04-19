@@ -30,10 +30,14 @@
 
 #include <OgreSceneManager.h>
 
-#include "DarkBspPrerequisites.h"
-#include "DarkLight.h"
-
 namespace Ogre {
+
+class BspTree;
+class BspNode;
+class DarkGeometry;
+class DarkLight;
+class DarkLightFactory;
+class Portal;
 
 /** Portal + BSP based SceneManager targetted at DE based levels.
  * This SceneManager is targetted at scenes composed of great amount of convex
@@ -183,7 +187,7 @@ public:
 
 protected:
     /// BSP Tree getter
-    BspTree *getBspTree(void) { return mBspTree; };
+    BspTree *getBspTree(void) { return mBspTree.get(); };
 
     /// routine that updates dirty lights before rendering takes place
     void updateDirtyLights();
@@ -195,7 +199,7 @@ protected:
     void destroyAllGeometries(void);
 
     /// The BSP tree currently used
-    BspTree *mBspTree;
+    std::unique_ptr<BspTree> mBspTree;
 
     typedef std::set<Portal *> PortalSet;
 
@@ -233,13 +237,14 @@ protected:
     // MovablesForRendering mMovablesForRendering;
 
     /** Factory for DarkLight objects */
-    DarkLightFactory *mDarkLightFactory;
+    std::unique_ptr<DarkLightFactory> mDarkLightFactory;
 
     /** Map of dark geometry objects */
-    typedef std::map<String, DarkGeometry *> DarkGeometryMap;
+    typedef std::map<String, std::unique_ptr<DarkGeometry>> DarkGeometryMap;
 
     DarkGeometryMap mDarkGeometryMap;
 
+    // weak ptr
     DarkGeometry *mActiveGeometry;
 };
 
@@ -255,9 +260,9 @@ public:
     /// Factory type name
     static const String FACTORY_TYPE_NAME;
 
-    SceneManager *createInstance(const String &instanceName);
+    SceneManager *createInstance(const String &instanceName) override;
 
-    void destroyInstance(SceneManager *instance);
+    void destroyInstance(SceneManager *instance) override;
 };
 
 }; // namespace Ogre

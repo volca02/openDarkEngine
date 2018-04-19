@@ -22,6 +22,7 @@
  *****************************************************************************/
 
 #include "GUIService.h"
+#include "DarkCommon.h"
 #include "ServiceCommon.h"
 #include "StringTokenizer.h"
 
@@ -137,7 +138,7 @@ void GUIService::bootstrapFinished() {
 
     // TODO: Do we need palette for the console font?
     mCoreAtlas = mDrawSrv->createAtlas();
-    mDrawSrv->setFontPalette(ManualFonFileLoader::ePT_Default);
+    mDrawSrv->setFontPalette(ePT_Default);
     mConsoleFont =
         mDrawSrv->loadFont(mCoreAtlas, mConsoleFontName, mConsoleFontGroup);
 

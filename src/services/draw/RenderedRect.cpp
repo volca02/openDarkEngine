@@ -25,6 +25,8 @@
 #include "DrawBuffer.h"
 #include "DrawCommon.h"
 #include "DrawService.h"
+#include "DrawSheet.h"
+#include "TextureAtlas.h"
 
 using namespace Ogre;
 

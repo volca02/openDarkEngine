@@ -36,7 +36,7 @@ class DrawSheet;
 /** A single 2D draw operation (Bitmap draw for example). Internally this
  * explodes to N vertices stored in the VBO of choice (via DrawBuffer) - For
  * building itself into a VBO, this produces N DrawQuads. */
-class OPDELIB_EXPORT DrawOperation {
+class DrawOperation {
 public:
     /// ID type of this operation
     typedef size_t ID;

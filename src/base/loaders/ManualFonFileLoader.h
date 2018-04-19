@@ -29,6 +29,8 @@
 
 #include "File.h"
 #include "FonFormat.h"
+#include "DarkCommon.h"
+
 #include <OgreResourceManager.h>
 #include <Overlay/OgreFont.h>
 
@@ -42,13 +44,6 @@ extern const char WHITE_INDEX;
 /// ManualResourceLoader for FON files.
 class OPDELIB_EXPORT ManualFonFileLoader : public ManualResourceLoader {
 public:
-    /// Palette type specifier
-    enum PaletteType {
-        ePT_Default = 0, /// Default palette
-        ePT_DefaultBook, /// Palette from accompanying BOOK.PCX
-        ePT_PCX,         /// PCX file palette
-        ePT_External     /// External palette
-    };
     ManualFonFileLoader();
     virtual ~ManualFonFileLoader();
 

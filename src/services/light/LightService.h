@@ -31,14 +31,12 @@
 #define __LIGHTSERVICE_H
 
 #include "Array.h"
-#include "DarkCommon.h"
-#include "File.h"
-#include "FileCompat.h"
+#include "Vector3.h"
+
+#include "ServiceCommon.h"
+
 #include "OpdeServiceManager.h"
 #include "config.h"
-#include "render/RenderService.h"
-#include "worldrep/LightmapAtlas.h"
-#include "worldrep/WRTypes.h"
 
 #include <OgreVector2.h>
 
@@ -49,20 +47,16 @@ class DarkLight;
 using Ogre::DarkLight;
 
 namespace Opde {
+
+class LightAtlasList;
+class LightService;
+class WRLightInfo;
+class WRPolygonTexturing;
+class LightMap;
+
 struct LightTableEntry {
-    LightTableEntry(const FilePtr &tag, bool rgb) {
-        *tag >> pos >> rot;
-
-        if (rgb) {
-            *tag >> brightness;
-        } else {
-            *tag >> brightness.x;
-            brightness.y = brightness.x;
-            brightness.z = brightness.x;
-        }
-
-        *tag >> cone_inner >> cone_outer >> radius;
-    };
+    // Ctor that reads the data from WR tag
+    LightTableEntry(const FilePtr &tag, bool rgb);
 
     Vector3 pos;        // 12
     Vector3 rot;        // 12 - 24
@@ -72,7 +66,6 @@ struct LightTableEntry {
     float radius;       // 4 - 40
 };
 
-class LightService;
 
 /// class holding all the light info loaded for a single cell.
 /// Constructed/destructed using LightService

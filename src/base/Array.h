@@ -26,7 +26,6 @@
 #define __ARRAY_H
 
 #include "OpdeException.h"
-#include "config.h"
 
 #include <malloc.h>
 #include <cassert>

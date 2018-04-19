@@ -103,31 +103,31 @@ enum DarkMouseEvents {
 };
 
 /// Input event
-typedef struct {
+struct InputEventMsg {
     InputEventType event;
     // unmapped command, or empty
     std::string command;
     // Parameters of the command
     DVariant params;
-} InputEventMsg;
+} ;
 
 /// The state of input modifiers
-typedef enum {
+enum InputModifierState {
     /// Shift key modifier
     IST_SHIFT = 1,
     /// Alt key modifier
     IST_ALT = 2,
     /// Control key modifier
     IST_CTRL = 4
-} InputModifierState;
+};
 
 /// The input mode - direct or translated to the commands
-typedef enum {
+enum InputMode {
     /// Direct mode
     IM_DIRECT = 1,
     /// Translated mode
     IM_MAPPED
-} InputMode;
+};
 
 /// Listener for the direct - unfiltered events. Typically one per application
 /// (GUIService for example)

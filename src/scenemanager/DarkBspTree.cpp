@@ -31,6 +31,7 @@ $Id$
 */
 
 #include "DarkBspTree.h"
+#include "DarkLight.h"
 #include "DarkSceneManager.h"
 
 #include <OgreException.h>

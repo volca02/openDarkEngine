@@ -22,8 +22,14 @@
  *****************************************************************************/
 
 #include "CameraService.h"
+#include "OpdeServiceManager.h"
 #include "ServiceCommon.h"
+#include "SharedPtr.h"
+#include "input/InputService.h"
 #include "logger.h"
+#include "physics/PhysicsService.h"
+#include "player/PlayerService.h"
+#include "render/RenderService.h"
 
 using namespace std;
 using namespace Ogre;
