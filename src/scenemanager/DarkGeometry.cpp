@@ -122,14 +122,10 @@ void DarkGeometry::updateFromCamera(const DarkCamera *cam) {
 
     // 2. build the geometry
     // Call all the sub geoms to update ibufs based on cam's visibility
-    DarkSubGeometryMap::iterator it = mSubGeometryMap.begin();
-    DarkSubGeometryMap::iterator end = mSubGeometryMap.end();
-
     mVisibleSubGeometries.clear();
 
-    while (it != end) {
-        DarkSubGeometry *sg = it->second;
-        it++;
+    for (auto &gp : mSubGeometryMap) {
+        DarkSubGeometry *sg = gp.second;
 
         int indices = sg->updateFromCamera(cam);
 
@@ -142,12 +138,9 @@ void DarkGeometry::updateFromCamera(const DarkCamera *cam) {
 // -----------------------------------------------------------------
 void DarkGeometry::build(void) {
     // call all the sub-geometries to build
-    DarkSubGeometryMap::iterator it = mSubGeometryMap.begin();
-    DarkSubGeometryMap::iterator end = mSubGeometryMap.end();
-
     mVisibleSubGeometries.clear();
 
-    for (auto gp : mSubGeometryMap) {
+    for (auto &gp : mSubGeometryMap) {
         gp.second->build();
     }
 

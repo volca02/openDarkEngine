@@ -32,7 +32,4 @@
 // data installation path
 #define OPDE_SHARE_DIR "${OPDE_FULL_DATA_INSTALL_DIR}"
 
-// Script compilers present
-#cmakedefine SCRIPT_COMPILERS
-
 #endif

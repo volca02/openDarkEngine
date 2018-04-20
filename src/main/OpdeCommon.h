@@ -25,13 +25,5 @@
 #define __OPDECOMMON_H
 
 // common header-only definitions
-#ifdef SCRIPT_COMPILERS
-namespace Opde {
-class DTypeScriptCompiler;
-class PLDefScriptCompiler;
-class DTypeScriptLoader;
-class PLDefScriptLoader;
-} // namespace Opde
-#endif
 
 #endif

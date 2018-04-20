@@ -83,22 +83,6 @@ const char *opde_Root_loadResourceConfig__doc__ =
     "@type path: string\n"
     "@param path: Path to the resource config file to be loaded\n";
 
-const char *opde_Root_loadDTypeScript__doc__ =
-    "loadDTypeScript(path, group)\n"
-    "Loads a DType (Dynamic type specifications) file from the specified path\n"
-    "@type path: string\n"
-    "@param path: Path to the dtype file to be loaded\n"
-    "@type group: string\n"
-    "@param group: Resource group from which to load\n";
-
-const char *opde_Root_loadPLDefScript__doc__ =
-    "loadPLDefScript(path)\n"
-    "Loads a PLDef (Property/Link definitions) file from the specified path\n"
-    "@type path: string\n"
-    "@param path: Path to the pldef file to be loaded\n"
-    "@type group: string\n"
-    "@param group: Resource group from which to load\n";
-
 const char *opde_Root_loadConfigFile__doc__ =
     "loadConfigFile(path)\n"
     "Loads a Opde's config file (opde.cfg type) from the specified path\n"
@@ -152,10 +136,6 @@ const char *opde_Root_registerCustomScriptLoaders__doc__ =
 PyMethodDef RootBinder::msMethods[] = {
     {"loadResourceConfig", RootBinder::loadResourceConfig, METH_VARARGS,
      opde_Root_loadResourceConfig__doc__},
-    {"loadDTypeScript", RootBinder::loadDTypeScript, METH_VARARGS,
-     opde_Root_loadDTypeScript__doc__},
-    {"loadPLDefScript", RootBinder::loadPLDefScript, METH_VARARGS,
-     opde_Root_loadPLDefScript__doc__},
     {"loadConfigFile", RootBinder::loadConfigFile, METH_VARARGS,
      opde_Root_loadConfigFile__doc__},
     {"addResourceLocation", RootBinder::addResourceLocation, METH_VARARGS,
@@ -168,8 +148,6 @@ PyMethodDef RootBinder::msMethods[] = {
      opde_Root_logToFile__doc__},
     {"setLogLevel", RootBinder::setLogLevel, METH_VARARGS,
      opde_Root_setLogLevel__doc__},
-    {"registerCustomScriptLoaders", RootBinder::registerCustomScriptLoaders,
-     METH_NOARGS, opde_Root_registerCustomScriptLoaders__doc__},
     {NULL, NULL},
 };
 
@@ -191,52 +169,6 @@ PyObject *RootBinder::loadResourceConfig(PyObject *self, PyObject *args) {
     } else {
         // Invalid parameters
         PyErr_SetString(PyExc_TypeError, "Expected a string argument!");
-        return NULL;
-    }
-    __PYTHON_EXCEPTION_GUARD_END_;
-}
-
-// ------------------------------------------
-PyObject *RootBinder::loadDTypeScript(PyObject *self, PyObject *args) {
-    __PYTHON_EXCEPTION_GUARD_BEGIN_;
-    // ARGS: string, string
-    Root *o = NULL;
-
-    if (!python_cast<Root *>(self, &msType, &o))
-        __PY_CONVERR_RET;
-
-    const char *fname, *gname;
-
-    if (PyArg_ParseTuple(args, "ss", &fname, &gname)) {
-        o->loadDTypeScript(fname, gname);
-
-        __PY_NONE_RET;
-    } else {
-        // Invalid parameters
-        PyErr_SetString(PyExc_TypeError, "Expected two string arguments!");
-        return NULL;
-    }
-    __PYTHON_EXCEPTION_GUARD_END_;
-}
-
-// ------------------------------------------
-PyObject *RootBinder::loadPLDefScript(PyObject *self, PyObject *args) {
-    __PYTHON_EXCEPTION_GUARD_BEGIN_;
-    // ARGS: string, string
-    Root *o = NULL;
-
-    if (!python_cast<Root *>(self, &msType, &o))
-        __PY_CONVERR_RET;
-
-    const char *fname, *gname;
-
-    if (PyArg_ParseTuple(args, "ss", &fname, &gname)) {
-        o->loadPLDefScript(fname, gname);
-
-        __PY_NONE_RET;
-    } else {
-        // Invalid parameters
-        PyErr_SetString(PyExc_TypeError, "Expected two string arguments!");
         return NULL;
     }
     __PYTHON_EXCEPTION_GUARD_END_;
@@ -379,22 +311,6 @@ PyObject *RootBinder::setLogLevel(PyObject *self, PyObject *args) {
         PyErr_SetString(PyExc_TypeError, "Expected an integer argument!");
         return NULL;
     }
-
-    __PYTHON_EXCEPTION_GUARD_END_;
-}
-
-// ------------------------------------------
-PyObject *RootBinder::registerCustomScriptLoaders(PyObject *self,
-                                                  PyObject *args) {
-    __PYTHON_EXCEPTION_GUARD_BEGIN_;
-    Root *o = NULL;
-
-    if (!python_cast<Root *>(self, &msType, &o))
-        __PY_CONVERR_RET;
-
-    o->registerCustomScriptLoaders();
-
-    __PY_NONE_RET;
 
     __PYTHON_EXCEPTION_GUARD_END_;
 }

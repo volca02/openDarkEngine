@@ -28,26 +28,10 @@ include_directories(
     ${PYTHON_INCLUDE_PATH}
 )
 
-IF(SCRIPT_COMPILERS)
-    SET(OPDE_SCRIPT_COMPILER_FILES
-        DTypeScriptCompiler.cpp
-        DTypeScriptCompiler.h
-        PLDefScriptCompiler.cpp
-        PLDefScriptCompiler.h
-        DTypeScriptLoader.cpp
-        DTypeScriptLoader.h
-        PLDefScriptLoader.cpp
-        PLDefScriptLoader.h
-    )
-ELSE(SCRIPT_COMPILERS)
-    SET(OPDE_SCRIPT_COMPILER_FILES)
-ENDIF(SCRIPT_COMPILERS)
-
 # TODO: Split this into parts. We don't need the whole package for small utils
 add_library (OpdeRoot OBJECT
     Root.cpp
     Root.h
-    ${OPDE_SCRIPT_COMPILER_FILES}
     CustomImageCodec.cpp
     CustomImageCodec.h
     ProxyArchive.cpp

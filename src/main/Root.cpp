@@ -74,10 +74,6 @@ template <> Root *Singleton<Root>::ms_Singleton = 0;
 Root::Root(uint serviceMask, const char *logFileName)
     : mLogger(NULL), mServiceMgr(NULL), mOgreRoot(NULL), mOgreLogManager(NULL),
       mConsoleBackend(NULL),
-#ifdef SCRIPT_COMPILERS
-      mDTypeScriptCompiler(NULL), mPLDefScriptCompiler(NULL),
-      mDTypeScriptLdr(NULL), mPLDefScriptLdr(NULL),
-#endif
       mServiceMask(serviceMask), mDirArchiveFactory(NULL),
       //          mCrfArchiveFactory(NULL),
       mResourceGroupManager(NULL), mArchiveManager(NULL) {
@@ -141,25 +137,12 @@ Root::Root(uint serviceMask, const char *logFileName)
     LOG_INFO("Root: Registering Service factories");
     // Now we need to register all the service factories
     registerServiceFactories();
-#ifdef SCRIPT_COMPILERS
-    LOG_INFO("Root: Registering custom script compilers");
-    mDTypeScriptCompiler = new DTypeScriptCompiler();
-    mPLDefScriptCompiler = new PLDefScriptCompiler();
-#endif
     setupLoopModes();
 }
 
 // -------------------------------------------------------
 Root::~Root() {
     LOG_INFO("Root: openDarkEngine is shutting down");
-#ifdef SCRIPT_COMPILERS
-    // if those are used, delete them
-    delete mDTypeScriptLdr;
-    delete mPLDefScriptLdr;
-
-    delete mDTypeScriptCompiler;
-    delete mPLDefScriptCompiler;
-#endif
     // Archive manager has no way to remove the archive factories...
     delete mServiceMgr;
 
@@ -203,21 +186,6 @@ Root::~Root() {
 }
 
 // -------------------------------------------------------
-void Root::registerCustomScriptLoaders() {
-#ifdef SCRIPT_COMPILERS
-    // the classes register themselves to ogre
-    if (!mDTypeScriptLdr)
-        mDTypeScriptLdr = new DTypeScriptLoader();
-
-    if (!mPLDefScriptLdr)
-        mPLDefScriptLdr = new PLDefScriptLoader();
-#else
-    OPDE_EXCEPT("Opde Script Compilers not compiled in!",
-                "Root::registerCustomScriptLoaders");
-#endif
-}
-
-// -------------------------------------------------------
 void Root::bootstrapFinished() {
     LOG_INFO("Root: Bootstrapping finished");
     // Initialize all the remainging services in the service mask
@@ -233,35 +201,6 @@ void Root::loadConfigFile(const std::string &fileName) {
     ConfigServicePtr cfp = GET_SERVICE(ConfigService);
 
     cfp->loadParams(fileName);
-}
-
-// -------------------------------------------------------
-void Root::loadPLDefScript(const std::string &fileName,
-                           const std::string &groupName) {
-#ifdef SCRIPT_COMPILERS
-    // try to open the given resource stream
-    Ogre::DataStreamPtr str =
-        Ogre::ResourceGroupManager::getSingleton().openResource(
-            fileName, groupName, true, NULL);
-    mPLDefScriptCompiler->parseScript(str, groupName);
-#else
-    OPDE_EXCEPT("Opde Script Compilers not compiled in!",
-                "Root::loadPLDefScript");
-#endif
-}
-
-// -------------------------------------------------------
-void Root::loadDTypeScript(const std::string &fileName,
-                           const std::string &groupName) {
-#ifdef SCRIPT_COMPILERS
-    Ogre::DataStreamPtr str =
-        Ogre::ResourceGroupManager::getSingleton().openResource(
-            fileName, groupName, true, NULL);
-    mDTypeScriptCompiler->parseScript(str, groupName);
-#else
-    OPDE_EXCEPT("Opde Script Compilers not compiled in!",
-                "Root::loadDTypeScript");
-#endif
 }
 
 // -------------------------------------------------------

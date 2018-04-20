@@ -48,8 +48,6 @@ public:
 
     // methods:
     static PyObject *loadResourceConfig(PyObject *self, PyObject *args);
-    static PyObject *loadDTypeScript(PyObject *self, PyObject *args);
-    static PyObject *loadPLDefScript(PyObject *self, PyObject *args);
     static PyObject *loadConfigFile(PyObject *self, PyObject *args);
     static PyObject *addResourceLocation(PyObject *self, PyObject *args);
     static PyObject *removeResourceLocation(PyObject *self, PyObject *args);
@@ -59,8 +57,6 @@ public:
     static PyObject *logToFile(PyObject *self, PyObject *args);
     static PyObject *setLogLevel(PyObject *self, PyObject *args);
 
-    static PyObject *registerCustomScriptLoaders(PyObject *self,
-                                                 PyObject *args);
 
     /* TODO: Need bindings written first
     static PyObject* getLogger(PyObject *self, PyObject* args);

@@ -64,14 +64,6 @@ public:
     /// locations configuration
     void loadResourceConfig(const std::string &fileName);
 
-    /// Loads dynamic type definitions from a given file name and group name
-    void loadDTypeScript(const std::string &fileName,
-                         const std::string &groupName);
-
-    /// Loads property and link definitions
-    void loadPLDefScript(const std::string &fileName,
-                         const std::string &groupName);
-
     /// Loads a config file with opde settings
     void loadConfigFile(const std::string &fileName);
 
@@ -103,10 +95,6 @@ public:
     /** A shortcut to set loglevel. Valid values are 0-4 */
     void setLogLevel(int level);
 
-    /// registers custom script loaders with ogre, meaning the custom scripts
-    /// will get loaded automatically
-    void registerCustomScriptLoaders();
-
 protected:
     /// Registers all the service factories to the Service Manger
     void registerServiceFactories();
@@ -122,17 +110,6 @@ protected:
 
     /// @deprecated
     ConsoleBackend *mConsoleBackend;
-
-#ifdef SCRIPT_COMPILERS
-    DTypeScriptCompiler *mDTypeScriptCompiler;
-    PLDefScriptCompiler *mPLDefScriptCompiler;
-
-    /// Loader for the DType scripts.
-    DTypeScriptLoader *mDTypeScriptLdr;
-
-    /// Loader for the PLDef scripts
-    PLDefScriptLoader *mPLDefScriptLdr;
-#endif
 
     typedef std::list<LogListener *> LogListenerList;
     typedef std::list<ServiceFactory *> ServiceFactoryList;

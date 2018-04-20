@@ -70,9 +70,6 @@ GameStateManager::GameStateManager(const std::string &GameType)
     mGameType = GameType;
 
     mRoot = new Opde::Root(SERVICE_ALL, "opde.log");
-#ifdef SCRIPT_COMPILERS
-    mRoot->registerCustomScriptLoaders();
-#endif
 }
 
 GameStateManager::~GameStateManager() {
