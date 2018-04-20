@@ -401,7 +401,7 @@ Ogre::Vector2 LightsForCell::mapUV(size_t face_id,
 }
 
 //-------------------------- Factory implementation
-std::string LightServiceFactory::mName = "LightService";
+const std::string LightServiceFactory::mName = "LightService";
 
 LightServiceFactory::LightServiceFactory() : ServiceFactory() {}
 

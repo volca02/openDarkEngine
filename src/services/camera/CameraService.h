@@ -31,6 +31,10 @@
 #include "ServiceCommon.h"
 #include "sim/SimService.h"
 
+namespace Ogre {
+class Camera;
+} // namespace Ogre
+
 namespace Opde {
 
 struct InputEventMsg;

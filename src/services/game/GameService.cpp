@@ -22,10 +22,10 @@
  *****************************************************************************/
 
 #include "GameService.h"
+#include "FileGroup.h"
 #include "OpdeException.h"
-#include "ServiceCommon.h"
-
-using namespace std;
+#include "OpdeServiceManager.h"
+#include "database/DatabaseService.h"
 
 namespace Opde {
 
@@ -53,7 +53,7 @@ void GameService::load(const std::string &filename) {
 }
 
 //-------------------------- Factory implementation
-std::string GameServiceFactory::mName = "GameService";
+const std::string GameServiceFactory::mName = "GameService";
 
 GameServiceFactory::GameServiceFactory() : ServiceFactory(){};
 

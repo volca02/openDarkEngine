@@ -23,6 +23,7 @@
  *****************************************************************************/
 
 #include "GUIServiceBinder.h"
+#include "OpdeServiceManager.h"
 #include "RelationBinder.h"
 #include "bindings.h"
 

@@ -22,8 +22,10 @@
  *
  *****************************************************************************/
 
+#include "OpdeServiceManager.h"
 #include "LoopServiceBinder.h"
 #include "bindings.h"
+#include "loop/LoopService.h"
 
 namespace Opde {
 

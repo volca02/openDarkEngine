@@ -26,13 +26,15 @@
 #include "RenderService.h"
 #include "SingleFieldDataStorage.h"
 #include "property/PropertyService.h"
+#include "EntityInfo.h"
 
 namespace Opde {
 /*--------------------------------------------------------*/
 /*-------------------- RenderAlphaProperty ----------------*/
 /*--------------------------------------------------------*/
 ZBiasProperty::ZBiasProperty(RenderService *rs, PropertyService *owner)
-    : RenderedProperty(rs, owner, "RendererZBias", "Z-Bias", "always") {
+    : RenderedProperty(rs, owner, "RendererZBias", "Z-Bias", "always")
+{
 
     mPropertyStorage = DataStoragePtr(new UIntDataStorage(NULL));
 

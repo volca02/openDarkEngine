@@ -18,39 +18,32 @@
  *    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  *
- *		$Id$
- *
  *****************************************************************************/
 
-/**
- @file DarkCommon.h
- @brief Common data types used throughout the entire engine. Here, these are
- mainly used for disk access.
- */
+#ifndef __FORMAT_H
+#define __FORMAT_H
 
-#ifndef __DARKCOMMON_H
-#define __DARKCOMMON_H
-
-#include <memory>
+#include <string>
+#include <sstream>
 
 namespace Opde {
 
-typedef size_t MessageListenerID;
+void _format(std::ostringstream &oss) {}
 
-/// Palette type specifier
-enum PaletteType {
-    ePT_Default = 0, /// Default palette
-    ePT_DefaultBook, /// Palette from accompanying BOOK.PCX
-    ePT_PCX,         /// PCX file palette
-    ePT_External     /// External palette
-};
+template<typename T, typename...ArgsT>
+void _format(std::ostringstream &oss, const T &t, ArgsT&&...args) {
+    oss << t;
+    _format(oss, std::forward<ArgsT>(args)...);
+}
 
-class File;
-class FileGroup;
-
-using FilePtr = std::shared_ptr<File>;
-using FileGroupPtr = std::shared_ptr<FileGroup>;
+template<typename...ArgsT>
+std::string format(ArgsT&&...args) {
+    std::ostringstream oss;
+    _format(oss, std::forward<ArgsT>(args)...);
+    return oss.str();
+}
 
 } // namespace Opde
 
-#endif
+#endif /* __FORMAT_H */
+

@@ -25,23 +25,32 @@
 #ifndef __GUISERVICE_H
 #define __GUISERVICE_H
 
-#include "config.h"
-
+#include "DarkCommon.h"
 #include "OpdeService.h"
-#include "OpdeServiceManager.h"
+#include "OpdeServiceFactory.h"
 #include "ServiceCommon.h"
-#include "config/ConfigService.h"
-#include "draw/DrawService.h"
-#include "gui/ConsoleGUI.h"
-#include "input/InputService.h"
+
+// TODO: We only need the callback classes, no need to pull main service headers
+#include "input/InputCommon.h"
+#include "loop/LoopCommon.h"
 
 namespace Opde {
 
+class DrawSheet;
+class TextureAtlas;
+class FontDrawSource;
+class ConsoleGUI;
+struct RenderServiceMsg;
+
+using FontDrawSourcePtr = std::shared_ptr<FontDrawSource>;
+using TextureAtlasPtr = std::shared_ptr<TextureAtlas>;
+using DrawSheetPtr = std::shared_ptr<DrawSheet>;
+
 /** @brief GUI service - service which handles user interfaces
  * @note This class also handles console and show_console input command */
-class OPDELIB_EXPORT GUIService : public ServiceImpl<GUIService>,
-                                  public DirectInputListener,
-                                  public LoopClient {
+class GUIService : public ServiceImpl<GUIService>,
+                   public DirectInputListener,
+                   public LoopClient {
 public:
     GUIService(ServiceManager *manager, const std::string &name);
     virtual ~GUIService();
@@ -112,7 +121,7 @@ private:
     DrawSheetPtr mActiveSheet;
 
     /// Console frontend - GUI render of the console
-    ConsoleGUI *mConsole;
+    std::unique_ptr<ConsoleGUI> mConsole;
 
     // --- Console backup ---
     /// Console Backup - activeness flag
@@ -138,7 +147,7 @@ private:
     std::string mConsoleFontGroup;
 
     /// Render service listener ID (for resolution changes)
-    RenderService::ListenerID mRenderServiceListenerID;
+    MessageListenerID mRenderServiceListenerID;
 
     /// Input service ptr - used for input handling
     InputServicePtr mInputSrv;
@@ -160,7 +169,7 @@ private:
 typedef shared_ptr<GUIService> GUIServicePtr;
 
 /// Factory for the GUIService objects
-class OPDELIB_EXPORT GUIServiceFactory : public ServiceFactory {
+class GUIServiceFactory : public ServiceFactory {
 public:
     GUIServiceFactory();
     ~GUIServiceFactory(){};
@@ -168,11 +177,11 @@ public:
     /** Creates a GUIService instance */
     Service *createInstance(ServiceManager *manager);
 
-    virtual const std::string &getName();
+    const std::string &getName() override;
 
-    virtual const uint getMask();
+    const uint getMask() override;
 
-    virtual const size_t getSID();
+    const size_t getSID() override;
 
 private:
     static std::string mName;

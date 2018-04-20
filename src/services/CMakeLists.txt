@@ -134,6 +134,8 @@ add_library (OpdeServices OBJECT
     property/PropertyService.h
     render/EntityMaterialInstance.cpp
     render/EntityMaterialInstance.h
+    render/EntityInfo.cpp
+    render/EntityInfo.h
     render/HasRefsProperty.cpp
     render/HasRefsProperty.h
     render/jorge.h

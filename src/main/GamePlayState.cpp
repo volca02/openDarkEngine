@@ -34,6 +34,14 @@
 
 #include "draw/TextureAtlas.h"
 
+#include "config/ConfigService.h"
+#include "input/InputService.h"
+#include "link/LinkCommon.h"
+#include "link/LinkService.h"
+#include "link/Relation.h"
+#include "property/PropertyService.h"
+#include "render/RenderService.h"
+
 #include <OgreRenderWindow.h>
 #include <OgreStringConverter.h>
 

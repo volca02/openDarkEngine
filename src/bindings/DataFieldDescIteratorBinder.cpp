@@ -23,6 +23,7 @@
  *****************************************************************************/
 
 #include "DataFieldDescIteratorBinder.h"
+#include "DataStorage.h"
 #include "PythonStruct.h"
 #include "bindings.h"
 

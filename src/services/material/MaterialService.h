@@ -30,15 +30,16 @@
 #ifndef __MATERIALSERVICE_H
 #define __MATERIALSERVICE_H
 
+#include "DarkCommon.h"
+#include "OpdeService.h"
+#include "OpdeServiceFactory.h"
+#include "ServiceCommon.h"
+#include "database/DatabaseCommon.h"
+
 #include <OgreStringVector.h>
 
-#include "File.h"
-#include "config.h"
-#include "config/ConfigService.h"
-#include "database/DatabaseService.h"
-#include "light/LightService.h"
-
 namespace Opde {
+
 // --- Following are family and txlist chunk structures shamelessly ripped from
 // Telliamed's code. To be replaced by a competent reader/writer - we should
 // have a handling class for this anyway
@@ -82,8 +83,8 @@ struct DarkDBChunkFLOW_TEX {
 
 /** @brief Material Service - Service which handles materials for terrain and
  * objects - their loading, unloading, cloning, etc. */
-class OPDELIB_EXPORT MaterialService : public ServiceImpl<MaterialService>,
-                                       public DatabaseListener {
+class MaterialService : public ServiceImpl<MaterialService>,
+                        public DatabaseListener {
 public:
     /** Constructor
      * @param manager The ServiceManager that created this service
@@ -277,14 +278,12 @@ public:
     /** Creates a MaterialService instance */
     Service *createInstance(ServiceManager *manager);
 
-    virtual const std::string &getName();
-
-    virtual const uint getMask();
-
-    virtual const size_t getSID();
+    const std::string &getName() override;
+    const uint getMask() override;
+    const size_t getSID() override;
 
 private:
-    static std::string mName;
+    static const std::string mName;
 };
 } // namespace Opde
 

@@ -23,7 +23,9 @@
  *****************************************************************************/
 
 #include "ConfigServiceBinder.h"
+#include "OpdeServiceManager.h"
 #include "bindings.h"
+#include "config/ConfigService.h"
 
 namespace Opde {
 

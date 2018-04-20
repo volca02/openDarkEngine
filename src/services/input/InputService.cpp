@@ -24,9 +24,11 @@
 
 #include "InputService.h"
 #include "OpdeException.h"
-#include "ServiceCommon.h"
 #include "StringTokenizer.h"
+#include "config/ConfigService.h"
 #include "logger.h"
+#include "loop/LoopService.h"
+#include "render/RenderService.h"
 
 using namespace std;
 using namespace Ogre;

@@ -23,6 +23,7 @@
  *****************************************************************************/
 
 #include "InheritServiceBinder.h"
+#include "OpdeServiceManager.h"
 #include "InheritQueryResultBinder.h"
 #include "bindings.h"
 

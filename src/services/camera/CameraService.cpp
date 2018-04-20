@@ -29,6 +29,7 @@
 #include "logger.h"
 #include "physics/PhysicsService.h"
 #include "player/PlayerService.h"
+#include "property/PropertyService.h"
 #include "render/RenderService.h"
 
 using namespace std;

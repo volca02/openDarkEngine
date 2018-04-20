@@ -477,7 +477,6 @@ PyTypeObject DrawOperationBinder::msType = {
     0,                            // PyBufferProcs *tp_as_buffer; */
 // for inheritance searches to work we need this
 #ifdef IS_PY3K
-#warning Check for correctness
     1, // long tp_flags; */
 #else
     Py_TPFLAGS_HAVE_CLASS, // long tp_flags; */

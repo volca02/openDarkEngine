@@ -22,32 +22,48 @@
  *
  *****************************************************************************/
 
+
+#include <SDL2/SDL_syswm.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
+
 #include "RenderService.h"
 
 #include "DarkSceneManager.h"
 
+#include "OpdeServiceManager.h"
+
+#include "config/ConfigService.h"
 #include "object/ObjectService.h"
 #include "property/PropertyService.h"
 
 #include "ServiceCommon.h"
 #include "logger.h"
 
-#include <SDL2/SDL_syswm.h>
-
 #include <OgreAnimation.h>
 #include <OgreBone.h>
+#include <OgreEntity.h>
 #include <OgreException.h>
+#include <OgreLight.h>
 #include <OgreMaterialManager.h>
 #include <OgreMeshManager.h>
 #include <OgreNode.h>
 #include <OgreRenderWindow.h>
 #include <OgreRoot.h>
+#include <OgreSceneNode.h>
 #include <OgreStringConverter.h>
 #include <OgreViewport.h>
 #include <OgreWindowEventUtilities.h>
 
 // Jorge texture png
 #include "jorge.h"
+
+#include "loop/LoopService.h"
+#include "object/ObjectService.h"
+#include "property/PropertyService.h"
+#include "OpdeServiceManager.h"
+#include "ManualBinFileLoader.h"
+#include "EntityInfo.h"
 
 #include "HasRefsProperty.h"
 #include "ModelNameProperty.h"
@@ -62,98 +78,6 @@ using namespace Ogre;
 namespace Opde {
 const char *DEFAULT_RAMP_OBJECT_NAME = "DefaultRamp";
 const char *FX_PARTICLE_OBJECT_NAME = "FX_PARTICLE";
-
-/*--------------------------------------------------------*/
-/*--------------------- EntityInfo -----------------------*/
-/*--------------------------------------------------------*/
-EntityInfo::EntityInfo(Ogre::SceneManager *man, Ogre::Entity *entity,
-                       Ogre::SceneNode *node)
-    : mSceneMgr(man), mRenderType(RENDER_TYPE_NORMAL), mHasRefs(true),
-      mSkip(false), mAlpha(1.0f), mZBias(0.0f), mEntity(entity), mNode(node),
-      mEmi(NULL) {
-    mEmi = new EntityMaterialInstance(mEntity);
-    mEmi->setSceneBlending(SBT_TRANSPARENT_ALPHA);
-    // mEmi->setSceneBlending(SBT_MODULATE);
-};
-
-// --------------------------------------------------------------------------
-EntityInfo::~EntityInfo() {
-    //
-    mNode->detachObject(mEntity);
-
-    delete mEmi;
-
-    mSceneMgr->destroyEntity(mEntity);
-
-    mSceneMgr->destroySceneNode(mNode->getName());
-}
-
-// --------------------------------------------------------------------------
-void EntityInfo::setHasRefs(bool _hasRefs) {
-    mHasRefs = _hasRefs;
-    refreshVisibility();
-};
-
-// --------------------------------------------------------------------------
-void EntityInfo::setRenderType(unsigned int _renderType) {
-    mRenderType = _renderType;
-    refreshVisibility();
-};
-
-// --------------------------------------------------------------------------
-void EntityInfo::setSkip(bool _skip) {
-    mSkip = _skip;
-    refreshVisibility();
-};
-
-// --------------------------------------------------------------------------
-void EntityInfo::setAlpha(float alpha) {
-    mAlpha = alpha;
-    mEmi->setTransparency(1.0f - mAlpha);
-};
-
-// --------------------------------------------------------------------------
-void EntityInfo::setZBias(size_t bias) {
-    mZBias = bias;
-    mEmi->setZBias(bias);
-};
-
-// --------------------------------------------------------------------------
-void EntityInfo::setScale(const Vector3 &scale) { mNode->setScale(scale); };
-
-// --------------------------------------------------------------------------
-void EntityInfo::setEntity(Ogre::Entity *entity) {
-    if (mEntity == entity)
-        return;
-
-    // detach the old entity
-    mNode->detachObject(mEntity);
-
-    // attach the new entity
-    mNode->attachObject(entity);
-
-    mEmi->setEntity(entity);
-
-    // destroy the previous entity
-    mSceneMgr->destroyEntity(mEntity);
-
-    mEntity = entity;
-
-    refreshVisibility();
-};
-
-// --------------------------------------------------------------------------
-void EntityInfo::refreshVisibility() {
-    // calculate the visibilities:
-    bool brType = true;
-
-    if (mRenderType == RENDER_TYPE_NOT_RENDERED)
-        brType = false;
-
-    // todo: editor mode handling
-
-    mNode->setVisible(!mSkip && mHasRefs && brType, true);
-};
 
 /*--------------------------------------------------------*/
 /*--------------------- RenderService --------------------*/
@@ -173,7 +97,7 @@ RenderService::RenderService(ServiceManager *manager, const std::string &name)
     // initialiser of graphics as the whole. This will be the modification that
     // should be done soon in order to let the code look and be nice FIX!
     mRoot = Root::getSingletonPtr();
-    mManualBinFileLoader = new ManualBinFileLoader();
+    mManualBinFileLoader.reset(new ManualBinFileLoader());
 
     mLoopClientDef.id = LOOPCLIENT_ID_RENDERER;
     mLoopClientDef.mask = LOOPMODE_RENDER;
@@ -194,9 +118,6 @@ RenderService::~RenderService() {
         delete mDarkSMFactory;
         mDarkSMFactory = NULL;
     }
-
-    delete mManualBinFileLoader;
-    mManualBinFileLoader = NULL;
 }
 
 // --------------------------------------------------------------------------
@@ -546,7 +467,7 @@ void RenderService::prepareMesh(const Ogre::String &name) {
         try {
             Ogre::MeshPtr mesh1 = Ogre::MeshManager::getSingleton().create(
                 fname, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                true, mManualBinFileLoader);
+                true, mManualBinFileLoader.get());
         } catch (FileNotFoundException) {
             LOG_ERROR("RenderService::prepareMesh: Could not find the "
                       "requested model %s",

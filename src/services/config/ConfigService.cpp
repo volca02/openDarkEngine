@@ -22,9 +22,11 @@
  *****************************************************************************/
 
 #include "ConfigService.h"
+#include "FileGroup.h"
 #include "OpdeException.h"
-#include "ServiceCommon.h"
+#include "OpdeServiceManager.h"
 #include "logger.h"
+#include "platform/PlatformService.h"
 
 #include <OgreConfigFile.h>
 #include <OgreException.h>

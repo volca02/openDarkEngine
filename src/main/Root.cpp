@@ -270,20 +270,15 @@ void Root::loadResourceConfig(const std::string &fileName) {
     cf.load(fileName);
 
     // Go through all sections & settings in the file
-    Ogre::ConfigFile::SectionIterator seci = cf.getSectionIterator();
+    const auto &settings = cf.getSettingsBySection();
 
     Ogre::String secName, typeName, archName;
 
-    while (seci.hasMoreElements()) {
-        secName = seci.peekNextKey();
-        Ogre::ConfigFile::SettingsMultiMap *settings = seci.getNext();
-        Ogre::ConfigFile::SettingsMultiMap::iterator i;
-
-        for (i = settings->begin(); i != settings->end(); ++i) {
-            typeName = i->first;
-            archName = i->second;
+    for (const auto &sec : settings) {
+        const Ogre::String &secName = sec.first;
+        for (const auto &set : sec.second) {
             Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
-                archName, typeName, secName);
+                set.second, set.first, secName);
         }
     }
 }

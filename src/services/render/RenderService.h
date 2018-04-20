@@ -28,116 +28,34 @@
 #include "config.h"
 
 #include "EntityMaterialInstance.h"
-#include "ManualBinFileLoader.h"
 #include "MessageSource.h"
 #include "OpdeService.h"
-#include "OpdeServiceManager.h"
+#include "OpdeServiceFactory.h"
 #include "ServiceCommon.h"
 #include "SharedPtr.h"
-#include "loop/LoopService.h"
-#include "object/ObjectService.h"
-#include "property/PropertyService.h"
+#include "RenderCommon.h"
+#include "loop/LoopCommon.h"
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
-
-#include <OgreEntity.h>
-#include <OgreLight.h>
-#include <OgreSceneNode.h>
+struct SDL_Window;
 
 namespace Ogre {
 class DarkSceneManager;
 class DarkSceneManagerFactory;
+class ManualBinFileLoader;
 } // namespace Ogre
 
 namespace Opde {
+
 // forward decls.
 class HasRefsProperty;
 class RenderAlphaProperty;
 class RenderTypeProperty;
 class ZBiasProperty;
+class EntityInfo;
 
-/// Render System message type
-typedef enum {
-    /// Render window changed the size
-    RENDER_WINDOW_SIZE_CHANGE = 1
-} RenderMessageType;
-
-/// window size message details
-struct RenderWindowSize {
-    /// New width of the window (pixels)
-    unsigned int width;
-    /// New height of the window (pixels)
-    unsigned int height;
-    /// The new window is fullscreen (or windowed)
-    bool fullscreen;
-    /// Display id, or -1 if not found
-    int display;
-    // TODO: Pixelformat
-
-    RenderWindowSize() : width(0), height(0), fullscreen(false), display(-1) {}
-
-    RenderWindowSize(unsigned int w, unsigned int h, bool fs = false)
-        : width(w), height(h), fullscreen(fs), display(-1) {}
-};
-
-/// Render service message (Used to signalize a change in the renderer setup)
-struct RenderServiceMsg {
-    RenderMessageType msg_type;
-
-    RenderWindowSize size;
-};
-
-/** Entity property realization object. A package of an entity and a
- * EntityMaterialInstance. Realizes all the per-object rendering related
- * properties. All the property handlers(of RenderedProperty class) use this
- * class to make the property values visible. */
-class EntityInfo {
-public:
-    EntityInfo(Ogre::SceneManager *man, Ogre::Entity *entity,
-               Ogre::SceneNode *node);
-
-    // destructor - destroys the
-    ~EntityInfo();
-
-    // setters:
-    void setHasRefs(bool _hasRefs);
-    void setRenderType(unsigned int _renderType);
-    void setSkip(bool _skip);
-    void setAlpha(float alpha);
-    void setZBias(size_t bias);
-    void setScale(const Vector3 &scale);
-
-    void setEntity(Ogre::Entity *newEntity);
-
-    inline Ogre::Entity *getEntity(void) { return mEntity; };
-    inline Ogre::SceneNode *getSceneNode(void) { return mNode; };
-
-    /// refreshes the visibilty of the object based on hasRefs, renderType and
-    /// skip
-    void refreshVisibility();
-
-protected:
-    Ogre::SceneManager *mSceneMgr;
-
-    unsigned int mRenderType;
-
-    bool mHasRefs;
-
-    /// Used by FX_Particle and such. Hides without interfering with the
-    /// previous two
-    bool mSkip;
-
-    /// alpha transparency value of the object
-    float mAlpha;
-
-    /// z-bias of the object
-    float mZBias;
-
-    Ogre::Entity *mEntity;
-    Ogre::SceneNode *mNode;
-    EntityMaterialInstance *mEmi;
-};
+class Property;
+struct PropertyChangeMsg;
+struct ObjectServiceMsg;
 
 typedef shared_ptr<EntityInfo> EntityInfoPtr;
 
@@ -153,9 +71,9 @@ class RenderService;
  * object coordinates being 0,0,0 and we have to wait for Position prop message
  * to come in order to move the node
  */
-class OPDELIB_EXPORT RenderService : public ServiceImpl<RenderService>,
-                                     public MessageSource<RenderServiceMsg>,
-                                     public LoopClient {
+class RenderService : public ServiceImpl<RenderService>,
+                      public MessageSource<RenderServiceMsg>,
+                      public LoopClient {
     friend class ModelNameProperty; // so it can set object model name
 public:
     RenderService(ServiceManager *manager, const std::string &name);
@@ -286,7 +204,7 @@ protected:
     Property *mPropModelName;
 
     // "Position" Property related
-    Property::ListenerID mPropPositionListenerID;
+    MessageListenerID mPropPositionListenerID;
     Property *mPropPosition;
 
     // "ModelScale" Property related
@@ -312,14 +230,14 @@ protected:
     Ogre::Camera *mDefaultCamera;
 
     /// Manual loader for bin meshes
-    Ogre::ManualBinFileLoader *mManualBinFileLoader;
+    std::unique_ptr<Ogre::ManualBinFileLoader> mManualBinFileLoader;
 
     /// Pointer for loop service
     LoopServicePtr mLoopService;
 
     /// Shared ptr to object service (for scene nodes)
     ObjectServicePtr mObjectService;
-    ObjectService::ListenerID mObjSystemListenerID;
+    MessageListenerID mObjSystemListenerID;
 
     // Database listener handle related (For render params chunk)
     // DatabaseServicePtr mDatabaseService;

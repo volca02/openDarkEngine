@@ -34,8 +34,8 @@
 #include "Vector3.h"
 
 #include "ServiceCommon.h"
-
-#include "OpdeServiceManager.h"
+#include "OpdeService.h"
+#include "OpdeServiceFactory.h"
 #include "config.h"
 
 #include <OgreVector2.h>
@@ -243,14 +243,12 @@ public:
     /** Creates a LightService instance */
     Service *createInstance(ServiceManager *manager);
 
-    virtual const std::string &getName();
-
-    virtual const uint getMask();
-
-    virtual const size_t getSID();
+    const std::string &getName() override;
+    const uint getMask() override;
+    const size_t getSID() override;
 
 private:
-    static std::string mName;
+    static const std::string mName;
 };
 } // namespace Opde
 

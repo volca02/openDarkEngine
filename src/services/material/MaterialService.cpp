@@ -22,7 +22,13 @@
  *****************************************************************************/
 
 #include "MaterialService.h"
+#include "File.h"
+#include "FileGroup.h"
+#include "OpdeServiceManager.h"
 #include "ServiceCommon.h"
+#include "config/ConfigService.h"
+#include "database/DatabaseService.h"
+#include "light/LightService.h"
 #include "logger.h"
 
 #include <OgreCommon.h>
@@ -823,7 +829,7 @@ Ogre::TextureUnitState *MaterialService::createAnimatedTextureState(
 }
 
 //-------------------------- Factory implementation
-std::string MaterialServiceFactory::mName = "MaterialService";
+const std::string MaterialServiceFactory::mName = "MaterialService";
 
 MaterialServiceFactory::MaterialServiceFactory() : ServiceFactory() {}
 

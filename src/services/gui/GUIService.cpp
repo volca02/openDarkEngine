@@ -23,8 +23,14 @@
 
 #include "GUIService.h"
 #include "DarkCommon.h"
+#include "OpdeServiceManager.h"
 #include "ServiceCommon.h"
 #include "StringTokenizer.h"
+#include "config/ConfigService.h"
+#include "draw/DrawService.h"
+#include "gui/ConsoleGUI.h"
+#include "loop/LoopService.h"
+#include "render/RenderService.h"
 
 using namespace std;
 using namespace Ogre;
@@ -37,10 +43,17 @@ namespace Opde {
 template <> const size_t ServiceImpl<GUIService>::SID = __SERVICE_ID_GUI;
 
 GUIService::GUIService(ServiceManager *manager, const std::string &name)
-    : ServiceImpl<Opde::GUIService>(manager, name), mActive(false),
-      mVisible(false), mActiveSheet(), mConsole(NULL), mCoreAtlas(NULL),
-      mConsoleFont(NULL), mRenderServiceListenerID(0), mInputSrv(NULL),
-      mRenderSrv(NULL) {
+    : ServiceImpl<Opde::GUIService>(manager, name),
+      mActive(false),
+      mVisible(false),
+      mActiveSheet(),
+      mConsole(),
+      mCoreAtlas(NULL),
+      mConsoleFont(NULL),
+      mRenderServiceListenerID(0),
+      mInputSrv(NULL),
+      mRenderSrv(NULL)
+{
 
     mLoopClientDef.id = LOOPCLIENT_ID_GUI;
     mLoopClientDef.mask = LOOPMODE_GUI;
@@ -49,7 +62,7 @@ GUIService::GUIService(ServiceManager *manager, const std::string &name)
 }
 
 // -----------------------------------
-GUIService::~GUIService() { delete mConsole; }
+GUIService::~GUIService() { }
 
 // -----------------------------------
 void GUIService::setActive(bool active) {
@@ -143,7 +156,7 @@ void GUIService::bootstrapFinished() {
         mDrawSrv->loadFont(mCoreAtlas, mConsoleFontName, mConsoleFontGroup);
 
     // create the console.
-    mConsole = new ConsoleGUI(this);
+    mConsole.reset(new ConsoleGUI(this));
 }
 
 // -----------------------------------
@@ -159,8 +172,7 @@ void GUIService::shutdown() {
 
     mInputSrv->unregisterCommandTrap("show_console");
 
-    delete mConsole;
-    mConsole = NULL;
+    mConsole.reset();
 
     mRenderSrv.reset();
     mInputSrv.reset();

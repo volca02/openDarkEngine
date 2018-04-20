@@ -786,7 +786,7 @@ Ogre::String DrawService::getResourcePath(const Ogre::String &res,
 }
 
 //-------------------------- Factory implementation
-std::string DrawServiceFactory::mName = "DrawService";
+const std::string DrawServiceFactory::mName = "DrawService";
 
 DrawServiceFactory::DrawServiceFactory() : ServiceFactory(){};
 

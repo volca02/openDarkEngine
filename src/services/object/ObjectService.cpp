@@ -22,19 +22,22 @@
  *
  *****************************************************************************/
 
-#include "ObjectService.h"
-#include "ServiceCommon.h"
-#include "config.h"
-#include "config/ConfigService.h"
-#include "logger.h"
-
-#include "render/RenderService.h"
-
 #include <OgreMath.h>
 #include <OgreStringConverter.h>
 
-using namespace std;
-using namespace Ogre;
+#include "ObjectService.h"
+#include "OpdeServiceManager.h"
+#include "PositionPropertyStorage.h"
+#include "ServiceCommon.h"
+#include "SymNamePropertyStorage.h"
+#include "config.h"
+#include "config/ConfigService.h"
+#include "database/DatabaseService.h"
+#include "inherit/InheritService.h"
+#include "link/LinkService.h"
+#include "property/PropertyService.h"
+
+#include "logger.h"
 
 namespace Opde {
 /*------------------------------------------------------*/
@@ -695,7 +698,7 @@ void ObjectService::resetMinMaxID() {
 }
 
 //-------------------------- Factory implementation
-std::string ObjectServiceFactory::mName = "ObjectService";
+const std::string ObjectServiceFactory::mName = "ObjectService";
 
 ObjectServiceFactory::ObjectServiceFactory() : ServiceFactory(){};
 

@@ -22,7 +22,9 @@
  *
  *****************************************************************************/
 
+#include "OpdeServiceManager.h"
 #include "ObjectServiceBinder.h"
+#include "object/ObjectService.h"
 #include "bindings.h"
 
 namespace Opde {

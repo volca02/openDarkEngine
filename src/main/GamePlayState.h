@@ -122,7 +122,7 @@ private:
     LinkServicePtr mLinkService;
     int StartingPointObjID;
     /// Link (Relation player factory) listener registration ID
-    Relation::ListenerID mPlayerFactoryListenerID;
+    MessageListenerID mPlayerFactoryListenerID;
 
     DrawServicePtr mDrawService;
 };

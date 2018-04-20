@@ -44,7 +44,11 @@ class DarkSceneManager;
 } // namespace Ogre
 
 namespace Opde {
+
 class WorldRepService;
+class LightsForCell;
+
+using LightsForCellPtr = std::shared_ptr<LightsForCell>;
 
 /** Helping BSP vertex struct, used to prepare the vertex data. The
  * VertexDeclaration has to be set up accordingly */

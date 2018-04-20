@@ -23,6 +23,7 @@
  *****************************************************************************/
 
 #include "Property.h"
+#include "OpdeServiceManager.h"
 #include "inherit/InheritService.h"
 
 using namespace std;

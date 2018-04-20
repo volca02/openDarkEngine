@@ -30,8 +30,9 @@
 #ifndef __INHERITORCOMMON_H
 #define __INHERITORCOMMON_H
 
+#include "MessageSource.h"
 #include "SharedPtr.h"
-#include "link/LinkService.h"
+#include "DVariant.h"
 
 namespace Opde {
 // Forward declaration

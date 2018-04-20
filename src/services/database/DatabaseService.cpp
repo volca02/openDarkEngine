@@ -22,8 +22,10 @@
  *****************************************************************************/
 
 #include "DatabaseService.h"
+#include "FileGroup.h"
+#include "OgreTimer.h"
 #include "OpdeException.h"
-#include "ServiceCommon.h"
+#include "OpdeServiceManager.h"
 #include "logger.h"
 
 #include <OgreResourceGroupManager.h>

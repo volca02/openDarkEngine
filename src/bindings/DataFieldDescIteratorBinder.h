@@ -25,11 +25,10 @@
 #ifndef __DATAFIELDDESCITERATORBINDER_H
 #define __DATAFIELDDESCITERATORBINDER_H
 
+#include "DataStorage.h"
 #include "bindings.h"
-#include "inherit/InheritService.h"
 
 namespace Opde {
-
 namespace Python {
 
 struct DataFieldsWithPosition {

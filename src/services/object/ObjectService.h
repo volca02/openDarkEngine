@@ -27,17 +27,17 @@
 
 #include "config.h"
 
+#include "Vector3.h"
+#include "Quaternion.h"
+#include "DarkCommon.h"
+#include "ServiceCommon.h"
+#include "ObjectCommon.h"
+
 #include "MessageSource.h"
 #include "OpdeService.h"
-#include "OpdeServiceManager.h"
-#include "database/DatabaseService.h"
+#include "OpdeServiceFactory.h"
 
-#include "inherit/InheritService.h"
-#include "link/LinkService.h"
-#include "property/PropertyService.h"
-
-#include "PositionPropertyStorage.h"
-#include "SymNamePropertyStorage.h"
+#include "database/DatabaseCommon.h"
 
 #include "BitArray.h"
 
@@ -46,33 +46,12 @@
 #include <stack>
 
 namespace Opde {
-/// Object system broadcasted message types
-typedef enum {
-    /// Object is starting to be created (only basic initialization happened).
-    /// Used to initialize depending services
-    OBJ_CREATE_STARTED = 1,
-    /// Object was created (Including all links and properties)
-    OBJ_CREATED,
-    /// Object was destroyed (Including all links and properties)
-    OBJ_DESTROYED,
-    /// All objects were destroyed
-    OBJ_SYSTEM_CLEARED,
-    /// New min/max range for object ID's was supplied
-    OBJ_ID_RANGE_CHANGED
 
-} ObjectServiceMessageType;
-
-/// Message from object service - object was created/destroyed, etc
-struct ObjectServiceMsg {
-    /// Type of the message that happened
-    ObjectServiceMessageType type;
-    /// Object id that the message is informing about (not valid for
-    /// OBJ_SYSTEM_CLEARED). Minimal object id for OBJ_ID_RANGE_CHANGED
-    int objectID;
-    /// The Maximal id to hold. Only for OBJ_ID_RANGE_CHANGED event, otherwise
-    /// undefined
-    int maxObjID;
-};
+class Property;
+class SymNamePropertyStorage;
+class PositionPropertyStorage;
+using PositionPropertyStoragePtr = std::shared_ptr<PositionPropertyStorage>;
+using SymNamePropertyStoragePtr = std::shared_ptr<SymNamePropertyStorage>;
 
 /** @brief Object service - service managing in-game objects. Holder of the
 object's scene nodes
@@ -91,9 +70,9 @@ preparation for object creation (for example render service will create a
 SceneNode at that time, so it can update it's position and orientation when
 loading Position properties)
 */
-class OPDELIB_EXPORT ObjectService : public ServiceImpl<ObjectService>,
-                                     public MessageSource<ObjectServiceMsg>,
-                                     public DatabaseListener {
+class ObjectService : public ServiceImpl<ObjectService>,
+                      public MessageSource<ObjectServiceMsg>,
+                      public DatabaseListener {
 public:
     ObjectService(ServiceManager *manager, const std::string &name);
 
@@ -271,6 +250,7 @@ protected:
 
     /// Symbolic name property pointer
     Property *mPropSymName;
+
     /// Donor type property pointer
     Property *mPropDonorType;
 
@@ -284,11 +264,8 @@ protected:
     PositionPropertyStoragePtr mPositionStorage;
 };
 
-/// Shared pointer to the Object service
-typedef shared_ptr<ObjectService> ObjectServicePtr;
-
 /// Factory for the ObjectService objects
-class OPDELIB_EXPORT ObjectServiceFactory : public ServiceFactory {
+class ObjectServiceFactory : public ServiceFactory {
 public:
     ObjectServiceFactory();
     ~ObjectServiceFactory(){};
@@ -296,14 +273,12 @@ public:
     /** Creates a ObjectService instance */
     Service *createInstance(ServiceManager *manager);
 
-    virtual const std::string &getName();
-
-    virtual const uint getMask();
-
-    virtual const size_t getSID();
+    const std::string &getName() override;
+    const uint getMask() override;
+    const size_t getSID() override;
 
 private:
-    static std::string mName;
+    static const std::string mName;
 };
 } // namespace Opde
 

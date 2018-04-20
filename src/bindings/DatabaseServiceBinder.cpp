@@ -23,6 +23,8 @@
  *****************************************************************************/
 
 #include "DatabaseServiceBinder.h"
+#include "database/DatabaseService.h"
+#include "OpdeServiceManager.h"
 #include "PythonCallback.h"
 #include "PythonStruct.h"
 #include "bindings.h"

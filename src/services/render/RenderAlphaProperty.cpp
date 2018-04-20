@@ -23,6 +23,7 @@
  *****************************************************************************/
 
 #include "RenderAlphaProperty.h"
+#include "EntityInfo.h"
 #include "RenderService.h"
 #include "SingleFieldDataStorage.h"
 #include "property/PropertyService.h"

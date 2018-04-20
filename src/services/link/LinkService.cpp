@@ -21,11 +21,16 @@
  *
  *****************************************************************************/
 
-#include "LinkService.h"
-#include "ServiceCommon.h"
-#include "logger.h"
+#include <string>
 
-using namespace std;
+#include "format.h"
+#include "LinkService.h"
+#include "FileGroup.h"
+#include "OpdeServiceManager.h"
+#include "ServiceCommon.h"
+#include "database/DatabaseService.h"
+#include "logger.h"
+#include "Relation.h"
 
 namespace Opde {
 /// helper string iterator over map keys
@@ -110,10 +115,11 @@ void LinkService::load(const FileGroupPtr &db, const BitArray &objMask) {
         std::string stxt = text;
 
         if (stxt.substr(0, 1) == "~")
-            OPDE_EXCEPT("Conflicting name. Character ~ is reserved for inverse "
-                        "relations. Conflicting name : " +
-                            stxt,
-                        "LinkService::_load");
+            OPDE_EXCEPT(
+                format("Conflicting name. Character ~ is reserved for inverse "
+                       "relations. Conflicting name : ",
+                       stxt),
+                "LinkService::_load");
 
         // Look for relation with the specified Name
 
@@ -131,8 +137,8 @@ void LinkService::load(const FileGroupPtr &db, const BitArray &objMask) {
 
         // Request the mapping to ID
         if (!requestRelationFlavorMap(i, text, rel))
-            OPDE_EXCEPT(string("Could not map relation ") + text +
-                            " to flavor. Name/ID conflict",
+            OPDE_EXCEPT(format("Could not map relation '", text,
+                               "' to flavor. Name/ID conflict"),
                         "LinkService::_load");
 
         LOG_DEBUG("Mapped relation %s to flavor %d", text, i);
@@ -143,16 +149,16 @@ void LinkService::load(const FileGroupPtr &db, const BitArray &objMask) {
         rnit = mRelationNameMap.find(inverse);
 
         if (rnit == mRelationNameMap.end())
-            OPDE_EXCEPT(string("Could not find inverse relation ") + inverse +
-                            " predefined. Could not continue",
+            OPDE_EXCEPT(format("Could not find inverse relation ", inverse,
+                               " predefined. Could not continue"),
                         "LinkService::_load");
 
         RelationPtr irel = rnit->second;
 
         // Request the mapping to ID
         if (!requestRelationFlavorMap(-i, inverse, irel))
-            OPDE_EXCEPT(string("Could not map inverse relation ") + inverse +
-                            " to flavor. Name/ID conflict",
+            OPDE_EXCEPT(format("Could not map inverse relation ", inverse,
+                               " to flavor. Name/ID conflict"),
                         "LinkService::_load");
 
         LOG_DEBUG("Mapped relation pair %s, %s to flavor %d, %d", text,
@@ -239,9 +245,10 @@ RelationPtr LinkService::createRelation(const std::string &name,
                                         bool hidden) {
     if (name.substr(0, 1) == "~")
         OPDE_EXCEPT(
-            "Name conflict: Relation can't use ~ character as the first one, "
-            "it's reserved for inverse relations. Conflicting name: " +
-                name,
+            format(
+                "Name conflict: Relation can't use ~ character as the first "
+                "one, it's reserved for inverse relations. Conflicting name: ",
+                name),
             "LinkService::createRelation");
 
     std::string inverse = "~" + name;
@@ -432,7 +439,7 @@ void LinkService::objectDestroyed(int id) {
 }
 
 //-------------------------- Factory implementation
-std::string LinkServiceFactory::mName = "LinkService";
+const std::string LinkServiceFactory::mName = "LinkService";
 
 LinkServiceFactory::LinkServiceFactory() : ServiceFactory(){};
 

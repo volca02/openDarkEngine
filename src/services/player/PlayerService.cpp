@@ -174,8 +174,10 @@ void PlayerService::simStep(float simTime, float delta) {
 
     // Process the movement
     // Do we have creepon pushed?
+    /*
     float forward = mForwardMovement * (mCreepOn ? 0.5 : 1);
     float sidestep = mSideMovement * (mCreepOn ? 0.5 : 1);
+    */
 
     // Control the objects velocity via phys axis controls
     /*

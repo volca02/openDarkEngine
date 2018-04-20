@@ -24,7 +24,7 @@
 #ifndef __RELATION_H
 #define __RELATION_H
 
-#include "config.h"
+#include <string>
 
 #include "BitArray.h"
 #include "DataStorage.h"
@@ -32,13 +32,12 @@
 #include "LinkCommon.h"
 #include "MessageSource.h"
 #include "NonCopyable.h"
-#include <string>
 
 namespace Opde {
 /** @brief Relation. A store of a group of links of the same flavor.
  */
-class OPDELIB_EXPORT Relation : public NonCopyable,
-                                public MessageSource<LinkChangeMsg> {
+class Relation : public NonCopyable,
+                 public MessageSource<LinkChangeMsg> {
 public:
     Relation(const std::string &name, const DataStoragePtr &stor,
              bool isInverse, bool hidden = false);

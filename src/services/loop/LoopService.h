@@ -30,118 +30,28 @@
 #ifndef __LOOPSERVICE_H
 #define __LOOPSERVICE_H
 
-#include "config.h"
+#include <vector>
+#include <map>
 
 #include "Callback.h"
+#include "LoopCommon.h"
 #include "OpdeService.h"
-#include "OpdeServiceManager.h"
+#include "OpdeServiceFactory.h"
 #include "SharedPtr.h"
 #include "compat.h"
-#include "config.h"
-#include "config/ConfigService.h"
 
-#include <OgreRoot.h>
-#include <OgreTimer.h>
+namespace Ogre {
+class Root;
+} // namespace Ogre
 
 namespace Opde {
 
-// Forward decl.
 class LoopService;
-class LoopMode;
-
-/// @typedef Loop client id specifier
-typedef uint64_t LoopClientID;
-
-/// The ID of the loop client that is invalid (The loop client did not fill the
-/// definition struct)
-#define LOOPCLIENT_ID_INVALID 0
-
-/// @typedef Loop mode id specifier
-typedef uint64_t LoopModeID;
-
-/// @typedef The loop mode mask
-typedef uint64_t LoopModeMask;
-
-/// @typedef The priority of the client (inverse)
-typedef int64_t LoopClientPriority;
-
-/// Mask that permits all the clients to run
-/// ULL at the end of the value means unsigned long long
-#define LOOPMODE_MASK_ALL_CLIENTS 0xFFFFFFFFFFFFFFFFULL
-
-/// The definition of a loop client
-typedef struct {
-    /// Unique ID of the loop client
-    LoopClientID id;
-    /// Loop mode mask (which loop modes this loop client is member of)
-    LoopModeMask mask;
-    /// A descriptive name of the loop client name (for debugging)
-    std::string name;
-    /// The clients priority (not necesarilly unique) - lower number -> client
-    /// called sooner in the loop
-    LoopClientPriority priority;
-} LoopClientDefinition;
-
-/// Loop mode definition struct
-typedef struct {
-    /// unique id of this loop mode
-    LoopModeID id;
-    /// The mask of the loop mode (Should be 2^n for normal loop modes, but is
-    /// not checked)
-    LoopModeMask mask;
-    /// A descriptive name of the loop mode name (for debugging)
-    std::string name;
-} LoopModeDefinition;
-
-/// Loop Client. Abstract class. Receives the loop messages
-class OPDELIB_EXPORT LoopClient {
-protected:
-    friend class LoopService;
-    friend class LoopMode;
-
-    /// default destructor
-    virtual ~LoopClient();
-
-    /** Loop mode started event. Called on the start of the frame, if a loop
-     * mode changed and this client is a listener of the new loop mode
-     * @param loopMode The new active loop mode
-     */
-    virtual void loopModeStarted(const LoopModeDefinition &loopMode);
-
-    /** Loop mode ended event. Called on the end of the frame, if a loop mode
-     * changed and this client is a listener of the old loop mode
-     * @param loopMode The old loop mode
-     */
-    virtual void loopModeEnded(const LoopModeDefinition &loopMode);
-
-    /** Loop step event. Called every frame by the active loop mode, if this
-     * mode is the member of the new mode
-     * @param deltaTime The time (in miliseconds) that passed since the start of
-     * the last frame to the start of this frame
-     */
-    virtual void loopStep(float deltaTime) = 0;
-
-    /// @returns the Loop mask of this client
-    LoopModeMask getLoopMask() { return mLoopClientDef.mask; };
-
-    /// @returns the clients priority
-    LoopClientPriority getPriority() { return mLoopClientDef.priority; };
-
-    /** The loop client definition getter.
-     * @return The loop client definition struct reference.
-     */
-    virtual const LoopClientDefinition &getLoopClientSpecification() const {
-        return mLoopClientDef;
-    };
-
-    /// Loop client mode definition
-    LoopClientDefinition mLoopClientDef;
-};
 
 typedef std::multimap<LoopClientPriority, LoopClient *> LoopClientMap;
 
 /** The loop mode definition. */
-class OPDELIB_EXPORT LoopMode {
+class LoopMode {
 public:
     LoopMode(const LoopModeDefinition &def, LoopService *owner);
 
@@ -186,7 +96,7 @@ protected:
 typedef shared_ptr<LoopMode> LoopModePtr;
 
 /** @brief Loop Service - service which handles game loop (per-frame loop) */
-class OPDELIB_EXPORT LoopService : public ServiceImpl<LoopService> {
+class LoopService : public ServiceImpl<LoopService> {
 public:
     /** Constructor
      * @param manager The ServiceManager that created this service
@@ -247,9 +157,7 @@ public:
     void step();
 
     /// @return The current absolute time in ms
-    unsigned long getCurrentTime() {
-        return mRoot->getTimer()->getMilliseconds();
-    };
+    unsigned long getCurrentTime();
 
     /// Logs DEBUG level info of one frame timings
     void debugOneFrame();
@@ -280,7 +188,7 @@ protected:
     typedef std::map<LoopModeID, LoopModePtr> LoopModeIDMap;
     typedef std::map<std::string, LoopModePtr> LoopModeNameMap;
 
-    typedef std::list<LoopClient *> LoopClientList;
+    typedef std::vector<LoopClient *> LoopClientList;
 
     /// Loop mode map - per ID
     LoopModeIDMap mLoopModes;
@@ -302,11 +210,8 @@ protected:
     bool mDebugOneFrame;
 };
 
-/// Shared pointer to Loop service
-typedef shared_ptr<LoopService> LoopServicePtr;
-
 /// Factory for the LoopService objects
-class OPDELIB_EXPORT LoopServiceFactory : public ServiceFactory {
+class LoopServiceFactory : public ServiceFactory {
 public:
     LoopServiceFactory();
     ~LoopServiceFactory(){};
@@ -314,14 +219,12 @@ public:
     /** Creates a LoopService instance */
     Service *createInstance(ServiceManager *manager);
 
-    virtual const std::string &getName();
-
-    virtual const uint getMask();
-
-    virtual const size_t getSID();
+    const std::string &getName() override;
+    const uint getMask() override;
+    const size_t getSID() override;
 
 private:
-    static std::string mName;
+    static const std::string mName;
 };
 } // namespace Opde
 

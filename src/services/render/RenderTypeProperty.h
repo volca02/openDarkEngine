@@ -26,14 +26,9 @@
 #define __RENDERTYPEPROPERTY_H
 
 #include "RenderedProperty.h"
+#include "RenderCommon.h"
 
 namespace Opde {
-// Internal rendertype constants
-
-extern const unsigned int RENDER_TYPE_NORMAL;
-extern const unsigned int RENDER_TYPE_NOT_RENDERED;
-extern const unsigned int RENDER_TYPE_NO_LIGHTMAP;
-extern const unsigned int RENDER_TYPE_EDITOR_ONLY;
 
 /** a RenderType property implementation using rendered property handler.
  * Uses simple unsigned integer data storage with an enumeration. Defaults to 0

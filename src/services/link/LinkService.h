@@ -24,22 +24,27 @@
 #ifndef __LINKSERVICE_H
 #define __LINKSERVICE_H
 
-#include "config.h"
+#include "DarkCommon.h"
+#include "ServiceCommon.h"
+#include "DataStorage.h"
 
 #include "BitArray.h"
-#include "FileGroup.h"
 #include "LinkCommon.h"
 #include "OpdeService.h"
-#include "OpdeServiceManager.h"
-#include "Relation.h"
+#include "OpdeServiceFactory.h"
 #include "SharedPtr.h"
-#include "database/DatabaseService.h"
 
 namespace Opde {
 
+class Relation;
+class DataStorage;
+
+using RelationPtr = std::shared_ptr<Relation>;
+using DataStoragePtr = std::shared_ptr<DataStorage>;
+
 /** @brief Link service - service managing in-game object links
  */
-class OPDELIB_EXPORT LinkService : public ServiceImpl<LinkService> {
+class LinkService : public ServiceImpl<LinkService> {
 public:
     LinkService(ServiceManager *manager, const std::string &name);
 
@@ -182,11 +187,8 @@ protected:
     DatabaseServicePtr mDatabaseService;
 };
 
-/// Shared pointer to Link service
-typedef shared_ptr<LinkService> LinkServicePtr;
-
 /// Factory for the LinkService objects
-class OPDELIB_EXPORT LinkServiceFactory : public ServiceFactory {
+class LinkServiceFactory : public ServiceFactory {
 public:
     LinkServiceFactory();
     ~LinkServiceFactory(){};
@@ -194,14 +196,12 @@ public:
     /** Creates a LinkService instance */
     Service *createInstance(ServiceManager *manager);
 
-    virtual const std::string &getName();
-
-    virtual const uint getMask();
-
-    virtual const size_t getSID();
+    const std::string &getName() override;
+    const uint getMask() override;
+    const size_t getSID() override;
 
 private:
-    static std::string mName;
+    static const std::string mName;
 };
 } // namespace Opde
 

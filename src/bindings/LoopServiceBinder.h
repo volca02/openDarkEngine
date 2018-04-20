@@ -26,8 +26,7 @@
 #define __LOOPSERVICEBINDER_H
 
 #include "bindings.h"
-
-#include "loop/LoopService.h"
+#include "ServiceCommon.h"
 
 namespace Opde {
 namespace Python {

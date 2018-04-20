@@ -303,14 +303,14 @@ public:
     /** Creates a GameService instance */
     Service *createInstance(ServiceManager *manager);
 
-    virtual const std::string &getName();
+    const std::string &getName() override;
 
-    virtual const uint getMask();
+    const uint getMask() override;
 
-    virtual const size_t getSID();
+    const size_t getSID() override;
 
 private:
-    static std::string mName;
+    static const std::string mName;
 };
 } // namespace Opde
 

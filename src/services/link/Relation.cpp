@@ -22,10 +22,12 @@
  *****************************************************************************/
 
 #include "Relation.h"
+#include "OpdeServiceManager.h"
 #include "LinkCommon.h"
 #include "inherit/InheritService.h"
 #include "integers.h"
 #include "logger.h"
+#include "inherit/InheritService.h"
 
 #include <stack>
 

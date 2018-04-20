@@ -21,9 +21,14 @@
  *
  *****************************************************************************/
 
+#include <OgreRoot.h>
+#include <OgreTimer.h>
+
 #include "LoopService.h"
 #include "OpdeException.h"
 #include "ServiceCommon.h"
+#include "OpdeServiceManager.h"
+#include "config/ConfigService.h"
 #include "logger.h"
 
 using namespace std;
@@ -314,6 +319,12 @@ void LoopService::step() {
     mLastFrameTime = lFrameStart;
 }
 
+
+//------------------------------------------------------
+unsigned long LoopService::getCurrentTime() {
+    return mRoot->getTimer()->getMilliseconds();
+};
+
 //------------------------------------------------------
 void LoopService::setLoopMode(const LoopModePtr &newMode) {
     LOG_INFO("LoopService: Setting loop mode %s",
@@ -328,7 +339,7 @@ void LoopService::debugOneFrame() { mDebugOneFrame = true; }
 unsigned long LoopService::getLastFrameTime() { return mLastFrameLength; }
 
 //-------------------------- Factory implementation
-std::string LoopServiceFactory::mName = "LoopService";
+const std::string LoopServiceFactory::mName = "LoopService";
 
 LoopServiceFactory::LoopServiceFactory() : ServiceFactory(){};
 

@@ -26,8 +26,11 @@
 #include "ArchetypeInheritor.h"
 #include "CachedInheritor.h"
 #include "NeverInheritor.h"
+#include "OpdeServiceManager.h"
 #include "ServiceCommon.h"
 #include "SingleFieldDataStorage.h"
+#include "link/Relation.h"
+#include "link/LinkService.h"
 #include "logger.h"
 
 using namespace std;
@@ -482,7 +485,7 @@ void InheritService::_createMPLink(int objID, int srcID, int priority) {
 }
 
 //-------------------------- Factory implementation
-std::string InheritServiceFactory::mName = "InheritService";
+const std::string InheritServiceFactory::mName = "InheritService";
 
 InheritServiceFactory::InheritServiceFactory() : ServiceFactory(){};
 

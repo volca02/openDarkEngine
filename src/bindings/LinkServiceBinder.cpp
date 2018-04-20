@@ -23,6 +23,7 @@
  *****************************************************************************/
 
 #include "LinkServiceBinder.h"
+#include "OpdeServiceManager.h"
 #include "DataFieldDescIteratorBinder.h"
 #include "LinkQueryResultBinder.h"
 #include "RelationBinder.h"

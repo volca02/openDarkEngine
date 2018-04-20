@@ -26,12 +26,9 @@
 #include "RenderService.h"
 #include "SingleFieldDataStorage.h"
 #include "property/PropertyService.h"
+#include "EntityInfo.h"
 
 namespace Opde {
-const unsigned int RENDER_TYPE_NORMAL = 0;
-const unsigned int RENDER_TYPE_NOT_RENDERED = 1;
-const unsigned int RENDER_TYPE_NO_LIGHTMAP = 2;
-const unsigned int RENDER_TYPE_EDITOR_ONLY = 3;
 
 /*--------------------------------------------------------*/
 /*-------------------- RenderTypeProperty ----------------*/

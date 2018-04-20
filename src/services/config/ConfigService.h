@@ -25,20 +25,17 @@
 #ifndef __CONFIGSERVICE_H
 #define __CONFIGSERVICE_H
 
-#include "config.h"
-
 #include "DVariant.h"
-#include "FileGroup.h"
 #include "OpdeService.h"
-#include "OpdeServiceManager.h"
+#include "OpdeServiceFactory.h"
 #include "SharedPtr.h"
-#include "platform/PlatformService.h"
+#include "ServiceCommon.h"
 
 namespace Opde {
 
 /** @brief config service
  */
-class OPDELIB_EXPORT ConfigService : public ServiceImpl<ConfigService> {
+class ConfigService : public ServiceImpl<ConfigService> {
 public:
     typedef enum {
         GAME_TYPE_INVALID = 0,
@@ -136,9 +133,6 @@ private:
     std::string mConfigPathOverride;
 };
 
-/// Shared pointer to Config service
-typedef shared_ptr<ConfigService> ConfigServicePtr;
-
 /// Factory for the ConfigService objects
 class OPDELIB_EXPORT ConfigServiceFactory : public ServiceFactory {
 public:
@@ -148,11 +142,11 @@ public:
     /** Creates a ConfigService instance */
     Service *createInstance(ServiceManager *manager);
 
-    virtual const std::string &getName();
+    const std::string &getName() override;
 
-    virtual const uint getMask();
+    const uint getMask() override;
 
-    virtual const size_t getSID();
+    const size_t getSID() override;
 
 private:
     static std::string mName;

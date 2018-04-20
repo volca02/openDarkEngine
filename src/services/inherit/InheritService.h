@@ -27,13 +27,20 @@
 
 #include "config.h"
 
+#include "ServiceCommon.h"
 #include "InheritCommon.h"
 #include "Iterator.h"
 #include "OpdeService.h"
-#include "OpdeServiceManager.h"
+#include "OpdeServiceFactory.h"
 #include "SharedPtr.h"
 
 namespace Opde {
+
+class Relation;
+class Link;
+struct LinkChangeMsg;
+using LinkPtr = std::shared_ptr<Link>;
+using RelationPtr = std::shared_ptr<Relation>;
 
 struct InheritLink {
     /// Source object ID
@@ -65,8 +72,8 @@ typedef shared_ptr<InheritQueryResult> InheritQueryResultPtr;
  * that has the maximal priority.
  * @note This class creates and uses the Metaproperty link, which is built-in
  * */
-class OPDELIB_EXPORT InheritService : public ServiceImpl<InheritService>,
-                                      public MessageSource<InheritChangeMsg> {
+class InheritService : public ServiceImpl<InheritService>,
+                       public MessageSource<InheritChangeMsg> {
 public:
     /// Constructor
     InheritService(ServiceManager *manager, const std::string &name);
@@ -195,7 +202,7 @@ private:
     InheritorFactoryMap mInheritorFactoryMap;
 
     /// Link (Relation metaproperty) listener registration ID
-    Relation::ListenerID mMetaPropListenerID;
+    MessageListenerID mMetaPropListenerID;
 
     /// Handle to the link service
     LinkServicePtr mLinkService;
@@ -222,14 +229,12 @@ public:
     /** Creates a InheritService instance */
     Service *createInstance(ServiceManager *manager);
 
-    virtual const std::string &getName();
-
-    virtual const uint getMask();
-
-    virtual const size_t getSID();
+    const std::string &getName() override;
+    const uint getMask() override;
+    const size_t getSID() override;
 
 private:
-    static std::string mName;
+    static const std::string mName;
 };
 } // namespace Opde
 

@@ -26,6 +26,7 @@
 #include "RenderService.h"
 #include "SingleFieldDataStorage.h"
 #include "property/PropertyService.h"
+#include "EntityInfo.h"
 
 namespace Opde {
 /*--------------------------------------------------------*/
