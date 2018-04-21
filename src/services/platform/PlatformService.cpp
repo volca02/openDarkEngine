@@ -22,7 +22,7 @@
  *****************************************************************************/
 
 #include "PlatformService.h"
-#include "ServiceCommon.h"
+#include "OpdeServiceManager.h"
 #include "logger.h"
 
 #ifdef WIN32
@@ -101,7 +101,7 @@ void PlatformService::bootstrapFinished() {}
 void PlatformService::shutdown() {}
 
 //-------------------------- Factory implementation
-std::string PlatformServiceFactory::mName = "PlatformService";
+const std::string PlatformServiceFactory::mName = "PlatformService";
 
 PlatformServiceFactory::PlatformServiceFactory() : ServiceFactory(){};
 

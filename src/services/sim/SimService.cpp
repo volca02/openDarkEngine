@@ -24,6 +24,8 @@
 #include "SimService.h"
 #include "OpdeException.h"
 #include "ServiceCommon.h"
+#include "OpdeServiceManager.h"
+#include "loop/LoopService.h"
 
 using namespace std;
 
@@ -191,7 +193,7 @@ void SimService::setFlowCoeff(float flowCoeff) {
 }
 
 //-------------------------- Factory implementation
-std::string SimServiceFactory::mName = "SimService";
+const std::string SimServiceFactory::mName = "SimService";
 
 SimServiceFactory::SimServiceFactory() : ServiceFactory() {}
 

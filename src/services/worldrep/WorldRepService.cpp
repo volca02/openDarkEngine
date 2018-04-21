@@ -40,8 +40,11 @@
 #include "WRCommon.h"
 #include "integers.h"
 #include "logger.h"
-
-using namespace Ogre;
+#include "database/DatabaseService.h"
+#include "light/LightService.h"
+#include "render/RenderService.h"
+#include "OpdeServiceManager.h"
+#include "WRCell.h"
 
 // #define __SG
 
@@ -69,7 +72,7 @@ bool WorldRepService::init() {
 
     mRoot = mRenderService->getOgreRoot();
     mSceneMgr =
-        dynamic_cast<DarkSceneManager *>(mRenderService->getSceneManager());
+        dynamic_cast<Ogre::DarkSceneManager *>(mRenderService->getSceneManager());
 
     return true;
 }
@@ -261,7 +264,7 @@ void WorldRepService::loadFromChunk(FilePtr &wrChunk, size_t lightSize) {
 
     // assign the leaf nodes
     for (idx = 0; idx < header.numCells; idx++) {
-        BspNode *node = mSceneMgr->getBspLeaf(idx);
+        Ogre::BspNode *node = mSceneMgr->getBspLeaf(idx);
         mCells[idx]->setBspNode(node);
     }
 
@@ -331,7 +334,7 @@ void WorldRepService::createBSP(unsigned int BspRows, WRBSPNode *tree) {
             back = wr_node.back;
 
         // get the represented (pre-created) node
-        BspNode *node = mSceneMgr->getBspNode(i);
+        Ogre::BspNode *node = mSceneMgr->getBspNode(i);
 
         // Set the split plane
         if (wr_node.cell < 0) {
@@ -370,7 +373,7 @@ void WorldRepService::createBSP(unsigned int BspRows, WRBSPNode *tree) {
 Ogre::SceneManager *WorldRepService::getSceneManager() { return mSceneMgr; }
 
 //-------------------------- Factory implementation
-std::string WorldRepServiceFactory::mName = "WorldRepService";
+const std::string WorldRepServiceFactory::mName = "WorldRepService";
 
 WorldRepServiceFactory::WorldRepServiceFactory() : ServiceFactory() {}
 

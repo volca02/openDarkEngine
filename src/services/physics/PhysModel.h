@@ -36,7 +36,7 @@ namespace Opde {
  * composition of a multiple of other classes, logically separating the
  * different aspects of the physical behavior of the model.
  */
-class OPDELIB_EXPORT PhysModel {
+class PhysModel {
 public:
     PhysModel(int objid);
     ~PhysModel();
@@ -86,14 +86,14 @@ protected:
     uint32_t mSubModelCount;
     uint32_t mFlags;
     float mGravity;
-    uint32_t *mSubModelTypes; // the same as the main type of the object
+    std::vector<uint32_t> mSubModelTypes; // the same as the main type of the object
     float mFriction;
     /** Media type. Not entirelly the same as encoded in WR for some obscure
      * reason Mapping: 3->8, 2->1, 1->0, otherwise it stays the same
      */
     int32_t mMediaType;
 
-    Spring *mSprings;
+    std::vector<Spring> mSprings;
 
     /// Some frame time accumulator
     float mTime;

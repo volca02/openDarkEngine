@@ -24,8 +24,10 @@
 
 #include "PropertyServiceBinder.h"
 #include "DataFieldDescIteratorBinder.h"
+#include "OpdeServiceManager.h"
 #include "StringIteratorBinder.h"
 #include "bindings.h"
+#include "property/PropertyService.h"
 
 namespace Opde {
 

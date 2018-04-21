@@ -33,16 +33,12 @@
 #include "config.h"
 
 #include "OpdeService.h"
-#include "OpdeServiceManager.h"
+#include "OpdeServiceFactory.h"
 #include "ServiceCommon.h"
 #include "SharedPtr.h"
-#include "object/ObjectService.h"
-
-#include "input/InputService.h"
-#include "link/LinkService.h"
-#include "object/ObjectService.h"
-#include "physics/PhysicsService.h"
-#include "sim/SimService.h"
+#include "link/LinkCommon.h"
+#include "input/InputCommon.h"
+#include "sim/SimCommon.h"
 
 namespace Opde {
 
@@ -101,14 +97,12 @@ public:
     /** Creates a PlayerService instance */
     Service *createInstance(ServiceManager *manager);
 
-    virtual const std::string &getName();
-
-    virtual const uint getMask();
-
-    virtual const size_t getSID();
+    const std::string &getName() override;
+    const uint getMask() override;
+    const size_t getSID() override;
 
 private:
-    static std::string mName;
+    static const std::string mName;
 };
 } // namespace Opde
 

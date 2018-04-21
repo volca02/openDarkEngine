@@ -28,14 +28,12 @@
 
 #include "Callback.h"
 #include "Ogre.h"
+#include "ServiceCommon.h"
 #include "OpdeService.h"
-#include "OpdeServiceManager.h"
-#include "WRCell.h"
+#include "OpdeServiceFactory.h"
 #include "WRTypes.h"
-#include "database/DatabaseService.h"
 #include "integers.h"
-#include "light/LightService.h"
-#include "render/RenderService.h"
+#include "database/DatabaseCommon.h"
 
 #include <OgreDefaultHardwareBufferManager.h>
 #include <OgreHardwareBufferManager.h>
@@ -45,24 +43,22 @@
 #include "FileGroup.h"
 #include "SharedPtr.h"
 
-// The name of the group that stores the built textures and materials
-#define TEMPTEXTURE_RESOURCE_GROUP "WrTextures"
-
 namespace Ogre {
-
 class DarkSceneManager;
-
+class DarkGeometry;
 } // namespace Ogre
 
 namespace Opde {
+
+class WRCell;
 
 /** @brief WorldRep service - Level geometry loader.
  *
  * This service is responsible for the level geometry initialization.
  * @note Should handle world-geometry related methods later on. For example -
  * Light switching */
-class OPDELIB_EXPORT WorldRepService : public ServiceImpl<WorldRepService>,
-                                       public DatabaseListener {
+class WorldRepService : public ServiceImpl<WorldRepService>,
+                        public DatabaseListener {
 public:
     /** Initializes the Service */
     WorldRepService(ServiceManager *manager, const std::string &name);
@@ -136,11 +132,8 @@ protected:
     Ogre::DarkGeometry *mWorldGeometry;
 };
 
-/// Shared pointer to worldrep service
-typedef shared_ptr<WorldRepService> WorldRepServicePtr;
-
 /// Factory for the WorldRep service
-class OPDELIB_EXPORT WorldRepServiceFactory : public ServiceFactory {
+class WorldRepServiceFactory : public ServiceFactory {
 public:
     WorldRepServiceFactory();
     ~WorldRepServiceFactory(){};
@@ -148,14 +141,12 @@ public:
     /** Creates a WorldRepService instance */
     Service *createInstance(ServiceManager *manager);
 
-    const std::string &getName();
-
-    virtual const uint getMask();
-
-    virtual const size_t getSID();
+    const std::string &getName() override;
+    const uint getMask() override;
+    const size_t getSID() override;
 
 private:
-    static std::string mName;
+    static const std::string mName;
 };
 } // namespace Opde
 

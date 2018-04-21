@@ -28,12 +28,13 @@
 
 #include "FileGroup.h"
 #include "OpdeService.h"
-#include "OpdeServiceManager.h"
+#include "OpdeServiceFactory.h"
+#include "ServiceCommon.h"
 #include "PhysModels.h"
 #include "Quaternion.h"
 #include "SharedPtr.h"
 #include "Vector3.h"
-#include "database/DatabaseService.h"
+#include "database/DatabaseCommon.h"
 
 #include <ode/ode.h>
 
@@ -41,8 +42,8 @@ namespace Opde {
 
 /** @brief Physics service - service handling physics (STUB)
  */
-class OPDELIB_EXPORT PhysicsService : public ServiceImpl<PhysicsService>,
-                                      public DatabaseListener {
+class PhysicsService : public ServiceImpl<PhysicsService>,
+                       public DatabaseListener {
 public:
     /** Constructor */
     PhysicsService(ServiceManager *manager, const std::string &name);
@@ -101,12 +102,8 @@ protected:
     /// Collection of all the physical models
     PhysModels mPhysModels;
 };
-
-/// Shared pointer to Physics service
-typedef shared_ptr<PhysicsService> PhysicsServicePtr;
-
 /// Factory for the PhysicsService objects
-class OPDELIB_EXPORT PhysicsServiceFactory : public ServiceFactory {
+class PhysicsServiceFactory : public ServiceFactory {
 public:
     PhysicsServiceFactory();
     ~PhysicsServiceFactory(){};
@@ -114,14 +111,12 @@ public:
     /** Creates a PhysicsService instance */
     Service *createInstance(ServiceManager *manager);
 
-    virtual const std::string &getName();
-
-    virtual const uint getMask();
-
-    virtual const size_t getSID();
+    const std::string &getName() override;
+    const uint getMask() override;
+    const size_t getSID() override;
 
 private:
-    static std::string mName;
+    static const std::string mName;
 };
 } // namespace Opde
 

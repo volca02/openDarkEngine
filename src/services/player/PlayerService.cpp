@@ -22,11 +22,13 @@
  *****************************************************************************/
 
 #include "PlayerService.h"
-#include "ServiceCommon.h"
+#include "OpdeServiceManager.h"
+#include "input/InputService.h"
+#include "link/LinkService.h"
 #include "logger.h"
-
-using namespace std;
-using namespace Ogre;
+#include "object/ObjectService.h"
+#include "physics/PhysicsService.h"
+#include "sim/SimService.h"
 
 // TODO: The right value
 #define PLAYER_HEAD_SUBMODEL 0
@@ -208,7 +210,7 @@ size_t PlayerService::getPlayerHeadSubModel(void) const {
 }
 
 //-------------------------- Factory implementation
-std::string PlayerServiceFactory::mName = "PlayerService";
+const std::string PlayerServiceFactory::mName = "PlayerService";
 
 PlayerServiceFactory::PlayerServiceFactory() : ServiceFactory(){};
 

@@ -75,7 +75,7 @@ private:
     WRCellHeader mHeader;
 
     /** the list of the cell's vertices (count is in the header) */
-    Vector3 *mVertices;
+    std::vector<Vector3> mVertices;
 
     /** the list of the polygon map headers */
     WRPolygon *mFaceMaps;

@@ -24,14 +24,18 @@
 #ifndef __ROOMSERVICE_H
 #define __ROOMSERVICE_H
 
-#include "FileGroup.h"
+#include <vector>
+#include <memory>
+
+#include "DarkCommon.h"
 #include "OpdeService.h"
-#include "OpdeServiceManager.h"
+#include "OpdeServiceFactory.h"
 #include "RoomCommon.h"
+#include "ServiceCommon.h"
 #include "SharedPtr.h"
 #include "Vector3.h"
 #include "config.h"
-#include "database/DatabaseService.h"
+#include "database/DatabaseCommon.h"
 
 namespace Opde {
 /** @brief Room service - service providing a Room database.
@@ -40,15 +44,14 @@ namespace Opde {
  * @note This service listens to object positions
  * @note This service is a source of script messages
  */
-class OPDELIB_EXPORT RoomService : public ServiceImpl<RoomService>,
-                                   DatabaseListener {
+class RoomService : public ServiceImpl<RoomService>,
+                    DatabaseListener {
 public:
     /// Constructor
     RoomService(ServiceManager *manager, const std::string &name);
 
     /// Destructor
-    virtual ~RoomService();
-
+    ~RoomService() override;
     Room *getRoomByID(int32_t id);
 
     /** Reassigns the object's room if a room is sucessfully found
@@ -118,14 +121,14 @@ protected:
     void onDBDrop(uint32_t dropmask);
 
 private:
-    typedef std::map<int32_t, Room *> RoomsByID;
+    typedef std::unordered_map<int32_t, Room *> RoomsByID; // weak ptrs to rooms
     typedef std::vector<RoomsByID> ObjectIDSets;
 
     /// Database service
     DatabaseServicePtr mDbService;
 
     /// Array of all rooms
-    SimpleArray<Room *> mRooms;
+    std::vector<std::unique_ptr<Room>> mRooms;
 
     /// Map of rooms by their ID
     RoomsByID mRoomsByID;
@@ -137,11 +140,8 @@ private:
     ObjectIDSets mIDSets;
 };
 
-/// Shared pointer to Room service
-typedef shared_ptr<RoomService> RoomServicePtr;
-
 /// Factory for the RoomService objects
-class OPDELIB_EXPORT RoomServiceFactory : public ServiceFactory {
+class RoomServiceFactory : public ServiceFactory {
 public:
     RoomServiceFactory();
     ~RoomServiceFactory(){};
@@ -149,14 +149,12 @@ public:
     /** Creates a RoomService instance */
     Service *createInstance(ServiceManager *manager);
 
-    virtual const std::string &getName();
-
-    virtual const uint getMask();
-
-    virtual const size_t getSID();
+    const std::string &getName() override;
+    const uint getMask() override;
+    const size_t getSID() override;
 
 private:
-    static std::string mName;
+    static const std::string mName;
 };
 } // namespace Opde
 

@@ -22,13 +22,14 @@
  *****************************************************************************/
 
 #include "RoomService.h"
+#include "FileGroup.h"
 #include "OpdeException.h"
+#include "OpdeServiceManager.h"
 #include "Room.h"
 #include "RoomPortal.h"
 #include "ServiceCommon.h"
+#include "database/DatabaseService.h"
 #include "logger.h"
-
-using namespace std;
 
 namespace Opde {
 
@@ -61,15 +62,9 @@ Room *RoomService::findObjRoom(size_t idset, int objID, const Vector3 &pos) {
 
 //------------------------------------------------------
 Room *RoomService::roomFromPoint(const Vector3 &pos) {
-    // iterate through all rooms....
-    RoomsByID::iterator it, end = mRoomsByID.end();
-
-    for (it = mRoomsByID.begin(); it != end; ++it) {
-        // are we there?
-        Room *r = it->second;
-
+    for (const std::unique_ptr<Room> &r : mRooms) {
         if (r->isInside(pos))
-            return r;
+            return r.get();
     }
 
     return NULL;
@@ -131,11 +126,6 @@ void RoomService::shutdown() {
 //------------------------------------------------------
 void RoomService::clear() {
     mRoomsByID.clear();
-
-    for (size_t rn = 0; rn < mRooms.size(); ++rn) {
-        delete mRooms[rn];
-    }
-
     mRooms.clear();
     mRoomsOk = false;
 }
@@ -179,20 +169,20 @@ void RoomService::onDBLoad(const FileGroupPtr &db, uint32_t curmask) {
     LOG_INFO("RoomService: ROOM_DB contains %u rooms", count);
 
     // construct array of rooms as needed
-    mRooms.grow(count);
+    mRooms.resize(count);
 
     // Two phase load... first we construct them
     for (size_t rn = 0; rn < count; ++rn)
-        mRooms[rn] = new Room(this);
+        mRooms[rn].reset(new Room(this));
 
     // then we load - the two phase construction enables us to link rooms and
     // room portals together directly...
     for (size_t rn = 0; rn < count; ++rn) {
         LOG_DEBUG("RoomService: Loading room %d", rn);
-        Room *r = mRooms[rn];
-        assert(r != NULL);
+        std::unique_ptr<Room> &r = mRooms[rn];
+        assert(r);
         r->read(rdb);
-        mRoomsByID[r->getRoomID()] = r;
+        mRoomsByID[r->getRoomID()] = r.get(); // weak ptrs here
     }
 }
 
@@ -282,7 +272,7 @@ void RoomService::setCurrentObjRoom(size_t idset, int objID, Room *room) {
 }
 
 //-------------------------- Factory implementation
-std::string RoomServiceFactory::mName = "RoomService";
+const std::string RoomServiceFactory::mName = "RoomService";
 
 RoomServiceFactory::RoomServiceFactory() : ServiceFactory() {}
 

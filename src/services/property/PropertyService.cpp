@@ -23,10 +23,9 @@
  *****************************************************************************/
 
 #include "PropertyService.h"
+#include "OpdeServiceManager.h"
 #include "ServiceCommon.h"
 #include "logger.h"
-
-using namespace std;
 
 namespace Opde {
 /// helper string iterator over map keys
@@ -288,7 +287,7 @@ void PropertyService::objectDestroyed(int id) {
 }
 
 //-------------------------- Factory implementation
-std::string PropertyServiceFactory::mName = "PropertyService";
+const std::string PropertyServiceFactory::mName = "PropertyService";
 
 PropertyServiceFactory::PropertyServiceFactory() : ServiceFactory(){};
 

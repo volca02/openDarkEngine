@@ -28,8 +28,9 @@
 #include "config.h"
 
 #include "OpdeService.h"
-#include "OpdeServiceManager.h"
+#include "ServiceCommon.h"
 #include "SharedPtr.h"
+#include "OpdeServiceFactory.h"
 
 namespace Opde {
 // Forward decl.
@@ -39,7 +40,7 @@ class Platform;
  * work with various OSes and File Systems they introduce. Wrapper around
  * Platform class implementation
  */
-class OPDELIB_EXPORT PlatformService : public ServiceImpl<PlatformService> {
+class PlatformService : public ServiceImpl<PlatformService> {
 public:
     PlatformService(ServiceManager *manager, const std::string &name);
     virtual ~PlatformService();
@@ -66,7 +67,7 @@ private:
 typedef shared_ptr<PlatformService> PlatformServicePtr;
 
 /// Factory for the PlatformService objects
-class OPDELIB_EXPORT PlatformServiceFactory : public ServiceFactory {
+class PlatformServiceFactory : public ServiceFactory {
 public:
     PlatformServiceFactory();
     ~PlatformServiceFactory(){};
@@ -74,14 +75,12 @@ public:
     /** Creates a PlatformService instance */
     Service *createInstance(ServiceManager *manager);
 
-    virtual const std::string &getName();
-
-    virtual const uint getMask();
-
-    virtual const size_t getSID();
+    const std::string &getName() override;
+    const uint getMask() override;
+    const size_t getSID() override;
 
 private:
-    static std::string mName;
+    static const std::string mName;
 };
 } // namespace Opde
 

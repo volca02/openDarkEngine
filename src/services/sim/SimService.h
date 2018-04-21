@@ -24,53 +24,17 @@
 #ifndef __SIMSERVICE_H
 #define __SIMSERVICE_H
 
-#include "config.h"
+#include <map>
 
 #include "OpdeService.h"
-#include "OpdeServiceManager.h"
+#include "OpdeServiceFactory.h"
+#include "ServiceCommon.h"
 #include "SharedPtr.h"
+#include "SimCommon.h"
 #include "ValueChangeRequest.h"
-#include "loop/LoopService.h"
+#include "loop/LoopCommon.h"
 
 namespace Opde {
-/** Abstract Simulation listener - a class that does something related to
- * simulation extends this
- */
-class OPDELIB_EXPORT SimListener {
-public:
-    SimListener();
-
-    virtual ~SimListener();
-
-    /** Called when the simulation is started by sim service. Sets sim time to
-     * zero. sets mSimRunning to true. */
-    virtual void simStarted();
-
-    /** Called when the simulation is ended by sim service. Sets mSimRunning to
-     * false. */
-    virtual void simEnded();
-
-    /** Called when the simulation is paused. Sets mPaused */
-    virtual void simPaused();
-
-    /** Called when the simulation is un-paused. Unsets mPaused */
-    virtual void simUnPaused();
-
-    /** Called every time time flow change happens. */
-    virtual void simFlowChange(float newFlow);
-
-    /** simulation time step happened
-     * @param simTime the new sim time
-     * @param delta the time increment that happened
-     */
-    virtual void simStep(float simTime, float delta);
-
-protected:
-    float mSimTime;
-    float mSimTimeFlow;
-    bool mSimPaused;
-    bool mSimRunning;
-};
 
 /** @brief Sim Service - a simulation timer base. Implements Sim time
  * (simulation time). This time can have different flow rate than normal time.
@@ -78,7 +42,7 @@ protected:
  * only handles game loop (and does not have the capability to pause/stretch
  * time).
  */
-class OPDELIB_EXPORT SimService : public ServiceImpl<SimService>, LoopClient {
+class SimService : public ServiceImpl<SimService>, LoopClient {
 public:
     SimService(ServiceManager *manager, const std::string &name);
     virtual ~SimService();
@@ -176,7 +140,7 @@ protected:
 typedef shared_ptr<SimService> SimServicePtr;
 
 /// Factory for the SimService objects
-class OPDELIB_EXPORT SimServiceFactory : public ServiceFactory {
+class SimServiceFactory : public ServiceFactory {
 public:
     SimServiceFactory();
     ~SimServiceFactory(){};
@@ -184,14 +148,12 @@ public:
     /** Creates a SimService instance */
     Service *createInstance(ServiceManager *manager);
 
-    virtual const std::string &getName();
-
-    virtual const uint getMask();
-
-    virtual const size_t getSID();
+    const std::string &getName() override;
+    const uint getMask() override;
+    const size_t getSID() override;
 
 private:
-    static std::string mName;
+    static const std::string mName;
 };
 } // namespace Opde
 

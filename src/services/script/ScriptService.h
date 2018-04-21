@@ -36,7 +36,7 @@
 namespace Opde {
 
 /// A single instance of object script (instanced on object ID)
-class OPDELIB_EXPORT ObjectScript {
+class ObjectScript {
 public:
     ObjectScript(int id);
 
@@ -48,14 +48,14 @@ protected:
     int mID;
 };
 
-typedef shared_ptr<ObjectScript> ObjectScriptPtr;
+using ObjectScriptPtr = shared_ptr<ObjectScript>;
 
 /// Factory for object scripts, as reported from scripting language.
 /// All that scripting lang side should do is implement the getScriptNames and
 /// createScript The scripts will be stand-alone objects inherited from some
 /// base parent class, and their destructor will Py_DECREF the callable python
 /// object, effectively removing it from the python VM
-class OPDELIB_EXPORT ObjectScriptModule {
+class ObjectScriptModule {
 public:
     ObjectScriptModule(std::string &name);
 
@@ -80,7 +80,7 @@ protected:
     // typedef std::map<int, ObjectScriptPtr> ObjectIDToScript;
 };
 
-typedef shared_ptr<ObjectScriptModule> ObjectScriptModulePtr;
+using ObjectScriptModulePtr = shared_ptr<ObjectScriptModule>;
 
 /** @brief Script service - class responsible for loading and saving scripts and
  * their interaction with the services
@@ -116,7 +116,7 @@ typedef shared_ptr<ObjectScriptModule> ObjectScriptModulePtr;
  * data['something'] = 1, etc. With automatic mapping of object ID, internally
  * calling ScriptDataService::get(id, name)... etc.
  */
-class OPDELIB_EXPORT ScriptService : public ServiceImpl<ScriptService> {
+class ScriptService : public ServiceImpl<ScriptService> {
 public:
     /** Initializes the Service */
     ScriptService(ServiceManager *manager, const std::string &name);
@@ -146,11 +146,8 @@ protected:
                              const std::string &name);
 };
 
-/// Shared pointer to script service
-typedef shared_ptr<ScriptService> ScriptServicePtr;
-
 /// Factory for the Script service
-class OPDELIB_EXPORT ScriptServiceFactory : public ServiceFactory {
+class ScriptServiceFactory : public ServiceFactory {
 public:
     ScriptServiceFactory();
     ~ScriptServiceFactory(){};
@@ -158,14 +155,12 @@ public:
     /** Creates a ScriptService instance */
     Service *createInstance(ServiceManager *manager);
 
-    virtual const std::string &getName();
-
-    virtual const uint getMask();
-
-    virtual const size_t getSID();
+    const std::string &getName() override;
+    const uint getMask() override;
+    const size_t getSID() override;
 
 private:
-    static std::string mName;
+    static const std::string mName;
 };
 } // namespace Opde
 

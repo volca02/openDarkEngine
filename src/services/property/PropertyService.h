@@ -29,7 +29,7 @@
 #include "FileGroup.h"
 #include "MessageSource.h"
 #include "OpdeService.h"
-#include "OpdeServiceManager.h"
+#include "OpdeServiceFactory.h"
 #include "Property.h"
 #include "PropertyCommon.h"
 #include "SharedPtr.h"
@@ -37,7 +37,7 @@
 namespace Opde {
 /** @brief Property service - service managing in-game object properties
  */
-class OPDELIB_EXPORT PropertyService : public ServiceImpl<PropertyService> {
+class PropertyService : public ServiceImpl<PropertyService> {
 public:
     PropertyService(ServiceManager *manager, const std::string &name);
     virtual ~PropertyService();
@@ -173,11 +173,8 @@ protected:
     DatabaseServicePtr mDatabaseService;
 };
 
-/// Shared pointer to Property service
-typedef shared_ptr<PropertyService> PropertyServicePtr;
-
 /// Factory for the PropertyService objects
-class OPDELIB_EXPORT PropertyServiceFactory : public ServiceFactory {
+class PropertyServiceFactory : public ServiceFactory {
 public:
     PropertyServiceFactory();
     ~PropertyServiceFactory(){};
@@ -185,14 +182,12 @@ public:
     /** Creates a PropertyService instance */
     Service *createInstance(ServiceManager *manager);
 
-    virtual const std::string &getName();
-
-    virtual const uint getMask();
-
-    virtual const size_t getSID();
+    const std::string &getName() override;
+    const uint getMask() override;
+    const size_t getSID() override;
 
 private:
-    static std::string mName;
+    static const std::string mName;
 };
 } // namespace Opde
 

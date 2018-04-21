@@ -31,6 +31,7 @@
 #include "player/PlayerService.h"
 #include "property/PropertyService.h"
 #include "render/RenderService.h"
+#include "object/ObjectService.h"
 
 using namespace std;
 using namespace Ogre;

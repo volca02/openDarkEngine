@@ -31,6 +31,10 @@
 
 namespace Opde {
 
+class Relation;
+
+using RelationPtr = std::shared_ptr<Relation>;
+
 /// Link ID type. 32bit number at least...
 typedef unsigned int link_id_t;
 
@@ -98,7 +102,7 @@ protected:
 };
 
 /// Link change types
-typedef enum {
+enum LinkChangeType {
     /// Link was added (Sent after the addition)
     LNK_ADDED = 1,
     /// Link was removed (Sent before the removal)
@@ -107,7 +111,7 @@ typedef enum {
     LNK_CHANGED,
     /// All the links were removed from the relation (Sent before the cleanout)
     LNK_RELATION_CLEARED
-} LinkChangeType;
+};
 
 /// Link chage message
 struct LinkChangeMsg {

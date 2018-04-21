@@ -23,31 +23,32 @@
 
 #include "WRCell.h"
 
-#include "OgreException.h"
-#include "OgreManualObject.h"
-#include "OgreMaterial.h"
-#include "OgreMaterialManager.h"
-#include "OgrePrerequisites.h"
-#include "OgreSceneManager.h"
-#include "OgreTextureManager.h"
+#include <OgreException.h>
+#include <OgreManualObject.h>
+#include <OgreMaterial.h>
+#include <OgreMaterialManager.h>
+#include <OgrePrerequisites.h>
+#include <OgreSceneManager.h>
+#include <OgreTextureManager.h>
+
 #include "OpdeException.h"
+#include "OpdeServiceManager.h"
 #include "WRCommon.h"
 #include "WorldRepService.h"
 #include "light/LightService.h"
 #include "logger.h"
+#include "material/MaterialService.h"
 
 #include "DarkBspNode.h"
 #include "DarkGeometry.h"
 #include "DarkPortal.h"
 #include "DarkSceneManager.h"
 
-using namespace Ogre;
-
 namespace Opde {
 
 //------------------------------------------------------------------------------------
 WRCell::WRCell(WorldRepService *owner, Ogre::DarkGeometry *targetGeom)
-    : mCellNum(-1), mVertices(NULL), mFaceMaps(NULL), mFaceInfos(NULL),
+    : mCellNum(-1), mVertices(), mFaceMaps(NULL), mFaceInfos(NULL),
       mPolyIndices(NULL), mPlanes(NULL), mLoaded(false), mPortalsDone(false),
       mOwner(owner), mLevelGeometry(targetGeom), mLights(NULL) {
     mBSPNode = NULL;
@@ -60,7 +61,7 @@ WRCell::WRCell(WorldRepService *owner, Ogre::DarkGeometry *targetGeom)
 WRCell::~WRCell() {
     if (mLoaded) {
 
-        delete[] mVertices;
+        mVertices.clear();
         delete[] mFaceMaps;
         delete[] mFaceInfos;
 
@@ -89,7 +90,7 @@ void WRCell::loadFromChunk(unsigned int _cell_num, FilePtr &chunk,
     *chunk >> mHeader;
 
     // 1. load the vertices
-    mVertices = new Vector3[mHeader.numVertices];
+    mVertices.resize(mHeader.numVertices);
 
     for (size_t i = 0; i < mHeader.numVertices; ++i)
         *chunk >> mVertices[i];
@@ -228,7 +229,7 @@ void WRCell::constructPortalMeshes(Ogre::SceneManager *sceneMgr) {
 
         // Each portal's mesh gets it's own manual object. This way we minimize
         // the mesh attachments to hopefully minimal set
-        ManualObject *manual = sceneMgr->createManualObject(modelName.str());
+        Ogre::ManualObject *manual = sceneMgr->createManualObject(modelName.str());
 
         // Iterate through the faces, and add all the triangles we can construct
         // using the polygons defined
@@ -237,7 +238,7 @@ void WRCell::constructPortalMeshes(Ogre::SceneManager *sceneMgr) {
         // getMaterialName(face_infos[polyNum].txt,
         // lightMaps[polyNum]->getAtlasIndex(), dimensions,
         // face_maps[polyNum].flags)
-        MaterialPtr mat = mMaterialService->getWRMaterialInstance(
+        Ogre::MaterialPtr mat = mMaterialService->getWRMaterialInstance(
             mFaceInfos[polyNum].txt, -1, mFaceMaps[polyNum].flags); // mLightService->getAtlasForCellPolygon(cellNum,
                                                                     // polyNum)
 
@@ -276,7 +277,7 @@ void WRCell::constructPortalMeshes(Ogre::SceneManager *sceneMgr) {
         LOG_DEBUG("Attaching cell water portal %d geometry...", mCellNum);
         // Attach the resulting object to the node with the center in the center
         // vertex of the mesh...
-        SceneNode *meshNode = sceneMgr->createSceneNode(modelName.str());
+        Ogre::SceneNode *meshNode = sceneMgr->createSceneNode(modelName.str());
         meshNode->setPosition(nodeCenter);
 
         meshNode->attachObject(manual);
@@ -296,7 +297,7 @@ void WRCell::constructPortalMeshes(Ogre::SceneManager *sceneMgr) {
 }
 
 //------------------------------------------------------------------------------------
-int WRCell::attachPortals(DarkSceneManager *smgr) {
+int WRCell::attachPortals(Ogre::DarkSceneManager *smgr) {
     assert(mBSPNode);
     assert(!mPortalsDone);
 
@@ -315,9 +316,9 @@ int WRCell::attachPortals(DarkSceneManager *smgr) {
 
         portalPlane = getPlane(mFaceMaps[portalNum].plane);
 
-        Portal *portal = smgr->createPortal(
-            smgr->getBspLeaf(mCellNum),
-            smgr->getBspLeaf(mFaceMaps[portalNum].tgtCell), portalPlane);
+        Ogre::Portal *portal = smgr->createPortal(
+                smgr->getBspLeaf(mCellNum),
+                smgr->getBspLeaf(mFaceMaps[portalNum].tgtCell), portalPlane);
 
         for (int vert = 0; vert < mFaceMaps[portalNum].count; vert++) {
             // for each vertex of that poly
@@ -437,7 +438,7 @@ void WRCell::createCellGeometry() {
     for (int polyNum = 0; polyNum < faceCount; polyNum++) {
         std::pair<Ogre::uint, Ogre::uint> dimensions;
 
-        MaterialPtr mat = mMaterialService->getWRMaterialInstance(
+        Ogre::MaterialPtr mat = mMaterialService->getWRMaterialInstance(
             mFaceInfos[polyNum].txt,
             mLightService->getAtlasForCellPolygon(mCellNum, polyNum),
             mFaceMaps[polyNum].flags);
@@ -458,8 +459,8 @@ void WRCell::createCellGeometry() {
     std::map<std::string, std::vector<int>>::iterator it = matToPolys.begin();
 
     for (; it != matToPolys.end(); it++) {
-        DarkFragment *frag = mLevelGeometry->createFragment(
-            mCellNum, MaterialManager::getSingleton().getByName(it->first));
+        Ogre::DarkFragment *frag = mLevelGeometry->createFragment(
+            mCellNum, Ogre::MaterialManager::getSingleton().getByName(it->first));
 
         std::vector<int>::iterator pi = it->second.begin();
 

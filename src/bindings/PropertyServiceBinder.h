@@ -26,8 +26,7 @@
 #define __PROPERTYSERVICEBINDER_H
 
 #include "bindings.h"
-
-#include "property/PropertyService.h"
+#include "ServiceCommon.h"
 
 namespace Opde {
 namespace Python {

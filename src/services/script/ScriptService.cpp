@@ -127,7 +127,7 @@ ObjectScriptModule::ObjectScriptModule(std::string &name) {}
 ObjectScriptModule::~ObjectScriptModule() {}
 
 //-------------------------- Factory implementation
-std::string ScriptServiceFactory::mName = "ScriptService";
+const std::string ScriptServiceFactory::mName = "ScriptService";
 
 ScriptServiceFactory::ScriptServiceFactory() : ServiceFactory() {}
 

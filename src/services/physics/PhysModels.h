@@ -24,7 +24,10 @@
 #ifndef __PHYSMODELS_H
 #define __PHYSMODELS_H
 
-#include "File.h"
+#include <map>
+#include <set>
+
+#include "DarkCommon.h"
 
 namespace Opde {
 class PhysicsService;
@@ -33,7 +36,7 @@ class PhysModel;
 /** @brief Collection of physics models. Contains two lists - Stationary and
  * Moving. Used to contain all the physics models in the mission.
  */
-class OPDELIB_EXPORT PhysModels {
+class PhysModels {
 public:
     PhysModels(PhysicsService *owner);
 

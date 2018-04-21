@@ -30,6 +30,7 @@
 #include "GameStateManager.h"
 
 #include "game/GameService.h"
+#include "render/RenderService.h"
 
 #include "logger.h"
 
