@@ -85,12 +85,24 @@ const char *FX_PARTICLE_OBJECT_NAME = "FX_PARTICLE";
 template <> const size_t ServiceImpl<RenderService>::SID = __SERVICE_ID_RENDER;
 
 RenderService::RenderService(ServiceManager *manager, const std::string &name)
-    : ServiceImpl<Opde::RenderService>(manager, name), mPropModelName(NULL),
-      mPropPosition(NULL), mPropScale(NULL), mRoot(NULL), mSceneMgr(NULL),
-      mRenderWindow(NULL), mDarkSMFactory(NULL), mDefaultCamera(NULL),
-      mLoopService(NULL), mEditorMode(false), mHasRefsProperty(NULL),
-      mRenderTypeProperty(NULL), mRenderAlphaProperty(NULL),
-      mZBiasProperty(NULL), mCurrentSize(0, 0), mSDLWindow(NULL) {
+    : ServiceImpl<Opde::RenderService>(manager, name),
+      mPropModelName(),
+      mPropPosition(NULL),
+      mPropScale(),
+      mRoot(NULL),
+      mSceneMgr(NULL),
+      mRenderWindow(NULL),
+      mDarkSMFactory(NULL),
+      mDefaultCamera(NULL),
+      mLoopService(NULL),
+      mEditorMode(false),
+      mHasRefsProperty(),
+      mRenderTypeProperty(),
+      mRenderAlphaProperty(),
+      mZBiasProperty(),
+      mCurrentSize(0, 0),
+      mSDLWindow(NULL)
+{
     // TODO: This is just plain wrong. This service should be the maintainer of
     // the used scene manager, if any other service needs the direct handle,
     // etc. The fact is this service is probably game only, and should be the
@@ -127,44 +139,38 @@ void RenderService::shutdown() {
     clear();
 
     if (mHasRefsProperty) {
-        mPropertyService->unregisterProperty(mHasRefsProperty);
-        delete mHasRefsProperty;
-        mHasRefsProperty = NULL;
+        mPropertyService->unregisterProperty(mHasRefsProperty.get());
+        mHasRefsProperty.reset();
     }
 
     if (mRenderTypeProperty) {
-        mPropertyService->unregisterProperty(mRenderTypeProperty);
-        delete mRenderTypeProperty;
-        mRenderTypeProperty = NULL;
+        mPropertyService->unregisterProperty(mRenderTypeProperty.get());
+        mRenderTypeProperty.reset();
     }
 
     if (mRenderAlphaProperty) {
-        mPropertyService->unregisterProperty(mRenderAlphaProperty);
-        delete mRenderAlphaProperty;
-        mRenderAlphaProperty = NULL;
+        mPropertyService->unregisterProperty(mRenderAlphaProperty.get());
+        mRenderAlphaProperty.reset();
     }
 
     if (mZBiasProperty) {
-        mPropertyService->unregisterProperty(mZBiasProperty);
-        delete mZBiasProperty;
-        mZBiasProperty = NULL;
+        mPropertyService->unregisterProperty(mZBiasProperty.get());
+        mZBiasProperty.reset();
+    }
+
+    if (mPropModelName) {
+        mPropertyService->unregisterProperty(mPropModelName.get());
+        mPropModelName.reset();
+    }
+
+    if (mPropScale) {
+        mPropertyService->unregisterProperty(mPropScale.get());
+        mPropScale.reset();
     }
 
     if (mPropPosition != NULL)
         mPropPosition->unregisterListener(mPropPositionListenerID);
     mPropPosition = NULL;
-
-    if (mPropModelName != NULL) {
-        mPropertyService->unregisterProperty(mPropModelName);
-        delete mPropModelName;
-        mPropModelName = NULL;
-    }
-
-    if (mPropScale != NULL) {
-        mPropertyService->unregisterProperty(mPropScale);
-        delete mPropScale;
-        mPropScale = NULL;
-    }
 
     if (mLoopService) {
         mLoopService->removeLoopClient(this);
@@ -866,32 +872,32 @@ void RenderService::createProperties() {
     // Ok, what do we have here?
     // Model Name. Simple fixed-length string prop
     // Fixed on version 2.16
-    mPropModelName = new ModelNameProperty(this, mPropertyService.get());
-    mPropertyService->registerProperty(mPropModelName);
+    mPropModelName.reset(new ModelNameProperty(this, mPropertyService.get()));
+    mPropertyService->registerProperty(mPropModelName.get());
 
     // RenderAlpha property - single float prop
-    mRenderAlphaProperty =
-        new RenderAlphaProperty(this, mPropertyService.get());
-    mPropertyService->registerProperty(mRenderAlphaProperty);
+    mRenderAlphaProperty.reset(
+        new RenderAlphaProperty(this, mPropertyService.get()));
+    mPropertyService->registerProperty(mRenderAlphaProperty.get());
 
     // HasRefs - single bool prop
-    mHasRefsProperty = new HasRefsProperty(this, mPropertyService.get());
-    mPropertyService->registerProperty(mHasRefsProperty);
+    mHasRefsProperty.reset(new HasRefsProperty(this, mPropertyService.get()));
+    mPropertyService->registerProperty(mHasRefsProperty.get());
 
     // RenderType property - single unsigned int property with enum
-    mRenderTypeProperty = new RenderTypeProperty(this, mPropertyService.get());
-    mPropertyService->registerProperty(mRenderTypeProperty);
+    mRenderTypeProperty.reset(new RenderTypeProperty(this, mPropertyService.get()));
+    mPropertyService->registerProperty(mRenderTypeProperty.get());
 
     // ZBias - z bias for depth fighting avoidance
     if (mConfigService->getGameType() >
         ConfigService::GAME_TYPE_T1) { // only t1 does not have ZBIAS
-        mZBiasProperty = new ZBiasProperty(this, mPropertyService.get());
-        mPropertyService->registerProperty(mZBiasProperty);
+        mZBiasProperty.reset(new ZBiasProperty(this, mPropertyService.get()));
+        mPropertyService->registerProperty(mZBiasProperty.get());
     }
 
     // Scale property
-    mPropScale = new ModelScaleProperty(this, mPropertyService.get());
-    mPropertyService->registerProperty(mPropScale);
+    mPropScale.reset(new ModelScaleProperty(this, mPropertyService.get()));
+    mPropertyService->registerProperty(mPropScale.get());
 }
 
 // --------------------------------------------------------------------------

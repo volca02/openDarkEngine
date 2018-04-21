@@ -201,14 +201,14 @@ protected:
     // Listener structs for property messages
 
     // ModelName property
-    Property *mPropModelName;
+    std::unique_ptr<Property> mPropModelName;
 
-    // "Position" Property related
+    // "Position" Property related. weak ref
     MessageListenerID mPropPositionListenerID;
     Property *mPropPosition;
 
     // "ModelScale" Property related
-    Property *mPropScale;
+    std::unique_ptr<Property> mPropScale;
 
     /// Shared pointer to the property service
     PropertyServicePtr mPropertyService;
@@ -260,10 +260,10 @@ protected:
 
     ConfigServicePtr mConfigService;
 
-    HasRefsProperty *mHasRefsProperty;
-    RenderTypeProperty *mRenderTypeProperty;
-    RenderAlphaProperty *mRenderAlphaProperty;
-    ZBiasProperty *mZBiasProperty;
+    std::unique_ptr<HasRefsProperty> mHasRefsProperty;
+    std::unique_ptr<RenderTypeProperty> mRenderTypeProperty;
+    std::unique_ptr<RenderAlphaProperty> mRenderAlphaProperty;
+    std::unique_ptr<ZBiasProperty> mZBiasProperty;
 
     Ogre::uint8 mDefaultRenderQueue;
 
