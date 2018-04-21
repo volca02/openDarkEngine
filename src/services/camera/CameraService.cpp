@@ -219,8 +219,8 @@ void CameraService::onMTurn(const InputEventMsg &iem) {
     // we are interested in:
     //  * mouse_sensitivity
     //  * mouse_invert
-    const DVariant &msens = mInputSrv->getVariable("mouse_sensitivity");
-    const DVariant &minvert = mInputSrv->getVariable("mouse_invert");
+    const Variant &msens = mInputSrv->getVariable("mouse_sensitivity");
+    const Variant &minvert = mInputSrv->getVariable("mouse_invert");
 
     // schedule a turn on the object in question
     float rot = iem.params.toFloat() * msens.toFloat();
@@ -237,14 +237,14 @@ void CameraService::onMLook(const InputEventMsg &iem) {
         return;
 
     // is freelook enabled?
-    DVariant mfreelook = mInputSrv->getVariable("freelook");
+    Variant mfreelook = mInputSrv->getVariable("freelook");
 
     if (mfreelook.toInt() == 0)
         return;
 
     // freelook enabled, rotate the view
-    const DVariant &msens = mInputSrv->getVariable("mouse_sensitivity");
-    const DVariant &minvert = mInputSrv->getVariable("mouse_invert");
+    const Variant &msens = mInputSrv->getVariable("mouse_sensitivity");
+    const Variant &minvert = mInputSrv->getVariable("mouse_invert");
 
     float rot = iem.params.toFloat() * msens.toFloat();
     if (minvert.toBool())

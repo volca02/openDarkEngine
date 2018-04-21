@@ -44,8 +44,8 @@ add_library (OpdeBase OBJECT
     dyntype/DataStorage.cpp
     dyntype/DataStorage.h
     dyntype/DTHelpers.h
-    dyntype/DVariant.cpp
-    dyntype/DVariant.h
+    dyntype/Variant.cpp
+    dyntype/Variant.h
     dyntype/Serializer.cpp
     dyntype/Serializer.h
     dyntype/SingleFieldDataStorage.h

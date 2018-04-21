@@ -159,7 +159,7 @@ public:
      * @see owns
      * @note Will log error when object id does not own the property to be
      * changed */
-    virtual bool set(int id, const std::string &field, const DVariant &value);
+    virtual bool set(int id, const std::string &field, const Variant &value);
 
     /** Direct data getter
      * @param id object id
@@ -169,7 +169,7 @@ public:
      * @see owns
      * @return false if field name was invalid, true if value was set in target
      */
-    virtual bool get(int id, const std::string &field, DVariant &target);
+    virtual bool get(int id, const std::string &field, Variant &target);
 
     /** Notification that an object was destroyed. @see
      * PropertyService::objectDestroyed */
@@ -296,7 +296,7 @@ protected:
      * @param value the new value of the propertie's field
      */
     virtual void valueChanged(int oid, const std::string &field,
-                              const DVariant &value) = 0;
+                              const Variant &value) = 0;
 };
 } // namespace Opde
 

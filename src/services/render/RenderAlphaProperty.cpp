@@ -49,7 +49,7 @@ RenderAlphaProperty::~RenderAlphaProperty(void){};
 
 // --------------------------------------------------------------------------
 void RenderAlphaProperty::addProperty(int oid) {
-    DVariant val;
+    Variant val;
 
     if (!get(oid, "", val))
         OPDE_EXCEPT("Property not defined for object.",
@@ -72,7 +72,7 @@ void RenderAlphaProperty::setPropertySource(int oid, int effid) {
 
 // --------------------------------------------------------------------------
 void RenderAlphaProperty::valueChanged(int oid, const std::string &field,
-                                       const DVariant &value) {
+                                       const Variant &value) {
     // just call the setter
     setAlpha(oid, value.toFloat());
 };

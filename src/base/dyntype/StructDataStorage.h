@@ -30,7 +30,7 @@
 
 #include "DataStorage.h"
 
-#include "DVariant.h"
+#include "Variant.h"
 #include "File.h"
 #include "Iterator.h"
 #include "Serializer.h"
@@ -59,16 +59,16 @@ protected:
      */
 
     typedef bool (StructDataStorage::*FieldSetter)(
-        const TypeHelperBasePtr &helper, T &data, const DVariant &value);
+        const TypeHelperBasePtr &helper, T &data, const Variant &value);
     /** Field getter member pointer - called when setting a value on certain
      * field
      * @param field The field name
      * @param data The struct instance to set value for
-     * @param value the target DVariant instance ref to fill with value
+     * @param value the target Variant instance ref to fill with value
      * @return true if getting was successful, false otherwise
      */
     typedef bool (StructDataStorage::*FieldGetter)(
-        const TypeHelperBasePtr &helper, const T &data, DVariant &value);
+        const TypeHelperBasePtr &helper, const T &data, Variant &value);
 
     /// Type helper (for easy struct field manipulation)
     class TypeHelperBase : public NonCopyable {
@@ -79,10 +79,10 @@ protected:
         virtual ~TypeHelperBase() {}
 
         /// sets the struct's field with the given value
-        virtual void toField(T &data, const DVariant &val) = 0;
+        virtual void toField(T &data, const Variant &val) = 0;
 
         /// sets the variant with the value from the struct's field
-        virtual void fromField(const T &data, DVariant &val) = 0;
+        virtual void fromField(const T &data, Variant &val) = 0;
 
         /// serializer getter
         virtual Serializer *getSerializer() = 0;
@@ -149,7 +149,7 @@ public:
 
     /** @see DataStorage::getField */
     virtual bool getField(int objID, const std::string &field,
-                          DVariant &target) {
+                          Variant &target) {
         typename DataMap::iterator it = mDataMap.find(objID);
 
         if (it != mDataMap.end()) {
@@ -166,7 +166,7 @@ public:
 
     /** @see DataStorage::setField */
     virtual bool setField(int objID, const std::string &field,
-                          const DVariant &value) {
+                          const Variant &value) {
         typename DataMap::iterator it = mDataMap.find(objID);
 
         if (it != mDataMap.end()) {
@@ -280,12 +280,12 @@ protected:
 
         virtual ~TypeHelper() { }
 
-        virtual void toField(T &data, const DVariant &val) {
+        virtual void toField(T &data, const Variant &val) {
             data.*mField = val.as<FT>();
         }
 
-        virtual void fromField(const T &data, DVariant &val) {
-            val = DVariant(data.*mField);
+        virtual void fromField(const T &data, Variant &val) {
+            val = Variant(data.*mField);
         };
 
         virtual Serializer *getSerializer() { return &mSerializer; }
@@ -305,21 +305,22 @@ protected:
 
     /// Default field setter. Used when no other specified
     bool defaultFieldSetter(const TypeHelperBasePtr &helper, T &data,
-                            const DVariant &value) {
+                            const Variant &value) {
         helper->toField(data, value);
         return true;
     }
 
     /// Default field getter. Used when no other specified
     bool defaultFieldGetter(const TypeHelperBasePtr &helper, const T &data,
-                            DVariant &value) {
+                            Variant &value) {
         helper->fromField(data, value);
         return true;
     }
 
     template <typename FT>
-    void field(const std::string &name, FT T::*fieldPtr, DEnum *enumer = NULL,
-               FieldGetter getter = NULL, FieldSetter setter = NULL)
+    void field(const std::string &name, FT T::*fieldPtr,
+               Enumeration *enumer = NULL, FieldGetter getter = NULL,
+               FieldSetter setter = NULL)
     {
         // insert into the field def array.
         DataFieldDesc fd;
@@ -328,7 +329,7 @@ protected:
         fd.label = name;
         fd.size = sizeof(FT);
         fd.enumerator = enumer;
-        fd.type = DVariantTypeTraits<FT>::type;
+        fd.type = VariantTypeTraits<FT>::type;
 
         mFieldDesc.push_back(fd);
 

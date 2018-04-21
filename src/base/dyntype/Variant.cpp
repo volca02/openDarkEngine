@@ -21,24 +21,24 @@
  *
  *****************************************************************************/
 
-#include "DVariant.h"
+#include "Variant.h"
 #include <stdexcept>
 
 using namespace std;
 
 namespace Opde {
 /*------------------------------------------------------*/
-/*-------------------- DVariant ------------------------*/
+/*-------------------- Variant ------------------------*/
 /*------------------------------------------------------*/
-const DVariant DVariant::INVALID = DVariant();
+const Variant Variant::INVALID = Variant();
 
-DVariant::DVariant() {
+Variant::Variant() {
     mPrivate.isShared = false;
     mPrivate.type = DV_INVALID;
 }
 
 //------------------------------------
-DVariant::DVariant(Type t, void *val) {
+Variant::Variant(Type t, void *val) {
     mPrivate.isShared = false;
     mPrivate.type = t;
 
@@ -77,12 +77,12 @@ DVariant::DVariant(Type t, void *val) {
         break;
 
     default:
-        throw runtime_error("DVariant::DVariant() - invalid type");
+        throw runtime_error("Variant::Variant() - invalid type");
     }
 }
 
 //------------------------------------
-DVariant::DVariant(Type t, const std::string &txtval) {
+Variant::Variant(Type t, const std::string &txtval) {
     mPrivate.isShared = false;
     mPrivate.type = t;
 
@@ -120,12 +120,12 @@ DVariant::DVariant(Type t, const std::string &txtval) {
         break;
 
     default:
-        throw runtime_error("DVariant::DVariant() - invalid type");
+        throw runtime_error("Variant::Variant() - invalid type");
     }
 }
 
 //------------------------------------
-DVariant::DVariant(const DVariant &b) {
+Variant::Variant(const Variant &b) {
     if (b.mPrivate.isShared) {
         mPrivate.isShared = true;
         mPrivate.type = b.mPrivate.type;
@@ -136,35 +136,35 @@ DVariant::DVariant(const DVariant &b) {
 }
 
 //------------------------------------
-DVariant::DVariant(bool val) {
+Variant::Variant(bool val) {
     mPrivate.type = DV_BOOL;
     mPrivate.data.dbool = val;
     mPrivate.isShared = false;
 }
 
 //------------------------------------
-DVariant::DVariant(float val) {
+Variant::Variant(float val) {
     mPrivate.type = DV_FLOAT;
     mPrivate.data.dfloat = val;
     mPrivate.isShared = false;
 }
 
 //------------------------------------
-DVariant::DVariant(int val) {
+Variant::Variant(int val) {
     mPrivate.type = DV_INT;
     mPrivate.data.dint = val;
     mPrivate.isShared = false;
 }
 
 //------------------------------------
-DVariant::DVariant(uint val) {
+Variant::Variant(uint val) {
     mPrivate.type = DV_UINT;
     mPrivate.data.duint = val;
     mPrivate.isShared = false;
 }
 
 //------------------------------------
-DVariant::DVariant(const char *text, int length) {
+Variant::Variant(const char *text, int length) {
     mPrivate.type = DV_STRING;
 
     if (length > 0) { // if length is present... (I could probably see what the
@@ -178,65 +178,65 @@ DVariant::DVariant(const char *text, int length) {
 }
 
 //------------------------------------
-DVariant::DVariant(const std::string &text) {
+Variant::Variant(const std::string &text) {
     mPrivate.type = DV_STRING;
     mPrivate.data.shared = new Shared<string>(text);
     mPrivate.isShared = true;
 }
 
 //------------------------------------
-DVariant::DVariant(const Vector3 &vec) {
+Variant::Variant(const Vector3 &vec) {
     mPrivate.type = DV_VECTOR;
     mPrivate.data.shared = new Shared<Vector3>(vec);
     mPrivate.isShared = true;
 }
 
 //------------------------------------
-DVariant::DVariant(const Quaternion &ori) {
+Variant::Variant(const Quaternion &ori) {
     mPrivate.type = DV_QUATERNION;
     mPrivate.data.shared = new Shared<Quaternion>(ori);
     mPrivate.isShared = true;
 }
 
 //------------------------------------
-DVariant::DVariant(float x, float y, float z) {
+Variant::Variant(float x, float y, float z) {
     mPrivate.type = DV_VECTOR;
     mPrivate.data.shared = new Shared<Vector3>(Vector3(x, y, z));
     mPrivate.isShared = true;
 }
 
 //------------------------------------
-DVariant::DVariant(float x, float y, float z, float w) {
+Variant::Variant(float x, float y, float z, float w) {
     mPrivate.type = DV_QUATERNION;
     mPrivate.data.shared = new Shared<Quaternion>(Quaternion(x, y, z, w));
     mPrivate.isShared = true;
 }
 
 //------------------------------------
-DVariant::~DVariant() {
+Variant::~Variant() {
     if (mPrivate.isShared)
         delete mPrivate.data.shared;
 }
 
 //------------------------------------
-const char *DVariant::typeString() const { return typeToString(mPrivate.type); }
+const char *Variant::typeString() const { return typeToString(mPrivate.type); }
 
 //------------------------------------
-const char *DVariant::typeToString(DVariant::Type t) {
+const char *Variant::typeToString(Variant::Type t) {
     switch (t) {
-    case DVariant::DV_BOOL:
+    case Variant::DV_BOOL:
         return "Bool";
-    case DVariant::DV_FLOAT:
+    case Variant::DV_FLOAT:
         return "Float";
-    case DVariant::DV_INT:
+    case Variant::DV_INT:
         return "Int";
-    case DVariant::DV_UINT:
+    case Variant::DV_UINT:
         return "UInt";
-    case DVariant::DV_STRING:
+    case Variant::DV_STRING:
         return "String";
-    case DVariant::DV_VECTOR:
+    case Variant::DV_VECTOR:
         return "Vector";
-    case DVariant::DV_QUATERNION:
+    case Variant::DV_QUATERNION:
         return "Quaternion";
     default:
         return "Invalid"; // Be gentle. Do not throw
@@ -244,7 +244,7 @@ const char *DVariant::typeToString(DVariant::Type t) {
 }
 
 //------------------------------------
-DVariant::operator std::string() const {
+Variant::operator std::string() const {
     std::ostringstream o;
 
     switch (mPrivate.type) {
@@ -283,10 +283,10 @@ DVariant::operator std::string() const {
 }
 
 //------------------------------------
-string DVariant::toString() const { return operator string(); }
+string Variant::toString() const { return operator string(); }
 
 //------------------------------------
-int DVariant::toInt() const {
+int Variant::toInt() const {
     std::stringstream ssStream;
 
     switch (mPrivate.type) {
@@ -303,19 +303,19 @@ int DVariant::toInt() const {
             ((static_cast<Shared<string> *>(mPrivate.data.shared))->data));
     case DV_VECTOR:
         throw runtime_error(
-            "DVariant::toInt() - vector cannot be converted to int");
+            "Variant::toInt() - vector cannot be converted to int");
     case DV_QUATERNION:
         throw runtime_error(
-            "DVariant::toInt() - quaternion cannot be converted to int");
+            "Variant::toInt() - quaternion cannot be converted to int");
     case DV_INVALID:
-        throw runtime_error("DVariant::toInt() - invalid type specified");
+        throw runtime_error("Variant::toInt() - invalid type specified");
     default:
-        throw runtime_error("DVariant::toInt() - unknown type specified");
+        throw runtime_error("Variant::toInt() - unknown type specified");
     }
 }
 
 //------------------------------------
-uint DVariant::toUInt() const {
+uint Variant::toUInt() const {
     switch (mPrivate.type) {
     case DV_BOOL:
         return mPrivate.data.dbool ? 1 : 0;
@@ -330,17 +330,17 @@ uint DVariant::toUInt() const {
             ((static_cast<Shared<string> *>(mPrivate.data.shared))->data));
     case DV_VECTOR:
         throw runtime_error(
-            "DVariant::toUInt() - vector cannot be converted to uint");
+            "Variant::toUInt() - vector cannot be converted to uint");
     case DV_QUATERNION:
         throw runtime_error(
-            "DVariant::toUInt() - quaternion cannot be converted to uint");
+            "Variant::toUInt() - quaternion cannot be converted to uint");
     default:
-        throw runtime_error("DVariant::toUInt() - invalid type specified");
+        throw runtime_error("Variant::toUInt() - invalid type specified");
     }
 }
 
 //------------------------------------
-float DVariant::toFloat() const {
+float Variant::toFloat() const {
     std::stringstream ssStream;
 
     switch (mPrivate.type) {
@@ -357,17 +357,17 @@ float DVariant::toFloat() const {
             (static_cast<Shared<string> *>(mPrivate.data.shared))->data);
     case DV_VECTOR:
         throw runtime_error(
-            "DVariant::toFloat() - vector cannot be converted to int");
+            "Variant::toFloat() - vector cannot be converted to int");
     case DV_QUATERNION:
         throw runtime_error(
-            "DVariant::toFloat() - quaternion cannot be converted to int");
+            "Variant::toFloat() - quaternion cannot be converted to int");
     default:
-        throw runtime_error("DVariant::toFloat() - invalid type specified");
+        throw runtime_error("Variant::toFloat() - invalid type specified");
     }
 }
 
 //------------------------------------
-bool DVariant::toBool() const {
+bool Variant::toBool() const {
     switch (mPrivate.type) {
     case DV_BOOL:
         return mPrivate.data.dbool;
@@ -382,17 +382,17 @@ bool DVariant::toBool() const {
             (static_cast<Shared<string> *>(mPrivate.data.shared))->data);
     case DV_VECTOR:
         throw runtime_error(
-            "DVariant::toBool() - vector cannot be converted to bool");
+            "Variant::toBool() - vector cannot be converted to bool");
     case DV_QUATERNION:
         throw runtime_error(
-            "DVariant::toBool() - quaternion cannot be converted to bool");
+            "Variant::toBool() - quaternion cannot be converted to bool");
     default:
-        throw runtime_error("DVariant::toBool() - invalid type specified");
+        throw runtime_error("Variant::toBool() - invalid type specified");
     }
 }
 
 //------------------------------------
-Vector3 DVariant::toVector() const {
+Vector3 Variant::toVector() const {
     if (mPrivate.type == DV_VECTOR) {
         // simply return the value
         return ((static_cast<Shared<Vector3> *>(mPrivate.data.shared))->data);
@@ -400,12 +400,12 @@ Vector3 DVariant::toVector() const {
         return StringToVector(
             (static_cast<Shared<string> *>(mPrivate.data.shared))->data);
     } else {
-        throw runtime_error("DVariant::toVector - Incompatible source type");
+        throw runtime_error("Variant::toVector - Incompatible source type");
     }
 }
 
 //------------------------------------
-Quaternion DVariant::toQuaternion() const {
+Quaternion Variant::toQuaternion() const {
     if (mPrivate.type == DV_QUATERNION) {
         // simply return the value
         return (
@@ -415,12 +415,12 @@ Quaternion DVariant::toQuaternion() const {
             (static_cast<Shared<string> *>(mPrivate.data.shared))->data);
     } else {
         throw runtime_error(
-            "DVariant::toQuaternion - Incompatible source type");
+            "Variant::toQuaternion - Incompatible source type");
     }
 }
 
 //------------------------------------
-const DVariant &DVariant::operator=(const DVariant &b) {
+const Variant &Variant::operator=(const Variant &b) {
     // The rather unreadable ugly code is here to handle to self-asignment
     if (b.mPrivate.isShared) {
 
@@ -449,7 +449,7 @@ const DVariant &DVariant::operator=(const DVariant &b) {
 }
 
 //------------------------------------
-const DVariant &DVariant::operator=(bool b) {
+const Variant &Variant::operator=(bool b) {
     if (mPrivate.isShared)
         delete mPrivate.data.shared;
 
@@ -461,7 +461,7 @@ const DVariant &DVariant::operator=(bool b) {
 }
 
 //------------------------------------
-const DVariant &DVariant::operator=(int i) {
+const Variant &Variant::operator=(int i) {
     if (mPrivate.isShared)
         delete mPrivate.data.shared;
 
@@ -473,7 +473,7 @@ const DVariant &DVariant::operator=(int i) {
 }
 
 //------------------------------------
-const DVariant &DVariant::operator=(uint u) {
+const Variant &Variant::operator=(uint u) {
     if (mPrivate.isShared)
         delete mPrivate.data.shared;
 
@@ -485,7 +485,7 @@ const DVariant &DVariant::operator=(uint u) {
 }
 
 //------------------------------------
-const DVariant &DVariant::operator=(float f) {
+const Variant &Variant::operator=(float f) {
     if (mPrivate.isShared)
         delete mPrivate.data.shared;
 
@@ -497,7 +497,7 @@ const DVariant &DVariant::operator=(float f) {
 }
 
 //------------------------------------
-const DVariant &DVariant::operator=(const char *s) {
+const Variant &Variant::operator=(const char *s) {
     if (mPrivate.isShared)
         delete mPrivate.data.shared;
 
@@ -509,7 +509,7 @@ const DVariant &DVariant::operator=(const char *s) {
 }
 
 //------------------------------------
-const DVariant &DVariant::operator=(const std::string &s) {
+const Variant &Variant::operator=(const std::string &s) {
     if (mPrivate.isShared)
         delete mPrivate.data.shared;
 
@@ -521,7 +521,7 @@ const DVariant &DVariant::operator=(const std::string &s) {
 }
 
 //------------------------------------
-const DVariant &DVariant::operator=(const Vector3 &v) {
+const Variant &Variant::operator=(const Vector3 &v) {
     if (mPrivate.isShared)
         delete mPrivate.data.shared;
 
@@ -533,7 +533,7 @@ const DVariant &DVariant::operator=(const Vector3 &v) {
 }
 
 //------------------------------------
-const DVariant &DVariant::operator=(const Quaternion &q) {
+const Variant &Variant::operator=(const Quaternion &q) {
     if (mPrivate.isShared)
         delete mPrivate.data.shared;
 
@@ -545,12 +545,12 @@ const DVariant &DVariant::operator=(const Quaternion &q) {
 }
 
 //------------------------------------
-DVariant::Type DVariant::type() const { return mPrivate.type; }
+Variant::Type Variant::type() const { return mPrivate.type; }
 
 //------------------------------------
 // Returns a reference to a shared data, statically cast to the requested type,
 // if possible
-template <typename T> T &DVariant::shared_cast() const {
+template <typename T> T &Variant::shared_cast() const {
     if (mPrivate.isShared == false)
         throw(runtime_error("Invalid shared_cast - cast on non-shared data"));
 
@@ -564,7 +564,7 @@ template <typename T> T &DVariant::shared_cast() const {
 }
 
 //------------------------------------
-bool DVariant::compare(const DVariant &b) const {
+bool Variant::compare(const Variant &b) const {
     if (b.type() == type()) {
         switch (mPrivate.type) {
         case DV_BOOL:
@@ -584,7 +584,7 @@ bool DVariant::compare(const DVariant &b) const {
             return b.shared_cast<Quaternion>() == shared_cast<Quaternion>();
 
         default:
-            throw(runtime_error("DVariant: Invalid compare type"));
+            throw(runtime_error("Variant: Invalid compare type"));
         }
     } else {
         // Some basic comparison operations with conversion
@@ -610,7 +610,7 @@ bool DVariant::compare(const DVariant &b) const {
             return shared_cast<Quaternion>() == b.toQuaternion();
 
         default:
-            throw runtime_error("DVariant::typeToString() - invalid type");
+            throw runtime_error("Variant::typeToString() - invalid type");
         }
     }
 
@@ -618,7 +618,7 @@ bool DVariant::compare(const DVariant &b) const {
 };
 
 //------------------------------------
-Vector3 DVariant::StringToVector(const std::string &str) {
+Vector3 Variant::StringToVector(const std::string &str) {
     string src(str);
 
     float vec[3];
@@ -636,7 +636,7 @@ Vector3 DVariant::StringToVector(const std::string &str) {
 
             if (!ssStream)
                 throw runtime_error(
-                    string("DVariant::StringToVector - Parse error for ") +
+                    string("Variant::StringToVector - Parse error for ") +
                     str);
         } else {
             if (comma_pos != string::npos) {
@@ -646,13 +646,13 @@ Vector3 DVariant::StringToVector(const std::string &str) {
 
                 if (!ssStream)
                     throw runtime_error(
-                        string("DVariant::StringToVector - Parse error for ") +
+                        string("Variant::StringToVector - Parse error for ") +
                         str);
 
                 src = src.substr(comma_pos + 1, src.length() - (comma_pos + 1));
             } else {
                 throw runtime_error(
-                    string("DVariant::StringToVector - Parse error for ") +
+                    string("Variant::StringToVector - Parse error for ") +
                     str);
                 // return Vector3(0,0,0);
             }
@@ -666,7 +666,7 @@ Vector3 DVariant::StringToVector(const std::string &str) {
 }
 
 //------------------------------------
-Quaternion DVariant::StringToQuaternion(const std::string &str) {
+Quaternion Variant::StringToQuaternion(const std::string &str) {
     string src(str);
 
     float quat[4];
@@ -684,7 +684,7 @@ Quaternion DVariant::StringToQuaternion(const std::string &str) {
 
             if (!ssStream)
                 throw runtime_error(
-                    string("DVariant::StringToQuaternion - Parse error for ") +
+                    string("Variant::StringToQuaternion - Parse error for ") +
                     str);
         } else {
             if (comma_pos != string::npos) {
@@ -695,13 +695,13 @@ Quaternion DVariant::StringToQuaternion(const std::string &str) {
                 if (!ssStream)
                     throw runtime_error(
                         string(
-                            "DVariant::StringToQuaternion - Parse error for ") +
+                            "Variant::StringToQuaternion - Parse error for ") +
                         str);
 
                 src = src.substr(comma_pos + 1, src.length() - (comma_pos + 1));
             } else {
                 throw runtime_error(
-                    string("DVariant::StringToQuaternion - Parse error for ") +
+                    string("Variant::StringToQuaternion - Parse error for ") +
                     str);
             }
         }
@@ -714,7 +714,7 @@ Quaternion DVariant::StringToQuaternion(const std::string &str) {
 }
 
 //------------------------------------
-int DVariant::StringToInt(const std::string &str) {
+int Variant::StringToInt(const std::string &str) {
     std::stringstream ssStream;
     int iReturn;
 
@@ -725,21 +725,21 @@ int DVariant::StringToInt(const std::string &str) {
 
         if (!ssStream)
             throw runtime_error(
-                string("DVariant::StringToInt - Parse error for ") + str);
+                string("Variant::StringToInt - Parse error for ") + str);
     } else {
         ssStream << str;
         ssStream >> iReturn;
 
         if (!ssStream)
             throw runtime_error(
-                string("DVariant::StringToInt - Parse error for ") + str);
+                string("Variant::StringToInt - Parse error for ") + str);
     }
 
     return iReturn;
 }
 
 //------------------------------------
-uint DVariant::StringToUInt(const std::string &str) {
+uint Variant::StringToUInt(const std::string &str) {
     std::stringstream ssStream;
     uint iReturn;
 
@@ -750,21 +750,21 @@ uint DVariant::StringToUInt(const std::string &str) {
 
         if (!ssStream)
             throw runtime_error(
-                string("DVariant::StringToInt - Parse error for ") + str);
+                string("Variant::StringToInt - Parse error for ") + str);
     } else {
         ssStream << str;
         ssStream >> iReturn;
 
         if (!ssStream)
             throw runtime_error(
-                string("DVariant::StringToInt - Parse error for ") + str);
+                string("Variant::StringToInt - Parse error for ") + str);
     }
 
     return iReturn;
 }
 
 //------------------------------------
-bool DVariant::StringToBool(const std::string &str) {
+bool Variant::StringToBool(const std::string &str) {
     string s(str);
 
     // HMM: VC does not like this.
@@ -776,11 +776,11 @@ bool DVariant::StringToBool(const std::string &str) {
         return false;
     } else
         throw runtime_error(
-            string("DVariant::StringToBool - Parse error for ") + str);
+            string("Variant::StringToBool - Parse error for ") + str);
 }
 
 //------------------------------------
-float DVariant::StringToFloat(const std::string &str) {
+float Variant::StringToFloat(const std::string &str) {
     std::stringstream ssStream;
     float fReturn;
 
@@ -789,31 +789,31 @@ float DVariant::StringToFloat(const std::string &str) {
 
     if (!ssStream)
         throw runtime_error(
-            string("DVariant::StringToFloat - Parse error for ") + str);
+            string("Variant::StringToFloat - Parse error for ") + str);
 
     return fReturn;
 }
 
 //------------------------------------
-template <> bool DVariant::as<bool>() const { return toBool(); }
+template <> bool Variant::as<bool>() const { return toBool(); }
 
 //------------------------------------
-template <> float DVariant::as<float>() const { return toFloat(); }
+template <> float Variant::as<float>() const { return toFloat(); }
 
 //------------------------------------
-template <> int DVariant::as<int>() const { return toInt(); }
+template <> int Variant::as<int>() const { return toInt(); }
 
 //------------------------------------
-template <> uint DVariant::as<uint>() const { return toUInt(); }
+template <> uint Variant::as<uint>() const { return toUInt(); }
 
 //------------------------------------
-template <> std::string DVariant::as<std::string>() const { return toString(); }
+template <> std::string Variant::as<std::string>() const { return toString(); }
 
 //------------------------------------
-template <> Vector3 DVariant::as<Vector3>() const { return toVector(); }
+template <> Vector3 Variant::as<Vector3>() const { return toVector(); }
 
 //------------------------------------
-template <> Ogre::Quaternion DVariant::as<Ogre::Quaternion>() const {
+template <> Ogre::Quaternion Variant::as<Ogre::Quaternion>() const {
     return toQuaternion();
 }
 

@@ -131,7 +131,7 @@ void GUIService::bootstrapFinished() {
     mConfigSrv->setParamDescription("console_font_group",
                                     "Resource group of the base console font");
 
-    DVariant tmp;
+    Variant tmp;
     mConsoleFontName = "font.fon";
 
     if (mConfigSrv->getParam("console_font_name", tmp)) {

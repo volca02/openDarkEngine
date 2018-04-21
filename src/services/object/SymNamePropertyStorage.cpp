@@ -37,7 +37,7 @@ SymNamePropertyStorage::~SymNamePropertyStorage(){};
 // --------------------------------------------------------------------------
 bool SymNamePropertyStorage::destroy(int objID) {
     // Find the object name before destroying
-    DVariant res;
+    Variant res;
 
     if (getField(objID, "", res)) {
         bool eraseok = StringDataStorage::destroy(objID);
@@ -63,7 +63,7 @@ bool SymNamePropertyStorage::destroy(int objID) {
 
 // --------------------------------------------------------------------------
 bool SymNamePropertyStorage::setField(int objID, const std::string &field,
-                                      const DVariant &value) {
+                                      const Variant &value) {
     // if the parent's set field passes, update ourselves as well.
     // but first, look if we can proceed (name duplicity check)
 

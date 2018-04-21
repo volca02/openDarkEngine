@@ -25,7 +25,7 @@
 #ifndef __CONFIGSERVICE_H
 #define __CONFIGSERVICE_H
 
-#include "DVariant.h"
+#include "Variant.h"
 #include "OpdeService.h"
 #include "OpdeServiceFactory.h"
 #include "SharedPtr.h"
@@ -56,18 +56,18 @@ public:
 
     /** get a parameter
      * @param param The parameter name
-     * @param dflt The DVariant default value, if not found
-     * @return The parameter value, or Empty DVariant if the parameter was not
+     * @param dflt The Variant default value, if not found
+     * @return The parameter value, or Empty Variant if the parameter was not
      * found */
-    DVariant getParam(const std::string &param,
-                      const DVariant &dflt = DVariant());
+    Variant getParam(const std::string &param,
+                      const Variant &dflt = Variant());
 
     /** get a parameter
      * @param param The parameter name
-     * @param tgt The DVariant instance to fill if successful (will not
+     * @param tgt The Variant instance to fill if successful (will not
      * overwrite if no param found)
      * @return true if parameter was changed */
-    bool getParam(const std::string &param, DVariant &tgt);
+    bool getParam(const std::string &param, Variant &tgt);
 
     /** determine an existence of a parameter */
     bool hasParam(const std::string &param);

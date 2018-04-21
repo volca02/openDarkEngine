@@ -82,7 +82,7 @@ bool ObjectService::exists(int objID) { return mAllocatedObjects[objID]; }
 
 //------------------------------------------------------
 Vector3 ObjectService::position(int objID) {
-    DVariant res;
+    Variant res;
 
     if (mPropPosition->get(objID, "position", res)) {
         return res.toVector();
@@ -92,7 +92,7 @@ Vector3 ObjectService::position(int objID) {
 
 //------------------------------------------------------
 Quaternion ObjectService::orientation(int objID) {
-    DVariant res;
+    Variant res;
 
     if (mPropPosition->get(objID, "orientation", res)) {
         return res.toQuaternion();
@@ -102,7 +102,7 @@ Quaternion ObjectService::orientation(int objID) {
 
 //------------------------------------------------------
 std::string ObjectService::getName(int objID) {
-    DVariant res;
+    Variant res;
 
     if (mPropSymName->get(objID, "", res)) {
         return res.toString();
@@ -514,7 +514,7 @@ void ObjectService::_save(const FileGroupPtr &db, uint saveMask) {
 
     for (int id = mAllocatedObjects.getMinIndex();
          id < mAllocatedObjects.getMaxIndex(); ++id) {
-        DVariant v;
+        Variant v;
 
         if (mAllocatedObjects[id]) { // only gamesys object have donortype...
             if (!mPropertyService->has(id, "DonorType")) {
@@ -676,7 +676,7 @@ void ObjectService::freeID(int objID) {
 void ObjectService::resetMinMaxID() {
     ConfigServicePtr cfp = GET_SERVICE(ConfigService);
 
-    DVariant val;
+    Variant val;
     // Config Values: obj_min, obj_max
 
     int minID, maxID;

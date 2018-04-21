@@ -53,14 +53,14 @@ protected:
     void setPropertySource(int oid, int effid);
 
     /// @see ActiveProperty::valueChanged
-    void valueChanged(int oid, const std::string &field, const DVariant &value);
+    void valueChanged(int oid, const std::string &field, const Variant &value);
 
     /// core setter method. Called from other methods to set the rendertype
     /// value
     void setRenderType(int oid, uint32_t renderType);
 
     Ogre::SceneManager *mSceneMgr;
-    DEnum *mEnum;
+    std::unique_ptr<Enumeration> mEnum;
 };
 }; // namespace Opde
 

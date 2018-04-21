@@ -178,10 +178,10 @@ PyObject *RelationBinder::getLinkField(PyObject *self, PyObject *args) {
     const char *field;
 
     if (PyArg_ParseTuple(args, "is", &id, &field)) {
-        DVariant value;
+        Variant value;
         value = o->getLinkField(id, field);
 
-        result = DVariantToPyObject(value);
+        result = VariantToPyObject(value);
         return result;
     } else {
         // Invalid parameters
@@ -204,8 +204,8 @@ PyObject *RelationBinder::setLinkField(PyObject *self, PyObject *args) {
     PyObject *Object = NULL;
 
     if (PyArg_ParseTuple(args, "isO", &id, &field, &Object)) {
-        DVariant value;
-        value = PyObjectToDVariant(Object);
+        Variant value;
+        value = PyObjectToVariant(Object);
         o->setLinkField(id, field, value);
 
         __PY_NONE_RET;

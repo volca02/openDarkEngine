@@ -235,7 +235,7 @@ bool PropertyService::owns(int obj_id, const std::string &propName) {
 
 // --------------------------------------------------------------------------
 bool PropertyService::set(int obj_id, const std::string &propName,
-                          const std::string &propField, const DVariant &value) {
+                          const std::string &propField, const Variant &value) {
     Property *prop = getProperty(propName);
 
     if (prop != NULL) {
@@ -250,7 +250,7 @@ bool PropertyService::set(int obj_id, const std::string &propName,
 
 // --------------------------------------------------------------------------
 bool PropertyService::get(int obj_id, const std::string &propName,
-                          const std::string &propField, DVariant &target) {
+                          const std::string &propField, Variant &target) {
     Property *prop = getProperty(propName);
 
     if (prop != NULL) {

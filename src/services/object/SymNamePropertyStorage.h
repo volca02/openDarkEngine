@@ -43,7 +43,7 @@ public:
     virtual bool destroy(int objID);
 
     virtual bool setField(int objID, const std::string &field,
-                          const DVariant &value);
+                          const Variant &value);
 
     virtual bool _create(int objID, const std::string &text);
 

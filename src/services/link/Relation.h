@@ -127,7 +127,7 @@ public:
      * This could be
      */
     link_id_t createWithValues(int from, int to,
-                               const DVariantStringMap &dataValues);
+                               const VariantStringMap &dataValues);
 
     /** Creates a new link, returning it's ID
      * @param from The source object ID of this link
@@ -143,7 +143,7 @@ public:
      * @todo Some relations could be limited to one link between obect pair(!).
      * This could be
      */
-    link_id_t createWithValue(int from, int to, const DVariant &value);
+    link_id_t createWithValue(int from, int to, const Variant &value);
 
     /** Sets the link data field
      * @param id The link id
@@ -152,13 +152,13 @@ public:
      * @return true if successful, false otherwise
      */
     bool setLinkField(link_id_t id, const std::string &field,
-                      const DVariant &value);
+                      const Variant &value);
 
     /** Gets the link data field value
      * @param id The link id
      * @param field The name of the field the modification is requested on
      */
-    DVariant getLinkField(link_id_t id, const std::string &field);
+    Variant getLinkField(link_id_t id, const std::string &field);
 
     // ----------------- Link query methods --------------------
     /** Gets all links that come from source to destination

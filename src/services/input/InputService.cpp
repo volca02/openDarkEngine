@@ -304,7 +304,7 @@ void InputService::addBinding(const std::string &keys,
 }
 
 //------------------------------------------------------
-DVariant InputService::processCommand(const std::string &commandStr) {
+Variant InputService::processCommand(const std::string &commandStr) {
     std::string cstr;
     cstr = stripComment(commandStr);
 
@@ -576,17 +576,17 @@ std::string InputService::stripComment(const std::string &cmd) {
 }
 
 //------------------------------------------------------
-DVariant InputService::getVariable(const std::string &var) {
+Variant InputService::getVariable(const std::string &var) {
     ValueMap::const_iterator it = mVariables.find(var);
 
     if (it != mVariables.end())
         return it->second;
     else
-        return DVariant();
+        return Variant();
 }
 
 //------------------------------------------------------
-void InputService::setVariable(const std::string &var, const DVariant &val) {
+void InputService::setVariable(const std::string &var, const Variant &val) {
     LOG_DEBUG("InputService::setVariable: '%s' -> %s", var.c_str(),
               val.toString().c_str());
     ValueMap::iterator it = mVariables.find(var);
@@ -818,7 +818,7 @@ bool InputService::callCommandTrap(InputEventMsg &msg) {
         std::pair<string, string> split = splitCommand(cmd);
         msg.command = split.first;
 
-        DVariant param(split.second);
+        Variant param(split.second);
         msg.params = msg.params.as<float>() * param.as<float>();
     }
 

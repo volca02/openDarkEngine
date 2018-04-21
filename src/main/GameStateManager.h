@@ -33,7 +33,7 @@
 #include <stack>
 
 #include "ConsoleBackend.h"
-#include "DVariant.h"
+#include "Variant.h"
 #include "GameState.h"
 #include "OpdeServiceManager.h"
 #include "OpdeSingleton.h"

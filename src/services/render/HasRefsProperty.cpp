@@ -47,7 +47,7 @@ HasRefsProperty::~HasRefsProperty(void){};
 void HasRefsProperty::addProperty(int oid) {
     // nothing special needed here. Just initialize the value of the hasrefs to
     // the data value as hasRefs is inherited, just use our methods
-    DVariant val(false);
+    Variant val(false);
 
     if (!get(oid, "", val))
         OPDE_EXCEPT("Property not defined for object.",
@@ -70,7 +70,7 @@ void HasRefsProperty::setPropertySource(int oid, int effid) {
 
 // --------------------------------------------------------------------------
 void HasRefsProperty::valueChanged(int oid, const std::string &field,
-                                   const DVariant &value) {
+                                   const Variant &value) {
     // just call the setter
     setHasRefs(oid, value.toBool());
 };

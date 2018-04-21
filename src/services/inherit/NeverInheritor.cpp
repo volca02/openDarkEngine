@@ -114,7 +114,7 @@ bool NeverInheritor::validate(int srcID, int dstID,
 
 //------------------------------------------------------
 void NeverInheritor::valueChanged(int objID, const std::string &field,
-                                  const DVariant &value) {
+                                  const Variant &value) {
     // just for the original object here
     InheritValueChangeMsg msg;
 

@@ -23,7 +23,7 @@
 #ifndef __INPUTCOMMON_H
 #define __INPUTCOMMON_H
 
-#include "DVariant.h"
+#include "Variant.h"
 
 // fwds so we don't have to pull in SDL2/SDL.h here
 struct SDL_KeyboardEvent;
@@ -96,7 +96,7 @@ struct InputEventMsg {
     // unmapped command, or empty
     std::string command;
     // Parameters of the command
-    DVariant params;
+    Variant params;
 } ;
 
 /// The state of input modifiers

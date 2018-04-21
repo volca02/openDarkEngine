@@ -30,22 +30,23 @@ using namespace std;
 namespace Opde {
 
 /*------------------------------------------------------*/
-/*------------------- DEnum ----------------------------*/
+/*------------------- Enumeration ----------------------*/
 /*------------------------------------------------------*/
-DEnum::DEnum(const std::string &name, DVariant::Type enumType, bool bitfield)
-    : mValMap(), mName(name) {
+Enumeration::Enumeration(const std::string &name, Variant::Type enumType,
+                         bool bitfield)
+    : mValMap(), mName(name)
+{
     mEnumType = enumType;
     mBitField = bitfield;
 
-    if (mBitField && mEnumType != DVariant::DV_UINT)
-        OPDE_EXCEPT("Only uint is supported for bitfields", "DEnum::DEnum");
+    if (mBitField && mEnumType != Variant::DV_UINT)
+        OPDE_EXCEPT("Only uint is supported for bitfields",
+                    "Enumeration::Enumeration");
 }
 
 //------------------------------------
-DEnum::~DEnum() {}
-
-//------------------------------------
-void DEnum::insert(const std::string &key, const DVariant &value) {
+void Enumeration::insert(const std::string &key, const Variant &value)
+{
     // Type check
     if (mEnumType != value.type())
         throw(runtime_error("Type violation of the enumeration type"));
@@ -54,7 +55,8 @@ void DEnum::insert(const std::string &key, const DVariant &value) {
 }
 
 //------------------------------------
-const string &DEnum::symbol(const DVariant &val) const {
+const string &Enumeration::symbol(const Variant &val) const
+{
     if (mEnumType != val.type())
         throw(runtime_error("Type violation of the enumeration type"));
 
@@ -65,21 +67,23 @@ const string &DEnum::symbol(const DVariant &val) const {
             return it->first;
     }
 
-    throw(out_of_range("DEnum::symbol"));
+    throw(out_of_range("Enumeration::symbol"));
 }
 
 //------------------------------------
-const DVariant &DEnum::value(const std::string &symbol) const {
+const Variant &Enumeration::value(const std::string &symbol) const
+{
     StrValMap::const_iterator it = mValMap.find(symbol);
 
     if (it == mValMap.end())
         return it->second;
 
-    throw(out_of_range("DEnum::value"));
+    throw(out_of_range("Enumeration::value"));
 }
 
 //------------------------------------
-DEnum::EnumFieldList DEnum::getFieldList(const DVariant &val) const {
+Enumeration::EnumFieldList Enumeration::getFieldList(const Variant &val) const
+{
     uint uval = 0;
 
     if (mBitField) {
@@ -115,12 +119,13 @@ DEnum::EnumFieldList DEnum::getFieldList(const DVariant &val) const {
 // ---------------------------- Data Storage --------------------------------
 // --------------------------------------------------------------------------
 bool DataStorage::createWithValues(int objID,
-                                   const DVariantStringMap &dataValues) {
+                                   const VariantStringMap &dataValues)
+{
     if (!create(objID))
         return false;
 
-    DVariantStringMap::const_iterator end = dataValues.end();
-    DVariantStringMap::const_iterator it = dataValues.begin();
+    VariantStringMap::const_iterator end = dataValues.end();
+    VariantStringMap::const_iterator it = dataValues.begin();
 
     for (; it != end; ++it) {
         setField(objID, it->first, it->second);
@@ -130,7 +135,8 @@ bool DataStorage::createWithValues(int objID,
 }
 
 // --------------------------------------------------------------------------
-bool DataStorage::createWithValue(int objID, const DVariant &value) {
+bool DataStorage::createWithValue(int objID, const Variant &value)
+{
     if (!create(objID))
         return false;
 

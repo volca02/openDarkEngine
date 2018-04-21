@@ -56,7 +56,7 @@ GameLoadState::GameLoadState()
 GameLoadState::~GameLoadState() {}
 
 void GameLoadState::start() {
-    DVariant fnttst;
+    Variant fnttst;
 
     LOG_INFO("LoadState: Starting");
 

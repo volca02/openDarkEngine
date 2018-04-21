@@ -28,7 +28,7 @@
 
 #include "DataStorage.h"
 
-#include "DVariant.h"
+#include "Variant.h"
 #include "File.h"
 #include "Iterator.h"
 #include "Serializer.h"
@@ -40,12 +40,12 @@ namespace Opde {
 template <typename T, typename SerT = TypeSerializer<T>>
 class SingleFieldDataStorage : public DataStorage {
 public:
-    explicit SingleFieldDataStorage(DEnum *enm) : mFieldDesc(), mSerializer() {
+    explicit SingleFieldDataStorage(Enumeration *enm) : mFieldDesc(), mSerializer() {
         DataFieldDesc fieldDesc;
         fieldDesc.enumerator = enm;
         fieldDesc.name = "";
         fieldDesc.size = sizeof(T);
-        fieldDesc.type = DVariantTypeTraits<T>::type;
+        fieldDesc.type = VariantTypeTraits<T>::type;
         mFieldDesc.push_back(fieldDesc);
     };
 
@@ -91,7 +91,7 @@ public:
 
     /** @see DataStorage::getField */
     virtual bool getField(int objID, const std::string &field,
-                          DVariant &target) {
+                          Variant &target) {
         assert(field == "");
 
         typename DataMap::iterator it = mDataMap.find(objID);
@@ -107,7 +107,7 @@ public:
 
     /** @see DataStorage::setField */
     virtual bool setField(int objID, const std::string &field,
-                          const DVariant &value) {
+                          const Variant &value) {
         assert(field == "");
 
         typename DataMap::iterator it = mDataMap.find(objID);
@@ -207,7 +207,7 @@ protected:
 
     /// Converts from variant to the internal storage type. Should be overrided,
     /// or reimplemented by explicit specialization
-    virtual T fromVariant(const DVariant &v) const { return v.as<T>(); }
+    virtual T fromVariant(const Variant &v) const { return v.as<T>(); }
 
     /// Data map
     typedef typename std::map<int, T> DataMap;
@@ -246,7 +246,7 @@ typedef SingleFieldDataStorage<Vector3> Vector3DataStorage;
 class OPDELIB_EXPORT StringDataStorage
     : public SingleFieldDataStorage<std::string> {
 public:
-    StringDataStorage(DEnum *enm = NULL)
+    StringDataStorage(Enumeration *enm = NULL)
         : SingleFieldDataStorage<std::string>(enm) {
         mFieldDesc[0].size = -1; // override needed
     }
@@ -266,9 +266,9 @@ class FixedStringDataStorage
         SingleFieldDataStorage<std::string, FixedStringSerializer<Len>>;
 
 public:
-    FixedStringDataStorage(DEnum *enm = NULL)
+    FixedStringDataStorage(Enumeration *enm = NULL)
         : Parent(DataFieldDesc{"", "", Len,
-                               DVariantTypeTraits<std::string>::type}) {}
+                               VariantTypeTraits<std::string>::type}) {}
 };
 
 } // namespace Opde

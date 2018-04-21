@@ -133,7 +133,7 @@ bool ConsoleGUI::injectKeyPress(unsigned int keycode) {
         // add the command to the log...
         mConsoleBackend->putMessage(">" + mCommand, 6);
         // and execute
-        DVariant result = mInputSrv->processCommand(mCommand);
+        Variant result = mInputSrv->processCommand(mCommand);
 
         if (!result.toBool())
             mConsoleBackend->putMessage("Invalid command or parameters", 1);

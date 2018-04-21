@@ -32,7 +32,7 @@
 
 #include "MessageSource.h"
 #include "SharedPtr.h"
-#include "DVariant.h"
+#include "Variant.h"
 
 namespace Opde {
 // Forward declaration
@@ -68,7 +68,7 @@ struct InheritValueChangeMsg {
     /// A field name of the change (only valid for INH_VAL_FIELD_CHANGED)
     std::string field;
     /// A new value of the field (only valid for INH_VAL_FIELD_CHANGED)
-    DVariant value;
+    Variant value;
 };
 
 // forward decl.
@@ -141,7 +141,7 @@ public:
     /// on a value change, the inheritor propagates the field and the new value
     /// to all affected objects
     virtual void valueChanged(int objID, const std::string &field,
-                              const DVariant &value) = 0;
+                              const Variant &value) = 0;
 
     /// returns a pointer to the factory instance which constructed this
     /// inheritor

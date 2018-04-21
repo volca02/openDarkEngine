@@ -97,7 +97,7 @@ protected:
 
     /// @see Inheritor::valueChanged
     void valueChanged(int objID, const std::string &field,
-                      const DVariant &value);
+                      const Variant &value);
 
     /// InheritService reference
     InheritService *mInheritService;

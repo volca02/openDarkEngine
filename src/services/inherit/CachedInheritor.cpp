@@ -201,7 +201,7 @@ void CachedInheritor::clear() {
 
 //------------------------------------------------------
 void CachedInheritor::valueChanged(int objID, const std::string &field,
-                                   const DVariant &value) {
+                                   const Variant &value) {
     // TODO: search for all inheriting objects, broadcast for each
     InheritValueChangeMsg msg;
 

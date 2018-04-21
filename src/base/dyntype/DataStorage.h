@@ -26,7 +26,7 @@
 
 #include "config.h"
 
-#include "DVariant.h"
+#include "Variant.h"
 #include "File.h"
 #include "Iterator.h"
 
@@ -36,38 +36,37 @@ namespace Opde {
    bitfields.
         @note For bitfields, the base type must be DV_UINT
         @note No check on multiple keys with the same values is made */
-class DEnum {
+class Enumeration {
 private:
-    typedef std::map<std::string, DVariant> StrValMap;
+    typedef std::map<std::string, Variant> StrValMap;
 
     StrValMap mValMap;
 
-    DVariant::Type mEnumType;
+    Variant::Type mEnumType;
 
     bool mBitField;
 
     std::string mName;
 
 public:
-    DEnum(const std::string &name, DVariant::Type enumType, bool bitfield);
-
-    ~DEnum();
+    Enumeration(const std::string &name, Variant::Type enumType, bool bitfield);
+    ~Enumeration() = default;
 
     /** Insert a field definition inside the Enum
      * @note It is not adviced to modify enumerations on other times than
      * creation as this could confuse other pieces of code */
-    void insert(const std::string &key, const DVariant &value);
+    void insert(const std::string &key, const Variant &value);
 
     /** get the symbol text by the enumeration value */
-    const std::string &symbol(const DVariant &val) const;
+    const std::string &symbol(const Variant &val) const;
 
     /** get the value by the symbol text */
-    const DVariant &value(const std::string &symbol) const;
+    const Variant &value(const std::string &symbol) const;
 
     /** Enumeration field. A single field that is either checked or not, and has
      * a specific value */
     struct EnumField {
-        EnumField(std::string _k, const DVariant &_v, bool _c)
+        EnumField(std::string _k, const Variant &_v, bool _c)
             : checked(_c), key(_k), value(_v){};
 
         /** True if the field is enabled or the value is selected in case of
@@ -76,7 +75,7 @@ public:
         /** The field name (key) */
         std::string key;
         /** value of the field */
-        const DVariant &value;
+        Variant value;
     };
 
     /** Enumeration of the fields. */
@@ -85,7 +84,7 @@ public:
     /** Gets the field list for the enumeration given the field value
      * @note For bitfields, multiple can be checked==true, for Enumeration, one
      * will (if there is only a single key for any value) */
-    EnumFieldList getFieldList(const DVariant &val) const;
+    EnumFieldList getFieldList(const Variant &val) const;
 
     /** Returns true if the Enumeration is a bitfield */
     inline bool isBitfield() const { return mBitField; };
@@ -98,7 +97,7 @@ public:
 struct DataFieldDesc {
     DataFieldDesc() {};
     DataFieldDesc(const std::string &name, const std::string &label, int size,
-                  DVariant::Type type, DEnum *enumerator = nullptr)
+                  Variant::Type type, Enumeration *enumerator = nullptr)
         : name(name), label(label), size(size), type(type),
           enumerator(enumerator) {}
 
@@ -109,10 +108,10 @@ struct DataFieldDesc {
     /// Size of the field. -1 for variable-sized fields (strings)
     int size;
     /// Type of the field
-    DVariant::Type type;
+    Variant::Type type;
     /// Enumerator of the allowed values (either enum or bitfield type). NULL
     /// means this field is not enumerated
-    DEnum *enumerator;
+    Enumeration *enumerator;
 };
 
 typedef std::vector<DataFieldDesc> DataFields;
@@ -146,16 +145,16 @@ public:
      *
      */
     virtual bool createWithValues(int objID,
-                                  const DVariantStringMap &dataValues);
+                                  const VariantStringMap &dataValues);
 
     /** Creates a single-value data with specified value
      * @param objID the object id
-     * @param values DVariant value of the created record
+     * @param values Variant value of the created record
      * @see create
      * @return true if creation wen't ok
      *
      */
-    virtual bool createWithValue(int objID, const DVariant &values);
+    virtual bool createWithValue(int objID, const Variant &values);
 
     /** Destroys data on a defined object
      * @param objID the object to destroy the data for
@@ -185,7 +184,7 @@ public:
      * @return true if value was set to target, false if the field was invalid
      */
     virtual bool getField(int objID, const std::string &field,
-                          DVariant &target) = 0;
+                          Variant &target) = 0;
 
     /** Field value setter
      * @param objID The object id to set data value for
@@ -194,7 +193,7 @@ public:
      * @return true if value was set to target, false if the field was invalid
      */
     virtual bool setField(int objID, const std::string &field,
-                          const DVariant &value) = 0;
+                          const Variant &value) = 0;
 
     /** Serialization core routine
      * This routine is used to serialize the data for given object ID into a

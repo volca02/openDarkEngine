@@ -75,8 +75,8 @@ void ConfigService::setParam(const std::string &param,
 }
 
 //------------------------------------------------------
-DVariant ConfigService::getParam(const std::string &param,
-                                 const DVariant &dflt) {
+Variant ConfigService::getParam(const std::string &param,
+                                 const Variant &dflt) {
     Parameters::const_iterator it = mParameters.find(param);
 
     Parameters::const_iterator dit = mConfigKeyDescriptions.find(param);
@@ -89,14 +89,14 @@ DVariant ConfigService::getParam(const std::string &param,
     }
 
     if (it != mParameters.end()) {
-        return DVariant(it->second);
+        return Variant(it->second);
     } else {
         return dflt;
     }
 }
 
 //------------------------------------------------------
-bool ConfigService::getParam(const std::string &param, DVariant &tgt) {
+bool ConfigService::getParam(const std::string &param, Variant &tgt) {
     Parameters::const_iterator it = mParameters.find(param);
 
     if (it != mParameters.end()) {
@@ -149,7 +149,7 @@ void ConfigService::setConfigPathOverride(const std::string &cfgpath) {
 ConfigService::GameType ConfigService::getGameType() {
     GameType gt = GAME_TYPE_INVALID;
 
-    DVariant val;
+    Variant val;
 
     if (getParam("game_type", val)) {
         if (val.toString() == "t1")
@@ -165,7 +165,7 @@ ConfigService::GameType ConfigService::getGameType() {
 
 //------------------------------------------------------
 std::string ConfigService::getLanguage() {
-    DVariant val = "english";
+    Variant val = "english";
 
     // a trick - if not found, will use the previous
     // otherwise it will replace.

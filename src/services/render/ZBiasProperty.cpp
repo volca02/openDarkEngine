@@ -48,7 +48,7 @@ ZBiasProperty::~ZBiasProperty(void){};
 
 // --------------------------------------------------------------------------
 void ZBiasProperty::addProperty(int oid) {
-    DVariant val;
+    Variant val;
 
     if (!get(oid, "", val))
         OPDE_EXCEPT("Property not defined for object.",
@@ -71,7 +71,7 @@ void ZBiasProperty::setPropertySource(int oid, int effid) {
 
 // --------------------------------------------------------------------------
 void ZBiasProperty::valueChanged(int oid, const std::string &field,
-                                 const DVariant &value) {
+                                 const Variant &value) {
     // just call the setter
     setZBias(oid, value.toUInt());
 };

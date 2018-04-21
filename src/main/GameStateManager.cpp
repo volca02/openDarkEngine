@@ -208,7 +208,7 @@ bool GameStateManager::run() {
      * loaded
      */
     if (mConfigService->hasParam("mission")) {
-        DVariant mis = mConfigService->getParam("mission");
+        Variant mis = mConfigService->getParam("mission");
 
         // process
         String path = "", fname = mis.toString();

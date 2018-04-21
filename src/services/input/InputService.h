@@ -30,7 +30,7 @@
 #include "ServiceCommon.h"
 
 #include "Callback.h"
-#include "DVariant.h"
+#include "Variant.h"
 #include "InputEventMapper.h"
 #include "OpdeService.h"
 #include "OpdeServiceManager.h"
@@ -80,15 +80,15 @@ public:
     bool loadBNDFile(const std::string &filename);
 
     /// Adds a command to the pool
-    DVariant processCommand(const std::string &CommandString);
+    Variant processCommand(const std::string &CommandString);
 
     /// TODO:	void saveBNDFile(const std::string& filename);
 
     /// Variable getter (for mouse senitivity, etc)
-    DVariant getVariable(const std::string &var);
+    Variant getVariable(const std::string &var);
 
     /// Variable setter (for mouse senitivity, etc)
-    void setVariable(const std::string &var, const DVariant &val);
+    void setVariable(const std::string &var, const Variant &val);
 
     /// Definition of the command listener
     typedef Callback<InputEventMsg> Listener;
@@ -202,7 +202,7 @@ protected:
     typedef std::map<std::string, InputEventMapper *> ContextToMapper;
 
     /// string variable name to variant map
-    typedef std::map<std::string, DVariant> ValueMap;
+    typedef std::map<std::string, Variant> ValueMap;
 
     /// map of SDL scancode to the code text
     typedef std::map<unsigned int, std::string> KeyMap; // (lower case please)

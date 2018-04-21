@@ -679,9 +679,9 @@ void RenderService::onPropPositionMsg(const PropertyChangeMsg &msg) {
             if (node == NULL)
                 return;
 
-            DVariant pos;
+            Variant pos;
             mPropPosition->get(msg.objectID, "position", pos);
-            DVariant ori;
+            Variant ori;
             mPropPosition->get(msg.objectID, "facing", ori);
 
             node->setPosition(pos.toVector());

@@ -25,7 +25,7 @@
 
 #include "config.h"
 
-#include "DVariant.h"
+#include "Variant.h"
 #include "OpdeException.h"
 #include "Root.h"
 #include "StringTokenizer.h"
@@ -60,11 +60,11 @@ protected:
     DocStrings mEnumDocs;
     DocStrings mSpecialDocs;
 
-    typedef std::map<std::string, DEnum *> EnumMap;
+    typedef std::map<std::string, Enumeration *> EnumMap;
 
     EnumMap mEncounteredEnums;
 
-    void queueEnumForDesc(DEnum *en) {
+    void queueEnumForDesc(Enumeration *en) {
         assert(en);
 
         mEncounteredEnums[en->getName()] = en;
@@ -86,7 +86,7 @@ protected:
         // initialize Opde::Root. No service types besides the base
         mRoot->loadConfigFile(mConfigFile);
 
-        DVariant p;
+        Variant p;
 
         if (!mConfigSvc->getParam("resources", p)) {
             // default
@@ -129,7 +129,7 @@ protected:
 
     void loadAdditionalDocStrings(void) {
         // see if we can open the specified file
-        DVariant fn = "docstrings.txt"; // default
+        Variant fn = "docstrings.txt"; // default
 
         // override, if present
         mConfigSvc->getParam("docstrings", fn);
@@ -256,7 +256,7 @@ protected:
 
             // TODO: spit all the property fields with descriptions
             for (const DataFieldDesc &df : pg->getFieldDesc()) {
-                fo << df.name << " & " << DVariant::typeToString(df.type)
+                fo << df.name << " & " << Variant::typeToString(df.type)
                    << " & " << df.size << " & ";
 
                 if (df.enumerator != NULL) {
@@ -311,7 +311,7 @@ protected:
         EnumMap::iterator it = mEncounteredEnums.begin();
 
         for (; it != mEncounteredEnums.end(); ++it) {
-            DEnum *en = it->second;
+            Enumeration *en = it->second;
 
             const string &enname = en->getName();
 
@@ -341,13 +341,13 @@ protected:
             // table contents, each line ending with \\, cells separated using &
             fo << "\\textbf{Key} & \\textbf{Value} \\\\" << endl;
 
-            DEnum::EnumFieldList l = en->getFieldList(0);
+            Enumeration::EnumFieldList l = en->getFieldList(0);
 
-            DEnum::EnumFieldList::iterator kit = l.begin();
+            Enumeration::EnumFieldList::iterator kit = l.begin();
 
             // iterate
             for (; kit != l.end(); ++kit) {
-                DEnum::EnumField &f = *kit;
+                Enumeration::EnumField &f = *kit;
 
                 fo << f.key << " & " << f.value.toUInt() << " \\\\"
                    << std::endl;
@@ -360,7 +360,7 @@ protected:
     }
 
     void doGenerate(void) {
-        DVariant fn = "output.tex"; // default
+        Variant fn = "output.tex"; // default
 
         // override, if present
         mConfigSvc->getParam("outfile", fn);

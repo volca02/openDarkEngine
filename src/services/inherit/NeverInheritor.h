@@ -51,7 +51,7 @@ public:
 
     /// @see Inheritor::valueChanged
     virtual void valueChanged(int objID, const std::string &field,
-                              const DVariant &value);
+                              const Variant &value);
 
     /// @see Inheritor::clear
     virtual void clear();

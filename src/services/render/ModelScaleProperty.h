@@ -52,7 +52,7 @@ protected:
     void setPropertySource(int oid, int effid);
 
     /// @see ActiveProperty::valueChanged
-    void valueChanged(int oid, const std::string &field, const DVariant &value);
+    void valueChanged(int oid, const std::string &field, const Variant &value);
 
     /// core setter method. Called from other methods to set the scale value
     void setScale(int oid, const Vector3 &scale);

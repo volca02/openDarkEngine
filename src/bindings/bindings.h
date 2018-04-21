@@ -30,7 +30,7 @@
 // this has to be the first one - _POSIX_C_SOURCE crazyness...
 #include <Python.h>
 
-#include "DVariant.h"
+#include "Variant.h"
 #include "OpdeException.h"
 
 #include <OgreColourValue.h>
@@ -364,19 +364,19 @@ struct TypeInfo<Ogre::ColourValue> : TypeInfoBase<Ogre::ColourValue> {
 };
 
 // Global utilities - object conversion and such
-PyObject *DVariantToPyObject(const DVariant &inst);
-DVariant PyObjectToDVariant(PyObject *obj);
+PyObject *VariantToPyObject(const Variant &inst);
+Variant PyObjectToVariant(PyObject *obj);
 
-// DVariant type info
-template <> struct TypeInfo<DVariant> : TypeInfoBase<DVariant> {
-    TypeInfo() : TypeInfoBase<DVariant>("DVariant", VT_CUSTOM_TYPE){};
+// Variant type info
+template <> struct TypeInfo<Variant> : TypeInfoBase<Variant> {
+    TypeInfo() : TypeInfoBase<Variant>("Variant", VT_CUSTOM_TYPE){};
 
-    static PyObject *toPyObject(const DVariant &val) {
-        return DVariantToPyObject(val);
+    static PyObject *toPyObject(const Variant &val) {
+        return VariantToPyObject(val);
     }
 
-    static bool fromPyObject(PyObject *src, DVariant &dst) {
-        dst = PyObjectToDVariant(src);
+    static bool fromPyObject(PyObject *src, Variant &dst) {
+        dst = PyObjectToVariant(src);
         return true;
     }
 };

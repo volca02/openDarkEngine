@@ -35,66 +35,66 @@ Opde::Root *Opde::PythonLanguage::msRoot = NULL;
 
 namespace Python {
 
-PyObject *DVariantToPyObject(const DVariant &inst) {
+PyObject *VariantToPyObject(const Variant &inst) {
     // Do a conversion to python object from variant
     // Look for the type
     switch (inst.type()) {
-    case DVariant::DV_INVALID:
+    case Variant::DV_INVALID:
         Py_INCREF(Py_None);
         return Py_None;
 
-    case DVariant::DV_BOOL:
+    case Variant::DV_BOOL:
         return TypeInfo<bool>::toPyObject(inst.toBool());
-    case DVariant::DV_FLOAT:
+    case Variant::DV_FLOAT:
         return TypeInfo<float>::toPyObject(inst.toFloat());
-    case DVariant::DV_INT:
+    case Variant::DV_INT:
         return TypeInfo<int>::toPyObject(inst.toInt());
-    case DVariant::DV_UINT:
+    case Variant::DV_UINT:
         return TypeInfo<int>::toPyObject(inst.toUInt());
-    case DVariant::DV_STRING:
+    case Variant::DV_STRING:
         return TypeInfo<std::string>::toPyObject(inst.toString());
-    case DVariant::DV_VECTOR:
+    case Variant::DV_VECTOR:
         return TypeInfo<Vector3>::toPyObject(inst.toVector());
-    case DVariant::DV_QUATERNION:
+    case Variant::DV_QUATERNION:
         return TypeInfo<Quaternion>::toPyObject(inst.toQuaternion());
     default: // All possible paths must return a value
-        PyErr_SetString(PyExc_TypeError, "Invalid DVariant type");
+        PyErr_SetString(PyExc_TypeError, "Invalid Variant type");
         return NULL;
     }
 }
 
-DVariant PyObjectToDVariant(PyObject *obj) {
-    // Do a conversion from python object to DVariant instance
+Variant PyObjectToVariant(PyObject *obj) {
+    // Do a conversion from python object to Variant instance
     // Look for the type of the python object
 
     if (PyLong_Check(obj))
-        return DVariant(static_cast<int>(PyLong_AsLong(obj)));
+        return Variant(static_cast<int>(PyLong_AsLong(obj)));
     else if (PyBool_Check(obj)) {
         if (obj == Py_True)
-            return DVariant((bool)true);
+            return Variant((bool)true);
         else
-            return DVariant((bool)false);
+            return Variant((bool)false);
     } else if (PyFloat_Check(obj))
-        return DVariant((float)PyFloat_AsDouble(obj));
+        return Variant((float)PyFloat_AsDouble(obj));
 #ifdef IS_PY3K
     else if (PyBytes_Check(obj))
-        return DVariant(PyBytes_AsString(obj));
+        return Variant(PyBytes_AsString(obj));
 #else
     else if (PyString_Check(obj))
-        return DVariant(PyString_AsString(obj));
+        return Variant(PyString_AsString(obj));
 #endif
     else if (PyModule_Check(obj)) {
         float x, y, z, w;
 
         if (PyArg_Parse(obj, "[ffff]", &x, &y, &z, &w)) {
-            return DVariant(x, y, z, w);
+            return Variant(x, y, z, w);
         } else if (PyArg_Parse(obj, "[fff]", &x, &y, &z)) {
-            return DVariant(x, y, z);
+            return Variant(x, y, z);
         } else
-            return DVariant(DVariant::DV_INVALID);
+            return Variant(Variant::DV_INVALID);
     }
 
-    return DVariant(DVariant::DV_INVALID); // Py_None, or a non-handled type
+    return Variant(Variant::DV_INVALID); // Py_None, or a non-handled type
 }
 
 // Logging methods

@@ -170,9 +170,9 @@ PyObject *ConfigServiceBinder::getParam(PyObject *self, PyObject *args) {
     const char *name;
 
     if (PyArg_ParseTuple(args, "s", &name)) {
-        DVariant rv = o->getParam(name);
+        Variant rv = o->getParam(name);
 
-        return DVariantToPyObject(rv);
+        return VariantToPyObject(rv);
     } else {
         // Invalid parameters
         PyErr_SetString(PyExc_TypeError, "Expected a string parameter!");

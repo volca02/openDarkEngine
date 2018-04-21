@@ -98,7 +98,7 @@ public:
      * @param value The new value
      */
     bool set(int obj_id, const std::string &propName,
-             const std::string &propField, const DVariant &value);
+             const std::string &propField, const Variant &value);
 
     /** Property getter. Gets a value of a property field
      * @param obj_id The object id
@@ -106,7 +106,7 @@ public:
      * @param propField The field path to get
      */
     bool get(int obj_id, const std::string &propName,
-             const std::string &propField, DVariant &target);
+             const std::string &propField, Variant &target);
 
     /** A shortcut to Property::getFieldDescIterator
      * @param propName The name of the property

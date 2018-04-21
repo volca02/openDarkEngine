@@ -200,11 +200,11 @@ PyObject *PropertyServiceBinder::set(PyObject *self, PyObject *args) {
     const char *propName;
     const char *propField;
     PyObject *Object;
-    DVariant value;
+    Variant value;
 
     if (PyArg_ParseTuple(args, "issO", &obj_id, &propName, &propField,
                          &Object)) {
-        value = PyObjectToDVariant(Object);
+        value = PyObjectToVariant(Object);
         o->set(obj_id, propName, propField, value);
 
         // TODO: should indicate by Py_True/Py_False here
@@ -212,7 +212,7 @@ PyObject *PropertyServiceBinder::set(PyObject *self, PyObject *args) {
     } else {
         // Invalid parameters
         PyErr_SetString(PyExc_TypeError,
-                        "Expected an integer, two strings and a DVariant!");
+                        "Expected an integer, two strings and a Variant!");
         return NULL;
     }
     __PYTHON_EXCEPTION_GUARD_END_;
@@ -231,10 +231,10 @@ PyObject *PropertyServiceBinder::get(PyObject *self, PyObject *args) {
     const char *propField;
 
     if (PyArg_ParseTuple(args, "iss", &obj_id, &propName, &propField)) {
-        DVariant ret;
+        Variant ret;
 
         if (o->get(obj_id, propName, propField, ret)) {
-            return DVariantToPyObject(ret);
+            return VariantToPyObject(ret);
         } else {
             PyObject *result = Py_None;
             Py_INCREF(result);

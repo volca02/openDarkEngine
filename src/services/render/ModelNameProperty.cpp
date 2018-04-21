@@ -46,7 +46,7 @@ ModelNameProperty::~ModelNameProperty(void){};
 
 // --------------------------------------------------------------------------
 void ModelNameProperty::addProperty(int oid) {
-    DVariant val;
+    Variant val;
 
     if (!get(oid, "", val))
         OPDE_EXCEPT("Property not defined for object.",
@@ -66,7 +66,7 @@ void ModelNameProperty::setPropertySource(int oid, int effid) {
 
 // --------------------------------------------------------------------------
 void ModelNameProperty::valueChanged(int oid, const std::string &field,
-                                     const DVariant &value) {
+                                     const Variant &value) {
     // just call the setter
     setModel(oid, value.toString());
 };

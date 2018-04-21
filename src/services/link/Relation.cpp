@@ -454,7 +454,7 @@ link_id_t Relation::create(int from, int to) {
 
 // --------------------------------------------------------------------------
 link_id_t Relation::createWithValues(int from, int to,
-                                     const DVariantStringMap &dataValues) {
+                                     const VariantStringMap &dataValues) {
     // Request an id. First let's see what concreteness we have
     unsigned int cidx = 0;
 
@@ -478,7 +478,7 @@ link_id_t Relation::createWithValues(int from, int to,
 }
 
 // --------------------------------------------------------------------------
-link_id_t Relation::createWithValue(int from, int to, const DVariant &value) {
+link_id_t Relation::createWithValue(int from, int to, const Variant &value) {
     // Request an id. First let's see what concreteness we have
     unsigned int cidx = 0;
 
@@ -512,7 +512,7 @@ void Relation::remove(link_id_t id) {
 
 // --------------------------------------------------------------------------
 bool Relation::setLinkField(link_id_t id, const std::string &field,
-                            const DVariant &value) {
+                            const Variant &value) {
     if (mStorage->setField(id, field, value)) {
         LinkChangeMsg m;
 
@@ -532,8 +532,8 @@ bool Relation::setLinkField(link_id_t id, const std::string &field,
 }
 
 // --------------------------------------------------------------------------
-DVariant Relation::getLinkField(link_id_t id, const std::string &field) {
-    DVariant value;
+Variant Relation::getLinkField(link_id_t id, const std::string &field) {
+    Variant value;
 
     if (mStorage->getField(id, field, value)) {
         return value;
@@ -541,7 +541,7 @@ DVariant Relation::getLinkField(link_id_t id, const std::string &field) {
         LOG_ERROR(
             "Relation::getLinkField : Link %d was not found in relation %d", id,
             mID);
-        return DVariant();
+        return Variant();
     }
 }
 

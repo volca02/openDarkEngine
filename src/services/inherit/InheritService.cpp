@@ -481,7 +481,7 @@ void InheritService::_removeLink(const LinkPtr &link) {
 
 //------------------------------------------------------
 void InheritService::_createMPLink(int objID, int srcID, int priority) {
-    mMetaPropRelation->createWithValue(objID, srcID, DVariant(priority));
+    mMetaPropRelation->createWithValue(objID, srcID, Variant(priority));
 }
 
 //-------------------------- Factory implementation

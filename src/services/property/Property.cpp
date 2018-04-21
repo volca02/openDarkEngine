@@ -230,7 +230,7 @@ bool Property::cloneProperty(int obj_id, int src_id) {
 }
 
 // --------------------------------------------------------------------------
-bool Property::set(int id, const std::string &field, const DVariant &value) {
+bool Property::set(int id, const std::string &field, const Variant &value) {
     if (mPropertyStorage->setField(id, field, value)) {
         mInheritor->valueChanged(id, field, value);
 
@@ -241,7 +241,7 @@ bool Property::set(int id, const std::string &field, const DVariant &value) {
 }
 
 // --------------------------------------------------------------------------
-bool Property::get(int id, const std::string &field, DVariant &target) {
+bool Property::get(int id, const std::string &field, Variant &target) {
     int effID = _getEffectiveObject(id);
     return mPropertyStorage->getField(effID, field, target);
 }
