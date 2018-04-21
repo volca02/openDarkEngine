@@ -81,8 +81,8 @@ bool WorldRepService::init() {
 void WorldRepService::bootstrapFinished() {
     // Get a reference to the sceneManager. We can get DarkSceneManager directly
     // because of the format of the data we load (BSP/Portals)
-    mCells = NULL;
-    mExtraPlanes = NULL;
+    mCells.clear();
+    mExtraPlanes.clear();
 
     LOG_DEBUG(
         "WorldRepService: Registering as a listener to the database messages");
@@ -180,20 +180,8 @@ void WorldRepService::clearData() {
     // release all the entities later, when those are already invalid
     // a special care must be taken
     mSceneMgr->clearScene();
-
-    if (mCells != NULL) {
-        for (uint32_t i = 0; i < mNumCells; i++) {
-            LOG_DEBUG("WorldRepService::clearData deleting cell %d of %d", i,
-                      mNumCells);
-            delete mCells[i];
-        }
-    }
-
-    delete[] mCells;
-    mCells = NULL;
-
-    delete[] mExtraPlanes;
-    mExtraPlanes = NULL;
+    mCells.clear();
+    mExtraPlanes.clear();
 
     // inform the Light service that it can unload now
     mLightService->clear();
@@ -212,7 +200,8 @@ void WorldRepService::loadFromChunk(FilePtr &wrChunk, size_t lightSize) {
 
     mNumCells = header.numCells;
 
-    mCells = new WRCell *[header.numCells];
+    mCells.clear();
+    mCells.resize(header.numCells);
 
     LOG_DEBUG("WorldRepService: Loading Cells");
 
@@ -220,7 +209,7 @@ void WorldRepService::loadFromChunk(FilePtr &wrChunk, size_t lightSize) {
         "LEVEL_GEOMETRY", header.numCells); // will be deleted on clear_scene
 
     for (uint32_t i = 0; i < mNumCells; i++) {
-        mCells[i] = new WRCell(this, mWorldGeometry);
+        mCells[i].reset(new WRCell());
     }
 
     mLightService->setLightPixelSize(lightSize);
@@ -231,16 +220,18 @@ void WorldRepService::loadFromChunk(FilePtr &wrChunk, size_t lightSize) {
         mCells[idx]->loadFromChunk(idx, wrChunk, lightSize);
     }
 
+    // inform light service we're done loading
+    mLightService->_setCells(&mCells);
+
     LOG_DEBUG("WorldRepService: Loading Extra planes");
 
     // -- Load the extra planes
     wrChunk->read(&mExtraPlaneCount, sizeof(uint32_t));
 
-    mExtraPlanes = new Plane[mExtraPlaneCount];
-    for (size_t i = 0; i < mExtraPlaneCount; ++i)
-        *wrChunk >> mExtraPlanes[i];
+    mExtraPlanes.resize(mExtraPlaneCount);
+    for (auto &plane : mExtraPlanes) *wrChunk >> plane;
 
-    // --------------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // -- Load and process the BSP tree
     LOG_DEBUG("WorldRepService: Loading BSP");
 
@@ -256,19 +247,19 @@ void WorldRepService::loadFromChunk(FilePtr &wrChunk, size_t lightSize) {
 
     delete[] Bsp;
 
-    // --------------------------------------------------------------------------------
-    // let the light service build the atlases, etc
-    LOG_DEBUG("WorldRepService: Loading Lights table");
-    mLightService->_loadTableFromTagFile(wrChunk);
-    mLightService->build();
-
     // assign the leaf nodes
     for (idx = 0; idx < header.numCells; idx++) {
         Ogre::BspNode *node = mSceneMgr->getBspLeaf(idx);
         mCells[idx]->setBspNode(node);
     }
 
-    // --------------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // let the light service build the atlases, etc
+    LOG_DEBUG("WorldRepService: Loading Lights table");
+    mLightService->_loadTableFromTagFile(wrChunk);
+    mLightService->build();
+
+    // -------------------------------------------------------------------------
     LOG_DEBUG("WorldRepService: Attaching portals");
     // Attach the portals to the BSP tree leafs
     int optimized = 0;
@@ -279,12 +270,12 @@ void WorldRepService::loadFromChunk(FilePtr &wrChunk, size_t lightSize) {
 
     LOG_INFO("Worldrep: Optimization removed %d vertices", optimized);
 
-    // --------------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     LOG_DEBUG("WorldRepService: Creating WR geometry");
     // Build the portal meshes and cell geometry
     for (idx = 0; idx < header.numCells; idx++) {
         mCells[idx]->constructPortalMeshes(mSceneMgr);
-        mCells[idx]->createCellGeometry();
+        mCells[idx]->createCellGeometry(mWorldGeometry);
     }
 
     // build the buffers
@@ -292,13 +283,12 @@ void WorldRepService::loadFromChunk(FilePtr &wrChunk, size_t lightSize) {
     mWorldGeometry->build();
     mSceneMgr->setActiveGeometry(mWorldGeometry);
 
-    // --------------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // We have done all we could, bringing the level data to the SceneManager.
     // Now delete the used data
     LOG_DEBUG("Worldrep: Freeing temporary buffers");
 
-    delete[] mExtraPlanes;
-    mExtraPlanes = NULL;
+    mExtraPlanes.clear();
     LOG_DEBUG("Worldrep: Freeing done");
 }
 

@@ -111,10 +111,10 @@ protected:
     Ogre::DarkSceneManager *mSceneMgr;
 
     /** Loaded structure of the cells */
-    WRCell **mCells;
+    std::vector<std::unique_ptr<WRCell>> mCells;
 
     uint32_t mExtraPlaneCount;
-    Ogre::Plane *mExtraPlanes;
+    std::vector<Ogre::Plane> mExtraPlanes;
 
     /** Cell count from header */
     uint32_t mNumCells;

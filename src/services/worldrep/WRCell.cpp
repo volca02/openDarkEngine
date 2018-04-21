@@ -48,10 +48,17 @@
 namespace Opde {
 
 //------------------------------------------------------------------------------------
-WRCell::WRCell(WorldRepService *owner, Ogre::DarkGeometry *targetGeom)
-    : mCellNum(-1), mVertices(), mFaceMaps(), mFaceInfos(),
-      mPolyIndices(NULL), mPlanes(), mLoaded(false), mPortalsDone(false),
-      mOwner(owner), mLevelGeometry(targetGeom), mLights(NULL) {
+WRCell::WRCell()
+    : mCellNum(-1),
+      mVertices(),
+      mFaceMaps(),
+      mFaceInfos(),
+      mPolyIndices(NULL),
+      mPlanes(),
+      mLoaded(false),
+      mPortalsDone(false),
+      mLights()
+{
     mBSPNode = NULL;
 
     mMaterialService = GET_SERVICE(MaterialService);
@@ -128,9 +135,9 @@ void WRCell::loadFromChunk(unsigned int _cell_num, FilePtr &chunk,
         *chunk >> mPlanes[i];
 
     // and load it's light info
-    mLights = mLightService->_loadLightDefinitionsForCell(
-        mCellNum, chunk, mHeader.numAnimLights, mHeader.numTextured,
-        mFaceInfos);
+    mLights.reset(new LightsForCell(chunk, mHeader.numAnimLights,
+                                    mHeader.numTextured, lightSize,
+                                    mFaceInfos));
 
     mLoaded = true;
 }
@@ -407,7 +414,7 @@ void WRCell::findLightmapShifts(Vector2 &tgt, Vector2 origin) {
 }
 
 //------------------------------------------------------------------------------------
-void WRCell::createCellGeometry() {
+void WRCell::createCellGeometry(Ogre::DarkGeometry *levelGeometry) {
     // some checks on the status. These are hard mistakes
     assert(mLoaded);
 
@@ -460,7 +467,7 @@ void WRCell::createCellGeometry() {
     std::map<std::string, std::vector<int>>::iterator it = matToPolys.begin();
 
     for (; it != matToPolys.end(); it++) {
-        Ogre::DarkFragment *frag = mLevelGeometry->createFragment(
+        Ogre::DarkFragment *frag = levelGeometry->createFragment(
             mCellNum, Ogre::MaterialManager::getSingleton().getByName(it->first));
 
         std::vector<int>::iterator pi = it->second.begin();

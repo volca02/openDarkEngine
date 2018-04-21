@@ -117,12 +117,6 @@ private:
      * otherwise initialized */
     Ogre::BspNode *mBSPNode;
 
-    /** Owner service of this cell */
-    WorldRepService *mOwner;
-
-    /** Geometry holder to fill */
-    Ogre::DarkGeometry *mLevelGeometry;
-
     /** Material Service - used for texture UV, atlas/material combinations */
     MaterialServicePtr mMaterialService;
 
@@ -130,11 +124,11 @@ private:
     LightServicePtr mLightService;
 
     /// Info about lmaps of the cell. Used for UV remaps, atlas mapping etc.
-    LightsForCellPtr mLights;
+    std::unique_ptr<LightsForCell> mLights;
 
 public:
     /** Default constructor. */
-    WRCell(WorldRepService *owner, Ogre::DarkGeometry *targetGeom);
+    WRCell();
 
     /** destructor */
     ~WRCell();
@@ -161,7 +155,7 @@ public:
 
     /// creates the geometry for the cell in the DarkGeometry given in
     /// constructor
-    void createCellGeometry();
+    void createCellGeometry(Ogre::DarkGeometry *levelGeometry);
 
     /** Return the exact vertex count needed to set-up the vertex buffer with
     the cell data.
@@ -210,6 +204,8 @@ public:
     /** Returns the center coordinate for the cell.
      */
     Ogre::Vector3 getCenter();
+
+    LightsForCell *getLights() { return mLights.get(); }
 };
 } // namespace Opde
 

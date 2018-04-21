@@ -28,6 +28,7 @@
 #include "LightService.h"
 #include "OpdeServiceManager.h"
 #include "render/RenderService.h"
+#include "worldrep/WRCell.h"
 #include "worldrep/WRTypes.h"
 #include "worldrep/LightsForCell.h"
 
@@ -93,6 +94,7 @@ void LightService::clear() {
     // TODO: To be totally clean we would have to release all the created
     // lights! for now, this is done in WR - it calls clearScene
     mLights.clear();
+    mCells = nullptr;
 }
 
 //------------------------------------------------------
@@ -102,21 +104,6 @@ bool LightService::init() {
     mSceneMgr = mRenderService->getSceneManager();
 
     return true;
-}
-
-//------------------------------------------------------
-LightsForCellPtr LightService::_loadLightDefinitionsForCell(
-    size_t cellID, const FilePtr &tag, size_t num_anim_lights,
-    size_t num_textured, const std::vector<WRPolygonTexturing> &face_infos) {
-    assert(mLightPixelSize != 0);
-
-    // create a new cell, load the definitions for it
-    LightsForCellPtr lfc(new LightsForCell(tag, num_anim_lights, num_textured,
-                                           mLightPixelSize, face_infos));
-
-    mLightsForCell.insert(make_pair(cellID, lfc));
-
-    return lfc;
 }
 
 //------------------------------------------------------
@@ -146,12 +133,11 @@ void LightService::_loadTableFromTagFile(const FilePtr &tag) {
     }
 
     // Now we have to iterate over the cells and attach lights to all affected
-    for (auto &l : mLightsForCell) {
-        // get the BSP leaf from SceneMgr
-        BspNode *leaf =
-            static_cast<DarkSceneManager *>(mSceneMgr)->getBspLeaf(l.first);
+    for (auto &c : *mCells) {
+        LightsForCell *lfc = c->getLights();
 
-        const LightsForCellPtr &lfc = l.second;
+        // get the BSP leaf from SceneMgr
+        BspNode *leaf = c->getBspNode();
 
         // for all lights in the cell
         for (size_t i = 0; i < lfc->light_count; ++i) {
@@ -172,31 +158,35 @@ DarkLight *LightService::getLightForID(int id) {
 //------------------------------------------------------
 const WRLightInfo &LightService::getLightInfo(size_t cellID, size_t faceID) {
     // find the LFC pointer for the cell
-    return mLightsForCell[cellID]->getLightInfo(faceID);
+    return getLightsForCell(cellID)->getLightInfo(faceID);
 }
 
 //------------------------------------------------------
 size_t LightService::getAtlasForCellPolygon(size_t cellID, size_t faceID) {
     //
-    return mLightsForCell[cellID]->getAtlasForPolygon(faceID);
+    return getLightsForCell(cellID)->getAtlasForPolygon(faceID);
 }
 
 Ogre::TexturePtr LightService::getAtlasTexture(size_t idx) {
     return mAtlasList->getAtlas(idx)->getTexture();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void LightService::atlasLightMaps() {
     // atlas all the cells
-    CellLightInfoMap::iterator it = mLightsForCell.begin();
-
-    for (; it != mLightsForCell.end(); ++it) {
+    for (const auto &cell : *mCells) {
         // atlas each
-        it->second->atlasLightMaps(mAtlasList);
+        cell->getLights()->atlasLightMaps(mAtlasList);
     }
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+LightsForCell *LightService::getLightsForCell(size_t cellID) {
+    if (!mCells) return nullptr;
+    return (*mCells)[cellID]->getLights();
+}
+
+//------------------------------------------------------------------------------
 DarkLight *LightService::_produceLight(const LightTableEntry &entry, size_t id,
                                        bool dynamic) {
     String lname =

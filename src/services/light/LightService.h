@@ -53,6 +53,7 @@ class LightService;
 class WRLightInfo;
 class WRPolygonTexturing;
 class LightMap;
+class WRCell;
 
 struct LightTableEntry {
     // Ctor that reads the data from WR tag
@@ -80,6 +81,8 @@ typedef shared_ptr<LightsForCell> LightsForCellPtr;
  * this service) are Dromed side only. */
 class LightService : public ServiceImpl<LightService> {
 public:
+    friend class WorldRepService;
+
     /** Constructor
      * @param manager The ServiceManager that created this service
      * @param name The name this service should have (For Debugging/Logging)
@@ -131,17 +134,19 @@ protected:
     /// puts all the read light maps into atlases
     void atlasLightMaps();
 
+    void _setCells(std::vector<std::unique_ptr<WRCell>> *cells)
+    {
+        mCells = cells;
+    }
+
+    LightsForCell *getLightsForCell(size_t cellID);
+
     /// produces a light (by creating it using the scene manager)
     DarkLight *_produceLight(const LightTableEntry &entry, size_t id,
                              bool dynamic);
 
     /// Lists of all light map atlases
     LightAtlasList *mAtlasList;
-
-    typedef std::map<size_t, LightsForCellPtr> CellLightInfoMap;
-
-    /// contains a pointer to light per cell
-    CellLightInfoMap mLightsForCell;
 
     // Version of the lightmap - either 1 or 2 - directly means the stored
     // lightmap pixel size as well
@@ -152,6 +157,9 @@ protected:
 
     /// count of the dynamic lights, as read from the tag
     size_t mDynamicLightCount;
+
+    // borrowed cells from worldrep service
+    std::vector<std::unique_ptr<WRCell>> *mCells = nullptr;
 
     // and the tables of the lights (indexed by the light id)
 
