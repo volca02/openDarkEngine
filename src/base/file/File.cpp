@@ -77,17 +77,15 @@ File &File::readElem(void *buf, file_size_t size, uint count) {
 File &File::writeElem(const void *buf, file_size_t size, uint count) {
 #ifdef __OPDE_BIG_ENDIAN
     file_size_t bsize = size * count;
-    char *copyb = new char[bsize];
+    std::unique_ptr<char[]> copyb(new char[bsize]);
 
-    memcpy(copyb, buf,
+    memcpy(copyb.get(), buf,
            bsize); // TODO: This is kind-of ineffective - the swapEndian could
                    // work on different target buffer
 
-    swapEndian(copyb, size, count);
+    swapEndian(copyb.get(), size, count);
 
     write(copyb, bsize);
-
-    delete[] copyb;
 #else
     write(buf, size * count);
 #endif
@@ -412,12 +410,6 @@ MemoryFile::MemoryFile(const std::string &name, AccessMode mode)
 
 //------------------------------------
 MemoryFile::~MemoryFile() {
-    FilePages::iterator it = mPages.begin();
-
-    for (; it != mPages.end(); it++) {
-        delete[](*it); // Release the allocated buf.
-    }
-
     mPages.clear();
 }
 
@@ -494,7 +486,7 @@ File &MemoryFile::_read(void *buf, file_size_t size) {
     while (resSize > 0) { // read from one page in one cycle pass
         file_size_t read = 0;
 
-        char *page = mPages.at(pgp.first);
+        char *page = mPages.at(pgp.first).get();
 
         uint toEnd;
 
@@ -559,18 +551,17 @@ File &MemoryFile::_write(const void *buf, file_size_t size) {
 
         if (pgp.first >=
             PagesSize) { // I've finished the already allocated pages
-            char *nbuf = new char[MEMORY_FILE_BUF_LEN];
+            std::unique_ptr<char[]> nbuf(new char[MEMORY_FILE_BUF_LEN]);
 
-            if (nbuf ==
-                NULL) // this is quite fatal. something like out of disk space
+            if (!nbuf) // this is quite fatal. something like out of disk space
                 OPDE_FILEEXCEPT(FILE_WRITE_ERROR,
                                 "Out of memory when allocating a new page",
                                 "MemoryFile.write()");
 
-            mPages.push_back(nbuf);
+            mPages.push_back(std::move(nbuf));
         }
 
-        char *page = mPages.at(pgp.first);
+        char *page = mPages.at(pgp.first).get();
 
         uint toEnd;
 

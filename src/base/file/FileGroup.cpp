@@ -22,8 +22,7 @@
  *****************************************************************************/
 
 #include "FileGroup.h"
-
-using namespace std;
+#include "format.h"
 
 namespace Opde {
 /*----------------------------------------------------*/
@@ -92,65 +91,29 @@ void DarkFileGroup::_initSource() {
     // The count of chunks
     mSrcFile->readElem(&chunkCount, sizeof(uint32_t), 1);
 
-    DarkDBInvItem *inventory = new DarkDBInvItem[chunkCount];
-
-    readInventory(inventory, chunkCount);
+    std::vector<DarkDBInvItem> inventory;
+    inventory.resize(chunkCount);
+    for (auto &inv : inventory) *mSrcFile >> inv;
 
     // Init a file for all chunks given
-    for (uint idx = 0; idx < chunkCount; idx++) {
+    for (const auto &item : inventory) {
         Chunk ch;
 
-        mSrcFile->seek(inventory[idx].offset);
+        mSrcFile->seek(item.offset);
 
-        readChunkHeader(&ch.header);
+        *mSrcFile >> ch.header;
 
-        if (strncmp(ch.header.name, inventory[idx].name, 12) != 0)
-            OPDE_EXCEPT(string("Inventory chunk name mismatch: ") +
-                            ch.header.name + "-" + inventory[idx].name,
+        if (strncmp(ch.header.name, item.name, 12) != 0)
+            OPDE_EXCEPT(format("Inventory chunk name mismatch: ",
+                               ch.header.name, "-", item.name),
                         "DarkFileGroup::_initSource");
 
         ch.file = FilePtr(new FilePart(
-            inventory[idx].name, File::FILE_R, mSrcFile,
-            inventory[idx].offset + sizeof(ch.header), inventory[idx].length));
+            item.name, File::FILE_R, mSrcFile,
+            item.offset + sizeof(ch.header), item.length));
 
-        mFiles.insert(make_pair(std::string(inventory[idx].name), ch));
+        mFiles.insert(make_pair(std::string(item.name), ch));
     }
-
-    delete[] inventory;
-}
-
-//------------------------------------
-void DarkFileGroup::readInventory(DarkDBInvItem *inventory, uint count) {
-    assert(!mSrcFile.isNull());
-
-    for (uint i = 0; i < count; i++) {
-        *mSrcFile >> inventory[i];
-    }
-}
-
-//------------------------------------
-void DarkFileGroup::writeInventory(FilePtr &dest, DarkDBInvItem *inventory,
-                                   uint count) {
-    assert(!dest.isNull());
-
-    for (uint i = 0; i < count; i++) {
-        *dest << inventory[i];
-    }
-}
-
-//------------------------------------
-void DarkFileGroup::readChunkHeader(DarkDBChunkHeader *hdr) {
-    assert(!mSrcFile.isNull());
-
-    *mSrcFile >> *hdr;
-}
-
-//------------------------------------
-void DarkFileGroup::writeChunkHeader(FilePtr &dest,
-                                     const DarkDBChunkHeader &hdr) {
-    assert(!dest.isNull());
-
-    *dest << hdr;
 }
 
 //------------------------------------
@@ -167,15 +130,15 @@ const DarkDBChunkHeader &DarkFileGroup::getFileHeader(const std::string &name) {
     if (it != mFiles.end())
         return it->second.header;
     else
-        OPDE_FILEEXCEPT(FILE_OP_FAILED,
-                        string("File named ") + name +
-                            " was not found in this FileGroup",
-                        "DarkFileGroup::getFile");
+        OPDE_FILEEXCEPT(
+            FILE_OP_FAILED,
+            format("File named ", name, " was not found in this FileGroup"),
+            "DarkFileGroup::getFile");
 }
 
 //------------------------------------
 FilePtr DarkFileGroup::getFile(const std::string &name) {
-    string sname;
+    std::string sname;
     sname = name.substr(0, 11);
 
     ChunkMap::iterator it = mFiles.find(sname);
@@ -184,10 +147,10 @@ FilePtr DarkFileGroup::getFile(const std::string &name) {
         it->second.file->seek(0);
         return it->second.file;
     } else
-        OPDE_FILEEXCEPT(FILE_OP_FAILED,
-                        string("File named ") + sname +
-                            " was not found in this FileGroup",
-                        "DarkFileGroup::getFile");
+        OPDE_FILEEXCEPT(
+            FILE_OP_FAILED,
+            format("File named ", sname, " was not found in this FileGroup"),
+            "DarkFileGroup::getFile");
 }
 
 //------------------------------------
@@ -198,7 +161,7 @@ FilePtr DarkFileGroup::createFile(const std::string &name, uint32_t ver_maj,
 
     if (it != mFiles.end()) {
         OPDE_FILEEXCEPT(FILE_OTHER_ERROR,
-                        string("Chunk already exists : ") + name,
+                        format("Chunk already exists : " + name),
                         "DarkFileGroup::createFile");
     }
 
@@ -228,9 +191,9 @@ void DarkFileGroup::deleteFile(const std::string &name) {
     if (it != mFiles.end()) {
         mFiles.erase(it);
     } else {
-        OPDE_EXCEPT(string("File requested for deletion was not found : ") +
-                        name,
-                    "DarkFileGroup::deleteFile");
+        OPDE_EXCEPT(
+            format("File requested for deletion was not found : ", name),
+            "DarkFileGroup::deleteFile");
     }
 }
 
@@ -269,14 +232,15 @@ void DarkFileGroup::write(FilePtr &dest) {
 
     it = mFiles.begin();
 
-    DarkDBInvItem *inventory = new DarkDBInvItem[chunkcount];
+    std::vector<DarkDBInvItem> inventory;
+    inventory.resize(chunkcount);
 
     // Write the chunks
     for (int pos = 0; it != mFiles.end(); it++, pos++) {
         file_pos_t cfpos = dest->tell();
 
         // write the chunk header
-        writeChunkHeader(dest, it->second.header);
+        *dest << it->second.header;
 
         // write the chunk data
         it->second.file->writeToFile(*dest);
@@ -286,12 +250,11 @@ void DarkFileGroup::write(FilePtr &dest) {
         inventory[pos].length = it->second.file->size();
     }
 
-    // write the inventory
+    // write the inventory size
     dest->writeElem(&chunkcount, sizeof(uint32_t));
-    writeInventory(dest, inventory, chunkcount);
 
-    // get rid of temporary
-    delete[] inventory;
+    // write inventory
+    for (auto &inv : inventory) *dest << inv;
 }
 
 //------------------------------------

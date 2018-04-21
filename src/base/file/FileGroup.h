@@ -161,26 +161,6 @@ protected:
     */
     void _initSource();
 
-    /** Platform safe inventory reader
-     * @param inventory Pre-allocated inventory array to read to
-     * @param count the count of inventory items to read */
-    void readInventory(DarkDBInvItem *inventory, uint count);
-
-    /** Platform safe inventory writer
-     * @param inventory Pre-allocated inventory array to write
-     * @param count the count of inventory items to write */
-    void writeInventory(FilePtr &dest, DarkDBInvItem *inventory, uint count);
-
-    /** Platform safe chunk header reader
-     * @param hdr The header to read
-     */
-    void readChunkHeader(DarkDBChunkHeader *hdr);
-
-    /** Platform safe chunk header writer
-     * @param hdr The header to written
-     */
-    void writeChunkHeader(FilePtr &dest, const DarkDBChunkHeader &hdr);
-
     /** File (Chunk) map */
     ChunkMap mFiles;
 

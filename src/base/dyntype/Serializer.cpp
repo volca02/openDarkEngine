@@ -156,17 +156,15 @@ void TypeSerializer<std::string>::deserialize(FilePtr &src, void *valuePtr) {
     src->readElem(&size, sizeof(uint32_t));
 
     // prepare the string temp buffer
-    char *str = new char[size + 1];
+    std::unique_ptr<char[]> str(new char[size + 1]);
 
     str[size] = 0; // terminate to be sure
 
-    src->read(str, size);
+    src->read(str.get(), size);
 
-    std::string sobj(str);
+    std::string sobj(str.get());
 
     *static_cast<std::string *>(valuePtr) = sobj;
-
-    delete[] str;
 };
 
 template <>

@@ -267,8 +267,7 @@ void DrawService::loadFonFile(const std::string &name, const std::string &group,
     DarkFontHeader header;
 
     Ogre::DataStreamPtr Stream =
-        Ogre::ResourceGroupManager::getSingleton().openResource(name, group,
-                                                                true, NULL);
+        Ogre::ResourceGroupManager::getSingleton().openResource(name, group);
     FilePtr fontFile(new OgreFile(Stream));
 
     fontFile->readElem(&header.Format, 2);       // 0
@@ -411,7 +410,7 @@ void DrawService::loadPaletteFromPCX(const Ogre::String &fname,
 
     try {
         stream = Ogre::ResourceGroupManager::getSingleton().openResource(
-            fname, group, true);
+            fname, group);
         paletteFile = FilePtr(new OgreFile(stream));
     } catch (Ogre::FileNotFoundException) {
         // Could not find resource, use the default table
@@ -481,7 +480,7 @@ void DrawService::loadPaletteExternal(const Ogre::String &fname,
 
     try {
         stream = Ogre::ResourceGroupManager::getSingleton().openResource(
-            fname, group, true);
+            fname, group);
         paletteFile = FilePtr(new OgreFile(stream));
     } catch (Ogre::FileNotFoundException) {
         // Could not find resource, use the default table

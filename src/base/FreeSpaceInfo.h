@@ -25,8 +25,7 @@
 #ifndef __FREESPACEINFO_H
 #define __FREESPACEINFO_H
 
-// For NULL
-#include <stddef.h>
+#include <memory>
 
 namespace Opde {
 
@@ -41,7 +40,7 @@ protected:
     bool mIsLeaf;
 
     // Children of this node, if it's a node
-    FreeSpaceInfo *mChild[2];
+    std::unique_ptr<FreeSpaceInfo> mChild[2];
 
     FreeSpaceInfo() {
         this->x = 0;
@@ -51,9 +50,6 @@ protected:
 
         mMaxArea = 0;
         mIsLeaf = true;
-
-        mChild[0] = NULL;
-        mChild[1] = NULL;
     }
 
 public:
@@ -71,19 +67,10 @@ public:
 
         mIsLeaf = true;
         mMaxArea = w * h;
-
-        mChild[0] = NULL;
-        mChild[1] = NULL;
     }
 
     // destructor. Deletes the children if any.
-    ~FreeSpaceInfo() {
-        if (mChild[0] != NULL)
-            delete mChild[0];
-
-        if (mChild[1] != NULL)
-            delete mChild[1];
-    }
+    ~FreeSpaceInfo() { }
 
     // Tests if this node has free space somewhere to store the specified sized
     // texture.
@@ -112,9 +99,9 @@ public:
             int reqa = sw * sh;
 
             for (int i = 0; i < 2; i++) {
-                FreeSpaceInfo *result = NULL;
+                FreeSpaceInfo *result = nullptr;
 
-                if (mChild[i] == NULL)
+                if (!mChild[i])
                     continue;
 
                 if (mChild[i]->getMaxArea() >= reqa)
@@ -136,11 +123,11 @@ public:
 
             // bottom will be created?
             if (sh < h)
-                mChild[0] = new FreeSpaceInfo(x, y + sh, w, h - sh);
+                mChild[0].reset(new FreeSpaceInfo(x, y + sh, w, h - sh));
 
             // right will be created?
             if (sw < w)
-                mChild[1] = new FreeSpaceInfo(x + sw, y, w - sw, sh);
+                mChild[1].reset(new FreeSpaceInfo(x + sw, y, w - sw, sh));
 
             // modify this node to be non-leaf, as it was allocated
             mIsLeaf = false;
@@ -167,7 +154,7 @@ public:
         mMaxArea = -1;
 
         for (int j = 0; j < 2; j++) {
-            if (mChild[j] == NULL)
+            if (!mChild[j])
                 continue;
 
             if (mChild[j]->getMaxArea() > mMaxArea)
@@ -184,7 +171,7 @@ public:
         int area = 0;
 
         for (int j = 0; j < 2; j++) {
-            if (mChild[j] == NULL)
+            if (!mChild[j])
                 continue;
 
             area += mChild[j]->getLeafArea();

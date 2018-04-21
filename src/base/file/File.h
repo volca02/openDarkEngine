@@ -291,7 +291,7 @@ class MemoryFile : public File {
 protected:
     /** File page vector (one Page contains data with length up to
      * MEMORY_FILE_BUF_LEN) */
-    typedef std::vector<char *> FilePages;
+    typedef std::vector<std::unique_ptr<char[]>> FilePages;
 
     /** file pages
      * File pages holding the file data */

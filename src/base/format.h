@@ -28,16 +28,16 @@
 
 namespace Opde {
 
-void _format(std::ostringstream &oss) {}
+inline void _format(std::ostringstream &oss) {}
 
 template<typename T, typename...ArgsT>
-void _format(std::ostringstream &oss, const T &t, ArgsT&&...args) {
+inline void _format(std::ostringstream &oss, const T &t, ArgsT&&...args) {
     oss << t;
     _format(oss, std::forward<ArgsT>(args)...);
 }
 
 template<typename...ArgsT>
-std::string format(ArgsT&&...args) {
+inline std::string format(ArgsT&&...args) {
     std::ostringstream oss;
     _format(oss, std::forward<ArgsT>(args)...);
     return oss.str();
