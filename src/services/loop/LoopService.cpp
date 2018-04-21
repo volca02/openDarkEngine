@@ -214,12 +214,14 @@ void LoopService::removeLoopClient(LoopClient *client) {
 //------------------------------------------------------
 bool LoopService::requestLoopMode(LoopModeID newLoopMode) {
     LoopModeIDMap::const_iterator it = mLoopModes.find(newLoopMode);
+    LOG_DEBUG("LoopService: Loop mode %zu requested", newLoopMode);
 
     if (it != mLoopModes.end()) {
         mNewLoopMode = it->second;
         mNewModeRequested = true;
         return true;
     } else {
+        LOG_ERROR("LoopService: Invalid loop mode %zu requested", newLoopMode);
         return false;
     }
 }
@@ -227,12 +229,14 @@ bool LoopService::requestLoopMode(LoopModeID newLoopMode) {
 //------------------------------------------------------
 bool LoopService::requestLoopMode(const std::string &name) {
     LoopModeNameMap::const_iterator it = mLoopNamedModes.find(name);
+    LOG_DEBUG("LoopService: Loop mode %s requested", name.c_str());
 
     if (it != mLoopNamedModes.end()) {
         mNewLoopMode = it->second;
         mNewModeRequested = true;
         return true;
     } else {
+        LOG_ERROR("LoopService: Invalid loop mode %s requested", name.c_str());
         return false;
     }
 }

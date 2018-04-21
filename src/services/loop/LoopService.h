@@ -149,6 +149,9 @@ public:
     /// Requests the termination of the loop (program exit)
     void requestTermination();
 
+    /// Returns true if the termination was requested and program should end
+    bool isTerminationRequested() { return mTerminationRequested; }
+
     /// The main run code. Run by the main.cpp typically. Runs the application
     /// loops
     void run();
