@@ -60,9 +60,6 @@ WRCell::WRCell()
       mLights()
 {
     mBSPNode = NULL;
-
-    mMaterialService = GET_SERVICE(MaterialService);
-    mLightService = GET_SERVICE(LightService);
 }
 
 //------------------------------------------------------------------------------------
@@ -99,19 +96,15 @@ void WRCell::loadFromChunk(unsigned int _cell_num, FilePtr &chunk,
 
     // 1. load the vertices
     mVertices.resize(mHeader.numVertices);
-//    for (auto &vertex : mVertices) *chunk >> vertex;
-    for (size_t i = 0; i < mHeader.numVertices; ++i)
-        *chunk >> mVertices[i];
+    for (auto &vertex : mVertices) *chunk >> vertex;
 
     // 2. load the cell's polygon mapping
     mFaceMaps.resize(mHeader.numPolygons);
-    for (size_t i = 0; i < mHeader.numPolygons; ++i)
-        *chunk >> mFaceMaps[i];
+    for (auto &face : mFaceMaps) *chunk >> face;
 
     // 3. load the cell's texturing infos
     mFaceInfos.resize(mHeader.numTextured);
-    for (size_t i = 0; i < mHeader.numTextured; ++i)
-        *chunk >> mFaceInfos[i];
+    for (auto &faceInfo : mFaceInfos) *chunk >> faceInfo;
 
     // polygon mapping struct.. len and data
 
@@ -224,7 +217,9 @@ void WRCell::insertTexturedVertex(
 }
 
 //------------------------------------------------------------------------------------
-void WRCell::constructPortalMeshes(Ogre::SceneManager *sceneMgr) {
+void WRCell::constructPortalMeshes(const MaterialServicePtr &matSvc,
+                                   Ogre::SceneManager *sceneMgr)
+{
     // some checks on the status. These are hard mistakes
     assert(mLoaded);
 
@@ -246,12 +241,12 @@ void WRCell::constructPortalMeshes(Ogre::SceneManager *sceneMgr) {
         // getMaterialName(face_infos[polyNum].txt,
         // lightMaps[polyNum]->getAtlasIndex(), dimensions,
         // face_maps[polyNum].flags)
-        Ogre::MaterialPtr mat = mMaterialService->getWRMaterialInstance(
-            mFaceInfos[polyNum].txt, -1, mFaceMaps[polyNum].flags); // mLightService->getAtlasForCellPolygon(cellNum,
-                                                                    // polyNum)
+        Ogre::MaterialPtr mat = matSvc->getWRMaterialInstance(
+            mFaceInfos[polyNum].txt, -1, mFaceMaps[polyNum].flags);
+        // mLightService->getAtlasForCellPolygon(cellNum, polyNum)
 
         dimensions =
-            mMaterialService->getTextureDimensions(mFaceInfos[polyNum].txt);
+            matSvc->getTextureDimensions(mFaceInfos[polyNum].txt);
 
         // begin inserting one polygon
         manual->begin(mat->getName());
@@ -414,7 +409,10 @@ void WRCell::findLightmapShifts(Vector2 &tgt, Vector2 origin) {
 }
 
 //------------------------------------------------------------------------------------
-void WRCell::createCellGeometry(Ogre::DarkGeometry *levelGeometry) {
+void WRCell::createCellGeometry(const MaterialServicePtr &matSvc,
+                                const LightServicePtr &lghtSvc,
+                                Ogre::DarkGeometry *levelGeometry)
+{
     // some checks on the status. These are hard mistakes
     assert(mLoaded);
 
@@ -446,9 +444,9 @@ void WRCell::createCellGeometry(Ogre::DarkGeometry *levelGeometry) {
     for (int polyNum = 0; polyNum < faceCount; polyNum++) {
         std::pair<Ogre::uint, Ogre::uint> dimensions;
 
-        Ogre::MaterialPtr mat = mMaterialService->getWRMaterialInstance(
+        Ogre::MaterialPtr mat = matSvc->getWRMaterialInstance(
             mFaceInfos[polyNum].txt,
-            mLightService->getAtlasForCellPolygon(mCellNum, polyNum),
+            lghtSvc->getAtlasForCellPolygon(mCellNum, polyNum),
             mFaceMaps[polyNum].flags);
 
         // insert the poly index into the list of that material
@@ -458,7 +456,7 @@ void WRCell::createCellGeometry(Ogre::DarkGeometry *levelGeometry) {
         res.first->second.push_back(polyNum);
 
         dimensions =
-            mMaterialService->getTextureDimensions(mFaceInfos[polyNum].txt);
+            matSvc->getTextureDimensions(mFaceInfos[polyNum].txt);
 
         // Could be rather per material. But well. just for test anyway
         polyToDim.insert(make_pair(polyNum, dimensions));

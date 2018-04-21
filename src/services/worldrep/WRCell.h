@@ -117,12 +117,6 @@ private:
      * otherwise initialized */
     Ogre::BspNode *mBSPNode;
 
-    /** Material Service - used for texture UV, atlas/material combinations */
-    MaterialServicePtr mMaterialService;
-
-    /** Light Service - used to get the poly's tag, lmap uv transforms, etc */
-    LightServicePtr mLightService;
-
     /// Info about lmaps of the cell. Used for UV remaps, atlas mapping etc.
     std::unique_ptr<LightsForCell> mLights;
 
@@ -151,11 +145,14 @@ public:
      * @note Note that Materials \@templateXXXX are expected to exist as those
      * are cloned in the construction process
      */
-    void constructPortalMeshes(Ogre::SceneManager *sceneMgr);
+    void constructPortalMeshes(const MaterialServicePtr &matSvc,
+                               Ogre::SceneManager *sceneMgr);
 
     /// creates the geometry for the cell in the DarkGeometry given in
     /// constructor
-    void createCellGeometry(Ogre::DarkGeometry *levelGeometry);
+    void createCellGeometry(const MaterialServicePtr &matSvc,
+                            const LightServicePtr &lghtSvc,
+                            Ogre::DarkGeometry *levelGeometry);
 
     /** Return the exact vertex count needed to set-up the vertex buffer with
     the cell data.

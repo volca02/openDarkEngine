@@ -270,12 +270,16 @@ void WorldRepService::loadFromChunk(FilePtr &wrChunk, size_t lightSize) {
 
     LOG_INFO("Worldrep: Optimization removed %d vertices", optimized);
 
+
+    auto materialService = GET_SERVICE(MaterialService);
+
     // -------------------------------------------------------------------------
     LOG_DEBUG("WorldRepService: Creating WR geometry");
     // Build the portal meshes and cell geometry
-    for (idx = 0; idx < header.numCells; idx++) {
-        mCells[idx]->constructPortalMeshes(mSceneMgr);
-        mCells[idx]->createCellGeometry(mWorldGeometry);
+    for (auto &cell : mCells) {
+        cell->constructPortalMeshes(materialService, mSceneMgr);
+        cell->createCellGeometry(materialService, mLightService,
+                                 mWorldGeometry);
     }
 
     // build the buffers
