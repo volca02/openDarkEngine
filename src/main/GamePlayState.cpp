@@ -169,75 +169,15 @@ void GamePlayState::start() {
 
     if (mConfigService->hasParam("debug")) {
         if (mConfigService->getParam("debug") == true) {
-            // debug overlay
-            // TODO
-            mDebug = true;
+            // enable verbose logging
+            ::Opde::Logger::getSingleton().setLogLevel(
+                ::Opde::Logger::LOG_LEVEL_VERBOSE);
         }
     }
-
-    // hidden as default
-    // mConsole->setActive(false);
 
     mWindow->resetStatistics();
 
     mToLoadScreen = false;
-    /*
-  mDrawService = GET_SERVICE(DrawService);
-
-  mCamera->setPosition(0,10,-15);
-  mCamera->lookAt(0,0,30);
-  mCamera->setNearClipDistance(0.5f);
-  mSceneMgr->setAmbientLight(ColourValue(1, 1, 1));
-
-  TextureAtlas* ta = mDrawService->createAtlas();
-  TextureAtlas* ta1 = mDrawService->createAtlas();
-
-  DrawSource* ds = ta->createDrawSource("access.pcx", "General");
-  // testing what happens when a font is loaded (e.g. where it segv's)
-  mDrawService->setFontPalette(Ogre::ManualFonFileLoader::ePT_PCX,
-  "fontpal.pcx", "General"); FontDrawSource* fds = mDrawService->loadFont(ta,
-  "fonts/MAINFONT.FON" , "General"); FontDrawSource* fds1 =
-  mDrawService->loadFont(ta, "fonts/MAINAA.FON" , "General"); FontDrawSource*
-  fds2 = mDrawService->loadFont(ta, "fonts/keyfonta.FON" , "General");
-
-  ta->build();
-  ta1->build();
-
-  RenderedLabel* rl = mDrawService->createRenderedLabel(fds, "OpenDarkEngine
-  test");
-
-  mRl1 = mDrawService->createRenderedLabel(fds, "TEST 2");
-  mRl2 = mDrawService->createRenderedLabel(fds, "ONLY VISIBLE IN CLIPPED
-  AREA\nThis text is a multiline text that is only to be seen\nif inside a
-  clipping rectangle that it is set to be\nviewed through.");
-
-  ClipRect cr = mDrawService->getClipRect(150, 300, 150, 176);
-  mRl2->setClipRect(cr);
-
-  RenderedImage* ri = mDrawService->createRenderedImage(ds);
-  ri->setPosition(100, 250);
-
-
-
-  rl->setPosition(250, 100);
-  mRl1->setPosition(0, 0);
-  mRl2->setPosition(0, 12);
-  rl->setZOrder(2);
-  mRl2->setZOrder(2);
-  mRl2->setZOrder(2);
-
-  DrawSheet* dsh = mDrawService->createSheet("GameScreen");
-
-  dsh->addDrawOperation(ri);
-  dsh->addDrawOperation(rl);
-  dsh->addDrawOperation(mRl1);
-  dsh->addDrawOperation(mRl2);
-
-  dsh->setVisible(true);
-
-  mSceneMgr->getRootSceneNode()->attachObject(dsh);
-  mDrawService->setActiveSheet(dsh);
-    */
     LOG_INFO("GamePlayState: Started");
 }
 

@@ -91,6 +91,8 @@ I just hope we won't run out of mask bits! :D
 // Services related to engine work (dropping these will result in the engine
 // doing nothing)
 #define SERVICE_ENGINE 0x00040000
+// TODO: Temporary. Remove after getting rid of GameStateManager
+#define SERVICE_GUI 0x00080000
 
 /// Link listener mask
 #define SERVICE_LINK_LISTENER 0x0001

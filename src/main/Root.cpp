@@ -255,7 +255,11 @@ void Root::registerServiceFactories() {
     mServiceFactories.push_back(new MaterialServiceFactory());
     mServiceFactories.push_back(new DrawServiceFactory());
     mServiceFactories.push_back(new RoomServiceFactory());
-    // mServiceFactories.push_back(new GUIServiceFactory());
+    // HACK: This thing is here so that we can test opdeScript, but still
+    // have direct input in GameStateManager...
+    // Reason is that GUIService steals direct input
+    if (mServiceMask & SERVICE_GUI)
+        mServiceFactories.push_back(new GUIServiceFactory());
     mServiceFactories.push_back(new PlatformServiceFactory());
 
     ServiceFactoryList::iterator it = mServiceFactories.begin();

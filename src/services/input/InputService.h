@@ -115,9 +115,7 @@ public:
                               const std::string &command);
 
     /// Sets a direct listener (only notified when IM_DIRECT is active)
-    void setDirectListener(DirectInputListener *listener) {
-        mDirectListener = listener;
-    };
+    void setDirectListener(DirectInputListener *listener);
 
     /// Clears the direct listener mapping
     void unsetDirectListener() { mDirectListener = NULL; };

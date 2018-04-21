@@ -762,6 +762,16 @@ void InputService::registerCommandAlias(const std::string &alias,
 }
 
 //------------------------------------------------------
+void InputService::setDirectListener(DirectInputListener *listener) {
+    if (mDirectListener)
+        OPDE_EXCEPT("InputService: Direct input listener already registered",
+        "InputService::setDirectListener");
+
+    mDirectListener = listener;
+};
+
+
+//------------------------------------------------------
 void InputService::pollEvents(float deltaTime) {
     // Process SDL queue
     SDL_Event event;

@@ -69,7 +69,7 @@ GameStateManager::GameStateManager(const std::string &GameType)
       mConfigService(NULL), mInputService(NULL), mServiceMgr(NULL) {
     mGameType = GameType;
 
-    mRoot = new Opde::Root(SERVICE_ALL, "opde.log");
+    mRoot = new Opde::Root(SERVICE_ALL & ~SERVICE_GUI, "opde.log");
 }
 
 GameStateManager::~GameStateManager() {
