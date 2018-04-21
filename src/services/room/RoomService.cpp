@@ -119,8 +119,10 @@ void RoomService::bootstrapFinished() {
 
 //------------------------------------------------------
 void RoomService::shutdown() {
-    mDbService->unregisterListener(this);
-    mDbService.reset();
+    if (mDbService) {
+        mDbService->unregisterListener(this);
+        mDbService.reset();
+    }
 }
 
 //------------------------------------------------------

@@ -94,8 +94,11 @@ void WorldRepService::bootstrapFinished() {
 
 //------------------------------------------------------
 void WorldRepService::shutdown() {
-    mDatabaseService->unregisterListener(this);
-    mDatabaseService.reset();
+    if (mDatabaseService) {
+        mDatabaseService->unregisterListener(this);
+        mDatabaseService.reset();
+    }
+
     clearData();
 
     mRenderService.reset();
@@ -179,12 +182,16 @@ void WorldRepService::clearData() {
     // this might cause problems because of render service trying to
     // release all the entities later, when those are already invalid
     // a special care must be taken
-    mSceneMgr->clearScene();
+    if (mSceneMgr)
+        mSceneMgr->clearScene();
+
     mCells.clear();
     mExtraPlanes.clear();
 
     // inform the Light service that it can unload now
-    mLightService->clear();
+    if (mLightService) {
+        mLightService->clear();
+    }
 
     mNumCells = 0;
 
