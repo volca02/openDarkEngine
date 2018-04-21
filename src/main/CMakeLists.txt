@@ -178,3 +178,48 @@ target_link_libraries(opdeScript
     # TODO: REMOVE, TEMPORARY TILL WE CHANGE TO OGRE's STRICT RESOURCE MANAGER
     ${ZZIPLIB_LIBRARIES}
 )
+
+add_executable(meshconvert meshconvert.cpp ${OPDE_LIB_OBJECTS})
+add_executable(chunk chunk.cpp ${OPDE_LIB_OBJECTS})
+add_executable(physver physver.cpp ${OPDE_LIB_OBJECTS})
+add_executable(DarkFontConverter DarkFontConverter.cpp ${OPDE_LIB_OBJECTS})
+
+target_link_libraries(chunk
+    ${OGRE_LIBRARIES}
+    ${ODE_LIBRARIES}
+    ${OPDE_PYTHON_LIBRARIES}
+    ${SDL2_LIBRARIES}
+    ${FREEIMAGE_LIBRARIES}
+    # TODO: REMOVE, TEMPORARY TILL WE CHANGE TO OGRE's STRICT RESOURCE MANAGER
+    ${ZZIPLIB_LIBRARIES}
+)
+
+target_link_libraries(meshconvert
+    ${OGRE_LIBRARIES}
+    ${ODE_LIBRARIES}
+    ${OPDE_PYTHON_LIBRARIES}
+    ${SDL2_LIBRARIES}
+    ${FREEIMAGE_LIBRARIES}
+    # TODO: REMOVE, TEMPORARY TILL WE CHANGE TO OGRE's STRICT RESOURCE MANAGER
+    ${ZZIPLIB_LIBRARIES}
+)
+
+target_link_libraries(DarkFontConverter
+    ${OGRE_LIBRARIES}
+    ${ODE_LIBRARIES}
+    ${OPDE_PYTHON_LIBRARIES}
+    ${SDL2_LIBRARIES}
+    ${FREEIMAGE_LIBRARIES}
+    # TODO: REMOVE, TEMPORARY TILL WE CHANGE TO OGRE's STRICT RESOURCE MANAGER
+    ${ZZIPLIB_LIBRARIES}
+)
+
+target_link_libraries(physver
+    ${OGRE_LIBRARIES}
+    ${ODE_LIBRARIES}
+    ${OPDE_PYTHON_LIBRARIES}
+    ${SDL2_LIBRARIES}
+    ${FREEIMAGE_LIBRARIES}
+    # TODO: REMOVE, TEMPORARY TILL WE CHANGE TO OGRE's STRICT RESOURCE MANAGER
+    ${ZZIPLIB_LIBRARIES}
+)

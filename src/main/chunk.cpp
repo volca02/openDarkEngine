@@ -44,14 +44,12 @@ void usage(const char *message = NULL) {
     exit(1);
 }
 
-void listChunks(FileGroup *gr) {
-    FileGroup::const_iterator itr = gr->begin();
+void listChunks(FileGroup &gr) {
+    for (const auto &c : gr) {
+        const DarkDBChunkHeader &head = c.second.header;
 
-    for (; itr != gr->end(); itr++) {
-        const DarkDBChunkHeader &head = itr->second.header;
-
-        printf("%-12s %8ld %4d.%d\n", itr->first.c_str(),
-               itr->second.file->size(), head.version_high, head.version_low);
+        printf("%-12s %8ld %4d.%d\n", c.first.c_str(),
+               c.second.file->size(), head.version_high, head.version_low);
     }
 }
 
@@ -75,10 +73,10 @@ int main(int argc, char *argv[]) {
 
     try {
         FilePtr src = FilePtr(new StdFile(argv[1], File::FILE_R));
-        DarkFileGroup *gr = new DarkFileGroup(src);
+        DarkFileGroup gr (src);
 
         if (!display) {
-            FilePtr chunk = gr->getFile(argv[2]);
+            FilePtr chunk = gr.getFile(argv[2]);
 
             StdFile dest(argv[3], File::FILE_W);
 
@@ -86,8 +84,6 @@ int main(int argc, char *argv[]) {
         } else {
             listChunks(gr);
         }
-
-        delete gr;
     } catch (FileException &e) {
         std::cerr << "File exception occured trying to extract the chunk : "
                   << e.getDetails() << std::endl;
