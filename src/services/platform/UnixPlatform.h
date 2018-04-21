@@ -35,7 +35,7 @@ namespace Opde {
 
 /** @brief Unix platform. Unix/Linux (Posix OS) specific platform handling code.
  */
-class OPDELIB_EXPORT UnixPlatform : public Platform {
+class UnixPlatform : public Platform {
 public:
     UnixPlatform(PlatformService *owner);
     virtual ~UnixPlatform();

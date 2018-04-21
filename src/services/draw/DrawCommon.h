@@ -57,7 +57,7 @@ template <typename T> struct DrawRect {
 typedef std::pair<int, int> PixelCoord;
 
 /// A pixel dimensions type
-struct OPDELIB_EXPORT PixelSize {
+struct PixelSize {
     PixelSize(size_t w, size_t h) {
         width = w;
         height = h;
@@ -75,7 +75,7 @@ struct OPDELIB_EXPORT PixelSize {
         return *this;
     };
 
-    inline OPDELIB_EXPORT friend std::ostream &operator<<(std::ostream &o,
+    inline friend std::ostream &operator<<(std::ostream &o,
                                                           const PixelSize &ps) {
         o << "PixelSize(" << ps.width << ", " << ps.height << ")";
         return o;
@@ -87,7 +87,7 @@ struct OPDELIB_EXPORT PixelSize {
 
 /// Draw quad - a single Rectangle that can be stored for rendering. All
 /// coordinates are already transformed as needed
-struct OPDELIB_EXPORT DrawQuad {
+struct DrawQuad {
     /// Positions of the rect
     DrawRect<Ogre::Real> positions;
     /// Positions in the texture space
@@ -100,7 +100,7 @@ struct OPDELIB_EXPORT DrawQuad {
     // specifier)
 };
 
-struct OPDELIB_EXPORT ClipRect {
+struct ClipRect {
     ClipRect() : left(0), right(0), top(0), bottom(0), noClip(true){};
     int left;
     int right;
@@ -118,8 +118,8 @@ struct OPDELIB_EXPORT ClipRect {
         noClip = b.noClip;
     }
 
-    inline OPDELIB_EXPORT friend std::ostream &operator<<(std::ostream &o,
-                                                          const ClipRect &cr) {
+    inline  friend std::ostream &operator<<(std::ostream &o,
+                                            const ClipRect &cr) {
         o << "ClipRect(" << cr.left << ", " << cr.right << ", " << cr.top
           << ", " << cr.bottom << ", " << cr.noClip << ")";
         return o;
@@ -128,7 +128,7 @@ struct OPDELIB_EXPORT ClipRect {
 
 /// A Clipping rectangle (on-screen version, in -1 - 1 range).
 /// This struct is used to set rendered boundaries for rendered (drawn) objects
-struct OPDELIB_EXPORT ScreenRect {
+struct ScreenRect {
     ScreenRect() : left(0), right(0), top(0), bottom(0), noClip(true){};
     Ogre::Real left;
     Ogre::Real right;
@@ -220,7 +220,7 @@ struct OPDELIB_EXPORT ScreenRect {
         return true;
     };
 
-    inline OPDELIB_EXPORT friend std::ostream &
+    inline friend std::ostream &
     operator<<(std::ostream &o, const ScreenRect &sr) {
         o << "ScreenRect(" << sr.left << ", " << sr.right << ", " << sr.top
           << ", " << sr.bottom << ", " << sr.noClip << ")";
@@ -232,7 +232,7 @@ struct OPDELIB_EXPORT ScreenRect {
 typedef std::vector<const DrawQuad *> DrawQuadList;
 
 /// Sorting comparison op.
-struct OPDELIB_EXPORT QuadLess {
+struct QuadLess {
     bool operator()(const DrawQuad *a, const DrawQuad *b) const;
 };
 
@@ -240,7 +240,7 @@ struct OPDELIB_EXPORT QuadLess {
 class DrawSource;
 
 // A base rendering source info - material and texture
-class OPDELIB_EXPORT DrawSourceBase {
+class DrawSourceBase {
 public:
     /// Draw source image ID. Atlased draw sources have the same ID. It is used
     /// to organize buffers.
@@ -293,7 +293,7 @@ protected:
 typedef shared_ptr<DrawSourceBase> DrawSourceBasePtr;
 
 /// A drawn bitmap source (can be a part of an atlas)
-class OPDELIB_EXPORT DrawSource : public DrawSourceBase {
+class DrawSource : public DrawSourceBase {
 public:
     DrawSource(DrawService *owner);
 
@@ -372,7 +372,7 @@ private:
 /// Shared pointer to the draw source base
 typedef shared_ptr<DrawSource> DrawSourcePtr;
 
-struct OPDELIB_EXPORT DrawSourceLess {
+struct DrawSourceLess {
     bool operator()(const DrawSourceBasePtr &a, const DrawSourceBasePtr &b) {
         size_t sa = a->getPixelArea();
         size_t sb = b->getPixelArea();

@@ -35,7 +35,7 @@ namespace Opde {
 
 /** @brief Win32 platform. Windows specific platform handling code.
  */
-class OPDELIB_EXPORT Win32Platform : public Platform {
+class Win32Platform : public Platform {
 public:
     Win32Platform(PlatformService *owner);
     virtual ~Win32Platform();

@@ -134,7 +134,7 @@ private:
 };
 
 /// Factory for the ConfigService objects
-class OPDELIB_EXPORT ConfigServiceFactory : public ServiceFactory {
+class ConfigServiceFactory : public ServiceFactory {
 public:
     ConfigServiceFactory();
     ~ConfigServiceFactory(){};

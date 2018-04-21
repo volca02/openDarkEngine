@@ -32,7 +32,7 @@ namespace Opde {
  * @note There are two approaches to do collision detection with this - either
  * use the polygon soap directly or produce the needed model in manual loader.
  */
-class OPDELIB_EXPORT PhysBSPModel : public PhysModel {
+class PhysBSPModel : public PhysModel {
 public:
     PhysBSPModel(int objid);
     ~PhysBSPModel();

@@ -37,7 +37,7 @@ class Timer;
 namespace Opde {
 
 /** Performance tracer. Writes performance probes with function names. */
-class OPDELIB_EXPORT Tracer : public Singleton<Tracer> {
+class Tracer : public Singleton<Tracer> {
 public:
     /** Constructor */
     Tracer(Ogre::Timer *timer);

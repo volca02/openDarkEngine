@@ -42,7 +42,7 @@ namespace Ogre {
 
 /// Custom image codec providing transparency for pallete index 0 on 8bit
 /// palletized images of .PCX and .GIF formats
-class OPDELIB_EXPORT CustomImageCodec : public ImageCodec {
+class CustomImageCodec : public ImageCodec {
 private:
     String mType;
     unsigned int mFreeImageType;

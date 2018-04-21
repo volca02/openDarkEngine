@@ -85,7 +85,7 @@ struct module_state {
 namespace Opde {
 namespace Python {
 
-class OPDELIB_EXPORT PythonException : public Opde::BasicException {
+class PythonException : public Opde::BasicException {
 protected:
     std::string mType;
 
@@ -622,7 +622,7 @@ protected:
 
 /** Central class for python bindings. Call PythonLanguage::Init() to prepare
  * python environment */
-class OPDELIB_EXPORT PythonLanguage {
+class PythonLanguage {
 protected:
     static Opde::Root *msRoot;
 

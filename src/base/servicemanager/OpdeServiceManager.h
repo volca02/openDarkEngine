@@ -47,8 +47,8 @@ namespace Opde {
  * @todo Introduce a quicker way of getting service - use service IDs instead of
  * Names
  */
-class OPDELIB_EXPORT ServiceManager : public Singleton<ServiceManager>,
-                                      public NonCopyable {
+class ServiceManager : public Singleton<ServiceManager>,
+                       public NonCopyable {
 private:
     typedef SimpleArray<ServiceFactory *> ServiceFactoryMap;
     typedef SimpleArray<ServicePtr> ServiceInstanceMap;

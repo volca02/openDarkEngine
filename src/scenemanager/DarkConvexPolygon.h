@@ -40,7 +40,7 @@ typedef std::vector<Vector3> PolygonPoints;
 /** @brief A Polygon class used as a base for the Portal class as well as other
  * things
  */
-class OPDELIB_EXPORT ConvexPolygon {
+class ConvexPolygon {
     friend class DarkSceneManager;
 
 protected:

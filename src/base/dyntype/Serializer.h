@@ -38,7 +38,7 @@ namespace Opde {
 
 /// Data serializer - used to fill the values of data based on File contents,
 /// and the other way round
-class OPDELIB_EXPORT Serializer : public NonCopyable {
+class Serializer : public NonCopyable {
 public:
     /// destructor
     virtual ~Serializer(){};

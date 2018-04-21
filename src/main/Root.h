@@ -46,7 +46,7 @@
 namespace Opde {
 
 /** OPDE core class. Used to initialize the whole engine. Singleton */
-class OPDELIB_EXPORT Root : public Singleton<Root> {
+class Root : public Singleton<Root> {
 public:
     /** Initializes the opde core
      * @param serviceMask the mask of the services which should be used (others

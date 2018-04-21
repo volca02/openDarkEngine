@@ -44,7 +44,7 @@ $Id$
 namespace Ogre {
 
 /** BspTree handling class */
-class OPDELIB_EXPORT BspTree : public Ogre::MovableObject::Listener {
+class BspTree : public Ogre::MovableObject::Listener {
     friend class DarkSceneManager;
 
 public:

@@ -37,7 +37,7 @@
 namespace Opde {
 /** @brief A room portal. Room portals connect two Room instances (doorways)
  */
-class OPDELIB_EXPORT RoomPortal {
+class RoomPortal {
 public:
     RoomPortal(RoomService *owner);
     ~RoomPortal();

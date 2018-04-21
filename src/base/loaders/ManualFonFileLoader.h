@@ -42,7 +42,7 @@ extern const char BLACK_INDEX;
 extern const char WHITE_INDEX;
 
 /// ManualResourceLoader for FON files.
-class OPDELIB_EXPORT ManualFonFileLoader : public ManualResourceLoader {
+class ManualFonFileLoader : public ManualResourceLoader {
 public:
     ManualFonFileLoader();
     virtual ~ManualFonFileLoader();

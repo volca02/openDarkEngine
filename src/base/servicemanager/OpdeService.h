@@ -42,7 +42,7 @@ class ServiceManager;
  * methods.
  * @warning Do not override. Override ServiceImpl instead to avoid SID
  * manipulation problems (And others) */
-class OPDELIB_EXPORT Service : public NonCopyable {
+class Service : public NonCopyable {
 protected:
     friend class ServiceManager;
 
@@ -86,7 +86,7 @@ protected:
 
 /// Implementation base for all services. Used to force-in the inclusion of
 /// service-specific version of the static variables
-template <class C> class OPDELIB_EXPORT ServiceImpl : public Service {
+template <class C> class ServiceImpl : public Service {
 public:
     /** Constructor. Do not implement inheritance resolution here! (Can cycle if
      * you do so)

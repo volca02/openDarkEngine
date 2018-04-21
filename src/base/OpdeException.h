@@ -41,7 +41,7 @@ namespace Opde {
  *
  * This is a basic OPDE exception. Based largely on the Ogre's exception code
  * For simple usage, use the OPDE_EXCEPT macro */
-class OPDELIB_EXPORT BasicException : public std::exception {
+class BasicException : public std::exception {
 protected:
     std::string description;
     std::string source;

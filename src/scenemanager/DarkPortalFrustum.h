@@ -44,7 +44,7 @@ typedef std::vector<Plane> FrustumPlanes;
  * polygon defining the boundaries of the frustum.
  * @deprecated This class should be deprecated. DarkCamera class should be able
  * to handle all the visibility updates alone */
-class OPDELIB_EXPORT PortalFrustum {
+class PortalFrustum {
 private:
     FrustumPlanes planes;
 

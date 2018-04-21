@@ -35,7 +35,7 @@ namespace Opde {
 
 /** Ogre<->Opde log connector. Logs messages from ogre as a special kind of opde
  * log messages */
-class OPDELIB_EXPORT OgreOpdeLogConnector : public Ogre::LogListener {
+class OgreOpdeLogConnector : public Ogre::LogListener {
 protected:
     Logger *mOpdeLogger;
 

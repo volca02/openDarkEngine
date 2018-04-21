@@ -41,7 +41,7 @@ namespace Opde {
 /** @brief A single Room. Rooms are space bounded elements that are used
  * for sound propagation, path finding and as a script message sources.
  */
-class OPDELIB_EXPORT Room {
+class Room {
 public:
     Room(RoomService *owner);
     ~Room();

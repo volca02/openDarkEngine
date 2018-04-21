@@ -35,7 +35,7 @@ namespace Opde {
 
 /** @brief Apple platform. Apple OS specific platform handling code.
  */
-class OPDELIB_EXPORT ApplePlatform : public Platform {
+class ApplePlatform : public Platform {
 public:
     ApplePlatform(PlatformService *owner);
     virtual ~ApplePlatform();

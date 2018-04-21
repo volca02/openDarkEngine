@@ -38,7 +38,7 @@
 namespace Ogre {
 
 /** Camera specialized for BSP/Portal combination */
-class OPDELIB_EXPORT DarkCamera : public Camera {
+class DarkCamera : public Camera {
     friend class DarkSceneManager;
 
 public:

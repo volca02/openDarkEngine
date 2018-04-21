@@ -276,7 +276,7 @@ private:
 typedef shared_ptr<RenderService> RenderServicePtr;
 
 /// Factory for the LinkService objects
-class OPDELIB_EXPORT RenderServiceFactory : public ServiceFactory {
+class RenderServiceFactory : public ServiceFactory {
 public:
     RenderServiceFactory();
     ~RenderServiceFactory(){};

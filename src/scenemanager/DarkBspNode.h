@@ -63,7 +63,7 @@ namespace Ogre {
     This version of BspNode, updated to be used by DarkSceneManager, implements
    Portals as members. It should be considered as a 'Cell' if it is a leaf.
 */
-class OPDELIB_EXPORT BspNode {
+class BspNode {
     friend class DarkSceneManager;
     friend class DarkCamera;
     friend class BspRaySceneQuery;

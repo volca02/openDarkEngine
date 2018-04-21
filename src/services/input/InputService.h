@@ -277,7 +277,7 @@ protected:
 typedef shared_ptr<InputService> InputServicePtr;
 
 /// Factory for the InputService objects
-class OPDELIB_EXPORT InputServiceFactory : public ServiceFactory {
+class InputServiceFactory : public ServiceFactory {
 public:
     InputServiceFactory();
     ~InputServiceFactory(){};

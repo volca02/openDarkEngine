@@ -34,7 +34,7 @@
 namespace Opde {
 
 /** Log listener, writing the logging messsages to a file */
-class OPDELIB_EXPORT FileLog : public LogListener {
+class FileLog : public LogListener {
 protected:
     std::ofstream ofile;
 

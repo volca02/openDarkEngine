@@ -35,7 +35,7 @@ class DrawService;
 /** A 2D rendering sheet. Represents one visible screen.
  * Stores rendering operations, can queue itself for rendering to ogre.
  * Uses DrawBuffer for render op. storage */
-class OPDELIB_EXPORT DrawSheet : public Ogre::MovableObject {
+class DrawSheet : public Ogre::MovableObject {
 public:
     /// Constructor
     DrawSheet(DrawService *owner, const std::string &sheetName);

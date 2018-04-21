@@ -32,7 +32,7 @@
 namespace Opde {
 
 /// Non copyable class. Inherit to make class not copyable
-class OPDELIB_EXPORT NonCopyable {
+class NonCopyable {
 public:
     NonCopyable(){};
 

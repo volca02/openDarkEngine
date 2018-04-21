@@ -243,8 +243,7 @@ typedef SingleFieldDataStorage<uint32_t> UIntDataStorage;
 typedef SingleFieldDataStorage<Vector3> Vector3DataStorage;
 
 /// Variable length string data storage
-class OPDELIB_EXPORT StringDataStorage
-    : public SingleFieldDataStorage<std::string> {
+class StringDataStorage : public SingleFieldDataStorage<std::string> {
 public:
     StringDataStorage(Enumeration *enm = NULL)
         : SingleFieldDataStorage<std::string>(enm) {

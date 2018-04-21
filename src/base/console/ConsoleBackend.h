@@ -42,9 +42,9 @@ namespace Opde {
 /** Backend class, used for commands processing, and console text memmory
  * A singleton class, used to insert texts to console and to call Command
  * Listeners */
-class OPDELIB_EXPORT ConsoleBackend : public Singleton<ConsoleBackend>,
-                                      public Ogre::LogListener,
-                                      public Opde::LogListener {
+class ConsoleBackend : public Singleton<ConsoleBackend>,
+                       public Ogre::LogListener,
+                       public Opde::LogListener {
 public:
     /** A pair - level, message */
     typedef std::pair<size_t, Ogre::String> Message;

@@ -55,7 +55,7 @@ the boundaries of more than one leaf, that it is possible that an object
 attached to one DarkSceneNode may actually be associated with more than one
 BspNode.
 */
-class OPDELIB_EXPORT DarkSceneNode : public SceneNode {
+class DarkSceneNode : public SceneNode {
 protected:
     /// Overridden from SceneNode
     void setInSceneGraph(bool inGraph);

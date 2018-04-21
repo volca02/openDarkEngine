@@ -38,7 +38,7 @@ class Service;
 
 /** Code base for the service factories. Implement the methods with the Service
  * Factory you're implementing. */
-class OPDELIB_EXPORT ServiceFactory {
+class ServiceFactory {
 public:
     ServiceFactory(){};
     virtual ~ServiceFactory(){};

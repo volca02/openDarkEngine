@@ -39,7 +39,7 @@ using Ogre::Quaternion;
 
 namespace Opde {
 /** a variant class. This is a class that stores a value of a certain type. */
-class OPDELIB_EXPORT Variant {
+class Variant {
 public:
     /** Type specifier */
     typedef enum {

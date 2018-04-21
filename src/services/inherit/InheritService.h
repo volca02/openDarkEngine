@@ -221,7 +221,7 @@ private:
 typedef shared_ptr<InheritService> InheritServicePtr;
 
 /// Factory for the InheritService objects
-class OPDELIB_EXPORT InheritServiceFactory : public ServiceFactory {
+class InheritServiceFactory : public ServiceFactory {
 public:
     InheritServiceFactory();
     ~InheritServiceFactory(){};

@@ -143,7 +143,7 @@ typedef shared_ptr<LightsForCell> LightsForCellPtr;
  * request to change the brightness/position. Static lights don't respond to
  * Light/Spotlight property changes, as those properties (although exposed by
  * this service) are Dromed side only. */
-class OPDELIB_EXPORT LightService : public ServiceImpl<LightService> {
+class LightService : public ServiceImpl<LightService> {
 public:
     /** Constructor
      * @param manager The ServiceManager that created this service
@@ -235,7 +235,7 @@ protected:
 typedef shared_ptr<LightService> LightServicePtr;
 
 /// Factory for the LightService objects
-class OPDELIB_EXPORT LightServiceFactory : public ServiceFactory {
+class LightServiceFactory : public ServiceFactory {
 public:
     LightServiceFactory();
     ~LightServiceFactory(){};

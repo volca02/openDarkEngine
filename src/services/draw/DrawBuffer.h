@@ -35,7 +35,7 @@ namespace Opde {
 
 /** A single renderable representing all drawn quads for particular rendered
  * settings combination (DrawSheet stores N of these for N materials) */
-class OPDELIB_EXPORT DrawBuffer : public Ogre::Renderable {
+class DrawBuffer : public Ogre::Renderable {
 public:
     /** Constructor
      * @param materialName The name of the material to use for rendering. The

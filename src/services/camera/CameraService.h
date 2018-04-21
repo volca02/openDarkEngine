@@ -42,7 +42,7 @@ class Property;
 
 /** @brief camera service. Service that handles in-game camera
  */
-class OPDELIB_EXPORT CameraService : public ServiceImpl<CameraService>,
+class CameraService : public ServiceImpl<CameraService>,
                                      public SimListener {
 public:
     CameraService(ServiceManager *manager, const std::string &name);
@@ -149,7 +149,7 @@ private:
 typedef shared_ptr<CameraService> CameraServicePtr;
 
 /// Factory for the CameraService objects
-class OPDELIB_EXPORT CameraServiceFactory : public ServiceFactory {
+class CameraServiceFactory : public ServiceFactory {
 public:
     CameraServiceFactory();
     ~CameraServiceFactory(){};

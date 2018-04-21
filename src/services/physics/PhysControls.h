@@ -32,7 +32,7 @@ namespace Opde {
  * world oriented)
  * * Rotational Velocity
  */
-class OPDELIB_EXPORT PhysControls {
+class PhysControls {
 public:
     PhysControls();
     ~PhysControls();

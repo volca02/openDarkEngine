@@ -36,7 +36,7 @@ namespace Opde {
 /** @brief A platform. OS specific piece of code used to handle configuration
  * and data paths.
  */
-class OPDELIB_EXPORT Platform {
+class Platform {
 public:
     Platform(PlatformService *owner);
     virtual ~Platform();

@@ -49,7 +49,7 @@ namespace Ogre {
  *resources \ for the predefined group, and a resource listener that allows
  *duplicate resource names in some way
  */
-class OPDELIB_EXPORT ProxyArchive : public Archive {
+class ProxyArchive : public Archive {
 public:
     /// constructor
     ProxyArchive(const String &name, const String &archType, bool readOnly);
@@ -151,7 +151,7 @@ protected:
 
 // Factories, so we can actually use these
 
-class OPDELIB_EXPORT CaseLessFileSystemArchiveFactory
+class CaseLessFileSystemArchiveFactory
     : public ArchiveFactory { // what a title!
 public:
     virtual ~CaseLessFileSystemArchiveFactory() {}

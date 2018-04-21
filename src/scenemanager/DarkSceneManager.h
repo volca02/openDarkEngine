@@ -44,7 +44,7 @@ class Portal;
  * cells connected with portals.
  * Each cell has to be a leaf node of the supplied Bsp node tree. Portals are
  * created */
-class OPDELIB_EXPORT DarkSceneManager : public SceneManager {
+class DarkSceneManager : public SceneManager {
     // So we don't need to expose getBspTree() method to public
     friend class DarkCamera;
     friend class DarkLight;
@@ -249,7 +249,7 @@ protected:
 };
 
 /// Factory for DarkSceneManager
-class OPDELIB_EXPORT DarkSceneManagerFactory : public SceneManagerFactory {
+class DarkSceneManagerFactory : public SceneManagerFactory {
 protected:
     void initMetaData(void) const;
 

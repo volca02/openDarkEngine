@@ -59,7 +59,7 @@ typedef std::streamoff file_offset_t;
 typedef std::streampos file_pos_t;
 
 /** File access exception. */
-class OPDELIB_EXPORT FileException : public Opde::BasicException {
+class FileException : public Opde::BasicException {
 protected:
     FileError error;
 
@@ -85,7 +85,7 @@ public:
  * reading/writing will raise an exception.
  * @todo Line read/write functionality might be useful
  */
-class OPDELIB_EXPORT File {
+class File {
 public:
     /** File open mode. Read/Write/Read+Write access */
     typedef enum {
@@ -209,7 +209,7 @@ File &operator>>(File &st, bool &val);
 typedef shared_ptr<File> FilePtr;
 
 /** File class implementation using std::fstream class as a base */
-class OPDELIB_EXPORT StdFile : public File {
+class StdFile : public File {
 protected:
     /** input/output stream, valid for output access */
     std::fstream mStream;
@@ -253,7 +253,7 @@ public:
 
 /** Read only File implementation using Ogre's DataStream.
  */
-class OPDELIB_EXPORT OgreFile : public File {
+class OgreFile : public File {
 private:
     Ogre::DataStreamPtr mStream;
 
@@ -287,7 +287,7 @@ public:
  * is an ability to write/read the data to/from another file instance.
  * Internally, the data are organized in buffers of maximal length of
  * MEMORY_FILE_BUF_LEN macro. */
-class OPDELIB_EXPORT MemoryFile : public File {
+class MemoryFile : public File {
 protected:
     /** File page vector (one Page contains data with length up to
      * MEMORY_FILE_BUF_LEN) */
@@ -364,7 +364,7 @@ public:
  * @note Care is taken about the underlying file. Backup/Restore of the previous
  * position is done. This enables multiple simultaneous usage (not threaded
  * though) */
-class OPDELIB_EXPORT FilePart : public File {
+class FilePart : public File {
 public:
     /** Constructor - Takes a file instance, an absolute position, and length */
     FilePart(const std::string &name, AccessMode accm, FilePtr &src,

@@ -53,8 +53,8 @@ using TextureAtlasPtr = std::shared_ptr<TextureAtlas>;
  * @author volca
  * @note some parts written by Patryn as well
  */
-class OPDELIB_EXPORT DrawService : public ServiceImpl<DrawService>,
-                                   public Ogre::RenderQueueListener {
+class DrawService : public ServiceImpl<DrawService>,
+                    public Ogre::RenderQueueListener {
 public:
     /// Constructor
     DrawService(ServiceManager *manager, const std::string &name);
@@ -295,7 +295,7 @@ private:
 typedef shared_ptr<DrawService> DrawServicePtr;
 
 /// Factory for the DrawService objects
-class OPDELIB_EXPORT DrawServiceFactory : public ServiceFactory {
+class DrawServiceFactory : public ServiceFactory {
 public:
     DrawServiceFactory();
     ~DrawServiceFactory(){};

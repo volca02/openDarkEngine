@@ -39,7 +39,7 @@ class DarkSubGeometry;
 class DarkFragment;
 
 /// Class that tries to optimally store level geometry of Dark for rendering
-class OPDELIB_EXPORT DarkGeometry {
+class DarkGeometry {
 public:
     /// Constructor
     DarkGeometry(const String &name, 
@@ -122,7 +122,7 @@ typedef struct {
 
 /// Geometry builder for a fragment. Is used temporarily to build geometry from
 /// vertex definitions
-class OPDELIB_EXPORT DarkFragmentBuilder {
+class DarkFragmentBuilder {
 public:
     /// defines a vertex. Returns index to the vertex list holding the
     /// definition of this vertex
@@ -197,7 +197,7 @@ protected:
 
 /// A fragment of a world's geometry. Contains info about one distinct material
 /// of one cell
-class OPDELIB_EXPORT DarkFragment {
+class DarkFragment {
     friend class DarkSubGeometry;
 
 public:

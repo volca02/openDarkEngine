@@ -43,8 +43,8 @@ class PropertyService;
  * Property holds all the properties of the same kind for all the objects.
  * Properties contain a set of values via key->value mapping.
  */
-class OPDELIB_EXPORT Property : public NonCopyable,
-                                public MessageSource<PropertyChangeMsg> {
+class Property : public NonCopyable,
+                 public MessageSource<PropertyChangeMsg> {
 public:
     /** Property Constructor
      * @param owner The owner property service
@@ -254,7 +254,7 @@ protected:
  * when unloading data.
  * @note All the methods introduced here are only called on concrete objects!
  */
-class OPDELIB_EXPORT ActiveProperty : public Property {
+class ActiveProperty : public Property {
 public:
     ActiveProperty(PropertyService *owner, const std::string &name,
                    const std::string &chunk_name, std::string inheritorName);

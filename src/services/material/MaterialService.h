@@ -270,7 +270,7 @@ protected:
 typedef shared_ptr<MaterialService> MaterialServicePtr;
 
 /// Factory for the MaterialService objects
-class OPDELIB_EXPORT MaterialServiceFactory : public ServiceFactory {
+class MaterialServiceFactory : public ServiceFactory {
 public:
     MaterialServiceFactory();
     ~MaterialServiceFactory(){};

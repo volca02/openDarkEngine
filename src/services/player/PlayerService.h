@@ -44,8 +44,8 @@ namespace Opde {
 
 /** @brief Player service. Service that handles the player object (and input)
  */
-class OPDELIB_EXPORT PlayerService : public ServiceImpl<PlayerService>,
-                                     public SimListener {
+class PlayerService : public ServiceImpl<PlayerService>,
+                      public SimListener {
 public:
     PlayerService(ServiceManager *manager, const std::string &name);
 
@@ -89,7 +89,7 @@ private:
 typedef shared_ptr<PlayerService> PlayerServicePtr;
 
 /// Factory for the PlayerService objects
-class OPDELIB_EXPORT PlayerServiceFactory : public ServiceFactory {
+class PlayerServiceFactory : public ServiceFactory {
 public:
     PlayerServiceFactory();
     ~PlayerServiceFactory(){};

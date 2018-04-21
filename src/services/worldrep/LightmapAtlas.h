@@ -203,7 +203,7 @@ public:
  * rendering. This texture atlas implementation is targetted at lightmaps. Uses
  * tag set to tell if the atlas already contains the specified tag of lightmap
  */
-class OPDELIB_EXPORT LightAtlas {
+class LightAtlas {
 private:
     /** The count of the stored light maps */
     int mCount;

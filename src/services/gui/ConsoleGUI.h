@@ -36,7 +36,7 @@ namespace Opde {
 /// forward decl.
 class GUIService;
 
-class OPDELIB_EXPORT ConsoleGUI {
+class ConsoleGUI {
 public:
     ConsoleGUI(GUIService *owner);
     ~ConsoleGUI();

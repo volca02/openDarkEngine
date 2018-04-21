@@ -21,9 +21,6 @@
 #pragma warning(disable:4661)
 #endif
 
-// obsolete
-#define OPDELIB_EXPORT
-
 // platforms
 #cmakedefine WIN32
 #cmakedefine UNIX

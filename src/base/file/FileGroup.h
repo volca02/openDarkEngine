@@ -38,7 +38,7 @@ namespace Opde {
 group manipulation. For implementation see DarkFileGroup.
 * The loaded file group does not modify the source file in any way. That means
 all operations are safe and do not destroy/modify original file. */
-class OPDELIB_EXPORT FileGroup {
+class FileGroup {
 public:
     /** File source FileGroup constructor. Loads the chunk list from a given
      * file. */
@@ -118,7 +118,7 @@ replaced, deleted or added. The new database of chunks can be written to a new
 file. This allows modifications to be done on a database, leaving the chunks in
 an original form if not touched. The order of the chunks is not guaranteed to
 stay equal. This is not a problem for DarkEngine. */
-class OPDELIB_EXPORT DarkFileGroup : public FileGroup {
+class DarkFileGroup : public FileGroup {
 public:
     /** @copydoc FileGroup::FileGroup(FilePtr&) */
     DarkFileGroup(FilePtr &source);

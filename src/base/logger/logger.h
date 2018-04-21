@@ -38,7 +38,7 @@ class LogListener;
 /** Main logger class. This class is intended for logging purposes. Logging
  * listeners, registered using registerLogListener method recieve logging
  * messages formated by vsnprintf function */
-class OPDELIB_EXPORT Logger : public Singleton<Logger> {
+class Logger : public Singleton<Logger> {
 public:
     /// Logging level
     typedef enum {
@@ -104,7 +104,7 @@ public:
  * log listener to work. Basicaly, this should implement a log writer to some
  * target (File, Console, etc.).
  * @see Logger */
-class OPDELIB_EXPORT LogListener {
+class LogListener {
 public:
     LogListener();
     virtual ~LogListener();

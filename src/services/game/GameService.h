@@ -37,7 +37,7 @@ namespace Opde {
  * filled with a high level state management - screens)
  * @todo Deprecate this or put it to a good use. Decide the fate...
  */
-class OPDELIB_EXPORT GameService : public ServiceImpl<GameService> {
+class GameService : public ServiceImpl<GameService> {
 public:
     GameService(ServiceManager *manager, const std::string &name);
     virtual ~GameService();
@@ -55,7 +55,7 @@ protected:
 typedef shared_ptr<GameService> GameServicePtr;
 
 /// Factory for the GameService objects
-class OPDELIB_EXPORT GameServiceFactory : public ServiceFactory {
+class GameServiceFactory : public ServiceFactory {
 public:
     GameServiceFactory();
     ~GameServiceFactory(){};

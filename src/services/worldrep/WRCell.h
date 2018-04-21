@@ -67,7 +67,7 @@ typedef struct BspVertex {
 
 /** Encapsulates the reading and interpreting of one Cell in the chunk. Has
  * methods for ogre Mesh generation. And data access */
-class OPDELIB_EXPORT WRCell {
+class WRCell {
 private:
     /** The cell number this cell represents */
     int mCellNum;

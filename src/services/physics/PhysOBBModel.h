@@ -27,15 +27,15 @@
 #include "PhysModel.h"
 
 namespace Opde {
-	/** @brief Box physics model. Unmovable.
-	* Model that is consisted of a OBB.
-	*/
-	class OPDELIB_EXPORT PhysOBBModel : public PhysModel {
-		public:
-			PhysOBBModel(int objid);
-			~PhysOBBModel();
-	};
-}
+/** @brief Box physics model. Unmovable.
+ * Model that is consisted of a OBB.
+ */
+class PhysOBBModel : public PhysModel {
+public:
+    PhysOBBModel(int objid);
+    ~PhysOBBModel();
+};
 
+} // namespace Opde
 
 #endif

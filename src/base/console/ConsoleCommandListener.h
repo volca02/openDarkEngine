@@ -33,7 +33,7 @@ namespace Opde {
 
 /** Abstract class ConsoleCommandListener. Defines an interface for classes,
  * which want to register as a command executors */
-class OPDELIB_EXPORT ConsoleCommandListener {
+class ConsoleCommandListener {
 public:
     /** Please override with a method that will handle the command */
     virtual void commandExecuted(std::string command,
