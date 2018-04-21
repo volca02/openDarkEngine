@@ -52,7 +52,7 @@ using LightsForCellPtr = std::shared_ptr<LightsForCell>;
 
 /** Helping BSP vertex struct, used to prepare the vertex data. The
  * VertexDeclaration has to be set up accordingly */
-typedef struct BspVertex {
+struct BspVertex {
     /** Vertex position */
     float position[3];
     /** Vertex normal vector */
@@ -63,7 +63,7 @@ typedef struct BspVertex {
     float texcoords[2];
     /** Lightmapping UV */
     float lightmap[2];
-} BspVertex;
+};
 
 /** Encapsulates the reading and interpreting of one Cell in the chunk. Has
  * methods for ogre Mesh generation. And data access */
@@ -78,10 +78,10 @@ private:
     std::vector<Vector3> mVertices;
 
     /** the list of the polygon map headers */
-    WRPolygon *mFaceMaps;
+    std::vector<WRPolygon> mFaceMaps;
 
     /** the list of the face texturing infos */
-    WRPolygonTexturing *mFaceInfos;
+    std::vector<WRPolygonTexturing> mFaceInfos;
 
     /** polygon mapping struct.. pointer to array of indices on each poly index
      * poly_indices[0][0]... etc.*/
@@ -89,7 +89,7 @@ private:
     uint8_t **mPolyIndices;
 
     /** Planes forming the cell */
-    Plane *mPlanes;
+    std::vector<Plane> mPlanes;
 
     /** Indicates the fact that the cell data have already been loaded */
     bool mLoaded;

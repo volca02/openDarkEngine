@@ -171,6 +171,8 @@ add_library (OpdeServices OBJECT
     sim/SimService.h
     worldrep/LightmapAtlas.cpp
     worldrep/LightmapAtlas.h
+    worldrep/LightsForCell.cpp
+    worldrep/LightsForCell.h
     worldrep/WorldRepService.cpp
     worldrep/WorldRepService.h
     worldrep/WRCell.cpp

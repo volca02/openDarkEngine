@@ -31,6 +31,7 @@
 #include <OgreSceneManager.h>
 #include <OgreTextureManager.h>
 
+#include "LightsForCell.h"
 #include "OpdeException.h"
 #include "OpdeServiceManager.h"
 #include "WRCommon.h"
@@ -48,8 +49,8 @@ namespace Opde {
 
 //------------------------------------------------------------------------------------
 WRCell::WRCell(WorldRepService *owner, Ogre::DarkGeometry *targetGeom)
-    : mCellNum(-1), mVertices(), mFaceMaps(NULL), mFaceInfos(NULL),
-      mPolyIndices(NULL), mPlanes(NULL), mLoaded(false), mPortalsDone(false),
+    : mCellNum(-1), mVertices(), mFaceMaps(), mFaceInfos(),
+      mPolyIndices(NULL), mPlanes(), mLoaded(false), mPortalsDone(false),
       mOwner(owner), mLevelGeometry(targetGeom), mLights(NULL) {
     mBSPNode = NULL;
 
@@ -62,15 +63,15 @@ WRCell::~WRCell() {
     if (mLoaded) {
 
         mVertices.clear();
-        delete[] mFaceMaps;
-        delete[] mFaceInfos;
+        mFaceMaps.clear();
+        mFaceInfos.clear();
 
         for (int i = 0; i < mHeader.numPolygons; i++)
             delete[] mPolyIndices[i];
 
         delete[] mPolyIndices;
 
-        delete[] mPlanes;
+        mPlanes.clear();
     }
 }
 
@@ -91,17 +92,17 @@ void WRCell::loadFromChunk(unsigned int _cell_num, FilePtr &chunk,
 
     // 1. load the vertices
     mVertices.resize(mHeader.numVertices);
-
+//    for (auto &vertex : mVertices) *chunk >> vertex;
     for (size_t i = 0; i < mHeader.numVertices; ++i)
         *chunk >> mVertices[i];
 
     // 2. load the cell's polygon mapping
-    mFaceMaps = new WRPolygon[mHeader.numPolygons];
+    mFaceMaps.resize(mHeader.numPolygons);
     for (size_t i = 0; i < mHeader.numPolygons; ++i)
         *chunk >> mFaceMaps[i];
 
     // 3. load the cell's texturing infos
-    mFaceInfos = new WRPolygonTexturing[mHeader.numTextured];
+    mFaceInfos.resize(mHeader.numTextured);
     for (size_t i = 0; i < mHeader.numTextured; ++i)
         *chunk >> mFaceInfos[i];
 
@@ -122,7 +123,7 @@ void WRCell::loadFromChunk(unsigned int _cell_num, FilePtr &chunk,
     }
 
     // 6. load the planes
-    mPlanes = new Ogre::Plane[mHeader.numPlanes];
+    mPlanes.resize(mHeader.numPlanes);
     for (size_t i = 0; i < mHeader.numPlanes; ++i)
         *chunk >> mPlanes[i];
 
@@ -499,7 +500,7 @@ void WRCell::createCellGeometry() {
 
             // base vertex - texturing origin
             Vector3 origin =
-                mVertices[mPolyIndices[polyNum][mFaceInfos->originVertex]];
+                mVertices[mPolyIndices[polyNum][mFaceInfos[polyNum].originVertex]];
 
             // plane id of the polygon
             unsigned int pln = mFaceMaps[polyNum].plane;
