@@ -174,6 +174,9 @@ void GUIService::shutdown() {
 
     mConsole.reset();
 
+    mConsoleFont.reset();
+    mCoreAtlas.reset();
+
     mRenderSrv.reset();
     mInputSrv.reset();
     mDrawSrv.reset();
