@@ -44,8 +44,6 @@ ConsoleBackend::ConsoleBackend(unsigned int text_history)
     mMessages.clear();
     mChanged = true;
 
-    // Register as an ogre logger
-    // LogManager::getSingleton().getDefaultLog()->addListener(this);
     // Register as Opde log listener
     Logger::getSingleton().registerLogListener(this);
 }
