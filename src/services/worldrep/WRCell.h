@@ -86,7 +86,7 @@ private:
     /** polygon mapping struct.. pointer to array of indices on each poly index
      * poly_indices[0][0]... etc.*/
     // uint32_t		num_indices;
-    uint8_t **mPolyIndices;
+    std::vector<std::vector<uint8_t>> mPolyIndices;
 
     /** Planes forming the cell */
     std::vector<Plane> mPlanes;

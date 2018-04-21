@@ -53,7 +53,7 @@ WRCell::WRCell()
       mVertices(),
       mFaceMaps(),
       mFaceInfos(),
-      mPolyIndices(NULL),
+      mPolyIndices(),
       mPlanes(),
       mLoaded(false),
       mPortalsDone(false),
@@ -69,12 +69,7 @@ WRCell::~WRCell() {
         mVertices.clear();
         mFaceMaps.clear();
         mFaceInfos.clear();
-
-        for (int i = 0; i < mHeader.numPolygons; i++)
-            delete[] mPolyIndices[i];
-
-        delete[] mPolyIndices;
-
+        mPolyIndices.clear();
         mPlanes.clear();
     }
 }
@@ -114,12 +109,12 @@ void WRCell::loadFromChunk(unsigned int _cell_num, FilePtr &chunk,
     *chunk >> num_indices;
 
     // 4.
-    mPolyIndices = new uint8_t *[mHeader.numPolygons];
+    mPolyIndices.resize(mHeader.numPolygons);
 
     // 5. for each polygon there is
     for (int x = 0; x < mHeader.numPolygons; x++) {
-        mPolyIndices[x] = new uint8_t[mFaceMaps[x].count];
-        chunk->read(&(mPolyIndices[x][0]), mFaceMaps[x].count);
+        mPolyIndices[x].resize(mFaceMaps[x].count);
+        chunk->read(mPolyIndices[x].data(), mFaceMaps[x].count);
     }
 
     // 6. load the planes
