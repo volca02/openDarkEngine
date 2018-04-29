@@ -128,8 +128,7 @@ void WorldRepService::onDBLoad(const FileGroupPtr &db, uint32_t curmask) {
         wrChunk = db->getFile("WRRGB");
     } else {
         // Still no data?
-        OPDE_EXCEPT("Could not find WR nor WRRGB chunk...",
-                    "WorldRepService::loadFromDarkDatabase");
+        OPDE_EXCEPT("Could not find WR nor WRRGB chunk...");
     }
 
     loadFromChunk(wrChunk, lightSize);

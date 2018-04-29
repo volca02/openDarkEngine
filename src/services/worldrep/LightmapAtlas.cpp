@@ -113,7 +113,7 @@ void LightAtlas::growAtlas(int newSize) {
         // place the lmap
         // should not fail, since the lmaps fitted to prev atlas.
         if (!placeLightMap(*it))
-            OPDE_EXCEPT("Could not fit after growth!", "LightAtlas::growAtlas");
+            OPDE_EXCEPT("Could not fit after growth!");
     }
 }
 
@@ -393,8 +393,7 @@ bool LightAtlasList::render() {
     for (std::vector<LightAtlas *>::iterator it = mList.begin();
          it != mList.end(); ++it)
         if (!(*it)->render())
-            OPDE_EXCEPT("Could not render the lightmaps!",
-                        "LightAtlasList::render()");
+            OPDE_EXCEPT("Could not render the lightmaps!");
 
     // iterate through existing Atlases, and see if any of them accepts our
     // lightmap

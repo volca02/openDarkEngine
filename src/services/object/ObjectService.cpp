@@ -560,8 +560,7 @@ void ObjectService::_beginCreateObject(int objID, int archetypeID) {
     _prepareForObject(objID);
 
     if (!exists(archetypeID)) {
-        OPDE_EXCEPT("Given archetype ID does not exist!",
-                    "ObjectService::_beginCreateObject");
+        OPDE_EXCEPT("Given archetype ID does not exist!");
     }
 
     // Use inherit service to set archetype for the new object

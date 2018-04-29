@@ -72,7 +72,7 @@ ConsoleGUI::ConsoleGUI(GUIService *owner) : mIsActive(false), mOwner(owner) {
 
     mConsoleBackground = mDrawSrv->createRenderedRect(mAtlas);
     // mConsoleBackground->setColour(ColourValue(0.5f, 0.5f, 0.5f, 0.5f));
-    mConsoleBackground->setColour(ColourValue(0.0f, 0.0f, 0.0f));
+    mConsoleBackground->setColour(ColourValue(0.1f, 0.1f, 0.1f, 0.1f));
     mConsoleBackground->setZOrder(1);
 
     mCommandLineBackground = mDrawSrv->createRenderedRect(mAtlas);

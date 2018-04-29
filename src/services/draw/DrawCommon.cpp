@@ -144,8 +144,7 @@ void DrawSource::loadImage(const Ogre::String &name,
                            const Ogre::String &group) {
     // If the image is loaded already, we have an error
     if (mImageLoaded)
-        OPDE_EXCEPT("Image already loaded in this DrawSource",
-                    "DrawSource::loadImage");
+        OPDE_EXCEPT("Image already loaded in this DrawSource");
 
     mImage->load(name, group);
     updatePixelSizeFromImage();

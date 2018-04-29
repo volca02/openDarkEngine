@@ -37,8 +37,7 @@ EntityInfo *RenderedProperty::getEntityInfo(int oid) {
     assert(ei);
 
     if (ei == NULL)
-        OPDE_EXCEPT("EntityInfo not found for object",
-                    "RenderedProperty::getEntityInfo");
+        OPDE_EXCEPT("EntityInfo not found for object");
 
     return ei;
 };
@@ -48,8 +47,7 @@ Ogre::SceneNode *RenderedProperty::getSceneNode(int oid) {
     assert(sn);
 
     if (sn == NULL)
-        OPDE_EXCEPT("SceneNode not found for object",
-                    "RenderedProperty::getSceneNode");
+        OPDE_EXCEPT("SceneNode not found for object");
 
     return sn;
 };

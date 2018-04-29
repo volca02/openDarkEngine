@@ -136,7 +136,7 @@ const Ogre::Plane &WRCell::getPlane(int index) {
     assert(mLoaded);
 
     if (index > mHeader.numPlanes)
-        OPDE_EXCEPT("Plane index is out of bounds", "WRCell::getPlane");
+        OPDE_EXCEPT("Plane index is out of bounds");
 
     return mPlanes[index];
 }
@@ -477,8 +477,7 @@ void WRCell::createCellGeometry(const MaterialServicePtr &matSvc,
                 polyToDim.find(polyNum);
 
             if (dimi == polyToDim.end())
-                OPDE_EXCEPT("Missing polygon texture dimensions!",
-                            "WrCell::constructCellMesh");
+                OPDE_EXCEPT("Missing polygon texture dimensions!");
 
             dimensions = dimi->second;
 

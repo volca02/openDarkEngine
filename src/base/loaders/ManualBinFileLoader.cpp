@@ -29,6 +29,7 @@
 #include "FileCompat.h"
 #include "ManualBinFileLoader.h"
 #include "LGPalette.h"
+#include "format.h"
 
 // #include "MaterialService.h"
 
@@ -1534,10 +1535,8 @@ MaterialPtr ObjectMeshLoader::prepareMaterial(String matname, MeshMaterial &mat,
             if (!ResourceGroupManager::getSingleton().resourceExists(
                     ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                     txtname)) {
-                OPDE_EXCEPT(
-                    String("Can't find texture in txt16 or txt folder: ") +
-                        mat.name,
-                    "ObjectMeshLoader::prepareMaterial");
+                OPDE_EXCEPT(format(
+                    "Can't find texture in txt16 or txt folder: ", mat.name));
             }
         }
 

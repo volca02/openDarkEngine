@@ -37,7 +37,7 @@ namespace Opde {
 FileLog::FileLog(const std::string &fname)
     : ofile(fname.c_str(), std::ios::out) {
     if (!ofile.is_open())
-        OPDE_EXCEPT("Could not create output log file", "FileLog::FileLog");
+        OPDE_EXCEPT("Could not create output log file");
 };
 
 FileLog::~FileLog() { ofile.close(); };

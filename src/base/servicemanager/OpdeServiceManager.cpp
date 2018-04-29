@@ -32,6 +32,7 @@
 #include "OpdeService.h"
 #include "OpdeServiceManager.h"
 #include "logger.h"
+#include "format.h"
 
 using namespace std;
 
@@ -105,15 +106,13 @@ void ServiceManager::addServiceFactory(std::unique_ptr<ServiceFactory> &factory)
     size_t fsid = factory->getSID();
 
     if (fsid > msMaxServiceSID)
-        OPDE_EXCEPT("ServiceFactory SID beyond maximum for " +
-                        factory->getName(),
-                    "ServiceManager::addServiceFactory");
+        OPDE_EXCEPT(format("ServiceFactory SID beyond maximum for ",
+                           factory->getName()));
 
     if (mServiceFactories[fsid] != NULL)
-        OPDE_EXCEPT("ServiceFactory SID already taken by " +
-                        mServiceFactories[fsid]->getName() +
-                        " could not issue it to " + factory->getName(),
-                    "ServiceManager::addServiceFactory");
+        OPDE_EXCEPT(format("ServiceFactory SID already taken by ",
+                           mServiceFactories[fsid]->getName(),
+                           " could not issue it to ", factory->getName()));
 
     mServiceFactories[fsid] = std::move(factory);
 }
@@ -144,19 +143,17 @@ ServicePtr ServiceManager::createInstance(size_t sid) {
                  factory->getName().c_str(), sid);
 
         if (!(factory->getMask() & mGlobalServiceMask))
-            OPDE_EXCEPT("Creation of service " + factory->getName() +
+            OPDE_EXCEPT(format("Creation of service ", factory->getName(),
                             " was not permitted by mask. Please consult OPDE "
-                            "log for details",
-                        "ServiceManager::createInstance");
+                            "log for details"));
 
         ServicePtr ns(factory->createInstance(this));
         mServiceInstances[fsid] = ns;
 
         if (!ns->init()) {
-            OPDE_EXCEPT(
-                "Initialization of service " + factory->getName() +
-                    " failed. Fatal. Please consult OPDE log for details",
-                "ServiceManager::createInstance");
+            OPDE_EXCEPT(format(
+                "Initialization of service ", factory->getName(),
+                    " failed. Fatal. Please consult OPDE log for details"));
         }
 
         // Bootstrap already over, call the after-bootstrap init too
@@ -165,10 +162,7 @@ ServicePtr ServiceManager::createInstance(size_t sid) {
 
         return ns;
     } else {
-        std::ostringstream oss;
-        oss << "ServiceFactory with ID " << sid << string(" not found");
-
-        OPDE_EXCEPT(oss.str(), "OpdeServiceManager::getService");
+        OPDE_EXCEPT(format("ServiceFactory with ID ", sid, " not found"));
     }
 }
 

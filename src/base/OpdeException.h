@@ -34,8 +34,8 @@
 namespace Opde {
 
 /** A usage - simplifying macro */
-#define OPDE_EXCEPT(desc, src)                                                 \
-    throw(Opde::BasicException(desc, src, __FILE__, __LINE__))
+#define OPDE_EXCEPT(desc)                                                      \
+    throw(Opde::BasicException(desc, __FUNCTION__, __FILE__, __LINE__))
 
 /** @brief A standard OPDE exception
  *

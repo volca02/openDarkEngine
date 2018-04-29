@@ -52,8 +52,7 @@ void ModelScaleProperty::addProperty(int oid) {
     Variant val;
 
     if (!get(oid, "", val))
-        OPDE_EXCEPT("Property not defined for object.",
-                    "ModelScaleProperty::addProperty");
+        OPDE_EXCEPT("Property not defined for object.");
 
     setScale(oid, val.toVector());
 };

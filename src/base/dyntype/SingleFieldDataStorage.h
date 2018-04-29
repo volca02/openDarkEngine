@@ -252,8 +252,7 @@ public:
 
     /** @see DataStorage::getDataSize */
     virtual size_t getDataSize(void) {
-        OPDE_EXCEPT("StringDataStorage::getDataSize",
-                    "Invalid call - string length is variable");
+        OPDE_EXCEPT("Invalid call - string length is variable");
     }
 };
 

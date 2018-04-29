@@ -118,8 +118,7 @@ void LinkService::load(const FileGroupPtr &db, const BitArray &objMask) {
             OPDE_EXCEPT(
                 format("Conflicting name. Character ~ is reserved for inverse "
                        "relations. Conflicting name : ",
-                       stxt),
-                "LinkService::_load");
+                       stxt));
 
         // Look for relation with the specified Name
 
@@ -138,8 +137,7 @@ void LinkService::load(const FileGroupPtr &db, const BitArray &objMask) {
         // Request the mapping to ID
         if (!requestRelationFlavorMap(i, text, rel))
             OPDE_EXCEPT(format("Could not map relation '", text,
-                               "' to flavor. Name/ID conflict"),
-                        "LinkService::_load");
+                               "' to flavor. Name/ID conflict"));
 
         LOG_DEBUG("Mapped relation %s to flavor %d", text, i);
 
@@ -150,16 +148,14 @@ void LinkService::load(const FileGroupPtr &db, const BitArray &objMask) {
 
         if (rnit == mRelationNameMap.end())
             OPDE_EXCEPT(format("Could not find inverse relation ", inverse,
-                               " predefined. Could not continue"),
-                        "LinkService::_load");
+                               " predefined. Could not continue"));
 
         RelationPtr irel = rnit->second;
 
         // Request the mapping to ID
         if (!requestRelationFlavorMap(-i, inverse, irel))
             OPDE_EXCEPT(format("Could not map inverse relation ", inverse,
-                               " to flavor. Name/ID conflict"),
-                        "LinkService::_load");
+                               " to flavor. Name/ID conflict"));
 
         LOG_DEBUG("Mapped relation pair %s, %s to flavor %d, %d", text,
                   inverse.c_str(), i, -i);
@@ -196,8 +192,7 @@ void LinkService::save(const FileGroupPtr &db, uint saveMask) {
 
     for (; it != mRelationIDMap.end(); ++it, ++order) {
         if (order != it->first)
-            OPDE_EXCEPT("Index order mismatch, could not continue...",
-                        "LinkService::save");
+            OPDE_EXCEPT("Index order mismatch, could not continue...");
 
         // Write the relation's name
         char title[32];
@@ -248,8 +243,7 @@ RelationPtr LinkService::createRelation(const std::string &name,
             format(
                 "Name conflict: Relation can't use ~ character as the first "
                 "one, it's reserved for inverse relations. Conflicting name: ",
-                name),
-            "LinkService::createRelation");
+                name));
 
     std::string inverse = "~" + name;
 
@@ -265,15 +259,13 @@ RelationPtr LinkService::createRelation(const std::string &name,
         mRelationNameMap.insert(make_pair(name, nr));
 
     if (!res.second)
-        OPDE_EXCEPT("Failed to insert new instance of Relation named " + name,
-                    "LinkService::createRelation");
+        OPDE_EXCEPT("Failed to insert new instance of Relation named " + name);
 
     // Inverse relation now
     res = mRelationNameMap.insert(make_pair(inverse, nrinv));
 
     if (!res.second)
-        OPDE_EXCEPT("Failed to insert new instance of Relation",
-                    "LinkService::createRelation");
+        OPDE_EXCEPT("Failed to insert new instance of Relation");
 
     LOG_VERBOSE(
         "LinkService::createRelation: Succesfully created Relation pair '%s'",

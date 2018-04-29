@@ -29,8 +29,9 @@
 #include "OpdeServiceManager.h"
 #include "ServiceCommon.h"
 #include "SingleFieldDataStorage.h"
-#include "link/Relation.h"
+#include "format.h"
 #include "link/LinkService.h"
+#include "link/Relation.h"
 #include "logger.h"
 
 using namespace std;
@@ -127,8 +128,7 @@ Inheritor *InheritService::createInheritor(const std::string &name) {
         mInheritors.push_back(inh); // no need map by name
         return inh;
     } else
-        OPDE_EXCEPT(string("No inheritor factory found for name : ") + name,
-                    "InheritService::createInheritor");
+        OPDE_EXCEPT(format("No inheritor factory found for name : ", name));
 }
 
 //------------------------------------------------------
@@ -164,8 +164,7 @@ bool InheritService::init() {
 
     // Could not be created?
     if (!mMetaPropRelation)
-        OPDE_EXCEPT("MetaProp relation could not be created. Fatal.",
-                    "InheritService::init");
+        OPDE_EXCEPT("MetaProp relation could not be created. Fatal.");
 
     LOG_DEBUG("InheritService::init() - done!");
     return true;
@@ -291,8 +290,7 @@ bool InheritService::hasTargets(int objID) const {
 //------------------------------------------------------
 void InheritService::setArchetype(int objID, int archetypeID) {
     if (getArchetype(objID) != 0) {
-        OPDE_EXCEPT("Given object already has an archetype set",
-                    "InheritService::setArchetype");
+        OPDE_EXCEPT("Given object already has an archetype set");
     }
 
     _createMPLink(objID, archetypeID, 0);
@@ -416,8 +414,7 @@ void InheritService::_addLink(const LinkPtr &link, unsigned int priority) {
 
     if (!ri.second)
         OPDE_EXCEPT(
-            "Multiple inheritance for the same src/dst pair is not allowed!",
-            "InheritService::_addLink");
+            "Multiple inheritance for the same src/dst pair is not allowed!");
 
     // Repeat for the mInheritTarget's
 
@@ -427,8 +424,7 @@ void InheritService::_addLink(const LinkPtr &link, unsigned int priority) {
 
     if (!ri.second)
         OPDE_EXCEPT(
-            "Multiple inheritance for the same src/dst pair is not allowed!",
-            "InheritService::_addLink");
+            "Multiple inheritance for the same src/dst pair is not allowed!");
 }
 
 //------------------------------------------------------
@@ -442,8 +438,7 @@ void InheritService::_changeLink(const LinkPtr &link, unsigned int priority) {
 
         it2->second->priority = priority;
     } else
-        OPDE_EXCEPT("Could not find the link to change the priority for",
-                    "InheritService::_changeLink");
+        OPDE_EXCEPT("Could not find the link to change the priority for");
 }
 
 //------------------------------------------------------
@@ -457,11 +452,9 @@ void InheritService::_removeLink(const LinkPtr &link) {
         if (it2 != it->second.end())
             it->second.erase(it2);
         else
-            OPDE_EXCEPT("Could not find the link to change the priority for",
-                        "InheritService::_changeLink");
+            OPDE_EXCEPT("Could not find the link to change the priority for");
     } else
-        OPDE_EXCEPT("Could not find the link to change the priority for",
-                    "InheritService::_changeLink");
+        OPDE_EXCEPT("Could not find the link to change the priority for");
 
     // Same again, for the targets
     it = mInheritTargets.find(link->src());
@@ -472,11 +465,9 @@ void InheritService::_removeLink(const LinkPtr &link) {
         if (it2 != it->second.end())
             it->second.erase(it2);
         else
-            OPDE_EXCEPT("Could not find the link to change the priority for",
-                        "InheritService::_changeLink");
+            OPDE_EXCEPT("Could not find the link to change the priority for");
     } else
-        OPDE_EXCEPT("Could not find the link to change the priority for",
-                    "InheritService::_changeLink");
+        OPDE_EXCEPT("Could not find the link to change the priority for");
 }
 
 //------------------------------------------------------

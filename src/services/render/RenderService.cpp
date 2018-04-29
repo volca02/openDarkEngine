@@ -27,19 +27,6 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_opengl.h>
 
-#include "RenderService.h"
-
-#include "DarkSceneManager.h"
-
-#include "OpdeServiceManager.h"
-
-#include "config/ConfigService.h"
-#include "object/ObjectService.h"
-#include "property/PropertyService.h"
-
-#include "ServiceCommon.h"
-#include "logger.h"
-
 #include <OgreAnimation.h>
 #include <OgreBone.h>
 #include <OgreEntity.h>
@@ -58,12 +45,18 @@
 // Jorge texture png
 #include "jorge.h"
 
+#include "DarkSceneManager.h"
+#include "EntityInfo.h"
+#include "ManualBinFileLoader.h"
+#include "OpdeServiceManager.h"
+#include "RenderService.h"
+#include "ServiceCommon.h"
+#include "config/ConfigService.h"
+#include "format.h"
+#include "logger.h"
 #include "loop/LoopService.h"
 #include "object/ObjectService.h"
 #include "property/PropertyService.h"
-#include "OpdeServiceManager.h"
-#include "ManualBinFileLoader.h"
-#include "EntityInfo.h"
 
 #include "HasRefsProperty.h"
 #include "ModelNameProperty.h"
@@ -71,9 +64,6 @@
 #include "RenderAlphaProperty.h"
 #include "RenderTypeProperty.h"
 #include "ZBiasProperty.h"
-
-using namespace std;
-using namespace Ogre;
 
 namespace Opde {
 const char *DEFAULT_RAMP_OBJECT_NAME = "DefaultRamp";
@@ -108,8 +98,8 @@ RenderService::RenderService(ServiceManager *manager, const std::string &name)
     // etc. The fact is this service is probably game only, and should be the
     // initialiser of graphics as the whole. This will be the modification that
     // should be done soon in order to let the code look and be nice FIX!
-    mRoot = Root::getSingletonPtr();
-    mManualBinFileLoader.reset(new ManualBinFileLoader());
+    mRoot = Ogre::Root::getSingletonPtr();
+    mManualBinFileLoader.reset(new Ogre::ManualBinFileLoader());
 
     mLoopClientDef.id = LOOPCLIENT_ID_RENDERER;
     mLoopClientDef.mask = LOOPMODE_RENDER;
@@ -126,7 +116,7 @@ RenderService::~RenderService() {
         mSceneMgr->destroyAllCameras();
 
     if (mDarkSMFactory) {
-        Root::getSingleton().removeSceneManagerFactory(mDarkSMFactory);
+        Ogre::Root::getSingleton().removeSceneManagerFactory(mDarkSMFactory);
         delete mDarkSMFactory;
         mDarkSMFactory = NULL;
     }
@@ -216,19 +206,19 @@ bool RenderService::init() {
 
     // Dark scene manager factory
     LOG_DEBUG("RenderService::init(): new DarkSceneManagerFactory()");
-    mDarkSMFactory = new DarkSceneManagerFactory();
+    mDarkSMFactory = new Ogre::DarkSceneManagerFactory();
 
     // Register
-    Root::getSingleton().addSceneManagerFactory(mDarkSMFactory);
+    Ogre::Root::getSingleton().addSceneManagerFactory(mDarkSMFactory);
 
     mSceneMgr =
         mRoot->createSceneManager("DarkSceneManager", "DarkSceneManager");
 
     // mSceneMgr->setShadowTechnique(SHADOWTYPE_TEXTURE_MODULATIVE);
-    mSceneMgr->setShadowTechnique(SHADOWTYPE_NONE);
+    mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_NONE);
 
     // TODO: Set this in Database listener using Render Params chunk
-    mSceneMgr->setAmbientLight(ColourValue(0.08, 0.08, 0.08));
+    mSceneMgr->setAmbientLight(Ogre::ColourValue(0.08, 0.08, 0.08));
 
     // Next step. We create a default camera in the mRenderWindow
     mDefaultCamera = mSceneMgr->createCamera("MainCamera");
@@ -236,8 +226,8 @@ bool RenderService::init() {
     mDefaultCamera->setCastShadows(true);
 
     // aspect derived from screen aspect (to avoid stretching)
-    mDefaultCamera->setAspectRatio(Real(mRenderWindow->getWidth()) /
-                                   Real(mRenderWindow->getHeight()));
+    mDefaultCamera->setAspectRatio(Ogre::Real(mRenderWindow->getWidth()) /
+                                   Ogre::Real(mRenderWindow->getHeight()));
 
     mRenderWindow->addViewport(mDefaultCamera);
 
@@ -263,8 +253,7 @@ bool RenderService::init() {
 void RenderService::initSDLWindow() {
     int res = SDL_Init(SDL_INIT_EVERYTHING);
     if (res != 0) {
-        OPDE_EXCEPT(String("SDL Initialization error: ") + SDL_GetError(),
-                    "RenderService::initSDLWindow");
+        OPDE_EXCEPT(format("SDL Initialization error: ", SDL_GetError()));
     }
 
     // try to reach propper display and resolution
@@ -274,9 +263,7 @@ void RenderService::initSDLWindow() {
         int dispCount = SDL_GetNumVideoDisplays();
 
         if (dispCount < 0)
-            OPDE_EXCEPT(String("SDL can't get display count. Error: ") +
-                            SDL_GetError(),
-                        "RenderService::initSDLWindow");
+            OPDE_EXCEPT(format("SDL can't get display count. Error: ", SDL_GetError()));
 
         if (mCurrentSize.display < 0)
             mCurrentSize.display = 0;
@@ -292,9 +279,8 @@ void RenderService::initSDLWindow() {
         res = SDL_GetDesktopDisplayMode(mCurrentSize.display, &mode);
 
         if (res)
-            OPDE_EXCEPT(String("SDL can't get current video mode. Error: ") +
-                            SDL_GetError(),
-                        "RenderService::initSDLWindow");
+            OPDE_EXCEPT(format("SDL can't get current video mode. Error: ",
+                               SDL_GetError()));
 
         mCurrentSize.width = mode.w;
         mCurrentSize.height = mode.h;
@@ -316,15 +302,14 @@ void RenderService::initSDLWindow() {
                                   mCurrentSize.height, flags);
 
     if (mSDLWindow == NULL)
-        OPDE_EXCEPT("Can't create SDL window", "RenderService::initSDLWindow");
+        OPDE_EXCEPT("Can't create SDL window");
 }
 
 // --------------------------------------------------------------------------
 void RenderService::initOgreWindow() {
     // where do I find this?
     if (mRoot->getAvailableRenderers().size() < 1)
-        OPDE_EXCEPT("Failed to initialize RenderSystem",
-                    "RenderService::initOgre");
+        OPDE_EXCEPT("Failed to initialize RenderSystem");
     mRoot->setRenderSystem(mRoot->getAvailableRenderers()[0]);
     mRoot->initialise(false);
 
@@ -335,8 +320,7 @@ void RenderService::initOgreWindow() {
     SDL_SysWMinfo sysInfo;
     SDL_VERSION(&sysInfo.version);
     if (SDL_GetWindowWMInfo(mSDLWindow, &sysInfo) <= 0) {
-        OPDE_EXCEPT("Can't create SDL GL context",
-                    "RenderService::initSDLWindow");
+        OPDE_EXCEPT("Can't create SDL GL context");
     }
 
 #ifdef __WINDOWS__
@@ -406,10 +390,12 @@ void RenderService::setWorldVisible(bool visible) {
     mSceneMgr->clearSpecialCaseRenderQueues();
 
     if (visible) {
-        mSceneMgr->setSpecialCaseRenderQueueMode(SceneManager::SCRQM_EXCLUDE);
+        mSceneMgr->setSpecialCaseRenderQueueMode(
+            Ogre::SceneManager::SCRQM_EXCLUDE);
     } else {
-        mSceneMgr->addSpecialCaseRenderQueue(RENDER_QUEUE_OVERLAY);
-        mSceneMgr->setSpecialCaseRenderQueueMode(SceneManager::SCRQM_INCLUDE);
+        mSceneMgr->addSpecialCaseRenderQueue(Ogre::RENDER_QUEUE_OVERLAY);
+        mSceneMgr->setSpecialCaseRenderQueueMode(
+            Ogre::SceneManager::SCRQM_INCLUDE);
     }
 }
 
@@ -427,8 +413,7 @@ void RenderService::bootstrapFinished() {
     mPropPosition = mPropertyService->getProperty("Position");
 
     if (mPropPosition == NULL)
-        OPDE_EXCEPT("Could not get Position property. Not defined. Fatal",
-                    "RenderService::bootstrapFinished");
+        OPDE_EXCEPT("Could not get Position property. Not defined. Fatal");
 
     // listener to the position property to control the scenenode
     Property::ListenerPtr cposc(
@@ -459,7 +444,7 @@ void RenderService::loopStep(float deltaTime) {
 
 // --------------------------------------------------------------------------
 void RenderService::prepareMesh(const Ogre::String &name) {
-    String fname = name + ".mesh";
+    Ogre::String fname = name + ".mesh";
 
     if (!Ogre::MeshManager::getSingleton().resourceExists(fname)) {
         // Undefine in advance, so there will be no clash
@@ -474,7 +459,7 @@ void RenderService::prepareMesh(const Ogre::String &name) {
             Ogre::MeshPtr mesh1 = Ogre::MeshManager::getSingleton().create(
                 fname, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                 true, mManualBinFileLoader.get());
-        } catch (FileNotFoundException) {
+        } catch (Ogre::FileNotFoundException) {
             LOG_ERROR("RenderService::prepareMesh: Could not find the "
                       "requested model %s",
                       name.c_str());
@@ -488,13 +473,13 @@ void RenderService::prepareMesh(const Ogre::String &name) {
 
 // --------------------------------------------------------------------------
 void RenderService::createObjectModel(int id) {
-    Ogre::String idstr = StringConverter::toString(id);
+    Ogre::String idstr = Ogre::StringConverter::toString(id);
 
-    Entity *ent =
+    Ogre::Entity *ent =
         mSceneMgr->createEntity("Object" + idstr, DEFAULT_RAMP_OBJECT_NAME);
 
     // bind the ent to the node of the obj.
-    SceneNode *node = NULL;
+    Ogre::SceneNode *node = NULL;
 
     try {
         node = getSceneNode(id);
@@ -508,7 +493,7 @@ void RenderService::createObjectModel(int id) {
 
     assert(node != NULL);
 
-    SceneNode *enode = mSceneMgr->createSceneNode("ObjMesh" + idstr);
+    Ogre::SceneNode *enode = mSceneMgr->createSceneNode("ObjMesh" + idstr);
     enode->setPosition(Vector3::ZERO);
     enode->setOrientation(Quaternion::IDENTITY);
     node->addChild(enode);
@@ -557,7 +542,7 @@ void RenderService::setObjectModel(int id, const std::string &name) {
 
     // upper, to compare without case
     std::string iname = name;
-    StringUtil::toUpperCase(iname);
+    Ogre::StringUtil::toUpperCase(iname);
 
     // if the new name is particle, just set skip and it's done
     if (iname == FX_PARTICLE_OBJECT_NAME) {
@@ -568,9 +553,9 @@ void RenderService::setObjectModel(int id, const std::string &name) {
 
     // name not empty. Prepare new entity, swap, destroy old
 
-    Ogre::String idstr = StringConverter::toString(id);
+    Ogre::String idstr = Ogre::StringConverter::toString(id);
 
-    Entity *ent = NULL;
+    Ogre::Entity *ent = NULL;
 
     // load the new entity, set it as the current in the entity info
     try {
@@ -602,10 +587,10 @@ void RenderService::prepareEntity(Ogre::Entity *e) {
     // TODO: This should only apply for non-ai meshes!
     if (e->hasSkeleton()) {
 
-        Skeleton::BoneIterator bi = e->getSkeleton()->getBoneIterator();
+        Ogre::Skeleton::BoneIterator bi = e->getSkeleton()->getBoneIterator();
 
         while (bi.hasMoreElements()) {
-            Bone *n = bi.getNext();
+            Ogre::Bone *n = bi.getNext();
 
             n->setManuallyControlled(true);
         }
@@ -624,7 +609,7 @@ void RenderService::clear() {
 
 // --------------------------------------------------------------------------
 void RenderService::attachCameraToObject(int objID) {
-    SceneNode *sn = getSceneNode(objID);
+    Ogre::SceneNode *sn = getSceneNode(objID);
 
     if (sn) {
         sn->attachObject(mDefaultCamera);
@@ -634,7 +619,7 @@ void RenderService::attachCameraToObject(int objID) {
 // --------------------------------------------------------------------------
 void RenderService::detachCamera() {
     if (mDefaultCamera->isAttached()) {
-        SceneNode *sn = mDefaultCamera->getParentSceneNode();
+        Ogre::SceneNode *sn = mDefaultCamera->getParentSceneNode();
         sn->detachObject(mDefaultCamera);
     }
 }
@@ -765,17 +750,18 @@ void RenderService::onObjectMsg(const ObjectServiceMsg &msg) {
 // --------------------------------------------------------------------------
 void RenderService::prepareHardcodedMedia() {
     // 1. The default texture - Jorge (recreated to be nearly the same visually)
-    TexturePtr jorgeTex = TextureManager::getSingleton().getByName("jorge.png");
+    Ogre::TexturePtr jorgeTex =
+        Ogre::TextureManager::getSingleton().getByName("jorge.png");
 
     if (!jorgeTex) {
-        DataStreamPtr stream(new MemoryDataStream(
+        Ogre::DataStreamPtr stream(new Ogre::MemoryDataStream(
             JORGE_TEXTURE_PNG, JORGE_TEXTURE_PNG_SIZE, false));
 
-        Image img;
+        Ogre::Image img;
         img.load(stream, "png");
-        jorgeTex = TextureManager::getSingleton().loadImage(
-            "jorge.png", ResourceGroupManager::INTERNAL_RESOURCE_GROUP_NAME,
-            img, TEX_TYPE_2D);
+        jorgeTex = Ogre::TextureManager::getSingleton().loadImage(
+            "jorge.png", Ogre::ResourceGroupManager::INTERNAL_RESOURCE_GROUP_NAME,
+            img, Ogre::TEX_TYPE_2D);
     }
 
     // 2. The default geometric shape - White Ramp
@@ -788,12 +774,12 @@ void RenderService::createRampMesh() {
     // Code copied from Ogre3D wiki, and modified (Thanks to the original author
     // for saving my time!)
     /// Create the mesh via the MeshManager
-    Ogre::MeshPtr msh = MeshManager::getSingleton().createManual(
+    Ogre::MeshPtr msh = Ogre::MeshManager::getSingleton().createManual(
         DEFAULT_RAMP_OBJECT_NAME,
-        ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+        Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
     /// Create one submesh
-    SubMesh *sub = msh->createSubMesh();
+    Ogre::SubMesh *sub = msh->createSubMesh();
     sub->setMaterialName("BaseWhite");
 
     // Not exactly accurate for 1:1:2 side size ratio, but well...
@@ -816,37 +802,38 @@ void RenderService::createRampMesh() {
                                        5, 3, 2, 5, 2, 4, 1, 4, 2, 5, 0, 3};
 
     /// Create vertex data structure for 8 vertices shared between submeshes
-    msh->sharedVertexData = new VertexData();
+    msh->sharedVertexData = new Ogre::VertexData();
     msh->sharedVertexData->vertexCount = nVertices;
 
     /// Create declaration (memory format) of vertex data
-    VertexDeclaration *decl = msh->sharedVertexData->vertexDeclaration;
+    Ogre::VertexDeclaration *decl = msh->sharedVertexData->vertexDeclaration;
     size_t offset = 0;
     // 1st buffer
-    decl->addElement(0, offset, VET_FLOAT3, VES_POSITION);
-    offset += VertexElement::getTypeSize(VET_FLOAT3);
-    decl->addElement(0, offset, VET_FLOAT3, VES_NORMAL);
-    offset += VertexElement::getTypeSize(VET_FLOAT3);
+    decl->addElement(0, offset, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+    offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
+    decl->addElement(0, offset, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
+    offset += Ogre::VertexElement::getTypeSize(Ogre::VET_FLOAT3);
 
     /// Allocate vertex buffer of the requested number of vertices (vertexCount)
     /// and bytes per vertex (offset)
-    HardwareVertexBufferSharedPtr vbuf =
-        HardwareBufferManager::getSingleton().createVertexBuffer(
+    Ogre::HardwareVertexBufferSharedPtr vbuf =
+        Ogre::HardwareBufferManager::getSingleton().createVertexBuffer(
             offset, msh->sharedVertexData->vertexCount,
-            HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+            Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
 
     /// Upload the vertex data to the card
     vbuf->writeData(0, vbuf->getSizeInBytes(), vertices, true);
 
     /// Set vertex buffer binding so buffer 0 is bound to our vertex buffer
-    VertexBufferBinding *bind = msh->sharedVertexData->vertexBufferBinding;
+    Ogre::VertexBufferBinding *bind =
+        msh->sharedVertexData->vertexBufferBinding;
     bind->setBinding(0, vbuf);
 
     /// Allocate index buffer of the requested number of vertices (ibufCount)
-    HardwareIndexBufferSharedPtr ibuf =
-        HardwareBufferManager::getSingleton().createIndexBuffer(
-            HardwareIndexBuffer::IT_16BIT, ibufCount,
-            HardwareBuffer::HBU_STATIC_WRITE_ONLY);
+    Ogre::HardwareIndexBufferSharedPtr ibuf =
+        Ogre::HardwareBufferManager::getSingleton().createIndexBuffer(
+            Ogre::HardwareIndexBuffer::IT_16BIT, ibufCount,
+            Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY);
 
     /// Upload the index data to the card
     ibuf->writeData(0, ibuf->getSizeInBytes(), faces, true);
@@ -858,8 +845,8 @@ void RenderService::createRampMesh() {
     sub->indexData->indexStart = 0;
 
     /// Set bounding information (for culling)
-    msh->_setBounds(AxisAlignedBox(-2, -1, -1, 2, 1, 1));
-    msh->_setBoundingSphereRadius(Math::Sqrt(6));
+    msh->_setBounds(Ogre::AxisAlignedBox(-2, -1, -1, 2, 1, 1));
+    msh->_setBoundingSphereRadius(Ogre::Math::Sqrt(6));
 
     /// Notify Mesh object that it has been loaded
     msh->load();

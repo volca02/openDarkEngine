@@ -59,8 +59,7 @@ void RenderTypeProperty::addProperty(int oid) {
     Variant val;
 
     if (!get(oid, "", val))
-        OPDE_EXCEPT("Property not defined for object.",
-                    "RenderTypeProperty::addProperty");
+        OPDE_EXCEPT("Property not defined for object.");
 
     setRenderType(oid, val.toUInt());
 };

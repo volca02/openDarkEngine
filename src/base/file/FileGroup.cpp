@@ -105,8 +105,7 @@ void DarkFileGroup::_initSource() {
 
         if (strncmp(ch.header.name, item.name, 12) != 0)
             OPDE_EXCEPT(format("Inventory chunk name mismatch: ",
-                               ch.header.name, "-", item.name),
-                        "DarkFileGroup::_initSource");
+                               ch.header.name, "-", item.name));
 
         ch.file = FilePtr(new FilePart(
             item.name, File::FILE_R, mSrcFile,
@@ -191,9 +190,7 @@ void DarkFileGroup::deleteFile(const std::string &name) {
     if (it != mFiles.end()) {
         mFiles.erase(it);
     } else {
-        OPDE_EXCEPT(
-            format("File requested for deletion was not found : ", name),
-            "DarkFileGroup::deleteFile");
+        OPDE_EXCEPT(format("File requested for deletion was not found : ", name));
     }
 }
 

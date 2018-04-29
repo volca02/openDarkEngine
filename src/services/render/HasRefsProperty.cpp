@@ -50,8 +50,7 @@ void HasRefsProperty::addProperty(int oid) {
     Variant val(false);
 
     if (!get(oid, "", val))
-        OPDE_EXCEPT("Property not defined for object.",
-                    "HasRefsProperty::addProperty");
+        OPDE_EXCEPT("Property not defined for object.");
 
     setHasRefs(oid, val.toBool());
 };

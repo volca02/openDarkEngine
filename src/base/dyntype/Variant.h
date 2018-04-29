@@ -214,7 +214,7 @@ public:
     /// convertion operation with target type specified as template parameter
     /// (e.g.: dv.as<int>());
     template <typename T> T as() const {
-        OPDE_EXCEPT("Invalid Variant as<>() cast", "Variant::as<T>()");
+        OPDE_EXCEPT("Invalid Variant as<>() cast");
     }
 
     /** Templated shared type for Variant. Holds values for the shared types

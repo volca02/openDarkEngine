@@ -126,8 +126,7 @@ void GameStateManager::popState() {
             // the last?
         }
     } else {
-        OPDE_EXCEPT("State stack was empty, nothing could be done.",
-                    "StateManager::popState");
+        OPDE_EXCEPT("State stack was empty, nothing could be done.");
     }
 }
 

@@ -95,7 +95,7 @@ void PhysModels::read(const FilePtr &tag, unsigned int physVersion) {
 
         default:
             LOG_ERROR("PhysModels::read: Unknown volume type %d", voltype);
-            OPDE_EXCEPT("PhysModels::read", "Unknown volume type encountered");
+            OPDE_EXCEPT("Unknown volume type encountered");
         }
 
         mdl->read(tag, physVersion);
@@ -128,7 +128,7 @@ void PhysModels::read(const FilePtr &tag, unsigned int physVersion) {
 
         default:
             LOG_ERROR("PhysModels::read: Unknown volume type %d", voltype);
-            OPDE_EXCEPT("PhysModels::read", "Unknown volume type encountered");
+            OPDE_EXCEPT("Unknown volume type encountered");
         }
 
         mdl->read(tag, physVersion);

@@ -49,8 +49,7 @@ void ModelNameProperty::addProperty(int oid) {
     Variant val;
 
     if (!get(oid, "", val))
-        OPDE_EXCEPT("Property not defined for object.",
-                    "ModelNameProperty::addProperty");
+        OPDE_EXCEPT("Property not defined for object.");
 
     setModel(oid, val.toString());
 };

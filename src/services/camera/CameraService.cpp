@@ -236,6 +236,8 @@ void CameraService::onMLook(const InputEventMsg &iem) {
     if (iem.event != IET_MOUSE_MOVE)
         return;
 
+    // TODO: Handle input service variables via references
+
     // is freelook enabled?
     Variant mfreelook = mInputSrv->getVariable("freelook");
 

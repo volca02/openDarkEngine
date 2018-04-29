@@ -51,8 +51,7 @@ void ZBiasProperty::addProperty(int oid) {
     Variant val;
 
     if (!get(oid, "", val))
-        OPDE_EXCEPT("Property not defined for object.",
-                    "RenderAlphaProperty::addProperty");
+        OPDE_EXCEPT("Property not defined for object.");
 
     setZBias(oid, val.toUInt());
 };

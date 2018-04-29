@@ -22,25 +22,20 @@
  *****************************************************************************/
 
 #include <iostream>
+#include <OgreException.h>
 
-#include "config.h"
-
-#include "Variant.h"
 #include "OpdeException.h"
 #include "Root.h"
 #include "StringTokenizer.h"
+#include "Variant.h"
 #include "config/ConfigService.h"
+#include "format.h"
 #include "link/LinkService.h"
 #include "property/PropertyService.h"
-
-#include <OgreException.h>
 
 // Simple and very dirty doc generator.
 // outputs to latex so it can be converted to html using latex2html or rendered
 // to pdf, etc.
-using namespace Opde;
-using namespace std;
-
 namespace Opde {
 /// Documentation generator for properties and links
 class DocGenerator {
@@ -98,7 +93,9 @@ protected:
     }
 
     void dispatchAdditionalDocString(DocumentStringType type,
-                                     const string &addr, const string &txt) {
+                                     const std::string &addr,
+                                     const std::string &txt)
+    {
         if (addr != "") {
             switch (type) {
             case DT_PROP:
@@ -136,18 +133,18 @@ protected:
 
         std::fstream s;
 
-        s.open(fn.toString().c_str(), ios::in);
+        s.open(fn.toString().c_str(), std::ios::in);
 
         if (s.fail())
             return;
 
-        string target = "";
+        std::string target = "";
         DocumentStringType doctype = DT_PROP;
-        string text = "";
+        std::string text = "";
 
         // process line by line
         while (!s.eof()) {
-            string line;
+            std::string line;
 
             getline(s, line, '\n');
 
@@ -165,12 +162,12 @@ protected:
 
             if (line[0] == '[' && cl != line.npos) {
                 // yup. see the type
-                string cont = line.substr(1, cl - 1);
+                std::string cont = line.substr(1, cl - 1);
 
                 WhitespaceStringTokenizer tok(cont);
 
-                string type = tok.next();
-                string address = tok.next();
+                std::string type = tok.next();
+                std::string address = tok.next();
 
                 DocumentStringType ntype = DT_PROP;
 
@@ -183,8 +180,7 @@ protected:
                 } else if (type == "page") {
                     ntype = DT_SPECIAL;
                 } else {
-                    OPDE_EXCEPT("Unknown section type :" + type,
-                                "DocGenerator::loadAdditionalDocStrings");
+                    OPDE_EXCEPT(format("Unknown section type :", type));
                 }
 
                 // dispatch the old text
@@ -205,54 +201,54 @@ protected:
         s.close();
     }
 
-    void genPropDocs(fstream &fo) {
+    void genPropDocs(std::fstream &fo) {
         PropertyServicePtr ps = GET_SERVICE(PropertyService);
 
         StringIteratorPtr pn = ps->getAllPropertyNames();
 
-        fo << "\\chapter{Properties}" << endl;
+        fo << "\\chapter{Properties}" << std::endl;
 
         while (!pn->end()) {
-            const string &propname = pn->next();
+            const std::string &propname = pn->next();
 
             std::cerr << "Prop " << propname << std::endl;
 
-            fo << "\\section*{" << propname << "}" << endl;
+            fo << "\\section*{" << propname << "}" << std::endl;
 
             // for cross linking
-            fo << "\\label{prop_" << propname << "}" << endl;
+            fo << "\\label{prop_" << propname << "}" << std::endl;
 
             // standard info header. Chunk versions, data size, label
             // Get the prop group
             Property *pg = ps->getProperty(propname);
 
-            fo << "\\textbf{Property}: " << propname << endl
-               << endl; // TODO: Path
+            fo << "\\textbf{Property}: " << propname << std::endl
+               << std::endl; // TODO: Path
 
             uint maj, min;
             maj = pg->getChunkVersionMajor();
             min = pg->getChunkVersionMinor();
 
             // get the info
-            fo << "\\textbf{Chunk version:} " << maj << "." << min << endl;
+            fo << "\\textbf{Chunk version:} " << maj << "." << min << std::endl;
 
             if (pg->getBuiltin())
-                fo << "Built-In" << endl;
+                fo << "Built-In" << std::endl;
 
             DocStrings::iterator it = mPropertyDocs.find(propname);
             if (it != mPropertyDocs.end()) {
-                fo << endl << "\\subsection*{Description}" << endl;
+                fo << std::endl << "\\subsection*{Description}" << std::endl;
 
                 // spit out the additional docs if present
-                fo << it->second << endl;
+                fo << it->second << std::endl;
             }
 
-            fo << endl << "\\subsection*{Fields}" << endl;
-            fo << "\\begin{tabular}{lcrrr}" << endl;
+            fo << std::endl << "\\subsection*{Fields}" << std::endl;
+            fo << "\\begin{tabular}{lcrrr}" << std::endl;
             // table contents, each line ending with \\, cells separated using &
             fo << "\\textbf{Field} & \\textbf{Type} & \\textbf{Size} & "
                   "\\textbf{Enum} & \\textbf{Description} \\\\"
-               << endl;
+               << std::endl;
 
             // TODO: spit all the property fields with descriptions
             for (const DataFieldDesc &df : pg->getFieldDesc()) {
@@ -270,76 +266,76 @@ protected:
                 fo << " &  \\\\" << std::endl;
             }
 
-            fo << "\\end{tabular}" << endl;
+            fo << "\\end{tabular}" << std::endl;
 
-            fo << endl;
+            fo << std::endl;
         }
     }
 
-    void genLinkDocs(fstream &fo) {
+    void genLinkDocs(std::fstream &fo) {
         LinkServicePtr ls = GET_SERVICE(LinkService);
 
         StringIteratorPtr ln = ls->getAllLinkNames();
 
-        fo << "\\chapter{Links}" << endl;
+        fo << "\\chapter{Links}" << std::endl;
 
         while (!ln->end()) {
-            const string &linkname = ln->next();
+            const std::string &linkname = ln->next();
 
-            fo << "\\section*{" << linkname << "}" << endl;
+            fo << "\\section*{" << linkname << "}" << std::endl;
 
             // for cross linking
-            fo << "\\label{prop_" << linkname << "}" << endl;
+            fo << "\\label{prop_" << linkname << "}" << std::endl;
 
             DocStrings::iterator it = mLinkDocs.find(linkname);
             if (it != mLinkDocs.end()) {
-                fo << endl << "\\subsection*{Description}" << endl;
+                fo << std::endl << "\\subsection*{Description}" << std::endl;
 
                 // spit out the additional docs if present
-                fo << it->second << endl;
+                fo << it->second << std::endl;
             }
 
-            fo << "\\end{tabular}" << endl;
+            fo << "\\end{tabular}" << std::endl;
 
-            fo << endl;
+            fo << std::endl;
         }
     }
 
-    void genEnumDocs(fstream &fo) {
-        fo << "\\chapter{Enumerations}" << endl;
+    void genEnumDocs(std::fstream &fo) {
+        fo << "\\chapter{Enumerations}" << std::endl;
 
         EnumMap::iterator it = mEncounteredEnums.begin();
 
         for (; it != mEncounteredEnums.end(); ++it) {
             Enumeration *en = it->second;
 
-            const string &enname = en->getName();
+            const std::string &enname = en->getName();
 
-            fo << "\\section*{" << enname << "}" << endl;
+            fo << "\\section*{" << enname << "}" << std::endl;
 
             // for cross linking
-            fo << "\\label{enum_" << enname << "}" << endl;
+            fo << "\\label{enum_" << enname << "}" << std::endl;
 
             fo << "\\textbf{Type:}";
 
             if (en->isBitfield())
-                fo << "Bitfield" << endl << endl; // TODO: Path
+                fo << "Bitfield" << std::endl << std::endl; // TODO: Path
             else
-                fo << "Enumeration" << endl << endl; // TODO: Path
+                fo << "Enumeration" << std::endl << std::endl; // TODO: Path
 
             DocStrings::iterator it = mEnumDocs.find(enname);
 
             if (it != mEnumDocs.end()) {
-                fo << endl << "\\subsection*{Description}" << endl;
+                fo << std::endl << "\\subsection*{Description}" << std::endl;
 
                 // spit out the additional docs if present
-                fo << it->second << endl;
+                fo << it->second << std::endl;
             }
 
-            fo << endl << "\\subsection*{Structure}" << endl;
-            fo << "\\begin{tabular}{lr}" << endl;
+            fo << std::endl << "\\subsection*{Structure}" << std::endl;
+            fo << "\\begin{tabular}{lr}" << std::endl;
             // table contents, each line ending with \\, cells separated using &
-            fo << "\\textbf{Key} & \\textbf{Value} \\\\" << endl;
+            fo << "\\textbf{Key} & \\textbf{Value} \\\\" << std::endl;
 
             Enumeration::EnumFieldList l = en->getFieldList(0);
 
@@ -353,9 +349,9 @@ protected:
                    << std::endl;
             }
 
-            fo << "\\end{tabular}" << endl;
+            fo << "\\end{tabular}" << std::endl;
 
-            fo << endl;
+            fo << std::endl;
         }
     }
 
@@ -367,7 +363,7 @@ protected:
 
         std::fstream s;
 
-        s.open(fn.toString().c_str(), ios::out);
+        s.open(fn.toString().c_str(), std::ios::out);
 
         // if we have specialdoc header, output it
         s << mSpecialDocs["header"];
@@ -381,7 +377,7 @@ protected:
         // enumerations
         genEnumDocs(s);
 
-        s << "\\end{document}" << endl;
+        s << "\\end{document}" << std::endl;
         s.close();
     }
 
@@ -402,7 +398,9 @@ public:
         mRoot = NULL;
     }
 
-    void help(void) { cout << "Usage: opdeDocGen config_file" << endl; }
+    void help(void) {
+        std::cout << "Usage: opdeDocGen config_file" << std::endl;
+    }
 
     bool generateDoc(void) {
         if (!parseCommandline()) {
@@ -431,7 +429,7 @@ int main(int argc, char **argv) {
     int rv = 0;
 
     try {
-        DocGenerator dg(argc, argv);
+        Opde::DocGenerator dg(argc, argv);
 
         if (!dg.generateDoc())
             rv = 3; // exit code 3 - parsing failed
@@ -439,7 +437,7 @@ int main(int argc, char **argv) {
         std::cerr << "An exception has occured: "
                   << e.getFullDescription().c_str() << std::endl;
         rv = 1; // exit code 2 - ogre error
-    } catch (BasicException &e) {
+    } catch (Opde::BasicException &e) {
         std::cerr << "An exception has occured: " << e.getDetails().c_str()
                   << std::endl;
         rv = 2; // exit code 1 - opde error

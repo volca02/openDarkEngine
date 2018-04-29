@@ -21,17 +21,16 @@
  *
  *****************************************************************************/
 
-#include "Relation.h"
-#include "OpdeServiceManager.h"
-#include "LinkCommon.h"
-#include "inherit/InheritService.h"
-#include "integers.h"
-#include "logger.h"
-#include "inherit/InheritService.h"
 
 #include <stack>
 
-using namespace std;
+#include "Relation.h"
+#include "LinkCommon.h"
+#include "OpdeServiceManager.h"
+#include "format.h"
+#include "inherit/InheritService.h"
+#include "integers.h"
+#include "logger.h"
 
 namespace Opde {
 // size of the link header (id, src, dest, flav)
@@ -165,8 +164,8 @@ void Relation::load(const FileGroupPtr &db, const BitArray &objMask) {
 
     // load the links and thei're data
     // Link chunk name
-    string lchn = "L$" + mName;
-    string ldchn = "LD$" + mName;
+    std::string lchn = "L$" + mName;
+    std::string ldchn = "LD$" + mName;
 
     FilePtr flink;
     FilePtr fldata;
@@ -317,8 +316,8 @@ void Relation::save(const FileGroupPtr &db, uint saveMask) {
     LOG_DEBUG("Relation::save Saving relation %s", mName.c_str());
 
     // Link chunk name
-    string lchn = "L$" + mName;
-    string ldchn = "LD$" + mName;
+    std::string lchn = "L$" + mName;
+    std::string ldchn = "LD$" + mName;
 
     FilePtr flnk = db->createFile(lchn, mLCVMaj, mLCVMin);
     FilePtr fldt = db->createFile(ldchn, mDCVMaj, mDCVMin);
@@ -599,8 +598,7 @@ LinkPtr Relation::getOneLink(int src, int dst) const {
     // I also could just return the first even if there would be more than one,
     // but that could lead to programmers headaches
     if (!res->end())
-        OPDE_EXCEPT("More than one link fulfilled the requirement",
-                    "Relation::getOneLink");
+        OPDE_EXCEPT("More than one link fulfilled the requirement");
 
     return l;
 }
@@ -646,16 +644,16 @@ void Relation::_addLink(const LinkPtr &link) {
     } else {
         // Verify link data exist
         if (mStorage && !mStorage->has(link->mID))
-            OPDE_EXCEPT("Relation (" + mName +
-                            "): Link Data not defined prior to link insertion",
-                        "Relation::_addLink"); // for link id " + link->mID
+            OPDE_EXCEPT(format("Relation (", mName,
+                               "): Link Data not defined prior to link "
+                               "insertion")); // for link id " + link->mID
 
         // Update the free link info
         allocateLinkID(link->mID);
 
         // Update the query databases
         // Src->Dst->LinkList
-        pair<ObjectLinkMap::iterator, bool> r =
+        std::pair<ObjectLinkMap::iterator, bool> r =
             mSrcDstLinkMap.insert(make_pair(link->mSrc, ObjectIDToLinks()));
         r.first->second.insert(make_pair(link->mDst, link));
 

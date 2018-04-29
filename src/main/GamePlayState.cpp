@@ -117,8 +117,7 @@ void GamePlayState::start() {
     inputSrv->processCommand("bind ` show_console");
 
     if (posPG == NULL)
-        OPDE_EXCEPT("Could not get Position property. Not defined. Fatal",
-                    "GamePlayState::start");
+        OPDE_EXCEPT("Could not get Position property. Not defined. Fatal");
 
     LOG_DEBUG("Starting Point object id : %d", StartingPointObjID);
 
@@ -282,8 +281,9 @@ bool GamePlayState::keyPressed(const SDL_KeyboardEvent &e) {
     } else if (e.keysym.sym == SDLK_o) {
         mSceneDisplay = true;
         return true;
-    } 
-    return true;
+    }
+
+    return false;
 }
 
 bool GamePlayState::keyReleased(const SDL_KeyboardEvent &e) {
@@ -310,8 +310,7 @@ bool GamePlayState::keyReleased(const SDL_KeyboardEvent &e) {
         else
             mSceneMgr->setShadowTechnique(SHADOWTYPE_NONE);
     }
-
-    return true;
+    return false;
 }
 
 bool GamePlayState::mouseMoved(const SDL_MouseMotionEvent &e) {
@@ -366,8 +365,7 @@ void GamePlayState::bootstrapFinished() {
     mPlayerFactoryRelation = mLinkService->getRelation("PlayerFactory");
 
     if (!mPlayerFactoryRelation)
-        OPDE_EXCEPT("PlayerFactory relation not found. Fatal.",
-                    "GamePlayState::bootstrapFinished");
+        OPDE_EXCEPT("PlayerFactory relation not found. Fatal.");
 
     mPlayerFactoryListenerID =
         mPlayerFactoryRelation->registerListener(metaPropCallback);

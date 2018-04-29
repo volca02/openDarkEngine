@@ -198,16 +198,14 @@ PyObject *ServiceBinder::init(PyObject *container) {
 #endif
     // Error?
     if (!module)
-        OPDE_EXCEPT("Could not initialize the python Module!",
-                    "PythonLanguage::initModule");
+        OPDE_EXCEPT("Could not initialize the python Module!");
 
     // Error handling
     struct module_state *st = GETSTATE(module);
     st->error = PyErr_NewException("opde.Error", NULL, NULL);
     if (st->error == NULL) {
         Py_DECREF(module);
-        OPDE_EXCEPT("Could not initialize the opde.Error!",
-                    "PythonLanguage::initModule");
+        OPDE_EXCEPT("Could not initialize the opde.Error!");
     }
 
     // Register itself as a member of the container we got

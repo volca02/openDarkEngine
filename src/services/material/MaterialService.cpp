@@ -328,8 +328,7 @@ Ogre::MaterialPtr MaterialService::getWorldMaterialInstance(unsigned int idx,
 void MaterialService::prepareMaterialInstance(MaterialPtr &mat,
                                               unsigned int idx, int tag) {
     if (tag < 0) // Should not be here if the polygon is sky textured
-        OPDE_EXCEPT("Non-instanced material instance requested",
-                    "MaterialService::prepareMaterialInstance");
+        OPDE_EXCEPT("Non-instanced material instance requested");
 
     mat->setReceiveShadows(true);
 

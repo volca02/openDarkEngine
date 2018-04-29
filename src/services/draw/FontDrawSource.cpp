@@ -79,8 +79,7 @@ void FontDrawSource::addGlyph(FontCharType chr, const PixelSize &dimensions,
                                  palette);
         break;
     default:
-        OPDE_EXCEPT("Invalid pixel format supplied",
-                    "FontDrawSource::addGlyph");
+        OPDE_EXCEPT("Invalid pixel format supplied");
     }
 
     // copy the dimensions

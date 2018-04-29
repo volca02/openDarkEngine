@@ -39,8 +39,8 @@ public:
         if (!PyCallable_Check(mCallable))
             // WOULD BE: PyErr_SetString(PyExc_TypeError, "Python callback can't
             // be constructed on non-callable!");
-            OPDE_EXCEPT("Python callback can't be constructed on non-callable!",
-                        "PythonCallback::PythonCallback");
+            OPDE_EXCEPT(
+                "Python callback can't be constructed on non-callable!");
 
         Py_INCREF(mCallable);
     };

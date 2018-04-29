@@ -25,6 +25,7 @@
 #include "PropertyService.h"
 #include "OpdeServiceManager.h"
 #include "ServiceCommon.h"
+#include "format.h"
 #include "logger.h"
 
 namespace Opde {
@@ -106,8 +107,7 @@ Property *PropertyService::createProperty(const std::string &name,
     try {
         nr = new Property(this, name, chunkName, storage, inheritorName);
     } catch (...) {
-        OPDE_EXCEPT("Failed to create property for " + name,
-                    "PropertyService::createProperty");
+        OPDE_EXCEPT(format("Failed to create property for ", name));
     }
 
     std::pair<PropertyMap::iterator, bool> res =
@@ -116,10 +116,8 @@ Property *PropertyService::createProperty(const std::string &name,
     if (!res.second) {
         delete nr;
 
-        OPDE_EXCEPT("Failed to insert new instance of Property, name already "
-                    "allocated : " +
-                        name,
-                    "PropertyService::createProperty");
+        OPDE_EXCEPT(format("Failed to insert new instance of Property, name already "
+                    "allocated : ", name));
     }
 
     // insert the pointer into the to be freed list

@@ -582,7 +582,7 @@ Variant InputService::getVariable(const std::string &var) {
     if (it != mVariables.end())
         return it->second;
     else
-        return Variant();
+        OPDE_EXCEPT(format("InputService: Undefined variable requested ", var));
 }
 
 //------------------------------------------------------
@@ -764,8 +764,7 @@ void InputService::registerCommandAlias(const std::string &alias,
 //------------------------------------------------------
 void InputService::setDirectListener(DirectInputListener *listener) {
     if (mDirectListener)
-        OPDE_EXCEPT("InputService: Direct input listener already registered",
-        "InputService::setDirectListener");
+        OPDE_EXCEPT("InputService: Direct input listener already registered");
 
     mDirectListener = listener;
 };
