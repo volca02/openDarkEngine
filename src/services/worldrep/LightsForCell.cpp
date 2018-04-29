@@ -99,7 +99,7 @@ LightsForCell::~LightsForCell() {
 
     delete[] light_indices;
 
-    delete[] lightMaps;
+    mLightMaps.clear();
 }
 
 //------------------------------------------------------
@@ -109,15 +109,12 @@ void LightsForCell::atlasLightMaps(LightAtlasList *atlas) {
     int ver = mLightSize - 1;
 
     // Array of lmap references
-    lightMaps = new LightMap *[mNumTextured];
+    mLightMaps.resize(mNumTextured);
 
     for (size_t face = 0; face < mNumTextured; ++face) {
-        AtlasInfo info;
-        LightMap *lmap = atlas->addLightmap(
-            ver, mFaceInfos[face].txt, (char *)lmaps[face][0],
-            lm_infos[face].lx, lm_infos[face].ly, info);
-
-        lightMaps[face] = lmap;
+        auto lmap = atlas->addLightmap(ver, mFaceInfos[face].txt,
+                                       (char *)lmaps[face][0],
+                                       lm_infos[face].lx, lm_infos[face].ly);
 
         // Let's iterate through the animated lmaps
         // we have anim_map (array of light id's), cell->header->anim_lights
@@ -127,11 +124,12 @@ void LightsForCell::atlasLightMaps(LightAtlasList *atlas) {
         for (size_t anim_l = 0; anim_l < mNumAnimLights; anim_l++) {
             if ((lm_infos[face].animflags & bit_idx) > 0) {
                 // There is a anim lmap for this light and face
-                LMPixel *converted = LightMap::convert(
+                auto converted = LightMap::convert(
                     (char *)lmaps[face][lmap_order], lm_infos[face].lx,
                     lm_infos[face].ly, ver);
 
-                lmap->AddSwitchableLightmap(anim_map[anim_l], converted);
+                lmap->addSwitchableLightmap(anim_map[anim_l],
+                                            std::move(converted));
 
                 lmap_order++;
             }
@@ -139,6 +137,8 @@ void LightsForCell::atlasLightMaps(LightAtlasList *atlas) {
             bit_idx <<= 1;
         }
 
+        // the lmap is fully populated, set it into the vector
+        mLightMaps[face] = std::move(lmap);
     } // for each face
 
     mAtlased = true;
@@ -147,7 +147,6 @@ void LightsForCell::atlasLightMaps(LightAtlasList *atlas) {
 //------------------------------------------------------
 const WRLightInfo &LightsForCell::getLightInfo(size_t face_id) {
     assert(face_id < mNumTextured);
-
     return lm_infos[face_id];
 }
 
@@ -157,10 +156,10 @@ size_t LightsForCell::getAtlasForPolygon(size_t face_id) {
 
     assert(face_id < mNumTextured);
 
-    return lightMaps[face_id]->getAtlasIndex();
+    return mLightMaps[face_id]->getAtlasIndex();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int LightsForCell::countBits(uint32_t src) {
     // Contributed by TNH (Telliamed):
     // Found this trick in some code by Sean Barrett [TNH]
@@ -173,12 +172,13 @@ int LightsForCell::countBits(uint32_t src) {
     return count & 0xff;
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 Ogre::Vector2 LightsForCell::mapUV(size_t face_id,
-                                   const Ogre::Vector2 &original) {
+                                   const Ogre::Vector2 &original)
+{
     assert(face_id < mNumTextured);
 
-    return lightMaps[face_id]->toAtlasCoords(original);
+    return mLightMaps[face_id]->toAtlasCoords(original);
 }
 
 } // namespace Opde

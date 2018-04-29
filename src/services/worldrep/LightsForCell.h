@@ -81,7 +81,7 @@ protected:
     uint16_t *light_indices; // the object index number
 
     /* Array referencing the lightmaps inserted into the atlas */
-    LightMap **lightMaps;
+    std::vector<std::unique_ptr<LightMap>> mLightMaps;
 
     /** Size of the lightmap element */
     size_t mLightSize;

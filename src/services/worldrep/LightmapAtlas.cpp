@@ -46,11 +46,11 @@ Vector3 operator*(float a, const LMPixel &b) {
    construction
 */
 LightAtlas::LightAtlas(int idx, int tag)
-    : mCount(0), mIdx(idx), mTex(), mAtlas(), mFreeSpace(NULL), mSize(1) {
+    : mCount(0), mIdx(idx), mTex(), mAtlas(), mFreeSpace(), mSize(1) {
     mName = "@lightmap" +
             idx; // so we can find the atlas by number in the returned AtlasInfo
 
-    mFreeSpace = new FreeSpaceInfo(0, 0, mSize, mSize);
+    mFreeSpace.reset(new FreeSpaceInfo(0, 0, mSize, mSize));
 
     mCount = 0;
 
@@ -58,8 +58,7 @@ LightAtlas::LightAtlas(int idx, int tag)
 }
 
 LightAtlas::~LightAtlas() {
-    // TODO: for_each(lightmaps.begin(), lightmaps.end(), delete lmap);
-    delete mFreeSpace;
+    mFreeSpace.reset();
 
     if (mTex) {
         TextureManager::getSingleton().remove(mName);
@@ -67,13 +66,6 @@ LightAtlas::~LightAtlas() {
     }
 
     // delete all the lmaps.
-    std::vector<LightMap *>::iterator it = mLightmaps.begin();
-
-    while (it != mLightmaps.end()) {
-        delete (*it);
-        ++it;
-    }
-
     mLightmaps.clear();
 }
 
@@ -100,19 +92,14 @@ void LightAtlas::growAtlas(int newSize) {
 
     mSize = newSize;
 
-    // clear the lightmap placement
-    delete mFreeSpace;
-
     // initialise the free space - initially whole lmap
-    mFreeSpace = new FreeSpaceInfo(0, 0, mSize, mSize);
+    mFreeSpace.reset(new FreeSpaceInfo(0, 0, mSize, mSize));
 
     // place the lightmaps again
-    LightMapVector::iterator it = mLightmaps.begin();
-
-    for (; it != mLightmaps.end(); ++it) {
+    for (auto &lm : mLightmaps) {
         // place the lmap
         // should not fail, since the lmaps fitted to prev atlas.
-        if (!placeLightMap(*it))
+        if (!placeLightMap(lm))
             OPDE_EXCEPT("Could not fit after growth!");
     }
 }
@@ -298,123 +285,89 @@ LightAtlasList::LightAtlasList() {
 }
 
 LightAtlasList::~LightAtlasList() {
-    std::vector<LightAtlas *>::iterator it = mList.begin();
-
-    for (; it != mList.end(); ++it)
-        delete *it;
-
-    mList.clear();
+    mAtlases.clear();
 }
 
 bool LightAtlasList::placeLightMap(LightMap *lmap) {
-    if (mList.empty())
-        mList.push_back(new LightAtlas(0));
+    if (mAtlases.empty())
+        mAtlases.emplace_back(new LightAtlas(0));
 
-    int last = mList.size();
+    int last = mAtlases.size();
 
     // iterate through existing Atlases, and see if any of them accepts our
     // lightmap
     for (int i = 0; i < last; i++) {
-        if (!mList.at(i)->hasTag(lmap->getTag()))
+        if (!mAtlases.at(i)->hasTag(lmap->getTag()))
             continue;
 
-        if (mList.at(i)->addLightMap(lmap))
+        if (mAtlases.at(i)->addLightMap(lmap))
             return false;
     }
 
     // pass two - without the tag
     for (int i = 0; i < last; i++) {
-        if (mList.at(i)->addLightMap(lmap)) // will addTag internally
+        if (mAtlases.at(i)->addLightMap(lmap)) // will addTag internally
             return false;
     }
 
     // add new atlas to list if none of them accepted the lmap
-    LightAtlas *la = new LightAtlas(last, lmap->getTag());
-    mList.push_back(la);
-
+    std::unique_ptr<LightAtlas> la(new LightAtlas(last, lmap->getTag()));
     la->addLightMap(lmap);
+
+    mAtlases.emplace_back(std::move(la));
     return true;
 }
 
-LightMap *LightAtlasList::addLightmap(int ver, int texture, char *buf, int w,
-                                      int h, AtlasInfo &destinfo) {
+std::unique_ptr<LightMap> LightAtlasList::addLightmap(int ver, int texture,
+                                                      char *buf, int w, int h)
+{
     // convert the pixel representation
-    LMPixel *cdata = LightMap::convert(buf, w, h, ver);
-
+    std::unique_ptr<LMPixel[]> cdata{LightMap::convert(buf, w, h, ver)};
     // construct the lmap
-    LightMap *lmap = new LightMap(w, h, cdata, texture);
+    std::unique_ptr<LightMap> lmap{
+        new LightMap(w, h, std::move(cdata), texture)};
 
-    // Try to insert, will find existing if already there
-    std::pair<TextureLightMapQueue::iterator, bool> lmm;
+    // Insert the lightmap to the queue for atlas rendering after all are done.
+    mLightMapQueue.push_back(lmap.get());
 
-    // Insert the lightmap to the queue
-    lmm = mLightMapQueue.insert(
-        TextureLightMapQueue::value_type(texture, std::vector<LightMap *>()));
-
-    lmm.first->second.push_back(lmap);
-
-    return lmap;
+    return std::move(lmap);
 }
 
-int LightAtlasList::getCount() { return mList.size(); }
+int LightAtlasList::getCount() { return mAtlases.size(); }
 
 bool LightAtlasList::render() {
-    /*
-    TODO: The performance of the renderer highly depends on the atlasing used.
-    * The reason is that each material is processed separately. As each atlas
-    produces one texture, the same-material based lightmaps should be in the
-    same atlases.
-    * There should be as little atlasses as possible for the same reason.
-    - If atlasing takes the lightmaps as they go, a low number of atlases is
-    produced, but the lightmap categories are highly mixed
-    - If the lightmaps are put into atlases per thei're texture number, the
-    result is good, but the redundacy is killing memory a bit (90% unused pixel
-    space common) The solution is to atlas the lightmaps after all those are
-    inserted (there is no guarantee that those will come in material index
-    order), And doing so in a material order
-    */
-
     // Step 1. Atlas the queue
-    TextureLightMapQueue::iterator ti = mLightMapQueue.begin();
-
     // for all materials
-    for (; ti != mLightMapQueue.end(); ti++) {
-        // sort the lmap vector by the area of the lmaps, and insert those all
-        std::sort(ti->second.begin(), ti->second.end(), lightMapLess());
-
-        // find a nice warm place for all those little lightmaps
-        for (std::vector<LightMap *>::iterator it = ti->second.begin();
-             it < ti->second.end(); it++) {
-            placeLightMap(*it);
-        }
+    std::sort(mLightMapQueue.begin(), mLightMapQueue.end(), lightMapLess());
+    for (auto &lm : mLightMapQueue) {
+        placeLightMap(lm);
     }
+    mLightMapQueue.clear();
 
     // Step2. Render
-    for (std::vector<LightAtlas *>::iterator it = mList.begin();
-         it != mList.end(); ++it)
-        if (!(*it)->render())
+    for (auto &atlas : mAtlases) {
+        if (!atlas->render())
             OPDE_EXCEPT("Could not render the lightmaps!");
+    }
 
     // iterate through existing Atlases, and see if any of them accepts our
     // lightmap
     int used_pixels = 0;
     int total_pixels = 0;
 
-    int last = mList.size();
+    int last = mAtlases.size();
 
-    for (int i = 0; i < last; i++) {
-        LightAtlas *a = mList.at(i);
-
-        int totc = a->getPixelCount();
-        int used = a->getUsedArea();
+    for (auto &atlas : mAtlases) {
+        int totc = atlas->getPixelCount();
+        int used = atlas->getUsedArea();
 
         used_pixels += used;
         total_pixels += totc;
 
         LOG_VERBOSE("Light Map Atlas: Atlas {tags %s} : %d of %d used (%f%%) "
                     "(%d of %d so far)",
-                    a->getTagStr().c_str(), used, totc, 100.0f * used / totc,
-                    used_pixels, total_pixels);
+                    atlas->getTagStr().c_str(), used, totc,
+                    100.0f * used / totc, used_pixels, total_pixels);
     }
 
     float percentage = 0;
@@ -457,14 +410,13 @@ void LightAtlasList::commandExecuted(std::string command,
         int total_pixels = 0;
         int unused_pixels = 0;
 
-        int last = mList.size();
+        int last = mAtlases.size();
 
         // iterate through existing Atlases, and see if any of them accepts our
         // lightmap
-        for (int i = 0; i < last; i++) {
-            LightAtlas *a = mList.at(i);
-            unused_pixels += a->getUnusedArea();
-            total_pixels += a->getPixelCount();
+        for (auto &atlas : mAtlases) {
+            unused_pixels += atlas->getUnusedArea();
+            total_pixels  += atlas->getPixelCount();
         }
 
         float percentage = 0;
@@ -499,24 +451,21 @@ void LightMap::refresh() {
     // First we calculate the new version of the lmap. Then we post it to the
     // atlas
 
-    unsigned int LightMapSize = mSizeX * mSizeY;
-    uint32 *lmapR = new uint32[LightMapSize];
-    uint32 *lmapG = new uint32[LightMapSize];
-    uint32 *lmapB = new uint32[LightMapSize];
+    unsigned int lightMapSize = mSizeX * mSizeY;
+    std::vector<uint32> lmapR; lmapR.resize(lightMapSize);
+    std::vector<uint32> lmapG; lmapG.resize(lightMapSize);
+    std::vector<uint32> lmapB; lmapB.resize(lightMapSize);
 
     // Copy the static lmap...
-    for (unsigned int i = 0; i < LightMapSize; i++) {
+    for (unsigned int i = 0; i < lightMapSize; i++) {
         lmapR[i] = mStaticLmap[i].R << 8;
         lmapG[i] = mStaticLmap[i].G << 8;
         lmapB[i] = mStaticLmap[i].B << 8;
     }
 
-    ObjectToLightMap::const_iterator lmap_it = mSwitchableLmaps.begin();
-
-    for (; lmap_it != mSwitchableLmaps.end(); ++lmap_it) {
-        LMPixel *act_lmap = lmap_it->second;
-
-        int light_id = lmap_it->first;
+    for (auto &p : mSwitchableLmaps) {
+        int light_id = p.first;
+        auto &act_lmap = p.second;
 
         float intensity = 0;
 
@@ -530,7 +479,7 @@ void LightMap::refresh() {
 
         uint32_t Intens = static_cast<uint32_t>(intensity * 256);
         if (Intens > 0) {
-            for (unsigned int i = 0; i < LightMapSize; i++) {
+            for (unsigned int i = 0; i < lightMapSize; i++) {
                 lmapR[i] += Intens * act_lmap[i].R;
                 lmapG[i] += Intens * act_lmap[i].G;
                 lmapB[i] += Intens * act_lmap[i].B;
@@ -538,16 +487,18 @@ void LightMap::refresh() {
         }
     }
 
-    mOwner->updateLightMapBuffer(*mPosition, lmapR, lmapG, lmapB);
+    mOwner->updateLightMapBuffer(*mPosition,
+                                 lmapR.data(),
+                                 lmapG.data(),
+                                 lmapB.data());
 
     // Get rid of the helping arrays
-    delete[] lmapR;
-    delete[] lmapG;
-    delete[] lmapB;
 }
 
-LMPixel *LightMap::convert(char *data, int sx, int sy, int ver) {
-    LMPixel *result = new LMPixel[sx * sy];
+std::unique_ptr<LMPixel[]> LightMap::convert(char *data, int sx, int sy,
+                                             int ver)
+{
+    std::unique_ptr<LMPixel[]> result(new LMPixel[sx * sy]);
 
     // old version - grayscale
     if (ver == 0) {
@@ -568,11 +519,12 @@ LMPixel *LightMap::convert(char *data, int sx, int sy, int ver) {
         }
     }
 
-    return result;
+    return std::move(result);
 }
 
-void LightMap::AddSwitchableLightmap(int id, LMPixel *data) {
-    mSwitchableLmaps.insert(std::make_pair(id, data));
+void LightMap::addSwitchableLightmap(int id, std::unique_ptr<LMPixel[]> &&data)
+{
+    mSwitchableLmaps.emplace(id, std::move(data));
     mIntensities[id] = 1.0f;
 }
 

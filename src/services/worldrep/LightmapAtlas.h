@@ -87,10 +87,10 @@ class LightMap {
     FreeSpaceInfo *mPosition;
 
     /** static lightmap */
-    LMPixel *mStaticLmap;
+    std::unique_ptr<LMPixel[]> mStaticLmap;
 
     /// maps object ID (light) to lightmaps
-    typedef std::map<int, LMPixel *> ObjectToLightMap;
+    typedef std::map<int, std::unique_ptr<LMPixel[]>> ObjectToLightMap;
 
     /** A map of the switchable lightmaps */
     ObjectToLightMap mSwitchableLmaps;
@@ -122,23 +122,19 @@ public:
      * it will deallocate the lmap in the destructor
      * @note The static_lightmap will be delete[]'d in destructor, together with
      * any switchable lightmaps present */
-    LightMap(unsigned int sx, unsigned int sy, LMPixel *static_lightmap,
-             int tag = 0)
-        : mSizeX(sx), mSizeY(sy), mTag(tag) {
-        mStaticLmap = static_lightmap;
-
+    LightMap(unsigned int sx, unsigned int sy,
+             std::unique_ptr<LMPixel[]> &&static_lightmap, int tag = 0)
+        : mStaticLmap(std::move(static_lightmap)),
+          mSizeX(sx),
+          mSizeY(sy),
+          mTag(tag)
+    {
         mPosition = NULL;
     }
 
     /** Destructor. Frees all allocated lightmaps */
     ~LightMap() {
-        delete[] mStaticLmap;
-
-        ObjectToLightMap::iterator it = mSwitchableLmaps.begin();
-
-        for (; it != mSwitchableLmaps.end(); ++it)
-            delete[] it->second;
-
+        mStaticLmap.reset();
         mSwitchableLmaps.clear();
     }
 
@@ -164,14 +160,14 @@ public:
      * @note Returns NEW buffer that the caller is responsible to manage!
      * @todo If somebody finds time, do this two stage - one return required
      * size, two convert into supplied buffer */
-    static LMPixel *convert(char *data, int sx, int sy, int ver);
+    static std::unique_ptr<LMPixel[]> convert(char *data, int sx, int sy, int ver);
 
     /** Adds a switchable lightmap with identification id to the lightmap list
      * (has to be of the same size).
      * @param id the ID of the light the lightmaps belongs to.
      * @param data are the actual values converted to RGB. Unallocation is
      * handled in destructor */
-    void AddSwitchableLightmap(int id, LMPixel *data);
+    void addSwitchableLightmap(int id, std::unique_ptr<LMPixel[]> &&data);
 
     /** The main intensity setting function
      * @param id The id of the light (not object id, but internal light id)
@@ -224,8 +220,8 @@ private:
     /** The name of the resulting resource */
     Ogre::String mName;
 
-    /** A vector containing Free Space rectangles left in the Atlas */
-    FreeSpaceInfo *mFreeSpace;
+    /** Containins Free Space rectangles left in the Atlas */
+    std::unique_ptr<FreeSpaceInfo> mFreeSpace;
 
     typedef std::vector<LightMap *> LightMapVector;
 
@@ -337,16 +333,13 @@ public:
     };
 
 private:
-    typedef std::vector<LightAtlas *> LightAtlasVector;
+    typedef std::vector<std::unique_ptr<LightAtlas>> LightAtlasVector;
 
     /** A list of the light map atlases */
-    LightAtlasVector mList;
-
-    /** Pre-render lightmap list*/
-    typedef std::map<int, std::vector<LightMap *>> TextureLightMapQueue;
+    LightAtlasVector mAtlases;
 
     /// List of lightmaps that are waiting for processing
-    TextureLightMapQueue mLightMapQueue;
+    std::vector<LightMap*> mLightMapQueue;
 
 protected:
     bool placeLightMap(LightMap *lmap);
@@ -360,8 +353,8 @@ public:
     /** Adds a light map holding place and a static lightmap.
      * @note The U/V mapping of the lightmap is not valid until the atlas list
      * is rendered */
-    LightMap *addLightmap(int ver, int texture, char *buf, int w, int h,
-                          AtlasInfo &destinfo);
+    std::unique_ptr<LightMap> addLightmap(int ver, int texture, char *buf,
+                                          int w, int h);
 
     /** get's the current count of the atlases stored.
      * \return int Count of the atlases */
@@ -377,14 +370,11 @@ public:
     /// Light intensity setter - refreshes the lightmaps containing the light
     /// with the new intensity
     void setLightIntensity(int id, float value) {
-        std::vector<LightAtlas *>::iterator atlases = mList.begin();
-
-        for (; atlases != mList.end(); ++atlases) {
-            (*atlases)->setLightIntensity(id, value);
-        }
+        for (auto &atlas : mAtlases)
+            atlas->setLightIntensity(id, value);
     };
 
-    LightAtlas *getAtlas(int idx) { return mList.at(idx); }
+    LightAtlas *getAtlas(int idx) { return mAtlases.at(idx).get(); }
 
     /// console command listener
     virtual void commandExecuted(std::string command, std::string parameters);
