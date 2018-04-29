@@ -65,7 +65,7 @@ namespace Opde {
 template <> GameStateManager *Singleton<GameStateManager>::ms_Singleton = 0;
 
 GameStateManager::GameStateManager(const std::string &GameType)
-    : mStateStack(), mTerminate(false), mConsoleBackend(NULL), mRoot(NULL),
+    : mStateStack(), mTerminate(false), mRoot(NULL),
       mConfigService(NULL), mInputService(NULL), mServiceMgr(NULL) {
     mGameType = GameType;
 
@@ -135,9 +135,6 @@ bool GameStateManager::run() {
     // Initialize opde logger and console backend
     // Create an ogre's root
     mOgreRoot = Ogre::Root::getSingletonPtr();
-
-    mConsoleBackend = Opde::ConsoleBackend::getSingletonPtr();
-    mConsoleBackend->putMessage("==Console Starting==");
 
     assert(ServiceManager::getSingletonPtr() != 0);
 

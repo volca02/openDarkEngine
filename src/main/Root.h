@@ -83,10 +83,10 @@ public:
     void bootstrapFinished();
 
     /** @returns a pointer to the logger used */
-    Logger *getLogger() { return mLogger; };
+    Logger *getLogger() { return mLogger.get(); };
 
     /** @returns a pointer to the service manager */
-    ServiceManager *getServiceManager() { return mServiceMgr; };
+    ServiceManager *getServiceManager() { return mServiceMgr.get(); };
 
     /** Creates a new logger instance that logs to a file (Logger will be
      * automatically destroyed on termination) */
@@ -102,37 +102,33 @@ protected:
     /// Creates all the loop modes
     void setupLoopModes();
 
-    Logger *mLogger;
-    ServiceManager *mServiceMgr;
-    Ogre::Root *mOgreRoot;
-    Ogre::LogManager *mOgreLogManager;
-    OgreOpdeLogConnector *mOgreOpdeLogConnector;
+    std::unique_ptr<Logger> mLogger;
+    std::unique_ptr<ServiceManager> mServiceMgr;
+    std::unique_ptr<Ogre::Root> mOgreRoot;
+    std::unique_ptr<Ogre::LogManager> mOgreLogManager;
+    std::unique_ptr<OgreOpdeLogConnector> mOgreOpdeLogConnector;
 
     /// @deprecated
-    ConsoleBackend *mConsoleBackend;
+    std::unique_ptr<ConsoleBackend> mConsoleBackend;
 
-    typedef std::list<LogListener *> LogListenerList;
-    typedef std::list<ServiceFactory *> ServiceFactoryList;
+    typedef std::vector<std::unique_ptr<LogListener>> LogListenerList;
 
     LogListenerList mLogListeners;
 
     const unsigned int mServiceMask;
+
     /// Factory for case-less filesystem archives
-    /// Factory for case-less filesystem archives
-    Ogre::ArchiveFactory *mDirArchiveFactory;
+    std::unique_ptr<Ogre::ArchiveFactory> mDirArchiveFactory;
 
     /// Factory for Zip archives (Quickfix for ogre 1.9 bug)
-    Ogre::ArchiveFactory *mZipArchiveFactory;
+    std::unique_ptr<Ogre::ArchiveFactory> mZipArchiveFactory;
 
     /// Factory for Crf archives (zip archives with archivename prefix)
-    Ogre::ArchiveFactory *mCrfArchiveFactory;
+    std::unique_ptr<Ogre::ArchiveFactory> mCrfArchiveFactory;
 
     // If ogre is not used, these point to particular managers we hijack
-    Ogre::ResourceGroupManager *mResourceGroupManager;
-    Ogre::ArchiveManager *mArchiveManager;
-
-    // list of all service factories (for deletion in destructor)
-    ServiceFactoryList mServiceFactories;
+    std::unique_ptr<Ogre::ResourceGroupManager> mResourceGroupManager;
+    std::unique_ptr<Ogre::ArchiveManager> mArchiveManager;
 };
 
 } // namespace Opde

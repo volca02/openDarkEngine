@@ -104,9 +104,6 @@ protected:
     /// last frame's time
     unsigned long mTimeLastFrame;
 
-    ///  Stderr logger
-    ConsoleBackend *mConsoleBackend;
-
     /// Opde::root
     Opde::Root *mRoot;
     Ogre::Root *mOgreRoot;

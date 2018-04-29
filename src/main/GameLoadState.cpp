@@ -71,14 +71,6 @@ void GameLoadState::start() {
     mCamera = renderSrv->getDefaultCamera();
     mViewport = renderSrv->getDefaultViewport();
 
-    // display loading... message
-    // TODO: replace with DrawService code...
-    // mLoadingOverlay =
-    // OverlayManager::getSingleton().getByName("Opde/LoadOverlay");
-
-    // Create a panel
-    // mLoadingOverlay->show();
-
     LOG_INFO("LoadState: Started");
 
     mLoaded = false;
@@ -109,11 +101,6 @@ void GameLoadState::update(unsigned long timePassed) {
         unsigned long start_ms =
             Ogre::Root::getSingleton().getTimer()->getMilliseconds();
 
-        // TODO: Replace with draw service
-        /*			OverlayElement* guiLdr =
-           OverlayManager::getSingleton().getOverlayElement("Opde/LoadPanel/Description");
-                    guiLdr->setCaption("Loading, please wait...");*/
-
         mRoot->renderOneFrame();
 
         GameServicePtr gsvc = GET_SERVICE(GameService);
@@ -123,8 +110,6 @@ void GameLoadState::update(unsigned long timePassed) {
         gsvc->load(misFile);
 
         mLoaded = true;
-
-        //		guiLdr->setCaption("Loaded, press ESC...");
 
         LOG_INFO("Loading took %10.2f seconds",
                  (Ogre::Root::getSingleton().getTimer()->getMilliseconds() -

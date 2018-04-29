@@ -43,7 +43,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT) {
     // split on space, find if we have two arguments or just one
     WhitespaceStringTokenizer wst(scmd, false); // false == obey the quotes
 
-    std::string GameType = wst.next();
+    std::string gameType = wst.next();
 
     std::string missionName = "";
 
@@ -51,27 +51,24 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT) {
         missionName = wst.next();
 #else
 int main(int argc, char **argv) {
-    std::string GameType = "";
+    std::string gameType = "";
     std::string missionName = "";
 
     if (argc >= 2)
-        GameType = argv[1];
+        gameType = argv[1];
 
     if (argc >= 3)
         missionName = argv[2];
 #endif
 
-    // Create application object
-    GameStateManager *man = NULL;
-
     try {
-        man = new GameStateManager(GameType);
+        GameStateManager man(gameType);
 
         // if we have a mission name, supply
         if (missionName != "")
-            man->setDesiredMissionName(missionName);
+            man.setDesiredMissionName(missionName);
 
-        man->run();
+        man.run();
     } catch (Ogre::Exception &e) {
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
         MessageBox(NULL, e.getFullDescription().c_str(),
@@ -91,8 +88,6 @@ int main(int argc, char **argv) {
                   << std::endl;
 #endif
     }
-
-    delete man;
 
     return 0;
 }

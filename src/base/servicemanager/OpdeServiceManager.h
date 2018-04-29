@@ -25,6 +25,7 @@
 #define __OPDESERVICEMANAGER_H
 
 #include <memory>
+#include <vector>
 
 #include "config.h"
 
@@ -50,8 +51,8 @@ namespace Opde {
 class ServiceManager : public Singleton<ServiceManager>,
                        public NonCopyable {
 private:
-    typedef SimpleArray<ServiceFactory *> ServiceFactoryMap;
-    typedef SimpleArray<ServicePtr> ServiceInstanceMap;
+    using ServiceFactoryMap = std::vector<std::unique_ptr<ServiceFactory>>;
+    using ServiceInstanceMap = std::vector<ServicePtr>;
 
     ServiceFactoryMap mServiceFactories;
     ServiceInstanceMap mServiceInstances;
@@ -76,8 +77,15 @@ public:
     static ServiceManager &getSingleton(void);
     static ServiceManager *getSingletonPtr(void);
 
-    /** Registration for the services */
-    void addServiceFactory(ServiceFactory *factory);
+    /** Registration for the services - will own the given pointer */
+    void addServiceFactory(std::unique_ptr<ServiceFactory> &factory);
+
+    // syntactic sugar - register directly by the factory type
+    template<typename SvT>
+    void registerFactory() {
+        std::unique_ptr<ServiceFactory> sfptr(new SvT);
+        addServiceFactory(sfptr);
+    }
 
     /** Returns the service, named name, pointer.
      * @param name The service type name (The name returned by the

@@ -72,12 +72,17 @@ template <> Root *Singleton<Root>::ms_Singleton = 0;
 
 // -------------------------------------------------------
 Root::Root(uint serviceMask, const char *logFileName)
-    : mLogger(NULL), mServiceMgr(NULL), mOgreRoot(NULL), mOgreLogManager(NULL),
-      mConsoleBackend(NULL),
-      mServiceMask(serviceMask), mDirArchiveFactory(NULL),
-      //          mCrfArchiveFactory(NULL),
-      mResourceGroupManager(NULL), mArchiveManager(NULL) {
-    mLogger = new Logger();
+    : mLogger(),
+      mServiceMgr(),
+      mOgreRoot(),
+      mOgreLogManager(),
+      mConsoleBackend(),
+      mServiceMask(serviceMask),
+      mDirArchiveFactory(),
+      mResourceGroupManager(),
+      mArchiveManager()
+{
+    mLogger.reset(new Logger());
 
     if (logFileName) {
         logToFile(logFileName);
@@ -87,7 +92,7 @@ Root::Root(uint serviceMask, const char *logFileName)
              OPDE_VER_MAJOR, OPDE_VER_MINOR, OPDE_VER_PATCH, OPDE_CODE_NAME,
              __DATE__, __TIME__);
 
-    mServiceMgr = new ServiceManager(mServiceMask);
+    mServiceMgr.reset(new ServiceManager(mServiceMask));
 
     LOG_INFO("Root: Created a ServiceManager instance with global mask %X",
              mServiceMask);
@@ -95,34 +100,37 @@ Root::Root(uint serviceMask, const char *logFileName)
     LOG_INFO("Root: Hooking up the Ogre logging");
     // To supress logging of OGRE (we'll use a plugin for our logger for Ogre
     // logs) we need to create a Ogre::LogManager here on our own
-    mOgreLogManager = new Ogre::LogManager();
+    mOgreLogManager.reset(new Ogre::LogManager());
     mOgreLogManager->createLog("Ogre.log", true, false, true);
 
-    mOgreOpdeLogConnector = new OgreOpdeLogConnector(mLogger);
+    mOgreOpdeLogConnector.reset(new OgreOpdeLogConnector(mLogger.get()));
 
     // create our logger's ogre log listener interface. Connect together
-    mOgreLogManager->getDefaultLog()->addListener(mOgreOpdeLogConnector);
+    mOgreLogManager->getDefaultLog()->addListener(mOgreOpdeLogConnector.get());
 
     // Only initialize ogre if rendering is in serviceMask
     if (serviceMask & SERVICE_RENDERER) {
         LOG_INFO("Root: Initializing the Ogre's Root object");
-        mOgreRoot = new Ogre::Root();
+        mOgreRoot.reset(new Ogre::Root());
     } else {
         LOG_INFO("Root: Initializing the Ogre's Resource system");
         // only initialize Archive manager and ResourceGroupManager
-        mResourceGroupManager = new Ogre::ResourceGroupManager();
-        mArchiveManager = new Ogre::ArchiveManager();
+        mResourceGroupManager.reset(new Ogre::ResourceGroupManager());
+        mArchiveManager.reset(new Ogre::ArchiveManager());
     }
 
     LOG_INFO("Root: Registering custom archive factories");
     // register the factories
-    mDirArchiveFactory = new Ogre::CaseLessFileSystemArchiveFactory();
-    mZipArchiveFactory = new Ogre::FixedZipArchiveFactory();
-    mCrfArchiveFactory = new Ogre::CrfArchiveFactory();
+    mDirArchiveFactory.reset(new Ogre::CaseLessFileSystemArchiveFactory());
+    mZipArchiveFactory.reset(new Ogre::FixedZipArchiveFactory());
+    mCrfArchiveFactory.reset(new Ogre::CrfArchiveFactory());
 
-    Ogre::ArchiveManager::getSingleton().addArchiveFactory(mDirArchiveFactory);
-    Ogre::ArchiveManager::getSingleton().addArchiveFactory(mZipArchiveFactory);
-    Ogre::ArchiveManager::getSingleton().addArchiveFactory(mCrfArchiveFactory);
+    Ogre::ArchiveManager::getSingleton().addArchiveFactory(
+        mDirArchiveFactory.get());
+    Ogre::ArchiveManager::getSingleton().addArchiveFactory(
+        mZipArchiveFactory.get());
+    Ogre::ArchiveManager::getSingleton().addArchiveFactory(
+        mCrfArchiveFactory.get());
 
     if (serviceMask & SERVICE_RENDERER) {
         LOG_INFO("Root: Hooking up custom 8 bit image codecs");
@@ -132,7 +140,8 @@ Root::Root(uint serviceMask, const char *logFileName)
 
     LOG_INFO("Root: Creating console backend");
 
-    mConsoleBackend = new ConsoleBackend();
+    mConsoleBackend.reset(new ConsoleBackend());
+    mConsoleBackend->putMessage("==Console Starting==");
 
     LOG_INFO("Root: Registering Service factories");
     // Now we need to register all the service factories
@@ -144,45 +153,32 @@ Root::Root(uint serviceMask, const char *logFileName)
 Root::~Root() {
     LOG_INFO("Root: openDarkEngine is shutting down");
     // Archive manager has no way to remove the archive factories...
-    delete mServiceMgr;
+    mServiceMgr.reset();
 
     // delete all the service factories
-    ServiceFactoryList::iterator sit = mServiceFactories.begin();
-
-    while (sit != mServiceFactories.end()) {
-        delete *sit++;
-    }
-
-    mServiceFactories.clear();
-
-    delete mConsoleBackend;
+    mConsoleBackend.reset();
 
     if (mServiceMask & SERVICE_RENDERER) {
         Ogre::CustomImageCodec::shutdown();
     }
 
-    delete mOgreRoot;
-    delete mResourceGroupManager;
-    delete mArchiveManager;
+    mOgreRoot.reset();
+    mResourceGroupManager.reset();
+    mArchiveManager.reset();
 
-    LogListenerList::iterator it = mLogListeners.begin();
-
-    for (; it != mLogListeners.end(); ++it) {
-        mLogger->unregisterLogListener(*it);
-        delete *it;
+    for (auto &listener : mLogListeners) {
+        mLogger->unregisterLogListener(listener.get());
     }
     mLogListeners.clear();
 
-    delete mDirArchiveFactory;
-    delete mCrfArchiveFactory;
-    delete mZipArchiveFactory;
+    mDirArchiveFactory.reset();
+    mCrfArchiveFactory.reset();
+    mZipArchiveFactory.reset();
 
     // As the last thing - release the logger
-    delete mLogger;
-
-    delete mOgreOpdeLogConnector;
-
-    delete mOgreLogManager;
+    mOgreOpdeLogConnector.reset();
+    mOgreLogManager.reset();
+    mLogger.reset();
 }
 
 // -------------------------------------------------------
@@ -239,34 +235,28 @@ void Root::removeResourceLocation(const std::string &name,
 
 // -------------------------------------------------------
 void Root::registerServiceFactories() {
-    mServiceFactories.push_back(new WorldRepServiceFactory());
-    mServiceFactories.push_back(new GameServiceFactory());
-    mServiceFactories.push_back(new PhysicsServiceFactory());
-    mServiceFactories.push_back(new ConfigServiceFactory());
-    mServiceFactories.push_back(new LinkServiceFactory());
-    mServiceFactories.push_back(new PropertyServiceFactory());
-    mServiceFactories.push_back(new InheritServiceFactory());
-    mServiceFactories.push_back(new RenderServiceFactory());
-    mServiceFactories.push_back(new DatabaseServiceFactory());
-    mServiceFactories.push_back(new InputServiceFactory());
-    mServiceFactories.push_back(new LoopServiceFactory());
-    mServiceFactories.push_back(new ObjectServiceFactory());
-    mServiceFactories.push_back(new LightServiceFactory());
-    mServiceFactories.push_back(new MaterialServiceFactory());
-    mServiceFactories.push_back(new DrawServiceFactory());
-    mServiceFactories.push_back(new RoomServiceFactory());
+    mServiceMgr->registerFactory<WorldRepServiceFactory>();
+    mServiceMgr->registerFactory<GameServiceFactory>();
+    mServiceMgr->registerFactory<PhysicsServiceFactory>();
+    mServiceMgr->registerFactory<ConfigServiceFactory>();
+    mServiceMgr->registerFactory<LinkServiceFactory>();
+    mServiceMgr->registerFactory<PropertyServiceFactory>();
+    mServiceMgr->registerFactory<InheritServiceFactory>();
+    mServiceMgr->registerFactory<RenderServiceFactory>();
+    mServiceMgr->registerFactory<DatabaseServiceFactory>();
+    mServiceMgr->registerFactory<InputServiceFactory>();
+    mServiceMgr->registerFactory<LoopServiceFactory>();
+    mServiceMgr->registerFactory<ObjectServiceFactory>();
+    mServiceMgr->registerFactory<LightServiceFactory>();
+    mServiceMgr->registerFactory<MaterialServiceFactory>();
+    mServiceMgr->registerFactory<DrawServiceFactory>();
+    mServiceMgr->registerFactory<RoomServiceFactory>();
+    mServiceMgr->registerFactory<PlatformServiceFactory>();
     // HACK: This thing is here so that we can test opdeScript, but still
     // have direct input in GameStateManager...
     // Reason is that GUIService steals direct input
     if (mServiceMask & SERVICE_GUI)
-        mServiceFactories.push_back(new GUIServiceFactory());
-    mServiceFactories.push_back(new PlatformServiceFactory());
-
-    ServiceFactoryList::iterator it = mServiceFactories.begin();
-
-    while (it != mServiceFactories.end()) {
-        mServiceMgr->addServiceFactory(*it++);
-    }
+        mServiceMgr->registerFactory<GUIServiceFactory>();
 }
 
 // -------------------------------------------------------
@@ -291,15 +281,15 @@ void Root::setupLoopModes() {
         def.mask = LOOPMODE_MASK_ALL_CLIENTS;
 
         ls->createLoopMode(def);
+        ls->requestLoopMode("AllClientsLoopMode");
     }
 }
 
 // -------------------------------------------------------
 void Root::logToFile(const std::string &fname) {
-    LogListener *flog = new FileLog(fname);
-
-    mLogger->registerLogListener(flog);
-    mLogListeners.push_back(flog);
+    // TODO: Ugly. Let the logger hold the listeners?
+    mLogListeners.emplace_back(new FileLog(fname));
+    mLogger->registerLogListener(mLogListeners.back().get());
 }
 
 // -------------------------------------------------------

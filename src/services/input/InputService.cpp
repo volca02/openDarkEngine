@@ -802,8 +802,7 @@ void InputService::pollEvents(float deltaTime) {
 
     // Process the key repeat (but only for exclusive input)
     if (!mNonExclusive)
-        processKeyRepeat(deltaTime / 1000.0f); // loop time is in
-    // milis
+        processKeyRepeat(deltaTime / 1000.0f); // loop time is in milis
 }
 
 //------------------------------------------------------

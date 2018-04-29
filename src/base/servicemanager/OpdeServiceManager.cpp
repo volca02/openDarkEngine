@@ -43,11 +43,11 @@ const uint ServiceManager::msMaxServiceSID = 128;
 ServiceManager::ServiceManager(uint serviceMask)
     : mServiceFactories(), mServiceInstances(), mBootstrapFinished(false),
       mGlobalServiceMask(serviceMask) {
-    mServiceInstances.grow(msMaxServiceSID);
-    mServiceFactories.grow(msMaxServiceSID);
+    mServiceInstances.resize(msMaxServiceSID);
+    mServiceFactories.resize(msMaxServiceSID);
 
     for (size_t idx = 0; idx < msMaxServiceSID; ++idx) {
-        mServiceFactories[idx] = NULL;
+        mServiceFactories[idx].reset();
         mServiceInstances[idx].reset();
     }
 }
@@ -97,7 +97,8 @@ ServiceManager &ServiceManager::getSingleton(void) {
 ServiceManager *ServiceManager::getSingletonPtr(void) { return ms_Singleton; }
 
 //------------------ Main implementation ------------------
-void ServiceManager::addServiceFactory(ServiceFactory *factory) {
+void ServiceManager::addServiceFactory(std::unique_ptr<ServiceFactory> &factory)
+{
     LOG_INFO("ServiceManager: Registered service factory for %s (%d - mask %X)",
              factory->getName().c_str(), factory->getSID(), factory->getMask());
 
@@ -114,11 +115,11 @@ void ServiceManager::addServiceFactory(ServiceFactory *factory) {
                         " could not issue it to " + factory->getName(),
                     "ServiceManager::addServiceFactory");
 
-    mServiceFactories[fsid] = factory;
+    mServiceFactories[fsid] = std::move(factory);
 }
 
 ServiceFactory *ServiceManager::findFactory(size_t sid) {
-    return mServiceFactories[sid];
+    return mServiceFactories[sid].get();
 }
 
 ServicePtr ServiceManager::findService(size_t sid) {
@@ -126,9 +127,16 @@ ServicePtr ServiceManager::findService(size_t sid) {
 }
 
 ServicePtr ServiceManager::createInstance(size_t sid) {
-    ServiceFactory *factory = mServiceFactories[sid];
+    auto &factory = mServiceFactories.at(sid);
 
-    if (factory != NULL) { // Found a factory for the Service name
+    if (mServiceInstances.at(sid)) {
+        LOG_INFO("ServiceManager: Service already created?! (%s (%d))",
+                 factory->getName().c_str(), sid);
+        return mServiceInstances[sid];
+    }
+
+    if (factory) {
+        // Found a factory for the Service name
         size_t fsid = factory->getSID();
         assert(fsid == sid);
 
@@ -142,12 +150,6 @@ ServicePtr ServiceManager::createInstance(size_t sid) {
                         "ServiceManager::createInstance");
 
         ServicePtr ns(factory->createInstance(this));
-
-        if (mServiceInstances[fsid])
-            LOG_INFO("ServiceManager: Service already created?! (%s (%d))",
-                     factory->getName().c_str(), sid);
-
-        assert(mServiceInstances[fsid].isNull());
         mServiceInstances[fsid] = ns;
 
         if (!ns->init()) {
@@ -157,8 +159,8 @@ ServicePtr ServiceManager::createInstance(size_t sid) {
                 "ServiceManager::createInstance");
         }
 
-        if (mBootstrapFinished) // Bootstrap already over, call the
-                                // after-bootstrap init too
+        // Bootstrap already over, call the after-bootstrap init too
+        if (mBootstrapFinished)
             ns->bootstrapFinished();
 
         return ns;
@@ -171,7 +173,7 @@ ServicePtr ServiceManager::createInstance(size_t sid) {
 }
 
 ServicePtr ServiceManager::getService(size_t sid) {
-    ServicePtr service = mServiceInstances[sid];
+    ServicePtr service = mServiceInstances.at(sid);
 
     if (service)
         return service;
@@ -185,14 +187,16 @@ ServicePtr ServiceManager::getService(size_t sid) {
 
 void ServiceManager::createByMask(uint mask) {
     for (size_t idx = 0; idx < mServiceInstances.size(); ++idx) {
-        ServiceFactory *factory = mServiceFactories[idx];
+
+        auto &factory = mServiceFactories[idx];
 
         if (!factory)
             continue;
 
         // if the mask fits and the service is permitted by global service mask
         if ((factory->getMask() & mask) &&
-            (factory->getMask() & mGlobalServiceMask)) {
+            (factory->getMask() & mGlobalServiceMask))
+        {
             ServicePtr service = getService(factory->getSID());
         }
     }
