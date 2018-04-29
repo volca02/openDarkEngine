@@ -30,8 +30,6 @@
 #include <OgreResourceGroupManager.h>
 #include <cctype>
 
-using namespace std;
-
 namespace Opde {
 
 /*---------------------------------------------------*/

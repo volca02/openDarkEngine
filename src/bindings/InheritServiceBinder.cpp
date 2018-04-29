@@ -38,7 +38,7 @@ const char *InheritServiceBinder::msName = "InheritService";
 PyTypeObject InheritServiceBinder::msType = {
     PyVarObject_HEAD_INIT(
         &PyType_Type, 0) "opde.services.InheritService", /* char *tp_name; */
-    sizeof(InheritServiceBinder::Object),                /* int tp_basicsize; */
+    sizeof(InheritServiceBinder::Base),                /* int tp_basicsize; */
     0,                             /* int tp_itemsize;       // not used much */
     InheritServiceBinder::dealloc, /* destructor tp_dealloc; */
     0,                             /* printfunc  tp_print;   */
@@ -223,7 +223,7 @@ PyObject *InheritServiceBinder::inheritsFrom(PyObject *self, PyObject *args) {
 
 // ------------------------------------------
 PyObject *InheritServiceBinder::create() {
-    Object *object = construct(&msType);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = GET_SERVICE(InheritService);
@@ -246,7 +246,7 @@ const char *InheritLinkBinder::msName = "InheritLink";
 // ------------------------------------------
 PyTypeObject InheritLinkBinder::msType = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0) msName, /* char *tp_name; */
-    sizeof(InheritLinkBinder::Object),             // int tp_basicsize; */
+    sizeof(InheritLinkBinder::Base),             // int tp_basicsize; */
     0,                          /* int tp_itemsize;       // not used much */
     InheritLinkBinder::dealloc, /* destructor tp_dealloc; */
     0,                          /* printfunc  tp_print;   */
@@ -283,7 +283,7 @@ PyObject *InheritLinkBinder::create(InheritLinkPtr &link) {
         return NULL;
     }
 
-    Object *object = construct(&msType);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = link;

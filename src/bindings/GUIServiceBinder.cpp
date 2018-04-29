@@ -37,7 +37,7 @@ const char *GUIServiceBinder::msName = "GUIService";
 // ------------------------------------------
 PyTypeObject GUIServiceBinder::msType = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0) msName, /* char *tp_name; */
-    sizeof(GUIServiceBinder::Object),              /* int tp_basicsize; */
+    sizeof(GUIServiceBinder::Base),              /* int tp_basicsize; */
     0,                         // int tp_itemsize;       /* not used much */
     GUIServiceBinder::dealloc, /* destructor tp_dealloc; */
     0,                         /* printfunc  tp_print;   */
@@ -166,7 +166,7 @@ PyObject *GUIServiceBinder::destroySheet(PyObject *self, PyObject *args) {
 
 // ------------------------------------------
 PyObject *GUIServiceBinder::create() {
-    Object *object = construct(&msType);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = GET_SERVICE(GUIService);

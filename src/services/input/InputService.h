@@ -26,10 +26,10 @@
 #define __INPUTSERVICE_H
 
 #include <SDL2/SDL.h>
+#include <functional>
 
 #include "ServiceCommon.h"
 
-#include "Callback.h"
 #include "Variant.h"
 #include "InputEventMapper.h"
 #include "OpdeService.h"
@@ -84,24 +84,22 @@ public:
 
     /// TODO:	void saveBNDFile(const std::string& filename);
 
-    /// Variable getter (for mouse senitivity, etc)
-    Variant getVariable(const std::string &var);
+    /// Declares a variable. Returns a reference to it
+    Variant &createVariable(const std::string &var, const Variant &d_val);
+
+        /// Variable getter (for mouse senitivity, etc)
+        Variant &getVariable(const std::string &var);
+    const Variant &getVariable(const std::string &var) const;
 
     /// Variable setter (for mouse senitivity, etc)
     void setVariable(const std::string &var, const Variant &val);
 
     /// Definition of the command listener
-    typedef Callback<InputEventMsg> Listener;
-
-    /// Definition of the command listener Shared Pointer
-    typedef shared_ptr<Listener> ListenerPtr;
+    using Listener = std::function<void(const InputEventMsg&)>;
 
     /// Registers a command listener
     void registerCommandTrap(const std::string &command,
-                             const ListenerPtr &listener);
-
-    /// Unregisters a command listener
-    void unregisterCommandTrap(const ListenerPtr &listener);
+                             const Listener &listener);
 
     /// Unregisters a command listener by it's name
     void unregisterCommandTrap(const std::string &command);
@@ -197,7 +195,7 @@ protected:
     bool dealiasCommand(const std::string &alias, std::string &command);
 
     /// Named context to an event mapper map
-    typedef std::map<std::string, InputEventMapper *> ContextToMapper;
+    typedef std::map<std::string, std::unique_ptr<InputEventMapper>> ContextToMapper;
 
     /// string variable name to variant map
     typedef std::map<std::string, Variant> ValueMap;
@@ -209,7 +207,7 @@ protected:
     typedef std::map<std::string, int> ReverseKeyMap; // (lower case please)
 
     /// map of command text to the handling listener
-    typedef std::map<std::string, ListenerPtr> ListenerMap;
+    typedef std::map<std::string, Listener> ListenerMap;
 
     /// string variable name to dealiased value
     typedef std::map<std::string, std::string> AliasMap;

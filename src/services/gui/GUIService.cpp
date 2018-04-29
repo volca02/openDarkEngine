@@ -116,13 +116,11 @@ void GUIService::bootstrapFinished() {
     mRenderServiceListenerID =
         mRenderSrv->registerListener(renderServiceListener);
 
-    InputService::ListenerPtr showConsoleListener(
-        new ClassCallback<InputEventMsg, GUIService>(
-            this, &GUIService::onShowConsole));
-
     // TODO: Hardcode a monospaced font here (as we do with jorge.png)
     // we should not depend on external font file unless specified in config
-    mInputSrv->registerCommandTrap("show_console", showConsoleListener);
+    using std::placeholders::_1;
+    mInputSrv->registerCommandTrap(
+        "show_console", std::bind(&GUIService::onShowConsole, this, _1));
 
     mLoopSrv->addLoopClient(this);
 

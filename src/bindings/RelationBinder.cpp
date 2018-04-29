@@ -39,7 +39,7 @@ const char *RelationBinder::msName = "Relation";
 PyTypeObject RelationBinder::msType = {
     PyVarObject_HEAD_INIT(&PyType_Type,
                           0) "opde.services.Relation", /* char *tp_name; */
-    sizeof(RelationBinder::Object),                    /* int tp_basicsize; */
+    sizeof(RelationBinder::Base),                    /* int tp_basicsize; */
     0,                       // int tp_itemsize;       /* not used much */
     RelationBinder::dealloc, /* destructor tp_dealloc; */
     0,                       /* printfunc  tp_print;   */
@@ -290,7 +290,7 @@ PyObject *RelationBinder::repr(PyObject *self) {
 
 // ------------------------------------------
 PyObject *RelationBinder::create(const RelationPtr &relation) {
-    Object *object = construct(&msType);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = relation;

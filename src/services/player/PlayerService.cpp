@@ -21,6 +21,8 @@
  *
  *****************************************************************************/
 
+#include <functional>
+
 #include "PlayerService.h"
 #include "OpdeServiceManager.h"
 #include "input/InputService.h"
@@ -70,19 +72,14 @@ void PlayerService::bootstrapFinished() {
     mPlayerFactoryRelation =
         mLinkSrv->createRelation("PlayerFactory", DataStoragePtr(NULL), false);
 
-    InputService::ListenerPtr forwardListener(
-        new ClassCallback<InputEventMsg, PlayerService>(
-            this, &PlayerService::onInputForward));
-    InputService::ListenerPtr sidestepListener(
-        new ClassCallback<InputEventMsg, PlayerService>(
-            this, &PlayerService::onInputSidestep));
-    InputService::ListenerPtr creeponListener(
-        new ClassCallback<InputEventMsg, PlayerService>(
-            this, &PlayerService::onInputCreepOn));
+    using std::placeholders::_1;
 
-    mInputSrv->registerCommandTrap("forward", forwardListener);
-    mInputSrv->registerCommandTrap("sidestep", sidestepListener);
-    mInputSrv->registerCommandTrap("creepon", creeponListener);
+    mInputSrv->registerCommandTrap(
+        "forward", std::bind(&PlayerService::onInputForward, this, _1));
+    mInputSrv->registerCommandTrap(
+        "sidestep", std::bind(&PlayerService::onInputSidestep, this, _1));
+    mInputSrv->registerCommandTrap(
+        "creepon", std::bind(&PlayerService::onInputCreepOn, this, _1));
 
     // TODO: zlook, turn (maybe into the camera service...)
 

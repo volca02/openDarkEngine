@@ -60,7 +60,7 @@ const char *PythonStruct<DatabaseProgressMsg>::msName = "DatabaseProgressMsg";
 // -------------------- Database Progress message --------------------
 class PythonDatabaseProgressMessageConverter {
 public:
-    PyObject *operator()(const DatabaseProgressMsg &ev) {
+    static PyObject *convert(const DatabaseProgressMsg &ev) {
         PyObject *result = PythonDatabaseProgressMessage::create(ev);
         return result;
     }
@@ -82,7 +82,7 @@ const char *opde_DatabaseService__doc__ =
 PyTypeObject DatabaseServiceBinder::msType = {
     PyVarObject_HEAD_INIT(
         &PyType_Type, 0) "opde.services.DatabaseService", // char *tp_name; */
-    sizeof(DatabaseServiceBinder::Object), // int tp_basicsize; */
+    sizeof(DatabaseServiceBinder::Base), // int tp_basicsize; */
     0, // int tp_itemsize;       /* not used much */
     DatabaseServiceBinder::dealloc, // destructor tp_dealloc; */
     0,                              // printfunc  tp_print;   */
@@ -371,7 +371,7 @@ PyObject *DatabaseServiceBinder::unsetProgressListener(PyObject *self,
 
 // ------------------------------------------
 PyObject *DatabaseServiceBinder::create() {
-    Object *object = construct(&msType);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = GET_SERVICE(DatabaseService);

@@ -36,7 +36,7 @@ const char *StringIteratorBinder::msName = "StringIterator";
 PyTypeObject StringIteratorBinder::msType = {
     PyVarObject_HEAD_INIT(&PyType_Type,
                           0) "opde.StringIterator", /* char *tp_name; */
-    sizeof(StringIteratorBinder::Object),           /* int tp_basicsize; */
+    sizeof(StringIteratorBinder::Base),           /* int tp_basicsize; */
     0,                             // int tp_itemsize;       /* not used much */
     StringIteratorBinder::dealloc, /* destructor tp_dealloc; */
     0,                             /* printfunc  tp_print;   */
@@ -111,7 +111,7 @@ PyObject *StringIteratorBinder::repr(PyObject *self) {
 
 // ------------------------------------------
 PyObject *StringIteratorBinder::create(StringIteratorPtr &strit) {
-    Object *object = construct(&msType);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = strit;

@@ -37,6 +37,7 @@ class Camera;
 
 namespace Opde {
 
+class Variant;
 struct InputEventMsg;
 class Property;
 
@@ -143,6 +144,11 @@ private:
 
     /// Camera that we use
     Ogre::Camera *mCamera;
+
+    // Input variables
+    const Variant *mSensitivity;
+    const Variant *mInvert;
+    const Variant *mFreeLook;
 };
 
 /// Shared pointer to Camera service

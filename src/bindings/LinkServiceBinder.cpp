@@ -41,7 +41,7 @@ const char *LinkServiceBinder::msName = "LinkService";
 PyTypeObject LinkServiceBinder::msType = {
     PyVarObject_HEAD_INIT(&PyType_Type,
                           0) "opde.services.LinkService", // char *tp_name; */
-    sizeof(LinkServiceBinder::Object), // int tp_basicsize; */
+    sizeof(LinkServiceBinder::Base), // int tp_basicsize; */
     0,                          // int tp_itemsize;       /* not used much */
     LinkServiceBinder::dealloc, // destructor tp_dealloc; */
     0,                          // printfunc  tp_print;   */
@@ -387,7 +387,7 @@ PyObject *LinkServiceBinder::getFieldsDesc(PyObject *self, PyObject *args) {
 
 // ------------------------------------------
 PyObject *LinkServiceBinder::create() {
-    Object *object = construct(&msType);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = GET_SERVICE(LinkService);
@@ -411,7 +411,7 @@ const char *LinkBinder::msName = "Link";
 // ------------------------------------------
 PyTypeObject LinkBinder::msType = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0) msName, // char *tp_name; */
-    sizeof(LinkBinder::Object),                    // int tp_basicsize; */
+    sizeof(LinkBinder::Base),                    // int tp_basicsize; */
     0,                   // int tp_itemsize;       /* not used much */
     LinkBinder::dealloc, // destructor tp_dealloc; */
     0,                   // printfunc  tp_print;   */
@@ -451,7 +451,7 @@ PyObject *LinkBinder::create(LinkPtr &link) {
         return NULL;
     }
 
-    Object *object = construct(&msType);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = link;

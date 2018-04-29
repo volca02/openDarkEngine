@@ -39,7 +39,7 @@ const char *RenderedImageBinder::msName = "RenderedImage";
 PyTypeObject RenderedImageBinder::msType = {
     PyVarObject_HEAD_INIT(&PyType_Type,
                           0) "opde.services.RenderedImage", // char *tp_name; */
-    sizeof(RenderedImageBinder::Object), // int tp_basicsize; */
+    sizeof(RenderedImageBinder::Base), // int tp_basicsize; */
     0,                            // int tp_itemsize;       /* not used much */
     RenderedImageBinder::dealloc, // destructor tp_dealloc; */
     0,                            // printfunc  tp_print;   */
@@ -131,7 +131,7 @@ bool RenderedImageBinder::extract(PyObject *obj, RenderedImage *&tgt) {
 
 // ------------------------------------------
 PyObject *RenderedImageBinder::create(RenderedImage *sh) {
-    Object *object = construct(&msType);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = sh;

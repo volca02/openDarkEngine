@@ -36,7 +36,7 @@ const char *FontDrawSourceBinder::msName = "FontDrawSource";
 PyTypeObject FontDrawSourceBinder::msType = {
     PyVarObject_HEAD_INIT(
         &PyType_Type, 0) "opde.services.FontDrawSource", // char *tp_name; */
-    sizeof(FontDrawSourceBinder::Object),                // int tp_basicsize; */
+    sizeof(FontDrawSourceBinder::Base),                // int tp_basicsize; */
     0,                             // int tp_itemsize;       /* not used much */
     FontDrawSourceBinder::dealloc, // destructor tp_dealloc; */
     0,                             // printfunc  tp_print;   */
@@ -85,7 +85,7 @@ bool FontDrawSourceBinder::extract(PyObject *obj, FontDrawSourcePtr &tgt) {
 
 // ------------------------------------------
 PyObject *FontDrawSourceBinder::create(const FontDrawSourcePtr &sh) {
-    Object *object = construct(&msType);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = sh;

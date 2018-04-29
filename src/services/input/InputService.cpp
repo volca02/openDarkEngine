@@ -26,6 +26,7 @@
 #include "OpdeException.h"
 #include "StringTokenizer.h"
 #include "config/ConfigService.h"
+#include "format.h"
 #include "logger.h"
 #include "loop/LoopService.h"
 #include "render/RenderService.h"
@@ -41,11 +42,16 @@ namespace Opde {
 template <> const size_t ServiceImpl<InputService>::SID = __SERVICE_ID_INPUT;
 
 InputService::InputService(ServiceManager *manager, const std::string &name)
-    : ServiceImpl<Opde::InputService>(manager, name), mInputMode(IM_MAPPED),
+    : ServiceImpl<Opde::InputService>(manager, name),
+      mInputMode(IM_MAPPED),
       mDirectListener(NULL),
       mInitialDelay(0.4f), // TODO: Read these from the config service
-      mRepeatDelay(0.3f), mKeyPressTime(0.0f), mCurrentKey(SDLK_UNKNOWN),
-      mCurrentMods(0), mNonExclusive(false) {
+      mRepeatDelay(0.3f),
+      mKeyPressTime(0.0f),
+      mCurrentKey(SDLK_UNKNOWN),
+      mCurrentMods(0),
+      mNonExclusive(false)
+{
     // Loop client definition
     mLoopClientDef.id = LOOPCLIENT_ID_INPUT;
     mLoopClientDef.mask = LOOPMODE_INPUT;
@@ -58,12 +64,6 @@ InputService::InputService(ServiceManager *manager, const std::string &name)
 
 //------------------------------------------------------
 InputService::~InputService() {
-    ContextToMapper::iterator it = mMappers.begin();
-    for (; it != mMappers.end(); ++it) {
-        delete it->second;
-        it->second = NULL;
-    }
-
     mMappers.clear();
     delete mDefaultMapper;
     mDefaultMapper = NULL;
@@ -259,7 +259,8 @@ unsigned int InputService::mapToKeyCode(const std::string &key) const {
 //------------------------------------------------------
 void InputService::addBinding(const std::string &keys,
                               const std::string &command,
-                              InputEventMapper *mapper) {
+                              InputEventMapper *mapper)
+{
     if (!mapper)
         mapper = mCurrentMapper;
 
@@ -555,7 +556,7 @@ InputEventMapper *InputService::findMapperForContext(const std::string &ctx) {
     ContextToMapper::const_iterator it = mMappers.find(ctx);
 
     if (it != mMappers.end())
-        return it->second;
+        return it->second.get();
     else
         return NULL;
 }
@@ -575,8 +576,32 @@ std::string InputService::stripComment(const std::string &cmd) {
     return string(cmd.begin(), it);
 }
 
+
 //------------------------------------------------------
-Variant InputService::getVariable(const std::string &var) {
+Variant &InputService::createVariable(const std::string &var,
+                                      const Variant &d_val)
+{
+    ValueMap::iterator it = mVariables.find(var);
+
+    if (it != mVariables.end())
+        OPDE_EXCEPT(format("InputService: duplicit creation of variable ", var));
+
+    return mVariables.emplace(var, d_val).first->second;
+
+}
+
+//------------------------------------------------------
+Variant &InputService::getVariable(const std::string &var) {
+    ValueMap::iterator it = mVariables.find(var);
+
+    if (it != mVariables.end())
+        return it->second;
+    else
+        OPDE_EXCEPT(format("InputService: Undefined variable requested ", var));
+}
+
+//------------------------------------------------------
+const Variant &InputService::getVariable(const std::string &var) const {
     ValueMap::const_iterator it = mVariables.find(var);
 
     if (it != mVariables.end())
@@ -713,7 +738,7 @@ void InputService::processMouseEvent(unsigned int id, InputEventType event) {
 
 //------------------------------------------------------
 void InputService::registerCommandTrap(const std::string &command,
-                                       const ListenerPtr &listener) {
+                                       const Listener &listener) {
     if (mCommandTraps.find(command) != mCommandTraps.end()) {
         // Already registered command. LOG an error
         LOG_ERROR("InputService: The command %s already has a registered trap. "
@@ -723,36 +748,13 @@ void InputService::registerCommandTrap(const std::string &command,
     } else {
         LOG_INFO("InputService: The command '%s' is now registered",
                  command.c_str());
-        mCommandTraps.insert(make_pair(command, listener));
-    }
-}
-
-//------------------------------------------------------
-void InputService::unregisterCommandTrap(const ListenerPtr &listener) {
-    // Iterate through the trappers, find the ones with this listener ptr,
-    // remove
-    ListenerMap::iterator it = mCommandTraps.begin();
-
-    while (it != mCommandTraps.end()) {
-        ListenerMap::iterator pos = it++;
-
-        if (pos->second == listener)
-            mCommandTraps.erase(pos);
+        mCommandTraps.emplace(command, listener);
     }
 }
 
 //------------------------------------------------------
 void InputService::unregisterCommandTrap(const std::string &command) {
-    // Iterate through the trappers, find the ones with the given command name,
-    // remove
-    ListenerMap::iterator it = mCommandTraps.begin();
-
-    while (it != mCommandTraps.end()) {
-        ListenerMap::iterator pos = it++;
-
-        if (pos->first == command)
-            mCommandTraps.erase(pos);
-    }
+    mCommandTraps.erase(command);
 }
 
 //------------------------------------------------------
@@ -835,7 +837,7 @@ bool InputService::callCommandTrap(InputEventMsg &msg) {
     LOG_VERBOSE("InputService: Command trap '%s'", msg.command.c_str());
 
     if (it != mCommandTraps.end()) {
-        (*it->second)(msg);
+        (it->second)(msg);
         return true;
     }
 

@@ -43,7 +43,7 @@ const char *opde_PropertyService__doc__ =
 PyTypeObject PropertyServiceBinder::msType = {
     PyVarObject_HEAD_INIT(
         &PyType_Type, 0) "opde.services.PropertyService", // char *tp_name; */
-    sizeof(PropertyServiceBinder::Object), /* int tp_basicsize; */
+    sizeof(PropertyServiceBinder::Base), /* int tp_basicsize; */
     0, // int tp_itemsize;       /* not used much */
     PropertyServiceBinder::dealloc, // destructor tp_dealloc; */
     0,                              // printfunc  tp_print;   */
@@ -298,7 +298,7 @@ void PropertyServiceBinder::init(PyObject *module) {
 
 // ------------------------------------------
 PyObject *PropertyServiceBinder::create() {
-    Object *object = construct(&msType);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = GET_SERVICE(PropertyService);

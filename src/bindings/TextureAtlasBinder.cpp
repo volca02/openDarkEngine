@@ -37,7 +37,7 @@ const char *TextureAtlasBinder::msName = "TextureAtlas";
 PyTypeObject TextureAtlasBinder::msType = {
     PyVarObject_HEAD_INIT(&PyType_Type,
                           0) "opde.services.TextureAtlas", // char *tp_name; */
-    sizeof(TextureAtlasBinder::Object), // int tp_basicsize; */
+    sizeof(TextureAtlasBinder::Base), // int tp_basicsize; */
     0,                           // int tp_itemsize;       /* not used much */
     TextureAtlasBinder::dealloc, // destructor tp_dealloc; */
     0,                           // printfunc  tp_print;   */
@@ -130,7 +130,7 @@ bool TextureAtlasBinder::extract(PyObject *obj, TextureAtlasPtr &tgt) {
 
 // ------------------------------------------
 PyObject *TextureAtlasBinder::create(const TextureAtlasPtr &sh) {
-    Object *object = construct(&msType);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = sh;

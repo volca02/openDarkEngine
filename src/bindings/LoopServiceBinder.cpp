@@ -38,7 +38,7 @@ const char *LoopServiceBinder::msName = "LoopService";
 PyTypeObject LoopServiceBinder::msType = {
     PyVarObject_HEAD_INIT(&PyType_Type,
                           0) "opde.services.LoopService", // char *tp_name; */
-    sizeof(LoopServiceBinder::Object), // int tp_basicsize; */
+    sizeof(LoopServiceBinder::Base), // int tp_basicsize; */
     0,                          // int tp_itemsize;       /* not used much */
     LoopServiceBinder::dealloc, // destructor tp_dealloc; */
     0,                          // printfunc  tp_print;   */
@@ -185,7 +185,7 @@ PyObject *LoopServiceBinder::getLastFrameTime(PyObject *self, PyObject *args) {
 
 // ------------------------------------------
 PyObject *LoopServiceBinder::create() {
-    Object *object = construct(&msType);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = GET_SERVICE(LoopService);

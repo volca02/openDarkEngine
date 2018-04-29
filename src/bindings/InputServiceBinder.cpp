@@ -59,7 +59,7 @@ template <> const char *PythonStruct<InputEventMsg>::msName = "InputEventMsg";
 
 class PythonInputMessageConverter {
 public:
-    PyObject *operator()(const InputEventMsg &ev) {
+    static PyObject *convert(const InputEventMsg &ev) {
         PyObject *result = PythonInputMessage::create(ev);
         return result;
     }
@@ -76,7 +76,7 @@ const char *InputServiceBinder::msName = "InputService";
 PyTypeObject InputServiceBinder::msType = {
     PyVarObject_HEAD_INIT(&PyType_Type,
                           0) "opde.services.InputService", // char *tp_name; */
-    sizeof(InputServiceBinder::Object), // int tp_basicsize; */
+    sizeof(InputServiceBinder::Base), // int tp_basicsize; */
     0,                           // int tp_itemsize;       /* not used much */
     InputServiceBinder::dealloc, // destructor tp_dealloc; */
     0,                           // printfunc  tp_print;   */
@@ -203,10 +203,14 @@ PyObject *InputServiceBinder::registerCommandTrap(PyObject *self,
 
     if (PyArg_ParseTuple(args, "sO", &name, &callable)) {
         try {
-            InputService::ListenerPtr pcp(new PythonInputCallback(callable));
-
             // call the is to register the command trap
-            o->registerCommandTrap(name, pcp);
+            Object cb(callable);
+
+            using std::placeholders::_1;
+            o->registerCommandTrap(
+                name,
+                std::bind(&call_python_callback<InputEventMsg, PythonInputMessageConverter>,
+                          std::move(cb), _1));
 
             __PY_NONE_RET;
         } catch (BasicException) {
@@ -276,7 +280,7 @@ PyObject *InputServiceBinder::setInputMapped(PyObject *self, PyObject *args) {
 
 // ------------------------------------------
 PyObject *InputServiceBinder::create() {
-    Object *object = construct(&msType);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = GET_SERVICE(InputService);

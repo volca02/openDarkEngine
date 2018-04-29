@@ -37,7 +37,7 @@ const char *LinkQueryResultBinder::msName = "LinkQueryResult";
 PyTypeObject LinkQueryResultBinder::msType = {
     PyVarObject_HEAD_INIT(
         &PyType_Type, 0) "opde.services.LinkQueryResult", // char *tp_name; */
-    sizeof(LinkQueryResultBinder::Object), // int tp_basicsize; */
+    sizeof(LinkQueryResultBinder::Base), // int tp_basicsize; */
     0, // int tp_itemsize;       /* not used much */
     LinkQueryResultBinder::dealloc, // destructor tp_dealloc; */
     0,                              // printfunc  tp_print;   */
@@ -107,7 +107,7 @@ PyObject *LinkQueryResultBinder::repr(PyObject *self) {
 
 // ------------------------------------------
 PyObject *LinkQueryResultBinder::create(const LinkQueryResultPtr &result) {
-    Object *object = construct(&msType);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = result;

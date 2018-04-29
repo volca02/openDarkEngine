@@ -53,7 +53,7 @@ const char *DataFieldsBinder::msName = "DataFieldDescIterator";
 PyTypeObject DataFieldsBinder::msType = {
     PyVarObject_HEAD_INIT(&PyType_Type,
                           0) "opde.DataFieldsIterator", // char *tp_name; */
-    sizeof(DataFieldsBinder::Object), /* int tp_basicsize; */
+    sizeof(DataFieldsBinder::Base), /* int tp_basicsize; */
     0, // int tp_itemsize;       /* not used much */
     DataFieldsBinder::dealloc, // destructor tp_dealloc; */
     0,                                    // printfunc  tp_print;   */
@@ -125,7 +125,7 @@ PyObject *DataFieldsBinder::repr(PyObject *self) {
 // ------------------------------------------
 PyObject *
 DataFieldsBinder::create(const DataFields &result) {
-    Object *object = construct(&msType, &result);
+    Base *object = construct(&msType, &result);
     return (PyObject *)object;
 }
 

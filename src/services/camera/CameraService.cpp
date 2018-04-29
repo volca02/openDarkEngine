@@ -171,15 +171,12 @@ void CameraService::bootstrapFinished() {
        - joyxaxis
     */
 
-    InputService::ListenerPtr mturnListener(
-        new ClassCallback<InputEventMsg, CameraService>(
-            this, &CameraService::onMTurn));
-    InputService::ListenerPtr mlookListener(
-        new ClassCallback<InputEventMsg, CameraService>(
-            this, &CameraService::onMLook));
-
-    mInputSrv->registerCommandTrap("mturn", mturnListener);
-    mInputSrv->registerCommandTrap("mlook", mlookListener);
+    // TODO: Move these to PlayerService. We should only handle attachments here
+    using std::placeholders::_1;
+    mInputSrv->registerCommandTrap(
+        "mturn", std::bind(&CameraService::onMTurn, this, _1));
+    mInputSrv->registerCommandTrap(
+        "mlook", std::bind(&CameraService::onMLook, this, _1));
 
     // sim listener for the camera rotation
     mSimSrv->registerListener(this, SIM_PRIORITY_INPUT);
@@ -194,6 +191,10 @@ void CameraService::bootstrapFinished() {
     // interfere with this code?
 
     mHasRefsProperty = mPropertySrv->getProperty("HasRefs");
+
+    mSensitivity = &mInputSrv->createVariable("mouse_sensitivity", {1.0f});
+    mInvert      = &mInputSrv->createVariable("mouse_invert", {false});
+    mFreeLook    = &mInputSrv->createVariable("freelook", {false});
 }
 
 //------------------------------------------------------
@@ -201,6 +202,10 @@ void CameraService::shutdown() {
     mInputSrv->unregisterCommandTrap("mturn");
     mInputSrv->unregisterCommandTrap("mlook");
     mSimSrv->unregisterListener(this);
+
+    mSensitivity = nullptr;
+    mInvert      = nullptr;
+    mFreeLook    = nullptr;
 
     mInputSrv.reset();
     mRenderSrv.reset();
@@ -219,12 +224,10 @@ void CameraService::onMTurn(const InputEventMsg &iem) {
     // we are interested in:
     //  * mouse_sensitivity
     //  * mouse_invert
-    const Variant &msens = mInputSrv->getVariable("mouse_sensitivity");
-    const Variant &minvert = mInputSrv->getVariable("mouse_invert");
 
     // schedule a turn on the object in question
-    float rot = iem.params.toFloat() * msens.toFloat();
-    if (minvert.toBool())
+    float rot = iem.params.toFloat() * mSensitivity->toFloat();
+    if (mInvert->toBool())
         rot = -rot;
 
     appendCameraRotation(rot, 0.0f);
@@ -236,20 +239,12 @@ void CameraService::onMLook(const InputEventMsg &iem) {
     if (iem.event != IET_MOUSE_MOVE)
         return;
 
-    // TODO: Handle input service variables via references
-
     // is freelook enabled?
-    Variant mfreelook = mInputSrv->getVariable("freelook");
-
-    if (mfreelook.toInt() == 0)
+    if (mFreeLook->toInt() == 0)
         return;
 
-    // freelook enabled, rotate the view
-    const Variant &msens = mInputSrv->getVariable("mouse_sensitivity");
-    const Variant &minvert = mInputSrv->getVariable("mouse_invert");
-
-    float rot = iem.params.toFloat() * msens.toFloat();
-    if (minvert.toBool())
+    float rot = iem.params.toFloat() * mSensitivity->toFloat();
+    if (mInvert->toBool())
         rot = -rot;
 
     appendCameraRotation(0.0f, rot);

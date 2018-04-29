@@ -39,7 +39,7 @@ const char *RenderedLabelBinder::msName = "RenderedLabel";
 PyTypeObject RenderedLabelBinder::msType = {
     PyVarObject_HEAD_INIT(&PyType_Type,
                           0) "opde.services.RenderedLabel", // char *tp_name; */
-    sizeof(RenderedLabelBinder::Object), // int tp_basicsize; */
+    sizeof(RenderedLabelBinder::Base), // int tp_basicsize; */
     0,                            // int tp_itemsize;       /* not used much */
     RenderedLabelBinder::dealloc, // destructor tp_dealloc; */
     0,                            // printfunc  tp_print;   */
@@ -157,7 +157,7 @@ bool RenderedLabelBinder::extract(PyObject *obj, RenderedLabel *&tgt) {
 
 // ------------------------------------------
 PyObject *RenderedLabelBinder::create(RenderedLabel *sh) {
-    Object *object = construct(&msType);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = sh;

@@ -36,7 +36,7 @@ const char *DrawSourceBinder::msName = "DrawSource";
 PyTypeObject DrawSourceBinder::msType = {
     PyVarObject_HEAD_INIT(&PyType_Type,
                           0) "opde.services.DrawSource", // char *tp_name; */
-    sizeof(DrawSourceBinder::Object),                    // int tp_basicsize; */
+    sizeof(DrawSourceBinder::Base),                    // int tp_basicsize; */
     0,                         // int tp_itemsize;       /* not used much */
     DrawSourceBinder::dealloc, // destructor tp_dealloc; */
     0,                         // printfunc  tp_print;   */
@@ -85,7 +85,7 @@ bool DrawSourceBinder::extract(PyObject *obj, DrawSourcePtr &tgt) {
 
 // ------------------------------------------
 PyObject *DrawSourceBinder::create(const DrawSourcePtr &sh) {
-    Object *object = construct(&msType);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = sh;

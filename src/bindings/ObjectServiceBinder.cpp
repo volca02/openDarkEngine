@@ -38,7 +38,7 @@ const char *ObjectServiceBinder::msName = "ObjectService";
 PyTypeObject ObjectServiceBinder::msType = {
     PyVarObject_HEAD_INIT(&PyType_Type,
                           0) "opde.services.ObjectService", // char *tp_name; */
-    sizeof(ObjectServiceBinder::Object), // int tp_basicsize; */
+    sizeof(ObjectServiceBinder::Base), // int tp_basicsize; */
     0,                            // int tp_itemsize;       /* not used much */
     ObjectServiceBinder::dealloc, // destructor tp_dealloc; */
     0,                            // printfunc  tp_print;   */
@@ -427,7 +427,7 @@ PyObject *ObjectServiceBinder::hasMetaProperty(PyObject *self, PyObject *args) {
 
 // ------------------------------------------
 PyObject *ObjectServiceBinder::create() {
-    Object *object = construct(&msType);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = GET_SERVICE(ObjectService);

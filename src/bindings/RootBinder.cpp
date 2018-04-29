@@ -38,7 +38,7 @@ const char *opde_Root__doc__ = "The root object of the openDarkEngine API. "
 // ------------------------------------------
 PyTypeObject RootBinder::msType = {
     PyVarObject_HEAD_INIT(&PyType_Type, 0) "opde.Root", /* char *tp_name; */
-    sizeof(RootBinder::Object),                         /* int tp_basicsize; */
+    sizeof(RootBinder::Base),                         /* int tp_basicsize; */
     0,                       // int tp_itemsize;       /* not used much */
     RootBinder::dealloc,     /* destructor tp_dealloc; */
     0,                       /* printfunc  tp_print;   */
@@ -326,7 +326,7 @@ PyObject *RootBinder::repr(PyObject *self) {
 
 // ------------------------------------------
 PyObject *RootBinder::create(Root *root) {
-    Object *object = construct(&msType);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = root;

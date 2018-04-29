@@ -522,15 +522,15 @@ template<typename T>
 class object_binder : public PythonPublishedType {
 public:
     /// A python object type
-    typedef ObjectBase<T> Object;
+    typedef ObjectBase<T> Base;
 
 protected:
     /// A sort-of constructor method. To be used to create a new NULL Object*
     template<typename...ArgsT>
-    static Object *construct(PyTypeObject *type, ArgsT&&...args) {
-        Object *object;
+    static Base *construct(PyTypeObject *type, ArgsT&&...args) {
+        Base *object;
 
-        object = PyObject_New(Object, type);
+        object = PyObject_New(Base, type);
 
         // At this point, the shared_ptr instance in the object is invalid (I.E.
         // Allocated, but not initialized). If we try to assign into it, we'll
@@ -547,7 +547,7 @@ protected:
     /// shared_ptr. To be used in msType
     static void dealloc(PyObject *self) {
         // cast the object to T::Object
-        Object *o = reinterpret_cast<Object *>(self);
+        Base *o = reinterpret_cast<Base*>(self);
 
         // Call the destructor to clean up
         (&o->mInstance)->~T();
@@ -562,11 +562,11 @@ protected:
 template <typename T> class shared_ptr_binder : public object_binder<T> {
 public:
     /// A python object type
-    using Object = typename object_binder<T>::Object;
+    using Base = typename object_binder<T>::Base;
 
 protected:
     /// A sort-of constructor method. To be used to create a new NULL Object*
-    static Object *construct(PyTypeObject *type) {
+    static Base *construct(PyTypeObject *type) {
         return object_binder<T>::construct(type);
     }
 
@@ -574,7 +574,7 @@ protected:
     /// shared_ptr. To be used in msType
     static void dealloc(PyObject *self) {
         // cast the object to T::Object
-        Object *o = reinterpret_cast<Object *>(self);
+        Base *o = reinterpret_cast<Base*>(self);
 
         // Decreases the shared_ptr counter (just to be sure here, dtor does
         // that to)
@@ -592,14 +592,14 @@ protected:
 
 public:
     /// A python object type
-    typedef ObjectBase<T *> Object;
+    using Base = ObjectBase<T*>;
 
 protected:
     /// A sort-of constructor method. To be used to create a new NULL Object*
-    static Object *construct(PyTypeObject *type) {
-        Object *object;
+    static Base *construct(PyTypeObject *type) {
+        Base *object;
 
-        object = PyObject_New(Object, type);
+        object = PyObject_New(Base, type);
 
         if (object != NULL) {
             // Here, tidy!
@@ -616,6 +616,98 @@ protected:
         // delete the object
         PyObject_Del(self);
     }
+};
+
+/// Encapsulates python object with propper refcounting
+class Object {
+public:
+    struct TAKE_REF_TYPE {};
+    static const TAKE_REF_TYPE TAKE_REF;
+
+    Object() {}
+
+    Object(std::nullptr_t) {}
+
+    Object(PyObject *held) : mObj(held) {
+        incref();
+    }
+
+    Object(const Object &other) : mObj(other.mObj) {
+        incref();
+    }
+
+    Object(Object &&other) : mObj(other.mObj) {
+        incref();
+        other.decref();
+    }
+
+    // Ctor that does not increase refcount (already increased)
+    Object(PyObject *held, TAKE_REF_TYPE) : mObj(held) {}
+
+    ~Object() {
+        decref();
+    }
+
+    Object &operator=(PyObject *ptr) {
+        mObj = ptr;
+        return *this;
+    }
+
+    Object &operator=(const Object &other) {
+        if (mObj == other.mObj)
+            return *this;
+
+        // let go of the original object
+        decref();
+
+        mObj = other.mObj;
+
+        incref();
+        return *this;
+    }
+
+    Object &operator=(Object &&other) {
+        if (mObj == other.mObj) {
+            other.decref();
+            return *this;
+        }
+
+        // let go of the original object
+        decref();
+
+        mObj = other.mObj;
+
+        incref();
+        other.decref();
+        return *this;
+    }
+
+    // releases the object without decreasing refcount
+    PyObject *release() {
+        auto obj = mObj;
+        mObj = nullptr;
+        return obj;
+    }
+
+    PyObject *get() { return mObj; }
+    PyObject *operator*() { return mObj; }
+    const PyObject *get() const { return mObj; }
+    const PyObject *operator*() const { return mObj; }
+    operator PyObject*() { return mObj; }
+
+private:
+    void incref() {
+        if (mObj)
+            Py_INCREF(mObj);
+    }
+
+    void decref() {
+        if (mObj)
+            Py_DECREF(mObj);
+        mObj = nullptr;
+    }
+
+    PyObject *mObj = nullptr;
 };
 
 }; // namespace Python

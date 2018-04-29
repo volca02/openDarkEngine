@@ -25,54 +25,56 @@
 #ifndef __PYTHONCALLBACK_H
 #define __PYTHONCALLBACK_H
 
+#include "bindings.h"
 #include "Callback.h"
 
 namespace Opde {
+
+template<typename MSG, typename CVT>
+void call_python_callback(Python::Object &callable, const MSG &msg) {
+    using Object = Python::Object;
+
+    // already increased refcount here.
+    Object py_msg{CVT::convert(msg), Object::TAKE_REF};
+
+    // Call the pyobject
+    Object args{PyTuple_New(1), Object::TAKE_REF};
+    PyTuple_SetItem(args, 0, py_msg.release()); // Steals reference
+
+    {
+        Object rslt = PyObject_CallObject(callable, args);
+        // will ignore the result, but decref it!
+    }
+
+    __PY_HANDLE_PYTHON_ERROR; // converts python side error to
+    // PythonException
+}
+
 /// Python callback template. MSG marks the message sent, C the converter that
 /// is a functor - converts the message to PyObject* as required
 /// @note Please catch exceptions upon construction. There is no way to pas
 /// PyErr directly!
-template <typename MSG, typename C>
+template <typename MSG, typename CVT>
 class PythonCallback : public Callback<MSG> {
 public:
-    PythonCallback(PyObject *callable) : mCallable(callable), mConverter() {
+    PythonCallback(PyObject *callable) : mCallable(callable) {
         if (!PyCallable_Check(mCallable))
             // WOULD BE: PyErr_SetString(PyExc_TypeError, "Python callback can't
             // be constructed on non-callable!");
             OPDE_EXCEPT(
                 "Python callback can't be constructed on non-callable!");
-
-        Py_INCREF(mCallable);
     };
 
     ~PythonCallback() { Py_DECREF(mCallable); };
 
     virtual void operator()(const MSG &msg) {
-        PyObject *py_msg = mConverter(msg);
-
-        // Call the pyobject
-        PyObject *args;
-        args = PyTuple_New(1);
-
-        PyTuple_SetItem(args, 0, py_msg); // Steals reference
-
-        PyObject *rslt = PyObject_CallObject(mCallable, args);
-
-        if (rslt) {
-            // To be sure no leak happened
-            Py_DECREF(rslt);
-        }
-
-        __PY_HANDLE_PYTHON_ERROR; // converts python side error to
-                                  // PythonException
-
-        Py_DECREF(args);
+        call_python_callback<MSG, CVT>(mCallable, msg);
     }
 
 protected:
-    PyObject *mCallable;
-    C mConverter;
+    Python::Object mCallable;
 };
+
 } // namespace Opde
 
 #endif

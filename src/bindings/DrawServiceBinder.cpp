@@ -47,7 +47,7 @@ const char *DrawServiceBinder::msName = "DrawService";
 PyTypeObject DrawServiceBinder::msType = {
     PyVarObject_HEAD_INIT(&PyType_Type,
                           0) "opde.services.DrawService", // char *tp_name; */
-    sizeof(DrawServiceBinder::Object), // int tp_basicsize; */
+    sizeof(DrawServiceBinder::Base), // int tp_basicsize; */
     0,                          // int tp_itemsize;       /* not used much */
     DrawServiceBinder::dealloc, // destructor tp_dealloc; */
     0,                          // printfunc  tp_print;   */
@@ -429,7 +429,7 @@ PyObject *DrawServiceBinder::repr(PyObject *self) {
 
 // ------------------------------------------
 PyObject *DrawServiceBinder::create() {
-    Object *object = construct(&msType);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = GET_SERVICE(DrawService);
@@ -458,7 +458,7 @@ const char *DrawOperationBinder::msName = "DrawOperation";
 PyTypeObject DrawOperationBinder::msType = {
     PyVarObject_HEAD_INIT(&PyType_Type,
                           0) "opde.services.DrawOperation", // char *tp_name; */
-    sizeof(DrawOperationBinder::Object), // int tp_basicsize; */
+    sizeof(DrawOperationBinder::Base), // int tp_basicsize; */
     0,                            // int tp_itemsize;       /* not used much */
     DrawOperationBinder::dealloc, // destructor tp_dealloc; */
     0,                            // printfunc  tp_print;   */
@@ -751,7 +751,7 @@ bool DrawOperationBinder::extract(PyObject *object, DrawOperation *&op) {
 
 // ------------------------------------------
 PyObject *DrawOperationBinder::create(DrawOperation *sh) {
-    Object *object = construct(&msType);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
         object->mInstance = sh;
