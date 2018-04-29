@@ -67,7 +67,7 @@ on this thing too, as well as maybe other, which I do not know about)
 
 #pragma pack(push, 1)
 
-typedef struct Vertex {
+struct Vertex {
     float x;
     float y;
     float z;
@@ -78,33 +78,33 @@ typedef struct Vertex {
         y = _y;
         z = _z;
     }
-} Vertex;
+};
 
-typedef struct {
+struct PolyParts {
     int32_t a;
     int32_t b;
     int32_t c;
-} PolyParts;
+};
 
-typedef struct {
+struct PolyPartsShorts {
     int16_t a;
     int16_t b;
     int16_t c;
-} PolyPartsShorts;
+};
 
-typedef struct {
+struct UVMap {
     float u;
     float v;
-} UVMap;
+};
 
 // Main header
-typedef struct {
+struct BinHeadType {
     char ID[4];       // 'LGMD', 'LGMM'
     uint32_t version; // 3, 4 - 1
-} BinHeadType;
+};
 
 // the object file type headers:
-typedef struct BinHeader {
+struct BinHeader {
     char ObjName[8];
     float sphere_rad;
     float max_poly_rad;
@@ -140,14 +140,14 @@ typedef struct BinHeader {
     // version 6 addons
     uint32_t offset_hdr2;
     uint32_t offset_end_parts;
-} BinHeader;
+};
 
 // the sizes of the header versions
 #define SIZE_BIN_HDR_V6 (sizeof(BinHeader))
 #define SIZE_BIN_HDR_V4 (SIZE_BIN_HDR_V6 - 8)
 #define SIZE_BIN_HDR_V3 (SIZE_BIN_HDR_V4 - 12)
 
-typedef struct BinHeader2 {
+struct BinHeader2 {
     short num_uvs;
     short num_verts;
     char unk1;
@@ -158,13 +158,13 @@ typedef struct BinHeader2 {
     uint32_t offset_norms;
     uint32_t offset_parts;
     uint32_t offset_unk2;
-} BinHeader2;
+};
 
 // the ?skeleton? joint definitions(?)
-typedef struct VHotObj {
+struct VHotObj {
     uint32_t index;
     Vertex point;
-} VHotObj;
+};
 
 // Material definitions
 struct MeshMaterial {
@@ -193,15 +193,15 @@ struct MeshMaterialExtra {
     float illum;
 };
 
-typedef struct {
+struct SubObjTransform {
     uint32_t JointNumber; // A numbered joint identification
     float min_range;      // minimal angle/translation ?
     float max_range;      // maximal angle/translation ?
     float f[9];           // Transformation matrix
     Vertex AxlePoint;     // seems to be a Joint position
-} SubObjTransform;
+};
 
-typedef struct {
+struct SubObjectHeader {
     char name[8];
 
     unsigned char
@@ -221,17 +221,16 @@ typedef struct {
     short sub_num_norms;
     short node_start;
     short sub_num_nodes;
-} SubObjectHeader;
+};
 
 // geometry nodes definitions
-typedef struct NodeHeader {
+struct NodeHeader {
     char flag;
     char object_number;
     char c_unk1;
+};
 
-} NodeHeader;
-
-typedef struct NodeSplit {
+struct NodeSplit {
     Vertex sphere_center;
     float sphere_radius;
     short pgon_before_count;
@@ -240,36 +239,36 @@ typedef struct NodeSplit {
     short behind_node; // offset to the node on the behind (from offset_nodes)
     short front_node;  // offset to the node on the front (from offset_nodes)
     short pgon_after_count;
-} NodeSplit;
+};
 
-typedef struct NodeCall {
+struct NodeCall {
     Vertex sphere_center;
     float sphere_radius;
     short pgon_before_count;
     short call_node; // Inserted node?
     short pgon_after_count;
-} NodeCall;
+};
 
-typedef struct NodeRaw // Simple Node. No splitting
+struct NodeRaw // Simple Node. No splitting
 {
     Vertex sphere_center;
     float sphere_radius;
     short pgon_count;
-} NodeRaw;
+};
 
 // If version 3 and type is MD_PGON_TMAP or MD_PGON_SOLID_COLOR_VCOLOR
 // data is the material index. Range: 1 - num_materials
 //
 // In any version, if type is MD_PGON_SOLID_COLOR_PAL data is the palette index
 
-typedef struct ObjPolygon {
+struct ObjPolygon {
     unsigned short index;    // Index of the Polygon
     short data;              // ?
     unsigned char type;      // MD_PGON Type
     unsigned char num_verts; // Number of verts in polygon
     unsigned short norm;     // Polygon normal number
     float d;                 // ?
-} ObjPolygon;
+};
 
 #pragma pack(pop)
 

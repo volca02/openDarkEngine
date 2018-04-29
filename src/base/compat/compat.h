@@ -26,9 +26,6 @@
 #define snprintf _snprintf
 #define M_PI_2 1.57079632679489661923
 
-// Disable typedef struct warnings
-#pragma warning(disable : 4091)
-
 #endif
 
 #ifndef _MSC_VER

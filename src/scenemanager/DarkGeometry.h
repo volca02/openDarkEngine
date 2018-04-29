@@ -113,12 +113,12 @@ struct DarkBufferAllocation {
 // Forward decl.
 class DarkSubGeometry;
 
-typedef struct {
+struct DarkVertex {
     float pos[3];
     float norm[3];
     float txtcoord[2];
     float lmcoord[2];
-} DarkVertex;
+};
 
 /// Geometry builder for a fragment. Is used temporarily to build geometry from
 /// vertex definitions
@@ -133,12 +133,12 @@ public:
     void index(size_t index);
 
     /// Vertex definition for a single unique vertex
-    typedef struct {
+    struct VertexDefinition {
         size_t pos_idx;
         size_t norm_idx;
         size_t txt0_idx;
         size_t txt1_idx;
-    } VertexDefinition;
+    };
 
     /** builds the queued vertex and index data into the fragment/sub-geometry
      * pair

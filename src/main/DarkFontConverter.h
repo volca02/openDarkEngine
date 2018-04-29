@@ -63,15 +63,15 @@ struct CharInfo {
 
 #pragma pack(push, 1)
 
-typedef struct tagBITMAPFILEHEADER {
+struct BITMAPFILEHEADER {
     WORD bfType;
     DWORD bfSize;
     WORD bfReserved1;
     WORD bfReserved2;
     DWORD bfOffBits;
-} BITMAPFILEHEADER;
+};
 
-typedef struct tagBITMAPINFOHEADER {
+struct BITMAPINFOHEADER {
     DWORD biSize;
     DWORD biWidth;
     DWORD biHeight;
@@ -83,25 +83,25 @@ typedef struct tagBITMAPINFOHEADER {
     DWORD biYPelsPerMeter;
     DWORD biClrUsed;
     DWORD biClrImportant;
-} BITMAPINFOHEADER;
+};
 
-typedef struct tagRGBQUAD {
+struct RGBQUAD {
     BYTE rgbBlue;
     BYTE rgbGreen;
     BYTE rgbRed;
     BYTE rgbReserved;
-} RGBQUAD;
+};
 
-typedef struct tagBITMAPINFO {
+struct BITMAPINFO {
     BITMAPINFOHEADER bmiHeader;
     RGBQUAD bmiColors[1];
-} BITMAPINFO;
+};
 
-typedef struct tagRGBTRIPLE {
+struct RGBTRIPLE {
     BYTE rgbtBlue;
     BYTE rgbtGreen;
     BYTE rgbtRed;
-} RGBTRIPLE;
+};
 
 static const COLORREF ColorTable[] = {
     0x000000, 0xDDDDDD, 0xB6B6B6, 0x969696, 0x7C7C7C, 0x666666, 0x545454,

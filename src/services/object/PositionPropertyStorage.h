@@ -28,11 +28,11 @@
 
 namespace Opde {
 
-typedef struct {
+struct sPositionProp {
     Vector3 position;
     uint32_t cell;
     Quaternion facing;
-} sPositionProp;
+};
 
 /** Position property storage */
 class PositionPropertyStorage : public StructDataStorage<sPositionProp> {

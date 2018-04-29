@@ -40,33 +40,33 @@
 namespace Opde {
 
 /// A structure holding info for one texture in an atlas
-typedef struct {
+struct AtlasInfo {
     int atlasnum;
     float u, v;   // shift of the texture (UV) in the atlas (position)
     float su, sv; // size of the texture (UV) in the atlas (relative to atlas
                   // size - 0-1)
-} AtlasInfo;
+};
 
 /** A structure representing a lightmap pixel */
-typedef struct lmpixel {
+struct LMPixel {
     unsigned char R, G, B;
 
     /** Converts the RGB values to the A8R8G8B8 format
      * \return uint32 holding the A8R8G8B8 version of the stored RGB */
     Ogre::uint32 ARGB() { return (R << 16) | (G << 8) | B; }
 
-    lmpixel(unsigned char nR, unsigned char nG, unsigned char nB) {
+    LMPixel(unsigned char nR, unsigned char nG, unsigned char nB) {
         R = nR;
         G = nG;
         B = nB;
     }
 
-    lmpixel() {
+    LMPixel() {
         R = 0;
         G = 0;
         B = 0;
     }
-} lmpixel;
+};
 
 // Forward declaration
 class LightAtlas;
@@ -87,9 +87,10 @@ class LightMap {
     FreeSpaceInfo *mPosition;
 
     /** static lightmap */
-    lmpixel *mStaticLmap;
+    LMPixel *mStaticLmap;
 
-    typedef std::map<int, lmpixel *> ObjectToLightMap;
+    /// maps object ID (light) to lightmaps
+    typedef std::map<int, LMPixel *> ObjectToLightMap;
 
     /** A map of the switchable lightmaps */
     ObjectToLightMap mSwitchableLmaps;
@@ -121,7 +122,7 @@ public:
      * it will deallocate the lmap in the destructor
      * @note The static_lightmap will be delete[]'d in destructor, together with
      * any switchable lightmaps present */
-    LightMap(unsigned int sx, unsigned int sy, lmpixel *static_lightmap,
+    LightMap(unsigned int sx, unsigned int sy, LMPixel *static_lightmap,
              int tag = 0)
         : mSizeX(sx), mSizeY(sy), mTag(tag) {
         mStaticLmap = static_lightmap;
@@ -163,14 +164,14 @@ public:
      * @note Returns NEW buffer that the caller is responsible to manage!
      * @todo If somebody finds time, do this two stage - one return required
      * size, two convert into supplied buffer */
-    static lmpixel *convert(char *data, int sx, int sy, int ver);
+    static LMPixel *convert(char *data, int sx, int sy, int ver);
 
     /** Adds a switchable lightmap with identification id to the lightmap list
      * (has to be of the same size).
      * @param id the ID of the light the lightmaps belongs to.
      * @param data are the actual values converted to RGB. Unallocation is
      * handled in destructor */
-    void AddSwitchableLightmap(int id, lmpixel *data);
+    void AddSwitchableLightmap(int id, LMPixel *data);
 
     /** The main intensity setting function
      * @param id The id of the light (not object id, but internal light id)

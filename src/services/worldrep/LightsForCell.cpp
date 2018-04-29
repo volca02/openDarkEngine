@@ -127,7 +127,7 @@ void LightsForCell::atlasLightMaps(LightAtlasList *atlas) {
         for (size_t anim_l = 0; anim_l < mNumAnimLights; anim_l++) {
             if ((lm_infos[face].animflags & bit_idx) > 0) {
                 // There is a anim lmap for this light and face
-                lmpixel *converted = LightMap::convert(
+                LMPixel *converted = LightMap::convert(
                     (char *)lmaps[face][lmap_order], lm_infos[face].lx,
                     lm_infos[face].ly, ver);
 

@@ -36,7 +36,7 @@ namespace Opde {
 
 int LightAtlas::mMaxSize;
 
-Vector3 operator*(float a, lmpixel b) {
+Vector3 operator*(float a, const LMPixel &b) {
     return Vector3(a * b.R, a * b.G, a * b.B);
 }
 
@@ -339,7 +339,7 @@ bool LightAtlasList::placeLightMap(LightMap *lmap) {
 LightMap *LightAtlasList::addLightmap(int ver, int texture, char *buf, int w,
                                       int h, AtlasInfo &destinfo) {
     // convert the pixel representation
-    lmpixel *cdata = LightMap::convert(buf, w, h, ver);
+    LMPixel *cdata = LightMap::convert(buf, w, h, ver);
 
     // construct the lmap
     LightMap *lmap = new LightMap(w, h, cdata, texture);
@@ -514,7 +514,7 @@ void LightMap::refresh() {
     ObjectToLightMap::const_iterator lmap_it = mSwitchableLmaps.begin();
 
     for (; lmap_it != mSwitchableLmaps.end(); ++lmap_it) {
-        lmpixel *act_lmap = lmap_it->second;
+        LMPixel *act_lmap = lmap_it->second;
 
         int light_id = lmap_it->first;
 
@@ -546,8 +546,8 @@ void LightMap::refresh() {
     delete[] lmapB;
 }
 
-lmpixel *LightMap::convert(char *data, int sx, int sy, int ver) {
-    lmpixel *result = new lmpixel[sx * sy];
+LMPixel *LightMap::convert(char *data, int sx, int sy, int ver) {
+    LMPixel *result = new LMPixel[sx * sy];
 
     // old version - grayscale
     if (ver == 0) {
@@ -571,7 +571,7 @@ lmpixel *LightMap::convert(char *data, int sx, int sy, int ver) {
     return result;
 }
 
-void LightMap::AddSwitchableLightmap(int id, lmpixel *data) {
+void LightMap::AddSwitchableLightmap(int id, LMPixel *data) {
     mSwitchableLmaps.insert(std::make_pair(id, data));
     mIntensities[id] = 1.0f;
 }
