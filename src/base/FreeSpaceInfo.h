@@ -36,20 +36,14 @@ namespace Opde {
  */
 class FreeSpaceInfo {
 protected:
-    int mMaxArea;
-    bool mIsLeaf;
-
     // Children of this node, if it's a node
     std::unique_ptr<FreeSpaceInfo> mChild[2];
 
     FreeSpaceInfo() {
         this->x = 0;
         this->y = 0;
-        this->w = -1;
-        this->h = -1;
-
-        mMaxArea = 0;
-        mIsLeaf = true;
+        this->w = 0;
+        this->h = 0;
     }
 
 public:
@@ -57,6 +51,7 @@ public:
     int y;
     int w;
     int h;
+    bool used = false;
 
     // Constructor with the specified dimensions and position (leaf constructor)
     FreeSpaceInfo(int x, int y, int w, int h) {
@@ -64,28 +59,15 @@ public:
         this->y = y;
         this->w = w;
         this->h = h;
-
-        mIsLeaf = true;
-        mMaxArea = w * h;
     }
 
     // destructor. Deletes the children if any.
     ~FreeSpaceInfo() { }
 
-    // Tests if this node has free space somewhere to store the specified sized
-    // texture.
-    bool Fits(int sw, int sh) const {
-        if ((sw <= w) && (sh <= h))
-            return true;
-
-        return false;
-    }
-
     // Returns the area this free space represents
     int getArea() const { return w * h; }
 
-    /** returns the maximal allocatable area of this node/leaf */
-    int getMaxArea() const { return mMaxArea; }
+    bool isLeaf() const { return !mChild[0]; }
 
     /** allocate a space in the free area.
      * If this is a node, it searches both it's children. If it is a leaf, it
@@ -95,88 +77,46 @@ public:
      * @return A free space rectangle of the requested space, or null if the
      * space could not be allocated */
     FreeSpaceInfo *allocate(int sw, int sh) {
-        if (!mIsLeaf) { // split node.
-            int reqa = sw * sh;
+        if (!isLeaf()) { // split node.
+            FreeSpaceInfo *result = mChild[0]->allocate(sw, sh);
+            if (result) return result;
+            return mChild[1]->allocate(sw, sh);
+        }
 
-            for (int i = 0; i < 2; i++) {
-                FreeSpaceInfo *result = nullptr;
 
-                if (!mChild[i])
-                    continue;
+        if (used) return nullptr;
 
-                if (mChild[i]->getMaxArea() >= reqa)
-                    result = mChild[i]->allocate(sw, sh);
+        // we're the leaf node. Try to insert if possible
+        if ((sw > w) || (sh > h))
+            return nullptr;
 
-                if (result != NULL) { // allocation was ok
-                    // refresh the maximal area
-                    refreshMaxArea();
-
-                    return result;
-                }
-            }
-
-            return NULL; // no luck, sorry!
-        } else {
-            // we're the leaf node. Try to insert if possible
-            if (!Fits(sw, sh))
-                return NULL;
-
-            // bottom will be created?
-            if (sh < h)
-                mChild[0].reset(new FreeSpaceInfo(x, y + sh, w, h - sh));
-
-            // right will be created?
-            if (sw < w)
-                mChild[1].reset(new FreeSpaceInfo(x + sw, y, w - sw, sh));
-
-            // modify this node to be non-leaf, as it was allocated
-            mIsLeaf = false;
-
-            w = sw;
-            h = sh;
-
-            // refresh the mMaxArea
-            refreshMaxArea();
-
+        // exact fit. Return this node as result
+        if ((w == sw) && (h == sh)) {
+            used = true;
             return this;
         }
-    }
 
-    /** refreshes the maximal allocatable area for this node/leaf.
-        Non-leaf nodes get the maximum as the maximum of the areas of the children
-    */
-    void refreshMaxArea() {
-        if (mIsLeaf) {
-            mMaxArea = w * h;
-            return;
+        // we have to split this into two leafs.
+        int dw = w - sw;
+        int dh = h - sh;
+
+        // choose split based on bigger delta
+        if (dw > dh) {
+            mChild[0].reset(new FreeSpaceInfo(x,      y,     sw, h));
+            mChild[1].reset(new FreeSpaceInfo(x + sw, y, w - sw, h));
+        } else {
+            mChild[0].reset(new FreeSpaceInfo(x, y,      w,     sh));
+            mChild[1].reset(new FreeSpaceInfo(x, y + sh, w, h - sh));
         }
 
-        mMaxArea = -1;
-
-        for (int j = 0; j < 2; j++) {
-            if (!mChild[j])
-                continue;
-
-            if (mChild[j]->getMaxArea() > mMaxArea)
-                mMaxArea = mChild[j]->getMaxArea();
-        }
+        return mChild[0]->allocate(sw, sh);
     }
 
-    /** returns the maximal area of this node */
+    /** returns the allocated area of this subtree */
     int getLeafArea() {
-        if (mIsLeaf) {
-            return getArea();
-        }
+        if (isLeaf()) return w*h;
 
-        int area = 0;
-
-        for (int j = 0; j < 2; j++) {
-            if (!mChild[j])
-                continue;
-
-            area += mChild[j]->getLeafArea();
-        }
-
+        int area = mChild[0]->getLeafArea() + mChild[1]->getLeafArea();
         return area;
     }
 };

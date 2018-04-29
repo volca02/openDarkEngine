@@ -308,6 +308,8 @@ public:
         return it != mTagSet.end();
     };
 
+    int getEdgeSize() { return mSize; }
+
     /** adds a new tag into the atlas */
     void addTag(int tag) { mTagSet.insert(tag); };
 

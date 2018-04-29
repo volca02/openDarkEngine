@@ -46,7 +46,8 @@ Vector3 operator*(float a, const LMPixel &b) {
    construction
 */
 LightAtlas::LightAtlas(int idx, int tag)
-    : mCount(0), mIdx(idx), mTex(), mAtlas(), mFreeSpace(), mSize(1) {
+    : mCount(0), mIdx(idx), mTex(), mAtlas(), mFreeSpace(), mSize(1)
+{
     mName = "@lightmap" +
             idx; // so we can find the atlas by number in the returned AtlasInfo
 
@@ -108,10 +109,8 @@ int LightAtlas::getUsedArea() {
     int area = 0;
 
     // place the lightmaps again
-    LightMapVector::iterator it = mLightmaps.begin();
-
-    for (; it != mLightmaps.end(); ++it) {
-        std::pair<int, int> dim = (*it)->getDimensions();
+    for (auto &lm : mLightmaps) {
+        std::pair<int, int> dim = lm->getDimensions();
         area += dim.first * dim.second;
     }
 
@@ -360,13 +359,13 @@ bool LightAtlasList::render() {
     for (auto &atlas : mAtlases) {
         int totc = atlas->getPixelCount();
         int used = atlas->getUsedArea();
-
+        int s = atlas->getEdgeSize();
         used_pixels += used;
         total_pixels += totc;
 
-        LOG_VERBOSE("Light Map Atlas: Atlas {tags %s} : %d of %d used (%f%%) "
+        LOG_VERBOSE("Light Map Atlas: Atlas {tags %s} %dx%d : %d of %d used (%f%%) "
                     "(%d of %d so far)",
-                    atlas->getTagStr().c_str(), used, totc,
+                    atlas->getTagStr().c_str(), s, s, used, totc,
                     100.0f * used / totc, used_pixels, total_pixels);
     }
 

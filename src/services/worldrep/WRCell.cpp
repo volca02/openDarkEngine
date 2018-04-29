@@ -430,7 +430,7 @@ void WRCell::createCellGeometry(const MaterialServicePtr &matSvc,
     // Attach the resulting object to the node with the center in the center
     // vertex of the mesh...
     if (faceCount <= 0) {
-        LOG_INFO(
+        LOG_DEBUG(
             "A geometry - less cell encountered, skipping the mesh generation");
         return;
     }
