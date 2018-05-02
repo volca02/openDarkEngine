@@ -218,9 +218,6 @@ protected:
     /// Time it took to find visible objects
     unsigned long mFindVisibleObjectsTime;
 
-    /// Time it took to populate light list
-    unsigned long mLightListTime;
-
     /// Time it took to update scene graph
     unsigned long mSceneGraphTime;
 

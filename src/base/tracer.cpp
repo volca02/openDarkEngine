@@ -61,13 +61,19 @@ void Tracer::traceStartFrame() {
 
     // For now, I'm spitting this into normal log. Later I'll
     // write it into a special file.
-    LOG_DEBUG("PERF_FRAME %zu %zu %zu", mTraceFrameNum, now, spentTime);
+    LOG_DEBUG("PERF_FRAME f=%zu t=%zu spent=%zu", mTraceFrameNum, now, spentTime);
 
     for (TraceLog::const_iterator ci = mTraces.begin(), iend = mTraces.end();
          ci != iend; ++ci) {
         if (ci->function) {
-            LOG_DEBUG("PERF_TRACE_SCOPE %s %zu '%s' '%p'", ci->entry ? "ENTER" : "EXIT",
-                      ci->time - mFrameStartTime, ci->text, ci->data);
+            if (ci->entry) {
+                LOG_DEBUG("PERF_TRACE_SCOPE %zu ENTER '%s' '%p'",
+                          ci->time - mFrameStartTime, ci->text, ci->data);
+            } else {
+                LOG_DEBUG("PERF_TRACE_SCOPE %zu EXIT(%zu) '%s' '%p'",
+                          ci->time - mFrameStartTime, ci->spent, ci->text,
+                          ci->data);
+            }
         } else {
             LOG_DEBUG("PERF_TRACE_POINT %zu '%s' '%p'", ci->time - mFrameStartTime,
                       ci->text, ci->data);
@@ -81,13 +87,28 @@ void Tracer::traceStartFrame() {
 }
 
 /** logs a tracer record used for performance tracing */
-void Tracer::trace(bool start, const char *func, const void *data) {
+unsigned long Tracer::trace(bool start, const char *func, const void *data) {
     TraceRecord trace;
     trace.time = mTimer->getMicroseconds();
     trace.entry = start;
     trace.text = func;
     trace.function = true;
     trace.data = data;
+    mTraces.push_back(trace);
+    return trace.time;
+}
+
+/** logs a tracer record used for performance tracing */
+void Tracer::trace_endpoint(const char *func,
+                            const void *data, unsigned long start)
+{
+    TraceRecord trace;
+    trace.time = mTimer->getMicroseconds();
+    trace.entry = false;
+    trace.text = func;
+    trace.function = true;
+    trace.data = data;
+    trace.spent = trace.time - start;
     mTraces.push_back(trace);
 }
 

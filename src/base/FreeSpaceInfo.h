@@ -101,10 +101,34 @@ public:
         int dh = h - sh;
 
         // choose split based on bigger delta
+        // the first rect of the two will be able to fit [sw,sh]
         if (dw > dh) {
+            /*Split relative to x,y:
+
+              0,0       sw,0           w,0
+              +---------+--------------+
+              |         |              |
+              |         |              |
+              |         |              |
+              +---------+--------------+
+              0,h       sw,h           w,h
+              */
             mChild[0].reset(new FreeSpaceInfo(x,      y,     sw, h));
             mChild[1].reset(new FreeSpaceInfo(x + sw, y, w - sw, h));
         } else {
+            /*Split relative to x,y:
+
+              0,0            w,0
+              +--------------+
+              |              |
+              |              |
+              |0,sh          |w,sh
+              +--------------+
+              |              |
+              |              |
+              +--------------+
+              0,h            w,h
+              */
             mChild[0].reset(new FreeSpaceInfo(x, y,      w,     sh));
             mChild[1].reset(new FreeSpaceInfo(x, y + sh, w, h - sh));
         }
@@ -114,7 +138,7 @@ public:
 
     /** returns the allocated area of this subtree */
     int getLeafArea() {
-        if (isLeaf()) return w*h;
+        if (isLeaf()) return used ? w*h : 0;
 
         int area = mChild[0]->getLeafArea() + mChild[1]->getLeafArea();
         return area;

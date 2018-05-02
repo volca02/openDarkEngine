@@ -25,12 +25,12 @@
 #define __TEXTUREATLAS_H
 
 #include "DrawCommon.h"
-#include "FreeSpaceInfo.h"
 
 namespace Opde {
 // Forward decl.
 class DrawService;
 class FontDrawSource;
+class FreeSpaceInfo;
 
 /** Texture atlas for DrawSource grouping. Textures created within this atlas
  * are grouped together into a single rendering call when used as a source for
@@ -96,7 +96,7 @@ protected:
     DrawSourceList mMyDrawSources;
     FontSet mMyFonts;
 
-    FreeSpaceInfo *mAtlasAllocation;
+    std::unique_ptr<FreeSpaceInfo> mAtlasAllocation;
 
     bool mIsDirty; // TODO: Replace by mIsBuilt
 

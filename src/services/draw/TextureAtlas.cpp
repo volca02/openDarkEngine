@@ -23,9 +23,12 @@
 
 // Portions inspired by ajs' Atlas code
 
+#include <list>
+
 #include "TextureAtlas.h"
 #include "DrawService.h"
 #include "FontDrawSource.h"
+#include "FreeSpaceInfo.h"
 #include "logger.h"
 
 #include <OgreHardwarePixelBuffer.h>
@@ -33,8 +36,6 @@
 #include <OgreStringConverter.h>
 #include <OgreTechnique.h>
 #include <OgreTextureManager.h>
-
-#include <list>
 
 namespace Opde {
 
@@ -45,7 +46,7 @@ TextureAtlas::TextureAtlas(DrawService *owner, DrawSource::ID id)
     : DrawSourceBase(), mOwner(owner), mAtlasID(id), mMyDrawSources(),
       mIsDirty(false), mAtlasSize(1, 1) {
 
-    mAtlasAllocation = new FreeSpaceInfo(0, 0, 1, 1);
+    mAtlasAllocation.reset(new FreeSpaceInfo(0, 0, 1, 1));
     mAtlasName = "DrawAtlas" + Ogre::StringConverter::toString(mAtlasID);
     mMaterial = Ogre::MaterialManager::getSingleton().create(
         "M_" + mAtlasName,
@@ -79,7 +80,7 @@ TextureAtlas::~TextureAtlas() {
     mMyDrawSources.clear();
 
     // and get rid of the allocation info too
-    delete mAtlasAllocation;
+    mAtlasAllocation.reset();
 
     mMyFonts.clear();
 
@@ -310,9 +311,7 @@ void TextureAtlas::enlarge(size_t area) {
     LOG_DEBUG("TextureAtlas: (%s) Enlarged atlas to %d x %d",
               mAtlasName.c_str(), mAtlasSize.width, mAtlasSize.height);
 
-    delete mAtlasAllocation;
-    mAtlasAllocation =
-        new FreeSpaceInfo(0, 0, mAtlasSize.width, mAtlasSize.height);
+    mAtlasAllocation.reset(new FreeSpaceInfo(0, 0, mAtlasSize.width, mAtlasSize.height));
 
     // destroy the old invalid texture
     if (mTexture) {

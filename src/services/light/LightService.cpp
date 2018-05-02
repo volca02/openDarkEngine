@@ -194,10 +194,10 @@ DarkLight *LightService::_produceLight(const LightTableEntry &entry, size_t id,
 
     SceneNode *ln = mSceneMgr->createSceneNode(lname);
     DarkLight *l = static_cast<DarkLight *>(mSceneMgr->createLight(lname));
-    ln->attachObject(l);
+
     // set the parameters
     ln->setPosition(entry.pos.x, entry.pos.y, entry.pos.z);
-
+//    l->setPosition(entry.pos.x, entry.pos.y, entry.pos.z);
     if (entry.cone_inner < 0) {
         l->setType(Light::LT_POINT);
     } else {
@@ -227,7 +227,8 @@ DarkLight *LightService::_produceLight(const LightTableEntry &entry, size_t id,
 
     l->setIsDynamic(dynamic);
 
-    static_cast<DarkSceneManager *>(mSceneMgr)->queueLightForUpdate(l);
+    ln->attachObject(l);
+    // static_cast<DarkSceneManager *>(mSceneMgr)->queueLightForUpdate(l);
 
     return l;
 }

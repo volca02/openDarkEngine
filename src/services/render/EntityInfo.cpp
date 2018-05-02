@@ -47,8 +47,8 @@ EntityInfo::EntityInfo(Ogre::SceneManager *man, Ogre::Entity *entity,
       mEmi(new EntityMaterialInstance(mEntity))
 {
     // TODO: This causes some serious perf. issues, and should not be needed!
-    mEmi->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-    // mEmi->setSceneBlending(SBT_MODULATE);
+    //mEmi->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+    //mEmi->setSceneBlending(SBT_MODULATE);
 };
 
 // --------------------------------------------------------------------------
@@ -106,7 +106,6 @@ void EntityInfo::setEntity(Ogre::Entity *entity) {
 
     // attach the new entity
     mNode->attachObject(entity);
-
     mEmi->setEntity(entity);
 
     // destroy the previous entity
@@ -120,10 +119,7 @@ void EntityInfo::setEntity(Ogre::Entity *entity) {
 // --------------------------------------------------------------------------
 void EntityInfo::refreshVisibility() {
     // calculate the visibilities:
-    bool brType = true;
-
-    if (mRenderType == RENDER_TYPE_NOT_RENDERED)
-        brType = false;
+    bool brType = (mRenderType != RENDER_TYPE_NOT_RENDERED);
 
     // todo: editor mode handling
 

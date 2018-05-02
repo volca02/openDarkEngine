@@ -50,7 +50,11 @@ public:
     void traceStartFrame();
 
     /** logs a tracer record used for performance tracing */
-    void trace(bool start, const char *func, const void *data);
+    unsigned long trace(bool start, const char *func, const void *data);
+
+    /** logs endpoint of a scoped tracer */
+    void trace_endpoint(const char *func, const void *data,
+                        unsigned long start);
 
     /** logs a custom event */
     void tracePoint(const char *text);
@@ -84,15 +88,19 @@ private:
 class PerfTracer {
 public:
     PerfTracer(const char *text, const void *instance = nullptr)
-        : text(text), instance(instance) {
-        Tracer::getSingleton().trace(true, text, instance);
-    }
+        : text(text),
+          instance(instance),
+          mStart(Tracer::getSingleton().trace(true, text, instance))
+    {}
 
-    ~PerfTracer() { Tracer::getSingleton().trace(false, text, instance); }
+    ~PerfTracer() {
+        Tracer::getSingleton().trace_endpoint(text, instance, mStart);
+    }
 
 private:
     const char *text;
     const void *instance;
+    unsigned long mStart;
 };
 
 // Use this to place performance probes into code

@@ -80,6 +80,8 @@ public:
     /** Detaches all objects attached to this node.
      */
     void detachAllObjects(void);
+
+    void findLights(LightList& destList, Real radius, uint32 lightMask) const override;
 };
 } // namespace Ogre
 

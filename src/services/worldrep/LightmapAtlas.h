@@ -28,16 +28,17 @@
 #include <map>
 #include <vector>
 
+#include <OgreHardwarePixelBuffer.h>
+#include <OgreImage.h>
+#include <OgreVector2.h>
+#include <OgreVector3.h>
+
 #include "ConsoleCommandListener.h"
-#include "FreeSpaceInfo.h"
-#include "OgreHardwarePixelBuffer.h"
-#include "OgreImage.h"
-#include "OgreTextureManager.h"
-#include "OgreVector2.h"
-#include "OgreVector3.h"
 #include "integers.h"
 
 namespace Opde {
+
+class FreeSpaceInfo;
 
 /// A structure holding info for one texture in an atlas
 struct AtlasInfo {

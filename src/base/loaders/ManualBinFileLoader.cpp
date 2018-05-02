@@ -1505,6 +1505,7 @@ MaterialPtr ObjectMeshLoader::prepareMaterial(String matname, MeshMaterial &mat,
 
     // fill it with the values given
     Pass *pass = omat->getTechnique(0)->getPass(0);
+    pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
 
     // Defaults:
     // Ambient is one. It is controlled by mission ambient setting...
@@ -1604,6 +1605,7 @@ MaterialPtr ObjectMeshLoader::createPalMaterial(String &matname, int palindex) {
 
     // fill it with the values given
     Pass *pass = omat->getTechnique(0)->getPass(0);
+    pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
 
     // Fill in a color-only material
     TextureUnitState *tus = pass->createTextureUnitState();
@@ -2007,6 +2009,7 @@ MaterialPtr AIMeshLoader::prepareMaterial(String matname, AIMaterial &mat) {
 
     // fill it with the values given
     Pass *pass = omat->getTechnique(0)->getPass(0);
+    pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
 
     // Defaults:
     // Ambient is one. It is controlled by mission ambient setting...
@@ -2034,7 +2037,6 @@ MaterialPtr AIMeshLoader::prepareMaterial(String matname, AIMaterial &mat) {
             txtname = String("txt/") + String(mat.name);
         }
 
-        pass->setSceneBlending(SBT_TRANSPARENT_ALPHA);
         pass->setAlphaRejectSettings(CMPF_GREATER, 128); // Alpha rejection.
 
         // Some basic lightning settings

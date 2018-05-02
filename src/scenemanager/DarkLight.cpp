@@ -54,14 +54,12 @@ const String &DarkLight::getMovableType(void) {
 // -----------------------------------------------------------
 void DarkLight::_notifyMoved(void) {
     Light::_notifyMoved();
-
     _updateNeeded();
 }
 
 // -----------------------------------------------------------
 void DarkLight::_notifyAttached(Node *parent, bool isTagPoint) {
     Light::_notifyAttached(parent, isTagPoint);
-
     _updateNeeded();
 }
 
@@ -182,15 +180,14 @@ void DarkLight::_updateNeeded(void) {
     mNeedsUpdate = true;
 
     // Just to be sure
-    static_cast<DarkSceneManager *>(mManager)->_queueLightForUpdate(this);
+    if (mIsDynamic) // guarantee consistency
+        static_cast<DarkSceneManager *>(mManager)->_queueLightForUpdate(this);
 }
 
 // -----------------------------------------------------------
 void DarkLight::setIsDynamic(bool dynamic) {
     mIsDynamic = dynamic;
-
-    if (mIsDynamic) // guarantee consistency
-        _updateNeeded();
+    _updateNeeded();
 }
 
 // -----------------------------------------------------------

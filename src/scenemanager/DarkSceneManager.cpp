@@ -388,7 +388,6 @@ void DarkSceneManager::findLightsAffectingFrustum(const Camera *camera) {
 
     const DarkCamera *dcam = static_cast<const DarkCamera *>(camera);
 
-
     for (BspNode *n : dcam->_getVisibleNodes()) {
         lightSet.insert(n->mAffectingLights.begin(), n->mAffectingLights.end());
     }
@@ -402,6 +401,7 @@ void DarkSceneManager::findLightsAffectingFrustum(const Camera *camera) {
 
         lightInfo.light = light;
         lightInfo.type = light->getType();
+        lightInfo.lightMask = light->getLightMask();
 
         if (lightInfo.type == Light::LT_DIRECTIONAL) {
             lightInfo.position = Vector3::ZERO;
@@ -475,8 +475,6 @@ void DarkSceneManager::findLightsAffectingFrustum(const Camera *camera) {
     }
 
     mLightCount = mCachedLightInfos.size();
-    mLightListTime =
-        Root::getSingleton().getTimer()->getMilliseconds() - startt;
 }
 
 //-----------------------------------------------------------------------
@@ -506,28 +504,17 @@ void DarkSceneManager::_populateLightList(const Vector3 &position, Real radius,
 
     mBspTree->findLeafsForSphere(leafList, position, radius);
 
-    //  List of all leafs the sphere is in
-    BspNodeList::iterator it = leafList.begin();
-
     // This set ensures the resulting destination list will get unique set of
     // lights
     std::set<DarkLight *> resLights;
 
     destList.clear();
 
-    while (it != leafList.end()) {
-        BspNode *node = *(it++);
-
-        BspNode::AffectingLights::const_iterator lit =
-            node->mAffectingLights.begin();
-        BspNode::AffectingLights::const_iterator lend =
-            node->mAffectingLights.end();
-
+    //  List of all leafs the sphere is in
+    for (auto *node : leafList) {
         // Fill the light list by querying if the light's radius is touching the
         // movable
-        while (lit != lend) {
-            DarkLight *lt = *(lit++);
-
+        for (auto *lt : node->mAffectingLights) {
             // If it has not been considered yet, reconsider this light
             // (no need to consider light twice)
             if (resLights.find(lt) == resLights.end()) {
@@ -632,9 +619,6 @@ bool DarkSceneManager::getOption(const String &strKey, void *pDestValue) {
         return true;
     } else if (strKey == "FindVisibleObjectsTime") {
         *(static_cast<unsigned long *>(pDestValue)) = mFindVisibleObjectsTime;
-        return true;
-    } else if (strKey == "LightListTime") {
-        *(static_cast<unsigned long *>(pDestValue)) = mLightListTime;
         return true;
     } else if (strKey == "SceneGraphTime") {
         *(static_cast<unsigned long *>(pDestValue)) = mSceneGraphTime;

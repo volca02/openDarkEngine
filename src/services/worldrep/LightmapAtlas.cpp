@@ -21,16 +21,19 @@
  *
  *****************************************************************************/
 
+#include <OgreString.h>
+#include <OgreStringConverter.h>
+#include <OgreTextureManager.h>
+
 #include "LightmapAtlas.h"
 #include "ConsoleBackend.h"
-#include "OgreStringConverter.h"
+#include "FreeSpaceInfo.h"
 #include "OpdeException.h"
 #include "WRCommon.h"
 #include "compat.h"
 #include "integers.h"
 #include "material/MaterialService.h"
-
-using namespace Ogre;
+#include "Vector3.h"
 
 namespace Opde {
 
@@ -62,7 +65,7 @@ LightAtlas::~LightAtlas() {
     mFreeSpace.reset();
 
     if (mTex) {
-        TextureManager::getSingleton().remove(mName);
+        Ogre::TextureManager::getSingleton().remove(mName);
         mTex.reset();
     }
 
@@ -165,25 +168,26 @@ bool LightAtlas::render() {
 
     // (re)create the texture
     if (mTex) {
-        TextureManager::getSingleton().remove(mName);
+        Ogre::TextureManager::getSingleton().remove(mName);
         mTex.reset();
     }
 
     // We place the lightmaps into a separate resource group for easy unloading
-    mTex = TextureManager::getSingleton().createManual(
-        mName, MaterialService::TEMPTEXTURE_RESOURCE_GROUP, TEX_TYPE_2D, mSize,
-        mSize, 0, PF_X8R8G8B8, TU_DYNAMIC_WRITE_ONLY);
+    mTex = Ogre::TextureManager::getSingleton().createManual(
+        mName, MaterialService::TEMPTEXTURE_RESOURCE_GROUP,
+        Ogre::TEX_TYPE_2D, mSize, mSize, 0, Ogre::PF_X8R8G8B8,
+        Ogre::TU_DYNAMIC_WRITE_ONLY);
 
     mAtlas = mTex->getBuffer(0, 0);
 
     // Erase the lmap atlas pixel buffer
-    mAtlas->lock(HardwareBuffer::HBL_DISCARD);
+    mAtlas->lock(Ogre::HardwareBuffer::HBL_DISCARD);
 
-    const PixelBox &pb = mAtlas->getCurrentLock();
+    const Ogre::PixelBox &pb = mAtlas->getCurrentLock();
 
-    uint32 *data = static_cast<uint32 *>(pb.data);
+    uint32_t *data = static_cast<uint32_t *>(pb.data);
     for (int y = 0; y < mSize; y++) {
-        memset(data, 0, mSize * sizeof(uint32));
+        memset(data, 0, mSize * sizeof(uint32_t));
         data += pb.rowPitch;
     }
 
@@ -201,14 +205,14 @@ bool LightAtlas::render() {
 
 inline void LightAtlas::updateLightMapBuffer(FreeSpaceInfo &fsi, uint32_t *lR,
                                              uint32_t *lG, uint32_t *lB) {
-    const PixelBox &pb = mAtlas->getCurrentLock();
+    const Ogre::PixelBox &pb = mAtlas->getCurrentLock();
 
-    uint32 *data = static_cast<uint32 *>(pb.data) + fsi.y * pb.rowPitch;
+    uint32_t *data = static_cast<uint32_t *>(pb.data) + fsi.y * pb.rowPitch;
     for (int y = 0; y < fsi.h; y++) {
-        uint32 w = (y * fsi.w);
+        uint32_t w = (y * fsi.w);
         for (int x = 0; x < fsi.w; x++) {
 
-            uint32 R, G, B;
+            uint32_t R, G, B;
 
             R = lR[x + w] >> 8;
             G = lG[x + w] >> 8;
@@ -221,7 +225,7 @@ inline void LightAtlas::updateLightMapBuffer(FreeSpaceInfo &fsi, uint32_t *lR,
             if (B > 255)
                 B = 255;
 
-            uint32 ARGB = (R << 16) | (G << 8) | B;
+            uint32_t ARGB = (R << 16) | (G << 8) | B;
 
             // Write a A8R8G8B8 conversion of the lmpixel
             data[x + fsi.x] = ARGB;
@@ -252,7 +256,7 @@ void LightAtlas::setLightIntensity(int id, float intensity) {
     std::map<int, std::set<LightMap *>>::iterator light_it = mLights.find(id);
 
     if (light_it != mLights.end()) {
-        mAtlas->lock(HardwareBuffer::HBL_DISCARD);
+        mAtlas->lock(Ogre::HardwareBuffer::HBL_DISCARD);
 
         std::set<LightMap *>::const_iterator lmaps_it =
             light_it->second.begin();
@@ -397,8 +401,8 @@ void LightAtlasList::commandExecuted(std::string command,
             Opde::ConsoleBackend::getSingleton().putMessage(
                 std::string("Doing light change"));
 
-            int light = StringConverter::parseInt(s_light);
-            float intensity = StringConverter::parseReal(s_intensity);
+            int light = Ogre::StringConverter::parseInt(s_light);
+            float intensity = Ogre::StringConverter::parseReal(s_intensity);
 
             // apply
             setLightIntensity(light, intensity);
@@ -451,9 +455,9 @@ void LightMap::refresh() {
     // atlas
 
     unsigned int lightMapSize = mSizeX * mSizeY;
-    std::vector<uint32> lmapR; lmapR.resize(lightMapSize);
-    std::vector<uint32> lmapG; lmapG.resize(lightMapSize);
-    std::vector<uint32> lmapB; lmapB.resize(lightMapSize);
+    std::vector<uint32_t> lmapR; lmapR.resize(lightMapSize);
+    std::vector<uint32_t> lmapG; lmapG.resize(lightMapSize);
+    std::vector<uint32_t> lmapB; lmapB.resize(lightMapSize);
 
     // Copy the static lmap...
     for (unsigned int i = 0; i < lightMapSize; i++) {
@@ -507,7 +511,7 @@ std::unique_ptr<LMPixel[]> LightMap::convert(char *data, int sx, int sy,
             result[i].B = data[i];
         }
     } else {
-        uint16 *buf_ptr = (uint16 *)data;
+        uint16_t *buf_ptr = (uint16_t *)data;
 
         for (int i = 0; i < (sx * sy); i++) {
             unsigned int xBGR = buf_ptr[i];
