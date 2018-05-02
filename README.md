@@ -18,9 +18,11 @@ There is some partially obsolete info with build instructions in the doc/DEVELOP
 This project would obviously benefit from more developers. Anyone willing to participate is welcome, please start by diving in the project, look at some issues that are in the tracker, maybe try fixing something or improving something.
 
 ## Thanks
+
 Thanks go to:
-TomNHarris (telliamed) - for the all the work he has done understanding the Dark Engine and its data formats. Also for the irreplaceable help in the past.
-ShadowSpawn - For the BIN mesh format and Movement database format descriptions.
-ataricom - For helping out with the (now defunct) sourceforge Wiki
-TTLG community
-...and others not mentioned
+
+* TomNHarris (telliamed) - for the all the work he has done understanding the Dark Engine and its data formats. Also for the irreplaceable help in the past.
+* ShadowSpawn - For the BIN mesh format and Movement database format descriptions.
+* ataricom - For helping out with the (now defunct) sourceforge Wiki
+* TTLG community
+* ...and others not mentioned
