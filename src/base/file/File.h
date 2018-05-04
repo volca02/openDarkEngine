@@ -196,7 +196,7 @@ public:
     template<typename T>
     void write_vector(const std::vector<T> &target) {
         for (const auto &t: target) {
-            (*this) << target;
+            (*this) << t;
         }
     }
 
