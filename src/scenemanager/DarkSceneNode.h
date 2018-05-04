@@ -81,7 +81,7 @@ public:
      */
     void detachAllObjects(void);
 
-    void findLights(LightList& destList, Real radius, uint32 lightMask) const override;
+    void findLights(LightList& destList, Real radius, uint32 lightMask) const;
 };
 } // namespace Ogre
 

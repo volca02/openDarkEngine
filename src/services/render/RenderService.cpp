@@ -99,7 +99,7 @@ RenderService::RenderService(ServiceManager *manager, const std::string &name)
     // initialiser of graphics as the whole. This will be the modification that
     // should be done soon in order to let the code look and be nice FIX!
     mRoot = Ogre::Root::getSingletonPtr();
-    mManualBinFileLoader.reset(new Ogre::ManualBinFileLoader());
+    mManualBinFileLoader.reset(new Opde::ManualBinFileLoader());
 
     mLoopClientDef.id = LOOPCLIENT_ID_RENDERER;
     mLoopClientDef.mask = LOOPMODE_RENDER;

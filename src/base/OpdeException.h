@@ -58,7 +58,7 @@ public:
     ~BasicException() throw();
 
     /** Gets the details about the exception that happened */
-    const std::string &getDetails();
+    const std::string &getDetails() const;
 };
 
 class IndexOutOfBoundsException : public BasicException {

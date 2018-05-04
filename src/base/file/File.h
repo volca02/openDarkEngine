@@ -175,6 +175,31 @@ public:
      */
     std::string getLine();
 
+    /** read properly sized vector of elements from File. 
+     * Expects propertly overloaded operator '>>' for type T on File&
+    */
+    template<typename T>
+    void read_vector(std::vector<T> &target) {
+        for (auto &t: target) {
+            (*this) >> t;
+        }
+    }
+
+    // resize vector to [count] elements, read vector of elements from File
+    template<typename T>
+    void read_vector(std::vector<T> &target, size_t count) {
+        target.resize(count);
+        read_vector(target);
+    }
+
+    // read properly sized vector of elements from File
+    template<typename T>
+    void write_vector(const std::vector<T> &target) {
+        for (const auto &t: target) {
+            (*this) << target;
+        }
+    }
+
 protected:
     /** swaps the endianness of the given buffer
      * @param ptr the buffer to swap endianness on
@@ -204,6 +229,18 @@ File &operator>>(File &st, uint32_t &val);
 File &operator>>(File &st, int32_t &val);
 File &operator>>(File &st, float &val);
 File &operator>>(File &st, bool &val);
+
+template<typename T>
+File &operator>>(File &st, std::vector<T> &vec) {
+    st.read_vector(vec);
+    return st;
+}
+
+template<typename T>
+File &operator<<(File &st, std::vector<T> &vec) {
+    st.write_vector(vec);
+    return st;
+}
 
 /** Shared file pointer */
 typedef shared_ptr<File> FilePtr;

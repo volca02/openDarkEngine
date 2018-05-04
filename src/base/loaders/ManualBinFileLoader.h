@@ -30,16 +30,16 @@
 #include "OgreMesh.h"
 #include <OgreResourceManager.h>
 
-namespace Ogre {
+namespace Opde {
 
 /** ManualResourceLoader for BIN meshes. Used to load BIN meshes as Ogre::Mesh
  * instances */
-class ManualBinFileLoader : public ManualResourceLoader {
+class ManualBinFileLoader : public Ogre::ManualResourceLoader {
 public:
     ManualBinFileLoader();
     virtual ~ManualBinFileLoader();
 
-    virtual void loadResource(Resource *resource);
+    virtual void loadResource(Ogre::Resource *resource);
 };
 
 } // namespace Ogre

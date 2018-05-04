@@ -41,7 +41,6 @@ struct SDL_Window;
 namespace Ogre {
 class DarkSceneManager;
 class DarkSceneManagerFactory;
-class ManualBinFileLoader;
 } // namespace Ogre
 
 namespace Opde {
@@ -52,6 +51,7 @@ class RenderAlphaProperty;
 class RenderTypeProperty;
 class ZBiasProperty;
 class EntityInfo;
+class ManualBinFileLoader;
 
 class Property;
 struct PropertyChangeMsg;
@@ -230,7 +230,7 @@ protected:
     Ogre::Camera *mDefaultCamera;
 
     /// Manual loader for bin meshes
-    std::unique_ptr<Ogre::ManualBinFileLoader> mManualBinFileLoader;
+    std::unique_ptr<Opde::ManualBinFileLoader> mManualBinFileLoader;
 
     /// Pointer for loop service
     LoopServicePtr mLoopService;

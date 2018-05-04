@@ -52,7 +52,7 @@ BasicException::BasicException(const std::string &desc, const std::string &src,
     }
 }
 
-const std::string &BasicException::getDetails() { return details; }
+const std::string &BasicException::getDetails() const { return details; }
 
 BasicException::~BasicException() throw() {}
 } // namespace Opde
