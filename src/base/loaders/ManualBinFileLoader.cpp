@@ -1257,7 +1257,7 @@ SubMeshFiller *ObjectMeshLoader::getFillerForPolygon(ObjPolygon &ply) {
 
         // Set extra parameters - transfer transparency, colour to
         // SubmeshFillers only if it is an original material
-        if (fillerIdx >= 0) {
+        if (fillerIdx >= 0 && fillerIdx < mMaterials.size()) {
             const MeshMaterial &mm = mMaterials[fillerIdx];
             const MeshMaterialExtra &me = mMaterialsExtra[fillerIdx];
 
