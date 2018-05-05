@@ -54,6 +54,28 @@ using namespace std;
 
 namespace Opde {
 
+namespace {
+
+static Vertex unpack_normal(uint32_t src) {
+    Vertex res;
+    /* The Vector is organized as follows
+
+    bit 32 -> bit 0
+
+    XXXX XXXX | XXYY YYYY || YYYY ZZZZ | ZZZZ ZZ00
+
+    each of those are fixed point signed numbers (10 bit)
+    */
+
+    res.z = (int16_t)((int16_t)(src & 0x0FFC) << 4) / 16384.0f;
+    res.y = (int16_t)((src >> 6) & 0x0FFC0) / 16384.0f;
+    res.x = (int16_t)((src >> 16) & 0x0FFC0) / 16384.0f;
+
+    return res;
+}
+
+} // namespace
+
 /** Class that loads a .CAL file and produces a ogre's skeleton instance
  * There are certain differences between .CAL and ogre's skeleton concept.
  * For example the whole skeleton in the CAL file is consisted of Torsos and
@@ -249,8 +271,7 @@ public:
     /// For AI meshes. All 3 coords index vert, norm and uv at once
     void addTriangle(uint16_t a, uint16_t bone_a,
                      uint16_t b, uint16_t bone_b,
-                     uint16_t c, uint16_t bone_c,
-                     uint16_t norm);
+                     uint16_t c, uint16_t bone_c);
 
     void setSkeleton(const Ogre::SkeletonPtr &skel) { mSkeleton = skel; };
 
@@ -353,13 +374,12 @@ void SubMeshFiller::addPolygon(int bone, size_t numverts, uint16_t normal,
 }
 
 void SubMeshFiller::addTriangle(uint16_t a, uint16_t bone_a, uint16_t b,
-                                uint16_t bone_b, uint16_t c, uint16_t bone_c,
-                                uint16_t norm)
+                                uint16_t bone_b, uint16_t c, uint16_t bone_c)
 {
 
-    uint16_t idxa = getIndex(bone_a, a, norm, 0, a);
-    uint16_t idxb = getIndex(bone_b, b, norm, 0, b);
-    uint16_t idxc = getIndex(bone_c, c, norm, 0, c);
+    uint16_t idxa = getIndex(bone_a, a, a, 0, a);
+    uint16_t idxb = getIndex(bone_b, b, b, 0, b);
+    uint16_t idxc = getIndex(bone_c, c, c, 0, c);
 
     mIndexList.push_back(idxa);
     mIndexList.push_back(idxb);
@@ -420,24 +440,9 @@ Vector3 SubMeshFiller::getUnpackedNormal(uint16_t idx) {
     if (idx >= mLights.size())
         OPDE_EXCEPT("Light Index out of range!");
 
-    Vector3 res;
-
     uint32_t src = mLights[idx].packed_normal;
-
-    /* The Vector is organized as follows
-
-    bit 32 -> bit 0
-
-    XXXX XXXX | XXYY YYYY || YYYY ZZZZ | ZZZZ ZZ00
-
-    each of those are fixed point signed numbers (10 bit)
-    */
-
-    res.z = (int16_t)((int16_t)(src & 0x0FFC) << 4) / 16384.0f;
-    res.y = (int16_t)((src >> 6) & 0x0FFC0) / 16384.0f;
-    res.x = (int16_t)((src >> 16) & 0x0FFC0) / 16384.0f;
-
-    return res;
+    auto v = unpack_normal(src);
+    return {v.x, v.y, v.z};
 }
 
 void SubMeshFiller::build() {
@@ -783,7 +788,10 @@ protected:
     /// vertices
     std::vector<Vertex> mVertices;
 
-    /// normals
+    /// triangle normals
+    std::vector<Vertex> mTriNormals;
+
+    /// vertex normals
     std::vector<Vertex> mNormals;
 
     /// uv's (stored as Vertex in file, but we use the same submesh filler
@@ -1570,15 +1578,9 @@ void AIMeshLoader::load() {
             if (!f)
                 OPDE_EXCEPT("Filler not found for slot!");
 
-            // failback in case norm is greater that vertex count
-            if (tri.norm >= mNormals.size())
-                OPDE_EXCEPT(format("Encountered an out of bounds normal index. "
-                                   "Please report."));
-
             f->addTriangle(tri.vert[0], mVertexJointMap[tri.vert[0]],
                            tri.vert[1], mVertexJointMap[tri.vert[1]],
-                           tri.vert[2], mVertexJointMap[tri.vert[2]],
-                           tri.norm);
+                           tri.vert[2], mVertexJointMap[tri.vert[2]]);
         }
     }
 
@@ -1668,8 +1670,8 @@ void AIMeshLoader::readNormals() {
 
     size_t num_normals = (mHeader.offset_vert - mHeader.offset_norm) / 12;
 
-    mNormals.resize(num_normals);
-    *mFile >> mNormals;
+    mTriNormals.resize(num_normals);
+    *mFile >> mTriNormals;
 }
 
 void AIMeshLoader::readUVs() {
@@ -1678,12 +1680,16 @@ void AIMeshLoader::readUVs() {
     if (mHeader.num_vertices < 1) // TODO: This could be fatal
         OPDE_EXCEPT(format("File contains no uv's ", mMesh->getName()));
 
+    // this packs both UV and a packed normal that we preffer
+
     mUVs.resize(mHeader.num_vertices);
+    mNormals.resize(mHeader.num_vertices);
 
-    float bogus_z;
-
-    for (auto &uv : mUVs) {
-        *mFile >> uv >> bogus_z;
+    for (size_t i = 0; i < mHeader.num_vertices; ++i) {
+        uint32_t packed_n;
+        *mFile >> mUVs[i];
+        *mFile >> packed_n;
+        mNormals[i] = unpack_normal(packed_n);
     }
 }
 

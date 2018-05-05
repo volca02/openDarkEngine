@@ -36,6 +36,7 @@ this file are exact copies or free-style rewrites of the contributed code
 
 namespace Opde {
 
+
 // Material flags (known)
 enum MaterialFlags {
     MD_MAT_TRANS = 1,
@@ -678,11 +679,10 @@ struct AIMeshHeader {
     uint32_t offset_mats;   /// looks likes material offset, see object header
     uint32_t offset_joints; /// Per-Joint Polygon info. The joints mentioned
                             /// here are not the same joints as in .CAL
-    uint32_t offset_poly;   /// (U5-U4) = polygons
-    uint32_t offset_norm;   /// (U6-U5) = Normals
-    uint32_t offset_vert;   /// (U7-U6) = Vertexes (munged) - num_vertices
-    uint32_t offset_uvmap; /// (U8-U7) = UV maps. Z is junk (count - the same as
-                           /// vertex count)
+    uint32_t offset_poly;   /// polygons (num_polys)
+    uint32_t offset_norm;   /// Normals (no counter, (offset_vert-offset_norm)/12)
+    uint32_t offset_vert;   /// Vertex data (munged) - num_vertices
+    uint32_t offset_uvmap; /// (U8-U7) = UV maps + 32 bit packed normals
     uint32_t offset_blends; /// Floats (num_stretchy). Blending factors. All in
                             /// the range 0-1. Probably blend factors between
                             /// two joints. Count - the same as num_stretchy
