@@ -834,23 +834,21 @@ File &operator <<(File &f, const AIJointInfo &j) {
 /// Triangle in AI mesh definition. Defines one triangle using indices to the
 /// vertex table, references material and exposes various flags.
 struct AITriangle {
-    int16_t a;       /// vertex index
-    int16_t b;       /// vertex index
-    int16_t c;       /// vertex index
+    int16_t vert[3]; /// vertex index, 3x
     int16_t mat;     /// material ID
-    float f_unk;     /// some float? Hmm what could've this be?
-    int16_t index;   /// index of this
+    float   d;       /// plane D coeff
+    int16_t norm;    /// normal index
     int16_t flags;   /// stretch or not? This would seem to be a good place
                      /// to inform about it
 };
 
 File &operator >>(File &f, AITriangle &t) {
-    f >> t.a >> t.b >> t.c >> t.mat >> t.f_unk >> t.index >> t.flags;
+    f >> t.vert[0] >> t.vert[1] >> t.vert[2] >> t.mat >> t.d >> t.norm >> t.flags;
     return f;
 }
 
 File &operator <<(File &f, AITriangle &t) {
-    f << t.a << t.b << t.c << t.mat << t.f_unk << t.index << t.flags;
+    f << t.vert[0] << t.vert[1] << t.vert[2] << t.mat << t.d << t.norm << t.flags;
     return f;
 }
 

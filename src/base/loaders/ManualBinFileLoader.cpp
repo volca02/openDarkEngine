@@ -247,8 +247,10 @@ public:
                     const std::vector<uint16_t> &uvidx);
 
     /// For AI meshes. All 3 coords index vert, norm and uv at once
-    void addTriangle(uint16_t a, uint16_t bone_a, uint16_t b, uint16_t bone_b,
-                     uint16_t c, uint16_t bone_c);
+    void addTriangle(uint16_t a, uint16_t bone_a,
+                     uint16_t b, uint16_t bone_b,
+                     uint16_t c, uint16_t bone_c,
+                     uint16_t norm);
 
     void setSkeleton(const Ogre::SkeletonPtr &skel) { mSkeleton = skel; };
 
@@ -351,12 +353,13 @@ void SubMeshFiller::addPolygon(int bone, size_t numverts, uint16_t normal,
 }
 
 void SubMeshFiller::addTriangle(uint16_t a, uint16_t bone_a, uint16_t b,
-                                uint16_t bone_b, uint16_t c, uint16_t bone_c)
+                                uint16_t bone_b, uint16_t c, uint16_t bone_c,
+                                uint16_t norm)
 {
 
-    uint16_t idxa = getIndex(bone_a, a, a, 0, a);
-    uint16_t idxb = getIndex(bone_b, b, b, 0, b);
-    uint16_t idxc = getIndex(bone_c, c, c, 0, c);
+    uint16_t idxa = getIndex(bone_a, a, norm, 0, a);
+    uint16_t idxb = getIndex(bone_b, b, norm, 0, b);
+    uint16_t idxc = getIndex(bone_c, c, norm, 0, c);
 
     mIndexList.push_back(idxa);
     mIndexList.push_back(idxb);
@@ -1531,10 +1534,8 @@ void AIMeshLoader::load() {
     // interpret.
 
     // pass 1 of joint mappings. Build vertex -> .CAL joint mapping info
-    mVertexJointMap.resize(mHeader.num_vertices);
+    mVertexJointMap.assign(mHeader.num_vertices, 0);
 
-    for (int16_t j = 0; j < mHeader.num_vertices; ++j)
-        mVertexJointMap[j] = 0;
 
     for (unsigned int j = 0; j < mHeader.num_joints; ++j) {
         // for every joint
@@ -1569,9 +1570,15 @@ void AIMeshLoader::load() {
             if (!f)
                 OPDE_EXCEPT("Filler not found for slot!");
 
-            f->addTriangle(tri.a, mVertexJointMap[tri.a], tri.b,
-                           mVertexJointMap[tri.b], tri.c,
-                           mVertexJointMap[tri.c]);
+            // failback in case norm is greater that vertex count
+            if (tri.norm >= mNormals.size())
+                OPDE_EXCEPT(format("Encountered an out of bounds normal index. "
+                                   "Please report."));
+
+            f->addTriangle(tri.vert[0], mVertexJointMap[tri.vert[0]],
+                           tri.vert[1], mVertexJointMap[tri.vert[1]],
+                           tri.vert[2], mVertexJointMap[tri.vert[2]],
+                           tri.norm);
         }
     }
 
@@ -1659,7 +1666,9 @@ void AIMeshLoader::readNormals() {
     if (mHeader.num_vertices < 1) // TODO: This could be fatal
         OPDE_EXCEPT(format("File contains no normals ", mMesh->getName()));
 
-    mNormals.resize(mHeader.num_vertices);
+    size_t num_normals = (mHeader.offset_vert - mHeader.offset_norm) / 12;
+
+    mNormals.resize(num_normals);
     *mFile >> mNormals;
 }
 
