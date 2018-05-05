@@ -239,13 +239,12 @@ void CalSkeletonLoader::readLimbs(void) {
  * and is filled with triangles */
 class SubMeshFiller {
 public:
-    SubMeshFiller(Ogre::SubMesh *sm, const std::vector<Vertex> &vertices,
+    SubMeshFiller(Ogre::SubMesh *sm, 
+                  const std::vector<Vertex> &vertices,
                   const std::vector<Vertex> &normals,
-                  const std::vector<ObjLight> &lights,
                   const std::vector<UVMap> &uvs, bool useuvmap)
         : mVertices(vertices),
           mNormals(normals),
-          mLights(lights),
           mUVs(uvs),
           mUseUV(useuvmap),
           mBuilt(false),
@@ -284,24 +283,17 @@ public:
     struct VertexDefinition {
         uint16_t vertex;
         uint16_t normal;
-        uint16_t light;
         uint16_t uvidx; // Left zero if the UV's are not used
         int bone;
     };
 
 private:
-    uint16_t getIndex(int bone, uint16_t vert, uint16_t norm, uint16_t light,
-                      uint16_t uv);
-
-    /// Unpacks the 30 bit normal from light struct (at index idx)
-    Vector3 getUnpackedNormal(uint16_t idx);
+    uint16_t getIndex(int bone, uint16_t vert, uint16_t norm, uint16_t uv);
 
     /// Global vertex data pointer
     const std::vector<Vertex> &mVertices;
     /// Global normals data pointer
     const std::vector<Vertex> &mNormals;
-    // Lights (~normals)
-    std::vector<ObjLight> mLights;
     /// Global UV table pointer
     const std::vector<UVMap> &mUVs;
     /// used Material name
@@ -332,12 +324,12 @@ private:
 bool operator==(const SubMeshFiller::VertexDefinition &a,
                 const SubMeshFiller::VertexDefinition &b) {
     return ((a.vertex == b.vertex) && (a.normal == b.normal) &&
-            (a.uvidx == b.uvidx) && (a.bone == b.bone) && (a.light == b.light));
+            (a.uvidx == b.uvidx) && (a.bone == b.bone));
 }
 
 void SubMeshFiller::addPolygon(int bone, size_t numverts, uint16_t normal,
                                const std::vector<uint16_t> &vidx,
-                               const std::vector<uint16_t> &lightidx,
+                               const std::vector<uint16_t> &normidx,
                                const std::vector<uint16_t> &uvidx)
 {
     // For each of the vertices, search for the vertex/normal combination
@@ -348,22 +340,19 @@ void SubMeshFiller::addPolygon(int bone, size_t numverts, uint16_t normal,
     uint16_t max_index;
 
     if (mUseUV) {
-        last_index = getIndex(bone, vidx[0], normal, lightidx[0], uvidx[0]);
-        max_index = getIndex(bone, vidx[numverts - 1], normal,
-                             lightidx[numverts - 1], uvidx[numverts - 1]);
+        last_index = getIndex(bone, vidx[0], normidx[0], uvidx[0]);
+        max_index = getIndex(bone, vidx[numverts - 1], normidx[numverts - 1],
+                             uvidx[numverts - 1]);
     } else {
-        last_index = getIndex(bone, vidx[0], normal, lightidx[0], 0);
-        max_index = getIndex(bone, vidx[numverts - 1], normal,
-                             lightidx[numverts - 1], 0);
+        last_index = getIndex(bone, vidx[0], normidx[0], 0);
+        max_index = getIndex(bone, vidx[numverts - 1], normidx[numverts - 1],
+                             0);
     }
 
     for (size_t i = 1; i < (numverts - 1); i++) {
         uint16_t index;
 
-        if (mUseUV)
-            index = getIndex(bone, vidx[i], normal, lightidx[i], uvidx[i]);
-        else
-            index = getIndex(bone, vidx[i], normal, lightidx[i], 0);
+        index = getIndex(bone, vidx[i], normidx[i], mUseUV ? uvidx[i] : 0);
 
         mIndexList.push_back(max_index);
         mIndexList.push_back(index);
@@ -377,9 +366,9 @@ void SubMeshFiller::addTriangle(uint16_t a, uint16_t bone_a, uint16_t b,
                                 uint16_t bone_b, uint16_t c, uint16_t bone_c)
 {
 
-    uint16_t idxa = getIndex(bone_a, a, a, 0, a);
-    uint16_t idxb = getIndex(bone_b, b, b, 0, b);
-    uint16_t idxc = getIndex(bone_c, c, c, 0, c);
+    uint16_t idxa = getIndex(bone_a, a, a, a);
+    uint16_t idxb = getIndex(bone_b, b, b, b);
+    uint16_t idxc = getIndex(bone_c, c, c, c);
 
     mIndexList.push_back(idxa);
     mIndexList.push_back(idxb);
@@ -387,7 +376,7 @@ void SubMeshFiller::addTriangle(uint16_t a, uint16_t bone_a, uint16_t b,
 }
 
 uint16_t SubMeshFiller::getIndex(int bone, uint16_t vert, uint16_t norm,
-                                 uint16_t light, uint16_t uv)
+                                 uint16_t uv)
 {
     // Find the record with the same parameters
     // As I'm a bit lazy, I do this by iterating the whole vector
@@ -396,28 +385,15 @@ uint16_t SubMeshFiller::getIndex(int bone, uint16_t vert, uint16_t norm,
         OPDE_EXCEPT("Vertex Index out of range!");
 
     // TODO: What takes precedence? Light's or normal's index?
-    if (mLights.empty()) {
-        if (norm >= mNormals.size())
+    if (norm >= mNormals.size())
             OPDE_EXCEPT("Normal Index out of range!");
-    } else {
-        if (light >= mLights.size())
-            OPDE_EXCEPT("Light Index out of range!");
-    }
 
     if (uv >= mUVs.size() && mUseUV)
         OPDE_EXCEPT("UV Index out of range!");
 
     VertexDefinition vdef;
     vdef.vertex = vert;
-
-    if (mLights.empty()) {
-        vdef.normal = norm;
-        vdef.light = 0;
-    } else {
-        vdef.normal = 0;
-        vdef.light = light;
-    }
-
+    vdef.normal = norm;
     vdef.uvidx = uv;
     vdef.bone  = bone;
 
@@ -433,16 +409,6 @@ uint16_t SubMeshFiller::getIndex(int bone, uint16_t vert, uint16_t norm,
 
     // Push the vertex bone binding as well
     return mVertexList.size() - 1;
-}
-
-Vector3 SubMeshFiller::getUnpackedNormal(uint16_t idx) {
-    // get the ref to light struct at idx
-    if (idx >= mLights.size())
-        OPDE_EXCEPT("Light Index out of range!");
-
-    uint32_t src = mLights[idx].packed_normal;
-    auto v = unpack_normal(src);
-    return {v.x, v.y, v.z};
 }
 
 void SubMeshFiller::build() {
@@ -496,22 +462,15 @@ void SubMeshFiller::build() {
     float *f = fptr;
 
     VertexList::const_iterator it = mVertexList.begin();
-
-    size_t vidx = 0;
-
-    for (; it != mVertexList.end(); ++it, ++vidx) {
+    for (; it != mVertexList.end(); ++it) {
         // Transform the vertex position and normal, then put into the buffer
         Vector3 pos(mVertices[it->vertex].x, mVertices[it->vertex].y,
                     mVertices[it->vertex].z);
         Vector3 norm;
 
-        if (!mLights.empty()) {
-            norm = getUnpackedNormal(it->light);
-        } else {
-            norm = Vector3(mNormals[it->normal].x,
-                           mNormals[it->normal].y,
-                           mNormals[it->normal].z);
-        }
+        norm = Vector3(mNormals[it->normal].x,
+                       mNormals[it->normal].y,
+                       mNormals[it->normal].z);
 
         Vector3 npos, nnorm;
 
@@ -721,7 +680,8 @@ private:
     std::vector<MeshMaterialExtra> mMaterialsExtra;
     std::vector<VHotObj> mVHots;
     std::vector<Vertex> mVertices;
-    std::vector<Vertex> mNormals;
+    std::vector<Vertex> mExtraNormals;
+    std::vector<Vertex> mNormals; // converted from mLights
     std::vector<ObjLight> mLights;
 
     std::vector<UVMap> mUVs;
@@ -838,11 +798,11 @@ void ObjectMeshLoader::load() {
     // Read the vertices
     readVertices();
 
-    // Read the light vectors
-    readLights();
-
     // Read the normals
     readNormals();
+
+    // Read the light vectors
+    readLights();
 
     // Everything is ready. Can proceed with the filling
     readObjects();
@@ -1040,8 +1000,6 @@ void ObjectMeshLoader::loadPolygons(int obj, size_t count) {
         std::vector<uint16_t> verts(op.num_verts);
         *mFile >> verts;
 
-        // TODO: These are lights, not normals, and it will probably be bad to
-        // do it like this
         std::vector<uint16_t> norms(op.num_verts);
         *mFile >> norms;
 
@@ -1172,21 +1130,26 @@ void ObjectMeshLoader::readVertices() {
 //-------------------------------------------------------------------
 void ObjectMeshLoader::readNormals() {
     if (mNumNorms > 0) {
-        mNormals.resize(mNumNorms);
+        mExtraNormals.resize(mNumNorms);
         mFile->seek(mHdr.offset_norms);
-        *mFile >> mNormals;
+        *mFile >> mExtraNormals;
     } else
         OPDE_EXCEPT("Number of normals is zero!");
 }
 
 //-------------------------------------------------------------------
 void ObjectMeshLoader::readLights() {
-    if (mNumLights > 0) {
-        mLights.resize(mNumLights);
-        mFile->seek(mHdr.offset_light);
-        *mFile >> mLights;
-    } else
+    if (mNumLights == 0)
         OPDE_EXCEPT("Number of normals is zero!");
+
+    mLights.resize(mNumLights);
+    mFile->seek(mHdr.offset_light);
+    *mFile >> mLights;
+
+    mNormals.resize(mNumLights);
+    for (size_t idx = 0; idx < mNumLights; ++idx) {
+        mNormals[idx] = unpack_normal(mLights[idx].packed_normal);
+    }
 }
 
 //-------------------------------------------------------------------
@@ -1260,8 +1223,8 @@ SubMeshFiller *ObjectMeshLoader::getFillerForPolygon(ObjPolygon &ply) {
         Ogre::SubMesh *sm = mMesh->createSubMesh(
                 format("SubMesh", fillerIdx));
 
-        SubMeshFiller *f = new SubMeshFiller(sm, mVertices,mNormals,
-                                             mLights, mUVs, use_uvs);
+        SubMeshFiller *f = new SubMeshFiller(sm, mVertices, mNormals,
+                                             mUVs, use_uvs);
 
         // Set the material for the submesh
         f->setMaterialName(matName);
@@ -1818,10 +1781,8 @@ SubMeshFiller *AIMeshLoader::getFillerForSlot(int slot) {
         if (mit != mOgreMaterials.end()) {
             Ogre::SubMesh *sm = mMesh->createSubMesh(format("SubMesh", slot));
 
-            static const std::vector<ObjLight> mEmptyLights;
-
             SubMeshFiller *f = new SubMeshFiller(
-                sm, mVertices, mNormals, mEmptyLights, mUVs, true);
+                sm, mVertices, mNormals, mUVs, true);
 
             // Set the material for the submesh
             f->setMaterialName(mit->second->getName());
