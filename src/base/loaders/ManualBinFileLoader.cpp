@@ -1146,6 +1146,12 @@ void ObjectMeshLoader::readLights() {
     mFile->seek(mHdr.offset_light);
     *mFile >> mLights;
 
+    // this converts the packed normals to vectors that can be used
+    // by the SubMeshFiller
+    // since we don't care about the mExtraNormals here
+    // the mExtraNormals seem to be polygon based normals used for collision
+    // detection.
+    // We only care about rendering here, so we used the packed normals.
     mNormals.resize(mNumLights);
     for (size_t idx = 0; idx < mNumLights; ++idx) {
         mNormals[idx] = unpack_normal(mLights[idx].packed_normal);
