@@ -24,6 +24,8 @@
 #ifndef __DATABASESERVICE_H
 #define __DATABASESERVICE_H
 
+#include <functional>
+
 #include "DarkCommon.h"
 #include "OpdeService.h"
 #include "OpdeServiceFactory.h"
@@ -68,18 +70,15 @@ public:
     void unload(uint32_t dropMask);
 
     /// Listener that receives events every now and then while loading
-    typedef Callback<DatabaseProgressMsg> ProgressListener;
-
-    /// Progress Listener shared_ptr
-    typedef shared_ptr<ProgressListener> ProgressListenerPtr;
+    typedef std::function<void(const DatabaseProgressMsg &)> ProgressListener;
 
     /// Setter for the progress listener.
-    void setProgressListener(const ProgressListenerPtr &listener) {
+    void setProgressListener(const ProgressListener &listener) {
         mProgressListener = listener;
     };
 
     /// Clears (unsets) the progress listener (disabling it)
-    void unsetProgressListener() { mProgressListener.reset(); };
+    void unsetProgressListener() { mProgressListener = [](const DatabaseProgressMsg&){}; };
 
     /// A free to use fine step function that calls the Progress Listener to
     /// reflect the loading progress Use this especially in some long-to load
@@ -136,7 +135,7 @@ protected:
     /// Used to report to the Progress Listener
     DatabaseProgressMsg mLoadingStatus;
 
-    ProgressListenerPtr mProgressListener;
+    ProgressListener mProgressListener;
 
     /// Map of db. load listeners
     typedef std::multimap<size_t, DatabaseListener *> Listeners;

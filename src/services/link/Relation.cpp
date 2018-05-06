@@ -87,7 +87,7 @@ public:
             pollNextAncestor();
         }
 
-        assert(!mCurrentIt.isNull());
+        assert(mCurrentIt);
         return mCurrentIt->next();
     }
 

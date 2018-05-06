@@ -37,7 +37,7 @@
 
 namespace Opde {
 
-int LightAtlas::mMaxSize;
+int LightAtlas::mMaxSize = 1024;
 
 Vector3 operator*(float a, const LMPixel &b) {
     return Vector3(a * b.R, a * b.G, a * b.B);

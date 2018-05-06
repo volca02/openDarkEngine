@@ -88,6 +88,8 @@ Root::Root(uint serviceMask, const char *logFileName)
         logToFile(logFileName);
     }
 
+    mTracer.reset(new Opde::Tracer());
+
     LOG_INFO("Root: Starting openDarkEngine %d.%d.%d (%s), build %s, %s",
              OPDE_VER_MAJOR, OPDE_VER_MINOR, OPDE_VER_PATCH, OPDE_CODE_NAME,
              __DATE__, __TIME__);

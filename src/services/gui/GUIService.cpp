@@ -70,7 +70,7 @@ void GUIService::setActive(bool active) {
        if set to true, we set direct input mode and show cursor
        if set to false, we set mapped input mode and hide the cursor
     */
-    assert(!mInputSrv.isNull());
+    assert(mInputSrv);
 
     if (active) {
         mInputSrv->setInputMode(IM_DIRECT);
@@ -187,7 +187,7 @@ void GUIService::shutdown() {
 // -----------------------------------
 bool GUIService::keyPressed(const SDL_KeyboardEvent &e) {
     if (mConsole && mConsole->isActive()) {
-        mConsole->injectKeyPress(e.keysym.sym);
+        mConsole->injectKeyPress(e);
         return true;
     } else {
         // TODO: Inject into the focussed GUI object

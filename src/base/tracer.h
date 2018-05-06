@@ -29,6 +29,7 @@
 
 #include <cstddef>
 #include <vector>
+#include <chrono>
 
 namespace Ogre {
 class Timer;
@@ -39,8 +40,10 @@ namespace Opde {
 /** Performance tracer. Writes performance probes with function names. */
 class Tracer : public Singleton<Tracer> {
 public:
+    using time_point = std::chrono::time_point<std::chrono::system_clock>;
+
     /** Constructor */
-    Tracer(Ogre::Timer *timer);
+    Tracer();
 
     /** Destructor. Does not deallocate the listeners, as this is not a wanted
      * behavior. */
@@ -50,11 +53,11 @@ public:
     void traceStartFrame();
 
     /** logs a tracer record used for performance tracing */
-    unsigned long trace(bool start, const char *func, const void *data);
+    time_point trace(bool start, const char *func, const void *data);
 
     /** logs endpoint of a scoped tracer */
     void trace_endpoint(const char *func, const void *data,
-                        unsigned long start);
+                        const time_point &start);
 
     /** logs a custom event */
     void tracePoint(const char *text);
@@ -64,15 +67,13 @@ public:
     static Tracer *getSingletonPtr(void);
 
 private:
-    Ogre::Timer *mTimer;
-
     /** Frame number for perf tracer */
     size_t mTraceFrameNum;
-    unsigned long mFrameStartTime;
+    time_point mFrameStartTime;
 
     struct TraceRecord {
-        unsigned long time;
-        unsigned long spent;
+        time_point time;
+        std::chrono::microseconds spent;
         bool entry;
         bool function;
         const void *data = nullptr;
@@ -100,7 +101,7 @@ public:
 private:
     const char *text;
     const void *instance;
-    unsigned long mStart;
+    Tracer::time_point mStart;
 };
 
 // Use this to place performance probes into code

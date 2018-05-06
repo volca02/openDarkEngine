@@ -23,15 +23,94 @@
 
 #include <iostream>
 
-#include "config.h"
-
-#include "GameStateManager.h"
+#include "Root.h"
 #include "OpdeException.h"
 #include "StringTokenizer.h"
+#include "ServiceCommon.h"
+
+#include "config/ConfigService.h"
+#include "loop/LoopService.h"
+#include "gui/GUIService.h"
+#include "database/DatabaseService.h"
+#include "input/InputService.h"
 
 #include <OgreException.h>
 
-using namespace Opde;
+namespace Opde {
+
+// args are temporary!
+void run(const std::string &config_name, std::string mission) {
+    Root root(SERVICE_ALL);
+
+    // logging setup
+    root.logToFile("opde.log");
+    root.setLogLevel(4);
+
+    // first argument is config name
+    // that includes specification of resource locations
+    root.loadConfigFile(config_name);
+
+    auto cfg_srv = GET_SERVICE(ConfigService);
+
+    // get the resource config spec
+    auto rc = cfg_srv->getParam("resource_config", "thief1.cfg");
+
+    // setup resources, based on game
+    // NOTE: Temporary solution here
+    root.loadResourceConfig(rc.toString());
+
+    // inform root that this is all needed for bootstrap of the services
+    // (mandatory)
+    root.bootstrapFinished();
+
+    // get loop service so that we can run the main loop
+    auto loop_srv = GET_SERVICE(LoopService);
+
+    // setup some basic input bindings
+    auto inp_srv = GET_SERVICE(InputService);
+
+    // database service for mission loading
+    auto db_svc = GET_SERVICE(DatabaseService);
+
+    // register a refresh callback to db service for redraws
+    // NOTE: Would like multithread later on
+    db_svc->setProgressListener(
+            [&](const DatabaseProgressMsg &m) {
+                loop_srv->step();
+            }
+    );
+
+    inp_srv->registerCommandTrap("exit_request",
+                                 [&](const InputEventMsg&) {
+                                     loop_srv->requestTermination();
+                                 });
+
+    // non-bound mission loading command
+    inp_srv->registerCommandTrap("load", [&](const InputEventMsg &m) {
+        db_svc->load(m.params.toString(), DBM_COMPLETE);
+    });
+
+    // hardcoded, so we can exit the process and control the engine
+    inp_srv->processCommand("bind esc exit_request");
+    inp_srv->processCommand("bind ` show_console");
+
+    // any mission file requested yet?
+    if (!mission.empty()) {
+        db_svc->load(mission, DBM_COMPLETE);
+    } else {
+        // no mission, show console
+        auto gui_svc = GET_SERVICE(GUIService);
+        gui_svc->showConsole();
+    }
+
+    // loop
+    if (loop_srv->requestLoopMode("AllClientsLoopMode"))
+        loop_srv->run();
+    else
+        OPDE_EXCEPT("Cannot start AllClientsLoopMode");
+}
+
+} // namespace Opde
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -43,32 +122,26 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT) {
     // split on space, find if we have two arguments or just one
     WhitespaceStringTokenizer wst(scmd, false); // false == obey the quotes
 
-    std::string gameType = wst.next();
+    std::string config_name = wst.next();
 
-    std::string missionName = "";
+    std::string mission_file = "";
 
     if (!wst.end())
-        missionName = wst.next();
+        mission_file = wst.next();
 #else
 int main(int argc, char **argv) {
-    std::string gameType = "";
-    std::string missionName = "";
+    std::string config_name = "";
+    std::string mission_file = "";
 
     if (argc >= 2)
-        gameType = argv[1];
+        config_name = argv[1];
 
     if (argc >= 3)
-        missionName = argv[2];
+        mission_file = argv[2];
 #endif
 
     try {
-        GameStateManager man(gameType);
-
-        // if we have a mission name, supply
-        if (missionName != "")
-            man.setDesiredMissionName(missionName);
-
-        man.run();
+        Opde::run(config_name, mission_file);
     } catch (Ogre::Exception &e) {
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
         MessageBox(NULL, e.getFullDescription().c_str(),
@@ -79,7 +152,7 @@ int main(int argc, char **argv) {
                   << e.getFullDescription().c_str() << std::endl;
 #endif
 
-    } catch (BasicException &e) {
+    } catch (Opde::BasicException &e) {
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
         MessageBox(NULL, e.getDetails().c_str(), "An exception has occured!",
                    MB_OK | MB_ICONERROR | MB_TASKMODAL);

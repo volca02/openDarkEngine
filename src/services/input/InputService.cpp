@@ -48,6 +48,7 @@ InputService::InputService(ServiceManager *manager, const std::string &name)
       mInitialDelay(0.4f), // TODO: Read these from the config service
       mRepeatDelay(0.3f),
       mKeyPressTime(0.0f),
+      mCurrentDelay(mInitialDelay),
       mCurrentKey(SDLK_UNKNOWN),
       mCurrentMods(0),
       mNonExclusive(false)
@@ -477,8 +478,11 @@ void InputService::loopStep(float deltaTime) { pollEvents(deltaTime); }
 
 //------------------------------------------------------
 void InputService::processKeyRepeat(float deltaTime) {
-    if (mCurrentKey == SDLK_CLEAR)
+    if (mCurrentKey == SDLK_UNKNOWN ||
+        mCurrentKey == SDLK_CLEAR)
+    {
         return;
+    }
 
     mKeyPressTime += deltaTime;
 
@@ -486,8 +490,9 @@ void InputService::processKeyRepeat(float deltaTime) {
     assert(mRepeatDelay > 0);
 
     // see if we overlapped
-    while (mKeyPressTime > mRepeatDelay) {
+    while (mKeyPressTime > mCurrentDelay) {
         mKeyPressTime -= mCurrentDelay;
+        // after initial delay, we force repeat delay here
         mCurrentDelay = mRepeatDelay;
 
         if (mInputMode == IM_MAPPED)

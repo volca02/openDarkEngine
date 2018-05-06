@@ -146,7 +146,7 @@ protected:
                              bool dynamic);
 
     /// Lists of all light map atlases
-    LightAtlasList *mAtlasList;
+    std::unique_ptr<LightAtlasList> mAtlasList;
 
     // Version of the lightmap - either 1 or 2 - directly means the stored
     // lightmap pixel size as well

@@ -45,6 +45,8 @@
 /** OpenDarkEngine namespace. Holds the whole openDarkEngine project. */
 namespace Opde {
 
+class Tracer;
+
 /** OPDE core class. Used to initialize the whole engine. Singleton */
 class Root : public Singleton<Root> {
 public:
@@ -103,6 +105,7 @@ protected:
     void setupLoopModes();
 
     std::unique_ptr<Logger> mLogger;
+    std::unique_ptr<Tracer> mTracer;
     std::unique_ptr<ServiceManager> mServiceMgr;
     std::unique_ptr<Ogre::Root> mOgreRoot;
     std::unique_ptr<Ogre::LogManager> mOgreLogManager;

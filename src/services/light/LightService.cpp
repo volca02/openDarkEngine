@@ -67,14 +67,12 @@ template <> const size_t ServiceImpl<LightService>::SID = __SERVICE_ID_LIGHT;
 LightService::LightService(ServiceManager *manager, const std::string &name)
     : ServiceImpl<Opde::LightService>(manager, name), mLightPixelSize(0) {
 
-    mAtlasList = new LightAtlasList();
+    mAtlasList.reset(new LightAtlasList());
 }
 
 //------------------------------------------------------
 LightService::~LightService() {
     clear();
-
-    delete mAtlasList;
 }
 
 //------------------------------------------------------
@@ -176,7 +174,7 @@ void LightService::atlasLightMaps() {
     // atlas all the cells
     for (const auto &cell : *mCells) {
         // atlas each
-        cell->getLights()->atlasLightMaps(mAtlasList);
+        cell->getLights()->atlasLightMaps(mAtlasList.get());
     }
 }
 

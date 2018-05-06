@@ -7,14 +7,14 @@
 namespace Opde {
 
 /// Database event types
-typedef enum {
+enum DatabaseChangeType {
     /// Loading a new database
     DBC_LOADING = 1,
     /// Saving a database
     DBC_SAVING,
     /// Dropping a database
     DBC_DROPPING
-} DatabaseChangeType;
+};
 
 /*
  * FILE_TYPE [*] [*]
@@ -61,7 +61,7 @@ typedef enum {
  * : bit 3 (4). Active only on VBR databases - that contain brush lists
  *
  */
-typedef enum {
+enum DatabaseMask {
     /// Contains concrete objects (not necessarily object database!)
     DBM_CONCRETE = 0x0100,
     /// Contains Abstract objects
@@ -95,7 +95,7 @@ typedef enum {
     DBM_FILETYPE_MIS = 0x031900,
     /// COW file type
     DBM_FILETYPE_COW = 0x071F00,
-} DatabaseMask;
+};
 
 /// The database change message
 /*

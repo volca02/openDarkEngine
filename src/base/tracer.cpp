@@ -41,9 +41,10 @@ namespace Opde {
 
 template <> Tracer *Singleton<Tracer>::ms_Singleton = 0;
 
-Tracer::Tracer(Ogre::Timer *timer)
-    : mTimer(timer), mTraceFrameNum(0),
-      mFrameStartTime(mTimer->getMicroseconds()) {}
+Tracer::Tracer()
+    : mTraceFrameNum(0),
+      mFrameStartTime(std::chrono::system_clock::now())
+{}
 
 Tracer::~Tracer() {}
 
@@ -56,8 +57,10 @@ Tracer *Tracer::getSingletonPtr(void) { return ms_Singleton; }
 
 void Tracer::traceStartFrame() {
     // spit out the traces?
-    unsigned long now = mTimer->getMicroseconds();
-    unsigned long spentTime = now - mFrameStartTime;
+    auto now = std::chrono::system_clock::now();
+    auto spentTime =
+        std::chrono::duration_cast<std::chrono::microseconds>(now -
+                                                              mFrameStartTime);
 
     // For now, I'm spitting this into normal log. Later I'll
     // write it into a special file.
@@ -66,12 +69,15 @@ void Tracer::traceStartFrame() {
     for (TraceLog::const_iterator ci = mTraces.begin(), iend = mTraces.end();
          ci != iend; ++ci) {
         if (ci->function) {
+            auto start = std::chrono::duration_cast<std::chrono::microseconds>(
+                    ci->time - mFrameStartTime);
+
             if (ci->entry) {
                 LOG_DEBUG("PERF_TRACE_SCOPE %zu ENTER '%s' '%p'",
-                          ci->time - mFrameStartTime, ci->text, ci->data);
+                          start.count(), ci->text, ci->data);
             } else {
                 LOG_DEBUG("PERF_TRACE_SCOPE %zu EXIT(%zu) '%s' '%p'",
-                          ci->time - mFrameStartTime, ci->spent, ci->text,
+                          start.count(), ci->spent.count(), ci->text,
                           ci->data);
             }
         } else {
@@ -83,13 +89,13 @@ void Tracer::traceStartFrame() {
     ++mTraceFrameNum;
     mTraces.clear();
     mTraces.reserve(256);
-    mFrameStartTime = mTimer->getMicroseconds();
+    mFrameStartTime = std::chrono::system_clock::now();
 }
 
 /** logs a tracer record used for performance tracing */
-unsigned long Tracer::trace(bool start, const char *func, const void *data) {
+Tracer::time_point Tracer::trace(bool start, const char *func, const void *data) {
     TraceRecord trace;
-    trace.time = mTimer->getMicroseconds();
+    trace.time = std::chrono::system_clock::now();
     trace.entry = start;
     trace.text = func;
     trace.function = true;
@@ -100,22 +106,24 @@ unsigned long Tracer::trace(bool start, const char *func, const void *data) {
 
 /** logs a tracer record used for performance tracing */
 void Tracer::trace_endpoint(const char *func,
-                            const void *data, unsigned long start)
+                            const void *data, 
+                            const time_point &start)
 {
     TraceRecord trace;
-    trace.time = mTimer->getMicroseconds();
+    trace.time = std::chrono::system_clock::now();
     trace.entry = false;
     trace.text = func;
     trace.function = true;
     trace.data = data;
-    trace.spent = trace.time - start;
+    trace.spent = std::chrono::duration_cast<std::chrono::microseconds>(
+        trace.time - start);
     mTraces.push_back(trace);
 }
 
 /** logs a tracer record used for performance tracing */
 void Tracer::tracePoint(const char *text) {
     TraceRecord trace;
-    trace.time = mTimer->getMicroseconds();
+    trace.time = std::chrono::system_clock::now();
     trace.entry = true;
     trace.text = text;
     trace.function = false;

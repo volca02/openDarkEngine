@@ -186,7 +186,7 @@ void DatabaseService::fineStep(int count) {
 
     // call the progress listener if it is set
     if (mProgressListener) {
-        (*mProgressListener)(mLoadingStatus);
+        mProgressListener(mLoadingStatus);
     }
 }
 
@@ -294,7 +294,7 @@ void DatabaseService::broadcastOnDBLoad(const FileGroupPtr &db,
 
         // call the progress listener if it is set
         if (mProgressListener) {
-            (*mProgressListener)(mLoadingStatus);
+            mProgressListener(mLoadingStatus);
         }
     }
 }
@@ -322,7 +322,7 @@ void DatabaseService::broadcastOnDBSave(const FileGroupPtr &db,
 
         // call the progress listener if it is set
         if (mProgressListener) {
-            (*mProgressListener)(mLoadingStatus);
+            mProgressListener(mLoadingStatus);
         }
     }
 }
@@ -349,7 +349,7 @@ void DatabaseService::broadcastOnDBDrop(uint32_t dropmask) {
 
         // call the progress listener if it is set
         if (mProgressListener) {
-            (*mProgressListener)(mLoadingStatus);
+            mProgressListener(mLoadingStatus);
         }
     }
 }

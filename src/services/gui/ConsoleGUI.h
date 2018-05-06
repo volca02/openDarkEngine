@@ -45,7 +45,7 @@ public:
      * @return true if the keyboard event was consumed, false otherwise (Console
      * not visible)
      */
-    bool injectKeyPress(unsigned int keycode);
+    bool injectKeyPress(const SDL_KeyboardEvent &e);
 
     void setActive(bool active);
 

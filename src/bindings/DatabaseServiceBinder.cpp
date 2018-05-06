@@ -337,12 +337,13 @@ PyObject *DatabaseServiceBinder::setProgressListener(PyObject *self,
     PyObject *callable;
 
     if (PyArg_ParseTuple(args, "O", &callable)) {
-        DatabaseService::ProgressListenerPtr pcp(
-            new PythonDatabaseProgressCallback(callable));
-
+        Object cb(callable);
         // call the is to register the command trap
-        o->setProgressListener(pcp);
-
+        using std::placeholders::_1;
+        o->setProgressListener(std::bind(
+            &call_python_callback<DatabaseProgressMsg,
+                                  PythonDatabaseProgressMessageConverter>,
+            std::move(cb), _1));
         __PY_NONE_RET;
     } else {
         PyErr_SetString(PyExc_TypeError, "Expected a callable parameter!");

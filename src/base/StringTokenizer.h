@@ -25,11 +25,13 @@
 #ifndef __STRINGTOKENIZER_H
 #define __STRINGTOKENIZER_H
 
-#include "config.h"
-
-#include "Iterator.h"
 #include <functional>
 #include <string>
+#include <algorithm>
+
+#include "config.h"
+#include "Iterator.h"
+
 
 namespace Opde {
 /// char classifier (is Space)

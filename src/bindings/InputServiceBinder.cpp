@@ -209,7 +209,8 @@ PyObject *InputServiceBinder::registerCommandTrap(PyObject *self,
             using std::placeholders::_1;
             o->registerCommandTrap(
                 name,
-                std::bind(&call_python_callback<InputEventMsg, PythonInputMessageConverter>,
+                std::bind(&call_python_callback<InputEventMsg,
+                                                PythonInputMessageConverter>,
                           std::move(cb), _1));
 
             __PY_NONE_RET;

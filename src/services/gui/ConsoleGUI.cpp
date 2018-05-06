@@ -58,7 +58,7 @@ ConsoleGUI::ConsoleGUI(GUIService *owner) : mIsActive(false), mOwner(owner) {
     mConsoleColors.push_back(ColourValue(0.8f, 0.8f, 0.3f));
     mConsoleColors.push_back(ColourValue::Blue);
 
-    assert(!mFont.isNull());
+    assert(mFont);
 
     mDrawSrv = GET_SERVICE(DrawService);
     mInputSrv = GET_SERVICE(InputService);
@@ -123,9 +123,11 @@ void ConsoleGUI::setActive(bool active) {
         mDrawSrv->setActiveSheet(mConsoleSheet);
 }
 
-bool ConsoleGUI::injectKeyPress(unsigned int keycode) {
+bool ConsoleGUI::injectKeyPress(const SDL_KeyboardEvent &e) {
     if (!mIsActive)
         return false;
+
+    int keycode = e.keysym.sym;
 
     if (keycode == SDLK_ESCAPE) {
         mOwner->hideConsole();
@@ -174,6 +176,8 @@ bool ConsoleGUI::injectKeyPress(unsigned int keycode) {
         if (keycode & (1 << 30))
             return true;
 
+        // TODO: this should be reworked to use SDL_TEXTINPUT, as it does not 
+        // handle shift, capslock, etc.
         string allowed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0"
                          "123456789 ,./:;'-_+=[]{}()| \"\t";
 

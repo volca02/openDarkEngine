@@ -229,7 +229,6 @@ bool GameStateManager::run() {
     LOG_INFO("GameStateManager: Finishing bootstrap");
 
     mRoot->bootstrapFinished();
-
     ps->bootstrapFinished();
 
     LOG_INFO("GameStateManager: State");
@@ -241,9 +240,7 @@ bool GameStateManager::run() {
     // Main while-loop
     unsigned long lTimeCurrentFrame = 0;
 
-    Timer *timer = mOgreRoot->getTimer();
-
-    std::unique_ptr<Opde::Tracer> tracer(new Opde::Tracer(timer));
+    Ogre::Timer *timer = mOgreRoot->getTimer();
 
 #warning TODO: Replace this code with propper loop manager code.
 
@@ -303,7 +300,6 @@ bool GameStateManager::run() {
     while (!mStateStack.empty()) {
         GameState *state = mStateStack.top();
         mStateStack.pop();
-
         state->exit();
     }
 

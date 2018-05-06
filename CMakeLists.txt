@@ -57,11 +57,6 @@ OPTION(GENERATE_DOC
     OFF)
 
 # Option to build in the debugging code
-OPTION(PROFILING
-    "Build the sources with profiling support (Only Debug build type)"
-    OFF)
-
-# Option to build in the debugging code
 OPTION(FRAME_PROFILER
     "Build in support for frame profiling (will log frame profiling events)"
     OFF)
@@ -92,15 +87,6 @@ SET(OPDE_FULL_DATA_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/${OPDE_DATA_INSTALL_DIR})
 MARK_AS_ADVANCED(OPDE_DATA_INSTALL_DIR)
 MARK_AS_ADVANCED(OPDE_FULL_DATA_INSTALL_DIR)
 
-# Compiler profiling flags
-IF (PROFILING)
-    IF(CMAKE_COMPILER_IS_GNUCXX)
-    SET(PROFILER "-pg") # GCC only profiler option
-    ENDIF(CMAKE_COMPILER_IS_GNUCXX)
-ELSE (PROFILING)
-    SET(PROFILER "")
-ENDIF (PROFILING)
-
 #Target the binary files into a separate directories
 # SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR/Build})
 
@@ -112,22 +98,6 @@ ENDIF(CMAKE_COMPILER_IS_MINGW)
 
 # Warning level high (Lowered by one to supress the payload of ogre related warnings in VC)
 SET(CMAKE_CXX_WARNING_LEVEL 3)
-
-# GCC specific. Release/Debug flags (I add some debug/profiler switches there)
-IF(CMAKE_COMPILER_IS_GNUCXX)
-    SET(CMAKE_C_FLAGS_DEBUG "-g -O3 ${PROFILER}")
-    SET(CMAKE_CXX_FLAGS_DEBUG "-g -O3 ${PROFILER}")
-    SET(CMAKE_CXX_FLAGS_DISTRIBUTION "-O3 ${PROFILER}")
-    SET(CMAKE_C_FLAGS_DISTRIBUTION "-O3 ${PROFILER}")
-
-    SET(CMAKE_CXX_FLAGS "-O3 ${PROFILER}")
-    SET(CMAKE_C_FLAGS "-O3 ${PROFILER}")
-
-    # extra warnings, but no unused params (too common)
-    # no strict aliasing (see Py_True type punned pointer aliasing errors)
-    ADD_DEFINITIONS(-Wall -fno-strict-aliasing -fvisibility=default)
-    #  -Wextra -Wno-unused-parameter
-ENDIF(CMAKE_COMPILER_IS_GNUCXX)
 
 # -fPIC for 64bit IA (x86_64 that is)
 IF(UNIX AND NOT WIN32)
@@ -211,7 +181,7 @@ ELSE(SDL2_FOUND)
 ENDIF(SDL2_FOUND)
 
 FIND_PACKAGE(PythonLibs REQUIRED)
-SET(OPDE_PYTHON_LIBRARIES optimized ${PYTHON_LIBRARIES} debug ${PYTHON_DEBUG_LIBRARIES})
+SET(OPDE_PYTHON_LIBRARIES optimized ${PYTHON_LIBRARIES} debug ${PYTHON_LIBRARIES})
 
 # Aditional libraries - deps of the python lib
 IF(UNIX)
@@ -241,37 +211,37 @@ MARK_AS_ADVANCED(DOC_DEPS_SATISFIED)
 
 # Preparation for the documentation generators - do we have all dependencies?
 IF (GENERATE_DOC)
-	IF(DOXYGEN_EXECUTABLE)
-		MESSAGE(STATUS "Doxygen Found OK")
-	ELSE(DOXYGEN_EXECUTABLE)
-		MESSAGE("Doxygen not found")
-	ENDIF(DOXYGEN_EXECUTABLE)
+    IF(DOXYGEN_EXECUTABLE)
+        MESSAGE(STATUS "Doxygen Found OK")
+    ELSE(DOXYGEN_EXECUTABLE)
+        MESSAGE("Doxygen not found")
+    ENDIF(DOXYGEN_EXECUTABLE)
 
-	IF(TEXI2HTML)
-		MESSAGE(STATUS "Texi2html Found OK")
-	ELSE(TEXI2HTML)
-		MESSAGE("Texi2html not found")
-	ENDIF(TEXI2HTML)
+    IF(TEXI2HTML)
+        MESSAGE(STATUS "Texi2html Found OK")
+    ELSE(TEXI2HTML)
+        MESSAGE("Texi2html not found")
+    ENDIF(TEXI2HTML)
 
-	IF(DOT)
-		MESSAGE(STATUS "Dot Found OK")
-	ELSE(DOT)
-		MESSAGE("Dot not found")
-	ENDIF(DOT)
+    IF(DOT)
+        MESSAGE(STATUS "Dot Found OK")
+    ELSE(DOT)
+        MESSAGE("Dot not found")
+    ENDIF(DOT)
 
-	IF(EPYDOC)
-		MESSAGE(STATUS "Epydoc Found OK")
-	ELSE(EPYDOC)
-		MESSAGE("Epydoc not found")
-	ENDIF(EPYDOC)
+    IF(EPYDOC)
+        MESSAGE(STATUS "Epydoc Found OK")
+    ELSE(EPYDOC)
+        MESSAGE("Epydoc not found")
+    ENDIF(EPYDOC)
 
-	# See if we have all the dependencies for DOC_DEPS_SATISFIED
-	IF (DOXYGEN_EXECUTABLE AND TEXI2HTML AND DOT AND EPYDOC)
-		SET(DOC_DEPS_SATISFIED ON)
-	ELSE (DOXYGEN_EXECUTABLE AND TEXI2HTML AND DOT AND EPYDOC)
-		MESSAGE("Warning: Documentation dependencies not satisfied. Doc generation will be disabled.")
-		SET(GENERATE_DOC OFF)
-	ENDIF (DOXYGEN_EXECUTABLE AND TEXI2HTML AND DOT AND EPYDOC)
+    # See if we have all the dependencies for DOC_DEPS_SATISFIED
+    IF (DOXYGEN_EXECUTABLE AND TEXI2HTML AND DOT AND EPYDOC)
+        SET(DOC_DEPS_SATISFIED ON)
+    ELSE (DOXYGEN_EXECUTABLE AND TEXI2HTML AND DOT AND EPYDOC)
+        MESSAGE("Warning: Documentation dependencies not satisfied. Doc generation will be disabled.")
+        SET(GENERATE_DOC OFF)
+    ENDIF (DOXYGEN_EXECUTABLE AND TEXI2HTML AND DOT AND EPYDOC)
 ENDIF (GENERATE_DOC)
 
 # Some configuration checks to allow platform independence
@@ -378,7 +348,6 @@ MESSAGE(STATUS "")
 MESSAGE(STATUS "Your build parameters:")
 MESSAGE(STATUS " * Global debugging : ${GLOBAL_DEBUG}")
 MESSAGE(STATUS " * Build type       : ${CMAKE_BUILD_TYPE}")
-MESSAGE(STATUS " * Profilling       : ${PROFILING}")
 MESSAGE(STATUS " * Python module    : ${PYTHON_MODULE}")
 MESSAGE(STATUS " * Documentation    : ${GENERATE_DOC}")
 MESSAGE(STATUS " * C compiler       : ${CMAKE_C_COMPILER}")
