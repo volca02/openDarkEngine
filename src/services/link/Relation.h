@@ -177,18 +177,18 @@ public:
     /** Gets single link ID that is coming from source to destination
      * @param src Source object ID, or 0 if any source
      * @param dst Destination object ID or 0 if any destination
-     * @return LinkPtr link instance that fulfills the requirements
+     * @return Link link instance that fulfills the requirements
      * @note only one of the parameters can be zero
      * @throws BasicException if there was more than one link that could be
      * returned
      */
-    LinkPtr getOneLink(int src, int dst) const;
+    const Link *getOneLink(int src, int dst) const;
 
     /** Gets single link given the link ID
      * @param id The link's ID
-     * @return LinkPtr link instance that fulfills the requirements, or NULL
+     * @return Link link instance that fulfills the requirements, or NULL
      */
-    LinkPtr getLink(link_id_t id) const;
+    const Link *getLink(link_id_t id) const;
 
     /** Removes all links that connected to a given object ID
      * @param id the object id to remove all links from
@@ -227,7 +227,7 @@ protected:
      * (notification, query database refresh)
      * @note The link data have to be assigned prior to calling this method
      */
-    void _addLink(const LinkPtr &newlnk);
+    void _addLink(const Link &newlnk);
 
     /** Internal method for link removal handling. Notifies the listeners,
      * refreshes query databases.
@@ -259,22 +259,15 @@ protected:
      */
     void unallocateLinkID(link_id_t id);
 
-    /** Creates an inverse link for the given link. The links share the same
-     * data, but have src and dst object id's swapped
-     * @param src The source link
-     * @return LinkPtr of the new inverse link
-     */
-    LinkPtr createInverseLink(const LinkPtr &src);
-
     /** internal object destruction handler. @see objectDestroyed */
     void _objectDestroyed(int id);
 
     /// Map of links. Indexed by whole link id, contains the link class
     /// (LinkPtr)
-    typedef std::map<link_id_t, LinkPtr> LinkMap;
+    typedef std::map<link_id_t, Link> LinkMap;
 
     /// Map of all links that have an object ID in either target or source
-    typedef std::multimap<int, LinkPtr> ObjectIDToLinks;
+    typedef std::multimap<int, Link> ObjectIDToLinks;
 
     /// Map of all maps that share a certain object ID
     typedef std::map<int, ObjectIDToLinks> ObjectLinkMap;

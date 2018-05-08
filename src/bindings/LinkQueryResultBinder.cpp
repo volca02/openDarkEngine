@@ -89,7 +89,7 @@ PyObject *LinkQueryResultBinder::getNext(PyObject *self) {
     PyObject *next = NULL;
 
     if (o && !o->end()) {
-        LinkPtr l = o->next();
+        const Link &l = o->next();
         next = LinkBinder::create(l);
     }
 

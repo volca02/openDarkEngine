@@ -173,15 +173,15 @@ private:
     /** Adds an inheritance link.
      * @param link The link to be added as InheritLink
      * @param priority The priority of the link to be added */
-    void _addLink(const LinkPtr &link, unsigned int priority);
+    void _addLink(const Link &link, unsigned int priority);
 
     /** Modifies the inheritance link priority
      * @param link The link to be modified
      * @param priority The priority of the link to be modified to */
-    void _changeLink(const LinkPtr &link, unsigned int priority);
+    void _changeLink(const Link &link, unsigned int priority);
 
     /** Removes the given inheritance link */
-    void _removeLink(const LinkPtr &link);
+    void _removeLink(const Link &link);
 
     /// Listener for the metaprop
     void onMetaPropMsg(const LinkChangeMsg &msg);

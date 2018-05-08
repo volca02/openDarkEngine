@@ -252,7 +252,7 @@ void GamePlayState::update(unsigned long timePassed) {
     }
 
     if (mScreenShot) {
-        char tmp[20];
+        char tmp[30];
         sprintf(tmp, "screenshot_%d.png", ++mNumScreenShots);
         RenderWindow *w = Ogre::Root::getSingleton().getAutoCreatedWindow();
 
@@ -351,7 +351,7 @@ void GamePlayState::onLinkPlayerFactoryMsg(const LinkChangeMsg &msg) {
     if (msg.change == LNK_ADDED) {
         LOG_INFO("GamePlayState: Found StartingPoint");
         // get the Link ref.
-        LinkPtr l = mPlayerFactoryRelation->getLink(msg.linkID);
+        const Link *l = mPlayerFactoryRelation->getLink(msg.linkID);
         StartingPointObjID = l->src();
     }
 }
