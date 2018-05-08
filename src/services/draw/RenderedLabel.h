@@ -71,7 +71,7 @@ protected:
     void fillQuad(int x, int y, const unsigned char chr, DrawSourcePtr ds,
                   DrawQuad &dq);
 
-    typedef std::list<DrawQuad *> DrawQuadList;
+    typedef std::vector<DrawQuad> DrawQuadList;
 
     DrawQuadList mDrawQuadList;
 

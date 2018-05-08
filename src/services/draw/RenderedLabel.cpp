@@ -119,8 +119,7 @@ void RenderedLabel::_rebuild() {
                 if (mClipOnScreen.clip(dq)) {
                     // the quad is queued (by making a dynamically allocated
                     // copy)
-                    DrawQuad *toStore = new DrawQuad(dq);
-                    mDrawQuadList.push_back(toStore);
+                    mDrawQuadList.push_back(dq);
                 }
             } else {
                 x += mFontSource->getWidth(); // move the maximal width (maybe
@@ -132,23 +131,13 @@ void RenderedLabel::_rebuild() {
 
 //------------------------------------------------------
 void RenderedLabel::freeQuadList() {
-    DrawQuadList::iterator it = mDrawQuadList.begin();
-    DrawQuadList::iterator end = mDrawQuadList.end();
-
-    for (; it != end; ++it) {
-        delete *it;
-    }
-
     mDrawQuadList.clear();
 }
 
 //------------------------------------------------------
 void RenderedLabel::visitDrawBuffer(DrawBuffer *db) {
-    DrawQuadList::iterator it = mDrawQuadList.begin();
-    DrawQuadList::iterator end = mDrawQuadList.end();
-
-    for (; it != end; ++it) {
-        db->_queueDrawQuad(*it);
+    for (const auto &dq : mDrawQuadList) {
+        db->_queueDrawQuad(&dq);
     }
 }
 
