@@ -426,7 +426,7 @@ PyTypeObject LinkBinder::msType = {
 PyObject *LinkBinder::getattr(PyObject *self, char *name) {
     Link *o;
 
-    if (!python_cast<Link>(self, &msType, o))
+    if (!python_cast<Link*>(self, &msType, &o))
         __PY_CONVERR_RET;
 
     if (!o)
@@ -450,10 +450,10 @@ PyObject *LinkBinder::getattr(PyObject *self, char *name) {
 
 // ------------------------------------------
 PyObject *LinkBinder::create(const Link &link) {
-    Base *object = construct(&msType, link);
+    Base *object = construct(&msType);
 
     if (object != NULL) {
-        object->mInstance = link;
+        object->mInstance = &link;
     }
 
     return (PyObject *)object;

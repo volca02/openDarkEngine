@@ -255,8 +255,8 @@ PyTypeObject InheritLinkBinder::msType = {
 
 // ------------------------------------------
 PyObject *InheritLinkBinder::getattr(PyObject *self, char *name) {
-    InheritLinkPtr o;
-    if (!python_cast<InheritLinkPtr>(self, &msType, &o))
+    InheritLink *o;
+    if (!python_cast<InheritLink *>(self, &msType, &o))
         __PY_CONVERR_RET;
 
     if (!o)
@@ -277,16 +277,11 @@ PyObject *InheritLinkBinder::getattr(PyObject *self, char *name) {
 }
 
 // ------------------------------------------
-PyObject *InheritLinkBinder::create(InheritLinkPtr &link) {
-    if (!link) {
-        PyErr_SetString(PyExc_TypeError, "Null link binding!");
-        return NULL;
-    }
-
+PyObject *InheritLinkBinder::create(const InheritLink &link) {
     Base *object = construct(&msType);
 
     if (object != NULL) {
-        object->mInstance = link;
+        object->mInstance = &link;
     }
 
     return (PyObject *)object;

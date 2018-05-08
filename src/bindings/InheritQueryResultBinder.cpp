@@ -90,7 +90,7 @@ PyObject *InheritQueryResultBinder::getNext(PyObject *self) {
     PyObject *next = NULL;
 
     if (o && !o->end()) {
-        InheritLinkPtr l = o->next();
+        const InheritLink &l = o->next();
         next = InheritLinkBinder::create(l);
     }
 

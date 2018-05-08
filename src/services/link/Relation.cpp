@@ -109,9 +109,8 @@ protected:
         InheritQueryResultPtr anci = mInheritService->getSources(curId);
 
         while (!anci->end()) {
-            const InheritLinkPtr &l = anci->next();
-
-            mAncestorStack.push(l->srcID);
+            const InheritLink &l = anci->next();
+            mAncestorStack.push(l.srcID);
         }
 
         // and unroll into the iterator

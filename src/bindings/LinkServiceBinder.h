@@ -67,7 +67,7 @@ protected:
 
 // -------------------------------
 /// Link class binder. The methods are converted to read-only attributes
-class LinkBinder : public object_binder<Link> {
+class LinkBinder : public object_binder<const Link*> {
 public:
     static void init(PyObject *module);
 

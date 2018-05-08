@@ -43,14 +43,14 @@ namespace Opde {
 /// Just an empty result of a query
 class EmptyInheritQueryResult : public InheritQueryResult {
 public:
-    EmptyInheritQueryResult() : InheritQueryResult(), mNullPtr(NULL){};
+    EmptyInheritQueryResult() : InheritQueryResult() {};
 
-    virtual const InheritLinkPtr &next() { return mNullPtr; };
+    virtual const InheritLink &next() {
+        static const InheritLink empty{0,0,0};
+        return empty;
+    };
 
     virtual bool end() const { return true; };
-
-protected:
-    InheritLinkPtr mNullPtr;
 };
 
 class SimpleInheritQueryResult : public InheritQueryResult {
@@ -60,10 +60,10 @@ public:
         mIter = mLinkMap.begin();
     }
 
-    virtual const InheritLinkPtr &next() {
+    virtual const InheritLink &next() {
         assert(!end());
 
-        const InheritLinkPtr &l = mIter->second;
+        const InheritLink &l = mIter->second;
 
         ++mIter;
 
@@ -310,8 +310,8 @@ int InheritService::getArchetype(int objID) const {
         InheritLinkMap::const_iterator it2 = it->second.begin();
 
         while (it2 != it->second.end()) {
-            if (it2->second->priority == 0) {
-                return it2->second->srcID;
+            if (it2->second.priority == 0) {
+                return it2->second.srcID;
             }
         }
     }
@@ -340,10 +340,10 @@ void InheritService::addMetaProperty(int objID, int mpID) {
         InheritLinkMap::iterator it2 = it->second.begin();
 
         while (it2 != it->second.end()) {
-            int actPrio = it2->second->priority;
+            int actPrio = it2->second.priority;
             if (actPrio > mpPrio) {
-                mpPrio =
-                    actPrio + 8; // next free. MP priorities are stepped by 8
+                // next free. MP priorities are stepped by 8
+                mpPrio = actPrio + 8;
             }
         }
     }
@@ -401,20 +401,20 @@ bool InheritService::inheritsFrom(int objID, int srcID) const {
 void InheritService::_addLink(const Link &link, unsigned int priority) {
     // It works like this. link.src() is the target for inheritance, link.dst()
     // is the source for inheritance
-    InheritLinkPtr ilp(new InheritLink());
+    InheritLink ilp;
 
     // we've got the link reverse. MetaProp has src the target for inh, and dst
     // the parent.
-    ilp->srcID = link.dst();
-    ilp->dstID = link.src();
-    ilp->priority = priority;
+    ilp.srcID = link.dst();
+    ilp.dstID = link.src();
+    ilp.priority = priority;
 
     pair<InheritMap::iterator, bool> r =
-        mInheritSources.insert(make_pair(ilp->dstID, InheritLinkMap()));
+        mInheritSources.insert(make_pair(ilp.dstID, InheritLinkMap()));
 
-    // now insert for the link.src, with the InheritLinkPtr struct
+    // now insert for the link.src, with the InheritLink struct
     pair<InheritLinkMap::iterator, bool> ri =
-        r.first->second.insert(make_pair(ilp->srcID, ilp));
+        r.first->second.insert(make_pair(ilp.srcID, ilp));
 
     if (!ri.second)
         OPDE_EXCEPT(
@@ -422,9 +422,9 @@ void InheritService::_addLink(const Link &link, unsigned int priority) {
 
     // Repeat for the mInheritTarget's
 
-    r = mInheritTargets.insert(make_pair(ilp->srcID, InheritLinkMap()));
+    r = mInheritTargets.insert(make_pair(ilp.srcID, InheritLinkMap()));
 
-    ri = r.first->second.insert(make_pair(ilp->dstID, ilp));
+    ri = r.first->second.insert(make_pair(ilp.dstID, ilp));
 
     if (!ri.second)
         OPDE_EXCEPT(
@@ -437,10 +437,10 @@ void InheritService::_changeLink(const Link &link, unsigned int priority) {
     InheritMap::iterator it = mInheritSources.find(link.dst());
 
     if (it != mInheritSources.end()) {
-        // now insert for the link.src, with the InheritLinkPtr struct
+        // now insert for the link.src, with the InheritLink struct
         InheritLinkMap::iterator it2 = it->second.find(link.src());
 
-        it2->second->priority = priority;
+        it2->second.priority = priority;
     } else
         OPDE_EXCEPT("Could not find the link to change the priority for");
 }
@@ -450,7 +450,7 @@ void InheritService::_removeLink(const Link &link) {
     InheritMap::iterator it = mInheritSources.find(link.dst());
 
     if (it != mInheritSources.end()) {
-        // now insert for the link.src, with the InheritLinkPtr struct
+        // now insert for the link.src, with the InheritLink struct
         InheritLinkMap::iterator it2 = it->second.find(link.src());
 
         if (it2 != it->second.end())
@@ -463,7 +463,7 @@ void InheritService::_removeLink(const Link &link) {
     // Same again, for the targets
     it = mInheritTargets.find(link.src());
     if (it != mInheritTargets.end()) {
-        // now insert for the link.src, with the InheritLinkPtr struct
+        // now insert for the link.src, with the InheritLink struct
         InheritLinkMap::iterator it2 = it->second.find(link.dst());
 
         if (it2 != it->second.end())

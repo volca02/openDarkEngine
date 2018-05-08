@@ -64,14 +64,14 @@ protected:
 // -------------------------------
 /// Inherit link struct binder. The attributes are exposed as read only to
 /// python
-class InheritLinkBinder : public shared_ptr_binder<InheritLinkPtr> {
+class InheritLinkBinder : public object_binder<const InheritLink*> {
 public:
     static void init(PyObject *module);
 
     // --- Python type related methods ---
     static PyObject *getattr(PyObject *self, char *name);
 
-    static PyObject *create(InheritLinkPtr &link);
+    static PyObject *create(const InheritLink &link);
 
 protected:
     /// Static type definition for LinkService
