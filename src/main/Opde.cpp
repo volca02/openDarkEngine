@@ -55,6 +55,11 @@ void run(const std::string &config_name, std::string mission) {
     // get the resource config spec
     auto rc = cfg_srv->getParam("resource_config", "thief1.cfg");
 
+    // enable the frame tracer?
+    auto tr_ena = cfg_srv->getParam("enable_tracer", false);
+    if (tr_ena.toBool())
+        Tracer::getSingleton().enable(true);
+
     // setup resources, based on game
     // NOTE: Temporary solution here
     root.loadResourceConfig(rc.toString());

@@ -49,6 +49,9 @@ public:
      * behavior. */
     ~Tracer();
 
+    /** switches the tracer on/off */
+    void enable(bool enable);
+
     /** Logs a start frame event to tracer */
     void traceStartFrame();
 
@@ -83,6 +86,7 @@ private:
     typedef std::vector<TraceRecord> TraceLog;
 
     TraceLog mTraces;
+    bool mEnabled = false;
 };
 
 /** RAII performance probe */

@@ -53,9 +53,20 @@ Tracer &Tracer::getSingleton(void) {
     return (*ms_Singleton);
 }
 
+void Tracer::enable(bool ena) {
+    mEnabled = ena;
+    if (!mEnabled)
+        mTraces.clear();
+    else
+        mFrameStartTime = std::chrono::system_clock::now();
+}
+
 Tracer *Tracer::getSingletonPtr(void) { return ms_Singleton; }
 
 void Tracer::traceStartFrame() {
+    if (!mEnabled)
+        return;
+
     // spit out the traces?
     auto now = std::chrono::system_clock::now();
     auto spentTime =
