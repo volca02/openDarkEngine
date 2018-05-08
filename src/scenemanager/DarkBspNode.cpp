@@ -280,12 +280,7 @@ void BspNode::testAndSetDistributed(unsigned int prereq, unsigned int mask,
     mCellFlags |= addition;
 
     if (mCellFlags != prev) { // flags changed
-        PortalListConstIterator outPortal_it = mDstPortals.begin();
-        PortalListConstIterator end = mDstPortals.end();
-
-        for (; outPortal_it != end; outPortal_it++) {
-            Portal *out_portal = (*outPortal_it);
-
+        for (auto &out_portal : mDstPortals) {
             out_portal->getTarget()->testAndSetDistributed(prereq, mask,
                                                            addition);
         }
@@ -297,13 +292,8 @@ void BspNode::refreshScreenRect(const Vector3 &vpos, ScreenRectCache &rects,
                                 const Matrix4 &toScreen,
                                 const PortalFrustum &frust) const {
     rects.cell(getID()).initialized = true;
-    // Iterate all portals and refresh the view rect of those
-    PortalListConstIterator outPortal_it = mDstPortals.begin();
-    PortalListConstIterator end = mDstPortals.end();
 
-    for (; outPortal_it != end; outPortal_it++) {
-        Portal *out_portal = (*outPortal_it);
-
+    for (auto &out_portal : mDstPortals) {
         out_portal->refreshScreenRect(vpos, rects, toScreen, frust);
     }
 }
@@ -313,13 +303,8 @@ void BspNode::refreshScreenRect(const Vector3 &vpos, ScreenRectCache &rects,
                                 const Matrix4 &toScreen,
                                 const Plane &cutp) const {
     rects.cell(getID()).initialized = true;
-    // Iterate all portals and refresh the view rect of those
-    PortalListConstIterator outPortal_it = mDstPortals.begin();
-    PortalListConstIterator end = mDstPortals.end();
 
-    for (; outPortal_it != end; outPortal_it++) {
-        Portal *out_portal = (*outPortal_it);
-
+    for (auto &out_portal : mDstPortals) {
         out_portal->refreshScreenRect(vpos, rects, toScreen, cutp);
     }
 }

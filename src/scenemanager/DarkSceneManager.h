@@ -202,11 +202,10 @@ protected:
     std::unique_ptr<BspTree> mBspTree;
 
     typedef std::set<Portal *> PortalSet;
-
+    unsigned mPortalID;
     PortalSet mPortals;
 
     typedef std::set<DarkLight *> LightSet;
-
     LightSet mLightsForUpdate;
 
     /// Current frame number

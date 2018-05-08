@@ -301,14 +301,14 @@ int WRCell::attachPortals(Ogre::DarkSceneManager *smgr) {
 
     // The textured portals are both texturing source and portals. This solves
     // the problems of that approach.
-    int PortalOffset = mHeader.numPolygons - mHeader.numPortals;
+    int portalOffset = mHeader.numPolygons - mHeader.numPortals;
 
     // Number of removed vertices (This number indicates the count of vertices
     // removed due to the fact that the vector to the next vertex is the same
     // (to some degree) as from the last one to here)
     int optimized = 0;
 
-    for (int portalNum = PortalOffset; portalNum < mHeader.numPolygons;
+    for (int portalNum = portalOffset; portalNum < mHeader.numPolygons;
          portalNum++) {
         Ogre::Plane portalPlane;
 
@@ -322,9 +322,6 @@ int WRCell::attachPortals(Ogre::DarkSceneManager *smgr) {
             // for each vertex of that poly
             portal->addPoint(mVertices[mPolyIndices[portalNum][vert]]);
         } // for each vertex
-
-        // Debbuging portal order ID
-        portal->setPortalID(portalNum - PortalOffset);
 
         // refresh the polygon bounding sphere... for clipping optimisation
         portal->refreshBoundingVolume();

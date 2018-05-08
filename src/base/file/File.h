@@ -40,14 +40,14 @@
 namespace Opde {
 
 /** File error reasons. Will probably grow as needed */
-typedef enum {
+enum FileError {
     FILE_READ_ERROR,
     FILE_WRITE_ERROR,
     FILE_OPEN_ERROR,
     FILE_OP_FAILED,
     FILE_OTHER_ERROR,
     FILE_UNIMPL
-} FileError;
+};
 
 /** File size type */
 typedef std::size_t file_size_t;
@@ -88,24 +88,24 @@ public:
 class File {
 public:
     /** File open mode. Read/Write/Read+Write access */
-    typedef enum {
+    enum AccessMode {
         /** Read-only file access mode */
         FILE_R = 1,
         /** Write-only file access mode */
         FILE_W = 2,
         /** Read/write file access mode */
         FILE_RW = 3
-    } AccessMode;
+    };
 
     /** Seek mode. Either seek from begining, from end, or actual position */
-    typedef enum {
+    enum SeekMode {
         /** Seek from file's beginning */
         FSEEK_BEG,
         /** Seek from file's end */
         FSEEK_END,
         /** Seek from file's current position */
         FSEEK_CUR
-    } SeekMode;
+    };
 
     /** Constructor. */
     File(const std::string &name, AccessMode mode);
@@ -145,13 +145,13 @@ public:
     virtual void writeToFile(File &dest);
 
     /** returns true if the file can be read from */
-    inline bool isReadable() { return (mAccessMode | FILE_R) != 0; };
+    inline bool isReadable() { return (mAccessMode & FILE_R) != 0; };
 
     /** returns true if the file can be written to */
-    inline bool isWriteable() { return (mAccessMode | FILE_W) != 0; };
+    inline bool isWriteable() { return (mAccessMode & FILE_W) != 0; };
 
     /** Returns the access mode of the file */
-    inline AccessMode getAccessMode() { return mAccessMode; };
+    inline unsigned getAccessMode() { return mAccessMode; };
 
     /** Returns the file name of this file */
     inline std::string &getName() { return mFileName; };
@@ -208,7 +208,7 @@ protected:
     static void swapEndian(void *ptr, file_size_t size, uint count);
 
     std::string mFileName;
-    AccessMode mAccessMode;
+    unsigned mAccessMode;
 };
 
 // Stream - like bit shift operator overloads for common types

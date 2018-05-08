@@ -58,7 +58,7 @@ ConsoleGUI::ConsoleGUI(GUIService *owner) : mIsActive(false), mOwner(owner) {
     mConsoleColors.push_back(ColourValue(0.8f, 0.8f, 0.3f));
     mConsoleColors.push_back(ColourValue::Blue);
 
-    assert(!mFont.isNull());
+    assert(mFont);
 
     mDrawSrv = GET_SERVICE(DrawService);
     mInputSrv = GET_SERVICE(InputService);

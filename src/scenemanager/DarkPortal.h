@@ -26,8 +26,6 @@
 #ifndef __DARKPORTAL_H
 #define __DARKPORTAL_H
 
-#include "config.h"
-
 #include <OgreCamera.h>
 #include <OgrePlane.h>
 #include <OgreSimpleRenderable.h>
@@ -257,9 +255,6 @@ protected:
     /** Unique portal id */
     unsigned int mID;
 
-    /** On-demand (lazy) generated movable object for debug rendering */
-    ManualObject *mMovableObject;
-
     /** target Scene Node (Cell) for this Portal */
     BspNode *mTarget;
 
@@ -338,10 +333,6 @@ public:
      */
     void refreshScreenRect(const Vector3 &vpos, ScreenRectCache &rects,
                            const Matrix4 &toScreen, const PortalFrustum &frust);
-    /**
-     * Debugging portal id setter
-     */
-    void setPortalID(int id);
 
     /** Attaches the portal to the source and destination DarkSceneNodes */
     void attach();

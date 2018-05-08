@@ -477,7 +477,8 @@ void InputService::loopStep(float deltaTime) { pollEvents(deltaTime); }
 
 //------------------------------------------------------
 void InputService::processKeyRepeat(float deltaTime) {
-    if (mCurrentKey == SDLK_CLEAR)
+    if (mCurrentKey == SDLK_CLEAR ||
+        mCurrentKey == SDLK_UNKNOWN)
         return;
 
     mKeyPressTime += deltaTime;
@@ -486,7 +487,7 @@ void InputService::processKeyRepeat(float deltaTime) {
     assert(mRepeatDelay > 0);
 
     // see if we overlapped
-    while (mKeyPressTime > mRepeatDelay) {
+    while (mKeyPressTime > mCurrentDelay) {
         mKeyPressTime -= mCurrentDelay;
         mCurrentDelay = mRepeatDelay;
 

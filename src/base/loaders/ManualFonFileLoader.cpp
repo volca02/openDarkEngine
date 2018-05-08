@@ -224,7 +224,7 @@ RGBQuad *ManualFonFileLoader::ReadPalette() {
         Stream = Ogre::ResourceGroupManager::getSingleton().openResource(
             mPaletteFileName, mFontGroup, true);
         mPaletteFile = FilePtr(new OgreFile(Stream));
-    } catch (Ogre::FileNotFoundException) {
+    } catch (const Ogre::FileNotFoundException &) {
         // Could not find resource, use the default table
         LogManager::getSingleton().logMessage(
             "Specified palette file not found - using default palette!");

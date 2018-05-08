@@ -50,6 +50,7 @@ DarkSceneManager::DarkSceneManager(const String &instanceName)
       mDarkLightFactory(new DarkLightFactory(this))
 {
     Root::getSingleton().addMovableObjectFactory(mDarkLightFactory.get());
+    mPortalID = 0;
 }
 
 // ----------------------------------------------------------------------
@@ -66,14 +67,12 @@ void DarkSceneManager::clearScene(void) {
     destroyAllLights();
 
     // Destroy all the portals
-    PortalList::iterator it = mPortals.begin();
-
-    for (; it != mPortals.end(); ++it) {
-        (*it)->detach();
-        delete *it;
+    for (auto &p : mPortals) {
+        p->detach();
+        delete p;
     }
-
     mPortals.clear();
+    mPortalID = 0;
 
     // clear the BSP tree
     mBspTree->clear();
@@ -118,15 +117,9 @@ Portal *DarkSceneManager::createPortal(BspNode *src, BspNode *dst,
 
 // ----------------------------------------------------------------------
 Portal *DarkSceneManager::createPortal(int srcLeafID, int dstLeafID,
-                                       const Plane &plane) {
-    unsigned int portalID = mPortals.size();
-    Portal *p = new Portal(portalID, getBspLeaf(srcLeafID),
-                           getBspLeaf(dstLeafID), plane);
-
-    mPortals.insert(p);
-
-    p->attach();
-    return p;
+                                       const Plane &plane)
+{
+    return createPortal(getBspLeaf(srcLeafID), getBspLeaf(dstLeafID), plane);
 }
 
 // ----------------------------------------------------------------------
@@ -228,7 +221,8 @@ void DarkSceneManager::_notifyObjectDetached(const MovableObject *mov) {
 //-----------------------------------------------------------------------
 void DarkSceneManager::_findVisibleObjects(
     Camera *cam, VisibleObjectsBoundsInfo *visibleBounds,
-    bool onlyShadowCasters) {
+    bool onlyShadowCasters) 
+{
 
     TRACE_METHOD;
     unsigned long startt = Root::getSingleton().getTimer()->getMilliseconds();

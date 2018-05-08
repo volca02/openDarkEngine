@@ -139,7 +139,7 @@ void BspTree::tagNodesWithMovable(BspNode *node, const MovableObject *mov,
                 tagNodesWithMovable(front, mov, pos);
         } else if (
             dist <
-            0) { //-----------------------------------------------------------------------
+            0) { // ------------------------------------------------------------
             // Do back
             if (back != NULL)
                 tagNodesWithMovable(back, mov, pos);

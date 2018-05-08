@@ -64,7 +64,7 @@ DarkFileGroup::~DarkFileGroup() {
 
 //------------------------------------
 void DarkFileGroup::_initSource() {
-    assert(!mSrcFile.isNull());
+    assert(mSrcFile);
 
     mSrcFile->seek(0);
 
