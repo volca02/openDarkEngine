@@ -332,8 +332,12 @@ PyObject *LinkServiceBinder::getOneLink(PyObject *self, PyObject *args) {
         if (!getFlavor(objflav, o, flavor))
             return NULL;
 
-        LinkPtr res = o->getOneLink(flavor, src, dst);
-        return LinkBinder::create(res);
+        const Link *res = o->getOneLink(flavor, src, dst);
+        if (res)
+            return LinkBinder::create(*res);
+
+        // not found? return none
+        __PY_NONE_RET;
     } else {
         // Invalid parameters
         PyErr_SetString(
@@ -420,9 +424,9 @@ PyTypeObject LinkBinder::msType = {
 
 // ------------------------------------------
 PyObject *LinkBinder::getattr(PyObject *self, char *name) {
-    LinkPtr o;
+    Link *o;
 
-    if (!python_cast<LinkPtr>(self, &msType, &o))
+    if (!python_cast<Link*>(self, &msType, &o))
         __PY_CONVERR_RET;
 
     if (!o)
@@ -445,16 +449,11 @@ PyObject *LinkBinder::getattr(PyObject *self, char *name) {
 }
 
 // ------------------------------------------
-PyObject *LinkBinder::create(LinkPtr &link) {
-    if (!link) {
-        PyErr_SetString(PyExc_TypeError, "Null link binding!");
-        return NULL;
-    }
-
+PyObject *LinkBinder::create(const Link &link) {
     Base *object = construct(&msType);
 
     if (object != NULL) {
-        object->mInstance = link;
+        object->mInstance = &link;
     }
 
     return (PyObject *)object;

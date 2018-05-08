@@ -51,10 +51,10 @@ public:
         mIter = mBegin;
     }
 
-    virtual const LinkPtr &next() {
+    virtual const Link &next() {
         assert(!end());
 
-        const LinkPtr &l = mIter->second;
+        const Link &l = mIter->second;
 
         ++mIter;
 
@@ -81,7 +81,7 @@ public:
 
     ~InheritedMultiTargetLinkQueryResult() { mInheritService.reset(); }
 
-    virtual const LinkPtr &next() {
+    virtual const Link &next() {
         // see if we have any more in the current iterator
         if (mCurrentIt || mCurrentIt->end()) {
             pollNextAncestor();
@@ -109,9 +109,8 @@ protected:
         InheritQueryResultPtr anci = mInheritService->getSources(curId);
 
         while (!anci->end()) {
-            const InheritLinkPtr &l = anci->next();
-
-            mAncestorStack.push(l->srcID);
+            const InheritLink &l = anci->next();
+            mAncestorStack.push(l.srcID);
         }
 
         // and unroll into the iterator
@@ -250,7 +249,6 @@ void Relation::load(const FileGroupPtr &db, const BitArray &objMask) {
         // assert(link_count == link_data_count);
 
         for (unsigned int idx = 0; idx < link_count; ++idx) {
-            // Will get deleted automatically once the LinkPtr is released...
             // Link ID goes first, then the data
             link_id_t id;
             fldata->readElem(&id, 4);
@@ -264,19 +262,15 @@ void Relation::load(const FileGroupPtr &db, const BitArray &objMask) {
 
     for (unsigned int idx = 0; idx < link_count; idx++) {
         LinkStruct slink;
+        *flink >> slink.id >> slink.src >> slink.dest >> slink.flavor;
 
-        flink->readElem(&slink.id, sizeof(uint32_t));
-        flink->readElem(&slink.src, sizeof(int32_t));
-        flink->readElem(&slink.dest, sizeof(int32_t));
-        flink->readElem(&slink.flavor, sizeof(uint16_t));
-
-        LinkPtr link(new Link(slink));
+        Link link{slink};
 
         LOG_VERBOSE("Relation (%s - %d): Read link ID %d, from %d to %d "
                     "(F,C,IX: %d, %d, %d)",
-                    mName.c_str(), mID, link->mID, link->mSrc, link->mDst,
-                    LINK_ID_FLAVOR(link->mID), LINK_ID_CONCRETE(link->mID),
-                    LINK_ID_INDEX(link->mID));
+                    mName.c_str(), mID, link.id(), link.src(), link.dst(),
+                    LINK_ID_FLAVOR(link.id())), LINK_ID_CONCRETE(link.id()),
+                    LINK_ID_INDEX(link.id());
 
         // Check if the flavor fits
         // The mID can't be negative, but just for sure:
@@ -285,24 +279,21 @@ void Relation::load(const FileGroupPtr &db, const BitArray &objMask) {
                static_cast<unsigned int>(mID)); // keep compiler happy
 
         // Look if we fit into the mask
-        if (objMask[link->mSrc] && objMask[link->mDst]) {
+        if (objMask[link.src()] && objMask[link.dst()]) {
             // Add link, notify listeners... Will search for data and throw if
             // did not find them
             _addLink(link);
-
             // Inverse relation will get an inverse link to use
-            LinkPtr ilink = createInverseLink(link);
-
-            mInverse->_addLink(ilink);
+            mInverse->_addLink(link.inverse());
         } else {
             // the mask says no to the link!
             LOG_ERROR("Relation (%s - %d): Link (ID %d, %d to %d) thrown away "
                       "- obj IDs invalid",
-                      mName.c_str(), mID, link->mID, link->mSrc, link->mDst);
+                      mName.c_str(), mID, link.id(), link.src(), link.dst());
 
             // delete the data as well...
             if (mStorage)
-                mStorage->destroy(link->mID);
+                mStorage->destroy(link.id());
         }
     }
 
@@ -332,31 +323,20 @@ void Relation::save(const FileGroupPtr &db, uint saveMask) {
     // No need to order those. If it shows up that it would be actually better,
     // no problem sorting those by link_id_t just write the links as they go,
     // and write the data in parallel
-    LinkMap::const_iterator it = mLinkMap.begin();
-
     // Write the links
-    for (; it != mLinkMap.end(); ++it) {
-        LinkPtr link = it->second;
+    for (auto &lr : mLinkMap) {
+        const auto &link = lr.second;
 
         // Test against the link write mask
-        int conc = LINK_ID_CONCRETE(link->mID);
+        int conc = LINK_ID_CONCRETE(link.id());
 
         if (saveMask & (1 << conc)) { // mask says save!
-            LinkStruct slink;
-
-            slink.id = link->mID;
-            slink.src = link->mSrc;
-            slink.dest = link->mDst;
-            slink.flavor = link->mFlavor;
-
-            flnk->writeElem(&slink.id, sizeof(uint32_t));
-            flnk->writeElem(&slink.src, sizeof(int32_t));
-            flnk->writeElem(&slink.dest, sizeof(int32_t));
-            flnk->writeElem(&slink.flavor, sizeof(uint16_t));
+            LinkStruct slink = link.toStruct();
+            *flnk << slink.id << slink.src << slink.dest << slink.flavor;
         } else {
             LOG_DEBUG("Relation (%s): Link concreteness of link %d was out of "
                       "requested : %d",
-                      mName.c_str(), link->mID, conc);
+                      mName.c_str(), link.id(), conc);
         }
     }
 
@@ -437,16 +417,12 @@ link_id_t Relation::create(int from, int to) {
 
     link_id_t id = getFreeLinkID(cidx);
 
-    LinkPtr newl(new Link(id, from, to, mID));
-
+    Link newl{id, from, to, mID};
     mStorage->create(id);
 
     // Last, insert the link to the database and notify
     _addLink(newl);
-
-    LinkPtr ilink = createInverseLink(newl);
-
-    mInverse->_addLink(ilink);
+    mInverse->_addLink(newl.inverse());
 
     return id;
 }
@@ -462,16 +438,13 @@ link_id_t Relation::createWithValues(int from, int to,
 
     link_id_t id = getFreeLinkID(cidx);
 
-    LinkPtr newl(new Link(id, from, to, mID));
+    Link newl{id, from, to, mID};
 
     mStorage->createWithValues(id, dataValues);
 
     // Last, insert the link to the database and notify
     _addLink(newl);
-
-    LinkPtr ilink = createInverseLink(newl);
-
-    mInverse->_addLink(ilink);
+    mInverse->_addLink(newl.inverse());
 
     return id;
 }
@@ -486,16 +459,13 @@ link_id_t Relation::createWithValue(int from, int to, const Variant &value) {
 
     link_id_t id = getFreeLinkID(cidx);
 
-    LinkPtr newl(new Link(id, from, to, mID));
+    Link newl{id, from, to, mID};
 
     mStorage->createWithValue(id, value);
 
     // Last, insert the link to the database and notify
     _addLink(newl);
-
-    LinkPtr ilink = createInverseLink(newl);
-
-    mInverse->_addLink(ilink);
+    mInverse->_addLink(newl.inverse());
 
     return id;
 }
@@ -505,7 +475,6 @@ void Relation::remove(link_id_t id) {
     // A waste I smell here. Maybe there will be a difference in Broadcasts
     // later
     _removeLink(id);
-
     mInverse->_removeLink(id);
 }
 
@@ -587,32 +556,30 @@ LinkQueryResultPtr Relation::getAllInherited(int src, int dst) const {
 }
 
 // --------------------------------------------------------------------------
-LinkPtr Relation::getOneLink(int src, int dst) const {
+const Link *Relation::getOneLink(int src, int dst) const {
     LinkQueryResultPtr res = getAllLinks(src, dst);
 
     if (res->end())
-        return LinkPtr(NULL);
+        return nullptr;
 
-    LinkPtr l = res->next();
+    const Link &l = res->next();
 
     // I also could just return the first even if there would be more than one,
     // but that could lead to programmers headaches
     if (!res->end())
         OPDE_EXCEPT("More than one link fulfilled the requirement");
 
-    return l;
+    return &l;
 }
 
 // --------------------------------------------------------------------------
-LinkPtr Relation::getLink(link_id_t id) const {
+const Link *Relation::getLink(link_id_t id) const {
     LinkMap::const_iterator r = mLinkMap.find(id);
 
     if (r != mLinkMap.end()) {
-        LinkPtr l =
-            r->second; // I've heard direct return will confuse the ref-counting
-        return l;
+        return &r->second;
     } else
-        return LinkPtr(NULL);
+        return nullptr;
 }
 
 // --------------------------------------------------------------------------
@@ -632,37 +599,36 @@ const DataFields &Relation::getFieldDesc(void) {
 }
 
 // --------------------------------------------------------------------------
-void Relation::_addLink(const LinkPtr &link) {
+void Relation::_addLink(const Link &link) {
     // Insert, and detect the presence of such link already inserted (same ID)
     std::pair<LinkMap::iterator, bool> ires =
-        mLinkMap.insert(make_pair(link->mID, link));
+        mLinkMap.emplace(link.id(), link);
 
     if (!ires.second) {
         LOG_ERROR("Relation: Found link with conflicting ID in relation %d "
                   "(%s): ID: %d (stored %d) - link already existed",
-                  mID, mName.c_str(), link->mID, ires.first->second->mID);
+                  mID, mName.c_str(), link.id(), ires.first->second.id());
     } else {
         // Verify link data exist
-        if (mStorage && !mStorage->has(link->mID))
+        if (mStorage && !mStorage->has(link.id()))
             OPDE_EXCEPT(format("Relation (", mName,
                                "): Link Data not defined prior to link "
                                "insertion")); // for link id " + link->mID
 
         // Update the free link info
-        allocateLinkID(link->mID);
+        allocateLinkID(link.id());
 
         // Update the query databases
         // Src->Dst->LinkList
         std::pair<ObjectLinkMap::iterator, bool> r =
-            mSrcDstLinkMap.insert(make_pair(link->mSrc, ObjectIDToLinks()));
-        r.first->second.insert(make_pair(link->mDst, link));
+            mSrcDstLinkMap.insert(make_pair(link.src(), ObjectIDToLinks()));
+        r.first->second.emplace(link.dst(), link);
 
         // fire the notification about inserted link
-        LinkPtr lcopy(new Link(*link));
-        LinkChangeMsg m(lcopy);
+        LinkChangeMsg m(&ires.first->second);
 
         m.change = LNK_ADDED;
-        m.linkID = link->mID;
+        m.linkID = link.id();
 
         // Inform the listeners about the change
         broadcastMessage(m);
@@ -676,45 +642,31 @@ void Relation::_removeLink(link_id_t id) {
     if (it != mLinkMap.end()) {
         unallocateLinkID(id);
 
-        LinkPtr to_remove = it->second;
+        Link &to_remove = it->second;
 
         // Update the query databases
         // SrcDst
-        ObjectLinkMap::iterator r = mSrcDstLinkMap.find(to_remove->mSrc);
+        ObjectLinkMap::iterator r = mSrcDstLinkMap.find(to_remove.src());
 
         assert(r != mSrcDstLinkMap.end());
 
-        ObjectIDToLinks::iterator ri = r->second.find(to_remove->mDst);
-        ObjectIDToLinks::iterator rend = r->second.upper_bound(to_remove->mDst);
+        ObjectIDToLinks::iterator ri = r->second.find(to_remove.dst());
+        ObjectIDToLinks::iterator rend = r->second.upper_bound(to_remove.dst());
 
         assert(ri != r->second.end());
 
         // cycle through the result, find the occurence of the link with the
         // given ID, then remove
-        for (; ri != rend; ++ri) {
-            if (ri->second->mID == id) {
-                r->second.erase(ri);
-            }
-        }
-
-        // DstSrc
-        r = mSrcDstLinkMap.find(to_remove->mSrc);
-
-        assert(r != mSrcDstLinkMap.end());
-
-        ri = r->second.find(to_remove->mDst);
-        rend = r->second.upper_bound(to_remove->mDst);
-
-        assert(ri != r->second.end());
-
-        for (; ri != rend; ++ri) {
-            if (ri->second->mID == id) {
-                r->second.erase(ri);
+        for (; ri != rend;) {
+            if (ri->second.id() == id) {
+                ri = r->second.erase(ri);
+            } else {
+                ++ri;
             }
         }
 
         // fire the notification about inserted link
-        LinkChangeMsg m;
+        LinkChangeMsg m(&to_remove);
 
         m.change = LNK_REMOVED;
         m.linkID = id;
@@ -724,7 +676,6 @@ void Relation::_removeLink(link_id_t id) {
 
         // last, erase the link
         mLinkMap.erase(it);
-
         mStorage->destroy(id);
     } else {
         LOG_ERROR(
@@ -771,13 +722,6 @@ void Relation::unallocateLinkID(link_id_t id) {
 }
 
 // --------------------------------------------------------------------------
-LinkPtr Relation::createInverseLink(const LinkPtr &src) {
-    LinkPtr inv(new Link(src->id(), src->dst(), src->src(), src->flavor()));
-
-    return inv;
-}
-
-// --------------------------------------------------------------------------
 void Relation::_objectDestroyed(int id) {
     assert(id != 0); // has to be nonzero. Zero is a wildcard
 
@@ -785,16 +729,16 @@ void Relation::_objectDestroyed(int id) {
 
     if (r != mSrcDstLinkMap.end()) {
         // I could just remove it, but let's be fair and broadcast
-        // This will be very stormy. Maybe we will have to
+        // This will be very stormy.
         LinkQueryResultPtr res(new MultiTargetLinkQueryResult(
             r->second, r->second.begin(), r->second.end()));
 
         // We have the source object. Now branch on the dest
         while (!res->end()) {
-            const LinkPtr &l = res->next();
-
-            _removeLink(l->id());
-            mInverse->_removeLink(l->id());
+            // store by copy, so we can remove it safely in both cases
+            Link l = res->next();
+            _removeLink(l.id());
+            mInverse->_removeLink(l.id());
         }
     }
 }

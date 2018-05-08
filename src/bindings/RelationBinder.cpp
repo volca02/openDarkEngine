@@ -253,8 +253,11 @@ PyObject *RelationBinder::getOneLink(PyObject *self, PyObject *args) {
     int src, dst;
 
     if (PyArg_ParseTuple(args, "ii", &src, &dst)) {
-        LinkPtr res = o->getOneLink(src, dst);
-        return LinkBinder::create(res);
+        const Link *res = o->getOneLink(src, dst);
+        if (res)
+            return LinkBinder::create(*res);
+        // not found? return none
+        __PY_NONE_RET;
     } else {
         // Invalid parameters
         PyErr_SetString(PyExc_TypeError,

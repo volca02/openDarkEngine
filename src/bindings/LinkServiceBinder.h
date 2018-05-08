@@ -67,14 +67,14 @@ protected:
 
 // -------------------------------
 /// Link class binder. The methods are converted to read-only attributes
-class LinkBinder : public shared_ptr_binder<LinkPtr> {
+class LinkBinder : public object_binder<const Link*> {
 public:
     static void init(PyObject *module);
 
     // --- Python type related methods ---
     static PyObject *getattr(PyObject *self, char *name);
 
-    static PyObject *create(LinkPtr &link);
+    static PyObject *create(const Link &link);
 
 protected:
     /// Static type definition for LinkService

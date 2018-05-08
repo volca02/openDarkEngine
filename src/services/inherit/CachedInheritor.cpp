@@ -90,7 +90,6 @@ bool CachedInheritor::refresh(int objID) {
     int newEffID = 0; // Detected new effective ID
 
     int niter = 0;
-    InheritLinkPtr effective(NULL);
 
     // If self-implements
     if (getImplements(objID)) {
@@ -103,11 +102,11 @@ bool CachedInheritor::refresh(int objID) {
         // still implements. Some logic to accept the self assigned is also
         // present
         while (!sources->end()) {
-            InheritLinkPtr il = sources->next();
+            const InheritLink &il = sources->next();
             ++niter;
 
-            int effID = getEffectiveID(
-                il->srcID); // look for the effective ID of the source
+            // look for the effective ID of the source
+            int effID = getEffectiveID(il.srcID);
 
             /*
             validate and compare to the maximal. If priority is greater,
@@ -115,10 +114,9 @@ bool CachedInheritor::refresh(int objID) {
             some effective ID)
             */
             // Comparing the priority to signed int...
-            if (validate(il->srcID, il->dstID, il->priority) &&
-                (il->priority > maxPrio) && (effID != 0)) {
-                effective = il;
-                maxPrio = il->priority;
+            if (validate(il.srcID, il.dstID, il.priority) &&
+                (il.priority > maxPrio) && (effID != 0)) {
+                maxPrio = il.priority;
                 newEffID = effID;
             }
         }
@@ -161,9 +159,9 @@ bool CachedInheritor::refresh(int objID) {
         InheritQueryResultPtr targets = mInheritService->getTargets(objID);
 
         while (!targets->end()) {
-            InheritLinkPtr il = targets->next();
+            const InheritLink &il = targets->next();
 
-            refresh(il->dstID); // refresh the target object
+            refresh(il.dstID); // refresh the target object
         }
     }
     return false;

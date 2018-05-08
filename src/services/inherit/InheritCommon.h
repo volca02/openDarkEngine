@@ -38,6 +38,16 @@ namespace Opde {
 // Forward declaration
 class InheritService;
 
+struct InheritLink {
+    /// Source object ID
+    int srcID;
+    /// Destination object ID
+    int dstID;
+    /// The priority of this inheritance definition (It's int to help comparison
+    /// with negative values)
+    int priority;
+};
+
 /** Inheritance value change message types.
  * This is not a converted version of the link message as InheritChangeType,
  * but rather the description of what that change caused to the implemented

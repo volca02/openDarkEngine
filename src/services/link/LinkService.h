@@ -133,10 +133,10 @@ public:
     found)
     @throw If invalid flavor is specified, this method will return a NULL link
     (invalid) */
-    LinkPtr getOneLink(int flavor, int src, int dst) const;
+    const Link *getOneLink(int flavor, int src, int dst) const;
 
     /** @see Relation::getLink */
-    LinkPtr getLink(link_id_t id) const;
+    const Link *getLink(link_id_t id) const;
 
     /// Name to Relation instance. The primary storage of Relation instances.
     typedef std::map<std::string, RelationPtr> RelationNameMap;

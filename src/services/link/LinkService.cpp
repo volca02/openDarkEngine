@@ -321,7 +321,7 @@ LinkQueryResultPtr LinkService::getAllInherited(int flavor, int src,
 }
 
 //------------------------------------------------------
-LinkPtr LinkService::getOneLink(int flavor, int src, int dst) const {
+const Link *LinkService::getOneLink(int flavor, int src, int dst) const {
     // find the relation with the specified flavor.
     // If none such found, return NULL link
     RelationIDMap::const_iterator it = mRelationIDMap.find(flavor);
@@ -330,12 +330,13 @@ LinkPtr LinkService::getOneLink(int flavor, int src, int dst) const {
         // dedicate to the given relation
         return it->second->getOneLink(src, dst);
     } else {
-        return LinkPtr(NULL);
+        LOG_VERBOSE("getOneLink failed - flavor %d not found", flavor);
+        return nullptr;
     }
 }
 
 //------------------------------------------------------
-LinkPtr LinkService::getLink(link_id_t id) const {
+const Link *LinkService::getLink(link_id_t id) const {
     // get relation flavor from link id
     int flavor = LINK_ID_FLAVOR(id);
 
@@ -346,7 +347,8 @@ LinkPtr LinkService::getLink(link_id_t id) const {
         // dedicate to the given relation
         return it->second->getLink(id);
     } else {
-        return LinkPtr(NULL);
+        LOG_VERBOSE("getLink failed - flavor %d not found", flavor);
+        return nullptr;
     }
 }
 

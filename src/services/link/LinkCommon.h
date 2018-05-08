@@ -65,25 +65,31 @@ public:
         : mID(ls.id), mSrc(ls.src), mDst(ls.dest), mFlavor(ls.flavor) {}
 
     /// Copy constructor
-    Link(Link &b)
+    Link(const Link &b)
         : mID(b.mID), mSrc(b.mSrc), mDst(b.mDst), mFlavor(b.mFlavor){};
 
-    inline link_id_t id() { return mID; };
-    inline int src() { return mSrc; };
-    inline int dst() { return mDst; };
-    inline int flavor() { return mFlavor; };
+    // produces link in opposite direction
+    Link inverse() const {
+        return {mID, mDst, mSrc, mFlavor};
+    }
+
+    LinkStruct toStruct() const {
+        return {mID, mSrc, mDst, mFlavor};
+    }
+
+    inline link_id_t id() const { return mID; };
+    inline int src() const { return mSrc; };
+    inline int dst() const { return mDst; };
+    inline int flavor() const { return mFlavor; };
 };
 
-/// Shared pointer to Link
-typedef shared_ptr<Link> LinkPtr;
-
 /// Supportive Link comparison operator for sets and maps
-inline bool operator<(const LinkPtr &a, const LinkPtr &b) {
-    return a->id() < b->id();
+inline bool operator<(const Link &a, const Link &b) {
+    return a.id() < b.id();
 }
 
 /// Class representing a link query result.
-typedef ConstIterator<LinkPtr> LinkQueryResult;
+typedef ConstIterator<Link> LinkQueryResult;
 
 /// Shared pointer instance to link query result
 typedef shared_ptr<LinkQueryResult> LinkQueryResultPtr;
@@ -91,14 +97,14 @@ typedef shared_ptr<LinkQueryResult> LinkQueryResultPtr;
 /// Just an empty result of a query
 class EmptyLinkQueryResult : public LinkQueryResult {
 public:
-    EmptyLinkQueryResult() : LinkQueryResult(), mNullPtr(NULL){};
+    EmptyLinkQueryResult() : LinkQueryResult() {};
 
-    virtual const LinkPtr &next() { return mNullPtr; };
+    virtual const Link &next() {
+        static Link empty{0,0,0,0};
+        return empty;
+    }
 
     virtual bool end() const { return true; };
-
-protected:
-    LinkPtr mNullPtr;
 };
 
 /// Link change types
@@ -115,15 +121,15 @@ enum LinkChangeType {
 
 /// Link chage message
 struct LinkChangeMsg {
-    LinkChangeMsg() : link(NULL){};
-    LinkChangeMsg(const LinkPtr &lnk) : link(lnk){};
+    LinkChangeMsg() : link(nullptr) {};
+    LinkChangeMsg(const Link *lnk) : link(lnk) {};
 
     /// A change that happened
     LinkChangeType change;
     /// An ID of link that was added/removed/modified
     link_id_t linkID;
     /// The link itself. Do not modify!
-    const LinkPtr link;
+    const Link *link;
 };
 
 /// Creates a link ID from flavor, concreteness and index
