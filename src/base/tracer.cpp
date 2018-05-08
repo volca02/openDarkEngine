@@ -64,8 +64,7 @@ void Tracer::enable(bool ena) {
 Tracer *Tracer::getSingletonPtr(void) { return ms_Singleton; }
 
 void Tracer::traceStartFrame() {
-    if (!mEnabled)
-        return;
+    if (!mEnabled) return;
 
     // spit out the traces?
     auto now = std::chrono::system_clock::now();
@@ -105,6 +104,8 @@ void Tracer::traceStartFrame() {
 
 /** logs a tracer record used for performance tracing */
 Tracer::time_point Tracer::trace(bool start, const char *func, const void *data) {
+    if (!mEnabled) return std::chrono::system_clock::now();
+
     TraceRecord trace;
     trace.time = std::chrono::system_clock::now();
     trace.entry = start;
@@ -120,6 +121,7 @@ void Tracer::trace_endpoint(const char *func,
                             const void *data, 
                             const time_point &start)
 {
+    if (!mEnabled) return;
     TraceRecord trace;
     trace.time = std::chrono::system_clock::now();
     trace.entry = false;
@@ -133,6 +135,7 @@ void Tracer::trace_endpoint(const char *func,
 
 /** logs a tracer record used for performance tracing */
 void Tracer::tracePoint(const char *text) {
+    if (!mEnabled) return;
     TraceRecord trace;
     trace.time = std::chrono::system_clock::now();
     trace.entry = true;
