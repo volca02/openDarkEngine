@@ -211,8 +211,8 @@ bool RenderService::init() {
     // Register
     Ogre::Root::getSingleton().addSceneManagerFactory(mDarkSMFactory);
 
-    mSceneMgr =
-        mRoot->createSceneManager("DarkSceneManager", "DarkSceneManager");
+    mSceneMgr = static_cast<Ogre::DarkSceneManager*>(
+        mRoot->createSceneManager("DarkSceneManager", "DarkSceneManager"));
 
     // mSceneMgr->setShadowTechnique(SHADOWTYPE_TEXTURE_MODULATIVE);
     mSceneMgr->setShadowTechnique(Ogre::SHADOWTYPE_NONE);
@@ -459,11 +459,11 @@ void RenderService::prepareMesh(const Ogre::String &name) {
             Ogre::MeshPtr mesh1 = Ogre::MeshManager::getSingleton().create(
                 fname, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
                 true, mManualBinFileLoader.get());
-        } catch (Ogre::FileNotFoundException) {
+        } catch (const Ogre::FileNotFoundException &) {
             LOG_ERROR("RenderService::prepareMesh: Could not find the "
                       "requested model %s",
                       name.c_str());
-        } catch (Opde::FileException) {
+        } catch (const Opde::FileException &) {
             LOG_ERROR("RenderService::prepareMesh: Could not load the "
                       "requested model %s",
                       name.c_str());
@@ -476,14 +476,14 @@ void RenderService::createObjectModel(int id) {
     Ogre::String idstr = Ogre::StringConverter::toString(id);
 
     Ogre::Entity *ent =
-        mSceneMgr->createEntity("Object" + idstr, DEFAULT_RAMP_OBJECT_NAME);
+        mSceneMgr->createBoundEntity("Object" + idstr, DEFAULT_RAMP_OBJECT_NAME);
 
     // bind the ent to the node of the obj.
     Ogre::SceneNode *node = NULL;
 
     try {
         node = getSceneNode(id);
-    } catch (BasicException) {
+    } catch (const BasicException &) {
         LOG_ERROR("RenderService: Could not get the sceneNode for object %d! "
                   "Not attaching object model!",
                   id);
@@ -559,12 +559,12 @@ void RenderService::setObjectModel(int id, const std::string &name) {
 
     // load the new entity, set it as the current in the entity info
     try {
-        ent = mSceneMgr->createEntity("Object" + idstr + name, name + ".mesh");
+        ent = mSceneMgr->createBoundEntity("Object" + idstr + name, name + ".mesh");
     } catch (Ogre::Exception &e) {
         // TODO: This could also be handled by not setting the new entity at all
         LOG_ERROR("RenderService: Could not load model %s for obj %d : %s",
                   name.c_str(), id, e.getFullDescription().c_str());
-        ent = mSceneMgr->createEntity("Object" + idstr + "Ramp",
+        ent = mSceneMgr->createBoundEntity("Object" + idstr + "Ramp",
                                       DEFAULT_RAMP_OBJECT_NAME);
     }
 
@@ -586,13 +586,8 @@ void RenderService::prepareEntity(Ogre::Entity *e) {
     // Update the bones to be manual
     // TODO: This should only apply for non-ai meshes!
     if (e->hasSkeleton()) {
-
-        Ogre::Skeleton::BoneIterator bi = e->getSkeleton()->getBoneIterator();
-
-        while (bi.hasMoreElements()) {
-            Ogre::Bone *n = bi.getNext();
-
-            n->setManuallyControlled(true);
+        for (auto &bone : e->getSkeleton()->getBones()) {
+            bone->setManuallyControlled(true);
         }
 
         e->getSkeleton()->setBindingPose();
@@ -678,7 +673,7 @@ void RenderService::onPropPositionMsg(const PropertyChangeMsg &msg) {
             node->setPosition(pos.toVector());
             node->setOrientation(ori.toQuaternion());
 
-        } catch (BasicException &e) {
+        } catch (const BasicException &e) {
             LOG_ERROR(
                 "RenderService: Exception while setting position of object: %s",
                 e.getDetails().c_str());

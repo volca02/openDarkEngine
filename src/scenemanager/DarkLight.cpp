@@ -33,13 +33,13 @@ namespace Ogre {
 
 // -----------------------------------------------------------
 DarkLight::DarkLight()
-    : Light(), mTraversal(), mNeedsUpdate(true), mIsDynamic(false)
+    : Light(), mNeedsUpdate(true), mTraversal(), mIsDynamic(false)
 {
 }
 
 // -----------------------------------------------------------
 DarkLight::DarkLight(const String &name)
-    : Light(name), mTraversal(), mNeedsUpdate(true), mIsDynamic(false)
+    : Light(name), mNeedsUpdate(true), mTraversal(), mIsDynamic(false)
 {
 }
 

@@ -478,11 +478,9 @@ void InputService::loopStep(float deltaTime) { pollEvents(deltaTime); }
 
 //------------------------------------------------------
 void InputService::processKeyRepeat(float deltaTime) {
-    if (mCurrentKey == SDLK_UNKNOWN ||
-        mCurrentKey == SDLK_CLEAR)
-    {
+    if (mCurrentKey == SDLK_CLEAR ||
+        mCurrentKey == SDLK_UNKNOWN)
         return;
-    }
 
     mKeyPressTime += deltaTime;
 

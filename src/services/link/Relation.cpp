@@ -173,7 +173,7 @@ void Relation::load(const FileGroupPtr &db, const BitArray &objMask) {
     // let's open the L$NAME and LD$NAME files in the db
     try {
         flink = db->getFile(lchn);
-    } catch (BasicException) {
+    } catch (const BasicException &) {
         LOG_FATAL("Relation::load : Could not find the Link chunk %s",
                   lchn.c_str());
         return;
@@ -182,7 +182,7 @@ void Relation::load(const FileGroupPtr &db, const BitArray &objMask) {
     // Link data file:
     try {
         fldata = db->getFile(ldchn);
-    } catch (BasicException &e) {
+    } catch (const BasicException &e) {
         if (!mStorage) {
             LOG_INFO("Relation::load : Link data chunk %s not found (It's ok "
                      "since data type not registered either)",

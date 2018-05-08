@@ -78,8 +78,6 @@ Portal::Portal(unsigned int id, BspNode *source, BspNode *target, Plane plane)
     mSource = source;
     mTarget = target;
 
-    mMovableObject = NULL;
-
     // Setup the render op. for portal debug display.
     // This should be conditional to the DEBUG builds to stop eating precious
     // memory (10-30000 portals * few 100 bytes of class data is not as much
@@ -107,7 +105,6 @@ Portal::Portal(Portal &&src)
     : ConvexPolygon(std::move(src))
 {
     mID = src.mID;
-    mMovableObject = src.mMovableObject;
     mTarget = src.mTarget;
     mSource = src.mSource;
     mPortalID = src.mPortalID;
@@ -148,9 +145,6 @@ void Portal::refreshBoundingVolume() {
 
     mRadius = sqrt(radius);
 }
-
-// -----------------------------------------------------------------------------
-void Portal::setPortalID(int id) { mPortalID = id; }
 
 // -----------------------------------------------------------------------------
 void Portal::attach()
@@ -204,7 +198,7 @@ bool Portal::refreshScreenRect(const Vector3 &vpos, ScreenRectCache &rects,
     if (pointcount == 0)
         return 0;
 
-    assert(pointcount > MAX_PORTAL_POINTS);
+    assert(pointcount < MAX_PORTAL_POINTS);
 
     // first we mark the vertices
     Plane::Side sides[MAX_PORTAL_POINTS];

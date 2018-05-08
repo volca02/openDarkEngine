@@ -45,9 +45,9 @@ public:
 
     const String &getMovableType(void);
 
-    virtual void _notifyMoved(void);
+    void _notifyMoved(void) override;
 
-    virtual void _notifyAttached(Node *parent, bool isTagPoint);
+    void _notifyAttached(Node *parent, bool isTagPoint) override;
 
     /// Refreshes the list of cells affected by this light
     void _updateAffectedCells(void);
@@ -62,7 +62,7 @@ public:
     /// Called by SceneManager after a call to
     /// DarkSceneManager::queueLightForUpdate(); Causes the light to be
     /// reevaluated in terms of coverage before using it for rendering
-    virtual void _updateNeeded(void);
+    void _updateNeeded(void);
 
     /// toggles the dynamic flag for this light
     void setIsDynamic(bool dynamic);

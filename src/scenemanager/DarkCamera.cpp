@@ -82,6 +82,8 @@ const BspNodeSet &DarkCamera::_getVisibleNodes(void) const {
 
 // ----------------------------------------------------------------------
 void DarkCamera::updateVisibleCellList() const {
+    TRACE_METHOD;
+
     if (!mIsDirty) // nothing to do...
         return;
 
