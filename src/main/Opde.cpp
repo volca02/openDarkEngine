@@ -80,28 +80,30 @@ void run(const std::string &config_name, std::string mission) {
             }
     );
 
-    inp_srv->registerCommandTrap("exit_request",
+    // request termination on escape
+    inp_srv->registerCommandTrap("exit",
                                  [&](const InputEventMsg&) {
                                      loop_srv->requestTermination();
                                  });
 
-    // non-bound mission loading command
+    // non-bound mission loading command that can be called from console
     inp_srv->registerCommandTrap("load", [&](const InputEventMsg &m) {
         db_svc->load(m.params.toString(), DBM_COMPLETE);
     });
 
     // hardcoded, so we can exit the process and control the engine
-    inp_srv->processCommand("bind esc exit_request");
+    inp_srv->processCommand("bind esc exit");
+    // show_console is implemented in GUIService, we're just binding it here
     inp_srv->processCommand("bind ` show_console");
 
     // any mission file requested yet?
     if (!mission.empty()) {
         db_svc->load(mission, DBM_COMPLETE);
-    } else {
-        // no mission, show console
-        auto gui_svc = GET_SERVICE(GUIService);
-        gui_svc->showConsole();
     }
+
+    // show console in any case
+    auto gui_svc = GET_SERVICE(GUIService);
+    gui_svc->showConsole();
 
     // loop
     if (loop_srv->requestLoopMode("AllClientsLoopMode"))

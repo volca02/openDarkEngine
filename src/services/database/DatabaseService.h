@@ -25,11 +25,11 @@
 #define __DATABASESERVICE_H
 
 #include <functional>
+#include <map>
 
 #include "DarkCommon.h"
 #include "OpdeService.h"
 #include "OpdeServiceFactory.h"
-#include "PrioritizedMessageSource.h"
 #include "ServiceCommon.h"
 #include "SharedPtr.h"
 #include "DatabaseCommon.h"

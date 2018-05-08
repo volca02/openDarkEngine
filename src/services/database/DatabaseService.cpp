@@ -63,6 +63,8 @@ void DatabaseService::load(const std::string &filename, uint32_t loadMask) {
     LOG_DEBUG("DatabaseService::load - Loading requested file %s",
               filename.c_str());
 
+    unsigned long now = mTimer->getMilliseconds();
+
     mLoadingStatus.reset();
 
     // drop first
@@ -71,7 +73,8 @@ void DatabaseService::load(const std::string &filename, uint32_t loadMask) {
     // do a recursive load as needed
     recursiveMergeLoad(filename, loadMask);
 
-    LOG_DEBUG("DatabaseService::load - end()");
+    unsigned long spent = mTimer->getMilliseconds() - now;
+    LOG_DEBUG("DatabaseService::load - end() - Loading took %ld ms", spent);
 }
 
 //------------------------------------------------------
