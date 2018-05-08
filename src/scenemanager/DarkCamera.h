@@ -65,9 +65,6 @@ protected:
 
     void updateVisibleCellList() const;
 
-    // The BSP tree used to update the visible cells
-    BspTree *mBspTree;
-
     // used to populate the visible cell list
     mutable DarkPortalTraversal mTraversal;
     mutable unsigned long mTraversalTime;

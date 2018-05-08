@@ -29,7 +29,8 @@
 
 namespace Ogre {
 
-void DarkPortalTraversal::traverse(const Vector3 &pos,
+void DarkPortalTraversal::traverse(BspTree *tree,
+                                   const Vector3 &pos,
                                    const Matrix4 &toScreen,
                                    const Plane &cutPlane,
                                    const PortalFrustum &cameraFrustum,
@@ -40,11 +41,11 @@ void DarkPortalTraversal::traverse(const Vector3 &pos,
     // this effectively invalidates the screen space info for all cells/portals
     ++mUpdateID;
 
-    mRects.startUpdate(mBspTree->getPortalCount(), mBspTree->getCellCount(),
+    mRects.startUpdate(tree->getPortalCount(), tree->getCellCount(),
                        mUpdateID);
 
     // Look for our root cell
-    BspNode *root = mBspTree->findLeaf(pos);
+    BspNode *root = tree->findLeaf(pos);
 
     if (root == NULL) // out of world
         return;

@@ -37,9 +37,9 @@ namespace Ogre {
 /** Specialized version of Ogre::Light that caches cells it affects */
 class DarkLight : public Light {
 public:
-    DarkLight(BspTree* tree);
+    DarkLight();
 
-    DarkLight(BspTree* tree, const String &name);
+    DarkLight(const String &name);
 
     ~DarkLight();
 

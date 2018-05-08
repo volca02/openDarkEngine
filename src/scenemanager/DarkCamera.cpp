@@ -37,8 +37,7 @@ namespace Ogre {
 // ----------------------------------------------------------------------
 DarkCamera::DarkCamera(const String &name, SceneManager *sm)
     : Camera(name, sm),
-      mBspTree(static_cast<DarkSceneManager *>(mSceneMgr)->getBspTree()),
-      mTraversal(mBspTree),
+      mTraversal(),
       mIsDirty(false)
 {
 }
@@ -101,7 +100,8 @@ void DarkCamera::updateVisibleCellList() const {
 
     PortalFrustum cameraFrustum = PortalFrustum(this);
 
-    mTraversal.traverse(getDerivedPosition(),
+    mTraversal.traverse(static_cast<DarkSceneManager *>(mSceneMgr)->getBspTree(),
+                        getDerivedPosition(),
                         toScreen, cutPlane,
                         cameraFrustum);
 

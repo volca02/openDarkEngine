@@ -365,6 +365,7 @@ void DarkSceneManager::_queueLightForUpdate(Light *l) {
 //-----------------------------------------------------------------------
 void DarkSceneManager::destroyAllGeometries(void) {
     mDarkGeometryMap.clear();
+    mActiveGeometry = nullptr;
 }
 
 //-----------------------------------------------------------------------

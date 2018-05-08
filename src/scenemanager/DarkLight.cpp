@@ -32,14 +32,14 @@
 namespace Ogre {
 
 // -----------------------------------------------------------
-DarkLight::DarkLight(BspTree *tree)
-    : Light(), mTraversal(tree), mNeedsUpdate(true), mIsDynamic(false)
+DarkLight::DarkLight()
+    : Light(), mTraversal(), mNeedsUpdate(true), mIsDynamic(false)
 {
 }
 
 // -----------------------------------------------------------
-DarkLight::DarkLight(BspTree *tree, const String &name)
-    : Light(name), mTraversal(tree), mNeedsUpdate(true), mIsDynamic(false)
+DarkLight::DarkLight(const String &name)
+    : Light(name), mTraversal(), mNeedsUpdate(true), mIsDynamic(false)
 {
 }
 
@@ -207,7 +207,7 @@ MovableObject *
 DarkLightFactory::createInstanceImpl(const String &name,
                                      const NameValuePairList *params) {
 
-    return new DarkLight(mSceneMgr->getBspTree(), name);
+    return new DarkLight(name);
 }
 
 } // namespace Ogre

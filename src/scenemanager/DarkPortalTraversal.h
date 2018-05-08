@@ -37,7 +37,7 @@ class DarkPortalTraversal {
 public:
     using BspNodes = BspNodeSet;
 
-    DarkPortalTraversal(BspTree *t) : mBspTree(t) {}
+    DarkPortalTraversal() {}
 
     const BspNodes &visibleCells() const { return mVisibleCells; }
 
@@ -55,14 +55,13 @@ public:
      * @param cameraFrustum the frustum to use when cutting the initial cell's
      * portals
      */
-    void traverse(const Vector3 &pos, const Matrix4 &toScreen,
+    void traverse(BspTree *tree,
+                  const Vector3 &pos, const Matrix4 &toScreen,
                   const Plane &cutPlane,
                   const PortalFrustum &cameraFrustum,
                   bool cleanFirst = true);
 
 protected:
-    BspTree *mBspTree;
-
     /// Cache of screen projected rectangles
     ScreenRectCache mRects;
 
