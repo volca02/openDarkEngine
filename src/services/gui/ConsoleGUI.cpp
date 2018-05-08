@@ -92,8 +92,6 @@ ConsoleGUI::ConsoleGUI(GUIService *owner) : mIsActive(false), mOwner(owner) {
     mConsoleSheet->addDrawOperation(mConsoleText);
     mConsoleSheet->addDrawOperation(mCommandLine);
 
-    mPosition = 0;
-
     // pull out the current resolution from render service
     RenderServicePtr rs = GET_SERVICE(RenderService);
 
