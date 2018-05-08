@@ -213,7 +213,7 @@ PyObject *InputServiceBinder::registerCommandTrap(PyObject *self,
                           std::move(cb), _1));
 
             __PY_NONE_RET;
-        } catch (BasicException) {
+        } catch (const BasicException &) {
             PyErr_SetString(
                 PyExc_TypeError,
                 "Error setting a callback, is the given argument a callable?");

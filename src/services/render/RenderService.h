@@ -218,7 +218,7 @@ protected:
     Ogre::Root *mRoot;
 
     /// Scene manager handle
-    Ogre::SceneManager *mSceneMgr;
+    Ogre::DarkSceneManager *mSceneMgr;
 
     /// Render window handle
     Ogre::RenderWindow *mRenderWindow;

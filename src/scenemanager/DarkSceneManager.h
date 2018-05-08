@@ -106,13 +106,14 @@ public:
 
     /// Specialized version of SceneNode creation. Creates DarkSceneNode
     /// instances
-    virtual SceneNode *createSceneNode(void);
+    SceneNode *createSceneNode(void) override;
 
     /// Specialized version of SceneNode creation. Creates DarkSceneNode
     /// instances
-    virtual SceneNode *createSceneNode(const String &name);
+    SceneNode *createSceneNode(const String &name) override;
 
-    /// Internal method that updates scenenode membership in BSP tree
+    /** Internal method that updates scenenode membership in BSP tree.
+     * Called by DarkSceneNode */
     void _notifyObjectMoved(const MovableObject *mov, const Vector3 &pos);
 
     /** Internal method, makes sure an object is removed from the leaves when
@@ -123,32 +124,32 @@ public:
      * Camera's visible cells */
     virtual void _findVisibleObjects(Camera *cam,
                                      VisibleObjectsBoundsInfo *visibleBounds,
-                                     bool onlyShadowCasters);
+                                     bool onlyShadowCasters) override;
 
     /// Scene manager type name getter
-    virtual const String &getTypeName(void) const;
+    const String &getTypeName(void) const override;
 
     /// Specialized method for creating DarkLight objects
-    virtual Light *createLight(const String &name);
+    Light *createLight(const String &name) override;
 
     /// Specialized method for getting DarkLight objects
-    virtual Light *getLight(const String &name);
+    Light *getLight(const String &name) const override;
 
     /// Specialized method for querying the existence of DarkLight objects
-    virtual bool hasLight(const String &name);
+    bool hasLight(const String &name) const override;
 
     /// Specialized method for destroying DarkLight objects
-    virtual void destroyLight(const String &name);
+    void destroyLight(const String &name) override;
 
     /// Specialized method for destroying all DarkLight objects
-    virtual void destroyAllLights(void);
+    void destroyAllLights(void) override;
 
     /// Queues a light to be included in the pre-render update
     /// @note Do call this method after manipulating the light's parameters
     void queueLightForUpdate(Light *l);
 
     /// Finds lights that are affecting the cells the camera sees
-    virtual void findLightsAffectingFrustum(const Camera *camera);
+    void findLightsAffectingFrustum(const Camera *camera) override;
 
     /** Populates a light list by looking into the BSP tree and getting all the
      lights from leaf nodes the MovableObject is in (customized to get use of
@@ -158,8 +159,8 @@ public:
 
     /** Overrided entity creation. Sets BspTree as the entity listener - this
      * accelerates the population of the light lists */
-    virtual Entity *createEntity(const String &entityName,
-                                 const String &meshName);
+    Entity *createBoundEntity(const String &entityName,
+                              const String &meshName);
 
     // TODO: The DarkGeometry should probably have a factory
     /** Creates an instance of static geometry */

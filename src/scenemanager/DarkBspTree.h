@@ -99,7 +99,7 @@ public:
                             Real radius);
 
     /** Listener's callback that returns light list of the movable object */
-    virtual const LightList *objectQueryLights(const MovableObject *movable);
+    const LightList *objectQueryLights(const MovableObject *movable) override;
 
     /** Listener's callback - flushes light list */
     virtual void objectDestroyed(MovableObject *movable);
@@ -131,13 +131,14 @@ protected:
     /// Owner of the BSP tree
     DarkSceneManager *mOwner;
 
-    typedef std::map<const MovableObject *, std::list<BspNode *>>
+    typedef std::unordered_map<const MovableObject *, std::vector<BspNode *>>
         MovableToNodeMap;
 
     // A cache of light lists for object. The entry is removed upon a change to
     // a movable the list is flushed upon a light change (could be made more
     // inteligent later on)
-    typedef std::map<const MovableObject *, LightList> MovableLightListCache;
+    typedef std::unordered_map<const MovableObject *, LightList>
+        MovableLightListCache;
 
     /// Map for locating the nodes a movable is currently a member of
     MovableToNodeMap mMovableToNodeMap;

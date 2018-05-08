@@ -33,13 +33,13 @@ namespace Ogre {
 
 // -----------------------------------------------------------
 DarkLight::DarkLight(BspTree *tree)
-    : Light(), mTraversal(tree), mNeedsUpdate(true), mIsDynamic(false)
+    : Light(), mNeedsUpdate(true), mTraversal(tree), mIsDynamic(false)
 {
 }
 
 // -----------------------------------------------------------
 DarkLight::DarkLight(BspTree *tree, const String &name)
-    : Light(name), mTraversal(tree), mNeedsUpdate(true), mIsDynamic(false)
+    : Light(name), mNeedsUpdate(true), mTraversal(tree), mIsDynamic(false)
 {
 }
 

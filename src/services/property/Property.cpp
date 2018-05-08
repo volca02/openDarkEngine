@@ -106,7 +106,7 @@ void Property::load(const FileGroupPtr &db, const BitArray &objMask) {
                       pchn.c_str(), mVerMaj, mVerMin, hdr.version_high,
                       hdr.version_low);
         }
-    } catch (BasicException) {
+    } catch (const BasicException &) {
         LOG_ERROR("Property::load : Could not find the property chunk %s",
                   pchn.c_str());
         return;
@@ -150,7 +150,7 @@ void Property::save(const FileGroupPtr &db, const BitArray &objMask) {
 
     try {
         fprop = db->createFile(pchn, mVerMaj, mVerMin);
-    } catch (BasicException) {
+    } catch (const BasicException &) {
         LOG_FATAL("Property::save : Could not create property chunk %s",
                   pchn.c_str());
         return;

@@ -43,11 +43,11 @@ namespace Ogre {
 // ----------------------------------------------------------------------
 DarkSceneManager::DarkSceneManager(const String &instanceName)
     : SceneManager(instanceName),
+      mBspTree(new BspTree(this)),
       mFrameNum(1),
       mCellCount(0),
-      mActiveGeometry(NULL),
-      mBspTree(new BspTree(this)),
-      mDarkLightFactory(new DarkLightFactory(this))
+      mDarkLightFactory(new DarkLightFactory(this)),
+      mActiveGeometry(NULL)
 {
     Root::getSingleton().addMovableObjectFactory(mDarkLightFactory.get());
     mPortalID = 0;
@@ -325,13 +325,13 @@ Light *DarkSceneManager::createLight(const String &name) {
 }
 
 //-----------------------------------------------------------------------
-Light *DarkSceneManager::getLight(const String &name) {
+Light *DarkSceneManager::getLight(const String &name) const {
     return static_cast<Light *>(
         getMovableObject(name, DarkLightFactory::FACTORY_TYPE_NAME));
 }
 
 //-----------------------------------------------------------------------
-bool DarkSceneManager::hasLight(const String &name) {
+bool DarkSceneManager::hasLight(const String &name) const {
     return hasMovableObject(name, DarkLightFactory::FACTORY_TYPE_NAME);
 }
 
@@ -375,10 +375,9 @@ void DarkSceneManager::updateDirtyLights() {
 //-----------------------------------------------------------------------
 void DarkSceneManager::findLightsAffectingFrustum(const Camera *camera) {
     TRACE_METHOD;
-    unsigned long startt = Root::getSingleton().getTimer()->getMilliseconds();
 
     // Collect lights from visible cells
-    std::set<Light *> lightSet;
+    std::unordered_set<Light *> lightSet;
 
     const DarkCamera *dcam = static_cast<const DarkCamera *>(camera);
 
@@ -556,8 +555,8 @@ void DarkSceneManager::_populateLightList(const Vector3 &position, Real radius,
 }
 
 //-----------------------------------------------------------------------
-Entity *DarkSceneManager::createEntity(const String &entityName,
-                                       const String &meshName) {
+Entity *DarkSceneManager::createBoundEntity(const String &entityName,
+                                            const String &meshName) {
     Entity *e = SceneManager::createEntity(entityName, meshName);
 
     e->setListener(mBspTree.get());

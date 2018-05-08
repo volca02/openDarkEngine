@@ -219,7 +219,7 @@ bool ConfigService::loadFromFile(const std::string &cfgfile) {
         }
 
         return true;
-    } catch (Ogre::Exception e) {
+    } catch (const Ogre::Exception &e) {
         LOG_ERROR("Config file '%s' was not found", cfgfile.c_str());
         return false;
         // Guess the file didn't exist
