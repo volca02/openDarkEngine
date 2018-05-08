@@ -33,6 +33,7 @@
 #include "gui/GUIService.h"
 #include "database/DatabaseService.h"
 #include "input/InputService.h"
+#include "tracer.h"
 
 #include <OgreException.h>
 
@@ -46,11 +47,15 @@ void run(const std::string &config_name, std::string mission) {
     root.logToFile("opde.log");
     root.setLogLevel(4);
 
+    // NOTE: Temporary override to get local files loading
+    // could be resolved by looking if the config contains path
+    // or in config service as last resort to look at current path
+    auto cfg_srv = GET_SERVICE(ConfigService);
+    cfg_srv->setConfigPathOverride(".");
+
     // first argument is config name
     // that includes specification of resource locations
     root.loadConfigFile(config_name);
-
-    auto cfg_srv = GET_SERVICE(ConfigService);
 
     // get the resource config spec
     auto rc = cfg_srv->getParam("resource_config", "thief1.cfg");
@@ -61,7 +66,7 @@ void run(const std::string &config_name, std::string mission) {
         Tracer::getSingleton().enable(true);
 
     // setup resources, based on game
-    // NOTE: Temporary solution here
+    // NOTE: Temporary solution here (will be replaced with VFS service)
     root.loadResourceConfig(rc.toString());
 
     // inform root that this is all needed for bootstrap of the services
