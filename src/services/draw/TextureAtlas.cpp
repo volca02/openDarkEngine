@@ -46,7 +46,7 @@ TextureAtlas::TextureAtlas(DrawService *owner, DrawSource::ID id)
     : DrawSourceBase(), mOwner(owner), mAtlasID(id), mMyDrawSources(),
       mIsDirty(false), mAtlasSize(1, 1) {
 
-    mAtlasAllocation.reset(new FreeSpaceInfo(0, 0, 1, 1));
+    mAtlasAllocation.reset(new FreeSpaceInfo(64, 64));
     mAtlasName = "DrawAtlas" + Ogre::StringConverter::toString(mAtlasID);
     mMaterial = Ogre::MaterialManager::getSingleton().create(
         "M_" + mAtlasName,
@@ -255,8 +255,9 @@ void TextureAtlas::build() {
         // 4 bytes each iteration instead of one (speedup)
         for (size_t row = 0; row < dps.height; row++) {
             for (size_t col = 0; col < srcrowsize; col++) {
-                dstData[((row + fsi->y) * rowsize) + (fsi->x * pixelsize) +
-                        col] = srcData[(row * srcrowsize) + col];
+                dstData[((row + fsi->posY()) * rowsize) +
+                        (fsi->posX() * pixelsize) + col] =
+                    srcData[(row * srcrowsize) + col];
             }
         }
 
@@ -264,7 +265,7 @@ void TextureAtlas::build() {
 
         // Convert the full draw source pixel coordinates to the atlas contained
         // ones (initializes the texturing coordinates transform)
-        ds->atlas(mMaterial, fsi->x, fsi->y, mAtlasSize.width,
+        ds->atlas(mMaterial, fsi->posX(), fsi->posY(), mAtlasSize.width,
                   mAtlasSize.height);
     }
 
@@ -311,7 +312,7 @@ void TextureAtlas::enlarge(size_t area) {
     LOG_DEBUG("TextureAtlas: (%s) Enlarged atlas to %d x %d",
               mAtlasName.c_str(), mAtlasSize.width, mAtlasSize.height);
 
-    mAtlasAllocation.reset(new FreeSpaceInfo(0, 0, mAtlasSize.width, mAtlasSize.height));
+    mAtlasAllocation.reset(new FreeSpaceInfo(mAtlasSize.width, mAtlasSize.height));
 
     // destroy the old invalid texture
     if (mTexture) {

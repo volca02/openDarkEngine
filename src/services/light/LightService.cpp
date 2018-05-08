@@ -87,7 +87,7 @@ void LightService::build() {
 
 //------------------------------------------------------
 void LightService::clear() {
-    // TODO: mAtlasList->clear();
+    mAtlasList->clear();
 
     // TODO: To be totally clean we would have to release all the created
     // lights! for now, this is done in WR - it calls clearScene

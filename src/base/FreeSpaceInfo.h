@@ -35,34 +35,49 @@ namespace Opde {
  * http://www.blackpawn.com/texts/lightmaps/default.html
  */
 class FreeSpaceInfo {
-protected:
-    // Children of this node, if it's a node
-    std::unique_ptr<FreeSpaceInfo> mChild[2];
-
-    FreeSpaceInfo() {
-        this->x = 0;
-        this->y = 0;
-        this->w = 0;
-        this->h = 0;
-    }
-
 public:
-    int x;
-    int y;
-    int w;
-    int h;
-    bool used = false;
+    // Constructor with the specified dimensions
+    FreeSpaceInfo(int w, int h)
+        : w(w), h(h)
+    {}
 
-    // Constructor with the specified dimensions and position (leaf constructor)
-    FreeSpaceInfo(int x, int y, int w, int h) {
-        this->x = x;
-        this->y = y;
-        this->w = w;
-        this->h = h;
+    FreeSpaceInfo(FreeSpaceInfo &&s) :
+        x(s.x), y(s.y), w(s.w), h(s.h)
+    {
+        std::swap(mChild[0], s.mChild[0]);
+        std::swap(mChild[1], s.mChild[1]);
     }
 
     // destructor. Deletes the children if any.
     ~FreeSpaceInfo() { }
+
+    // grows to a new 2x size in one direction, placing the current node as single child
+    // and adding other node of the same size
+    void grow() {
+        // child0 -> we have new free space in there
+        // child1 -> we move the whole current tree there
+        std::unique_ptr<FreeSpaceInfo> child0, child1;
+        child1.reset(new FreeSpaceInfo(std::move(*this)));
+        if (w > h) {
+            child0.reset(new FreeSpaceInfo(0,h,w,h));
+            h = 2*h;
+        } else {
+            child0.reset(new FreeSpaceInfo(w,0,w,h));
+            w = 2*w;
+        }
+
+        // replace our own kids with the new ones
+        mChild[0] = std::move(child0);
+        mChild[1] = std::move(child1);
+    }
+
+    int getDominantSize() const { return w > h ? w : h; }
+    int getMinorSize() const { return w < h ? w : h; }
+    int width() const { return w; }
+    int height() const { return h; }
+
+    int posX() const { return x; }
+    int posY() const { return y; }
 
     // Returns the area this free space represents
     int getArea() const { return w * h; }
@@ -143,6 +158,23 @@ public:
         int area = mChild[0]->getLeafArea() + mChild[1]->getLeafArea();
         return area;
     }
+
+protected:
+    // Constructor with the specified dimensions and position (leaf constructor)
+    FreeSpaceInfo(int x, int y, int w, int h)
+        : x(x), y(y), w(w), h(h)
+    {}
+
+    FreeSpaceInfo() {}
+
+    // Children of this node, if it's a node
+    std::unique_ptr<FreeSpaceInfo> mChild[2];
+
+    int x = 0;
+    int y = 0;
+    int w = 0;
+    int h = 0;
+    bool used = false;
 };
 
 } // namespace Opde

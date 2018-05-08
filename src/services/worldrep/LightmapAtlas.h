@@ -216,7 +216,7 @@ private:
     Ogre::TexturePtr mTex;
 
     /** The resulting pixel buffer */
-    Ogre::HardwarePixelBufferSharedPtr mAtlas;
+    Ogre::HardwarePixelBufferSharedPtr mPixelBuffer;
 
     /** The name of the resulting resource */
     Ogre::String mName;
@@ -242,14 +242,7 @@ private:
     /** Tag values of this atlas */
     TagSet mTagSet;
 
-    /** The dimension of the atlas (starts at 16x16 - 16 here). As the atlas is
-     * rectangular we only need one */
-    int mSize;
-
 protected:
-    /// grows the atlas to the newly specified dimensions
-    void growAtlas(int newSize);
-
     /// places the lightmap without any refreshes
     bool placeLightMap(LightMap *lmap);
 
@@ -281,8 +274,8 @@ public:
      * by 8) to 0-255 range (checks limits)
      * \warning Must be called after atlas locking, otherwise the program will
      * crash ! */
-    inline void updateLightMapBuffer(FreeSpaceInfo &fsi, uint32_t *lR,
-                                     uint32_t *lG, uint32_t *lB);
+    inline void updateLightMapBuffer(FreeSpaceInfo &fsi, uint16_t *lR,
+                                     uint16_t *lG, uint16_t *lB);
 
     /** Register that animated light ID maps to the LightMap instance */
     void registerAnimLight(int id, LightMap *target);
@@ -309,7 +302,7 @@ public:
         return it != mTagSet.end();
     };
 
-    int getEdgeSize() { return mSize; }
+    std::pair<int,int> getDimensions();
 
     /** adds a new tag into the atlas */
     void addTag(int tag) { mTagSet.insert(tag); };
@@ -381,6 +374,9 @@ public:
 
     /// console command listener
     virtual void commandExecuted(std::string command, std::string parameters);
+
+    /// clears the contents of this atlas list
+    void clear();
 };
 
 } // namespace Opde
