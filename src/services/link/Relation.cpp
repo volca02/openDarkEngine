@@ -269,8 +269,8 @@ void Relation::load(const FileGroupPtr &db, const BitArray &objMask) {
         LOG_VERBOSE("Relation (%s - %d): Read link ID %d, from %d to %d "
                     "(F,C,IX: %d, %d, %d)",
                     mName.c_str(), mID, link.id(), link.src(), link.dst(),
-                    LINK_ID_FLAVOR(link.id())), LINK_ID_CONCRETE(link.id()),
-                    LINK_ID_INDEX(link.id());
+                    LINK_ID_FLAVOR(link.id()), LINK_ID_CONCRETE(link.id()),
+                    LINK_ID_INDEX(link.id()));
 
         // Check if the flavor fits
         // The mID can't be negative, but just for sure:
