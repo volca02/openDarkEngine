@@ -66,7 +66,7 @@ template <> const size_t ServiceImpl<DrawService>::SID = __SERVICE_ID_DRAW;
 
 DrawService::DrawService(ServiceManager *manager, const std::string &name)
     : ServiceImpl<DrawService>(manager, name), mSheetMap(), mActiveSheet(NULL),
-      mDrawOpID(0), mDrawSourceID(0), mViewport(NULL), mCurrentPalette(NULL),
+      mDrawSourceID(0), mViewport(NULL), mCurrentPalette(NULL),
       mWidth(1), mHeight(1) {
 
     mCurrentPalette = sLGPalette;
@@ -116,26 +116,8 @@ void DrawService::clear() {
     }
 
     mSheetMap.clear();
-
-    // destroy all draw operations left
-    for (size_t idx = 0; idx < mDrawOperations.size(); ++idx) {
-        // delete
-        DrawOperation *dop = mDrawOperations[idx];
-
-        if (dop != NULL)
-            dop->clear();
-
-        delete dop;
-        mDrawOperations[idx] = NULL;
-    }
-
-    TextureAtlasMap::iterator end = mAtlasMap.end();
-    for (TextureAtlasMap::iterator it = mAtlasMap.begin(); it != end; ++it) {
-        destroyAtlas(it->second);
-    }
-
-    mAtlasMap.clear();
-
+    mDrawOperations.clear();
+    mAtlases.clear();
     mDrawOperations.clear();
 
     // destroy all draw sources
@@ -607,11 +589,10 @@ DrawSourcePtr DrawService::createDrawSource(const std::string &img,
 
 //------------------------------------------------------
 RenderedImage *DrawService::createRenderedImage(const DrawSourcePtr &draw) {
-    DrawOperation::ID opID = getNewDrawOperationID();
-    RenderedImage *ri = new RenderedImage(this, opID, draw);
+    RenderedImage *ri = new RenderedImage(this, draw);
 
     // register so we'll be able to remove it
-    mDrawOperations[opID] = ri;
+    allocDrawOpSlot().reset(ri);
 
     postCreate(ri);
 
@@ -626,11 +607,10 @@ void DrawService::destroyRenderedImage(RenderedImage *ri) {
 //------------------------------------------------------
 RenderedLabel *DrawService::createRenderedLabel(const FontDrawSourcePtr &fds,
                                                 const std::string &label) {
-    DrawOperation::ID opID = getNewDrawOperationID();
-    RenderedLabel *rl = new RenderedLabel(this, opID, fds, label);
+    RenderedLabel *rl = new RenderedLabel(this, fds, label);
 
     // register so we'll be able to remove it
-    mDrawOperations[opID] = rl;
+    allocDrawOpSlot().reset(rl);
 
     postCreate(rl);
 
@@ -644,11 +624,10 @@ void DrawService::destroyRenderedLabel(RenderedLabel *rl) {
 
 //------------------------------------------------------
 RenderedRect *DrawService::createRenderedRect(const TextureAtlasPtr &atlas) {
-    DrawOperation::ID opID = getNewDrawOperationID();
-    RenderedRect *rr = new RenderedRect(this, opID, atlas);
+    RenderedRect *rr = new RenderedRect(this, atlas);
 
     // register so we'll be able to remove it
-    mDrawOperations[opID] = rr;
+    allocDrawOpSlot().reset(rr);
 
     postCreate(rr);
 
@@ -661,36 +640,30 @@ void DrawService::destroyRenderedRect(RenderedRect *rr) {
 }
 
 //------------------------------------------------------
-size_t DrawService::getNewDrawOperationID() {
-    // do we have some free id's in the stack?
-    if (mFreeIDs.empty()) {
-        // raise the id
-        mDrawOpID++;
-
-        size_t prev_size = mDrawOperations.size();
-        mDrawOperations.grow(mDrawOpID * 2);
-
-        // and clean up the allocated mess
-        for (size_t pos = prev_size; pos < mDrawOpID * 2; ++pos)
-            mDrawOperations[pos] = NULL;
-
-        return mDrawOpID;
-    } else {
-        size_t newid = mFreeIDs.top();
-        mFreeIDs.pop();
-        return newid;
+std::unique_ptr<DrawOperation> &DrawService::allocDrawOpSlot() {
+    for (auto &op : mDrawOperations) {
+        if (!op)
+            return op;
     }
+
+    // new empty ptr placed at top and ref returned
+    mDrawOperations.emplace_back();
+    return mDrawOperations.back();
 }
 
 //------------------------------------------------------
 void DrawService::destroyDrawOperation(DrawOperation *dop) {
-    DrawOperation::ID id = dop->getID();
-    mDrawOperations[id] = NULL;
-    // recycle the id for reuse
-    mFreeIDs.push(id);
+    // first we remove the draw operation from all sheets
+    for (auto &sheet : mSheetMap) {
+        sheet.second->removeDrawOperation(dop);
+    }
 
-    dop->clear();
-    delete dop;
+    // should not be a problem. If it will, we'll have to move
+    // to an unordered_set<DrawOperation*>
+    for (auto &op : mDrawOperations) {
+        if (op.get() == dop)
+            op.reset();
+    }
 }
 
 //------------------------------------------------------
@@ -733,21 +706,9 @@ void DrawService::_queueAtlasForRebuild(TextureAtlas *atlas) {
 
 //------------------------------------------------------
 TextureAtlasPtr DrawService::createAtlas() {
-    //
-    TextureAtlasPtr ta(new TextureAtlas(this, getNewDrawOperationID()));
-
-    mAtlasMap.insert(std::make_pair(ta->getAtlasID(), ta));
-
+    TextureAtlasPtr ta(new TextureAtlas(this));
+    mAtlases.insert(ta);
     return ta;
-}
-
-//------------------------------------------------------
-void DrawService::destroyAtlas(const TextureAtlasPtr &atlas) {
-    /* TODO: INVALID:
-       mFreeIDs.push(atlas->getAtlasID());
-       delete atlas;
-    */
-    LOG_INFO("DrawService::destroyAtlas ignored");
 }
 
 //------------------------------------------------------

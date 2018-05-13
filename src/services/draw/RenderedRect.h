@@ -33,8 +33,7 @@ namespace Opde {
 /** Rendered rectangle. A single on-screen rectangle with a specified colour. */
 class RenderedRect : public DrawOperation {
 public:
-    RenderedRect(DrawService *owner, DrawOperation::ID id,
-                 const TextureAtlasPtr &atlas);
+    RenderedRect(DrawService *owner, const TextureAtlasPtr &atlas);
 
     virtual ~RenderedRect();
 

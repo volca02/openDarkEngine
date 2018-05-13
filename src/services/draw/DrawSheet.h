@@ -141,8 +141,7 @@ protected:
     /// True if this sheet is rendered
     bool mActive;
 
-    /// All draw operations on this sheet
-    DrawOperationMap mDrawOpMap;
+    std::unordered_set<DrawOperation*> mDrawOps;
 
     /// Sheet name
     std::string mSheetName;

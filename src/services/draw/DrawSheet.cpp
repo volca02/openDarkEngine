@@ -52,26 +52,19 @@ void DrawSheet::activate() {
     setVisible(true);
 
     // Inform all buffers that the parent changed
-    for (DrawBufferMap::iterator it = mDrawBufferMap.begin();
-         it != mDrawBufferMap.end(); ++it) {
-        DrawBuffer *db = it->second;
-
-        db->_parentChanged(this);
+    for (auto &p : mDrawBufferMap) {
+        p.second->_parentChanged(this);
     }
 
     // Inform all the operations about the new sheet
-    DrawOperationMap::iterator iend = mDrawOpMap.end();
-
-    for (DrawOperationMap::iterator doi = mDrawOpMap.begin(); doi != iend;
-         ++doi) {
-        doi->second->_notifyActiveSheet(this);
+    for (auto &op : mDrawOps) {
+        op->_notifyActiveSheet(this);
     }
 }
 
 //------------------------------------------------------
 void DrawSheet::deactivate() {
     mActive = false;
-
     setVisible(false);
 }
 
@@ -83,7 +76,7 @@ void DrawSheet::addDrawOperation(DrawOperation *drawOp) {
 
     if (buf) {
         buf->addDrawOperation(drawOp);
-        mDrawOpMap[drawOp->getID()] = drawOp;
+        mDrawOps.insert(drawOp);
         drawOp->onSheetRegister(this);
     }
 }
@@ -118,7 +111,7 @@ void DrawSheet::_removeDrawOperation(DrawOperation *toRemove) {
     if (buf)
         buf->removeDrawOperation(toRemove);
 
-    mDrawOpMap.erase(toRemove->getID());
+    mDrawOps.erase(toRemove);
 }
 
 //------------------------------------------------------
@@ -150,7 +143,7 @@ DrawBuffer *DrawSheet::getBufferForOperation(DrawOperation *drawOp,
     if (autoCreate) {
         const Ogre::MaterialPtr &mp = dsb->getMaterial();
         DrawBuffer *db = new DrawBuffer(mp);
-        mDrawBufferMap[dsb->getSourceID()] = db;
+        mDrawBufferMap[dsb->getSourceID()].reset(db);
         return db;
     } else {
         return NULL; // nope, just return null
@@ -162,7 +155,7 @@ DrawBuffer *DrawSheet::getBufferForSourceID(DrawSourceBase::ID id) {
     DrawBufferMap::iterator it = mDrawBufferMap.find(id);
 
     if (it != mDrawBufferMap.end()) {
-        return it->second;
+        return it->second.get();
     }
 
     return NULL;
@@ -232,9 +225,8 @@ void DrawSheet::convertClipToScreen(const ClipRect &cr, ScreenRect &tgt) const {
 
 //------------------------------------------------------
 void DrawSheet::queueRenderables(Ogre::RenderQueue *rq) {
-    for (DrawBufferMap::iterator it = mDrawBufferMap.begin();
-         it != mDrawBufferMap.end(); ++it) {
-        DrawBuffer *db = it->second;
+    for (auto &p : mDrawBufferMap) {
+        auto &db = p.second;
 
         // could be done in Renderable::preRender hidden from the eyes
         if (db->isDirty())
@@ -244,7 +236,7 @@ void DrawSheet::queueRenderables(Ogre::RenderQueue *rq) {
         if (db->isEmpty())
             continue;
 
-        rq->addRenderable(db, db->getRenderQueueID(),
+        rq->addRenderable(db.get(), db->getRenderQueueID(),
                           OGRE_RENDERABLE_DEFAULT_PRIORITY);
     }
 }
@@ -253,11 +245,7 @@ void DrawSheet::queueRenderables(Ogre::RenderQueue *rq) {
 void DrawSheet::clear() {
     // this ensures we have not shared pointers hanging in there to cause
     // troubles for example.
-    DrawOperationMap::iterator iend = mDrawOpMap.end();
-
-    for (DrawOperationMap::iterator doi = mDrawOpMap.begin(); doi != iend;
-         ++doi) {
-        DrawOperation *dop = doi->second;
+    for (auto &dop : mDrawOps) {
         DrawBuffer *buf = getBufferForOperation(dop);
 
         assert(buf);
@@ -266,14 +254,7 @@ void DrawSheet::clear() {
         dop->onSheetUnregister(this);
     }
 
-    mDrawOpMap.clear();
-
-    DrawBufferMap::iterator it = mDrawBufferMap.begin();
-
-    for (; it != mDrawBufferMap.end(); ++it) {
-        delete it->second;
-    }
-
+    mDrawOps.clear();
     mDrawBufferMap.clear();
 }
 
@@ -297,11 +278,10 @@ Ogre::Real DrawSheet::getBoundingRadius() const {
 
 //------------------------------------------------------
 void DrawSheet::visitRenderables(Ogre::Renderable::Visitor *vis,
-                                 bool debugRenderables) {
-    // visit all the renderables - all draw buffers
-    for (DrawBufferMap::iterator it = mDrawBufferMap.begin();
-         it != mDrawBufferMap.end(); ++it) {
-        vis->visit(it->second, 0, debugRenderables);
+                                 bool debugRenderables)
+{
+    for (auto &p : mDrawBufferMap) {
+        vis->visit(p.second.get(), 0, debugRenderables);
     }
 };
 
@@ -325,11 +305,8 @@ void DrawSheet::_updateRenderQueue(Ogre::RenderQueue *queue){
 
 //-----------------------------------------------------
 void DrawSheet::markBuffersDirty() {
-    for (DrawBufferMap::iterator it = mDrawBufferMap.begin();
-         it != mDrawBufferMap.end(); ++it) {
-        DrawBuffer *db = it->second;
-
-        db->markDirty();
+    for (auto &p : mDrawBufferMap) {
+        p.second->markDirty();
     }
 }
 }; // namespace Opde

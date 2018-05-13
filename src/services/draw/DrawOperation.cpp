@@ -30,11 +30,15 @@ namespace Opde {
 /*----------------------------------------------------*/
 /*-------------------- 	DrawOperation ----------------*/
 /*----------------------------------------------------*/
-DrawOperation::DrawOperation(DrawService *owner, DrawOperation::ID id)
-    : mID(id), mOwner(owner), mActiveSheet(NULL), mPosition(0, 0), mZOrder(0),
-      mIsDirty(false){
-          // nothing to do besides this
-      };
+DrawOperation::DrawOperation(DrawService *owner)
+    : mOwner(owner),
+      mActiveSheet(NULL),
+      mPosition(0, 0),
+      mZOrder(0),
+      mIsDirty(false)
+{
+    // nothing to do besides this
+};
 
 //------------------------------------------------------
 DrawOperation::~DrawOperation() {

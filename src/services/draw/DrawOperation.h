@@ -38,14 +38,9 @@ class DrawSheet;
  * building itself into a VBO, this produces N DrawQuads. */
 class DrawOperation {
 public:
-    /// ID type of this operation
-    typedef size_t ID;
-
-    DrawOperation(DrawService *owner, ID id);
+    DrawOperation(DrawService *owner);
 
     virtual ~DrawOperation();
-
-    inline ID getID() const { return mID; };
 
     /// Called by DrawBuffer to get the Quads queued for rendering. Fill this
     /// method to get the rendering done (via DrawBuffer::_queueDrawQuad())
@@ -104,8 +99,6 @@ protected:
     /// To be called when the draw source is changing
     void _sourceChanged(const DrawSourcePtr &old);
 
-    const ID mID;
-
     DrawService *mOwner;
 
     // Should have used weak_ptr here to avoid circles (DrawSheet::clear should
@@ -134,8 +127,6 @@ protected:
     bool mIsDirty;
 };
 
-/// Map of all draw operations by it's ID
-typedef std::map<DrawOperation::ID, DrawOperation *> DrawOperationMap;
 } // namespace Opde
 
 #endif

@@ -35,10 +35,9 @@ namespace Opde {
 /*----------------------------------------------------*/
 /*-------------------- RenderedRect ------------------*/
 /*----------------------------------------------------*/
-RenderedRect::RenderedRect(DrawService *owner, DrawOperation::ID id,
-                           const TextureAtlasPtr &atlas)
-    : DrawOperation(owner, id), mAtlas(atlas) {
-
+RenderedRect::RenderedRect(DrawService *owner, const TextureAtlasPtr &atlas)
+    : DrawOperation(owner), mAtlas(atlas)
+{
     mVertexColourDS = atlas->getVertexColourDrawSource();
 
     mDrawQuad.texCoords.left = mVertexColourDS->transformX(0);

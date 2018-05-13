@@ -34,8 +34,7 @@ namespace Opde {
  * image source (be it atlassed or not). */
 class RenderedImage : public DrawOperation {
 public:
-    RenderedImage(DrawService *owner, DrawOperation::ID id,
-                  const DrawSourcePtr &ds);
+    RenderedImage(DrawService *owner, const DrawSourcePtr &ds);
 
     virtual ~RenderedImage();
 

@@ -34,10 +34,10 @@ namespace Opde {
 /*----------------------------------------------------*/
 /*-------------------- RenderedLabel -----------------*/
 /*----------------------------------------------------*/
-RenderedLabel::RenderedLabel(DrawService *owner, DrawOperation::ID id,
-                             const FontDrawSourcePtr fds,
+RenderedLabel::RenderedLabel(DrawService *owner, const FontDrawSourcePtr fds,
                              const std::string &label)
-    : DrawOperation(owner, id), mFontSource(fds), mText() {
+    : DrawOperation(owner), mFontSource(fds), mText()
+{
 
     rebuild();
 }

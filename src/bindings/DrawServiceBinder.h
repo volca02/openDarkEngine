@@ -56,7 +56,6 @@ public:
     static PyObject *destroyDrawOperation(PyObject *self, PyObject *args);
 
     static PyObject *createAtlas(PyObject *self, PyObject *args);
-    static PyObject *destroyAtlas(PyObject *self, PyObject *args);
 
     static PyObject *loadFont(PyObject *self, PyObject *args);
     static PyObject *setFontPalette(PyObject *self, PyObject *args);

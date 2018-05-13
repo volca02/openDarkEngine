@@ -24,15 +24,17 @@
 #ifndef __DRAWSERVICE_H
 #define __DRAWSERVICE_H
 
-#include "Array.h"
+#include <stack>
+#include <vector>
+
+#include <OgreRenderQueueListener.h>
+
 #include "DrawOperation.h"
 #include "OpdeService.h"
 #include "RGBAQuad.h"
 #include "ServiceCommon.h"
 #include "OpdeServiceFactory.h"
 
-#include <OgreRenderQueueListener.h>
-#include <stack>
 
 namespace Opde {
 
@@ -140,11 +142,6 @@ public:
      */
     TextureAtlasPtr createAtlas();
 
-    /** Destroys the given instance of texture atlas.
-     * @param atlas The atlas to be destroyed
-     */
-    void destroyAtlas(const TextureAtlasPtr &atlas);
-
     /** Converts the given coordinate to the screen space x coordinate
      */
     Ogre::Real convertToScreenSpaceX(int x, size_t width) const;
@@ -229,7 +226,7 @@ protected:
     void loadPaletteExternal(const Ogre::String &fname,
                              const Ogre::String &group);
 
-    DrawOperation::ID getNewDrawOperationID();
+    std::unique_ptr<DrawOperation> &allocDrawOpSlot();
 
     /// Rebuilds all queued atlasses (so those can be used for rendering)
     void rebuildAtlases();
@@ -247,20 +244,17 @@ protected:
                                  const Ogre::String &grp);
 
     typedef std::map<std::string, DrawSheetPtr> SheetMap;
-    typedef std::stack<size_t> IDStack;
-    typedef SimpleArray<DrawOperation *> DrawOperationArray;
-    typedef std::map<DrawSource::ID, TextureAtlasPtr> TextureAtlasMap;
+    typedef std::vector<std::unique_ptr<DrawOperation>> DrawOperations;
+    typedef std::unordered_set<TextureAtlasPtr> TextureAtlases;
     typedef std::set<TextureAtlas *> AtlasList;
-    typedef std::list<DrawSourceBasePtr> DrawSourceList;
+    typedef std::vector<DrawSourceBasePtr> DrawSourceList;
     typedef std::map<std::string, DrawSourcePtr> ResourceDrawSourceMap;
 
 private:
     SheetMap mSheetMap;
     DrawSheetPtr mActiveSheet;
-    DrawOperation::ID mDrawOpID;
     DrawSource::ID mDrawSourceID; // draw sources in atlas have the same ID
-    IDStack mFreeIDs;
-    DrawOperationArray mDrawOperations;
+    DrawOperations mDrawOperations;
     ResourceDrawSourceMap mResourceMap;
 
     Ogre::RenderSystem *mRenderSystem;
@@ -272,6 +266,7 @@ private:
 
     Ogre::SceneManager *mSceneManager;
 
+    // non-owning
     AtlasList mAtlasesForRebuild;
 
     static const RGBAQuad msMonoPalette[2];
@@ -283,7 +278,7 @@ private:
 
     RenderServicePtr mRenderService;
 
-    TextureAtlasMap mAtlasMap;
+    TextureAtlases mAtlases;
 
     size_t mWidth;
     size_t mHeight;

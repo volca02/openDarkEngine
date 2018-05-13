@@ -39,7 +39,7 @@ class FreeSpaceInfo;
 class TextureAtlas : public DrawSourceBase {
 public:
     /** Constructor. Creates a new atlas for texture storage */
-    TextureAtlas(DrawService *owner, DrawSource::ID id);
+    TextureAtlas(DrawService *owner);
 
     /** destructor */
     ~TextureAtlas();

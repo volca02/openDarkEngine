@@ -35,8 +35,8 @@ namespace Opde {
  * wrapped and coloured. */
 class RenderedLabel : public DrawOperation {
 public:
-    RenderedLabel(DrawService *owner, DrawOperation::ID id,
-                  const FontDrawSourcePtr fds, const std::string &label);
+    RenderedLabel(DrawService *owner, const FontDrawSourcePtr fds,
+                  const std::string &label);
 
     virtual ~RenderedLabel();
 

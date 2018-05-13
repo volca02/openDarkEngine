@@ -57,13 +57,13 @@ DrawBuffer::~DrawBuffer() {
 
 //------------------------------------------------------
 void DrawBuffer::addDrawOperation(DrawOperation *op) {
-    mDrawOpMap.insert(std::make_pair(op->getID(), op));
+    mDrawOps.insert(op);
     mIsDirty = true;
 };
 
 //------------------------------------------------------
 void DrawBuffer::removeDrawOperation(DrawOperation *op) {
-    mDrawOpMap.erase(op->getID());
+    mDrawOps.erase(op);
     mIsDirty = true;
 };
 
@@ -76,21 +76,17 @@ void DrawBuffer::update() {
     // We'll set isUpdating to true - _queueDrawQuad can then be used
     mIsUpdating = true;
 
-    // now we call all the render ops to visit this buffer
-    DrawOperationMap::iterator iend = mDrawOpMap.end();
-
     // clear the quad list for this usage
     mQuadList.clear();
 
-    for (DrawOperationMap::iterator it = mDrawOpMap.begin(); it != iend; ++it) {
-        DrawOperation *op = it->second;
-
+    // now we call all the render ops to visit this buffer
+    for (auto &op : mDrawOps) {
         // rebuild the drawop if needed
         if (op->isDirty())
             op->rebuild();
 
         // visit!
-        it->second->visitDrawBuffer(this);
+        op->visitDrawBuffer(this);
     }
 
     mIsUpdating = false;

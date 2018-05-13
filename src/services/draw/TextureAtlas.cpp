@@ -42,10 +42,13 @@ namespace Opde {
 /*----------------------------------------------------*/
 /*-------------------- TextureAtlas ------------------*/
 /*----------------------------------------------------*/
-TextureAtlas::TextureAtlas(DrawService *owner, DrawSource::ID id)
-    : DrawSourceBase(), mOwner(owner), mAtlasID(id), mMyDrawSources(),
-      mIsDirty(false), mAtlasSize(1, 1) {
-
+TextureAtlas::TextureAtlas(DrawService *owner)
+    : DrawSourceBase(),
+      mOwner(owner),
+      mMyDrawSources(),
+      mIsDirty(false),
+      mAtlasSize(1, 1)
+{
     mAtlasAllocation.reset(new FreeSpaceInfo(64, 64));
     mAtlasName = "DrawAtlas" + Ogre::StringConverter::toString(mAtlasID);
     mMaterial = Ogre::MaterialManager::getSingleton().create(

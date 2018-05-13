@@ -88,7 +88,6 @@ PyMethodDef DrawServiceBinder::msMethods[] = {
     {"createRenderedLabel", createRenderedLabel, METH_VARARGS},
     {"destroyDrawOperation", destroyDrawOperation, METH_VARARGS},
     {"createAtlas", createAtlas, METH_VARARGS},
-    {"destroyAtlas", destroyAtlas, METH_VARARGS},
     {"loadFont", loadFont, METH_VARARGS},
     {"setFontPalette", setFontPalette, METH_VARARGS},
     {NULL, NULL},
@@ -326,29 +325,6 @@ PyObject *DrawServiceBinder::createAtlas(PyObject *self, PyObject *args) {
 
     return TextureAtlasBinder::create(a);
 
-    __PYTHON_EXCEPTION_GUARD_END_;
-}
-// ------------------------------------------
-PyObject *DrawServiceBinder::destroyAtlas(PyObject *self, PyObject *args) {
-    __PYTHON_EXCEPTION_GUARD_BEGIN_;
-    DrawServicePtr o;
-
-    if (!python_cast<DrawServicePtr>(self, &msType, &o))
-        __PY_CONVERR_RET;
-
-    PyObject *atp;
-
-    if (!PyArg_ParseTuple(args, "O", &atp))
-        __PY_BADPARM_RET(1);
-
-    TextureAtlasPtr atl;
-
-    if (!TextureAtlasBinder::extract(atp, atl))
-        __PY_CONVERR_RET;
-
-    o->destroyAtlas(atl);
-
-    __PY_NONE_RET;
     __PYTHON_EXCEPTION_GUARD_END_;
 }
 // ------------------------------------------

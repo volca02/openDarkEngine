@@ -34,9 +34,9 @@ namespace Opde {
 /*----------------------------------------------------*/
 /*-------------------- RenderedImage -----------------*/
 /*----------------------------------------------------*/
-RenderedImage::RenderedImage(DrawService *owner, DrawOperation::ID id,
-                             const DrawSourcePtr &ds)
-    : DrawOperation(owner, id), mDrawSource(ds) {
+RenderedImage::RenderedImage(DrawService *owner, const DrawSourcePtr &ds)
+    : DrawOperation(owner), mDrawSource(ds)
+{
     mDrawQuad.texCoords.left = ds->transformX(0);
     mDrawQuad.texCoords.right = ds->transformX(1.0f);
     mDrawQuad.texCoords.top = ds->transformY(0);
