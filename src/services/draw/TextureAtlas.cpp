@@ -50,7 +50,7 @@ TextureAtlas::TextureAtlas(DrawService *owner)
       mAtlasSize(1, 1)
 {
     mAtlasAllocation.reset(new FreeSpaceInfo(64, 64));
-    mAtlasName = "DrawAtlas" + Ogre::StringConverter::toString(mAtlasID);
+    mAtlasName = "DrawAtlas" + std::to_string(std::hash<void*>{}(this));
     mMaterial = Ogre::MaterialManager::getSingleton().create(
         "M_" + mAtlasName,
         Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
@@ -70,7 +70,7 @@ TextureAtlas::TextureAtlas(DrawService *owner)
         false);
     mVertexColour->setSourcePixmapPointer(pixels);
     mVertexColour->updatePixelSizeFromImage();
-    mVertexColour->setSourceID(mAtlasID);
+    mVertexColour->setSource(this);
 
     // register:
     _addDrawSource(mVertexColour);
@@ -108,7 +108,7 @@ DrawSourcePtr TextureAtlas::createDrawSource(const Ogre::String &imgName,
     // First we load the image.
     DrawSourcePtr ds(new DrawSource(mOwner, imgName, groupName, mMaterial));
 
-    ds->setSourceID(mAtlasID);
+    ds->setSource(this);
 
     _addDrawSource(ds);
 

@@ -56,9 +56,6 @@ public:
     /** Removes the specified font from the atlas */
     void _removeFont(FontDrawSource *fdsp);
 
-    /** returns this Atlase's source ID */
-    inline DrawSource::ID getAtlasID() const { return mAtlasID; };
-
     /** Internal tool to allow external addition of draw sources. Used by font
      * code. */
     void _addDrawSource(const DrawSourcePtr &ds);
@@ -87,8 +84,6 @@ protected:
     void dropResources();
 
     DrawService *mOwner;
-
-    DrawSource::ID mAtlasID;
 
     typedef std::list<DrawSourcePtr> DrawSourceList;
     typedef std::list<FontDrawSource *> FontSet;

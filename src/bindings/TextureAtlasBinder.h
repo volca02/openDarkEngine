@@ -48,7 +48,6 @@ public:
 
     // methods:
     static PyObject *createDrawSource(PyObject *self, PyObject *args);
-    static PyObject *getAtlasID(PyObject *self, PyObject *args);
 
     static PyObject *create(const TextureAtlasPtr &ds);
 

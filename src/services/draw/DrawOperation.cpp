@@ -70,7 +70,7 @@ void DrawOperation::_sourceChanged(const DrawSourcePtr &old) {
     }
 
     // Texture didn't change, be sure to invalidate at least
-    if (old->getSourceID() == getDrawSourceBase()->getSourceID()) {
+    if (old->getSource() == getDrawSourceBase()->getSource()) {
         _markDirty();
     }
 }

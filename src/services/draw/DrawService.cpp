@@ -66,7 +66,7 @@ template <> const size_t ServiceImpl<DrawService>::SID = __SERVICE_ID_DRAW;
 
 DrawService::DrawService(ServiceManager *manager, const std::string &name)
     : ServiceImpl<DrawService>(manager, name), mSheetMap(), mActiveSheet(NULL),
-      mDrawSourceID(0), mViewport(NULL), mCurrentPalette(NULL),
+      mViewport(NULL), mCurrentPalette(NULL),
       mWidth(1), mHeight(1) {
 
     mCurrentPalette = sLGPalette;
@@ -578,7 +578,7 @@ DrawSourcePtr DrawService::createDrawSource(const std::string &img,
     mat->load();
 
     // will set up the pixelsize automatically for us
-    DrawSourcePtr ds(new DrawSource(this, mDrawSourceID++, mat, tex));
+    DrawSourcePtr ds(new DrawSource(this, mat, tex));
 
     mDrawSources.push_back(ds);
 

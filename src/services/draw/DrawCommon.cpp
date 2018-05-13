@@ -30,15 +30,15 @@ using Ogre::Vector2;
 
 namespace Opde {
 //------------------------------------------------------
-DrawSourceBase::DrawSourceBase(ID srcID, const Ogre::MaterialPtr &mat,
+DrawSourceBase::DrawSourceBase(const Ogre::MaterialPtr &mat,
                                const Ogre::TexturePtr &tex)
-    : mMaterial(mat), mTexture(tex), mSourceID(srcID) {
+    : mMaterial(mat), mTexture(tex) {
     mPixelSize.width = tex->getWidth();
     mPixelSize.height = tex->getHeight();
 };
 
 //------------------------------------------------------
-DrawSourceBase::DrawSourceBase() : mMaterial(), mTexture(), mSourceID(0) {
+DrawSourceBase::DrawSourceBase() : mMaterial(), mTexture() {
     mMaterial.reset();
     mTexture.reset();
 
@@ -59,9 +59,9 @@ DrawSource::DrawSource(DrawService *owner)
 }
 
 //------------------------------------------------------
-DrawSource::DrawSource(DrawService *owner, ID id, const Ogre::MaterialPtr &mat,
+DrawSource::DrawSource(DrawService *owner, const Ogre::MaterialPtr &mat,
                        const Ogre::TexturePtr &tex)
-    : DrawSourceBase(id, mat, tex), mAtlassed(false), mImageLoaded(false),
+    : DrawSourceBase(mat, tex), mAtlassed(false), mImageLoaded(false),
       mOwner(owner), mPixmap(NULL) {
     mImage = new Ogre::Image();
 }

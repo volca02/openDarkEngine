@@ -126,7 +126,7 @@ protected:
     DrawBuffer *getBufferForOperation(DrawOperation *drawOp,
                                       bool autoCreate = false);
 
-    DrawBuffer *getBufferForSourceID(DrawSourceBase::ID id);
+    DrawBuffer *getBufferForSource(DrawSourceBase *src);
 
     /// this does the rendering - updates the render queue with the buffers to
     /// display

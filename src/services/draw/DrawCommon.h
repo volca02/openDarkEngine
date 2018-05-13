@@ -242,12 +242,8 @@ class DrawSource;
 // A base rendering source info - material and texture
 class DrawSourceBase {
 public:
-    /// Draw source image ID. Atlased draw sources have the same ID. It is used
-    /// to organize buffers.
-    typedef size_t ID;
-
     /// Constructor
-    DrawSourceBase(ID srcID, const Ogre::MaterialPtr &mat,
+    DrawSourceBase(const Ogre::MaterialPtr &mat,
                    const Ogre::TexturePtr &tex);
 
     /// NULL-setting constructor
@@ -259,11 +255,12 @@ public:
     /// Texture getter
     inline Ogre::TexturePtr getTexture() const { return mTexture; };
 
-    /// Source (texture id) getter
-    inline ID getSourceID() const { return mSourceID; };
+    // TODO: Deprecate these!
+    /// Source (texture) getter
+    inline DrawSourceBase *getSource() const { return mSource; };
 
-    /// Source (texture id) setter
-    inline void setSourceID(ID id) { mSourceID = id; };
+    /// Source (texture) setter
+    inline void setSource(DrawSourceBase *src) { mSource = src; };
 
     /// Returns a vector of width and height
     inline Ogre::Vector2 getPixelSizeVector() {
@@ -282,8 +279,9 @@ protected:
     /// Texture used for rendering of this DrawSourceBase
     Ogre::TexturePtr mTexture;
 
-    /// Identifies the texture id (image id).
-    ID mSourceID;
+    // TODO: Resolve logic around this
+    /// Source ptr
+    DrawSourceBase *mSource = nullptr;
 
     /// size in pixels of the DrawSource
     PixelSize mPixelSize;
@@ -300,7 +298,7 @@ public:
     DrawSource(DrawService *owner, const Ogre::String &name,
                const Ogre::String &group, const Ogre::MaterialPtr &extMaterial);
 
-    DrawSource(DrawService *owner, ID id, const Ogre::MaterialPtr &mat,
+    DrawSource(DrawService *owner, const Ogre::MaterialPtr &mat,
                const Ogre::TexturePtr &tex);
 
     virtual ~DrawSource();

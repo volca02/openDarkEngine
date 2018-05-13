@@ -253,7 +253,6 @@ protected:
 private:
     SheetMap mSheetMap;
     DrawSheetPtr mActiveSheet;
-    DrawSource::ID mDrawSourceID; // draw sources in atlas have the same ID
     DrawOperations mDrawOperations;
     ResourceDrawSourceMap mResourceMap;
 

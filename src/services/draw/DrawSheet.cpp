@@ -90,12 +90,12 @@ void DrawSheet::removeDrawOperation(DrawOperation *toRemove) {
 
 //------------------------------------------------------
 void DrawSheet::_sourceChanged(DrawOperation *op, const DrawSourcePtr &oldsrc) {
-    DrawSourceBase::ID oldID = oldsrc->getSourceID();
-    DrawSourceBase::ID newID = op->getDrawSourceBase()->getSourceID();
+    auto oldID = oldsrc->getSource();
+    auto newID = op->getDrawSourceBase()->getSource();
 
     if (oldID != newID) {
-        DrawBuffer *dbo = getBufferForSourceID(oldID);
-        DrawBuffer *dbn = getBufferForSourceID(newID);
+        DrawBuffer *dbo = getBufferForSource(oldID);
+        DrawBuffer *dbn = getBufferForSource(newID);
 
         // remove from the old buffer
         // add into the new one
@@ -134,7 +134,7 @@ DrawBuffer *DrawSheet::getBufferForOperation(DrawOperation *drawOp,
     DrawSourceBasePtr dsb = drawOp->getDrawSourceBase();
 
     // todf
-    DrawBuffer *db = getBufferForSourceID(dsb->getSourceID());
+    DrawBuffer *db = getBufferForSource(dsb->getSource());
 
     if (db) // if found, return
         return db;
@@ -143,7 +143,7 @@ DrawBuffer *DrawSheet::getBufferForOperation(DrawOperation *drawOp,
     if (autoCreate) {
         const Ogre::MaterialPtr &mp = dsb->getMaterial();
         DrawBuffer *db = new DrawBuffer(mp);
-        mDrawBufferMap[dsb->getSourceID()].reset(db);
+        mDrawBufferMap[dsb->getSource()].reset(db);
         return db;
     } else {
         return NULL; // nope, just return null
@@ -151,7 +151,7 @@ DrawBuffer *DrawSheet::getBufferForOperation(DrawOperation *drawOp,
 }
 
 //------------------------------------------------------
-DrawBuffer *DrawSheet::getBufferForSourceID(DrawSourceBase::ID id) {
+DrawBuffer *DrawSheet::getBufferForSource(DrawSourceBase *id) {
     DrawBufferMap::iterator it = mDrawBufferMap.find(id);
 
     if (it != mDrawBufferMap.end()) {

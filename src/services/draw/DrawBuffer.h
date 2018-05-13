@@ -129,7 +129,7 @@ protected:
 
 /// Draw buffer map for all render op. combinations (indexed with texture source
 /// ID)
-typedef std::map<DrawSource::ID, std::unique_ptr<DrawBuffer>> DrawBufferMap;
+typedef std::map<DrawSourceBase *, std::unique_ptr<DrawBuffer>> DrawBufferMap;
 } // namespace Opde
 
 #endif

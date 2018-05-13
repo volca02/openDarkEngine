@@ -70,7 +70,6 @@ PyTypeObject TextureAtlasBinder::msType = {
 // ------------------------------------------
 PyMethodDef TextureAtlasBinder::msMethods[] = {
     {"createDrawSource", createDrawSource, METH_VARARGS},
-    {"getAtlasID", getAtlasID, METH_NOARGS},
     {NULL, NULL}};
 
 // ------------------------------------------
@@ -96,20 +95,6 @@ PyObject *TextureAtlasBinder::createDrawSource(PyObject *self, PyObject *args) {
         PyErr_SetString(PyExc_TypeError, "Expected two string arguments!");
         return NULL;
     }
-
-    __PYTHON_EXCEPTION_GUARD_END_;
-}
-
-// ------------------------------------------
-PyObject *TextureAtlasBinder::getAtlasID(PyObject *self, PyObject *args) {
-    __PYTHON_EXCEPTION_GUARD_BEGIN_;
-
-    TextureAtlasPtr o;
-
-    if (!python_cast<TextureAtlasPtr>(self, &msType, &o))
-        __PY_CONVERR_RET;
-
-    return TypeInfo<int>::toPyObject(o->getAtlasID());
 
     __PYTHON_EXCEPTION_GUARD_END_;
 }
