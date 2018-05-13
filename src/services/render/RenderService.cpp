@@ -53,11 +53,12 @@
 #include "ServiceCommon.h"
 #include "config/ConfigService.h"
 #include "format.h"
+#include "input/InputService.h"
 #include "logger.h"
 #include "loop/LoopService.h"
 #include "object/ObjectService.h"
 #include "property/PropertyService.h"
-#include "input/InputService.h"
+#include "player/PlayerService.h"
 
 #include "HasRefsProperty.h"
 #include "ModelNameProperty.h"
@@ -406,6 +407,18 @@ void RenderService::bootstrapFinished() {
     // masks. So we can register as a link service listener
     LOG_INFO("RenderService::bootstrapFinished()");
 
+    // TODO: Temporary stuff to get the camera ready
+    mSceneMgr->clearSpecialCaseRenderQueues();
+    mSceneMgr->setSpecialCaseRenderQueueMode(Ogre::SceneManager::SCRQM_EXCLUDE);
+    Ogre::ViewPoint vp = mSceneMgr->getSuggestedViewpoint(true);
+    mDefaultCamera->pitch(Ogre::Degree(90));
+    mDefaultCamera->rotate(vp.orientation);
+    mDefaultCamera->setFixedYawAxis(true, Vector3::UNIT_Z);
+    mDefaultCamera->setNearClipDistance(0.5);
+    mDefaultCamera->setFarClipDistance(4000);
+    mDefaultCamera->setFOVy(Ogre::Degree(60)); //  * mCamera->getAspectRatio()
+
+
     // create the properties the render service uses (built-in)
     createProperties();
 
@@ -463,26 +476,51 @@ void RenderService::bootstrapFinished() {
     mInputService->registerCommandTrap("debug_camera",
                                    [&](const InputEventMsg &msg) {
                                        mDebugCameraActive = !mDebugCameraActive;
+                                       if (mDebugCameraActive) {
+                                           mInputService->processCommands(
+                                               "context debug_camera");
+                                       } else {
+                                           mInputService->processCommands(
+                                               "context default");
+                                       }
                                    });
+
+    mInputService->registerCommandTrap(
+        "debug_camera_to_spawn", [&](const InputEventMsg &msg) {
+            // resets the camera position
+            auto playerSrv = GET_SERVICE(PlayerService);
+            int spawn = playerSrv->getStartingPointObjID();
+
+            PropertyServicePtr ps = GET_SERVICE(PropertyService);
+            Property *posPG = ps->getProperty("Position");
+            Variant spos;
+            posPG->get(spawn, "position", spos);
+            mDefaultCamera->setPosition(spos.toVector());
+        });
 
     // bind camera operations to common keys in debug_camera context
     mInputService->createBindContext("debug_camera");
 
     mInputService->registerCommandAlias("debug_forward", "debug_fwd 1.0");
     mInputService->registerCommandAlias("debug_backward", "debug_fwd -1.0");
+    mInputService->registerCommandAlias("debug_slow_forward", "debug_fwd 0.2");
+    mInputService->registerCommandAlias("debug_slow_backward", "debug_fwd -0.2");
     mInputService->registerCommandAlias("debug_left", "debug_sidestep 1.0");
     mInputService->registerCommandAlias("debug_right", "debug_sidestep -1.0");
 
     mInputService->processCommands(
         "debug_camera bind w +debug_forward",
         "debug_camera bind s +debug_backward",
+        "debug_camera bind q +debug_slow_forward",
+        "debug_camera bind e +debug_slow_backward",
         "debug_camera bind a +debug_left", "debug_camera bind d +debug_right",
         "debug_camera bind mouse_axisx debug_mturn",
         "debug_camera bind mouse_axisy debug_mlook",
+        // teleport to spawn
+        "debug_camera bind p debug_camera_to_spawn",
         // a way to switch to debug_camera context and back
-        "debug_camera bind ] \"context default\"",
-        "debug_camera bind esc \"context default\"",
-        "default bind ] \"context debug_camera\"");
+        "debug_camera bind esc exit",
+        "default bind ] debug_camera");
 
     LOG_INFO("RenderService::bootstrapFinished() - done");
 }
@@ -490,8 +528,9 @@ void RenderService::bootstrapFinished() {
 // --------------------------------------------------------------------------
 void RenderService::loopStep(float deltaTime) {
     if (mDebugCameraActive) {
-        float moveScale = deltaTime / 1000000.0f;
-        float rotScale  = deltaTime / 1000000.0f;
+        // TODO: Why do we need to make the scale negative here?
+        float moveScale = -deltaTime / 20.0f;
+        float rotScale  = -deltaTime / 20.0f;
 
         Vector3 translateVector(mDebugSidestep * moveScale,
                                 0,
@@ -500,6 +539,9 @@ void RenderService::loopStep(float deltaTime) {
         mDefaultCamera->yaw(Ogre::Degree(mDebugTurn * rotScale));
         mDefaultCamera->pitch(Ogre::Degree(mDebugLook * rotScale));
         mDefaultCamera->moveRelative(translateVector);
+
+        mDebugTurn = 0;
+        mDebugLook = 0;
     }
 
     // Rendering step...
