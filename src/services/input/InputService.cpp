@@ -679,6 +679,8 @@ void InputService::processKeyEvent(SDL_Keycode keyCode, unsigned int modifiers,
         return;
     }
 
+    // TODO: shift modifier seems not to work. Inspect
+
     InputEventMsg msg;
     std::pair<string, string> split = splitCommand(command);
 
@@ -835,8 +837,17 @@ void InputService::unregisterCommandTrap(const std::string &command) {
 void InputService::registerCommandAlias(const std::string &alias,
                                         const std::string &command)
 {
+    // parse the command beforehand. Separate the command and the parameter
+    // the parameter then gets multiplied in the callback
+    auto cp = splitCommand(command);
+    Variant rate(cp.second);
+
     registerCommandTrap(alias, [=](const InputEventMsg &msg) {
-                                   processCommand(command);
+                                   InputEventMsg trans(msg);
+                                   trans.command = cp.first;
+                                   trans.params =
+                                       trans.params.toFloat() * rate.toFloat();
+                                   callCommandTrap(trans);
                                });
 }
 
