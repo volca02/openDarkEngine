@@ -23,6 +23,7 @@
 
 #include <OgreRoot.h>
 #include <OgreTimer.h>
+#include <SDL2/SDL_timer.h>
 
 #include "LoopService.h"
 #include "OpdeException.h"
@@ -302,6 +303,13 @@ void LoopService::run() {
                 mLastFrameLength);
         }
         mLastFrameTime = lFrameStart;
+
+        // NOTE: Hacky. Should be handled via config vars, at least.
+        // if we're too fast, limit ourselves to ~300 FPS
+        if (mLastFrameLength < 3333) {
+            // coarse sleep, we don't have microsecond sleep here...
+            SDL_Delay((3333 - mLastFrameLength) / 1000);
+        }
     }
 
     if (mActiveMode) {
