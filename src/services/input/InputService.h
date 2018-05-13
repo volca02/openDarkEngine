@@ -80,15 +80,26 @@ public:
     bool loadBNDFile(const std::string &filename);
 
     /// Adds a command to the pool
-    Variant processCommand(const std::string &CommandString);
+    Variant processCommand(const std::string &commandString);
+
+    void processCommands(const std::string &commandString) {
+        processCommand(commandString);
+    }
+
+    /// Runs 2 or more specified commands via processCommand
+    template<typename...Args>
+    void processCommands(const std::string &c, Args... rest) {
+        processCommand(c);
+        processCommands(rest...);
+    }
 
     /// TODO:	void saveBNDFile(const std::string& filename);
 
     /// Declares a variable. Returns a reference to it
     Variant &createVariable(const std::string &var, const Variant &d_val);
 
-        /// Variable getter (for mouse senitivity, etc)
-        Variant &getVariable(const std::string &var);
+    /// Variable getter (for mouse senitivity, etc)
+    Variant &getVariable(const std::string &var);
     const Variant &getVariable(const std::string &var) const;
 
     /// Variable setter (for mouse senitivity, etc)
@@ -168,6 +179,9 @@ protected:
     /// Processes joystick or mouse event (axis movement, etc)
     void processMouseEvent(unsigned int Id, InputEventType Event);
 
+    /// Processes mouse movement event
+    void processMouseMovement(int xrel, int yrel);
+
     // ---- input events ----
     bool keyPressed(const SDL_KeyboardEvent &e);
     bool keyReleased(const SDL_KeyboardEvent &e);
@@ -226,7 +240,7 @@ protected:
 
     /// Current mapper
     InputEventMapper *mCurrentMapper;
-    InputEventMapper *mDefaultMapper;
+    std::unique_ptr<InputEventMapper> mDefaultMapper;
 
     /// Current input mode
     InputMode mInputMode;

@@ -59,15 +59,14 @@ InputService::InputService(ServiceManager *manager, const std::string &name)
     mLoopClientDef.priority = LOOPCLIENT_PRIORITY_INPUT;
     mLoopClientDef.name = mName;
 
-    mDefaultMapper = new InputEventMapper(this, "-DEFAULT-");
-    mCurrentMapper = mDefaultMapper;
+    mDefaultMapper.reset(new InputEventMapper(this, "default"));
+    mCurrentMapper = mDefaultMapper.get();
 }
 
 //------------------------------------------------------
 InputService::~InputService() {
     mMappers.clear();
-    delete mDefaultMapper;
-    mDefaultMapper = NULL;
+    mDefaultMapper.reset();
     mCurrentMapper = NULL;
 
     if (mLoopService)
@@ -266,7 +265,7 @@ void InputService::addBinding(const std::string &keys,
         mapper = mCurrentMapper;
 
     if (!mapper)
-        mapper = mDefaultMapper;
+        mapper = mDefaultMapper.get();
 
     assert(mapper);
 
@@ -333,7 +332,9 @@ Variant InputService::processCommand(const std::string &commandStr) {
         }
     }
 
-    if (command == "bind") {
+    if (command == "context") {
+        setBindContext(tok.next());
+    } if (command == "bind") {
         if (mpr == NULL)
             mpr = mCurrentMapper;
 
@@ -500,12 +501,21 @@ void InputService::processKeyRepeat(float deltaTime) {
 
 //------------------------------------------------------
 void InputService::setBindContext(const std::string &context) {
+    // default context is hardcoded
+    if (context == "default") {
+        mCurrentMapper = mDefaultMapper.get();
+        LOG_INFO("InputService::setBindContext: Switched to default context");
+        return;
+    }
+
     InputEventMapper *iemp = findMapperForContext(context);
 
-    if (iemp)
+    if (iemp) {
+        LOG_INFO("InputService::setBindContext: Switched to default %s",
+                 context.c_str());
         mCurrentMapper = iemp;
-    else {
-        mCurrentMapper = mDefaultMapper;
+    } else {
+        mCurrentMapper = mDefaultMapper.get();
         LOG_ERROR("InputService::setBindContext: invalid context specified: "
                   "'%s', setting default context",
                   context.c_str());
@@ -556,6 +566,9 @@ std::string InputService::fillVariables(const std::string &src) const {
 
 //------------------------------------------------------
 InputEventMapper *InputService::findMapperForContext(const std::string &ctx) {
+    if (ctx == "default")
+        return mDefaultMapper.get();
+
     ContextToMapper::const_iterator it = mMappers.find(ctx);
 
     if (it != mMappers.end())
@@ -737,6 +750,43 @@ void InputService::processMouseEvent(unsigned int id, InputEventType event) {
     }
 
     callCommandTrap(msg);
+}
+
+//------------------------------------------------------
+void InputService::processMouseMovement(int xrel, int yrel) {
+    // send for both X and Y if they are nonzero
+    if (mInputMode == IM_DIRECT)
+        return;
+
+    if (!mCurrentMapper) {
+        LOG_ERROR("InputService::processKeyEvent: Mapped input, but no mapper "
+                  "set for the current state!");
+        return;
+    }
+
+    // unmap xrel if nonzero
+    if (xrel) {
+        std::string command;
+        if (!mCurrentMapper->unmapEvent(MOUSE_AXISX, command))
+            return;
+
+        InputEventMsg msg;
+        msg.event = IET_MOUSE_MOVE;
+        msg.command = command;
+        msg.params = xrel;
+        callCommandTrap(msg);
+    }
+
+    if (yrel) {
+        std::string command;
+        if (!mCurrentMapper->unmapEvent(MOUSE_AXISY, command))
+            return;
+        InputEventMsg msg;
+        msg.event = IET_MOUSE_MOVE;
+        msg.command = command;
+        msg.params = yrel;
+        callCommandTrap(msg);
+    }
 }
 
 //------------------------------------------------------
@@ -933,7 +983,7 @@ bool InputService::mouseMoved(const SDL_MouseMotionEvent &e) {
         if (mDirectListener) // direct event, dispatch to the current listener
             return mDirectListener->mouseMoved(e);
     } else {
-        // TODO: dispatch the mouse movement using the mapper (axisx or axisy)
+        processMouseMovement(e.xrel, e.yrel);
     }
 
     return false;

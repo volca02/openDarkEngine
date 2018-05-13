@@ -57,6 +57,7 @@
 #include "loop/LoopService.h"
 #include "object/ObjectService.h"
 #include "property/PropertyService.h"
+#include "input/InputService.h"
 
 #include "HasRefsProperty.h"
 #include "ModelNameProperty.h"
@@ -432,11 +433,68 @@ void RenderService::bootstrapFinished() {
 
     mObjSystemListenerID = mObjectService->registerListener(objlist);
 
+    // ==== INPUT SERVICE - Debug camera controls ====
+    mInputService = GET_SERVICE(InputService);
+
+    // Forward/Backward keypress
+    mInputService->registerCommandTrap("debug_forward",
+                                   [&](const InputEventMsg &msg) {
+                                       mDebugForward = msg.params.toFloat();
+                                   });
+
+    mInputService->registerCommandTrap(
+        "debug_sidestep", [&](const InputEventMsg &msg) {
+            mDebugSidestep = msg.params.toFloat();
+        });
+
+    // camera rotation
+    mInputService->registerCommandTrap("debug_mturn",
+                                   [&](const InputEventMsg &msg) {
+                                       if (msg.event == IET_MOUSE_MOVE)
+                                           mDebugTurn += msg.params.toFloat();
+                                   });
+
+    mInputService->registerCommandTrap("debug_mlook",
+                                   [&](const InputEventMsg &msg) {
+                                       if (msg.event == IET_MOUSE_MOVE)
+                                           mDebugLook += msg.params.toFloat();
+                                   });
+
+    mInputService->registerCommandTrap("debug_camera",
+                                   [&](const InputEventMsg &msg) {
+                                       mDebugCameraActive = !mDebugCameraActive;
+                                   });
+
+    // bind camera operations to common keys in debug_camera context
+    mInputService->createBindContext("debug_camera");
+    mInputService->processCommands("debug_camera bind w +debug_forward 1.0",
+                               "debug_camera bind s +debug_forward -1.0",
+                               "debug_camera bind a +debug_sidestep -1.0",
+                               "debug_camera bind d +debug_sidestep 1.0",
+                               "debug_camera bind mouse_axisx debug_mturn",
+                               "debug_camera bind mouse_axisy debug_mlook"
+                               // a way to switch to debug_camera context and back
+                               "debug_camera bind ] context default",
+                               "default bind ] context debug_camera");
+
     LOG_INFO("RenderService::bootstrapFinished() - done");
 }
 
 // --------------------------------------------------------------------------
 void RenderService::loopStep(float deltaTime) {
+    if (mDebugCameraActive) {
+        float moveScale = deltaTime / 1000000.0f;
+        float rotScale  = deltaTime / 1000000.0f;
+
+        Vector3 translateVector(mDebugSidestep * moveScale,
+                                0,
+                                mDebugForward * moveScale);
+
+        mDefaultCamera->yaw(Ogre::Degree(mDebugTurn * rotScale));
+        mDefaultCamera->pitch(Ogre::Degree(mDebugLook * rotScale));
+        mDefaultCamera->moveRelative(translateVector);
+    }
+
     // Rendering step...
     mRoot->renderOneFrame();
     Ogre::WindowEventUtilities::messagePump();

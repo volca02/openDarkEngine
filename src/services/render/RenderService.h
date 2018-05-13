@@ -239,6 +239,9 @@ protected:
     ObjectServicePtr mObjectService;
     MessageListenerID mObjSystemListenerID;
 
+    // Input service for debug camera handling
+    InputServicePtr mInputService;
+
     // Database listener handle related (For render params chunk)
     // DatabaseServicePtr mDatabaseService;
 
@@ -268,6 +271,14 @@ protected:
     Ogre::uint8 mDefaultRenderQueue;
 
 private:
+    // Debug camera handling
+    bool mDebugCameraActive = false;
+    float mDebugForward     = 0;
+    float mDebugSidestep    = 0;
+    float mDebugLook        = 0;
+    float mDebugTurn        = 0;
+
+    // Window management
     RenderWindowSize mCurrentSize;
     SDL_Window *mSDLWindow;
 };
