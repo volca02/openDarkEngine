@@ -332,76 +332,21 @@ Variant InputService::processCommand(const std::string &commandStr) {
         }
     }
 
-    if (command == "context") {
-        setBindContext(tok.next());
-    } if (command == "bind") {
-        if (mpr == NULL)
-            mpr = mCurrentMapper;
-
-        std::string keycode;
-
-        if (!tok.pull(keycode)) {
-            LOG_ERROR(
-                "InputService::processCommand: bind command without keycode!");
-            return false;
-        }
-
-        if (!tok.pull(command)) {
-            LOG_ERROR(
-                "InputService::processCommand: bind command without command!");
-            return false;
-        }
-
-        addBinding(keycode, command, mpr);
-        return true;
-    } else if (command == "echo") {
-        return tok.next();
-    } else if (command == "set") {
-        // must have two more tokens
-        std::string var, val;
-
-        if (!tok.pull(var))
-            return false;
-
-        if (!tok.pull(val))
-            return false;
-
-        setVariable(var, val);
-        return true;
-    } else if (command == "help") {
-        // list all commands registered
-        logCommands();
-        return true;
-    } else if (command == "show") {
-        // list all commands registered
-        logVariables();
-        return true;
-    } else if (command == "loadbnd") {
-        // load bnd file
-        loadBNDFile(tok.rest());
-        return true;
-    }
-
     ListenerMap::iterator it = mCommandTraps.find(command);
     if (it != mCommandTraps.end()) {
         InputEventMsg msg;
         msg.command = command;
-        msg.params = tok.next();
+        msg.params = tok.rest(/*eat the leading separator*/true);
         msg.event = IET_COMMAND_CALL;
+        msg.context = mpr;
 
         return callCommandTrap(msg);
     }
 
-    std::string var, val;
-
-    if (!tok.pull(var))
-        return false;
-
-    if (!tok.pull(val))
-        return false;
-
-    setVariable(var, val);
-    return true;
+    // don't know how to process this
+    LOG_ERROR("InputService::processCommand: Don't know how to process '%s'",
+              commandStr.c_str());
+    return false;
 }
 
 //------------------------------------------------------
@@ -458,6 +403,66 @@ bool InputService::init() {
 
     // we want relative SDL mouse mode!
     SDL_SetRelativeMouseMode(SDL_TRUE);
+
+    // default commands are bound
+    registerCommandTrap("bind", [&](const InputEventMsg &msg) {
+        LOG_DEBUG("InputService: bind '%s'", msg.params.toString().c_str());
+        // tokenize the params
+        // toString returns a copy - we have to persist it here for the tokenizer
+        std::string parm = msg.params.toString();
+        WhitespaceStringTokenizer tok(parm, false);
+        std::string keycode;
+        std::string command;
+
+        if (!tok.pull(keycode)) {
+            LOG_ERROR(
+                "InputService:: bind: bind command without keycode!");
+            return;
+        }
+
+        if (!tok.pull(command)) {
+            LOG_ERROR(
+                "InputService:: bind: bind command without command!");
+            return;
+        }
+
+        LOG_DEBUG("InputService: bind '%s' '%s'", keycode.c_str(),
+                  command.c_str());
+
+        addBinding(keycode, command, msg.context);
+    });
+
+    registerCommandTrap("context", [&](const InputEventMsg &msg) {
+        setBindContext(msg.params.toString());
+    });
+
+    registerCommandTrap("set", [&](const InputEventMsg &msg) {
+        WhitespaceStringTokenizer tok(msg.params.toString(), false);
+        std::string var, val;
+
+        if (!tok.pull(var)) {
+            LOG_ERROR("InputService:: set: no var name specified!");
+            return;
+        }
+
+        if (!tok.pull(val)) {
+            LOG_ERROR("InputService:: set: no value specified!");
+            return;
+        }
+
+        if (!tok.end()) {
+            LOG_ERROR("InputService:: set: extra text at end of command");
+            return;
+        }
+
+        setVariable(var, val);
+    });
+
+    registerCommandTrap("help", [&](const InputEventMsg &) { logCommands(); });
+    registerCommandTrap("show", [&](const InputEventMsg &) { logVariables(); });
+    registerCommandTrap("loadbnd", [&](const InputEventMsg &msg) {
+        loadBNDFile(msg.params.toString());
+    });
 
     return true;
 }
@@ -602,8 +607,13 @@ Variant &InputService::createVariable(const std::string &var,
     if (it != mVariables.end())
         OPDE_EXCEPT(format("InputService: duplicit creation of variable ", var));
 
-    return mVariables.emplace(var, d_val).first->second;
+    Variant &var_ref = mVariables.emplace(var, d_val).first->second;
 
+    // bind a command to set the variable
+    registerCommandTrap(var, [&](const InputEventMsg &msg) {
+                                 var_ref = msg.params;
+                             });
+    return var_ref;
 }
 
 //------------------------------------------------------
@@ -670,12 +680,18 @@ void InputService::processKeyEvent(SDL_Keycode keyCode, unsigned int modifiers,
     }
 
     InputEventMsg msg;
-    std::pair<string, string> Split = splitCommand(command);
+    std::pair<string, string> split = splitCommand(command);
 
-    msg.command = Split.first;
-    msg.params = Split.second;
+    msg.params = split.second;
     msg.event = t;
 
+
+    if (command.empty()) {
+        LOG_ERROR("key event %d resulted in empty command", keyCode);
+        return;
+    }
+
+    // TODO: Tidy this
     if (command[0] == '+') {
         if (t == IET_KEYBOARD_PRESS)
             msg.params = 1.0f;
@@ -686,6 +702,7 @@ void InputService::processKeyEvent(SDL_Keycode keyCode, unsigned int modifiers,
             return;
 
         command = command.substr(1);
+        msg.command = split.first.substr(1);
     } else if (command[0] == '-') {
         if (t == IET_KEYBOARD_PRESS)
             msg.params = 0.0f;
@@ -695,15 +712,19 @@ void InputService::processKeyEvent(SDL_Keycode keyCode, unsigned int modifiers,
             // no processing for keyboard hold
             return;
         command = command.substr(1);
+        msg.command = split.first.substr(1);
     } else if (t == IET_KEYBOARD_RELEASE) {
         // no key release for the non-on/off type events
         return;
+    } else {
+        msg.command = split.first;
     }
 
     if (!callCommandTrap(msg)) {
-        LOG_DEBUG("InputService: Key event '%d' (mapped to the command %s) "
-                  "seems to have no trap present",
-                  keyCode, msg.command.c_str());
+        LOG_DEBUG(
+            "InputService: Key event '%d' -> '%s' (mapped to the command '%s') "
+            "seems to have no trap present",
+            keyCode, command.c_str(), msg.command.c_str());
     }
 }
 
@@ -812,8 +833,11 @@ void InputService::unregisterCommandTrap(const std::string &command) {
 
 //------------------------------------------------------
 void InputService::registerCommandAlias(const std::string &alias,
-                                        const std::string &command) {
-    mCommandAliases[alias] = command;
+                                        const std::string &command)
+{
+    registerCommandTrap(alias, [=](const InputEventMsg &msg) {
+                                   processCommand(command);
+                               });
 }
 
 //------------------------------------------------------
@@ -860,30 +884,8 @@ void InputService::pollEvents(float deltaTime) {
 }
 
 //------------------------------------------------------
-bool InputService::dealiasCommand(const std::string &alias,
-                                  std::string &command) {
-    AliasMap::const_iterator it = mCommandAliases.find(alias);
-
-    if (it != mCommandAliases.end()) {
-        command = it->second;
-        return true;
-    }
-
-    return false;
-}
-
-//------------------------------------------------------
 bool InputService::callCommandTrap(InputEventMsg &msg) {
     std::string cmd;
-
-    // see if we found a new candidate
-    if (dealiasCommand(msg.command, cmd)) {
-        std::pair<string, string> split = splitCommand(cmd);
-        msg.command = split.first;
-
-        Variant param(split.second);
-        msg.params = msg.params.as<float>() * param.as<float>();
-    }
 
     ListenerMap::const_iterator it = mCommandTraps.find(msg.command);
 
@@ -916,7 +918,7 @@ InputService::splitCommand(const std::string &cmd) const {
         res.first = stok.next();
 
     if (!stok.end())
-        res.second = stok.rest();
+        res.second = stok.rest(true);
 
     return res;
 }

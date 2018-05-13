@@ -32,6 +32,8 @@ struct SDL_MouseButtonEvent;
 
 namespace Opde {
 
+class InputEventMapper;
+
 /// Input event types
 enum InputEventType {
     IET_KEYBOARD_PRESS,
@@ -97,6 +99,8 @@ struct InputEventMsg {
     std::string command;
     // Parameters of the command
     Variant params;
+    // Optionally the mapping context in which this happened
+    InputEventMapper *context = nullptr;
 } ;
 
 /// The state of input modifiers

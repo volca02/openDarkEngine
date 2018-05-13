@@ -437,10 +437,10 @@ void RenderService::bootstrapFinished() {
     mInputService = GET_SERVICE(InputService);
 
     // Forward/Backward keypress
-    mInputService->registerCommandTrap("debug_forward",
-                                   [&](const InputEventMsg &msg) {
-                                       mDebugForward = msg.params.toFloat();
-                                   });
+    mInputService->registerCommandTrap(
+            "debug_fwd", [&](const InputEventMsg &msg) {
+                mDebugForward = msg.params.toFloat();
+            });
 
     mInputService->registerCommandTrap(
         "debug_sidestep", [&](const InputEventMsg &msg) {
@@ -467,15 +467,22 @@ void RenderService::bootstrapFinished() {
 
     // bind camera operations to common keys in debug_camera context
     mInputService->createBindContext("debug_camera");
-    mInputService->processCommands("debug_camera bind w +debug_forward 1.0",
-                               "debug_camera bind s +debug_forward -1.0",
-                               "debug_camera bind a +debug_sidestep -1.0",
-                               "debug_camera bind d +debug_sidestep 1.0",
-                               "debug_camera bind mouse_axisx debug_mturn",
-                               "debug_camera bind mouse_axisy debug_mlook"
-                               // a way to switch to debug_camera context and back
-                               "debug_camera bind ] context default",
-                               "default bind ] context debug_camera");
+
+    mInputService->registerCommandAlias("debug_forward", "debug_fwd 1.0");
+    mInputService->registerCommandAlias("debug_backward", "debug_fwd -1.0");
+    mInputService->registerCommandAlias("debug_left", "debug_sidestep 1.0");
+    mInputService->registerCommandAlias("debug_right", "debug_sidestep -1.0");
+
+    mInputService->processCommands(
+        "debug_camera bind w +debug_forward",
+        "debug_camera bind s +debug_backward",
+        "debug_camera bind a +debug_left", "debug_camera bind d +debug_right",
+        "debug_camera bind mouse_axisx debug_mturn",
+        "debug_camera bind mouse_axisy debug_mlook",
+        // a way to switch to debug_camera context and back
+        "debug_camera bind ] \"context default\"",
+        "debug_camera bind esc \"context default\"",
+        "default bind ] \"context debug_camera\"");
 
     LOG_INFO("RenderService::bootstrapFinished() - done");
 }

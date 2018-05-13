@@ -152,7 +152,6 @@ protected:
     void registerValidKey(int kc, const std::string &txt);
 
     /** Calls a trap for a command
-     * @warning Modifies the msg parameter upon dealiasing
      * @returns true if the command was found, false otherwise
      */
     bool callCommandTrap(InputEventMsg &msg);
@@ -200,14 +199,6 @@ protected:
     void addBinding(const std::string &keys, const std::string &command,
                     InputEventMapper *mapper);
 
-    /** Gives a command found for the given alias, if any
-     * @param alias The aliased command
-     * @param command the string that gets filled with the dealiased version of
-     * the command
-     * @return true if the alias was found and command was dealiased
-     */
-    bool dealiasCommand(const std::string &alias, std::string &command);
-
     /// Named context to an event mapper map
     typedef std::map<std::string, std::unique_ptr<InputEventMapper>> ContextToMapper;
 
@@ -222,9 +213,6 @@ protected:
 
     /// map of command text to the handling listener
     typedef std::map<std::string, Listener> ListenerMap;
-
-    /// string variable name to dealiased value
-    typedef std::map<std::string, std::string> AliasMap;
 
     /// map of the context name to the mapper
     ContextToMapper mMappers;
@@ -278,9 +266,6 @@ protected:
 
     /// Non-exclusive input
     bool mNonExclusive;
-
-    /// Aliases to commands
-    AliasMap mCommandAliases;
 };
 
 /// Shared pointer to input service
