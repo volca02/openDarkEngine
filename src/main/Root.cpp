@@ -295,6 +295,12 @@ void Root::logToFile(const std::string &fname) {
 }
 
 // -------------------------------------------------------
+void Root::logToStderr() {
+    mLogListeners.emplace_back(new StdLog());
+    mLogger->registerLogListener(mLogListeners.back().get());
+}
+
+// -------------------------------------------------------
 void Root::setLogLevel(int level) {
     // Call mLogger to setup the log level
     mLogger->setLogLevel(level);

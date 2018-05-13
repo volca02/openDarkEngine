@@ -46,6 +46,7 @@ void run(const std::string &config_name, std::string mission) {
     // logging setup
     root.logToFile("opde.log");
     root.setLogLevel(4);
+    root.logToStderr();
 
     // NOTE: Temporary override to get local files loading
     // could be resolved by looking if the config contains path

@@ -94,6 +94,10 @@ public:
      * automatically destroyed on termination) */
     void logToFile(const std::string &fname);
 
+    /** Creates a new logger instance that logs to a file (Logger will be
+     * automatically destroyed on termination) */
+    void logToStderr();
+
     /** A shortcut to set loglevel. Valid values are 0-4 */
     void setLogLevel(int level);
 
