@@ -101,7 +101,7 @@ GamePlayState::GamePlayState() : mSceneMgr(NULL), mToLoadScreen(true) {
     mRoot = Ogre::Root::getSingletonPtr();
     mShadows = true;
 
-    StartingPointObjID = 0;
+    mStartingPointObjID = 0;
 }
 
 GamePlayState::~GamePlayState() {
@@ -119,20 +119,20 @@ void GamePlayState::start() {
     if (posPG == NULL)
         OPDE_EXCEPT("Could not get Position property. Not defined. Fatal");
 
-    LOG_DEBUG("Starting Point object id : %d", StartingPointObjID);
+    LOG_DEBUG("Starting Point object id : %d", mStartingPointObjID);
 
     Variant spoint;
-    posPG->get(StartingPointObjID, "position", spoint);
+    posPG->get(mStartingPointObjID, "position", spoint);
 
     // Medsci1.mis position with some damn bad performance under GL
-    // Vector3 StartingPoint(-8.41809, -163.39, 1.3465);
-    Vector3 StartingPoint(0, 0, 0);
+    // Vector3 startingPoint(-8.41809, -163.39, 1.3465);
+    Vector3 startingPoint(0, 0, 0);
 
     if (spoint.type() == Variant::DV_VECTOR)
-        StartingPoint = spoint.toVector();
+        startingPoint = spoint.toVector();
 
-    LOG_DEBUG("Starting Point position : %f %f %f", StartingPoint.x,
-              StartingPoint.y, StartingPoint.z);
+    LOG_DEBUG("Starting Point position : %f %f %f", startingPoint.x,
+              startingPoint.y, startingPoint.z);
 
     mSceneMgr = mRoot->getSceneManager("DarkSceneManager");
     RenderServicePtr renderSrv = GET_SERVICE(RenderService);
@@ -151,8 +151,8 @@ void GamePlayState::start() {
     ViewPoint vp = mSceneMgr->getSuggestedViewpoint(true);
     mCamera->setPosition(vp.position);
 
-    if (StartingPointObjID != 0)
-        mCamera->setPosition(StartingPoint);
+    if (mStartingPointObjID != 0)
+        mCamera->setPosition(startingPoint);
 
     mCamera->pitch(Degree(90));
     mCamera->rotate(vp.orientation);
@@ -349,10 +349,10 @@ void GamePlayState::commandExecuted(std::string command,
 
 void GamePlayState::onLinkPlayerFactoryMsg(const LinkChangeMsg &msg) {
     if (msg.change == LNK_ADDED) {
-        LOG_INFO("GamePlayState: Found StartingPoint");
+        LOG_INFO("GamePlayState: Found startingPoint");
         // get the Link ref.
         const Link *l = mPlayerFactoryRelation->getLink(msg.linkID);
-        StartingPointObjID = l->src();
+        mStartingPointObjID = l->src();
     }
 }
 

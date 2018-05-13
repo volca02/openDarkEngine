@@ -120,7 +120,7 @@ private:
     RelationPtr mPlayerFactoryRelation;
     /// Handle to the link service
     LinkServicePtr mLinkService;
-    int StartingPointObjID;
+    int mStartingPointObjID;
     /// Link (Relation player factory) listener registration ID
     MessageListenerID mPlayerFactoryListenerID;
 
