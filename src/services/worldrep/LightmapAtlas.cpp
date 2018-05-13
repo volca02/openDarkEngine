@@ -129,16 +129,6 @@ bool LightAtlas::placeLightMap(LightMap *lmap) {
     if (area == NULL)
         return false;
 
-    // calculate some important UV conversion data
-    // +0.5? to display only the inner transition of lmap texture, the outer
-    // goes to black color
-    lmap->mUV.x = ((float)area->posX()) / (float)mFreeSpace->width();
-    lmap->mUV.y = ((float)area->posY()) / (float)mFreeSpace->height();
-
-    // size conversion to atlas coords
-    lmap->mSizeUV.x = ((float)dim.first) / (float)mFreeSpace->width();
-    lmap->mSizeUV.y = ((float)dim.second) / (float)mFreeSpace->height();
-
     lmap->setPlacement(this, area);
 
     // finally increment the count of stored lightmaps
@@ -551,4 +541,20 @@ void LightMap::setPlacement(LightAtlas *_owner, FreeSpaceInfo *tgt) {
 std::pair<int, int> LightMap::getDimensions() const {
     return std::pair<int, int>(mSizeX, mSizeY);
 }
+
+Ogre::Vector2 LightMap::toAtlasCoords(Ogre::Vector2 in_uv) {
+    auto idim = mOwner->getDimensions();
+
+    Ogre::Vector2 dims{idim.first, idim.second};
+
+    Ogre::Vector2 shrink{(float)mPosition->width() / dims.x,
+            (float)mPosition->height() / dims.y};
+    Ogre::Vector2 shift{mPosition->posX() / dims.x, mPosition->posY() / dims.y};
+
+    in_uv = in_uv * shrink;
+    in_uv += shift;
+
+    return in_uv;
+}
+
 } // namespace Opde

@@ -107,12 +107,6 @@ class LightMap {
     /** Atlas holding the lightmap */
     LightAtlas *mOwner;
 
-    /** Repositioning from 0-1 to the Atlas coords */
-    Ogre::Vector2 mUV;
-
-    /** Size of the lmap in the atlas*/
-    Ogre::Vector2 mSizeUV;
-
     /** Lightmap's tag value */
     int mTag;
 
@@ -148,13 +142,7 @@ public:
 
     /** Converts input UV coords to the Atlassed coords (after UV
      * transformation) */
-    Ogre::Vector2 toAtlasCoords(Ogre::Vector2 in_uv) {
-        in_uv = in_uv * mSizeUV; // dunno why, this one does not work written
-                                 // in_uv *= mSizeUV;
-        in_uv += mUV;
-
-        return in_uv;
-    }
+    Ogre::Vector2 toAtlasCoords(Ogre::Vector2 in_uv);
 
     /** Helping static method. Prepares an RGB version of the given buffer
      * containing v1 or v2 lightmap
