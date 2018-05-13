@@ -142,7 +142,7 @@ void SimService::registerListener(SimListener *listener, size_t priority) {
 
 //------------------------------------------------------
 void SimService::unregisterListener(SimListener *listener) {
-    SimListeners::iterator it;
+    SimListeners::iterator it = mSimListeners.begin();
 
     while (it != mSimListeners.end()) {
         if (it->second == listener) {
