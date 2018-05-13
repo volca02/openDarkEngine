@@ -182,7 +182,12 @@ public:
     bool end() const { return mCurPos == mStr.end(); };
 
     /// Returns the rest of the string
-    std::string rest() { return std::string(mCurPos, mStr.end()); }
+    std::string rest(bool eatLWS = false) {
+        if (eatLWS) {
+            for (;mCurPos != mStr.end() && mIsSpaceP(*mCurPos); ++mCurPos);
+        }
+        return std::string(mCurPos, mStr.end());
+    }
 
     /** Pulls one string into the target
      * @param target The string to be filled with next token
