@@ -23,10 +23,11 @@
 
 #include <functional>
 
-#include "PlayerService.h"
 #include "OpdeServiceManager.h"
+#include "PlayerService.h"
 #include "input/InputService.h"
 #include "link/LinkService.h"
+#include "link/Relation.h"
 #include "logger.h"
 #include "object/ObjectService.h"
 #include "physics/PhysicsService.h"
@@ -43,8 +44,13 @@ namespace Opde {
 template <> const size_t ServiceImpl<PlayerService>::SID = __SERVICE_ID_PLAYER;
 
 PlayerService::PlayerService(ServiceManager *manager, const std::string &name)
-    : ServiceImpl<PlayerService>(manager, name), mForwardMovement(0.0f),
-      mSideMovement(0.0f), mCreepOn(false) {}
+    : ServiceImpl<PlayerService>(manager, name),
+      mStartingPointObjID(0),
+      mForwardMovement(0.0f),
+      mSideMovement(0.0f),
+      mCreepOn(false)
+{
+}
 
 //------------------------------------------------------
 PlayerService::~PlayerService() {}
@@ -72,14 +78,26 @@ void PlayerService::bootstrapFinished() {
     mPlayerFactoryRelation =
         mLinkSrv->createRelation("PlayerFactory", DataStoragePtr(NULL), false);
 
-    using std::placeholders::_1;
+    // we have to listen to link events on player factory relation to get star
+    // object id
+    Relation::ListenerPtr metaPropCallback(
+        new ClassCallback<LinkChangeMsg, PlayerService>(
+            this, &PlayerService::onLinkPlayerFactoryMsg));
+    mPlayerFactoryListenerID =
+        mPlayerFactoryRelation->registerListener(metaPropCallback);
 
-    mInputSrv->registerCommandTrap(
-        "forward", std::bind(&PlayerService::onInputForward, this, _1));
-    mInputSrv->registerCommandTrap(
-        "sidestep", std::bind(&PlayerService::onInputSidestep, this, _1));
-    mInputSrv->registerCommandTrap(
-        "creepon", std::bind(&PlayerService::onInputCreepOn, this, _1));
+    // Forward/Backward keypress
+    mInputSrv->registerCommandTrap("forward", [&](const InputEventMsg &msg) {
+        mForwardMovement = msg.params.toFloat();
+    });
+
+    mInputSrv->registerCommandTrap("sidestep", [&](const InputEventMsg &msg) {
+        mSideMovement = msg.params.toFloat();
+    });
+
+    mInputSrv->registerCommandTrap("creepon", [&](const InputEventMsg &msg) {
+        mCreepOn = msg.params.toBool();
+    });
 
     // TODO: zlook, turn (maybe into the camera service...)
 
@@ -138,32 +156,17 @@ void PlayerService::bootstrapFinished() {
 
 //------------------------------------------------------
 void PlayerService::shutdown() {
-    mInputSrv->unregisterCommandTrap("forward");
-    mInputSrv->unregisterCommandTrap("sidestep");
-    mInputSrv->unregisterCommandTrap("creepon");
+    if (mInputSrv) {
+        mInputSrv->unregisterCommandTrap("forward");
+        mInputSrv->unregisterCommandTrap("sidestep");
+        mInputSrv->unregisterCommandTrap("creepon");
+    }
 
     mObjSrv.reset();
     mInputSrv.reset();
     mLinkSrv.reset();
     mPhysSrv.reset();
     mSimSrv.reset();
-}
-
-//------------------------------------------------------
-void PlayerService::onInputForward(const InputEventMsg &msg) {
-    // TODO: Hmm. Original dark posts +value on keyon, -value on keyoff. This
-    // allows key combinations
-    mForwardMovement = msg.params.toFloat();
-}
-
-//------------------------------------------------------
-void PlayerService::onInputSidestep(const InputEventMsg &msg) {
-    mSideMovement = msg.params.toFloat();
-}
-
-//------------------------------------------------------
-void PlayerService::onInputCreepOn(const InputEventMsg &msg) {
-    mCreepOn = msg.params.toBool();
 }
 
 //------------------------------------------------------
@@ -199,6 +202,16 @@ void PlayerService::simStep(float simTime, float delta) {
     // PLAYER_HEAD_SUBMDL);
 
     // mPhysSrv->set
+}
+
+//------------------------------------------------------
+void PlayerService::onLinkPlayerFactoryMsg(const LinkChangeMsg &msg) {
+    if (msg.change == LNK_ADDED) {
+        // get the Link ref.
+        const Link *l = mPlayerFactoryRelation->getLink(msg.linkID);
+        mStartingPointObjID = l->src();
+        LOG_INFO("PlayerService: Found startingPoint %d", mStartingPointObjID);
+    }
 }
 
 //------------------------------------------------------

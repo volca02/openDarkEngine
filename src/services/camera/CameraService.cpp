@@ -45,7 +45,7 @@ template <> const size_t ServiceImpl<CameraService>::SID = __SERVICE_ID_CAMERA;
 
 CameraService::CameraService(ServiceManager *manager, const std::string &name)
     : ServiceImpl<CameraService>(manager, name), mHorizontalRot(0),
-      mVerticalRot(0), mPaused(false), mAttachmentObject(0),
+      mVerticalRot(0), mAttachmentObject(0),
       mDynamicAttach(false) {}
 
 //------------------------------------------------------
@@ -90,18 +90,19 @@ void CameraService::forceCameraReturn() {
 }
 
 //------------------------------------------------------
-void CameraService::simPaused() {
-    // this means we will not apply any rotation
-    mPaused = true;
-}
-
-//------------------------------------------------------
-void CameraService::simUnPaused() { mPaused = false; }
-
-//------------------------------------------------------
 void CameraService::simStep(float simTime, float delta) {
-    if (mPaused)
-        return;
+    // We should not control camera if it is detached from the player
+    auto playerID = mPlayerSrv->getPlayerObject();
+
+    /** We only ever control camera when it's on player or in dynamic
+     attach. Even when in dynamic attach, we have to decide whether to use
+     physics for the controls or not, based on whether the object is physical or
+     not.
+
+     When controlling the player:
+     * the horizonal rotation gets translated directly to object rotation
+     * the vertical rotation controls HEAD subobject only
+     */
 
     // TODO: Handle rotation controlled/not controlled physics flags on the
     // target object!
@@ -110,17 +111,14 @@ void CameraService::simStep(float simTime, float delta) {
     Vector2 rotation(mHorizontalRot, mVerticalRot);
     rotation /= delta;
 
-    // apply to the object in question
-    if (mAttachmentObject != mPlayerSrv->getPlayerObject()) {
-        // load the rotation
-        Quaternion rot = mObjSrv->orientation(mAttachmentObject);
-        // laod the position
-        Vector3 pos = mObjSrv->position(mAttachmentObject);
+    // load the rotation
+    Quaternion rot = mObjSrv->orientation(mAttachmentObject);
+    // laod the position
+    Vector3 pos = mObjSrv->position(mAttachmentObject);
 
-        if (mDynamicAttach) { // we should rotate the object...
-            // TODO: Code - apply the rotation on the obj.
-            // rot.
-        }
+    if (mDynamicAttach) { // we should rotate the object...
+        // TODO: Code - apply the rotation on the obj.
+        // rot.
     } else {
         //
         // rotate the player object
@@ -199,9 +197,13 @@ void CameraService::bootstrapFinished() {
 
 //------------------------------------------------------
 void CameraService::shutdown() {
-    mInputSrv->unregisterCommandTrap("mturn");
-    mInputSrv->unregisterCommandTrap("mlook");
-    mSimSrv->unregisterListener(this);
+    if (mInputSrv) {
+        mInputSrv->unregisterCommandTrap("mturn");
+        mInputSrv->unregisterCommandTrap("mlook");
+    }
+
+    if (mSimSrv)
+        mSimSrv->unregisterListener(this);
 
     mSensitivity = nullptr;
     mInvert      = nullptr;

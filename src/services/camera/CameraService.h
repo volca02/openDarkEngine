@@ -68,9 +68,7 @@ public:
     void forceCameraReturn();
 
     // sim service listener:
-    virtual void simPaused();
-    virtual void simUnPaused();
-    virtual void simStep(float simTime, float delta);
+    void simStep(float simTime, float delta) override;
 
 protected:
     bool init();
@@ -118,9 +116,6 @@ private:
 
     float mHorizontalRot;
     float mVerticalRot;
-
-    /// paused flag (if paused, all rotation is discarded)
-    bool mPaused;
 
     /// object we're attached to, or zero if none
     int mAttachmentObject;

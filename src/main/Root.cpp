@@ -37,6 +37,7 @@
 #include "OpdeServiceManager.h"
 
 // Services
+#include "camera/CameraService.h"
 #include "database/DatabaseService.h"
 #include "draw/DrawService.h"
 #include "game/GameService.h"
@@ -254,6 +255,9 @@ void Root::registerServiceFactories() {
     mServiceMgr->registerFactory<DrawServiceFactory>();
     mServiceMgr->registerFactory<RoomServiceFactory>();
     mServiceMgr->registerFactory<PlatformServiceFactory>();
+    mServiceMgr->registerFactory<PlayerServiceFactory>();
+    mServiceMgr->registerFactory<CameraServiceFactory>();
+    mServiceMgr->registerFactory<SimServiceFactory>();
     // HACK: This thing is here so that we can test opdeScript, but still
     // have direct input in GameStateManager...
     // Reason is that GUIService steals direct input

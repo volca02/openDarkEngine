@@ -62,22 +62,24 @@ public:
     /** Returns the state of the creepOn modifier (slower movement speed) */
     bool getCreepOn(void) const { return mCreepOn; };
 
+    int getStartingPointObjID() const { return mStartingPointObjID; }
+
 protected:
     bool init();
     void bootstrapFinished();
     void shutdown();
 
-    void onInputForward(const InputEventMsg &msg);
-    void onInputSidestep(const InputEventMsg &msg);
-    void onInputCreepOn(const InputEventMsg &msg);
+    void onLinkPlayerFactoryMsg(const LinkChangeMsg &msg);
 
 private:
     /// Object service ptr
+    int mStartingPointObjID;
     ObjectServicePtr mObjSrv;
     InputServicePtr mInputSrv;
     LinkServicePtr mLinkSrv;
     int mPlayerObjID;
     RelationPtr mPlayerFactoryRelation;
+    int mPlayerFactoryListenerID = 0;
     PhysicsServicePtr mPhysSrv;
     SimServicePtr mSimSrv;
     float mForwardMovement;
