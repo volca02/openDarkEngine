@@ -275,7 +275,7 @@ void Relation::load(const FileGroupPtr &db, const BitArray &objMask) {
         // Check if the flavor fits
         // The mID can't be negative, but just for sure:
         assert(mID >= 0);
-        assert(LINK_ID_FLAVOR(link->mID) ==
+        assert(LINK_ID_FLAVOR(link.mID) ==
                static_cast<unsigned int>(mID)); // keep compiler happy
 
         // Look if we fit into the mask
