@@ -28,7 +28,7 @@
 #include "TextureAtlas.h"
 #include "DrawService.h"
 #include "FontDrawSource.h"
-#include "FreeSpaceInfo.h"
+#include "AtlasAllocator.h"
 #include "logger.h"
 
 #include <OgreHardwarePixelBuffer.h>
@@ -49,7 +49,7 @@ TextureAtlas::TextureAtlas(DrawService *owner)
       mIsDirty(false),
       mAtlasSize(1, 1)
 {
-    mAtlasAllocation.reset(new FreeSpaceInfo(64, 64));
+    mAtlasAllocation.reset(new AtlasAllocator(64, 64));
     mAtlasName = "DrawAtlas" + std::to_string(std::hash<void*>{}(this));
     mMaterial = Ogre::MaterialManager::getSingleton().create(
         "M_" + mAtlasName,
@@ -187,7 +187,7 @@ void TextureAtlas::build() {
                         ps.getPixelArea(), area);
 
             // try to allocate
-            FreeSpaceInfo *fsi =
+            AtlasAllocator *fsi =
                 mAtlasAllocation->allocate(ps.width, ps.height);
 
             if (fsi) {
@@ -228,8 +228,8 @@ void TextureAtlas::build() {
         const DrawSourcePtr &ds = *it++;
 
         // render all pixels into the right place
-        FreeSpaceInfo *fsi =
-            reinterpret_cast<FreeSpaceInfo *>(ds->getPlacementPtr());
+        AtlasAllocator *fsi =
+            reinterpret_cast<AtlasAllocator *>(ds->getPlacementPtr());
 
         assert(fsi);
 
@@ -315,7 +315,7 @@ void TextureAtlas::enlarge(size_t area) {
     LOG_DEBUG("TextureAtlas: (%s) Enlarged atlas to %d x %d",
               mAtlasName.c_str(), mAtlasSize.width, mAtlasSize.height);
 
-    mAtlasAllocation.reset(new FreeSpaceInfo(mAtlasSize.width, mAtlasSize.height));
+    mAtlasAllocation.reset(new AtlasAllocator(mAtlasSize.width, mAtlasSize.height));
 
     // destroy the old invalid texture
     if (mTexture) {

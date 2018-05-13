@@ -38,7 +38,7 @@
 
 namespace Opde {
 
-class FreeSpaceInfo;
+class AtlasAllocator;
 
 /// A structure holding info for one texture in an atlas
 struct AtlasInfo {
@@ -85,7 +85,7 @@ class LightMap {
     friend class LightAtlas;
 
     /** Information about the lightmap position in the atlas */
-    FreeSpaceInfo *mPosition;
+    AtlasAllocator *mPosition;
 
     /** static lightmap */
     std::unique_ptr<LMPixel[]> mStaticLmap;
@@ -134,7 +134,7 @@ public:
     }
 
     /** Set the targetting placement of the lightmap in the atlas _owner */
-    void setPlacement(LightAtlas *_owner, FreeSpaceInfo *tgt);
+    void setPlacement(LightAtlas *_owner, AtlasAllocator *tgt);
 
     /** Gets an owner atlas of this lightmap
      * \return LightAtlas containing this light map */
@@ -210,7 +210,7 @@ private:
     Ogre::String mName;
 
     /** Containins Free Space rectangles left in the Atlas */
-    std::unique_ptr<FreeSpaceInfo> mFreeSpace;
+    std::unique_ptr<AtlasAllocator> mFreeSpace;
 
     typedef std::vector<LightMap *> LightMapVector;
 
@@ -262,7 +262,7 @@ public:
      * by 8) to 0-255 range (checks limits)
      * \warning Must be called after atlas locking, otherwise the program will
      * crash ! */
-    inline void updateLightMapBuffer(FreeSpaceInfo &fsi, uint16_t *lR,
+    inline void updateLightMapBuffer(AtlasAllocator &fsi, uint16_t *lR,
                                      uint16_t *lG, uint16_t *lB);
 
     /** Register that animated light ID maps to the LightMap instance */

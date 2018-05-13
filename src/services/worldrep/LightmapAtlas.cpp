@@ -27,7 +27,7 @@
 
 #include "LightmapAtlas.h"
 #include "ConsoleBackend.h"
-#include "FreeSpaceInfo.h"
+#include "AtlasAllocator.h"
 #include "OpdeException.h"
 #include "WRCommon.h"
 #include "compat.h"
@@ -54,7 +54,7 @@ LightAtlas::LightAtlas(int idx, int tag)
     mName = "@lightmap" +
             idx; // so we can find the atlas by number in the returned AtlasInfo
 
-    mFreeSpace.reset(new FreeSpaceInfo(256, 256));
+    mFreeSpace.reset(new AtlasAllocator(256, 256));
 
     mCount = 0;
 
@@ -124,7 +124,7 @@ bool LightAtlas::addLightMap(LightMap *lmap) {
 bool LightAtlas::placeLightMap(LightMap *lmap) {
     std::pair<int, int> dim = lmap->getDimensions();
 
-    FreeSpaceInfo *area = mFreeSpace->allocate(dim.first, dim.second);
+    AtlasAllocator *area = mFreeSpace->allocate(dim.first, dim.second);
 
     if (area == NULL)
         return false;
@@ -177,7 +177,7 @@ bool LightAtlas::render() {
     return true;
 }
 
-inline void LightAtlas::updateLightMapBuffer(FreeSpaceInfo &fsi,
+inline void LightAtlas::updateLightMapBuffer(AtlasAllocator &fsi,
                                              uint16_t *lR,
                                              uint16_t *lG,
                                              uint16_t *lB)
@@ -526,7 +526,7 @@ void LightMap::setLightIntensity(int id, float intensity) {
 
 int LightMap::getAtlasIndex() { return mOwner->getIndex(); }
 
-void LightMap::setPlacement(LightAtlas *_owner, FreeSpaceInfo *tgt) {
+void LightMap::setPlacement(LightAtlas *_owner, AtlasAllocator *tgt) {
     mOwner = _owner;
     mPosition = tgt;
 

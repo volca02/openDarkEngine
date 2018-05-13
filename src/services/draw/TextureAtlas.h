@@ -30,7 +30,7 @@ namespace Opde {
 // Forward decl.
 class DrawService;
 class FontDrawSource;
-class FreeSpaceInfo;
+class AtlasAllocator;
 
 /** Texture atlas for DrawSource grouping. Textures created within this atlas
  * are grouped together into a single rendering call when used as a source for
@@ -91,7 +91,7 @@ protected:
     DrawSourceList mMyDrawSources;
     FontSet mMyFonts;
 
-    std::unique_ptr<FreeSpaceInfo> mAtlasAllocation;
+    std::unique_ptr<AtlasAllocator> mAtlasAllocation;
 
     bool mIsDirty; // TODO: Replace by mIsBuilt
 

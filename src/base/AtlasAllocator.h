@@ -22,8 +22,8 @@
  *
  *****************************************************************************/
 
-#ifndef __FREESPACEINFO_H
-#define __FREESPACEINFO_H
+#ifndef __ATLASALLOCATOR_H
+#define __ATLASALLOCATOR_H
 
 #include <memory>
 
@@ -34,14 +34,14 @@ namespace Opde {
  * space allocator. thanks to this article for a tip:
  * http://www.blackpawn.com/texts/lightmaps/default.html
  */
-class FreeSpaceInfo {
+class AtlasAllocator {
 public:
     // Constructor with the specified dimensions
-    FreeSpaceInfo(int w, int h)
+    AtlasAllocator(int w, int h)
         : w(w), h(h)
     {}
 
-    FreeSpaceInfo(FreeSpaceInfo &&s) :
+    AtlasAllocator(AtlasAllocator &&s) :
         x(s.x), y(s.y), w(s.w), h(s.h)
     {
         std::swap(mChild[0], s.mChild[0]);
@@ -49,20 +49,20 @@ public:
     }
 
     // destructor. Deletes the children if any.
-    ~FreeSpaceInfo() { }
+    ~AtlasAllocator() { }
 
     // grows to a new 2x size in one direction, placing the current node as single child
     // and adding other node of the same size
     void grow() {
         // child0 -> we have new free space in there
         // child1 -> we move the whole current tree there
-        std::unique_ptr<FreeSpaceInfo> child0, child1;
-        child1.reset(new FreeSpaceInfo(std::move(*this)));
+        std::unique_ptr<AtlasAllocator> child0, child1;
+        child1.reset(new AtlasAllocator(std::move(*this)));
         if (w > h) {
-            child0.reset(new FreeSpaceInfo(0,h,w,h));
+            child0.reset(new AtlasAllocator(0,h,w,h));
             h = 2*h;
         } else {
-            child0.reset(new FreeSpaceInfo(w,0,w,h));
+            child0.reset(new AtlasAllocator(w,0,w,h));
             w = 2*w;
         }
 
@@ -91,9 +91,9 @@ public:
      * not taken up by the alocation is put as a child of the node)
      * @return A free space rectangle of the requested space, or null if the
      * space could not be allocated */
-    FreeSpaceInfo *allocate(int sw, int sh) {
+    AtlasAllocator *allocate(int sw, int sh) {
         if (!isLeaf()) { // split node.
-            FreeSpaceInfo *result = mChild[0]->allocate(sw, sh);
+            AtlasAllocator *result = mChild[0]->allocate(sw, sh);
             if (result) return result;
             return mChild[1]->allocate(sw, sh);
         }
@@ -128,8 +128,8 @@ public:
               +---------+--------------+
               0,h       sw,h           w,h
               */
-            mChild[0].reset(new FreeSpaceInfo(x,      y,     sw, h));
-            mChild[1].reset(new FreeSpaceInfo(x + sw, y, w - sw, h));
+            mChild[0].reset(new AtlasAllocator(x,      y,     sw, h));
+            mChild[1].reset(new AtlasAllocator(x + sw, y, w - sw, h));
         } else {
             /*Split relative to x,y:
 
@@ -144,8 +144,8 @@ public:
               +--------------+
               0,h            w,h
               */
-            mChild[0].reset(new FreeSpaceInfo(x, y,      w,     sh));
-            mChild[1].reset(new FreeSpaceInfo(x, y + sh, w, h - sh));
+            mChild[0].reset(new AtlasAllocator(x, y,      w,     sh));
+            mChild[1].reset(new AtlasAllocator(x, y + sh, w, h - sh));
         }
 
         return mChild[0]->allocate(sw, sh);
@@ -161,14 +161,14 @@ public:
 
 protected:
     // Constructor with the specified dimensions and position (leaf constructor)
-    FreeSpaceInfo(int x, int y, int w, int h)
+    AtlasAllocator(int x, int y, int w, int h)
         : x(x), y(y), w(w), h(h)
     {}
 
-    FreeSpaceInfo() {}
+    AtlasAllocator() {}
 
     // Children of this node, if it's a node
-    std::unique_ptr<FreeSpaceInfo> mChild[2];
+    std::unique_ptr<AtlasAllocator> mChild[2];
 
     int x = 0;
     int y = 0;

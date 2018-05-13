@@ -58,7 +58,7 @@ add_library (OpdeBase OBJECT
     file/FileGroup.cpp
     file/FileGroup.h
     file/File.h
-    FreeSpaceInfo.h
+    AtlasAllocator.h
     Iterator.h
     loaders/BinFormat.h
     loaders/FonFormat.cpp
