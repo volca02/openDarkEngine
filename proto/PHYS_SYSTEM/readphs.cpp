@@ -754,7 +754,7 @@ bool readObjectPhys(FILE *f, int pos, int version) {
 	fpos(f);
 
 	// release sub-obj data
-	delete subobj_types;
+	delete[] subobj_types;
 
 	if (feof(f)) {
 		return false;

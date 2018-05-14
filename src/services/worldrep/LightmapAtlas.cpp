@@ -45,15 +45,14 @@ Vector3 operator*(float a, const LMPixel &b) {
 
 // ---------------- LightAtlas Methods ----------------------
 /*
-        A single texture, containing many lightmaps. used in the texturelist
-   construction
+  A single texture, containing many lightmaps. used in the texturelist
+  construction
 */
 LightAtlas::LightAtlas(int idx, int tag)
     : mCount(0), mIdx(idx), mTex(), mPixelBuffer(), mFreeSpace()
 {
-    mName = "@lightmap" +
-            idx; // so we can find the atlas by number in the returned AtlasInfo
-
+    // so we can find the atlas by number in the returned AtlasInfo
+    mName = "@lightmap" + std::to_string(idx);
     mFreeSpace.reset(new AtlasAllocator(256, 256));
 
     mCount = 0;
