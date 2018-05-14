@@ -72,7 +72,7 @@ public:
 template<size_t LenT>
 class FixedStringSerializer : public Serializer {
 public:
-    static_assert(LenT > 0);
+    static_assert(LenT > 0, "Fixed string has to have nonzero positive length");
 
     // contructor
     FixedStringSerializer() {};

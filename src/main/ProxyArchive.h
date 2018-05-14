@@ -91,9 +91,9 @@ public:
                                          bool dirs = false) const override;
 
     /// reports case sensitiveness of this proxy archive
-    virtual bool isCaseSensitive(void) const = 0;
+    virtual bool isCaseSensitive(void) const override = 0;
 
-    time_t getModifiedTime(const String &filename) const { return 0; };
+    time_t getModifiedTime(const String &filename) const override { return 0; };
 
 protected:
     /// This implements a const version of listFileInfo, as ogre is inconsistent

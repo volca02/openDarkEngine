@@ -38,7 +38,7 @@ public:
 
     /// A request application method. Call this to set the new desired value
     void set(T newVal) {
-        mValue = mValue;
+        mValue = newVal;
         mRequested = true;
     };
 

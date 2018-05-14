@@ -60,7 +60,7 @@ public:
     /** Clears the scene.
      * @note Delete's the current BSP tree and creates a new one
      */
-    virtual void clearScene(void);
+    virtual void clearScene(void) override;
 
     /** Creates a new portal from src to dst on a plane 'plane'
      * @param src the source cell (leaf bsp node) to attach to
@@ -82,11 +82,11 @@ public:
     void destroyPortal(Portal *portal);
 
     /** Creates our specialized camera (DarkCamera) */
-    virtual Camera *createCamera(const String &name);
+    Camera *createCamera(const String &name) override;
 
     /** Specialised scene graph update method. Update's the Camera's visible
      * cell list if needed */
-    virtual void _updateSceneGraph(Camera *cam);
+    void _updateSceneGraph(Camera *cam) override;
 
     /** creates a new BSP node
      * @param id the bsp node id
@@ -122,9 +122,9 @@ public:
 
     /** Overriden visible object finder which only enlists the object found in
      * Camera's visible cells */
-    virtual void _findVisibleObjects(Camera *cam,
-                                     VisibleObjectsBoundsInfo *visibleBounds,
-                                     bool onlyShadowCasters) override;
+    void _findVisibleObjects(Camera *cam,
+                             VisibleObjectsBoundsInfo *visibleBounds,
+                             bool onlyShadowCasters) override;
 
     /// Scene manager type name getter
     const String &getTypeName(void) const override;
@@ -181,7 +181,7 @@ public:
     /** gets an option from this scenemanager
      * @param strKey the option name (valid options: StaticBuildTime - unsigned
      * long) */
-    virtual bool getOption(const String &strKey, void *pDestValue);
+    bool getOption(const String &strKey, void *pDestValue) override;
 
     unsigned int getPortalCount() const { return mPortals.size(); };
     unsigned int getCellCount() const { return mCellCount; };
@@ -248,7 +248,7 @@ protected:
 /// Factory for DarkSceneManager
 class DarkSceneManagerFactory : public SceneManagerFactory {
 protected:
-    void initMetaData(void) const;
+    void initMetaData(void) const override;
 
 public:
     DarkSceneManagerFactory() {}

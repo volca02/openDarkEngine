@@ -52,13 +52,13 @@ public:
     virtual ~SingleFieldDataStorage() { }
 
     /** @see DataStorage::create */
-    virtual bool create(int objID) {
+    bool create(int objID) override {
         // call _create to handle the creation, with the default value
         return _create(objID, T());
     }
 
     /** @see DataStorage::destroy */
-    virtual bool destroy(int objID) {
+    bool destroy(int objID) override {
         typename DataMap::iterator it = mDataMap.find(objID);
 
         if (it != mDataMap.end()) {
@@ -72,14 +72,14 @@ public:
     }
 
     /** @see DataStorage::has */
-    virtual bool has(int objID) {
+    bool has(int objID) override {
         typename DataMap::iterator it = mDataMap.find(objID);
 
         return (it != mDataMap.end());
     }
 
     /** @see DataStorage::clone */
-    virtual bool clone(int srcID, int dstID) {
+    bool clone(int srcID, int dstID) override {
         typename DataMap::iterator it = mDataMap.find(srcID);
 
         if (it != mDataMap.end()) {
@@ -90,8 +90,9 @@ public:
     }
 
     /** @see DataStorage::getField */
-    virtual bool getField(int objID, const std::string &field,
-                          Variant &target) {
+    bool getField(int objID, const std::string &field,
+                  Variant &target) override
+    {
         assert(field == "");
 
         typename DataMap::iterator it = mDataMap.find(objID);
@@ -106,8 +107,9 @@ public:
     }
 
     /** @see DataStorage::setField */
-    virtual bool setField(int objID, const std::string &field,
-                          const Variant &value) {
+    bool setField(int objID, const std::string &field,
+                          const Variant &value) override
+    {
         assert(field == "");
 
         typename DataMap::iterator it = mDataMap.find(objID);
@@ -122,7 +124,7 @@ public:
     }
 
     /** @see DataStorage::writeToFile */
-    virtual bool writeToFile(FilePtr &file, int objID, bool sizeStored) {
+    bool writeToFile(FilePtr &file, int objID, bool sizeStored) override {
         typename DataMap::iterator it = mDataMap.find(objID);
 
         if (it != mDataMap.end()) {
@@ -144,7 +146,9 @@ public:
     }
 
     /** @see DataStorage::readFromFile */
-    virtual bool readFromFile(FilePtr &file, int objID, bool sizeStored) {
+    bool readFromFile(FilePtr &file, int objID,
+                      bool sizeStored) override
+    {
         typename DataMap::iterator it = mDataMap.find(objID);
 
         if (it == mDataMap.end()) {
@@ -174,13 +178,13 @@ public:
     }
 
     /** @see DataStorage::clear */
-    virtual void clear() { mDataMap.clear(); }
+    void clear() override { mDataMap.clear(); }
 
     /** @see DataStorage::isEmpty */
-    virtual bool isEmpty() { return mDataMap.empty(); }
+    bool isEmpty() override { return mDataMap.empty(); }
 
     /** @see DataStorage::getAllStoredObjects */
-    virtual IntIteratorPtr getAllStoredObjects() {
+    IntIteratorPtr getAllStoredObjects() override {
         return IntIteratorPtr(new DataMapKeyIterator(mDataMap));
     }
 
@@ -198,7 +202,7 @@ public:
     }
 
     /** @see DataStorage::getDataSize */
-    virtual size_t getDataSize(void) { return sizeof(T); }
+    size_t getDataSize(void) override { return sizeof(T); }
 
 protected:
     explicit SingleFieldDataStorage(const DataFieldDesc &fieldDesc)

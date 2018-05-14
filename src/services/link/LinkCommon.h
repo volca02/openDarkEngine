@@ -55,7 +55,7 @@ protected:
     link_id_t mID;
     int mSrc;
     int mDst;
-    uint mFlavor;
+    uint16_t mFlavor;
 
 public:
     Link(uint ID, int src, int dst, uint flavor)

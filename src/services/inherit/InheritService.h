@@ -215,7 +215,7 @@ public:
     ~InheritServiceFactory(){};
 
     /** Creates a InheritService instance */
-    Service *createInstance(ServiceManager *manager);
+    Service *createInstance(ServiceManager *manager) override;
 
     const std::string &getName() override;
     const uint getMask() override;

@@ -140,7 +140,7 @@ public:
     ~ConfigServiceFactory(){};
 
     /** Creates a ConfigService instance */
-    Service *createInstance(ServiceManager *manager);
+    Service *createInstance(ServiceManager *manager) override;
 
     const std::string &getName() override;
 

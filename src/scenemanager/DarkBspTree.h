@@ -102,7 +102,7 @@ public:
     const LightList *objectQueryLights(const MovableObject *movable) override;
 
     /** Listener's callback - flushes light list */
-    virtual void objectDestroyed(MovableObject *movable);
+    void objectDestroyed(MovableObject *movable) override;
 
     unsigned int getPortalCount() const;
     unsigned int getCellCount() const;

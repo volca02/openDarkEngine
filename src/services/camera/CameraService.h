@@ -71,9 +71,9 @@ public:
     void simStep(float simTime, float delta) override;
 
 protected:
-    bool init();
-    void bootstrapFinished();
-    void shutdown();
+    bool init() override;
+    void bootstrapFinished() override;
+    void shutdown() override;
 
     // input listeners
 

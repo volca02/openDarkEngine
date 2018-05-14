@@ -102,23 +102,23 @@ protected:
     void setCurrentObjRoom(size_t idset, int objID, Room *room);
 
     // service related
-    bool init();
-    void bootstrapFinished();
-    void shutdown();
+    bool init() override;
+    void bootstrapFinished() override;
+    void shutdown() override;
 
     void clear();
 
     /** Database load callback
      * @see DatabaseListener::onDBLoad */
-    void onDBLoad(const FileGroupPtr &db, uint32_t curmask);
+    void onDBLoad(const FileGroupPtr &db, uint32_t curmask) override;
 
     /** Database save callback
      * @see DatabaseListener::onDBSave */
-    void onDBSave(const FileGroupPtr &db, uint32_t tgtmask);
+    void onDBSave(const FileGroupPtr &db, uint32_t tgtmask) override;
 
     /** Database drop callback
      * @see DatabaseListener::onDBDrop */
-    void onDBDrop(uint32_t dropmask);
+    void onDBDrop(uint32_t dropmask) override;
 
 private:
     typedef std::unordered_map<int32_t, Room *> RoomsByID; // weak ptrs to rooms
@@ -147,7 +147,7 @@ public:
     ~RoomServiceFactory(){};
 
     /** Creates a RoomService instance */
-    Service *createInstance(ServiceManager *manager);
+    Service *createInstance(ServiceManager *manager) override;
 
     const std::string &getName() override;
     const uint getMask() override;

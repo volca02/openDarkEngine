@@ -175,7 +175,7 @@ public:
     ~GUIServiceFactory(){};
 
     /** Creates a GUIService instance */
-    Service *createInstance(ServiceManager *manager);
+    Service *createInstance(ServiceManager *manager) override;
 
     const std::string &getName() override;
 

@@ -174,7 +174,6 @@ public:
 
     /** Font loading interface. It is capable of loading .fon files only at the
      * moment.
-     * @note To supply additional settings, use the
      */
     FontDrawSourcePtr loadFont(const TextureAtlasPtr &atlas,
                                const std::string &name,
@@ -295,7 +294,7 @@ public:
     ~DrawServiceFactory(){};
 
     /** Creates a GameService instance */
-    Service *createInstance(ServiceManager *manager);
+    Service *createInstance(ServiceManager *manager) override;
 
     const std::string &getName() override;
 

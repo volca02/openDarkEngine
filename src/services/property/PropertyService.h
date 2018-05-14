@@ -180,7 +180,7 @@ public:
     ~PropertyServiceFactory(){};
 
     /** Creates a PropertyService instance */
-    Service *createInstance(ServiceManager *manager);
+    Service *createInstance(ServiceManager *manager) override;
 
     const std::string &getName() override;
     const uint getMask() override;

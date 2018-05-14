@@ -545,7 +545,7 @@ std::pair<int, int> LightMap::getDimensions() const {
 Ogre::Vector2 LightMap::toAtlasCoords(Ogre::Vector2 in_uv) {
     auto idim = mOwner->getDimensions();
 
-    Ogre::Vector2 dims{idim.first, idim.second};
+    Ogre::Vector2 dims(idim.first, idim.second);
 
     Ogre::Vector2 shrink{(float)mPosition->width() / dims.x,
             (float)mPosition->height() / dims.y};

@@ -153,7 +153,7 @@ public:
     ~ScriptServiceFactory(){};
 
     /** Creates a ScriptService instance */
-    Service *createInstance(ServiceManager *manager);
+    Service *createInstance(ServiceManager *manager) override;
 
     const std::string &getName() override;
     const uint getMask() override;

@@ -417,7 +417,7 @@ link_id_t Relation::create(int from, int to) {
 
     link_id_t id = getFreeLinkID(cidx);
 
-    Link newl{id, from, to, mID};
+    Link newl{id, from, to, static_cast<uint16_t>(mID)};
     mStorage->create(id);
 
     // Last, insert the link to the database and notify
@@ -438,7 +438,7 @@ link_id_t Relation::createWithValues(int from, int to,
 
     link_id_t id = getFreeLinkID(cidx);
 
-    Link newl{id, from, to, mID};
+    Link newl{id, from, to, static_cast<uint16_t>(mID)};
 
     mStorage->createWithValues(id, dataValues);
 
@@ -459,7 +459,7 @@ link_id_t Relation::createWithValue(int from, int to, const Variant &value) {
 
     link_id_t id = getFreeLinkID(cidx);
 
-    Link newl{id, from, to, mID};
+    Link newl{id, from, to, static_cast<uint16_t>(mID)};
 
     mStorage->createWithValue(id, value);
 

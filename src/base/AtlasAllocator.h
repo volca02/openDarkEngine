@@ -29,9 +29,9 @@
 
 namespace Opde {
 
-/** Free space information storage - rectangular area in the lightmap (either
- * used or free to use) Organized in a binary tree. - A sort of a 2D texture
- * space allocator. thanks to this article for a tip:
+/** Binary tree based 2d area allocator for bitmap atlas creation.
+ * A sort of a 2D texture space allocator.
+ * Thanks to this article for a tip:
  * http://www.blackpawn.com/texts/lightmaps/default.html
  */
 class AtlasAllocator {

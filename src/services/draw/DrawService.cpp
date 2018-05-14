@@ -245,7 +245,8 @@ FontDrawSourcePtr DrawService::loadFont(const TextureAtlasPtr &atlas,
 
 //------------------------------------------------------
 void DrawService::loadFonFile(const std::string &name, const std::string &group,
-                              FontDrawSourcePtr fon) {
+                              FontDrawSourcePtr fon)
+{
     DarkFontHeader header;
 
     Ogre::DataStreamPtr Stream =
@@ -276,15 +277,13 @@ void DrawService::loadFonFile(const std::string &name, const std::string &group,
         LOG_DEBUG("DrawService: Font is monochromatic");
     } else if (header.Format == 0x0CCCC) {
         LOG_DEBUG("DrawService: Font is antialiased");
-        if (header.Palette !=
-            0) // 0 == use current, otherwise we'll use the default one
-            curpalette = sAAPalette;
+        // 0 == use current, otherwise we'll use the default one
+        if (header.Palette != 0) curpalette = sAAPalette;
         // these are inverted! At least it seems so.
     } else {
         LOG_DEBUG("DrawService: Font 8Bit with palette");
-        if (header.Palette !=
-            0) // 0 == use current, otherwise we'll use the default one
-            curpalette = sLGPalette;
+        // 0 == use current, otherwise we'll use the default one
+        if (header.Palette != 0) curpalette = sLGPalette;
     }
 
     size_t nchars = header.LastChar - header.FirstChar + 1;
